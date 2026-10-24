@@ -1,43 +1,12 @@
 import pytest
-from support import game
+from support import game, login, registration
 
-from openfesl.protocol.fields import Fields
 from openfesl.protocol.relay import Channel, ConnectionKey
 
 pytestmark = pytest.mark.anyio
 
 FESL = ConnectionKey(Channel.FESL, 1)
 SERVER_ACCOUNT = "bfbc2.server.pc@ea.com"
-
-
-def registration(nuid: str, password: str, terms: str, born: str = "1990-05-28") -> Fields:
-    year, month, day = born.split("-")
-    return [
-        ("TXN", "NuAddAccount"),
-        ("nuid", nuid),
-        ("password", password),
-        ("globalOptin", "0"),
-        ("thirdPartyOptin", "0"),
-        ("parentalEmail", ""),
-        ("DOBDay", day),
-        ("DOBMonth", month),
-        ("DOBYear", year),
-        ("zipCode", "00-001"),
-        ("country", "PL"),
-        ("language", "pl"),
-        ("tosVersion", terms),
-    ]
-
-
-def login(nuid: str, password: str, *extra: tuple[str, str]) -> Fields:
-    return [
-        ("TXN", "NuLogin"),
-        ("returnEncryptedInfo", "1"),
-        ("nuid", nuid),
-        ("password", password),
-        ("macAddr", "$0a0b0c0d0e0f"),
-        *extra,
-    ]
 
 
 async def test_a_player_registers_logs_in_and_a_later_login_sends_the_first_session_away(

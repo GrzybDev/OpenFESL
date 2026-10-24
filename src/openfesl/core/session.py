@@ -5,6 +5,7 @@ from typing import Any
 from openfesl.core.accounts import Account
 from openfesl.core.connection import Address, Connection, Outbox
 from openfesl.core.fesl import FeslConnection, Route
+from openfesl.core.personas import Persona
 from openfesl.protocol.packet import Packet
 from openfesl.protocol.relay import Channel, Open
 
@@ -65,6 +66,8 @@ class GameSession:
         self.address = address
         self.account: Account | None = None
         self.account_key: str | None = None
+        self.persona: Persona | None = None
+        self.persona_key: str | None = None
         self._routes = routes
         self._players = players
         self._fesl: FeslConnection | None = None
@@ -96,14 +99,32 @@ class GameSession:
             self._players.log_out(self)
         self.account = account
         self.account_key = key
+        self.persona = None
+        self.persona_key = None
         self._fesl = connection
         if not account.server:
             self._players.log_in(self)
+
+    def log_in_persona(self, persona: Persona, key: str) -> None:
+        """Make a persona of the session's account the one it plays as.
+
+        Args:
+            persona: The persona.
+            key: The session key handed to the game for it.
+        """
+        self.persona = persona
+        self.persona_key = key
+
+    def forget_persona(self) -> None:
+        """Stop playing as the session's persona, as when it was disabled."""
+        self.persona = None
+        self.persona_key = None
 
     def forget_login(self) -> None:
         """Drop the session's login, as when its account moved to another session."""
         self.account = None
         self.account_key = None
+        self.forget_persona()
 
     def disconnect(self, reason: int) -> None:
         """Send the game away on the connection it logged in on.

@@ -1,0 +1,101 @@
+from sqlalchemy import func, select, update
+from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+from openfesl.core.personas import Persona
+from openfesl.storage.models import PersonaRow
+
+_BIGINT = range(-(2**63), 2**63)
+
+
+class SqlPersonaStore:
+    """Personas in PostgreSQL."""
+
+    def __init__(self, sessions: async_sessionmaker[AsyncSession]) -> None:
+        """Use a database through its session factory.
+
+        Args:
+            sessions: Opens database sessions.
+        """
+        self._sessions = sessions
+
+    async def of_account(self, account_id: int, namespace: str) -> list[Persona]:
+        """Return an account's enabled personas in a namespace, oldest first.
+
+        Args:
+            account_id: The account.
+            namespace: The namespace.
+        """
+        async with self._sessions() as session:
+            rows = await session.scalars(
+                select(PersonaRow)
+                .where(
+                    PersonaRow.account_id == account_id,
+                    PersonaRow.namespace == namespace,
+                    PersonaRow.disabled_at.is_(None),
+                )
+                .order_by(PersonaRow.id)
+            )
+            return [_persona(row) for row in rows]
+
+    async def find(self, namespace: str, name: str) -> Persona | None:
+        """Return the enabled persona with a name, matched regardless of case.
+
+        Args:
+            namespace: The namespace.
+            name: The name.
+        """
+        async with self._sessions() as session:
+            row = await session.scalar(
+                select(PersonaRow).where(
+                    PersonaRow.namespace == namespace,
+                    func.lower(PersonaRow.name) == func.lower(name),
+                    PersonaRow.disabled_at.is_(None),
+                )
+            )
+        return _persona(row) if row else None
+
+    async def find_by_id(self, persona_id: int) -> Persona | None:
+        """Return an enabled persona by its number.
+
+        Args:
+            persona_id: The persona's number.
+        """
+        # Games send any number they like, and the driver refuses those beyond a bigint.
+        if persona_id not in _BIGINT:
+            return None
+        async with self._sessions() as session:
+            row = await session.get(PersonaRow, persona_id)
+        return _persona(row) if row and row.disabled_at is None else None
+
+    async def add(self, account_id: int, namespace: str, name: str) -> Persona | None:
+        """Create a persona, or return None when the name is taken in the namespace.
+
+        Args:
+            account_id: The account it belongs to.
+            namespace: The namespace.
+            name: The name.
+        """
+        async with self._sessions.begin() as session:
+            row = await session.scalar(
+                insert(PersonaRow)
+                .values(account_id=account_id, namespace=namespace, name=name)
+                .on_conflict_do_nothing()
+                .returning(PersonaRow)
+            )
+            return _persona(row) if row else None
+
+    async def disable(self, persona_id: int) -> None:
+        """Take a persona out of use; its name stays taken.
+
+        Args:
+            persona_id: The persona's number.
+        """
+        async with self._sessions.begin() as session:
+            await session.execute(
+                update(PersonaRow).where(PersonaRow.id == persona_id).values(disabled_at=func.now())
+            )
+
+
+def _persona(row: PersonaRow) -> Persona:
+    return Persona(id=row.id, account_id=row.account_id, namespace=row.namespace, name=row.name)

@@ -55,3 +55,59 @@ class NuAddAccount(Message):
     dob_day: int = Field(0, alias="DOBDay")
     dob_month: int = Field(0, alias="DOBMonth")
     dob_year: int = Field(0, alias="DOBYear")
+
+
+class Persona(Message):
+    """A request naming one of the account's personas."""
+
+    name: str = ""
+
+
+class NuSuggestPersonas(Message):
+    name: str = ""
+    max_suggestions: int = 0
+
+
+class NuSuggestPersonasAnswer(Message):
+    """Free names; the game reads them until the first gap, so they have none."""
+
+    names: list[str]
+
+
+class NuGetPersonas(Message):
+    namespace: str = ""
+
+
+class NuGetPersonasAnswer(Message):
+    """The account's personas; the game reads them until the first gap, so they have none."""
+
+    personas: list[str]
+
+
+class NuLoginPersonaAnswer(Message):
+    """The persona's session key, which Theater and the game's HTTP requests carry."""
+
+    lkey: str
+    user_id: int
+
+
+class UserLookup(Message):
+    user_name: str | None = None
+    user_id: int | None = None
+
+
+class NuLookupUserInfo(Message):
+    user_info: list[UserLookup] = Field(default_factory=list)
+
+
+class UserInfo(Message):
+    user_name: str
+    user_id: int
+    master_user_id: int
+    namespace: str
+
+
+class NuLookupUserInfoAnswer(Message):
+    """The personas found, each with its account as the master user."""
+
+    user_info: list[UserInfo]

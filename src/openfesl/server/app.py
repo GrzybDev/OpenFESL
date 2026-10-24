@@ -10,12 +10,14 @@ from openfesl.core.accounts import AccountService
 from openfesl.core.connect import connect_routes
 from openfesl.core.fesl import Route
 from openfesl.core.games import load_games
+from openfesl.core.personas import PersonaService
 from openfesl.core.registration import Terms
 from openfesl.core.session import GameSession, Players
 from openfesl.relay.endpoint import relay_endpoint
 from openfesl.server.settings import Settings
 from openfesl.storage.accounts import SqlAccountStore
 from openfesl.storage.database import migrate
+from openfesl.storage.personas import SqlPersonaStore
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -36,11 +38,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             settings.database_url, pool_pre_ping=True, hide_parameters=True
         )
         await migrate(engine)
+        sessions = async_sessionmaker(engine)
         games = load_games()
-        accounts = AccountService(SqlAccountStore(async_sessionmaker(engine)), Terms.load())
-        await accounts.prepare(games)
+        accounts = AccountService(SqlAccountStore(sessions), Terms.load())
+        personas = PersonaService(SqlPersonaStore(sessions))
+        await personas.prepare(await accounts.prepare(games))
         routes.update(connect_routes(games))
         routes.update(accounts.routes())
+        routes.update(personas.routes())
         yield
         await engine.dispose()
 

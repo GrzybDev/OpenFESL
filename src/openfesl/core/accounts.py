@@ -10,7 +10,7 @@ from pwdlib import PasswordHash
 from pwdlib.hashers.argon2 import Argon2Hasher
 
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
-from openfesl.core.games import Games
+from openfesl.core.games import Game, Games
 from openfesl.core.registration import Terms, countries, is_country
 from openfesl.protocol.acct import (
     Country,
@@ -139,7 +139,7 @@ class AccountService:
         self._hasher = PasswordHash((Argon2Hasher(),))
         self._hashing = asyncio.Semaphore(CONCURRENT_HASHES)
 
-    async def prepare(self, games: Games) -> None:
+    async def prepare(self, games: Games) -> list[tuple[Game, Account]]:
         """Create the accounts that the games' dedicated servers log in with.
 
         They exist before any player could register their names, which every server of the
@@ -147,12 +147,19 @@ class AccountService:
 
         Args:
             games: The games the server serves.
+
+        Returns:
+            Each game with its dedicated servers' account.
         """
-        for nuid in games.server_accounts:
+        prepared = []
+        for game, nuid in games.server_accounts:
             await self._store.add(nuid, None, "", None, server=True)
             credentials = await self._store.find(nuid)
             if credentials is None or not credentials.account.server:
                 logger.error("The dedicated servers' account %s belongs to a player", nuid)
+            else:
+                prepared.append((game, credentials.account))
+        return prepared
 
     def routes(self) -> dict[tuple[str, str], Route[Any]]:
         """Return the handlers of the service's transactions."""

@@ -31,12 +31,20 @@ class Client(BaseModel):
 
 
 class Game(BaseModel):
-    """A game the server serves, as its data file describes it."""
+    """A game the server serves, as its data file describes it.
+
+    Attributes:
+        name: The game's name.
+        partition: Where the game's data lives.
+        namespace: The persona namespace; persona names are unique within it.
+        clients: The game's client strings.
+    """
 
     model_config = ConfigDict(frozen=True)
 
     name: str
     partition: Partition
+    namespace: str
     clients: dict[str, Client]
 
     @field_validator("partition", mode="before")
@@ -70,10 +78,13 @@ class Games:
                 self._clients[name] = (game, client)
 
     @property
-    def server_accounts(self) -> list[str]:
-        """Return the accounts that the games' dedicated servers log in with."""
-        clients = (client for _, client in self._clients.values())
-        return [client.server_account for client in clients if client.server_account]
+    def server_accounts(self) -> list[tuple[Game, str]]:
+        """Return the accounts that the games' dedicated servers log in with, by game."""
+        return [
+            (game, client.server_account)
+            for game, client in self._clients.values()
+            if client.server_account
+        ]
 
     def find(self, client_string: str) -> tuple[Game, Client] | None:
         """Return the game and client that a client string names, if the server serves it.

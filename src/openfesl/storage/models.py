@@ -31,3 +31,20 @@ class LoginTokenRow(Base):
         ForeignKey("account.id", ondelete="CASCADE"), index=True
     )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PersonaRow(Base):
+    __tablename__ = "persona"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    account_id: Mapped[int] = mapped_column(
+        ForeignKey("account.id", ondelete="CASCADE"), index=True
+    )
+    namespace: Mapped[str]
+    name: Mapped[str]
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    disabled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+# Disabled names stay taken, so a name never moves to another account.
+Index("persona_name_key", PersonaRow.namespace, func.lower(PersonaRow.name), unique=True)

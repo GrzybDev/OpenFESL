@@ -99,6 +99,44 @@ def text(packet: Packet) -> Answer:
     }
 
 
+def registration(nuid: str, password: str, terms: str, born: str = "1990-05-28") -> Fields:
+    year, month, day = born.split("-")
+    return [
+        ("TXN", "NuAddAccount"),
+        ("nuid", nuid),
+        ("password", password),
+        ("globalOptin", "0"),
+        ("thirdPartyOptin", "0"),
+        ("parentalEmail", ""),
+        ("DOBDay", day),
+        ("DOBMonth", month),
+        ("DOBYear", year),
+        ("zipCode", "00-001"),
+        ("country", "PL"),
+        ("language", "pl"),
+        ("tosVersion", terms),
+    ]
+
+
+def login(nuid: str, password: str, *extra: tuple[str, str]) -> Fields:
+    return [
+        ("TXN", "NuLogin"),
+        ("returnEncryptedInfo", "1"),
+        ("nuid", nuid),
+        ("password", password),
+        ("macAddr", "$0a0b0c0d0e0f"),
+        *extra,
+    ]
+
+
+async def log_in_player(game: Game, key: ConnectionKey, nuid: str) -> Answer:
+    """Register a player with the current terms and log it in on a new FESL connection."""
+    await game.hello(key, "bfbc2-pc")
+    terms = (await game.request(key, "acct", [("TXN", "NuGetTos")]))["version"]
+    await game.request(key, "acct", registration(nuid, "secret-pass", terms))
+    return await game.request(key, "acct", login(nuid, "secret-pass"))
+
+
 @asynccontextmanager
 async def game(server_url: str) -> AsyncIterator[Game]:
     async with connect(server_url, subprotocols=[Subprotocol(SUBPROTOCOL)]) as websocket:
