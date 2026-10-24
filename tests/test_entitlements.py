@@ -112,3 +112,21 @@ async def test_the_game_key_prompt_takes_only_a_key_for_the_game(server_url: str
             FESL, "acct", [("TXN", "NuGetEntitlementCount"), ("groupName", "BFBC2PC")]
         )
         assert owned["entitlementCount"] == "0"
+
+
+@pytest.mark.anyio
+async def test_a_game_cannot_grant_its_account_what_no_key_gave_it(server_url: str) -> None:
+    async with game(server_url) as player, game(server_url) as server:
+        await log_in_player(player, FESL, "ann@example.test")
+        grant = [("TXN", "NuGrantEntitlement"), ("entitlementTag", "BFBC2:PC:VIETNAM_ACCESS")]
+        assert (await player.request(FESL, "acct", grant))["errorCode"] == "21"
+        vietnam = [("TXN", "NuGetEntitlementCount"), ("groupName", "BFBC2PC")]
+        assert (await player.request(FESL, "acct", vietnam))["entitlementCount"] == "0"
+
+        await player.request(FESL, "acct", [("TXN", "NuEntitleUser"), ("key", "ACTIVATE-VIETNAM")])
+        assert "errorCode" not in await player.request(FESL, "acct", grant)
+        assert (await player.request(FESL, "acct", vietnam))["entitlementCount"] == "2"
+
+        await server.hello(FESL, "bfbc2-pc-server", client_type="server")
+        await server.request(FESL, "acct", login("bfbc2.server.pc@ea.com", "from-game-data"))
+        assert (await server.request(FESL, "acct", grant))["errorCode"] == "21"

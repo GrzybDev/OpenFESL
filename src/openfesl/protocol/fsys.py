@@ -64,3 +64,10 @@ class GoodbyePush(Message):
     """The server sending the game away; reason 2 means the account logged in elsewhere."""
 
     reason: int
+
+
+class GetPingSitesAnswer(Message):
+    """The sites the server browser pings to find the closest region; without any it pings none."""
+
+    min_ping_sites_to_ping: int = 0
+    ping_site: list[Message] = Field(default_factory=list)

@@ -208,3 +208,20 @@ class GetLockerURLAnswer(Message):
     """Where the game lists the files it keeps online, with its persona's session key."""
 
     url: str
+
+
+class GetTelemetryTokenAnswer(Message):
+    """Where the game sends telemetry, as base64 of `address,port,locale,`, and for which countries.
+
+    The SDK sends nothing for a country on the disabled list.
+    """
+
+    telemetry_token: str
+    enabled: str
+    disabled: str
+
+
+class NuGrantEntitlement(Message):
+    """An entitlement the game grants the logged-in account; the SDK names no account."""
+
+    entitlement_tag: Text = ""

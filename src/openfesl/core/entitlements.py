@@ -13,8 +13,10 @@ from openfesl.protocol.acct import (
     NuGetEntitlementCountAnswer,
     NuGetEntitlements,
     NuGetEntitlementsAnswer,
+    NuGrantEntitlement,
     Product,
 )
+from openfesl.protocol.message import Message
 
 logger = logging.getLogger(__name__)
 
@@ -127,6 +129,7 @@ class EntitlementService:
             ("acct", "NuEntitleUser"): Route(NuEntitleUser, self.entitle_user),
             ("acct", "NuGetEntitlements"): Route(NuGetEntitlements, self.entitlements),
             ("acct", "NuGetEntitlementCount"): Route(NuGetEntitlements, self.count),
+            ("acct", "NuGrantEntitlement"): Route(NuGrantEntitlement, self.grant),
         }
 
     async def entitle_user(
@@ -157,6 +160,27 @@ class EntitlementService:
                 if grant.product
             ]
         )
+
+    async def grant(self, connection: FeslConnection, request: NuGrantEntitlement) -> Message:
+        """Confirm an entitlement that the logged-in account holds already.
+
+        Nothing new is granted: the SDK names no account, so any game could grant itself
+        anything, while what an account owns comes from product keys and the admin.
+
+        Args:
+            connection: The FESL connection the request came on.
+            request: The entitlement.
+
+        Raises:
+            TransactionError: When nobody is logged in, a dedicated server asks or the account
+                does not hold the entitlement.
+        """
+        account = connection.session.account
+        if account is None:
+            raise TransactionError(NOT_LOGGED_IN)
+        if account.server or not await self._store.entitled(account.id, request.entitlement_tag):
+            raise TransactionError(PARAMETERS_ERROR)
+        return Message()
 
     async def entitlements(
         self, connection: FeslConnection, request: NuGetEntitlements

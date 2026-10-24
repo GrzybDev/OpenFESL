@@ -7,7 +7,15 @@ from typing import Any
 
 from openfesl.core.fesl import SYSTEM_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Games
-from openfesl.protocol.fsys import DomainPartition, Goodbye, Hello, HelloAnswer, MemCheck, Ping
+from openfesl.protocol.fsys import (
+    DomainPartition,
+    GetPingSitesAnswer,
+    Goodbye,
+    Hello,
+    HelloAnswer,
+    MemCheck,
+    Ping,
+)
 from openfesl.protocol.message import Message
 
 logger = logging.getLogger(__name__)
@@ -54,11 +62,21 @@ def connect_routes(games: Games) -> dict[tuple[str, str], Route[Any]]:
     async def reply(connection: FeslConnection, request: Message) -> None:
         pass
 
+    async def ping_sites(connection: FeslConnection, request: Message) -> GetPingSitesAnswer:
+        # The browser would ping each site's address itself; with none it finishes at once.
+        return GetPingSitesAnswer()
+
+    async def acknowledge(connection: FeslConnection, request: Message) -> Message:
+        return Message()
+
     return {
         ("fsys", "Hello"): Route(Hello, hello),
         ("fsys", "Goodbye"): Route(Goodbye, goodbye),
         ("fsys", "MemCheck"): Route(Message, reply),
         ("fsys", "Ping"): Route(Message, reply),
+        ("fsys", "GetPingSites"): Route(Message, ping_sites),
+        # The SDK reads nothing from the answer and no flow of it sends this.
+        ("fsys", "Suicide"): Route(Message, acknowledge),
     }
 
 

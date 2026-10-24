@@ -6,7 +6,7 @@ from typing import Any, Protocol
 from openfesl.core.entitlements import UNKNOWN_KEY, EntitlementStore
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Game, Games
-from openfesl.core.logins import INVALID_PASSWORD, Logins
+from openfesl.core.logins import INVALID_PASSWORD, UNKNOWN_USER, Logins
 from openfesl.core.registration import (
     INVALID_VALUE,
     TOO_LONG,
@@ -38,6 +38,11 @@ MINIMUM_PASSWORD = 8
 # The SDK keeps 31 bytes of a password and logs in again after registration with what it kept.
 MAXIMUM_PASSWORD = 31
 MAXIMUM_NAME = 63
+
+# No account here belongs to a console identity, and the service hands out no tokens for other
+# services; the SDK passes these errors on to the game.
+CONSOLE_LOGINS = ("NuPS3Login", "NuXBL360Login", "NuGetAccountByPS3Ticket")
+NOT_OFFERED = ("NuPS3AddAccount", "NuXBL360AddAccount", "GameSpyPreAuth", "NuCreateEncryptedToken")
 
 
 @dataclass(frozen=True, slots=True)
@@ -192,6 +197,8 @@ class AccountService:
             ("acct", "NuEntitleGame"): Route(NuEntitleGame, self.entitle_game),
             ("acct", "NuGetTos"): Route(NuGetTos, self.terms),
             ("acct", "GetCountryList"): Route(Message, self.country_list),
+            **{("acct", txn): _refusal(UNKNOWN_USER) for txn in CONSOLE_LOGINS},
+            **{("acct", txn): _refusal(PARAMETERS_ERROR) for txn in NOT_OFFERED},
         }
 
     async def login(self, connection: FeslConnection, request: NuLogin) -> NuLoginAnswer:
@@ -359,3 +366,10 @@ def password_error(field_name: str, password: str) -> FieldError | None:
     if len(password.encode()) > MAXIMUM_PASSWORD:
         return FieldError(field_name=field_name, field_error=TOO_LONG)
     return None
+
+
+def _refusal(code: int) -> Route[Message]:
+    async def refuse(connection: FeslConnection, request: Message) -> None:
+        raise TransactionError(code)
+
+    return Route(Message, refuse)

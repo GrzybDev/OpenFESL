@@ -17,6 +17,7 @@ from openfesl.core.logins import Logins
 from openfesl.core.personas import PersonaService
 from openfesl.core.registration import Terms
 from openfesl.core.session import GameSession, Players
+from openfesl.core.telemetry import telemetry_routes
 from openfesl.core.texts import load_texts
 from openfesl.relay.endpoint import relay_endpoint
 from openfesl.server.settings import Settings
@@ -58,6 +59,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         personas = PersonaService(SqlPersonaStore(sessions))
         await personas.prepare(await accounts.prepare(games))
         routes.update(connect_routes(games))
+        routes.update(telemetry_routes())
         routes.update(accounts.routes())
         routes.update(AccountSettingsService(store, logins).routes())
         routes.update(personas.routes())
