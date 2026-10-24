@@ -32,7 +32,8 @@ async def relay_server(
 ) -> AsyncIterator[tuple[str, RelayServer]]:
     # The production server and settings, so the handshake, subprotocol, frame limits and
     # shutdown are the ones the hook meets.
-    monkeypatch.setenv("DATABASE_URL", database_url)
+    # A plain URL, as database hosts such as Dokploy hand it out; the server picks its driver.
+    monkeypatch.setenv("DATABASE_URL", database_url.replace("+asyncpg", "", 1))
     server = RelayServer(uvicorn_config("127.0.0.1", 0))
     task = asyncio.create_task(server.serve())
     while not server.started:

@@ -49,7 +49,7 @@ The server reads its settings from the environment.
 
 | Variable | Description | Default |
 |---|---|---|
-| `DATABASE_URL` | The PostgreSQL database as a SQLAlchemy URL with the asyncpg driver, such as `postgresql+asyncpg://openfesl:password@database/openfesl` | required |
+| `DATABASE_URL` | The PostgreSQL database, such as `postgresql://openfesl:password@database/openfesl`; the server connects through asyncpg | required |
 | `BEHIND_TRUSTED_PROXY` | `true` when every request comes through a proxy that sets `CLIENT_IP_HEADER`; any client could set the header otherwise | `false` |
 | `CLIENT_IP_HEADER` | The header that carries the client's address behind that proxy, such as `CF-Connecting-IP` | none |
 | `LOG_LEVEL` | The lowest level logged; `DEBUG` logs every packet with secrets masked | `INFO` |

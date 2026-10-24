@@ -1,7 +1,9 @@
 from ipaddress import ip_address
 
 from fastapi.requests import HTTPConnection
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
+from sqlalchemy.engine import make_url
 
 from openfesl.core.connection import Address
 
@@ -15,13 +17,23 @@ class Settings(BaseSettings):
         client_ip_header: The header that carries the client's address behind the proxy, such as
             CF-Connecting-IP.
         log_level: The lowest level logged; DEBUG shows every packet, secrets masked.
-        database_url: The PostgreSQL database, as a SQLAlchemy URL with the asyncpg driver.
+        database_url: The PostgreSQL database, as a SQLAlchemy URL with the asyncpg driver; a
+            plain postgresql:// or postgres:// URL gets that driver.
     """
 
     database_url: str
     behind_trusted_proxy: bool = False
     client_ip_header: str | None = None
     log_level: str = "INFO"
+
+    @field_validator("database_url")
+    @classmethod
+    def _use_asyncpg(cls, value: str) -> str:
+        # Hosts such as Dokploy hand out plain URLs, for which SQLAlchemy would pick psycopg.
+        url = make_url(value)
+        if url.drivername in {"postgres", "postgresql"}:
+            url = url.set(drivername="postgresql+asyncpg")
+        return url.render_as_string(hide_password=False)
 
     def client_address(self, connection: HTTPConnection) -> Address | None:
         """Return the address of the client behind a request or WebSocket.

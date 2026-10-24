@@ -18,7 +18,7 @@ services:
   server:
     build: .
     environment:
-      DATABASE_URL: postgresql+asyncpg://openfesl:openfesl@database/openfesl
+      DATABASE_URL: postgresql://openfesl:openfesl@database/openfesl
       LOG_LEVEL: DEBUG
     ports:
       - "127.0.0.1:8000:8000"
