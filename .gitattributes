@@ -1,0 +1,2 @@
+# The image is built and run on Linux, where CRLF breaks shebangs and Dockerfile heredocs.
+* text=auto eol=lf
