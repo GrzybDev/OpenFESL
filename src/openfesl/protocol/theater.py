@@ -1,9 +1,10 @@
-from typing import Annotated, ClassVar, Self
+from collections.abc import Mapping
+from typing import Annotated, ClassVar, Literal, Self
 
 from pydantic import AfterValidator, ConfigDict, Field
 
 from openfesl.protocol.fields import Fields, format_fields, parse_fields
-from openfesl.protocol.message import Message, _flatten, _from_wire, _to_wire
+from openfesl.protocol.message import Int32, Message, _flatten, _from_wire, _to_wire
 from openfesl.protocol.packet import HEADER_SIZE, Packet, PacketError
 
 REQUEST = 0x40
@@ -25,6 +26,11 @@ def _cut(size: int) -> AfterValidator:
 
 VersionText = Annotated[str, _cut(63)]
 ShortText = Annotated[str, _cut(31)]
+NameText = Annotated[str, _cut(127)]
+# The game reads ports as 16-bit numbers.
+Port = Annotated[int, Field(ge=0, le=0xFFFF)]
+GameType = Literal["G", "P"]
+JoinMode = Literal["O", "W", "C"]
 
 
 class TheaterMessage(Message):
@@ -96,6 +102,15 @@ def theater_packet(command: str, fields: Fields, error: str | None = None) -> Pa
     return Packet(command, code >> 24, code & 0xFFFFFF, payload)
 
 
+def attributes_size(attributes: Mapping[str, str]) -> int:
+    """Return the size of the Theater body that attributes make, escapes included.
+
+    Args:
+        attributes: The attributes by full key.
+    """
+    return len(format_fields((key, _to_wire(value)) for key, value in attributes.items()))
+
+
 def transaction_id(fields: Fields) -> int:
     """Return a Theater body's TID, which pairs a request with its answer; 0 when absent.
 
@@ -147,3 +162,113 @@ class EchoAnswer(TheaterMessage):
     port: int
     type: int
     uid: int
+
+
+class LobbyListAnswer(TheaterMessage):
+    """The answer to LLST: how many LDAT rows follow it."""
+
+    num_lobbies: int
+
+
+class LobbyData(TheaterMessage):
+    """LDAT: one lobby, sent after the LLST answer with its TID."""
+
+    lid: int
+    passing: int
+    name: str
+    locale: str
+    max_games: int
+    favorite_games: int
+    favorite_players: int
+    num_games: int
+
+
+class CreateGame(TheaterMessage):
+    """CGAM: a host lists a game in a lobby, LID -1 leaving the choice to the server."""
+
+    attribute_prefix = "B-U-"
+
+    lid: int = -1
+    name: NameText
+    port: Port
+    type: GameType = "G"
+    qlen: Int32 = 0
+    int_ip: ShortText | None = None
+    int_port: Port | None = None
+    max_players: Int32
+    max_observers: Int32 = Field(0, alias="B-maxObservers")
+    num_observers: Int32 = Field(0, alias="B-numObservers")
+    password: bool = False
+    ugid: str = ""
+    secret: str = ""
+    version: VersionText = Field("", alias="B-version")
+    join: JoinMode = "O"
+    attributes: dict[str, str] = Field(default_factory=dict)
+
+
+class CreateGameAnswer(TheaterMessage):
+    """The answer to CGAM: the ids every later packet about the game names, and its keys."""
+
+    lid: int
+    gid: int
+    max_players: int
+    ekey: str
+    ugid: str
+    secret: str
+    join: str
+
+
+class GameRequest(TheaterMessage):
+    """A host's request about one of its games, such as UBRA."""
+
+    lid: int
+    gid: int
+
+
+class UpdateGame(GameRequest):
+    """UGAM: what changed in a hosted game, its basic attributes as deltas; never answered."""
+
+    attribute_prefix = "B-U-"
+
+    name: NameText | None = None
+    join: JoinMode | None = None
+    max_players: Int32 | None = None
+    max_observers: Int32 | None = Field(None, alias="B-maxObservers")
+    num_observers: Int32 | None = Field(None, alias="B-numObservers")
+    attributes: dict[str, str] = Field(default_factory=dict)
+
+
+class UpdateGameDetails(GameRequest):
+    """UGDE: the detailed attributes of a hosted game that changed; never answered."""
+
+    attribute_prefix = "D-"
+
+    attributes: dict[str, str] = Field(default_factory=dict)
+
+
+class PlayerRequest(GameRequest):
+    """A host's request about one player of its game, such as PENT or PLVT."""
+
+    pid: int
+
+
+class UpdatePlayer(PlayerRequest):
+    """UPLA: the attributes of a joined player that changed; never answered."""
+
+    attribute_prefix = "P-"
+
+    attributes: dict[str, str] = Field(default_factory=dict)
+
+
+class PlayerEnteredAnswer(TheaterMessage):
+    """The answer to PENT, which the host matches to the player by its PID."""
+
+    pid: int
+
+
+class RemoveGame(TheaterMessage):
+    """RGAM: a host removes a game by its ids, or every game of a type it may still have."""
+
+    lid: int | None = None
+    gid: int | None = None
+    type: str | None = None

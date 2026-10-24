@@ -70,3 +70,9 @@ PlasmaBlock = { size = 20, blocks = true }
 PlasmaMute = { size = 20 }
 PlasmaRecentPlayers = { size = 100 }
 dogtags = { size = 100, kept_by_servers = true }
+
+[[lobbies]]
+id = 1
+name = "bfbc2PC01"
+locale = "en_US"
+max_games = 10000

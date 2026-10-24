@@ -66,6 +66,9 @@ class Game:
             ],
         )
 
+    async def close(self, key: ConnectionKey) -> None:
+        await self.websocket.send(struct.pack(">BBH", 3, key.channel, key.number))
+
     async def request(self, key: ConnectionKey, command: str, fields: Fields) -> Answer:
         """Send a request and return its answer, keeping every other frame in `frames`."""
         number = self._numbers.get(key, 0) + 1

@@ -90,6 +90,17 @@ class ListRule(BaseModel):
     invitations: tuple[str, ...] = ()
 
 
+class Lobby(BaseModel):
+    """A Theater lobby that a game's hosts list their games in."""
+
+    model_config = ConfigDict(frozen=True)
+
+    id: int
+    name: str
+    locale: str
+    max_games: int
+
+
 class Game(BaseModel):
     """A game the server serves, as its data file describes it.
 
@@ -102,6 +113,7 @@ class Game(BaseModel):
         http: What the game fetches over HTTP.
         records: The records a persona may keep, by name, with the most entries each holds.
         associations: The association list types the game keeps, by name.
+        lobbies: The Theater lobbies of all of the game's clients.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -114,6 +126,7 @@ class Game(BaseModel):
     http: Http = Http()
     records: dict[str, int] = {}
     associations: dict[str, ListRule] = {}
+    lobbies: list[Lobby] = []
 
     @field_validator("partition", mode="before")
     @classmethod

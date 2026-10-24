@@ -14,6 +14,7 @@ from openfesl.core.entitlements import EntitlementService
 from openfesl.core.fesl import Route
 from openfesl.core.game_http import GameHttp
 from openfesl.core.games import load_games
+from openfesl.core.hosting import Hosting
 from openfesl.core.leaderboards import LeaderboardService
 from openfesl.core.logins import Logins
 from openfesl.core.messages import MessageService
@@ -89,6 +90,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         messages = MessageService(SqlMessageStore(sessions), persona_store, players, associations)
         routes.update(messages.routes())
         commands.update(theater_routes())
+        commands.update(Hosting().routes())
         yield
         await messages.close()
         await engine.dispose()
