@@ -22,6 +22,7 @@ from openfesl.core.leaderboards import LeaderboardService
 from openfesl.core.logins import Logins
 from openfesl.core.messages import MessageService
 from openfesl.core.personas import PersonaService
+from openfesl.core.playnow import PlayNow
 from openfesl.core.presence import PresenceService
 from openfesl.core.records import RecordService
 from openfesl.core.registration import Terms
@@ -99,6 +100,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         commands.update(hosting.routes())
         commands.update(Browsing(hosting).routes())
         commands.update(Joining(hosting).routes())
+        routes.update(PlayNow(hosting).routes())
         following = asyncio.create_task(hosting.follow_approvals())
         yield
         following.cancel()
