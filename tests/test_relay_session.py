@@ -1,14 +1,116 @@
 import asyncio
+import struct
+from unittest.mock import Mock
 
 import pytest
-from websockets.asyncio.client import connect
+from websockets.asyncio.client import ClientConnection, connect
 from websockets.exceptions import ConnectionClosed, InvalidStatus
 from websockets.typing import Subprotocol
 
-from openfesl.protocol.relay import SUBPROTOCOL
+from openfesl.core.fesl import FeslConnection, Route
+from openfesl.protocol.fields import format_fields, parse_fields
+from openfesl.protocol.message import Message
+from openfesl.protocol.packet import Packet
+from openfesl.protocol.relay import (
+    SUBPROTOCOL,
+    Channel,
+    ConnectionKey,
+    Data,
+    decode_frame,
+    encode_frame,
+)
 from openfesl.server.cli import RelayServer, uvicorn_config
 
 pytestmark = pytest.mark.anyio
+
+SERVER_FESL = ConnectionKey(Channel.FESL, 1)
+OTHER_FESL = ConnectionKey(Channel.FESL, 2)
+
+# The dedicated server's Hello in the key order its SDK writes.
+SERVER_HELLO = [
+    ("TXN", "Hello"),
+    ("clientString", "bfbc2-pc-server"),
+    ("sku", "125170"),
+    ("locale", "en_US"),
+    ("clientPlatform", "PC"),
+    ("clientVersion", "2.0"),
+    ("SDKVersion", "5.1.2.0.0"),
+    ("protocolVersion", "2.0"),
+    ("fragmentSize", "8096"),
+    ("clientType", "server"),
+]
+
+
+def open_frame(key: ConnectionKey, host: str, port: int, game_port: int) -> bytes:
+    return struct.pack(">BBHHHB", 1, key.channel, key.number, port, game_port, len(host)) + (
+        host.encode("ascii")
+    )
+
+
+async def send(websocket: ClientConnection, key: ConnectionKey, packet: Packet) -> None:
+    await websocket.send(encode_frame(Data(key, packet)))
+
+
+async def receive(websocket: ClientConnection) -> tuple[ConnectionKey, Packet, dict[str, str]]:
+    frame = decode_frame(await websocket.recv(decode=False))
+    assert isinstance(frame, Data)
+    return frame.connection, frame.packet, dict(parse_fields(frame.packet.payload))
+
+
+async def test_a_dedicated_server_is_greeted_and_kept_alive_while_other_connections_stay_apart(
+    server_url: str,
+) -> None:
+    async with connect(server_url, subprotocols=[Subprotocol(SUBPROTOCOL)]) as websocket:
+        assert websocket.subprotocol == SUBPROTOCOL
+        await websocket.send(open_frame(SERVER_FESL, "bfbc2-pc-server.fesl.ea.com", 19021, 50001))
+        await send(websocket, SERVER_FESL, Packet("fsys", 0xC0, 1, format_fields(SERVER_HELLO)))
+
+        key, answer, fields = await receive(websocket)
+        assert (key, answer.command, answer.kind, answer.number) == (SERVER_FESL, "fsys", 0x80, 1)
+        assert fields["TXN"] == "Hello"
+        assert fields["theaterIp"] == "bfbc2-pc-server.theater.ea.com"
+        assert fields["theaterPort"] == "18326"
+        assert (fields["domainPartition.domain"], fields["domainPartition.subDomain"]) == (
+            "eagames",
+            "BFBC2",
+        )
+        assert fields["activityTimeoutSecs"] == "0"
+        assert fields["curTime"].endswith(" UTC")
+
+        key, push, fields = await receive(websocket)
+        assert (key, push.command, push.number) == (SERVER_FESL, "fsys", 0)
+        assert (fields["TXN"], fields["memcheck.[]"]) == ("MemCheck", "0")
+
+        reply = format_fields([("TXN", "MemCheck"), ("result", "")])
+        await send(websocket, SERVER_FESL, Packet("fsys", 0x80, 0, reply))
+        await websocket.send(open_frame(OTHER_FESL, "unknown-pc.fesl.ea.com", 18390, 50002))
+        unknown = format_fields([("TXN", "Hello"), ("clientString", "unknown-pc")])
+        await send(websocket, OTHER_FESL, Packet("fsys", 0xC0, 1, unknown))
+
+        key, answer, fields = await receive(websocket)
+        assert (key, answer.number, fields["TXN"]) == (OTHER_FESL, 1, "Hello")
+        assert fields["errorCode"] != "0"
+
+        nothing = format_fields([("TXN", "Nothing")])
+        await send(websocket, SERVER_FESL, Packet("zzzz", 0xC0, 2, nothing))
+        key, answer, fields = await receive(websocket)
+        assert (key, answer.number, fields["TXN"]) == (SERVER_FESL, 2, "Nothing")
+        assert fields["errorCode"] != "0"
+
+
+async def test_a_transaction_that_fails_unexpectedly_answers_99_and_keeps_the_connection() -> None:
+    async def fail(connection: FeslConnection, request: Message) -> None:
+        raise ConnectionRefusedError("the database is unreachable")
+
+    outbox = Mock()
+    routes = {("fsys", "Hello"): Route(Message, fail)}
+    connection = FeslConnection(outbox, routes)
+    await connection.receive(Packet("fsys", 0xC0, 1, format_fields([("TXN", "Hello")])))
+
+    [answer] = [call.args[0] for call in outbox.send.call_args_list]
+    assert answer.number == 1
+    assert dict(parse_fields(answer.payload))["errorCode"] == "99"
+    outbox.close.assert_not_called()
 
 
 async def test_a_websocket_without_the_relay_subprotocol_is_refused(server_url: str) -> None:

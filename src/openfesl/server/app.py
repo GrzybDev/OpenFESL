@@ -1,6 +1,8 @@
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import PlainTextResponse
 
+from openfesl.core.connect import connect_routes
+from openfesl.core.games import load_games
 from openfesl.core.session import GameSession
 from openfesl.relay.endpoint import relay_endpoint
 from openfesl.server.settings import Settings
@@ -13,9 +15,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         settings: The deployment's settings; read from the environment when omitted.
     """
     settings = settings or Settings()
+    routes = connect_routes(load_games())
 
     def start_session(websocket: WebSocket) -> GameSession:
-        return GameSession(settings.client_address(websocket))
+        return GameSession(routes, settings.client_address(websocket))
 
     app = FastAPI(title="OpenFESL", docs_url=None, redoc_url=None, openapi_url=None)
     app.add_api_websocket_route("/", relay_endpoint(start_session))

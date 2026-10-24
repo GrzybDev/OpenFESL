@@ -1,0 +1,8 @@
+name = "Battlefield: Bad Company 2"
+partition = "/eagames/BFBC2"
+
+[clients.bfbc2-pc]
+theater_port = 18395
+
+[clients.bfbc2-pc-server]
+theater_port = 18326
