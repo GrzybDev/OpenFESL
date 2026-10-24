@@ -11,9 +11,14 @@ license-files = [
 ]
 requires-python = ">=3.14"
 dependencies = [
+    "alembic>=1.20.1",
+    "asyncpg>=0.32.0",
+    "babel>=2.18.0",
     "fastapi>=0.162.0",
+    "pwdlib[argon2]>=0.3.1",
     "pydantic>=2.14.1",
     "pydantic-settings>=2.16.1",
+    "sqlalchemy[asyncio]>=2.1.6",
     "uvicorn[standard]>=0.54.0",
 ]
 
@@ -27,6 +32,7 @@ dev = [
     "mypy>=2.4.0",
     "pytest>=9.1.1",
     "ruff>=0.17.2",
+    "testcontainers>=4.15.0",
     "websockets>=17.3",
 ]
 
@@ -48,10 +54,13 @@ convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["D"]
+# Alembic's environment and revisions follow Alembic's own layout.
+"src/openfesl/storage/migrations/**" = ["D"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = ["-ra", "--strict-markers", "--import-mode=importlib"]
+pythonpath = ["tests"]
 
 [tool.mypy]
 files = ["src", "tests"]

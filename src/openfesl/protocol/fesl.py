@@ -14,6 +14,21 @@ FRAGMENT = 0x20
 DEFAULT_FRAGMENT_SIZE = 8096
 
 
+class FieldError(Message):
+    """Why one field of a request was refused."""
+
+    field_name: str
+    field_error: int
+    value: str = ""
+
+
+class ErrorAnswer(Message):
+    """A failed transaction: any nonzero code fails it, field errors say which input was wrong."""
+
+    error_code: int
+    error_container: list[FieldError] | None = None
+
+
 class FragmentError(ValueError):
     """Pieces of a fragmented request that do not add up to one packet."""
 

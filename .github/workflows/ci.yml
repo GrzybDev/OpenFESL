@@ -39,8 +39,16 @@ jobs:
 
       - name: Check that the server starts and answers its health check
         run: |
-          docker run --detach --name openfesl openfesl
-          for _ in $(seq 1 20); do
+          docker network create openfesl
+          docker run --detach --name database --network openfesl \
+            --env POSTGRES_PASSWORD=openfesl postgres:18-alpine
+          # Over TCP: the image's first-start server listens on its socket only, then restarts.
+          until docker exec database pg_isready --host 127.0.0.1 --username postgres; do
+            sleep 1
+          done
+          docker run --detach --name openfesl --network openfesl \
+            --env DATABASE_URL=postgresql+asyncpg://postgres:openfesl@database/postgres openfesl
+          for _ in $(seq 1 30); do
             if docker exec openfesl openfesl health; then
               exit 0
             fi

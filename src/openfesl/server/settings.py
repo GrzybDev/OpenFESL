@@ -15,8 +15,10 @@ class Settings(BaseSettings):
         client_ip_header: The header that carries the client's address behind the proxy, such as
             CF-Connecting-IP.
         log_level: The lowest level logged; DEBUG shows every packet, secrets masked.
+        database_url: The PostgreSQL database, as a SQLAlchemy URL with the asyncpg driver.
     """
 
+    database_url: str
     behind_trusted_proxy: bool = False
     client_ip_header: str | None = None
     log_level: str = "INFO"

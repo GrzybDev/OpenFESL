@@ -3,7 +3,7 @@ from datetime import UTC, date, datetime
 from datetime import time as datetime_time
 from typing import Annotated, Any, Self
 
-from pydantic import BaseModel, BeforeValidator, ConfigDict
+from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict
 from pydantic.alias_generators import to_camel
 
 from openfesl.protocol.fields import Fields, format_fields, parse_fields
@@ -31,7 +31,20 @@ def _parse_date_time(value: object) -> object:
     return datetime.combine(_date(day), datetime_time(hour, minute, second), UTC)
 
 
+def _storable(value: str) -> str:
+    if "\0" in value:
+        raise ValueError("text holds a NUL")
+    try:
+        value.encode("utf-8")
+    except UnicodeEncodeError:
+        # The codec's own message quotes the character, which may be part of a password.
+        raise ValueError("text is not UTF-8") from None
+    return value
+
+
 FeslDate = Annotated[date, BeforeValidator(_parse_date)]
+# Text that is kept or compared, so it must be UTF-8 without NUL; other bytes fail validation.
+Text = Annotated[str, AfterValidator(_storable)]
 FeslDateTime = Annotated[datetime, BeforeValidator(_parse_date_time)]
 
 
@@ -46,7 +59,10 @@ class Message(BaseModel):
     `"OCT-24-2026 12:34:56 UTC"` forms.
     """
 
-    model_config = ConfigDict(frozen=True, alias_generator=to_camel, validate_by_name=True)
+    # Validation errors reach the log, so they leave out the values, which may be secrets.
+    model_config = ConfigDict(
+        frozen=True, alias_generator=to_camel, validate_by_name=True, hide_input_in_errors=True
+    )
 
     @classmethod
     def parse(cls, body: bytes) -> Self:

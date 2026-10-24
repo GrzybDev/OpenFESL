@@ -58,3 +58,9 @@ class Goodbye(Message):
 
     reason: str = ""
     message: str = ""
+
+
+class GoodbyePush(Message):
+    """The server sending the game away; reason 2 means the account logged in elsewhere."""
+
+    reason: int

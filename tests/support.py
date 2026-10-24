@@ -1,0 +1,105 @@
+import base64
+import struct
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
+from websockets.asyncio.client import ClientConnection, connect
+from websockets.typing import Subprotocol
+
+from openfesl.protocol.fields import Fields, format_fields, parse_fields
+from openfesl.protocol.packet import Packet
+from openfesl.protocol.relay import (
+    SUBPROTOCOL,
+    ConnectionKey,
+    Data,
+    Frame,
+    decode_frame,
+    encode_frame,
+)
+
+type Answer = dict[str, str]
+
+
+class Game:
+    """A game process that talks to the server through one relay WebSocket, as the hook does."""
+
+    def __init__(self, websocket: ClientConnection) -> None:
+        self.websocket = websocket
+        self.frames: list[Frame] = []
+        self._numbers: dict[ConnectionKey, int] = {}
+
+    async def open(self, key: ConnectionKey, host: str, port: int = 18390) -> None:
+        body = struct.pack(">HHB", port, 50000 + key.number, len(host)) + host.encode("ascii")
+        await self.websocket.send(struct.pack(">BBH", 1, key.channel, key.number) + body)
+
+    async def hello(
+        self, key: ConnectionKey, client_string: str, client_type: str = "", locale: str = "en_US"
+    ) -> Answer:
+        await self.open(key, f"{client_string}.fesl.ea.com")
+        return await self.request(
+            key,
+            "fsys",
+            [
+                ("TXN", "Hello"),
+                ("clientString", client_string),
+                ("sku", "PC"),
+                ("locale", locale),
+                ("clientPlatform", "PC"),
+                ("clientVersion", "2.0"),
+                ("SDKVersion", "5.1.2.0.0"),
+                ("protocolVersion", "2.0"),
+                ("fragmentSize", "8096"),
+                ("clientType", client_type),
+            ],
+        )
+
+    async def request(self, key: ConnectionKey, command: str, fields: Fields) -> Answer:
+        """Send a request and return its answer, keeping every other frame in `frames`."""
+        number = self._numbers.get(key, 0) + 1
+        self._numbers[key] = number
+        packet = Packet(command, 0xC0, number, format_fields(fields))
+        await self.websocket.send(encode_frame(Data(key, packet)))
+        pieces: list[bytes] = []
+        while True:
+            frame = await self.next_frame()
+            if (
+                not isinstance(frame, Data)
+                or frame.connection != key
+                or frame.packet.number != number
+            ):
+                self.frames.append(frame)
+            elif frame.packet.kind & 0x20:
+                # Joined by decodedSize, as the game joins an answer that came in fragments.
+                piece = dict(parse_fields(frame.packet.payload))
+                pieces.append(base64.b64decode(piece["data"]))
+                if sum(map(len, pieces)) == int(piece["decodedSize"]):
+                    return text(Packet(command, 0x80, number, b"".join(pieces)))
+            else:
+                return text(frame.packet)
+
+    async def push(self, txn: str) -> Answer:
+        """Return the first push of a transaction, waiting for it when it has not arrived yet."""
+        while (found := self.pushed(txn)) is None:
+            self.frames.append(await self.next_frame())
+        return found
+
+    def pushed(self, txn: str) -> Answer | None:
+        """Return the first push of a transaction among the frames that arrived so far."""
+        pushes = (text(frame.packet) for frame in self.frames if isinstance(frame, Data))
+        return next((fields for fields in pushes if fields.get("TXN") == txn), None)
+
+    async def next_frame(self) -> Frame:
+        return decode_frame(await self.websocket.recv(decode=False))
+
+
+def text(packet: Packet) -> Answer:
+    """Return a packet's fields with their text decoded as UTF-8."""
+    return {
+        key: value.encode("latin-1").decode("utf-8") for key, value in parse_fields(packet.payload)
+    }
+
+
+@asynccontextmanager
+async def game(server_url: str) -> AsyncIterator[Game]:
+    async with connect(server_url, subprotocols=[Subprotocol(SUBPROTOCOL)]) as websocket:
+        yield Game(websocket)

@@ -1,5 +1,5 @@
-import asyncio
 import struct
+from typing import TYPE_CHECKING, Any, cast
 from unittest.mock import Mock
 
 import pytest
@@ -9,6 +9,7 @@ from websockets.typing import Subprotocol
 
 from openfesl.core.fesl import FeslConnection, Route
 from openfesl.protocol.fields import format_fields, parse_fields
+from openfesl.protocol.fsys import Hello
 from openfesl.protocol.message import Message
 from openfesl.protocol.packet import Packet
 from openfesl.protocol.relay import (
@@ -19,7 +20,10 @@ from openfesl.protocol.relay import (
     decode_frame,
     encode_frame,
 )
-from openfesl.server.cli import RelayServer, uvicorn_config
+from openfesl.server.cli import RelayServer
+
+if TYPE_CHECKING:
+    from openfesl.core.session import GameSession
 
 pytestmark = pytest.mark.anyio
 
@@ -98,18 +102,30 @@ async def test_a_dedicated_server_is_greeted_and_kept_alive_while_other_connecti
         assert fields["errorCode"] != "0"
 
 
-async def test_a_transaction_that_fails_unexpectedly_answers_99_and_keeps_the_connection() -> None:
+async def test_an_unexpected_failure_answers_an_error_and_keeps_the_connection() -> None:
+    async def greet(connection: FeslConnection, request: Hello) -> None:
+        connection.hello = request
+
     async def fail(connection: FeslConnection, request: Message) -> None:
         raise ConnectionRefusedError("the database is unreachable")
 
     outbox = Mock()
-    routes = {("fsys", "Hello"): Route(Message, fail)}
-    connection = FeslConnection(outbox, routes)
-    await connection.receive(Packet("fsys", 0xC0, 1, format_fields([("TXN", "Hello")])))
+    routes: dict[tuple[str, str], Route[Any]] = {
+        ("fsys", "Hello"): Route(Hello, greet),
+        ("fsys", "GetPingSites"): Route(Message, fail),
+        ("acct", "NuLogin"): Route(Message, fail),
+    }
+    connection = FeslConnection(cast("GameSession", None), outbox, routes)
+    await connection.receive(Packet("fsys", 0xC0, 1, format_fields(SERVER_HELLO)))
+    await connection.receive(Packet("fsys", 0xC0, 2, format_fields([("TXN", "GetPingSites")])))
+    await connection.receive(Packet("acct", 0xC0, 3, format_fields([("TXN", "NuLogin")])))
 
-    [answer] = [call.args[0] for call in outbox.send.call_args_list]
-    assert answer.number == 1
-    assert dict(parse_fields(answer.payload))["errorCode"] == "99"
+    answers = [call.args[0] for call in outbox.send.call_args_list]
+    # The game's login dialog reads 99 as a key server timeout, so the account service answers
+    # its own code for a failed service.
+    assert [
+        (answer.number, dict(parse_fields(answer.payload))["errorCode"]) for answer in answers
+    ] == [(2, "99"), (3, "193")]
     outbox.close.assert_not_called()
 
 
@@ -148,17 +164,14 @@ async def test_a_connection_that_no_service_answers_is_closed(server_url: str) -
         assert await websocket.recv(decode=False) == bytes.fromhex("03020001")
 
 
-async def test_stopping_the_server_ends_sessions_with_a_close_code_windows_accepts() -> None:
-    server = RelayServer(uvicorn_config("127.0.0.1", 0))
-    task = asyncio.create_task(server.serve())
-    while not server.started:
-        await asyncio.sleep(0.01)
-    port = server.servers[0].sockets[0].getsockname()[1]
-    async with connect(f"ws://127.0.0.1:{port}/", subprotocols=[Subprotocol(SUBPROTOCOL)]) as hook:
+async def test_stopping_the_server_ends_sessions_with_a_close_code_windows_accepts(
+    relay_server: tuple[str, RelayServer],
+) -> None:
+    url, server = relay_server
+    async with connect(url, subprotocols=[Subprotocol(SUBPROTOCOL)]) as hook:
         server.should_exit = True
         with pytest.raises(ConnectionClosed) as closed:
             await hook.recv()
-    await task
 
     assert closed.value.rcvd is not None
     assert closed.value.rcvd.code == 1001

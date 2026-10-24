@@ -30,7 +30,7 @@ def connect_routes(games: Games) -> dict[tuple[str, str], Route[Any]]:
             logger.warning("Refusing a FESL Hello from %s", request.client_string)
             raise TransactionError(SYSTEM_ERROR)
         game, client = found
-        connection.greet(request, game)
+        connection.greet(request, game, client)
         logger.info(
             "FESL Hello from %s %s (%s)",
             request.client_string,

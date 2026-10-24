@@ -6,3 +6,4 @@ theater_port = 18395
 
 [clients.bfbc2-pc-server]
 theater_port = 18326
+server_account = "bfbc2.server.pc@ea.com"

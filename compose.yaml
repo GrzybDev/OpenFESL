@@ -1,0 +1,30 @@
+# The server and its database for local runs, such as with OpenFESLHook at ws://127.0.0.1:8000;
+# deployments build from the Dockerfile and get their database from Dokploy.
+services:
+  database:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: openfesl
+      POSTGRES_PASSWORD: openfesl
+    # From 18 the image keeps its data in a per-version folder below this one.
+    volumes:
+      - database:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --host 127.0.0.1 --username openfesl"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+
+  server:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+asyncpg://openfesl:openfesl@database/openfesl
+      LOG_LEVEL: DEBUG
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      database:
+        condition: service_healthy
+
+volumes:
+  database:

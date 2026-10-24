@@ -16,11 +16,18 @@ class Partition(BaseModel):
 
 
 class Client(BaseModel):
-    """One client string of a game, such as the game on a platform or its dedicated server."""
+    """One client string of a game, such as the game on a platform or its dedicated server.
+
+    Attributes:
+        theater_port: The Theater port that the Hello answer names.
+        server_account: The account that every dedicated server of the game logs in with, as
+            its game data names it; only dedicated servers may use it.
+    """
 
     model_config = ConfigDict(frozen=True)
 
     theater_port: int
+    server_account: str | None = None
 
 
 class Game(BaseModel):
@@ -61,6 +68,12 @@ class Games:
                 if name in self._clients:
                     raise ValueError(f"client string {name} belongs to two games")
                 self._clients[name] = (game, client)
+
+    @property
+    def server_accounts(self) -> list[str]:
+        """Return the accounts that the games' dedicated servers log in with."""
+        clients = (client for _, client in self._clients.values())
+        return [client.server_account for client in clients if client.server_account]
 
     def find(self, client_string: str) -> tuple[Game, Client] | None:
         """Return the game and client that a client string names, if the server serves it.
