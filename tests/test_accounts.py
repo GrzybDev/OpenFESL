@@ -1,5 +1,5 @@
 import pytest
-from support import game, login, registration
+from support import entitle_game, game, login, registration
 
 from openfesl.protocol.relay import Channel, ConnectionKey
 
@@ -27,6 +27,10 @@ async def test_a_player_registers_logs_in_and_a_later_login_sends_the_first_sess
 
         form = registration("ann@example.test", "secret-pass", terms["version"])
         assert "errorCode" not in await first.request(FESL, "acct", form)
+        refused = await first.request(FESL, "acct", login("ann@example.test", "secret-pass"))
+        assert refused["errorCode"] == "120"
+        entitle = entitle_game("ann@example.test", "secret-pass", "activate-game")
+        assert "errorCode" not in await first.request(FESL, "acct", entitle)
         answer = await first.request(FESL, "acct", login("ANN@example.test", "secret-pass"))
         assert answer["nuid"] == "ann@example.test"
         assert answer["lkey"].endswith(".")
@@ -87,7 +91,12 @@ async def test_registration_and_login_refuse_what_the_game_must_correct(
         assert "Invalid acct NuLogin" in caplog.text
         assert "hunter2" not in caplog.text
         accepted = login("bob@example.test", "secret-pass", ("tosVersion", terms))
-        assert "errorCode" not in await player.request(FESL, "acct", accepted)
+        assert (await player.request(FESL, "acct", accepted))["errorCode"] == "120"
+        entitle = entitle_game("bob@example.test", "secret-pass", "ACTIVATE-GAME")
+        await player.request(FESL, "acct", entitle)
+        assert "errorCode" not in await player.request(
+            FESL, "acct", login("bob@example.test", "secret-pass")
+        )
 
 
 async def test_dedicated_servers_share_the_server_account_of_their_game(server_url: str) -> None:

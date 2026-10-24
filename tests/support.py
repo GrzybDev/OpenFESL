@@ -129,11 +129,16 @@ def login(nuid: str, password: str, *extra: tuple[str, str]) -> Fields:
     ]
 
 
+def entitle_game(nuid: str, password: str, key: str) -> Fields:
+    return [("TXN", "NuEntitleGame"), ("key", key), ("nuid", nuid), ("password", password)]
+
+
 async def log_in_player(game: Game, key: ConnectionKey, nuid: str) -> Answer:
     """Register a player with the current terms and log it in on a new FESL connection."""
     await game.hello(key, "bfbc2-pc")
     terms = (await game.request(key, "acct", [("TXN", "NuGetTos")]))["version"]
     await game.request(key, "acct", registration(nuid, "secret-pass", terms))
+    await game.request(key, "acct", entitle_game(nuid, "secret-pass", "ACTIVATE-GAME"))
     return await game.request(key, "acct", login(nuid, "secret-pass"))
 
 

@@ -20,6 +20,7 @@ class Client(BaseModel):
 
     Attributes:
         theater_port: The Theater port that the Hello answer names.
+        entitlement: The tag a player's account needs to play; none for dedicated servers.
         server_account: The account that every dedicated server of the game logs in with, as
             its game data names it; only dedicated servers may use it.
     """
@@ -27,7 +28,27 @@ class Client(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     theater_port: int
+    entitlement: str | None = None
     server_account: str | None = None
+
+
+class Grant(BaseModel):
+    """An entitlement that a product key grants."""
+
+    model_config = ConfigDict(frozen=True)
+
+    tag: str
+    group: str | None = None
+    product: str | None = None
+
+
+class ProductKey(BaseModel):
+    """A product key of a game's starting set and what it grants."""
+
+    model_config = ConfigDict(frozen=True)
+
+    code: str
+    entitlements: list[Grant]
 
 
 class Game(BaseModel):
@@ -38,6 +59,7 @@ class Game(BaseModel):
         partition: Where the game's data lives.
         namespace: The persona namespace; persona names are unique within it.
         clients: The game's client strings.
+        keys: The product keys the database starts with; the admin manages them from there.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -46,6 +68,7 @@ class Game(BaseModel):
     partition: Partition
     namespace: str
     clients: dict[str, Client]
+    keys: list[ProductKey] = []
 
     @field_validator("partition", mode="before")
     @classmethod
@@ -85,6 +108,12 @@ class Games:
             for game, client in self._clients.values()
             if client.server_account
         ]
+
+    @property
+    def keys(self) -> list[ProductKey]:
+        """Return the starting product keys of every game."""
+        games = {id(game): game for game, _ in self._clients.values()}
+        return [key for game in games.values() for key in game.keys]
 
     def find(self, client_string: str) -> tuple[Game, Client] | None:
         """Return the game and client that a client string names, if the server serves it.

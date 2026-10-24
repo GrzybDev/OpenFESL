@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from openfesl.core.accounts import AccountService
 from openfesl.core.connect import connect_routes
+from openfesl.core.entitlements import EntitlementService
 from openfesl.core.fesl import Route
 from openfesl.core.games import load_games
 from openfesl.core.personas import PersonaService
@@ -17,6 +18,7 @@ from openfesl.relay.endpoint import relay_endpoint
 from openfesl.server.settings import Settings
 from openfesl.storage.accounts import SqlAccountStore
 from openfesl.storage.database import migrate
+from openfesl.storage.entitlements import SqlEntitlementStore
 from openfesl.storage.personas import SqlPersonaStore
 
 
@@ -40,12 +42,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         await migrate(engine)
         sessions = async_sessionmaker(engine)
         games = load_games()
-        accounts = AccountService(SqlAccountStore(sessions), Terms.load())
+        entitlements = SqlEntitlementStore(sessions)
+        # A new database starts with the games' keys; from then on the admin manages them.
+        if not await entitlements.has_keys():
+            await entitlements.import_keys(games.keys)
+        accounts = AccountService(SqlAccountStore(sessions), entitlements, Terms.load())
         personas = PersonaService(SqlPersonaStore(sessions))
         await personas.prepare(await accounts.prepare(games))
         routes.update(connect_routes(games))
         routes.update(accounts.routes())
         routes.update(personas.routes())
+        routes.update(EntitlementService(entitlements).routes())
         yield
         await engine.dispose()
 

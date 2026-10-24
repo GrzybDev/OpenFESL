@@ -9,6 +9,7 @@ from typing import Any, Protocol
 from pwdlib import PasswordHash
 from pwdlib.hashers.argon2 import Argon2Hasher
 
+from openfesl.core.entitlements import UNKNOWN_KEY, EntitlementStore
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Game, Games
 from openfesl.core.registration import Terms, countries, is_country
@@ -16,6 +17,7 @@ from openfesl.protocol.acct import (
     Country,
     GetCountryListAnswer,
     NuAddAccount,
+    NuEntitleGame,
     NuGetTos,
     NuGetTosAnswer,
     NuLogin,
@@ -27,6 +29,7 @@ from openfesl.protocol.message import Message
 logger = logging.getLogger(__name__)
 
 UNKNOWN_USER = 101
+NOT_ENTITLED = 120
 INVALID_PASSWORD = 122
 ALREADY_REGISTERED = 160
 TERMS_OUT_OF_DATE = 260
@@ -127,14 +130,16 @@ class AccountStore(Protocol):
 class AccountService:
     """The acct transactions that register accounts and log them in."""
 
-    def __init__(self, store: AccountStore, terms: Terms) -> None:
+    def __init__(self, store: AccountStore, entitlements: EntitlementStore, terms: Terms) -> None:
         """Serve accounts from a store.
 
         Args:
             store: Where accounts are kept.
+            entitlements: Where the entitlements that let players in are kept.
             terms: The service's terms.
         """
         self._store = store
+        self._entitlements = entitlements
         self._terms = terms
         self._hasher = PasswordHash((Argon2Hasher(),))
         self._hashing = asyncio.Semaphore(CONCURRENT_HASHES)
@@ -166,6 +171,7 @@ class AccountService:
         return {
             ("acct", "NuLogin"): Route(NuLogin, self.login),
             ("acct", "NuAddAccount"): Route(NuAddAccount, self.add_account),
+            ("acct", "NuEntitleGame"): Route(NuEntitleGame, self.entitle_game),
             ("acct", "NuGetTos"): Route(NuGetTos, self.terms),
             ("acct", "GetCountryList"): Route(Message, self.country_list),
         }
@@ -179,7 +185,8 @@ class AccountService:
 
         Raises:
             TransactionError: When the account is unknown, the password or token is wrong, the
-                terms are out of date, or a player and a server account meet.
+                terms are out of date, a player lacks the game's entitlement, or a player and a
+                server account meet.
         """
         assert connection.hello is not None and connection.client is not None
         token = None
@@ -190,7 +197,7 @@ class AccountService:
                 raise TransactionError(INVALID_PASSWORD)
             account = await self._server_account(expected, request.nuid)
         else:
-            account, token = await self._player_account(request)
+            account, token = await self._player_account(request, connection.client.entitlement)
         key = secrets.token_urlsafe(20) + "."
         connection.session.log_in(account, key, connection)
         logger.info("Account %d (%s) logged in", account.id, account.nuid)
@@ -264,33 +271,68 @@ class AccountService:
             ]
         )
 
-    async def _player_account(self, request: NuLogin) -> tuple[Account, str | None]:
-        if request.encrypted_info:
-            account = await self._store.find_remembered(_digest(request.encrypted_info))
-            if account is None:
-                raise TransactionError(INVALID_PASSWORD)
-            # The game's own remembered login asks for no token but keeps whatever the answer
-            # carries, nothing included, so a token login always gets its token back.
-            token = request.encrypted_info
-        else:
-            credentials = await self._store.find(request.nuid)
-            if credentials is None:
-                raise TransactionError(UNKNOWN_USER)
-            if not credentials.password_hash or not await self._verify(
-                request.password, credentials.password_hash
-            ):
-                raise TransactionError(INVALID_PASSWORD)
-            account, token = credentials.account, None
-        if account.server:
-            raise TransactionError(INVALID_PASSWORD)
+    async def entitle_game(self, connection: FeslConnection, request: NuEntitleGame) -> Message:
+        """Redeem a product key for an account that could not log in without the game.
+
+        Args:
+            connection: The FESL connection the request came on.
+            request: The key and the login it is for.
+
+        Raises:
+            TransactionError: When the login fails, no enabled key has that code, the key does
+                not grant the game, or the account's entitlement to it was taken away.
+        """
+        assert connection.client is not None
+        account = await self._authenticate(request.nuid, request.password, request.encrypted_info)
+        # Only a key for the game itself, so the game does not loop between its key prompt
+        # and NuLogin's 120, and a key for downloadable content is not used up here.
+        game = connection.client.entitlement
+        grants = await self._entitlements.grants(request.key)
+        if grants is None or (game and game not in {grant.tag for grant in grants}):
+            raise TransactionError(UNKNOWN_KEY)
+        await self._entitlements.redeem(account.id, request.key)
+        if game and not await self._entitlements.entitled(account.id, game):
+            raise TransactionError(NOT_ENTITLED)
+        logger.info("Account %d redeemed a product key for the game", account.id)
+        return Message()
+
+    async def _player_account(
+        self, request: NuLogin, entitlement: str | None
+    ) -> tuple[Account, str | None]:
+        account = await self._authenticate(request.nuid, request.password, request.encrypted_info)
         if account.terms_version != self._terms.version:
             if request.tos_version != self._terms.version:
                 raise TransactionError(TERMS_OUT_OF_DATE)
             await self._store.accept_terms(account.id, self._terms.version)
-        if request.return_encrypted_info and token is None:
-            token = secrets.token_urlsafe(32)
-            await self._store.remember(account.id, _digest(token))
+        if entitlement and not await self._entitlements.entitled(account.id, entitlement):
+            raise TransactionError(NOT_ENTITLED)
+        # The game's own remembered login asks for no token but keeps whatever the answer
+        # carries, nothing included, so a token login always gets its token back.
+        if request.encrypted_info:
+            return account, request.encrypted_info
+        if not request.return_encrypted_info:
+            return account, None
+        token = secrets.token_urlsafe(32)
+        await self._store.remember(account.id, _digest(token))
         return account, token
+
+    async def _authenticate(self, nuid: str, password: str, token: str) -> Account:
+        if token:
+            account = await self._store.find_remembered(_digest(token))
+            if account is None:
+                raise TransactionError(INVALID_PASSWORD)
+        else:
+            credentials = await self._store.find(nuid)
+            if credentials is None:
+                raise TransactionError(UNKNOWN_USER)
+            if not credentials.password_hash or not await self._verify(
+                password, credentials.password_hash
+            ):
+                raise TransactionError(INVALID_PASSWORD)
+            account = credentials.account
+        if account.server:
+            raise TransactionError(INVALID_PASSWORD)
+        return account
 
     async def _server_account(self, expected: str, nuid: str) -> Account:
         # Every dedicated server of a game logs in with the same account from its game data,

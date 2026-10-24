@@ -4,7 +4,43 @@ namespace = "battlefield"
 
 [clients.bfbc2-pc]
 theater_port = 18395
+entitlement = "bfbc2-pc"
 
 [clients.bfbc2-pc-server]
 theater_port = 18326
 server_account = "bfbc2.server.pc@ea.com"
+
+[[keys]]
+code = "ACTIVATE-GAME"
+entitlements = [
+    { tag = "bfbc2-pc" },
+    { tag = "ONLINE_ACCESS", product = "DR:156691300" },
+    { tag = "BETA_ONLINE_ACCESS", product = "OFB-BFBC:19121" },
+]
+
+[[keys]]
+code = "ACTIVATE-VIETNAM"
+entitlements = [
+    { tag = "BFBC2:PC:VIETNAM_ACCESS", group = "BFBC2PC", product = "DR:219316800" },
+    { tag = "BFBC2:PC:VIETNAM_PDLC", group = "BFBC2PC", product = "DR:219316800" },
+]
+
+[[keys]]
+code = "ACTIVATE-SPECACT"
+entitlements = [
+    { tag = "BFBC2:PC:ALLKIT", group = "BFBC2PC" },
+    { tag = "BFBC2:PC:MAXALLKIT", group = "BFBC2PC" },
+]
+
+[[keys]]
+code = "ACTIVATE-PREMIUM"
+entitlements = [
+    { tag = "BFBC2:PC:LimitedEdition", group = "BFBC2PC", product = "OFB-BFBC:19120" },
+]
+
+[[keys]]
+code = "ACTIVATE-VETERAN"
+entitlements = [
+    { tag = "BFBC2:PC:ADDSVETRANK", group = "AddsVetRank", product = "OFB-EAST:40873" },
+    { tag = "BF3:PC:ADDSVETRANK", group = "AddsVetRank", product = "OFB-EAST:40873" },
+]

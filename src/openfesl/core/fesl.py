@@ -33,7 +33,7 @@ HELLO_MISSING = 22
 SYSTEM_ERROR = 99
 SERVICE_FAILED = 193
 
-_SECRET = re.compile(r"password|lkey|encrypted|ticket", re.IGNORECASE)
+_SECRET = re.compile(r"password|lkey|encrypted|ticket|^key$", re.IGNORECASE)
 
 
 class TransactionError(Exception):

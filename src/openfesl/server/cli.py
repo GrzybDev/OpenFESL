@@ -1,4 +1,5 @@
 import argparse
+import asyncio
 import logging
 import socket
 import sys
@@ -6,10 +7,14 @@ import urllib.request
 from collections.abc import Sequence
 
 import uvicorn
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
+from openfesl.core.games import load_games
 from openfesl.protocol.packet import MAX_SIZE
 from openfesl.relay.endpoint import close_sessions
 from openfesl.server.settings import Settings
+from openfesl.storage.database import migrate
+from openfesl.storage.entitlements import SqlEntitlementStore
 
 DEFAULT_PORT = 8000
 GOING_AWAY = 1001
@@ -34,6 +39,10 @@ def main(argv: Sequence[str] | None = None) -> None:
     serve.add_argument("--port", type=int, default=DEFAULT_PORT, help="port to listen on")
     health = commands.add_parser("health", help="check that the server on this machine answers")
     health.add_argument("--port", type=int, default=DEFAULT_PORT, help="port the server uses")
+    keys = commands.add_parser("keys", help="manage product keys")
+    keys.add_subparsers(dest="action", required=True).add_parser(
+        "import", help="add the games' product keys that the database lacks, keeping the others"
+    )
     args = parser.parse_args(argv)
 
     match args.command:
@@ -45,6 +54,8 @@ def main(argv: Sequence[str] | None = None) -> None:
             RelayServer(uvicorn_config(args.host, args.port)).run()
         case "health":
             sys.exit(0 if _healthy(args.port) else 1)
+        case "keys":
+            print(f"Added {asyncio.run(_import_keys(Settings()))} product keys")
 
 
 class RelayServer(uvicorn.Server):
@@ -88,6 +99,15 @@ def uvicorn_config(host: str, port: int) -> uvicorn.Config:
         log_config=None,
         access_log=False,
     )
+
+
+async def _import_keys(settings: Settings) -> int:
+    engine = create_async_engine(settings.database_url)
+    try:
+        await migrate(engine)
+        return await SqlEntitlementStore(async_sessionmaker(engine)).import_keys(load_games().keys)
+    finally:
+        await engine.dispose()
 
 
 def _healthy(port: int) -> bool:

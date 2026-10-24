@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from openfesl.protocol.message import Message, Text
+from openfesl.protocol.message import FeslDate, Message, Text
 
 
 class NuLogin(Message):
@@ -111,3 +111,55 @@ class NuLookupUserInfoAnswer(Message):
     """The personas found, each with its account as the master user."""
 
     user_info: list[UserInfo]
+
+
+class NuEntitleGame(Message):
+    """A product key for the game, sent with the login it should entitle."""
+
+    key: Text = ""
+    nuid: Text = ""
+    password: Text = ""
+    encrypted_info: Text = ""
+
+
+class NuEntitleUser(Message):
+    """A product key that the logged-in account redeems, such as one for downloadable content."""
+
+    key: Text = ""
+
+
+class Product(Message):
+    product_id: str
+    name: str
+
+
+class NuEntitleUserAnswer(Message):
+    product_list: list[Product]
+
+
+class NuGetEntitlements(Message):
+    """Filters for an account's entitlements; a dedicated server names the player's account."""
+
+    entitlement_id: str = ""
+    entitlement_tag: str = ""
+    product_id: str = ""
+    group_name: str = ""
+    status: str = ""
+    master_user_id: int = 0
+    device_physical_id: str = ""
+
+
+class EntitlementInfo(Message):
+    entitlement_id: str
+    entitlement_tag: str
+    product_id: str | None = None
+    status: str
+    grant_date: FeslDate
+
+
+class NuGetEntitlementsAnswer(Message):
+    entitlements: list[EntitlementInfo]
+
+
+class NuGetEntitlementCountAnswer(Message):
+    entitlement_count: int
