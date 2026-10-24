@@ -10,16 +10,19 @@ from openfesl.core.accounts import AccountService
 from openfesl.core.connect import connect_routes
 from openfesl.core.entitlements import EntitlementService
 from openfesl.core.fesl import Route
+from openfesl.core.game_http import GameHttp
 from openfesl.core.games import load_games
 from openfesl.core.personas import PersonaService
 from openfesl.core.registration import Terms
 from openfesl.core.session import GameSession, Players
+from openfesl.core.texts import load_texts
 from openfesl.relay.endpoint import relay_endpoint
 from openfesl.server.settings import Settings
 from openfesl.storage.accounts import SqlAccountStore
 from openfesl.storage.database import migrate
 from openfesl.storage.entitlements import SqlEntitlementStore
 from openfesl.storage.personas import SqlPersonaStore
+from openfesl.web.game_http import GameHttpMiddleware
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -33,6 +36,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings()
     routes: dict[tuple[str, str], Route[Any]] = {}
     players = Players()
+    games = load_games()
+    game_http = GameHttp(games, players, load_texts("news"))
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -41,7 +46,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
         await migrate(engine)
         sessions = async_sessionmaker(engine)
-        games = load_games()
         entitlements = SqlEntitlementStore(sessions)
         # A new database starts with the games' keys; from then on the admin manages them.
         if not await entitlements.has_keys():
@@ -53,6 +57,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         routes.update(accounts.routes())
         routes.update(personas.routes())
         routes.update(EntitlementService(entitlements).routes())
+        routes.update(game_http.routes())
         yield
         await engine.dispose()
 
@@ -63,6 +68,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         title="OpenFESL", lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None
     )
     app.add_api_websocket_route("/", relay_endpoint(start_session))
+    app.add_middleware(GameHttpMiddleware, http=game_http)
 
     @app.get("/health", response_class=PlainTextResponse)
     async def health() -> str:

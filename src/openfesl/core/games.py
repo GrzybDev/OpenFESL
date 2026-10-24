@@ -1,5 +1,5 @@
 import tomllib
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
 from importlib.resources import files
 from importlib.resources.abc import Traversable
 
@@ -51,6 +51,21 @@ class ProductKey(BaseModel):
     entitlements: list[Grant]
 
 
+class Http(BaseModel):
+    """What a game fetches over HTTP from EA's web servers, which the hook sends here instead.
+
+    Attributes:
+        locker: The URL that GetLockerURL hands out, where the server answers the locker.
+        files: The editorial files by URL, as UTF-8 templates whose `${news_<language>}`
+            placeholders take the news text in that language.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    locker: str | None = None
+    files: dict[str, str] = {}
+
+
 class Game(BaseModel):
     """A game the server serves, as its data file describes it.
 
@@ -60,6 +75,7 @@ class Game(BaseModel):
         namespace: The persona namespace; persona names are unique within it.
         clients: The game's client strings.
         keys: The product keys the database starts with; the admin manages them from there.
+        http: What the game fetches over HTTP.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -69,6 +85,7 @@ class Game(BaseModel):
     namespace: str
     clients: dict[str, Client]
     keys: list[ProductKey] = []
+    http: Http = Http()
 
     @field_validator("partition", mode="before")
     @classmethod
@@ -93,12 +110,16 @@ class Games:
         Raises:
             ValueError: When two games claim the same client string.
         """
+        self._games = list(games)
         self._clients: dict[str, tuple[Game, Client]] = {}
-        for game in games:
+        for game in self._games:
             for name, client in game.clients.items():
                 if name in self._clients:
                     raise ValueError(f"client string {name} belongs to two games")
                 self._clients[name] = (game, client)
+
+    def __iter__(self) -> Iterator[Game]:
+        return iter(self._games)
 
     @property
     def server_accounts(self) -> list[tuple[Game, str]]:
@@ -112,8 +133,7 @@ class Games:
     @property
     def keys(self) -> list[ProductKey]:
         """Return the starting product keys of every game."""
-        games = {id(game): game for game, _ in self._clients.values()}
-        return [key for game in games.values() for key in game.keys]
+        return [key for game in self._games for key in game.keys]
 
     def find(self, client_string: str) -> tuple[Game, Client] | None:
         """Return the game and client that a client string names, if the server serves it.
@@ -125,14 +145,21 @@ class Games:
 
 
 def load_games(folder: Traversable | None = None) -> Games:
-    """Read every game's TOML data file.
+    """Read every game's TOML data file and the editorial files it names.
 
     Args:
         folder: The folder of data files; the games that ship with the server when omitted.
     """
     folder = folder or files("openfesl") / "games"
-    return Games(
-        Game.model_validate(tomllib.loads(entry.read_text("utf-8")))
-        for entry in folder.iterdir()
-        if entry.name.endswith(".toml")
-    )
+    return Games(_load(entry, folder) for entry in folder.iterdir() if entry.name.endswith(".toml"))
+
+
+def _load(entry: Traversable, folder: Traversable) -> Game:
+    data = tomllib.loads(entry.read_text("utf-8"))
+    http = data.get("http", {})
+    # The data file names each editorial file by its path in the folder.
+    contents = {
+        url: folder.joinpath(*name.split("/")).read_text("utf-8")
+        for url, name in http.get("files", {}).items()
+    }
+    return Game.model_validate(data | {"http": http | {"files": contents}})

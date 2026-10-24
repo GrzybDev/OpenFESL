@@ -163,3 +163,9 @@ class NuGetEntitlementsAnswer(Message):
 
 class NuGetEntitlementCountAnswer(Message):
     entitlement_count: int
+
+
+class GetLockerURLAnswer(Message):
+    """Where the game lists the files it keeps online, with its persona's session key."""
+
+    url: str

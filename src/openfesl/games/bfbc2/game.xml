@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <!-- The map revision EA served last; the game takes the level only with this key, the GUID
+         form of MD5("PC" + level). -->
+    <revision level="8" key="7C0A303E-F4D2-985E-763D-E7C41B1E06A3" />
+    <ticker>
+        <lang id="en-US">${news_en}</lang>
+        <lang id="pl-PL">${news_pl}</lang>
+    </ticker>
+    <NamAccessState>Released</NamAccessState>
+</config>

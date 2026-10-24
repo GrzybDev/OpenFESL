@@ -1,8 +1,9 @@
 import hashlib
 from functools import cache
-from importlib.resources import files
 
 from babel import Locale, UnknownLocaleError
+
+from openfesl.core.texts import load_texts
 
 # Regions and placeholders that CLDR lists among territories but that are no country.
 _NOT_COUNTRIES = frozenset({"EU", "EZ", "UN", "QO", "XA", "XB", "ZZ"})
@@ -26,14 +27,7 @@ class Terms:
     @classmethod
     def load(cls) -> Terms:
         """Read the terms that ship with the server."""
-        folder = files("openfesl") / "terms"
-        return cls(
-            {
-                entry.name.removesuffix(".txt"): entry.read_text("utf-8").strip()
-                for entry in folder.iterdir()
-                if entry.name.endswith(".txt")
-            }
-        )
+        return cls(load_texts("terms"))
 
     def text(self, locale: str) -> str:
         """Return the terms in the game's language, or in English when there is no translation.

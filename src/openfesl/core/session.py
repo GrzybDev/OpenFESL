@@ -1,3 +1,4 @@
+import hmac
 import logging
 from collections.abc import Mapping
 from typing import Any
@@ -45,6 +46,22 @@ class Players:
         """
         if session.account is not None and self._sessions.get(session.account.id) is session:
             del self._sessions[session.account.id]
+
+    def find_key(self, key: str) -> GameSession | None:
+        """Return the player session whose persona a session key belongs to.
+
+        Args:
+            key: The key that NuLoginPersona handed out, as the game's HTTP requests carry it.
+        """
+        wanted = key.encode()
+        return next(
+            (
+                session
+                for session in self._sessions.values()
+                if session.persona_key and hmac.compare_digest(session.persona_key.encode(), wanted)
+            ),
+            None,
+        )
 
 
 class GameSession:

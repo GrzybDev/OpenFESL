@@ -10,6 +10,16 @@ entitlement = "bfbc2-pc"
 theater_port = 18326
 server_account = "bfbc2.server.pc@ea.com"
 
+[http]
+locker = "http://easo.ea.com/fileupload/locker2.jsp"
+
+# The game compares the version file with its own build, so it holds the last one to keep the
+# updater quiet; the store lists no offers.
+[http.files]
+"http://easo.ea.com/easo/editorial/BF/2010/BFBC2/config/PC/version" = "bfbc2/version"
+"http://easo.ea.com/easo/editorial/BF/2010/BFBC2/config/PC/game.xml" = "bfbc2/game.xml"
+"http://easo.ea.com/easo/editorial/BF/2010/BFBC2/store/PC/overlay.xml" = "bfbc2/overlay.xml"
+
 [[keys]]
 code = "ACTIVATE-GAME"
 entitlements = [

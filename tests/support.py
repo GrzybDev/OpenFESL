@@ -1,7 +1,11 @@
+import asyncio
 import base64
 import struct
+import urllib.error
+import urllib.request
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from email.message import Message
 
 from websockets.asyncio.client import ClientConnection, connect
 from websockets.typing import Subprotocol
@@ -146,3 +150,19 @@ async def log_in_player(game: Game, key: ConnectionKey, nuid: str) -> Answer:
 async def game(server_url: str) -> AsyncIterator[Game]:
     async with connect(server_url, subprotocols=[Subprotocol(SUBPROTOCOL)]) as websocket:
         yield Game(websocket)
+
+
+async def fetch(server_url: str, path: str, host: str | None = None) -> tuple[int, Message, bytes]:
+    """Send a GET to the server, as the hook forwards the game's HTTP when a host is given."""
+    request = urllib.request.Request(server_url.replace("ws://", "http://", 1).rstrip("/") + path)
+    if host is not None:
+        request.add_header("X-OpenFESL-Host", host)
+
+    def send() -> tuple[int, Message, bytes]:
+        try:
+            with urllib.request.urlopen(request, timeout=5) as response:
+                return response.status, response.headers, response.read()
+        except urllib.error.HTTPError as error:
+            return error.code, error.headers, error.read()
+
+    return await asyncio.to_thread(send)
