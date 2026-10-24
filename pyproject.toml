@@ -47,7 +47,7 @@ testpaths = ["tests"]
 addopts = ["-ra", "--strict-markers", "--import-mode=importlib"]
 
 [tool.mypy]
-files = ["src"]
+files = ["src", "tests"]
 strict = true
 
 [tool.importlinter]
