@@ -115,20 +115,20 @@ class StatStore(Protocol):
         """
 
 
-def period_start(period: Period, today: date, past: int = 0) -> date:
+def period_start(period: Period, day: date, past: int = 0) -> date:
     """Return the first day of a period, counted in UTC.
 
     Weeks start on Mondays and two-week periods on every other Monday since 1970-01-05.
 
     Args:
         period: The kind of period.
-        today: A day within the current period.
+        day: A day within the current period.
         past: How many periods back; -1 gives the start of the next one.
     """
     if days := _DAYS.get(period):
-        return _MONDAY + timedelta(days=((today - _MONDAY).days // days - past) * days)
+        return _MONDAY + timedelta(days=((day - _MONDAY).days // days - past) * days)
     if months := _MONTHS.get(period):
-        index = today.year * 12 + (today.month - 1) // months * months - past * months
+        index = day.year * 12 + (day.month - 1) // months * months - past * months
         return date(index // 12, index % 12 + 1, 1)
     return _ALL_TIME
 
@@ -161,13 +161,16 @@ class StatsService:
             connection: The FESL connection the request came on.
             request: The owner, period and keys.
         """
-        game = _game(connection)
-        owner = _owner(connection, request.owner, request.owner_type)
-        _check_size(1, request.keys)
+        game = game_of(connection)
+        owner = owner_of(connection, request.owner, request.owner_type)
+        check_size(1, request.keys)
         found = await self._store.values(
-            _partition(game), [owner], request.keys, _bucket(request.period_id, request.period_past)
+            partition_of(game),
+            [owner],
+            request.keys,
+            bucket_of(request.period_id, request.period_past),
         )
-        return GetStatsAnswer(stats=[_stat(key, found.get((owner, key))) for key in request.keys])
+        return GetStatsAnswer(stats=[stat_of(key, found.get((owner, key))) for key in request.keys])
 
     async def get_stats_for_owners(
         self, connection: FeslConnection, request: GetStatsForOwners
@@ -178,18 +181,21 @@ class StatsService:
             connection: The FESL connection the request came on.
             request: The owners, period and keys.
         """
-        game = _game(connection)
+        game = game_of(connection)
         owners = [Owner(owner.owner_type, owner.owner_id) for owner in request.owners]
-        _check_size(len(owners), request.keys)
+        check_size(len(owners), request.keys)
         found = await self._store.values(
-            _partition(game), owners, request.keys, _bucket(request.period_id, request.period_past)
+            partition_of(game),
+            owners,
+            request.keys,
+            bucket_of(request.period_id, request.period_past),
         )
         return GetStatsForOwnersAnswer(
             stats=[
                 OwnerStats(
                     owner_id=owner.id,
                     owner_type=owner.type,
-                    stats=[_stat(key, found.get((owner, key))) for key in request.keys],
+                    stats=[stat_of(key, found.get((owner, key))) for key in request.keys],
                 )
                 for owner in owners
             ]
@@ -209,11 +215,11 @@ class StatsService:
             TransactionError: When the session is not a dedicated server's, an owner is not a
                 persona of the game or the game, or the request is too large.
         """
-        game = _game(connection)
+        game = game_of(connection)
         account = connection.session.account
         if account is None or not account.server:
             raise TransactionError(PARAMETERS_ERROR)
-        today = _today()
+        day = _today()
         changes: list[Change] = []
         for updates in request.owners:
             owner = await self._writable(connection, game, updates)
@@ -221,7 +227,7 @@ class StatsService:
                 Change(
                     owner=owner,
                     key=update.key,
-                    bucket=Bucket(period, period_start(period, today)),
+                    bucket=Bucket(period, period_start(period, day)),
                     kind=update.kind,
                     value=update.value,
                     text=update.text,
@@ -231,13 +237,13 @@ class StatsService:
             )
         if len(changes) > MAXIMUM_ENTRIES:
             raise TransactionError(PARAMETERS_ERROR)
-        await self._store.apply(_partition(game), changes)
+        await self._store.apply(partition_of(game), changes)
         return Message()
 
     async def _writable(
         self, connection: FeslConnection, game: Game, updates: OwnerUpdates
     ) -> Owner:
-        owner = _owner(connection, updates.owner, updates.owner_type)
+        owner = owner_of(connection, updates.owner, updates.owner_type)
         if owner.type == GAME_WIDE:
             return owner
         if owner.type != PERSONA:
@@ -248,13 +254,31 @@ class StatsService:
         return owner
 
 
-def _game(connection: FeslConnection) -> Game:
+def game_of(connection: FeslConnection) -> Game:
+    """Return the game of a logged-in session.
+
+    Args:
+        connection: The FESL connection a request came on.
+
+    Raises:
+        TransactionError: When the session has not logged in.
+    """
     if connection.session.account is None or connection.game is None:
         raise TransactionError(NOT_LOGGED_IN)
     return connection.game
 
 
-def _owner(connection: FeslConnection, owner_id: int, owner_type: int) -> Owner:
+def owner_of(connection: FeslConnection, owner_id: int, owner_type: int) -> Owner:
+    """Return the owner a request names, or the session's persona when it names none.
+
+    Args:
+        connection: The FESL connection the request came on.
+        owner_id: The owner's id, 0 when left out.
+        owner_type: The owner's type.
+
+    Raises:
+        TransactionError: When the request names no owner and the session plays no persona.
+    """
     if owner_id:
         return Owner(owner_type, owner_id)
     if connection.session.persona is None:
@@ -262,12 +286,26 @@ def _owner(connection: FeslConnection, owner_id: int, owner_type: int) -> Owner:
     return Owner(PERSONA, connection.session.persona.id)
 
 
-def _check_size(owners: int, keys: Sequence[str]) -> None:
+def check_size(owners: int, keys: Sequence[str]) -> None:
+    """Refuse a request whose answer would hold too many stats.
+
+    Args:
+        owners: How many owners the answer holds.
+        keys: The keys each of them gets.
+
+    Raises:
+        TransactionError: When owners times keys exceed the bound.
+    """
     if owners * len(keys) > MAXIMUM_ENTRIES:
         raise TransactionError(PARAMETERS_ERROR)
 
 
-def _partition(game: Game) -> str:
+def partition_of(game: Game) -> str:
+    """Return the partition that holds a game's stats, written `/domain/subDomain`.
+
+    Args:
+        game: The game.
+    """
     return f"/{game.partition.domain}/{game.partition.sub_domain}"
 
 
@@ -275,11 +313,23 @@ def _today() -> date:
     return datetime.now(UTC).date()
 
 
-def _bucket(period: Period, past: int) -> Bucket:
+def bucket_of(period: Period, past: int) -> Bucket:
+    """Return a period that a request names, counted back from the current one.
+
+    Args:
+        period: The kind of period.
+        past: How many periods back.
+    """
     return Bucket(period, period_start(period, _today(), past))
 
 
-def _stat(key: str, found: Value | None) -> Stat:
+def stat_of(key: str, found: Value | None) -> Stat:
+    """Return a stat as the game reads it, 0 when never stored.
+
+    Args:
+        key: The key the game asked for.
+        found: What is stored, if anything.
+    """
     if found is None:
         return Stat(key=key, value=0.0)
     return Stat(key=key, value=found.value, text=found.text or None)

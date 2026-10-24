@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, time, timedelta
 
 import anyio
 import pytest
@@ -233,3 +233,156 @@ def test_periods_start_on_mondays_months_quarters_and_years_across_year_ends(
     period: Period, today: date, past: int, start: date
 ) -> None:
     assert period_start(period, today, past) == start
+
+
+async def test_leaderboards_rank_everyone_and_show_the_caller_outside_the_window(
+    server_url: str,
+) -> None:
+    async with game(server_url) as player, game(server_url) as server:
+        await log_in_player(player, FESL, "ann@example.test")
+        names = ("Ann_01", "Bob_02", "Cid_03", "Dee_04")
+        ids = {}
+        for name in names:
+            await player.request(FESL, "acct", [("TXN", "NuAddPersona"), ("name", name)])
+            playing = [("TXN", "NuLoginPersona"), ("name", name)]
+            ids[name] = (await player.request(FESL, "acct", playing))["userId"]
+        ann, bob, cid, dee = (ids[name] for name in names)
+        await host(server)
+        rounds = [
+            (ann, [(3, "score", "300.0000", "", "0"), (3, "deaths", "5.0000", "", "0")]),
+            (bob, [(3, "score", "500.0000", "", "0"), (3, "deaths", "9.0000", "", "0")]),
+            (cid, [(3, "score", "300.0000", "", "0"), (3, "deaths", "2.0000", "", "0")]),
+            (dee, [(3, "score", "100.0000", "", "0")]),
+        ]
+        await server.request(FESL, "rank", update_stats(*((id, "1", s) for id, s in rounds)))
+
+        mine = await player.request(
+            FESL,
+            "rank",
+            [
+                ("TXN", "GetRankedStats"),
+                ("owner", ann),
+                ("ownerType", "1"),
+                ("periodId", "0"),
+                ("periodPast", "0"),
+                *keys("score", "deaths", "flags"),
+                ("rankOrders.0", "0"),
+                ("rankOrders.1", "1"),
+                ("rankOrders.2", "0"),
+                ("rankOrders.[]", "3"),
+            ],
+        )
+        assert ranks(mine) == [
+            ("score", "300.0000", "2"),
+            ("deaths", "5.0000", "2"),
+            ("flags", "0.0000", "0"),
+        ]
+        friends = await player.request(
+            FESL,
+            "rank",
+            [
+                ("TXN", "GetRankedStatsForOwners"),
+                ("owners.0.ownerId", bob),
+                ("owners.0.ownerType", "1"),
+                ("owners.1.ownerId", "999999"),
+                ("owners.1.ownerType", "1"),
+                ("owners.[]", "2"),
+                ("periodId", "0"),
+                *keys("score"),
+            ],
+        )
+        assert friends["rankedStats.1.ownerId"] == "999999"
+        assert ranks(friends, "rankedStats.0.rankedStats.") == [("score", "500.0000", "1")]
+        assert ranks(friends, "rankedStats.1.rankedStats.") == [("score", "0.0000", "0")]
+
+        # Ann and Cid tie for 2nd across the pages' boundary; each page lists one of them.
+        pages = [
+            leaders(await player.request(FESL, "rank", top_n("GetTopN", "score", first, first + 1)))
+            for first in (1, 3)
+        ]
+        assert pages == [
+            [("Bob_02", "1", "500.0000"), ("Ann_01", "2", "300.0000")],
+            [("Cid_03", "2", "300.0000"), ("Dee_04", "4", "100.0000")],
+        ]
+        await player.request(FESL, "acct", [("TXN", "NuLoginPersona"), ("name", "Dee_04")])
+        with_me = await player.request(
+            FESL, "rank", [*top_n("GetTopNAndMe", "score", 1, 2), ("includeUser", "1")]
+        )
+        assert leaders(with_me)[2] == ("Dee_04", "4", "100.0000")
+        assert with_me["stats.2.owner"] == dee
+
+        rest = await player.request(
+            FESL, "rank", [*top_n("GetTopNAndStats", "score", 2, 10), *keys("deaths")]
+        )
+        assert leaders(rest) == [
+            ("Ann_01", "2", "300.0000"),
+            ("Cid_03", "2", "300.0000"),
+            ("Dee_04", "4", "100.0000"),
+        ]
+        assert rest["stats.0.addStats.[]"] == "1"
+        assert [rest[f"stats.{index}.addStats.0.value"] for index in range(3)] == [
+            "5.0000",
+            "2.0000",
+            "0.0000",
+        ]
+        fewest = await player.request(FESL, "rank", top_n("GetTopN", "deaths", 1, 10, order="1"))
+        assert [name for name, _, _ in leaders(fewest)] == ["Cid_03", "Ann_01", "Bob_02"]
+
+        # A deleted soldier leaves the leaderboards and everyone behind it moves up.
+        await player.request(FESL, "acct", [("TXN", "NuDisablePersona"), ("name", "Bob_02")])
+        board = await player.request(FESL, "rank", top_n("GetTopN", "score", 1, 10))
+        assert leaders(board) == [
+            ("Ann_01", "1", "300.0000"),
+            ("Cid_03", "1", "300.0000"),
+            ("Dee_04", "3", "100.0000"),
+        ]
+        ranked = [("TXN", "GetRankedStats"), ("periodId", "0"), *keys("score")]
+        assert ranks(await player.request(FESL, "rank", ranked)) == [("score", "100.0000", "3")]
+
+
+async def test_date_ranges_span_the_current_period(server_url: str) -> None:
+    async with game(server_url) as player:
+        await log_in_player(player, FESL, "ann@example.test")
+        week = await player.request(
+            FESL, "rank", [("TXN", "GetDateRange"), ("key", "score"), ("periodId", "2")]
+        )
+        start, end = (fesl_time(week[name]) for name in ("startDate", "endDate"))
+        assert (start.weekday(), start.time()) == (0, time())
+        assert end - start == timedelta(days=7, seconds=-1)
+        ever = await player.request(FESL, "rank", [("TXN", "GetDateRange"), ("periodId", "0")])
+        assert fesl_time(ever["startDate"]) == datetime(1970, 1, 1)
+
+
+def top_n(txn: str, key: str, first: int, last: int, order: str = "0") -> Fields:
+    return [
+        ("TXN", txn),
+        ("key", key),
+        ("ownerType", "1"),
+        ("minRank", str(first)),
+        ("maxRank", str(last)),
+        ("periodId", "0"),
+        ("periodPast", "0"),
+        ("rankOrder", order),
+    ]
+
+
+def ranks(answer: dict[str, str], prefix: str = "stats.") -> list[tuple[str, str, str]]:
+    return [
+        (key, value, answer[f"{prefix}{index}.rank"])
+        for index, (key, value) in enumerate(values(answer, prefix))
+    ]
+
+
+def leaders(answer: dict[str, str]) -> list[tuple[str, str, str]]:
+    return [
+        (
+            answer[f"stats.{index}.name"],
+            answer[f"stats.{index}.rank"],
+            answer[f"stats.{index}.value"],
+        )
+        for index in range(int(answer["stats.[]"]))
+    ]
+
+
+def fesl_time(text: str) -> datetime:
+    return datetime.strptime(text, "%b-%d-%Y %H:%M:%S UTC")

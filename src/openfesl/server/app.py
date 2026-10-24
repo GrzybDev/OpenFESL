@@ -13,6 +13,7 @@ from openfesl.core.entitlements import EntitlementService
 from openfesl.core.fesl import Route
 from openfesl.core.game_http import GameHttp
 from openfesl.core.games import load_games
+from openfesl.core.leaderboards import LeaderboardService
 from openfesl.core.logins import Logins
 from openfesl.core.personas import PersonaService
 from openfesl.core.registration import Terms
@@ -68,7 +69,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         routes.update(personas.routes())
         routes.update(EntitlementService(entitlements).routes())
         routes.update(game_http.routes())
-        routes.update(StatsService(SqlStatStore(sessions), persona_store).routes())
+        stats = SqlStatStore(sessions)
+        routes.update(StatsService(stats, persona_store).routes())
+        routes.update(LeaderboardService(stats).routes())
         yield
         await engine.dispose()
 
