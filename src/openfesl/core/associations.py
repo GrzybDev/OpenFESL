@@ -7,7 +7,7 @@ from typing import Any, Protocol
 
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Game, ListRule
-from openfesl.core.personas import NOT_LOGGED_IN, Persona, PersonaStore
+from openfesl.core.personas import NOT_LOGGED_IN, PERSONA, Persona, PersonaStore
 from openfesl.core.session import Players
 from openfesl.protocol.asso import (
     AddAssociations,
@@ -32,7 +32,6 @@ OWNER_INVALID = 23001
 MEMBER_INVALID = 23002
 LIST_FULL = 23005
 
-PERSONA = 1
 ROLL = "RollLeastRecentlyModified"
 MAXIMUM_REQUESTS = 100
 

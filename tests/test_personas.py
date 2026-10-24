@@ -106,3 +106,33 @@ async def test_a_dedicated_server_creates_its_persona_once_and_looks_up_joining_
         assert lookup["userInfo.0.userName"] == "Ann_01"
         assert lookup["userInfo.0.masterUserId"] == account["userId"]
         assert lookup["userInfo.0.namespace"] == "battlefield"
+
+
+def search(name: str, chunk_size: int = 0) -> list[tuple[str, str]]:
+    fields = [("TXN", "NuSearchOwners"), ("screenName", name), ("searchType", "1")]
+    fields.append(("retrieveUserIds", "1"))
+    return fields + ([("chunkSize", str(chunk_size))] if chunk_size else [])
+
+
+async def test_players_find_the_personas_of_others_by_name_with_wildcards(
+    server_url: str,
+) -> None:
+    async with game(server_url) as ann, game(server_url) as bob:
+        await log_in_player(ann, FESL, "ann@example.test")
+        for name in ("Ann_01", "AnnX01", "Anna", "Ann.02"):
+            await ann.request(FESL, "acct", persona("NuAddPersona", name))
+        await ann.request(FESL, "acct", persona("NuDisablePersona", "Ann.02"))
+        await log_in_player(bob, FESL, "bob@example.test")
+
+        found = await bob.request(FESL, "acct", search("ann*"))
+        names = {found[f"users.{index}.name"] for index in range(int(found["users.[]"]))}
+        assert names == {"Ann_01", "AnnX01", "Anna"}
+        assert found["users.0.type"] == "1"
+        assert int(found["users.0.id"]) > 0
+        exact = await bob.request(FESL, "acct", search("ann_01"))
+        assert (exact["users.[]"], exact["users.0.name"]) == ("1", "Ann_01")
+        # Only * is a wildcard, and the dedicated servers' persona is no player's.
+        for literal in ("Ann%", "bfbc2*"):
+            assert (await bob.request(FESL, "acct", search(literal)))["users.[]"] == "0"
+        few = await bob.request(FESL, "acct", search("*", chunk_size=2))
+        assert few["users.[]"] == "2"

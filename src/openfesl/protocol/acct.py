@@ -152,6 +152,23 @@ class NuLookupUserInfoAnswer(Message):
     user_info: list[UserInfo]
 
 
+class NuSearchOwners(Message):
+    """A search for personas by name, where * stands for any run of characters."""
+
+    screen_name: Text = ""
+    chunk_size: int = 0
+
+
+class FoundOwner(Message):
+    name: str
+    type: int
+    id: int
+
+
+class NuSearchOwnersAnswer(Message):
+    users: list[FoundOwner]
+
+
 class NuEntitleGame(Message):
     """A product key for the game, sent with the login it should entitle."""
 

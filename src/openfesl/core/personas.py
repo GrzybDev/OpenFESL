@@ -8,11 +8,14 @@ from openfesl.core.accounts import ALREADY_REGISTERED, Account
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Game
 from openfesl.protocol.acct import (
+    FoundOwner,
     NuGetPersonas,
     NuGetPersonasAnswer,
     NuLoginPersonaAnswer,
     NuLookupUserInfo,
     NuLookupUserInfoAnswer,
+    NuSearchOwners,
+    NuSearchOwnersAnswer,
     NuSuggestPersonas,
     NuSuggestPersonasAnswer,
     UserInfo,
@@ -27,6 +30,9 @@ logger = logging.getLogger(__name__)
 NOT_LOGGED_IN = 20
 UNKNOWN_PERSONA = 101
 TOO_MANY_PERSONAS = 163
+
+# The owner type that names a persona in the SDK's owner fields.
+PERSONA = 1
 
 MAXIMUM_PERSONAS = 8
 MAXIMUM_LOOKUPS = 64
@@ -78,6 +84,15 @@ class PersonaStore(Protocol):
 
         Args:
             persona_id: The persona's number.
+        """
+
+    async def search(self, namespace: str, pattern: str, limit: int) -> list[Persona]:
+        """Return players' enabled personas whose names match a pattern regardless of case.
+
+        Args:
+            namespace: The namespace.
+            pattern: The name, where * stands for any run of characters.
+            limit: The most personas to return, by name.
         """
 
     async def add(self, account_id: int, namespace: str, name: str) -> Persona | None:
@@ -133,6 +148,7 @@ class PersonaService:
             ("acct", "NuLoginPersona"): Route(PersonaRequest, self.login),
             ("acct", "NuLookupUserInfo"): Route(NuLookupUserInfo, self.lookup),
             ("acct", "NuSuggestPersonas"): Route(NuSuggestPersonas, self.suggest),
+            ("acct", "NuSearchOwners"): Route(NuSearchOwners, self.search),
         }
 
     async def get_personas(
@@ -260,6 +276,27 @@ class PersonaService:
                     )
                 )
         return NuLookupUserInfoAnswer(user_info=found)
+
+    async def search(
+        self, connection: FeslConnection, request: NuSearchOwners
+    ) -> NuSearchOwnersAnswer:
+        """Return the players' personas of the game whose names match a search.
+
+        Dedicated servers' personas are left out, and at most 64 come back, or fewer when the
+        game asks for a smaller chunk.
+
+        Args:
+            connection: The FESL connection the request came on.
+            request: The name, where * stands for any run of characters.
+        """
+        _, namespace = _context(connection)
+        limit = MAXIMUM_LOOKUPS
+        if request.chunk_size > 0:
+            limit = min(request.chunk_size, limit)
+        found = await self._store.search(namespace, request.screen_name, limit)
+        return NuSearchOwnersAnswer(
+            users=[FoundOwner(name=persona.name, type=PERSONA, id=persona.id) for persona in found]
+        )
 
     async def _own(self, connection: FeslConnection, name: str) -> Persona:
         account, namespace = _context(connection)

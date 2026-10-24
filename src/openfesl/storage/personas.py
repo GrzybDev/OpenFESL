@@ -1,10 +1,13 @@
+import re
+
 from sqlalchemy import func, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.personas import Persona
-from openfesl.storage.models import PersonaRow
+from openfesl.storage.models import AccountRow, PersonaRow
 
+_LIKE_SPECIAL = re.compile(r"[\\%_]")
 _BIGINT = range(-(2**63), 2**63)
 
 
@@ -67,6 +70,30 @@ class SqlPersonaStore:
         async with self._sessions() as session:
             row = await session.get(PersonaRow, persona_id)
         return _persona(row) if row and row.disabled_at is None else None
+
+    async def search(self, namespace: str, pattern: str, limit: int) -> list[Persona]:
+        """Return players' enabled personas whose names match a pattern regardless of case.
+
+        Args:
+            namespace: The namespace.
+            pattern: The name, where * stands for any run of characters.
+            limit: The most personas to return, by name.
+        """
+        like = _LIKE_SPECIAL.sub(lambda match: "\\" + match[0], pattern).replace("*", "%")
+        async with self._sessions() as session:
+            rows = await session.scalars(
+                select(PersonaRow)
+                .join(AccountRow, AccountRow.id == PersonaRow.account_id)
+                .where(
+                    PersonaRow.namespace == namespace,
+                    PersonaRow.name.ilike(like, escape="\\"),
+                    PersonaRow.disabled_at.is_(None),
+                    AccountRow.server.is_(False),
+                )
+                .order_by(func.lower(PersonaRow.name))
+                .limit(limit)
+            )
+            return [_persona(row) for row in rows]
 
     async def add(self, account_id: int, namespace: str, name: str) -> Persona | None:
         """Create a persona, or return None when the name is taken in the namespace.
