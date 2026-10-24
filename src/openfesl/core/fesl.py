@@ -33,7 +33,7 @@ HELLO_MISSING = 22
 SYSTEM_ERROR = 99
 SERVICE_FAILED = 193
 
-_SECRET = re.compile(r"password|lkey|encrypted|ticket|^key$", re.IGNORECASE)
+_SECRET = re.compile(r"password|lkey|encrypted|ticket|secret|ekey|^key$", re.IGNORECASE)
 
 
 class TransactionError(Exception):
@@ -105,7 +105,7 @@ class FeslConnection:
             packet = joined
         fields = parse_fields(packet.payload)
         txn = next((value for key, value in fields if key.upper() == "TXN"), "")
-        logger.debug("<- %s %s #%d %s", packet.command, txn, packet.number, _describe(fields))
+        logger.debug("<- %s %s #%d %s", packet.command, txn, packet.number, describe(fields))
         route = self._routes.get((packet.command, txn))
         if route is None:
             logger.warning("Unknown FESL transaction %s %s", packet.command, txn)
@@ -190,13 +190,18 @@ class FeslConnection:
 
     def _send(self, command: str, number: int, txn: str, fields: Fields) -> None:
         fields = [("TXN", txn), *fields]
-        logger.debug("-> %s %s #%d %s", command, txn, number, _describe(fields))
+        logger.debug("-> %s %s #%d %s", command, txn, number, describe(fields))
         packet = Packet(command, ANSWER, number, format_fields(fields))
         for piece in fragment(packet, self.fragment_size):
             self._outbox.send(piece)
 
 
-def _describe(fields: Fields) -> str:
+def describe(fields: Fields) -> str:
+    """Return fields for the log, the values of secrets masked.
+
+    Args:
+        fields: A FESL or Theater body; its TXN is left out, as the log line names it.
+    """
     return " ".join(
         f"{key}={'***' if _SECRET.search(key) else value!r}"
         for key, value in fields

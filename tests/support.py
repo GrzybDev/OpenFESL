@@ -3,8 +3,9 @@ import base64
 import struct
 import urllib.error
 import urllib.request
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Mapping, Sequence
 from contextlib import asynccontextmanager
+from dataclasses import dataclass
 from email.message import Message
 
 from websockets.asyncio.client import ClientConnection, connect
@@ -22,6 +23,14 @@ from openfesl.protocol.relay import (
 )
 
 type Answer = dict[str, str]
+
+
+@dataclass(frozen=True)
+class TheaterAnswer:
+    """A Theater packet's fields and the error code its header carries, if any."""
+
+    error: str | None
+    fields: Answer
 
 
 class Game:
@@ -81,6 +90,44 @@ class Game:
             else:
                 return text(frame.packet)
 
+    async def theater(
+        self, key: ConnectionKey, command: str, fields: Sequence[tuple[str, str]] = ()
+    ) -> TheaterAnswer:
+        """Send a Theater request with the connection's next TID and return its answer."""
+        tid = self._numbers.get(key, 0) + 1
+        self._numbers[key] = tid
+        await self.send_theater(key, command, [*fields, ("TID", str(tid))], kind=0x40)
+        while True:
+            frame = await self.next_frame()
+            if (
+                isinstance(frame, Data)
+                and frame.connection == key
+                and frame.packet.command == command
+                and text(frame.packet).get("TID") == str(tid)
+            ):
+                return theater_answer(frame.packet)
+            self.frames.append(frame)
+
+    async def send_theater(
+        self, key: ConnectionKey, command: str, fields: Fields, kind: int = 0
+    ) -> None:
+        """Send a Theater packet that waits for no answer, as the game sends UGAM or ECHO."""
+        packet = Packet(command, kind, 0, format_fields(fields))
+        await self.websocket.send(encode_frame(Data(key, packet)))
+
+    async def theater_push(self, key: ConnectionKey, command: str) -> TheaterAnswer:
+        """Take the first Theater packet of a command on a connection, waiting for it."""
+        while True:
+            for frame in self.frames:
+                if (
+                    isinstance(frame, Data)
+                    and frame.connection == key
+                    and frame.packet.command == command
+                ):
+                    self.frames.remove(frame)
+                    return theater_answer(frame.packet)
+            self.frames.append(await self.next_frame())
+
     async def push(self, txn: str) -> Answer:
         """Take the first push of a transaction, waiting for it when it has not arrived yet."""
         while True:
@@ -104,6 +151,11 @@ def text(packet: Packet) -> Answer:
     return {
         key: value.encode("latin-1").decode("utf-8") for key, value in parse_fields(packet.payload)
     }
+
+
+def theater_answer(packet: Packet) -> TheaterAnswer:
+    code = (packet.kind << 24 | packet.number).to_bytes(4, "big")
+    return TheaterAnswer(code.decode("ascii") if any(code) else None, text(packet))
 
 
 def registration(nuid: str, password: str, terms: str, born: str = "1990-05-28") -> Fields:
@@ -164,9 +216,27 @@ async def log_in_again(game: Game, key: ConnectionKey, nuid: str, name: str) -> 
     await game.request(key, "acct", [("TXN", "NuLoginPersona"), ("name", name)])
 
 
+async def log_in_server(game: Game, key: ConnectionKey) -> str:
+    """Log a dedicated server in to FESL with its persona and return the persona's key."""
+    await game.hello(key, "bfbc2-pc-server", client_type="server")
+    await game.request(key, "acct", login("bfbc2.server.pc@ea.com", "from-game-data"))
+    persona = [("TXN", "NuLoginPersona"), ("name", "bfbc2.server.p")]
+    return (await game.request(key, "acct", persona))["lkey"]
+
+
+async def enter_theater(game: Game, key: ConnectionKey, client_string: str, lkey: str) -> None:
+    """Open a Theater connection and log in with a persona key, as the game's SDK does."""
+    await game.open(key, f"{client_string}.theater.ea.com", port=18326)
+    connected = await game.theater(key, "CONN", [("PROT", "2"), ("PROD", client_string)])
+    assert connected.error is None
+    assert (await game.theater(key, "USER", [("LKEY", lkey), ("NAME", "")])).error is None
+
+
 @asynccontextmanager
-async def game(server_url: str) -> AsyncIterator[Game]:
-    async with connect(server_url, subprotocols=[Subprotocol(SUBPROTOCOL)]) as websocket:
+async def game(server_url: str, headers: Mapping[str, str] | None = None) -> AsyncIterator[Game]:
+    async with connect(
+        server_url, subprotocols=[Subprotocol(SUBPROTOCOL)], additional_headers=headers
+    ) as websocket:
         yield Game(websocket)
 
 

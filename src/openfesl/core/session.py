@@ -7,6 +7,7 @@ from openfesl.core.accounts import Account
 from openfesl.core.connection import Address, Connection, Outbox
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.personas import NOT_LOGGED_IN, Persona
+from openfesl.core.theater import Theater
 from openfesl.protocol.message import Message
 from openfesl.protocol.packet import Packet
 from openfesl.protocol.relay import Channel, Open
@@ -119,6 +120,7 @@ class GameSession:
         routes: Mapping[tuple[str, str], Route[Any]],
         players: Players,
         address: Address | None,
+        theater: Theater,
     ) -> None:
         """Start a session for a game process.
 
@@ -126,6 +128,7 @@ class GameSession:
             routes: The FESL handlers by service command and TXN.
             players: Where player logins are registered.
             address: The public address of the player's PC, when known.
+            theater: The Theater service its Theater connections and datagrams go to.
         """
         self.address = address
         self.account: Account | None = None
@@ -134,10 +137,11 @@ class GameSession:
         self.persona_key: str | None = None
         self._routes = routes
         self._players = players
+        self._theater = theater
         self._fesl: FeslConnection | None = None
 
     def open(self, opened: Open, outbox: Outbox) -> Connection:
-        """Start handling a connection that the game opened; Theater is not served yet.
+        """Start handling a connection that the game opened, or close one to an unknown host.
 
         Args:
             opened: The host the game looked up and the ports on both ends.
@@ -145,6 +149,8 @@ class GameSession:
         """
         if opened.connection.channel is Channel.FESL:
             return FeslConnection(self, outbox, self._routes)
+        if connection := self._theater.open(self, opened, outbox):
+            return connection
         logger.info("Refusing a %s connection to %s", opened.connection.channel.name, opened.host)
         outbox.close()
         return _Refused()

@@ -25,6 +25,7 @@ from openfesl.core.session import GameSession, Players
 from openfesl.core.stats import StatsService
 from openfesl.core.telemetry import telemetry_routes
 from openfesl.core.texts import load_texts
+from openfesl.core.theater import Theater, TheaterRoute, theater_routes
 from openfesl.relay.endpoint import relay_endpoint
 from openfesl.server.settings import Settings
 from openfesl.storage.accounts import SqlAccountStore
@@ -51,6 +52,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     players = Players()
     games = load_games()
     game_http = GameHttp(games, players, load_texts("news"))
+    commands: dict[str, TheaterRoute[Any]] = {}
+    theater = Theater(games, commands)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -85,12 +88,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         routes.update(PresenceService(persona_store, players, associations).routes())
         messages = MessageService(SqlMessageStore(sessions), persona_store, players, associations)
         routes.update(messages.routes())
+        commands.update(theater_routes())
         yield
         await messages.close()
         await engine.dispose()
 
     def start_session(websocket: WebSocket) -> GameSession:
-        return GameSession(routes, players, settings.client_address(websocket))
+        return GameSession(routes, players, settings.client_address(websocket), theater)
 
     app = FastAPI(
         title="OpenFESL", lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None
