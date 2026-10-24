@@ -6,12 +6,14 @@ from fastapi import FastAPI, WebSocket
 from fastapi.responses import PlainTextResponse
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
+from openfesl.core.account_settings import AccountSettingsService
 from openfesl.core.accounts import AccountService
 from openfesl.core.connect import connect_routes
 from openfesl.core.entitlements import EntitlementService
 from openfesl.core.fesl import Route
 from openfesl.core.game_http import GameHttp
 from openfesl.core.games import load_games
+from openfesl.core.logins import Logins
 from openfesl.core.personas import PersonaService
 from openfesl.core.registration import Terms
 from openfesl.core.session import GameSession, Players
@@ -50,11 +52,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         # A new database starts with the games' keys; from then on the admin manages them.
         if not await entitlements.has_keys():
             await entitlements.import_keys(games.keys)
-        accounts = AccountService(SqlAccountStore(sessions), entitlements, Terms.load())
+        store = SqlAccountStore(sessions)
+        logins = Logins(store)
+        accounts = AccountService(store, logins, entitlements, Terms.load())
         personas = PersonaService(SqlPersonaStore(sessions))
         await personas.prepare(await accounts.prepare(games))
         routes.update(connect_routes(games))
         routes.update(accounts.routes())
+        routes.update(AccountSettingsService(store, logins).routes())
         routes.update(personas.routes())
         routes.update(EntitlementService(entitlements).routes())
         routes.update(game_http.routes())

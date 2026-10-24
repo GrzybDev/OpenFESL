@@ -1,9 +1,17 @@
 import hashlib
+from datetime import UTC, date, datetime
 from functools import cache
 
 from babel import Locale, UnknownLocaleError
 
 from openfesl.core.texts import load_texts
+from openfesl.protocol.fesl import FieldError
+
+TOO_LONG = 2
+INVALID_VALUE = 6
+TOO_YOUNG = 16
+
+MINIMUM_AGE = 13
 
 # Regions and placeholders that CLDR lists among territories but that are no country.
 _NOT_COUNTRIES = frozenset({"EU", "EZ", "UN", "QO", "XA", "XB", "ZZ"})
@@ -71,3 +79,25 @@ def is_country(code: str) -> bool:
         code: An ISO 3166 alpha-2 code.
     """
     return code.upper() in dict(countries("en"))
+
+
+def birth_date_error(year: int, month: int, day: int) -> FieldError | None:
+    """Return what is wrong with a birth date from a form, if anything.
+
+    The date is only checked against the minimum age and never kept.
+
+    Args:
+        year: The year of birth.
+        month: The month of birth.
+        day: The day of birth.
+    """
+    try:
+        born = date(year, month, day)
+    except ValueError, OverflowError:
+        return FieldError(field_name="dob", field_error=INVALID_VALUE)
+    return FieldError(field_name="dob", field_error=TOO_YOUNG) if _age(born) < MINIMUM_AGE else None
+
+
+def _age(born: date) -> int:
+    today = datetime.now(UTC).date()
+    return today.year - born.year - ((today.month, today.day) < (born.month, born.day))

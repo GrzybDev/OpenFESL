@@ -1,18 +1,20 @@
-import asyncio
-import hashlib
 import logging
 import secrets
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
 from typing import Any, Protocol
-
-from pwdlib import PasswordHash
-from pwdlib.hashers.argon2 import Argon2Hasher
 
 from openfesl.core.entitlements import UNKNOWN_KEY, EntitlementStore
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Game, Games
-from openfesl.core.registration import Terms, countries, is_country
+from openfesl.core.logins import INVALID_PASSWORD, Logins
+from openfesl.core.registration import (
+    INVALID_VALUE,
+    TOO_LONG,
+    Terms,
+    birth_date_error,
+    countries,
+    is_country,
+)
 from openfesl.protocol.acct import (
     Country,
     GetCountryListAnswer,
@@ -28,23 +30,14 @@ from openfesl.protocol.message import Message
 
 logger = logging.getLogger(__name__)
 
-UNKNOWN_USER = 101
 NOT_ENTITLED = 120
-INVALID_PASSWORD = 122
 ALREADY_REGISTERED = 160
 TERMS_OUT_OF_DATE = 260
 
-TOO_LONG = 2
-INVALID_VALUE = 6
-TOO_YOUNG = 16
-
-MINIMUM_AGE = 13
 MINIMUM_PASSWORD = 8
 # The SDK keeps 31 bytes of a password and logs in again after registration with what it kept.
 MAXIMUM_PASSWORD = 31
 MAXIMUM_NAME = 63
-# Argon2 is slow on purpose; this many hashes at once keep logins from starving the server.
-CONCURRENT_HASHES = 4
 
 
 @dataclass(frozen=True, slots=True)
@@ -68,7 +61,10 @@ class Account:
 
 @dataclass(frozen=True, slots=True)
 class Credentials:
-    """An account with the hash its password is checked against; server accounts have none."""
+    """An account with the hash its password is checked against.
+
+    Server accounts have none, and neither has a login that a remembered token proved.
+    """
 
     account: Account
     password_hash: str | None
@@ -118,31 +114,53 @@ class AccountStore(Protocol):
             version: The version it accepted.
         """
 
-    async def remember(self, account_id: int, token_hash: bytes) -> None:
+    async def remember(self, account_id: int, token_hash: bytes, password_hash: str) -> bool:
         """Keep a login token so the game can log in without the password later.
 
         Args:
             account_id: The account.
             token_hash: The SHA-256 digest of the token handed to the game.
+            password_hash: The hash the login's password was checked against.
+
+        Returns:
+            Whether the token was kept, which it is not once the password changed.
+        """
+
+    async def change_password(self, account_id: int, password_hash: str) -> None:
+        """Replace an account's password and forget every login remembered with the old one.
+
+        Args:
+            account_id: The account.
+            password_hash: The new password's hash.
+        """
+
+    async def change_country(self, account_id: int, country: str) -> None:
+        """Replace the country an account chose.
+
+        Args:
+            account_id: The account.
+            country: The ISO code of the new country.
         """
 
 
 class AccountService:
     """The acct transactions that register accounts and log them in."""
 
-    def __init__(self, store: AccountStore, entitlements: EntitlementStore, terms: Terms) -> None:
+    def __init__(
+        self, store: AccountStore, logins: Logins, entitlements: EntitlementStore, terms: Terms
+    ) -> None:
         """Serve accounts from a store.
 
         Args:
             store: Where accounts are kept.
+            logins: Checks passwords and remembered logins.
             entitlements: Where the entitlements that let players in are kept.
             terms: The service's terms.
         """
         self._store = store
+        self._logins = logins
         self._entitlements = entitlements
         self._terms = terms
-        self._hasher = PasswordHash((Argon2Hasher(),))
-        self._hashing = asyncio.Semaphore(CONCURRENT_HASHES)
 
     async def prepare(self, games: Games) -> list[tuple[Game, Account]]:
         """Create the accounts that the games' dedicated servers log in with.
@@ -222,17 +240,11 @@ class AccountService:
             errors.append(error)
         if not is_country(request.country):
             errors.append(FieldError(field_name="country", field_error=INVALID_VALUE))
-        try:
-            born = date(request.dob_year, request.dob_month, request.dob_day)
-        except ValueError, OverflowError:
-            errors.append(FieldError(field_name="dob", field_error=INVALID_VALUE))
-        else:
-            if _age(born) < MINIMUM_AGE:
-                errors.append(FieldError(field_name="dob", field_error=TOO_YOUNG))
+        if error := birth_date_error(request.dob_year, request.dob_month, request.dob_day):
+            errors.append(error)
         if errors:
             raise TransactionError(PARAMETERS_ERROR, errors)
-        async with self._hashing:
-            password_hash = await asyncio.to_thread(self._hasher.hash, request.password)
+        password_hash = await self._logins.hash(request.password)
         accepted = request.tos_version if request.tos_version == self._terms.version else None
         account = await self._store.add(
             request.nuid, password_hash, request.country.upper(), accepted
@@ -283,7 +295,10 @@ class AccountService:
                 not grant the game, or the account's entitlement to it was taken away.
         """
         assert connection.client is not None
-        account = await self._authenticate(request.nuid, request.password, request.encrypted_info)
+        credentials = await self._authenticate(
+            request.nuid, request.password, request.encrypted_info
+        )
+        account = credentials.account
         # Only a key for the game itself, so the game does not loop between its key prompt
         # and NuLogin's 120, and a key for downloadable content is not used up here.
         game = connection.client.entitlement
@@ -299,7 +314,10 @@ class AccountService:
     async def _player_account(
         self, request: NuLogin, entitlement: str | None
     ) -> tuple[Account, str | None]:
-        account = await self._authenticate(request.nuid, request.password, request.encrypted_info)
+        credentials = await self._authenticate(
+            request.nuid, request.password, request.encrypted_info
+        )
+        account = credentials.account
         if account.terms_version != self._terms.version:
             if request.tos_version != self._terms.version:
                 raise TransactionError(TERMS_OUT_OF_DATE)
@@ -308,31 +326,16 @@ class AccountService:
             raise TransactionError(NOT_ENTITLED)
         # The game's own remembered login asks for no token but keeps whatever the answer
         # carries, nothing included, so a token login always gets its token back.
-        if request.encrypted_info:
+        if credentials.password_hash is None:
             return account, request.encrypted_info
         if not request.return_encrypted_info:
             return account, None
-        token = secrets.token_urlsafe(32)
-        await self._store.remember(account.id, _digest(token))
-        return account, token
+        return account, await self._logins.remember(account.id, credentials.password_hash)
 
-    async def _authenticate(self, nuid: str, password: str, token: str) -> Account:
+    async def _authenticate(self, nuid: str, password: str, token: str) -> Credentials:
         if token:
-            account = await self._store.find_remembered(_digest(token))
-            if account is None:
-                raise TransactionError(INVALID_PASSWORD)
-        else:
-            credentials = await self._store.find(nuid)
-            if credentials is None:
-                raise TransactionError(UNKNOWN_USER)
-            if not credentials.password_hash or not await self._verify(
-                password, credentials.password_hash
-            ):
-                raise TransactionError(INVALID_PASSWORD)
-            account = credentials.account
-        if account.server:
-            raise TransactionError(INVALID_PASSWORD)
-        return account
+            return Credentials(await self._logins.recall(token), None)
+        return await self._logins.check(nuid, password)
 
     async def _server_account(self, expected: str, nuid: str) -> Account:
         # Every dedicated server of a game logs in with the same account from its game data,
@@ -342,10 +345,6 @@ class AccountService:
         if credentials is None or not credentials.account.server:
             raise TransactionError(INVALID_PASSWORD)
         return credentials.account
-
-    async def _verify(self, password: str, password_hash: str) -> bool:
-        async with self._hashing:
-            return await asyncio.to_thread(self._hasher.verify, password, password_hash)
 
 
 def password_error(field_name: str, password: str) -> FieldError | None:
@@ -360,12 +359,3 @@ def password_error(field_name: str, password: str) -> FieldError | None:
     if len(password.encode()) > MAXIMUM_PASSWORD:
         return FieldError(field_name=field_name, field_error=TOO_LONG)
     return None
-
-
-def _digest(token: str) -> bytes:
-    return hashlib.sha256(token.encode("utf-8", "surrogateescape")).digest()
-
-
-def _age(born: date) -> int:
-    today = datetime.now(UTC).date()
-    return today.year - born.year - ((today.month, today.day) < (born.month, born.day))

@@ -96,14 +96,27 @@ class SqlAccountStore:
                 update(AccountRow).where(AccountRow.id == account_id).values(terms_version=version)
             )
 
-    async def remember(self, account_id: int, token_hash: bytes) -> None:
+    async def remember(self, account_id: int, token_hash: bytes, password_hash: str) -> bool:
         """Keep a login token, dropping the account's oldest beyond the newest few.
 
         Args:
             account_id: The account.
             token_hash: The SHA-256 digest of the token handed to the game.
+            password_hash: The hash the login's password was checked against.
+
+        Returns:
+            Whether the token was kept, which it is not once the password changed.
         """
         async with self._sessions.begin() as session:
+            # The lock waits for a password change under way, which forgets the tokens it finds,
+            # and a later change waits for this token, so neither misses the other.
+            current = await session.scalar(
+                select(AccountRow.password_hash)
+                .where(AccountRow.id == account_id)
+                .with_for_update(read=True)
+            )
+            if current != password_hash:
+                return False
             session.add(LoginTokenRow(token_hash=token_hash, account_id=account_id))
             await session.flush()
             newest = (
@@ -117,6 +130,36 @@ class SqlAccountStore:
                     LoginTokenRow.account_id == account_id,
                     LoginTokenRow.token_hash.not_in(newest),
                 )
+            )
+        return True
+
+    async def change_password(self, account_id: int, password_hash: str) -> None:
+        """Replace an account's password and forget every login remembered with the old one.
+
+        Args:
+            account_id: The account.
+            password_hash: The new password's hash.
+        """
+        async with self._sessions.begin() as session:
+            await session.execute(
+                update(AccountRow)
+                .where(AccountRow.id == account_id)
+                .values(password_hash=password_hash)
+            )
+            await session.execute(
+                delete(LoginTokenRow).where(LoginTokenRow.account_id == account_id)
+            )
+
+    async def change_country(self, account_id: int, country: str) -> None:
+        """Replace the country an account chose.
+
+        Args:
+            account_id: The account.
+            country: The ISO code of the new country.
+        """
+        async with self._sessions.begin() as session:
+            await session.execute(
+                update(AccountRow).where(AccountRow.id == account_id).values(country=country)
             )
 
 

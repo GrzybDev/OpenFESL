@@ -57,6 +57,45 @@ class NuAddAccount(Message):
     dob_year: int = Field(0, alias="DOBYear")
 
 
+class NuUpdateAccount(Message):
+    """The account form again, with the account's own name and password to confirm the change.
+
+    The birth date comes only when the player gave one.
+    """
+
+    nuid: Text = ""
+    password: Text = ""
+    country: Text = ""
+    dob_day: int | None = Field(None, alias="DOBDay")
+    dob_month: int | None = Field(None, alias="DOBMonth")
+    dob_year: int | None = Field(None, alias="DOBYear")
+
+
+class NuGetAccountByNuid(Message):
+    nuid: Text = ""
+    password: Text = ""
+
+
+class NuGetAccountAnswer(Message):
+    """The account's details; the service keeps no names, address, birth date or e-mail choices."""
+
+    nuid: str
+    user_id: int
+    country: str
+
+
+class NuUpdatePassword(Message):
+    password: Text = ""
+    new_password: Text = ""
+    return_encrypted_info: bool = False
+
+
+class NuUpdatePasswordAnswer(Message):
+    """The token for the next silent login, since the change forgets the remembered ones."""
+
+    encrypted_password_info: str | None = None
+
+
 class Persona(Message):
     """A request naming one of the account's personas."""
 
