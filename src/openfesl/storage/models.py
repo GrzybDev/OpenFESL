@@ -121,3 +121,19 @@ Index(
     StatRow.period_start,
     StatRow.value,
 )
+
+
+class RecordEntryRow(Base):
+    __tablename__ = "record_entry"
+
+    # The persona first, so the key also serves deleting a persona's records with it.
+    persona_id: Mapped[int] = mapped_column(
+        ForeignKey("persona.id", ondelete="CASCADE"), primary_key=True
+    )
+    partition: Mapped[str] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(primary_key=True)
+    key: Mapped[str] = mapped_column(primary_key=True)
+    value: Mapped[str]
+    modified_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )

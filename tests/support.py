@@ -146,6 +146,14 @@ async def log_in_player(game: Game, key: ConnectionKey, nuid: str) -> Answer:
     return await game.request(key, "acct", login(nuid, "secret-pass"))
 
 
+async def log_in_persona(game: Game, key: ConnectionKey, nuid: str, name: str) -> tuple[int, str]:
+    """Log a new player in as a new persona and return the persona's number and session key."""
+    await log_in_player(game, key, nuid)
+    await game.request(key, "acct", [("TXN", "NuAddPersona"), ("name", name)])
+    playing = await game.request(key, "acct", [("TXN", "NuLoginPersona"), ("name", name)])
+    return int(playing["userId"]), playing["lkey"]
+
+
 @asynccontextmanager
 async def game(server_url: str) -> AsyncIterator[Game]:
     async with connect(server_url, subprotocols=[Subprotocol(SUBPROTOCOL)]) as websocket:

@@ -54,3 +54,9 @@ entitlements = [
     { tag = "BFBC2:PC:ADDSVETRANK", group = "AddsVetRank", product = "OFB-EAST:40873" },
     { tag = "BF3:PC:ADDSVETRANK", group = "AddsVetRank", product = "OFB-EAST:40873" },
 ]
+
+# The records a player's game keeps per persona: the dogtags it took, by victim persona id, of
+# which it keeps at most 1000, and its clan tag.
+[records]
+dogtags = 1000
+clan = 16

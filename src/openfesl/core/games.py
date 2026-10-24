@@ -76,6 +76,7 @@ class Game(BaseModel):
         clients: The game's client strings.
         keys: The product keys the database starts with; the admin manages them from there.
         http: What the game fetches over HTTP.
+        records: The records a persona may keep, by name, with the most entries each holds.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -86,6 +87,7 @@ class Game(BaseModel):
     clients: dict[str, Client]
     keys: list[ProductKey] = []
     http: Http = Http()
+    records: dict[str, int] = {}
 
     @field_validator("partition", mode="before")
     @classmethod
