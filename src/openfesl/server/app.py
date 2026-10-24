@@ -16,6 +16,7 @@ from openfesl.core.fesl import Route
 from openfesl.core.game_http import GameHttp
 from openfesl.core.games import load_games
 from openfesl.core.hosting import Hosting
+from openfesl.core.joining import Joining
 from openfesl.core.leaderboards import LeaderboardService
 from openfesl.core.logins import Logins
 from openfesl.core.messages import MessageService
@@ -95,6 +96,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         routes.update(messages.routes())
         commands.update(theater_routes())
         commands.update(hosting.routes())
+        commands.update(Joining(hosting).routes())
         following = asyncio.create_task(hosting.follow_approvals())
         yield
         following.cancel()

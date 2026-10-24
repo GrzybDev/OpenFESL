@@ -2,8 +2,9 @@ import asyncio
 import itertools
 import logging
 import secrets
-from collections.abc import Mapping
+from collections.abc import Callable, Iterator, Mapping
 from dataclasses import dataclass, field
+from enum import Enum, auto
 from ipaddress import IPv4Address
 from typing import TYPE_CHECKING, Any
 
@@ -25,7 +26,6 @@ from openfesl.protocol.theater import (
     GameRequest,
     LobbyData,
     LobbyListAnswer,
-    PlayerEnteredAnswer,
     PlayerRequest,
     RemoveGame,
     TheaterMessage,
@@ -57,21 +57,62 @@ APPROVAL_CHECK_INTERVAL = 5.0
 MAXIMUM_ATTRIBUTES_SIZE = 6144
 
 
+class PlayerState(Enum):
+    """How far a player got into a hosted game."""
+
+    QUEUED = auto()
+    """It waits in the game's queue for a place."""
+    JOINING = auto()
+    """The host was asked whether it may join (EGRQ) and has not answered."""
+    APPROVED = auto()
+    """The host allowed it and it connects to the host (EGEG)."""
+    ENTERED = auto()
+    """The host reported it in the game (PENT)."""
+
+
 @dataclass(eq=False)
 class Player:
-    """A player in a hosted game, joining until its host reports it entered.
+    """A player of a hosted game, from its EGAM until its host reports it left.
 
     Attributes:
         pid: The number the server gave the player within the game.
         persona: Who plays.
-        entered: Whether the host reported the player in the game (PENT).
+        connection: The player's Theater connection.
+        participant: Whether it plays rather than watches.
+        address: The player's public IPv4 address.
+        port: The public port of the player's game socket.
+        internal_address: The player's LAN address, its public one when its game knows none.
+        internal_port: The port of the player's game socket on its LAN.
+        request: The `R-U-` attributes the player's game sent for the host.
+        group: The playgroup the player joins with, if any.
+        looked_up: The player its EGAM named the game by, if it did.
+        ticket: What the player proves to its host that the server let it in with.
+        state: How far it got.
         attributes: The player's `P-` attributes by full key.
+        deadline: When the host's answer is due, while the server waits for it.
     """
 
     pid: int
     persona: Persona
-    entered: bool = False
+    connection: TheaterConnection
+    participant: bool
+    address: IPv4Address
+    port: int
+    internal_address: IPv4Address
+    internal_port: int
+    request: dict[str, str]
+    group: int | None
+    looked_up: Persona | None
+    ticket: str
+    state: PlayerState = PlayerState.QUEUED
     attributes: dict[str, str] = field(default_factory=dict)
+    deadline: asyncio.TimerHandle | None = None
+
+    def stop_waiting(self) -> None:
+        """Stop waiting for the host's answer about the player."""
+        if self.deadline is not None:
+            self.deadline.cancel()
+            self.deadline = None
 
 
 @dataclass(eq=False)
@@ -97,11 +138,15 @@ class HostedGame:
         max_observers: How many observers it takes.
         observers: How many observers it has.
         queue_length: How many players may wait for a place.
+        dequeue: Whether the server lets waiting players in as places free; otherwise the
+            host picks them itself (DQEG).
         password: Whether joining needs a password.
         version: The game protocol version its players need.
         basic: The `B-U-` attributes by full key.
         details: The `D-` attributes by full key.
-        players: Its players by PID.
+        players: Its players that are past the queue, by PID.
+        queue: Its waiting players, first in line first.
+        pids: The numbers its next players get.
     """
 
     lobby: Lobby
@@ -122,11 +167,29 @@ class HostedGame:
     max_observers: int
     observers: int
     queue_length: int
+    dequeue: bool
     password: bool
     version: str
     basic: dict[str, str]
     details: dict[str, str] = field(default_factory=dict)
     players: dict[int, Player] = field(default_factory=dict)
+    queue: list[Player] = field(default_factory=list)
+    pids: Iterator[int] = field(default_factory=lambda: itertools.count(1))
+
+    def everyone(self) -> list[Player]:
+        """Return its players and those waiting in its queue."""
+        return [*self.players.values(), *self.queue]
+
+    def has_room(self, player: Player) -> bool:
+        """Return whether a player fits besides the participants joining or in the game.
+
+        Observers are left to the host, which knows how many watch.
+
+        Args:
+            player: The player that wants a place.
+        """
+        taken = sum(other.participant for other in self.players.values())
+        return not player.participant or taken < self.max_players
 
 
 class Hosting:
@@ -141,6 +204,7 @@ class Hosting:
         self._approval = approval
         self._lobbies: dict[tuple[str, int], dict[int, HostedGame]] = {}
         self._ids = itertools.count(1)
+        self._changed: list[Callable[[HostedGame], object]] = []
 
     def routes(self) -> dict[str, TheaterRoute[Any]]:
         """Return the handlers of the commands that list lobbies and host games."""
@@ -151,10 +215,16 @@ class Hosting:
             "UGAM": TheaterRoute(UpdateGame, self.update),
             "UGDE": TheaterRoute(UpdateGameDetails, self.update_details),
             "UPLA": TheaterRoute(UpdatePlayer, self.update_player),
-            "PENT": TheaterRoute(PlayerRequest, self.player_entered),
-            "PLVT": TheaterRoute(PlayerRequest, self.player_exited),
             "RGAM": TheaterRoute(RemoveGame, self.remove),
         }
+
+    def on_change(self, listener: Callable[[HostedGame], object]) -> None:
+        """Call a function after a host changes how many players its game takes or who may join.
+
+        Args:
+            listener: Called with the game.
+        """
+        self._changed.append(listener)
 
     def games(self, game: Game, lobby: Lobby) -> list[HostedGame]:
         """Return the games players see in a lobby, without those waiting for approval.
@@ -164,6 +234,66 @@ class Hosting:
             lobby: The lobby.
         """
         return [hosted for hosted in self._lobby(game, lobby).values() if hosted.listed]
+
+    def all_games(self, game: Game) -> Iterator[HostedGame]:
+        """Return the games players see in every lobby of a game.
+
+        Args:
+            game: The game.
+        """
+        for lobby in game.lobbies:
+            yield from self.games(game, lobby)
+
+    def find(self, game: Game, lid: int, gid: int) -> HostedGame | None:
+        """Return a game by its lobby and game ids, if players see it.
+
+        Args:
+            game: The game it belongs to.
+            lid: Its lobby's id.
+            gid: Its id.
+        """
+        hosted = self._lobbies.get((game.name, lid), {}).get(gid)
+        return hosted if hosted is not None and hosted.listed else None
+
+    def find_by_player(
+        self, game: Game, type: str, name: str | None, uid: int | None
+    ) -> tuple[HostedGame, Persona] | None:
+        """Return a game of a type that a player hosts or plays in, and that player.
+
+        Dedicated servers share their persona, so it names none of their games.
+
+        Args:
+            game: The game it belongs to.
+            type: G for a game, P for a playgroup.
+            name: The player's persona name, matched regardless of case.
+            uid: The player's persona id.
+        """
+        for hosted in self.all_games(game):
+            if hosted.type != type:
+                continue
+            people = [player.persona for player in hosted.players.values()]
+            account = hosted.host.session.account
+            if hosted.host.persona and account and not account.server:
+                people.append(hosted.host.persona)
+            for persona in people:
+                if persona.id == uid or (name and persona.name.casefold() == name.casefold()):
+                    return hosted, persona
+        return None
+
+    def own(self, connection: TheaterConnection, request: GameRequest) -> HostedGame:
+        """Return a game that a request names, as long as the connection hosts it.
+
+        Args:
+            connection: The host's connection.
+            request: The request.
+
+        Raises:
+            TheaterError: When the connection hosts no such game.
+        """
+        hosted = self._lobbies.get((connection.game.name, request.lid), {}).get(request.gid)
+        if hosted is None or hosted.host is not connection:
+            raise TheaterError(NO_GAME)
+        return hosted
 
     async def list_lobbies(
         self, connection: TheaterConnection, request: TheaterMessage, tid: int
@@ -247,6 +377,7 @@ class Hosting:
             max_observers=request.max_observers,
             observers=request.num_observers,
             queue_length=request.qlen,
+            dequeue=not request.disable_auto_dequeue,
             password=request.password,
             version=request.version,
             basic={},
@@ -280,7 +411,7 @@ class Hosting:
             request: The game the updates are about.
             tid: The request's TID.
         """
-        self._own(connection, request)
+        self.own(connection, request)
         connection.send("UBRA", None, tid)
 
     async def update(self, connection: TheaterConnection, request: UpdateGame, tid: int) -> None:
@@ -291,7 +422,8 @@ class Hosting:
             request: The changes.
             tid: The TID of the bracket it belongs to.
         """
-        hosted = self._own(connection, request)
+        hosted = self.own(connection, request)
+        room = (hosted.max_players, hosted.join)
         if request.name is not None:
             hosted.name = request.name
         if request.join is not None:
@@ -304,6 +436,9 @@ class Hosting:
             hosted.observers = request.num_observers
         _merge(hosted.basic, request.attributes)
         _label(connection.game, hosted)
+        if (hosted.max_players, hosted.join) != room:
+            for listener in self._changed:
+                listener(hosted)
         await self._note_provider(connection.game, hosted, request.attributes)
 
     async def update_details(
@@ -316,7 +451,7 @@ class Hosting:
             request: The changes.
             tid: The TID of the bracket it belongs to.
         """
-        _merge(self._own(connection, request).details, request.attributes)
+        _merge(self.own(connection, request).details, request.attributes)
 
     async def update_player(
         self, connection: TheaterConnection, request: UpdatePlayer, tid: int
@@ -328,33 +463,7 @@ class Hosting:
             request: The player and the changes.
             tid: The TID of the bracket it belongs to.
         """
-        _merge(self._player(connection, request).attributes, request.attributes)
-
-    async def player_entered(
-        self, connection: TheaterConnection, request: PlayerRequest, tid: int
-    ) -> None:
-        """Answer PENT: the host let a joining player into its game.
-
-        Args:
-            connection: The host's connection.
-            request: The player.
-            tid: The request's TID.
-        """
-        self._player(connection, request).entered = True
-        connection.send("PENT", PlayerEnteredAnswer(pid=request.pid), tid)
-
-    async def player_exited(
-        self, connection: TheaterConnection, request: PlayerRequest, tid: int
-    ) -> None:
-        """Answer PLVT: a player left the host's game.
-
-        Args:
-            connection: The host's connection.
-            request: The player.
-            tid: The request's TID.
-        """
-        self._own(connection, request).players.pop(request.pid, None)
-        connection.send("PLVT", None, tid)
+        _merge(self.player(connection, request).attributes, request.attributes)
 
     async def remove(self, connection: TheaterConnection, request: RemoveGame, tid: int) -> None:
         """Answer RGAM: remove a host's game by its ids, or each of its games of a type.
@@ -420,6 +529,21 @@ class Hosting:
                 return lobby
         raise TheaterError(LOBBY_FULL)
 
+    def player(self, connection: TheaterConnection, request: PlayerRequest) -> Player:
+        """Return a player past the queue of a game the connection hosts.
+
+        Args:
+            connection: The host's connection.
+            request: The request that names the game and the player.
+
+        Raises:
+            TheaterError: When the connection hosts no such game or the game no such player.
+        """
+        player = self.own(connection, request).players.get(request.pid)
+        if player is None:
+            raise TheaterError(NOT_FOUND)
+        return player
+
     def _lobby(self, game: Game, lobby: Lobby) -> dict[int, HostedGame]:
         return self._lobbies.get((game.name, lobby.id), {})
 
@@ -433,18 +557,6 @@ class Hosting:
             for hosted in self._lobby(connection.game, lobby).values()
             if _same_host(hosted.host, connection)
         ]
-
-    def _own(self, connection: TheaterConnection, request: GameRequest) -> HostedGame:
-        hosted = self._lobbies.get((connection.game.name, request.lid), {}).get(request.gid)
-        if hosted is None or hosted.host is not connection:
-            raise TheaterError(NO_GAME)
-        return hosted
-
-    def _player(self, connection: TheaterConnection, request: PlayerRequest) -> Player:
-        player = self._own(connection, request).players.get(request.pid)
-        if player is None:
-            raise TheaterError(NOT_FOUND)
-        return player
 
     async def _note_provider(self, game: Game, hosted: HostedGame, sent: Mapping[str, str]) -> None:
         provider_id = _provider_in(game, sent)
@@ -468,8 +580,13 @@ class Hosting:
 
     def _remove(self, hosted: HostedGame) -> None:
         listed = self._lobbies.get((hosted.host.game.name, hosted.lobby.id), {})
-        if listed.pop(hosted.id, None) is not None:
-            logger.info("Game %d (%r) removed", hosted.id, hosted.name)
+        if listed.pop(hosted.id, None) is None:
+            return
+        logger.info("Game %d (%r) removed", hosted.id, hosted.name)
+        for player in hosted.everyone():
+            player.stop_waiting()
+            if player.connection is not hosted.host:
+                player.connection.send("GREM", GameRequest(lid=hosted.lobby.id, gid=hosted.id))
 
 
 def _same_host(host: TheaterConnection, connection: TheaterConnection) -> bool:

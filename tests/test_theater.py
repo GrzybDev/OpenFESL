@@ -15,7 +15,6 @@ from support import (
 
 from openfesl.core import theater
 from openfesl.protocol.relay import Channel, ConnectionKey, Data
-from openfesl.server.cli import main
 
 pytestmark = pytest.mark.anyio
 
@@ -23,11 +22,6 @@ FESL = ConnectionKey(Channel.FESL, 1)
 THEATER = ConnectionKey(Channel.THEATER, 1)
 OTHER_THEATER = ConnectionKey(Channel.THEATER, 2)
 DATAGRAMS = ConnectionKey(Channel.THEATER_DATAGRAM, 7)
-
-
-@pytest.fixture
-async def open_hosting(server_url: str) -> None:
-    await anyio.to_thread.run_sync(main, ["hosting", "open"])
 
 
 @pytest.fixture
@@ -176,7 +170,7 @@ async def test_a_player_lists_one_playgroup_wherever_it_logs_in(server_url: str)
         assert (await second.theater(THEATER, "CGAM", playgroup)).error is None
 
 
-async def test_a_session_without_a_public_ipv4_address_can_neither_echo_nor_host(
+async def test_a_session_without_a_public_ipv4_address_can_neither_echo_host_nor_join(
     behind_proxy: None, server_url: str
 ) -> None:
     async with game(server_url, {"CF-Connecting-IP": "2001:db8::7"}) as server:
@@ -185,6 +179,8 @@ async def test_a_session_without_a_public_ipv4_address_can_neither_echo_nor_host
         await server.send_theater(DATAGRAMS, "ECHO", [("TID", "1"), ("TYPE", "1")])
 
         assert (await server.theater(THEATER, "CGAM", CREATE_GAME)).error == "misc"
+        join = [("LID", "1"), ("GID", "1"), ("PORT", "19567")]
+        assert (await server.theater(THEATER, "EGAM", join)).error == "misc"
         assert not [
             frame
             for frame in server.frames

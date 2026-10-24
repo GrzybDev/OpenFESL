@@ -46,14 +46,16 @@ PING_INTERVAL = 60.0
 class TheaterError(Exception):
     """Ends a Theater request with an error code in the answer's header instead of a result."""
 
-    def __init__(self, code: str) -> None:
+    def __init__(self, code: str, message: TheaterMessage | None = None) -> None:
         """Remember the code for the answer.
 
         Args:
             code: Four ASCII letters, such as `ngam` for a game that does not exist.
+            message: The fields the answer carries besides its TID, such as a reason.
         """
         super().__init__(code)
         self.code = code
+        self.message = message
 
 
 @dataclass(frozen=True, slots=True)
@@ -125,6 +127,8 @@ class TheaterConnection:
         self.persona: Persona | None = None
         # Whether the persona is the one that every dedicated server of the game shares.
         self.server = False
+        # The platform CONN named, which the games of joining players read as their host's.
+        self.platform = ""
         self._outbox = outbox
         self._routes = routes
         self._heard = time.monotonic()
@@ -161,7 +165,7 @@ class TheaterConnection:
         except TheaterError as error:
             logger.info("Theater %s failed with %s", packet.command, error.code)
             if request:
-                self.send(packet.command, None, tid, error=error.code)
+                self.send(packet.command, error.message, tid, error=error.code)
 
     def send(
         self,
@@ -271,6 +275,7 @@ def theater_routes() -> dict[str, TheaterRoute[Any]]:
 
     async def connect(connection: TheaterConnection, request: Connect, tid: int) -> None:
         logger.info("Theater CONN from %s %s (%s)", request.prod, request.vers, request.plat)
+        connection.platform = request.plat
         answer = ConnectAnswer(
             time=int(time.time()), activity_timeout_secs=ACTIVITY_TIMEOUT, prot=request.prot
         )

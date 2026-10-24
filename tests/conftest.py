@@ -2,6 +2,7 @@ import asyncio
 import os
 from collections.abc import AsyncIterator, Iterator
 
+import anyio
 import pytest
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -11,7 +12,7 @@ os.environ.setdefault("TESTCONTAINERS_HOST_OVERRIDE", "127.0.0.1")
 
 from testcontainers.community.postgres import PostgresContainer
 
-from openfesl.server.cli import RelayServer, uvicorn_config
+from openfesl.server.cli import RelayServer, main, uvicorn_config
 
 
 @pytest.fixture
@@ -51,3 +52,9 @@ async def relay_server(
 @pytest.fixture
 def server_url(relay_server: tuple[str, RelayServer]) -> str:
     return relay_server[0]
+
+
+@pytest.fixture
+async def open_hosting(server_url: str) -> None:
+    # Approval has tests of its own; elsewhere any dedicated server may host.
+    await anyio.to_thread.run_sync(main, ["hosting", "open"])

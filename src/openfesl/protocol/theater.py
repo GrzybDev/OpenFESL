@@ -1,10 +1,11 @@
 from collections.abc import Mapping
+from ipaddress import IPv4Address
 from typing import Annotated, ClassVar, Literal, Self
 
 from pydantic import AfterValidator, ConfigDict, Field
 
 from openfesl.protocol.fields import Fields, format_fields, parse_fields
-from openfesl.protocol.message import Int32, Message, _flatten, _from_wire, _to_wire
+from openfesl.protocol.message import Int32, Message, Text, _flatten, _from_wire, _to_wire
 from openfesl.protocol.packet import HEADER_SIZE, Packet, PacketError
 
 REQUEST = 0x40
@@ -27,6 +28,7 @@ def _cut(size: int) -> AfterValidator:
 VersionText = Annotated[str, _cut(63)]
 ShortText = Annotated[str, _cut(31)]
 NameText = Annotated[str, _cut(127)]
+ReasonText = Annotated[str, _cut(255)]
 # The game reads ports as 16-bit numbers.
 Port = Annotated[int, Field(ge=0, le=0xFFFF)]
 GameType = Literal["G", "P"]
@@ -198,6 +200,7 @@ class CreateGame(TheaterMessage):
     max_players: Int32
     max_observers: Int32 = Field(0, alias="B-maxObservers")
     num_observers: Int32 = Field(0, alias="B-numObservers")
+    disable_auto_dequeue: bool = False
     password: bool = False
     ugid: str = ""
     secret: str = ""
@@ -219,7 +222,7 @@ class CreateGameAnswer(TheaterMessage):
 
 
 class GameRequest(TheaterMessage):
-    """A host's request about one of its games, such as UBRA."""
+    """A message about one game, named by its lobby and game ids, such as UBRA or GREM."""
 
     lid: int
     gid: int
@@ -247,7 +250,7 @@ class UpdateGameDetails(GameRequest):
 
 
 class PlayerRequest(GameRequest):
-    """A host's request about one player of its game, such as PENT or PLVT."""
+    """A message about one player of a game, such as PENT, KICK or QLVT."""
 
     pid: int
 
@@ -272,3 +275,102 @@ class RemoveGame(TheaterMessage):
     lid: int | None = None
     gid: int | None = None
     type: str | None = None
+
+
+class EnterGame(TheaterMessage):
+    """EGAM: a player asks to join a game, named by its ids or by a player in it.
+
+    The ports and LAN address are the player's own, which its host connects back to.
+    """
+
+    attribute_prefix = "R-U-"
+
+    lid: int | None = None
+    gid: int | None = None
+    user: Text | None = None
+    uid: int | None = None
+    type: str = "G"
+    port: int
+    r_int_ip: IPv4Address | None = None
+    r_int_port: int | None = None
+    ptype: str = "P"
+    r_groupid: int | None = None
+    attributes: dict[str, str] = Field(default_factory=dict)
+
+
+class QueuePosition(GameRequest):
+    """Where a waiting player is in a full game's queue: the EGAM answer `queu`, and QLEN."""
+
+    qpos: int
+    qlen: int
+
+
+class Refusal(TheaterMessage):
+    """Why a join failed, as a letter such as `f` for full or the host's number."""
+
+    lid: int | None = None
+    gid: int | None = None
+    reason: str | None = None
+
+
+class EnterGameHostRequest(PlayerRequest):
+    """EGRQ: asks a host whether a player may join, with the ticket the player proves it with."""
+
+    attribute_prefix = "R-U-"
+
+    name: str
+    uid: int
+    ticket: str
+    ip: str
+    port: int
+    r_int_ip: str
+    r_int_port: int
+    ptype: str
+    r_user: str | None = None
+    r_uid: int | None = None
+    r_groupid: int | None = None
+    attributes: dict[str, str] = Field(default_factory=dict)
+
+
+class EnterGameHostResponse(PlayerRequest):
+    """EGRS: the host's decision, with its reason when it refuses."""
+
+    allowed: bool
+    reason: ReasonText | None = None
+
+
+class EnterGameNotice(PlayerRequest):
+    """EGEG: tells an allowed player where its host is and how to prove it may join."""
+
+    ticket: str
+    ugid: str
+    ekey: str
+    huid: int
+    i: str
+    p: int
+    pl: str
+    int_ip: str
+    int_port: int
+
+
+class QueueEnter(PlayerRequest):
+    """QENT: tells a host that lets players in itself who waits in its queue."""
+
+    attribute_prefix = "R-U-"
+
+    uid: int
+    name: str
+    r_groupid: int | None = None
+    attributes: dict[str, str] = Field(default_factory=dict)
+
+
+class QueueKick(PlayerRequest):
+    """QKCK: a host sends a waiting player away, with its reason."""
+
+    reason: ReasonText | None = None
+
+
+class QueueUpdate(GameRequest):
+    """UQUE: a host's new order of its queue, as comma-separated PIDs."""
+
+    queue: str = ""

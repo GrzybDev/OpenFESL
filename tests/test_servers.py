@@ -8,9 +8,9 @@ from support import (
     CREATE_GAME,
     Game,
     TheaterAnswer,
+    enter_as_player,
     enter_theater,
     game,
-    log_in_persona,
     log_in_server,
 )
 
@@ -58,11 +58,6 @@ def masked(provider_id: bytes, mask: bytes) -> str:
     """Return a provider attribute as a server sends it: the id XORed with a mask, the mask."""
     data = bytes(byte ^ mask[index % 8] for index, byte in enumerate(provider_id)) + mask
     return data.hex().upper()
-
-
-async def player(game: Game) -> None:
-    _, lkey = await log_in_persona(game, FESL, "ann@example.test", "Ann_01")
-    await enter_theater(game, THEATER, "bfbc2-pc", lkey)
 
 
 async def games_seen(player: Game) -> int:
@@ -130,17 +125,23 @@ async def test_players_see_a_new_server_once_approved_and_lose_it_when_revoked(
 ) -> None:
     assert await cli(capsys, "hosting") == "approved\n"
     async with game(server_url) as server, game(server_url) as ann:
-        await player(ann)
+        await enter_as_player(ann, "ann@example.test", "Ann_01")
         await connect(server)
         created = await create(server)
         assert created.error is None
         ugid, secret = created.fields["UGID"], created.fields["SECRET"]
         assert await games_seen(ann) == 0
+        ids = [("LID", created.fields["LID"]), ("GID", created.fields["GID"])]
+        join = [*ids, ("PORT", "50111")]
+        assert (await ann.theater(THEATER, "EGAM", join)).error == "ngam"
 
         await cli(capsys, "servers", "approve", ugid)
         await until_seen(ann, 1)
+        assert (await ann.theater(THEATER, "EGAM", join)).error is None
         await cli(capsys, "servers", "revoke", ugid)
-        await until_seen(ann, 0)
+        removed = await ann.theater_push(THEATER, "GREM")
+        assert [(key, removed.fields[key]) for key in ("LID", "GID")] == ids
+        assert await games_seen(ann) == 0
         # The host learns from its closed Theater connection that it no longer hosts.
         await closed(server, THEATER)
         assert await cli(capsys, "servers", "list") == f"{ugid}  revoked  -  Invented Server #1\n"
@@ -198,7 +199,7 @@ async def test_open_hosting_lists_every_server_at_once_and_still_records_it(
 ) -> None:
     assert await cli(capsys, "hosting", "open") == "open\n"
     async with game(server_url) as server, game(server_url) as ann:
-        await player(ann)
+        await enter_as_player(ann, "ann@example.test", "Ann_01")
         await connect(server)
         created = await create(server)
         assert created.error is None

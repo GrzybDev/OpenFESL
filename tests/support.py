@@ -15,6 +15,7 @@ from openfesl.protocol.fields import Fields, format_fields, parse_fields
 from openfesl.protocol.packet import Packet
 from openfesl.protocol.relay import (
     SUBPROTOCOL,
+    Channel,
     ConnectionKey,
     Data,
     Frame,
@@ -23,6 +24,9 @@ from openfesl.protocol.relay import (
 )
 
 type Answer = dict[str, str]
+
+FESL = ConnectionKey(Channel.FESL, 1)
+THEATER = ConnectionKey(Channel.THEATER, 1)
 
 # What the R34 dedicated server sends: no lobby, no attributes, empty UGID and SECRET.
 CREATE_GAME = [
@@ -253,9 +257,25 @@ async def log_in_server(game: Game, key: ConnectionKey) -> str:
 async def enter_theater(game: Game, key: ConnectionKey, client_string: str, lkey: str) -> None:
     """Open a Theater connection and log in with a persona key, as the game's SDK does."""
     await game.open(key, f"{client_string}.theater.ea.com", port=18326)
-    connected = await game.theater(key, "CONN", [("PROT", "2"), ("PROD", client_string)])
+    connect = [("PROT", "2"), ("PROD", client_string), ("PLAT", "PC")]
+    connected = await game.theater(key, "CONN", connect)
     assert connected.error is None
     assert (await game.theater(key, "USER", [("LKEY", lkey), ("NAME", "")])).error is None
+
+
+async def host_game(server: Game, changes: Mapping[str, str] | None = None) -> Answer:
+    """Log a dedicated server in to Theater and list CREATE_GAME with some fields changed."""
+    await enter_theater(server, THEATER, "bfbc2-pc-server", await log_in_server(server, FESL))
+    sent = {**dict(CREATE_GAME), **(changes or {})}
+    created = await server.theater(THEATER, "CGAM", list(sent.items()))
+    assert created.error is None
+    return created.fields
+
+
+async def enter_as_player(player: Game, nuid: str, name: str) -> None:
+    """Register a player with a persona and log it in to Theater."""
+    _, lkey = await log_in_persona(player, FESL, nuid, name)
+    await enter_theater(player, THEATER, "bfbc2-pc", lkey)
 
 
 @asynccontextmanager

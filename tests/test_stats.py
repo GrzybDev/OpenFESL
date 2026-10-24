@@ -3,7 +3,7 @@ from datetime import date, datetime, time, timedelta
 import anyio
 import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from support import CREATE_GAME, Game, enter_theater, game, log_in_player, log_in_server
+from support import CREATE_GAME, Game, enter_theater, game, host_game, log_in_player, log_in_server
 
 from openfesl.core.stats import GAME_WIDE, MAXIMUM_ENTRIES, Bucket, Owner, Value, period_start
 from openfesl.protocol.fields import Fields
@@ -30,8 +30,7 @@ async def play_as(player: Game, nuid: str, name: str) -> str:
 async def host(server: Game) -> None:
     # Dedicated servers write stats only while they host a game players see.
     await anyio.to_thread.run_sync(main, ["hosting", "open"])
-    await enter_theater(server, THEATER, "bfbc2-pc-server", await log_in_server(server, FESL))
-    assert (await server.theater(THEATER, "CGAM", CREATE_GAME)).error is None
+    await host_game(server)
 
 
 def keys(*names: str) -> Fields:
