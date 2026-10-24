@@ -7,6 +7,7 @@ from typing import Any, Protocol
 
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Game, ListRule
+from openfesl.core.hosting import Hosting
 from openfesl.core.personas import NOT_LOGGED_IN, PERSONA, Persona, PersonaStore
 from openfesl.core.session import Players
 from openfesl.protocol.asso import (
@@ -165,17 +166,21 @@ def blocking(game: Game) -> list[str]:
 class AssociationService:
     """The asso transactions that read and change association lists, such as friends."""
 
-    def __init__(self, store: AssociationStore, personas: PersonaStore, players: Players) -> None:
+    def __init__(
+        self, store: AssociationStore, personas: PersonaStore, players: Players, hosting: Hosting
+    ) -> None:
         """Serve association lists from a store.
 
         Args:
             store: Where the lists are kept.
             personas: Where owners and members are looked up.
             players: Where the owners of changed lists are found online.
+            hosting: Where the games are that dedicated servers host.
         """
         self._store = store
         self._personas = personas
         self._players = players
+        self._hosting = hosting
 
     def routes(self) -> dict[tuple[str, str], Route[Any]]:
         """Return the handlers of the service's transactions."""
@@ -244,7 +249,7 @@ class AssociationService:
             TransactionError: When nobody plays, the game keeps no such list or the request
                 holds too many additions.
         """
-        actor, rule, reach = self._change(
+        actor, rule, reach = await self._change(
             connection, request.type, request.domain_partition, request.add_requests
         )
         outcomes = []
@@ -296,7 +301,7 @@ class AssociationService:
         Raises:
             TransactionError: As for AddAssociations.
         """
-        actor, rule, reach = self._change(
+        actor, rule, reach = await self._change(
             connection, request.type, request.domain_partition, request.delete_requests
         )
         outcomes = []
@@ -329,13 +334,13 @@ class AssociationService:
             logger.warning(
                 "%s keeps no association list %r in %r", game.name, request.type, partition
             )
-        reach = self._reach(connection, rule, change=False)
+        reach = await self._reach(connection, rule, change=False)
         owner = await self._owner(actor, request.owner, reach)
         if owner is None:
             raise TransactionError(OWNER_INVALID)
         return rule, OwnedList(owner.id, request.type, _partition(request.domain_partition)), owner
 
-    def _change(
+    async def _change(
         self,
         connection: FeslConnection,
         list_type: str,
@@ -346,15 +351,19 @@ class AssociationService:
         rule = _rule(game, list_type, partition)
         if rule is None or len(items) > MAXIMUM_REQUESTS:
             raise TransactionError(PARAMETERS_ERROR)
-        return actor, rule, self._reach(connection, rule, change=True)
+        return actor, rule, await self._reach(connection, rule, change=True)
 
-    def _reach(self, connection: FeslConnection, rule: ListRule | None, *, change: bool) -> _Reach:
+    async def _reach(
+        self, connection: FeslConnection, rule: ListRule | None, *, change: bool
+    ) -> _Reach:
         # Players use their own lists but only read the ones the game's dedicated servers keep
-        # for them; a server keeps those for every player and has only its own of the others.
+        # for them. Anyone logs in like a server, so a server keeps those for every player only
+        # while it hosts a game players see; of the other types it uses its own lists.
         kept = rule is not None and rule.kept_by_servers
         account = connection.session.account
         if account is not None and account.server:
-            return _Reach.ANYONE if kept else _Reach.OWN
+            hosts = kept and await self._hosting.admits(connection.session)
+            return _Reach.ANYONE if hosts else _Reach.OWN
         return _Reach.NOBODY if kept and change else _Reach.OWN
 
     async def _owner(self, actor: Persona, wanted: Owner, reach: _Reach) -> Persona | None:

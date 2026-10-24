@@ -123,6 +123,8 @@ class TheaterConnection:
         self.session = session
         self.game = game
         self.persona: Persona | None = None
+        # Whether the persona is the one that every dedicated server of the game shares.
+        self.server = False
         self._outbox = outbox
         self._routes = routes
         self._heard = time.monotonic()
@@ -285,6 +287,7 @@ def theater_routes() -> dict[str, TheaterRoute[Any]]:
         ):
             raise TheaterError(UNAUTHORIZED)
         connection.persona = persona
+        connection.server = session.account is not None and session.account.server
         logger.info("Persona %d (%s) logged in to Theater", persona.id, persona.name)
         connection.send("USER", LoginAnswer(name=persona.name), tid)
 

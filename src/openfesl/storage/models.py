@@ -184,3 +184,32 @@ class MessageRecipientRow(Base):
     )
     # The recipient's copy; the row outlives it, since the message still names the recipient.
     inbox: Mapped[bool] = mapped_column(default=True)
+
+
+class SettingRow(Base):
+    __tablename__ = "setting"
+
+    key: Mapped[str] = mapped_column(primary_key=True)
+    value: Mapped[str]
+
+
+class ProviderRow(Base):
+    __tablename__ = "provider"
+
+    id: Mapped[bytes] = mapped_column(LargeBinary, primary_key=True)
+    name: Mapped[str]
+    revoked: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class GameServerRow(Base):
+    __tablename__ = "game_server"
+
+    ugid: Mapped[str] = mapped_column(primary_key=True)
+    secret_hash: Mapped[bytes] = mapped_column(LargeBinary)
+    name: Mapped[str]
+    state: Mapped[str]
+    # No foreign key: a server keeps the id it reports also while the admin knows no such
+    # provider, so that one created later is recognised.
+    provider_id: Mapped[bytes | None] = mapped_column(LargeBinary)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -1,11 +1,22 @@
+import anyio
 import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from support import Game, game, log_in_persona, log_in_player, login
+from support import (
+    CREATE_GAME,
+    Game,
+    enter_theater,
+    game,
+    log_in_persona,
+    log_in_player,
+    log_in_server,
+    login,
+)
 
 from openfesl.core.associations import OwnedList
 from openfesl.core.messages import Draft
 from openfesl.protocol.fields import Fields
 from openfesl.protocol.relay import Channel, ConnectionKey
+from openfesl.server.cli import main
 from openfesl.storage.associations import SqlAssociationStore
 from openfesl.storage.messages import SqlMessageStore
 from openfesl.storage.personas import SqlPersonaStore
@@ -13,6 +24,7 @@ from openfesl.storage.personas import SqlPersonaStore
 pytestmark = pytest.mark.anyio
 
 FESL = ConnectionKey(Channel.FESL, 1)
+THEATER = ConnectionKey(Channel.THEATER, 1)
 PARTITION = [
     ("domainPartition.domain", "eagames"),
     ("domainPartition.subDomain", "BFBC2"),
@@ -216,9 +228,13 @@ async def test_dedicated_servers_keep_the_dogtags_players_take_and_no_other_list
     async with game(server_url) as ann, game(server_url) as bob, game(server_url) as server:
         ann_id, _ = await log_in_persona(ann, FESL, "ann@example.test", "Ann")
         bob_id, _ = await log_in_persona(bob, FESL, "bob@example.test", "Bob")
-        await server.hello(FESL, "bfbc2-pc-server", client_type="server")
-        await server.request(FESL, "acct", login("bfbc2.server.pc@ea.com", "from-game-data"))
-        await server.request(FESL, "acct", [("TXN", "NuLoginPersona"), ("name", "bfbc2.server.p")])
+        # Anyone logs in like a dedicated server; a server keeps lists while it hosts a game.
+        lkey = await log_in_server(server, FESL)
+        early = await server.request(FESL, "asso", get("GetAssociations", "dogtags", ann_id, []))
+        assert early["errorCode"] == "23001"
+        await anyio.to_thread.run_sync(main, ["hosting", "open"])
+        await enter_theater(server, THEATER, "bfbc2-pc-server", lkey)
+        assert (await server.theater(THEATER, "CGAM", CREATE_GAME)).error is None
 
         # The server's dogtag list names no domain partition.
         loaded = await server.request(FESL, "asso", get("GetAssociations", "dogtags", ann_id, []))

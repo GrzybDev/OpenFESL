@@ -1,14 +1,23 @@
+import asyncio
 import itertools
 import logging
 import secrets
-import uuid
-from collections.abc import Iterator
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from ipaddress import IPv4Address
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from openfesl.core.games import Game, Lobby
 from openfesl.core.personas import Persona
+from openfesl.core.servers import (
+    BAD_SECRET,
+    Admission,
+    Approval,
+    GameServer,
+    Standing,
+    new_identity,
+    reported_provider,
+)
 from openfesl.core.theater import FAILED, TheaterConnection, TheaterError, TheaterRoute
 from openfesl.protocol.theater import (
     CreateGame,
@@ -26,12 +35,21 @@ from openfesl.protocol.theater import (
     attributes_size,
 )
 
+if TYPE_CHECKING:
+    from openfesl.core.session import GameSession
+
 logger = logging.getLogger(__name__)
+
+GAME = "G"
+PLAYGROUP = "P"
 
 IN_GAME = "ingm"
 LOBBY_FULL = "lbfl"
 NO_GAME = "ngam"
 NOT_FOUND = "ntfn"
+
+# The admin decides in another process, so the server reads the decisions back this often.
+APPROVAL_CHECK_INTERVAL = 5.0
 
 # Each attribute map travels whole in one row of a game list, which the game drops past 8223
 # bytes, so a map as written stays below that with room for the row's other fields, which
@@ -71,7 +89,8 @@ class HostedGame:
         internal_address: The host's LAN address, when the host knows it.
         internal_port: The host's LAN game port.
         ugid: Its persistent id.
-        secret: The secret its host proves the id with.
+        server: The dedicated server that hosts it; none for a player's own playgroup.
+        listed: Whether players see it; games of servers waiting for approval are hidden.
         key: The key the game's traffic is encrypted with, which joining players get too.
         join: Who may join: O open, W wait, C closed.
         max_players: How many participants it takes.
@@ -95,7 +114,8 @@ class HostedGame:
     internal_address: str | None
     internal_port: int | None
     ugid: str
-    secret: str
+    server: GameServer | None
+    listed: bool
     key: str
     join: str
     max_players: int
@@ -112,8 +132,13 @@ class HostedGame:
 class Hosting:
     """The games hosts list in the lobbies of every game; one process holds them all."""
 
-    def __init__(self) -> None:
-        """Start with empty lobbies."""
+    def __init__(self, approval: Approval) -> None:
+        """Start with empty lobbies.
+
+        Args:
+            approval: Issues dedicated servers their identities and decides who sees their games.
+        """
+        self._approval = approval
         self._lobbies: dict[tuple[str, int], dict[int, HostedGame]] = {}
         self._ids = itertools.count(1)
 
@@ -132,13 +157,13 @@ class Hosting:
         }
 
     def games(self, game: Game, lobby: Lobby) -> list[HostedGame]:
-        """Return the games listed in a lobby.
+        """Return the games players see in a lobby, without those waiting for approval.
 
         Args:
             game: The game the lobby belongs to.
             lobby: The lobby.
         """
-        return list(self._lobbies.get((game.name, lobby.id), {}).values())
+        return [hosted for hosted in self._lobby(game, lobby).values() if hosted.listed]
 
     async def list_lobbies(
         self, connection: TheaterConnection, request: TheaterMessage, tid: int
@@ -169,6 +194,10 @@ class Hosting:
     async def create(self, connection: TheaterConnection, request: CreateGame, tid: int) -> None:
         """List a host's game in a lobby, answering with the ids and keys the host keeps.
 
+        A dedicated server hosts under the identity the master issued it, which it sends again
+        in every later CGAM; players see its games once the admin approves it, or at once
+        while hosting is open.
+
         Args:
             connection: The host's connection.
             request: The game.
@@ -176,8 +205,9 @@ class Hosting:
 
         Raises:
             TheaterError: When the session has no public IPv4 address for players to reach, the
-                host lists a game of the type already (it then removes it and asks again), or no
-                lobby has room.
+                host lists a game of the type already (it then removes it and asks again), its
+                secret is wrong or another instance hosts under its id, the admin revoked it,
+                or no lobby has room.
         """
         address = connection.session.address
         if not isinstance(address, IPv4Address):
@@ -185,7 +215,19 @@ class Hosting:
             raise TheaterError(FAILED)
         if any(game.type == request.type for game in self._hosted_by(connection)):
             raise TheaterError(IN_GAME)
-        lobby = self._free_lobby(connection.game, request.lid)
+        # Only a player's own playgroup needs no approval.
+        if request.type != PLAYGROUP or connection.server:
+            admission = await self._approval.admit(request.ugid, request.secret, request.name)
+            ugid = admission.identity.ugid
+            if any(
+                hosted.ugid == ugid and hosted.host.session is not connection.session
+                for hosted in self._every()
+            ):
+                logger.warning("Refusing server %s: another instance hosts under its id", ugid)
+                raise TheaterError(BAD_SECRET)
+        else:
+            admission = Admission(new_identity(), server=None, listed=True)
+        lobby = self._free_lobby(connection.game, request.lid, request.type)
         hosted = HostedGame(
             lobby=lobby,
             id=next(self._ids),
@@ -196,8 +238,9 @@ class Hosting:
             port=request.port,
             internal_address=request.int_ip,
             internal_port=request.int_port,
-            ugid=str(uuid.uuid4()),
-            secret=secrets.token_urlsafe(32),
+            ugid=admission.identity.ugid,
+            server=admission.server,
+            listed=admission.listed,
             key=secrets.token_urlsafe(12),
             join=request.join,
             max_players=request.max_players,
@@ -209,6 +252,7 @@ class Hosting:
             basic={},
         )
         _merge(hosted.basic, request.attributes)
+        _label(connection.game, hosted)
         self._lobbies.setdefault((connection.game.name, lobby.id), {})[hosted.id] = hosted
         connection.on_close(lambda: self._remove(hosted))
         logger.info(
@@ -220,10 +264,11 @@ class Hosting:
             max_players=hosted.max_players,
             ekey=hosted.key,
             ugid=hosted.ugid,
-            secret=hosted.secret,
+            secret=admission.identity.secret,
             join=hosted.join,
         )
         connection.send("CGAM", answer, tid)
+        await self._note_provider(connection.game, hosted, request.attributes)
 
     async def bracket(self, connection: TheaterConnection, request: GameRequest, tid: int) -> None:
         """Answer the UBRA that opens or closes a host's batch of updates.
@@ -258,6 +303,8 @@ class Hosting:
         if request.num_observers is not None:
             hosted.observers = request.num_observers
         _merge(hosted.basic, request.attributes)
+        _label(connection.game, hosted)
+        await self._note_provider(connection.game, hosted, request.attributes)
 
     async def update_details(
         self, connection: TheaterConnection, request: UpdateGameDetails, tid: int
@@ -324,18 +371,68 @@ class Hosting:
                 self._remove(hosted)
         connection.send("RGAM", None, tid)
 
-    def _free_lobby(self, game: Game, wanted: int) -> Lobby:
+    async def admits(self, session: GameSession) -> bool:
+        """Return whether a session hosts a game that players see as of now.
+
+        The servers of a game share their FESL login, so only this tells a dedicated server
+        that keeps its players' stats and lists from anyone who logs in like one.
+
+        Args:
+            session: The session.
+        """
+        for hosted in self._every():
+            if hosted.type == GAME and hosted.server and hosted.host.session is session:
+                # The admin may have decided otherwise since the game listed.
+                standings = await self._approval.standings([hosted.ugid])
+                return standings.get(hosted.ugid) is Standing.LISTED
+        return False
+
+    async def follow_approvals(self) -> None:
+        """Apply the admin's decisions to the games of dedicated servers until cancelled."""
+        while True:
+            await asyncio.sleep(APPROVAL_CHECK_INTERVAL)
+            try:
+                await self._apply_decisions()
+            except Exception:
+                # The database may be away for a moment; the next check tries again.
+                logger.exception("Could not read the admin's decisions about hosting servers")
+
+    async def _apply_decisions(self) -> None:
+        vetted = [hosted for hosted in self._every() if hosted.server is not None]
+        if not vetted:
+            return
+        standings = await self._approval.standings({hosted.ugid for hosted in vetted})
+        for hosted in vetted:
+            standing = standings.get(hosted.ugid, Standing.REFUSED)
+            listed = standing is Standing.LISTED
+            if standing is Standing.REFUSED:
+                self._end(hosted)
+            elif hosted.listed != listed:
+                hosted.listed = listed
+                logger.info("Game %d %s", hosted.id, "listed" if listed else "hidden")
+
+    def _free_lobby(self, game: Game, wanted: int, type: str) -> Lobby:
         lobbies = [lobby for lobby in game.lobbies if lobby.id == wanted] or game.lobbies
         for lobby in lobbies:
-            if len(self.games(game, lobby)) < lobby.max_games:
+            # A player lists one playgroup at most, so only games fill a lobby, hidden ones too.
+            taken = sum(hosted.type == GAME for hosted in self._lobby(game, lobby).values())
+            if type == PLAYGROUP or taken < lobby.max_games:
                 return lobby
         raise TheaterError(LOBBY_FULL)
 
-    def _hosted_by(self, connection: TheaterConnection) -> Iterator[HostedGame]:
-        for lobby in connection.game.lobbies:
-            for hosted in self.games(connection.game, lobby):
-                if hosted.host is connection:
-                    yield hosted
+    def _lobby(self, game: Game, lobby: Lobby) -> dict[int, HostedGame]:
+        return self._lobbies.get((game.name, lobby.id), {})
+
+    def _every(self) -> list[HostedGame]:
+        return [hosted for lobby in self._lobbies.values() for hosted in lobby.values()]
+
+    def _hosted_by(self, connection: TheaterConnection) -> list[HostedGame]:
+        return [
+            hosted
+            for lobby in connection.game.lobbies
+            for hosted in self._lobby(connection.game, lobby).values()
+            if _same_host(hosted.host, connection)
+        ]
 
     def _own(self, connection: TheaterConnection, request: GameRequest) -> HostedGame:
         hosted = self._lobbies.get((connection.game.name, request.lid), {}).get(request.gid)
@@ -349,10 +446,57 @@ class Hosting:
             raise TheaterError(NOT_FOUND)
         return player
 
+    async def _note_provider(self, game: Game, hosted: HostedGame, sent: Mapping[str, str]) -> None:
+        provider_id = _provider_in(game, sent)
+        if hosted.server is None or provider_id is None or provider_id == hosted.server.provider_id:
+            return
+        server = await self._approval.attach(hosted.ugid, provider_id)
+        if server is None or server.revoked:
+            self._end(hosted)
+            return
+        hosted.server = server
+        _label(game, hosted)
+
+    def _end(self, hosted: HostedGame) -> None:
+        # The host learns from its closed connection that it no longer hosts; when it goes
+        # online again, it is refused.
+        logger.warning(
+            "Removing game %d: the admin revoked %s or its provider", hosted.id, hosted.ugid
+        )
+        self._remove(hosted)
+        hosted.host.close_connection()
+
     def _remove(self, hosted: HostedGame) -> None:
         listed = self._lobbies.get((hosted.host.game.name, hosted.lobby.id), {})
         if listed.pop(hosted.id, None) is not None:
             logger.info("Game %d (%r) removed", hosted.id, hosted.name)
+
+
+def _same_host(host: TheaterConnection, connection: TheaterConnection) -> bool:
+    # A player hosts as its persona wherever it logged in last; the dedicated servers of a game
+    # share one persona, so each server process hosts on its own.
+    if host.server or connection.server:
+        return host.session is connection.session
+    return host.persona == connection.persona
+
+
+def _label(game: Game, hosted: HostedGame) -> None:
+    # Only the master server says who provides a game, whatever the host sends and however it
+    # spells the key: the name of the provider its server reports, once the admin knows it.
+    if name := game.provider_attribute:
+        for key in [key for key in hosted.basic if key.casefold() == name.casefold()]:
+            del hosted.basic[key]
+        provider = hosted.server.provider if hosted.server else None
+        if provider is not None:
+            hosted.basic[name] = provider.name
+
+
+def _provider_in(game: Game, sent: Mapping[str, str]) -> bytes | None:
+    name = game.provider_attribute
+    for key, value in sent.items():
+        if name and key.casefold() == name.casefold():
+            return reported_provider(value)
+    return None
 
 
 def _merge(attributes: dict[str, str], changes: dict[str, str]) -> None:

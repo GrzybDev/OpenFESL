@@ -3,17 +3,19 @@ from datetime import date, datetime, time, timedelta
 import anyio
 import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from support import Game, game, log_in_player, login
+from support import CREATE_GAME, Game, enter_theater, game, log_in_player, log_in_server
 
 from openfesl.core.stats import GAME_WIDE, MAXIMUM_ENTRIES, Bucket, Owner, Value, period_start
 from openfesl.protocol.fields import Fields
 from openfesl.protocol.rank import Period
 from openfesl.protocol.relay import Channel, ConnectionKey
+from openfesl.server.cli import main
 from openfesl.storage.stats import SqlStatStore
 
 pytestmark = pytest.mark.anyio
 
 FESL = ConnectionKey(Channel.FESL, 1)
+THEATER = ConnectionKey(Channel.THEATER, 1)
 
 type Update = tuple[int, str, str, str, str]
 
@@ -26,9 +28,10 @@ async def play_as(player: Game, nuid: str, name: str) -> str:
 
 
 async def host(server: Game) -> None:
-    await server.hello(FESL, "bfbc2-pc-server", client_type="server")
-    await server.request(FESL, "acct", login("bfbc2.server.pc@ea.com", "from-game-data"))
-    await server.request(FESL, "acct", [("TXN", "NuLoginPersona"), ("name", "bfbc2.server.p")])
+    # Dedicated servers write stats only while they host a game players see.
+    await anyio.to_thread.run_sync(main, ["hosting", "open"])
+    await enter_theater(server, THEATER, "bfbc2-pc-server", await log_in_server(server, FESL))
+    assert (await server.theater(THEATER, "CGAM", CREATE_GAME)).error is None
 
 
 def keys(*names: str) -> Fields:
@@ -166,17 +169,30 @@ async def test_stats_are_kept_per_period_and_for_the_whole_game(server_url: str)
         assert whole["stats.0.value"] == "10.0000"
 
 
-async def test_only_dedicated_servers_write_and_a_refused_update_changes_nothing(
+async def test_only_dedicated_servers_that_host_write_and_a_refused_update_changes_nothing(
     server_url: str,
 ) -> None:
     async with game(server_url) as player, game(server_url) as server:
         ann = await play_as(player, "ann@example.test", "Ann_01")
-        for cheat in [
+        cheats = [
             update_stats(("", "1", [(0, "score", "99999.0000", "", "0")])),
             update_stats((ann, "1", [(3, "kills", "500.0000", "", "0")])),
-        ]:
+        ]
+        for cheat in cheats:
             assert (await player.request(FESL, "rank", cheat))["errorCode"] == "21"
+        # Anyone logs in like a dedicated server; hosting a game players see is what counts.
+        lkey = await log_in_server(server, FESL)
+        assert (await server.request(FESL, "rank", cheats[1]))["errorCode"] == "21"
+        await enter_theater(server, THEATER, "bfbc2-pc-server", lkey)
+        created = await server.theater(THEATER, "CGAM", CREATE_GAME)
+        # A new server waits for the admin's approval and writes nothing until it has it.
+        assert created.error is None
+        played = update_stats((ann, "1", [(3, "kills", "5.0000", "", "0")]))
+        assert (await server.request(FESL, "rank", played))["errorCode"] == "21"
+        await anyio.to_thread.run_sync(main, ["servers", "approve", created.fields["UGID"]])
+        assert "errorCode" not in await server.request(FESL, "rank", played)
 
+    async with game(server_url) as server:
         await host(server)
         both = update_stats((ann, "1", [(3, "score", "5.0000", "", "0")]), ("999999", "1", []))
         assert (await server.request(FESL, "rank", both))["errorCode"] == "101"

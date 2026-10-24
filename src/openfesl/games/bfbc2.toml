@@ -1,6 +1,7 @@
 name = "Battlefield: Bad Company 2"
 partition = "/eagames/BFBC2"
 namespace = "battlefield"
+provider_attribute = "B-U-Provider"
 
 [clients.bfbc2-pc]
 theater_port = 18395

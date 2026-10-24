@@ -2,7 +2,7 @@ import logging
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Grant, ProductKey
@@ -17,6 +17,10 @@ from openfesl.protocol.acct import (
     Product,
 )
 from openfesl.protocol.message import Message
+
+# For annotations only, since hosting reaches the account service, which imports this module.
+if TYPE_CHECKING:
+    from openfesl.core.hosting import Hosting
 
 logger = logging.getLogger(__name__)
 
@@ -115,13 +119,15 @@ class EntitlementStore(Protocol):
 class EntitlementService:
     """The acct transactions that redeem product keys and list entitlements."""
 
-    def __init__(self, store: EntitlementStore) -> None:
+    def __init__(self, store: EntitlementStore, hosting: Hosting) -> None:
         """Serve entitlements from a store.
 
         Args:
             store: Where entitlements and product keys are kept.
+            hosting: Where the games are that dedicated servers host.
         """
         self._store = store
+        self._hosting = hosting
 
     def routes(self) -> dict[tuple[str, str], Route[Any]]:
         """Return the handlers of the service's transactions."""
@@ -229,7 +235,11 @@ class EntitlementService:
         if request.device_physical_id:
             return []
         owner = request.master_user_id or account.id
-        if owner != account.id and not account.server:
+        # Anyone logs in like a dedicated server, so only one that hosts a game players see
+        # reads its players' entitlements, such as their veteran tags.
+        if owner != account.id and not (
+            account.server and await self._hosting.admits(connection.session)
+        ):
             raise TransactionError(PARAMETERS_ERROR)
         query = EntitlementQuery(
             id=request.entitlement_id,

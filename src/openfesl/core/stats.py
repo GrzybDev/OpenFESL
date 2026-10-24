@@ -5,6 +5,7 @@ from typing import Any, Protocol
 
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Game
+from openfesl.core.hosting import Hosting
 from openfesl.core.personas import NOT_LOGGED_IN, UNKNOWN_PERSONA, PersonaStore
 from openfesl.protocol.message import Message
 from openfesl.protocol.rank import (
@@ -136,15 +137,17 @@ def period_start(period: Period, day: date, past: int = 0) -> date:
 class StatsService:
     """The rank transactions that read and update stats."""
 
-    def __init__(self, store: StatStore, personas: PersonaStore) -> None:
+    def __init__(self, store: StatStore, personas: PersonaStore, hosting: Hosting) -> None:
         """Serve stats from a store.
 
         Args:
             store: Where stats are kept.
             personas: Where the personas that own stats are found.
+            hosting: Where the games are that dedicated servers host.
         """
         self._store = store
         self._personas = personas
+        self._hosting = hosting
 
     def routes(self) -> dict[tuple[str, str], Route[Any]]:
         """Return the handlers of the service's transactions."""
@@ -204,20 +207,23 @@ class StatsService:
     async def update_stats(self, connection: FeslConnection, request: UpdateStats) -> Message:
         """Update stats as a dedicated server reports its players' rounds, all or nothing.
 
-        Only the game's dedicated servers write: players' stats come from the rounds they
-        play, and a client could write any number.
+        Only the game's dedicated servers write, and only while they host a game players see:
+        players' stats come from the rounds they play, and a client could write any number.
 
         Args:
             connection: The FESL connection the request came on.
             request: Each owner's updates.
 
         Raises:
-            TransactionError: When the session is not a dedicated server's, an owner is not a
-                persona of the game or the game, or the request is too large.
+            TransactionError: When the session is not a dedicated server's that hosts such a
+                game, an owner is not a persona of the game or the game, or the request is too
+                large.
         """
         game = game_of(connection)
         account = connection.session.account
         if account is None or not account.server:
+            raise TransactionError(PARAMETERS_ERROR)
+        if not await self._hosting.admits(connection.session):
             raise TransactionError(PARAMETERS_ERROR)
         day = _today()
         changes: list[Change] = []

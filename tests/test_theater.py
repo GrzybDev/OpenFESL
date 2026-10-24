@@ -3,38 +3,31 @@ from collections.abc import Iterator
 
 import anyio
 import pytest
-from support import Game, enter_theater, game, log_in_persona, log_in_server
+from support import (
+    CREATE_GAME,
+    Game,
+    enter_theater,
+    game,
+    log_in_again,
+    log_in_persona,
+    log_in_server,
+)
 
 from openfesl.core import theater
 from openfesl.protocol.relay import Channel, ConnectionKey, Data
+from openfesl.server.cli import main
 
 pytestmark = pytest.mark.anyio
 
 FESL = ConnectionKey(Channel.FESL, 1)
 THEATER = ConnectionKey(Channel.THEATER, 1)
+OTHER_THEATER = ConnectionKey(Channel.THEATER, 2)
 DATAGRAMS = ConnectionKey(Channel.THEATER_DATAGRAM, 7)
 
-# What the R34 dedicated server sends: no lobby, no attributes, empty UGID and SECRET.
-CREATE_GAME = [
-    ("LID", "-1"),
-    ("RESERVE-HOST", "0"),
-    ("NAME", "Invented Server #1"),
-    ("PORT", "19567"),
-    ("HTTYPE", "A"),
-    ("TYPE", "G"),
-    ("QLEN", "0"),
-    ("DISABLE-AUTO-DEQUEUE", "0"),
-    ("HXFR", "0"),
-    ("INT-PORT", "19567"),
-    ("INT-IP", "192.168.1.10"),
-    ("MAX-PLAYERS", "32"),
-    ("B-maxObservers", "0"),
-    ("B-numObservers", "0"),
-    ("UGID", ""),
-    ("SECRET", ""),
-    ("B-version", "ROMEPC795745"),
-    ("JOIN", "O"),
-]
+
+@pytest.fixture
+async def open_hosting(server_url: str) -> None:
+    await anyio.to_thread.run_sync(main, ["hosting", "open"])
 
 
 @pytest.fixture
@@ -118,9 +111,12 @@ async def test_theater_keeps_a_connection_that_answers_pings_and_closes_one_that
         assert frame.connection == THEATER
 
 
-async def test_a_dedicated_server_lists_updates_and_removes_its_game(server_url: str) -> None:
+async def test_a_dedicated_server_lists_updates_and_removes_its_game(
+    open_hosting: None, server_url: str
+) -> None:
     async with game(server_url) as server, game(server_url) as player:
-        await enter_theater(server, THEATER, "bfbc2-pc-server", await log_in_server(server, FESL))
+        server_key = await log_in_server(server, FESL)
+        await enter_theater(server, THEATER, "bfbc2-pc-server", server_key)
         _, lkey = await log_in_persona(player, FESL, "ann@example.test", "Ann_01")
         await enter_theater(player, THEATER, "bfbc2-pc", lkey)
         assert await games_in_lobby(player, THEATER) == 0
@@ -132,6 +128,10 @@ async def test_a_dedicated_server_lists_updates_and_removes_its_game(server_url:
         assert (len(fields["UGID"]), len(fields["EKEY"])) == (36, 16)
         assert fields["SECRET"]
         assert (await server.theater(THEATER, "CGAM", CREATE_GAME)).error == "ingm"
+        await enter_theater(server, OTHER_THEATER, "bfbc2-pc-server", server_key)
+        assert (await server.theater(OTHER_THEATER, "CGAM", CREATE_GAME)).error == "ingm"
+        odd = [(key, "g" if key == "TYPE" else value) for key, value in CREATE_GAME]
+        assert (await server.theater(OTHER_THEATER, "CGAM", odd)).error == "bpar"
         assert (await server.theater(THEATER, "RGAM", [("TYPE", "G")])).error is None
         again = await server.theater(THEATER, "CGAM", CREATE_GAME)
         assert again.error is None
@@ -159,6 +159,21 @@ async def test_a_dedicated_server_lists_updates_and_removes_its_game(server_url:
         with anyio.fail_after(5):
             while await games_in_lobby(player, THEATER):
                 await anyio.sleep(0.01)
+
+
+async def test_a_player_lists_one_playgroup_wherever_it_logs_in(server_url: str) -> None:
+    playgroup = [(key, "P" if key == "TYPE" else value) for key, value in CREATE_GAME]
+    async with game(server_url) as first, game(server_url) as second:
+        _, lkey = await log_in_persona(first, FESL, "ann@example.test", "Ann_01")
+        await enter_theater(first, THEATER, "bfbc2-pc", lkey)
+        assert (await first.theater(THEATER, "CGAM", playgroup)).error is None
+
+        # Logging in elsewhere leaves the first Theater connection open with its playgroup.
+        lkey = await log_in_again(second, FESL, "ann@example.test", "Ann_01")
+        await enter_theater(second, THEATER, "bfbc2-pc", lkey)
+        assert (await second.theater(THEATER, "CGAM", playgroup)).error == "ingm"
+        assert (await second.theater(THEATER, "RGAM", [("TYPE", "P")])).error is None
+        assert (await second.theater(THEATER, "CGAM", playgroup)).error is None
 
 
 async def test_a_session_without_a_public_ipv4_address_can_neither_echo_nor_host(

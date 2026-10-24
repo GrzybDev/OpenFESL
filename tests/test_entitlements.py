@@ -3,12 +3,22 @@ import asyncio
 import pytest
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
-from support import entitle_game, game, log_in_player, login, registration
+from support import (
+    CREATE_GAME,
+    enter_theater,
+    entitle_game,
+    game,
+    log_in_player,
+    log_in_server,
+    login,
+    registration,
+)
 
 from openfesl.protocol.relay import Channel, ConnectionKey
 from openfesl.server.cli import main
 
 FESL = ConnectionKey(Channel.FESL, 1)
+THEATER = ConnectionKey(Channel.THEATER, 1)
 
 
 async def run(database_url: str, statement: str) -> None:
@@ -52,8 +62,15 @@ async def test_keys_grant_entitlements_once_and_a_revoked_one_stays_revoked(
 
         await server.hello(FESL, "bfbc2-pc-server", client_type="server")
         await server.request(FESL, "acct", login("bfbc2.server.pc@ea.com", "from-game-data"))
-        asked = await server.request(FESL, "acct", [*query, ("masterUserId", account["userId"])])
-        assert asked["entitlements.[]"] == "2"
+        players = [*query, ("masterUserId", account["userId"])]
+        # Anyone logs in like a dedicated server; one that hosts reads its players' entitlements.
+        assert (await server.request(FESL, "acct", players))["errorCode"] == "21"
+        await asyncio.to_thread(main, ["hosting", "open"])
+        async with game(server_url) as hosting:
+            lkey = await log_in_server(hosting, FESL)
+            await enter_theater(hosting, THEATER, "bfbc2-pc-server", lkey)
+            assert (await hosting.theater(THEATER, "CGAM", CREATE_GAME)).error is None
+            assert (await hosting.request(FESL, "acct", players))["entitlements.[]"] == "2"
         other = [*query, ("masterUserId", "999999")]
         assert (await player.request(FESL, "acct", other))["errorCode"] == "21"
         redeem = [("TXN", "NuEntitleUser"), ("key", "ACTIVATE-VIETNAM")]

@@ -24,6 +24,28 @@ from openfesl.protocol.relay import (
 
 type Answer = dict[str, str]
 
+# What the R34 dedicated server sends: no lobby, no attributes, empty UGID and SECRET.
+CREATE_GAME = [
+    ("LID", "-1"),
+    ("RESERVE-HOST", "0"),
+    ("NAME", "Invented Server #1"),
+    ("PORT", "19567"),
+    ("HTTYPE", "A"),
+    ("TYPE", "G"),
+    ("QLEN", "0"),
+    ("DISABLE-AUTO-DEQUEUE", "0"),
+    ("HXFR", "0"),
+    ("INT-PORT", "19567"),
+    ("INT-IP", "192.168.1.10"),
+    ("MAX-PLAYERS", "32"),
+    ("B-maxObservers", "0"),
+    ("B-numObservers", "0"),
+    ("UGID", ""),
+    ("SECRET", ""),
+    ("B-version", "ROMEPC795745"),
+    ("JOIN", "O"),
+]
+
 
 @dataclass(frozen=True)
 class TheaterAnswer:
@@ -212,11 +234,12 @@ async def log_in_persona(game: Game, key: ConnectionKey, nuid: str, name: str) -
     return int(playing["userId"]), playing["lkey"]
 
 
-async def log_in_again(game: Game, key: ConnectionKey, nuid: str, name: str) -> None:
-    """Log a player that registered earlier in again as one of its personas."""
+async def log_in_again(game: Game, key: ConnectionKey, nuid: str, name: str) -> str:
+    """Log a player that registered earlier in again as one of its personas, returning its key."""
     await game.hello(key, "bfbc2-pc")
     await game.request(key, "acct", login(nuid, "secret-pass"))
-    await game.request(key, "acct", [("TXN", "NuLoginPersona"), ("name", name)])
+    playing = await game.request(key, "acct", [("TXN", "NuLoginPersona"), ("name", name)])
+    return playing["lkey"]
 
 
 async def log_in_server(game: Game, key: ConnectionKey) -> str:

@@ -114,6 +114,8 @@ class Game(BaseModel):
         records: The records a persona may keep, by name, with the most entries each holds.
         associations: The association list types the game keeps, by name.
         lobbies: The Theater lobbies of all of the game's clients.
+        provider_attribute: The basic game attribute in which dedicated servers report their
+            provider and game lists show the provider's name; hosts cannot set it themselves.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -127,6 +129,7 @@ class Game(BaseModel):
     records: dict[str, int] = {}
     associations: dict[str, ListRule] = {}
     lobbies: list[Lobby] = []
+    provider_attribute: str | None = None
 
     @field_validator("partition", mode="before")
     @classmethod

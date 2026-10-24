@@ -1,5 +1,6 @@
+import asyncio
 from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 from typing import Any
 
 from fastapi import FastAPI, WebSocket
@@ -22,6 +23,7 @@ from openfesl.core.personas import PersonaService
 from openfesl.core.presence import PresenceService
 from openfesl.core.records import RecordService
 from openfesl.core.registration import Terms
+from openfesl.core.servers import Approval
 from openfesl.core.session import GameSession, Players
 from openfesl.core.stats import StatsService
 from openfesl.core.telemetry import telemetry_routes
@@ -36,6 +38,7 @@ from openfesl.storage.entitlements import SqlEntitlementStore
 from openfesl.storage.messages import SqlMessageStore
 from openfesl.storage.personas import SqlPersonaStore
 from openfesl.storage.records import SqlRecordStore
+from openfesl.storage.servers import SqlServerStore
 from openfesl.storage.stats import SqlStatStore
 from openfesl.web.game_http import GameHttpMiddleware
 
@@ -78,20 +81,25 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         routes.update(accounts.routes())
         routes.update(AccountSettingsService(store, logins).routes())
         routes.update(personas.routes())
-        routes.update(EntitlementService(entitlements).routes())
+        hosting = Hosting(Approval(SqlServerStore(sessions)))
+        routes.update(EntitlementService(entitlements, hosting).routes())
         routes.update(game_http.routes())
         stats = SqlStatStore(sessions)
-        routes.update(StatsService(stats, persona_store).routes())
+        routes.update(StatsService(stats, persona_store, hosting).routes())
         routes.update(LeaderboardService(stats).routes())
         routes.update(RecordService(SqlRecordStore(sessions)).routes())
         associations = SqlAssociationStore(sessions)
-        routes.update(AssociationService(associations, persona_store, players).routes())
+        routes.update(AssociationService(associations, persona_store, players, hosting).routes())
         routes.update(PresenceService(persona_store, players, associations).routes())
         messages = MessageService(SqlMessageStore(sessions), persona_store, players, associations)
         routes.update(messages.routes())
         commands.update(theater_routes())
-        commands.update(Hosting().routes())
+        commands.update(hosting.routes())
+        following = asyncio.create_task(hosting.follow_approvals())
         yield
+        following.cancel()
+        with suppress(asyncio.CancelledError):
+            await following
         await messages.close()
         await engine.dispose()
 

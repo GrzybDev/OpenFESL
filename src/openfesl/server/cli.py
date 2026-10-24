@@ -4,17 +4,27 @@ import logging
 import socket
 import sys
 import urllib.request
-from collections.abc import Sequence
+from collections.abc import AsyncIterator, Sequence
+from contextlib import asynccontextmanager
+from pathlib import Path
 
 import uvicorn
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from openfesl.core.games import load_games
+from openfesl.core.servers import (
+    GameServer,
+    HostingMode,
+    ServerState,
+    new_provider,
+    provider_file,
+)
 from openfesl.protocol.packet import MAX_SIZE
 from openfesl.relay.endpoint import close_sessions
 from openfesl.server.settings import Settings
 from openfesl.storage.database import migrate
 from openfesl.storage.entitlements import SqlEntitlementStore
+from openfesl.storage.servers import SqlServerStore
 
 DEFAULT_PORT = 8000
 GOING_AWAY = 1001
@@ -43,6 +53,33 @@ def main(argv: Sequence[str] | None = None) -> None:
     keys.add_subparsers(dest="action", required=True).add_parser(
         "import", help="add the games' product keys that the database lacks, keeping the others"
     )
+    hosting = commands.add_parser(
+        "hosting", help="show or change whether players see only approved servers' games"
+    )
+    hosting.add_argument("mode", nargs="?", choices=[mode.value for mode in HostingMode])
+    providers = commands.add_parser("providers", help="manage the operators of dedicated servers")
+    provider_actions = providers.add_subparsers(dest="action", required=True)
+    provider_actions.add_parser("list", help="list the providers and their ids")
+    add = provider_actions.add_parser(
+        "add", help="add a provider and write the ProviderId.dat its servers read"
+    )
+    add.add_argument("name", help="what to call the provider; game lists show it")
+    add.add_argument(
+        "--out",
+        type=Path,
+        default=Path("ProviderId.dat"),
+        help="the file to write, ProviderId.dat here by default; an existing one is kept",
+    )
+    provider_actions.add_parser(
+        "revoke", help="stop every server of a provider from hosting"
+    ).add_argument("id", help="the provider's id as listed")
+    servers = commands.add_parser("servers", help="manage the dedicated servers that host")
+    server_actions = servers.add_subparsers(dest="action", required=True)
+    server_actions.add_parser("list", help="list the servers that ever hosted")
+    server_actions.add_parser("approve", help="let players see a server's games").add_argument(
+        "ugid"
+    )
+    server_actions.add_parser("revoke", help="stop a server from hosting").add_argument("ugid")
     args = parser.parse_args(argv)
 
     match args.command:
@@ -56,6 +93,12 @@ def main(argv: Sequence[str] | None = None) -> None:
             sys.exit(0 if _healthy(args.port) else 1)
         case "keys":
             print(f"Added {asyncio.run(_import_keys(Settings()))} product keys")
+        case "hosting":
+            print(asyncio.run(_hosting(Settings(), args.mode)))
+        case "providers":
+            asyncio.run(_providers(Settings(), args))
+        case "servers":
+            asyncio.run(_servers(Settings(), args))
 
 
 class RelayServer(uvicorn.Server):
@@ -101,13 +144,74 @@ def uvicorn_config(host: str, port: int) -> uvicorn.Config:
     )
 
 
-async def _import_keys(settings: Settings) -> int:
+@asynccontextmanager
+async def _database(settings: Settings) -> AsyncIterator[async_sessionmaker[AsyncSession]]:
     engine = create_async_engine(settings.database_url)
     try:
         await migrate(engine)
-        return await SqlEntitlementStore(async_sessionmaker(engine)).import_keys(load_games().keys)
+        yield async_sessionmaker(engine)
     finally:
         await engine.dispose()
+
+
+async def _import_keys(settings: Settings) -> int:
+    async with _database(settings) as sessions:
+        return await SqlEntitlementStore(sessions).import_keys(load_games().keys)
+
+
+async def _hosting(settings: Settings, mode: str | None) -> HostingMode:
+    async with _database(settings) as sessions:
+        store = SqlServerStore(sessions)
+        if mode:
+            await store.set_hosting_mode(HostingMode(mode))
+        return await store.hosting_mode()
+
+
+async def _providers(settings: Settings, args: argparse.Namespace) -> None:
+    async with _database(settings) as sessions:
+        store = SqlServerStore(sessions)
+        match args.action:
+            case "list":
+                for provider in await store.providers():
+                    state = "revoked" if provider.revoked else "active"
+                    print(f"{provider.id.hex().upper()}  {state}  {provider.name}")
+            case "add":
+                try:
+                    provider = new_provider(args.name)
+                    # An operator may hold the file already, so none is ever replaced.
+                    with args.out.open("xb") as file:
+                        file.write(provider_file(provider.id))
+                except (ValueError, FileExistsError) as error:
+                    sys.exit(str(error))
+                await store.add_provider(provider)
+                print(provider.id.hex().upper())
+            case "revoke":
+                try:
+                    provider_id = bytes.fromhex(args.id)
+                except ValueError:
+                    provider_id = b""
+                if not await store.revoke_provider(provider_id):
+                    sys.exit(f"No provider has the id {args.id}")
+
+
+async def _servers(settings: Settings, args: argparse.Namespace) -> None:
+    async with _database(settings) as sessions:
+        store = SqlServerStore(sessions)
+        match args.action:
+            case "list":
+                for server in await store.all():
+                    state = ServerState.REVOKED if server.revoked else server.state
+                    print(f"{server.ugid}  {state}  {_provider_of(server)}  {server.name}")
+            case "approve" | "revoke":
+                state = ServerState.APPROVED if args.action == "approve" else ServerState.REVOKED
+                if not await store.set_state(args.ugid, state):
+                    sys.exit(f"No server has the id {args.ugid}")
+
+
+def _provider_of(server: GameServer) -> str:
+    if server.provider is not None:
+        return server.provider.name
+    return server.provider_id.hex().upper() if server.provider_id else "-"
 
 
 def _healthy(port: int) -> bool:
