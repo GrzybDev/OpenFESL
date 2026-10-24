@@ -1,12 +1,12 @@
 import hmac
 import logging
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import Any
 
 from openfesl.core.accounts import Account
 from openfesl.core.connection import Address, Connection, Outbox
-from openfesl.core.fesl import FeslConnection, Route
-from openfesl.core.personas import Persona
+from openfesl.core.fesl import FeslConnection, Route, TransactionError
+from openfesl.core.personas import NOT_LOGGED_IN, Persona
 from openfesl.protocol.message import Message
 from openfesl.protocol.packet import Packet
 from openfesl.protocol.relay import Channel, Open
@@ -26,6 +26,7 @@ class Players:
         """Start with nobody logged in."""
         self._sessions: dict[int, GameSession] = {}
         self._personas: dict[int, GameSession] = {}
+        self._leaving: list[Callable[[GameSession, Persona], object]] = []
 
     def log_in(self, session: GameSession) -> None:
         """Register a player's login and send the account's earlier session away.
@@ -70,14 +71,28 @@ class Players:
         self._personas[session.persona.id] = session
 
     def leave(self, session: GameSession, persona: Persona) -> None:
-        """Forget that a session plays as a persona.
+        """Forget that a session plays as a persona, and tell whoever listens.
+
+        A session that the persona has moved away from tells nobody, since the persona still
+        plays elsewhere.
 
         Args:
             session: The session.
             persona: The persona it played as.
         """
-        if self._personas.get(persona.id) is session:
-            del self._personas[persona.id]
+        if self._personas.get(persona.id) is not session:
+            return
+        del self._personas[persona.id]
+        for listener in self._leaving:
+            listener(session, persona)
+
+    def on_leave(self, listener: Callable[[GameSession, Persona], object]) -> None:
+        """Call a function whenever a persona stops playing in a session.
+
+        Args:
+            listener: Called with the session and the persona that left it.
+        """
+        self._leaving.append(listener)
 
     def find_key(self, key: str) -> GameSession | None:
         """Return the player session whose persona a session key belongs to.
@@ -159,13 +174,19 @@ class GameSession:
         Args:
             persona: The persona.
             key: The session key handed to the game for it.
+
+        Raises:
+            TransactionError: When the account is no longer the session's, as when it logged
+                in elsewhere while the persona was looked up.
         """
+        if self.account is None or self.account.id != persona.account_id:
+            raise TransactionError(NOT_LOGGED_IN)
         if self.persona != persona:
             self.forget_persona()
         self.persona = persona
         self.persona_key = key
         # Dedicated servers of a game share their persona, so no push could pick one of them.
-        if self.account is not None and not self.account.server:
+        if not self.account.server:
             self._players.play(self)
 
     def forget_persona(self) -> None:

@@ -1,3 +1,4 @@
+from collections.abc import Collection
 from dataclasses import replace
 
 from sqlalchemy import ColumnElement, delete, exists, func, insert, select, update
@@ -106,6 +107,28 @@ class SqlAssociationStore:
                     size = await _size(session, target)
                     changes.append(Change(target, gone, size, removed=True))
             return changes
+
+    async def listed_by(
+        self, member_id: int, types: Collection[str], owner_ids: Collection[int]
+    ) -> set[int]:
+        """Return which of some personas hold a member on a list of some types, in any partition.
+
+        Args:
+            member_id: The member.
+            types: The list types.
+            owner_ids: The personas whose lists are looked at.
+        """
+        if not types or not owner_ids:
+            return set()
+        async with self._sessions() as session:
+            owners = await session.scalars(
+                select(AssociationRow.owner_id).where(
+                    AssociationRow.member_id == member_id,
+                    AssociationRow.type.in_(types),
+                    AssociationRow.owner_id.in_(owner_ids),
+                )
+            )
+            return set(owners)
 
 
 class _Full(Exception):

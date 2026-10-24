@@ -17,6 +17,7 @@ from openfesl.core.games import load_games
 from openfesl.core.leaderboards import LeaderboardService
 from openfesl.core.logins import Logins
 from openfesl.core.personas import PersonaService
+from openfesl.core.presence import PresenceService
 from openfesl.core.records import RecordService
 from openfesl.core.registration import Terms
 from openfesl.core.session import GameSession, Players
@@ -77,9 +78,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         routes.update(StatsService(stats, persona_store).routes())
         routes.update(LeaderboardService(stats).routes())
         routes.update(RecordService(SqlRecordStore(sessions)).routes())
-        routes.update(
-            AssociationService(SqlAssociationStore(sessions), persona_store, players).routes()
-        )
+        associations = SqlAssociationStore(sessions)
+        routes.update(AssociationService(associations, persona_store, players).routes())
+        routes.update(PresenceService(persona_store, players, associations).routes())
         yield
         await engine.dispose()
 

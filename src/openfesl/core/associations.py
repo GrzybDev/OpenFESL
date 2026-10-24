@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Collection
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum, auto
@@ -132,6 +133,26 @@ class AssociationStore(Protocol):
         Returns:
             A change for each list that held the member.
         """
+
+    async def listed_by(
+        self, member_id: int, types: Collection[str], owner_ids: Collection[int]
+    ) -> set[int]:
+        """Return which of some personas hold a member on a list of some types, in any partition.
+
+        Args:
+            member_id: The member.
+            types: The list types.
+            owner_ids: The personas whose lists are looked at.
+        """
+
+
+def blocking(game: Game) -> list[str]:
+    """Return the list types whose members a game keeps away from the lists' owners.
+
+    Args:
+        game: The game.
+    """
+    return [name for name, rule in game.associations.items() if rule.blocks]
 
 
 class AssociationService:

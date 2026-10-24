@@ -75,6 +75,8 @@ class ListRule(BaseModel):
             list once it agreed, and loses the owner whenever either removes the other.
         kept_by_servers: Whether the game's dedicated servers keep the lists for their
             players, who may only read their own.
+        blocks: Whether a list's members are kept away from its owner, who stays hidden
+            from them.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -82,6 +84,7 @@ class ListRule(BaseModel):
     size: int
     mutual: bool = False
     kept_by_servers: bool = False
+    blocks: bool = False
 
 
 class Game(BaseModel):

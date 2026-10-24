@@ -177,3 +177,18 @@ async def fetch(server_url: str, path: str, host: str | None = None) -> tuple[in
             return error.code, error.headers, error.read()
 
     return await asyncio.to_thread(send)
+
+
+def block(owner: int, member: int) -> Fields:
+    """Return the AddAssociations that puts a member on its owner's block list."""
+    return [
+        ("TXN", "AddAssociations"),
+        ("type", "PlasmaBlock"),
+        ("listFullBehavior", "RollLeastRecentlyModified"),
+        ("addRequests.[]", "1"),
+        ("addRequests.0.owner.id", str(owner)),
+        ("addRequests.0.owner.type", "1"),
+        ("addRequests.0.member.id", str(member)),
+        ("addRequests.0.member.type", "1"),
+        ("addRequests.0.mutual", "0"),
+    ]
