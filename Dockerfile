@@ -34,5 +34,6 @@ USER app
 WORKDIR /home/app
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD ["openfesl", "health"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --start-interval=2s --retries=3 \
+    CMD ["python", "-m", "openfesl.server.health"]
 CMD ["openfesl", "serve"]

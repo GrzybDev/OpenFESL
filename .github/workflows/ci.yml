@@ -49,7 +49,7 @@ jobs:
           docker run --detach --name openfesl --network openfesl \
             --env DATABASE_URL=postgresql+asyncpg://postgres:openfesl@database/postgres openfesl
           for _ in $(seq 1 30); do
-            if docker exec openfesl openfesl health; then
+            if docker exec openfesl python -m openfesl.server.health; then
               exit 0
             fi
             sleep 1

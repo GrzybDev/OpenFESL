@@ -3,7 +3,6 @@ import asyncio
 import logging
 import socket
 import sys
-import urllib.request
 from collections.abc import AsyncIterator, Sequence
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -21,12 +20,12 @@ from openfesl.core.servers import (
 )
 from openfesl.protocol.packet import MAX_SIZE
 from openfesl.relay.endpoint import close_sessions
+from openfesl.server.health import DEFAULT_PORT
 from openfesl.server.settings import Settings
 from openfesl.storage.database import migrate
 from openfesl.storage.entitlements import SqlEntitlementStore
 from openfesl.storage.servers import SqlServerStore
 
-DEFAULT_PORT = 8000
 GOING_AWAY = 1001
 
 # One relay frame: its 4-byte header and the largest packet the hook forwards.
@@ -47,8 +46,6 @@ def main(argv: Sequence[str] | None = None) -> None:
     serve = commands.add_parser("serve", help="run the server")
     serve.add_argument("--host", default="0.0.0.0", help="address to listen on")
     serve.add_argument("--port", type=int, default=DEFAULT_PORT, help="port to listen on")
-    health = commands.add_parser("health", help="check that the server on this machine answers")
-    health.add_argument("--port", type=int, default=DEFAULT_PORT, help="port the server uses")
     keys = commands.add_parser("keys", help="manage product keys")
     keys.add_subparsers(dest="action", required=True).add_parser(
         "import", help="add the games' product keys that the database lacks, keeping the others"
@@ -89,8 +86,6 @@ def main(argv: Sequence[str] | None = None) -> None:
                 level=settings.log_level, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
             )
             RelayServer(uvicorn_config(args.host, args.port)).run()
-        case "health":
-            sys.exit(0 if _healthy(args.port) else 1)
         case "keys":
             print(f"Added {asyncio.run(_import_keys(Settings()))} product keys")
         case "hosting":
@@ -212,12 +207,3 @@ def _provider_of(server: GameServer) -> str:
     if server.provider is not None:
         return server.provider.name
     return server.provider_id.hex().upper() if server.provider_id else "-"
-
-
-def _healthy(port: int) -> bool:
-    try:
-        with urllib.request.urlopen(f"http://127.0.0.1:{port}/health", timeout=3) as response:
-            status: int = response.status
-    except OSError:
-        return False
-    return status == 200

@@ -63,7 +63,8 @@ The database schema is created and upgraded when the server starts.
 - Serve it over TLS (`wss://`) through a proxy that passes WebSocket upgrades and keeps connections open for hours.
   The server pings the hook to find dead connections.
 - On shutdown the server closes every session with code 1001, and the hook reconnects when the game does.
-- `openfesl health` checks that the server in the container answers; the image uses it as its health check.
+- The image checks its health with `python -m openfesl.server.health`, which loads only the standard library so
+  it answers within its timeout on small machines such as a Raspberry Pi.
 
 ## Administration
 
