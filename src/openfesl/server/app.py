@@ -17,6 +17,7 @@ from openfesl.core.logins import Logins
 from openfesl.core.personas import PersonaService
 from openfesl.core.registration import Terms
 from openfesl.core.session import GameSession, Players
+from openfesl.core.stats import StatsService
 from openfesl.core.telemetry import telemetry_routes
 from openfesl.core.texts import load_texts
 from openfesl.relay.endpoint import relay_endpoint
@@ -25,6 +26,7 @@ from openfesl.storage.accounts import SqlAccountStore
 from openfesl.storage.database import migrate
 from openfesl.storage.entitlements import SqlEntitlementStore
 from openfesl.storage.personas import SqlPersonaStore
+from openfesl.storage.stats import SqlStatStore
 from openfesl.web.game_http import GameHttpMiddleware
 
 
@@ -56,7 +58,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         store = SqlAccountStore(sessions)
         logins = Logins(store)
         accounts = AccountService(store, logins, entitlements, Terms.load())
-        personas = PersonaService(SqlPersonaStore(sessions))
+        persona_store = SqlPersonaStore(sessions)
+        personas = PersonaService(persona_store)
         await personas.prepare(await accounts.prepare(games))
         routes.update(connect_routes(games))
         routes.update(telemetry_routes())
@@ -65,6 +68,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         routes.update(personas.routes())
         routes.update(EntitlementService(entitlements).routes())
         routes.update(game_http.routes())
+        routes.update(StatsService(SqlStatStore(sessions), persona_store).routes())
         yield
         await engine.dispose()
 

@@ -1,12 +1,14 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlalchemy import (
     BigInteger,
     DateTime,
+    Double,
     ForeignKey,
     Identity,
     Index,
     LargeBinary,
+    SmallInteger,
     UniqueConstraint,
     func,
 )
@@ -94,3 +96,28 @@ class ProductKeyGrantRow(Base):
     tag: Mapped[str] = mapped_column(primary_key=True)
     group_name: Mapped[str | None]
     product_id: Mapped[str | None]
+
+
+class StatRow(Base):
+    __tablename__ = "stat"
+
+    partition: Mapped[str] = mapped_column(primary_key=True)
+    owner_type: Mapped[int] = mapped_column(primary_key=True)
+    owner_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    period: Mapped[int] = mapped_column(SmallInteger, primary_key=True)
+    period_start: Mapped[date] = mapped_column(primary_key=True)
+    key: Mapped[str] = mapped_column(primary_key=True)
+    value: Mapped[float] = mapped_column(Double)
+    text: Mapped[str]
+
+
+# Leaderboards order everyone holding a key in a period by value.
+Index(
+    "stat_leaderboard",
+    StatRow.partition,
+    StatRow.owner_type,
+    StatRow.key,
+    StatRow.period,
+    StatRow.period_start,
+    StatRow.value,
+)

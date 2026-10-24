@@ -3,7 +3,7 @@ from datetime import UTC, date, datetime
 from datetime import time as datetime_time
 from typing import Annotated, Any, Self
 
-from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict
+from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
 from openfesl.protocol.fields import Fields, format_fields, parse_fields
@@ -46,6 +46,9 @@ FeslDate = Annotated[date, BeforeValidator(_parse_date)]
 # Text that is kept or compared, so it must be UTF-8 without NUL; other bytes fail validation.
 Text = Annotated[str, AfterValidator(_storable)]
 FeslDateTime = Annotated[datetime, BeforeValidator(_parse_date_time)]
+# The SDK reads and writes its numbers as 32-bit integers and its ids as 64-bit ones.
+Int32 = Annotated[int, Field(ge=-(2**31), lt=2**31)]
+Int64 = Annotated[int, Field(ge=-(2**63), lt=2**63)]
 
 
 class Message(BaseModel):
