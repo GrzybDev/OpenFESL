@@ -66,6 +66,24 @@ class Http(BaseModel):
     files: dict[str, str] = {}
 
 
+class ListRule(BaseModel):
+    """How the server keeps one type of a game's association lists.
+
+    Attributes:
+        size: The most members one list holds.
+        mutual: Whether members are on each other's lists: a member gains the owner on its own
+            list once it agreed, and loses the owner whenever either removes the other.
+        kept_by_servers: Whether the game's dedicated servers keep the lists for their
+            players, who may only read their own.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    size: int
+    mutual: bool = False
+    kept_by_servers: bool = False
+
+
 class Game(BaseModel):
     """A game the server serves, as its data file describes it.
 
@@ -77,6 +95,7 @@ class Game(BaseModel):
         keys: The product keys the database starts with; the admin manages them from there.
         http: What the game fetches over HTTP.
         records: The records a persona may keep, by name, with the most entries each holds.
+        associations: The association list types the game keeps, by name.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -88,6 +107,7 @@ class Game(BaseModel):
     keys: list[ProductKey] = []
     http: Http = Http()
     records: dict[str, int] = {}
+    associations: dict[str, ListRule] = {}
 
     @field_validator("partition", mode="before")
     @classmethod

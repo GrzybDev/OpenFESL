@@ -82,10 +82,13 @@ class Game:
                 return text(frame.packet)
 
     async def push(self, txn: str) -> Answer:
-        """Return the first push of a transaction, waiting for it when it has not arrived yet."""
-        while (found := self.pushed(txn)) is None:
+        """Take the first push of a transaction, waiting for it when it has not arrived yet."""
+        while True:
+            for frame in self.frames:
+                if isinstance(frame, Data) and (fields := text(frame.packet)).get("TXN") == txn:
+                    self.frames.remove(frame)
+                    return fields
             self.frames.append(await self.next_frame())
-        return found
 
     def pushed(self, txn: str) -> Answer | None:
         """Return the first push of a transaction among the frames that arrived so far."""

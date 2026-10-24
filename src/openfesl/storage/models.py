@@ -137,3 +137,21 @@ class RecordEntryRow(Base):
     modified_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+
+
+class AssociationRow(Base):
+    __tablename__ = "association"
+
+    owner_id: Mapped[int] = mapped_column(
+        ForeignKey("persona.id", ondelete="CASCADE"), primary_key=True
+    )
+    type: Mapped[str] = mapped_column(primary_key=True)
+    # `/domain/subDomain[/key]` as the game names the list, empty for lists without one.
+    partition: Mapped[str] = mapped_column(primary_key=True)
+    member_id: Mapped[int] = mapped_column(
+        ForeignKey("persona.id", ondelete="CASCADE"), primary_key=True, index=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    modified_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )

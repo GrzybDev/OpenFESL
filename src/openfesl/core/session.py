@@ -7,6 +7,7 @@ from openfesl.core.accounts import Account
 from openfesl.core.connection import Address, Connection, Outbox
 from openfesl.core.fesl import FeslConnection, Route
 from openfesl.core.personas import Persona
+from openfesl.protocol.message import Message
 from openfesl.protocol.packet import Packet
 from openfesl.protocol.relay import Channel, Open
 
@@ -16,11 +17,15 @@ LOGGED_IN_ELSEWHERE = 2
 
 
 class Players:
-    """The sessions that players are logged in on, so that an account plays in one place."""
+    """The sessions that players are logged in on, so that an account plays in one place.
+
+    The personas they play as are known too, so that what other players do reaches them.
+    """
 
     def __init__(self) -> None:
         """Start with nobody logged in."""
         self._sessions: dict[int, GameSession] = {}
+        self._personas: dict[int, GameSession] = {}
 
     def log_in(self, session: GameSession) -> None:
         """Register a player's login and send the account's earlier session away.
@@ -47,6 +52,33 @@ class Players:
         if session.account is not None and self._sessions.get(session.account.id) is session:
             del self._sessions[session.account.id]
 
+    def playing(self, persona_id: int) -> GameSession | None:
+        """Return the session a player's persona plays in, when it is online.
+
+        Args:
+            persona_id: The persona's number.
+        """
+        return self._personas.get(persona_id)
+
+    def play(self, session: GameSession) -> None:
+        """Register the persona that a player's session plays as.
+
+        Args:
+            session: A session whose persona just logged in.
+        """
+        assert session.persona is not None
+        self._personas[session.persona.id] = session
+
+    def leave(self, session: GameSession, persona: Persona) -> None:
+        """Forget that a session plays as a persona.
+
+        Args:
+            session: The session.
+            persona: The persona it played as.
+        """
+        if self._personas.get(persona.id) is session:
+            del self._personas[persona.id]
+
     def find_key(self, key: str) -> GameSession | None:
         """Return the player session whose persona a session key belongs to.
 
@@ -57,7 +89,7 @@ class Players:
         return next(
             (
                 session
-                for session in self._sessions.values()
+                for session in self._personas.values()
                 if session.persona_key and hmac.compare_digest(session.persona_key.encode(), wanted)
             ),
             None,
@@ -112,12 +144,11 @@ class GameSession:
             key: The session key handed to the game.
             connection: The FESL connection the login came on.
         """
+        self.forget_persona()
         if self.account is not None and self.account.id != account.id:
             self._players.log_out(self)
         self.account = account
         self.account_key = key
-        self.persona = None
-        self.persona_key = None
         self._fesl = connection
         if not account.server:
             self._players.log_in(self)
@@ -129,13 +160,21 @@ class GameSession:
             persona: The persona.
             key: The session key handed to the game for it.
         """
+        if self.persona != persona:
+            self.forget_persona()
         self.persona = persona
         self.persona_key = key
+        # Dedicated servers of a game share their persona, so no push could pick one of them.
+        if self.account is not None and not self.account.server:
+            self._players.play(self)
 
     def forget_persona(self) -> None:
         """Stop playing as the session's persona, as when it was disabled."""
+        persona = self.persona
         self.persona = None
         self.persona_key = None
+        if persona is not None:
+            self._players.leave(self, persona)
 
     def forget_login(self) -> None:
         """Drop the session's login, as when its account moved to another session."""
@@ -152,8 +191,20 @@ class GameSession:
         if self._fesl is not None:
             self._fesl.disconnect(reason)
 
+    def push(self, command: str, txn: str, message: Message) -> None:
+        """Send the game a transaction on the FESL connection it logged in on.
+
+        Args:
+            command: The service, such as asso.
+            txn: The transaction's name.
+            message: Its fields.
+        """
+        if self._fesl is not None:
+            self._fesl.push(command, txn, message)
+
     async def end(self) -> None:
         """Forget the session after all of its connections have closed."""
+        self.forget_persona()
         self._players.log_out(self)
 
 

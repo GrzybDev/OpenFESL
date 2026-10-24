@@ -60,3 +60,13 @@ entitlements = [
 [records]
 dogtags = 1000
 clan = 16
+
+# The Plasma lists the game loads and the dedicated servers' list of players whose dogtags a
+# player took, which the servers fill up to 100 for the unique dogtag awards. A player's game
+# keeps its own dogtags with their details in the record above.
+[associations]
+PlasmaFriends = { size = 20, mutual = true }
+PlasmaBlock = { size = 20 }
+PlasmaMute = { size = 20 }
+PlasmaRecentPlayers = { size = 100 }
+dogtags = { size = 100, kept_by_servers = true }

@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from openfesl.core.account_settings import AccountSettingsService
 from openfesl.core.accounts import AccountService
+from openfesl.core.associations import AssociationService
 from openfesl.core.connect import connect_routes
 from openfesl.core.entitlements import EntitlementService
 from openfesl.core.fesl import Route
@@ -25,6 +26,7 @@ from openfesl.core.texts import load_texts
 from openfesl.relay.endpoint import relay_endpoint
 from openfesl.server.settings import Settings
 from openfesl.storage.accounts import SqlAccountStore
+from openfesl.storage.associations import SqlAssociationStore
 from openfesl.storage.database import migrate
 from openfesl.storage.entitlements import SqlEntitlementStore
 from openfesl.storage.personas import SqlPersonaStore
@@ -75,6 +77,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         routes.update(StatsService(stats, persona_store).routes())
         routes.update(LeaderboardService(stats).routes())
         routes.update(RecordService(SqlRecordStore(sessions)).routes())
+        routes.update(
+            AssociationService(SqlAssociationStore(sessions), persona_store, players).routes()
+        )
         yield
         await engine.dispose()
 
