@@ -10,13 +10,16 @@ license-files = [
     "LICENSE.md",
 ]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "pydantic>=2.14.1",
+]
 
 [project.scripts]
 openfesl = "openfesl.server.cli:main"
 
 [dependency-groups]
 dev = [
+    "hypothesis>=6.170.9",
     "import-linter>=2.15",
     "mypy>=2.4.0",
     "pytest>=9.1.1",
@@ -49,6 +52,12 @@ addopts = ["-ra", "--strict-markers", "--import-mode=importlib"]
 [tool.mypy]
 files = ["src", "tests"]
 strict = true
+plugins = ["pydantic.mypy"]
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
 
 [tool.importlinter]
 root_package = "openfesl"
