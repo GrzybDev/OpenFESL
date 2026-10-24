@@ -1,0 +1,64 @@
+[project]
+name = "openfesl"
+version = "0.1.0"
+description = "Master server for games built on EA's FESL and Theater services, reached through OpenFESLHook"
+authors = [
+    {name = "Marek Grzyb", email = "marek@grzyb.dev"}
+]
+license = "GPL-3.0-or-later"
+license-files = [
+    "LICENSE.md",
+]
+requires-python = ">=3.14"
+dependencies = []
+
+[project.scripts]
+openfesl = "openfesl.server.cli:main"
+
+[dependency-groups]
+dev = [
+    "import-linter>=2.15",
+    "mypy>=2.4.0",
+    "pytest>=9.1.1",
+    "ruff>=0.17.2",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.5,<0.14"]
+build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "SIM", "PTH", "RUF", "D"]
+# Modules, packages, types and magic methods carry a summary only where their name needs one
+ignore = ["D100", "D101", "D104", "D105", "D106"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-markers", "--import-mode=importlib"]
+
+[tool.mypy]
+files = ["src"]
+strict = true
+
+[tool.importlinter]
+root_package = "openfesl"
+
+[[tool.importlinter.contracts]]
+name = "Each layer imports only the layers below it"
+type = "layers"
+layers = [
+    "openfesl.server",
+    "openfesl.relay | openfesl.web | openfesl.storage",
+    "openfesl.core",
+    "openfesl.protocol",
+]

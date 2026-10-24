@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    uses: GrzybDev/actions/.github/workflows/python-checks.yml@v1
+    with:
+      test-command: pytest
+      mypy: true
+
+  imports:
+    name: Check the layer imports
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # setup-uv publishes no floating major tags.
+      - uses: astral-sh/setup-uv@v10.3.0
+        with:
+          python-version: '3.14'
+
+      - run: uv run --locked lint-imports
