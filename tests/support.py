@@ -157,6 +157,13 @@ async def log_in_persona(game: Game, key: ConnectionKey, nuid: str, name: str) -
     return int(playing["userId"]), playing["lkey"]
 
 
+async def log_in_again(game: Game, key: ConnectionKey, nuid: str, name: str) -> None:
+    """Log a player that registered earlier in again as one of its personas."""
+    await game.hello(key, "bfbc2-pc")
+    await game.request(key, "acct", login(nuid, "secret-pass"))
+    await game.request(key, "acct", [("TXN", "NuLoginPersona"), ("name", name)])
+
+
 @asynccontextmanager
 async def game(server_url: str) -> AsyncIterator[Game]:
     async with connect(server_url, subprotocols=[Subprotocol(SUBPROTOCOL)]) as websocket:

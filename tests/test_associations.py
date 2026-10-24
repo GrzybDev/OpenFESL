@@ -3,9 +3,11 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from support import Game, game, log_in_persona, log_in_player, login
 
 from openfesl.core.associations import OwnedList
+from openfesl.core.messages import Draft
 from openfesl.protocol.fields import Fields
 from openfesl.protocol.relay import Channel, ConnectionKey
 from openfesl.storage.associations import SqlAssociationStore
+from openfesl.storage.messages import SqlMessageStore
 from openfesl.storage.personas import SqlPersonaStore
 
 pytestmark = pytest.mark.anyio
@@ -180,6 +182,33 @@ async def test_friends_are_on_each_others_lists_once_both_agree_and_leave_both_a
         assert gone["result.0.outcome"] == "0"
         assert await no_push(bob, "NotifyAssociationUpdate", bob_id)
 
+        # A friend invitation agrees in advance, so accepting it puts both on the lists.
+        invitation = [
+            ("TXN", "SendMessage"),
+            ("messageType", "invite/friend"),
+            ("to.[]", "1"),
+            ("to.0", str(bob_id)),
+            ("attachments.[]", "0"),
+            ("expires", "86400"),
+            ("deliveryType", "standard"),
+            ("purgeStrategy", "all"),
+        ]
+        await ann.request(FESL, "xmsg", invitation)
+        accepted = await bob.request(
+            FESL, "asso", change("AddAssociations", "PlasmaFriends", [(bob_id, ann_id)])
+        )
+        assert accepted["result.0.outcome"] == "0"
+        told = await ann.push("NotifyAssociationUpdate")
+        assert (told["owner.id"], told["member.id"], told["member.name"]) == (
+            str(ann_id),
+            str(bob_id),
+            "Bob",
+        )
+        assert (told["operation"], told["listSize"], told["mutual"]) == ("add", "1", "1")
+        assert (told["type"], told["domainPartition.domain"]) == ("PlasmaFriends", "eagames")
+        listed = await ann.request(FESL, "asso", get("GetAssociations", "PlasmaFriends", ann_id))
+        assert (listed["members.[]"], listed["members.0.id"]) == ("1", str(bob_id))
+
 
 async def test_dedicated_servers_keep_the_dogtags_players_take_and_no_other_lists(
     server_url: str,
@@ -296,4 +325,17 @@ async def test_a_full_list_refuses_a_member_or_rolls_off_the_least_recently_modi
     assert rolled is not None
     assert [change.member.id for change in rolled if change.removed] == [fourth]
     assert [member.id for member in await store.members(recent)] == [fifth, third]
+
+    # A member that invited the owner takes it on its own list, so the pair fails whole when
+    # that list is full.
+    sessions = async_sessionmaker(engine)
+    invitation = Draft(fourth, "invite/friend", "all", 60, [], [first])
+    await SqlMessageStore(sessions).send(invitation, 100)
+    await store.add(OwnedList(fourth, "PlasmaFriends", ""), fifth, 1, roll=False, mutual=False)
+    friends = OwnedList(first, "PlasmaFriends", "")
+    agreed = await store.add(
+        friends, fourth, 1, roll=False, mutual=True, invitations=["invite/friend"]
+    )
+    assert agreed is None
+    assert await store.count(friends) == 0
     await engine.dispose()

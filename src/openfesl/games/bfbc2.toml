@@ -65,7 +65,7 @@ clan = 16
 # player took, which the servers fill up to 100 for the unique dogtag awards. A player's game
 # keeps its own dogtags with their details in the record above.
 [associations]
-PlasmaFriends = { size = 20, mutual = true }
+PlasmaFriends = { size = 20, mutual = true, invitations = ["invite/friend"] }
 PlasmaBlock = { size = 20, blocks = true }
 PlasmaMute = { size = 20 }
 PlasmaRecentPlayers = { size = 100 }

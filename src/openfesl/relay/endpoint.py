@@ -105,6 +105,10 @@ class _Outbox:
     def close(self) -> None:
         self._link.close_connection(self._key)
 
+    @property
+    def busy(self) -> bool:
+        return self._link.busy
+
 
 class _Link:
     """One OpenFESLHook WebSocket, its game connections and the frames waiting to go out."""
@@ -146,6 +150,11 @@ class _Link:
             _links.discard(self)
             self.ended.set()
             logger.info("Session %d: ended", self.number)
+
+    @property
+    def busy(self) -> bool:
+        """Whether at least half of the queue waits for the hook."""
+        return self._outgoing.qsize() >= self._outgoing.maxsize // 2
 
     def send(self, frame: Data | Close) -> None:
         """Queue a frame for the hook, or end the session when the hook falls too far behind.

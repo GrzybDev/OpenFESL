@@ -4,7 +4,7 @@ from typing import Any
 from openfesl.core.associations import AssociationStore, blocking
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.personas import NOT_LOGGED_IN, UNKNOWN_PERSONA, Persona, PersonaStore
-from openfesl.core.session import GameSession, Players
+from openfesl.core.session import GameSession, Players, playing_player
 from openfesl.protocol.message import Message
 from openfesl.protocol.pres import (
     AsyncPresenceStatusEvent,
@@ -68,7 +68,7 @@ class PresenceService:
             TransactionError: When nobody plays, a dedicated server asks or the request names
                 too many personas.
         """
-        session, player = _player(connection)
+        session, player = playing_player(connection)
         if len(request.requests) > MAXIMUM_REQUESTS:
             raise TransactionError(PARAMETERS_ERROR)
         found = [await self._personas.find_by_id(wanted.user_id) for wanted in request.requests]
@@ -108,7 +108,7 @@ class PresenceService:
         Raises:
             TransactionError: When nobody plays, or a dedicated server asks.
         """
-        session, _ = _player(connection)
+        session, _ = playing_player(connection)
         for wanted in request.requests:
             self._unsubscribe(session, wanted.user_id)
         return PresenceAnswer(
@@ -128,7 +128,7 @@ class PresenceService:
         Raises:
             TransactionError: When nobody plays, or a dedicated server asks.
         """
-        _, player = _player(connection)
+        _, player = playing_player(connection)
         if request.status.show == OFFLINE.show:
             self._statuses.pop(player.id, None)
         else:
@@ -154,16 +154,6 @@ class PresenceService:
         event = _event(persona, status, initial=False)
         for subscriber in self._subscribers.get(persona.id, set()):
             subscriber.push("pres", "AsyncPresenceStatusEvent", event)
-
-
-def _player(connection: FeslConnection) -> tuple[GameSession, Persona]:
-    session = connection.session
-    if session.account is None or session.persona is None:
-        raise TransactionError(NOT_LOGGED_IN)
-    # Dedicated servers of a game share one persona, so a status of theirs would be no one's.
-    if session.account.server:
-        raise TransactionError(PARAMETERS_ERROR)
-    return session, session.persona
 
 
 def _user(persona: Persona) -> PresenceUser:

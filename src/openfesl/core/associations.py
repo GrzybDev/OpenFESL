@@ -104,7 +104,14 @@ class AssociationStore(Protocol):
         """
 
     async def add(
-        self, owned: OwnedList, member_id: int, limit: int, *, roll: bool, mutual: bool
+        self,
+        owned: OwnedList,
+        member_id: int,
+        limit: int,
+        *,
+        roll: bool,
+        mutual: bool,
+        invitations: Collection[str] = (),
     ) -> list[Change] | None:
         """Add a member to a list, or mark it modified when it is a member already.
 
@@ -115,7 +122,8 @@ class AssociationStore(Protocol):
             roll: Whether the owner's full list drops its least recently modified member to
                 make room.
             mutual: Whether the member's own list of the type gains the owner too, once the
-                member agreed by listing the owner itself.
+                member agreed by listing the owner itself or sending it an invitation.
+            invitations: The message types that invite the owner.
 
         Returns:
             The owner's change, then the member's when its list changed, then the member that
@@ -255,6 +263,7 @@ class AssociationService:
                 # A mutual list never drops a member, who would keep the owner on its own.
                 roll=request.list_full_behavior == ROLL and not rule.mutual,
                 mutual=rule.mutual,
+                invitations=rule.invitations,
             )
             if changes is None:
                 outcomes.append(_refusal(item, LIST_FULL, rule))

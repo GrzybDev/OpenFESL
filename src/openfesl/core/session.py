@@ -5,7 +5,7 @@ from typing import Any
 
 from openfesl.core.accounts import Account
 from openfesl.core.connection import Address, Connection, Outbox
-from openfesl.core.fesl import FeslConnection, Route, TransactionError
+from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.personas import NOT_LOGGED_IN, Persona
 from openfesl.protocol.message import Message
 from openfesl.protocol.packet import Packet
@@ -223,10 +223,33 @@ class GameSession:
         if self._fesl is not None:
             self._fesl.push(command, txn, message)
 
+    @property
+    def busy(self) -> bool:
+        """Whether the game falls behind with what it is sent, so that what can wait should."""
+        return self._fesl is not None and self._fesl.busy
+
     async def end(self) -> None:
         """Forget the session after all of its connections have closed."""
         self.forget_persona()
         self._players.log_out(self)
+
+
+def playing_player(connection: FeslConnection) -> tuple[GameSession, Persona]:
+    """Return the session and persona of the player that plays on a connection.
+
+    Args:
+        connection: The FESL connection a request came on.
+
+    Raises:
+        TransactionError: When nobody plays, or a dedicated server asks, since the servers of a
+            game share one persona that is nobody's.
+    """
+    session = connection.session
+    if session.account is None or session.persona is None:
+        raise TransactionError(NOT_LOGGED_IN)
+    if session.account.server:
+        raise TransactionError(PARAMETERS_ERROR)
+    return session, session.persona
 
 
 class _Refused:

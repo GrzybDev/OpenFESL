@@ -20,6 +20,10 @@ class Outbox(Protocol):
     def close(self) -> None:
         """Close the game connection once the packets queued before have gone out."""
 
+    @property
+    def busy(self) -> bool:
+        """Whether half of the session's queue waits for the game, so that what can wait should."""
+
 
 class Connection(Protocol):
     """The core's side of one game connection."""

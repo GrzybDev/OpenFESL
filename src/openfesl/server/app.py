@@ -16,6 +16,7 @@ from openfesl.core.game_http import GameHttp
 from openfesl.core.games import load_games
 from openfesl.core.leaderboards import LeaderboardService
 from openfesl.core.logins import Logins
+from openfesl.core.messages import MessageService
 from openfesl.core.personas import PersonaService
 from openfesl.core.presence import PresenceService
 from openfesl.core.records import RecordService
@@ -30,6 +31,7 @@ from openfesl.storage.accounts import SqlAccountStore
 from openfesl.storage.associations import SqlAssociationStore
 from openfesl.storage.database import migrate
 from openfesl.storage.entitlements import SqlEntitlementStore
+from openfesl.storage.messages import SqlMessageStore
 from openfesl.storage.personas import SqlPersonaStore
 from openfesl.storage.records import SqlRecordStore
 from openfesl.storage.stats import SqlStatStore
@@ -81,7 +83,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         associations = SqlAssociationStore(sessions)
         routes.update(AssociationService(associations, persona_store, players).routes())
         routes.update(PresenceService(persona_store, players, associations).routes())
+        messages = MessageService(SqlMessageStore(sessions), persona_store, players, associations)
+        routes.update(messages.routes())
         yield
+        await messages.close()
         await engine.dispose()
 
     def start_session(websocket: WebSocket) -> GameSession:

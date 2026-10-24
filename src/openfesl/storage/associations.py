@@ -5,7 +5,7 @@ from sqlalchemy import ColumnElement, delete, exists, func, insert, select, upda
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.associations import Change, Member, OwnedList
-from openfesl.storage.models import AssociationRow, PersonaRow
+from openfesl.storage.models import AssociationRow, MessageRecipientRow, MessageRow, PersonaRow
 
 _STAMPS = (AssociationRow.created_at, AssociationRow.modified_at)
 
@@ -46,7 +46,14 @@ class SqlAssociationStore:
             return await _size(session, owned)
 
     async def add(
-        self, owned: OwnedList, member_id: int, limit: int, *, roll: bool, mutual: bool
+        self,
+        owned: OwnedList,
+        member_id: int,
+        limit: int,
+        *,
+        roll: bool,
+        mutual: bool,
+        invitations: Collection[str] = (),
     ) -> list[Change] | None:
         """Add a member to a list, or mark it modified when it is a member already.
 
@@ -57,7 +64,8 @@ class SqlAssociationStore:
             roll: Whether the owner's full list drops its least recently modified member to
                 make room.
             mutual: Whether the member's own list of the type gains the owner too, once the
-                member agreed by listing the owner itself.
+                member agreed by listing the owner itself or sending it an invitation.
+            invitations: The message types that invite the owner.
 
         Returns:
             The owner's change, then the member's when its list changed, then the member that
@@ -71,7 +79,7 @@ class SqlAssociationStore:
                 )
                 changes = [added]
                 theirs = replace(owned, owner_id=member_id)
-                if mutual and await _agreed(session, theirs, owned.owner_id):
+                if mutual and await _agreed(session, theirs, owned.owner_id, invitations):
                     owner_name = names[owned.owner_id]
                     changes.append(
                         (await _add(session, theirs, owned.owner_id, owner_name, limit))[0]
@@ -137,19 +145,29 @@ class _Full(Exception):
 
 async def _lock(session: AsyncSession, *persona_ids: int) -> dict[int, str]:
     # Changes to the same personas' lists wait for each other, locked in id order so that two
-    # mutual changes never wait on each other.
+    # mutual changes never wait on each other. The lock leaves the persona's key alone, so rows
+    # that refer to the persona, such as a message it sends meanwhile, wait for nothing.
     rows = await session.execute(
         select(PersonaRow.id, PersonaRow.name)
         .where(PersonaRow.id.in_(persona_ids))
         .order_by(PersonaRow.id)
-        .with_for_update()
+        .with_for_update(key_share=True)
     )
     return {persona_id: name for persona_id, name in rows}
 
 
-async def _agreed(session: AsyncSession, theirs: OwnedList, owner_id: int) -> bool:
+async def _agreed(
+    session: AsyncSession, theirs: OwnedList, owner_id: int, invitations: Collection[str]
+) -> bool:
     listed = exists().where(*_of(theirs), AssociationRow.member_id == owner_id)
-    return bool(await session.scalar(select(listed)))
+    invited = exists().where(
+        MessageRow.sender_id == theirs.owner_id,
+        MessageRow.type.in_(invitations),
+        MessageRow.expires_at > func.now(),
+        MessageRecipientRow.message_id == MessageRow.id,
+        MessageRecipientRow.persona_id == owner_id,
+    )
+    return bool(await session.scalar(select(listed | invited)))
 
 
 async def _add(

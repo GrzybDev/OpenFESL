@@ -77,7 +77,19 @@ class Message(BaseModel):
         Raises:
             pydantic.ValidationError: When required fields are missing or do not fit their type.
         """
-        return cls.model_validate(_tree(parse_fields(body)))
+        return cls.from_fields(parse_fields(body))
+
+    @classmethod
+    def from_fields(cls, fields: Fields) -> Self:
+        """Read a message from fields already split, as when a sender's counts need fixing first.
+
+        Args:
+            fields: The fields in the order they arrived.
+
+        Raises:
+            pydantic.ValidationError: When required fields are missing or do not fit their type.
+        """
+        return cls.model_validate(_tree(fields))
 
     def fields(self) -> Fields:
         """Return the message as flat key=value fields, leaving out fields set to None."""

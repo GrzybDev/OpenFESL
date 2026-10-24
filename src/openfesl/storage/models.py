@@ -12,6 +12,7 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -155,3 +156,31 @@ class AssociationRow(Base):
     modified_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+
+
+class MessageRow(Base):
+    __tablename__ = "message"
+
+    # The SDK reads message numbers as 32-bit integers.
+    id: Mapped[int] = mapped_column(Identity(), primary_key=True)
+    sender_id: Mapped[int] = mapped_column(ForeignKey("persona.id", ondelete="CASCADE"), index=True)
+    type: Mapped[str]
+    purge: Mapped[str]
+    attachments: Mapped[list[dict[str, str]]] = mapped_column(JSONB)
+    sent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    # The sender's copy, which its outbox lists.
+    outbox: Mapped[bool] = mapped_column(default=True)
+
+
+class MessageRecipientRow(Base):
+    __tablename__ = "message_recipient"
+
+    message_id: Mapped[int] = mapped_column(
+        ForeignKey("message.id", ondelete="CASCADE"), primary_key=True
+    )
+    persona_id: Mapped[int] = mapped_column(
+        ForeignKey("persona.id", ondelete="CASCADE"), primary_key=True, index=True
+    )
+    # The recipient's copy; the row outlives it, since the message still names the recipient.
+    inbox: Mapped[bool] = mapped_column(default=True)

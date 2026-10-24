@@ -164,6 +164,11 @@ class FeslConnection:
         """
         self._send(command, 0, txn, message.fields())
 
+    @property
+    def busy(self) -> bool:
+        """Whether the game falls behind with what it is sent, so that what can wait should."""
+        return self._outbox.busy
+
     def on_close(self, closer: Callable[[], object]) -> None:
         """Run a function when the connection closes, such as stopping its timers.
 

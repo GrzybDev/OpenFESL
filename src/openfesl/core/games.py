@@ -77,6 +77,8 @@ class ListRule(BaseModel):
             players, who may only read their own.
         blocks: Whether a list's members are kept away from its owner, who stays hidden
             from them.
+        invitations: The message types with which a player asks another onto a mutual list;
+            sending one agrees to the other's add.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -85,6 +87,7 @@ class ListRule(BaseModel):
     mutual: bool = False
     kept_by_servers: bool = False
     blocks: bool = False
+    invitations: tuple[str, ...] = ()
 
 
 class Game(BaseModel):
