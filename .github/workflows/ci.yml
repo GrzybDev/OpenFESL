@@ -27,3 +27,24 @@ jobs:
           python-version: '3.14'
 
       - run: uv run --locked lint-imports
+
+  # Dokploy builds the deployed image from this Dockerfile on the server.
+  image:
+    name: Build the image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - run: docker build --tag openfesl .
+
+      - name: Check that the server starts and answers its health check
+        run: |
+          docker run --detach --name openfesl openfesl
+          for _ in $(seq 1 20); do
+            if docker exec openfesl openfesl health; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs openfesl
+          exit 1
