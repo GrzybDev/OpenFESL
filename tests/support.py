@@ -278,6 +278,35 @@ async def enter_as_player(player: Game, nuid: str, name: str) -> None:
     await enter_theater(player, THEATER, "bfbc2-pc", lkey)
 
 
+# What a player's game sends about itself: its external port and its LAN address.
+JOIN = [("PORT", "50111"), ("R-INT-IP", "192.168.1.20"), ("R-INT-PORT", "3659"), ("PTYPE", "P")]
+
+
+def holds(fields: Answer, expected: Answer) -> bool:
+    return fields.items() >= expected.items()
+
+
+def ids(created: Answer) -> list[tuple[str, str]]:
+    """Return the LID and GID fields that name a game the host listed."""
+    return [("LID", created["LID"]), ("GID", created["GID"])]
+
+
+async def asked_about(server: Game) -> str:
+    """Wait for the host to be asked about a player and return the player's PID."""
+    return (await server.theater_push(THEATER, "EGRQ")).fields["PID"]
+
+
+async def let_in(server: Game, player: Game, created: Answer) -> str:
+    """Join a player to a game that has room, the host allowing it, and report it entered."""
+    assert (await player.theater(THEATER, "EGAM", [*ids(created), *JOIN])).error is None
+    pid = await asked_about(server)
+    allowed = [*ids(created), ("ALLOWED", "1"), ("PID", pid)]
+    assert (await server.theater(THEATER, "EGRS", allowed)).error is None
+    assert (await player.theater_push(THEATER, "EGEG")).error is None
+    assert (await server.theater(THEATER, "PENT", [*ids(created), ("PID", pid)])).error is None
+    return pid
+
+
 @asynccontextmanager
 async def game(server_url: str, headers: Mapping[str, str] | None = None) -> AsyncIterator[Game]:
     async with connect(

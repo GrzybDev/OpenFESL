@@ -127,8 +127,9 @@ class TheaterConnection:
         self.persona: Persona | None = None
         # Whether the persona is the one that every dedicated server of the game shares.
         self.server = False
-        # The platform CONN named, which the games of joining players read as their host's.
+        # The platform and version CONN named, which other players' games read as their host's.
         self.platform = ""
+        self.version = ""
         self._outbox = outbox
         self._routes = routes
         self._heard = time.monotonic()
@@ -174,7 +175,7 @@ class TheaterConnection:
         tid: int | None = None,
         error: str | None = None,
     ) -> None:
-        """Send the game an answer, a row that follows one, or a push.
+        """Send the game an answer or a push.
 
         Args:
             command: The packet's command.
@@ -182,12 +183,21 @@ class TheaterConnection:
             tid: The TID of the request it belongs to; none for a push.
             error: The error code that fails the request.
         """
-        fields = message.fields() if message else []
-        if tid is not None:
-            fields.append(("TID", str(tid)))
-        logger.debug("-> %s %s %s", command, error or "", describe(fields))
-        if packet := _packet(command, fields, error):
+        if packet := self._encode(command, message, tid, error):
             self._outbox.send(packet)
+
+    async def send_row(self, command: str, message: TheaterMessage, tid: int) -> None:
+        """Send one of the rows that follow an answer, as soon as the session's queue has room.
+
+        A long list then waits for the game instead of crowding out every other packet.
+
+        Args:
+            command: The row's command, such as GDAT.
+            message: Its fields.
+            tid: The TID of the request it follows.
+        """
+        if packet := self._encode(command, message, tid):
+            await self._outbox.send_paced(packet)
 
     def close_connection(self) -> None:
         """Close the connection once the packets queued before have gone out."""
@@ -205,6 +215,19 @@ class TheaterConnection:
         """Stop everything the connection started."""
         for closer in self._closers:
             closer()
+
+    def _encode(
+        self,
+        command: str,
+        message: TheaterMessage | None,
+        tid: int | None,
+        error: str | None = None,
+    ) -> Packet | None:
+        fields = message.fields() if message else []
+        if tid is not None:
+            fields.append(("TID", str(tid)))
+        logger.debug("-> %s %s %s", command, error or "", describe(fields))
+        return _packet(command, fields, error)
 
     async def _keep_alive(self) -> None:
         while True:
@@ -276,6 +299,7 @@ def theater_routes() -> dict[str, TheaterRoute[Any]]:
     async def connect(connection: TheaterConnection, request: Connect, tid: int) -> None:
         logger.info("Theater CONN from %s %s (%s)", request.prod, request.vers, request.plat)
         connection.platform = request.plat
+        connection.version = request.vers
         answer = ConnectAnswer(
             time=int(time.time()), activity_timeout_secs=ACTIVITY_TIMEOUT, prot=request.prot
         )

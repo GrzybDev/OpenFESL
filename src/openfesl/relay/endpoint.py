@@ -102,6 +102,9 @@ class _Outbox:
     def send(self, packet: Packet) -> None:
         self._link.send(Data(self._key, packet))
 
+    async def send_paced(self, packet: Packet) -> None:
+        await self._link.send_paced(Data(self._key, packet))
+
     def close(self) -> None:
         self._link.close_connection(self._key)
 
@@ -120,6 +123,7 @@ class _Link:
         self._websocket = websocket
         self._session = session
         self._outgoing: asyncio.Queue[Data | Close] = asyncio.Queue(SEND_LIMIT)
+        self._dequeued = asyncio.Event()
         self._failure: tuple[int, str] | None = None
         self._failed = asyncio.Event()
         self.ended = asyncio.Event()
@@ -166,6 +170,19 @@ class _Link:
             self._outgoing.put_nowait(frame)
         except asyncio.QueueFull:
             self._fail(_POLICY_VIOLATION, f"{SEND_LIMIT} frames are waiting for the hook")
+
+    async def send_paced(self, frame: Data) -> None:
+        """Queue a frame of a long burst, such as a game list, once at most half of the queue waits.
+
+        The other half stays free for every other frame, which never waits.
+
+        Args:
+            frame: A packet for a game connection.
+        """
+        while self.busy:
+            self._dequeued.clear()
+            await self._dequeued.wait()
+        self.send(frame)
 
     def end(self, code: int, reason: str) -> None:
         """Close the WebSocket with a code, ending the session.
@@ -240,6 +257,7 @@ class _Link:
     async def _write(self) -> None:
         while True:
             frame = await self._outgoing.get()
+            self._dequeued.set()
             await self._websocket.send_bytes(encode_frame(frame))
 
     def _fail(self, code: int, reason: str) -> None:

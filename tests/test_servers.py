@@ -60,6 +60,14 @@ def masked(provider_id: bytes, mask: bytes) -> str:
     return data.hex().upper()
 
 
+async def providers_shown(looker: Game, created: TheaterAnswer) -> list[str]:
+    """Return the provider attributes that a lookup of a listed game shows."""
+    ids = [("LID", created.fields["LID"]), ("GID", created.fields["GID"])]
+    looked_up = await looker.theater(THEATER, "GDAT", ids)
+    assert looked_up.error is None
+    return [value for key, value in looked_up.fields.items() if key.casefold() == "b-u-provider"]
+
+
 async def games_seen(player: Game) -> int:
     await player.theater(THEATER, "LLST", [("FILTER-FAV-ONLY", "0")])
     return int((await player.theater_push(THEATER, "LDAT")).fields["NUM-GAMES"])
@@ -131,12 +139,16 @@ async def test_players_see_a_new_server_once_approved_and_lose_it_when_revoked(
         assert created.error is None
         ugid, secret = created.fields["UGID"], created.fields["SECRET"]
         assert await games_seen(ann) == 0
+        listed = await ann.theater(THEATER, "GLST", [("LID", "1"), ("TYPE", "G")])
+        assert (listed.fields["NUM-GAMES"], listed.fields["LOBBY-NUM-GAMES"]) == ("0", "0")
         ids = [("LID", created.fields["LID"]), ("GID", created.fields["GID"])]
+        assert (await ann.theater(THEATER, "GDAT", ids)).error == "ngam"
         join = [*ids, ("PORT", "50111")]
         assert (await ann.theater(THEATER, "EGAM", join)).error == "ngam"
 
         await cli(capsys, "servers", "approve", ugid)
         await until_seen(ann, 1)
+        assert (await ann.theater(THEATER, "GDAT", ids)).fields["N"] == "Invented Server #1"
         assert (await ann.theater(THEATER, "EGAM", join)).error is None
         await cli(capsys, "servers", "revoke", ugid)
         removed = await ann.theater_push(THEATER, "GREM")
@@ -177,6 +189,11 @@ async def test_servers_report_the_provider_whose_file_they_hold(
         # Anything but a masked id is no report at all.
         await report(server, created, ("b-u-PROVIDER", "forged"))
         assert await cli(capsys, "servers", "list") == listed
+        # Game lists show the provider's name, which no host can claim for its game.
+        await cli(capsys, "servers", "approve", ugid)
+        await until_seen(server, 1)
+        await report(server, created, ("B-U-Provider", "forged"))
+        assert await providers_shown(server, created) == ["Invented Hosting"]
 
         # Revoking the provider revokes its servers, also those that report it later.
         await cli(capsys, "providers", "revoke", added)
@@ -209,6 +226,8 @@ async def test_open_hosting_lists_every_server_at_once_and_still_records_it(
         ugid = created.fields["UGID"]
         recorded = f"{ugid}  pending  {unknown.hex().upper()}  Invented Server #1\n"
         assert await cli(capsys, "servers", "list") == recorded
+        await report(server, created, ("B-U-PROVIDER", "forged"))
+        assert await providers_shown(ann, created) == []
 
         # Closing hosting again hides the servers that wait for approval.
         assert await cli(capsys, "hosting", "approved") == "approved\n"

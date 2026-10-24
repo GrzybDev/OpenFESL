@@ -1,5 +1,5 @@
 OpenFESL is an unofficial, community-run replacement for the discontinued online services of this game. It is not affiliated with or endorsed by Electronic Arts.
 
-The service stores the data its online features need: the account name, a hash of the password, the country, the accepted version of these terms and what the game saves through the service, such as profiles and statistics. While a game is created or joined, the public IP address is shared with the other players of that game.
+The service stores the data its online features need: the account name, a hash of the password, the country, the accepted version of these terms and what the game saves through the service, such as profiles and statistics. The public IP address of the computer that hosts a game is shown in game lists, and the public IP address of a computer that joins a game is passed to the computer that hosts it.
 
 The service is provided as is, without warranty, and may change or end at any time. Accounts used for cheating or abuse may be suspended. Account deletion can be requested from the operator of this server.

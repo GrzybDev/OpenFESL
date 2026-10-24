@@ -24,11 +24,8 @@ from openfesl.protocol.theater import (
     CreateGame,
     CreateGameAnswer,
     GameRequest,
-    LobbyData,
-    LobbyListAnswer,
     PlayerRequest,
     RemoveGame,
-    TheaterMessage,
     UpdateGame,
     UpdateGameDetails,
     UpdatePlayer,
@@ -180,6 +177,18 @@ class HostedGame:
         """Return its players and those waiting in its queue."""
         return [*self.players.values(), *self.queue]
 
+    def in_game(self) -> list[Player]:
+        """Return the participants its host reported in the game, which game lists show."""
+        return [
+            player
+            for player in self.players.values()
+            if player.participant and player.state is PlayerState.ENTERED
+        ]
+
+    def taken(self) -> int:
+        """Return how many participants join or are in the game."""
+        return sum(player.participant for player in self.players.values())
+
     def has_room(self, player: Player) -> bool:
         """Return whether a player fits besides the participants joining or in the game.
 
@@ -188,8 +197,7 @@ class HostedGame:
         Args:
             player: The player that wants a place.
         """
-        taken = sum(other.participant for other in self.players.values())
-        return not player.participant or taken < self.max_players
+        return not player.participant or self.taken() < self.max_players
 
 
 class Hosting:
@@ -207,9 +215,8 @@ class Hosting:
         self._changed: list[Callable[[HostedGame], object]] = []
 
     def routes(self) -> dict[str, TheaterRoute[Any]]:
-        """Return the handlers of the commands that list lobbies and host games."""
+        """Return the handlers of the commands that host games."""
         return {
-            "LLST": TheaterRoute(TheaterMessage, self.list_lobbies),
             "CGAM": TheaterRoute(CreateGame, self.create),
             "UBRA": TheaterRoute(GameRequest, self.bracket),
             "UGAM": TheaterRoute(UpdateGame, self.update),
@@ -294,32 +301,6 @@ class Hosting:
         if hosted is None or hosted.host is not connection:
             raise TheaterError(NO_GAME)
         return hosted
-
-    async def list_lobbies(
-        self, connection: TheaterConnection, request: TheaterMessage, tid: int
-    ) -> None:
-        """Answer LLST with the game's lobbies, one LDAT row each after the answer.
-
-        Args:
-            connection: The connection the request came on.
-            request: The filters, which the server does not apply.
-            tid: The request's TID, which the rows carry too.
-        """
-        lobbies = connection.game.lobbies
-        connection.send("LLST", LobbyListAnswer(num_lobbies=len(lobbies)), tid)
-        for lobby in lobbies:
-            count = len(self.games(connection.game, lobby))
-            row = LobbyData(
-                lid=lobby.id,
-                passing=count,
-                name=lobby.name,
-                locale=lobby.locale,
-                max_games=lobby.max_games,
-                favorite_games=0,
-                favorite_players=0,
-                num_games=count,
-            )
-            connection.send("LDAT", row, tid)
 
     async def create(self, connection: TheaterConnection, request: CreateGame, tid: int) -> None:
         """List a host's game in a lobby, answering with the ids and keys the host keeps.
@@ -479,6 +460,15 @@ class Hosting:
             ):
                 self._remove(hosted)
         connection.send("RGAM", None, tid)
+
+    def count(self, game: Game, lobby: Lobby) -> int:
+        """Return how many games players see in a lobby; playgroups do not count.
+
+        Args:
+            game: The game the lobby belongs to.
+            lobby: The lobby.
+        """
+        return sum(hosted.type == GAME for hosted in self.games(game, lobby))
 
     async def admits(self, session: GameSession) -> bool:
         """Return whether a session hosts a game that players see as of now.

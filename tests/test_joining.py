@@ -1,35 +1,19 @@
 import pytest
-from support import THEATER, Answer, Game, enter_as_player, game, host_game
+from support import (
+    JOIN,
+    THEATER,
+    asked_about,
+    enter_as_player,
+    game,
+    holds,
+    host_game,
+    ids,
+    let_in,
+)
 
 from openfesl.core import joining
 
 pytestmark = pytest.mark.anyio
-
-# What a player's game sends about itself: its external port and its LAN address.
-JOIN = [("PORT", "50111"), ("R-INT-IP", "192.168.1.20"), ("R-INT-PORT", "3659"), ("PTYPE", "P")]
-
-
-def holds(fields: Answer, expected: Answer) -> bool:
-    return fields.items() >= expected.items()
-
-
-def ids(created: Answer) -> list[tuple[str, str]]:
-    return [("LID", created["LID"]), ("GID", created["GID"])]
-
-
-async def asked_about(server: Game) -> str:
-    return (await server.theater_push(THEATER, "EGRQ")).fields["PID"]
-
-
-async def let_in(server: Game, player: Game, created: Answer) -> str:
-    """Join a player to a game that has room, the host allowing it, and report it entered."""
-    assert (await player.theater(THEATER, "EGAM", [*ids(created), *JOIN])).error is None
-    pid = await asked_about(server)
-    allowed = [*ids(created), ("ALLOWED", "1"), ("PID", pid)]
-    assert (await server.theater(THEATER, "EGRS", allowed)).error is None
-    assert (await player.theater_push(THEATER, "EGEG")).error is None
-    assert (await server.theater(THEATER, "PENT", [*ids(created), ("PID", pid)])).error is None
-    return pid
 
 
 async def test_a_player_joins_a_dedicated_server_once_the_host_allows_it(

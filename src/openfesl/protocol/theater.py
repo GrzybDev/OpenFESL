@@ -166,6 +166,49 @@ class EchoAnswer(TheaterMessage):
     uid: int
 
 
+class GameRequest(TheaterMessage):
+    """A message about one game, named by its lobby and game ids, such as UBRA or GREM."""
+
+    lid: int
+    gid: int
+
+
+class PlayerRequest(GameRequest):
+    """A message about one player of a game, such as PENT, KICK or QLVT."""
+
+    pid: int
+
+
+class GameFilter(TheaterMessage):
+    """LLST: which games a player's lists count, and the favourites it marks.
+
+    `FILTER-ATTR-U-<key>` asks for games whose `B-U-<key>` holds that value. Favourites are
+    `;`-separated persona names and ids, and game names and UGIDs.
+    """
+
+    attribute_prefix = "FILTER-ATTR-"
+
+    filter_fav_only: bool = False
+    filter_not_full: bool = False
+    filter_not_private: bool = False
+    filter_not_closed: bool = False
+    filter_min_size: int = 0
+    fav_player: Text = ""
+    fav_game: Text = ""
+    fav_player_uid: str = ""
+    fav_game_uid: str = ""
+    attributes: dict[str, str] = Field(default_factory=dict)
+
+
+class GameList(GameFilter):
+    """GLST: the games of a lobby that pass the filters, from GID on and at most COUNT of them."""
+
+    lid: int
+    type: str | None = None
+    gid: int = 0
+    count: int = 0
+
+
 class LobbyListAnswer(TheaterMessage):
     """The answer to LLST: how many LDAT rows follow it."""
 
@@ -183,6 +226,87 @@ class LobbyData(TheaterMessage):
     favorite_games: int
     favorite_players: int
     num_games: int
+
+
+class GameListAnswer(TheaterMessage):
+    """The answer to GLST: how many GDAT rows follow it, and how full the lobby is."""
+
+    num_games: int
+    lid: int
+    lobby_max_games: int
+    lobby_num_games: int
+
+
+class GameData(TheaterMessage):
+    """GDAT: one game as lists show it, a row after GLST or the answer to a lookup.
+
+    AP counts the players in it, which a lookup's PDAT rows match.
+    """
+
+    attribute_prefix = "B-U-"
+
+    lid: int
+    gid: int
+    n: str
+    type: str
+    i: str
+    p: int
+    pw: bool
+    mp: int
+    ap: int
+    jp: int
+    qp: int
+    hn: str
+    hu: int
+    v: str
+    pl: str
+    j: str
+    f: bool
+    nf: int
+    max_observers: int = Field(alias="B-maxObservers")
+    num_observers: int = Field(alias="B-numObservers")
+    version: str = Field(alias="B-version")
+    attributes: dict[str, str] = Field(default_factory=dict)
+
+
+class PlayerCount(TheaterMessage):
+    """PCNT: how many players are in the games of a lobby, or of every lobby for LID -1."""
+
+    lid: int = -1
+
+
+class PlayerCountAnswer(TheaterMessage):
+    count: int
+    lid: int
+
+
+class GameLookup(TheaterMessage):
+    """GDAT: a player asks about one game, by its ids or by a player in it."""
+
+    lid: int | None = None
+    gid: int | None = None
+    user: Text | None = None
+    uid: int | None = None
+    type: str = "G"
+
+
+class GameDetails(GameRequest):
+    """GDET: a game's detailed attributes, after the answer to a lookup."""
+
+    attribute_prefix = "D-"
+
+    ugid: str
+    attributes: dict[str, str] = Field(default_factory=dict)
+
+
+class PlayerData(PlayerRequest):
+    """PDAT: one player in a game, after its GDET."""
+
+    attribute_prefix = "P-"
+
+    name: str
+    uid: int
+    attributes: dict[str, str] = Field(default_factory=dict)
 
 
 class CreateGame(TheaterMessage):
@@ -221,13 +345,6 @@ class CreateGameAnswer(TheaterMessage):
     join: str
 
 
-class GameRequest(TheaterMessage):
-    """A message about one game, named by its lobby and game ids, such as UBRA or GREM."""
-
-    lid: int
-    gid: int
-
-
 class UpdateGame(GameRequest):
     """UGAM: what changed in a hosted game, its basic attributes as deltas; never answered."""
 
@@ -247,12 +364,6 @@ class UpdateGameDetails(GameRequest):
     attribute_prefix = "D-"
 
     attributes: dict[str, str] = Field(default_factory=dict)
-
-
-class PlayerRequest(GameRequest):
-    """A message about one player of a game, such as PENT, KICK or QLVT."""
-
-    pid: int
 
 
 class UpdatePlayer(PlayerRequest):

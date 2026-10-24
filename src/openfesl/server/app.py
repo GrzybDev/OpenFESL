@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from openfesl.core.account_settings import AccountSettingsService
 from openfesl.core.accounts import AccountService
 from openfesl.core.associations import AssociationService
+from openfesl.core.browsing import Browsing
 from openfesl.core.connect import connect_routes
 from openfesl.core.entitlements import EntitlementService
 from openfesl.core.fesl import Route
@@ -96,6 +97,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         routes.update(messages.routes())
         commands.update(theater_routes())
         commands.update(hosting.routes())
+        commands.update(Browsing(hosting).routes())
         commands.update(Joining(hosting).routes())
         following = asyncio.create_task(hosting.follow_approvals())
         yield

@@ -17,6 +17,13 @@ class Outbox(Protocol):
             packet: The answer or push to send.
         """
 
+    async def send_paced(self, packet: Packet) -> None:
+        """Queue one packet of a long burst, first waiting while the session's queue is half full.
+
+        Args:
+            packet: The packet to send.
+        """
+
     def close(self) -> None:
         """Close the game connection once the packets queued before have gone out."""
 

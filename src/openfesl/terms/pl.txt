@@ -1,5 +1,5 @@
 OpenFESL to nieoficjalna usługa prowadzona przez społeczność, która zastępuje wyłączone usługi sieciowe tej gry. Nie jest powiązana z Electronic Arts ani przez nią wspierana.
 
-Usługa przechowuje dane potrzebne do działania funkcji sieciowych: nazwę konta, skrót hasła, kraj, zaakceptowaną wersję tych warunków oraz to, co gra zapisuje za jej pośrednictwem, na przykład profile i statystyki. Podczas tworzenia gry sieciowej lub dołączania do niej publiczny adres IP jest przekazywany pozostałym uczestnikom tej gry.
+Usługa przechowuje dane potrzebne do działania funkcji sieciowych: nazwę konta, skrót hasła, kraj, zaakceptowaną wersję tych warunków oraz to, co gra zapisuje za jej pośrednictwem, na przykład profile i statystyki. Publiczny adres IP komputera, na którym działa gra, jest widoczny na listach gier, a publiczny adres IP komputera dołączającego do gry jest przekazywany komputerowi, na którym ta gra działa.
 
 Usługa jest udostępniana w obecnej postaci, bez żadnych gwarancji, i może się zmienić lub zostać zakończona w dowolnym momencie. Konta używane do oszukiwania lub nadużyć mogą zostać zawieszone. Usunięcia konta można zażądać u operatora tego serwera.
