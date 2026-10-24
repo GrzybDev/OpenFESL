@@ -181,7 +181,7 @@ async def _providers(settings: Settings, args: argparse.Namespace) -> None:
                     # An operator may hold the file already, so none is ever replaced.
                     with args.out.open("xb") as file:
                         file.write(provider_file(provider.id))
-                except (ValueError, FileExistsError) as error:
+                except (ValueError, OSError) as error:
                     sys.exit(str(error))
                 await store.add_provider(provider)
                 print(provider.id.hex().upper())

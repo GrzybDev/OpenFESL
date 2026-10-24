@@ -30,6 +30,8 @@ RUN useradd --create-home --uid 1000 app
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
 
 USER app
+# Admin commands run in the container write files such as ProviderId.dat here.
+WORKDIR /home/app
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD ["openfesl", "health"]
