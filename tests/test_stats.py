@@ -3,7 +3,16 @@ from datetime import date, datetime, time, timedelta
 import anyio
 import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from support import CREATE_GAME, Game, enter_theater, game, host_game, log_in_player, log_in_server
+from support import (
+    CREATE_GAME,
+    Game,
+    enter_theater,
+    game,
+    host_game,
+    log_in_player,
+    log_in_server,
+    update_stats,
+)
 
 from openfesl.core.stats import GAME_WIDE, MAXIMUM_ENTRIES, Bucket, Owner, Value, period_start
 from openfesl.protocol.fields import Fields
@@ -16,8 +25,6 @@ pytestmark = pytest.mark.anyio
 
 FESL = ConnectionKey(Channel.FESL, 1)
 THEATER = ConnectionKey(Channel.THEATER, 1)
-
-type Update = tuple[int, str, str, str, str]
 
 
 async def play_as(player: Game, nuid: str, name: str) -> str:
@@ -46,25 +53,6 @@ def get_stats(
     # As the SDK writes it: the owner and its type only when the caller names an owner.
     owned = [("owner", owner), ("ownerType", owner_type)] if owner else []
     return [("TXN", "GetStats"), *owned, ("periodId", period), ("periodPast", past), *keys(*names)]
-
-
-def update_stats(*owners: tuple[str, str, list[Update]]) -> Fields:
-    # Each owner as owner id, owner type and updates; no id stands for the session's persona.
-    fields: Fields = [("TXN", "UpdateStats")]
-    for number, (owner, owner_type, updates) in enumerate(owners):
-        if owner:
-            fields += [(f"u.{number}.o", owner), (f"u.{number}.ot", owner_type)]
-        for index, (kind, key, value, text, periods) in enumerate(updates):
-            prefix = f"u.{number}.s.{index}."
-            fields += [
-                (prefix + "ut", str(kind)),
-                (prefix + "k", key),
-                (prefix + "v", value),
-                (prefix + "t", text),
-                (prefix + "pt", periods),
-            ]
-        fields.append((f"u.{number}.s.[]", str(len(updates))))
-    return [*fields, ("u.[]", str(len(owners)))]
 
 
 def values(answer: dict[str, str], prefix: str = "stats.") -> list[tuple[str, str]]:

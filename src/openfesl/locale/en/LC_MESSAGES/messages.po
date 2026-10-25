@@ -522,19 +522,19 @@ msgstr ""
 msgid "web.servers.found"
 msgstr "Servers found: %(count)s"
 
-msgid "web.servers.showing"
+msgid "web.pages.showing"
 msgstr "Showing %(first)s–%(last)s · page %(page)s of %(pages)s"
 
-msgid "web.servers.pages"
+msgid "web.pages"
 msgstr "Pages"
 
-msgid "web.servers.previous"
+msgid "web.pages.previous"
 msgstr "Previous"
 
-msgid "web.servers.next"
+msgid "web.pages.next"
 msgstr "Next"
 
-msgid "web.servers.page_number"
+msgid "web.pages.number"
 msgstr "Page %(page)s"
 
 msgid "web.server.title"
@@ -705,3 +705,321 @@ msgid "games.bfbc2.objective.squad-deathmatch"
 msgstr ""
 "Four squads fight each other; the first squad to reach the kill target wins "
 "the round."
+
+msgid "web.leaderboard.title"
+msgstr "Leaderboard"
+
+msgid "web.leaderboard.all_time"
+msgstr "All time"
+
+msgid "web.leaderboard.sort"
+msgstr "Sort by"
+
+msgid "web.leaderboard.stat.score"
+msgstr "Score"
+
+msgid "web.leaderboard.stat.kills"
+msgstr "Kills"
+
+msgid "web.leaderboard.stat.kd"
+msgstr "K/D"
+
+msgid "web.leaderboard.stat.dog_tags"
+msgstr "Dog tags"
+
+msgid "web.leaderboard.stat.time"
+msgstr "Time played"
+
+msgid "web.leaderboard.by.score"
+msgstr "score"
+
+msgid "web.leaderboard.by.kills"
+msgstr "kills"
+
+msgid "web.leaderboard.by.kd"
+msgstr "K/D"
+
+msgid "web.leaderboard.by.dog_tags"
+msgstr "dog tags"
+
+msgid "web.leaderboard.by.time"
+msgstr "time played"
+
+msgid "web.leaderboard.column.score"
+msgstr "Score"
+
+msgid "web.leaderboard.column.kills"
+msgstr "Kills"
+
+msgid "web.leaderboard.column.deaths"
+msgstr "Deaths"
+
+msgid "web.leaderboard.column.kd"
+msgstr "K/D"
+
+msgid "web.leaderboard.column.dog_tags"
+msgstr "Dog tags"
+
+msgid "web.leaderboard.column.time"
+msgstr "Time"
+
+msgid "web.leaderboard.column.now"
+msgstr "Now"
+
+msgid "web.leaderboard.rank"
+msgstr "Rank"
+
+msgid "web.leaderboard.page"
+msgstr "Player page"
+
+#, python-format
+msgid "web.leaderboard.page.of"
+msgstr "Player page: %(name)s"
+
+#, python-format
+msgid "web.leaderboard.hours"
+msgstr "%(hours)s h"
+
+msgid "web.leaderboard.offline_now"
+msgstr "Offline"
+
+msgid "web.leaderboard.find"
+msgstr "Find a player"
+
+msgid "web.leaderboard.name"
+msgstr "Player name"
+
+msgid "web.leaderboard.name.hint"
+msgstr "Part of a player name"
+
+#, python-format
+msgid "web.leaderboard.found"
+msgstr "Position %(position)s by %(stat)s · page %(page)s"
+
+#, python-format
+msgid "web.leaderboard.missing"
+msgstr "%(name)s is not on this leaderboard."
+
+msgid "web.leaderboard.missing.text"
+msgstr "A player appears here after their first round with stats."
+
+#, python-format
+msgid "web.leaderboard.offline"
+msgstr "%(name)s is offline now."
+
+msgid "web.leaderboard.offline.text"
+msgstr "The list of everyone shows the player's position."
+
+msgid "web.leaderboard.show"
+msgstr "Show"
+
+msgid "web.leaderboard.show.everyone"
+msgstr "Everyone"
+
+msgid "web.leaderboard.show.online"
+msgstr "Online"
+
+msgid "web.leaderboard.reset"
+msgstr "Reset"
+
+msgid "web.leaderboard.search"
+msgstr "Find"
+
+msgid "web.leaderboard.about"
+msgstr ""
+"Positions follow the chosen stat from each player's game stats. The "
+"shield holds the player's rank number, which follows the total score. "
+"Finding a player opens the page with their position."
+
+msgid "web.leaderboard.about.online"
+msgstr ""
+"Online players keep their overall positions, so the numbers skip the "
+"players who are offline."
+
+#, python-format
+msgid "web.leaderboard.caption"
+msgstr "Leaderboard, all time, sorted by %(stat)s"
+
+#, python-format
+msgid "web.leaderboard.caption.online"
+msgstr "Leaderboard, all time, players online, sorted by %(stat)s"
+
+#, python-format
+msgid "web.leaderboard.listed"
+msgstr "Players found: %(count)s"
+
+#, python-format
+msgid "web.leaderboard.showing.online"
+msgstr "Online players with their overall positions · page %(page)s of %(pages)s"
+
+msgid "web.leaderboard.empty"
+msgstr "No statistics yet"
+
+msgid "web.leaderboard.empty.text"
+msgstr ""
+"No player has stats yet. The leaderboard fills in once the game saves the"
+" stats of a first round."
+
+msgid "web.leaderboard.setup"
+msgstr "Setting up the game takes three steps."
+
+#, python-format
+msgid "web.rank.number"
+msgstr "Rank %(rank)s"
+
+msgid "games.bfbc2.rank.0"
+msgstr "Recruit"
+
+msgid "games.bfbc2.rank.1"
+msgstr "Private I"
+
+msgid "games.bfbc2.rank.2"
+msgstr "Private II"
+
+msgid "games.bfbc2.rank.3"
+msgstr "Private III"
+
+msgid "games.bfbc2.rank.4"
+msgstr "Specialist I"
+
+msgid "games.bfbc2.rank.5"
+msgstr "Specialist II"
+
+msgid "games.bfbc2.rank.6"
+msgstr "Specialist III"
+
+msgid "games.bfbc2.rank.7"
+msgstr "Corporal I"
+
+msgid "games.bfbc2.rank.8"
+msgstr "Corporal II"
+
+msgid "games.bfbc2.rank.9"
+msgstr "Corporal III"
+
+msgid "games.bfbc2.rank.10"
+msgstr "Sergeant I"
+
+msgid "games.bfbc2.rank.11"
+msgstr "Sergeant II"
+
+msgid "games.bfbc2.rank.12"
+msgstr "Sergeant III"
+
+msgid "games.bfbc2.rank.13"
+msgstr "Staff Sergeant I"
+
+msgid "games.bfbc2.rank.14"
+msgstr "Staff Sergeant II"
+
+msgid "games.bfbc2.rank.15"
+msgstr "Staff Sergeant III"
+
+msgid "games.bfbc2.rank.16"
+msgstr "Master Sergeant I"
+
+msgid "games.bfbc2.rank.17"
+msgstr "Master Sergeant II"
+
+msgid "games.bfbc2.rank.18"
+msgstr "Master Sergeant III"
+
+msgid "games.bfbc2.rank.19"
+msgstr "First Sergeant I"
+
+msgid "games.bfbc2.rank.20"
+msgstr "First Sergeant II"
+
+msgid "games.bfbc2.rank.21"
+msgstr "First Sergeant III"
+
+msgid "games.bfbc2.rank.22"
+msgstr "Warrant Officer I"
+
+msgid "games.bfbc2.rank.23"
+msgstr "Warrant Officer II"
+
+msgid "games.bfbc2.rank.24"
+msgstr "Warrant Officer III"
+
+msgid "games.bfbc2.rank.25"
+msgstr "Chief Warrant Officer I"
+
+msgid "games.bfbc2.rank.26"
+msgstr "Chief Warrant Officer II"
+
+msgid "games.bfbc2.rank.27"
+msgstr "Chief Warrant Officer III"
+
+msgid "games.bfbc2.rank.28"
+msgstr "Second Lieutenant I"
+
+msgid "games.bfbc2.rank.29"
+msgstr "Second Lieutenant II"
+
+msgid "games.bfbc2.rank.30"
+msgstr "Second Lieutenant III"
+
+msgid "games.bfbc2.rank.31"
+msgstr "First Lieutenant I"
+
+msgid "games.bfbc2.rank.32"
+msgstr "First Lieutenant II"
+
+msgid "games.bfbc2.rank.33"
+msgstr "First Lieutenant III"
+
+msgid "games.bfbc2.rank.34"
+msgstr "Captain I"
+
+msgid "games.bfbc2.rank.35"
+msgstr "Captain II"
+
+msgid "games.bfbc2.rank.36"
+msgstr "Captain III"
+
+msgid "games.bfbc2.rank.37"
+msgstr "Major I"
+
+msgid "games.bfbc2.rank.38"
+msgstr "Major II"
+
+msgid "games.bfbc2.rank.39"
+msgstr "Major III"
+
+msgid "games.bfbc2.rank.40"
+msgstr "Lieutenant Colonel I"
+
+msgid "games.bfbc2.rank.41"
+msgstr "Lieutenant Colonel II"
+
+msgid "games.bfbc2.rank.42"
+msgstr "Lieutenant Colonel III"
+
+msgid "games.bfbc2.rank.43"
+msgstr "Colonel I"
+
+msgid "games.bfbc2.rank.44"
+msgstr "Colonel II"
+
+msgid "games.bfbc2.rank.45"
+msgstr "Colonel III"
+
+msgid "games.bfbc2.rank.46"
+msgstr "Brigadier General I"
+
+msgid "games.bfbc2.rank.47"
+msgstr "Brigadier General II"
+
+msgid "games.bfbc2.rank.48"
+msgstr "Brigadier General III"
+
+msgid "games.bfbc2.rank.49"
+msgstr "General"
+
+msgid "games.bfbc2.rank.50"
+msgstr "General of the Army"
+
+# The number of digits from which whole numbers group their digits, as 1,000.
+msgid "web.number.grouped_from"
+msgstr "4"

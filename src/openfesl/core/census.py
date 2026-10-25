@@ -180,6 +180,26 @@ class Census:
             persona.name for persona in self._players.playing_in(game) if persona.id not in playing
         ]
 
+    def places(self, game: Game) -> dict[int, Server | None]:
+        """Return where the players logged in to a game are, by persona.
+
+        Args:
+            game: The game.
+
+        Returns:
+            The server whose game each player is in, or None for a player in the menus.
+        """
+        found: dict[int, Server | None] = {
+            persona.id: None for persona in self._players.playing_in(game)
+        }
+        taken: set[str] = set()
+        for hosted in self._hosted(game):
+            server = self._server(game, hosted, taken)
+            for player in hosted.in_game():
+                if player.persona.id in found:
+                    found[player.persona.id] = server
+        return found
+
     def _remember(self, hosted: HostedGame) -> None:
         if hosted.type != GAME or not hosted.listed:
             return

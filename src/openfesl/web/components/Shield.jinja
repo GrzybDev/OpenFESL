@@ -1,0 +1,9 @@
+{#def rank: int #}
+{# A player's rank as OpenFESL draws it: the rank number in a small shield, never the game's
+   insignia. #}
+<span role="img"
+      aria-label="{{ _('web.rank.number', rank=number(rank)) }}"
+      class="shield">
+  <svg width="24" height="28" aria-hidden="true">
+    <use href="{{ static('icons.svg') }}#shield" />
+  </svg><span aria-hidden="true">{{ rank }}</span></span>

@@ -131,6 +131,23 @@ crosshair = "D-Crosshair"
 attribute = "D-pdat"
 fields = ["name", "", "", "", ""]
 
+# The stats the web pages show, by the keys of the game's stats template (Persistence/MP_Template
+# in the game's data), which dedicated servers upload. The template derives the score from its
+# score buckets.
+[stats]
+score = ["sc_general", "sc_team", "sc_bonus", "sc_squad", "sc_objective", "sc_award"]
+kills = ["kills"]
+deaths = ["deaths"]
+dog_tags = ["dogt"]
+time = ["time"]
+# The total score each rank from 1 to 50 needs, as the game's point system
+# (Awards/PointSystemParams) lists them.
+ranks = [6500, 11000, 18500, 28000, 40000, 53000, 68000, 84000, 100000, 120000, 138000, 158000,
+    179000, 200000, 224000, 247000, 272000, 297000, 323000, 350000, 377000, 405000, 437000,
+    472000, 537000, 620000, 720000, 832000, 956000, 1090000, 1240000, 1400000, 1550000, 1730000,
+    1900000, 2100000, 2300000, 2500000, 2700000, 2900000, 3140000, 3370000, 3600000, 3800000,
+    4010000, 4300000, 4600000, 4900000, 5100000, 5400000]
+
 [http]
 locker = "http://easo.ea.com/fileupload/locker2.jsp"
 

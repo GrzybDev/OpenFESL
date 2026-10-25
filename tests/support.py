@@ -29,6 +29,7 @@ from openfesl.protocol.relay import (
 from openfesl.server.cli import main
 
 type Answer = dict[str, str]
+type Update = tuple[int, str, str, str, str]
 
 FESL = ConnectionKey(Channel.FESL, 1)
 THEATER = ConnectionKey(Channel.THEATER, 1)
@@ -390,3 +391,26 @@ def block(owner: int, member: int) -> Fields:
         ("addRequests.0.member.type", "1"),
         ("addRequests.0.mutual", "0"),
     ]
+
+
+def update_stats(*owners: tuple[str, str, list[Update]]) -> Fields:
+    """Return an UpdateStats as a dedicated server writes it.
+
+    Each owner comes as its id, its type and its updates: update type, key, value, text and
+    periods. No id stands for the session's persona.
+    """
+    fields: Fields = [("TXN", "UpdateStats")]
+    for number, (owner, owner_type, updates) in enumerate(owners):
+        if owner:
+            fields += [(f"u.{number}.o", owner), (f"u.{number}.ot", owner_type)]
+        for index, (kind, key, value, text, periods) in enumerate(updates):
+            prefix = f"u.{number}.s.{index}."
+            fields += [
+                (prefix + "ut", str(kind)),
+                (prefix + "k", key),
+                (prefix + "v", value),
+                (prefix + "t", text),
+                (prefix + "pt", periods),
+            ]
+        fields.append((f"u.{number}.s.[]", str(len(updates))))
+    return [*fields, ("u.[]", str(len(owners)))]

@@ -1,0 +1,133 @@
+/* A scoreboard's lines, as the leaderboard and a player's dog tags list players: the position or
+   a badge, the rank's shield, the name over the rank's name, the numbers and the end square. */
+@layer components {
+  .line {
+    --cell: var(--score-row);
+
+    &:nth-child(even) {
+      --cell: var(--score-row-alt);
+    }
+
+    &[aria-current] {
+      --cell: var(--accent);
+
+      .end-square > span {
+        background: var(--ink);
+        color: var(--accent);
+      }
+    }
+
+    .line-cell {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      background: var(--cell);
+      padding-inline: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .line-place {
+      min-height: 44px;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .line-shield {
+      display: grid;
+      place-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .line-who,
+    .line-now {
+      min-width: 0;
+      justify-content: flex-start;
+      font-variant-numeric: normal;
+    }
+
+    .line-who a {
+      display: flex;
+      min-height: 44px;
+      min-width: 0;
+      flex: 1;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2px;
+    }
+
+    .line-now a {
+      display: flex;
+      min-height: 44px;
+      align-items: center;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.15;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .cell-end {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+  }
+
+  .line-name {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.15;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .line-rank {
+    font-size: 11px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    color: var(--dim);
+    text-transform: uppercase;
+  }
+
+  .line-away,
+  .line-menus {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .line-away {
+    color: var(--dim);
+  }
+
+  .line[aria-current] :is(.line-rank, .line-away) {
+    color: var(--ink);
+  }
+
+  /* M4: a player's line lights up under the pointer and brightens its end square. */
+  .line-cell {
+    transition: background-color 120ms var(--ease-menu);
+  }
+
+  .line:not([aria-current]):hover {
+    .line-cell {
+      background-color: var(--row-hover);
+    }
+
+    .end-square > span {
+      background-color: var(--accent-hover);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .line-cell {
+      transition-duration: 100ms;
+    }
+  }
+}

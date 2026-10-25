@@ -223,7 +223,7 @@
 
             {% set found_count %}<Count :value="found" class="count-ink count-sm" />{% endset %}
             <div class="list-foot">
-              <p><span class="list-count">{{ _("web.servers.found", count=found_count) }}</span>{% if found %}<span class="list-range">{{ _("web.servers.showing", first=number(first), last=number(first + servers|length - 1), page=number(filters.page), pages=number(pages)) }}</span>{% endif %}</p>
+              <p><span class="list-count">{{ _("web.servers.found", count=found_count) }}</span>{% if found %}<span class="list-range">{{ _("web.pages.showing", first=number(first), last=number(first + servers|length - 1), page=number(filters.page), pages=number(pages)) }}</span>{% endif %}</p>
               <Pager :base="list" :view="filters" :pages="pages" />
             </div>
           </section>

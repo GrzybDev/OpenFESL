@@ -31,11 +31,12 @@
     color: var(--ink);
     text-transform: uppercase;
 
-    &[aria-pressed="true"] {
+    &:is([aria-pressed="true"], [aria-current]) {
       background: var(--accent);
     }
 
-    &[aria-pressed="false"]:hover {
+    &[aria-pressed="false"]:hover,
+    &:is(a):not([aria-current]):hover {
       background-color: var(--row-light);
     }
   }

@@ -1,13 +1,16 @@
-from collections.abc import Sequence
+from collections.abc import Collection, Mapping, Sequence
 from typing import Any
 
 from sqlalchemy import (
     BigInteger,
     ColumnElement,
     Integer,
+    Row,
     SQLColumnExpression,
     String,
+    Subquery,
     any_,
+    case,
     exists,
     false,
     func,
@@ -20,6 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import aliased
 
 from openfesl.core.leaderboards import Ranked, Standing
+from openfesl.core.rankings import KD, Line
 from openfesl.core.stats import PERSONA, Bucket, Change, Owner, Value
 from openfesl.protocol.rank import RankOrder, UpdateType
 from openfesl.storage.models import PersonaRow, StatRow
@@ -154,6 +158,97 @@ class SqlStatStore:
             rows = await session.execute(statement)
             return [Standing(row.owner_id, row.name, row.value, row.text, row.rank) for row in rows]
 
+    async def lines(
+        self,
+        partition: str,
+        sums: Mapping[str, Sequence[str]],
+        order: str,
+        bucket: Bucket,
+        among: Collection[int] | None,
+        window: slice,
+    ) -> list[Line]:
+        """Return players' lines in their order, best first.
+
+        Args:
+            partition: The game's partition.
+            sums: The stats to show by their names, each with the keys whose values it adds up.
+            order: The name of the stat the lines are sorted by, highest first, or `KD`.
+            bucket: The period.
+            among: The personas whose lines to return, keeping everyone's positions; every
+                player's when None.
+            window: Which of the returned lines, counted from 0.
+        """
+        placed = _placed(partition, sums, order, bucket)
+        statement = (
+            select(placed, PersonaRow.name)
+            .join(PersonaRow, PersonaRow.id == placed.c.owner_id)
+            .order_by(placed.c.place)
+            .offset(window.start)
+            .limit(window.stop - window.start)
+        )
+        if among is not None:
+            statement = statement.where(placed.c.owner_id == any_(_ids(among)))
+        async with self._sessions() as session:
+            return [_line(row, sums) for row in await session.execute(statement)]
+
+    async def count(
+        self,
+        partition: str,
+        keys: Sequence[str],
+        bucket: Bucket,
+        among: Collection[int] | None,
+    ) -> int:
+        """Return how many players are on the leaderboard.
+
+        Args:
+            partition: The game's partition.
+            keys: Every key the leaderboard sums up.
+            bucket: The period.
+            among: Count only these personas; every player when None.
+        """
+        statement = select(func.count(func.distinct(StatRow.owner_id))).where(
+            *_personas(partition, keys, bucket)
+        )
+        if among is not None:
+            statement = statement.where(StatRow.owner_id == any_(_ids(among)))
+        async with self._sessions() as session:
+            return await session.scalar(statement) or 0
+
+    async def find(
+        self,
+        partition: str,
+        sums: Mapping[str, Sequence[str]],
+        order: str,
+        bucket: Bucket,
+        name: str,
+    ) -> Line | None:
+        """Return the line of a player found by name: called it, or else holding it, best first.
+
+        Names match regardless of case.
+
+        Args:
+            partition: The game's partition.
+            sums: The stats to show by their names, each with the keys whose values it adds up.
+            order: The name of the stat the lines are sorted by, highest first, or `KD`.
+            bucket: The period.
+            name: The name or part of it.
+        """
+        placed = _placed(partition, sums, order, bucket)
+        first = (
+            select(placed, PersonaRow.name)
+            .join(PersonaRow, PersonaRow.id == placed.c.owner_id)
+            .order_by(placed.c.place)
+            .limit(1)
+        )
+        async with self._sessions() as session:
+            for matching in (
+                func.lower(PersonaRow.name) == func.lower(name),
+                PersonaRow.name.icontains(name, autoescape=True),
+            ):
+                if row := (await session.execute(first.where(matching))).first():
+                    return _line(row, sums)
+        return None
+
     async def apply(self, partition: str, changes: Sequence[Change]) -> None:
         """Apply updates in their order, all of them or none.
 
@@ -206,6 +301,52 @@ def _owned(
         StatRow.period_start == bucket.start,
         StatRow.key == any_(literal(list(keys), ARRAY(String))),
     ]
+
+
+def _personas(partition: str, keys: Sequence[str], bucket: Bucket) -> list[ColumnElement[bool]]:
+    return [
+        StatRow.partition == partition,
+        StatRow.owner_type == PERSONA,
+        StatRow.period == bucket.period,
+        StatRow.period_start == bucket.start,
+        StatRow.key == any_(literal(list(keys), ARRAY(String))),
+        _ranked(StatRow),
+    ]
+
+
+def _placed(
+    partition: str, sums: Mapping[str, Sequence[str]], order: str, bucket: Bucket
+) -> Subquery:
+    every = sorted({key for keys in sums.values() for key in keys})
+    totals = [
+        func.coalesce(
+            func.sum(StatRow.value).filter(StatRow.key == any_(literal(list(keys), ARRAY(String)))),
+            0.0,
+        ).label(name)
+        for name, keys in sums.items()
+    ]
+    summed = (
+        select(StatRow.owner_id, *totals)
+        .where(*_personas(partition, every, bucket))
+        .group_by(StatRow.owner_id)
+        .subquery()
+    )
+    value: ColumnElement[float] = (
+        case((summed.c.deaths > 0, summed.c.kills / summed.c.deaths), else_=summed.c.kills)
+        if order == KD
+        else summed.c[order]
+    )
+    # Every player has a place of their own, as on the game's own leaderboards.
+    place = func.row_number().over(order_by=(value.desc(), summed.c.owner_id))
+    return select(summed, place.label("place")).subquery()
+
+
+def _line(row: Row[Any], sums: Mapping[str, Sequence[str]]) -> Line:
+    return Line(row.owner_id, row.name, row.place, {name: row._mapping[name] for name in sums})
+
+
+def _ids(ids: Collection[int]) -> ColumnElement[list[int]]:
+    return literal(list(ids), ARRAY(BigInteger))
 
 
 def _ranked(row: type[StatRow]) -> ColumnElement[bool]:

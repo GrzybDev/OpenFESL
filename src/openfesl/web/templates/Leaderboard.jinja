@@ -1,0 +1,152 @@
+{#def activity, view, orders: list, lines: list, places, everyone: int, online: int, listed: int, first: int, pages: int, found, found_page: int | None #}
+{% set title = _("web.leaderboard.title") %}
+{% set board = url("/" ~ game.id ~ "/leaderboard") %}
+{% set stat = _("web.leaderboard.by." ~ view.order) %}
+{% set showing = _("web.leaderboard.show.online") if view.online else _("web.leaderboard.show.everyone") %}
+<Layout :title="title">
+  <div id="live"
+       hx-get="{{ here }}"
+       hx-trigger="every 15s, refresh"
+       hx-select="#live"
+       hx-select-oob="#shell-games:outerMorph"
+       hx-swap="outerMorph">
+    <GameStatus :activity="activity" />
+    <GameMenu current="leaderboard" />
+
+    <PageHead labelledby="board-title">
+      <div class="enter-title page-title">
+        <TitleBlock :title="title" id="board-title">{{ _("web.leaderboard.all_time") }}</TitleBlock>
+      </div>
+      {% if everyone %}
+        <nav aria-label="{{ _('web.leaderboard.sort') }}" class="tabs">
+          {% for order in orders %}
+            <Tab :href="board ~ view.changed(order=order, player='').query()" :label="_('web.leaderboard.stat.' ~ order)" :current="view.order == order" />
+          {% endfor %}
+        </nav>
+      {% endif %}
+    </PageHead>
+
+    <Panel class="enter-panel">
+      {% if everyone %}
+        <div class="list-layout">
+
+          <div class="list-side">
+            <form action="{{ board }}"
+                  method="get"
+                  role="search"
+                  aria-labelledby="find-title">
+              {% if view.order != "score" %}<input type="hidden" name="stat" value="{{ view.order }}">{% endif %}
+              {% if view.online %}<input type="hidden" name="show" value="online">{% endif %}
+              <Bar id="find-title" large>{{ _("web.leaderboard.find") }}</Bar>
+              {% if view.player %}
+                <SearchField id="find-name" name="player" :label="_('web.leaderboard.name')" :value="view.player" :hint="_('web.leaderboard.name.hint')" hx-morph-skip aria-describedby="find-result" />
+              {% else %}
+                <SearchField id="find-name" name="player" :label="_('web.leaderboard.name')" :value="view.player" :hint="_('web.leaderboard.name.hint')" hx-morph-skip />
+              {% endif %}
+              {% if found and found_page %}
+                <p id="find-result" aria-live="polite" class="find-found"><span>{{ found.name }}</span>{{ _("web.leaderboard.found", position=number(found.place), stat=stat, page=number(found_page)) }}</p>
+              {% elif view.player %}
+                <div id="find-result" aria-live="polite" class="find-missing">
+                  <p>{{ _("web.leaderboard.offline", name=found.name) if found else _("web.leaderboard.missing", name=view.player) }}</p>
+                  <p>{{ _("web.leaderboard.offline.text") if found else _("web.leaderboard.missing.text") }}</p>
+                </div>
+              {% endif %}
+              <div role="group" aria-labelledby="find-show" class="filter-group">
+                <Bar tag="h3" id="find-show" :extra="showing">{{ _("web.leaderboard.show") }}</Bar>
+                <div class="toggles">
+                  <Toggle :href="board ~ view.changed(online=False).query()" :label="_('web.leaderboard.show.everyone')" :count="everyone" :current="not view.online" />
+                  <Toggle :href="board ~ view.changed(online=True).query()" :label="_('web.leaderboard.show.online')" :count="online" :current="view.online" />
+                </div>
+              </div>
+              <div class="form-buttons">
+                <FormButton icon="x" :href="board">{{ _("web.leaderboard.reset") }}</FormButton>
+                <FormButton icon="find">{{ _("web.leaderboard.search") }}</FormButton>
+              </div>
+            </form>
+            <p class="body-text board-about">{{ _("web.leaderboard.about.online") if view.online else _("web.leaderboard.about") }}</p>
+          </div>
+
+          <section aria-labelledby="board-list" class="list-main">
+            <h2 id="board-list"
+                class="sr-only">{{ _("web.leaderboard.caption.online" if view.online else "web.leaderboard.caption", stat=stat) }}</h2>
+            <div class="table-scroll table-scroll-flush">
+              <div role="table" aria-labelledby="board-list" class="table board">
+                <div role="rowgroup">
+                  <div role="row" class="leader-columns board-head">
+                    <div aria-hidden="true" class="board-strip"></div>
+                    <div role="columnheader" class="column-head board-place"><span aria-hidden="true">#</span><span class="sr-only">{{ _("web.server.position") }}</span></div>
+                    <div role="columnheader"
+                         class="column-head"><span class="sr-only">{{ _("web.leaderboard.rank") }}</span></div>
+                    <div role="columnheader" class="column-head">{{ _("web.server.player") }}</div>
+                    {% for column in ["score", "kills", "deaths", "kd", "dog_tags", "time"] %}
+                      {% if column == "deaths" %}
+                        <div role="columnheader"
+                             class="column-head column-number">{{ _("web.leaderboard.column.deaths") }}</div>
+                      {% else %}
+                        <div role="columnheader"
+                             {% if view.order == column %} aria-sort="descending"{% endif %}
+                             class="column-head column-sort column-number"><a href="{{ board ~ view.changed(order=column, player='').query() }}">{{ _("web.leaderboard.column." ~ column) }}{% if view.order == column %}<Icon name="down" :size="14" stroke="currentColor" />{% endif %}</a></div>
+                      {% endif %}
+                    {% endfor %}
+                    <div role="columnheader" class="column-head">{{ _("web.leaderboard.column.now") }}</div>
+                    <div role="columnheader"><span class="sr-only">{{ _("web.leaderboard.page") }}</span></div>
+                  </div>
+                </div>
+                <div role="rowgroup" data-rows class="enter-rows table-rows">
+                  {% for line in lines %}
+                    {% set mine = found and found_page and line.persona_id == found.persona_id %}
+                    {% set href = url("/" ~ game.id ~ "/players/" ~ line.name|urlencode) %}
+                    {% set rank = game.stats.rank(line.values.score) %}
+                    <div role="row"
+                         id="persona-{{ line.persona_id }}"
+                         data-key="{{ line.persona_id }}"
+                         {% if mine %} aria-current="true"{% endif %}
+                         class="line leader-columns">
+                      <div role="cell" class="line-place line-cell">{{ number(line.place) }}</div>
+                      <div role="cell" class="line-shield line-cell">
+                        <Shield :rank="rank" />
+                      </div>
+                      <div role="cell" class="line-who line-cell"><a href="{{ href }}"><span class="line-name">{{ line.name }}</span><span class="line-rank">{{ _("games." ~ game.id ~ ".rank." ~ rank) }}</span></a></div>
+                      <div role="cell" class="line-score line-cell">{{ number(line.values.score|round|int) }}</div>
+                      <div role="cell" class="line-cell">{{ number(line.values.kills|round|int) }}</div>
+                      <div role="cell" class="line-cell">{{ number(line.values.deaths|round|int) }}</div>
+                      <div role="cell" class="line-cell">{{ number(line.kd, 2) }}</div>
+                      <div role="cell" class="line-cell">{{ number(line.values.dog_tags|round|int) }}</div>
+                      <div role="cell"
+                           class="line-cell">{{ _("web.leaderboard.hours", hours=number((line.values.time // 3600)|int)) }}</div>
+                      <div role="cell" class="line-now line-cell">
+                      {%- if line.persona_id not in places %}<span class="line-away">{{ _("web.leaderboard.offline_now") }}</span>
+                  {%- elif places[line.persona_id] %}<a href="{{ url('/' ~ game.id ~ '/servers/' ~ places[line.persona_id].slug) }}">{{ places[line.persona_id].name }}</a>
+      {%- else %}<span class="line-menus">{{ _("web.activity.in_menus") }}</span>{% endif -%}
+        </div>
+        <div role="cell" class="cell-end">
+          <EndSquare :href="href" :label="_('web.leaderboard.page.of', name=line.name)" />
+        </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+<div class="list-foot">
+  <p><span class="list-count">{{ _("web.leaderboard.listed", count=number(listed)) }}</span>{% if lines %}<span class="list-range">{% if view.online %}{{ _("web.leaderboard.showing.online", page=number(view.page), pages=number(pages)) }}{% else %}{{ _("web.pages.showing", first=number(first), last=number(first + lines|length - 1), page=number(view.page), pages=number(pages)) }}{% endif %}</span>{% endif %}</p>
+  <Pager :base="board" :view="view" :pages="pages" />
+</div>
+</section>
+
+</div>
+{% else %}
+<div class="board-empty">
+  <section aria-labelledby="board-empty">
+    <Bar id="board-empty">{{ _("web.leaderboard.empty") }}</Bar>
+    <p class="body-text">{{ _("web.leaderboard.empty.text") }}</p>
+    <p><span class="list-count">{{ _("web.leaderboard.listed", count=number(0)) }}</span></p>
+  </section>
+  <div>
+    <Action :href="url('/' ~ game.id ~ '/play')" :label="_('web.front.play')" :size="32" />
+    <p class="body-text">{{ _("web.leaderboard.setup") }}</p>
+  </div>
+</div>
+{% endif %}
+</Panel>
+</div>
+</Layout>

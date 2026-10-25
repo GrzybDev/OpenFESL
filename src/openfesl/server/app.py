@@ -54,6 +54,7 @@ from openfesl.storage.stats import SqlStatStore
 from openfesl.web.front import front_routes
 from openfesl.web.game_http import GameHttpMiddleware
 from openfesl.web.languages import LanguageMiddleware
+from openfesl.web.leaderboard import leaderboard_routes
 from openfesl.web.menu import menu_routes
 from openfesl.web.pages import STATIC, Pages, StaticAssets
 from openfesl.web.security import SecurityHeadersMiddleware
@@ -82,6 +83,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     sessions = async_sessionmaker(engine)
     hosting = Hosting(Approval(SqlServerStore(sessions)))
     census = Census(hosting, players)
+    stats = SqlStatStore(sessions)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -109,7 +111,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         routes.update(personas.routes())
         routes.update(EntitlementService(entitlements, hosting).routes())
         routes.update(game_http.routes())
-        stats = SqlStatStore(sessions)
         routes.update(StatsService(stats, persona_store, hosting).routes())
         routes.update(LeaderboardService(stats).routes())
         routes.update(RecordService(SqlRecordStore(sessions)).routes())
@@ -164,6 +165,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(menu_routes(pages, games, census))
     app.include_router(front_routes(pages, games, census))
     app.include_router(server_routes(pages, games, census))
+    app.include_router(leaderboard_routes(pages, games, census, stats))
     app.include_router(verification_routes(confirm, pages))
     # The last one added sees a request first: the game's HTTP keeps its own answers.
     app.add_middleware(LanguageMiddleware)

@@ -1,0 +1,133 @@
+/* A game's leaderboard in the scoreboard's style. On phones a player's row becomes a card: the
+   position, rank, name and score, then the other numbers in one line, then where the player is. */
+@layer pages {
+  .find-found {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 8px;
+    margin-top: 2px;
+    background: var(--row);
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--ink);
+    text-transform: uppercase;
+
+    > span {
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: normal;
+      text-transform: none;
+    }
+  }
+
+  .find-missing {
+    margin-top: 2px;
+    background: var(--row);
+    padding: 12px 14px;
+    font-family: var(--font-sans);
+    color: var(--ink);
+
+    > p:first-child {
+      font-size: 15px;
+      line-height: 1.35;
+      font-weight: 600;
+    }
+
+    > p:last-child {
+      margin-top: 4px;
+      font-size: 14px;
+      line-height: 1.4;
+      font-weight: 500;
+      color: var(--dim);
+    }
+  }
+
+  .board-about {
+    margin: 12px 2px 0;
+    color: var(--soft);
+  }
+
+  /* The accent strip over the numbers' heads, as the game's scoreboard draws it. */
+  .board-strip {
+    position: absolute;
+    top: 0;
+    right: 46px;
+    height: 5px;
+    width: 656px;
+    clip-path: polygon(6px 0, 100% 0, 100% 100%, 0 100%);
+    background: var(--accent);
+  }
+
+  .leader-columns {
+    position: relative;
+    display: grid;
+    grid-template-columns: 48px 40px minmax(150px, 1fr) 104px 76px 76px 64px 84px 76px 176px 46px;
+    gap: 2px;
+  }
+
+  .board-head {
+    .column-head {
+      padding-inline: 10px;
+    }
+
+    .column-sort {
+      padding: 0;
+
+      a {
+        justify-content: flex-end;
+        text-align: right;
+        line-height: 1.05;
+      }
+    }
+  }
+
+  .board-place {
+    justify-content: center;
+  }
+
+  .board {
+    min-width: 940px;
+  }
+
+  .board-empty {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px;
+
+    > section {
+      min-width: 0;
+      flex: 3 1 300px;
+
+      > .body-text {
+        margin-top: 2px;
+        background: var(--row-light);
+        padding: 14px 16px;
+        color: var(--ink);
+      }
+
+      > p:last-child {
+        margin-top: 12px;
+      }
+
+      .list-count {
+        display: inline-block;
+      }
+    }
+
+    > div {
+      min-width: 0;
+      flex: 2 1 240px;
+
+      > p {
+        margin: 10px 2px 0;
+        color: var(--soft);
+      }
+    }
+  }
+}

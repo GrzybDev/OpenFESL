@@ -84,8 +84,38 @@ def _count_text(context: Context, key: str, count: int, /, **values: object) -> 
 
 
 @pass_context
-def _number(context: Context, value: float) -> str:
-    return format_decimal(value, locale=context["language"])
+def _number(context: Context, value: float, places: int | None = None) -> str:
+    # A number with places keeps that many decimals, as ratios show them. Languages group the
+    # digits of whole numbers from a length of their own, as the catalogues say.
+    language = context["language"]
+    pattern = None if places is None else "#,##0." + "0" * places
+    grouped = len(str(abs(int(value)))) >= int(translate("web.number.grouped_from", language))
+    return format_decimal(value, pattern, locale=language, group_separator=grouped)
+
+
+def page_links(page: int, pages: int) -> list[int | None]:
+    """Return the pages a list links to from one of them, with None where some are left out.
+
+    Lists of up to seven pages link to all of them; longer ones to the first and last pages, the
+    pages next to the current one, and the five at either end the current page is close to.
+
+    Args:
+        page: The current page, from 1.
+        pages: How many pages there are.
+    """
+    if pages <= 7:
+        return list(range(1, pages + 1))
+    shown = {1, page - 1, page, page + 1, pages}
+    if page <= 4:
+        shown |= set(range(1, 6))
+    if page >= pages - 3:
+        shown |= set(range(pages - 4, pages + 1))
+    links: list[int | None] = []
+    for number in sorted(shown & set(range(1, pages + 1))):
+        if links and number - (links[-1] or 0) > 1:
+            links.append(None)
+        links.append(number)
+    return links
 
 
 def _fill(context: Context, text: str, values: Mapping[str, object]) -> str:
@@ -96,7 +126,13 @@ def _fill(context: Context, text: str, values: Mapping[str, object]) -> str:
 
 _catalog = Catalog(
     jinja_env=Environment(autoescape=True, undefined=StrictUndefined),
-    globals={"_": _text, "_n": _count_text, "number": _number, "static": static_url},
+    globals={
+        "_": _text,
+        "_n": _count_text,
+        "number": _number,
+        "static": static_url,
+        "page_links": page_links,
+    },
 )
 # The catalogue keeps its own environment, which takes the given one's escaping but not its
 # whitespace control.

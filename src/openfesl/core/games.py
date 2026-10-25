@@ -1,4 +1,5 @@
 import tomllib
+from bisect import bisect_right
 from collections.abc import Iterable, Iterator
 from importlib.resources import files
 from importlib.resources.abc import Traversable
@@ -251,6 +252,49 @@ class Listing(BaseModel):
     roster: Roster | None = None
 
 
+class Stats(BaseModel):
+    """The stats the web pages show, each as the keys of the game's stats whose values it sums.
+
+    Dedicated servers store each key as an offset from its default in the game's own stats
+    template, so these name only keys whose default is 0.
+
+    Attributes:
+        score: The total score.
+        kills: The kills.
+        deaths: The deaths.
+        dog_tags: The dog tags taken, every time counted.
+        time: The time played, in seconds.
+        ranks: The total score each rank needs, from rank 1 on; rank 0 needs none.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    score: list[str] = []
+    kills: list[str] = []
+    deaths: list[str] = []
+    dog_tags: list[str] = []
+    time: list[str] = []
+    ranks: list[int] = []
+
+    def rank(self, score: float) -> int:
+        """Return the rank that a total score reaches.
+
+        Args:
+            score: The total score.
+        """
+        return bisect_right(self.ranks, score)
+
+    def sums(self) -> dict[str, list[str]]:
+        """Return the keys of each stat the leaderboard shows, by the stat's name."""
+        return {
+            "score": self.score,
+            "kills": self.kills,
+            "deaths": self.deaths,
+            "dog_tags": self.dog_tags,
+            "time": self.time,
+        }
+
+
 class Game(BaseModel):
     """A game the server serves, as its data file describes it.
 
@@ -276,6 +320,7 @@ class Game(BaseModel):
             ISO code.
         theme: How the game's web pages look.
         listing: How the web pages read the games its servers host.
+        stats: The stats of the game's players that the web pages show.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -297,6 +342,7 @@ class Game(BaseModel):
     countries: dict[str, Ages] = {}
     theme: Theme
     listing: Listing = Listing()
+    stats: Stats = Stats()
 
     @property
     def play_key(self) -> ProductKey | None:

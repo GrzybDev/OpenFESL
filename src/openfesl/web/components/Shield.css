@@ -1,0 +1,27 @@
+@layer components {
+  .shield {
+    position: relative;
+    display: grid;
+    width: 24px;
+    height: 28px;
+    flex: none;
+    place-items: center;
+
+    svg {
+      position: absolute;
+      inset: 0;
+      fill: var(--badge);
+      stroke: var(--badge-edge);
+    }
+
+    > span {
+      position: relative;
+      margin-top: -3px;
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 800;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+  }
+}

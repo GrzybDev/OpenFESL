@@ -45,6 +45,10 @@
     padding: 0;
   }
 
+  .column-number {
+    justify-content: flex-end;
+  }
+
   /* A sortable column's head is a link; the current column shows its order with an arrow. */
   .column-sort {
     padding: 0;

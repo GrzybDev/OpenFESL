@@ -40,4 +40,7 @@
   <symbol id="find" viewBox="0 0 20 20">
     <path d="M8.5 3a5.5 5.5 0 1 0 0 11a5.5 5.5 0 1 0 0-11zM12.6 12.6 17 17" fill="none" stroke-width="2.4"/>
   </symbol>
+  <symbol id="shield" viewBox="0 0 24 28">
+    <path d="M1.5 1.5h21v16.8L12 26.6 1.5 18.3z" stroke-width="1"/>
+  </symbol>
 </svg>
