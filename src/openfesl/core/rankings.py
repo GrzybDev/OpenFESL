@@ -2,7 +2,7 @@ from collections.abc import Collection, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Protocol
 
-from openfesl.core.stats import Bucket
+from openfesl.core.stats import Bucket, StatStore
 
 # What a leaderboard is sorted by: a stat the game data sums up, or kills per death.
 KD = "kd"
@@ -41,7 +41,7 @@ def kd(kills: float, deaths: float) -> float:
     return kills / deaths if deaths > 0 else kills
 
 
-class RankingStore(Protocol):
+class RankingStore(StatStore, Protocol):
     """Where the stats of a game's players are kept, summed up and ordered for its leaderboard.
 
     The leaderboard holds the enabled personas with any of the summed stats stored.

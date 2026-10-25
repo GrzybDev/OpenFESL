@@ -1023,3 +1023,471 @@ msgstr "General of the Army"
 # The number of digits from which whole numbers group their digits, as 1,000.
 msgid "web.number.grouped_from"
 msgstr "4"
+
+# The locale whose conventions the pages write dates in, as 17 Oct.
+msgid "web.locale"
+msgstr "en_GB"
+
+msgid "web.player.title"
+msgstr "Player"
+
+msgid "web.player.tabs"
+msgstr "Player"
+
+msgid "web.player.tab.stats"
+msgstr "Stats"
+
+msgid "web.player.tab.awards"
+msgstr "Awards"
+
+msgid "web.player.tab.dog_tags"
+msgstr "Dog tags"
+
+msgid "web.player.rank.current"
+msgstr "Current rank"
+
+msgid "web.player.rank.next"
+msgstr "Next rank"
+
+#, python-format
+msgid "web.player.rank.toward"
+msgstr "Score toward %(rank)s"
+
+#, python-format
+msgid "web.player.rank.of"
+msgstr "%(score)s of %(needed)s"
+
+#, python-format
+msgid "web.player.rank.to_go"
+msgstr "%(rank)s at %(needed)s score: %(left)s to go."
+
+msgid "web.player.rank.highest"
+msgstr "The highest rank of the game."
+
+msgid "web.player.now.match"
+msgstr "In a match"
+
+msgid "web.player.now.menus"
+msgstr "Online in the game's menus, not on a server."
+
+msgid "web.player.now.offline"
+msgstr ""
+"Not online now. While the player is online, the server or the menus "
+"appear here."
+
+#, python-format
+msgid "web.player.round"
+msgstr "This round: %(score)s score, %(kills)s kills and %(deaths)s deaths."
+
+msgid "web.player.combat_score"
+msgstr "Combat score"
+
+msgid "web.player.award_score"
+msgstr "Award score"
+
+msgid "web.player.total_score"
+msgstr "Total score"
+
+msgid "web.player.record"
+msgstr "Combat record"
+
+msgid "web.player.kd"
+msgstr "K/D ratio"
+
+#, python-format
+msgid "web.player.place"
+msgstr "%(place)s of %(everyone)s"
+
+msgid "web.player.unranked"
+msgstr "Not ranked yet"
+
+msgid "web.player.reported"
+msgstr "Stats as the game reports them at the end of each round."
+
+msgid "web.player.pins"
+msgstr "Pins"
+
+#, python-format
+msgid "web.player.pins.all"
+msgstr "%(count)s in all"
+
+msgid "web.player.pins.none"
+msgstr "No pins earned yet."
+
+msgid "web.player.times"
+msgstr "times"
+
+msgid "web.player.insignias"
+msgstr "Insignias"
+
+#, python-format
+msgid "web.player.insignias.earned"
+msgstr "%(count)s of %(all)s earned"
+
+msgid "web.player.earned"
+msgstr "Earned"
+
+msgid "web.player.not_yet"
+msgstr "Not yet"
+
+msgid "web.player.awards.reported"
+msgstr "Awards as the game reports them at the end of each round."
+
+msgid "web.player.tag"
+msgstr "Dog tag"
+
+#, python-format
+msgid "web.player.tags.caption"
+msgstr "Dog tags %(name)s took, newest first"
+
+msgid "web.player.tags.from"
+msgstr "Taken from"
+
+msgid "web.player.tags.taken"
+msgstr "Last taken"
+
+#, python-format
+msgid "web.player.tags.count"
+msgstr "Dog tags: %(count)s"
+
+msgid "web.player.tags.about"
+msgstr ""
+"One tag per player, as the game keeps them, with when it last took that "
+"player's tag."
+
+msgid "web.player.tags.none"
+msgstr "No dog tags taken yet."
+
+msgid "web.player.unknown"
+msgstr "Not found"
+
+#, python-format
+msgid "web.player.unknown.text"
+msgstr "OpenFESL has no %(game)s player called %(name)s."
+
+msgid "web.player.unknown.search"
+msgstr "The leaderboard also finds players by part of their name."
+
+msgid "web.player.unknown.find"
+msgstr "Find on the leaderboard"
+
+msgid "games.bfbc2.kit.assault"
+msgstr "Assault score"
+
+msgid "games.bfbc2.kit.medic"
+msgstr "Medic score"
+
+msgid "games.bfbc2.kit.engineer"
+msgstr "Engineer score"
+
+msgid "games.bfbc2.kit.recon"
+msgstr "Recon score"
+
+msgid "games.bfbc2.kit.vehicles"
+msgstr "Vehicle score"
+
+msgid "games.bfbc2.award.p01"
+msgstr "Assault rifle efficiency pin"
+
+msgid "games.bfbc2.award.p02"
+msgstr "Grenade launcher efficiency pin"
+
+msgid "games.bfbc2.award.p03"
+msgstr "Sniper rifle efficiency pin"
+
+msgid "games.bfbc2.award.p04"
+msgstr "Handgun efficiency pin"
+
+msgid "games.bfbc2.award.p05"
+msgstr "Shotgun efficiency pin"
+
+msgid "games.bfbc2.award.p06"
+msgstr "Rocket launcher efficiency pin"
+
+msgid "games.bfbc2.award.p07"
+msgstr "Light machine gun efficiency pin"
+
+msgid "games.bfbc2.award.p08"
+msgstr "Submachine gun efficiency pin"
+
+msgid "games.bfbc2.award.p09"
+msgstr "Emplacement efficiency pin"
+
+msgid "games.bfbc2.award.p10"
+msgstr "Explosive efficiency pin"
+
+msgid "games.bfbc2.award.p11"
+msgstr "Melee efficiency pin"
+
+msgid "games.bfbc2.award.p12"
+msgstr "Anti-vehicle efficiency pin"
+
+msgid "games.bfbc2.award.p13"
+msgstr "Combat efficiency pin"
+
+msgid "games.bfbc2.award.p14"
+msgstr "Combat excellence pin"
+
+msgid "games.bfbc2.award.p15"
+msgstr "Kill assist pin"
+
+msgid "games.bfbc2.award.p16"
+msgstr "Savior pin"
+
+msgid "games.bfbc2.award.p17"
+msgstr "Avenger pin"
+
+msgid "games.bfbc2.award.p18"
+msgstr "Marksman pin"
+
+msgid "games.bfbc2.award.p19"
+msgstr "Ace pin"
+
+msgid "games.bfbc2.award.p20"
+msgstr "Gold squad pin"
+
+msgid "games.bfbc2.award.p21"
+msgstr "Nemesis pin"
+
+msgid "games.bfbc2.award.p22"
+msgstr "Payback pin"
+
+msgid "games.bfbc2.award.p23"
+msgstr "Squad member pin"
+
+msgid "games.bfbc2.award.p24"
+msgstr "Wheels of hazard pin"
+
+msgid "games.bfbc2.award.p25"
+msgstr "Car warfare pin"
+
+msgid "games.bfbc2.award.p26"
+msgstr "Tank warfare pin"
+
+msgid "games.bfbc2.award.p27"
+msgstr "Naval warfare pin"
+
+msgid "games.bfbc2.award.p28"
+msgstr "Air warfare pin"
+
+msgid "games.bfbc2.award.p29"
+msgstr "M-COM attacker pin"
+
+msgid "games.bfbc2.award.p30"
+msgstr "M-COM defender pin"
+
+msgid "games.bfbc2.award.p31"
+msgstr "Rush winner pin"
+
+msgid "games.bfbc2.award.p32"
+msgstr "Conquest winner pin"
+
+msgid "games.bfbc2.award.p33"
+msgstr "Squad deathmatch winner pin"
+
+msgid "games.bfbc2.award.p34"
+msgstr "Squad rush winner pin"
+
+msgid "games.bfbc2.award.p35"
+msgstr "Flag attacker pin"
+
+msgid "games.bfbc2.award.p36"
+msgstr "Flag defender pin"
+
+msgid "games.bfbc2.award.p37"
+msgstr "Resupply ops pin"
+
+msgid "games.bfbc2.award.p38"
+msgstr "Surveillance ops pin"
+
+msgid "games.bfbc2.award.p39"
+msgstr "Medical ops pin"
+
+msgid "games.bfbc2.award.p40"
+msgstr "Maintenance ops pin"
+
+msgid "games.bfbc2.award.dp01"
+msgstr "SPECACT assault excellence pin"
+
+msgid "games.bfbc2.award.dp02"
+msgstr "SPECACT engineer excellence pin"
+
+msgid "games.bfbc2.award.dp03"
+msgstr "SPECACT medic excellence pin"
+
+msgid "games.bfbc2.award.dp04"
+msgstr "SPECACT recon excellence pin"
+
+msgid "games.bfbc2.award.dp05"
+msgstr "M16 SPECACT efficiency pin"
+
+msgid "games.bfbc2.award.dp06"
+msgstr "UMP SPECACT efficiency pin"
+
+msgid "games.bfbc2.award.dp07"
+msgstr "MG3 SPECACT efficiency pin"
+
+msgid "games.bfbc2.award.dp08"
+msgstr "M95 SPECACT efficiency pin"
+
+msgid "games.bfbc2.award.i01"
+msgstr "Elite marksman combat"
+
+msgid "games.bfbc2.award.i02"
+msgstr "Distinguished sidearm combat"
+
+msgid "games.bfbc2.award.i03"
+msgstr "Distinguished grenade combat"
+
+msgid "games.bfbc2.award.i04"
+msgstr "Distinguished melee combat"
+
+msgid "games.bfbc2.award.i05"
+msgstr "Elite melee combat"
+
+msgid "games.bfbc2.award.i06"
+msgstr "Distinguished anti-vehicle combat"
+
+msgid "games.bfbc2.award.i07"
+msgstr "Long service assault weapons combat"
+
+msgid "games.bfbc2.award.i08"
+msgstr "Long service support weapons combat"
+
+msgid "games.bfbc2.award.i09"
+msgstr "Anti-vehicle combat"
+
+msgid "games.bfbc2.award.i10"
+msgstr "Long service radio warfare"
+
+msgid "games.bfbc2.award.i11"
+msgstr "Distinguished retaliation combat"
+
+msgid "games.bfbc2.award.i12"
+msgstr "Exemplary marksman combat"
+
+msgid "games.bfbc2.award.i13"
+msgstr "Distinguished remote explosives combat"
+
+msgid "games.bfbc2.award.i14"
+msgstr "Long service sniping weapons combat"
+
+msgid "games.bfbc2.award.i15"
+msgstr "Long service tactical weapons combat"
+
+msgid "games.bfbc2.award.i16"
+msgstr "Long service medical ops"
+
+msgid "games.bfbc2.award.i17"
+msgstr "Long service resupply ops"
+
+msgid "games.bfbc2.award.i18"
+msgstr "Long service surveillance ops"
+
+msgid "games.bfbc2.award.i19"
+msgstr "Long service maintenance ops"
+
+msgid "games.bfbc2.award.i20"
+msgstr "Combat veteran"
+
+msgid "games.bfbc2.award.i21"
+msgstr "Distinguished combat efficiency"
+
+msgid "games.bfbc2.award.i22"
+msgstr "Distinguished combat excellence"
+
+msgid "games.bfbc2.award.i23"
+msgstr "Long service light weapons combat"
+
+msgid "games.bfbc2.award.i24"
+msgstr "Distinguished explosives combat"
+
+msgid "games.bfbc2.award.i25"
+msgstr "Elite multiple target combat"
+
+msgid "games.bfbc2.award.i26"
+msgstr "Distinguished marksman combat"
+
+msgid "games.bfbc2.award.i27"
+msgstr "Superior service duty"
+
+msgid "games.bfbc2.award.i28"
+msgstr "Distinguished service duty"
+
+msgid "games.bfbc2.award.i29"
+msgstr "Elite service duty"
+
+msgid "games.bfbc2.award.i30"
+msgstr "Conquest good conduct"
+
+msgid "games.bfbc2.award.i31"
+msgstr "Rush good conduct"
+
+msgid "games.bfbc2.award.i32"
+msgstr "Exemplary weapon service"
+
+msgid "games.bfbc2.award.i33"
+msgstr "Exemplary combat service"
+
+msgid "games.bfbc2.award.i34"
+msgstr "Exemplary vehicle service"
+
+msgid "games.bfbc2.award.i35"
+msgstr "Elite service"
+
+msgid "games.bfbc2.award.i36"
+msgstr "Distinguished weapon knowledge"
+
+msgid "games.bfbc2.award.i37"
+msgstr "Distinguished vehicle knowledge"
+
+msgid "games.bfbc2.award.i38"
+msgstr "Distinguished artillery combat"
+
+msgid "games.bfbc2.award.i39"
+msgstr "Distinguished battlefield knowledge"
+
+msgid "games.bfbc2.award.i40"
+msgstr "Exemplary battlefield knowledge"
+
+msgid "games.bfbc2.award.i41"
+msgstr "Elite battlefield knowledge"
+
+msgid "games.bfbc2.award.i42"
+msgstr "Valorous battlefield knowledge"
+
+msgid "games.bfbc2.award.i43"
+msgstr "Squad combat assistance"
+
+msgid "games.bfbc2.award.i44"
+msgstr "Squad resupply ops"
+
+msgid "games.bfbc2.award.i45"
+msgstr "Squad repair ops"
+
+msgid "games.bfbc2.award.i46"
+msgstr "Squad medical ops"
+
+msgid "games.bfbc2.award.i47"
+msgstr "Squad surveillance ops"
+
+msgid "games.bfbc2.award.i48"
+msgstr "Squad tactical ops"
+
+msgid "games.bfbc2.award.i49"
+msgstr "Squad retaliation ops"
+
+msgid "games.bfbc2.award.i50"
+msgstr "Squad teamwork ops"
+
+msgid "games.bfbc2.award.di01"
+msgstr "Assault SPECACT knowledge"
+
+msgid "games.bfbc2.award.di02"
+msgstr "Engineer SPECACT knowledge"
+
+msgid "games.bfbc2.award.di03"
+msgstr "Medic SPECACT knowledge"
+
+msgid "games.bfbc2.award.di04"
+msgstr "Recon SPECACT knowledge"

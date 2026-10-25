@@ -1040,3 +1040,471 @@ msgstr "Generał armii"
 # The number of digits from which whole numbers group their digits, as 10 000.
 msgid "web.number.grouped_from"
 msgstr "5"
+
+# The locale whose conventions the pages write dates in, as 17 paź.
+msgid "web.locale"
+msgstr "pl"
+
+msgid "web.player.title"
+msgstr "Profil"
+
+msgid "web.player.tabs"
+msgstr "Profil"
+
+msgid "web.player.tab.stats"
+msgstr "Statystyki"
+
+msgid "web.player.tab.awards"
+msgstr "Odznaczenia"
+
+msgid "web.player.tab.dog_tags"
+msgstr "Nieśmiertelniki"
+
+msgid "web.player.rank.current"
+msgstr "Aktualny stopień"
+
+msgid "web.player.rank.next"
+msgstr "Następny stopień"
+
+#, python-format
+msgid "web.player.rank.toward"
+msgstr "Wynik do stopnia %(rank)s"
+
+#, python-format
+msgid "web.player.rank.of"
+msgstr "%(score)s z %(needed)s"
+
+#, python-format
+msgid "web.player.rank.to_go"
+msgstr "%(rank)s przy wyniku %(needed)s: brakuje %(left)s."
+
+msgid "web.player.rank.highest"
+msgstr "Najwyższy stopień w grze."
+
+msgid "web.player.now.match"
+msgstr "W meczu"
+
+msgid "web.player.now.menus"
+msgstr "Online w menu gry, poza serwerami."
+
+msgid "web.player.now.offline"
+msgstr ""
+"Teraz offline. Gdy ta osoba jest online, pojawia się tu serwer lub menu "
+"gry."
+
+#, python-format
+msgid "web.player.round"
+msgstr "Ta runda: wynik %(score)s, zabici %(kills)s, zgony %(deaths)s."
+
+msgid "web.player.combat_score"
+msgstr "Wynik – walka"
+
+msgid "web.player.award_score"
+msgstr "Wynik – odznaczenia"
+
+msgid "web.player.total_score"
+msgstr "Wynik ogółem"
+
+msgid "web.player.record"
+msgstr "Przebieg służby"
+
+msgid "web.player.kd"
+msgstr "Zab/zgn"
+
+#, python-format
+msgid "web.player.place"
+msgstr "%(place)s z %(everyone)s"
+
+msgid "web.player.unranked"
+msgstr "Jeszcze poza rankingiem"
+
+msgid "web.player.reported"
+msgstr "Statystyki takie, jak gra je przesyła na koniec każdej rundy."
+
+msgid "web.player.pins"
+msgstr "Szpilki"
+
+#, python-format
+msgid "web.player.pins.all"
+msgstr "Łącznie: %(count)s"
+
+msgid "web.player.pins.none"
+msgstr "Jeszcze bez szpilek."
+
+msgid "web.player.times"
+msgstr "razy"
+
+msgid "web.player.insignias"
+msgstr "Insygnia"
+
+#, python-format
+msgid "web.player.insignias.earned"
+msgstr "Zdobyte: %(count)s z %(all)s"
+
+msgid "web.player.earned"
+msgstr "Zdobyte"
+
+msgid "web.player.not_yet"
+msgstr "Jeszcze nie"
+
+msgid "web.player.awards.reported"
+msgstr "Odznaczenia takie, jak gra je przesyła na koniec każdej rundy."
+
+msgid "web.player.tag"
+msgstr "Nieśmiertelnik"
+
+#, python-format
+msgid "web.player.tags.caption"
+msgstr "Nieśmiertelniki zdobyte przez %(name)s, od najnowszych"
+
+msgid "web.player.tags.from"
+msgstr "Właściciel"
+
+msgid "web.player.tags.taken"
+msgstr "Ostatnio zdobyty"
+
+#, python-format
+msgid "web.player.tags.count"
+msgstr "Nieśmiertelniki: %(count)s"
+
+msgid "web.player.tags.about"
+msgstr ""
+"Jeden nieśmiertelnik na osobę, tak jak przechowuje je gra, z czasem "
+"ostatniego zdobycia."
+
+msgid "web.player.tags.none"
+msgstr "Nie zebrano jeszcze żadnych nieśmiertelników."
+
+msgid "web.player.unknown"
+msgstr "Nie znaleziono"
+
+#, python-format
+msgid "web.player.unknown.text"
+msgstr "W %(game)s na OpenFESL nie ma nikogo o nazwie %(name)s."
+
+msgid "web.player.unknown.search"
+msgstr "Ranking znajduje też osoby po części nazwy."
+
+msgid "web.player.unknown.find"
+msgstr "Szukaj w rankingu"
+
+msgid "games.bfbc2.kit.assault"
+msgstr "Wynik – szturmowiec"
+
+msgid "games.bfbc2.kit.medic"
+msgstr "Wynik – medyk"
+
+msgid "games.bfbc2.kit.engineer"
+msgstr "Wynik – mechanik"
+
+msgid "games.bfbc2.kit.recon"
+msgstr "Wynik – zwiadowca"
+
+msgid "games.bfbc2.kit.vehicles"
+msgstr "Wynik – pojazdy"
+
+msgid "games.bfbc2.award.p01"
+msgstr "Skuteczne użycie karabinu szturmowego"
+
+msgid "games.bfbc2.award.p02"
+msgstr "Skuteczność w walce granatnikiem"
+
+msgid "games.bfbc2.award.p03"
+msgstr "Skuteczne użycie karabinu wyborowego"
+
+msgid "games.bfbc2.award.p04"
+msgstr "Walka za pomocą pistoletu"
+
+msgid "games.bfbc2.award.p05"
+msgstr "Walka za pomocą strzelby"
+
+msgid "games.bfbc2.award.p06"
+msgstr "Skuteczność w walce wyrzutnią rakiet"
+
+msgid "games.bfbc2.award.p07"
+msgstr "Szpilka za skuteczne użycie RKM-u"
+
+msgid "games.bfbc2.award.p08"
+msgstr "Użycie pistoletu maszynowego"
+
+msgid "games.bfbc2.award.p09"
+msgstr "Walka bronią stacjonarną"
+
+msgid "games.bfbc2.award.p10"
+msgstr "Użycie materiałów wybuchowych"
+
+msgid "games.bfbc2.award.p11"
+msgstr "Szpilka za skuteczność w walce wręcz"
+
+msgid "games.bfbc2.award.p12"
+msgstr "Skuteczność w zwalczaniu pojazdów"
+
+msgid "games.bfbc2.award.p13"
+msgstr "Szpilka za skuteczność w walce"
+
+msgid "games.bfbc2.award.p14"
+msgstr "Doskonałe umiejętności w walce"
+
+msgid "games.bfbc2.award.p15"
+msgstr "Szpilka za asysty przy zabiciu"
+
+msgid "games.bfbc2.award.p16"
+msgstr "Szpilka zbawiciela"
+
+msgid "games.bfbc2.award.p17"
+msgstr "Szpilka mściciela"
+
+msgid "games.bfbc2.award.p18"
+msgstr "Szpilka strzelca wyborowego"
+
+msgid "games.bfbc2.award.p19"
+msgstr "Szpilka asa"
+
+msgid "games.bfbc2.award.p20"
+msgstr "Szpilka złotej drużyny"
+
+msgid "games.bfbc2.award.p21"
+msgstr "Szpilka adwersarza"
+
+msgid "games.bfbc2.award.p22"
+msgstr "Szpilka mściciela"
+
+msgid "games.bfbc2.award.p23"
+msgstr "Szpilka członka drużyny"
+
+msgid "games.bfbc2.award.p24"
+msgstr "Szpilka kół fortuny"
+
+msgid "games.bfbc2.award.p25"
+msgstr "Szpilka walki samochodowej"
+
+msgid "games.bfbc2.award.p26"
+msgstr "Szpilka walki pancernej"
+
+msgid "games.bfbc2.award.p27"
+msgstr "Szpilka walki nawodnej"
+
+msgid "games.bfbc2.award.p28"
+msgstr "Szpilka walki powietrznej"
+
+msgid "games.bfbc2.award.p29"
+msgstr "Szpilka niszczyciela przekaźników"
+
+msgid "games.bfbc2.award.p30"
+msgstr "Szpilka obrońcy stacji przekaźnikowej"
+
+msgid "games.bfbc2.award.p31"
+msgstr "Szpilka zwycięzcy gorączki"
+
+msgid "games.bfbc2.award.p32"
+msgstr "Szpilka zwycięzcy podboju"
+
+msgid "games.bfbc2.award.p33"
+msgstr "Zwycięzca drużynowego deathmatchu"
+
+msgid "games.bfbc2.award.p34"
+msgstr "Szpilka zwycięzcy gorączki drużynowej"
+
+msgid "games.bfbc2.award.p35"
+msgstr "Szpilka zdobywcy flagi"
+
+msgid "games.bfbc2.award.p36"
+msgstr "Szpilka obrońcy flagi"
+
+msgid "games.bfbc2.award.p37"
+msgstr "Szpilka zaopatrzeniowca"
+
+msgid "games.bfbc2.award.p38"
+msgstr "Szpilka za operacje obserwacyjne"
+
+msgid "games.bfbc2.award.p39"
+msgstr "Szpilka sanitariusza"
+
+msgid "games.bfbc2.award.p40"
+msgstr "Szpilka operacji inżynieryjnych"
+
+msgid "games.bfbc2.award.dp01"
+msgstr "Szpilka za doskonałe umiejętności szturmowca SPECACT"
+
+msgid "games.bfbc2.award.dp02"
+msgstr "Szpilka za doskonałe umiejętności inżyniera SPECACT"
+
+msgid "games.bfbc2.award.dp03"
+msgstr "Szpilka za doskonałe umiejętności sanitariusza SPECACT"
+
+msgid "games.bfbc2.award.dp04"
+msgstr "Szpilka za doskonałe umiejętności zwiadowcy SPECACT"
+
+msgid "games.bfbc2.award.dp05"
+msgstr "Szpilka za skuteczność w używaniu M16 SPECACT"
+
+msgid "games.bfbc2.award.dp06"
+msgstr "Szpilka za skuteczność w używaniu UMP SPECACT"
+
+msgid "games.bfbc2.award.dp07"
+msgstr "Szpilka za skuteczność w używaniu MG3 SPECACT"
+
+msgid "games.bfbc2.award.dp08"
+msgstr "Szpilka za skuteczność w używaniu M95 SPECACT"
+
+msgid "games.bfbc2.award.i01"
+msgstr "Doborowy snajper"
+
+msgid "games.bfbc2.award.i02"
+msgstr "Wzorowa skuteczność w walce pistoletem"
+
+msgid "games.bfbc2.award.i03"
+msgstr "Skuteczność w użyciu granatów"
+
+msgid "games.bfbc2.award.i04"
+msgstr "Wzorowa skuteczność w walce wręcz"
+
+msgid "games.bfbc2.award.i05"
+msgstr "Doskonała walka w zwarciu"
+
+msgid "games.bfbc2.award.i06"
+msgstr "Perfekcja w walce z wrogimi pojazdami"
+
+msgid "games.bfbc2.award.i07"
+msgstr "Długa służba z bronią szturmową"
+
+msgid "games.bfbc2.award.i08"
+msgstr "Długa służba z bronią wsparcia"
+
+msgid "games.bfbc2.award.i09"
+msgstr "Zwalczanie pojazdów"
+
+msgid "games.bfbc2.award.i10"
+msgstr "Długa służba radiolokacyjna"
+
+msgid "games.bfbc2.award.i11"
+msgstr "Wzorowa skuteczność odwetu"
+
+msgid "games.bfbc2.award.i12"
+msgstr "Przykładny snajper"
+
+msgid "games.bfbc2.award.i13"
+msgstr "Wzorowe użycie ładunków wybuchowych"
+
+msgid "games.bfbc2.award.i14"
+msgstr "Długa służba z bronią snajperską"
+
+msgid "games.bfbc2.award.i15"
+msgstr "Służba z wykorzystaniem strzelb"
+
+msgid "games.bfbc2.award.i16"
+msgstr "Długa służba medyczna"
+
+msgid "games.bfbc2.award.i17"
+msgstr "Długa służba zaopatrzeniowa"
+
+msgid "games.bfbc2.award.i18"
+msgstr "Długa służba obserwacyjna"
+
+msgid "games.bfbc2.award.i19"
+msgstr "Długa służba jako mechanik"
+
+msgid "games.bfbc2.award.i20"
+msgstr "Weteran wojenny"
+
+msgid "games.bfbc2.award.i21"
+msgstr "Wzorowa skuteczność w walce"
+
+msgid "games.bfbc2.award.i22"
+msgstr "Wzorowe umiejętności w walce"
+
+msgid "games.bfbc2.award.i23"
+msgstr "Długa służba z bronią maszynową"
+
+msgid "games.bfbc2.award.i24"
+msgstr "Wzorowa skuteczność użycia min"
+
+msgid "games.bfbc2.award.i25"
+msgstr "Za walkę z wieloma przeciwnikami"
+
+msgid "games.bfbc2.award.i26"
+msgstr "Wzorowa celność"
+
+msgid "games.bfbc2.award.i27"
+msgstr "Nadzwyczajna służba frontowa"
+
+msgid "games.bfbc2.award.i28"
+msgstr "Wzorowa służba frontowa"
+
+msgid "games.bfbc2.award.i29"
+msgstr "Doborowa służba frontowa"
+
+msgid "games.bfbc2.award.i30"
+msgstr "Dobra służba w trybie podboju"
+
+msgid "games.bfbc2.award.i31"
+msgstr "Dobra służba w trybie gorączki"
+
+msgid "games.bfbc2.award.i32"
+msgstr "Opanowanie wszystkich rodzajów broni"
+
+msgid "games.bfbc2.award.i33"
+msgstr "Przykładna służba bojowa"
+
+msgid "games.bfbc2.award.i34"
+msgstr "Przykładna służba w pojazdach"
+
+msgid "games.bfbc2.award.i35"
+msgstr "Doborowa służba"
+
+msgid "games.bfbc2.award.i36"
+msgstr "Wzorowa znajomość broni"
+
+msgid "games.bfbc2.award.i37"
+msgstr "Wzorowa znajomość pojazdów"
+
+msgid "games.bfbc2.award.i38"
+msgstr "Wzorowa walka artyleryjska"
+
+msgid "games.bfbc2.award.i39"
+msgstr "Wzorowa znajomość pola walki"
+
+msgid "games.bfbc2.award.i40"
+msgstr "Przykładna znajomość pola walki"
+
+msgid "games.bfbc2.award.i41"
+msgstr "Doborowa znajomość pola walki"
+
+msgid "games.bfbc2.award.i42"
+msgstr "Wyjątkowa znajomość pola walki"
+
+msgid "games.bfbc2.award.i43"
+msgstr "Drużynowe asysty bojowe"
+
+msgid "games.bfbc2.award.i44"
+msgstr "Drużynowe operacje zaopatrzeniowe"
+
+msgid "games.bfbc2.award.i45"
+msgstr "Drużynowe operacje naprawcze"
+
+msgid "games.bfbc2.award.i46"
+msgstr "Drużynowe operacje medyczne"
+
+msgid "games.bfbc2.award.i47"
+msgstr "Drużynowe operacje zwiadowcze"
+
+msgid "games.bfbc2.award.i48"
+msgstr "Drużynowe operacje taktyczne"
+
+msgid "games.bfbc2.award.i49"
+msgstr "Drużynowe operacje odwetowe"
+
+msgid "games.bfbc2.award.i50"
+msgstr "Współpraca w ramach drużyny"
+
+msgid "games.bfbc2.award.di01"
+msgstr "Wiedza szturmowca SPECACT"
+
+msgid "games.bfbc2.award.di02"
+msgstr "Wiedza inżyniera SPECACT"
+
+msgid "games.bfbc2.award.di03"
+msgstr "Wiedza sanitariusza SPECACT"
+
+msgid "games.bfbc2.award.di04"
+msgstr "Wiedza zwiadowcy SPECACT"

@@ -1,0 +1,46 @@
+/* A player's page: the name under the title block, and its tabs of stats, awards and dog tags. */
+@layer pages {
+  .player-name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-block: 6px;
+    font-family: var(--font-sans);
+    font-size: 22px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: normal;
+    overflow-wrap: anywhere;
+    text-transform: none;
+  }
+
+  /* A tab's two columns, the wider first, which stack on phones. */
+  .player-columns {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px;
+
+    > :first-child {
+      min-width: 0;
+      flex: 3 1 520px;
+    }
+
+    > :last-child {
+      min-width: 0;
+      flex: 2 1 400px;
+    }
+  }
+
+  .player-section {
+    margin-top: 14px;
+  }
+
+  /* A tab's sentence where it has nothing to list. */
+  .player-quiet {
+    margin-top: 2px;
+    background: var(--row-light);
+    padding: 14px 16px;
+    color: var(--ink);
+  }
+}

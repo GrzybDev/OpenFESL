@@ -1,0 +1,32 @@
+{#def activity, persona, tab: str, rank: int, tags: int #}
+{# A player's page around one of its tabs, which the content gives. #}
+{% set profile = url("/" ~ game.id ~ "/players/" ~ persona.name|urlencode) %}
+<Layout :title="persona.name">
+  <div id="live"
+       hx-get="{{ here }}"
+       hx-trigger="every 15s, refresh"
+       hx-select="#live"
+       hx-select-oob="#shell-games:outerMorph"
+       hx-swap="outerMorph">
+    <GameStatus :activity="activity" />
+    <GameMenu current="leaderboard" :exact="false" />
+
+    <PageHead labelledby="player-title">
+      <div class="enter-title page-title">
+        <h1 id="player-title">
+          <span class="title-block">{{ _("web.player.title") }}</span>
+          <span class="title-sub player-name"><Shield :rank="rank" />{{ persona.name }}</span>
+        </h1>
+      </div>
+      <nav aria-label="{{ _('web.player.tabs') }}" class="tabs">
+        <Tab :href="profile" :label="_('web.player.tab.stats')" :current="tab == 'stats'" />
+        <Tab :href="profile ~ '/awards'" :label="_('web.player.tab.awards')" :current="tab == 'awards'" />
+        <Tab :href="profile ~ '/dog-tags'" :label="_('web.player.tab.dog_tags')" :count="tags" :current="tab == 'dog-tags'" />
+      </nav>
+    </PageHead>
+
+    <Panel class="enter-panel">
+      {{ content }}
+    </Panel>
+  </div>
+</Layout>

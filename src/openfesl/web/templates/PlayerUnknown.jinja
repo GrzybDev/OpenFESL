@@ -1,0 +1,26 @@
+{#def activity, wanted: str #}
+{% set title = _("web.player.title") %}
+<Layout :title="title">
+  <GameStatus :activity="activity" />
+  <GameMenu current="leaderboard" :exact="false" />
+
+  <div class="player-unknown">
+    <div class="enter-title notice-title notice-narrow">
+      <TitleBlock :title="title">{{ _("web.player.unknown") }}</TitleBlock>
+    </div>
+    <Panel class="enter-panel">
+      <div class="player-unknown-text">
+        <p>{{ _("web.player.unknown.text", game=game.name, name=wanted) }}</p>
+        <p>{{ _("web.player.unknown.search") }}</p>
+      </div>
+      <form action="{{ url('/' ~ game.id ~ '/leaderboard') }}"
+            method="get"
+            role="search"
+            aria-labelledby="unknown-find">
+        <Bar id="unknown-find" large>{{ _("web.leaderboard.find") }}</Bar>
+        <SearchField id="unknown-name" name="player" :label="_('web.leaderboard.name')" :value="wanted" :hint="_('web.leaderboard.name.hint')" />
+        <FormButton icon="find">{{ _("web.player.unknown.find") }}</FormButton>
+      </form>
+    </Panel>
+  </div>
+</Layout>

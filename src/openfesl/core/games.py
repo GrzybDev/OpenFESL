@@ -3,9 +3,16 @@ from bisect import bisect_right
 from collections.abc import Iterable, Iterator
 from importlib.resources import files
 from importlib.resources.abc import Traversable
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Self
 
-from pydantic import BaseModel, ConfigDict, StringConstraints, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    PositiveInt,
+    StringConstraints,
+    field_validator,
+    model_validator,
+)
 
 from openfesl.core.policies import Policies
 
@@ -147,6 +154,7 @@ class Theme(BaseModel):
         subtitle: The bar under the title block.
         bright: Text on the backdrop and on black bars.
         soft: Secondary text on the backdrop.
+        tiers: The fill and glyph colour of earned insignias by their tier, from tier 1.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -170,6 +178,7 @@ class Theme(BaseModel):
     subtitle: Colour
     bright: Colour
     soft: Colour
+    tiers: list[tuple[Colour, Colour]] = []
 
 
 class Names(BaseModel):
@@ -252,6 +261,51 @@ class Listing(BaseModel):
     roster: Roster | None = None
 
 
+# The id of a glyph in the web pages' icons.
+type Glyph = Annotated[str, StringConstraints(pattern=r"^[a-z][a-z-]*$")]
+
+
+class Insignia(BaseModel):
+    """How a player's page draws an insignia.
+
+    Attributes:
+        glyph: The glyph of what the insignia is earned for.
+        tier: The rank word in the insignia's name, from 1 for none; it picks the insignia's
+            colours from the game's theme.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    glyph: Glyph
+    tier: PositiveInt = 1
+
+
+class Awards(BaseModel):
+    """The awards a player's page lists in this order, by their codes in the game's stats.
+
+    Attributes:
+        count: The key of the stat that counts how often an award was earned, with {code}
+            standing for the award's code.
+        pins: The pins, which players earn again and again, each with the glyph of what it is
+            earned for.
+        insignias: The insignias, which players earn once.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    count: str = "{code}"
+    pins: dict[str, Glyph] = {}
+    insignias: dict[str, Insignia] = {}
+
+    def key(self, code: str) -> str:
+        """Return the key of the stat that counts an award.
+
+        Args:
+            code: The award's code.
+        """
+        return self.count.replace("{code}", code)
+
+
 class Stats(BaseModel):
     """The stats the web pages show, each as the keys of the game's stats whose values it sums.
 
@@ -260,21 +314,30 @@ class Stats(BaseModel):
 
     Attributes:
         score: The total score.
+        award_score: The part of the total score that awards earned.
         kills: The kills.
         deaths: The deaths.
         dog_tags: The dog tags taken, every time counted.
         time: The time played, in seconds.
+        kits: The score earned with each kit or in vehicles, by its name in the catalogues.
         ranks: The total score each rank needs, from rank 1 on; rank 0 needs none.
+        awards: The awards players earn.
+        dog_tag_record: The record in which a player's game keeps the dog tags it took, one per
+            player whose tag it took.
     """
 
     model_config = ConfigDict(frozen=True)
 
     score: list[str] = []
+    award_score: list[str] = []
     kills: list[str] = []
     deaths: list[str] = []
     dog_tags: list[str] = []
     time: list[str] = []
+    kits: dict[str, list[str]] = {}
     ranks: list[int] = []
+    awards: Awards = Awards()
+    dog_tag_record: str | None = None
 
     def rank(self, score: float) -> int:
         """Return the rank that a total score reaches.
@@ -283,6 +346,14 @@ class Stats(BaseModel):
             score: The total score.
         """
         return bisect_right(self.ranks, score)
+
+    def needed(self, rank: int) -> int:
+        """Return the total score a rank needs.
+
+        Args:
+            rank: The rank, from 0.
+        """
+        return self.ranks[rank - 1] if rank > 0 else 0
 
     def sums(self) -> dict[str, list[str]]:
         """Return the keys of each stat the leaderboard shows, by the stat's name."""
@@ -293,6 +364,11 @@ class Stats(BaseModel):
             "dog_tags": self.dog_tags,
             "time": self.time,
         }
+
+    def profile(self) -> dict[str, list[str]]:
+        """Return the keys of each stat a player's page shows, by the stat's name."""
+        kits = {f"kit_{name}": keys for name, keys in self.kits.items()}
+        return self.sums() | {"award_score": self.award_score} | kits
 
 
 class Game(BaseModel):
@@ -370,6 +446,13 @@ class Game(BaseModel):
                 raise ValueError(f"partition {value!r} does not start with '/'")
             return Partition(domain=domain, sub_domain=sub_domain)
         return value
+
+    @model_validator(mode="after")
+    def _check_tiers(self) -> Self:
+        for code, insignia in self.stats.awards.insignias.items():
+            if insignia.tier > len(self.theme.tiers):
+                raise ValueError(f"insignia {code} has tier {insignia.tier}, which the theme lacks")
+        return self
 
 
 class Games:

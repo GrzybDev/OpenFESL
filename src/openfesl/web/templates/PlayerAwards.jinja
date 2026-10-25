@@ -1,0 +1,45 @@
+{#def activity, persona, tab: str, values, rank: int, tags: int, pins: list, pins_total: int, insignias: list, earned: int, counts #}
+<Player :activity="activity"
+        :persona="persona"
+        :tab="tab"
+        :rank="rank"
+        :tags="tags">
+  <div class="player-columns awards">
+    <section aria-labelledby="player-pins">
+      <Bar id="player-pins" :extra="_('web.player.pins.all', count=number(pins_total))">{{ _("web.player.pins") }}</Bar>
+      {% if pins %}
+        <ul class="pins">
+          {% for code in pins %}
+            <li>
+              <span aria-hidden="true"><span class="pin-mark"><Icon :name="game.stats.awards.pins[code]" :size="22" /></span></span>
+              <span class="award-name">{{ _("games." ~ game.id ~ ".award." ~ code) }}</span>
+              <span class="pin-count"><span aria-hidden="true">×</span><span class="sr-only">{{ _("web.player.times") }}</span>{{ number(counts[code]) }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="body-text player-quiet">{{ _("web.player.pins.none") }}</p>
+      {% endif %}
+    </section>
+    <section aria-labelledby="player-insignias">
+      <Bar id="player-insignias" :extra="_('web.player.insignias.earned', count=number(earned), all=number(insignias|length))">{{ _("web.player.insignias") }}</Bar>
+      <ul class="insignias">
+        {% for code in insignias %}
+          {% set insignia = game.stats.awards.insignias[code] %}
+          <li {% if code in counts %} class="insignia-earned" data-tier="{{ insignia.tier }}"{% endif %}>
+            <span aria-hidden="true" class="insignia-mark">
+              <svg width="40" height="40">
+                <use href="{{ static('icons.svg') }}#hex" />
+              </svg>
+            <Icon :name="insignia.glyph" :size="20" /></span>
+            <span><span class="award-name">{{ _("games." ~ game.id ~ ".award." ~ code) }}</span><span class="insignia-state">{{ _("web.player.earned") if code in counts else _("web.player.not_yet") }}</span></span>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+  <div class="awards-foot">
+    <p class="awards-score">{{ _("web.player.award_score") }}<span>+{{ number(values.award_score|round|int) }}</span></p>
+    <p class="body-text">{{ _("web.player.awards.reported") }}</p>
+  </div>
+</Player>

@@ -1,0 +1,187 @@
+{#def activity, persona, tab: str, values, rank: int, tags: int, place: int | None, everyone: int, online: bool, server #}
+{% set ranks = game.stats.ranks %}
+{% set next_rank = rank + 1 if rank < ranks|length else None %}
+{% set score = values.score|round|int %}
+{% set award_score = values.award_score|round|int %}
+{% set kits = game.stats.kits.keys()|list %}
+{% set profile = url("/" ~ game.id ~ "/players/" ~ persona.name|urlencode) %}
+{% set kit_sum = namespace(value=0) %}
+{% for kit in kits %}
+  {% set kit_sum.value = kit_sum.value + values["kit_" ~ kit] %}
+{% endfor %}
+<Player :activity="activity"
+        :persona="persona"
+        :tab="tab"
+        :rank="rank"
+        :tags="tags">
+  <div class="player-columns">
+
+    <div>
+      <section aria-labelledby="player-rank">
+        <h2 id="player-rank" class="sr-only">{{ _("web.leaderboard.rank") }}</h2>
+        <dl class="ranks{% if next_rank %} ranks-two{% endif %}">
+          <div>
+            <dt class="rank-current"><span>{{ _("web.player.rank.current") }}</span></dt>
+            <dd>
+              <span aria-hidden="true" class="rank-mark">
+                <svg width="68" height="80">
+                  <use href="{{ static('icons.svg') }}#shield" />
+                </svg><span>{{ rank }}</span></span>
+                <span class="rank-name">{{ _("games." ~ game.id ~ ".rank." ~ rank) }}</span>
+                <span class="rank-number">{{ _("web.rank.number", rank=number(rank)) }}</span>
+              </dd>
+            </div>
+            {% if next_rank %}
+              <div>
+                <dt>{{ _("web.player.rank.next") }}</dt>
+                <dd class="rank-ahead">
+                  <span aria-hidden="true" class="rank-mark">
+                    <svg width="68" height="80">
+                      <use href="{{ static('icons.svg') }}#shield" />
+                    </svg><span>{{ next_rank }}</span></span>
+                    <span class="rank-name">{{ _("games." ~ game.id ~ ".rank." ~ next_rank) }}</span>
+                    <span class="rank-number">{{ _("web.rank.number", rank=number(next_rank)) }}</span>
+                  </dd>
+                </div>
+            {% endif %}
+          </dl>
+          <div class="rank-progress">
+            {% if next_rank %}
+              {% set low = game.stats.needed(rank) %}
+              {% set high = game.stats.needed(next_rank) %}
+              <div role="progressbar"
+                   aria-label="{{ _('web.player.rank.toward', rank=_('games.' ~ game.id ~ '.rank.' ~ next_rank)) }}"
+                   aria-valuemin="{{ low }}"
+                   aria-valuemax="{{ high }}"
+                   aria-valuenow="{{ score }}"
+                   aria-valuetext="{{ _('web.player.rank.of', score=number(score), needed=number(high)) }}"
+                   class="progress">
+                <svg viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true">
+                  <rect class="grow" width="{{ (score - low) / (high - low) }}" height="1" />
+                </svg>
+              </div>
+              <p class="progress-ends"><span>{{ number(score) }}</span><span>{{ number(high) }}</span></p>
+              <p class="progress-text">{{ _("web.player.rank.to_go", rank=_("games." ~ game.id ~ ".rank." ~ next_rank), needed=number(high), left=number(high - score)) }}</p>
+            {% else %}
+              <p class="progress-text">{{ _("web.player.rank.highest") }}</p>
+            {% endif %}
+          </div>
+        </section>
+
+        <section aria-labelledby="player-now" class="player-section">
+          {% set now_state %}{% if server %}{{ _("web.player.now.match") }}{% elif online %}{{ _("web.activity.in_menus") }}{% else %}{{ _("web.leaderboard.offline_now") }}{% endif %}{% endset %}
+          <Bar id="player-now" :extra="now_state">{{ _("web.leaderboard.column.now") }}</Bar>
+          {% if server %}
+            {% set href = url("/" ~ game.id ~ "/servers/" ~ server.slug) %}
+            <div class="table-scroll player-server-scroll">
+              <div class="player-server">
+                <div class="player-server-badges">
+                  <Badges :server="server" />
+                </div>
+                <div class="player-server-name"><a href="{{ href }}" class="server-name">{{ server.name }}</a></div>
+                <div class="player-server-players">
+                  <span class="cell-taken">{{ number(server.players) }}&nbsp;/&nbsp;{{ number(server.max_players) }}<span class="cell-free"><Free :server="server" /></span></span>
+                  <Seats :taken="server.players" :slots="server.max_players" />
+                </div>
+                <div class="cell-end">
+                  <EndSquare :href="href" :label="_('web.server.page.of', name=server.name)" />
+                </div>
+              </div>
+            </div>
+            <div class="row-details player-match">
+              <div>
+                <p class="row-facts"><Published kind="mode" :label="server.mode" /> · <Published kind="map" :label="server.map" />{% if server.hardcore %} · {{ _("web.server.hardcore") }}{% endif %} · <Published kind="region" :label="server.region" /></p>
+                {% for seat in server.roster if seat.name == persona.name and "score" in seat.numbers and "kills" in seat.numbers and "deaths" in seat.numbers %}
+                  <p class="row-text">{{ _("web.player.round", score=number(seat.numbers.score), kills=number(seat.numbers.kills), deaths=number(seat.numbers.deaths)) }}</p>
+                {% endfor %}
+              </div>
+              <SmallAction :href="href ~ '?player=' ~ persona.name|urlencode" :label="_('web.server.scoreboard')" />
+            </div>
+          {% else %}
+            <p class="body-text player-quiet">{{ _("web.player.now.menus") if online else _("web.player.now.offline") }}</p>
+          {% endif %}
+        </section>
+      </div>
+
+      <div>
+        <section aria-labelledby="player-score">
+          <h2 id="player-score" class="sr-only">{{ _("web.leaderboard.column.score") }}</h2>
+          <dl class="score-sheet">
+            {% for kit in kits %}
+              <div class="kit">
+                <dt>
+                  <span aria-hidden="true"><span class="badge"><Icon :name="'kit-' ~ kit" fill="#0A0A0A" /></span></span><span><span>{{ _("games." ~ game.id ~ ".kit." ~ kit) }}</span><svg viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true">
+                    <rect class="grow" width="{{ (values['kit_' ~ kit] / kit_sum.value) if kit_sum.value else 0 }}" height="1" />
+                    </svg>
+                  </span>
+                </dt>
+                <dd>
+                  {{ number(values["kit_" ~ kit]|round|int) }}
+                </dd>
+              </div>
+            {% endfor %}
+            <div class="score-sum">
+              <dt>{{ _("web.player.combat_score") }}</dt>
+              <dd>
+                +{{ number(score - award_score) }}
+              </dd>
+            </div>
+            <div class="score-sum score-linked">
+              <dt>{{ _("web.player.award_score") }}</dt>
+              <dd>
+                <a href="{{ profile }}/awards">+{{ number(award_score) }}<Icon name="go" :size="14" stroke="currentColor" /></a>
+              </dd>
+            </div>
+            <div class="score-total">
+              <dt>{{ _("web.player.total_score") }}</dt>
+              <dd>
+                ={{ number(score) }}
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        <section aria-labelledby="player-record" class="player-record-section">
+          <h2 id="player-record" class="sr-only">{{ _("web.player.record") }}</h2>
+          <dl class="record">
+            <div>
+              <dt>{{ _("web.leaderboard.column.kills") }}</dt>
+              <dd>
+                {{ number(values.kills|round|int) }}
+              </dd>
+            </div>
+            <div>
+              <dt>{{ _("web.leaderboard.column.deaths") }}</dt>
+              <dd>
+                {{ number(values.deaths|round|int) }}
+              </dd>
+            </div>
+            <div class="record-alt">
+              <dt>{{ _("web.player.kd") }}</dt>
+              <dd>
+                {{ number(values.kills / values.deaths if values.deaths > 0 else values.kills, 2) }}
+              </dd>
+            </div>
+            <div class="record-alt record-linked">
+              <dt>{{ _("web.leaderboard.column.dog_tags") }}</dt>
+              <dd>
+                <a href="{{ profile }}/dog-tags">{{ number(values.dog_tags|round|int) }}<Icon name="go" :size="14" stroke="#0A0A0A" /></a>
+              </dd>
+            </div>
+            <div>
+              <dt>{{ _("web.leaderboard.stat.time") }}</dt>
+              <dd>
+                {{ _("web.leaderboard.hours", hours=number((values.time // 3600)|int)) }}
+              </dd>
+            </div>
+            <div{% if place %} class="record-linked"{% endif %}>
+              <dt>{{ _("web.leaderboard.title") }}</dt>
+              <dd>{% if place %}<a href="{{ url('/' ~ game.id ~ '/leaderboard') }}?player={{ persona.name|urlencode }}">{{ _("web.player.place", place=number(place), everyone=number(everyone)) }}<Icon name="go" :size="14" stroke="#0A0A0A" /></a>{% else %}<span class="record-unranked">{{ _("web.player.unranked") }}</span>{% endif %}</dd>
+            </div>
+          </dl>
+          <p class="body-text side-note">{{ _("web.player.reported") }}</p>
+        </section>
+      </div>
+
+    </div>
+  </Player>

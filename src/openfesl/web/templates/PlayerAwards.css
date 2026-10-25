@@ -1,0 +1,169 @@
+/* A player's awards: the pins with how often each was earned, and the insignias earned or not
+   yet, in OpenFESL's own marks. */
+@layer pages {
+  .awards > :last-child {
+    flex-basis: 380px;
+  }
+
+  .pins,
+  .insignias {
+    display: grid;
+    gap: 2px;
+    margin-top: 2px;
+  }
+
+  .pins {
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    color: var(--ink);
+
+    li {
+      display: grid;
+      min-height: 64px;
+      grid-template-columns: 60px minmax(0, 1fr) auto;
+      align-items: center;
+      background: var(--row-light);
+
+      > :first-child {
+        display: grid;
+        place-items: center;
+      }
+    }
+
+    .award-name {
+      padding: 8px 4px;
+    }
+  }
+
+  .pin-mark {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border: 1px solid var(--badge-edge);
+    border-radius: 9999px;
+    background: var(--badge);
+    fill: var(--ink);
+  }
+
+  .award-name {
+    font-size: 14px;
+    line-height: 1.15;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .pin-count {
+    padding-inline: 14px;
+    font-size: 22px;
+    line-height: 1;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+
+    > [aria-hidden] {
+      font-size: 15px;
+      font-weight: 700;
+    }
+  }
+
+  .insignias {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+
+    li {
+      display: grid;
+      min-height: 64px;
+      grid-template-columns: 56px minmax(0, 1fr);
+      align-items: center;
+      background: var(--row);
+      color: var(--dim);
+
+      > :last-child {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        padding: 8px 12px 8px 4px;
+      }
+    }
+
+    .insignia-earned {
+      background: var(--row-light);
+      color: var(--ink);
+    }
+  }
+
+  .insignia-mark {
+    position: relative;
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    justify-self: center;
+    fill: var(--dim);
+
+    > svg:first-child {
+      position: absolute;
+      inset: 0;
+      fill: none;
+      stroke: var(--dim);
+      stroke-width: 1.5;
+    }
+
+    > svg:last-child {
+      position: relative;
+    }
+
+    .insignia-earned & {
+      fill: var(--mark-ink);
+
+      > svg:first-child {
+        fill: var(--mark);
+        stroke: var(--badge-edge);
+        stroke-width: 1;
+      }
+    }
+  }
+
+  .insignia-state {
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .awards-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 20px;
+    margin-top: 12px;
+
+    > .body-text {
+      color: var(--soft);
+    }
+  }
+
+  .awards-score {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    background: var(--bar-dark);
+    padding-inline: 14px;
+    font-size: 14px;
+    line-height: calc(1.25 / 0.875);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--bright);
+    text-transform: uppercase;
+
+    > span {
+      font-size: 16px;
+      line-height: 1.5;
+      letter-spacing: normal;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+}

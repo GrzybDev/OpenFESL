@@ -1,0 +1,416 @@
+/* A player's stats, as the game's stats screen: the rank and the next, the score by kit and the
+   combat record. */
+@layer pages {
+  .ranks {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+
+    > div {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+    }
+
+    dt {
+      display: flex;
+      min-height: 40px;
+      align-items: center;
+      justify-content: center;
+      background: var(--ink);
+      padding-inline: 12px;
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.1;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    dd {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-top: 2px;
+      background: var(--row-light);
+      padding: 26px 12px 20px;
+      text-align: center;
+      color: var(--ink);
+    }
+  }
+
+  .ranks-two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* The current rank's label is an arrow on the accent pointing at the next one. */
+  .ranks .rank-current {
+    padding: 0;
+
+    > span {
+      display: flex;
+      min-height: 40px;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%);
+      background: var(--accent);
+      padding: 0 26px 0 12px;
+      color: var(--ink);
+    }
+  }
+
+  .rank-mark {
+    position: relative;
+    display: grid;
+    width: 68px;
+    height: 80px;
+    place-items: center;
+
+    svg {
+      position: absolute;
+      inset: 0;
+      fill: var(--badge);
+      stroke: var(--badge-edge);
+    }
+
+    > span {
+      position: relative;
+      margin-top: -9px;
+      font-size: 28px;
+      line-height: 1;
+      font-weight: 800;
+    }
+  }
+
+  .ranks .rank-ahead {
+    border-left: 2px dashed var(--off-text);
+
+    svg {
+      fill: none;
+      stroke: var(--dim);
+    }
+
+    .rank-mark > span {
+      color: var(--dim);
+    }
+  }
+
+  .rank-name {
+    font-size: 19px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .rank-number {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--dim);
+    text-transform: uppercase;
+  }
+
+  .rank-progress {
+    margin-top: 2px;
+    background: var(--row-light);
+    padding: 16px;
+    color: var(--ink);
+  }
+
+  .progress {
+    height: 10px;
+    background: var(--track);
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 10px;
+    }
+  }
+
+  .grow {
+    fill: var(--accent);
+  }
+
+  .progress-ends {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 8px;
+    font-size: 16px;
+    line-height: 1;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .progress-text {
+    margin-top: 8px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 500;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  .player-server-scroll {
+    padding-bottom: 0;
+  }
+
+  .player-server {
+    display: grid;
+    min-width: 460px;
+    grid-template-columns: 64px minmax(180px, 1fr) 160px 44px;
+    gap: 2px;
+    color: var(--ink);
+
+    > :not(.cell-end) {
+      display: flex;
+      min-height: 44px;
+      align-items: center;
+      background: var(--row);
+      padding-inline: 10px;
+    }
+  }
+
+  .player-server-badges {
+    gap: 4px;
+
+    .player-server > & {
+      padding-inline: 6px;
+    }
+  }
+
+  .player-server > .player-server-name {
+    padding-inline: 12px;
+  }
+
+  .player-server > .player-server-players {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  /* On phones the players go under the server's name, so the row needs no sideways scroll. */
+  @media (width < 40rem) {
+    .player-server {
+      min-width: 0;
+      grid-template-columns: 64px minmax(0, 1fr) 44px;
+
+      > .player-server-players {
+        grid-row: 2;
+        grid-column: 1 / -1;
+        padding-block: 8px;
+      }
+    }
+  }
+
+  .player-match {
+    margin-top: 2px;
+
+    > div:first-child {
+      flex-basis: 300px;
+    }
+  }
+
+  .score-sheet {
+    display: grid;
+    gap: 2px;
+    color: var(--ink);
+
+    > div {
+      display: flex;
+      min-height: 44px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-inline: 14px;
+    }
+
+    dd {
+      font-size: 16px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .score-sheet > .kit {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0;
+    background: var(--score-row);
+    padding: 0;
+
+    &:nth-child(even) {
+      background: var(--score-row-alt);
+    }
+
+    dt {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+
+      > :first-child {
+        display: grid;
+        flex: 0 0 44px;
+        place-items: center;
+      }
+
+      > :last-child {
+        min-width: 0;
+        flex: 1;
+        padding-inline: 4px;
+
+        > span {
+          display: block;
+          font-size: 13px;
+          font-weight: 700;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+        }
+      }
+
+      > :last-child > svg {
+        display: block;
+        width: 100%;
+        height: 4px;
+        margin-top: 6px;
+        background: var(--track);
+      }
+    }
+
+    dd {
+      padding-inline: 14px;
+    }
+  }
+
+  .score-sum {
+    background: var(--bar-dark);
+    color: var(--bright);
+
+    dt {
+      font-size: 14px;
+      line-height: calc(1.25 / 0.875);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+  }
+
+  .score-sheet > .score-linked {
+    padding-right: 0;
+
+    svg {
+      color: var(--accent);
+    }
+  }
+
+  .score-sheet > .score-total {
+    min-height: 52px;
+    background: var(--accent);
+    color: var(--ink);
+
+    dt {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    dd {
+      font-size: 19px;
+      font-weight: 800;
+    }
+  }
+
+  /* A stat that leads to its own page underlines its link. */
+  :is(.score-linked, .record-linked) a {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 14px 0 8px;
+    font-size: 16px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-decoration-line: underline;
+  }
+
+  .player-record-section {
+    margin-top: 10px;
+  }
+
+  .record {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2px;
+    color: var(--ink);
+
+    > div {
+      display: flex;
+      min-height: 44px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--score-row);
+      padding-inline: 14px;
+    }
+
+    > .record-alt {
+      background: var(--score-row-alt);
+    }
+
+    > .record-linked {
+      padding-right: 0;
+    }
+
+    dt {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    dd {
+      font-size: 16px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .record-unranked {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* M7: progress bars grow from zero on first view. */
+  .grow {
+    transform-box: fill-box;
+    transform-origin: left;
+    animation: grow 600ms var(--ease-menu) both;
+
+    html.refreshed & {
+      animation: none;
+    }
+  }
+
+  @keyframes grow {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .grow {
+      animation: none;
+    }
+  }
+}

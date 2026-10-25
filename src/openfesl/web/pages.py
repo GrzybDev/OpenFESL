@@ -8,6 +8,8 @@ from functools import cache
 from pathlib import Path
 from typing import Any
 
+from babel import Locale
+from babel.dates import format_skeleton
 from babel.numbers import format_decimal
 from fastapi import Request
 from fastapi.exception_handlers import http_exception_handler
@@ -93,6 +95,15 @@ def _number(context: Context, value: float, places: int | None = None) -> str:
     return format_decimal(value, pattern, locale=language, group_separator=grouped)
 
 
+@pass_context
+def _moment(context: Context, value: datetime) -> str:
+    # A day with its year and a time of day, as the page's language writes them.
+    locale = Locale.parse(translate("web.locale", context["language"]))
+    day = format_skeleton("yMMMd", value, tzinfo=UTC, locale=locale)
+    time = format_skeleton("Hm", value, tzinfo=UTC, locale=locale)
+    return str(locale.datetime_formats["medium"]).format(time, day)
+
+
 def page_links(page: int, pages: int) -> list[int | None]:
     """Return the pages a list links to from one of them, with None where some are left out.
 
@@ -132,6 +143,7 @@ _catalog = Catalog(
         "number": _number,
         "static": static_url,
         "page_links": page_links,
+        "moment": _moment,
     },
 )
 # The catalogue keeps its own environment, which takes the given one's escaping but not its
@@ -275,9 +287,17 @@ def _address(request: Request) -> tuple[str, str]:
 
 def _theme_rule(game: Game) -> str:
     values = game.theme.model_dump()
+    tiers = values.pop("tiers")
     properties = [f'--area-font:"{values.pop("font")}","Barlow",system-ui,sans-serif']
     properties += [f"--{name.replace('_', '-')}:{value}" for name, value in values.items()]
-    return f'[data-game="{game.id}"]{{{";".join(properties)}}}\n'
+    scope = f'[data-game="{game.id}"]'
+    rules = [f"{scope}{{{';'.join(properties)}}}"]
+    # An earned insignia names its tier, since the pages' policy allows no inline styles.
+    rules += [
+        f'{scope} [data-tier="{tier}"]{{--mark:{fill};--mark-ink:{ink}}}'
+        for tier, (fill, ink) in enumerate(tiers, 1)
+    ]
+    return "".join(f"{rule}\n" for rule in rules)
 
 
 # The modification time is part of the key, so that a rebuilt file gets a new version.

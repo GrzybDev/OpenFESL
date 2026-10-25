@@ -1,0 +1,56 @@
+{#def activity, persona, tab: str, values, rank: int, tags: int, listed: list, view, pages: int, first: int #}
+{% set profile = url("/" ~ game.id ~ "/players/" ~ persona.name|urlencode) %}
+<Player :activity="activity"
+        :persona="persona"
+        :tab="tab"
+        :rank="rank"
+        :tags="tags">
+  <section aria-labelledby="player-tags">
+    <h2 id="player-tags" class="sr-only">{{ _("web.player.tags.caption", name=persona.name) }}</h2>
+    {% if listed %}
+      <div class="table-scroll table-scroll-flush">
+        <div role="table" aria-labelledby="player-tags" class="table tags">
+          <div role="rowgroup">
+            <div role="row" class="tag-columns">
+              <div role="columnheader" class="column-head"><span class="sr-only">{{ _("web.player.tag") }}</span></div>
+              <div role="columnheader"
+                   class="column-head"><span class="sr-only">{{ _("web.leaderboard.rank") }}</span></div>
+              <div role="columnheader" class="column-head">{{ _("web.player.tags.from") }}</div>
+              <div role="columnheader"
+                   aria-sort="descending"
+                   class="column-head column-sorted">
+                {{ _("web.player.tags.taken") }}<Icon name="down" :size="14" stroke="currentColor" />
+              </div>
+              <div role="columnheader"><span class="sr-only">{{ _("web.leaderboard.page") }}</span></div>
+            </div>
+          </div>
+          <div role="rowgroup" class="enter-rows table-rows">
+            {% for tag in listed %}
+              {% set href = url("/" ~ game.id ~ "/players/" ~ tag.name|urlencode) %}
+              <div role="row" class="line tag-columns">
+                <div role="cell" class="line-place line-cell">
+                  <Badge name="tag" />
+                </div>
+                <div role="cell" class="line-shield line-cell">
+                  <Shield :rank="tag.rank" />
+                </div>
+                <div role="cell" class="line-who line-cell"><a href="{{ href }}"><span class="line-name">{{ tag.name }}</span><span class="line-rank">{{ _("games." ~ game.id ~ ".rank." ~ tag.rank) }}</span></a></div>
+                <div role="cell" class="line-cell tag-taken">{{ moment(tag.taken) }}</div>
+                <div role="cell" class="cell-end">
+                  <EndSquare :href="href" :label="_('web.leaderboard.page.of', name=tag.name)" />
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="list-foot">
+        <p><span class="list-count">{{ _("web.player.tags.count", count=number(tags)) }}</span><span class="list-range">{{ _("web.pages.showing", first=number(first), last=number(first + listed|length - 1), page=number(view.page), pages=number(pages)) }}</span></p>
+        <Pager :base="profile ~ '/dog-tags'" :view="view" :pages="pages" />
+      </div>
+      <p class="body-text side-note">{{ _("web.player.tags.about") }}</p>
+    {% else %}
+      <p class="body-text player-quiet tags-none">{{ _("web.player.tags.none") }}</p>
+    {% endif %}
+  </section>
+</Player>

@@ -65,6 +65,14 @@ score_row_alt = "#DADADA"
 subtitle = "#0A0A0A"
 bright = "#F4F4EE"
 soft = "#D9D9CD"
+# Earned insignias' fill and glyph colour by tier: olive, bronze, silver, gold, and gold on black.
+tiers = [
+    ["#94AC54", "#0A0A0A"],
+    ["#C08A4E", "#0A0A0A"],
+    ["#D2D5CC", "#0A0A0A"],
+    ["#E0A526", "#0A0A0A"],
+    ["#0A0A0A", "#E0A526"],
+]
 
 # How the web pages read the games that dedicated servers host, from the attributes the R34
 # dedicated server publishes. A squad holds four players.
@@ -136,6 +144,7 @@ fields = ["name", "", "", "", ""]
 # score buckets.
 [stats]
 score = ["sc_general", "sc_team", "sc_bonus", "sc_squad", "sc_objective", "sc_award"]
+award_score = ["sc_award"]
 kills = ["kills"]
 deaths = ["deaths"]
 dog_tags = ["dogt"]
@@ -147,6 +156,132 @@ ranks = [6500, 11000, 18500, 28000, 40000, 53000, 68000, 84000, 100000, 120000, 
     472000, 537000, 620000, 720000, 832000, 956000, 1090000, 1240000, 1400000, 1550000, 1730000,
     1900000, 2100000, 2300000, 2500000, 2700000, 2900000, 3140000, 3370000, 3600000, 3800000,
     4010000, 4300000, 4600000, 4900000, 5100000, 5400000]
+
+# The dog tags a player's game took, as it keeps them.
+dog_tag_record = "dogtags"
+
+# The score earned with each kit and in vehicles; the score buckets above hold the same points.
+[stats.kits]
+assault = ["sc_assault"]
+medic = ["sc_support"]
+engineer = ["sc_demo"]
+recon = ["sc_recon"]
+vehicles = ["sc_vehicle"]
+
+# The pins and insignias of the game's award data (Persistence/MP_Awards), those of the SPECACT
+# kits last. The game counts each award in its code followed by _00, and keeps the day it was last
+# earned in _01.
+[stats.awards]
+count = "{code}_00"
+
+# Each pin's glyph: what it is earned for.
+[stats.awards.pins]
+p01 = "rifle"
+p02 = "launcher"
+p03 = "sniper"
+p04 = "pistol"
+p05 = "shotgun"
+p06 = "rocket"
+p07 = "machine-gun"
+p08 = "smg"
+p09 = "mounted-gun"
+p10 = "explosive"
+p11 = "knife"
+p12 = "mine"
+p13 = "crosshair"
+p14 = "star"
+p15 = "assist"
+p16 = "guard"
+p17 = "payback"
+p18 = "marksman"
+p19 = "spade"
+p20 = "trophy"
+p21 = "skull"
+p22 = "payback"
+p23 = "squad"
+p24 = "wheel"
+p25 = "car"
+p26 = "tank"
+p27 = "boat"
+p28 = "helicopter"
+p29 = "objective"
+p30 = "objective"
+p31 = "laurel"
+p32 = "laurel"
+p33 = "laurel"
+p34 = "laurel"
+p35 = "flag"
+p36 = "flag"
+p37 = "ammo"
+p38 = "eye"
+p39 = "kit-medic"
+p40 = "wrench"
+dp01 = "kit-assault"
+dp02 = "kit-engineer"
+dp03 = "kit-medic"
+dp04 = "kit-recon"
+dp05 = "rifle"
+dp06 = "smg"
+dp07 = "machine-gun"
+dp08 = "sniper"
+
+# Each insignia's glyph, and its tier from the rank word of its name: 1 for none, Long service
+# or Superior, then Distinguished, Exemplary, Elite and 5 for Valorous.
+[stats.awards.insignias]
+i01 = { glyph = "marksman", tier = 4 }
+i02 = { glyph = "pistol", tier = 2 }
+i03 = { glyph = "grenade", tier = 2 }
+i04 = { glyph = "knife", tier = 2 }
+i05 = { glyph = "knife", tier = 4 }
+i06 = { glyph = "mine", tier = 2 }
+i07 = { glyph = "rifle", tier = 1 }
+i08 = { glyph = "machine-gun", tier = 1 }
+i09 = { glyph = "mine", tier = 1 }
+i10 = { glyph = "radio", tier = 1 }
+i11 = { glyph = "payback", tier = 2 }
+i12 = { glyph = "marksman", tier = 3 }
+i13 = { glyph = "explosive", tier = 2 }
+i14 = { glyph = "sniper", tier = 1 }
+i15 = { glyph = "shotgun", tier = 1 }
+i16 = { glyph = "kit-medic", tier = 1 }
+i17 = { glyph = "ammo", tier = 1 }
+i18 = { glyph = "eye", tier = 1 }
+i19 = { glyph = "wrench", tier = 1 }
+i20 = { glyph = "medal", tier = 1 }
+i21 = { glyph = "crosshair", tier = 2 }
+i22 = { glyph = "star", tier = 2 }
+i23 = { glyph = "smg", tier = 1 }
+i24 = { glyph = "explosive", tier = 2 }
+i25 = { glyph = "crosshair", tier = 4 }
+i26 = { glyph = "marksman", tier = 2 }
+i27 = { glyph = "time", tier = 1 }
+i28 = { glyph = "time", tier = 2 }
+i29 = { glyph = "time", tier = 4 }
+i30 = { glyph = "flag", tier = 1 }
+i31 = { glyph = "objective", tier = 1 }
+i32 = { glyph = "crossed-rifles", tier = 3 }
+i33 = { glyph = "medal", tier = 3 }
+i34 = { glyph = "kit-vehicles", tier = 3 }
+i35 = { glyph = "medal", tier = 4 }
+i36 = { glyph = "crossed-rifles", tier = 2 }
+i37 = { glyph = "kit-vehicles", tier = 2 }
+i38 = { glyph = "artillery", tier = 2 }
+i39 = { glyph = "compass", tier = 2 }
+i40 = { glyph = "compass", tier = 3 }
+i41 = { glyph = "compass", tier = 4 }
+i42 = { glyph = "compass", tier = 5 }
+i43 = { glyph = "assist", tier = 1 }
+i44 = { glyph = "ammo", tier = 1 }
+i45 = { glyph = "wrench", tier = 1 }
+i46 = { glyph = "kit-medic", tier = 1 }
+i47 = { glyph = "eye", tier = 1 }
+i48 = { glyph = "squad", tier = 1 }
+i49 = { glyph = "payback", tier = 1 }
+i50 = { glyph = "squad", tier = 1 }
+di01 = { glyph = "kit-assault", tier = 1 }
+di02 = { glyph = "kit-engineer", tier = 1 }
+di03 = { glyph = "kit-medic", tier = 1 }
+di04 = { glyph = "kit-recon", tier = 1 }
 
 [http]
 locker = "http://easo.ea.com/fileupload/locker2.jsp"

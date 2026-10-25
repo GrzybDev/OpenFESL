@@ -1,0 +1,33 @@
+/* The dog tags a player took, newest first, with whose tag and when; the rows are the
+   leaderboard's. */
+@layer pages {
+  .tags {
+    min-width: 580px;
+  }
+
+  .tag-columns {
+    display: grid;
+    grid-template-columns: 52px 40px minmax(200px, 1fr) 220px 46px;
+    gap: 2px;
+  }
+
+  .column-sorted {
+    gap: 6px;
+
+    svg {
+      flex: none;
+      color: var(--accent);
+    }
+  }
+
+  .tag-columns .tag-taken {
+    justify-content: flex-start;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .tags-none {
+    margin-top: 0;
+  }
+}

@@ -57,6 +57,7 @@ from openfesl.web.languages import LanguageMiddleware
 from openfesl.web.leaderboard import leaderboard_routes
 from openfesl.web.menu import menu_routes
 from openfesl.web.pages import STATIC, Pages, StaticAssets
+from openfesl.web.players import player_routes
 from openfesl.web.security import SecurityHeadersMiddleware
 from openfesl.web.servers import server_routes
 from openfesl.web.shell import shell_routes
@@ -84,6 +85,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     hosting = Hosting(Approval(SqlServerStore(sessions)))
     census = Census(hosting, players)
     stats = SqlStatStore(sessions)
+    persona_store = SqlPersonaStore(sessions)
+    records = SqlRecordStore(sessions)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -101,7 +104,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         verification = EmailVerification(store, mailer, settings.public_url)
         app.state.verification = verification
         accounts = AccountService(store, logins, entitlements, Terms.load(), policies, verification)
-        persona_store = SqlPersonaStore(sessions)
         personas = PersonaService(persona_store)
         await personas.prepare(await accounts.prepare(games))
         routes.update(connect_routes(games, policies))
@@ -113,7 +115,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         routes.update(game_http.routes())
         routes.update(StatsService(stats, persona_store, hosting).routes())
         routes.update(LeaderboardService(stats).routes())
-        routes.update(RecordService(SqlRecordStore(sessions)).routes())
+        routes.update(RecordService(records).routes())
         associations = SqlAssociationStore(sessions)
         routes.update(AssociationService(associations, persona_store, players, hosting).routes())
         routes.update(PresenceService(persona_store, players, associations).routes())
@@ -166,6 +168,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(front_routes(pages, games, census))
     app.include_router(server_routes(pages, games, census))
     app.include_router(leaderboard_routes(pages, games, census, stats))
+    app.include_router(player_routes(pages, games, census, stats, persona_store, records))
     app.include_router(verification_routes(confirm, pages))
     # The last one added sees a request first: the game's HTTP keeps its own answers.
     app.add_middleware(LanguageMiddleware)
