@@ -1869,3 +1869,215 @@ msgstr "Rosnąco"
 #, python-format
 msgid "web.leaderboard.sorted"
 msgstr "Według %(stat)s"
+
+msgid "web.activity.title"
+msgstr "Aktywność"
+
+msgid "web.activity.period"
+msgstr "Okres"
+
+msgid "web.activity.period.day"
+msgstr "24 godziny"
+
+msgid "web.activity.period.week"
+msgstr "7 dni"
+
+msgid "web.activity.period.month"
+msgstr "30 dni"
+
+msgid "web.activity.period.all"
+msgstr "Od początku"
+
+msgid "web.activity.since.day"
+msgstr "Ostatnie 24 godziny"
+
+msgid "web.activity.since.week"
+msgstr "Ostatnie 7 dni"
+
+msgid "web.activity.since.month"
+msgstr "Ostatnie 30 dni"
+
+msgid "web.activity.since.all"
+msgstr "Od %(day)s"
+
+msgid "web.activity.today"
+msgstr "Dziś najwięcej"
+
+msgid "web.activity.record"
+msgstr "Rekord"
+
+msgid "web.activity.none"
+msgstr "Jeszcze brak"
+
+msgid "web.activity.at"
+msgstr "O %(time)s UTC"
+
+msgid "web.activity.on"
+msgstr "%(day)s, %(time)s UTC"
+
+msgid "web.activity.chart.hour"
+msgstr "Najwięcej online w każdej godzinie · UTC"
+
+msgid "web.activity.chart.day"
+msgstr "Najwięcej online w każdym dniu · UTC"
+
+msgid "web.activity.chart.week"
+msgstr "Najwięcej online w każdym tygodniu · UTC"
+
+msgid "web.activity.highest"
+msgstr "Najwięcej %(count)s · %(when)s"
+
+msgid "web.activity.week_of"
+msgstr "tydzień od %(day)s"
+
+msgid "web.activity.legend"
+msgstr "Legenda"
+
+msgid "web.activity.legend.online"
+msgstr "Online (wysokość słupka)"
+
+msgid "web.activity.legend.highest"
+msgstr "Najwięcej w tym okresie"
+
+msgid "web.activity.legend.record"
+msgstr "Rekord %(count)s"
+
+msgid "web.activity.record_line"
+msgstr "Rekord %(count)s · %(day)s"
+
+msgid "web.activity.so_far"
+msgstr "W toku"
+
+msgid "web.activity.summary.day"
+msgstr ""
+"Najwięcej osób online w każdej z ostatnich 24 godzin (UTC), z częścią w "
+"meczach."
+
+msgid "web.activity.summary.week"
+msgstr "Najwięcej osób online w każdym z ostatnich 7 dni, z częścią w meczach."
+
+msgid "web.activity.summary.month"
+msgstr "Najwięcej osób online w każdym z ostatnich 30 dni, z częścią w meczach."
+
+msgid "web.activity.summary.all"
+msgstr "Najwięcej osób online w każdym tygodniu od %(day)s, z częścią w meczach."
+
+msgid "web.activity.summary.highest.hour"
+msgstr "Najwięcej: %(count)s w godzinie od %(when)s."
+
+msgid "web.activity.summary.highest.hour.record"
+msgstr "Najwięcej: %(count)s w godzinie od %(when)s – to rekord."
+
+msgid "web.activity.summary.highest.day"
+msgstr "Najwięcej: %(count)s, %(when)s."
+
+msgid "web.activity.summary.highest.day.record"
+msgstr "Najwięcej: %(count)s, %(when)s – to rekord."
+
+msgid "web.activity.summary.highest.week"
+msgstr "Najwięcej: %(count)s w tygodniu od %(day)s."
+
+msgid "web.activity.summary.highest.week.record"
+msgstr "Najwięcej: %(count)s w tygodniu od %(day)s – to rekord."
+
+msgid "web.activity.summary.table"
+msgstr "Tabela pod wykresem podaje wszystkie wartości."
+
+msgid "web.activity.note.hour"
+msgstr ""
+"Każdy słupek to najwięcej osób online jednocześnie w danej godzinie. "
+"Słupek godziny %(hour)s jest jeszcze liczony."
+
+msgid "web.activity.note.day"
+msgstr ""
+"Każdy słupek to najwięcej osób online jednocześnie w danym dniu. "
+"Dzisiejszy słupek jest jeszcze liczony."
+
+msgid "web.activity.note.week"
+msgstr ""
+"Każdy słupek to najwięcej osób online jednocześnie w danym tygodniu, od "
+"poniedziałku do niedzieli. Słupek tego tygodnia jest jeszcze liczony."
+
+msgid "web.activity.values"
+msgstr "Wartości w tabeli"
+
+msgid "web.activity.column.hour"
+msgstr "Godzina (UTC)"
+
+msgid "web.activity.column.day"
+msgstr "Dzień"
+
+msgid "web.activity.column.week"
+msgstr "Tydzień"
+
+msgid "web.activity.column.at"
+msgstr "Godzina"
+
+msgid "web.activity.most"
+msgstr "Najwięcej online"
+
+msgid "web.activity.row.hour"
+msgstr "%(start)s–%(end)s"
+
+msgid "web.activity.row.hour.current"
+msgstr "%(start)s, w toku"
+
+msgid "web.activity.row.day.current"
+msgstr "%(day)s, w toku"
+
+msgid "web.activity.row.week"
+msgstr "Tydzień od %(day)s"
+
+msgid "web.activity.row.week.current"
+msgstr "Tydzień od %(day)s, w toku"
+
+msgid "web.activity.uncounted"
+msgstr "Nie liczono"
+
+msgid "web.activity.days"
+msgstr "Dzienne szczyty"
+
+msgid "web.activity.days.note"
+msgstr "Osoby w meczach i serwery są liczone w chwili dziennego szczytu. Czas UTC."
+
+msgid "web.activity.days.none"
+msgstr "Nie zapisano jeszcze żadnego dnia."
+
+msgid "web.activity.how"
+msgstr "Jak liczone są wartości"
+
+msgid "web.activity.how.text"
+msgstr ""
+"Słupek to najwięcej osób online w tej samej chwili w danej godzinie, dniu"
+" lub tygodniu. Jego wypełniona część to te z nich, które były wtedy w "
+"meczach."
+
+msgid "web.activity.how.online"
+msgstr "Osoby zalogowane w grze przez OpenFESL"
+
+msgid "web.activity.how.in_matches"
+msgstr "Na serwerze"
+
+msgid "web.activity.how.in_menus"
+msgstr "Online, poza serwerem"
+
+msgid "web.activity.empty"
+msgstr "Brak historii"
+
+msgid "web.activity.empty.text"
+msgstr ""
+"Słupki pojawią się tutaj, gdy OpenFESL zacznie zapisywać liczbę osób "
+"online. Dzisiejszy szczyt i rekord pojawią się razem z pierwszymi "
+"wartościami."
+
+msgid "web.activity.peak_line"
+msgstr "Dziś najwięcej: %(count)s o %(time)s UTC · rekord: %(record)s, %(day)s"
+
+msgid "web.activity.peak_line.short"
+msgstr "Dziś najwięcej: %(count)s · rekord: %(record)s"
+
+msgid "web.activity.peak_line.quiet"
+msgstr "Dziś jeszcze nikogo · rekord: %(record)s, %(day)s"
+
+msgid "web.activity.peak_line.quiet.short"
+msgstr "Dziś jeszcze nikogo · rekord: %(record)s"

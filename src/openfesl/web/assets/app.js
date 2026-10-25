@@ -40,6 +40,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// A chart wider than the screen starts scrolled to its latest values.
+document.addEventListener("DOMContentLoaded", () => {
+  for (const box of document.querySelectorAll("[data-scroll-end]")) {
+    box.scrollLeft = box.scrollWidth;
+  }
+});
+
 // Live values: a page's #live region refreshes itself through htmx every 15 s while the tab is
 // visible. A changed number counts to its new value (M5), a server's slots fill or empty one by
 // one (M6), rows glide to their new places (M9), and a failed refresh keeps the last values,

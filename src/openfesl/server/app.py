@@ -53,6 +53,7 @@ from openfesl.storage.records import SqlRecordStore
 from openfesl.storage.servers import SqlServerStore
 from openfesl.storage.settings import SqlSettingStore
 from openfesl.storage.stats import SqlStatStore
+from openfesl.web.activity import activity_routes
 from openfesl.web.front import front_routes
 from openfesl.web.game_http import GameHttpMiddleware
 from openfesl.web.host import host_routes
@@ -172,7 +173,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.mount("/static", StaticAssets(directory=STATIC))
     app.include_router(shell_routes(pages, Terms.load()))
     app.include_router(menu_routes(pages, games, census))
-    app.include_router(front_routes(pages, games, census))
+    app.include_router(front_routes(pages, games, census, history))
+    app.include_router(activity_routes(pages, games, census, history))
     app.include_router(server_routes(pages, games, census))
     app.include_router(leaderboard_routes(pages, games, census, stats))
     app.include_router(player_routes(pages, games, census, stats, persona_store, records))

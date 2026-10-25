@@ -20,8 +20,8 @@ For Battlefield: Bad Company 2 on PC, the game and its dedicated server:
 - Dedicated servers identified by `ProviderId.dat`, either approved one by one or all allowed to host
 - The game's HTTP: the news and configuration files it downloads, and the locker
 - Web pages in English and Polish: OpenFESL's menu of games, and for each game its players online, its servers with
-  their settings and players, a leaderboard, player pages with stats, awards and dog tags, and guides to playing and
-  to hosting a dedicated server
+  their settings and players, a leaderboard, player pages with stats, awards and dog tags, the peaks of its players
+  online, and guides to playing and to hosting a dedicated server
 - Each game's players online, counted every minute and kept as the peak of every hour for seven days and of every
   day for good
 

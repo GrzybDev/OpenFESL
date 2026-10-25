@@ -2,7 +2,8 @@ import asyncio
 import logging
 from collections.abc import Iterable
 from dataclasses import dataclass
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime, time, timedelta
+from enum import StrEnum
 from typing import Protocol
 
 from openfesl.core.census import Activity, Census
@@ -38,6 +39,72 @@ class Peak:
     def in_menus(self) -> int:
         """The players logged in then who were in no hosted game."""
         return max(self.online - self.in_matches, 0)
+
+
+class Period(StrEnum):
+    """How far back the activity chart reaches; each period has bars of its own length."""
+
+    DAY = "day"
+    """The last 24 hours, a bar for each hour."""
+    WEEK = "week"
+    """The last 7 days, a bar for each day."""
+    MONTH = "month"
+    """The last 30 days, a bar for each day."""
+    ALL = "all"
+    """Every week since the first day counted, a bar for each week from Monday."""
+
+    @property
+    def span(self) -> str:
+        """How long each of the period's bars is: an hour, a day or a week."""
+        return {Period.DAY: "hour", Period.ALL: "week"}.get(self, "day")
+
+
+@dataclass(frozen=True, slots=True)
+class Bar:
+    """A bar of the activity chart: an hour, a day or a week, with its peak.
+
+    Attributes:
+        start: When its time began, in UTC.
+        end: When its time ends.
+        peak: The most players online at once then; None when nothing was counted.
+        current: Whether its time is still running.
+    """
+
+    start: datetime
+    end: datetime
+    peak: Peak | None
+    current: bool
+
+
+@dataclass(frozen=True, slots=True)
+class Chart:
+    """The activity chart of a period, with the record of every day counted.
+
+    Attributes:
+        period: The period it shows.
+        bars: Its bars, oldest first.
+        highest: The bar with the most players online, the first of equals; None when nobody
+            was online in the period.
+        record: The peak of the day with the most players online; None until someone was.
+    """
+
+    period: Period
+    bars: tuple[Bar, ...]
+    highest: Bar | None
+    record: Peak | None
+
+
+@dataclass(frozen=True, slots=True)
+class Overview:
+    """A game's peak today and its record.
+
+    Attributes:
+        today: Today's peak; None until someone was online today.
+        record: The peak of the day with the most players online; None until someone was.
+    """
+
+    today: Peak | None
+    record: Peak | None
 
 
 class HistoryStore(Protocol):
@@ -117,3 +184,62 @@ class OnlineHistory:
         except Exception:
             # The database may be away for a moment; the next count tries again.
             logger.exception("Could not record the players online")
+
+    async def overview(self, game: Game, now: datetime) -> Overview:
+        """Return a game's peak today and its record.
+
+        Args:
+            game: The game.
+            now: The time, in UTC, whose day is today.
+        """
+        today = await self._store.days(game.id, now.date())
+        return Overview(_reached(today[0] if today else None), await self._record(game))
+
+    async def chart(self, game: Game, period: Period, now: datetime) -> Chart:
+        """Return a game's activity chart of a period that ends now.
+
+        Args:
+            game: The game.
+            period: How far back the chart reaches.
+            now: The time, in UTC, whose hour, day or week is the last bar.
+        """
+        today = datetime.combine(now.date(), time(), UTC)
+        peaks: dict[datetime, Peak] = {}
+        if period is Period.DAY:
+            hour = now.replace(minute=0, second=0, microsecond=0)
+            starts = [hour - timedelta(hours=back) for back in range(23, -1, -1)]
+            peaks = {peak.start: peak for peak in await self._store.hours(game.id, starts[0])}
+            length = timedelta(hours=1)
+        elif period is Period.ALL:
+            for peak in await self._store.days(game.id):
+                # The first day with the most players in a week is the week's peak.
+                week = _monday(peak.start)
+                if week not in peaks or peak.online > peaks[week].online:
+                    peaks[week] = peak
+            first = min(peaks, default=_monday(today))
+            weeks = (_monday(today) - first).days // 7 + 1
+            starts = [first + timedelta(weeks=index) for index in range(weeks)]
+            length = timedelta(weeks=1)
+        else:
+            days = 7 if period is Period.WEEK else 30
+            starts = [today - timedelta(days=back) for back in range(days - 1, -1, -1)]
+            peaks = {peak.start: peak for peak in await self._store.days(game.id, starts[0].date())}
+            length = timedelta(days=1)
+        bars = tuple(
+            Bar(start, start + length, peaks.get(start), start == starts[-1]) for start in starts
+        )
+        counted = [bar for bar in bars if bar.peak and bar.peak.online]
+        highest = max(counted, key=lambda bar: bar.peak.online if bar.peak else 0, default=None)
+        return Chart(period, bars, highest, await self._record(game))
+
+    async def _record(self, game: Game) -> Peak | None:
+        return _reached(await self._store.best(game.id))
+
+
+def _reached(peak: Peak | None) -> Peak | None:
+    # A peak of nobody is no peak.
+    return peak if peak and peak.online else None
+
+
+def _monday(day: datetime) -> datetime:
+    return day - timedelta(days=day.weekday())

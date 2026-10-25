@@ -55,6 +55,21 @@
     color: var(--soft);
   }
 
+  .peak-line {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 8px;
+
+    svg {
+      color: var(--accent);
+    }
+  }
+
+  html[data-stale] :is(.peak-line, .peak-line svg) {
+    color: var(--muted-light);
+  }
+
   .front-updated {
     display: flex;
     min-height: 44px;

@@ -1840,3 +1840,217 @@ msgstr "Ascending"
 #, python-format
 msgid "web.leaderboard.sorted"
 msgstr "By %(stat)s"
+
+msgid "web.activity.title"
+msgstr "Activity"
+
+msgid "web.activity.period"
+msgstr "Period"
+
+msgid "web.activity.period.day"
+msgstr "24 hours"
+
+msgid "web.activity.period.week"
+msgstr "7 days"
+
+msgid "web.activity.period.month"
+msgstr "30 days"
+
+msgid "web.activity.period.all"
+msgstr "All time"
+
+msgid "web.activity.since.day"
+msgstr "Last 24 hours"
+
+msgid "web.activity.since.week"
+msgstr "Last 7 days"
+
+msgid "web.activity.since.month"
+msgstr "Last 30 days"
+
+msgid "web.activity.since.all"
+msgstr "Since %(day)s"
+
+msgid "web.activity.today"
+msgstr "Today's peak"
+
+msgid "web.activity.record"
+msgstr "Record"
+
+msgid "web.activity.none"
+msgstr "None yet"
+
+msgid "web.activity.at"
+msgstr "At %(time)s UTC"
+
+msgid "web.activity.on"
+msgstr "%(day)s, %(time)s UTC"
+
+msgid "web.activity.chart.hour"
+msgstr "Most online per hour · UTC"
+
+msgid "web.activity.chart.day"
+msgstr "Most online per day · UTC"
+
+msgid "web.activity.chart.week"
+msgstr "Most online per week · UTC"
+
+msgid "web.activity.highest"
+msgstr "Highest %(count)s · %(when)s"
+
+msgid "web.activity.week_of"
+msgstr "week of %(day)s"
+
+msgid "web.activity.legend"
+msgstr "Legend"
+
+msgid "web.activity.legend.online"
+msgstr "Online (bar height)"
+
+msgid "web.activity.legend.highest"
+msgstr "Highest in this period"
+
+msgid "web.activity.legend.record"
+msgstr "Record %(count)s"
+
+msgid "web.activity.record_line"
+msgstr "Record %(count)s · %(day)s"
+
+msgid "web.activity.so_far"
+msgstr "So far"
+
+msgid "web.activity.summary.day"
+msgstr ""
+"Most players online in each of the last 24 hours, UTC, with the part in "
+"matches."
+
+msgid "web.activity.summary.week"
+msgstr "Most players online on each of the last 7 days, with the part in matches."
+
+msgid "web.activity.summary.month"
+msgstr "Most players online on each of the last 30 days, with the part in matches."
+
+msgid "web.activity.summary.all"
+msgstr "Most players online in each week since %(day)s, with the part in matches."
+
+msgid "web.activity.summary.highest.hour"
+msgstr "Highest: %(count)s in the %(when)s hour."
+
+msgid "web.activity.summary.highest.hour.record"
+msgstr "Highest: %(count)s in the %(when)s hour, the record."
+
+msgid "web.activity.summary.highest.day"
+msgstr "Highest: %(count)s on %(when)s."
+
+msgid "web.activity.summary.highest.day.record"
+msgstr "Highest: %(count)s on %(when)s, the record."
+
+msgid "web.activity.summary.highest.week"
+msgstr "Highest: %(count)s in the week of %(day)s."
+
+msgid "web.activity.summary.highest.week.record"
+msgstr "Highest: %(count)s in the week of %(day)s, the record."
+
+msgid "web.activity.summary.table"
+msgstr "The table under the chart lists every value."
+
+msgid "web.activity.note.hour"
+msgstr ""
+"Each bar is the most players online at once in that hour. The %(hour)s "
+"bar is still counting."
+
+msgid "web.activity.note.day"
+msgstr ""
+"Each bar is the most players online at once on that day. Today's bar is "
+"still counting."
+
+msgid "web.activity.note.week"
+msgstr ""
+"Each bar is the most players online at once in that week, Monday to "
+"Sunday. This week's bar is still counting."
+
+msgid "web.activity.values"
+msgstr "Values as a table"
+
+msgid "web.activity.column.hour"
+msgstr "Hour (UTC)"
+
+msgid "web.activity.column.day"
+msgstr "Day"
+
+msgid "web.activity.column.week"
+msgstr "Week"
+
+msgid "web.activity.column.at"
+msgstr "At"
+
+msgid "web.activity.most"
+msgstr "Most online"
+
+msgid "web.activity.row.hour"
+msgstr "%(start)s–%(end)s"
+
+msgid "web.activity.row.hour.current"
+msgstr "%(start)s, so far"
+
+msgid "web.activity.row.day.current"
+msgstr "%(day)s, so far"
+
+msgid "web.activity.row.week"
+msgstr "Week of %(day)s"
+
+msgid "web.activity.row.week.current"
+msgstr "Week of %(day)s, so far"
+
+msgid "web.activity.uncounted"
+msgstr "Not counted"
+
+msgid "web.activity.days"
+msgstr "Daily peaks"
+
+msgid "web.activity.days.note"
+msgstr ""
+"In matches and servers are counted at the moment of each day's peak. "
+"Times are UTC."
+
+msgid "web.activity.days.none"
+msgstr "No days recorded yet."
+
+msgid "web.activity.how"
+msgstr "How the numbers are counted"
+
+msgid "web.activity.how.text"
+msgstr ""
+"A bar is the most players online at the same moment in that hour, day or "
+"week. Its filled part is how many of them were in matches then."
+
+msgid "web.activity.how.online"
+msgstr "Signed in to the game through OpenFESL"
+
+msgid "web.activity.how.in_matches"
+msgstr "On a server"
+
+msgid "web.activity.how.in_menus"
+msgstr "Online, not on a server"
+
+msgid "web.activity.empty"
+msgstr "No history yet"
+
+msgid "web.activity.empty.text"
+msgstr ""
+"Bars appear here as OpenFESL records how many players are online. Today's"
+" peak and the record follow with the first values."
+
+msgid "web.activity.peak_line"
+msgstr ""
+"Today's peak so far: %(count)s at %(time)s UTC · record: %(record)s on "
+"%(day)s"
+
+msgid "web.activity.peak_line.short"
+msgstr "Today's peak: %(count)s · record: %(record)s"
+
+msgid "web.activity.peak_line.quiet"
+msgstr "Nobody online today yet · record: %(record)s on %(day)s"
+
+msgid "web.activity.peak_line.quiet.short"
+msgstr "Today: nobody yet · record: %(record)s"

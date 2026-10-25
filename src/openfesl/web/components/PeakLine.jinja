@@ -1,0 +1,12 @@
+{#def overview #}
+{# A game's peak today and its record in a sentence, shorter on phones. #}
+{% set record = number(overview.record.online) %}
+{% set day = when(overview.record.start, "MMMEd") %}
+{% if overview.today %}
+  {% set count = number(overview.today.online) %}
+  <span class="wide-only">{{ _("web.activity.peak_line", count=count, time=when(overview.today.at, "Hm"), record=record, day=day) }}</span>
+  <span class="narrow-only">{{ _("web.activity.peak_line.short", count=count, record=record) }}</span>
+{% else %}
+  <span class="wide-only">{{ _("web.activity.peak_line.quiet", record=record, day=day) }}</span>
+  <span class="narrow-only">{{ _("web.activity.peak_line.quiet.short", record=record) }}</span>
+{% endif %}

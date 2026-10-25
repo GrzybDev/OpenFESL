@@ -1,0 +1,296 @@
+{#def activity, overview, chart, scale, week, periods: list #}
+{% set title = _("web.activity.title") %}
+{% set page_url = url("/" ~ game.id ~ "/activity") %}
+{% set span = chart.period.span %}
+{% set highest = chart.highest %}
+{% set record = chart.record %}
+{% set current = chart.bars[-1] %}
+{# Labels of a bar: under it, in the values table and in the chart's heading. #}
+{% macro axis(bar) %}
+  {%- if span == "hour" %}{{ when(bar.start, "Hm") }}
+  {%- elif span == "week" %}{{ when(bar.start, "MMMd") }}
+  {%- elif chart.period == "week" %}{{ when(bar.start, "Ed") }}
+  {%- else %}{{ when(bar.start, "d") }}
+  {%- endif %}
+{%- endmacro %}
+{% macro under(bar, index) %}
+  {%- if bar.current %}{{ _("web.activity.so_far") }}
+  {%- elif span == "hour" and (index == 0 or bar.start.hour == 0) %}{{ when(bar.start, "MMMEd") }}
+  {%- elif chart.period == "month" and (index == 0 or bar.start.day == 1) %}{{ when(bar.start, "MMM") }}
+  {%- endif %}
+{%- endmacro %}
+{% macro row_label(bar) %}
+  {%- if span == "hour" %}
+    {%- if bar.current %}{{ _("web.activity.row.hour.current", start=when(bar.start, "Hm")) }}
+  {%- else %}{{ _("web.activity.row.hour", start=when(bar.start, "Hm"), end=when(bar.end, "Hm")) }}{% endif %}
+  {%- elif span == "week" %}{{ _("web.activity.row.week" ~ (".current" if bar.current else ""), day=when(bar.start, "MMMd")) }}
+  {%- elif bar.current %}{{ _("web.activity.row.day.current", day=when(bar.start, "MMMEd")) }}
+  {%- else %}{{ when(bar.start, "MMMEd") }}
+  {%- endif %}
+{%- endmacro %}
+{% macro moment_of(bar) %}
+  {%- if span == "hour" %}{{ when(bar.start, "Hm") }}
+  {%- elif span == "week" %}{{ _("web.activity.week_of", day=when(bar.start, "MMMd")) }}
+  {%- else %}{{ when(bar.start, "MMMEd") }}
+  {%- endif %}
+{%- endmacro %}
+{% macro unknown() %}<span aria-hidden="true">–</span><span class="sr-only">{{ _("web.activity.uncounted") }}</span>{% endmacro %}
+{% set period_line %}
+  {%- if chart.period != "all" %}{{ _("web.activity.since." ~ chart.period) }}
+  {%- elif record %}{{ _("web.activity.since.all", day=when(chart.bars[0].start, "yMMMd")) }}
+{%- else %}{{ _("web.activity.period.all") }}{% endif -%}
+{% endset %}
+<Layout :title="title">
+  <GameMenu current="activity" />
+
+  <PageHead labelledby="activity-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="activity-title">{{ period_line }}</TitleBlock>
+    </div>
+    <nav aria-label="{{ _('web.activity.period') }}" class="tabs">
+      {% for option in periods %}
+        <Tab :href="page_url ~ ('' if option == 'day' else '?period=' ~ option)" :label="_('web.activity.period.' ~ option)" :current="option == chart.period" />
+      {% endfor %}
+    </nav>
+  </PageHead>
+
+  <Panel id="live"
+         :hx-get="here"
+         hx-trigger="every 15s, refresh"
+         hx-select="#live"
+         hx-select-oob="#shell-games:outerMorph"
+         hx-swap="outerMorph"
+         class="enter-panel panel-thin">
+    <dl class="stats">
+      <Stat :label="_('web.activity.online_now')" kind="accent">
+        <Count :value="activity.online" class="count-ink live-value" />
+      </Stat>
+      <Stat :label="_('web.activity.in_matches')" kind="stack">
+        <span><Count :value="activity.in_matches" class="live-value" /></span>
+        <ShareMeter :activity="activity" />
+      </Stat>
+      <Stat :label="_('web.activity.today')" kind="time">
+        {% if overview.today %}
+          <Count :value="overview.today.online" class="live-value" />
+          <span class="stat-when">{{ _("web.activity.at", time=when(overview.today.at, "Hm")) }}</span>
+        {% else %}
+          <span class="stat-none">{{ _("web.activity.none") }}</span>
+        {% endif %}
+      </Stat>
+      <Stat :label="_('web.activity.record')" kind="time">
+        {% if record %}
+          <Count :value="record.online" class="live-value" />
+          <span class="stat-when">{{ _("web.activity.on", day=when(record.start, "MMMEd"), time=when(record.at, "Hm")) }}</span>
+        {% else %}
+          <span class="stat-none">{{ _("web.activity.none") }}</span>
+        {% endif %}
+      </Stat>
+    </dl>
+    <p class="activity-updated">
+      <Updated />
+    </p>
+    <StalePanel />
+
+    <section aria-labelledby="activity-chart" class="activity-chart">
+      {% set highest_line %}{% if record and highest %}{{ _("web.activity.highest", count=number(highest.peak.online), when=moment_of(highest)) }}{% endif %}{% endset %}
+      <Bar id="activity-chart" :extra="highest_line" wrap>{{ _("web.activity.chart." ~ span) }}</Bar>
+      <div class="bar-text">
+        {% if record %}
+          <ul aria-label="{{ _('web.activity.legend') }}" class="chart-legend">
+            <li><span aria-hidden="true" class="legend-online"></span>{{ _("web.activity.legend.online") }}</li>
+            <li><span aria-hidden="true" class="legend-matches"></span>{{ _("web.activity.in_matches") }}</li>
+            <li><span aria-hidden="true" class="legend-highest"></span>{{ _("web.activity.legend.highest") }}</li>
+            <li><span aria-hidden="true"
+      class="legend-record"></span>{{ _("web.activity.legend.record", count=number(record.online)) }}</li>
+          </ul>
+          {% set summary_highest = "" %}
+          {% if highest %}
+            {% set summary_highest = _("web.activity.summary.highest." ~ span ~ (".record" if highest.peak.at == record.at else ""), count=number(highest.peak.online), when=moment_of(highest), day=when(highest.start, "MMMd")) %}
+          {% endif %}
+          {# The bars and lines take their heights from the attributes of SVG boxes, as the pages
+             set no styles of their own. #}
+          <div data-scroll-end class="chart-scroll">
+            <div role="img"
+                 aria-label="{{ _('web.activity.summary.' ~ chart.period, day=when(chart.bars[0].start, 'yMMMd')) }} {{ summary_highest }} {{ _('web.activity.summary.table') }}"
+                 class="chart">
+              <svg class="chart-patterns" width="0" height="0" aria-hidden="true">
+                <pattern id="chart-stripes" width="8" height="7" patternUnits="userSpaceOnUse">
+                <rect width="8" height="5" />
+                </pattern>
+              </svg>
+              <div aria-hidden="true" class="chart-scale">
+                <span class="chart-zero">0</span>
+                {% for line in scale.lines %}
+                  <span class="chart-mark"><span>{{ number(line) }}</span><svg height="{{ scale.height(line) }}%">
+                    </svg>
+                  </span>
+                {% endfor %}
+              </div>
+              <div aria-hidden="true" class="chart-plot">
+                {% for line in scale.lines %}
+                  <svg class="chart-grid" width="100%" height="{{ scale.height(line) }}%">
+                  </svg>
+                {% endfor %}
+                <div class="chart-bars">
+                  {% for bar in chart.bars %}
+                    <div{% if bar is sameas highest %} class="chart-highest"{% endif %}>
+                      {% if bar.peak %}
+                        {% set share = (bar.peak.in_matches * 100 / bar.peak.online)|round|int if bar.peak.online else 0 %}
+                        <span>{{ number(bar.peak.online) }}</span>
+                        <svg class="chart-bar" height="{{ scale.height(bar.peak.online) }}%">
+                          <rect width="100%" height="{{ share }}%" />
+                        </svg>
+                      {% else %}
+                        <span>–</span>
+                      {% endif %}
+                    </div>
+                  {% endfor %}
+                </div>
+                <div class="chart-record">
+                  <span>{{ _("web.activity.record_line", count=number(record.online), day=when(record.start, "MMMd")) }}</span><svg width="100%" height="{{ scale.height(record.online) }}%">
+                  </svg>
+                </div>
+              </div>
+              <div aria-hidden="true" class="chart-axis">
+                {% for bar in chart.bars %}
+                  <div>
+                    <span>{{ axis(bar) }}</span>
+                    <span>{{ under(bar, loop.index0) }}</span>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          <p class="body-text chart-note">
+            {%- if span == "hour" %}{{ _("web.activity.note.hour", hour=when(current.start, "Hm")) }}{% else %}{{ _("web.activity.note." ~ span) }}{% endif -%}
+          </p>
+          <details class="fold chart-values">
+            <summary>
+              <span aria-hidden="true"><Icon name="down" stroke="#F4F4EE" class="fold-chevron" /></span>{{ _("web.activity.values") }}
+            </summary>
+            <div class="chart-values-scroll">
+              <table class="values">
+                <caption class="sr-only">{{ _("web.activity.chart." ~ span) }}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">{{ _("web.activity.column." ~ span) }}</th>
+                    <th scope="col">{{ _("web.activity.most") }}</th>
+                    <th scope="col">{{ _("web.activity.in_matches") }}</th>
+                    <th scope="col">{{ _("web.activity.in_menus") }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for bar in chart.bars %}
+                    <tr{% if bar is sameas highest %} class="values-highest"{% endif %}>
+                      <th scope="row">{{ row_label(bar) }}</th>
+                      {% if bar.peak %}
+                        <td>{{ number(bar.peak.online) }}</td>
+                        <td>{{ number(bar.peak.in_matches) }}</td>
+                        <td>{{ number(bar.peak.in_menus) }}</td>
+                      {% else %}
+                        <td>{{ unknown() }}</td>
+                        <td>{{ unknown() }}</td>
+                        <td>{{ unknown() }}</td>
+                      {% endif %}
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </details>
+        {% else %}
+          <div class="chart-empty">
+            <div>
+              <span aria-hidden="true"
+                    class="badge chart-empty-mark"><Icon name="empty" :size="28" fill="#0A0A0A" /></span>
+              <p>{{ _("web.activity.empty") }}</p>
+              <p class="body-text">{{ _("web.activity.empty.text") }}</p>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </section>
+
+    <div class="activity-more">
+      <section aria-labelledby="activity-days" class="activity-days">
+        {% if record %}
+          <Bar id="activity-days" :extra="_('web.activity.since.week')" wrap>{{ _("web.activity.days") }}</Bar>
+          <div class="table-scroll">
+            <table class="days">
+              <thead>
+                <tr>
+                  <th scope="col">{{ _("web.activity.column.day") }}</th>
+                  <th scope="col">{{ _("web.activity.most") }}</th>
+                  <th scope="col">{{ _("web.activity.column.at") }}</th>
+                  <th scope="col">{{ _("web.activity.in_matches") }}</th>
+                  <th scope="col">{{ _("web.activity.servers") }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for bar in week.bars|reverse %}
+                  <tr>
+                    <th scope="row">
+                      <span class="day-name">{{ when(bar.start, "MMMEd") }}
+                      {%- if bar.current %}<span class="day-mark">{{ _("web.activity.so_far") }}</span>{% endif %}</span></th>
+                      {% if bar.peak %}
+                        <td>
+                          <span class="day-peak"><span>{{ number(bar.peak.online) }}</span><span aria-hidden="true" class="day-meter"><svg width="{{ (bar.peak.online * 100 / record.online)|round|int }}%"
+     height="100%">
+                            </svg>
+                          </span></span>
+                        </td>
+                        <td>{{ when(bar.peak.at, "Hm") }}</td>
+                        <td>{{ number(bar.peak.in_matches) }}</td>
+                        <td>{{ number(bar.peak.servers) }}</td>
+                      {% else %}
+                        <td>{{ unknown() }}</td>
+                        <td>{{ unknown() }}</td>
+                        <td>{{ unknown() }}</td>
+                        <td>{{ unknown() }}</td>
+                      {% endif %}
+                    </tr>
+                {% endfor %}
+                <tr class="days-record">
+                  <th scope="row"><span class="day-name"><span class="day-mark">{{ _("web.activity.record") }}</span>{{ when(record.start, "MMMEd") }}</span></th>
+                  <td>
+                    <span class="day-peak"><span>{{ number(record.online) }}</span><span aria-hidden="true" class="day-meter"><svg width="100%" height="100%">
+                      </svg>
+                    </span></span>
+                  </td>
+                  <td>{{ when(record.at, "Hm") }}</td>
+                  <td>{{ number(record.in_matches) }}</td>
+                  <td>{{ number(record.servers) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="body-text side-note days-note">{{ _("web.activity.days.note") }}</p>
+        {% else %}
+          <p id="activity-days"
+             class="body-text days-none"><span>{{ _("web.activity.days") }}</span>{{ _("web.activity.days.none") }}</p>
+        {% endif %}
+      </section>
+
+      <div class="activity-side">
+        <section aria-labelledby="activity-how">
+          <Bar id="activity-how" wrap>{{ _("web.activity.how") }}</Bar>
+          <p class="body-text how-text">{{ _("web.activity.how.text") }}</p>
+          <dl class="how-terms">
+            {% for term in ["online", "in_matches", "in_menus"] %}
+              <div>
+                <dt>{{ _("web.activity." ~ term) }}</dt>
+                <dd>
+                  {{ _("web.activity.how." ~ term) }}
+                </dd>
+              </div>
+            {% endfor %}
+          </dl>
+        </section>
+        <div>
+          <Action :href="url('/' ~ game.id ~ '/play')" :label="_('web.front.play')" :size="32" />
+          <p class="body-text side-note">{{ _("web.servers.joining") }}</p>
+        </div>
+      </div>
+    </div>
+  </Panel>
+</Layout>

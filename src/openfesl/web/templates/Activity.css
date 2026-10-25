@@ -1,0 +1,608 @@
+/* A game's activity: the stats, the chart of peaks in the game's style with its values as a
+   table, the daily peaks and how the numbers are counted. */
+@layer pages {
+  .stat-when {
+    font-size: 14px;
+    line-height: calc(1.25 / 0.875);
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    color: var(--dim);
+    text-transform: uppercase;
+  }
+
+  .stat-none {
+    align-self: center;
+    font-size: 24px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--dim);
+    text-transform: uppercase;
+  }
+
+  .activity-updated {
+    display: flex;
+    min-height: 44px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    margin: 2px 2px 0;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: calc(1.25 / 0.875);
+    font-weight: 500;
+    color: var(--soft);
+  }
+
+  .activity-chart {
+    margin-top: 10px;
+  }
+
+  .chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+
+  .legend-online,
+  .legend-matches,
+  .legend-highest {
+    width: 18px;
+    height: 18px;
+  }
+
+  .legend-online {
+    border: 2px solid var(--ink);
+  }
+
+  /* The part in matches, striped as the game's meters are. */
+  .legend-matches {
+    background: repeating-linear-gradient(to top, var(--ink) 0 5px, transparent 5px 7px);
+  }
+
+  .legend-highest {
+    background: var(--accent);
+  }
+
+  .legend-record {
+    width: 22px;
+    border-top: 2px dashed var(--ink);
+  }
+
+  .chart-scroll {
+    margin-inline: -6px;
+    overflow-x: auto;
+    padding: 0 6px 4px;
+  }
+
+  .chart {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+  }
+
+  .chart-patterns {
+    position: absolute;
+  }
+
+  #chart-stripes {
+    fill: var(--ink);
+  }
+
+  .chart-scale {
+    position: relative;
+    height: 240px;
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 700;
+    color: var(--dim);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .chart-zero {
+    position: absolute;
+    right: 8px;
+    bottom: 0;
+    transform: translateY(50%);
+  }
+
+  /* A line's number stands centred on its height, which the box under it sets. */
+  .chart-mark {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding-right: 8px;
+
+    > span {
+      transform: translateY(50%);
+    }
+  }
+
+  .chart-plot {
+    position: relative;
+    height: 240px;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .chart-grid {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    border-top: 1px solid var(--row-alt);
+  }
+
+  .chart-bars {
+    position: relative;
+    display: grid;
+    height: 100%;
+    grid-auto-columns: minmax(34px, 1fr);
+    grid-auto-flow: column;
+    column-gap: 2px;
+
+    > div {
+      --order: min(sibling-index() - 1, 30);
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding-inline: 5px;
+
+      > span {
+        margin-bottom: 4px;
+        font-size: 12px;
+        line-height: 1;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+      }
+    }
+
+    > .chart-highest {
+      background: var(--accent);
+    }
+  }
+
+  /* M7: the bars grow from the bottom on first view, 20 ms apart, and a refresh moves them to
+     their new heights. */
+  .chart-bar {
+    width: 100%;
+    max-width: 72px;
+    flex: none;
+    border: 2px solid var(--ink);
+    border-bottom: 0;
+    transform-origin: bottom;
+    animation: grow-up 600ms var(--ease-menu) both;
+    /* Browsers without sibling-index() grow every bar at once. */
+    animation-delay: calc(var(--order) * 20ms);
+    transition: height 400ms var(--ease-menu);
+
+    html.refreshed & {
+      animation: none;
+    }
+
+    /* The part in matches stands at the bottom, its stripes counted from there, as the game's
+       meters are. */
+    rect {
+      transform: scaleY(-1);
+      transform-box: view-box;
+      transform-origin: center;
+      fill: url(#chart-stripes);
+      transition: height 400ms var(--ease-menu);
+    }
+  }
+
+  @keyframes grow-up {
+    from {
+      transform: scaleY(0);
+    }
+  }
+
+  .chart-record {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+    pointer-events: none;
+
+    /* The line's border is part of the box under the label, so the gap is that much smaller. */
+    > span {
+      margin: 0 0 2px 4px;
+      background: var(--ink);
+      padding: 3px 6px;
+      font-size: 11px;
+      line-height: 1.1;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      white-space: nowrap;
+      color: var(--bright);
+      text-transform: uppercase;
+    }
+
+    > svg {
+      flex: none;
+      border-top: 2px dashed var(--ink);
+    }
+  }
+
+  .chart-axis {
+    display: grid;
+    grid-column-start: 2;
+    grid-auto-columns: minmax(34px, 1fr);
+    grid-auto-flow: column;
+    column-gap: 2px;
+    padding-top: 6px;
+
+    > div {
+      min-width: 0;
+      text-align: center;
+    }
+
+    span {
+      display: block;
+      white-space: nowrap;
+    }
+
+    > div > :first-child {
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    > div > :last-child {
+      min-height: 15px;
+      padding-top: 2px;
+      font-size: 11px;
+      line-height: 1.2;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: var(--dim);
+      text-transform: uppercase;
+    }
+  }
+
+  .chart-note {
+    margin-top: 10px;
+  }
+
+  .chart-values {
+    margin-top: 12px;
+
+    > summary {
+      display: flex;
+      min-height: 44px;
+      align-items: center;
+      gap: 10px;
+      background: var(--row);
+      padding: 0 14px 0 6px;
+      font-size: 14px;
+      line-height: calc(1.25 / 0.875);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+
+      > span {
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        background: var(--ink);
+      }
+    }
+  }
+
+  .chart-values-scroll {
+    margin-top: 2px;
+    overflow-x: auto;
+  }
+
+  /* The values and daily peaks tables keep their cells two pixels apart, as the pages' grids do. */
+  .values,
+  .days {
+    width: 100%;
+    margin: -2px;
+    border-collapse: separate;
+    border-spacing: 2px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+
+    th,
+    td {
+      padding-inline: 12px;
+      text-align: right;
+    }
+
+    th:first-child {
+      text-align: left;
+    }
+
+    tbody tr:nth-child(even) {
+      background: var(--row-alt);
+    }
+  }
+
+  .values {
+    max-width: 760px;
+    min-width: 520px;
+    font-size: 15px;
+
+    thead {
+      background: var(--ink);
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      color: var(--bright);
+      text-transform: uppercase;
+    }
+
+    thead th {
+      height: 40px;
+
+      &:not(:first-child) {
+        width: 120px;
+      }
+    }
+
+    tbody th {
+      height: 36px;
+    }
+
+    tbody tr {
+      background: var(--row);
+    }
+
+    tbody tr.values-highest {
+      background: var(--accent);
+    }
+  }
+
+  .chart-empty {
+    display: grid;
+    min-height: 240px;
+    place-items: center;
+    border-bottom: 2px solid var(--ink);
+    text-align: center;
+
+    > div {
+      display: flex;
+      max-width: 46ch;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    > div > p:not(.body-text) {
+      font-size: 22px;
+      line-height: 1.1;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+  }
+
+  .chart-empty-mark {
+    width: 44px;
+    height: 44px;
+  }
+
+  .activity-more {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px;
+    margin-top: 14px;
+  }
+
+  .activity-days {
+    min-width: 0;
+    flex: 999 1 600px;
+  }
+
+  .days {
+    min-width: 660px;
+    font-size: 16px;
+    color: var(--ink);
+
+    thead {
+      font-size: 14px;
+      line-height: calc(1.25 / 0.875);
+      letter-spacing: 0.06em;
+      color: var(--bright);
+      text-transform: uppercase;
+    }
+
+    thead th {
+      height: 44px;
+      background: var(--ink);
+
+      &:nth-child(2) {
+        width: 230px;
+        text-align: left;
+      }
+
+      &:nth-child(3),
+      &:nth-child(5) {
+        width: 90px;
+      }
+
+      &:nth-child(4) {
+        width: 110px;
+      }
+    }
+
+    tbody tr {
+      background: var(--row);
+    }
+
+    tbody th {
+      height: 44px;
+      font-size: 14px;
+      line-height: calc(1.25 / 0.875);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    tbody td:nth-child(2) {
+      text-align: left;
+    }
+
+    tbody tr.days-record {
+      background: var(--bar-dark);
+      color: var(--bright);
+    }
+  }
+
+  .day-name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+  }
+
+  .day-mark {
+    background: var(--ink);
+    padding: 2px 6px;
+    font-size: 11px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--bright);
+
+    .days-record & {
+      background: var(--accent);
+      color: var(--ink);
+    }
+  }
+
+  .day-peak {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    > span:first-child {
+      width: 34px;
+      flex: none;
+      text-align: right;
+
+      .days-record & {
+        font-weight: 800;
+      }
+    }
+  }
+
+  .day-meter {
+    height: 10px;
+    max-width: 150px;
+    flex: auto;
+    border: 2px solid var(--ink);
+
+    > svg {
+      background: var(--ink);
+    }
+
+    .days-record & {
+      border-color: var(--bright);
+
+      > svg {
+        background: var(--accent);
+      }
+    }
+  }
+
+  .days-note {
+    margin-top: 8px;
+  }
+
+  .days-none {
+    background: var(--row);
+    padding: 12px 14px;
+    color: var(--ink);
+
+    > span {
+      margin-right: 10px;
+      font-family: var(--area-font);
+      font-size: 14px;
+      line-height: calc(1.25 / 0.875);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+  }
+
+  .activity-side {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 320px;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .how-text {
+    margin-top: 2px;
+    background: var(--row-light);
+    padding: 12px 14px;
+    color: var(--ink);
+  }
+
+  .how-terms {
+    display: grid;
+    gap: 2px;
+    margin-top: 2px;
+    color: var(--ink);
+
+    > div {
+      display: grid;
+      min-height: 44px;
+      grid-template-columns: 118px minmax(0, 1fr);
+      align-items: center;
+      background: var(--row);
+
+      &:nth-child(even) {
+        background: var(--row-alt);
+      }
+    }
+
+    dt {
+      padding-inline: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    dd {
+      padding: 8px 12px;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.35;
+      font-weight: 500;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chart-bar {
+      animation: none;
+      transition: none;
+
+      rect {
+        transition: none;
+      }
+    }
+  }
+}

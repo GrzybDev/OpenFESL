@@ -1,4 +1,4 @@
-{#def activity, busiest #}
+{#def activity, busiest, overview #}
 {% set key = game.play_key.code if game.play_key else None %}
 {% set hook %}<FileName text="dinput8.dll" />{% endset %}
 <Layout :title="game.name">
@@ -34,6 +34,10 @@
         </Stat>
       </dl>
       <div class="front-lines">
+        {% if overview.record %}
+          <a href="{{ url('/' ~ game.id ~ '/activity') }}"
+             class="peak-line"><PeakLine :overview="overview" /><Icon name="go" :size="14" stroke="currentColor" /></a>
+        {% endif %}
         <p class="front-updated">
           <Updated />
         </p>

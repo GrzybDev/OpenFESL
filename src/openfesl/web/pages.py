@@ -98,10 +98,21 @@ def _number(context: Context, value: float, places: int | None = None) -> str:
 @pass_context
 def _moment(context: Context, value: datetime) -> str:
     # A day with its year and a time of day, as the page's language writes them.
-    locale = Locale.parse(translate("web.locale", context["language"]))
+    locale = _locale(context)
     day = format_skeleton("yMMMd", value, tzinfo=UTC, locale=locale)
     time = format_skeleton("Hm", value, tzinfo=UTC, locale=locale)
     return str(locale.datetime_formats["medium"]).format(time, day)
+
+
+@pass_context
+def _when(context: Context, value: datetime, skeleton: str) -> str:
+    # A time in UTC with the fields a CLDR skeleton names, such as MMMEd for "Sat 17 Oct", in the
+    # order and words of the page's language.
+    return str(format_skeleton(skeleton, value, tzinfo=UTC, locale=_locale(context)))
+
+
+def _locale(context: Context) -> Locale:
+    return Locale.parse(translate("web.locale", context["language"]))
 
 
 def page_links(page: int, pages: int) -> list[int | None]:
@@ -144,6 +155,7 @@ _catalog = Catalog(
         "static": static_url,
         "page_links": page_links,
         "moment": _moment,
+        "when": _when,
     },
 )
 # The catalogue keeps its own environment, which takes the given one's escaping but not its
