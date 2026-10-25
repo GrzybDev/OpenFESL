@@ -1,0 +1,36 @@
+/* A server's address with no server behind it: the reason, and a search that may find the
+   server the reader looked for. */
+@layer pages {
+  .missing-layout {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .missing-text {
+    min-width: 0;
+    flex: 999 1 560px;
+
+    > div {
+      margin-top: 2px;
+      background: var(--row-light);
+      padding: 14px 14px 16px;
+      color: var(--ink);
+    }
+
+    .body-text {
+      margin-top: 6px;
+    }
+  }
+
+  .missing-search {
+    min-width: 0;
+    flex: 1 1 320px;
+
+    .form-button {
+      width: 100%;
+      margin-top: 10px;
+    }
+  }
+}

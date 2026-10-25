@@ -2,7 +2,7 @@ import tomllib
 from collections.abc import Iterable, Iterator
 from importlib.resources import files
 from importlib.resources.abc import Traversable
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, StringConstraints, field_validator
 
@@ -141,6 +141,8 @@ class Theme(BaseModel):
         row: Rows and notes; black text goes on them.
         row_alt: Every other row of a table.
         row_light: Text boxes and light rows.
+        score_row: The rows of a scoreboard; black text goes on them.
+        score_row_alt: Every other row of a scoreboard.
         subtitle: The bar under the title block.
         bright: Text on the backdrop and on black bars.
         soft: Secondary text on the backdrop.
@@ -162,6 +164,8 @@ class Theme(BaseModel):
     row: Colour
     row_alt: Colour
     row_light: Colour
+    score_row: Colour
+    score_row_alt: Colour
     subtitle: Colour
     bright: Colour
     soft: Colour
@@ -196,6 +200,27 @@ class Flag(BaseModel):
     value: str
 
 
+type Field = Literal["name", "score", "kills", "deaths", ""]
+
+
+class Roster(BaseModel):
+    """The players a server lists in numbered attributes, one player each.
+
+    Attributes:
+        attribute: The attributes' name before their two-digit number, such as D-pdat for
+            D-pdat00, D-pdat01 and on.
+        separator: What separates the fields of one player.
+        fields: What each field holds, in order: the player's name or a number of the player's
+            round; an empty string for a field whose meaning is not known, which no page shows.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    attribute: str
+    separator: str = "|"
+    fields: list[Field]
+
+
 class Listing(BaseModel):
     """How the web pages read the games that a game's servers host.
 
@@ -206,6 +231,11 @@ class Listing(BaseModel):
         expansion: The content a game needs, such as an expansion.
         region: Where the server is.
         hardcore: The mark of a game played under hardcore rules.
+        message: The attributes that hold the server's message in pieces, named by a number
+            after this name, with their count in the attribute of this name and Count.
+        settings: The attributes of the game's settings that are on or off, by the settings'
+            names in the catalogues, in the order the server's page shows them.
+        roster: The players the server lists, with what it lists about each.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -216,6 +246,9 @@ class Listing(BaseModel):
     expansion: Names | None = None
     region: Names | None = None
     hardcore: Flag | None = None
+    message: str | None = None
+    settings: dict[str, str] = {}
+    roster: Roster | None = None
 
 
 class Game(BaseModel):

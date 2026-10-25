@@ -13,4 +13,17 @@
     flex: 0 1 440px;
     margin-bottom: 14px;
   }
+
+  /* A tab beside the title that leads to another page, such as back to the server list. */
+  .tab-link {
+    margin-bottom: 14px;
+  }
+
+  .tab.tab-back {
+    padding-left: 14px;
+
+    svg {
+      transform: scaleX(-1);
+    }
+  }
 }

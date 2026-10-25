@@ -1,0 +1,395 @@
+/* A server's page: its settings and message, its players and the scoreboard. */
+@layer pages {
+  .server-layout {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .server-about {
+    min-width: 0;
+    flex: 999 1 560px;
+  }
+
+  .server-side {
+    min-width: 0;
+    flex: 1 1 440px;
+  }
+
+  .server-name-bar {
+    display: flex;
+    min-height: 56px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    background: var(--ink);
+    padding: 8px 14px;
+
+    h1 {
+      font-family: var(--font-sans);
+      font-size: 24px;
+      line-height: 1.15;
+      font-weight: 700;
+      color: var(--bright);
+    }
+
+    p {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 14px;
+      font-size: 12px;
+      line-height: calc(1 / 0.75);
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+  }
+
+  .server-gone {
+    background: var(--row);
+    padding: 5px 8px;
+    line-height: 1.1;
+    color: var(--ink);
+  }
+
+  .server-hardcore {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .server-last {
+    margin-top: 2px;
+    background: var(--off-block);
+    padding: 9px 12px;
+    font-size: 13px;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--bright);
+    text-transform: uppercase;
+  }
+
+  /* Settings two to a line, every other pair of them shaded. */
+  .settings {
+    --setting: var(--row);
+    --setting-alt: var(--row-alt);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 2px;
+    margin-top: 2px;
+    color: var(--ink);
+
+    > div {
+      display: flex;
+      min-height: 40px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--setting);
+      padding-inline: 12px;
+
+      &:nth-child(4n + 3),
+      &:nth-child(4n + 4) {
+        background: var(--setting-alt);
+      }
+    }
+
+    dt {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    dd {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+  }
+
+  .settings-last {
+    --setting: #c9c9c2;
+    --setting-alt: #c5c5be;
+    color: var(--dim);
+  }
+
+  .setting-on,
+  .setting-off {
+    width: 10px;
+    height: 10px;
+  }
+
+  .setting-on {
+    background: currentcolor;
+  }
+
+  .setting-off {
+    border: 2px solid currentcolor;
+  }
+
+  .server-texts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 10px;
+    margin-top: 10px;
+
+    > section {
+      display: flex;
+      min-width: 0;
+      flex: 1 1 300px;
+      flex-direction: column;
+    }
+
+    .bar-text {
+      flex: 1;
+    }
+  }
+
+  .server-message {
+    white-space: pre-line;
+  }
+
+  .server-author {
+    margin-top: 10px;
+    font-size: 12px;
+    line-height: calc(1 / 0.75);
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    color: var(--dim);
+    text-transform: uppercase;
+  }
+
+  .server-players {
+    margin-top: 2px;
+    background: var(--row-light);
+    padding: 14px;
+    color: var(--ink);
+
+    .body-text {
+      margin-top: 10px;
+    }
+  }
+
+  .server-taken {
+    display: flex;
+    align-items: baseline;
+    font-size: 40px;
+    line-height: 1;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+
+    > span:last-child {
+      margin-left: 12px;
+      font-size: 14px;
+      line-height: calc(1.25 / 0.875);
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+  }
+
+  .server-meter {
+    height: auto;
+    max-width: 100%;
+    margin-top: 12px;
+  }
+
+  .server-state {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: calc(1.25 / 0.875);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .server-since {
+    font-size: 28px;
+    line-height: 1.05;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .facts {
+    display: grid;
+    gap: 2px;
+    margin-top: 2px;
+    color: var(--ink);
+  }
+
+  .server-copy {
+    margin-top: 14px;
+
+    > p {
+      margin: 10px 2px 0;
+      color: var(--soft);
+    }
+  }
+
+  .server-section {
+    margin-top: 14px;
+  }
+
+  .scoreboard-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 16px;
+    background: var(--ink);
+    padding: 11px 14px;
+
+    > * {
+      font-size: 14px;
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    p {
+      color: var(--soft);
+    }
+  }
+
+  .scoreboard-name {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    letter-spacing: normal;
+    color: var(--accent);
+    text-transform: none;
+  }
+
+  .scoreboard-note {
+    margin-top: 2px;
+    background: var(--row-light);
+    padding: 14px;
+    color: var(--ink);
+
+    .body-text {
+      margin-top: 6px;
+    }
+  }
+
+  .scoreboard {
+    min-width: 320px;
+  }
+
+  /* The scoreboard's columns: the position, the name and the numbers the game data names. */
+  .score-columns-0 {
+    grid-template-columns: 44px minmax(120px, 1fr);
+  }
+
+  .score-columns-1 {
+    grid-template-columns: 44px minmax(120px, 1fr) 84px;
+  }
+
+  .score-columns-2 {
+    grid-template-columns: 44px minmax(120px, 1fr) 72px 84px;
+  }
+
+  .score-columns-3 {
+    grid-template-columns: 44px minmax(120px, 1fr) 64px 72px 84px;
+  }
+
+  .scoreboard-head,
+  .seat {
+    display: grid;
+    min-height: 44px;
+    align-items: center;
+
+    > * {
+      padding-inline: 10px;
+      text-align: right;
+    }
+
+    > :nth-child(-n + 2) {
+      padding-inline: 8px;
+    }
+
+    > :nth-child(2) {
+      text-align: left;
+    }
+  }
+
+  .scoreboard-head {
+    background: var(--ink);
+    color: var(--bright);
+
+    > * {
+      font-size: 14px;
+      line-height: calc(1.25 / 0.875);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+  }
+
+  .seat {
+    background: var(--score-row);
+    color: var(--ink);
+    font-size: 16px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+
+    &:nth-child(even) {
+      background: var(--score-row-alt);
+    }
+
+    &[aria-current] {
+      background: var(--accent);
+    }
+
+    > :first-child {
+      font-size: 15px;
+    }
+
+    > :nth-child(2) {
+      min-width: 0;
+    }
+
+    a {
+      display: flex;
+      min-height: 44px;
+      align-items: center;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.2;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .server-menus {
+    margin-top: 8px;
+
+    .more-names {
+      gap: 8px;
+      background: var(--ink);
+      padding: 0 12px 0 14px;
+      font-family: var(--area-font);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--bright);
+      text-transform: uppercase;
+
+      svg {
+        color: var(--accent);
+      }
+    }
+  }
+}

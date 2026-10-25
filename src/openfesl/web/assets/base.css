@@ -142,10 +142,13 @@
     --row: #c9ccd1;
     --row-alt: #c3c6cb;
     --row-light: #e6e7e9;
+    --score-row: #d6d6d6;
+    --score-row-alt: #dadada;
     --subtitle: #26282c;
     --bright: #f4f4f4;
     --soft: #c9ccd1;
     /* The menus' fixed shades of the game style, the same in every theme. */
+    --dim: #3d3d38;
     --placeholder: #55554e;
     --bar-dark: #3a3b36;
     --track: #3a3b33;
@@ -195,6 +198,12 @@
     font-size: 15px;
     line-height: 1.45;
     font-weight: 500;
+  }
+
+  /* A sentence under a part of a panel or beside it, on the backdrop. */
+  .side-note {
+    margin: 10px 2px 0;
+    color: var(--soft);
   }
 
   /* A refresh that failed leaves the last values in place, muted. */

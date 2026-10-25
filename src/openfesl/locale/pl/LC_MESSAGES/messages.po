@@ -552,3 +552,173 @@ msgstr "Następna"
 
 msgid "web.servers.page_number"
 msgstr "Strona %(page)s"
+
+msgid "web.server.title"
+msgstr "Serwer"
+
+msgid "web.server.last_known"
+msgstr "ostatnio znane"
+
+msgid "web.server.not_hosting"
+msgstr "Nie prowadzi gry"
+
+msgid "web.server.settings"
+msgstr "Ustawienia serwera"
+
+msgid "web.server.settings.last_known"
+msgstr "Ostatnio znane ustawienia serwera"
+
+msgid "web.server.settings.last"
+msgstr "Ostatnio znane ustawienia · publikowane do %(time)s UTC"
+
+msgid "web.setting.on"
+msgstr "Wł."
+
+msgid "web.setting.off"
+msgstr "Wył."
+
+msgid "web.server.objective"
+msgstr "Cel"
+
+msgid "web.server.message"
+msgstr "Wiadomość serwera"
+
+msgid "web.server.message.author"
+msgstr "Tekst operatora serwera"
+
+msgid "web.server.not_hosting.since"
+msgstr "Nie prowadzi gry od %(time)s UTC"
+
+msgid "web.server.not_hosting.text"
+msgstr ""
+"Gdy znów poprowadzi grę, przeglądarka serwerów w grze pokaże go na liście, a"
+" ta strona – jego graczy i tablicę wyników."
+
+msgid "web.server.status"
+msgstr "Stan"
+
+msgid "web.server.hosting"
+msgstr "Prowadzi grę"
+
+msgid "web.server.up_since"
+msgstr "Działa od"
+
+msgid "web.server.time"
+msgstr "%(time)s UTC"
+
+msgid "web.server.content"
+msgstr "Zawartość"
+
+msgid "web.server.last_hosted"
+msgstr "Ostatnio działał"
+
+msgid "web.server.period"
+msgstr "%(start)s–%(end)s UTC"
+
+msgid "web.server.slots"
+msgstr "Miejsca"
+
+msgid "web.server.select"
+msgstr ""
+"Zaznacz nazwę i skopiuj ją. Do serwera dołącza się w grze; jej przeglądarka "
+"serwerów znajduje go po nazwie."
+
+msgid "web.server.scoreboard"
+msgstr "Tablica wyników"
+
+msgid "web.server.highlighted"
+msgstr "Wyróżniono %(name)s"
+
+msgid "web.server.scoreboard.not_hosting"
+msgstr "Brak tablicy wyników, dopóki serwer nie prowadzi gry."
+
+msgid "web.server.scoreboard.empty"
+msgstr "Na razie brak graczy"
+
+msgid "web.server.scoreboard.empty.text"
+msgstr ""
+"Tablica wypełnia się, gdy dołączają gracze. Do serwera dołącza się w grze; "
+"jej przeglądarka serwerów znajduje go po nazwie."
+
+msgid "web.server.position"
+msgstr "Pozycja"
+
+msgid "web.server.player"
+msgstr "Nazwa w grze"
+
+msgid "web.server.number.score"
+msgstr "Wynik"
+
+msgid "web.server.number.kills"
+msgstr "Zabici"
+
+msgid "web.server.number.deaths"
+msgstr "Zgony"
+
+msgid "web.server.scoreboard.numbers"
+msgstr "Wartości rundy, tak jak publikuje je serwer."
+
+msgid "web.server.menus"
+msgstr "Osoby online w %(game)s, poza serwerami."
+
+msgid "web.server.unknown"
+msgstr "Nie znaleziono serwera"
+
+msgid "web.server.unknown.heading"
+msgstr "Pod tym adresem nie ma znanego serwera."
+
+msgid "web.server.unknown.text"
+msgstr ""
+"Serwer, który przestał prowadzić grę, zachowuje przez pewien czas stronę z "
+"ostatnio znanymi ustawieniami. Wyszukiwanie fragmentu nazwy znajduje "
+"serwery, których nazwy go zawierają."
+
+msgid "web.server.find"
+msgstr "Znajdź serwer"
+
+msgid "games.bfbc2.setting.friendly-fire"
+msgstr "Własny ogień"
+
+msgid "games.bfbc2.setting.minimap"
+msgstr "Minimapa"
+
+msgid "games.bfbc2.setting.3d-spotting"
+msgstr "Śledzenie 3D"
+
+msgid "games.bfbc2.setting.auto-balance"
+msgstr "Auto balans"
+
+msgid "games.bfbc2.setting.vehicle-cameras"
+msgstr "Kamery pojazdu"
+
+msgid "games.bfbc2.setting.minimap-spotting"
+msgstr "Śledzenie na mapie"
+
+msgid "games.bfbc2.setting.kill-cam"
+msgstr "Kamera zabójcy"
+
+msgid "games.bfbc2.setting.crosshair"
+msgstr "Celownik"
+
+msgid "games.bfbc2.objective.conquest"
+msgstr ""
+"Drużyny zdobywają i utrzymują punkty kontrolne. Każde odrodzenie kosztuje "
+"drużynę jeden kupon, a drużyna, która trzyma mniej punktów, traci kupony "
+"także z upływem czasu. Rundę przegrywa drużyna, której pierwszej skończą się"
+" kupony."
+
+msgid "games.bfbc2.objective.rush"
+msgstr ""
+"Atakujący uzbrajają i niszczą stacje przekaźnikowe obrońców, po dwie naraz; "
+"zniszczenie pary otwiera kolejną bazę. Atakujący przegrywają, gdy skończą im"
+" się kupony, a obrońcy, gdy padnie ostatnia para."
+
+msgid "games.bfbc2.objective.squad-rush"
+msgstr ""
+"Jeden oddział atakuje, drugi broni: atakujący niszczą po jednej stacji "
+"przekaźnikowej w każdej bazie, zanim skończą im się kupony."
+
+msgid "games.bfbc2.objective.squad-deathmatch"
+msgstr ""
+"Cztery oddziały walczą ze sobą; rundę wygrywa oddział, który pierwszy "
+"osiągnie wymaganą liczbę zabójstw."

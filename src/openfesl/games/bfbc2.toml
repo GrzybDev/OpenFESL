@@ -60,6 +60,8 @@ panel_edge = "#8C8E78"
 row = "#BABAB2"
 row_alt = "#B6B6AE"
 row_light = "#E2E2DE"
+score_row = "#D6D6D6"
+score_row_alt = "#DADADA"
 subtitle = "#0A0A0A"
 bright = "#F4F4EE"
 soft = "#D9D9CD"
@@ -69,6 +71,8 @@ soft = "#D9D9CD"
 [listing]
 squad = 4
 hardcore = { attribute = "B-U-type", value = "HARDCORE" }
+# The message the server's operator wrote, in D-ServerDescription0 and on.
+message = "D-ServerDescription"
 
 # The level's id names the map; its modes' levels add a suffix, such as MP_005GR for Rush. The
 # names are those of the game's own map list; other levels show their ids.
@@ -107,6 +111,25 @@ otherwise = "base"
 [listing.region]
 attribute = "B-U-location"
 names = { UNKNOWN = "unknown" }
+
+# The settings the game's server info screen shows, which the server publishes as 1 or 0, the
+# friendly fire as the share of damage it does.
+[listing.settings]
+friendly-fire = "D-FriendlyFire"
+minimap = "D-Minimap"
+3d-spotting = "D-ThreeDSpotting"
+auto-balance = "D-AutoBalance"
+vehicle-cameras = "D-ThirdPersonVehicleCameras"
+minimap-spotting = "D-MinimapSpotting"
+kill-cam = "D-KillCam"
+crosshair = "D-Crosshair"
+
+# The R34 server lists up to 32 players in D-pdat00 to D-pdat31, each as name|n|n|n|n: the
+# name, then four numbers of its own; the third is a share in percent. Which numbers hold what is
+# not known yet, so the pages show the names only.
+[listing.roster]
+attribute = "D-pdat"
+fields = ["name", "", "", "", ""]
 
 [http]
 locker = "http://easo.ea.com/fileupload/locker2.jsp"

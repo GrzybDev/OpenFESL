@@ -216,6 +216,7 @@ class Hosting:
         self._lobbies: dict[tuple[str, int], dict[int, HostedGame]] = {}
         self._ids = itertools.count(1)
         self._changed: list[Callable[[HostedGame], object]] = []
+        self._ended: list[Callable[[HostedGame], object]] = []
 
     def routes(self) -> dict[str, TheaterRoute[Any]]:
         """Return the handlers of the commands that host games."""
@@ -235,6 +236,14 @@ class Hosting:
             listener: Called with the game.
         """
         self._changed.append(listener)
+
+    def on_end(self, listener: Callable[[HostedGame], object]) -> None:
+        """Call a function after a game leaves its lobby, however it ended.
+
+        Args:
+            listener: Called with the game as it was last.
+        """
+        self._ended.append(listener)
 
     def games(self, game: Game, lobby: Lobby) -> list[HostedGame]:
         """Return the games players see in a lobby, without those waiting for approval.
@@ -603,6 +612,8 @@ class Hosting:
         if listed.pop(hosted.id, None) is None:
             return False
         logger.info("Game %d (%r) removed", hosted.id, hosted.name)
+        for listener in self._ended:
+            listener(hosted)
         for player in hosted.everyone():
             player.stop_waiting()
             if player.connection is not hosted.host:

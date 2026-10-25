@@ -1,0 +1,32 @@
+@layer components {
+  .copy-block {
+    display: flex;
+    min-height: 76px;
+    width: 100%;
+    align-items: stretch;
+    background: var(--ink);
+    padding: 5px;
+    text-align: left;
+    color: var(--bright);
+
+    .copy-done {
+      color: inherit;
+    }
+  }
+
+  .copy-block-label {
+    display: flex;
+    align-items: center;
+    padding: 6px 18px;
+    font-size: 32px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .copy-hint {
+    margin: 10px 2px 0;
+    color: var(--soft);
+  }
+}

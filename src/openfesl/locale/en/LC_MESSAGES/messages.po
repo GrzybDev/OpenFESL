@@ -536,3 +536,172 @@ msgstr "Next"
 
 msgid "web.servers.page_number"
 msgstr "Page %(page)s"
+
+msgid "web.server.title"
+msgstr "Server"
+
+msgid "web.server.last_known"
+msgstr "last known"
+
+msgid "web.server.not_hosting"
+msgstr "Not hosting"
+
+msgid "web.server.settings"
+msgstr "Server settings"
+
+msgid "web.server.settings.last_known"
+msgstr "Last known server settings"
+
+msgid "web.server.settings.last"
+msgstr "Last known settings · published until %(time)s UTC"
+
+msgid "web.setting.on"
+msgstr "On"
+
+msgid "web.setting.off"
+msgstr "Off"
+
+msgid "web.server.objective"
+msgstr "Objective"
+
+msgid "web.server.message"
+msgstr "Server message"
+
+msgid "web.server.message.author"
+msgstr "Written by the server's operator"
+
+msgid "web.server.not_hosting.since"
+msgstr "Not hosting since %(time)s UTC"
+
+msgid "web.server.not_hosting.text"
+msgstr ""
+"When it hosts again, the game's server browser lists it, and this page shows"
+" its players and scoreboard."
+
+msgid "web.server.status"
+msgstr "Status"
+
+msgid "web.server.hosting"
+msgstr "Hosting"
+
+msgid "web.server.up_since"
+msgstr "Up since"
+
+msgid "web.server.time"
+msgstr "%(time)s UTC"
+
+msgid "web.server.content"
+msgstr "Content"
+
+msgid "web.server.last_hosted"
+msgstr "Last hosted"
+
+msgid "web.server.period"
+msgstr "%(start)s–%(end)s UTC"
+
+msgid "web.server.slots"
+msgstr "Slots"
+
+msgid "web.server.select"
+msgstr ""
+"Select the name and copy it. Joining happens in the game; its server browser"
+" finds this server by name."
+
+msgid "web.server.scoreboard"
+msgstr "Scoreboard"
+
+msgid "web.server.highlighted"
+msgstr "Highlighted %(name)s"
+
+msgid "web.server.scoreboard.not_hosting"
+msgstr "No scoreboard while the server is not hosting."
+
+msgid "web.server.scoreboard.empty"
+msgstr "No players yet"
+
+msgid "web.server.scoreboard.empty.text"
+msgstr ""
+"The scoreboard fills in as players join. Joining happens in the game; its "
+"server browser finds this server by name."
+
+msgid "web.server.position"
+msgstr "Position"
+
+msgid "web.server.player"
+msgstr "Player"
+
+msgid "web.server.number.score"
+msgstr "Score"
+
+msgid "web.server.number.kills"
+msgstr "Kills"
+
+msgid "web.server.number.deaths"
+msgstr "Deaths"
+
+msgid "web.server.scoreboard.numbers"
+msgstr "Numbers of the round as the server publishes them."
+
+msgid "web.server.menus"
+msgstr "Online in %(game)s, not on a server."
+
+msgid "web.server.unknown"
+msgstr "Server not found"
+
+msgid "web.server.unknown.heading"
+msgstr "No server is known at this address."
+
+msgid "web.server.unknown.text"
+msgstr ""
+"A server that stopped hosting keeps its page for a while, with its last "
+"known settings. A search by part of the name finds servers whose names "
+"contain it."
+
+msgid "web.server.find"
+msgstr "Find a server"
+
+msgid "games.bfbc2.setting.friendly-fire"
+msgstr "Friendly fire"
+
+msgid "games.bfbc2.setting.minimap"
+msgstr "Minimap"
+
+msgid "games.bfbc2.setting.3d-spotting"
+msgstr "3D spotting"
+
+msgid "games.bfbc2.setting.auto-balance"
+msgstr "Auto balance"
+
+msgid "games.bfbc2.setting.vehicle-cameras"
+msgstr "Third-person vehicle cameras"
+
+msgid "games.bfbc2.setting.minimap-spotting"
+msgstr "Minimap spotting"
+
+msgid "games.bfbc2.setting.kill-cam"
+msgstr "Kill cam"
+
+msgid "games.bfbc2.setting.crosshair"
+msgstr "Crosshair"
+
+msgid "games.bfbc2.objective.conquest"
+msgstr ""
+"Capture and hold the control points. Each respawn costs a team a ticket, and"
+" the team holding fewer points also loses tickets over time; the first team "
+"to run out loses the round."
+
+msgid "games.bfbc2.objective.rush"
+msgstr ""
+"The attackers arm and destroy the defenders' M-COM stations, two at a time; "
+"each pair destroyed opens the next base. The attackers lose when they run "
+"out of tickets, the defenders when the last pair falls."
+
+msgid "games.bfbc2.objective.squad-rush"
+msgstr ""
+"One attacking squad against one defending squad: the attackers destroy one "
+"M-COM station in each base before they run out of tickets."
+
+msgid "games.bfbc2.objective.squad-deathmatch"
+msgstr ""
+"Four squads fight each other; the first squad to reach the kill target wins "
+"the round."

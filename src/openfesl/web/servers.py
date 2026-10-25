@@ -142,7 +142,7 @@ class Filters:
 
 
 def server_routes(pages: Pages, games: Games, census: Census) -> APIRouter:
-    """Return each game's server list.
+    """Return each game's server list and its servers' pages.
 
     Args:
         pages: Renders the pages.
@@ -153,6 +153,9 @@ def server_routes(pages: Pages, games: Games, census: Census) -> APIRouter:
     for game in games:
         router.add_api_route(
             f"/{game.id}/servers", _list(pages, census, game), response_class=HTMLResponse
+        )
+        router.add_api_route(
+            f"/{game.id}/servers/{{slug}}", _page(pages, census, game), response_class=HTMLResponse
         )
     return router
 
@@ -209,6 +212,47 @@ def _list(pages: Pages, census: Census, game: Game) -> Callable[[Request], Await
         )
 
     return show_servers
+
+
+def _page(
+    pages: Pages, census: Census, game: Game
+) -> Callable[[Request, str], Awaitable[HTMLResponse]]:
+    async def show_server(request: Request, slug: str) -> HTMLResponse:
+        server = census.server(game, slug)
+        activity = census.activity(game)
+        total = activity.servers
+        if server is None:
+            # The search starts from the words of the address that found nothing.
+            wanted = slug.replace("-", " ")
+            return pages.render(
+                request,
+                "ServerUnknown",
+                404,
+                game=game,
+                activity=activity,
+                total=total,
+                wanted=wanted,
+            )
+        player = request.query_params.get("player", "").casefold()
+        return pages.render(
+            request,
+            "Server",
+            game=game,
+            activity=activity,
+            total=total,
+            server=server,
+            numbers=[
+                meaning
+                for meaning in ("score", "kills", "deaths")
+                if any(meaning in seat.numbers for seat in server.roster)
+            ],
+            highlighted=next(
+                (seat.name for seat in server.roster if seat.name.casefold() == player), None
+            ),
+            menus=census.in_menus(game) if server.ended is None else [],
+        )
+
+    return show_server
 
 
 def _key(label: Label | None) -> str | None:

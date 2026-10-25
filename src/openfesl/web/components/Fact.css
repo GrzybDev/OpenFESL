@@ -1,0 +1,30 @@
+@layer components {
+  .fact {
+    display: flex;
+    min-height: 40px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--row);
+    padding-inline: 14px;
+
+    &:nth-child(even) {
+      background: var(--row-alt);
+    }
+
+    dt {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    dd {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+}

@@ -1,0 +1,192 @@
+{#def activity, total: int, server, numbers: list, highlighted: str | None, menus: list #}
+{% set list = url("/" ~ game.id ~ "/servers") %}
+{% set hosting = server.ended is none %}
+{% set heading %}{% if server.mode %}<Published kind="mode" :label="server.mode" />{% else %}{{ _("web.server.title") }}{% endif %}{% endset %}
+<Layout :title="server.name">
+  <div id="live"
+       hx-get="{{ here }}"
+       hx-trigger="every 15s, refresh"
+       hx-select="#live"
+       hx-select-oob="#shell-games:outerMorph"
+       hx-swap="outerMorph">
+    <GameStatus :activity="activity" />
+    <GameMenu current="servers" :exact="false" />
+
+    <PageHead tag="div">
+      <div class="enter-title page-title">
+        <TitleBlock :title="heading" tag="p"><Published kind="map" :label="server.map" />{% if not hosting %} · {{ _("web.server.last_known") }}{% endif %}</TitleBlock>
+      </div>
+      <Tab :href="list" class="tab-link tab-back"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.servers.all") }}<span class="tab-count">{{ number(total) }}</span></Tab>
+    </PageHead>
+
+    <Panel class="enter-panel">
+      <div class="server-layout">
+
+        <div class="server-about">
+          <div class="server-name-bar">
+            <h1>{{ server.name }}</h1>
+            <p>{% if not hosting %}<span class="server-gone">{{ _("web.server.not_hosting") }}</span>{% endif %}{% if server.hardcore %}<span class="server-hardcore"><Badge name="bolt" />{{ _("web.server.hardcore") }}</span>{% endif %}</p>
+          </div>
+          {% if not hosting %}
+            <p class="server-last">{{ _("web.server.settings.last", time=server.ended.strftime("%H:%M")) }}</p>
+          {% endif %}
+          {% if server.settings %}
+            <dl aria-label="{{ _('web.server.settings') if hosting else _('web.server.settings.last_known') }}"
+                class="settings{% if not hosting %} settings-last{% endif %}">
+              {% for name, on in server.settings %}
+                <div>
+                  <dt>{{ _("games." ~ game.id ~ ".setting." ~ name) }}</dt>
+                  <dd>
+                    <span aria-hidden="true"
+                          class="{{ 'setting-on' if on else 'setting-off' }}"></span>{{ _("web.setting.on") if on else _("web.setting.off") }}
+                  </dd>
+                </div>
+              {% endfor %}
+            </dl>
+          {% endif %}
+
+          {% if server.mode and server.mode.name or server.message %}
+            <div class="server-texts">
+              {% if server.mode and server.mode.name %}
+                <section aria-labelledby="server-objective">
+                  {% set mode %}<Published kind="mode" :label="server.mode" />{% endset %}
+                  <Bar id="server-objective" :extra="mode">{{ _("web.server.objective") }}</Bar>
+                  <div class="bar-text">
+                    <p class="body-text">{{ _("games." ~ game.id ~ ".objective." ~ server.mode.name) }}</p>
+                  </div>
+                </section>
+              {% endif %}
+              {% if server.message %}
+                <section aria-labelledby="server-message">
+                  <Bar id="server-message">{{ _("web.server.message") }}</Bar>
+                  <div class="bar-text">
+                    <p class="body-text server-message">{{ server.message }}</p>
+                    <p class="server-author">{{ _("web.server.message.author") }}</p>
+                  </div>
+                </section>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="server-side">
+          <section aria-labelledby="server-players">
+            {% set free %}<Free :server="server" />{% endset %}
+            <Bar id="server-players" :extra="free if hosting else _('web.server.not_hosting')">{{ _("web.servers.players") }}</Bar>
+            <div class="server-players">
+              {% if hosting %}
+                <p class="server-taken">
+                  <Count :value="server.players" class="count-ink live-value" />&nbsp;/&nbsp;{{ number(server.max_players) }}<span>{{ free }}</span>
+                </p>
+                <Seats :taken="server.players" :slots="server.max_players" :scale="2" class="server-meter" />
+                {% set state = "full" if server.free == 0 else ("empty" if server.players == 0 else ("squad" if server.room else None)) %}
+                {% if state %}<p class="server-state"><Badge :name="state" />{{ _("web.servers.show." ~ state) }}</p>{% endif %}
+              {% else %}
+                <p class="server-since">{{ _("web.server.not_hosting.since", time=server.ended.strftime("%H:%M")) }}</p>
+                <p class="body-text">{{ _("web.server.not_hosting.text") }}</p>
+              {% endif %}
+            </div>
+            {% set region %}<Published kind="region" :label="server.region" />{% endset %}
+            <dl class="facts">
+              <Fact :label="_('web.server.status')">
+                {{ _("web.server.hosting") if hosting else _("web.server.not_hosting") }}
+              </Fact>
+              <Fact :label="_('web.servers.region')">
+                {{ region }}
+              </Fact>
+              {% if hosting %}
+                <Fact :label="_('web.server.up_since')">
+                  {{ _("web.server.time", time=server.since.strftime("%H:%M")) }}
+                </Fact>
+                {% if server.expansion %}
+                  <Fact :label="_('web.server.content')">
+                    <Published kind="expansion" :label="server.expansion" />
+                  </Fact>
+                {% endif %}
+              {% else %}
+                <Fact :label="_('web.server.last_hosted')">
+                  {{ _("web.server.period", start=server.since.strftime("%H:%M"), end=server.ended.strftime("%H:%M")) }}
+                </Fact>
+                <Fact :label="_('web.server.slots')">
+                  {{ number(server.max_players) }}
+                </Fact>
+              {% endif %}
+            </dl>
+          </section>
+          <div class="server-copy">
+            <CopyBlock :value="server.name" :label="_('web.server.copy')" :note="_('web.server.copied')" :field_label="_('web.servers.name')" :hint="_('web.server.select')" />
+            <p class="body-text js-only">{{ _("web.server.joining") }} <a href="{{ url('/' ~ game.id ~ '/play') }}"
+    class="reload">{{ _("web.front.play") }}</a></p>
+          </div>
+        </div>
+
+      </div>
+
+      <section aria-labelledby="server-scoreboard" class="server-section">
+        <div class="scoreboard-bar">
+          <h2 id="server-scoreboard">{{ _("web.server.scoreboard") }}</h2>
+          {% if highlighted %}
+            {% set name %}<span class="scoreboard-name">{{ highlighted }}</span>{% endset %}
+            <p>{{ _("web.server.highlighted", name=name) }}</p>
+          {% endif %}
+        </div>
+        {% if not hosting %}
+          <p class="body-text scoreboard-note">{{ _("web.server.scoreboard.not_hosting") }}</p>
+        {% elif not server.roster %}
+          <div class="scoreboard-note">
+            <p class="list-empty-title">{{ _("web.server.scoreboard.empty") }}</p>
+            <p class="body-text">{{ _("web.server.scoreboard.empty.text") }}</p>
+          </div>
+        {% else %}
+          <div class="table-scroll">
+            <div role="table"
+                 aria-labelledby="server-scoreboard"
+                 class="table scoreboard">
+              <div role="rowgroup">
+                <div role="row" class="score-columns-{{ numbers|length }} scoreboard-head">
+                  <div role="columnheader"><span class="sr-only">{{ _("web.server.position") }}</span></div>
+                  <div role="columnheader">{{ _("web.server.player") }}</div>
+                  {% for meaning in numbers %}<div role="columnheader">{{ _("web.server.number." ~ meaning) }}</div>{% endfor %}
+                </div>
+              </div>
+              <div role="rowgroup" data-rows class="enter-rows table-rows">
+                {% for seat in server.roster %}
+                  <div role="row"
+                       id="player-{{ loop.index }}"
+                       data-key="{{ seat.name }}"
+                       {% if seat.name == highlighted %} aria-current="true"{% endif %}
+                       class="score-columns-{{ numbers|length }} seat">
+                    <div role="cell">{{ number(loop.index) }}</div>
+                    <div role="cell"><a href="{{ url('/' ~ game.id ~ '/players/' ~ seat.name|urlencode) }}">{{ seat.name }}</a></div>
+                    {% for meaning in numbers %}
+                      <div role="cell">
+                        {% if meaning in seat.numbers %}<Count :value="seat.numbers[meaning]" class="count-ink count-sm" />{% endif %}
+                      </div>
+                    {% endfor %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          {% if numbers %}<p class="body-text side-note">{{ _("web.server.scoreboard.numbers") }}</p>{% endif %}
+        {% endif %}
+      </section>
+
+      {% if menus %}
+        <section aria-labelledby="server-menus" class="server-section">
+          <Bar id="server-menus" :extra="number(menus|length)">{{ _("web.activity.in_menus") }}</Bar>
+          <div class="bar-text">
+            <p class="body-text">{{ _("web.server.menus", game=game.name) }}</p>
+            <ul class="name-chips server-menus">
+              {% for name in menus[:12] %}
+                <li><a href="{{ url('/' ~ game.id ~ '/players/' ~ name|urlencode) }}">{{ name }}</a></li>
+              {% endfor %}
+              {% if menus|length > 12 %}<li><a href="{{ url('/' ~ game.id ~ '/leaderboard') }}?show=online"
+   class="more-names">{{ _("web.servers.more", count=number(menus|length - 12)) }}<Icon name="go" :size="14" stroke="currentColor" /></a></li>{% endif %}
+            </ul>
+          </div>
+        </section>
+      {% endif %}
+    </Panel>
+  </div>
+</Layout>

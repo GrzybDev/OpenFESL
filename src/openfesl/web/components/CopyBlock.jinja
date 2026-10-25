@@ -1,0 +1,20 @@
+{#def value: str, label: str, note: str, field_label: str, hint: str #}
+{# The large action block that copies a text: its chevron turns into a tick for a moment (M8).
+   Without scripts the text stands in a field to select instead. #}
+<button type="button"
+        data-copy="{{ value }}"
+        data-copied="{{ _('web.copy.done') }}"
+        data-note="{{ note }}"
+        class="copy copy-block js-only chevron">
+  <span aria-hidden="true" class="action-square"><span class="copy-icons"><Icon name="go" :size="30" stroke="#0A0A0A" class="go copy-idle" /><Icon name="tick" :size="30" stroke="#0A0A0A" class="copy-done" /></span></span>
+  <span data-label class="copy-block-label">{{ label }}</span>
+</button>
+<div class="no-js-only">
+  <label for="copy-field" class="field-label">{{ field_label }}</label>
+  <input id="copy-field"
+         type="text"
+         readonly
+         value="{{ value }}"
+         class="field-input">
+  <p class="body-text copy-hint">{{ hint }}</p>
+</div>

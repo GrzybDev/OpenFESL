@@ -167,7 +167,7 @@
                                 <ul aria-label="{{ _('web.servers.roster') }}"
                                     class="name-chips server-roster">
                                   {% for player in server.roster[:4] %}
-                                    <li><a href="{{ url('/' ~ game.id ~ '/players/' ~ player|urlencode) }}">{{ player }}</a></li>
+                                    <li><a href="{{ url('/' ~ game.id ~ '/players/' ~ player.name|urlencode) }}">{{ player.name }}</a></li>
                                   {% endfor %}
                                   {% if server.roster|length > 4 %}<li><a href="{{ href }}">{{ _("web.servers.more", count=number(server.roster|length - 4)) }}</a></li>{% endif %}
                                 </ul>

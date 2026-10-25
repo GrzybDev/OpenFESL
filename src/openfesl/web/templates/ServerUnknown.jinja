@@ -1,0 +1,34 @@
+{#def activity, total: int, wanted: str #}
+{% set list = url("/" ~ game.id ~ "/servers") %}
+<Layout :title="_('web.server.unknown')">
+  <GameStatus :activity="activity" />
+  <GameMenu current="servers" :exact="false" />
+
+  <PageHead tag="div">
+    <div class="enter-title page-title">
+      <TitleBlock :title="_('web.servers.title')" tag="p">{{ game.name }}</TitleBlock>
+    </div>
+    <Tab :href="list" class="tab-link tab-back"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.servers.all") }}<span class="tab-count">{{ number(total) }}</span></Tab>
+  </PageHead>
+
+  <Panel class="enter-panel">
+    <div class="missing-layout">
+      <section aria-labelledby="unknown-title" class="missing-text">
+        <Bar tag="h1" id="unknown-title">{{ _("web.server.unknown") }}</Bar>
+        <div>
+          <p class="list-empty-title">{{ _("web.server.unknown.heading") }}</p>
+          <p class="body-text">{{ _("web.server.unknown.text") }}</p>
+        </div>
+      </section>
+      <form action="{{ list }}"
+            method="get"
+            role="search"
+            aria-labelledby="unknown-search"
+            class="missing-search">
+        <Bar id="unknown-search" large>{{ _("web.server.find") }}</Bar>
+        <SearchField id="unknown-name" name="q" :label="_('web.servers.name')" :value="wanted" :hint="_('web.servers.name.hint')" />
+        <FormButton icon="find">{{ _("web.servers.search") }}</FormButton>
+      </form>
+    </div>
+  </Panel>
+</Layout>
