@@ -80,7 +80,7 @@ async def test_a_player_changes_the_country_and_the_password_which_ends_remember
         long = await player.request(mine, "acct", update_password("secret-pass", "x" * 32))
         assert (long["errorContainer.0.fieldName"], long["errorContainer.0.fieldError"]) == (
             "newPassword",
-            "2",
+            "3",
         )
         token = (await player.request(mine, "acct", update_password("secret-pass", "other-pass")))[
             "encryptedPasswordInfo"

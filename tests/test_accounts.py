@@ -68,12 +68,13 @@ async def test_registration_and_login_refuse_what_the_game_must_correct(
             assert (await player.request(FESL, "acct", form))["errorCode"] == "21"
         short = await player.request(FESL, "acct", registration("bob@example.test", "short", terms))
         assert (short["errorCode"], short["errorContainer.0.fieldName"]) == ("21", "password")
-        # Sixteen characters, but 32 bytes of UTF-8 on the wire, of which the SDK keeps 31.
+        # Sixteen characters, but 32 bytes of UTF-8 on the wire, of which the SDK keeps 31; the
+        # game shows its "password is too long" text for 3.
         long = registration("bob@example.test", "ł".encode().decode("latin-1") * 16, terms)
         refused = await player.request(FESL, "acct", long)
         assert (refused["errorContainer.0.fieldName"], refused["errorContainer.0.fieldError"]) == (
             "password",
-            "2",
+            "3",
         )
 
         form = registration("bob@example.test", "secret-pass", "outdated")

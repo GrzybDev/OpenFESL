@@ -7,7 +7,9 @@ from babel import Locale, UnknownLocaleError
 from openfesl.core.texts import load_texts
 from openfesl.protocol.fesl import FieldError
 
-TOO_LONG = 2
+# The game maps a field error one lower before it picks a text, so its "password is too long"
+# text takes 3; 2 shows its notice to fill in every field properly.
+TOO_LONG = 3
 INVALID_VALUE = 6
 TOO_YOUNG = 16
 
