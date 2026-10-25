@@ -5,7 +5,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.admin import AdminAction
-from openfesl.core.personas import Persona, PersonaState
+from openfesl.core.personas import Persona, PersonaRecord, PersonaState
 from openfesl.storage.models import AccountRow, AdminActionRow, PersonaRow
 
 _LIKE_SPECIAL = re.compile(r"[\\%_]")
@@ -41,6 +41,29 @@ class SqlPersonaStore:
                 .order_by(PersonaRow.id)
             )
             return [_persona(row) for row in rows]
+
+    async def records(self, account_ids: list[int]) -> dict[int, list[PersonaRecord]]:
+        """Return the personas of some accounts in every namespace, oldest first, by account.
+
+        Those their players removed are included.
+
+        Args:
+            account_ids: The accounts.
+        """
+        async with self._sessions() as session:
+            rows = await session.scalars(
+                select(PersonaRow)
+                .where(PersonaRow.account_id.in_(account_ids))
+                .order_by(PersonaRow.id)
+            )
+            found: dict[int, list[PersonaRecord]] = {account_id: [] for account_id in account_ids}
+            for row in rows:
+                found[row.account_id].append(
+                    PersonaRecord(
+                        _persona(row), row.created_at, row.disabled_at, PersonaState(row.state)
+                    )
+                )
+            return found
 
     async def find(self, namespace: str, name: str) -> Persona | None:
         """Return the enabled persona with a name, matched regardless of case.

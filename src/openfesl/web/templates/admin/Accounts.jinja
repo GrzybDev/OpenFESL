@@ -1,0 +1,129 @@
+{#def listing, accounts: list, total: int, pages: int, size: int #}
+{# The players' accounts, newest first or as a search by the start of a name found them: each with
+   its in-game names, country, registration and whether it plays now, beside the search. #}
+{% set title = _("web.admin.accounts") %}
+{% set list = url("/admin/accounts") %}
+{% set search = listing.search %}
+{% macro marked(name) %}
+  {%- if search and name.lower().startswith(search.lower()) -%}
+    <mark class="search-match">{{ name[:search|length] }}</mark>{{ name[search|length:] }}
+  {%- else -%}
+    {{ name }}
+  {%- endif -%}
+{%- endmacro %}
+<AdminPage :title="title" current="accounts">
+  <PageHead labelledby="accounts-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="accounts-title">{{ _("web.admin.accounts.subtitle") }}</TitleBlock>
+    </div>
+  </PageHead>
+  <Panel class="enter-panel">
+    <div class="list-layout admin-layout">
+      <section aria-labelledby="accounts-list" class="list-main admin-list">
+        <h2 id="accounts-list" class="sr-only">
+          {{ _("web.admin.accounts.matching", query=search) if search else _("web.admin.accounts.newest") }}
+        </h2>
+        <div class="table-scroll table-scroll-flush">
+          <div role="table" aria-labelledby="accounts-list" class="table">
+            <div role="rowgroup" class="admin-list-head">
+              <div role="row" class="account-columns">
+                <div role="columnheader" class="column-head column-name">{{ _("web.admin.account") }}</div>
+                <div role="columnheader" class="column-head">{{ _("web.admin.account.names") }}</div>
+                <div role="columnheader" class="column-head">{{ _("web.admin.account.country") }}</div>
+                <div role="columnheader"
+                     aria-sort="{{ 'ascending' if listing.oldest_first else 'descending' }}"
+                     class="column-head column-sort">
+                  <a href="{{ list ~ listing.changed(oldest_first=not listing.oldest_first, page=1).query() }}">{{ _("web.admin.account.created") }}<Icon name="down" :size="14" stroke="currentColor" :class="'ascending' if listing.oldest_first else ''" /></a>
+                </div>
+                <div role="columnheader" class="column-head">{{ _("web.admin.account.now") }}</div>
+                <div role="columnheader"><span class="sr-only">{{ _("web.admin.account.page") }}</span></div>
+              </div>
+            </div>
+            <div role="rowgroup" class="enter-rows table-rows">
+              {% for view in accounts %}
+                {% set account = view.record.account %}
+                {% set href = url("/admin/accounts/" ~ account.id) %}
+                {% set playing = view.playing %}
+                <div role="row" class="account-columns account-row">
+                  <div role="cell" class="admin-cell admin-name-cell">
+                    <a href="{{ href }}" class="account-link"><span class="account-login">{{ marked(account.nuid) }}</span><span class="cell-ago">{{ _("web.admin.account.number", number=account.id) }}</span></a>
+                  </div>
+                  <div role="cell" class="admin-cell cell-stack account-names">
+                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.account.names") }}</span>
+                    {% for persona in view.personas %}
+                      <span class="account-name"><span>{{ marked(persona.record.persona.name) }}
+                        {%- if not persona.usable %} · {{ _("web.admin.persona.mark.removed") if persona.record.removed else _("web.admin.persona.mark.disabled") }}{% endif -%}
+                        </span>
+                        {%- if persona.game and (loop.first or loop.previtem.game != persona.game) %}<GameChip :of="persona.game" />
+                        {% endif %}
+                      </span>
+                    {% else %}
+                      <span class="cell-ago">{{ _("web.admin.account.names.none") }}</span>
+                    {% endfor %}
+                  </div>
+                  <div role="cell" class="admin-cell account-country">
+                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.account.country") }}</span>
+                    {% if account.country %}
+                      <span class="country-code">{{ account.country }}</span>{{ country(account.country) }}
+                    {% endif %}
+                  </div>
+                  <div role="cell" class="admin-cell cell-stack">
+                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.account.created") }}</span>
+                    <span class="cell-time">{{ when(view.record.created, "yMMMd") }}</span>
+                    <span class="cell-ago">{{ _("web.server.time", time=when(view.record.created, "Hm")) }}</span>
+                  </div>
+                  <div role="cell" class="admin-cell cell-stack">
+                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.account.now") }}</span>
+                    <span class="account-now">{{ _("web.admin.account.online") if view.session else _("web.admin.account.offline") }}</span>
+                    <span class="cell-ago">
+                      {% if playing and playing.server %}
+                        {{ _("web.admin.account.on", server=playing.server.name) }}
+                      {% elif playing %}
+                        {{ _("web.admin.account.menus") }}
+                      {% elif view.session %}
+                        {{ _("web.admin.account.logged_in") }}
+                      {% elif view.record.last_login %}
+                        {{ _("web.admin.account.last", day=when(view.record.last_login, "yMMMd")) }}
+                      {% else %}
+                        {{ _("web.admin.account.never") }}
+                      {% endif %}
+                    </span>
+                  </div>
+                  <div role="cell" class="cell-end">
+                    <EndSquare :href="href" :label="_('web.admin.account.page.of', name=account.nuid)" />
+                  </div>
+                </div>
+              {% else %}
+                <div role="row">
+                  <div role="cell" aria-colspan="6" class="row-details list-empty">
+                    <div>
+                      {% if search %}
+                        <p class="list-empty-title">{{ _("web.admin.accounts.none_match", query=search) }}</p>
+                        <p class="body-text">{{ _("web.admin.accounts.none_match.text") }}</p>
+                      {% else %}
+                        <p class="list-empty-title">{{ _("web.admin.accounts.none") }}</p>
+                        <p class="body-text">{{ _("web.admin.accounts.none.text") }}</p>
+                      {% endif %}
+                    </div>
+                    {% if search %}
+                      <SmallAction :href="list" :label="_('web.admin.accounts.newest_link')" />
+                    {% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <div class="list-foot">
+          <p>
+            <span class="list-count">{{ _("web.admin.accounts.found", count=number(total)) if search else _("web.admin.accounts.count", count=number(total)) }}</span><span class="list-range">{{ _("web.admin.accounts.order." ~ ("oldest" if listing.oldest_first else "newest"), count=number(size)) }}</span>
+          </p>
+          <Pager :base="list" :view="listing" :pages="pages" />
+        </div>
+      </section>
+      <div class="list-side admin-side">
+        <AccountSearch :value="search" :status="_n('web.admin.accounts.matches', total, query=search) if search else ''" />
+      </div>
+    </div>
+  </Panel>
+</AdminPage>

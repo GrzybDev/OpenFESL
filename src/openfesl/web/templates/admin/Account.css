@@ -1,0 +1,264 @@
+/* The admin panel's page of a player's account: its facts, in-game names and entitlements beside
+   the search, its session and the logins its game remembers. */
+@layer pages {
+  .account-heading {
+    .title-block {
+      padding-bottom: 9px;
+    }
+
+    .account-heading-name {
+      font-family: var(--font-sans);
+      font-size: 22px;
+      line-height: 1.15;
+      font-weight: 700;
+      letter-spacing: 0;
+      text-transform: none;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .account-bar {
+    display: flex;
+    min-height: 56px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    background: var(--ink);
+    padding: 8px 14px;
+
+    h2 {
+      font-family: var(--font-sans);
+      font-size: 24px;
+      line-height: 1.15;
+      font-weight: 700;
+    }
+
+    p {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: var(--soft);
+      text-transform: uppercase;
+    }
+  }
+
+  .account-facts {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+
+  .country-code {
+    min-width: 28px;
+    background: var(--ink);
+    padding: 3px 4px;
+    font-size: 12px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--bright);
+    text-align: center;
+  }
+
+  .account-part {
+    margin-top: 14px;
+  }
+
+  .account-list {
+    display: grid;
+    gap: 2px;
+    margin-top: 2px;
+    color: var(--ink);
+
+    > li {
+      display: flex;
+      min-height: 44px;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 2px 12px;
+      background: var(--row);
+      padding: 0 12px 0 9px;
+
+      &:nth-child(even) {
+        background: var(--row-alt);
+      }
+    }
+
+    .badge {
+      width: 26px;
+      height: 26px;
+    }
+  }
+
+  .account-name-link,
+  .account-name-text {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .account-list-when {
+    margin-left: auto;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .account-list-state {
+    min-width: 150px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-align: right;
+    text-transform: uppercase;
+  }
+
+  .account-part {
+    container-type: inline-size;
+  }
+
+  .entitlements {
+    min-width: 720px;
+  }
+
+  .entitlement-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns: 64px minmax(210px, 1fr) 130px 150px 180px;
+    gap: 2px;
+  }
+
+  .entitlement-row:nth-child(even) {
+    --cell: var(--row-alt);
+  }
+
+  .entitlement-label {
+    display: none;
+    font-size: 11px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .entitlement-code {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    overflow-wrap: anywhere;
+  }
+
+  .account-session-name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    padding-bottom: 12px;
+    font-family: var(--font-sans);
+    font-size: 19px;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+
+  .account-server {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    text-decoration-line: underline;
+  }
+
+  .account-remembered > li {
+    justify-content: space-between;
+    gap: 10px;
+    padding: 0 0 0 14px;
+
+    > .cell-stack {
+      display: grid;
+      gap: 2px;
+    }
+  }
+
+  .account-remembered-when {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.2;
+    font-weight: 600;
+  }
+
+  /* Where the table does not fit, each entitlement is a block: its tag, then where it belongs,
+     then its state; the column names are left to screen readers. */
+  @container (width < 720px) {
+    .entitlements {
+      min-width: 0;
+
+      [role="rowgroup"]:first-child {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
+    }
+
+    .entitlement-row.entitlement-columns {
+      grid-template-columns: 64px repeat(2, minmax(0, 1fr));
+      grid-template-areas:
+        "badge tag tag"
+        "group product product"
+        "state state state";
+
+      > :nth-child(1) {
+        grid-area: badge;
+      }
+
+      > :nth-child(2) {
+        grid-area: tag;
+      }
+
+      > :nth-child(3) {
+        grid-area: group;
+      }
+
+      > :nth-child(4) {
+        grid-area: product;
+      }
+
+      > :nth-child(3),
+      > :nth-child(4) {
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 3px;
+        padding-block: 6px;
+      }
+
+      .entitlement-label {
+        display: block;
+      }
+
+      > :nth-child(5) {
+        grid-area: state;
+      }
+    }
+  }
+
+  .account-missing-title {
+    margin-top: 6px;
+  }
+
+  @media (width < 40rem) {
+    .account-list-when {
+      margin-left: 0;
+      flex-basis: 100%;
+    }
+
+    .account-list-state {
+      min-width: 0;
+      text-align: left;
+    }
+  }
+}

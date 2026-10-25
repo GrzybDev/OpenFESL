@@ -166,6 +166,24 @@
     color: var(--ink);
   }
 
+  /* What a search found, said where the search field's note stands. */
+  .field-status {
+    font-weight: 600;
+  }
+
+  /* A search form's button under its field. */
+  .find-button {
+    display: grid;
+    margin-top: 2px;
+  }
+
+  /* The start of a name that a search matched. */
+  .search-match {
+    background: var(--accent);
+    padding-inline: 1px;
+    color: var(--ink);
+  }
+
   .field-error {
     display: flex;
     align-items: flex-start;

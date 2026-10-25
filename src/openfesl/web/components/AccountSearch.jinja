@@ -1,0 +1,18 @@
+{#def value: str = "", status: str = "", tag: str = "h2" #}
+{# The admin panel's search for a player's account by the start of its login name or of an in-game
+   name, with what the last search found as its status, if any. #}
+<form action="{{ url('/admin/accounts') }}"
+      method="get"
+      role="search"
+      aria-labelledby="account-find">
+  <Bar :tag="tag" id="account-find" large>{{ _("web.admin.accounts.find") }}</Bar>
+  <SearchField id="account-q" name="q" :label="_('web.admin.accounts.find.field')" :value="value" :hint="_('web.admin.accounts.find.hint')" aria-describedby="account-note" />
+  {% if status %}
+    <p id="account-note" aria-live="polite" class="field-note field-status">{{ status }}</p>
+  {% else %}
+    <p id="account-note" class="field-note">{{ _("web.admin.accounts.find.note") }}</p>
+  {% endif %}
+  <div class="find-button">
+    <FormButton icon="find">{{ _("web.admin.find.search") }}</FormButton>
+  </div>
+</form>

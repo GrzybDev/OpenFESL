@@ -182,7 +182,7 @@ class SqlEntitlementStore:
                     group=row.group_name,
                     product=row.product_id,
                     status=row.status,
-                    granted=row.granted_at.date(),
+                    granted=row.granted_at,
                 )
                 for row in rows
             ]

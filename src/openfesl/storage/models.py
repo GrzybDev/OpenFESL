@@ -34,6 +34,7 @@ class AccountRow(Base):
     state: Mapped[str] = mapped_column(server_default="active")
     state_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     state_changed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # Set while the account waits for the link that confirms its e-mail address.
     verification_hash: Mapped[bytes | None] = mapped_column(LargeBinary, unique=True)
     verification_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

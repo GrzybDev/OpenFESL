@@ -1,0 +1,24 @@
+{#def number: str #}
+{# What the admin panel answers for an account number that no player's account has, with the
+   search that finds accounts by name. #}
+{% set title = _("web.admin.accounts") %}
+<AdminPage :title="title" current="accounts">
+  <div class="enter-title notice-title notice-narrow">
+    <TitleBlock :title="title">{{ _("web.admin.account.missing") }}</TitleBlock>
+  </div>
+  <Panel class="enter-panel">
+    <div class="list-layout admin-layout">
+      <div role="status" class="list-main row-details list-empty">
+        <div>
+          <p class="row-facts">{{ _("web.admin.account.missing") }}</p>
+          <p class="list-empty-title account-missing-title">{{ _("web.admin.account.missing.title", number=number) }}</p>
+          <p class="body-text">{{ _("web.admin.account.missing.text") }}</p>
+        </div>
+        <FormButton icon="go" :href="url('/admin/accounts')">{{ _("web.admin.accounts.newest_link") }}</FormButton>
+      </div>
+      <div class="list-side admin-side">
+        <AccountSearch />
+      </div>
+    </div>
+  </Panel>
+</AdminPage>

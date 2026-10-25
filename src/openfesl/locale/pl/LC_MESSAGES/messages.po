@@ -2891,3 +2891,255 @@ msgstr "Jego jedyny serwer zostaje cofnięty: jego gra od razu znika z listy ser
 
 msgid "web.admin.provider.how.single"
 msgstr "Cofnięcie wymaga potwierdzenia, a potem obejmuje jego jedyny serwer."
+
+msgid "web.admin.menu.accounts"
+msgstr "Konta"
+
+msgid "web.admin.accounts"
+msgstr "Konta"
+
+msgid "web.admin.accounts.subtitle"
+msgstr "Konta graczy"
+
+msgid "web.admin.accounts.matching"
+msgstr "Konta pasujące do „%(query)s”"
+
+msgid "web.admin.accounts.newest"
+msgstr "Najnowsze konta"
+
+msgid "web.admin.accounts.none_match"
+msgstr "Żadne konto nie pasuje do „%(query)s”."
+
+msgid "web.admin.accounts.none_match.text"
+msgstr "Wyszukiwanie porównuje początek nazw logowania i nazw w grze."
+
+msgid "web.admin.accounts.none"
+msgstr "Nikt jeszcze nie zarejestrował konta."
+
+msgid "web.admin.accounts.none.text"
+msgstr "Konta pojawiają się tutaj po rejestracji w grze."
+
+msgid "web.admin.accounts.newest_link"
+msgstr "Pokaż najnowsze konta"
+
+msgid "web.admin.accounts.found"
+msgstr "Znalezione konta: %(count)s"
+
+msgid "web.admin.accounts.count"
+msgstr "Konta: %(count)s"
+
+msgid "web.admin.accounts.order.newest"
+msgstr "Od najnowszych · %(count)s na stronę"
+
+msgid "web.admin.accounts.order.oldest"
+msgstr "Od najstarszych · %(count)s na stronę"
+
+msgid "web.admin.accounts.matches.one"
+msgstr "%(count)s konto pasuje do „%(query)s”."
+
+msgid "web.admin.accounts.matches.few"
+msgstr "%(count)s konta pasują do „%(query)s”."
+
+msgid "web.admin.accounts.matches.many"
+msgstr "%(count)s kont pasuje do „%(query)s”."
+
+msgid "web.admin.accounts.matches.other"
+msgstr "%(count)s konta pasuje do „%(query)s”."
+
+msgid "web.admin.accounts.find"
+msgstr "Znajdź konto"
+
+msgid "web.admin.accounts.find.field"
+msgstr "Nazwa logowania lub nazwa w grze"
+
+msgid "web.admin.accounts.find.hint"
+msgstr "Wystarczy początek nazwy"
+
+msgid "web.admin.accounts.find.note"
+msgstr "Porównuje początek nazw logowania i nazw w grze, bez względu na wielkość liter."
+
+msgid "web.admin.accounts.all"
+msgstr "Wszystkie konta"
+
+msgid "web.admin.account"
+msgstr "Konto"
+
+msgid "web.admin.account.names"
+msgstr "Nazwy w grze"
+
+msgid "web.admin.account.country"
+msgstr "Kraj"
+
+msgid "web.admin.account.created"
+msgstr "Utworzono"
+
+msgid "web.admin.account.now"
+msgstr "Teraz"
+
+msgid "web.admin.account.page"
+msgstr "Strona konta"
+
+msgid "web.admin.account.page.of"
+msgstr "Strona konta: %(name)s"
+
+msgid "web.admin.account.number"
+msgstr "Konto %(number)s"
+
+msgid "web.admin.account.online"
+msgstr "Zalogowane"
+
+msgid "web.admin.account.offline"
+msgstr "Wylogowane"
+
+msgid "web.admin.account.on"
+msgstr "Na serwerze %(server)s"
+
+msgid "web.admin.account.menus"
+msgstr "W menu"
+
+msgid "web.admin.account.logged_in"
+msgstr "Zalogowane, bez wybranej nazwy"
+
+msgid "web.admin.account.last"
+msgstr "Ostatnie logowanie: %(day)s"
+
+msgid "web.admin.account.never"
+msgstr "Jeszcze bez logowania"
+
+msgid "web.admin.account.names.none"
+msgstr "Brak nazw w grze"
+
+msgid "web.admin.account.kind"
+msgstr "Konto gracza"
+
+msgid "web.admin.account.login"
+msgstr "Nazwa logowania"
+
+msgid "web.admin.account.country.none"
+msgstr "Nie podano"
+
+msgid "web.admin.account.terms"
+msgstr "Warunki"
+
+msgid "web.admin.account.terms.current"
+msgstr "Zaakceptowana bieżąca wersja"
+
+msgid "web.admin.account.terms.older"
+msgstr "Zaakceptowana starsza wersja"
+
+msgid "web.admin.account.terms.none"
+msgstr "Jeszcze niezaakceptowane"
+
+msgid "web.admin.account.last_login"
+msgstr "Ostatnie logowanie"
+
+msgid "web.admin.account.online.session"
+msgstr "Zalogowane · 1 sesja"
+
+msgid "web.admin.account.names.note"
+msgstr "Nazwy są tworzone i usuwane w grze."
+
+msgid "web.admin.account.missing"
+msgstr "Nie znaleziono"
+
+msgid "web.admin.account.missing.title"
+msgstr "Żadne konto nie ma numeru %(number)s."
+
+msgid "web.admin.account.missing.text"
+msgstr "Konta można znaleźć po nazwie logowania lub nazwie w grze."
+
+msgid "web.admin.persona.state.disabled"
+msgstr "Wyłączona przez administrację"
+
+msgid "web.admin.persona.mark.disabled"
+msgstr "wyłączona"
+
+msgid "web.admin.persona.mark.removed"
+msgstr "usunięta"
+
+msgid "web.admin.persona.created"
+msgstr "Utworzona %(time)s"
+
+msgid "web.admin.persona.removed"
+msgstr "Usunięta %(day)s"
+
+msgid "web.admin.persona.active"
+msgstr "Aktywna"
+
+msgid "web.admin.entitlements"
+msgstr "Uprawnienia"
+
+msgid "web.admin.entitlements.summary"
+msgstr "Aktywne: %(active)s · cofnięte: %(revoked)s"
+
+msgid "web.admin.entitlements.active.one"
+msgstr "Aktywne: %(count)s"
+
+msgid "web.admin.entitlements.active.few"
+msgstr "Aktywne: %(count)s"
+
+msgid "web.admin.entitlements.active.many"
+msgstr "Aktywne: %(count)s"
+
+msgid "web.admin.entitlements.active.other"
+msgstr "Aktywne: %(count)s"
+
+msgid "web.admin.entitlements.none"
+msgstr "Brak uprawnień."
+
+msgid "web.admin.entitlements.count"
+msgstr "Uprawnienia: %(count)s"
+
+msgid "web.admin.entitlements.note"
+msgstr "Gra odczytuje uprawnienia przy logowaniu, więc zmiana działa od następnego logowania."
+
+msgid "web.admin.entitlement.tag"
+msgstr "Znacznik"
+
+msgid "web.admin.entitlement.group"
+msgstr "Grupa"
+
+msgid "web.admin.entitlement.product"
+msgstr "Identyfikator produktu"
+
+msgid "web.admin.entitlement.active"
+msgstr "Aktywne"
+
+msgid "web.admin.entitlement.revoked"
+msgstr "Cofnięte"
+
+msgid "web.admin.entitlement.granted"
+msgstr "Przyznane %(day)s"
+
+msgid "web.admin.sessions"
+msgstr "Sesje"
+
+msgid "web.admin.sessions.none"
+msgstr "Konto nie jest teraz zalogowane."
+
+msgid "web.admin.session.no_name"
+msgstr "Nazwa w grze jeszcze niewybrana"
+
+msgid "web.admin.session.client"
+msgstr "Klient"
+
+msgid "web.admin.session.player"
+msgstr "Gra"
+
+msgid "web.admin.session.connected"
+msgstr "Połączenie"
+
+msgid "web.admin.session.playing"
+msgstr "Teraz"
+
+msgid "web.admin.remembered"
+msgstr "Zapamiętane logowania"
+
+msgid "web.admin.remembered.created"
+msgstr "Utworzone %(time)s"
+
+msgid "web.admin.remembered.none"
+msgstr "Brak zapamiętanych logowań."
+
+msgid "web.admin.remembered.note"
+msgstr "Przechowywana jest tylko data utworzenia każdego zapamiętanego logowania."

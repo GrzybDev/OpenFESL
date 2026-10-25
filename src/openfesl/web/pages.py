@@ -154,6 +154,12 @@ def _ago(context: Context, value: datetime) -> str:
 
 
 @pass_context
+def _country(context: Context, code: str) -> str:
+    # A country's name in the page's language, from its ISO code.
+    return str(_locale(context).territories.get(code.upper(), code))
+
+
+@pass_context
 def _listed(context: Context, items: list[str]) -> str:
     # Names joined as the page's language lists them, such as "A, B and C".
     return str(format_list(items, locale=_locale(context)))
@@ -206,6 +212,7 @@ _catalog = Catalog(
         "when": _when,
         "ago": _ago,
         "listed": _listed,
+        "country": _country,
     },
 )
 # The catalogue keeps its own environment, which takes the given one's escaping but not its

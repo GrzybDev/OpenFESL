@@ -2,6 +2,7 @@ import logging
 import re
 import secrets
 from dataclasses import dataclass
+from datetime import datetime
 from enum import StrEnum
 from typing import Any, Protocol
 
@@ -68,6 +69,23 @@ class Persona:
     account_id: int
     namespace: str
     name: str
+
+
+@dataclass(frozen=True, slots=True)
+class PersonaRecord:
+    """A persona with what the admin panel shows about it.
+
+    Attributes:
+        persona: The persona.
+        created: When its player created it.
+        removed: When its player removed it, if they did.
+        state: Whether the admin lets it play.
+    """
+
+    persona: Persona
+    created: datetime
+    removed: datetime | None
+    state: PersonaState
 
 
 class PersonaStore(Protocol):

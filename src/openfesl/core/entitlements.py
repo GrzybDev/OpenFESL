@@ -1,7 +1,7 @@
 import logging
 from collections.abc import Sequence
 from dataclasses import dataclass
-from datetime import date
+from datetime import datetime
 from enum import IntEnum
 from typing import TYPE_CHECKING, Any, Protocol
 
@@ -75,7 +75,7 @@ class Entitlement:
     group: str | None
     product: str | None
     status: str
-    granted: date
+    granted: datetime
 
 
 @dataclass(frozen=True, slots=True)
@@ -256,7 +256,7 @@ class EntitlementService:
                     entitlement_tag=entitlement.tag,
                     product_id=entitlement.product,
                     status=entitlement.status,
-                    grant_date=entitlement.granted,
+                    grant_date=entitlement.granted.date(),
                 )
                 for entitlement in found
             ]

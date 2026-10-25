@@ -101,6 +101,36 @@ class Account:
 
 
 @dataclass(frozen=True, slots=True)
+class AccountRecord:
+    """A player's account with what the admin panel shows about it.
+
+    Attributes:
+        account: The account.
+        created: When it was registered.
+        last_login: When it last logged in, if it ever did.
+        state_changed: When the admin last changed its state, if ever.
+    """
+
+    account: Account
+    created: datetime
+    last_login: datetime | None
+    state_changed: datetime | None
+
+
+@dataclass(frozen=True, slots=True)
+class RememberedLogin:
+    """A login that the game remembers for an account; only when it was handed out is known.
+
+    Attributes:
+        id: The digest of its token in hex, which names it in the admin panel.
+        created: When it was handed out.
+    """
+
+    id: str
+    created: datetime
+
+
+@dataclass(frozen=True, slots=True)
 class Credentials:
     """An account with the hash its password is checked against.
 
@@ -167,6 +197,13 @@ class AccountStore(Protocol):
 
         Returns:
             Whether the token was kept, which it is not once the password changed.
+        """
+
+    async def record_login(self, account_id: int) -> None:
+        """Note that a player's account logged in now.
+
+        Args:
+            account_id: The account.
         """
 
     async def change_password(self, account_id: int, password_hash: str) -> None:
@@ -289,6 +326,8 @@ class AccountService:
             account, token = await self._player_account(connection, request, policies)
         key = secrets.token_urlsafe(20) + "."
         connection.session.log_in(account, key, connection, replace=_replaces(policies))
+        if not account.server:
+            await self._store.record_login(account.id)
         logger.info("Account %d (%s) logged in", account.id, account.nuid)
         return NuLoginAnswer(
             lkey=key, nuid=account.nuid, user_id=account.id, encrypted_login_info=token

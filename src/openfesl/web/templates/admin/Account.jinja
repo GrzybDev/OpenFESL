@@ -1,0 +1,209 @@
+{#def view, entitlements: list, active: int, remembered: list, total: int, terms: str #}
+{# A player's account: what is kept about it, its in-game names and entitlements, beside the search,
+   the session it is logged in on and the logins its game remembers. #}
+{% set record = view.record %}
+{% set account = record.account %}
+{% set title = _("web.admin.account") %}
+{% set base = url("/admin/accounts/" ~ account.id) %}
+{% set session = view.session %}
+{% set playing = view.playing %}
+{% set revoked = entitlements|length - active %}
+{% macro badge(glyph) %}
+  <span aria-hidden="true" class="badge"><Icon :name="glyph" stroke="#0A0A0A" fill="#0A0A0A" /></span>
+{% endmacro %}
+<AdminPage :title="title ~ ' · ' ~ account.nuid" current="accounts">
+  <PageHead labelledby="account-title">
+    <div class="enter-title page-title page-title-wider">
+      <h1 id="account-title" class="account-heading">
+        <span class="title-block">{{ title }}</span>
+        <span class="title-sub account-heading-name">{{ account.nuid }}</span>
+      </h1>
+    </div>
+    <Tab :href="url('/admin/accounts')" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.accounts.all") }}<span class="tab-count">{{ number(total) }}</span></Tab>
+  </PageHead>
+  <Panel class="enter-panel">
+    <div class="list-layout admin-layout">
+      <div class="list-main account-main">
+        <section aria-labelledby="account-facts">
+          <div class="account-bar">
+            <h2 id="account-facts">{{ _("web.admin.account.number", number=account.id) }}</h2>
+            <p>{{ _("web.admin.account.kind") }}</p>
+          </div>
+          <dl class="facts admin-facts account-facts">
+            <Fact :label="_('web.admin.account.login')" plain>
+              <span class="account-login">{{ account.nuid }}</span>
+            </Fact>
+            <Fact :label="_('web.admin.account.country')">
+              {% if account.country %}
+                <span class="country-code">{{ account.country }}</span>{{ country(account.country) }}
+              {% else %}
+                {{ _("web.admin.account.country.none") }}
+              {% endif %}
+            </Fact>
+            <Fact :label="_('web.admin.account.created')">
+              {{ _("web.server.time", time=moment(record.created)) }}
+            </Fact>
+            <Fact :label="_('web.admin.account.terms')">
+              {{ _("web.admin.account.terms." ~ ("current" if account.terms_version == terms else "older" if account.terms_version else "none")) }}
+            </Fact>
+            <Fact :label="_('web.admin.account.last_login')">
+              {{ _("web.server.time", time=moment(record.last_login)) if record.last_login else _("web.admin.account.never") }}
+            </Fact>
+            <Fact :label="_('web.admin.account.now')">
+              {{ _("web.admin.account.online.session") if session else _("web.admin.account.offline") }}
+            </Fact>
+          </dl>
+        </section>
+
+        <section aria-labelledby="account-names" class="account-part">
+          <Bar id="account-names" :extra="number(view.personas|length)">{{ _("web.admin.account.names") }}</Bar>
+          {% if view.personas %}
+            <ul class="account-list">
+              {% for persona in view.personas %}
+                {% set entry = persona.record %}
+                <li>
+                  {{ badge("tick" if persona.usable else "x") }}
+                  {% if persona.usable and persona.game %}
+                    <a href="{{ url('/' ~ persona.game.id ~ '/players/' ~ entry.persona.name|urlencode) }}"
+                       class="account-name-link">{{ entry.persona.name }}</a>
+                  {% else %}
+                    <span class="account-name-text">{{ entry.persona.name }}</span>
+                  {% endif %}
+                  {% if persona.game %}<GameChip :of="persona.game" />{% endif %}
+                  <span class="account-list-when">{{ _("web.admin.persona.created", time=_("web.server.time", time=moment(entry.created))) }}</span>
+                  <span class="account-list-state">
+                    {% if entry.removed %}
+                      {{ _("web.admin.persona.removed", day=when(entry.removed, "yMMMd")) }}
+                    {% elif entry.state == "disabled" %}
+                      {{ _("web.admin.persona.state.disabled") }}
+                    {% elif persona.server %}
+                      {{ _("web.admin.account.on", server=persona.server.name) }}
+                    {% elif persona.playing %}
+                      {{ _("web.admin.account.menus") }}
+                    {% else %}
+                      {{ _("web.admin.persona.active") }}
+                    {% endif %}
+                  </span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="bar-text body-text">{{ _("web.admin.account.names.none") }}</p>
+          {% endif %}
+          <p class="body-text side-note">{{ _("web.admin.account.names.note") }}</p>
+        </section>
+
+        <section aria-labelledby="account-entitlements" class="account-part">
+          <Bar id="account-entitlements" :extra="_('web.admin.entitlements.summary', active=number(active), revoked=number(revoked)) if revoked else _n('web.admin.entitlements.active', active)">{{ _("web.admin.entitlements") }}</Bar>
+          {% if entitlements %}
+            <div class="table-scroll">
+              <div role="table"
+                   aria-labelledby="account-entitlements"
+                   class="table entitlements">
+                <div role="rowgroup">
+                  <div role="row" class="entitlement-columns">
+                    <div role="columnheader"
+                         class="column-head"><span class="sr-only">{{ _("web.admin.state") }}</span></div>
+                    <div role="columnheader" class="column-head column-name">{{ _("web.admin.entitlement.tag") }}</div>
+                    <div role="columnheader" class="column-head">{{ _("web.admin.entitlement.group") }}</div>
+                    <div role="columnheader" class="column-head">{{ _("web.admin.entitlement.product") }}</div>
+                    <div role="columnheader" class="column-head">{{ _("web.admin.state") }}</div>
+                  </div>
+                </div>
+                <div role="rowgroup" class="table-rows">
+                  {% for entitlement in entitlements %}
+                    {% set held = entitlement.status == "ACTIVE" %}
+                    <div role="row" class="entitlement-columns entitlement-row">
+                      <div role="cell" class="admin-cell admin-badges">{{ badge("tick" if held else "x") }}</div>
+                      <div role="cell" class="admin-cell">
+                        <code class="entitlement-code">{{ entitlement.tag }}</code>
+                      </div>
+                      <div role="cell" class="admin-cell">
+                        <span aria-hidden="true" class="entitlement-label">{{ _("web.admin.entitlement.group") }}</span>
+                        <code class="entitlement-code">{{ entitlement.group or "–" }}</code>
+                      </div>
+                      <div role="cell" class="admin-cell">
+                        <span aria-hidden="true"
+                              class="entitlement-label">{{ _("web.admin.entitlement.product") }}</span>
+                        <code class="entitlement-code">{{ entitlement.product or "–" }}</code>
+                      </div>
+                      <div role="cell" class="admin-cell cell-stack">
+                        <span class="account-now">{{ _("web.admin.entitlement.active") if held else _("web.admin.entitlement.revoked") }}</span>
+                        <span class="cell-ago">{{ _("web.admin.entitlement.granted", day=when(entitlement.granted, "yMMMd")) }}</span>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          {% else %}
+            <p class="bar-text body-text">{{ _("web.admin.entitlements.none") }}</p>
+          {% endif %}
+          <div class="list-foot">
+            <p>
+              <span class="list-count">{{ _("web.admin.entitlements.count", count=number(entitlements|length)) }}</span><span class="list-range">{{ _("web.admin.entitlements.note") }}</span>
+            </p>
+          </div>
+        </section>
+      </div>
+
+      <div class="list-side admin-side">
+        <AccountSearch />
+
+        <section aria-labelledby="account-sessions">
+          <Bar id="account-sessions" :extra="number(1 if session else 0)">{{ _("web.admin.sessions") }}</Bar>
+          {% if session %}
+            <p class="bar-text account-session-name">
+              {% if playing %}
+                <span>{{ playing.record.persona.name }}</span>
+                {% if playing.game %}<GameChip :of="playing.game" />{% endif %}
+              {% else %}
+                <span>{{ _("web.admin.session.no_name") }}</span>
+              {% endif %}
+            </p>
+            <dl class="facts">
+              <Fact :label="_('web.admin.session.client')">
+                {{ _("web.admin.session.player") }}
+                {% if session.client_string %}<code class="entitlement-code">{{ session.client_string }}</code>{% endif %}
+              </Fact>
+              <Fact :label="_('web.admin.session.connected')">
+                {{ _("web.server.time", time=when(session.logged_in_at, "Hm")) }} · {{ ago(session.logged_in_at) }}
+              </Fact>
+              <Fact :label="_('web.admin.session.playing')" plain>
+                {% if playing and playing.server and playing.server.ugid %}
+                  <a href="{{ url('/admin/servers/' ~ playing.server.ugid) }}"
+                     class="account-server">{{ playing.server.name }}</a>
+                {% elif playing and playing.server %}
+                  {{ playing.server.name }}
+                {% else %}
+                  {{ _("web.admin.account.menus") }}
+                {% endif %}
+              </Fact>
+            </dl>
+          {% else %}
+            <p class="bar-text body-text">{{ _("web.admin.sessions.none") }}</p>
+          {% endif %}
+        </section>
+
+        <section aria-labelledby="account-remembered">
+          <Bar id="account-remembered" :extra="number(remembered|length)">{{ _("web.admin.remembered") }}</Bar>
+          {% if remembered %}
+            <ul class="account-list account-remembered">
+              {% for login in remembered %}
+                <li>
+                  <span class="cell-stack">
+                    <span class="account-remembered-when">{{ _("web.admin.remembered.created", time=_("web.server.time", time=moment(login.created))) }}</span>
+                    <span class="cell-ago">{{ ago(login.created) }}</span>
+                  </span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="bar-text body-text">{{ _("web.admin.remembered.none") }}</p>
+          {% endif %}
+          <p class="body-text side-note">{{ _("web.admin.remembered.note") }}</p>
+        </section>
+      </div>
+    </div>
+  </Panel>
+</AdminPage>

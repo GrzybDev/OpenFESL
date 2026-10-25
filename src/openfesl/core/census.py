@@ -81,6 +81,8 @@ class Server:
         settings: Its settings that are on or off, by name, as far as the server publishes
             them.
         message: What the server's operator wrote for its players.
+        ugid: The persistent game id of the dedicated server that hosts it, by which the admin
+            panel knows the server.
         ended: When it stopped hosting, for a server whose page shows what it was last.
     """
 
@@ -98,6 +100,7 @@ class Server:
     roster: tuple[Seat, ...]
     settings: tuple[tuple[str, bool], ...]
     message: str
+    ugid: str | None = None
     ended: datetime | None = None
 
     @property
@@ -253,6 +256,7 @@ class Census:
                 if attribute.casefold() in attributes
             ),
             message=_message(listing.message, attributes),
+            ugid=hosted.ugid or None,
         )
 
 

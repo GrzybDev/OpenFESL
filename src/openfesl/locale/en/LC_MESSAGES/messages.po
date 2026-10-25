@@ -2810,3 +2810,243 @@ msgstr "Its only server is revoked: its game leaves the server list at once, its
 
 msgid "web.admin.provider.how.single"
 msgstr "Revoke asks for confirmation, then revokes its only server."
+
+msgid "web.admin.menu.accounts"
+msgstr "Accounts"
+
+msgid "web.admin.accounts"
+msgstr "Accounts"
+
+msgid "web.admin.accounts.subtitle"
+msgstr "Player accounts"
+
+msgid "web.admin.accounts.matching"
+msgstr "Accounts matching “%(query)s”"
+
+msgid "web.admin.accounts.newest"
+msgstr "The newest accounts"
+
+msgid "web.admin.accounts.none_match"
+msgstr "No account matches “%(query)s”."
+
+msgid "web.admin.accounts.none_match.text"
+msgstr "The search compares the start of login names and in-game names."
+
+msgid "web.admin.accounts.none"
+msgstr "No player has registered yet."
+
+msgid "web.admin.accounts.none.text"
+msgstr "Accounts appear here once players register in a game."
+
+msgid "web.admin.accounts.newest_link"
+msgstr "Show the newest accounts"
+
+msgid "web.admin.accounts.found"
+msgstr "Accounts found: %(count)s"
+
+msgid "web.admin.accounts.count"
+msgstr "Accounts: %(count)s"
+
+msgid "web.admin.accounts.order.newest"
+msgstr "Newest first · %(count)s per page"
+
+msgid "web.admin.accounts.order.oldest"
+msgstr "Oldest first · %(count)s per page"
+
+msgid "web.admin.accounts.matches.one"
+msgstr "%(count)s account matches “%(query)s”."
+
+msgid "web.admin.accounts.matches.other"
+msgstr "%(count)s accounts match “%(query)s”."
+
+msgid "web.admin.accounts.find"
+msgstr "Find an account"
+
+msgid "web.admin.accounts.find.field"
+msgstr "Login name or in-game name"
+
+msgid "web.admin.accounts.find.hint"
+msgstr "The start of a name is enough"
+
+msgid "web.admin.accounts.find.note"
+msgstr "Compares the start of login names and in-game names, regardless of case."
+
+msgid "web.admin.accounts.all"
+msgstr "All accounts"
+
+msgid "web.admin.account"
+msgstr "Account"
+
+msgid "web.admin.account.names"
+msgstr "In-game names"
+
+msgid "web.admin.account.country"
+msgstr "Country"
+
+msgid "web.admin.account.created"
+msgstr "Created"
+
+msgid "web.admin.account.now"
+msgstr "Now"
+
+msgid "web.admin.account.page"
+msgstr "Account page"
+
+msgid "web.admin.account.page.of"
+msgstr "Account page: %(name)s"
+
+msgid "web.admin.account.number"
+msgstr "Account %(number)s"
+
+msgid "web.admin.account.online"
+msgstr "Online"
+
+msgid "web.admin.account.offline"
+msgstr "Offline"
+
+msgid "web.admin.account.on"
+msgstr "On %(server)s"
+
+msgid "web.admin.account.menus"
+msgstr "In the menus"
+
+msgid "web.admin.account.logged_in"
+msgstr "Logged in, no name chosen yet"
+
+msgid "web.admin.account.last"
+msgstr "Last login %(day)s"
+
+msgid "web.admin.account.never"
+msgstr "Never logged in"
+
+msgid "web.admin.account.names.none"
+msgstr "No in-game name yet"
+
+msgid "web.admin.account.kind"
+msgstr "Player account"
+
+msgid "web.admin.account.login"
+msgstr "Login name"
+
+msgid "web.admin.account.country.none"
+msgstr "Not given"
+
+msgid "web.admin.account.terms"
+msgstr "Terms"
+
+msgid "web.admin.account.terms.current"
+msgstr "Current version accepted"
+
+msgid "web.admin.account.terms.older"
+msgstr "An older version accepted"
+
+msgid "web.admin.account.terms.none"
+msgstr "Not accepted yet"
+
+msgid "web.admin.account.last_login"
+msgstr "Last login"
+
+msgid "web.admin.account.online.session"
+msgstr "Online · 1 session"
+
+msgid "web.admin.account.names.note"
+msgstr "Names are created and removed in the game."
+
+msgid "web.admin.account.missing"
+msgstr "Not found"
+
+msgid "web.admin.account.missing.title"
+msgstr "No account has the id %(number)s."
+
+msgid "web.admin.account.missing.text"
+msgstr "Accounts can be found by login name or in-game name."
+
+msgid "web.admin.persona.state.disabled"
+msgstr "Disabled by an admin"
+
+msgid "web.admin.persona.mark.disabled"
+msgstr "disabled"
+
+msgid "web.admin.persona.mark.removed"
+msgstr "removed"
+
+msgid "web.admin.persona.created"
+msgstr "Created %(time)s"
+
+msgid "web.admin.persona.removed"
+msgstr "Removed %(day)s"
+
+msgid "web.admin.persona.active"
+msgstr "Active"
+
+msgid "web.admin.entitlements"
+msgstr "Entitlements"
+
+msgid "web.admin.entitlements.summary"
+msgstr "%(active)s active · %(revoked)s revoked"
+
+msgid "web.admin.entitlements.active.one"
+msgstr "%(count)s active"
+
+msgid "web.admin.entitlements.active.other"
+msgstr "%(count)s active"
+
+msgid "web.admin.entitlements.none"
+msgstr "No entitlement yet."
+
+msgid "web.admin.entitlements.count"
+msgstr "Entitlements: %(count)s"
+
+msgid "web.admin.entitlements.note"
+msgstr "The game reads entitlements at login, so a change applies from the next login."
+
+msgid "web.admin.entitlement.tag"
+msgstr "Tag"
+
+msgid "web.admin.entitlement.group"
+msgstr "Group"
+
+msgid "web.admin.entitlement.product"
+msgstr "Product id"
+
+msgid "web.admin.entitlement.active"
+msgstr "Active"
+
+msgid "web.admin.entitlement.revoked"
+msgstr "Revoked"
+
+msgid "web.admin.entitlement.granted"
+msgstr "Granted %(day)s"
+
+msgid "web.admin.sessions"
+msgstr "Sessions"
+
+msgid "web.admin.sessions.none"
+msgstr "Not logged in now."
+
+msgid "web.admin.session.no_name"
+msgstr "No in-game name chosen yet"
+
+msgid "web.admin.session.client"
+msgstr "Client"
+
+msgid "web.admin.session.player"
+msgstr "Player"
+
+msgid "web.admin.session.connected"
+msgstr "Connected"
+
+msgid "web.admin.session.playing"
+msgstr "Playing on"
+
+msgid "web.admin.remembered"
+msgstr "Remembered logins"
+
+msgid "web.admin.remembered.created"
+msgstr "Created %(time)s"
+
+msgid "web.admin.remembered.none"
+msgstr "No login is remembered."
+
+msgid "web.admin.remembered.note"
+msgstr "Only the creation time of each remembered login is stored."

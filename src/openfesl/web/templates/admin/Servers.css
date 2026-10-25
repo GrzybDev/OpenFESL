@@ -2,11 +2,6 @@
    with the decisions that apply, beside the search and the hosting mode. Where the table does not
    fit, each server is a block of its own. */
 @layer pages {
-  .find-button {
-    display: grid;
-    margin-top: 2px;
-  }
-
   .admin-server-columns {
     --cell: var(--row);
     display: grid;

@@ -1,6 +1,7 @@
 import hmac
 import logging
 from collections.abc import Callable, Mapping
+from datetime import UTC, datetime
 from typing import Any
 
 from openfesl.core.accounts import Account, AccountState
@@ -177,6 +178,7 @@ class GameSession:
         """
         self.address = address
         self.hook_version = hook_version
+        self.logged_in_at: datetime | None = None
         self.account: Account | None = None
         self.account_key: str | None = None
         self.persona: Persona | None = None
@@ -191,6 +193,12 @@ class GameSession:
     def game(self) -> Game | None:
         """The game that the session's login came from."""
         return self._fesl.game if self._fesl is not None else None
+
+    @property
+    def client_string(self) -> str | None:
+        """The client string that the game's Hello named on the connection it logged in on."""
+        hello = self._fesl.hello if self._fesl is not None else None
+        return hello.client_string if hello is not None else None
 
     def open(self, opened: Open, outbox: Outbox) -> Connection:
         """Start handling a connection that the game opened, or close one to an unknown host.
@@ -248,6 +256,7 @@ class GameSession:
             self._players.log_out(self)
         self.account = account
         self.account_key = key
+        self.logged_in_at = datetime.now(UTC)
         self._fesl = connection
         if not account.server:
             self._players.log_in(self)

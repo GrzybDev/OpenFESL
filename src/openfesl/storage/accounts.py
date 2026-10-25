@@ -1,16 +1,24 @@
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import delete, func, select, update
+from sqlalchemy import Select, delete, exists, func, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from openfesl.core.accounts import Account, AccountState, Credentials
+from openfesl.core.accounts import (
+    Account,
+    AccountRecord,
+    AccountState,
+    Credentials,
+    RememberedLogin,
+)
 from openfesl.core.admin import AdminAction
 from openfesl.core.verification import Confirmation, Link
-from openfesl.storage.models import AccountRow, AdminActionRow, LoginTokenRow
+from openfesl.storage.models import AccountRow, AdminActionRow, LoginTokenRow, PersonaRow
 
 REMEMBERED_LOGINS = 8
 REMEMBERED_FOR = timedelta(days=180)
+# Account numbers in addresses can be any number, and the driver refuses those beyond a bigint.
+_BIGINT = range(-(2**63), 2**63)
 
 
 class SqlAccountStore:
@@ -50,6 +58,80 @@ class SqlAccountStore:
                 )
             ).one()
             return int(row[0]), int(row[1])
+
+    async def search(
+        self, start: str, oldest_first: bool, offset: int, limit: int
+    ) -> tuple[int, list[AccountRecord]]:
+        """Return the players' accounts whose login name or a persona's name starts with a text.
+
+        Args:
+            start: The start of the name, matched regardless of case; empty matches every
+                account.
+            oldest_first: Whether the oldest accounts come first; otherwise the newest do.
+            offset: How many matching accounts to skip.
+            limit: The most accounts to return.
+
+        Returns:
+            How many accounts match, and those of the page.
+        """
+        matching: Select[AccountRow] = select(AccountRow).where(~AccountRow.server)
+        if start:
+            named = exists().where(
+                PersonaRow.account_id == AccountRow.id,
+                PersonaRow.name.istartswith(start, autoescape=True),
+            )
+            matching = matching.where(AccountRow.nuid.istartswith(start, autoescape=True) | named)
+        order = (AccountRow.created_at, AccountRow.id)
+        async with self._sessions() as session:
+            total = await session.scalar(select(func.count()).select_from(matching.subquery()))
+            rows = await session.scalars(
+                matching.order_by(*(order if oldest_first else (column.desc() for column in order)))
+                .offset(offset)
+                .limit(limit)
+            )
+            return total or 0, [_record(row) for row in rows]
+
+    async def record(self, account_id: int) -> AccountRecord | None:
+        """Return a player's account by its number.
+
+        Args:
+            account_id: The account's number.
+        """
+        if account_id not in _BIGINT:
+            return None
+        async with self._sessions() as session:
+            row = await session.get(AccountRow, account_id)
+        return _record(row) if row and not row.server else None
+
+    async def remembered(self, account_id: int) -> list[RememberedLogin]:
+        """Return the logins remembered for an account that still log it in, newest first.
+
+        Args:
+            account_id: The account.
+        """
+        async with self._sessions() as session:
+            rows = await session.execute(
+                select(LoginTokenRow.token_hash, LoginTokenRow.created_at)
+                .where(
+                    LoginTokenRow.account_id == account_id,
+                    LoginTokenRow.created_at > func.now() - REMEMBERED_FOR,
+                )
+                .order_by(LoginTokenRow.created_at.desc())
+            )
+            return [RememberedLogin(token.hex(), created) for token, created in rows]
+
+    async def record_login(self, account_id: int) -> None:
+        """Note that a player's account logged in now.
+
+        Args:
+            account_id: The account.
+        """
+        async with self._sessions.begin() as session:
+            await session.execute(
+                update(AccountRow)
+                .where(AccountRow.id == account_id)
+                .values(last_login_at=func.now())
+            )
 
     async def find_remembered(self, token_hash: bytes) -> Account | None:
         """Return the account that a remembered login belongs to, if it is recent enough.
@@ -277,6 +359,10 @@ class SqlAccountStore:
                     details={},
                 )
             )
+
+
+def _record(row: AccountRow) -> AccountRecord:
+    return AccountRecord(_account(row), row.created_at, row.last_login_at, row.state_changed_at)
 
 
 def _account(row: AccountRow) -> Account:

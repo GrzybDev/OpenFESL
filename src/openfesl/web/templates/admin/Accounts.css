@@ -1,0 +1,108 @@
+/* The admin panel's accounts page: the accounts that a search found, newest first, with their
+   in-game names and whether they play now, beside the search. Where the table does not fit, each
+   account is a block of its own. */
+@layer pages {
+  .account-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns: minmax(230px, 1fr) 220px 150px 150px 190px 44px;
+    gap: 2px;
+  }
+
+  .account-row:nth-child(even) {
+    --cell: var(--row-alt);
+  }
+
+  .account-link {
+    display: flex;
+    min-height: 52px;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    font-family: var(--font-sans);
+  }
+
+  .account-login {
+    font-size: 15px;
+    line-height: 1.2;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .account-names {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.2;
+    font-weight: 600;
+  }
+
+  .account-name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+  }
+
+  .account-country {
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .account-now {
+    font-size: 13px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  @container (width < 940px) {
+    .account-country {
+      flex-wrap: wrap;
+      gap: 3px 8px;
+      padding-block: 6px;
+
+      .cell-label {
+        flex-basis: 100%;
+      }
+    }
+
+    .account-row.account-columns {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) 44px;
+      grid-template-areas:
+        "account account end"
+        "names names names"
+        "country created created"
+        "now now now";
+
+      > :nth-child(1) {
+        grid-area: account;
+      }
+
+      > :nth-child(2) {
+        grid-area: names;
+      }
+
+      > :nth-child(3) {
+        grid-area: country;
+      }
+
+      > :nth-child(4) {
+        grid-area: created;
+      }
+
+      > :nth-child(5) {
+        grid-area: now;
+      }
+
+      > :nth-child(6) {
+        grid-area: end;
+        background: var(--cell);
+      }
+    }
+  }
+}
