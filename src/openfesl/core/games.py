@@ -261,6 +261,26 @@ class Listing(BaseModel):
     roster: Roster | None = None
 
 
+class ServerFiles(BaseModel):
+    """The files of a game's dedicated server release that hosting on OpenFESL involves.
+
+    Attributes:
+        executable: The server's executable, next to which OpenFESLHook goes.
+        config: The configuration file in the server's folder, next to which the provider
+            file goes.
+        provider: The file that names the operator who runs the server.
+        identity: The file in the server's instance folder in which the server keeps the
+            identity OpenFESL issued it.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    executable: str
+    config: str
+    provider: str
+    identity: str
+
+
 # The id of a glyph in the web pages' icons.
 type Glyph = Annotated[str, StringConstraints(pattern=r"^[a-z][a-z-]*$")]
 
@@ -378,6 +398,8 @@ class Game(BaseModel):
         id: The name of its data file, which the instance's settings know it by.
         name: The game's name.
         executable: The file name of the game's executable, next to which OpenFESLHook goes.
+        server_files: The files of the game's dedicated server release, for a game whose players
+            may host servers.
         partition: Where the game's data lives.
         namespace: The persona namespace; persona names are unique within it.
         clients: The game's client strings.
@@ -404,6 +426,7 @@ class Game(BaseModel):
     id: str
     name: str
     executable: str
+    server_files: ServerFiles | None = None
     partition: Partition
     namespace: str
     clients: dict[str, Client]

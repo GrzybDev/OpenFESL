@@ -9,6 +9,15 @@ provider_attribute = "B-U-Provider"
 # which are not known, so none is listed.
 automatic_grants = []
 
+# The files of the R34 dedicated server release that hosting involves: the hook goes next to its
+# executable, the provider file next to its configuration, and the server keeps its identity in
+# its instance folder.
+[server_files]
+executable = "Frost.Game.Main_Win32_Final.exe"
+config = "Win32Game.cfg"
+provider = "ProviderId.dat"
+identity = "serverid.dat"
+
 [clients.bfbc2-pc]
 theater_port = 18395
 entitlement = "bfbc2-pc"

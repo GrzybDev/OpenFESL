@@ -1,0 +1,132 @@
+/* A game's guide to hosting a dedicated server, in the hosting mode the server runs in. */
+@layer pages {
+  .host-place {
+    letter-spacing: 0.02em;
+    overflow-wrap: anywhere;
+    text-transform: none;
+  }
+
+  .host-file {
+    overflow-wrap: anywhere;
+  }
+
+  .host-inline {
+    font-family: var(--area-font);
+    font-weight: 700;
+  }
+
+  .host-mode {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin-top: 2px;
+
+    > p {
+      flex: 1 1 520px;
+      background: var(--row-light);
+      padding: 12px 14px;
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.45;
+      font-weight: 500;
+      color: var(--ink);
+    }
+  }
+
+  .host-contact {
+    display: flex;
+    min-height: 56px;
+    flex: 0 1 340px;
+    align-items: center;
+    gap: 12px;
+    background: var(--ink);
+    padding: 6px 16px 6px 6px;
+    color: var(--bright);
+
+    > :first-child {
+      display: grid;
+      height: 44px;
+      flex: 0 0 44px;
+      place-items: center;
+      background: var(--accent);
+    }
+
+    > :last-child {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      gap: 3px;
+
+      > :first-child {
+        font-size: 15px;
+        line-height: 1.1;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      > :last-child {
+        font-family: var(--font-sans);
+        font-size: 15px;
+        line-height: 1.2;
+        font-weight: 600;
+        color: var(--muted-light);
+        overflow-wrap: anywhere;
+      }
+    }
+  }
+
+  .host-steps {
+    margin-top: 14px;
+  }
+
+  .host-states {
+    display: grid;
+    align-content: flex-start;
+    gap: 2px;
+
+    > div {
+      display: flex;
+      min-height: 40px;
+      align-items: center;
+      gap: 12px;
+      background: var(--row-pale);
+      padding-inline: 12px;
+    }
+
+    dt {
+      flex: 0 0 96px;
+      font-size: 12px;
+      line-height: calc(1 / 0.75);
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    dd {
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.3;
+      font-weight: 600;
+    }
+  }
+
+  .host-notes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 10px;
+    margin-top: 14px;
+
+    > section {
+      display: flex;
+      min-width: 0;
+      flex: 1 1 420px;
+      flex-direction: column;
+    }
+
+    .bar-text {
+      flex: 1;
+    }
+  }
+}

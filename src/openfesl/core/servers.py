@@ -316,6 +316,10 @@ class Approval:
             )
         return server
 
+    async def mode(self) -> HostingMode:
+        """Return whose games players see now: every dedicated server's or approved ones'."""
+        return await self._store.hosting_mode()
+
     async def standings(self, ugids: Collection[str]) -> dict[str, Standing]:
         """Return where the games of dedicated servers stand with players as of now.
 

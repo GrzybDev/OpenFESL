@@ -53,6 +53,7 @@ from openfesl.storage.settings import SqlSettingStore
 from openfesl.storage.stats import SqlStatStore
 from openfesl.web.front import front_routes
 from openfesl.web.game_http import GameHttpMiddleware
+from openfesl.web.host import host_routes
 from openfesl.web.languages import LanguageMiddleware
 from openfesl.web.leaderboard import leaderboard_routes
 from openfesl.web.menu import menu_routes
@@ -83,7 +84,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     # The engine connects on first use, inside the lifespan.
     engine = create_async_engine(settings.database_url, pool_pre_ping=True, hide_parameters=True)
     sessions = async_sessionmaker(engine)
-    hosting = Hosting(Approval(SqlServerStore(sessions)))
+    approval = Approval(SqlServerStore(sessions))
+    hosting = Hosting(approval)
     census = Census(hosting, players)
     stats = SqlStatStore(sessions)
     persona_store = SqlPersonaStore(sessions)
@@ -176,6 +178,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app.include_router(
         play_routes(pages, games, census, entitlements, relay, settings.hook_default_url)
+    )
+    app.include_router(
+        host_routes(
+            pages, games, census, approval, settings.contact_email, relay, settings.hook_default_url
+        )
     )
     app.include_router(verification_routes(confirm, pages))
     # The last one added sees a request first: the game's HTTP keeps its own answers.

@@ -1668,3 +1668,159 @@ msgstr "Limited Edition unlocks"
 
 msgid "games.bfbc2.key.ACTIVATE-VETERAN"
 msgstr "Veteran rank"
+
+msgid "web.host.title"
+msgstr "Host a server"
+
+#, python-format
+msgid "web.host.subtitle"
+msgstr "%(game)s dedicated server"
+
+msgid "web.host.mode"
+msgstr "Hosting on this server"
+
+msgid "web.host.mode.approved"
+msgstr "Approved servers only"
+
+msgid "web.host.mode.open"
+msgstr "Any server"
+
+msgid "web.host.mode.approved.text"
+msgstr ""
+"A new dedicated server waits for approval by this server's "
+"administrators. Until it is approved it is not listed, players cannot "
+"join it and its rounds do not count toward stats."
+
+msgid "web.host.mode.open.text"
+msgstr ""
+"Any dedicated server with OpenFESLHook can host here. It appears in the "
+"server list once it creates its game, and its rounds count toward stats."
+
+msgid "web.host.administrators"
+msgstr "The administrators"
+
+msgid "web.host.steps"
+msgstr "Set up the dedicated server in three steps"
+
+#, python-format
+msgid "web.host.next_to"
+msgstr "Next to %(file)s"
+
+msgid "web.host.hook"
+msgstr "Add the hook"
+
+#, python-format
+msgid "web.host.hook.text"
+msgstr ""
+"Copy %(hook)s from the latest OpenFESLHook release into the dedicated "
+"server's folder, next to %(executable)s."
+
+#, python-format
+msgid "web.host.hook.default"
+msgstr ""
+"The hook connects to this OpenFESL server by default, so no %(file)s is "
+"needed."
+
+#, python-format
+msgid "web.host.hook.elsewhere"
+msgstr ""
+"To connect to this OpenFESL server, save %(file)s next to it with these "
+"lines."
+
+msgid "web.host.provider"
+msgstr "Add the provider file"
+
+#, python-format
+msgid "web.host.provider.text"
+msgstr ""
+"Put the %(file)s issued by this server's administrators next to "
+"%(config)s, in place of the one the server release ships. It tells "
+"OpenFESL which operator runs the server; keep it private."
+
+msgid "web.host.provider.request"
+msgstr "Request the file"
+
+msgid "web.host.provider.keep"
+msgstr "Keep a provider file"
+
+#, python-format
+msgid "web.host.provider.keep.text"
+msgstr ""
+"The %(file)s that ships with the server release is enough. With a file "
+"issued by this server's administrators, they see which operator runs the "
+"server."
+
+msgid "web.host.folder"
+msgstr "The server's folder"
+
+msgid "web.host.folder.after"
+msgstr "The server's folder after steps 1 and 2"
+
+msgid "web.host.folder.open"
+msgstr "The server's folder in open mode"
+
+msgid "web.guide.replaced"
+msgstr "Replaced"
+
+msgid "web.guide.shipped"
+msgstr "As shipped"
+
+msgid "web.host.start"
+msgstr "Start the server"
+
+msgid "web.host.start.waits"
+msgstr "Then it waits for approval"
+
+msgid "web.host.start.text"
+msgstr ""
+"Start the server as usual. It connects to OpenFESL, receives its identity"
+" and waits for approval. Once an administrator approves it, it appears in"
+" the server list."
+
+msgid "web.host.state.waiting"
+msgstr "Waiting"
+
+msgid "web.host.state.waiting.text"
+msgstr "Not listed; no stats"
+
+msgid "web.host.state.approved"
+msgstr "Approved"
+
+msgid "web.host.state.approved.text"
+msgstr "Listed; rounds count toward stats"
+
+#, python-format
+msgid "web.host.identity"
+msgstr ""
+"The server keeps its identity in %(file)s in its instance folder. Without"
+" that file it counts as a new server and waits for approval again."
+
+msgid "web.host.start.listed"
+msgstr "Listed once it creates its game"
+
+msgid "web.host.start.open"
+msgstr ""
+"Start the server as usual. It appears in the server list once it creates "
+"its game. The administrators can still revoke a server: its game leaves "
+"the server list, its connection to OpenFESL closes and its next attempts "
+"are refused."
+
+msgid "web.host.seen"
+msgstr "What the administrators see"
+
+#, python-format
+msgid "web.host.seen.text"
+msgstr ""
+"For each new server: its name, its operator as named by %(file)s (or "
+"\"Unknown provider\" with the file's id), when it first connected, how "
+"many times it tried to host, and the map and mode it tried to host."
+
+msgid "web.host.after"
+msgstr "After approval"
+
+msgid "web.host.after.text"
+msgstr ""
+"The server is listed on this site and in the game's server browser. The "
+"administrators can revoke an approval: its game leaves the server list, "
+"its connection to OpenFESL closes and its next attempts are refused. "
+"Revoking an operator revokes all of its servers."

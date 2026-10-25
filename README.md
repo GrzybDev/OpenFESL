@@ -60,8 +60,9 @@ The server reads its settings from the environment.
 | `SMTP_USER` | The name to log in to the mail server with, if it needs a login | none |
 | `SMTP_PASSWORD` | The password of that login | none |
 | `SMTP_SENDER` | The address mail comes from; required for mail to go out | none |
-| `PUBLIC_URL` | The address the server's web pages are reached at, where the links in mail lead, such as `https://fesl.example.com`; required for mail to go out. The guide to playing gives the relay address that follows from it, such as `wss://fesl.example.com`, or the request's own without it | none |
-| `HOOK_DEFAULT_URL` | The relay address OpenFESLHook's releases connect to without an `OpenFESLHook.ini`; where this server's relay address differs, the guide to playing shows the lines of that file | `wss://fesl.grzyb.app` |
+| `PUBLIC_URL` | The address the server's web pages are reached at, where the links in mail lead, such as `https://fesl.example.com`; required for mail to go out. The guides to playing and hosting give the relay address that follows from it, such as `wss://fesl.example.com`, or the request's own without it | none |
+| `HOOK_DEFAULT_URL` | The relay address OpenFESLHook's releases connect to without an `OpenFESLHook.ini`; where this server's relay address differs, the guides show the lines of that file | `wss://fesl.grzyb.app` |
+| `CONTACT_EMAIL` | The address at which the operators of dedicated servers reach this server's administrators, such as for a provider file; the guide to hosting shows it | none |
 
 The database schema is created and upgraded when the server starts.
 

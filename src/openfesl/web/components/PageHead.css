@@ -18,6 +18,10 @@
     flex-basis: 480px;
   }
 
+  .page-title-wider {
+    flex-basis: 520px;
+  }
+
   /* A tab beside the title that leads to another page, such as back to the server list. */
   .tab-link {
     margin-bottom: 14px;

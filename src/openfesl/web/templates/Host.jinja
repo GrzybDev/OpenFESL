@@ -1,0 +1,110 @@
+{#def activity, files, approved_only: bool, contact: str, relay: str | None #}
+{% set title = _("web.host.title") %}
+{% set servers = url("/" ~ game.id ~ "/servers") %}
+{% set mode = "approved" if approved_only else "open" %}
+{% macro plain(name) %}<span class="host-place">{{ name }}</span>{% endmacro %}
+{% macro file(name) %}
+  <FileName :text="name" class="host-file" />
+{% endmacro %}
+{% macro inline(name) %}<code class="host-inline">{{ name }}</code>{% endmacro %}
+<Layout :title="title">
+  <div id="live"
+       hx-get="{{ here }}"
+       hx-trigger="every 15s, refresh"
+       hx-select="#live"
+       hx-select-oob="#shell-games:outerMorph"
+       hx-swap="outerMorph">
+    <GameStatus :activity="activity" />
+    <GameMenu current="host" />
+
+    <PageHead labelledby="host-title">
+      <div class="enter-title page-title page-title-wider">
+        <TitleBlock :title="title" id="host-title">{{ _("web.host.subtitle", game=game.name) }}</TitleBlock>
+      </div>
+      <Tab :href="servers" class="tab-link">{{ _("web.game.menu.servers") }}<span class="tab-count"><Count :value="activity.servers" class="count-sm live-value" /></span>
+      <Icon name="go" :size="14" stroke="currentColor" class="go" /></Tab>
+    </PageHead>
+
+    <Panel class="enter-panel">
+      <section aria-labelledby="host-mode">
+        <Bar id="host-mode" :extra="_('web.host.mode.' ~ mode)" wrap>{{ _("web.host.mode") }}</Bar>
+        <div class="host-mode">
+          <p>{{ _("web.host.mode." ~ mode ~ ".text") }}</p>
+          {% if contact %}
+            <a href="mailto:{{ contact }}" class="host-contact"><span aria-hidden="true"><Icon name="go" :size="18" stroke="#0A0A0A" /></span><span><span>{{ _("web.host.administrators") }}</span><span>{{ contact }}</span></span></a>
+          {% endif %}
+        </div>
+      </section>
+
+      <section aria-labelledby="host-steps" class="host-steps">
+        <h2 id="host-steps" class="sr-only">{{ _("web.host.steps") }}</h2>
+        <ol class="guide-steps">
+          <GuideStep :number="1"
+                     :heading="_('web.host.hook')"
+                     :where="_('web.host.next_to', file=plain(files.executable))">
+            <p class="body-text">{{ _("web.host.hook.text", hook=file("dinput8.dll"), executable=file(files.executable)) }} {% if relay %}{{ _("web.host.hook.elsewhere", file=file("OpenFESLHook.ini")) }}{% else %}{{ _("web.host.hook.default", file=file("OpenFESLHook.ini")) }}{% endif %}</p>
+            {% if relay %}<HookLines :relay="relay" />{% endif %}
+            <Download file="dinput8.dll" />
+            <Outside href="https://github.com/GrzybDev/OpenFESLHook/releases" :label="_('web.play.releases')" note="github.com" />
+          </GuideStep>
+          {% if approved_only %}
+            <GuideStep :number="2"
+                       :heading="_('web.host.provider')"
+                       :where="_('web.host.next_to', file=plain(files.config))">
+              <p class="body-text">{{ _("web.host.provider.text", file=file(files.provider), config=file(files.config)) }}</p>
+              <div class="guide-fill">
+                <Folder :caption="_('web.host.folder')" :label="_('web.host.folder.after')" :files="[('dinput8.dll', 'added'), (files.executable, None), (files.provider, 'replaced'), (files.config, None)]" />
+              </div>
+              {% if contact %}
+                <Outside :href="'mailto:' ~ contact" :label="_('web.host.provider.request')" :note="contact" />
+              {% endif %}
+            </GuideStep>
+            <GuideStep :number="3"
+                       :heading="_('web.host.start')"
+                       :where="_('web.host.start.waits')">
+              <p class="body-text">{{ _("web.host.start.text") }}</p>
+              <dl class="host-states guide-fill">
+                {% for state in ["waiting", "approved"] %}
+                  <div>
+                    <dt>{{ _("web.host.state." ~ state) }}</dt>
+                    <dd>
+                      {{ _("web.host.state." ~ state ~ ".text") }}
+                    </dd>
+                  </div>
+                {% endfor %}
+              </dl>
+              <p class="guide-aside">{{ _("web.host.identity", file=inline(files.identity)) }}</p>
+              <Outside :href="servers" :label="_('web.play.server_list')" :note="_n('web.play.servers', activity.servers)" />
+            </GuideStep>
+          {% else %}
+            <GuideStep :number="2"
+                       :heading="_('web.host.provider.keep')"
+                       :where="_('web.host.next_to', file=plain(files.config))">
+              <p class="body-text">{{ _("web.host.provider.keep.text", file=file(files.provider)) }}</p>
+              <Folder :caption="_('web.host.folder')" :label="_('web.host.folder.open')" :files="[('dinput8.dll', 'added'), (files.executable, None), (files.provider, 'shipped'), (files.config, None)]" />
+            </GuideStep>
+            <GuideStep :number="3"
+                       :heading="_('web.host.start')"
+                       :where="_('web.host.start.listed')">
+              <p class="body-text guide-fill">{{ _("web.host.start.open") }}</p>
+              <Outside :href="servers" :label="_('web.play.server_list')" :note="_n('web.play.servers', activity.servers)" />
+            </GuideStep>
+          {% endif %}
+        </ol>
+      </section>
+
+      <div class="host-notes">
+        <section aria-labelledby="host-seen">
+          <Bar id="host-seen" wrap>{{ _("web.host.seen") }}</Bar>
+          <p class="body-text bar-text">{{ _("web.host.seen.text", file=inline(files.provider)) }}</p>
+        </section>
+        {% if approved_only %}
+          <section aria-labelledby="host-after">
+            <Bar id="host-after" wrap>{{ _("web.host.after") }}</Bar>
+            <p class="body-text bar-text">{{ _("web.host.after.text") }}</p>
+          </section>
+        {% endif %}
+      </div>
+    </Panel>
+  </div>
+</Layout>

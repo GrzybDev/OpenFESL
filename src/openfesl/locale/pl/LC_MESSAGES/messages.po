@@ -1699,3 +1699,157 @@ msgstr "Odblokowania Edycji Limitowanej"
 
 msgid "games.bfbc2.key.ACTIVATE-VETERAN"
 msgstr "Status weterana"
+
+msgid "web.host.title"
+msgstr "Postaw serwer"
+
+#, python-format
+msgid "web.host.subtitle"
+msgstr "Serwer dedykowany %(game)s"
+
+msgid "web.host.mode"
+msgstr "Dopuszczanie serwerów"
+
+msgid "web.host.mode.approved"
+msgstr "Tylko zatwierdzone serwery"
+
+msgid "web.host.mode.open"
+msgstr "Dowolny serwer"
+
+msgid "web.host.mode.approved.text"
+msgstr ""
+"Nowy serwer dedykowany czeka na zatwierdzenie przez administrację tego "
+"serwera. Do tego czasu nie ma go na liście, nie można do niego dołączyć, "
+"a jego rundy nie liczą się do statystyk."
+
+msgid "web.host.mode.open.text"
+msgstr ""
+"Każdy serwer dedykowany z OpenFESLHook może tu działać. Pojawia się na "
+"liście serwerów, gdy utworzy grę, a jego rundy liczą się do statystyk."
+
+msgid "web.host.administrators"
+msgstr "Administracja"
+
+msgid "web.host.steps"
+msgstr "Przygotowanie serwera dedykowanego w trzech krokach"
+
+#, python-format
+msgid "web.host.next_to"
+msgstr "Obok %(file)s"
+
+msgid "web.host.hook"
+msgstr "Dodaj hook"
+
+#, python-format
+msgid "web.host.hook.text"
+msgstr ""
+"Skopiuj %(hook)s z najnowszego wydania OpenFESLHook do folderu serwera "
+"dedykowanego, obok %(executable)s."
+
+#, python-format
+msgid "web.host.hook.default"
+msgstr ""
+"Hook domyślnie łączy się z tym serwerem OpenFESL, więc %(file)s nie jest "
+"potrzebny."
+
+#, python-format
+msgid "web.host.hook.elsewhere"
+msgstr ""
+"Aby hook łączył się z tym serwerem OpenFESL, zapisz obok niego %(file)s z"
+" tymi wierszami."
+
+msgid "web.host.provider"
+msgstr "Dodaj plik operatora"
+
+#, python-format
+msgid "web.host.provider.text"
+msgstr ""
+"Umieść %(file)s wydany przez administrację tego serwera obok %(config)s, "
+"w miejsce pliku z wydania serwera. Mówi on OpenFESL, kto prowadzi serwer;"
+" nie udostępniaj go."
+
+msgid "web.host.provider.request"
+msgstr "Poproś o plik"
+
+msgid "web.host.provider.keep"
+msgstr "Zostaw plik operatora"
+
+#, python-format
+msgid "web.host.provider.keep.text"
+msgstr ""
+"Wystarczy %(file)s z wydania serwera. Z plikiem wydanym przez "
+"administrację tego serwera widać, kto go prowadzi."
+
+msgid "web.host.folder"
+msgstr "Folder serwera"
+
+msgid "web.host.folder.after"
+msgstr "Folder serwera po krokach 1 i 2"
+
+msgid "web.host.folder.open"
+msgstr "Folder serwera w trybie otwartym"
+
+msgid "web.guide.replaced"
+msgstr "Zastąpiony"
+
+msgid "web.guide.shipped"
+msgstr "Z wydania"
+
+msgid "web.host.start"
+msgstr "Uruchom serwer"
+
+msgid "web.host.start.waits"
+msgstr "Potem czeka na zatwierdzenie"
+
+msgid "web.host.start.text"
+msgstr ""
+"Uruchom serwer jak zwykle. Łączy się z OpenFESL, otrzymuje tożsamość i "
+"czeka na zatwierdzenie. Po zatwierdzeniu pojawia się na liście serwerów."
+
+msgid "web.host.state.waiting"
+msgstr "Oczekuje"
+
+msgid "web.host.state.waiting.text"
+msgstr "Poza listą; bez statystyk"
+
+msgid "web.host.state.approved"
+msgstr "Zatwierdzony"
+
+msgid "web.host.state.approved.text"
+msgstr "Na liście; rundy liczą się do statystyk"
+
+#, python-format
+msgid "web.host.identity"
+msgstr ""
+"Serwer przechowuje tożsamość w %(file)s w folderze instancji. Bez tego "
+"pliku liczy się jako nowy serwer i znów czeka na zatwierdzenie."
+
+msgid "web.host.start.listed"
+msgstr "Na liście, gdy utworzy grę"
+
+msgid "web.host.start.open"
+msgstr ""
+"Uruchom serwer jak zwykle. Pojawia się na liście serwerów, gdy utworzy "
+"grę. Administracja może cofnąć zgodę dla serwera: jego gra znika z listy,"
+" połączenie z OpenFESL zostaje zamknięte, a kolejne próby są odrzucane."
+
+msgid "web.host.seen"
+msgstr "Co widzi administracja"
+
+#, python-format
+msgid "web.host.seen.text"
+msgstr ""
+"Dla każdego nowego serwera: jego nazwę, operatora wskazanego przez "
+"%(file)s (lub „Nieznany dostawca” z identyfikatorem pliku), kiedy "
+"połączył się po raz pierwszy, ile razy próbował działać oraz mapę i tryb,"
+" które próbował uruchomić."
+
+msgid "web.host.after"
+msgstr "Po zatwierdzeniu"
+
+msgid "web.host.after.text"
+msgstr ""
+"Serwer jest na liście na tej stronie i w przeglądarce serwerów w grze. "
+"Administracja może cofnąć zatwierdzenie: jego gra znika z listy, "
+"połączenie z OpenFESL zostaje zamknięte, a kolejne próby są odrzucane. "
+"Cofnięcie zgody dla operatora obejmuje wszystkie jego serwery."
