@@ -1,6 +1,6 @@
 import logging
 import secrets
-from collections.abc import Mapping
+from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -76,7 +76,11 @@ class AdminSessions:
     """Signs admins in through the deployment's provider and keeps their sessions."""
 
     def __init__(
-        self, pages: Pages, provider: SignInProvider | None, public_url: str | None
+        self,
+        pages: Pages,
+        provider: SignInProvider | None,
+        public_url: str | None,
+        menu_counts: Callable[[], Awaitable[Mapping[str, int]]],
     ) -> None:
         """Prepare the sign-in through the provider.
 
@@ -85,8 +89,11 @@ class AdminSessions:
             provider: The sign-in provider; None when the deployment sets up none.
             public_url: The address the pages are reached at, to which the provider sends the
                 admin back; the request's own when None.
+            menu_counts: Returns the numbers the menu shows by its items, such as the servers
+                waiting for a decision.
         """
         self._pages = pages
+        self._menu_counts = menu_counts
         self.provider = provider
         self._public_url = public_url.rstrip("/") if public_url else None
         self._sign_in_policy = HEADERS["Content-Security-Policy"]
@@ -146,7 +153,7 @@ class AdminSessions:
         if not token or not isinstance(sent, str) or not secrets.compare_digest(token, sent):
             raise FormExpired
 
-    def render(
+    async def render(
         self,
         request: Request,
         template: str,
@@ -168,7 +175,8 @@ class AdminSessions:
         if admin is not None:
             shown = request.session.pop("toast", None)
             toast = Toast(shown["key"], shown["values"], shown["error"]) if shown else None
-            viewer = Viewer(admin, self.provider.name if self.provider else "", toast)
+            through = self.provider.name if self.provider else ""
+            viewer = Viewer(admin, through, toast, await self._menu_counts())
         return self._pages.render(
             request, template, status, steel=True, viewer=viewer, csrf=token, **context
         )
@@ -191,7 +199,7 @@ class AdminSessions:
         @router.get("/admin/sign-in", response_class=HTMLResponse)
         async def sign_in_page(request: Request, next: str = "") -> HTMLResponse:
             notice = request.session.pop("notice", None)
-            page = self.render(
+            page = await self.render(
                 request, "admin.SignIn", next=_inside(next), notice=notice, provider=self.provider
             )
             page.headers["Content-Security-Policy"] = self._sign_in_policy
@@ -278,7 +286,7 @@ class AdminSessions:
         """
         signed_in = request.session.get("admin")
         admin = _admin(signed_in) if signed_in else None
-        return self.render(request, "admin.Refused", 403, admin, reason="expired", section="")
+        return await self.render(request, "admin.Refused", 403, admin, reason="expired", section="")
 
     async def needs_role(self, request: Request, error: Exception) -> Response:
         """Answer a page that the admin's role does not open with the page that says so.
@@ -288,7 +296,7 @@ class AdminSessions:
             error: The NeedsRole raised.
         """
         assert isinstance(error, NeedsRole)
-        return self.render(
+        return await self.render(
             request, "admin.Refused", 403, error.admin, reason="role", section=error.section
         )
 

@@ -1,8 +1,8 @@
-{#def size: int #}
-{# The chevron of an action block's square, which turns into a spinning segment while the block's
-   page loads. #}
+{#def size: int, glyph: str = "go" #}
+{# The chevron of an action block's square, or another glyph in its place, which turns into a
+   spinning segment while the block's page loads. #}
 <svg class="go" width="{{ size }}" height="{{ size }}">
-  <use href="{{ static('icons.svg') }}#go" stroke="#0A0A0A" />
+  <use href="{{ static('icons.svg') }}#{{ glyph }}" stroke="#0A0A0A" />
 </svg>
 <svg class="busy" width="{{ size }}" height="{{ size }}">
   <use href="{{ static('icons.svg') }}#busy" stroke="#0A0A0A" />

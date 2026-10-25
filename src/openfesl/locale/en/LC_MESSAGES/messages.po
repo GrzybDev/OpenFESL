@@ -2196,11 +2196,7 @@ msgstr "Servers"
 msgid "web.admin.waiting"
 msgstr "Waiting for approval"
 
-msgid "web.admin.waiting.status"
-msgstr "Waiting"
 
-msgid "web.admin.waiting.status.unknown"
-msgstr "Waiting, unknown provider"
 
 msgid "web.admin.waiting.count"
 msgstr "Servers waiting: %(count)s"
@@ -2295,8 +2291,6 @@ msgstr "Error"
 msgid "web.admin.toast.dismiss"
 msgstr "Dismiss"
 
-msgid "web.admin.toast.approved"
-msgstr "Approved %(name)s."
 
 msgid "web.admin.toast.failed"
 msgstr "The change was not saved. Try again."
@@ -2312,3 +2306,273 @@ msgstr "Approving…"
 
 msgid "web.admin.close"
 msgstr "Close"
+
+msgid "web.admin.menu.servers"
+msgstr "Servers"
+
+msgid "web.admin.menu.waiting"
+msgstr "waiting for a decision"
+
+msgid "web.admin.servers.subtitle"
+msgstr "Dedicated servers"
+
+msgid "web.admin.servers.states"
+msgstr "Server state"
+
+msgid "web.admin.servers.tab.waiting"
+msgstr "Waiting"
+
+msgid "web.admin.servers.tab.approved"
+msgstr "Approved"
+
+msgid "web.admin.servers.tab.revoked"
+msgstr "Revoked"
+
+msgid "web.admin.servers.list.waiting"
+msgstr "Servers waiting for approval"
+
+msgid "web.admin.servers.list.approved"
+msgstr "Approved servers"
+
+msgid "web.admin.servers.list.revoked"
+msgstr "Servers whose approval is revoked"
+
+msgid "web.admin.state"
+msgstr "State"
+
+msgid "web.admin.state.waiting"
+msgstr "Waiting"
+
+msgid "web.admin.state.waiting.unknown"
+msgstr "Waiting, unknown provider"
+
+msgid "web.admin.state.approved"
+msgstr "Approved"
+
+msgid "web.admin.state.approved.unknown"
+msgstr "Approved, unknown provider"
+
+msgid "web.admin.state.revoked"
+msgstr "Revoked"
+
+msgid "web.admin.state.revoked.unknown"
+msgstr "Revoked, unknown provider"
+
+msgid "web.admin.column.attempts"
+msgstr "Attempts"
+
+msgid "web.admin.column.hosting"
+msgstr "Hosting now"
+
+msgid "web.admin.column.approved"
+msgstr "Approved"
+
+msgid "web.admin.column.players"
+msgstr "Players"
+
+msgid "web.admin.column.last"
+msgstr "Last tried"
+
+msgid "web.admin.column.revoked"
+msgstr "Revoked"
+
+msgid "web.admin.column.refused"
+msgstr "Refused today"
+
+msgid "web.admin.server.page.of"
+msgstr "Server page: %(name)s"
+
+msgid "web.admin.not_hosting"
+msgstr "Not hosting"
+
+msgid "web.admin.not_tried"
+msgstr "Not since the server started"
+
+msgid "web.admin.game"
+msgstr "Game"
+
+msgid "web.admin.server_id"
+msgstr "Server id"
+
+msgid "web.admin.server_id.copy"
+msgstr "Copy server id"
+
+msgid "web.admin.server_id.copied"
+msgstr "Server id copied."
+
+msgid "web.admin.refused_today"
+msgstr "Refused today"
+
+msgid "web.admin.details.waiting"
+msgstr "Waiting for approval · first seen %(time)s"
+
+msgid "web.admin.details.approved"
+msgstr "Approved · %(time)s · by %(name)s"
+
+msgid "web.admin.details.approved.earlier"
+msgstr "Approved"
+
+msgid "web.admin.details.revoked"
+msgstr "Revoked · %(time)s · by %(name)s"
+
+msgid "web.admin.details.revoked.earlier"
+msgstr "Revoked"
+
+msgid "web.admin.details.revoked.provider"
+msgstr "Revoked with its provider"
+
+msgid "web.admin.provider.matches.one"
+msgstr "The provider id matches %(provider)s, which runs %(count)s approved server: %(names)s."
+
+msgid "web.admin.provider.matches.other"
+msgstr "The provider id matches %(provider)s, which runs %(count)s approved servers: %(names)s."
+
+msgid "web.admin.provider.matches.none"
+msgstr "The provider id matches %(provider)s, which has no approved servers yet."
+
+msgid "web.admin.provider.unknown"
+msgstr "The provider id matches no provider on this instance."
+
+msgid "web.admin.provider.none"
+msgstr "The server has not reported a provider id yet."
+
+msgid "web.admin.provider.revoked"
+msgstr "Its provider %(provider)s is revoked, which revokes all of its servers; approving this server alone does not let it host."
+
+msgid "web.admin.how.approve.known"
+msgstr "Approve lists its game in the server list."
+
+msgid "web.admin.how.approve.unknown"
+msgstr "Approve asks for confirmation first, because the provider is unknown."
+
+msgid "web.admin.how.reject"
+msgstr "Reject asks for confirmation, then moves the server to Revoked."
+
+msgid "web.admin.how.revoke"
+msgstr "Revoke asks for confirmation; its game then leaves the server list and its later attempts to host are refused."
+
+msgid "web.admin.how.again"
+msgstr "Approve again asks for confirmation; its game lists as soon as it hosts again."
+
+msgid "web.admin.reject"
+msgstr "Reject"
+
+msgid "web.admin.revoke"
+msgstr "Revoke"
+
+msgid "web.admin.again"
+msgstr "Approve again"
+
+msgid "web.admin.reject.busy"
+msgstr "Rejecting…"
+
+msgid "web.admin.revoke.busy"
+msgstr "Revoking…"
+
+msgid "web.admin.confirm.reject"
+msgstr "Reject this server?"
+
+msgid "web.admin.confirm.reject.text"
+msgstr "It moves to Revoked: its attempts to host are refused and its game stays out of the server list. It can be approved again from the Revoked tab."
+
+msgid "web.admin.confirm.revoke"
+msgstr "Revoke this server?"
+
+msgid "web.admin.confirm.revoke.text"
+msgstr "Its game leaves the server list at once, its later attempts to host are refused, and the statistics it sends are no longer recorded. Only this server is revoked; revoking a provider revokes all of its servers. It can be approved again from the Revoked tab."
+
+msgid "web.admin.confirm.approve.again"
+msgstr "Approving it again lists its game in the server list as soon as it hosts, and the statistics it sends are recorded from then on. The approval can be revoked later."
+
+msgid "web.admin.hosting_now"
+msgstr "Approved · hosting now"
+
+msgid "web.admin.hosting_not"
+msgstr "Approved · not hosting"
+
+msgid "web.admin.toast.approve"
+msgstr "Approved %(name)s."
+
+msgid "web.admin.toast.reject"
+msgstr "Rejected %(name)s."
+
+msgid "web.admin.toast.revoke"
+msgstr "Revoked %(name)s."
+
+msgid "web.admin.toast.unchanged"
+msgstr "%(name)s was not changed: its state changed in the meantime."
+
+msgid "web.admin.servers.count.waiting"
+msgstr "Servers waiting: %(count)s"
+
+msgid "web.admin.servers.count.approved"
+msgstr "Servers approved: %(count)s"
+
+msgid "web.admin.servers.count.revoked"
+msgstr "Servers revoked: %(count)s"
+
+msgid "web.admin.servers.order.waiting"
+msgstr "Newest first"
+
+msgid "web.admin.servers.order.approved"
+msgstr "By name"
+
+msgid "web.admin.servers.order.revoked"
+msgstr "Newest first"
+
+msgid "web.admin.servers.counts.waiting"
+msgstr "attempts count the last hour"
+
+msgid "web.admin.servers.counts.revoked"
+msgstr "refusals count today"
+
+msgid "web.admin.servers.none.waiting"
+msgstr "No server waits for approval."
+
+msgid "web.admin.servers.none.waiting.text"
+msgstr "A new server appears here when it first tries to host."
+
+msgid "web.admin.servers.none.approved"
+msgstr "No server is approved yet."
+
+msgid "web.admin.servers.none.approved.text"
+msgstr "Servers approved from the Waiting tab are listed here."
+
+msgid "web.admin.servers.none.revoked"
+msgstr "No server is revoked."
+
+msgid "web.admin.servers.none.revoked.text"
+msgstr "Rejected and revoked servers are listed here, and can be approved again."
+
+msgid "web.admin.servers.none_match"
+msgstr "No server here matches “%(query)s”."
+
+msgid "web.admin.servers.none_match.text"
+msgstr "The tabs above count the servers that match in each state."
+
+msgid "web.admin.servers.all"
+msgstr "All servers"
+
+msgid "web.admin.find"
+msgstr "Find a server"
+
+msgid "web.admin.find.field"
+msgstr "Server name or id"
+
+msgid "web.admin.find.hint"
+msgstr "Part of a name, or the start of an id"
+
+msgid "web.admin.find.note"
+msgstr "Searches waiting, approved and revoked servers."
+
+msgid "web.admin.find.search"
+msgstr "Search"
+
+msgid "web.admin.details_link"
+msgstr "Details and reject in Servers"
+
+msgid "web.admin.open"
+msgstr "Open %(name)s"
+
+msgid "web.admin.servers.approved_link"
+msgstr "Approved servers"

@@ -36,6 +36,10 @@
     }
   }
 
+  .fact-wide {
+    grid-column: 1 / -1;
+  }
+
   /* A list of facts under a panel's part. */
   .facts {
     display: grid;

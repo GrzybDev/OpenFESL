@@ -1,7 +1,8 @@
-{#def label: str, plain: bool = False #}
+{#def label: str, plain: bool = False, wide: bool = False #}
 {# A line of a black-on-light list of facts, such as a server's status, with the content as its
-   value; every other line is shaded. A plain value, such as a name, keeps its case. #}
-<div class="fact">
+   value; every other line is shaded. A plain value, such as a name, keeps its case; a wide line
+   spans a grid of facts. #}
+<div class="fact{% if wide %} fact-wide{% endif %}">
   <dt>{{ label }}</dt>
   <dd{% if plain %} class="fact-plain"{% endif %}>
     {{ content }}

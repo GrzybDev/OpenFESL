@@ -2235,11 +2235,7 @@ msgstr "Serwery"
 msgid "web.admin.waiting"
 msgstr "Czekają na zatwierdzenie"
 
-msgid "web.admin.waiting.status"
-msgstr "Czeka"
 
-msgid "web.admin.waiting.status.unknown"
-msgstr "Czeka, nieznany dostawca"
 
 msgid "web.admin.waiting.count"
 msgstr "Czekające serwery: %(count)s"
@@ -2340,8 +2336,6 @@ msgstr "Błąd"
 msgid "web.admin.toast.dismiss"
 msgstr "Zamknij"
 
-msgid "web.admin.toast.approved"
-msgstr "Zatwierdzono %(name)s."
 
 msgid "web.admin.toast.failed"
 msgstr "Zmiana nie została zapisana. Spróbuj ponownie."
@@ -2363,3 +2357,279 @@ msgstr "Zatwierdzanie…"
 
 msgid "web.admin.close"
 msgstr "Zamknij"
+
+msgid "web.admin.menu.servers"
+msgstr "Serwery"
+
+msgid "web.admin.menu.waiting"
+msgstr "do decyzji"
+
+msgid "web.admin.servers.subtitle"
+msgstr "Serwery dedykowane"
+
+msgid "web.admin.servers.states"
+msgstr "Stan serwera"
+
+msgid "web.admin.servers.tab.waiting"
+msgstr "Czekające"
+
+msgid "web.admin.servers.tab.approved"
+msgstr "Zatwierdzone"
+
+msgid "web.admin.servers.tab.revoked"
+msgstr "Cofnięte"
+
+msgid "web.admin.servers.list.waiting"
+msgstr "Serwery czekające na zatwierdzenie"
+
+msgid "web.admin.servers.list.approved"
+msgstr "Zatwierdzone serwery"
+
+msgid "web.admin.servers.list.revoked"
+msgstr "Serwery z cofniętym zatwierdzeniem"
+
+msgid "web.admin.state"
+msgstr "Stan"
+
+msgid "web.admin.state.waiting"
+msgstr "Czeka"
+
+msgid "web.admin.state.waiting.unknown"
+msgstr "Czeka, nieznany dostawca"
+
+msgid "web.admin.state.approved"
+msgstr "Zatwierdzony"
+
+msgid "web.admin.state.approved.unknown"
+msgstr "Zatwierdzony, nieznany dostawca"
+
+msgid "web.admin.state.revoked"
+msgstr "Cofnięty"
+
+msgid "web.admin.state.revoked.unknown"
+msgstr "Cofnięty, nieznany dostawca"
+
+msgid "web.admin.column.attempts"
+msgstr "Próby"
+
+msgid "web.admin.column.hosting"
+msgstr "Teraz prowadzi grę"
+
+msgid "web.admin.column.approved"
+msgstr "Zatwierdzenie"
+
+msgid "web.admin.column.players"
+msgstr "Gracze"
+
+msgid "web.admin.column.last"
+msgstr "Ostatnia próba"
+
+msgid "web.admin.column.revoked"
+msgstr "Cofnięcie"
+
+msgid "web.admin.column.refused"
+msgstr "Odmowy dziś"
+
+msgid "web.admin.server.page.of"
+msgstr "Strona serwera: %(name)s"
+
+msgid "web.admin.not_hosting"
+msgstr "Nie prowadzi gry"
+
+msgid "web.admin.not_tried"
+msgstr "Nie od uruchomienia serwera"
+
+msgid "web.admin.game"
+msgstr "Gra"
+
+msgid "web.admin.server_id"
+msgstr "Identyfikator serwera"
+
+msgid "web.admin.server_id.copy"
+msgstr "Kopiuj identyfikator serwera"
+
+msgid "web.admin.server_id.copied"
+msgstr "Skopiowano identyfikator serwera."
+
+msgid "web.admin.refused_today"
+msgstr "Odmowy dziś"
+
+msgid "web.admin.details.waiting"
+msgstr "Czeka na zatwierdzenie · pierwsza próba %(time)s"
+
+msgid "web.admin.details.approved"
+msgstr "Zatwierdzony · %(time)s · zatwierdzenie: %(name)s"
+
+msgid "web.admin.details.approved.earlier"
+msgstr "Zatwierdzony"
+
+msgid "web.admin.details.revoked"
+msgstr "Cofnięty · %(time)s · cofnięcie: %(name)s"
+
+msgid "web.admin.details.revoked.earlier"
+msgstr "Cofnięty"
+
+msgid "web.admin.details.revoked.provider"
+msgstr "Cofnięty razem z dostawcą"
+
+msgid "web.admin.provider.matches.one"
+msgstr "Identyfikator dostawcy pasuje do dostawcy %(provider)s, który ma %(count)s zatwierdzony serwer: %(names)s."
+
+msgid "web.admin.provider.matches.few"
+msgstr "Identyfikator dostawcy pasuje do dostawcy %(provider)s, który ma %(count)s zatwierdzone serwery: %(names)s."
+
+msgid "web.admin.provider.matches.many"
+msgstr "Identyfikator dostawcy pasuje do dostawcy %(provider)s, który ma %(count)s zatwierdzonych serwerów: %(names)s."
+
+msgid "web.admin.provider.matches.other"
+msgstr "Identyfikator dostawcy pasuje do dostawcy %(provider)s, który ma %(count)s zatwierdzonego serwera: %(names)s."
+
+msgid "web.admin.provider.matches.none"
+msgstr "Identyfikator dostawcy pasuje do dostawcy %(provider)s, który nie ma jeszcze zatwierdzonych serwerów."
+
+msgid "web.admin.provider.unknown"
+msgstr "Identyfikator dostawcy nie pasuje do żadnego dostawcy na tym serwerze."
+
+msgid "web.admin.provider.none"
+msgstr "Serwer nie przesłał jeszcze identyfikatora dostawcy."
+
+msgid "web.admin.provider.revoked"
+msgstr "Dostawca %(provider)s ma cofnięte zatwierdzenie, a z nim wszystkie jego serwery; samo zatwierdzenie tego serwera nie pozwala mu prowadzić gier."
+
+msgid "web.admin.how.approve.known"
+msgstr "Zatwierdzenie wystawia jego grę na liście serwerów."
+
+msgid "web.admin.how.approve.unknown"
+msgstr "Zatwierdzenie wymaga najpierw potwierdzenia, bo dostawca jest nieznany."
+
+msgid "web.admin.how.reject"
+msgstr "Odrzucenie wymaga potwierdzenia, a potem przenosi serwer do cofniętych."
+
+msgid "web.admin.how.revoke"
+msgstr "Cofnięcie wymaga potwierdzenia; potem jego gra znika z listy serwerów, a kolejne próby uruchomienia gry są odrzucane."
+
+msgid "web.admin.how.again"
+msgstr "Ponowne zatwierdzenie wymaga potwierdzenia; jego gra pojawi się na liście, gdy znów zacznie prowadzić grę."
+
+msgid "web.admin.reject"
+msgstr "Odrzuć"
+
+msgid "web.admin.revoke"
+msgstr "Cofnij zatwierdzenie"
+
+msgid "web.admin.again"
+msgstr "Zatwierdź ponownie"
+
+msgid "web.admin.reject.busy"
+msgstr "Odrzucanie…"
+
+msgid "web.admin.revoke.busy"
+msgstr "Cofanie…"
+
+msgid "web.admin.confirm.reject"
+msgstr "Odrzucić ten serwer?"
+
+msgid "web.admin.confirm.reject.text"
+msgstr "Serwer trafia do cofniętych: jego próby uruchomienia gry są odrzucane, a jego gra nie pojawia się na liście serwerów. Można go ponownie zatwierdzić na karcie cofniętych."
+
+msgid "web.admin.confirm.revoke"
+msgstr "Cofnąć zatwierdzenie tego serwera?"
+
+msgid "web.admin.confirm.revoke.text"
+msgstr "Jego gra od razu znika z listy serwerów, kolejne próby uruchomienia gry są odrzucane, a przesyłane przez niego statystyki przestają być zapisywane. Cofnięcie dotyczy tylko tego serwera; cofnięcie zatwierdzenia dostawcy obejmuje wszystkie jego serwery. Serwer można ponownie zatwierdzić na karcie cofniętych."
+
+msgid "web.admin.confirm.approve.again"
+msgstr "Ponowne zatwierdzenie wystawia grę serwera na liście serwerów, gdy tylko zacznie prowadzić grę, a przesyłane przez niego statystyki są od tej chwili zapisywane. Zatwierdzenie można później cofnąć."
+
+msgid "web.admin.hosting_now"
+msgstr "Zatwierdzony · teraz prowadzi grę"
+
+msgid "web.admin.hosting_not"
+msgstr "Zatwierdzony · nie prowadzi gry"
+
+msgid "web.admin.toast.approve"
+msgstr "Zatwierdzono %(name)s."
+
+msgid "web.admin.toast.reject"
+msgstr "Odrzucono %(name)s."
+
+msgid "web.admin.toast.revoke"
+msgstr "Cofnięto zatwierdzenie %(name)s."
+
+msgid "web.admin.toast.unchanged"
+msgstr "%(name)s pozostaje bez zmian: jego stan zmienił się w międzyczasie."
+
+msgid "web.admin.servers.count.waiting"
+msgstr "Czekające serwery: %(count)s"
+
+msgid "web.admin.servers.count.approved"
+msgstr "Zatwierdzone serwery: %(count)s"
+
+msgid "web.admin.servers.count.revoked"
+msgstr "Cofnięte serwery: %(count)s"
+
+msgid "web.admin.servers.order.waiting"
+msgstr "Najnowsze na górze"
+
+msgid "web.admin.servers.order.approved"
+msgstr "Według nazwy"
+
+msgid "web.admin.servers.order.revoked"
+msgstr "Najnowsze na górze"
+
+msgid "web.admin.servers.counts.waiting"
+msgstr "próby z ostatniej godziny"
+
+msgid "web.admin.servers.counts.revoked"
+msgstr "odmowy z dzisiaj"
+
+msgid "web.admin.servers.none.waiting"
+msgstr "Żaden serwer nie czeka na zatwierdzenie."
+
+msgid "web.admin.servers.none.waiting.text"
+msgstr "Nowy serwer pojawia się tutaj przy pierwszej próbie uruchomienia gry."
+
+msgid "web.admin.servers.none.approved"
+msgstr "Żaden serwer nie jest jeszcze zatwierdzony."
+
+msgid "web.admin.servers.none.approved.text"
+msgstr "Tutaj są serwery zatwierdzone na karcie czekających."
+
+msgid "web.admin.servers.none.revoked"
+msgstr "Żaden serwer nie ma cofniętego zatwierdzenia."
+
+msgid "web.admin.servers.none.revoked.text"
+msgstr "Tutaj są serwery odrzucone i z cofniętym zatwierdzeniem; można je ponownie zatwierdzić."
+
+msgid "web.admin.servers.none_match"
+msgstr "Żaden serwer tutaj nie pasuje do „%(query)s”."
+
+msgid "web.admin.servers.none_match.text"
+msgstr "Karty powyżej liczą pasujące serwery w każdym stanie."
+
+msgid "web.admin.servers.all"
+msgstr "Wszystkie serwery"
+
+msgid "web.admin.find"
+msgstr "Znajdź serwer"
+
+msgid "web.admin.find.field"
+msgstr "Nazwa lub identyfikator serwera"
+
+msgid "web.admin.find.hint"
+msgstr "Część nazwy lub początek identyfikatora"
+
+msgid "web.admin.find.note"
+msgstr "Przeszukuje serwery czekające, zatwierdzone i cofnięte."
+
+msgid "web.admin.find.search"
+msgstr "Szukaj"
+
+msgid "web.admin.details_link"
+msgstr "Szczegóły i odrzucanie w serwerach"
+
+msgid "web.admin.open"
+msgstr "Otwórz %(name)s"
+
+msgid "web.admin.servers.approved_link"
+msgstr "Zatwierdzone serwery"

@@ -11,4 +11,9 @@
     text-transform: uppercase;
     white-space: nowrap;
   }
+
+  .game-chip-full {
+    padding: 3px 6px;
+    font-size: 12px;
+  }
 }

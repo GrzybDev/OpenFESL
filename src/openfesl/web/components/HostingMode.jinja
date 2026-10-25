@@ -1,0 +1,9 @@
+{#def mode: str #}
+{# The admin panel's box that says which hosting mode the instance runs in and what it means. #}
+<section aria-labelledby="hosting-mode">
+  <Bar id="hosting-mode" large>{{ _("web.admin.mode") }}</Bar>
+  <div class="bar-text">
+    <p class="hosting-mode-name">{{ _("web.host.mode." ~ mode) }}</p>
+    <p class="body-text">{{ _("web.admin.mode." ~ mode) }}</p>
+  </div>
+</section>

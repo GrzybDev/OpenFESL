@@ -1,8 +1,23 @@
-/* The admin panel's items sit side by side from the start of the bar, however few there are. */
+/* The admin panel's items sit side by side from the start of the bar, however few there are; an
+   item's count of what waits sits in the accent beside its label. */
 @layer components {
   @media (width >= 40rem) {
-    .admin-menu ul {
+    .game-menu.admin-menu ul {
       justify-content: flex-start;
     }
+  }
+
+  .menu-count {
+    position: relative;
+    min-width: 24px;
+    margin-left: 10px;
+    background: var(--accent);
+    padding: 3px 6px;
+    font-size: 13px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0;
+    color: var(--ink);
+    text-align: center;
   }
 }

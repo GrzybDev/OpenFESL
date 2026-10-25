@@ -2,7 +2,7 @@ import hashlib
 import json
 import os
 from collections.abc import Iterable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from functools import cache
 from pathlib import Path
@@ -10,6 +10,7 @@ from typing import Any
 
 from babel import Locale
 from babel.dates import format_skeleton, format_timedelta
+from babel.lists import format_list
 from babel.numbers import format_decimal
 from fastapi import Request
 from fastapi.exception_handlers import http_exception_handler
@@ -76,11 +77,13 @@ class Viewer:
         admin: The admin.
         through: The name of the provider they signed in through.
         toast: What came of their last change, if it is still to be shown.
+        counts: The numbers the menu shows by its items, such as the servers waiting.
     """
 
     admin: Admin
     through: str
     toast: Toast | None = None
+    counts: Mapping[str, int] = field(default_factory=dict)
 
 
 def built_assets() -> Assets:
@@ -150,6 +153,12 @@ def _ago(context: Context, value: datetime) -> str:
     return str(format_timedelta(elapsed, add_direction=True, locale=_locale(context)))
 
 
+@pass_context
+def _listed(context: Context, items: list[str]) -> str:
+    # Names joined as the page's language lists them, such as "A, B and C".
+    return str(format_list(items, locale=_locale(context)))
+
+
 def _locale(context: Context) -> Locale:
     return Locale.parse(translate("web.locale", context["language"]))
 
@@ -196,6 +205,7 @@ _catalog = Catalog(
         "moment": _moment,
         "when": _when,
         "ago": _ago,
+        "listed": _listed,
     },
 )
 # The catalogue keeps its own environment, which takes the given one's escaping but not its

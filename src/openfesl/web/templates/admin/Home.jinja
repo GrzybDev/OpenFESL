@@ -39,25 +39,21 @@
                       </div>
                       <div role="columnheader"
                            class="column-head"><span class="sr-only">{{ _("web.admin.decision") }}</span></div>
+                      <div role="columnheader"><span class="sr-only">{{ _("web.servers.page") }}</span></div>
                     </div>
                   </div>
                   <div role="rowgroup" data-rows class="enter-rows table-rows">
                     {% for view in waiting %}
                       {% set server = view.server %}
+                      {% set href = url("/admin/servers/" ~ server.ugid) %}
                       <div role="row"
                            data-key="{{ server.ugid }}"
                            class="waiting-columns waiting-row">
                         <div role="cell" class="waiting-status">
-                          <span class="sr-only">{{ _("web.admin.waiting.status") if server.provider else _("web.admin.waiting.status.unknown") }}</span>
-                          <span aria-hidden="true"
-                                class="badge"><Icon name="clock" stroke="#0A0A0A" fill="#0A0A0A" /></span>
-                          {% if not server.provider %}
-                            <span aria-hidden="true"
-                                  class="badge"><Icon name="warn" stroke="#0A0A0A" fill="#0A0A0A" /></span>
-                          {% endif %}
+                          <StateBadges :view="view" />
                         </div>
                         <div role="cell" class="waiting-name">
-                          <span class="server-name">{{ server.name }}</span>
+                          <a href="{{ href }}" class="server-name">{{ server.name }}</a>
                           {% if view.game %}<GameChip :of="view.game" />{% endif %}
                         </div>
                         <div role="cell" class="waiting-stack waiting-provider">
@@ -87,6 +83,9 @@
                             <SmallAction :href="url('/admin/servers/' ~ server.ugid ~ '/approve') ~ '?back=' ~ here|urlencode" :label="_('web.admin.approve')" :name="_('web.admin.approve.confirmed', name=server.name)" dialog />
                           {% endif %}
                         </div>
+                        <div role="cell" class="cell-end">
+                          <EndSquare :href="href" :label="_('web.admin.server.page.of', name=server.name)" />
+                        </div>
                       </div>
                     {% endfor %}
                   </div>
@@ -96,10 +95,17 @@
                 <p>
                   <span class="list-count">{{ _("web.admin.waiting.count", count=number(waiting|length)) }}</span><span class="list-range">{{ _("web.admin.waiting.note") }}</span>
                 </p>
+                <a href="{{ url('/admin/servers') }}"
+                   class="home-more">{{ _("web.admin.details_link") }}<Icon name="go" :size="14" stroke="currentColor" /></a>
               </div>
             </section>
           {% elif not warnings %}
-            <Alert :label="_('web.admin.calm.label', count=number(0))" :title="_('web.admin.calm.title')">{{ _("web.admin.calm.text") }}</Alert>
+            <div class="home-calm">
+              <Alert :label="_('web.admin.calm.label', count=number(0))" :title="_('web.admin.calm.title')">{{ _("web.admin.calm.text") }}</Alert>
+              <div class="row-actions">
+                <SmallAction :href="url('/admin/servers?state=approved')" :label="_('web.admin.servers.approved_link')" />
+              </div>
+            </div>
           {% endif %}
         </div>
         <div class="home-side">
@@ -127,16 +133,11 @@
                     </Fact>
                   {% endif %}
                 </dl>
+                <FormButton icon="go" :href="url('/admin/servers/' ~ view.server.ugid)">{{ _("web.admin.open", name=view.server.name) }}</FormButton>
               {% endfor %}
             </section>
           {% endif %}
-          <section aria-labelledby="home-mode">
-            <Bar id="home-mode" large>{{ _("web.admin.mode") }}</Bar>
-            <div class="bar-text">
-              <p class="home-mode-name">{{ _("web.host.mode." ~ mode) }}</p>
-              <p class="body-text">{{ _("web.admin.mode." ~ mode) }}</p>
-            </div>
-          </section>
+          <HostingMode :mode="mode" />
         </div>
       </div>
     </Panel>

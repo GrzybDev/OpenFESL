@@ -25,6 +25,30 @@
     padding-right: 14px;
   }
 
+  .copy-icon {
+    width: 44px;
+    flex: none;
+    justify-content: center;
+    background: none;
+    padding: 0;
+
+    .copy-icons {
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      background: var(--ink);
+    }
+
+    [data-label] {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+
   .copy-icons {
     display: grid;
 

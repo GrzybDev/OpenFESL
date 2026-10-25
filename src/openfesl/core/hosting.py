@@ -528,12 +528,13 @@ class Hosting:
         while True:
             await asyncio.sleep(APPROVAL_CHECK_INTERVAL)
             try:
-                await self._apply_decisions()
+                await self.apply_decisions()
             except Exception:
                 # The database may be away for a moment; the next check tries again.
                 logger.exception("Could not read the admin's decisions about hosting servers")
 
-    async def _apply_decisions(self) -> None:
+    async def apply_decisions(self) -> None:
+        """List, hide or end the games of dedicated servers as the admin last decided."""
         vetted = [hosted for hosted in self.every() if hosted.server is not None]
         if not vetted:
             return

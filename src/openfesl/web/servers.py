@@ -196,7 +196,7 @@ def _list(pages: Pages, census: Census, game: Game) -> Callable[[Request], Await
             modes=Counter(_key(server.mode) for server in every if server.mode),
             regions=sorted(
                 ((labels[key], count) for key, count in regions.items() if key),
-                key=lambda region: _name(game, "region", region[0], language).casefold(),
+                key=lambda region: label_name(game, "region", region[0], language).casefold(),
             ),
             shown=Counter(
                 state
@@ -260,7 +260,15 @@ def _key(label: Label | None) -> str | None:
     return (label.name or label.value) if label else None
 
 
-def _name(game: Game, kind: str, label: Label | None, language: str) -> str:
+def label_name(game: Game, kind: str, label: Label | None, language: str) -> str:
+    """Return a value a server publishes as a page in a language shows it.
+
+    Args:
+        game: The server's game.
+        kind: What the value is, such as map.
+        label: The value; None for one the server does not publish.
+        language: The page's language.
+    """
     if label is None:
         return ""
     if label.name:
@@ -272,4 +280,4 @@ def _sort_key(game: Game, column: str, server: Server, language: str) -> str:
     if column == "name":
         return server.name.casefold()
     label = {"map": server.map, "mode": server.mode, "region": server.region}[column]
-    return _name(game, column, label, language).casefold()
+    return label_name(game, column, label, language).casefold()

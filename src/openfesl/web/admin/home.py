@@ -6,7 +6,6 @@ from fastapi.responses import HTMLResponse
 
 from openfesl.core.census import Census
 from openfesl.core.games import Games
-from openfesl.core.servers import HostingMode, ServerState
 from openfesl.core.session import Players
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.servers import ServerViews
@@ -51,16 +50,9 @@ def home_routes(
         total, new = await accounts.totals(now.replace(hour=0, minute=0, second=0, microsecond=0))
         mode = await views.store.hosting_mode()
         servers = await views.all()
-        # In the open mode nothing waits: every server lists its game at once.
-        waiting = [
-            view
-            for view in servers
-            if mode is HostingMode.APPROVED
-            and view.server.state is ServerState.PENDING
-            and not view.server.revoked
-        ]
+        waiting = await views.waiting(servers)
         warnings = [view for view in servers if view.server.revoked and view.attempts.refused_today]
-        return sessions.render(
+        return await sessions.render(
             request,
             "admin.Home",
             admin=admin,

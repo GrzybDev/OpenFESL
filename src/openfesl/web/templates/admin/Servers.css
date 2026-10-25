@@ -1,0 +1,240 @@
+/* The admin panel's servers page: the servers of a tab, whose rows open their details in place
+   with the decisions that apply, beside the search and the hosting mode. Where the table does not
+   fit, each server is a block of its own and the column names are left to screen readers. */
+@layer pages {
+  /* The list comes first, also on phones, where the search and the mode follow it. */
+  .admin-servers-layout {
+    flex-direction: row;
+  }
+
+  .admin-servers-side {
+    display: grid;
+    gap: 14px;
+  }
+
+  .find-note {
+    margin-top: 2px;
+    background: var(--row);
+    padding: 9px 14px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .find-button {
+    display: grid;
+    margin-top: 2px;
+  }
+
+  .admin-servers {
+    container-type: inline-size;
+
+    .table {
+      min-width: 900px;
+    }
+  }
+
+  .admin-server-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns: 64px minmax(200px, 1fr) 210px 170px 130px 104px 44px;
+    gap: 2px;
+  }
+
+  .server:nth-child(even) > .admin-server-columns {
+    --cell: var(--row-alt);
+  }
+
+  .admin-cell {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    background: var(--cell);
+    padding-inline: 10px;
+    color: var(--ink);
+  }
+
+  .admin-badges {
+    gap: 4px;
+    padding-inline: 6px;
+  }
+
+  .admin-name {
+    gap: 6px;
+    padding: 0 0 0 12px;
+  }
+
+  .admin-server-name {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 10px;
+
+    .server-name {
+      flex: none;
+    }
+  }
+
+  .cell-stack {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 3px;
+    padding-block: 6px;
+  }
+
+  .cell-hosted {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .cell-time {
+    font-size: 15px;
+    line-height: 1;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cell-ago {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.2;
+    font-weight: 500;
+  }
+
+  .cell-count {
+    font-size: 16px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .admin-details {
+    align-items: flex-start;
+    gap: 14px 20px;
+    padding: 14px;
+
+    > div:first-child {
+      flex: 1 1 420px;
+    }
+
+    .row-text {
+      margin-top: 10px;
+      line-height: 1.45;
+    }
+  }
+
+  .admin-facts {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    margin-top: 8px;
+
+    .fact {
+      min-height: 44px;
+      padding-inline: 12px;
+    }
+
+    dd {
+      display: flex;
+      align-items: center;
+      gap: 4px 8px;
+    }
+
+    .badge {
+      width: 22px;
+      height: 22px;
+    }
+
+    .provider-id {
+      max-width: none;
+    }
+  }
+
+  .fact-number {
+    font-size: 16px;
+  }
+
+  .server-id {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-decide {
+    display: grid;
+    min-width: 0;
+    flex: 0 1 300px;
+    gap: 6px;
+
+    form {
+      display: grid;
+    }
+
+    .row-text {
+      margin-top: 4px;
+    }
+  }
+
+  @container (width < 900px) {
+    .admin-servers .table {
+      min-width: 0;
+    }
+
+    .admin-servers-head {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .server-row.admin-server-columns {
+      grid-template-columns: 64px repeat(2, minmax(0, 1fr)) 44px;
+      grid-template-areas:
+        "badges name name end"
+        "provider provider first first"
+        "second second third third";
+
+      > :nth-child(1) {
+        grid-area: badges;
+      }
+
+      > :nth-child(2) {
+        grid-area: name;
+      }
+
+      > :nth-child(3) {
+        grid-area: provider;
+      }
+
+      > :nth-child(4) {
+        grid-area: first;
+      }
+
+      > :nth-child(5) {
+        grid-area: second;
+      }
+
+      > :nth-child(6) {
+        grid-area: third;
+      }
+
+      > :nth-child(7) {
+        grid-area: end;
+        background: var(--cell);
+      }
+    }
+
+    .server[data-open] > .server-row > :nth-child(7) {
+      background: var(--accent);
+    }
+  }
+}

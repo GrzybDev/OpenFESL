@@ -1,7 +1,8 @@
 {#def value: str, label: str, note: str, name: str = "", size: str = "" #}
 {# A button that copies a text, which the page also shows; it needs scripts, so it only shows with
    them. It says it copied for a moment, and the shell announces it (M8). A name tells buttons with
-   the same label apart; the size is tall beside a large text, or a table cell's. #}
+   the same label apart; the size is tall beside a large text, a table cell's, or an icon's,
+   which leaves the label to screen readers. #}
 <button type="button"
         data-copy="{{ value }}"
         data-copied="{{ _('web.copy.done') }}"

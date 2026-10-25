@@ -1,6 +1,6 @@
 /* The columns of a game's server list, as its server browser lays them out. On phones a row
    becomes a card in the game's style: its badges, name and end square, then its map and mode, then
-   its players and region. */
+   its players and region. Server rows, also the admin panel's, open their details in place. */
 @layer components {
   .server-columns {
     --cell: var(--row);
@@ -171,6 +171,121 @@
 
     .cell-players {
       flex: 1 1 auto;
+    }
+  }
+
+  .details-button {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    place-items: center;
+
+    > span {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      background: var(--ink);
+    }
+  }
+
+  /* M4: a server's row tints under the pointer and brightens its end square; an open row takes
+     the accent from the left, its chevron turns, and its details open by their height. */
+  .row-cell {
+    position: relative;
+    isolation: isolate;
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    &::before {
+      background: var(--row-light);
+      opacity: 0;
+      transition: opacity 120ms var(--ease-menu);
+    }
+
+    &::after {
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 160ms var(--ease-menu);
+    }
+
+    html[data-stale] & {
+      color: var(--dim);
+    }
+  }
+
+  .server-row:hover {
+    .row-cell::before {
+      opacity: 1;
+    }
+
+    .end-square > span {
+      background-color: var(--accent-hover);
+    }
+  }
+
+  .server[data-open] {
+    .row-cell::after {
+      transform: none;
+    }
+
+    .end-square > span {
+      background-color: var(--ink);
+      color: var(--accent);
+    }
+
+    .details-chevron {
+      transform: rotate(180deg);
+    }
+
+    .drawer {
+      grid-template-rows: 1fr;
+      visibility: visible;
+      transition: grid-template-rows 200ms var(--ease-menu);
+    }
+  }
+
+  .details-chevron {
+    transition: transform 200ms var(--ease-menu);
+  }
+
+  .drawer {
+    display: grid;
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    transition:
+      grid-template-rows 200ms var(--ease-menu),
+      visibility 0s linear 200ms;
+
+    .row-details {
+      margin-top: 2px;
+    }
+  }
+
+  .drawer-cell {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .row-cell::after,
+    .details-chevron,
+    .drawer,
+    .server[data-open] .drawer {
+      transition: none;
+    }
+
+    .row-cell::before {
+      transition-duration: 100ms;
     }
   }
 }

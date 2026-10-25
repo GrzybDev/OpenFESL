@@ -44,28 +44,20 @@
     gap: 14px;
   }
 
-  .home-mode-name {
-    margin-bottom: 6px;
-    font-size: 17px;
-    line-height: 1.1;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-
   .waiting {
-    min-width: 820px;
+    min-width: 866px;
   }
 
+  /* Each row ends in the square that opens the server in Servers, outside the table. */
   .waiting-columns {
     display: grid;
-    grid-template-columns: 64px minmax(170px, 1fr) minmax(170px, 0.9fr) 140px 116px 150px;
+    grid-template-columns: 64px minmax(170px, 1fr) minmax(170px, 0.9fr) 140px 116px 150px 44px;
     gap: 2px;
   }
 
   /* Where the table does not fit, each server is a block of its own with the decision across its
      foot, and the column names are left to screen readers. */
-  @container (width < 820px) {
+  @container (width < 866px) {
     .waiting {
       min-width: 0;
     }
@@ -80,12 +72,17 @@
     }
 
     .waiting-row {
-      grid-template-columns: 64px minmax(0, 1fr) auto;
+      grid-template-columns: 64px minmax(0, 1fr) auto 44px;
       grid-template-areas:
-        "status name name"
-        "provider provider provider"
-        "tried tried seen"
-        "decide decide decide";
+        "status name name end"
+        "provider provider provider provider"
+        "tried tried seen seen"
+        "decide decide decide decide";
+    }
+
+    .waiting-row > .cell-end {
+      grid-area: end;
+      background: var(--cell);
     }
 
     .waiting-status {
@@ -125,7 +122,7 @@
       --cell: var(--row-light);
     }
 
-    > * {
+    > :not(.cell-end) {
       display: flex;
       min-height: 44px;
       align-items: center;
@@ -184,6 +181,52 @@
       flex: 1;
       width: 100%;
     }
+  }
+
+  .home-more {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 8px;
+    background: var(--ink);
+    padding: 0 12px 0 14px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--bright);
+    text-transform: uppercase;
+
+    svg {
+      color: var(--accent);
+    }
+  }
+
+  .home-calm {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0 20px;
+    background: var(--row-light);
+    padding-right: 20px;
+
+    .alert {
+      min-width: 0;
+      flex: 1 1 420px;
+      padding: 20px;
+    }
+
+    .row-actions {
+      padding: 0 0 20px 20px;
+
+      @container (width >= 820px) {
+        padding: 0;
+      }
+    }
+  }
+
+  .warning + .facts + .form-button {
+    margin-top: 2px;
   }
 
   .warning {

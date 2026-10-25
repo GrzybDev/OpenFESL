@@ -1,0 +1,293 @@
+{#def listing, servers: list, counts, total: int, mode: str, fellows #}
+{# The dedicated servers by the admin's decision about them, in tabs: their rows, whose details
+   open in place with the decisions that apply, the search over every tab and the hosting mode. #}
+{% set title = _("web.admin.servers") %}
+{% set list = url("/admin/servers") %}
+{% set tab = listing.tab %}
+{% set columns = {
+  "waiting": [("map", "web.admin.tried"), ("seen", "web.admin.seen"), ("attempts", "web.admin.column.attempts")],
+  "approved": [("map", "web.admin.column.hosting"), ("decided", "web.admin.column.approved"), ("players", "web.admin.column.players")],
+  "revoked": [("last", "web.admin.column.last"), ("decided", "web.admin.column.revoked"), ("refused", "web.admin.column.refused")],
+}[tab] %}
+{% macro sort_header(column, label, extra="") %}
+  {% set current = listing.sort == column %}
+  <div role="columnheader"
+       {% if current %} aria-sort="{{ 'descending' if listing.descending else 'ascending' }}"{% endif %}
+       class="column-head column-sort {{ extra }}"><a href="{{ list ~ listing.sorted_by(column).link() }}">{{ label }}{% if current %}<Icon name="down" :size="14" stroke="currentColor" :class="'' if listing.descending else 'ascending'" />{% endif %}</a></div>
+{%- endmacro %}
+{% macro moment_cell(at) %}
+  {% if at %}
+    <span class="cell-time">{{ _("web.server.time", time=when(at, "Hm")) }}</span>
+    <span class="cell-ago">{{ ago(at) }}</span>
+  {% else %}
+    <span aria-hidden="true">–</span><span class="sr-only">{{ _("web.admin.not_tried") }}</span>
+  {% endif %}
+{%- endmacro %}
+{% macro hosted(view, empty) %}
+  {% if view.hosting %}
+    <span><Published kind="map" :label="view.hosting.map" :of="view.game" /></span>
+    <span><Published kind="mode" :label="view.hosting.mode" :of="view.game" /></span>
+  {% else %}
+    <span aria-hidden="true">–</span><span class="sr-only">{{ empty }}</span>
+  {% endif %}
+{%- endmacro %}
+{% macro cell(column, view) %}
+  {% if column == "map" %}
+    <div role="cell" class="admin-cell row-cell cell-stack cell-hosted">
+      {{ hosted(view, _("web.admin.tried.none") if tab == "waiting" else _("web.admin.not_hosting")) }}
+    </div>
+  {% elif column == "seen" %}
+    <div role="cell" class="admin-cell row-cell cell-stack">{{ moment_cell(view.server.first_seen) }}</div>
+  {% elif column == "last" %}
+    <div role="cell" class="admin-cell row-cell cell-stack">{{ moment_cell(view.attempts.last) }}</div>
+  {% elif column == "decided" %}
+    <div role="cell"
+         class="admin-cell row-cell cell-stack">{{ moment_cell(view.decision.at if view.decision else None) }}</div>
+  {% elif column == "players" %}
+    <div role="cell" class="admin-cell row-cell cell-count">
+      {% if view.hosting %}
+        {{ number(view.hosting.players) }}&nbsp;/&nbsp;{{ number(view.hosting.max_players) }}
+      {% else %}
+        <span aria-hidden="true">–</span><span class="sr-only">{{ _("web.admin.not_hosting") }}</span>
+      {% endif %}
+    </div>
+  {% else %}
+    <div role="cell" class="admin-cell row-cell cell-count">
+      {{ number(view.attempts.last_hour if column == "attempts" else view.attempts.refused_today) }}
+    </div>
+  {% endif %}
+{%- endmacro %}
+{% macro headline(view) %}
+  {% set decision = view.decision %}
+  {% if tab == "waiting" %}
+    {{ _("web.admin.details.waiting", time=_("web.server.time", time=when(view.server.first_seen, "Hm")) if view.server.first_seen else "–") }}
+  {% elif view.server.provider and view.server.provider.revoked %}
+    {{ _("web.admin.details.revoked.provider") }}
+  {% elif decision %}
+    {{ _("web.admin.details." ~ tab, time=_("web.server.time", time=moment(decision.at, "MMMd")), name=decision.admin or _("web.admin.command_line")) }}
+  {% else %}
+    {{ _("web.admin.details." ~ tab ~ ".earlier") }}
+  {% endif %}
+{%- endmacro %}
+{% macro provider_note(server) %}
+  {% if server.provider and server.provider.revoked %}
+    {{ _("web.admin.provider.revoked", provider=server.provider.name) }}
+  {% elif server.provider and tab == "waiting" %}
+    {% set names = fellows.get(server.provider.id, []) | reject("equalto", server.name) | list %}
+    {% if names %}
+      {{ _n("web.admin.provider.matches", names|length, provider=server.provider.name, names=listed(names)) }}
+    {% else %}
+      {{ _("web.admin.provider.matches.none", provider=server.provider.name) }}
+    {% endif %}
+  {% elif server.provider %}
+  {% elif server.provider_id %}
+    {{ _("web.admin.provider.unknown") }}
+  {% else %}
+    {{ _("web.admin.provider.none") }}
+  {% endif %}
+{%- endmacro %}
+<AdminPage :title="title" current="servers">
+  <div id="live"
+       hx-get="{{ here }}"
+       hx-trigger="every 15s, refresh"
+       hx-select="#live"
+       hx-swap="outerMorph">
+    <PageHead labelledby="servers-title">
+      <div class="enter-title page-title">
+        <TitleBlock :title="title" id="servers-title">{{ _("web.admin.servers.subtitle") }}</TitleBlock>
+      </div>
+      <nav aria-label="{{ _('web.admin.servers.states') }}" class="tabs">
+        {% for name in ["waiting", "approved", "revoked"] %}
+          <Tab :href="list ~ listing.switched(name).link()" :label="_('web.admin.servers.tab.' ~ name)" :count="counts[name]" :current="tab == name" />
+        {% endfor %}
+      </nav>
+    </PageHead>
+
+    <Panel class="enter-panel">
+      <div class="list-layout admin-servers-layout">
+        <section aria-labelledby="servers-list" class="list-main admin-servers">
+          <h2 id="servers-list" class="sr-only">{{ _("web.admin.servers.list." ~ tab) }}</h2>
+          <div class="table-scroll table-scroll-flush">
+            <div role="table" aria-labelledby="servers-list" class="table">
+              <div role="rowgroup" class="admin-servers-head">
+                <div role="row" class="admin-server-columns">
+                  <div role="columnheader"
+                       class="column-head"><span class="sr-only">{{ _("web.admin.state") }}</span></div>
+                  {{ sort_header("name", _("web.servers.name"), "column-name") }}
+                  {{ sort_header("provider", _("web.admin.provider")) }}
+                  {% for column, key in columns %}{{ sort_header(column, _(key)) }}{% endfor %}
+                  <div role="columnheader"><span class="sr-only">{{ _("web.servers.page") }}</span></div>
+                </div>
+              </div>
+              <div role="rowgroup" data-rows class="enter-rows table-rows">
+                {% for view in servers %}
+                  {% set server = view.server %}
+                  {% set open = listing.open == server.ugid %}
+                  {% set href = url("/admin/servers/" ~ server.ugid) %}
+                  <div role="none"
+                       id="row-{{ server.ugid }}"
+                       data-key="{{ server.ugid }}"
+                       {% if open %} data-open{% endif %}
+                       class="server">
+                    <div role="row" class="server-row admin-server-columns">
+                      <div role="cell" class="admin-cell row-cell admin-badges">
+                        <StateBadges :view="view" />
+                      </div>
+                      <div role="cell" class="admin-cell row-cell admin-name">
+                        <span class="admin-server-name"><a href="{{ href }}" class="server-name">{{ server.name }}</a>
+                          {%- if view.game %}<GameChip :of="view.game" />{% endif %}
+                        </span>
+                        <a href="{{ list ~ listing.changed(open=None if open else server.ugid).link() }}#row-{{ server.ugid }}"
+                           role="button"
+                           aria-expanded="{{ 'true' if open else 'false' }}"
+                           aria-controls="details-{{ server.ugid }}"
+                           aria-label="{{ _('web.servers.details', name=server.name) }}"
+                           data-details
+                           class="details-button"><span><Icon name="down" stroke="#F4F4EE" class="details-chevron" /></span></a>
+                      </div>
+                      <div role="cell" class="admin-cell row-cell cell-stack">
+                        <ProviderName :server="server" />
+                      </div>
+                      {% for column, _key in columns %}{{ cell(column, view) }}{% endfor %}
+                      <div role="cell" class="cell-end">
+                        <EndSquare :href="href" :label="_('web.admin.server.page.of', name=server.name)" />
+                      </div>
+                    </div>
+                    <div role="row" class="drawer">
+                      <div role="cell"
+                           aria-colspan="7"
+                           id="details-{{ server.ugid }}"
+                           class="drawer-cell">
+                        <div class="row-details admin-details">
+                          <div>
+                            <p class="row-facts">{{ headline(view) }}</p>
+                            <dl class="facts admin-facts">
+                              {% if view.game %}
+                                <Fact :label="_('web.admin.game')" wide>
+                                  <GameChip :of="view.game" full />
+                                </Fact>
+                              {% endif %}
+                              <Fact :label="_('web.admin.provider')" plain>
+                                {% if not server.provider %}
+                                  <span aria-hidden="true"
+                                        class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>
+                                {% endif %}
+                                {{ server.provider.name if server.provider else _("web.admin.unknown_provider") }}
+                              </Fact>
+                              {% if server.provider_id %}
+                                <Fact :label="_('web.admin.provider_id')">
+                                  <ProviderId :id="server.provider_id" />
+                                </Fact>
+                              {% endif %}
+                              {% if tab == "waiting" %}
+                                <Fact :label="_('web.admin.tried')">
+                                  {% if view.hosting %}<Published kind="map" :label="view.hosting.map" :of="view.game" /> · <Published kind="mode" :label="view.hosting.mode" :of="view.game" />{% else %}{{ _("web.admin.tried.none") }}{% endif %}
+                                </Fact>
+                                <Fact :label="_('web.admin.attempts')">
+                                  <span class="fact-number">{{ number(view.attempts.last_hour) }}</span>
+                                </Fact>
+                              {% elif tab == "approved" %}
+                                <Fact :label="_('web.admin.column.hosting')">
+                                  {% if view.hosting %}<Published kind="map" :label="view.hosting.map" :of="view.game" /> · <Published kind="mode" :label="view.hosting.mode" :of="view.game" />{% else %}{{ _("web.admin.not_hosting") }}{% endif %}
+                                </Fact>
+                                {% if view.hosting %}
+                                  <Fact :label="_('web.admin.column.players')">
+                                    <span class="fact-number">{{ number(view.hosting.players) }} / {{ number(view.hosting.max_players) }}</span>
+                                  </Fact>
+                                {% endif %}
+                              {% else %}
+                                <Fact :label="_('web.admin.column.last')">
+                                  {{ _("web.server.time", time=when(view.attempts.last, "Hm")) if view.attempts.last else _("web.admin.not_tried") }}
+                                </Fact>
+                                <Fact :label="_('web.admin.refused_today')">
+                                  <span class="fact-number">{{ number(view.attempts.refused_today) }}</span>
+                                </Fact>
+                              {% endif %}
+                              <Fact :label="_('web.admin.server_id')" wide>
+                                <code class="server-id">{{ server.ugid }}</code>
+                                <CopyButton :value="server.ugid" :label="_('web.admin.server_id.copy')" :note="_('web.admin.server_id.copied')" size="icon" />
+                              </Fact>
+                            </dl>
+                            {% set note = provider_note(server)|trim %}
+                            {% if note %}<p class="row-text">{{ note }}</p>{% endif %}
+                          </div>
+                          {% set revoked_provider = server.provider and server.provider.revoked %}
+                          {% if not revoked_provider %}
+                            <div class="admin-decide">
+                              {% if tab == "waiting" %}
+                                {% if server.provider %}
+                                  <form method="post"
+                                        action="{{ url('/admin/servers/' ~ server.ugid ~ '/approve') }}">
+                                    <CsrfField />
+                                    <input type="hidden" name="back" value="{{ here }}">
+                                    <ActionButton :label="_('web.admin.approve')" :name="_('web.admin.approve.of', name=server.name)" :busy="_('web.admin.approve.busy')" />
+                                  </form>
+                                {% else %}
+                                  <Action :href="url('/admin/servers/' ~ server.ugid ~ '/approve') ~ '?back=' ~ here|urlencode" :label="_('web.admin.approve')" :size="32" dialog />
+                                {% endif %}
+                                <FormButton icon="x" :href="url('/admin/servers/' ~ server.ugid ~ '/reject') ~ '?back=' ~ here|urlencode" dialog>{{ _("web.admin.reject") }}</FormButton>
+                                <p class="row-text">
+                                  {{ _("web.admin.how.approve." ~ ("known" if server.provider else "unknown")) }} {{ _("web.admin.how.reject") }}
+                                </p>
+                              {% elif tab == "approved" %}
+                                <FormButton icon="x" :href="url('/admin/servers/' ~ server.ugid ~ '/revoke') ~ '?back=' ~ here|urlencode" dialog>{{ _("web.admin.revoke") }}</FormButton>
+                                <p class="row-text">{{ _("web.admin.how.revoke") }}</p>
+                              {% else %}
+                                <Action :href="url('/admin/servers/' ~ server.ugid ~ '/approve') ~ '?back=' ~ here|urlencode" :label="_('web.admin.again')" dialog />
+                                <p class="row-text">{{ _("web.admin.how.again") }}</p>
+                              {% endif %}
+                            </div>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% else %}
+                  <div role="row">
+                    <div role="cell" aria-colspan="7" class="row-details list-empty">
+                      {% if listing.query %}
+                        <div>
+                          <p class="list-empty-title">{{ _("web.admin.servers.none_match", query=listing.query) }}</p>
+                          <p class="body-text">{{ _("web.admin.servers.none_match.text") }}</p>
+                        </div>
+                        <SmallAction :href="list ~ listing.switched(tab).changed(query='').link()" :label="_('web.admin.servers.all')" />
+                      {% else %}
+                        <div>
+                          <p class="list-empty-title">{{ _("web.admin.servers.none." ~ tab) }}</p>
+                          <p class="body-text">{{ _("web.admin.servers.none." ~ tab ~ ".text") }}</p>
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          <div class="list-foot">
+            <p>
+              <span class="list-count">{{ _("web.admin.servers.count." ~ tab, count=number(servers|length)) }}</span><span class="list-range">
+                {%- if listing.sort == listing.switched(tab).sort and listing.descending == listing.switched(tab).descending %}{{ _("web.admin.servers.order." ~ tab) }} · {% endif %}
+                {%- if tab != "approved" %}{{ _("web.admin.servers.counts." ~ tab) }} · {% endif -%}
+              <Updated inline /></span>
+            </p>
+          </div>
+        </section>
+
+        <div class="list-side admin-servers-side">
+          <form action="{{ list }}"
+                method="get"
+                role="search"
+                aria-labelledby="find-title">
+            <Bar id="find-title" large>{{ _("web.admin.find") }}</Bar>
+            <SearchField id="find-q" name="q" :label="_('web.admin.find.field')" :value="listing.query" :hint="_('web.admin.find.hint')" aria-describedby="find-note" hx-morph-skip />
+            <p id="find-note" class="find-note">{{ _("web.admin.find.note") }}</p>
+            <div class="find-button">
+              <FormButton icon="find">{{ _("web.admin.find.search") }}</FormButton>
+            </div>
+          </form>
+          <HostingMode :mode="mode" />
+        </div>
+      </div>
+    </Panel>
+  </div>
+</AdminPage>

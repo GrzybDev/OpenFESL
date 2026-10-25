@@ -1,0 +1,12 @@
+{#def view #}
+{# The grey-blue squares that tell a dedicated server's state on the admin panel's rows: a clock
+   while it waits, a tick once approved, a cross once revoked, and a triangle beside it for an
+   unknown provider. Screen readers get the words. #}
+{% set state = view.tab %}
+{% set unknown = not view.server.provider %}
+<span class="sr-only">{{ _("web.admin.state." ~ state ~ (".unknown" if unknown else "")) }}</span>
+<span aria-hidden="true"
+      class="badge"><Icon :name="{'waiting': 'clock', 'approved': 'tick', 'revoked': 'x'}[state]" stroke="#0A0A0A" /></span>
+{% if unknown %}
+  <span aria-hidden="true" class="badge"><Icon name="warn" fill="#0A0A0A" /></span>
+{% endif %}

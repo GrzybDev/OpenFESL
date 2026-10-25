@@ -1,0 +1,10 @@
+@layer components {
+  .hosting-mode-name {
+    margin-bottom: 6px;
+    font-size: 17px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+}

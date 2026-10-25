@@ -114,6 +114,28 @@
     font-weight: 700;
   }
 
+  /* A list's empty state, in the light row of its details. */
+  .list-empty {
+    gap: 18px 32px;
+    padding: 22px 20px;
+
+    > div:first-child {
+      flex-basis: 440px;
+    }
+
+    .body-text {
+      margin-top: 6px;
+    }
+
+    h3 {
+      margin-top: 14px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+  }
+
   /* How many a list found, and which of them a page shows, before the page links. */
   .list-foot {
     display: flex;

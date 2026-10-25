@@ -1,6 +1,10 @@
-{#def label: str #}
-{# The large action block as the button that sends its form. #}
-<button type="submit" class="action action-large action-button chevron">
+{#def label: str, name: str = "", busy: str = "" #}
+{# The large action block as the button that sends its form. A name tells blocks with the same
+   label apart; a busy label replaces the label while the form's request runs. #}
+<button type="submit"
+        {% if name %} aria-label="{{ name }}"{% endif %}
+        {% if busy %} data-busy="{{ busy }}"{% endif %}
+        class="action action-large action-button chevron">
   <span aria-hidden="true" class="action-square"><Chevron :size="30" /></span>
-  <span class="action-label">{{ label }}</span>
+  <span data-label class="action-label">{{ label }}</span>
 </button>
