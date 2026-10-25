@@ -13,6 +13,7 @@ from openfesl.core.accounts import AccountService
 from openfesl.core.admin import AdminFeed
 from openfesl.core.associations import AssociationService
 from openfesl.core.browsing import Browsing
+from openfesl.core.census import Census
 from openfesl.core.connect import connect_routes
 from openfesl.core.entitlements import EntitlementService
 from openfesl.core.fesl import Route
@@ -52,6 +53,7 @@ from openfesl.storage.settings import SqlSettingStore
 from openfesl.storage.stats import SqlStatStore
 from openfesl.web.game_http import GameHttpMiddleware
 from openfesl.web.languages import LanguageMiddleware
+from openfesl.web.menu import menu_routes
 from openfesl.web.pages import STATIC, Pages, StaticAssets
 from openfesl.web.security import SecurityHeadersMiddleware
 from openfesl.web.shell import shell_routes
@@ -73,14 +75,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     game_http = GameHttp(games, players, load_texts("news"))
     commands: dict[str, TheaterRoute[Any]] = {}
     theater = Theater(games, commands)
+    # The engine connects on first use, inside the lifespan.
+    engine = create_async_engine(settings.database_url, pool_pre_ping=True, hide_parameters=True)
+    sessions = async_sessionmaker(engine)
+    hosting = Hosting(Approval(SqlServerStore(sessions)))
+    census = Census(hosting, players)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-        engine = create_async_engine(
-            settings.database_url, pool_pre_ping=True, hide_parameters=True
-        )
         await migrate(engine)
-        sessions = async_sessionmaker(engine)
         entitlements = SqlEntitlementStore(sessions)
         # A new database starts with the games' keys; from then on the admin manages them.
         if not await entitlements.has_keys():
@@ -102,7 +105,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         routes.update(accounts.routes())
         routes.update(AccountSettingsService(store, logins, policies).routes())
         routes.update(personas.routes())
-        hosting = Hosting(Approval(SqlServerStore(sessions)))
         routes.update(EntitlementService(entitlements, hosting).routes())
         routes.update(game_http.routes())
         stats = SqlStatStore(sessions)
@@ -140,7 +142,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         address = settings.client_address(websocket)
         return GameSession(routes, players, address, theater, hook_version)
 
-    pages = Pages(games)
+    pages = Pages(games, census)
     app = FastAPI(
         title="OpenFESL",
         lifespan=lifespan,
@@ -157,6 +159,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.add_api_websocket_route("/", relay_endpoint(start_session))
     app.mount("/static", StaticAssets(directory=STATIC))
     app.include_router(shell_routes(pages, Terms.load()))
+    app.include_router(menu_routes(pages, games, census))
     app.include_router(verification_routes(confirm, pages))
     # The last one added sees a request first: the game's HTTP keeps its own answers.
     app.add_middleware(LanguageMiddleware)

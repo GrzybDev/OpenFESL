@@ -1,7 +1,7 @@
 /* The web pages: the quiet OpenFESL shell around an area dressed in a game's menu style, or in
    OpenFESL's own steel or grey. Components and pages bring their own stylesheets; this one holds
    the tokens, the reset and what every page shares. */
-@layer reset, base, components, pages;
+@layer reset, base, components, pages, states;
 
 @layer reset {
   *,
@@ -86,6 +86,7 @@
 @layer base {
   :root {
     --font-sans: "Barlow", system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, monospace;
     --gutter: clamp(16px, 2.2vw, 32px);
     --ink: #0a0a0a;
     --shell: #0f1012;
@@ -94,6 +95,9 @@
     --shell-bright: #f4f4f4;
     --shell-link: #c9ccd1;
     --shell-muted: #a9acb2;
+    --shell-edge: #3a3d42;
+    --tile: #17181b;
+    --tile-cell: #202227;
     --ease-menu: cubic-bezier(0.2, 0.8, 0.2, 1);
     color-scheme: dark;
   }
@@ -127,15 +131,20 @@
   .area {
     --area-font: "Barlow Semi Condensed", "Barlow", system-ui, sans-serif;
     --accent: #e6e7e9;
+    --accent-hover: #f4f4f4;
     --field: #0f1012;
     --panel: #1a1c1f;
     --panel-edge: #3a3d42;
     --block-edge: #3a3d42;
     --row: #c9ccd1;
+    --row-alt: #c3c6cb;
     --row-light: #e6e7e9;
     --subtitle: #26282c;
     --bright: #f4f4f4;
     --soft: #c9ccd1;
+    /* The menus' fixed shades of the game style, the same in every theme. */
+    --track: #3a3b33;
+    --off-text: #8f8f84;
   }
 
   /* OpenFESL's own menu and admin, in steel so that they never read as a game's pages. */
@@ -179,6 +188,11 @@
     font-size: 15px;
     line-height: 1.45;
     font-weight: 500;
+  }
+
+  /* A refresh that failed leaves the last values in place, muted. */
+  html[data-stale] .live-value {
+    opacity: 0.62;
   }
 
   /* M1: the title block slides in, the panel rises after it and the first rows follow; a page
@@ -365,5 +379,14 @@
     html:active-view-transition-type(back, swap)::view-transition-new(area) {
       animation: 100ms linear both fade-in;
     }
+  }
+}
+
+/* Whatever a component or page shows, these hide it: what needs scripts shows only with them, and
+   what replaces it only without. */
+@layer states {
+  html:not(.js) .js-only,
+  .js .no-js-only {
+    display: none;
   }
 }

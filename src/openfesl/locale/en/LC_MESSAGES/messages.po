@@ -113,3 +113,110 @@ msgid "web.terms.shown"
 msgstr ""
 "The game shows these terms when an account is created, and again at the "
 "first login after the text changes."
+
+msgid "web.shell.online.one"
+msgstr "%(count)s online"
+
+msgid "web.shell.online.other"
+msgstr "%(count)s online"
+
+msgid "web.live.updated.sentence"
+msgstr "Updated %(seconds)s s ago"
+
+msgid "web.live.updated.inline"
+msgstr "updated %(seconds)s s ago"
+
+msgid "web.live.values.sentence"
+msgstr "Values from %(time)s UTC."
+
+msgid "web.live.values.inline"
+msgstr "values from %(time)s UTC"
+
+msgid "web.live.reload"
+msgstr "Refresh the page"
+
+msgid "web.live.reload.after"
+msgstr " for new values."
+
+msgid "web.live.stale"
+msgstr "The statistics could not be refreshed. Showing values from %(time)s UTC."
+
+msgid "web.activity.online"
+msgstr "Online"
+
+msgid "web.activity.in_matches"
+msgstr "In matches"
+
+msgid "web.activity.in_menus"
+msgstr "In the menus"
+
+msgid "web.activity.servers"
+msgstr "Servers"
+
+msgid "web.activity.busiest"
+msgstr "Busiest with room for a squad"
+
+msgid "web.activity.share.one"
+msgstr "%(matches)s of %(count)s online player is in a match"
+
+msgid "web.activity.share.other"
+msgstr "%(matches)s of %(count)s online players are in matches"
+
+msgid "web.activity.nobody"
+msgstr "Nobody is online"
+
+msgid "web.activity.no_room"
+msgstr "No server has room for a squad right now."
+
+msgid "web.activity.no_servers"
+msgstr "No servers are online right now."
+
+msgid "web.server.free"
+msgstr "%(count)s free"
+
+msgid "web.menu.subtitle"
+msgstr "Master server for FESL and Theater games"
+
+msgid "web.menu.lead"
+msgstr ""
+"OpenFESL is an open-source, community-run master server for games built on "
+"EA's FESL and Theater services."
+
+msgid "web.menu.games"
+msgstr "Games"
+
+msgid "web.menu.games.order"
+msgstr "By players online"
+
+msgid "web.menu.enter"
+msgstr "Enter"
+
+msgid "web.menu.hook"
+msgstr "One step for every game"
+
+msgid "web.menu.hook.text"
+msgstr ""
+"Each game connects to OpenFESL through OpenFESLHook: its %(file)s goes into "
+"the game's folder, next to the game's executable. Each game's Play page has "
+"the remaining steps."
+
+msgid "web.menu.hook.releases"
+msgstr "OpenFESLHook releases"
+
+msgid "web.menu.servers"
+msgstr "Servers"
+
+msgid "web.menu.servers.game"
+msgstr "Game"
+
+msgid "web.menu.servers.list"
+msgstr "Server list"
+
+msgid "web.menu.servers.of"
+msgstr "Server list: %(game)s"
+
+msgid "web.menu.servers.all"
+msgstr "All games"
+
+msgid "games.bfbc2.tagline"
+msgstr "Online play on PC"

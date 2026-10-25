@@ -19,7 +19,21 @@
     line-height: 1.1;
   }
 
+  .bar-large {
+    padding: 14px;
+    font-size: 16px;
+    letter-spacing: 0.07em;
+  }
+
   .bar-extra {
     color: var(--accent);
+  }
+
+  /* The light block under a bar that holds its text. */
+  .bar-text {
+    margin-top: 2px;
+    background: var(--row-light);
+    padding: 12px 14px 14px;
+    color: var(--ink);
   }
 }

@@ -1,6 +1,7 @@
 from functools import cache
 from importlib.resources import files
 
+from babel import Locale
 from babel.messages.catalog import Catalog
 from babel.messages.pofile import read_po
 
@@ -68,6 +69,27 @@ def translate(key: str, language: str) -> str:
         if message is not None and isinstance(message.string, str) and message.string:
             return message.string
     raise KeyError(key)
+
+
+def translate_count(key: str, count: int, language: str) -> str:
+    """Return a text about a number of things, in the form the language uses for that number.
+
+    The catalogues hold one text per CLDR plural category, as the key followed by .one, .few,
+    .many or .other; a category a language does not name takes the .other text.
+
+    Args:
+        key: The texts' id in the catalogues without the category.
+        count: The number.
+        language: A language code such as pl.
+
+    Raises:
+        KeyError: When the catalogues hold no .other text either.
+    """
+    category = Locale.parse(language).plural_form(count)
+    try:
+        return translate(f"{key}.{category}", language)
+    except KeyError:
+        return translate(f"{key}.other", language)
 
 
 @cache

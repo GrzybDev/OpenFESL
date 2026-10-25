@@ -46,16 +46,22 @@ FR = { registration_age = 16, parental_age = 16 }
 [theme]
 font = "Barlow Semi Condensed"
 accent = "#DA8602"
+accent_hover = "#F29A12"
 field = "#1A1B16"
 mottle = "#CED0C2"
 grit = "#F6F6EF"
 panel = "rgba(83, 85, 59, 0.74)"
 panel_edge = "#8C8E78"
 row = "#BABAB2"
+row_alt = "#B6B6AE"
 row_light = "#E2E2DE"
 subtitle = "#0A0A0A"
 bright = "#F4F4EE"
 soft = "#D9D9CD"
+
+# How the web pages read the games that dedicated servers host. A squad holds four players.
+[listing]
+squad = 4
 
 [http]
 locker = "http://easo.ea.com/fileupload/locker2.jsp"

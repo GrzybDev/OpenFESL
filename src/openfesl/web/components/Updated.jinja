@@ -1,0 +1,8 @@
+{#def inline: bool = False #}
+{# How fresh the page's values are: with scripts the seconds since the last refresh, without them
+   the time they are from and, in a sentence, a link that loads them again. #}
+{% set kind = "inline" if inline else "sentence" %}
+<span class="live-time live-time-{{ kind }}"><span class="js-only"
+      data-ago="{{ _('web.live.updated.' ~ kind, seconds='{seconds}') }}"></span><span class="no-js-only">
+  {%- if inline %}{{ _("web.live.values.inline", time=now.strftime("%H:%M")) }}{% else %}{{ _("web.live.values.sentence", time=now.strftime("%H:%M")) }} <a href="{{ here }}" class="reload">{{ _("web.live.reload") }}</a>{{ _("web.live.reload.after") }}{% endif -%}
+</span></span>

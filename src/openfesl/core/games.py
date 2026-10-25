@@ -129,12 +129,14 @@ class Theme(BaseModel):
         font: The typeface of the menus' capitals, one of those the web pages ship.
         accent: The colour of the title block, selections and action squares; black text
             goes on it.
+        accent_hover: The accent of an action square under the pointer.
         field: The backdrop behind the game's pages.
         mottle: The backdrop's coarse grain.
         grit: The backdrop's fine grain.
         panel: The large container behind tables and forms.
         panel_edge: The container's border.
         row: Rows and notes; black text goes on them.
+        row_alt: Every other row of a table.
         row_light: Text boxes and light rows.
         subtitle: The bar under the title block.
         bright: Text on the backdrop and on black bars.
@@ -145,16 +147,30 @@ class Theme(BaseModel):
 
     font: Annotated[str, StringConstraints(pattern=r"^[A-Za-z ]+$")]
     accent: Colour
+    accent_hover: Colour
     field: Colour
     mottle: Colour
     grit: Colour
     panel: Colour
     panel_edge: Colour
     row: Colour
+    row_alt: Colour
     row_light: Colour
     subtitle: Colour
     bright: Colour
     soft: Colour
+
+
+class Listing(BaseModel):
+    """How the web pages read the games that a game's servers host.
+
+    Attributes:
+        squad: How many players a squad holds, which a server needs free to have room for one.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    squad: int = 1
 
 
 class Game(BaseModel):
@@ -180,6 +196,7 @@ class Game(BaseModel):
         countries: The age limits of the countries whose limits differ from the defaults, by
             ISO code.
         theme: How the game's web pages look.
+        listing: How the web pages read the games its servers host.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -199,6 +216,7 @@ class Game(BaseModel):
     policies: Policies
     countries: dict[str, Ages] = {}
     theme: Theme
+    listing: Listing = Listing()
 
     def ages(self, country: str) -> Ages:
         """Return the age limits of a country on registration.

@@ -1,0 +1,17 @@
+@layer components {
+  .code {
+    background: var(--row);
+    padding: 1px 5px;
+    font-family: var(--area-font);
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  /* A command or file name that the reader types, in the shell's typewriter face. */
+  .code-typed {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: calc(1.25 / 0.875);
+    font-weight: 500;
+  }
+}

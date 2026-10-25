@@ -1,6 +1,6 @@
 # Third-party notices
 
-OpenFESL contains fonts made by other people. This file lists each such component that ships with
+OpenFESL contains fonts and scripts made by other people. This file lists each such component that ships with
 the server's web pages, gives its licence and copyright, and contains the licence texts that have to accompany it.
 
 OpenFESL's own source code is licensed under the GNU General Public License, version 3 or (at your option) any later
@@ -23,14 +23,31 @@ refer to, which does not mean that their owners endorse OpenFESL.
 - Use: the web pages' typefaces, Barlow for text and Barlow Semi Condensed for the menus' capitals, served as separate
   font files.
 
+### htmx
+
+- Website: https://htmx.org (https://github.com/bigskysoftware/htmx)
+- Version or package: htmx.org 4.0.0, its `dist/htmx.esm.js`
+- Licence: 0BSD (see "Zero-Clause BSD")
+- Copyright: Big Sky Software, the package's author; its licence names no holder
+- Use: refreshes the live parts of the web pages in place, bundled unchanged into the pages' script.
+
+### IBM Plex Mono
+
+- Website: https://github.com/IBM/plex
+- Version or package: @fontsource/ibm-plex-mono 5.3.0 (weight 500, in every subset the package has)
+- Licence: OFL-1.1 (see "SIL Open Font License 1.1")
+- Copyright: Copyright 2017 IBM Corp.
+- Use: the web pages' typeface for file names and codes, served as separate font files.
+
 ## Licence texts
 
 ### SIL Open Font License 1.1
 
-Applies to Barlow and Barlow Semi Condensed.
+Applies to Barlow and Barlow Semi Condensed, and to IBM Plex Mono.
 
 ```text
 Copyright 2017 The Barlow Project Authors (https://github.com/jpt/barlow)
+Copyright 2017 IBM Corp. (IBM Plex Mono)
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:
@@ -122,4 +139,24 @@ INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
 DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
+```
+
+### Zero-Clause BSD
+
+Applies to htmx.
+
+```text
+Zero-Clause BSD
+=============
+
+Permission to use, copy, modify, and/or distribute this software for
+any purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED “AS IS” AND THE AUTHOR DISCLAIMS ALL
+WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES
+OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE
+FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY
+DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN
+AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
+OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ```

@@ -1,5 +1,8 @@
-// What the page sets before it is first drawn: which way the page transition that brings the page
-// moves.
+// What the page sets before it is first drawn: whether scripts run, which shows the controls that
+// need them, and which way the page transition that brings the page moves.
+
+// The pages draw what needs scripts, such as copy buttons, only when this runs.
+document.documentElement.classList.add("js");
 
 // M12: the page that arrives tells its transition which way to move: back through the history
 // slides the other way, and another game's pages or another language cross-fade as a whole.

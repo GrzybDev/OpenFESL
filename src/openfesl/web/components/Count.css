@@ -1,0 +1,39 @@
+/* M5: a number a refresh changed gets an underline in the accent, or in black on the accent,
+   that fades out. */
+@layer components {
+  .count {
+    position: relative;
+    display: inline-block;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset-inline: 0;
+      bottom: -7px;
+      height: 4px;
+      background: var(--accent);
+      opacity: 0;
+      transition: opacity 600ms linear;
+    }
+
+    &.changed::after {
+      opacity: 1;
+      transition: none;
+    }
+  }
+
+  .count-sm::after {
+    bottom: -5px;
+    height: 3px;
+  }
+
+  .count-ink::after {
+    background: var(--ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .count::after {
+      transition-duration: 100ms;
+    }
+  }
+}

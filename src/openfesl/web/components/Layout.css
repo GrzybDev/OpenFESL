@@ -81,6 +81,11 @@
     }
   }
 
+  .shell-online {
+    font-weight: 500;
+    color: var(--shell-muted);
+  }
+
   .shell-languages {
     display: flex;
     gap: 2px;

@@ -1,0 +1,23 @@
+/* After a failed refresh the time of the values shows, which the stale notes repeat. */
+@layer components {
+  .reload {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    color: var(--bright);
+    text-decoration-line: underline;
+  }
+}
+
+@layer states {
+  html[data-stale] {
+    .live-time-sentence,
+    .live-time .js-only {
+      display: none;
+    }
+
+    .live-time .no-js-only {
+      display: inline;
+    }
+  }
+}

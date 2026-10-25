@@ -1,0 +1,28 @@
+@layer components {
+  .share-meter {
+    display: block;
+    height: 6px;
+    background: var(--track);
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 6px;
+    }
+  }
+
+  .meter-fill {
+    fill: var(--accent);
+    transition: width 400ms var(--ease-menu);
+  }
+
+  html[data-stale] .meter-fill {
+    fill: var(--off-text);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .meter-fill {
+      transition: none;
+    }
+  }
+}

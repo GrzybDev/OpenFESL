@@ -1,0 +1,501 @@
+/* OpenFESL's main menu: one tile per game, dressed in a hint of the game's style, and the servers
+   of every game. */
+@layer pages {
+  .menu-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px 32px;
+
+    > * {
+      min-width: 0;
+      flex: 0 1 560px;
+      margin-bottom: 14px;
+    }
+  }
+
+  .menu-lead {
+    font-family: var(--font-sans);
+    font-size: 17px;
+    line-height: 1.5;
+    font-weight: 500;
+    color: var(--soft);
+  }
+
+  .menu-columns {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .menu-games {
+    display: flex;
+    min-width: 0;
+    flex: 999 1 600px;
+    flex-direction: column;
+
+    .bar {
+      flex-wrap: wrap;
+      row-gap: 4px;
+    }
+
+    .bar-extra {
+      font-size: 14px;
+    }
+  }
+
+  .tiles {
+    display: grid;
+    flex: 1;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .tiles-many {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr));
+  }
+
+  .tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    border: 2px solid var(--shell-edge);
+    background: var(--tile);
+    padding: 30px 18px 0;
+    text-align: center;
+    color: var(--shell-text);
+
+    .tiles-many > & {
+      gap: 16px;
+      padding: 40px 16px 0;
+    }
+  }
+
+  .tile-edge {
+    position: absolute;
+    inset: -2px;
+    pointer-events: none;
+    border: 2px solid var(--accent);
+  }
+
+  .tile-title {
+    max-width: 100%;
+  }
+
+  /* The name's link covers the whole tile. */
+  .tile-name {
+    display: block;
+    background: var(--accent);
+    padding: 10px 28px 8px;
+    font-family: var(--area-font);
+    font-size: clamp(26px, 3vw, 38px);
+    line-height: 1.05;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    text-transform: uppercase;
+
+    &:hover {
+      text-decoration-line: none;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+    }
+
+    .tiles-many & {
+      padding-inline: 22px;
+      font-size: 27px;
+    }
+  }
+
+  .tile-tagline {
+    background: var(--ink);
+    padding: 8px 28px;
+    font-family: var(--area-font);
+    font-size: 14px;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    color: var(--bright);
+    text-transform: uppercase;
+
+    .tiles-many & {
+      padding-inline: 22px;
+      font-size: 13px;
+    }
+  }
+
+  .tile-figures {
+    display: grid;
+    width: 100%;
+    max-width: 780px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px;
+
+    .tiles-many & {
+      max-width: none;
+    }
+
+    > div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      background: var(--tile-cell);
+      padding: 12px 10px 16px;
+
+      .tiles-many & {
+        padding: 11px 8px 15px;
+      }
+    }
+
+    dt {
+      font-size: 13px;
+      line-height: 1.1;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--shell-muted);
+      text-transform: uppercase;
+    }
+
+    > div:not(.tile-busiest) .count {
+      font-size: 40px;
+      line-height: 1;
+      font-weight: 800;
+      color: var(--bright);
+      font-variant-numeric: tabular-nums;
+
+      .tiles-many & {
+        font-size: 34px;
+      }
+    }
+  }
+
+  @media (width >= 40rem) {
+    .tiles:not(.tiles-many) .tile-figures {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .tile-share {
+    display: grid;
+    width: 100%;
+    justify-items: center;
+    gap: 12px;
+
+    .share-meter {
+      width: 100%;
+      max-width: 128px;
+      background: var(--shell-edge);
+
+      .tiles-many & {
+        max-width: 110px;
+      }
+    }
+  }
+
+  .tiles .tile-figures .tile-busiest {
+    grid-column: 1 / -1;
+    padding: 12px 14px 14px;
+
+    dd {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: center;
+      gap: 4px 16px;
+    }
+  }
+
+  .tile-server {
+    font-family: var(--font-sans);
+    font-size: 18px;
+    line-height: 1.2;
+    font-weight: 600;
+    color: var(--bright);
+  }
+
+  .tile-players {
+    display: flex;
+    align-items: baseline;
+    font-size: 20px;
+    line-height: 1;
+    font-weight: 700;
+    color: var(--bright);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tile-free {
+    margin-left: 8px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .tile-none {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.3;
+    font-weight: 600;
+    color: var(--bright);
+  }
+
+  .tile-enter {
+    display: flex;
+    justify-content: flex-end;
+    align-self: stretch;
+    margin: auto -18px 0;
+    overflow: hidden;
+
+    .tiles-many & {
+      margin-inline: -16px;
+    }
+  }
+
+  .tile-go {
+    display: flex;
+    min-height: 58px;
+    align-items: stretch;
+    background: var(--ink);
+    padding: 5px;
+    color: var(--bright);
+
+    > :first-child {
+      display: grid;
+      flex: 0 0 48px;
+      place-items: center;
+      background: var(--accent);
+    }
+
+    > :last-child {
+      display: flex;
+      align-items: center;
+      padding: 0 22px 0 16px;
+      font-size: 26px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .tiles-many & {
+      min-height: 56px;
+
+      > :first-child {
+        flex-basis: 46px;
+      }
+
+      > :last-child {
+        padding: 0 20px 0 14px;
+        font-size: 24px;
+      }
+    }
+  }
+
+  /* M13: a game's tile lifts and lights its edge in the game's colour under the pointer or focus,
+     and the chosen tile's chevron block slides in. Without either, the first tile is the chosen
+     one. */
+  .tile {
+    transition: transform 120ms var(--ease-menu);
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  .tile-edge {
+    opacity: 0;
+    transition: opacity 120ms var(--ease-menu);
+  }
+
+  .tile-go {
+    opacity: 0;
+    transform: translateX(calc(100% + 4px));
+    transition:
+      transform 160ms var(--ease-menu),
+      opacity 160ms var(--ease-menu);
+
+    .go {
+      transition: transform 120ms var(--ease-menu);
+    }
+  }
+
+  .tile:is(:hover, :focus-within) .tile-go .go {
+    transform: translateX(4px);
+  }
+
+  .tile:is(:hover, :focus-within) :is(.tile-edge, .tile-go),
+  .tiles:not(:has(.tile:is(:hover, :focus-within))) > .tile:first-child :is(.tile-edge, .tile-go) {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tile,
+    .tile-go,
+    .tile-go .go {
+      transition: none;
+    }
+
+    .tile-edge {
+      transition-duration: 100ms;
+    }
+  }
+
+  .menu-side {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 360px;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .menu-hook-text {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+
+  .menu-releases {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 2px;
+    background: var(--ink);
+    padding: 0 12px 0 14px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--bright);
+    text-transform: uppercase;
+  }
+
+  .menu-servers {
+    display: grid;
+    gap: 2px;
+    margin-top: 2px;
+  }
+
+  .menu-server-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 72px 78px 44px;
+    gap: 2px;
+  }
+
+  .menu-servers-head {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--bright);
+    text-transform: uppercase;
+
+    > :not(:last-child) {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      background: var(--ink);
+      padding-inline: 10px;
+    }
+
+    > :first-child {
+      min-height: 40px;
+      justify-content: flex-start;
+      padding-inline: 12px;
+    }
+  }
+
+  .menu-servers-rows {
+    display: grid;
+    gap: 2px;
+  }
+
+  .menu-server {
+    --cell: var(--row);
+    color: var(--ink);
+
+    &:nth-child(even) {
+      --cell: var(--row-alt);
+    }
+
+    > :not(.cell-end) {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      background: var(--cell);
+      padding-inline: 10px;
+      font-size: 18px;
+      line-height: calc(1.75 / 1.125);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    > :first-child {
+      min-height: 44px;
+      justify-content: flex-start;
+      padding: 6px 12px;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.2;
+      font-weight: 600;
+    }
+  }
+
+  .menu-servers-total {
+    color: var(--ink);
+
+    > :not(:last-child) {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      background: var(--row-light);
+      padding-inline: 10px;
+      font-size: 19px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    > :first-child {
+      min-height: 44px;
+      justify-content: flex-start;
+      padding: 6px 12px;
+      font-size: 14px;
+      line-height: 1.1;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+  }
+
+  .menu-servers .count {
+    line-height: 1;
+  }
+
+  .menu-updated,
+  .menu-stale {
+    margin: 8px 2px 0;
+    text-align: right;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 500;
+    color: var(--soft);
+  }
+
+  .menu-stale {
+    font-weight: 600;
+    color: var(--bright);
+  }
+}

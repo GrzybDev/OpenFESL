@@ -1,0 +1,144 @@
+{#def tiles: list #}
+{% set many = tiles|length > 1 %}
+{# The front page is named after OpenFESL alone. #}
+<Layout page="menu">
+  <section aria-labelledby="menu-title" class="menu-head">
+    <div class="enter-title">
+      <TitleBlock title="OpenFESL" id="menu-title">{{ _("web.menu.subtitle") }}</TitleBlock>
+    </div>
+    <p class="enter-panel menu-lead">{{ _("web.menu.lead") }}</p>
+  </section>
+
+  <Panel id="live"
+         :hx-get="here"
+         hx-trigger="every 15s, refresh"
+         hx-select="#live"
+         hx-select-oob="#shell-games:outerMorph"
+         hx-swap="outerMorph"
+         class="enter-panel">
+    <div class="menu-columns">
+
+      <section aria-labelledby="menu-games" class="menu-games">
+        <Bar id="menu-games" :extra="_('web.menu.games.order') if many else ''" large>{{ _("web.menu.games") }}</Bar>
+        <ul class="tiles enter-rows{% if many %} tiles-many{% endif %}">
+          {% for tile in tiles %}
+            {% set activity = tile.activity %}
+            <li data-game="{{ tile.game.id }}" class="tile">
+              <span aria-hidden="true" class="tile-edge"></span>
+              <div class="tile-title">
+                <h3><a href="{{ url('/' ~ tile.game.id) }}" class="tile-name">{{ tile.game.name }}</a></h3>
+                <p class="tile-tagline">{{ _("games." ~ tile.game.id ~ ".tagline") }}</p>
+              </div>
+              {# Four stats in a row, or two, so that the busiest server's row below spans them evenly. #}
+              <dl class="tile-figures">
+                <div>
+                  <dt>{{ _("web.activity.online") }}</dt>
+                  <dd>
+                    <Count :value="activity.online" class="live-value" />
+                  </dd>
+                </div>
+                <div>
+                  <dt>{{ _("web.activity.in_matches") }}</dt>
+                  <dd class="tile-share">
+                    <Count :value="activity.in_matches" class="live-value" />
+                    <ShareMeter :activity="activity" />
+                  </dd>
+                </div>
+                <div>
+                  <dt>{{ _("web.activity.in_menus") }}</dt>
+                  <dd>
+                    <Count :value="activity.in_menus" class="live-value" />
+                  </dd>
+                </div>
+                <div>
+                  <dt>{{ _("web.activity.servers") }}</dt>
+                  <dd>
+                    <Count :value="activity.servers" class="live-value" />
+                  </dd>
+                </div>
+                <div class="tile-busiest">
+                  <dt>{{ _("web.activity.busiest") }}</dt>
+                  <dd>
+                    {% if tile.busiest %}
+                      <span class="tile-server">{{ tile.busiest.name }}</span>
+                      <span class="tile-players"><Count :value="tile.busiest.players" class="count-sm live-value" />&nbsp;/&nbsp;{{ number(tile.busiest.max_players) }}<span class="tile-free">{{ _("web.server.free", count=number(tile.busiest.free)) }}</span></span>
+                    {% elif activity.servers %}
+                      <span class="tile-none">{{ _("web.activity.no_room") }}</span>
+                    {% else %}
+                      <span class="tile-none">{{ _("web.activity.no_servers") }}</span>
+                    {% endif %}
+                  </dd>
+                </div>
+              </dl>
+              <div aria-hidden="true" class="tile-enter">
+                <span class="tile-go"><span><Icon name="go" :size="22 if many else 24" stroke="#0A0A0A" class="go" /></span><span>{{ _("web.menu.enter") }}</span></span>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+
+      <div class="menu-side">
+        <section aria-labelledby="menu-hook">
+          <Bar id="menu-hook" large>{{ _("web.menu.hook") }}</Bar>
+          {% set hook %}<FileName text="dinput8.dll" class="code-typed" />{% endset %}
+          <div class="bar-text">
+            <p class="menu-hook-text">{{ _("web.menu.hook.text", file=hook) }}</p>
+          </div>
+          <a href="https://github.com/GrzybDev/OpenFESLHook/releases"
+             class="chevron menu-releases">{{ _("web.menu.hook.releases") }}<Icon name="go" :size="14" stroke="#9FC3E6" class="go" /></a>
+        </section>
+
+        <section aria-labelledby="menu-servers">
+          <Bar id="menu-servers" large>{{ _("web.menu.servers") }}</Bar>
+          <div role="table" aria-labelledby="menu-servers" class="menu-servers">
+            <div role="rowgroup">
+              <div role="row" class="menu-server-columns menu-servers-head">
+                <div role="columnheader">{{ _("web.menu.servers.game") }}</div>
+                <div role="columnheader">{{ _("web.activity.servers") }}</div>
+                <div role="columnheader">{{ _("web.activity.online") }}</div>
+                <div role="columnheader"><span class="sr-only">{{ _("web.menu.servers.list") }}</span></div>
+              </div>
+            </div>
+            <div role="rowgroup" class="enter-rows menu-servers-rows">
+              {% for tile in tiles %}
+                <div role="row" class="menu-server-columns menu-server">
+                  <div role="cell">{{ tile.game.name }}</div>
+                  <div role="cell">
+                    <Count :value="tile.activity.servers" class="count-ink count-sm live-value" />
+                  </div>
+                  <div role="cell">
+                    <Count :value="tile.activity.online" class="count-ink count-sm live-value" />
+                  </div>
+                  <div role="cell" class="cell-end">
+                    <EndSquare :href="url('/' ~ tile.game.id ~ '/servers')" :label="_('web.menu.servers.of', game=tile.game.name)" />
+                  </div>
+                </div>
+              {% endfor %}
+              {% if many %}
+                <div role="row" class="menu-server-columns menu-servers-total">
+                  <div role="rowheader">{{ _("web.menu.servers.all") }}</div>
+                  <div role="cell">
+                    <Count :value="tiles|sum(attribute='activity.servers')" class="count-ink count-sm live-value" />
+                  </div>
+                  <div role="cell">
+                    <Count :value="tiles|sum(attribute='activity.online')" class="count-ink count-sm live-value" />
+                  </div>
+                  <div role="cell"></div>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+          <p class="menu-updated">
+            <Updated />
+          </p>
+          <p role="status"
+             data-stale-note
+             hidden
+             class="menu-stale">{{ _("web.live.stale", time=now.strftime("%H:%M")) }}</p>
+        </section>
+      </div>
+
+    </div>
+  </Panel>
+</Layout>

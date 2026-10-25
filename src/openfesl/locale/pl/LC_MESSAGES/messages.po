@@ -114,3 +114,122 @@ msgid "web.terms.shown"
 msgstr ""
 "Gra wyświetla te warunki przy zakładaniu konta i ponownie przy pierwszym "
 "logowaniu po zmianie tekstu."
+
+msgid "web.shell.online.one"
+msgstr "%(count)s osoba online"
+
+msgid "web.shell.online.few"
+msgstr "%(count)s osoby online"
+
+msgid "web.shell.online.many"
+msgstr "%(count)s osób online"
+
+msgid "web.shell.online.other"
+msgstr "%(count)s osoby online"
+
+msgid "web.live.updated.sentence"
+msgstr "Aktualizacja %(seconds)s s temu"
+
+msgid "web.live.updated.inline"
+msgstr "aktualizacja %(seconds)s s temu"
+
+msgid "web.live.values.sentence"
+msgstr "Wartości z %(time)s UTC."
+
+msgid "web.live.values.inline"
+msgstr "wartości z %(time)s UTC"
+
+msgid "web.live.reload"
+msgstr "Odśwież stronę"
+
+msgid "web.live.reload.after"
+msgstr ", aby zobaczyć nowe wartości."
+
+msgid "web.live.stale"
+msgstr "Nie udało się odświeżyć statystyk. Widoczne są wartości z %(time)s UTC."
+
+msgid "web.activity.online"
+msgstr "Online"
+
+msgid "web.activity.in_matches"
+msgstr "W meczach"
+
+msgid "web.activity.in_menus"
+msgstr "W menu"
+
+msgid "web.activity.servers"
+msgstr "Serwery"
+
+msgid "web.activity.busiest"
+msgstr "Najbardziej oblegany z miejscem dla oddziału"
+
+msgid "web.activity.share.one"
+msgstr "W meczach: %(matches)s z %(count)s osoby online"
+
+msgid "web.activity.share.few"
+msgstr "W meczach: %(matches)s z %(count)s osób online"
+
+msgid "web.activity.share.many"
+msgstr "W meczach: %(matches)s z %(count)s osób online"
+
+msgid "web.activity.share.other"
+msgstr "W meczach: %(matches)s z %(count)s osoby online"
+
+msgid "web.activity.nobody"
+msgstr "Nikogo nie ma online"
+
+msgid "web.activity.no_room"
+msgstr "Żaden serwer nie ma teraz miejsca dla oddziału."
+
+msgid "web.activity.no_servers"
+msgstr "Żaden serwer nie działa w tej chwili."
+
+msgid "web.server.free"
+msgstr "Wolne miejsca: %(count)s"
+
+msgid "web.menu.subtitle"
+msgstr "Serwer główny gier FESL i Theater"
+
+msgid "web.menu.lead"
+msgstr ""
+"OpenFESL to otwarty serwer główny prowadzony przez społeczność dla gier "
+"opartych na usługach FESL i Theater firmy EA."
+
+msgid "web.menu.games"
+msgstr "Gry"
+
+msgid "web.menu.games.order"
+msgstr "Według liczby osób online"
+
+msgid "web.menu.enter"
+msgstr "Wejdź"
+
+msgid "web.menu.hook"
+msgstr "Jeden krok dla każdej gry"
+
+msgid "web.menu.hook.text"
+msgstr ""
+"Każda gra łączy się z OpenFESL przez OpenFESLHook: plik %(file)s trafia do "
+"folderu gry, obok jej pliku wykonywalnego. Pozostałe kroki opisuje strona "
+"„Jak zagrać” każdej gry."
+
+msgid "web.menu.hook.releases"
+msgstr "Wydania OpenFESLHook"
+
+msgid "web.menu.servers"
+msgstr "Serwery"
+
+msgid "web.menu.servers.game"
+msgstr "Gra"
+
+msgid "web.menu.servers.list"
+msgstr "Lista serwerów"
+
+msgid "web.menu.servers.of"
+msgstr "Lista serwerów: %(game)s"
+
+msgid "web.menu.servers.all"
+msgstr "Wszystkie gry"
+
+msgid "games.bfbc2.tagline"
+msgstr "Gra sieciowa na PC"

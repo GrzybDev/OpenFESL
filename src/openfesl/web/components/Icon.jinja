@@ -1,0 +1,8 @@
+{#def name: str, size: int = 16, stroke: str = "", fill: str = "" #}
+{# One of the icons the pages draw, coloured by its stroke and fill. #}
+<svg width="{{ size }}"
+     height="{{ size }}"
+     aria-hidden="true"
+     {% if attrs.classes %} class="{{ attrs.classes }}"{% endif %}>
+  <use href="{{ static('icons.svg') }}#{{ name }}"{% if stroke %} stroke="{{ stroke }}"{% endif %}{% if fill %} fill="{{ fill }}"{% endif %} />
+</svg>

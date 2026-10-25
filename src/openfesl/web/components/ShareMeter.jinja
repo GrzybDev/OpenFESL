@@ -1,0 +1,9 @@
+{#def activity #}
+{# How many of a game's players online are in matches, as a bar filled in the accent. #}
+<span role="img"
+      aria-label="{{ _n('web.activity.share', activity.online, matches=number(activity.in_matches)) if activity.online else _('web.activity.nobody') }}"
+      class="share-meter{% if attrs.classes %} {{ attrs.classes }}{% endif %}">
+  <svg viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true">
+    <rect class="meter-fill" width="{{ (activity.in_matches / activity.online) if activity.online else 0 }}" height="1" />
+  </svg>
+</span>

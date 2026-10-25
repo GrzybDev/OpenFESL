@@ -3,10 +3,12 @@ import json
 import os
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from functools import cache
 from pathlib import Path
 from typing import Any
 
+from babel.numbers import format_decimal
 from fastapi import Request
 from fastapi.exception_handlers import http_exception_handler
 from fastapi.responses import HTMLResponse, Response
@@ -19,8 +21,9 @@ from starlette.exceptions import HTTPException
 from starlette.staticfiles import StaticFiles
 from starlette.types import Scope
 
+from openfesl.core.census import Census
 from openfesl.core.games import Game
-from openfesl.core.texts import languages, localize, translate
+from openfesl.core.texts import languages, localize, translate, translate_count
 from openfesl.web.languages import split_language
 from openfesl.web.security import HEADERS
 
@@ -38,7 +41,7 @@ class Assets:
 
     Attributes:
         head: The script that runs before the page is first drawn.
-        app: The module with the pages' motion.
+        app: The module with htmx and the pages' motion.
         styles: The stylesheets the module brings.
     """
 
@@ -70,7 +73,22 @@ def static_url(name: str) -> str:
 @pass_context
 def _text(context: Context, key: str, **values: object) -> str:
     # Like Jinja's i18n extension with new-style gettext, for catalogues whose ids are keys.
-    text = translate(key, context["language"])
+    return _fill(context, translate(key, context["language"]), values)
+
+
+@pass_context
+def _count_text(context: Context, key: str, count: int, **values: object) -> str:
+    # The text's plural form follows the count, which it shows as %(count)s.
+    text = translate_count(key, count, context["language"])
+    return _fill(context, text, {"count": _number(context, count), **values})
+
+
+@pass_context
+def _number(context: Context, value: float) -> str:
+    return format_decimal(value, locale=context["language"])
+
+
+def _fill(context: Context, text: str, values: Mapping[str, object]) -> str:
     if context.eval_ctx.autoescape:
         text = escape(text)
     return text % values if values else text
@@ -78,7 +96,7 @@ def _text(context: Context, key: str, **values: object) -> str:
 
 _catalog = Catalog(
     jinja_env=Environment(autoescape=True, undefined=StrictUndefined),
-    globals={"_": _text, "static": static_url},
+    globals={"_": _text, "_n": _count_text, "number": _number, "static": static_url},
 )
 # The catalogue keeps its own environment, which takes the given one's escaping but not its
 # whitespace control.
@@ -91,13 +109,16 @@ _catalog.add_folder(Path(__file__).with_name("templates"), prefix="page")
 class Pages:
     """Renders the web pages in the OpenFESL shell, in the language their address names."""
 
-    def __init__(self, games: Iterable[Game]) -> None:
+    def __init__(self, games: Iterable[Game], census: Census) -> None:
         """Prepare the shell for the games the server serves.
 
         Args:
-            games: Every game, listed in the shell and dressed in its theme.
+            games: Every game, listed in the shell with its players online and dressed in its
+                theme.
+            census: Counts the players of each game.
         """
         self._games = list(games)
+        self._census = census
         self.themes = "".join(_theme_rule(game) for game in self._games)
         self._themes_url = f"/themes.css?v={_digest(self.themes.encode())}"
 
@@ -135,11 +156,14 @@ class Pages:
             themes=self._themes_url,
             game=game,
             steel=steel,
+            # The time the page's values are from.
+            now=datetime.now(UTC),
             games=[
                 {
                     "name": entry.name,
                     "href": localize(f"/{entry.id}", language),
                     "current": entry is game,
+                    "online": self._census.activity(entry).online,
                 }
                 for entry in self._games
             ],

@@ -7,6 +7,7 @@ from openfesl.core.accounts import Account, AccountState
 from openfesl.core.admin import AdminAction, AdminFeed, LoggedAction
 from openfesl.core.connection import Address, Connection, Outbox
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
+from openfesl.core.games import Game
 from openfesl.core.personas import NOT_LOGGED_IN, Persona
 from openfesl.core.theater import Theater, TheaterConnection
 from openfesl.protocol.message import Message
@@ -87,6 +88,18 @@ class Players:
             persona_id: The persona's number.
         """
         return self._personas.get(persona_id)
+
+    def playing_in(self, game: Game) -> list[Persona]:
+        """Return the personas that players play a game as now, first logged in first.
+
+        Args:
+            game: The game.
+        """
+        return [
+            session.persona
+            for session in self._personas.values()
+            if session.persona is not None and session.game is game
+        ]
 
     def play(self, session: GameSession) -> None:
         """Register the persona that a player's session plays as.
@@ -169,6 +182,11 @@ class GameSession:
         self._theater = theater
         self._fesl: FeslConnection | None = None
         self._theater_connections: set[TheaterConnection] = set()
+
+    @property
+    def game(self) -> Game | None:
+        """The game that the session's login came from."""
+        return self._fesl.game if self._fesl is not None else None
 
     def open(self, opened: Open, outbox: Outbox) -> Connection:
         """Start handling a connection that the game opened, or close one to an unknown host.

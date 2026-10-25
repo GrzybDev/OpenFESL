@@ -1,4 +1,4 @@
-{#def title: str, page: str = "" #}
+{#def title: str | None = None, page: str = "" #}
 {# The shell around every page: the bar with OpenFESL's games and languages, the area dressed in
    the page's game or OpenFESL's steel, and the footer. #}
 <!DOCTYPE html>
@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ _("web.page.title", page=title) }}</title>
+    <title>{% if title %}{{ _("web.page.title", page=title) }}{% else %}OpenFESL{% endif %}</title>
     {% for href in assets.styles %}<link rel="stylesheet" href="{{ href }}">{% endfor %}
     <link rel="stylesheet" href="{{ themes }}">
     <link rel="icon" href="{{ static('favicon.svg') }}" type="image/svg+xml">
@@ -20,6 +20,9 @@
     {% endfor %}
     {# A page transition captures the area, so the first frame waits until it is parsed. #}
     <link rel="expect" href="#area" blocking="render">
+    {# Refreshes keep the page as it is when the server answers with an error. #}
+    <meta name="htmx-config"
+          content='{"includeIndicatorCSS": false, "noSwap": [204, 304, "4xx", "5xx"]}'>
     {% if assets.head %}<script src="{{ assets.head }}"></script>{% endif %}
     {% if assets.app %}<script type="module" src="{{ assets.app }}"></script>{% endif %}
   </head>
@@ -27,16 +30,18 @@
     <a href="#area" class="skip-link">{{ _("web.shell.skip") }}</a>
     <header class="shell-bar">
       <div class="shell-row">
-        <a href="{{ url('/') }}" class="wordmark">OpenFESL</a>
+        <a href="{{ url('/') }}"
+           {% if page == "menu" %} aria-current="page"{% endif %}
+           class="wordmark">OpenFESL</a>
         <nav aria-label="{{ _('web.shell.games') }}"
              data-games
              class="shell-games">
-          <ul>
+          <ul id="shell-games">
             {% for entry in games %}
               <li>
                 <a href="{{ entry.href }}"
                    {% if entry.current %} aria-current="true"{% endif %}
-                   class="shell-link">{{ entry.name }}</a>
+                   class="shell-link">{{ entry.name }} <span class="live-value shell-online">{{ _n("web.shell.online", entry.online) }}</span></a>
               </li>
             {% endfor %}
           </ul>
