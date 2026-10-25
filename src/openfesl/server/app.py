@@ -112,11 +112,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         commands.update(theater_routes())
         commands.update(hosting.routes())
         commands.update(Browsing(hosting).routes())
-        commands.update(Joining(hosting).routes())
+        joining = Joining(hosting)
+        commands.update(joining.routes())
         routes.update(PlayNow(hosting).routes())
         admin_log = SqlAdminLog(sessions)
         feed = AdminFeed(admin_log)
         players.follow(feed)
+        joining.follow(feed)
         followers = [
             asyncio.create_task(hosting.follow_approvals()),
             asyncio.create_task(feed.follow(await admin_log.last())),

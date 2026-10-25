@@ -92,12 +92,13 @@ The `openfesl` command in the server's container manages what the admin decides:
 | `openfesl settings get KEY` | Shows a policy's value; the key names the game and the policy, such as `bfbc2.accounts.concurrent_login` |
 | `openfesl settings set KEY VALUE` | Overrides the game's default for this server |
 | `openfesl settings reset KEY` | Returns a policy to the game's default |
-| `openfesl accounts state LOGIN active\|disabled\|banned\|deactivated [--until DATE]` | Sets whether an account may log in; the game's login form names the state, and a player online is signed out, with the game's ban notice for a ban. `--until` ends the state at a date such as `2026-12-01` or `2026-12-01T18:00+01:00`, UTC unless it names an offset |
+| `openfesl accounts state LOGIN active\|disabled\|banned\|deactivated [--until DATE]` | Sets whether an account may log in; the game's login form names the state, and a player online is signed out, with the game's ban notice for a ban, and leaves the games it plays in. `--until` ends the state at a date such as `2026-12-01` or `2026-12-01T18:00+01:00`, UTC unless it names an offset |
 | `openfesl accounts verify LOGIN` | Confirms an account's e-mail address by hand, so that it may log in |
 | `openfesl personas state NAME active\|disabled` | Sets whether a player's persona may play; the game names a disabled persona as disabled by customer support when its player picks it or another player wants its name |
+| `openfesl kick NAME` | Kicks a player's persona from the games it plays in, whose hosts drop it; a persona waiting in a game's queue or for its host is refused instead |
 
-The `keys limit`, `settings`, `accounts` and `personas` commands record each change with its time. A running server
-applies account changes within seconds.
+The `keys limit`, `settings`, `accounts`, `personas` and `kick` commands record each action with its time. A running
+server applies account changes and kicks within seconds.
 
 ## Policies
 

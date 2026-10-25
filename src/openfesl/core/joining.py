@@ -1,9 +1,12 @@
 import asyncio
 import logging
 import secrets
+from collections.abc import Callable
 from ipaddress import IPv4Address
 from typing import Any
 
+from openfesl.core.accounts import AccountState
+from openfesl.core.admin import AdminAction, AdminFeed, LoggedAction
 from openfesl.core.hosting import NO_GAME, NOT_FOUND, HostedGame, Hosting, Player, PlayerState
 from openfesl.core.personas import Persona
 from openfesl.core.theater import (
@@ -43,6 +46,9 @@ OBSERVER = "O"
 CLOSED_REASON = "c"
 FULL_REASON = "f"
 TIMED_OUT_REASON = "t"
+# The host's own reason for a player it does not let in; the game shows every reason but a
+# full game alike.
+NOT_ALLOWED_REASON = "4"
 
 # How long a player waits for its host's decision before the server refuses it.
 HOST_ANSWER_TIMEOUT = 10.0
@@ -60,6 +66,15 @@ class Joining:
         self._hosting = hosting
         self._watched: set[TheaterConnection] = set()
         hosting.on_change(self._admit)
+
+    def follow(self, feed: AdminFeed) -> None:
+        """Kick players from their games as the admin asks, and those the admin signs out.
+
+        Args:
+            feed: The admin's actions as they are recorded.
+        """
+        feed.on(AdminAction.PLAYER_KICK, self._kick_persona)
+        feed.on(AdminAction.ACCOUNT_STATE, self._kick_account)
 
     def routes(self) -> dict[str, TheaterRoute[Any]]:
         """Return the handlers of the commands that join, queue and leave games."""
@@ -331,6 +346,33 @@ class Joining:
         if hosted.players.pop(player.pid, None) is not None:
             hosted.host.send("KICK", _player_id(hosted, player))
             self._admit(hosted)
+
+    def _kick_persona(self, action: LoggedAction) -> None:
+        persona_id = int(action.target)
+        self._kick(lambda persona: persona.id == persona_id)
+
+    def _kick_account(self, action: LoggedAction) -> None:
+        # The host's link to a player outlives the player's sign-out, so the host is told too.
+        if AccountState(action.details["state"]) is not AccountState.ACTIVE:
+            account_id = int(action.target)
+            self._kick(lambda persona: persona.account_id == account_id)
+
+    def _kick(self, kicked: Callable[[Persona], bool]) -> None:
+        for hosted in self._hosting.every():
+            for player in hosted.everyone():
+                if not kicked(player.persona) or player.connection is hosted.host:
+                    continue
+                logger.info(
+                    "Kicking player %d (%s) from game %d",
+                    player.pid,
+                    player.persona.name,
+                    hosted.id,
+                )
+                waiting = player.state in {PlayerState.QUEUED, PlayerState.JOINING}
+                self._withdraw(hosted, player)
+                if waiting:
+                    refusal = Refusal(lid=hosted.lobby.id, gid=hosted.id, reason=NOT_ALLOWED_REASON)
+                    player.connection.send("EGEG", refusal, error=DENIED)
 
     def _forget(self, hosted: HostedGame, persona: Persona) -> None:
         # A player that joins again replaces what is left of its earlier attempt.

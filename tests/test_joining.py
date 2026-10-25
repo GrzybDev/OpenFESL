@@ -3,6 +3,7 @@ from support import (
     JOIN,
     THEATER,
     asked_about,
+    cli,
     enter_as_player,
     game,
     holds,
@@ -197,3 +198,37 @@ async def test_a_host_that_dequeues_players_itself_hears_who_waits_and_picks_the
         again = (await server.theater_push(THEATER, "QENT")).fields["PID"]
         await bob.close(THEATER)
         assert (await server.theater_push(THEATER, "QLVT")).fields["PID"] == again
+
+
+async def test_the_admin_kicks_a_player_from_its_game_and_a_banned_player_leaves_it(
+    prompt_actions: None,
+    open_hosting: None,
+    server_url: str,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    async with (
+        game(server_url) as server,
+        game(server_url) as ann,
+        game(server_url) as bob,
+        game(server_url) as cat,
+    ):
+        created = await host_game(server, {"MAX-PLAYERS": "2", "QLEN": "5"})
+        await enter_as_player(ann, "ann@example.test", "Ann_01")
+        await enter_as_player(bob, "bob@example.test", "Bob_02")
+        await enter_as_player(cat, "cat@example.test", "Cat_03")
+        ann_pid = await let_in(server, ann, created)
+        bob_pid = await let_in(server, bob, created)
+        assert (await cat.theater(THEATER, "EGAM", [*ids(created), *JOIN])).error == "queu"
+
+        await cli(capsys, "kick", "cat_03")
+        refused = await cat.theater_push(THEATER, "EGEG")
+        assert (refused.error, refused.fields["REASON"]) == ("jden", "4")
+        await cli(capsys, "kick", "Ann_01")
+        kicked = await server.theater_push(THEATER, "KICK")
+        assert holds(kicked.fields, {**dict(ids(created)), "PID": ann_pid})
+        # The host would keep a player the admin signed out, since it knows only the game.
+        await cli(capsys, "accounts", "state", "bob@example.test", "banned")
+        assert (await server.theater_push(THEATER, "KICK")).fields["PID"] == bob_pid
+
+    with pytest.raises(SystemExit, match="No player's persona"):
+        await cli(capsys, "kick", "bfbc2.server.p")

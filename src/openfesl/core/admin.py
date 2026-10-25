@@ -23,6 +23,8 @@ class AdminAction(StrEnum):
     """Confirmed the e-mail address of the account numbered as the target by hand."""
     PERSONA_STATE = "persona_state"
     """Changed the state of the persona numbered as the target; the details hold the state."""
+    PLAYER_KICK = "player_kick"
+    """Kicked the persona numbered as the target from the games it joins, plays or waits for."""
     KEY_LIMITS = "key_limits"
     """Changed how often the product key named as the target may be redeemed; the details hold
     its most uses, none for any number, and whether an account may redeem it only once."""

@@ -131,6 +131,9 @@ def main(argv: Sequence[str] | None = None) -> None:
     )
     persona_state.add_argument("name", help="the persona's name")
     persona_state.add_argument("state", choices=[state.value for state in PersonaState])
+    commands.add_parser(
+        "kick", help="kick a player's persona from the games it joins, plays or waits for"
+    ).add_argument("name", help="the persona's name")
     args = parser.parse_args(argv)
 
     settings = Settings()

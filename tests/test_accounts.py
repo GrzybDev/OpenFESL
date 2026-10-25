@@ -13,7 +13,6 @@ from support import (
     text,
 )
 
-from openfesl.core import admin
 from openfesl.protocol.relay import Channel, ConnectionKey, Data
 
 pytestmark = pytest.mark.anyio
@@ -21,12 +20,6 @@ pytestmark = pytest.mark.anyio
 FESL = ConnectionKey(Channel.FESL, 1)
 THEATER = ConnectionKey(Channel.THEATER, 1)
 SERVER_ACCOUNT = "bfbc2.server.pc@ea.com"
-
-
-@pytest.fixture
-def prompt_actions(monkeypatch: pytest.MonkeyPatch) -> None:
-    # The admin acts in another process; the server reads the log of actions this often.
-    monkeypatch.setattr(admin, "ADMIN_CHECK_INTERVAL", 0.05)
 
 
 async def test_a_player_registers_logs_in_and_a_later_login_sends_the_first_session_away(

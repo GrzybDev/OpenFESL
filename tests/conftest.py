@@ -12,6 +12,7 @@ os.environ.setdefault("TESTCONTAINERS_HOST_OVERRIDE", "127.0.0.1")
 
 from testcontainers.community.postgres import PostgresContainer
 
+from openfesl.core import admin
 from openfesl.server.cli import RelayServer, main, uvicorn_config
 
 
@@ -53,6 +54,12 @@ async def relay_server(
 @pytest.fixture
 def server_url(relay_server: tuple[str, RelayServer]) -> str:
     return relay_server[0]
+
+
+@pytest.fixture
+def prompt_actions(monkeypatch: pytest.MonkeyPatch) -> None:
+    # The admin acts in another process; the server reads the log of actions this often.
+    monkeypatch.setattr(admin, "ADMIN_CHECK_INTERVAL", 0.05)
 
 
 @pytest.fixture

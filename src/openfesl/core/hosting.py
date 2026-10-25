@@ -332,7 +332,7 @@ class Hosting:
             ugid = admission.identity.ugid
             if any(
                 hosted.ugid == ugid and hosted.host.session is not connection.session
-                for hosted in self._every()
+                for hosted in self.every()
             ):
                 logger.warning("Refusing server %s: another instance hosts under its id", ugid)
                 raise TheaterError(BAD_SECRET)
@@ -500,7 +500,7 @@ class Hosting:
         return next(
             (
                 hosted
-                for hosted in self._every()
+                for hosted in self.every()
                 if hosted.type == GAME and hosted.server and hosted.host.session is session
             ),
             None,
@@ -522,7 +522,7 @@ class Hosting:
                 logger.exception("Could not read the admin's decisions about hosting servers")
 
     async def _apply_decisions(self) -> None:
-        vetted = [hosted for hosted in self._every() if hosted.server is not None]
+        vetted = [hosted for hosted in self.every() if hosted.server is not None]
         if not vetted:
             return
         standings = await self._approval.standings({hosted.ugid for hosted in vetted})
@@ -562,7 +562,8 @@ class Hosting:
     def _lobby(self, game: Game, lobby: Lobby) -> dict[int, HostedGame]:
         return self._lobbies.get((game.name, lobby.id), {})
 
-    def _every(self) -> list[HostedGame]:
+    def every(self) -> list[HostedGame]:
+        """Return the games of every lobby of every game, those players do not see included."""
         return [hosted for lobby in self._lobbies.values() for hosted in lobby.values()]
 
     def _hosted_by(self, connection: TheaterConnection) -> list[HostedGame]:

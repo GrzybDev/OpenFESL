@@ -7,8 +7,9 @@ from dataclasses import replace
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from openfesl.core.accounts import Account, AccountState
+from openfesl.core.admin import AdminAction
 from openfesl.core.games import Game, Games, load_games
-from openfesl.core.personas import PersonaState
+from openfesl.core.personas import Persona, PersonaState
 from openfesl.core.policies import GamePolicies, setting_key
 from openfesl.core.servers import (
     GameServer,
@@ -19,6 +20,7 @@ from openfesl.core.servers import (
 )
 from openfesl.server.settings import Settings
 from openfesl.storage.accounts import SqlAccountStore
+from openfesl.storage.admin import SqlAdminLog
 from openfesl.storage.database import migrate
 from openfesl.storage.entitlements import SqlEntitlementStore
 from openfesl.storage.personas import SqlPersonaStore
@@ -48,6 +50,8 @@ async def run(settings: Settings, args: argparse.Namespace) -> None:
             await _accounts(settings, args)
         case "personas":
             await _personas(settings, args)
+        case "kick":
+            await _kick(settings, args)
 
 
 @asynccontextmanager
@@ -194,10 +198,21 @@ async def _player_account(store: SqlAccountStore, login: str) -> Account:
 async def _personas(settings: Settings, args: argparse.Namespace) -> None:
     async with _database(settings) as sessions:
         store = SqlPersonaStore(sessions)
-        match await store.named(args.name):
-            case []:
-                sys.exit(f"No player's persona is called {args.name}")
-            case [persona]:
-                await store.set_state(persona.id, PersonaState(args.state), admin=None)
-            case _:
-                sys.exit(f"Personas of several games are called {args.name}")
+        persona = await _player_persona(store, args.name)
+        await store.set_state(persona.id, PersonaState(args.state), admin=None)
+
+
+async def _kick(settings: Settings, args: argparse.Namespace) -> None:
+    async with _database(settings) as sessions:
+        persona = await _player_persona(SqlPersonaStore(sessions), args.name)
+        await SqlAdminLog(sessions).record(AdminAction.PLAYER_KICK, str(persona.id), admin=None)
+
+
+async def _player_persona(store: SqlPersonaStore, name: str) -> Persona:
+    match await store.named(name):
+        case []:
+            sys.exit(f"No player's persona is called {name}")
+        case [persona]:
+            return persona
+        case _:
+            sys.exit(f"Personas of several games are called {name}")
