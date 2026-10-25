@@ -18,13 +18,19 @@
     {% for entry in languages %}
       <link rel="alternate" hreflang="{{ entry.code }}" href="{{ entry.href }}">
     {% endfor %}
+    {# A page transition captures the area, so the first frame waits until it is parsed. #}
+    <link rel="expect" href="#area" blocking="render">
+    {% if assets.head %}<script src="{{ assets.head }}"></script>{% endif %}
+    {% if assets.app %}<script type="module" src="{{ assets.app }}"></script>{% endif %}
   </head>
   <body>
     <a href="#area" class="skip-link">{{ _("web.shell.skip") }}</a>
     <header class="shell-bar">
       <div class="shell-row">
         <a href="{{ url('/') }}" class="wordmark">OpenFESL</a>
-        <nav aria-label="{{ _('web.shell.games') }}" class="shell-games">
+        <nav aria-label="{{ _('web.shell.games') }}"
+             data-games
+             class="shell-games">
           <ul>
             {% for entry in games %}
               <li>

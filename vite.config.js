@@ -12,6 +12,7 @@ export default defineConfig({
     modulePreload: false,
     rolldownOptions: {
       input: {
+        head: "src/openfesl/web/assets/head.js",
         app: "src/openfesl/web/assets/app.js",
       },
     },

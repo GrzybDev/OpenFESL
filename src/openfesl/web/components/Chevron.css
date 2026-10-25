@@ -1,0 +1,46 @@
+/* M8: a chevron block's chevron moves on hover, the block gives on press, and a page that takes
+   long to arrive turns the chevron into a spinning segment. */
+@layer components {
+  .chevron {
+    transition: transform 120ms var(--ease-menu);
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    .go {
+      transition: transform 120ms var(--ease-menu);
+    }
+
+    &:hover .go,
+    &:focus-visible .go {
+      transform: translateX(4px);
+    }
+
+    .busy,
+    &[aria-busy="true"] .go {
+      opacity: 0;
+    }
+
+    &[aria-busy="true"] .busy {
+      opacity: 1;
+      animation: spin 900ms linear infinite;
+    }
+  }
+
+  /* The chevron and its spinning segment take the same place in their square. */
+  :is(.go, .busy):where(.chevron *) {
+    grid-area: 1 / 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chevron,
+    .chevron .go {
+      transition: none;
+    }
+
+    .chevron[aria-busy="true"] .busy {
+      animation: none;
+    }
+  }
+}

@@ -94,6 +94,7 @@
     --shell-bright: #f4f4f4;
     --shell-link: #c9ccd1;
     --shell-muted: #a9acb2;
+    --ease-menu: cubic-bezier(0.2, 0.8, 0.2, 1);
     color-scheme: dark;
   }
 
@@ -178,5 +179,191 @@
     font-size: 15px;
     line-height: 1.45;
     font-weight: 500;
+  }
+
+  /* M1: the title block slides in, the panel rises after it and the first rows follow; a page
+     that arrives through a page transition (M12) does not enter a second time. */
+  .enter-title {
+    animation: enter-title 220ms var(--ease-menu) both;
+  }
+
+  .enter-panel {
+    animation: enter-panel 240ms var(--ease-menu) 60ms both;
+  }
+
+  .enter-rows > :nth-child(-n + 12) {
+    animation: enter-row 200ms var(--ease-menu) var(--delay, 120ms) both;
+  }
+
+  .enter-rows > :nth-child(2) {
+    --delay: 150ms;
+  }
+  .enter-rows > :nth-child(3) {
+    --delay: 180ms;
+  }
+  .enter-rows > :nth-child(4) {
+    --delay: 210ms;
+  }
+  .enter-rows > :nth-child(5) {
+    --delay: 240ms;
+  }
+  .enter-rows > :nth-child(6) {
+    --delay: 270ms;
+  }
+  .enter-rows > :nth-child(7) {
+    --delay: 300ms;
+  }
+  .enter-rows > :nth-child(8) {
+    --delay: 330ms;
+  }
+  .enter-rows > :nth-child(9) {
+    --delay: 360ms;
+  }
+  .enter-rows > :nth-child(10) {
+    --delay: 390ms;
+  }
+  .enter-rows > :nth-child(11) {
+    --delay: 420ms;
+  }
+  .enter-rows > :nth-child(12) {
+    --delay: 450ms;
+  }
+
+  html:is(.arrived) :is(.enter-title, .enter-panel, .enter-rows > *) {
+    animation: none;
+  }
+
+  @keyframes enter-title {
+    from {
+      opacity: 0;
+      transform: translateX(-24px);
+    }
+  }
+
+  @keyframes enter-panel {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+
+  @keyframes enter-row {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes fade-out {
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* M12: the shell stays while the area slides 16 px in the direction of navigation; switching
+     games or languages cross-fades the whole area. */
+  @view-transition {
+    navigation: auto;
+  }
+
+  ::view-transition-group(*) {
+    animation-duration: 200ms;
+    animation-timing-function: var(--ease-menu);
+  }
+
+  ::view-transition-old(shell),
+  ::view-transition-new(shell) {
+    animation: none;
+  }
+
+  ::view-transition-old(area) {
+    animation: 200ms var(--ease-menu) both leave-forward;
+  }
+
+  ::view-transition-new(area) {
+    animation: 200ms var(--ease-menu) both arrive-forward;
+  }
+
+  html:active-view-transition-type(back) {
+    &::view-transition-old(area) {
+      animation-name: leave-back;
+    }
+
+    &::view-transition-new(area) {
+      animation-name: arrive-back;
+    }
+  }
+
+  html:active-view-transition-type(swap) {
+    &::view-transition-old(area) {
+      animation-name: fade-out;
+    }
+
+    &::view-transition-new(area) {
+      animation-name: fade-in;
+    }
+  }
+
+  @keyframes leave-forward {
+    to {
+      opacity: 0;
+      transform: translateX(-16px);
+    }
+  }
+
+  @keyframes arrive-forward {
+    from {
+      opacity: 0;
+      transform: translateX(16px);
+    }
+  }
+
+  @keyframes leave-back {
+    to {
+      opacity: 0;
+      transform: translateX(16px);
+    }
+  }
+
+  @keyframes arrive-back {
+    from {
+      opacity: 0;
+      transform: translateX(-16px);
+    }
+  }
+
+  /* Reduced motion: moves happen at once and fades take at most 100 ms. */
+  @media (prefers-reduced-motion: reduce) {
+    .enter-title,
+    .enter-panel,
+    .enter-rows > :nth-child(n) {
+      animation: fade-in 100ms linear both;
+    }
+
+    ::view-transition-group(*) {
+      animation-duration: 0s;
+    }
+
+    ::view-transition-old(area),
+    html:active-view-transition-type(back, swap)::view-transition-old(area) {
+      animation: 100ms linear both fade-out;
+    }
+
+    ::view-transition-new(area),
+    html:active-view-transition-type(back, swap)::view-transition-new(area) {
+      animation: 100ms linear both fade-in;
+    }
   }
 }

@@ -37,6 +37,7 @@
   }
 
   .shell-bar {
+    view-transition-name: shell;
     border-bottom: 1px solid var(--shell-line);
     background: var(--shell);
 
@@ -120,6 +121,7 @@
   }
 
   .area {
+    view-transition-name: area;
     position: relative;
     isolation: isolate;
     overflow: hidden;

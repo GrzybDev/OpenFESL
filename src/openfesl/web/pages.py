@@ -37,9 +37,13 @@ class Assets:
     """The addresses of the built files every page loads.
 
     Attributes:
-        styles: The stylesheets of the pages' entry.
+        head: The script that runs before the page is first drawn.
+        app: The module with the pages' motion.
+        styles: The stylesheets the module brings.
     """
 
+    head: str = ""
+    app: str = ""
     styles: tuple[str, ...] = ()
 
 
@@ -230,7 +234,11 @@ def _read_manifest(modified: int) -> Assets:
         if entry.get("isEntry")
     }
     base = "/static/build/"
-    return Assets(styles=tuple(base + name for name in entries["app"].get("css", [])))
+    return Assets(
+        head=base + entries["head"]["file"],
+        app=base + entries["app"]["file"],
+        styles=tuple(base + name for name in entries["app"].get("css", [])),
+    )
 
 
 def _digest(content: bytes) -> str:
