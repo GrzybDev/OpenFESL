@@ -14,8 +14,19 @@ server_account = "bfbc2.server.pc@ea.com"
 # How the services behave where the game handles more than one behaviour; the instance's
 # settings override each.
 [policies]
+# A birth date is checked against the country's age limits below (or: false).
+registration.age_check = true
+# A player old enough to register but not without a parent's consent registers, since the PC
+# game has no form for a parent's e-mail (or: refuse).
+registration.under_parental_age = "allow"
 # A login while the account plays elsewhere signs the other game out (or: refuse).
 accounts.concurrent_login = "replace"
+
+# The countries whose age limits differ from 13 to register and 18 to register without a
+# parent's consent.
+[countries]
+DE = { registration_age = 14, parental_age = 14 }
+FR = { registration_age = 16, parental_age = 16 }
 
 [http]
 locker = "http://easo.ea.com/fileupload/locker2.jsp"

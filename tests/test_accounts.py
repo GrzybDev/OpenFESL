@@ -1,5 +1,7 @@
+from datetime import UTC, datetime
+
 import pytest
-from support import entitle_game, game, login, registration
+from support import cli, entitle_game, game, login, registration
 
 from openfesl.protocol.relay import Channel, ConnectionKey
 
@@ -127,3 +129,42 @@ async def test_dedicated_servers_share_the_server_account_of_their_game(server_u
         await player.hello(disguised, "bfbc2-pc-server")
         refused = await player.request(disguised, "acct", login(SERVER_ACCOUNT, "from-game-data"))
         assert refused["errorCode"] == "122"
+
+
+def born(age: int) -> str:
+    """Return the birth date of a player who turned some age this New Year's Day."""
+    return f"{datetime.now(UTC).year - age}-01-01"
+
+
+async def test_registration_checks_the_birth_date_against_the_country_age_limits(
+    server_url: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    async with game(server_url) as player:
+        await player.hello(FESL, "bfbc2-pc")
+        countries = await player.request(FESL, "acct", [("TXN", "GetCountryList")])
+        limits = {
+            countries[f"countryList.{index}.ISOCode"]: (
+                countries[f"countryList.{index}.registrationAgeLimit"],
+                countries[f"countryList.{index}.parentalControlAgeLimit"],
+            )
+            for index in range(int(countries["countryList.[]"]))
+        }
+        assert (limits["PL"], limits["DE"]) == (("13", "18"), ("14", "14"))
+        terms = (await player.request(FESL, "acct", [("TXN", "NuGetTos")]))["version"]
+
+        async def register(nuid: str, age: int, country: str = "PL") -> str:
+            form = registration(nuid, "secret-pass", terms, born(age), country)
+            answer = await player.request(FESL, "acct", form)
+            if "errorCode" not in answer:
+                return "registered"
+            assert answer["errorContainer.0.fieldName"] == "dob"
+            return answer["errorContainer.0.fieldError"]
+
+        # 16 shows the birth date refusal; 15 the same refusal, after which the game disconnects.
+        assert await register("teen@example.test", 15) == "registered"
+        assert await register("kid.de@example.test", 13, "DE") == "16"
+        await cli(capsys, "settings", "set", "bfbc2.registration.under_parental_age", "refuse")
+        assert await register("teen.pl@example.test", 15) == "15"
+        assert await register("adult@example.test", 18) == "registered"
+        await cli(capsys, "settings", "set", "bfbc2.registration.age_check", "off")
+        assert await register("kid@example.test", 5) == "registered"

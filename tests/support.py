@@ -196,7 +196,9 @@ def theater_answer(packet: Packet) -> TheaterAnswer:
     return TheaterAnswer(code.decode("ascii") if any(code) else None, text(packet))
 
 
-def registration(nuid: str, password: str, terms: str, born: str = "1990-05-28") -> Fields:
+def registration(
+    nuid: str, password: str, terms: str, born: str = "1990-05-28", country: str = "PL"
+) -> Fields:
     year, month, day = born.split("-")
     return [
         ("TXN", "NuAddAccount"),
@@ -209,7 +211,7 @@ def registration(nuid: str, password: str, terms: str, born: str = "1990-05-28")
         ("DOBMonth", month),
         ("DOBYear", year),
         ("zipCode", "00-001"),
-        ("country", "PL"),
+        ("country", country),
         ("language", "pl"),
         ("tosVersion", terms),
     ]

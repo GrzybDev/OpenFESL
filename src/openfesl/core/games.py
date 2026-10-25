@@ -92,6 +92,20 @@ class ListRule(BaseModel):
     invitations: tuple[str, ...] = ()
 
 
+class Ages(BaseModel):
+    """The age limits of a country on registration.
+
+    Attributes:
+        registration_age: The age from which a player may register.
+        parental_age: The age from which a player registers without a parent's consent.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    registration_age: int = 13
+    parental_age: int = 18
+
+
 class Lobby(BaseModel):
     """A Theater lobby that a game's hosts list their games in."""
 
@@ -121,6 +135,8 @@ class Game(BaseModel):
             provider and game lists show the provider's name; hosts cannot set it themselves.
         policies: How the game's services behave by default where the game handles more than
             one behaviour.
+        countries: The age limits of the countries whose limits differ from the defaults, by
+            ISO code.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -137,6 +153,15 @@ class Game(BaseModel):
     lobbies: list[Lobby] = []
     provider_attribute: str | None = None
     policies: Policies
+    countries: dict[str, Ages] = {}
+
+    def ages(self, country: str) -> Ages:
+        """Return the age limits of a country on registration.
+
+        Args:
+            country: The country's ISO code, in either case.
+        """
+        return self.countries.get(country.upper(), Ages())
 
     @field_validator("partition", mode="before")
     @classmethod

@@ -35,12 +35,21 @@ class NuGetTosAnswer(Message):
 
 
 class Country(Message):
+    """A country of the registration form with the ages from which a player may register.
+
+    Attributes:
+        registration_age_limit: The age from which a player may register at all.
+        parental_control_age_limit: The age from which a player registers without a parent.
+    """
+
     description: str
     iso_code: str = Field(alias="ISOCode")
+    registration_age_limit: int
+    parental_control_age_limit: int
 
 
 class GetCountryListAnswer(Message):
-    """The countries offered on registration; the game's own age limits apply to each."""
+    """The countries offered on registration."""
 
     country_list: list[Country]
 

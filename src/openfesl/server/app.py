@@ -85,7 +85,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         routes.update(connect_routes(games))
         routes.update(telemetry_routes())
         routes.update(accounts.routes())
-        routes.update(AccountSettingsService(store, logins).routes())
+        routes.update(AccountSettingsService(store, logins, policies).routes())
         routes.update(personas.routes())
         hosting = Hosting(Approval(SqlServerStore(sessions)))
         routes.update(EntitlementService(entitlements, hosting).routes())

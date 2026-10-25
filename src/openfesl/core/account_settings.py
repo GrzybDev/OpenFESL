@@ -5,6 +5,7 @@ from openfesl.core.accounts import Account, AccountStore, password_error
 from openfesl.core.entitlements import NOT_LOGGED_IN
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.logins import UNKNOWN_USER, Logins
+from openfesl.core.policies import GamePolicies
 from openfesl.core.registration import INVALID_VALUE, birth_date_error, is_country
 from openfesl.protocol.acct import (
     NuGetAccountAnswer,
@@ -22,15 +23,17 @@ logger = logging.getLogger(__name__)
 class AccountSettingsService:
     """The acct transactions that show a player's account and change it or its password."""
 
-    def __init__(self, store: AccountStore, logins: Logins) -> None:
+    def __init__(self, store: AccountStore, logins: Logins, policies: GamePolicies) -> None:
         """Serve account settings from a store.
 
         Args:
             store: Where accounts are kept.
             logins: Checks passwords and hands out remembered logins.
+            policies: Each game's policies, which say how a birth date is checked.
         """
         self._store = store
         self._logins = logins
+        self._policies = policies
 
     def routes(self) -> dict[tuple[str, str], Route[Any]]:
         """Return the handlers of the service's transactions."""
@@ -82,7 +85,9 @@ class AccountSettingsService:
                 another account or a field is invalid.
         """
         account = _player(connection)
+        assert connection.game is not None
         await self._logins.check(account.nuid, request.password)
+        policies = await self._policies.of(connection.game)
         errors = []
         # The login name cannot change: it is what the account logs in with.
         if request.nuid.casefold() != account.nuid.casefold():
@@ -90,10 +95,11 @@ class AccountSettingsService:
         if request.country and not is_country(request.country):
             errors.append(FieldError(field_name="country", field_error=INVALID_VALUE))
         born = (request.dob_year, request.dob_month, request.dob_day)
-        if any(part is not None for part in born) and (
-            error := birth_date_error(*(part or 0 for part in born))
-        ):
-            errors.append(error)
+        if any(part is not None for part in born):
+            year, month, day = (part or 0 for part in born)
+            ages = connection.game.ages(request.country or account.country)
+            if error := birth_date_error(year, month, day, ages, policies.registration):
+                errors.append(error)
         if errors:
             raise TransactionError(PARAMETERS_ERROR, errors)
         if request.country:

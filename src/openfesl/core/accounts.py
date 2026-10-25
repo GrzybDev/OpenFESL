@@ -250,8 +250,11 @@ class AccountService:
             request: The form's fields.
 
         Raises:
-            TransactionError: When fields are invalid or the name is taken.
+            TransactionError: When fields are invalid, the player is too young for the game's
+                age check, or the name is taken.
         """
+        assert connection.game is not None
+        policies = await self._policies.of(connection.game)
         errors = []
         if not 3 <= len(request.nuid) <= MAXIMUM_NAME or not request.nuid.isprintable():
             errors.append(FieldError(field_name="email", field_error=INVALID_VALUE))
@@ -259,7 +262,13 @@ class AccountService:
             errors.append(error)
         if not is_country(request.country):
             errors.append(FieldError(field_name="country", field_error=INVALID_VALUE))
-        if error := birth_date_error(request.dob_year, request.dob_month, request.dob_day):
+        if error := birth_date_error(
+            request.dob_year,
+            request.dob_month,
+            request.dob_day,
+            connection.game.ages(request.country),
+            policies.registration,
+        ):
             errors.append(error)
         if errors:
             raise TransactionError(PARAMETERS_ERROR, errors)
@@ -294,10 +303,16 @@ class AccountService:
             connection: The FESL connection the request came on.
             request: The request, which has no fields.
         """
-        assert connection.hello is not None
+        assert connection.hello is not None and connection.game is not None
+        game = connection.game
         return GetCountryListAnswer(
             country_list=[
-                Country(description=name, iso_code=code)
+                Country(
+                    description=name,
+                    iso_code=code,
+                    registration_age_limit=game.ages(code).registration_age,
+                    parental_control_age_limit=game.ages(code).parental_age,
+                )
                 for code, name in countries(connection.hello.locale)
             ]
         )

@@ -10,8 +10,8 @@ An original copy of the game is needed; OpenFESL contains no game files.
 
 For Battlefield: Bad Company 2 on PC, the game and its dedicated server:
 
-- Accounts: registration with the terms the game shows, logins with remembered logins, personas, account details and
-  password changes
+- Accounts: registration with the terms the game shows and the countries' age limits, logins with remembered logins,
+  personas, account details and password changes
 - Product keys and the entitlements they grant
 - Stats, ranked stats and leaderboards, and the records players keep per persona (dog tags, clan tag)
 - Friends, block and mute lists, presence, and messages between players, delivered at the next login when the
@@ -91,9 +91,13 @@ Each setting change is recorded with its time.
 
 Where a game handles more than one behaviour, the game's data file in `src/openfesl/games` sets the default and
 `openfesl settings` overrides it. The server reads the policies on every use, so a change applies at once.
+The data file also holds the age limits of the countries that differ from 13 to register and 18 to register
+without a parent's consent. A birth date is checked and never stored.
 
 | Policy | Values | Bad Company 2 |
 |---|---|---|
+| `registration.age_check` | `on`: a birth date under the country's registration age is refused; `off`: birth dates are not checked | `on` |
+| `registration.under_parental_age` | `allow`: players old enough to register but under the country's age for registering without a parent's consent register; `refuse`: they are refused, and the game disconnects | `allow` |
 | `accounts.concurrent_login` | `replace`: a login signs the account's other game out; `refuse`: a second login is refused, and the game shows its notice about too many login attempts | `replace` |
 
 ## Development

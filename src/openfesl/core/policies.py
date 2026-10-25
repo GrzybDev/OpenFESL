@@ -20,8 +20,30 @@ class ConcurrentLogin(StrEnum):
     """The new login is refused."""
 
 
+class UnderParentalAge(StrEnum):
+    """What registration does with a player old enough to register but not without consent."""
+
+    ALLOW = "allow"
+    """The player registers; the service asks for no parent's consent."""
+    REFUSE = "refuse"
+    """The registration is refused; the game shows its birth date notice and disconnects."""
+
+
 class _Section(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
+
+
+class RegistrationPolicies(_Section):
+    """How players register.
+
+    Attributes:
+        age_check: Whether a birth date is checked against the country's age limits.
+        under_parental_age: What the age check does with a player under the country's age
+            for registering without a parent's consent.
+    """
+
+    age_check: bool
+    under_parental_age: UnderParentalAge
 
 
 class AccountPolicies(_Section):
@@ -41,9 +63,11 @@ class Policies(_Section):
     named by its section and field, such as `accounts.concurrent_login`.
 
     Attributes:
+        registration: How players register.
         accounts: How accounts log in.
     """
 
+    registration: RegistrationPolicies
     accounts: AccountPolicies
 
     def names(self) -> list[str]:
