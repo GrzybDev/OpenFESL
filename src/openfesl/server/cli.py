@@ -111,6 +111,9 @@ def main(argv: Sequence[str] | None = None) -> None:
         type=_moment,
         help="when the state ends, such as 2026-12-01 or 2026-12-01T18:00+01:00 (UTC by default)",
     )
+    account_actions.add_parser(
+        "verify", help="confirm an account's e-mail address so that it may log in"
+    ).add_argument("login", help="the name the account logs in with")
     persona_state = (
         commands.add_parser("personas", help="manage players' personas")
         .add_subparsers(dest="action", required=True)
@@ -294,10 +297,14 @@ async def _accounts(settings: Settings, args: argparse.Namespace) -> None:
     async with _database(settings) as sessions:
         store = SqlAccountStore(sessions)
         account = await _player_account(store, args.login)
-        state = AccountState(args.state)
-        if state is AccountState.ACTIVE and args.until:
-            sys.exit("An active account has no end date")
-        await store.set_state(account.id, state, args.until, admin=None)
+        match args.action:
+            case "state":
+                state = AccountState(args.state)
+                if state is AccountState.ACTIVE and args.until:
+                    sys.exit("An active account has no end date")
+                await store.set_state(account.id, state, args.until, admin=None)
+            case "verify":
+                await store.confirm_account(account.id, admin=None)
 
 
 async def _player_account(store: SqlAccountStore, login: str) -> Account:

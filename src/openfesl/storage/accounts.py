@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.dialects.postgresql import insert
@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.accounts import Account, AccountState, Credentials
 from openfesl.core.admin import AdminAction
+from openfesl.core.verification import Confirmation, Link
 from openfesl.storage.models import AccountRow, AdminActionRow, LoginTokenRow
 
 REMEMBERED_LOGINS = 8
@@ -60,6 +61,7 @@ class SqlAccountStore:
         terms_version: str | None,
         *,
         server: bool = False,
+        verification: Link | None = None,
     ) -> Account | None:
         """Create an account, or return None when the name is taken.
 
@@ -69,6 +71,7 @@ class SqlAccountStore:
             country: The ISO code chosen on registration.
             terms_version: The version of the terms accepted on registration, if current.
             server: Whether the account belongs to a game's dedicated servers.
+            verification: The link that must confirm its e-mail address before it logs in.
         """
         async with self._sessions.begin() as session:
             row = await session.scalar(
@@ -79,6 +82,8 @@ class SqlAccountStore:
                     country=country,
                     terms_version=terms_version,
                     server=server,
+                    verification_hash=verification.token_hash if verification else None,
+                    verification_expires_at=verification.expires_at if verification else None,
                 )
                 .on_conflict_do_nothing()
                 .returning(AccountRow)
@@ -190,6 +195,74 @@ class SqlAccountStore:
                 )
             )
 
+    async def renew(self, account_id: int, link: Link) -> bool:
+        """Replace the link of an account once its link expired.
+
+        Args:
+            account_id: The account.
+            link: The new link.
+
+        Returns:
+            Whether the link was replaced, which it is not while the last one works or once
+            the address is confirmed.
+        """
+        async with self._sessions.begin() as session:
+            renewed = await session.scalar(
+                update(AccountRow)
+                .where(
+                    AccountRow.id == account_id,
+                    AccountRow.verification_expires_at <= datetime.now(UTC),
+                )
+                .values(verification_hash=link.token_hash, verification_expires_at=link.expires_at)
+                .returning(AccountRow.id)
+            )
+        return renewed is not None
+
+    async def confirm(self, token_hash: bytes) -> Confirmation:
+        """Confirm the address of the account that waits for a link.
+
+        Args:
+            token_hash: The SHA-256 digest of the token the link carries.
+        """
+        async with self._sessions.begin() as session:
+            expires_at = await session.scalar(
+                select(AccountRow.verification_expires_at)
+                .where(AccountRow.verification_hash == token_hash)
+                .with_for_update()
+            )
+            if expires_at is None:
+                return Confirmation.UNKNOWN
+            if expires_at <= datetime.now(UTC):
+                return Confirmation.EXPIRED
+            await session.execute(
+                update(AccountRow)
+                .where(AccountRow.verification_hash == token_hash)
+                .values(verification_hash=None, verification_expires_at=None)
+            )
+        return Confirmation.CONFIRMED
+
+    async def confirm_account(self, account_id: int, admin: str | None) -> None:
+        """Confirm an account's address by hand and record it among the admin's actions.
+
+        Args:
+            account_id: The account.
+            admin: The admin who confirmed it; None for the command line.
+        """
+        async with self._sessions.begin() as session:
+            await session.execute(
+                update(AccountRow)
+                .where(AccountRow.id == account_id)
+                .values(verification_hash=None, verification_expires_at=None)
+            )
+            session.add(
+                AdminActionRow(
+                    admin=admin,
+                    action=AdminAction.ACCOUNT_VERIFIED,
+                    target=str(account_id),
+                    details={},
+                )
+            )
+
 
 def _account(row: AccountRow) -> Account:
     return Account(
@@ -200,4 +273,5 @@ def _account(row: AccountRow) -> Account:
         server=row.server,
         state=AccountState(row.state),
         state_until=row.state_until,
+        verification_expires_at=row.verification_expires_at,
     )

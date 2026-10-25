@@ -34,7 +34,9 @@ from openfesl.core.stats import StatsService
 from openfesl.core.telemetry import telemetry_routes
 from openfesl.core.texts import load_texts
 from openfesl.core.theater import Theater, TheaterRoute, theater_routes
+from openfesl.core.verification import Confirmation, EmailVerification
 from openfesl.relay.endpoint import relay_endpoint
+from openfesl.server.mail import SmtpMailer
 from openfesl.server.settings import Settings
 from openfesl.storage.accounts import SqlAccountStore
 from openfesl.storage.admin import SqlAdminLog
@@ -48,6 +50,7 @@ from openfesl.storage.servers import SqlServerStore
 from openfesl.storage.settings import SqlSettingStore
 from openfesl.storage.stats import SqlStatStore
 from openfesl.web.game_http import GameHttpMiddleware
+from openfesl.web.verification import verification_routes
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -80,7 +83,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         store = SqlAccountStore(sessions)
         logins = Logins(store)
         policies = GamePolicies(SqlSettingStore(sessions))
-        accounts = AccountService(store, logins, entitlements, Terms.load(), policies)
+        mailer = None
+        if settings.smtp_host and settings.smtp_sender:
+            mailer = SmtpMailer(settings, settings.smtp_host, settings.smtp_sender)
+        verification = EmailVerification(store, mailer, settings.public_url)
+        app.state.verification = verification
+        accounts = AccountService(store, logins, entitlements, Terms.load(), policies, verification)
         persona_store = SqlPersonaStore(sessions)
         personas = PersonaService(persona_store)
         await personas.prepare(await accounts.prepare(games))
@@ -128,7 +136,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app = FastAPI(
         title="OpenFESL", lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None
     )
+
+    async def confirm(token: str) -> Confirmation:
+        verification: EmailVerification = app.state.verification
+        return await verification.confirm(token)
+
     app.add_api_websocket_route("/", relay_endpoint(start_session))
+    app.include_router(verification_routes(confirm))
     app.add_middleware(GameHttpMiddleware, http=game_http)
 
     @app.get("/health", response_class=PlainTextResponse)

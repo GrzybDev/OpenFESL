@@ -6,7 +6,7 @@ from babel import Locale, UnknownLocaleError
 
 from openfesl.core.games import Ages
 from openfesl.core.policies import RegistrationPolicies, UnderParentalAge
-from openfesl.core.texts import load_texts
+from openfesl.core.texts import language_of, load_texts
 from openfesl.protocol.fesl import FieldError
 
 # The game maps a field error one lower before it picks a text, so its "password is too long"
@@ -48,7 +48,7 @@ class Terms:
         Args:
             locale: The locale of the game's Hello, such as pl_PL.
         """
-        return self._texts.get(locale.split("_")[0].lower(), self._texts["en"])
+        return self._texts.get(language_of(locale), self._texts["en"])
 
 
 def countries(locale: str) -> list[tuple[str, str]]:
@@ -57,7 +57,7 @@ def countries(locale: str) -> list[tuple[str, str]]:
     Args:
         locale: The locale of the game's Hello, such as pl_PL.
     """
-    language = locale.split("_")[0].lower()
+    language = language_of(locale)
     return _countries(language if language.isalpha() and len(language) <= 3 else "en")
 
 

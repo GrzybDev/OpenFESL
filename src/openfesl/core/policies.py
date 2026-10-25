@@ -51,9 +51,12 @@ class AccountPolicies(_Section):
     """How accounts log in.
 
     Attributes:
+        email_verification: Whether a new account logs in only once a link sent to its
+            address confirmed it.
         concurrent_login: What a player's login does while the account is logged in elsewhere.
     """
 
+    email_verification: bool
     concurrent_login: ConcurrentLogin
 
 

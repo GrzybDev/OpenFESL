@@ -1,0 +1,45 @@
+# The Polish texts of OpenFESL, by id.
+msgid ""
+msgstr ""
+"Project-Id-Version: OpenFESL\n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
+"|| n%100>=20) ? 1 : 2);\n"
+
+msgid "verification.mail.subject"
+msgstr "Potwierdzenie adresu e-mail konta OpenFESL"
+
+#, python-brace-format
+msgid "verification.mail.body"
+msgstr ""
+"Na ten adres e-mail zarejestrowano konto OpenFESL. Logowanie na nie będzie "
+"możliwe po potwierdzeniu adresu za pomocą tego linku:\n"
+"\n"
+"{link}\n"
+"\n"
+"Link jest ważny do {expires}. Po tym czasie następne logowanie w grze wyśle "
+"nowy link. Konto z niepotwierdzonym adresem nie może się logować; nie trzeba "
+"podejmować żadnych innych działań.\n"
+
+msgid "verification.page.confirmed.heading"
+msgstr "Adres e-mail potwierdzony"
+
+msgid "verification.page.confirmed.text"
+msgstr "Na to konto można już zalogować się w grze."
+
+msgid "verification.page.expired.heading"
+msgstr "Link wygasł"
+
+msgid "verification.page.expired.text"
+msgstr "Następne logowanie w grze wyśle nowy link na adres e-mail konta."
+
+msgid "verification.page.unknown.heading"
+msgstr "Nieprawidłowy link"
+
+msgid "verification.page.unknown.text"
+msgstr ""
+"Ten link jest nieprawidłowy albo został już użyty. Potwierdzony adres nie "
+"wymaga dalszych działań."

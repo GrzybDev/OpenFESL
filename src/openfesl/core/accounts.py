@@ -1,4 +1,5 @@
 import logging
+import re
 import secrets
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -9,7 +10,7 @@ from openfesl.core.entitlements import UNKNOWN_KEY, EntitlementStore
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Game, Games
 from openfesl.core.logins import INVALID_PASSWORD, UNKNOWN_USER, Logins
-from openfesl.core.policies import ConcurrentLogin, GamePolicies
+from openfesl.core.policies import ConcurrentLogin, GamePolicies, Policies
 from openfesl.core.registration import (
     INVALID_VALUE,
     TOO_LONG,
@@ -18,6 +19,8 @@ from openfesl.core.registration import (
     countries,
     is_country,
 )
+from openfesl.core.texts import language_of
+from openfesl.core.verification import EmailVerification, Link, new_link
 from openfesl.protocol.acct import (
     Country,
     GetCountryListAnswer,
@@ -41,6 +44,9 @@ MINIMUM_PASSWORD = 8
 # The SDK keeps 31 bytes of a password and logs in again after registration with what it kept.
 MAXIMUM_PASSWORD = 31
 MAXIMUM_NAME = 63
+
+# Enough to tell an address that mail can be sent to from a name that is none.
+_ADDRESS = re.compile(r"[^@\s]+@[^@\s]+\.[^@\s]+")
 
 # No account here belongs to a console identity, and the service hands out no tokens for other
 # services; the SDK passes these errors on to the game.
@@ -74,6 +80,8 @@ class Account:
         server: Whether the account belongs to a game's dedicated servers.
         state: Whether the admin lets it log in.
         state_until: When a state other than active ends, if it does.
+        verification_expires_at: When the link that confirms its e-mail address expires, while
+            it waits for that; None once confirmed or when it never had to be.
     """
 
     id: int
@@ -83,6 +91,7 @@ class Account:
     server: bool
     state: AccountState
     state_until: datetime | None
+    verification_expires_at: datetime | None
 
     def login_error(self) -> int | None:
         """Return the NuLogin error that the account's state refuses its logins with, if any."""
@@ -127,6 +136,7 @@ class AccountStore(Protocol):
         terms_version: str | None,
         *,
         server: bool = False,
+        verification: Link | None = None,
     ) -> Account | None:
         """Create an account, or return None when the name is taken.
 
@@ -136,6 +146,7 @@ class AccountStore(Protocol):
             country: The ISO code chosen on registration.
             terms_version: The version of the terms accepted on registration, if current.
             server: Whether the account belongs to a game's dedicated servers.
+            verification: The link that must confirm its e-mail address before it logs in.
         """
 
     async def accept_terms(self, account_id: int, version: str) -> None:
@@ -197,6 +208,7 @@ class AccountService:
         entitlements: EntitlementStore,
         terms: Terms,
         policies: GamePolicies,
+        verification: EmailVerification,
     ) -> None:
         """Serve accounts from a store.
 
@@ -206,12 +218,14 @@ class AccountService:
             entitlements: Where the entitlements that let players in are kept.
             terms: The service's terms.
             policies: Each game's policies.
+            verification: Confirms the e-mail addresses of new accounts.
         """
         self._store = store
         self._logins = logins
         self._entitlements = entitlements
         self._terms = terms
         self._policies = policies
+        self._verification = verification
 
     async def prepare(self, games: Games) -> list[tuple[Game, Account]]:
         """Create the accounts that the games' dedicated servers log in with.
@@ -256,14 +270,14 @@ class AccountService:
 
         Raises:
             TransactionError: When the account is unknown, the password or token is wrong, the
-                player is logged in elsewhere and the game's policy refuses a second login, the
-                terms are out of date, a player lacks the game's entitlement, or a player and a
-                server account meet.
+                account waits for its address to be confirmed, the player is logged in
+                elsewhere and the game's policy refuses a second login, the terms are out of
+                date, a player lacks the game's entitlement, or a player and a server account
+                meet.
         """
         assert connection.hello is not None and connection.client is not None
         assert connection.game is not None
         policies = await self._policies.of(connection.game)
-        replace = policies.accounts.concurrent_login is ConcurrentLogin.REPLACE
         token = None
         # The client string decides, not the client type the game declares, so a player cannot
         # skip the game's entitlement by connecting as a dedicated server's client.
@@ -272,9 +286,9 @@ class AccountService:
                 raise TransactionError(INVALID_PASSWORD)
             account = await self._server_account(expected, request.nuid)
         else:
-            account, token = await self._player_account(connection, request, replace=replace)
+            account, token = await self._player_account(connection, request, policies)
         key = secrets.token_urlsafe(20) + "."
-        connection.session.log_in(account, key, connection, replace=replace)
+        connection.session.log_in(account, key, connection, replace=_replaces(policies))
         logger.info("Account %d (%s) logged in", account.id, account.nuid)
         return NuLoginAnswer(
             lkey=key, nuid=account.nuid, user_id=account.id, encrypted_login_info=token
@@ -291,10 +305,15 @@ class AccountService:
             TransactionError: When fields are invalid, the player is too young for the game's
                 age check, or the name is taken.
         """
-        assert connection.game is not None
+        assert connection.hello is not None and connection.game is not None
         policies = await self._policies.of(connection.game)
+        verify = policies.accounts.email_verification
         errors = []
-        if not 3 <= len(request.nuid) <= MAXIMUM_NAME or not request.nuid.isprintable():
+        if (
+            not 3 <= len(request.nuid) <= MAXIMUM_NAME
+            or not request.nuid.isprintable()
+            or (verify and not _ADDRESS.fullmatch(request.nuid))
+        ):
             errors.append(FieldError(field_name="email", field_error=INVALID_VALUE))
         if error := password_error("password", request.password):
             errors.append(error)
@@ -312,12 +331,16 @@ class AccountService:
             raise TransactionError(PARAMETERS_ERROR, errors)
         password_hash = await self._logins.hash(request.password)
         accepted = request.tos_version if request.tos_version == self._terms.version else None
+        token, link = new_link() if verify else (None, None)
         account = await self._store.add(
-            request.nuid, password_hash, request.country.upper(), accepted
+            request.nuid, password_hash, request.country.upper(), accepted, verification=link
         )
         if account is None:
             raise TransactionError(ALREADY_REGISTERED)
         logger.info("Account %d (%s) registered", account.id, account.nuid)
+        if token and link:
+            language = language_of(connection.hello.locale)
+            self._verification.send(account.nuid, token, link, language)
         return Message()
 
     async def terms(self, connection: FeslConnection, request: NuGetTos) -> NuGetTosAnswer:
@@ -384,17 +407,20 @@ class AccountService:
         return Message()
 
     async def _player_account(
-        self, connection: FeslConnection, request: NuLogin, *, replace: bool
+        self, connection: FeslConnection, request: NuLogin, policies: Policies
     ) -> tuple[Account, str | None]:
-        assert connection.client is not None
+        assert connection.hello is not None and connection.client is not None
         entitlement = connection.client.entitlement
         credentials = await self._authenticate(
             request.nuid, request.password, request.encrypted_info
         )
         account = credentials.account
+        # Only while the policy is on, so turning it off lets waiting accounts in.
+        if policies.accounts.email_verification:
+            await self._verification.require(account, language_of(connection.hello.locale))
         # Before a token is remembered: an account keeps only its newest tokens, so those of
         # refused logins would push out the one of the session it is logged in on.
-        connection.session.admit(account, replace=replace)
+        connection.session.admit(account, replace=_replaces(policies))
         if account.terms_version != self._terms.version:
             if request.tos_version != self._terms.version:
                 raise TransactionError(TERMS_OUT_OF_DATE)
@@ -436,6 +462,10 @@ def password_error(field_name: str, password: str) -> FieldError | None:
     if len(password.encode()) > MAXIMUM_PASSWORD:
         return FieldError(field_name=field_name, field_error=TOO_LONG)
     return None
+
+
+def _replaces(policies: Policies) -> bool:
+    return policies.accounts.concurrent_login is ConcurrentLogin.REPLACE
 
 
 def _refusal(code: int) -> Route[Message]:

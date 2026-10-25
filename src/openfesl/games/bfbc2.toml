@@ -19,6 +19,8 @@ registration.age_check = true
 # A player old enough to register but not without a parent's consent registers, since the PC
 # game has no form for a parent's e-mail (or: refuse).
 registration.under_parental_age = "allow"
+# A new account logs in only once the link sent to its address was opened (or: true).
+accounts.email_verification = false
 # A login while the account plays elsewhere signs the other game out (or: refuse).
 accounts.concurrent_login = "replace"
 # The oldest client version that may connect, such as "1.0"; older ones are told to update.

@@ -19,6 +19,8 @@ class AdminAction(StrEnum):
     ACCOUNT_STATE = "account_state"
     """Changed the state of the account numbered as the target; the details hold the state and
     when it ends, if it does."""
+    ACCOUNT_VERIFIED = "account_verified"
+    """Confirmed the e-mail address of the account numbered as the target by hand."""
     PERSONA_STATE = "persona_state"
     """Changed the state of the persona numbered as the target; the details hold the state."""
 

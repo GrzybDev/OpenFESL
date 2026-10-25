@@ -10,8 +10,8 @@ An original copy of the game is needed; OpenFESL contains no game files.
 
 For Battlefield: Bad Company 2 on PC, the game and its dedicated server:
 
-- Accounts: registration with the terms the game shows and the countries' age limits, logins with remembered logins,
-  personas, account details and password changes
+- Accounts: registration with the terms the game shows and the countries' age limits, optional e-mail verification,
+  logins with remembered logins, personas, account details and password changes
 - Product keys and the entitlements they grant
 - Stats, ranked stats and leaderboards, and the records players keep per persona (dog tags, clan tag)
 - Friends, block and mute lists, presence, and messages between players, delivered at the next login when the
@@ -53,6 +53,13 @@ The server reads its settings from the environment.
 | `BEHIND_TRUSTED_PROXY` | `true` when every request comes through a proxy that sets `CLIENT_IP_HEADER`; any client could set the header otherwise | `false` |
 | `CLIENT_IP_HEADER` | The header that carries the client's address behind that proxy, such as `CF-Connecting-IP` | none |
 | `LOG_LEVEL` | The lowest level logged; `DEBUG` logs every packet with secrets masked | `INFO` |
+| `SMTP_HOST` | The mail server that sends new accounts the link confirming their address; without one no mail goes out | none |
+| `SMTP_PORT` | The mail server's port | `587` |
+| `SMTP_SECURITY` | `starttls` upgrades a plain connection, `tls` encrypts from the start (usually port 465), `none` leaves it plain | `starttls` |
+| `SMTP_USER` | The name to log in to the mail server with, if it needs a login | none |
+| `SMTP_PASSWORD` | The password of that login | none |
+| `SMTP_SENDER` | The address mail comes from; required for mail to go out | none |
+| `PUBLIC_URL` | The address the server's web pages are reached at, where the links in mail lead, such as `https://fesl.example.com`; required for mail to go out | none |
 
 The database schema is created and upgraded when the server starts.
 
@@ -85,10 +92,11 @@ The `openfesl` command in the server's container manages what the admin decides:
 | `openfesl settings set KEY VALUE` | Overrides the game's default for this server |
 | `openfesl settings reset KEY` | Returns a policy to the game's default |
 | `openfesl accounts state LOGIN active\|disabled\|banned\|deactivated [--until DATE]` | Sets whether an account may log in; the game's login form names the state, and a player online is signed out, with the game's ban notice for a ban. `--until` ends the state at a date such as `2026-12-01` or `2026-12-01T18:00+01:00`, UTC unless it names an offset |
+| `openfesl accounts verify LOGIN` | Confirms an account's e-mail address by hand, so that it may log in |
 | `openfesl personas state NAME active\|disabled` | Sets whether a player's persona may play; the game names a disabled persona as disabled by customer support when its player picks it or another player wants its name |
 
-The `settings`, `accounts` and `personas` commands record each change with its time. A running server applies account changes
-within seconds.
+The `settings`, `accounts` and `personas` commands record each change with its time. A running server applies
+account changes within seconds.
 
 ## Policies
 
@@ -101,6 +109,7 @@ without a parent's consent. A birth date is checked and never stored.
 |---|---|---|
 | `registration.age_check` | `on`: a birth date under the country's registration age is refused; `off`: birth dates are not checked | `on` |
 | `registration.under_parental_age` | `allow`: players old enough to register but under the country's age for registering without a parent's consent register; `refuse`: they are refused, and the game disconnects | `allow` |
+| `accounts.email_verification` | `on`: a new account logs in only once the link mailed to its address is opened; until then the game shows that the account waits for authorization. A link is valid for a day, and a login after that sends a new one. `off`: new accounts log in at once, and so do those still waiting | `off` |
 | `accounts.concurrent_login` | `replace`: a login signs the account's other game out; `refuse`: a second login is refused, and the game shows its notice about too many login attempts | `replace` |
 | `connect.minimum_client_version` | The oldest version of the game's client that may connect, such as `1.0`, compared number by number; older clients are told that an update is required. Empty lets every version in | empty |
 | `connect.minimum_hook_version` | The oldest version of OpenFESLHook that may connect, such as `0.2.0`, compared number by number, with a pre-release such as `0.2.0-dev` older than its release; players and dedicated servers whose hook is older or names no version are told that an update is required. Empty lets every hook in | empty |
