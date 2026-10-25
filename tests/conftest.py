@@ -5,15 +5,17 @@ from collections.abc import AsyncIterator, Iterator
 import anyio
 import pytest
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 # Docker Desktop on Windows publishes container ports on 127.0.0.1, not on the name localhost.
 os.environ.setdefault("TESTCONTAINERS_HOST_OVERRIDE", "127.0.0.1")
 
 from testcontainers.community.postgres import PostgresContainer
 
-from openfesl.core import admin
+from openfesl.core import admin, history
 from openfesl.server.cli import RelayServer, main, uvicorn_config
+from openfesl.storage.database import migrate
+from openfesl.storage.history import SqlHistoryStore
 
 
 @pytest.fixture
@@ -46,7 +48,10 @@ async def relay_server(
     engine = create_async_engine(database_url)
     async with engine.begin() as connection:
         # The keys too, so that the next server starts with the game data's keys, unlimited.
-        tables = "account, stat, game_server, provider, setting, admin_action, product_key"
+        tables = (
+            "account, stat, game_server, provider, setting, admin_action, product_key, "
+            "activity_hour, activity_day"
+        )
         await connection.execute(text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE"))
     await engine.dispose()
 
@@ -66,3 +71,19 @@ def prompt_actions(monkeypatch: pytest.MonkeyPatch) -> None:
 async def open_hosting(server_url: str) -> None:
     # Approval has tests of its own; elsewhere any dedicated server may host.
     await anyio.to_thread.run_sync(main, ["hosting", "open"])
+
+
+@pytest.fixture
+def quick_counts(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Before the server starts, whose first wait would otherwise last a minute.
+    monkeypatch.setattr(history, "SAMPLE_INTERVAL", 0.05)
+
+
+@pytest.fixture
+async def history_store(database_url: str) -> AsyncIterator[SqlHistoryStore]:
+    engine = create_async_engine(database_url)
+    await migrate(engine)
+    yield SqlHistoryStore(async_sessionmaker(engine))
+    async with engine.begin() as connection:
+        await connection.execute(text("TRUNCATE activity_hour, activity_day"))
+    await engine.dispose()

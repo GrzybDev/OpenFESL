@@ -250,3 +250,25 @@ class GameServerRow(Base):
     # provider, so that one created later is recognised.
     provider_id: Mapped[bytes | None] = mapped_column(LargeBinary)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ActivityHourRow(Base):
+    __tablename__ = "activity_hour"
+
+    game: Mapped[str] = mapped_column(primary_key=True)
+    hour: Mapped[datetime] = mapped_column(DateTime(timezone=True), primary_key=True)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    online: Mapped[int]
+    in_matches: Mapped[int]
+    servers: Mapped[int]
+
+
+class ActivityDayRow(Base):
+    __tablename__ = "activity_day"
+
+    game: Mapped[str] = mapped_column(primary_key=True)
+    day: Mapped[date] = mapped_column(primary_key=True)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    online: Mapped[int]
+    in_matches: Mapped[int]
+    servers: Mapped[int]

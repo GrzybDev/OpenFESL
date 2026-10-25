@@ -19,6 +19,7 @@ from openfesl.core.entitlements import EntitlementService
 from openfesl.core.fesl import Route
 from openfesl.core.game_http import GameHttp
 from openfesl.core.games import load_games
+from openfesl.core.history import OnlineHistory
 from openfesl.core.hosting import Hosting
 from openfesl.core.joining import Joining
 from openfesl.core.leaderboards import LeaderboardService
@@ -45,6 +46,7 @@ from openfesl.storage.admin import SqlAdminLog
 from openfesl.storage.associations import SqlAssociationStore
 from openfesl.storage.database import migrate
 from openfesl.storage.entitlements import SqlEntitlementStore
+from openfesl.storage.history import SqlHistoryStore
 from openfesl.storage.messages import SqlMessageStore
 from openfesl.storage.personas import SqlPersonaStore
 from openfesl.storage.records import SqlRecordStore
@@ -87,6 +89,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     approval = Approval(SqlServerStore(sessions))
     hosting = Hosting(approval)
     census = Census(hosting, players)
+    history = OnlineHistory(SqlHistoryStore(sessions), census, games)
     stats = SqlStatStore(sessions)
     persona_store = SqlPersonaStore(sessions)
     records = SqlRecordStore(sessions)
@@ -137,6 +140,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         followers = [
             asyncio.create_task(hosting.follow_approvals()),
             asyncio.create_task(feed.follow(await admin_log.last())),
+            asyncio.create_task(history.follow()),
         ]
         yield
         for follower in followers:
