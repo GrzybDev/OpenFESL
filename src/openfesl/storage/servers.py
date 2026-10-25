@@ -1,12 +1,20 @@
 from collections.abc import Collection
+from dataclasses import replace
 
-from sqlalchemy import ColumnElement, select, update
+from sqlalchemy import ColumnElement, func, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin
-from openfesl.core.servers import Decision, GameServer, HostingMode, Provider, ServerState
+from openfesl.core.servers import (
+    Decision,
+    GameServer,
+    HostingMode,
+    Provider,
+    ProviderHistory,
+    ServerState,
+)
 from openfesl.storage.admin import action_row
 from openfesl.storage.models import AdminActionRow, GameServerRow, ProviderRow, SettingRow
 
@@ -46,14 +54,28 @@ class SqlServerStore:
                 )
             )
 
-    async def add_provider(self, provider: Provider) -> None:
-        """Keep a new provider.
+    async def add_provider(self, provider: Provider, admin: Admin | None) -> bool:
+        """Keep a new provider, unless another has its name, recording who added it.
 
         Args:
             provider: The provider, with an id no other provider has.
+            admin: The admin who added it; None for the command line.
+
+        Returns:
+            Whether it was kept: names are unique, compared without case.
         """
         async with self._sessions.begin() as session:
+            taken = await session.scalar(
+                select(ProviderRow.id).where(
+                    func.lower(ProviderRow.name) == provider.name.casefold()
+                )
+            )
+            if taken is not None:
+                return False
             session.add(ProviderRow(id=provider.id, name=provider.name, revoked=provider.revoked))
+            details = {"name": provider.name}
+            session.add(action_row(AdminAction.PROVIDER_ADD, provider.id.hex(), details, admin))
+        return True
 
     async def providers(self) -> list[Provider]:
         """Return every provider, oldest first."""
@@ -63,11 +85,12 @@ class SqlServerStore:
             )
             return [_provider(row) for row in rows]
 
-    async def revoke_provider(self, provider_id: bytes) -> bool:
-        """Revoke a provider, which revokes every server that reports it.
+    async def revoke_provider(self, provider_id: bytes, admin: Admin | None) -> bool:
+        """Revoke a provider, which revokes every server that reports it, recording who did.
 
         Args:
             provider_id: The provider's id.
+            admin: The admin who revoked it; None for the command line.
 
         Returns:
             Whether a provider has that id.
@@ -79,7 +102,31 @@ class SqlServerStore:
                 .values(revoked=True)
                 .returning(ProviderRow.id)
             )
+            if changed is not None:
+                action = AdminAction.PROVIDER_REVOKE
+                session.add(action_row(action, provider_id.hex(), {}, admin))
         return changed is not None
+
+    async def provider_history(self) -> dict[bytes, ProviderHistory]:
+        """Return when each provider was added and revoked, and by whom, by its id."""
+        actions = (AdminAction.PROVIDER_ADD.value, AdminAction.PROVIDER_REVOKE.value)
+        async with self._sessions() as session:
+            providers = await session.execute(select(ProviderRow.id, ProviderRow.created_at))
+            history = {id: ProviderHistory(added) for id, added in providers}
+            rows = await session.scalars(
+                select(AdminActionRow)
+                .where(AdminActionRow.action.in_(actions))
+                .order_by(AdminActionRow.id)
+            )
+            for row in rows:
+                provider_id = bytes.fromhex(row.target)
+                if (found := history.get(provider_id)) is None:
+                    continue
+                if row.action == AdminAction.PROVIDER_ADD:
+                    history[provider_id] = replace(found, added_by=row.admin_name)
+                else:
+                    history[provider_id] = replace(found, revoked=row.at, revoked_by=row.admin_name)
+        return history
 
     async def add(self, server: GameServer) -> None:
         """Keep a new server.

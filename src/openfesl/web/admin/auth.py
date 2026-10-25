@@ -305,6 +305,17 @@ def _admin(signed_in: Mapping[str, str]) -> Admin:
     return Admin(signed_in["subject"], signed_in["name"], Role(signed_in["role"]))
 
 
+def back_to(request: Request, back: str, default: str = "/admin/") -> str:
+    """Return the panel's page that a form returns to: the one it names, or a default.
+
+    Args:
+        request: The form's request, whose language the default takes.
+        back: The page the form names; another site's is never used.
+        default: The page otherwise, such as the panel's home.
+    """
+    return _inside(back) or localize(default, request.state.language)
+
+
 def _inside(path: str) -> str:
     # Only the panel's own pages open after signing in, never another site.
     if path.startswith(("/admin/", "/pl/admin/")) and "//" not in path and "\\" not in path:

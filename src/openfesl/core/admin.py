@@ -25,6 +25,10 @@ class AdminAction(StrEnum):
     """Changed the state of the persona numbered as the target; the details hold the state."""
     PLAYER_KICK = "player_kick"
     """Kicked the persona numbered as the target from the games it joins, plays or waits for."""
+    PROVIDER_ADD = "provider_add"
+    """Added the provider whose id, in hex, is the target; the details hold its name."""
+    PROVIDER_REVOKE = "provider_revoke"
+    """Revoked the provider whose id, in hex, is the target, and with it its servers."""
     SERVER_STATE = "server_state"
     """Approved or revoked the dedicated server whose persistent game id is the target; the
     details hold its new state."""

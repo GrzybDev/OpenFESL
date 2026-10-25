@@ -8,11 +8,14 @@
   </div>
   <Panel class="enter-panel refused">
     {% if reason == "role" %}
-      <Alert :label="_('web.admin.refused.role.label')" :title="_('web.admin.refused.role.title')" glyph="guard" alert>{{ _("web.admin.refused.role.text", name=viewer.admin.name) }}</Alert>
+      <Alert :label="_('web.admin.refused.role.label')" :title="_('web.admin.refused.role.title')" glyph="guard" alert>{{ _("web.admin.refused.role.text", name=viewer.admin.name) }}{% if section %} {{ _("web.admin.refused.role." ~ section) }}{% endif %}</Alert>
     {% else %}
       <Alert :label="_('web.admin.refused.expired.label')" :title="_('web.admin.refused.expired.title')" glyph="warn" alert>{{ _("web.admin.refused.expired.text") }}</Alert>
     {% endif %}
     <div class="actions">
+      {% if viewer and section %}
+        <SmallAction :href="url('/admin/' ~ section)" :label="_('web.admin.menu.' ~ section)" />
+      {% endif %}
       <SmallAction :href="url('/admin/') if viewer else url('/admin/sign-in')" :label="_('web.admin.menu.home') if viewer else _('web.admin.sign_in')" />
     </div>
   </Panel>

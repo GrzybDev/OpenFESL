@@ -2633,3 +2633,261 @@ msgstr "Otwórz %(name)s"
 
 msgid "web.admin.servers.approved_link"
 msgstr "Zatwierdzone serwery"
+
+msgid "web.admin.menu.providers"
+msgstr "Dostawcy"
+
+msgid "web.admin.providers"
+msgstr "Dostawcy"
+
+msgid "web.admin.providers.subtitle"
+msgstr "Operatorzy serwerów dedykowanych"
+
+msgid "web.admin.providers.states"
+msgstr "Stan dostawcy"
+
+msgid "web.admin.providers.tab.active"
+msgstr "Aktywni"
+
+msgid "web.admin.providers.tab.revoked"
+msgstr "Cofnięci"
+
+msgid "web.admin.providers.list.active"
+msgstr "Aktywni dostawcy"
+
+msgid "web.admin.providers.list.revoked"
+msgstr "Cofnięci dostawcy"
+
+msgid "web.admin.provider.state.active"
+msgstr "Aktywny"
+
+msgid "web.admin.provider.state.active.waiting.one"
+msgstr "Aktywny, %(count)s serwer czeka"
+
+msgid "web.admin.provider.state.active.waiting.few"
+msgstr "Aktywny, %(count)s serwery czekają"
+
+msgid "web.admin.provider.state.active.waiting.many"
+msgstr "Aktywny, %(count)s serwerów czeka"
+
+msgid "web.admin.provider.state.active.waiting.other"
+msgstr "Aktywny, %(count)s serwera czeka"
+
+msgid "web.admin.provider.state.revoked"
+msgstr "Cofnięty"
+
+msgid "web.admin.column.waiting"
+msgstr "Czekające"
+
+msgid "web.admin.column.added"
+msgstr "Dodanie"
+
+msgid "web.admin.hosting_count"
+msgstr "Teraz prowadzi grę: %(count)s"
+
+msgid "web.admin.provider.page.of"
+msgstr "Strona dostawcy: %(name)s"
+
+msgid "web.admin.provider.details.active"
+msgstr "Aktywny · dodanie %(time)s · %(name)s"
+
+msgid "web.admin.provider.details.revoked"
+msgstr "Cofnięty · %(time)s · %(name)s"
+
+msgid "web.admin.provider.details.revoked.earlier"
+msgstr "Cofnięty"
+
+msgid "web.admin.provider_id.copy"
+msgstr "Kopiuj identyfikator dostawcy"
+
+msgid "web.admin.provider_id.copied"
+msgstr "Skopiowano identyfikator dostawcy."
+
+msgid "web.admin.file"
+msgstr "Plik"
+
+msgid "web.admin.file.size"
+msgstr "Bajty: %(count)s"
+
+msgid "web.admin.servers_count"
+msgstr "Zatwierdzone: %(approved)s · czekające: %(waiting)s · cofnięte: %(revoked)s"
+
+msgid "web.admin.servers_of"
+msgstr "Serwery dostawcy %(name)s"
+
+msgid "web.admin.server.line.waiting"
+msgstr "Czeka od %(time)s"
+
+msgid "web.admin.server.line.approved"
+msgstr "Zatwierdzony · prowadzi grę %(players)s / %(slots)s"
+
+msgid "web.admin.server.line.idle"
+msgstr "Zatwierdzony · nie prowadzi gry"
+
+msgid "web.admin.server.line.revoked"
+msgstr "Cofnięty"
+
+msgid "web.admin.provider.note.approved"
+msgstr "Każdy serwer uruchomiony z tym plikiem przesyła %(name)s jako swojego dostawcę. Dopóki tryb dopuszczania serwerów to %(mode)s, każdy nowy serwer czeka na zatwierdzenie."
+
+msgid "web.admin.provider.note.open"
+msgstr "Każdy serwer uruchomiony z tym plikiem przesyła %(name)s jako swojego dostawcę. Dopóki tryb dopuszczania serwerów to %(mode)s, jego serwery od razu wystawiają swoje gry."
+
+msgid "web.admin.provider.note.revoked"
+msgstr "Jego serwery są odrzucane, także te uruchomione później z jego plikiem. Cofniętego dostawcy nie można przywrócić; jego operator potrzebowałby nowego dostawcy i pliku."
+
+msgid "web.admin.download"
+msgstr "Pobierz %(file)s"
+
+msgid "web.admin.provider.revoke"
+msgstr "Cofnij dostawcę"
+
+msgid "web.admin.provider.revoke.busy"
+msgstr "Cofanie…"
+
+msgid "web.admin.provider.how.one"
+msgstr "Cofnięcie wymaga potwierdzenia, a potem obejmuje jego %(count)s serwer."
+
+msgid "web.admin.provider.how.few"
+msgstr "Cofnięcie wymaga potwierdzenia, a potem obejmuje wszystkie %(count)s jego serwery."
+
+msgid "web.admin.provider.how.many"
+msgstr "Cofnięcie wymaga potwierdzenia, a potem obejmuje wszystkie %(count)s jego serwerów."
+
+msgid "web.admin.provider.how.other"
+msgstr "Cofnięcie wymaga potwierdzenia, a potem obejmuje wszystkie %(count)s jego serwera."
+
+msgid "web.admin.provider.how.none"
+msgstr "Cofnięcie wymaga potwierdzenia; serwery uruchomione później z jego plikiem są odrzucane."
+
+msgid "web.admin.providers.count"
+msgstr "Dostawcy: %(count)s"
+
+msgid "web.admin.providers.order"
+msgstr "Według nazwy"
+
+msgid "web.admin.providers.unmatched.one"
+msgstr "%(count)s serwer przesyła identyfikator, który nie pasuje do żadnego dostawcy"
+
+msgid "web.admin.providers.unmatched.few"
+msgstr "%(count)s serwery przesyłają identyfikator, który nie pasuje do żadnego dostawcy"
+
+msgid "web.admin.providers.unmatched.many"
+msgstr "%(count)s serwerów przesyła identyfikator, który nie pasuje do żadnego dostawcy"
+
+msgid "web.admin.providers.unmatched.other"
+msgstr "%(count)s serwera przesyła identyfikator, który nie pasuje do żadnego dostawcy"
+
+msgid "web.admin.providers.none.active"
+msgstr "Nie dodano jeszcze żadnego dostawcy."
+
+msgid "web.admin.providers.none.active.text"
+msgstr "Dostawca dodany tutaj otrzymuje własny plik ProviderId.dat dla serwerów swojego operatora."
+
+msgid "web.admin.providers.none.revoked"
+msgstr "Żaden dostawca nie jest cofnięty."
+
+msgid "web.admin.providers.none.revoked.text"
+msgstr "Serwery cofniętego dostawcy są odrzucane, także te uruchomione później z jego plikiem."
+
+msgid "web.admin.provider.add"
+msgstr "Dodaj dostawcę"
+
+msgid "web.admin.provider.name"
+msgstr "Nazwa dostawcy"
+
+msgid "web.admin.provider.name.hint"
+msgstr "Nazwa operatora lub społeczności"
+
+msgid "web.admin.provider.name.note"
+msgstr "Widoczna przy jego serwerach w tym panelu; każda nazwa może być użyta raz. OpenFESL tworzy plik %(file)s dostawcy."
+
+msgid "web.admin.provider.name.taken"
+msgstr "Dostawca o nazwie %(name)s już istnieje; wielkość liter nie ma znaczenia."
+
+msgid "web.admin.provider.name.length"
+msgstr "Nazwa dostawcy zajmuje od 1 do %(count)s bajtów, aby listy gier pokazywały ją w całości."
+
+msgid "web.admin.provider.add.button"
+msgstr "Dodaj dostawcę"
+
+msgid "web.admin.provider.add.busy"
+msgstr "Dodawanie…"
+
+msgid "web.admin.provider.about"
+msgstr "Dostawca odróżnia serwery swojego operatora od innych: serwery dedykowane %(games)s przesyłają identyfikator z pliku %(file)s przy każdym uruchomieniu gry."
+
+msgid "web.admin.provider.managed"
+msgstr "Dostawców dodaje się i cofa z rolą administratora."
+
+msgid "web.admin.provider.added"
+msgstr "Dodano dostawcę"
+
+msgid "web.admin.provider.read_by"
+msgstr "Odczytywany przez"
+
+msgid "web.admin.provider.read_by.servers"
+msgstr "serwery dedykowane"
+
+msgid "web.admin.provider.added_at"
+msgstr "Dodanie"
+
+msgid "web.admin.provider.where"
+msgstr "Gdzie trafia plik"
+
+msgid "web.admin.provider.where.give"
+msgstr "Przekaż plik operatorowi %(name)s prywatnie, poza OpenFESL: każdy serwer uruchomiony z tym plikiem przesyła %(name)s jako swojego dostawcę."
+
+msgid "web.admin.provider.where.put"
+msgstr "Operator umieszcza %(file)s obok %(config)s w folderze serwera dedykowanego. Serwer odczytuje go przy uruchomieniu."
+
+msgid "web.admin.provider.where.wait"
+msgstr "W trybie %(mode)s każdy serwer uruchomiony z tym plikiem czeka w zakładce %(servers)s na zatwierdzenie."
+
+msgid "web.admin.provider.where.again"
+msgstr "Plik można pobrać ponownie ze szczegółów dostawcy."
+
+msgid "web.admin.confirm.provider"
+msgstr "Cofnąć tego dostawcę?"
+
+msgid "web.admin.confirm.provider.text.one"
+msgstr "Jego %(count)s serwer zostaje cofnięty: jego gra od razu znika z listy serwerów, kolejne próby uruchomienia gry są odrzucane, a przesyłane statystyki przestają być zapisywane. Serwery uruchomione później z jego plikiem %(file)s też są odrzucane. Cofniętego dostawcy nie można przywrócić; jego operator potrzebowałby nowego dostawcy i pliku."
+
+msgid "web.admin.confirm.provider.text.few"
+msgstr "Wszystkie %(count)s jego serwery zostają cofnięte: ich gry od razu znikają z listy serwerów, kolejne próby uruchomienia gry są odrzucane, a przesyłane statystyki przestają być zapisywane. Serwery uruchomione później z jego plikiem %(file)s też są odrzucane. Cofniętego dostawcy nie można przywrócić; jego operator potrzebowałby nowego dostawcy i pliku."
+
+msgid "web.admin.confirm.provider.text.many"
+msgstr "Wszystkie %(count)s jego serwerów zostaje cofniętych: ich gry od razu znikają z listy serwerów, kolejne próby uruchomienia gry są odrzucane, a przesyłane statystyki przestają być zapisywane. Serwery uruchomione później z jego plikiem %(file)s też są odrzucane. Cofniętego dostawcy nie można przywrócić; jego operator potrzebowałby nowego dostawcy i pliku."
+
+msgid "web.admin.confirm.provider.text.other"
+msgstr "Wszystkie %(count)s jego serwera zostają cofnięte: ich gry od razu znikają z listy serwerów, kolejne próby uruchomienia gry są odrzucane, a przesyłane statystyki przestają być zapisywane. Serwery uruchomione później z jego plikiem %(file)s też są odrzucane. Cofniętego dostawcy nie można przywrócić; jego operator potrzebowałby nowego dostawcy i pliku."
+
+msgid "web.admin.confirm.provider.text.none"
+msgstr "Żaden serwer jeszcze go nie przesyła. Serwery uruchomione później z jego plikiem %(file)s są odrzucane. Cofniętego dostawcy nie można przywrócić; jego operator potrzebowałby nowego dostawcy i pliku."
+
+msgid "web.admin.approved_count"
+msgstr "%(count)s · teraz prowadzi grę: %(hosting)s"
+
+msgid "web.admin.waiting_names"
+msgstr "%(count)s · %(names)s"
+
+msgid "web.admin.players_on"
+msgstr "Gracze na jego serwerach"
+
+msgid "web.admin.revoke.confirm"
+msgstr "Cofnij"
+
+msgid "web.admin.toast.provider_revoke"
+msgstr "Cofnięto dostawcę %(name)s i jego serwery."
+
+msgid "web.admin.toast.provider_unchanged"
+msgstr "Dostawca %(name)s był już cofnięty."
+
+msgid "web.admin.refused.role.providers"
+msgstr "Dostawcami i ich plikami zarządza rola administratora."
+
+msgid "web.admin.confirm.provider.text.single"
+msgstr "Jego jedyny serwer zostaje cofnięty: jego gra od razu znika z listy serwerów, kolejne próby uruchomienia gry są odrzucane, a przesyłane statystyki przestają być zapisywane. Serwery uruchomione później z jego plikiem %(file)s też są odrzucane. Cofniętego dostawcy nie można przywrócić; jego operator potrzebowałby nowego dostawcy i pliku."
+
+msgid "web.admin.provider.how.single"
+msgstr "Cofnięcie wymaga potwierdzenia, a potem obejmuje jego jedyny serwer."

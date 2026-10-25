@@ -18,80 +18,61 @@
     </div>
   </PageHead>
   <Panel class="enter-panel confirm-frame">
-    <section aria-labelledby="confirm-question"
-             aria-describedby="confirm-text"
-             data-confirm
-             class="confirm">
-      <div class="confirm-head">
-        <h2 id="confirm-question">{{ _("web.admin.confirm." ~ decision) }}</h2>
-        <button type="button"
-                data-close
-                class="confirm-close"
-                aria-label="{{ _('web.admin.close') }}">
-          <span><Icon name="x" :size="14" stroke="currentColor" /></span>
-        </button>
-      </div>
-      <div class="confirm-body">
-        <ServerTitle :name="server.name" :game="view.game" />
-        <dl class="facts">
-          {% if tab == "approved" %}
-            <Fact :label="_('web.admin.state')">
-              <span aria-hidden="true" class="badge"><Icon name="tick" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.hosting_now") if view.hosting else _("web.admin.hosting_not") }}
-            </Fact>
-            {% if view.hosting %}
-              <Fact :label="_('web.admin.column.hosting')">
-                {{ hosted() }}
-              </Fact>
-              <Fact :label="_('web.admin.column.players')">
-                <span class="confirm-number">{{ number(view.hosting.players) }} / {{ number(view.hosting.max_players) }}</span>
-              </Fact>
-            {% endif %}
-          {% elif tab == "revoked" %}
-            <Fact :label="_('web.admin.state')">
-              <span aria-hidden="true"
-                    class="badge"><Icon name="x" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.state.revoked") }}
-            </Fact>
-          {% endif %}
-          <Fact :label="_('web.admin.provider')">
-            {% if server.provider %}
-              {{ server.provider.name }}
-            {% else %}
-              <span aria-hidden="true"
-                    class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.unknown_provider") }}
-            {% endif %}
+    <Confirmation :question="_('web.admin.confirm.' ~ decision)"
+                  :action="url('/admin/servers/' ~ server.ugid ~ '/' ~ decision)"
+                  :label="_('web.admin.again') if tab == 'revoked' else _('web.admin.' ~ decision)"
+                  :busy="_('web.admin.' ~ decision ~ '.busy')"
+                  :back="back"
+                  :glyph="'go' if decision == 'approve' else 'x'">
+      <ServerTitle :name="server.name" :game="view.game" />
+      <dl class="facts">
+        {% if tab == "approved" %}
+          <Fact :label="_('web.admin.state')">
+            <span aria-hidden="true" class="badge"><Icon name="tick" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.hosting_now") if view.hosting else _("web.admin.hosting_not") }}
           </Fact>
-          {% if not server.provider and server.provider_id %}
-            <Fact :label="_('web.admin.provider_id')">
-              <ProviderId :id="server.provider_id" />
+          {% if view.hosting %}
+            <Fact :label="_('web.admin.column.hosting')">
+              {{ hosted() }}
+            </Fact>
+            <Fact :label="_('web.admin.column.players')">
+              <span class="confirm-number">{{ number(view.hosting.players) }} / {{ number(view.hosting.max_players) }}</span>
             </Fact>
           {% endif %}
-          {% if tab == "waiting" %}
-            {% if view.hosting %}
-              <Fact :label="_('web.admin.tried')">
-                {{ hosted() }}
-              </Fact>
-            {% endif %}
-            <Fact :label="_('web.admin.attempts')">
-              <span class="confirm-number">{{ number(view.attempts.last_hour) }}</span>
-            </Fact>
-          {% elif tab == "revoked" %}
-            <Fact :label="_('web.admin.refused_today')">
-              <span class="confirm-number">{{ number(view.attempts.refused_today) }}</span>
+        {% elif tab == "revoked" %}
+          <Fact :label="_('web.admin.state')">
+            <span aria-hidden="true"
+                  class="badge"><Icon name="x" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.state.revoked") }}
+          </Fact>
+        {% endif %}
+        <Fact :label="_('web.admin.provider')">
+          {% if server.provider %}
+            {{ server.provider.name }}
+          {% else %}
+            <span aria-hidden="true"
+                  class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.unknown_provider") }}
+          {% endif %}
+        </Fact>
+        {% if not server.provider and server.provider_id %}
+          <Fact :label="_('web.admin.provider_id')">
+            <ProviderId :id="server.provider_id" />
+          </Fact>
+        {% endif %}
+        {% if tab == "waiting" %}
+          {% if view.hosting %}
+            <Fact :label="_('web.admin.tried')">
+              {{ hosted() }}
             </Fact>
           {% endif %}
-        </dl>
-        <p id="confirm-text" class="body-text">{{ _(text) }}</p>
-      </div>
-      <div class="confirm-buttons">
-        <FormButton icon="x" :href="back">{{ _("web.admin.cancel") }}</FormButton>
-        <form method="post"
-              action="{{ url('/admin/servers/' ~ server.ugid ~ '/' ~ decision) }}">
-          <CsrfField />
-          <input type="hidden" name="confirmed" value="1">
-          <input type="hidden" name="back" value="{{ back }}">
-          <SmallAction :label="_('web.admin.again') if tab == 'revoked' else _('web.admin.' ~ decision)" :busy="_('web.admin.' ~ decision ~ '.busy')" :glyph="'go' if decision == 'approve' else 'x'" />
-        </form>
-      </div>
-    </section>
+          <Fact :label="_('web.admin.attempts')">
+            <span class="confirm-number">{{ number(view.attempts.last_hour) }}</span>
+          </Fact>
+        {% elif tab == "revoked" %}
+          <Fact :label="_('web.admin.refused_today')">
+            <span class="confirm-number">{{ number(view.attempts.refused_today) }}</span>
+          </Fact>
+        {% endif %}
+      </dl>
+      <p id="confirm-text" class="body-text">{{ _(text) }}</p>
+    </Confirmation>
   </Panel>
 </AdminPage>

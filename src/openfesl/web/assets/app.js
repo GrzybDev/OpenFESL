@@ -23,7 +23,8 @@ document.addEventListener("click", (event) => {
     plain &&
     !event.defaultPrevented &&
     !block.target &&
-    !block.hasAttribute("data-dialog")
+    !block.hasAttribute("data-dialog") &&
+    !block.hasAttribute("download")
   ) {
     showBusy(block);
   }

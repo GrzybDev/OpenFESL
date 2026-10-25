@@ -1,0 +1,44 @@
+{#def view, file_name: str, back: str #}
+{# The revocation of a provider, which asks first, as a page of its own: the provider, its servers
+   and what revoking it does. Where scripts run, its panel opens as a dialog (M10). #}
+{% set provider = view.provider %}
+{% set title = _("web.admin.providers") %}
+{% set approved = view.servers|selectattr("tab", "equalto", "approved")|list %}
+{% set waiting = view.servers|selectattr("tab", "equalto", "waiting")|map(attribute="server.name")|list %}
+{% set total = view.servers|length %}
+<AdminPage :title="title" current="providers">
+  <PageHead labelledby="confirm-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="confirm-title">{{ _("web.admin.providers.list.active") }}</TitleBlock>
+    </div>
+  </PageHead>
+  <Panel class="enter-panel confirm-frame">
+    <Confirmation :question="_('web.admin.confirm.provider')"
+                  :action="url('/admin/providers/' ~ provider.id.hex() ~ '/revoke')"
+                  :label="_('web.admin.revoke.confirm')"
+                  :busy="_('web.admin.provider.revoke.busy')"
+                  :back="back"
+                  glyph="x">
+      <p class="server-title">{{ provider.name }}</p>
+      <dl class="facts">
+        <Fact :label="_('web.admin.provider_id')">
+          <ProviderId :id="provider.id" />
+        </Fact>
+        <Fact :label="_('web.admin.column.approved')">
+          <span aria-hidden="true" class="badge"><Icon name="tick" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.approved_count", count=number(approved|length), hosting=number(view.hosting|length)) }}
+        </Fact>
+        {% if waiting %}
+          <Fact :label="_('web.admin.column.waiting')">
+            <span aria-hidden="true" class="badge"><Icon name="clock" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.waiting_names", count=number(waiting|length), names=listed(waiting)) }}
+          </Fact>
+        {% endif %}
+        <Fact :label="_('web.admin.players_on')">
+          <span class="confirm-number">{{ number(view.players) }}</span>
+        </Fact>
+      </dl>
+      <p id="confirm-text" class="body-text">
+        {{ _n("web.admin.confirm.provider.text", total, file=file_name) if total > 1 else _("web.admin.confirm.provider.text." ~ ("single" if total else "none"), file=file_name) }}
+      </p>
+    </Confirmation>
+  </Panel>
+</AdminPage>

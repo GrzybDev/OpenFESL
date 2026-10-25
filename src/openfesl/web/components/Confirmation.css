@@ -1,6 +1,6 @@
-/* A decision's confirmation, drawn as the black-headed panels of the game's dialogs, as a page
-   of its own or as a dialog over the page the decision was made on (M10). */
-@layer pages {
+/* A decision's confirmation, drawn as the black-headed panels of the game's dialogs, in a frame
+   as a page of its own or as a dialog over the page the decision was made on (M10). */
+@layer components {
   .confirm-frame {
     max-width: 546px;
   }

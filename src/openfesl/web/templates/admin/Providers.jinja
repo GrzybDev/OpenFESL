@@ -1,0 +1,293 @@
+{#def listing, providers: list, counts, unmatched: int, added, readers: list, files, file_name: str, file_size: int, longest: int, mode: str, manages: bool, form #}
+{# The operators of dedicated servers, active or revoked: their rows, whose details list their
+   servers and open their ProviderId.dat and revocation, beside adding a provider or, right
+   after adding one, its file and where it goes. Adding and revoking need the admin role. #}
+{% set title = _("web.admin.providers") %}
+{% set list = url("/admin/providers") %}
+{% set tab = listing.tab %}
+{% macro code(text) %}<code class="provider-code">{{ text }}</code>{% endmacro %}
+{% macro sort_header(column, label, extra="") %}
+  {% set current = listing.sort == column %}
+  <div role="columnheader"
+       {% if current %} aria-sort="{{ 'descending' if listing.descending else 'ascending' }}"{% endif %}
+       class="column-head column-sort {{ extra }}"><a href="{{ list ~ listing.sorted_by(column).link() }}">{{ label }}{% if current %}<Icon name="down" :size="14" stroke="currentColor" :class="'' if listing.descending else 'ascending'" />{% endif %}</a></div>
+{%- endmacro %}
+{% macro server_line(view) %}
+  {% if view.tab == "waiting" %}
+    {{ _("web.admin.server.line.waiting", time=_("web.server.time", time=when(view.server.first_seen, "Hm"))) if view.server.first_seen else _("web.admin.state.waiting") }}
+  {% elif view.tab == "approved" and view.hosting %}
+    {{ _("web.admin.server.line.approved", players=number(view.hosting.players), slots=number(view.hosting.max_players)) }}
+  {% elif view.tab == "approved" %}
+    {{ _("web.admin.server.line.idle") }}
+  {% else %}
+    {{ _("web.admin.server.line.revoked") }}
+  {% endif %}
+{%- endmacro %}
+{% macro headline(view) %}
+  {% set history = view.history %}
+  {% if tab == "active" %}
+    {{ _("web.admin.provider.details.active", time=_("web.server.time", time=moment(history.added)), name=history.added_by or _("web.admin.command_line")) }}
+  {% elif history.revoked %}
+    {{ _("web.admin.provider.details.revoked", time=_("web.server.time", time=moment(history.revoked)), name=history.revoked_by or _("web.admin.command_line")) }}
+  {% else %}
+    {{ _("web.admin.provider.details.revoked.earlier") }}
+  {% endif %}
+{%- endmacro %}
+<AdminPage :title="title" current="providers">
+  <div id="live"
+       hx-get="{{ here }}"
+       hx-trigger="every 15s, refresh"
+       hx-select="#live"
+       hx-swap="outerMorph">
+    <PageHead labelledby="providers-title">
+      <div class="enter-title page-title">
+        <TitleBlock :title="title" id="providers-title">{{ _("web.admin.providers.subtitle") }}</TitleBlock>
+      </div>
+      <nav aria-label="{{ _('web.admin.providers.states') }}" class="tabs">
+        {% for name in ["active", "revoked"] %}
+          <Tab :href="list ~ listing.switched(name).link()" :label="_('web.admin.providers.tab.' ~ name)" :count="counts[name]" :current="tab == name" />
+        {% endfor %}
+      </nav>
+    </PageHead>
+
+    <Panel class="enter-panel">
+      <div class="list-layout admin-layout">
+        <section aria-labelledby="providers-list" class="list-main admin-list">
+          <h2 id="providers-list" class="sr-only">{{ _("web.admin.providers.list." ~ tab) }}</h2>
+          <div class="table-scroll table-scroll-flush">
+            <div role="table" aria-labelledby="providers-list" class="table">
+              <div role="rowgroup" class="admin-list-head">
+                <div role="row" class="provider-columns">
+                  <div role="columnheader"
+                       class="column-head"><span class="sr-only">{{ _("web.admin.state") }}</span></div>
+                  {{ sort_header("name", _("web.admin.provider"), "column-name") }}
+                  <div role="columnheader" class="column-head">{{ _("web.admin.provider_id") }}</div>
+                  {{ sort_header("approved", _("web.admin.column.approved")) }}
+                  {{ sort_header("waiting", _("web.admin.column.waiting")) }}
+                  <div role="columnheader" class="column-head">{{ _("web.admin.column.revoked") }}</div>
+                  {{ sort_header("added", _("web.admin.column.added")) }}
+                  <div role="columnheader"><span class="sr-only">{{ _("web.servers.page") }}</span></div>
+                </div>
+              </div>
+              <div role="rowgroup" data-rows class="enter-rows table-rows">
+                {% for view in providers %}
+                  {% set provider = view.provider %}
+                  {% set key = provider.id.hex() %}
+                  {% set open = listing.open == key %}
+                  {% set href = url("/admin/providers/" ~ key) %}
+                  {% set waiting = view.count("waiting") %}
+                  {% set total = view.servers|length %}
+                  <div role="none"
+                       id="row-{{ key }}"
+                       data-key="{{ key }}"
+                       {% if open %} data-open{% endif %}
+                       class="server">
+                    <div role="row" class="server-row provider-columns">
+                      <div role="cell" class="admin-cell row-cell admin-badges">
+                        <span class="sr-only">{{ _n("web.admin.provider.state.active.waiting", waiting) if tab == "active" and waiting else _("web.admin.provider.state." ~ tab) }}</span>
+                        <span aria-hidden="true"
+                              class="badge"><Icon :name="'tick' if tab == 'active' else 'x'" stroke="#0A0A0A" /></span>
+                        {% if tab == "active" and waiting %}
+                          <span aria-hidden="true" class="badge"><Icon name="clock" stroke="#0A0A0A" /></span>
+                        {% endif %}
+                      </div>
+                      <div role="cell" class="admin-cell row-cell admin-name-cell">
+                        <span class="admin-server-name"><a href="{{ href }}"
+   class="server-name">{{ provider.name }}</a></span>
+                        <a href="{{ list ~ listing.changed(open=None if open else key).link() }}#row-{{ key }}"
+                           role="button"
+                           aria-expanded="{{ 'true' if open else 'false' }}"
+                           aria-controls="details-{{ key }}"
+                           aria-label="{{ _('web.servers.details', name=provider.name) }}"
+                           data-details
+                           class="details-button"><span><Icon name="down" stroke="#F4F4EE" class="details-chevron" /></span></a>
+                      </div>
+                      <div role="cell" class="admin-cell row-cell">
+                        <ProviderId :id="provider.id" />
+                      </div>
+                      <div role="cell" class="admin-cell row-cell cell-stack">
+                        <span aria-hidden="true" class="cell-label">{{ _("web.admin.column.approved") }}</span>
+                        <span class="cell-time">{{ number(view.count("approved")) }}</span>
+                        {% if view.hosting %}
+                          <span class="cell-ago">{{ _("web.admin.hosting_count", count=number(view.hosting|length)) }}</span>
+                        {% endif %}
+                      </div>
+                      <div role="cell" class="admin-cell row-cell cell-count">
+                        <span aria-hidden="true"
+                              class="cell-label">{{ _("web.admin.column.waiting") }}</span>{{ number(waiting) }}
+                      </div>
+                      <div role="cell" class="admin-cell row-cell cell-count">
+                        <span aria-hidden="true"
+                              class="cell-label">{{ _("web.admin.column.revoked") }}</span>{{ number(view.count("revoked")) }}
+                      </div>
+                      <div role="cell" class="admin-cell row-cell cell-stack">
+                        <span aria-hidden="true" class="cell-label">{{ _("web.admin.column.added") }}</span>
+                        <span class="cell-time">{{ when(view.history.added, "yMMMd") }}</span>
+                        <span class="cell-ago">{{ _("web.server.time", time=when(view.history.added, "Hm")) }}</span>
+                      </div>
+                      <div role="cell" class="cell-end">
+                        <EndSquare :href="href" :label="_('web.admin.provider.page.of', name=provider.name)" />
+                      </div>
+                    </div>
+                    <div role="row" class="drawer">
+                      <div role="cell"
+                           aria-colspan="8"
+                           id="details-{{ key }}"
+                           class="drawer-cell">
+                        <div class="row-details admin-details">
+                          <div>
+                            <p class="row-facts">{{ headline(view) }}</p>
+                            <dl class="facts admin-facts">
+                              <Fact :label="_('web.admin.provider_id')" wide>
+                                <ProviderId :id="provider.id" />
+                                <CopyButton :value="key.upper()" :label="_('web.admin.provider_id.copy')" :note="_('web.admin.provider_id.copied')" size="icon" />
+                              </Fact>
+                              <Fact :label="_('web.admin.file')" plain>
+                                {{ code(file_name) }}<span>{{ _("web.admin.file.size", count=number(file_size)) }}</span>
+                              </Fact>
+                              <Fact :label="_('web.admin.servers')">
+                                {{ _("web.admin.servers_count", approved=number(view.count("approved")), waiting=number(waiting), revoked=number(view.count("revoked"))) }}
+                              </Fact>
+                            </dl>
+                            {% if view.servers %}
+                              <ul aria-label="{{ _('web.admin.servers_of', name=provider.name) }}"
+                                  class="provider-servers">
+                                {% for server in view.servers %}
+                                  <li>
+                                    <StateBadges :view="server" />
+                                    <a href="{{ url('/admin/servers/' ~ server.server.ugid) }}">{{ server.server.name }}</a>
+                                    {% if server.game %}<GameChip :of="server.game" />{% endif %}
+                                    <span class="provider-server-line">{{ server_line(server) }}</span>
+                                  </li>
+                                {% endfor %}
+                              </ul>
+                            {% endif %}
+                            <p class="row-text">
+                              {% if tab == "revoked" %}
+                                {{ _("web.admin.provider.note.revoked") }}
+                              {% else %}
+                                {{ _("web.admin.provider.note." ~ mode, name=provider.name, mode=_("web.host.mode." ~ mode)) }}
+                              {% endif %}
+                            </p>
+                          </div>
+                          {% if manages and tab == "active" %}
+                            <div class="admin-decide">
+                              <FormButton icon="download" :href="href ~ '/provider-id.dat'">{{ _("web.admin.download", file=file_name) }}</FormButton>
+                              <FormButton icon="x" :href="href ~ '/revoke?back=' ~ here|urlencode" dialog>{{ _("web.admin.provider.revoke") }}</FormButton>
+                              <p class="row-text">{{ _n("web.admin.provider.how", total) if total > 1 else _("web.admin.provider.how." ~ ("single" if total else "none")) }}</p>
+                            </div>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% else %}
+                  <div role="row">
+                    <div role="cell" aria-colspan="8" class="row-details list-empty">
+                      <div>
+                        <p class="list-empty-title">{{ _("web.admin.providers.none." ~ tab) }}</p>
+                        <p class="body-text">{{ _("web.admin.providers.none." ~ tab ~ ".text") }}</p>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          <div class="list-foot">
+            <p>
+              <span class="list-count">{{ _("web.admin.providers.count", count=number(providers|length)) }}</span><span class="list-range">
+                {%- if listing.sort == "name" and not listing.descending %}{{ _("web.admin.providers.order") }} · {% endif %}
+                {%- if unmatched %}{{ _n("web.admin.providers.unmatched", unmatched) }} · {% endif -%}
+              <Updated inline /></span>
+            </p>
+          </div>
+        </section>
+
+        <div class="list-side admin-side">
+          {% if added %}
+            <section aria-labelledby="added-title" class="provider-added">
+              <h2 id="added-title" class="bar bar-large provider-added-title">
+                <span aria-hidden="true"
+                      class="badge"><Icon name="tick" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.provider.added") }}
+              </h2>
+              <div class="bar-text">
+                <p class="server-title">{{ added.provider.name }}</p>
+                <dl class="facts">
+                  <Fact :label="_('web.admin.provider_id')">
+                    <ProviderId :id="added.provider.id" />
+                  </Fact>
+                  <Fact :label="_('web.admin.provider.read_by')">
+                    {% for game in readers %}<GameChip :of="game" full />{% endfor %}
+                    {{ _("web.admin.provider.read_by.servers") }}
+                  </Fact>
+                  <Fact :label="_('web.admin.provider.added_at')">
+                    {{ _("web.server.time", time=moment(added.history.added)) }} · {{ added.history.added_by or _("web.admin.command_line") }}
+                  </Fact>
+                </dl>
+              </div>
+              <Action :href="url('/admin/providers/' ~ added.provider.id.hex() ~ '/provider-id.dat')" :label="_('web.admin.download', file=file_name)" :size="32" download />
+              <h3 class="bar provider-where">{{ _("web.admin.provider.where") }}</h3>
+              <ol class="provider-steps">
+                <li>
+                  <StepNumber :number="1" /><span>{{ _("web.admin.provider.where.give", name=added.provider.name) }}</span>
+                </li>
+                {% if files %}
+                  <li>
+                    <StepNumber :number="2" /><span>{{ _("web.admin.provider.where.put", file=code(files.provider), config=code(files.config)) }}</span>
+                  </li>
+                {% endif %}
+                {% if mode == "approved" %}
+                  {% set servers_link %}<a href="{{ url('/admin/servers') }}">{{ _("web.admin.menu.servers") }}</a>{% endset %}
+                  <li>
+                    <StepNumber :number="3 if files else 2" /><span>{{ _("web.admin.provider.where.wait", mode=_("web.host.mode.approved"), servers=servers_link) }}</span>
+                  </li>
+                {% endif %}
+              </ol>
+              <p class="provider-again">{{ _("web.admin.provider.where.again") }}</p>
+            </section>
+          {% elif manages %}
+            <form method="post"
+                  action="{{ list }}"
+                  aria-labelledby="add-title"
+                  class="provider-add">
+              <Bar id="add-title" large>{{ _("web.admin.provider.add") }}</Bar>
+              <CsrfField />
+              <label for="add-name" class="field-label field-label-joined">{{ _("web.admin.provider.name") }}</label>
+              <input id="add-name"
+                     name="name"
+                     type="text"
+                     value="{{ form.get('name', '') }}"
+                     required
+                     placeholder="{{ _('web.admin.provider.name.hint') }}"
+                     autocomplete="off"
+                     aria-describedby="add-note"
+                     {% if form.get('error') %} aria-invalid="true"{% endif %}
+                     class="field-input{% if form.get('error') %} field-invalid{% endif %}">
+              {% if form.get("error") == "taken" %}
+                <p id="add-note" class="field-note field-error">
+                  <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.provider.name.taken", name=form.get('taken')) }}
+                </p>
+              {% elif form.get("error") %}
+                <p id="add-note" class="field-note field-error">
+                  <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.provider.name.length", count=number(longest)) }}
+                </p>
+              {% else %}
+                <p id="add-note" class="field-note">{{ _("web.admin.provider.name.note", file=file_name) }}</p>
+              {% endif %}
+              <ActionButton :label="_('web.admin.provider.add.button')" :busy="_('web.admin.provider.add.busy')" />
+            </form>
+            <p class="provider-about">
+              {{ _("web.admin.provider.about", games=listed(readers|map(attribute='name')|list), file=file_name) }}
+            </p>
+          {% else %}
+            <p class="field-note">{{ _("web.admin.provider.managed") }}</p>
+            <p class="provider-about">
+              {{ _("web.admin.provider.about", games=listed(readers|map(attribute='name')|list), file=file_name) }}
+            </p>
+          {% endif %}
+        </div>
+      </div>
+    </Panel>
+  </div>
+</AdminPage>

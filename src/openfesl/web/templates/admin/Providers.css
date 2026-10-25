@@ -1,0 +1,184 @@
+/* The admin panel's providers page: the providers of a tab with their servers in their details,
+   beside adding a provider or, right after adding one, its file and where it goes. */
+@layer pages {
+  .provider-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns: 64px minmax(180px, 1fr) 170px 118px 104px 94px 140px 44px;
+    gap: 2px;
+  }
+
+  .server:nth-child(even) > .provider-columns {
+    --cell: var(--row-alt);
+  }
+
+  .provider-code {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .provider-servers {
+    display: grid;
+    gap: 2px;
+    margin-top: 2px;
+
+    li {
+      display: flex;
+      flex-wrap: wrap;
+      min-height: 44px;
+      align-items: center;
+      gap: 6px 10px;
+      background: var(--row);
+      padding: 6px 12px;
+
+      &:nth-child(even) {
+        background: var(--row-alt);
+      }
+    }
+
+    a {
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .badge {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  .provider-server-line {
+    margin-left: auto;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .provider-add .action-button {
+    width: 100%;
+    margin-top: 2px;
+  }
+
+  .provider-about {
+    margin: 10px 2px 0;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.45;
+    font-weight: 500;
+    color: var(--soft);
+  }
+
+  .provider-added {
+    .server-title {
+      margin-bottom: 10px;
+    }
+
+    .action {
+      margin-top: 2px;
+    }
+  }
+
+  .provider-added-title {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+
+    .badge {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  .provider-where {
+    margin-top: 10px;
+  }
+
+  .provider-steps {
+    display: grid;
+    gap: 2px;
+    margin-top: 2px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.45;
+    font-weight: 500;
+    color: var(--ink);
+
+    li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: var(--row-light);
+      padding: 12px 14px;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 13px;
+    }
+
+    a {
+      text-decoration-line: underline;
+    }
+  }
+
+  .provider-again {
+    margin: 10px 2px 0;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--soft);
+  }
+
+  @container (width < 940px) {
+    .server-row.provider-columns {
+      grid-template-columns: 64px repeat(3, minmax(0, 1fr)) 44px;
+      grid-template-areas:
+        "badges name name name end"
+        "id id id added added"
+        "approved approved waiting revoked revoked";
+
+      > :nth-child(1) {
+        grid-area: badges;
+      }
+
+      > :nth-child(2) {
+        grid-area: name;
+      }
+
+      > :nth-child(3) {
+        grid-area: id;
+      }
+
+      > :nth-child(4) {
+        grid-area: approved;
+      }
+
+      > :nth-child(5) {
+        grid-area: waiting;
+      }
+
+      > :nth-child(6) {
+        grid-area: revoked;
+      }
+
+      > :nth-child(7) {
+        grid-area: added;
+      }
+
+      > :nth-child(8) {
+        grid-area: end;
+        background: var(--cell);
+      }
+    }
+
+    .server[data-open] > .server-row > :nth-child(8) {
+      background: var(--accent);
+    }
+  }
+}

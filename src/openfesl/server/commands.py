@@ -108,14 +108,16 @@ async def _providers(settings: Settings, args: argparse.Namespace) -> None:
                         file.write(provider_file(provider.id))
                 except (ValueError, OSError) as error:
                     sys.exit(str(error))
-                await store.add_provider(provider)
+                if not await store.add_provider(provider, admin=None):
+                    args.out.unlink()
+                    sys.exit(f"A provider named {args.name} exists already")
                 print(provider.id.hex().upper())
             case "revoke":
                 try:
                     provider_id = bytes.fromhex(args.id)
                 except ValueError:
                     provider_id = b""
-                if not await store.revoke_provider(provider_id):
+                if not await store.revoke_provider(provider_id, admin=None):
                     sys.exit(f"No provider has the id {args.id}")
 
 

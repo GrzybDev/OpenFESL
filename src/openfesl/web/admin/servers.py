@@ -21,7 +21,7 @@ from openfesl.core.servers import (
     ServerStore,
 )
 from openfesl.core.texts import localize
-from openfesl.web.admin.auth import AdminSessions
+from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.servers import label_name
 
 # The tabs of the servers page with their sortable columns, the first the default order.
@@ -339,7 +339,7 @@ def _confirmation(
             admin=admin,
             view=view,
             decision=decision,
-            back=_back(request, back or _tab_address(request, view)),
+            back=back_to(request, back or _tab_address(request, view)),
         )
 
     return confirm
@@ -358,7 +358,7 @@ def _decide(
         form = await request.form()
         sessions.check(request, form)
         view = await views.find(ugid)
-        back = _back(request, str(form.get("back", "")))
+        back = back_to(request, str(form.get("back", "")))
         name = view.server.name
         provider = view.server.provider
         if view.tab not in tabs or (provider is not None and provider.revoked):
@@ -380,13 +380,6 @@ def _decide(
 def _tab_address(request: Request, view: ServerView) -> str:
     listing = ServerList().switched(view.tab)
     return localize(f"/admin/servers{listing.link()}", request.state.language)
-
-
-def _back(request: Request, back: str) -> str:
-    # A decision returns to the panel's page it was made on, and never to another site.
-    if back.startswith(("/admin/", "/pl/admin/")) and "//" not in back and "\\" not in back:
-        return back
-    return localize("/admin/", request.state.language)
 
 
 def _sort_key(column: str, view: ServerView, language: str) -> Any:

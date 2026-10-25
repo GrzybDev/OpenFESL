@@ -154,6 +154,23 @@ class Decision:
 
 
 @dataclass(frozen=True, slots=True)
+class ProviderHistory:
+    """When a provider was added and revoked, and by whom.
+
+    Attributes:
+        added: When it was added.
+        added_by: The display name of the admin who added it; None for the command line.
+        revoked: When it was revoked; None while it is not, or when no record says.
+        revoked_by: The display name of the admin who revoked it; None for the command line.
+    """
+
+    added: datetime
+    added_by: str | None = None
+    revoked: datetime | None = None
+    revoked_by: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class Admission:
     """How a host lists a game: under which identity, as which server, and whether it shows.
 
@@ -181,25 +198,33 @@ class ServerStore(Protocol):
             mode: The new mode.
         """
 
-    async def add_provider(self, provider: Provider) -> None:
-        """Keep a new provider.
+    async def add_provider(self, provider: Provider, admin: Admin | None) -> bool:
+        """Keep a new provider, unless another has its name, recording who added it.
 
         Args:
             provider: The provider, with an id no other provider has.
+            admin: The admin who added it; None for the command line.
+
+        Returns:
+            Whether it was kept: names are unique, compared without case.
         """
 
     async def providers(self) -> list[Provider]:
         """Return every provider, oldest first."""
 
-    async def revoke_provider(self, provider_id: bytes) -> bool:
-        """Revoke a provider, which revokes every server that reports it.
+    async def revoke_provider(self, provider_id: bytes, admin: Admin | None) -> bool:
+        """Revoke a provider, which revokes every server that reports it, recording who did.
 
         Args:
             provider_id: The provider's id.
+            admin: The admin who revoked it; None for the command line.
 
         Returns:
             Whether a provider has that id.
         """
+
+    async def provider_history(self) -> dict[bytes, ProviderHistory]:
+        """Return when each provider was added and revoked, and by whom, by its id."""
 
     async def add(self, server: GameServer) -> None:
         """Keep a new server.

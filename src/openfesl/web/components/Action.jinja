@@ -1,8 +1,10 @@
-{#def href: str, label: str, size: int = 30, dialog: bool = False #}
+{#def href: str, label: str, size: int = 30, dialog: bool = False, download: bool = False #}
 {# The large action block, as the game's JOIN block: a black block with the chevron square. A link
-   to a confirmation opens it as a dialog where scripts run. #}
+   to a confirmation opens it as a dialog where scripts run; a download saves a file and leaves
+   the page as it is. #}
 <a href="{{ href }}"
    {% if dialog %} data-dialog aria-haspopup="dialog"{% endif %}
+   {% if download %} download{% endif %}
    class="action chevron{% if size == 32 %} action-large{% endif %}">
   <span aria-hidden="true" class="action-square"><Chevron :size="30" /></span>
   <span class="action-label">{{ label }}</span>

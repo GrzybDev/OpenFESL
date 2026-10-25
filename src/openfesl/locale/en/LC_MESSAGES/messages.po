@@ -2576,3 +2576,237 @@ msgstr "Open %(name)s"
 
 msgid "web.admin.servers.approved_link"
 msgstr "Approved servers"
+
+msgid "web.admin.menu.providers"
+msgstr "Providers"
+
+msgid "web.admin.providers"
+msgstr "Providers"
+
+msgid "web.admin.providers.subtitle"
+msgstr "Dedicated server operators"
+
+msgid "web.admin.providers.states"
+msgstr "Provider state"
+
+msgid "web.admin.providers.tab.active"
+msgstr "Active"
+
+msgid "web.admin.providers.tab.revoked"
+msgstr "Revoked"
+
+msgid "web.admin.providers.list.active"
+msgstr "Active providers"
+
+msgid "web.admin.providers.list.revoked"
+msgstr "Revoked providers"
+
+msgid "web.admin.provider.state.active"
+msgstr "Active"
+
+msgid "web.admin.provider.state.active.waiting.one"
+msgstr "Active, %(count)s server waiting"
+
+msgid "web.admin.provider.state.active.waiting.other"
+msgstr "Active, %(count)s servers waiting"
+
+msgid "web.admin.provider.state.revoked"
+msgstr "Revoked"
+
+msgid "web.admin.column.waiting"
+msgstr "Waiting"
+
+msgid "web.admin.column.added"
+msgstr "Added"
+
+msgid "web.admin.hosting_count"
+msgstr "%(count)s hosting now"
+
+msgid "web.admin.provider.page.of"
+msgstr "Provider page: %(name)s"
+
+msgid "web.admin.provider.details.active"
+msgstr "Active · added %(time)s by %(name)s"
+
+msgid "web.admin.provider.details.revoked"
+msgstr "Revoked · %(time)s by %(name)s"
+
+msgid "web.admin.provider.details.revoked.earlier"
+msgstr "Revoked"
+
+msgid "web.admin.provider_id.copy"
+msgstr "Copy provider id"
+
+msgid "web.admin.provider_id.copied"
+msgstr "Provider id copied."
+
+msgid "web.admin.file"
+msgstr "File"
+
+msgid "web.admin.file.size"
+msgstr "%(count)s bytes"
+
+msgid "web.admin.servers_count"
+msgstr "%(approved)s approved · %(waiting)s waiting · %(revoked)s revoked"
+
+msgid "web.admin.servers_of"
+msgstr "Servers of %(name)s"
+
+msgid "web.admin.server.line.waiting"
+msgstr "Waiting since %(time)s"
+
+msgid "web.admin.server.line.approved"
+msgstr "Approved · hosting %(players)s / %(slots)s"
+
+msgid "web.admin.server.line.idle"
+msgstr "Approved · not hosting"
+
+msgid "web.admin.server.line.revoked"
+msgstr "Revoked"
+
+msgid "web.admin.provider.note.approved"
+msgstr "Every server started with this file reports %(name)s as its provider. While the hosting mode is %(mode)s, each new one waits for approval."
+
+msgid "web.admin.provider.note.open"
+msgstr "Every server started with this file reports %(name)s as its provider. While the hosting mode is %(mode)s, its servers list their games at once."
+
+msgid "web.admin.provider.note.revoked"
+msgstr "Its servers are refused, also those started later with its file. A revoked provider cannot be restored; its operator would need a new provider and file."
+
+msgid "web.admin.download"
+msgstr "Download %(file)s"
+
+msgid "web.admin.provider.revoke"
+msgstr "Revoke provider"
+
+msgid "web.admin.provider.revoke.busy"
+msgstr "Revoking…"
+
+msgid "web.admin.provider.how.one"
+msgstr "Revoke asks for confirmation, then revokes its %(count)s server."
+
+msgid "web.admin.provider.how.other"
+msgstr "Revoke asks for confirmation, then revokes all %(count)s of its servers."
+
+msgid "web.admin.provider.how.none"
+msgstr "Revoke asks for confirmation; servers started later with its file are refused."
+
+msgid "web.admin.providers.count"
+msgstr "Providers: %(count)s"
+
+msgid "web.admin.providers.order"
+msgstr "Sorted by name"
+
+msgid "web.admin.providers.unmatched.one"
+msgstr "%(count)s server reports a provider id that matches no provider"
+
+msgid "web.admin.providers.unmatched.other"
+msgstr "%(count)s servers report a provider id that matches no provider"
+
+msgid "web.admin.providers.none.active"
+msgstr "No provider is added yet."
+
+msgid "web.admin.providers.none.active.text"
+msgstr "A provider added here gets its own ProviderId.dat for its operator's servers."
+
+msgid "web.admin.providers.none.revoked"
+msgstr "No provider is revoked."
+
+msgid "web.admin.providers.none.revoked.text"
+msgstr "A revoked provider's servers are refused, also those started later with its file."
+
+msgid "web.admin.provider.add"
+msgstr "Add a provider"
+
+msgid "web.admin.provider.name"
+msgstr "Provider name"
+
+msgid "web.admin.provider.name.hint"
+msgstr "Operator or community name"
+
+msgid "web.admin.provider.name.note"
+msgstr "Shown with its servers in this panel; each name is used once. OpenFESL generates the provider's %(file)s."
+
+msgid "web.admin.provider.name.taken"
+msgstr "A provider named %(name)s already exists; names are compared regardless of case."
+
+msgid "web.admin.provider.name.length"
+msgstr "A provider's name takes 1 to %(count)s bytes, so that game lists show it whole."
+
+msgid "web.admin.provider.add.button"
+msgstr "Add provider"
+
+msgid "web.admin.provider.add.busy"
+msgstr "Adding…"
+
+msgid "web.admin.provider.about"
+msgstr "A provider tells its operator's servers apart from others: %(games)s dedicated servers send the id from their %(file)s each time they host."
+
+msgid "web.admin.provider.managed"
+msgstr "Providers are added and revoked with the admin role."
+
+msgid "web.admin.provider.added"
+msgstr "Provider added"
+
+msgid "web.admin.provider.read_by"
+msgstr "Read by"
+
+msgid "web.admin.provider.read_by.servers"
+msgstr "dedicated servers"
+
+msgid "web.admin.provider.added_at"
+msgstr "Added"
+
+msgid "web.admin.provider.where"
+msgstr "Where it goes"
+
+msgid "web.admin.provider.where.give"
+msgstr "Give the file to the operator of %(name)s privately, outside OpenFESL: every server started with it reports %(name)s as its provider."
+
+msgid "web.admin.provider.where.put"
+msgstr "The operator puts %(file)s next to %(config)s in the dedicated server's folder. The server reads it when it starts."
+
+msgid "web.admin.provider.where.wait"
+msgstr "With the hosting mode %(mode)s, each server started with it waits under %(servers)s until an admin approves it."
+
+msgid "web.admin.provider.where.again"
+msgstr "The file can be downloaded again from the provider's details."
+
+msgid "web.admin.confirm.provider"
+msgstr "Revoke this provider?"
+
+msgid "web.admin.confirm.provider.text.one"
+msgstr "Its %(count)s server is revoked: its game leaves the server list at once, its later attempts to host are refused, and the statistics it sends are no longer recorded. Servers started later with its %(file)s are refused too. A revoked provider cannot be restored; its operator would need a new provider and file."
+
+msgid "web.admin.confirm.provider.text.other"
+msgstr "All %(count)s of its servers are revoked: their games leave the server list at once, their later attempts to host are refused, and the statistics they send are no longer recorded. Servers started later with its %(file)s are refused too. A revoked provider cannot be restored; its operator would need a new provider and file."
+
+msgid "web.admin.confirm.provider.text.none"
+msgstr "No server reports it yet. Servers started later with its %(file)s are refused. A revoked provider cannot be restored; its operator would need a new provider and file."
+
+msgid "web.admin.approved_count"
+msgstr "%(count)s · %(hosting)s hosting now"
+
+msgid "web.admin.waiting_names"
+msgstr "%(count)s · %(names)s"
+
+msgid "web.admin.players_on"
+msgstr "Players on its servers"
+
+msgid "web.admin.revoke.confirm"
+msgstr "Revoke"
+
+msgid "web.admin.toast.provider_revoke"
+msgstr "Revoked %(name)s and its servers."
+
+msgid "web.admin.toast.provider_unchanged"
+msgstr "%(name)s was revoked already."
+
+msgid "web.admin.refused.role.providers"
+msgstr "Providers and their files are managed by the admin role."
+
+msgid "web.admin.confirm.provider.text.single"
+msgstr "Its only server is revoked: its game leaves the server list at once, its later attempts to host are refused, and the statistics it sends are no longer recorded. Servers started later with its %(file)s are refused too. A revoked provider cannot be restored; its operator would need a new provider and file."
+
+msgid "web.admin.provider.how.single"
+msgstr "Revoke asks for confirmation, then revokes its only server."

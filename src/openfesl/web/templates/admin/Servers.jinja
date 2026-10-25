@@ -31,20 +31,18 @@
     <span aria-hidden="true">–</span><span class="sr-only">{{ empty }}</span>
   {% endif %}
 {%- endmacro %}
-{% macro cell(column, view) %}
+{% macro cell(column, view, key) %}
+  {% set label %}<span aria-hidden="true" class="cell-label">{{ _(key) }}</span>{% endset %}
   {% if column == "map" %}
     <div role="cell" class="admin-cell row-cell cell-stack cell-hosted">
       {{ hosted(view, _("web.admin.tried.none") if tab == "waiting" else _("web.admin.not_hosting")) }}
     </div>
-  {% elif column == "seen" %}
-    <div role="cell" class="admin-cell row-cell cell-stack">{{ moment_cell(view.server.first_seen) }}</div>
-  {% elif column == "last" %}
-    <div role="cell" class="admin-cell row-cell cell-stack">{{ moment_cell(view.attempts.last) }}</div>
-  {% elif column == "decided" %}
-    <div role="cell"
-         class="admin-cell row-cell cell-stack">{{ moment_cell(view.decision.at if view.decision else None) }}</div>
+  {% elif column in ("seen", "last", "decided") %}
+    {% set at = view.server.first_seen if column == "seen" else view.attempts.last if column == "last" else view.decision.at if view.decision else None %}
+    <div role="cell" class="admin-cell row-cell cell-stack">{{ label }}{{ moment_cell(at) }}</div>
   {% elif column == "players" %}
     <div role="cell" class="admin-cell row-cell cell-count">
+      {{ label }}
       {% if view.hosting %}
         {{ number(view.hosting.players) }}&nbsp;/&nbsp;{{ number(view.hosting.max_players) }}
       {% else %}
@@ -53,7 +51,7 @@
     </div>
   {% else %}
     <div role="cell" class="admin-cell row-cell cell-count">
-      {{ number(view.attempts.last_hour if column == "attempts" else view.attempts.refused_today) }}
+      {{ label }}{{ number(view.attempts.last_hour if column == "attempts" else view.attempts.refused_today) }}
     </div>
   {% endif %}
 {%- endmacro %}
@@ -104,12 +102,12 @@
     </PageHead>
 
     <Panel class="enter-panel">
-      <div class="list-layout admin-servers-layout">
-        <section aria-labelledby="servers-list" class="list-main admin-servers">
+      <div class="list-layout admin-layout">
+        <section aria-labelledby="servers-list" class="list-main admin-list">
           <h2 id="servers-list" class="sr-only">{{ _("web.admin.servers.list." ~ tab) }}</h2>
           <div class="table-scroll table-scroll-flush">
             <div role="table" aria-labelledby="servers-list" class="table">
-              <div role="rowgroup" class="admin-servers-head">
+              <div role="rowgroup" class="admin-list-head">
                 <div role="row" class="admin-server-columns">
                   <div role="columnheader"
                        class="column-head"><span class="sr-only">{{ _("web.admin.state") }}</span></div>
@@ -133,7 +131,7 @@
                       <div role="cell" class="admin-cell row-cell admin-badges">
                         <StateBadges :view="view" />
                       </div>
-                      <div role="cell" class="admin-cell row-cell admin-name">
+                      <div role="cell" class="admin-cell row-cell admin-name-cell">
                         <span class="admin-server-name"><a href="{{ href }}" class="server-name">{{ server.name }}</a>
                           {%- if view.game %}<GameChip :of="view.game" />{% endif %}
                         </span>
@@ -148,7 +146,7 @@
                       <div role="cell" class="admin-cell row-cell cell-stack">
                         <ProviderName :server="server" />
                       </div>
-                      {% for column, _key in columns %}{{ cell(column, view) }}{% endfor %}
+                      {% for column, key in columns %}{{ cell(column, view, key) }}{% endfor %}
                       <div role="cell" class="cell-end">
                         <EndSquare :href="href" :label="_('web.admin.server.page.of', name=server.name)" />
                       </div>
@@ -273,14 +271,14 @@
           </div>
         </section>
 
-        <div class="list-side admin-servers-side">
+        <div class="list-side admin-side">
           <form action="{{ list }}"
                 method="get"
                 role="search"
                 aria-labelledby="find-title">
             <Bar id="find-title" large>{{ _("web.admin.find") }}</Bar>
             <SearchField id="find-q" name="q" :label="_('web.admin.find.field')" :value="listing.query" :hint="_('web.admin.find.hint')" aria-describedby="find-note" hx-morph-skip />
-            <p id="find-note" class="find-note">{{ _("web.admin.find.note") }}</p>
+            <p id="find-note" class="field-note">{{ _("web.admin.find.note") }}</p>
             <div class="find-button">
               <FormButton icon="find">{{ _("web.admin.find.search") }}</FormButton>
             </div>
