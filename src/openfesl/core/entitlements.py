@@ -159,11 +159,15 @@ class EntitlementService:
         if grants is None:
             raise TransactionError(UNKNOWN_KEY)
         logger.info("Account %d redeemed a product key", account.id)
+        # The game takes an answer without entries for a failed redeem, and names what the key
+        # unlocked after the licence whose tag an entry's name matches, so each product gets an
+        # entry named after its first tag, and the grants without a product share one.
+        products: dict[str | None, str] = {}
+        for grant in grants:
+            products.setdefault(grant.product, grant.tag)
         return NuEntitleUserAnswer(
             product_list=[
-                Product(product_id=grant.product, name=grant.tag)
-                for grant in grants
-                if grant.product
+                Product(product_id=product, name=tag) for product, tag in products.items()
             ]
         )
 

@@ -30,7 +30,15 @@ async def test_keys_grant_entitlements_once_and_a_revoked_one_stays_revoked(
             veteran = await player.request(
                 FESL, "acct", [("TXN", "NuEntitleUser"), ("key", "activate-veteran")]
             )
-            assert veteran["productList.0.productId"] == "OFB-EAST:40873"
+            product = (veteran["productList.[]"], veteran["productList.0.productId"])
+            assert product == ("1", "OFB-EAST:40873")
+        # A key whose grants name no product still answers an entry, or the game reports a
+        # failed redeem.
+        kits = await player.request(
+            FESL, "acct", [("TXN", "NuEntitleUser"), ("key", "ACTIVATE-SPECACT")]
+        )
+        assert (kits["productList.[]"], kits["productList.0.name"]) == ("1", "BFBC2:PC:ALLKIT")
+        assert "productList.0.productId" not in kits
 
         query = [("TXN", "NuGetEntitlements"), ("groupName", "AddsVetRank"), ("status", "ACTIVE")]
         own = await player.request(FESL, "acct", query)
@@ -40,7 +48,7 @@ async def test_keys_grant_entitlements_once_and_a_revoked_one_stays_revoked(
             {"BFBC2:PC:ADDSVETRANK", "BF3:PC:ADDSVETRANK"},
         )
         count = await player.request(FESL, "acct", [("TXN", "NuGetEntitlementCount")])
-        assert count["entitlementCount"] == "5"
+        assert count["entitlementCount"] == "7"
         # The game's check for licences of its PC, by the network card's address.
         device = [
             ("TXN", "NuGetEntitlements"),

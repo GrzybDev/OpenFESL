@@ -194,7 +194,7 @@ class NuEntitleUser(Message):
 
 
 class Product(Message):
-    product_id: str
+    product_id: str | None = None
     name: str
 
 
