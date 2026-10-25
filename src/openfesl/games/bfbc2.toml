@@ -21,6 +21,13 @@ registration.age_check = true
 registration.under_parental_age = "allow"
 # A login while the account plays elsewhere signs the other game out (or: refuse).
 accounts.concurrent_login = "replace"
+# The oldest client version that may connect, such as "1.0"; older ones are told to update.
+connect.minimum_client_version = ""
+# The oldest OpenFESLHook version that may connect, such as "0.2.0"; older hooks and those
+# that name no version are told to update.
+connect.minimum_hook_version = ""
+# Whether players are told that the service is busy; dedicated servers still connect.
+connect.maintenance = false
 
 # The countries whose age limits differ from 13 to register and 18 to register without a
 # parent's consent.

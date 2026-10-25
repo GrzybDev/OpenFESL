@@ -1,6 +1,7 @@
 import asyncio
 import itertools
 import logging
+import re
 from collections.abc import Awaitable, Callable
 
 from fastapi import WebSocket
@@ -31,7 +32,10 @@ _POLICY_VIOLATION = 1008
 _session_numbers = itertools.count(1)
 _links: set[_Link] = set()
 
-type SessionStarter = Callable[[WebSocket], Session]
+# How the hook names itself in the handshake, such as OpenFESLHook/0.1.0 (Windows).
+_HOOK_AGENT = re.compile(r"OpenFESLHook/(\d+(?:\.\d+)*(?:-[0-9A-Za-z.-]+)?)(?:\s|$)")
+
+type SessionStarter = Callable[[WebSocket, str | None], Session]
 
 
 async def close_sessions(code: int, timeout: float = 5) -> None:
@@ -54,7 +58,8 @@ def relay_endpoint(start_session: SessionStarter) -> Callable[[WebSocket], Await
     """Return the WebSocket endpoint that OpenFESLHook connects to.
 
     Args:
-        start_session: Creates the core's session for an accepted WebSocket.
+        start_session: Creates the core's session for an accepted WebSocket, given the
+            version of the hook that opened it, when its User-Agent names one.
     """
 
     async def endpoint(websocket: WebSocket) -> None:
@@ -63,7 +68,9 @@ def relay_endpoint(start_session: SessionStarter) -> Callable[[WebSocket], Await
             await websocket.close(_PROTOCOL_ERROR)
             return
         await websocket.accept(SUBPROTOCOL)
-        await _Link(websocket, start_session(websocket)).run()
+        agent = _HOOK_AGENT.match(websocket.headers.get("user-agent", ""))
+        session = start_session(websocket, agent[1] if agent else None)
+        await _Link(websocket, session).run()
 
     return endpoint
 

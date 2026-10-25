@@ -7,6 +7,7 @@ from typing import Any
 
 from openfesl.core.fesl import SYSTEM_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Games
+from openfesl.core.policies import GamePolicies
 from openfesl.protocol.fsys import (
     DomainPartition,
     GetPingSitesAnswer,
@@ -20,16 +21,22 @@ from openfesl.protocol.message import Message
 
 logger = logging.getLogger(__name__)
 
+# The Hello errors the game names: its notices that the service is busy and that it needs an
+# update. Any other code shows its generic connection failure.
+BUSY = -253
+UPDATE_REQUIRED = -254
+
 PING_INTERVAL = 120.0
 MEMCHECK_INTERVAL = 300.0
 THEATER_HOST = "{}.theater.ea.com"
 
 
-def connect_routes(games: Games) -> dict[tuple[str, str], Route[Any]]:
+def connect_routes(games: Games, policies: GamePolicies) -> dict[tuple[str, str], Route[Any]]:
     """Return the handlers of the fsys service, which greets the game and keeps it connected.
 
     Args:
         games: The games the server serves.
+        policies: Each game's policies, which say which clients may connect.
     """
 
     async def hello(connection: FeslConnection, request: Hello) -> HelloAnswer:
@@ -38,6 +45,29 @@ def connect_routes(games: Games) -> dict[tuple[str, str], Route[Any]]:
             logger.warning("Refusing a FESL Hello from %s", request.client_string)
             raise TransactionError(SYSTEM_ERROR)
         game, client = found
+        allowed = (await policies.of(game)).connect
+        # Dedicated servers have versions of their own and retry without end when refused.
+        if not client.server_account:
+            if allowed.maintenance:
+                logger.info("Refusing a FESL Hello from %s: maintenance", request.client_string)
+                raise TransactionError(BUSY)
+            if allowed.outdated_client(request.client_version):
+                logger.info(
+                    "Refusing a FESL Hello from %s %s: outdated",
+                    request.client_string,
+                    request.client_version,
+                )
+                raise TransactionError(UPDATE_REQUIRED)
+        # Dedicated servers run the same hook, so an outdated one keeps them out too.
+        hook_version = connection.session.hook_version
+        if allowed.outdated_hook(hook_version):
+            logger.info(
+                "Refusing a FESL Hello from %s: hook version %s, at least %s required",
+                request.client_string,
+                hook_version or "missing",
+                allowed.minimum_hook_version,
+            )
+            raise TransactionError(UPDATE_REQUIRED)
         connection.greet(request, game, client)
         logger.info(
             "FESL Hello from %s %s (%s)",

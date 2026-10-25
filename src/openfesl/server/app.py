@@ -84,7 +84,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         persona_store = SqlPersonaStore(sessions)
         personas = PersonaService(persona_store)
         await personas.prepare(await accounts.prepare(games))
-        routes.update(connect_routes(games))
+        routes.update(connect_routes(games, policies))
         routes.update(telemetry_routes())
         routes.update(accounts.routes())
         routes.update(AccountSettingsService(store, logins, policies).routes())
@@ -121,8 +121,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         await messages.close()
         await engine.dispose()
 
-    def start_session(websocket: WebSocket) -> GameSession:
-        return GameSession(routes, players, settings.client_address(websocket), theater)
+    def start_session(websocket: WebSocket, hook_version: str | None) -> GameSession:
+        address = settings.client_address(websocket)
+        return GameSession(routes, players, address, theater, hook_version)
 
     app = FastAPI(
         title="OpenFESL", lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None

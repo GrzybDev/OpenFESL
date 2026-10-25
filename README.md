@@ -102,6 +102,9 @@ without a parent's consent. A birth date is checked and never stored.
 | `registration.age_check` | `on`: a birth date under the country's registration age is refused; `off`: birth dates are not checked | `on` |
 | `registration.under_parental_age` | `allow`: players old enough to register but under the country's age for registering without a parent's consent register; `refuse`: they are refused, and the game disconnects | `allow` |
 | `accounts.concurrent_login` | `replace`: a login signs the account's other game out; `refuse`: a second login is refused, and the game shows its notice about too many login attempts | `replace` |
+| `connect.minimum_client_version` | The oldest version of the game's client that may connect, such as `1.0`, compared number by number; older clients are told that an update is required. Empty lets every version in | empty |
+| `connect.minimum_hook_version` | The oldest version of OpenFESLHook that may connect, such as `0.2.0`, compared number by number, with a pre-release such as `0.2.0-dev` older than its release; players and dedicated servers whose hook is older or names no version are told that an update is required. Empty lets every hook in | empty |
+| `connect.maintenance` | `on`: players are told that the service is busy, while dedicated servers still connect; `off`: everyone connects | `off` |
 
 ## Development
 

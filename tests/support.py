@@ -330,9 +330,21 @@ async def let_in(server: Game, player: Game, created: Answer) -> str:
 
 
 @asynccontextmanager
-async def game(server_url: str, headers: Mapping[str, str] | None = None) -> AsyncIterator[Game]:
+async def game(
+    server_url: str, headers: Mapping[str, str] | None = None, *, user_agent: str | None = None
+) -> AsyncIterator[Game]:
+    """Connect a game process to the server through a relay WebSocket, as the hook does.
+
+    Args:
+        server_url: The server's WebSocket URL.
+        headers: Further handshake headers, such as the address a proxy forwards.
+        user_agent: The User-Agent the hook names itself with; none is sent when omitted.
+    """
     async with connect(
-        server_url, subprotocols=[Subprotocol(SUBPROTOCOL)], additional_headers=headers
+        server_url,
+        subprotocols=[Subprotocol(SUBPROTOCOL)],
+        additional_headers=headers,
+        user_agent_header=user_agent,
     ) as websocket:
         yield Game(websocket)
 

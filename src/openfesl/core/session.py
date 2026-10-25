@@ -147,6 +147,7 @@ class GameSession:
         players: Players,
         address: Address | None,
         theater: Theater,
+        hook_version: str | None,
     ) -> None:
         """Start a session for a game process.
 
@@ -155,8 +156,10 @@ class GameSession:
             players: Where player logins are registered.
             address: The public address of the player's PC, when known.
             theater: The Theater service its Theater connections and datagrams go to.
+            hook_version: The version of OpenFESLHook that carries the game, when it names one.
         """
         self.address = address
+        self.hook_version = hook_version
         self.account: Account | None = None
         self.account_key: str | None = None
         self.persona: Persona | None = None

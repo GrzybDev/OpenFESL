@@ -1,8 +1,9 @@
 import logging
+import re
 from enum import StrEnum
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Annotated, Any, Protocol
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 # For annotations only, since a game's data holds its policies.
 if TYPE_CHECKING:
@@ -56,6 +57,45 @@ class AccountPolicies(_Section):
     concurrent_login: ConcurrentLogin
 
 
+_MinimumVersion = Annotated[str, Field(pattern=r"^(\d+(\.\d+)*)?$")]
+
+
+class ConnectPolicies(_Section):
+    """Which games may connect.
+
+    Attributes:
+        minimum_client_version: The oldest version of the game's client that may connect,
+            such as 1.0; empty lets every version in.
+        minimum_hook_version: The oldest version of OpenFESLHook that may connect, such as
+            0.2.0; empty lets every hook in, also one that names no version.
+        maintenance: Whether players are kept out while the service is under maintenance.
+    """
+
+    minimum_client_version: _MinimumVersion
+    minimum_hook_version: _MinimumVersion
+    maintenance: bool
+
+    def outdated_client(self, version: str) -> bool:
+        """Return whether a client's version is older than the oldest that may connect.
+
+        Args:
+            version: The version the client's Hello names.
+        """
+        minimum = self.minimum_client_version
+        return bool(minimum) and _older(version, minimum)
+
+    def outdated_hook(self, version: str | None) -> bool:
+        """Return whether a hook's version is older than the oldest that may connect.
+
+        Once a minimum is set, a hook that names no version counts as older.
+
+        Args:
+            version: The version the hook named when it connected; None when it named none.
+        """
+        minimum = self.minimum_hook_version
+        return bool(minimum) and (version is None or _older(version, minimum))
+
+
 class Policies(_Section):
     """How a game's services behave where the game handles more than one behaviour.
 
@@ -65,10 +105,12 @@ class Policies(_Section):
     Attributes:
         registration: How players register.
         accounts: How accounts log in.
+        connect: Which games may connect.
     """
 
     registration: RegistrationPolicies
     accounts: AccountPolicies
+    connect: ConnectPolicies
 
     def names(self) -> list[str]:
         """Return the name of every policy."""
@@ -165,6 +207,23 @@ class GamePolicies:
             except KeyError, ValueError:
                 logger.warning("Ignoring the setting %s, which no policy takes", key)
         return policies
+
+
+def _older(version: str, minimum: str) -> bool:
+    """Return whether a version is older than a minimum, comparing their numbers one by one.
+
+    So 1.10 is newer than 1.9, and a pre-release such as 0.2.0-dev is older than 0.2.0.
+
+    Args:
+        version: The version, which may end in a suffix such as -dev.
+        minimum: The minimum, numbers only.
+    """
+    release, _, suffix = version.partition("-")
+    return (_numbers(release), not suffix) < (_numbers(minimum), True)
+
+
+def _numbers(version: str) -> tuple[int, ...]:
+    return tuple(int(number) for number in re.findall(r"\d+", version))
 
 
 def _text(value: Any) -> str:
