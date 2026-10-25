@@ -52,10 +52,18 @@
     display: flex;
     min-height: 44px;
     align-items: center;
+    gap: 10px;
     font-size: 21px;
     font-weight: 700;
     letter-spacing: -0.01em;
     color: var(--shell-bright);
+  }
+
+  .wordmark-panel {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: var(--shell-muted);
   }
 
   /* On phones the games take a line of their own under the wordmark and the languages. */
@@ -86,9 +94,11 @@
     color: var(--shell-muted);
   }
 
+  /* The languages keep to the right also in the admin panel's bar, which lists no games. */
   .shell-languages {
     display: flex;
     gap: 2px;
+    margin-left: auto;
 
     .shell-link {
       font-size: 14px;

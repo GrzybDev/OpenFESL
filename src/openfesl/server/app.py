@@ -1,4 +1,5 @@
 import asyncio
+import secrets
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager, suppress
 from typing import Any
@@ -7,10 +8,12 @@ from fastapi import FastAPI, Request, WebSocket
 from fastapi.responses import PlainTextResponse
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from starlette.exceptions import HTTPException
+from starlette.middleware.sessions import SessionMiddleware
 
 from openfesl.core.account_settings import AccountSettingsService
 from openfesl.core.accounts import AccountService
 from openfesl.core.admin import AdminFeed
+from openfesl.core.admins import GroupRoles
 from openfesl.core.associations import AssociationService
 from openfesl.core.browsing import Browsing
 from openfesl.core.census import Census
@@ -54,6 +57,14 @@ from openfesl.storage.servers import SqlServerStore
 from openfesl.storage.settings import SqlSettingStore
 from openfesl.storage.stats import SqlStatStore
 from openfesl.web.activity import activity_routes
+from openfesl.web.admin.auth import (
+    AdminSessions,
+    FormExpired,
+    NeedsRole,
+    SignInNeeded,
+    SignInProvider,
+)
+from openfesl.web.admin.home import home_routes
 from openfesl.web.front import front_routes
 from openfesl.web.game_http import GameHttpMiddleware
 from openfesl.web.host import host_routes
@@ -67,6 +78,9 @@ from openfesl.web.security import SecurityHeadersMiddleware
 from openfesl.web.servers import server_routes
 from openfesl.web.shell import shell_routes
 from openfesl.web.verification import verification_routes
+
+# The session cookie outlives a session, so that an expired one can say so.
+SESSION_COOKIE_AGE = 14 * 24 * 3600
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -191,7 +205,24 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
     )
     app.include_router(verification_routes(confirm, pages))
-    # The last one added sees a request first: the game's HTTP keeps its own answers.
+    sign_in = AdminSessions(pages, _sign_in_provider(settings), settings.public_url)
+    app.include_router(sign_in.routes())
+    app.include_router(home_routes(sign_in, games, census, SqlAccountStore(sessions), approval))
+    app.add_exception_handler(SignInNeeded, sign_in.sign_in_needed)
+    app.add_exception_handler(FormExpired, sign_in.form_expired)
+    app.add_exception_handler(NeedsRole, sign_in.needs_role)
+    # The last one added sees a request first: the game's HTTP keeps its own answers. Only the
+    # admin panel stores anything in the session, so other pages set no cookie.
+    secret = settings.session_secret.get_secret_value() if settings.session_secret else None
+    app.add_middleware(
+        SessionMiddleware,
+        secret_key=secret or secrets.token_urlsafe(32),
+        session_cookie="openfesl_admin",
+        max_age=SESSION_COOKIE_AGE,
+        same_site="lax",
+        # Browsers send a Secure cookie only over HTTPS, as a deployment serves the pages.
+        https_only=(settings.public_url or "").startswith("https://"),
+    )
     app.add_middleware(LanguageMiddleware)
     app.add_middleware(SecurityHeadersMiddleware)
     app.add_middleware(GameHttpMiddleware, http=game_http)
@@ -201,3 +232,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return "ok"
 
     return app
+
+
+def _sign_in_provider(settings: Settings) -> SignInProvider | None:
+    secret = settings.admin_oidc_client_secret
+    if not (settings.admin_oidc_issuer and settings.admin_oidc_client_id and secret):
+        return None
+    return SignInProvider(
+        settings.admin_oidc_name,
+        settings.admin_oidc_issuer,
+        settings.admin_oidc_client_id,
+        secret.get_secret_value(),
+        GroupRoles(settings.admin_group, settings.moderator_group),
+    )

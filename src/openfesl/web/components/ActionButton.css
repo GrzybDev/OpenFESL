@@ -1,0 +1,11 @@
+@layer components {
+  .action-button {
+    width: 100%;
+    border: 0;
+    text-align: left;
+
+    &:hover .action-square {
+      background: var(--accent-hover);
+    }
+  }
+}

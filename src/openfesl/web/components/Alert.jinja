@@ -1,0 +1,11 @@
+{#def label: str, title: str, glyph: str = "", alert: bool = False #}
+{# A state of a panel's part on a light block: its label in capitals with a glyph, a sentence that
+   says what happened, and the content's explanation. Errors are read out at once. #}
+<div role="{{ 'alert' if alert else 'status' }}" class="alert">
+  <p class="alert-label">
+    {% if glyph %}<span aria-hidden="true"
+      class="alert-glyph"><Icon :name="glyph" stroke="#0A0A0A" fill="#0A0A0A" /></span>{% endif %}{{ label }}
+  </p>
+  <p class="alert-title">{{ title }}</p>
+  {% if content|trim %}<p class="alert-text">{{ content }}</p>{% endif %}
+</div>

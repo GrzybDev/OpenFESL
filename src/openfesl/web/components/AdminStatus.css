@@ -1,0 +1,59 @@
+@layer components {
+  .admin-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px 16px;
+    margin-top: -8px;
+    padding-bottom: 10px;
+
+    p {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  }
+
+  .admin-mark {
+    display: grid;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    place-items: center;
+    background: var(--accent);
+  }
+
+  .admin-name,
+  .admin-role {
+    display: block;
+    font-family: var(--font-sans);
+  }
+
+  .admin-name {
+    font-size: 17px;
+    line-height: 1.2;
+    font-weight: 600;
+    color: var(--bright);
+  }
+
+  .admin-role {
+    font-size: 14px;
+    line-height: 1.3;
+    font-weight: 500;
+    color: var(--soft);
+  }
+
+  .admin-sign-out {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    background: var(--ink);
+    padding-inline: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--bright);
+    text-transform: uppercase;
+  }
+}

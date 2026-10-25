@@ -4,6 +4,7 @@ from collections.abc import AsyncIterator, Iterator
 
 import anyio
 import pytest
+from identity import IdentityProvider, identity_provider
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
@@ -59,6 +60,23 @@ async def relay_server(
 @pytest.fixture
 def server_url(relay_server: tuple[str, RelayServer]) -> str:
     return relay_server[0]
+
+
+@pytest.fixture
+async def admin_provider(monkeypatch: pytest.MonkeyPatch) -> AsyncIterator[IdentityProvider]:
+    # Before the server starts, which reads its sign-in provider once. Members of fesl-admins
+    # are admins, members of fesl-moderators moderators.
+    async with identity_provider() as running:
+        for key, value in {
+            "ADMIN_OIDC_NAME": "Invented Sign-in",
+            "ADMIN_OIDC_ISSUER": running.url,
+            "ADMIN_OIDC_CLIENT_ID": "panel-client",
+            "ADMIN_OIDC_CLIENT_SECRET": "invented-secret",
+            "ADMIN_GROUP": "fesl-admins",
+            "MODERATOR_GROUP": "fesl-moderators",
+        }.items():
+            monkeypatch.setenv(key, value)
+        yield running
 
 
 @pytest.fixture

@@ -1,0 +1,19 @@
+{#def reason: str, section: str #}
+{# What the admin panel answers to a form whose token expired, or to a page that needs the admin
+   role; nothing changes either way. #}
+{% set title = _("web.admin.menu." ~ section) if section else _("web.admin.refused.expired") %}
+<AdminPage :title="title" :current="section">
+  <div class="enter-title notice-title notice-narrow">
+    <TitleBlock :title="title">{{ _("web.admin.refused." ~ reason) }}</TitleBlock>
+  </div>
+  <Panel class="enter-panel refused">
+    {% if reason == "role" %}
+      <Alert :label="_('web.admin.refused.role.label')" :title="_('web.admin.refused.role.title')" glyph="guard" alert>{{ _("web.admin.refused.role.text", name=viewer.admin.name) }}</Alert>
+    {% else %}
+      <Alert :label="_('web.admin.refused.expired.label')" :title="_('web.admin.refused.expired.title')" glyph="warn" alert>{{ _("web.admin.refused.expired.text") }}</Alert>
+    {% endif %}
+    <div class="actions">
+      <SmallAction :href="url('/admin/') if viewer else url('/admin/sign-in')" :label="_('web.admin.menu.home') if viewer else _('web.admin.sign_in')" />
+    </div>
+  </Panel>
+</AdminPage>

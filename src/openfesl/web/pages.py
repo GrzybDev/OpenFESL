@@ -23,6 +23,7 @@ from starlette.exceptions import HTTPException
 from starlette.staticfiles import StaticFiles
 from starlette.types import Scope
 
+from openfesl.core.admins import Admin
 from openfesl.core.census import Census
 from openfesl.core.games import Game
 from openfesl.core.texts import languages, localize, translate, translate_count
@@ -50,6 +51,19 @@ class Assets:
     head: str = ""
     app: str = ""
     styles: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class Viewer:
+    """The admin signed in to the admin panel, as its pages show them.
+
+    Attributes:
+        admin: The admin.
+        through: The name of the provider they signed in through.
+    """
+
+    admin: Admin
+    through: str
 
 
 def built_assets() -> Assets:
@@ -192,6 +206,8 @@ class Pages:
         steel: bool = False,
         switch: bool = True,
         headers: Mapping[str, str] | None = None,
+        viewer: Viewer | None = None,
+        csrf: str = "",
         **context: Any,
     ) -> HTMLResponse:
         """Render a page in the shell.
@@ -204,6 +220,8 @@ class Pages:
             steel: Whether the area wears OpenFESL's own steel instead of the shell's grey.
             switch: Whether the shell offers the page in the other languages.
             headers: Headers of the response.
+            viewer: The admin signed in to the admin panel, on its pages.
+            csrf: The token that the admin panel's forms send back.
             context: The template's own values.
         """
         language, path = _address(request)
@@ -216,6 +234,8 @@ class Pages:
             themes=self._themes_url,
             game=game,
             steel=steel,
+            viewer=viewer,
+            csrf=csrf,
             # The time the page's values are from.
             now=datetime.now(UTC),
             games=[

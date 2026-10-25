@@ -2081,3 +2081,148 @@ msgstr "Dziś jeszcze nikogo · rekord: %(record)s, %(day)s"
 
 msgid "web.activity.peak_line.quiet.short"
 msgstr "Dziś jeszcze nikogo · rekord: %(record)s"
+
+msgid "web.admin.panel"
+msgstr "Administracja"
+
+msgid "web.admin.menu"
+msgstr "Panel administracyjny"
+
+msgid "web.admin.menu.home"
+msgstr "Start"
+
+msgid "web.admin.menu.sign_in"
+msgstr "Logowanie"
+
+msgid "web.admin.sign_in"
+msgstr "Logowanie"
+
+msgid "web.admin.sign_in.subtitle"
+msgstr "Panel administracyjny OpenFESL"
+
+msgid "web.admin.sign_in.through"
+msgstr "Zaloguj się przez"
+
+msgid "web.admin.sign_in.none"
+msgstr "Na tym serwerze nie skonfigurowano logowania do panelu."
+
+msgid "web.admin.sign_in.kept"
+msgstr "Panel przechowuje tylko identyfikator konta, nazwę wyświetlaną i rolę."
+
+msgid "web.admin.access"
+msgstr "Dostęp wymaga roli administratora lub moderatora na tym serwerze."
+
+msgid "web.admin.signed_in.admin"
+msgstr "Rola administratora · zalogowano przez %(provider)s"
+
+msgid "web.admin.signed_in.moderator"
+msgstr "Rola moderatora · zalogowano przez %(provider)s"
+
+msgid "web.admin.sign_out"
+msgstr "Wyloguj"
+
+msgid "web.admin.notice.refused"
+msgstr "Brak dostępu"
+
+msgid "web.admin.notice.refused.title"
+msgstr "Konto %(name)s w %(provider)s nie ma dostępu do tego panelu."
+
+msgid "web.admin.notice.refused.text"
+msgstr "%(provider)s zaloguje to samo konto ponownie, dopóki nie zostanie tam wylogowane."
+
+msgid "web.admin.notice.failed"
+msgstr "Nie zalogowano"
+
+msgid "web.admin.notice.failed.title"
+msgstr "Logowanie nie zostało ukończone. Spróbuj ponownie."
+
+msgid "web.admin.notice.failed.text"
+msgstr "%(provider)s nie zwrócił zalogowanego konta."
+
+msgid "web.admin.notice.unreachable.text"
+msgstr "Nie udało się połączyć z %(provider)s."
+
+msgid "web.admin.notice.signed_out"
+msgstr "Wylogowano"
+
+msgid "web.admin.notice.signed_out.title"
+msgstr "Wylogowano."
+
+msgid "web.admin.notice.signed_out.text"
+msgstr "Sesja panelu zakończyła się. %(provider)s ma własną sesję, więc przy następnym logowaniu hasło może nie być potrzebne."
+
+msgid "web.admin.notice.expired"
+msgstr "Sesja wygasła"
+
+msgid "web.admin.notice.expired.title"
+msgstr "Sesja wygasła. Zaloguj się ponownie."
+
+msgid "web.admin.notice.expired.text"
+msgstr "Rozpoczęty formularz nie zostaje zachowany."
+
+msgid "web.admin.notice.expired.text.next"
+msgstr "Po zalogowaniu otworzy się ponownie poprzednia strona. Rozpoczęty formularz nie zostaje zachowany."
+
+msgid "web.admin.refused.expired"
+msgstr "Formularz wygasł"
+
+msgid "web.admin.refused.expired.label"
+msgstr "Nie zapisano"
+
+msgid "web.admin.refused.expired.title"
+msgstr "Formularz wygasł. Odśwież stronę i spróbuj ponownie."
+
+msgid "web.admin.refused.expired.text"
+msgstr "Nic nie zostało zmienione."
+
+msgid "web.admin.refused.role"
+msgstr "Wymaga roli administratora"
+
+msgid "web.admin.refused.role.label"
+msgstr "Wymaga roli administratora"
+
+msgid "web.admin.refused.role.title"
+msgstr "Ta strona wymaga roli administratora."
+
+msgid "web.admin.refused.role.text"
+msgstr "Zalogowano jako %(name)s z rolą moderatora."
+
+msgid "web.admin.home"
+msgstr "Start"
+
+msgid "web.admin.home.subtitle"
+msgstr "Do decyzji"
+
+
+msgid "web.admin.home.hosting.one"
+msgstr "%(count)s serwer prowadzi grę"
+
+msgid "web.admin.home.hosting.few"
+msgstr "%(count)s serwery prowadzą gry"
+
+msgid "web.admin.home.hosting.many"
+msgstr "%(count)s serwerów prowadzi gry"
+
+msgid "web.admin.home.hosting.other"
+msgstr "%(count)s serwera prowadzi gry"
+
+msgid "web.admin.home.accounts.one"
+msgstr "%(count)s konto, nowe dziś: %(new)s"
+
+msgid "web.admin.home.accounts.few"
+msgstr "%(count)s konta, nowe dziś: %(new)s"
+
+msgid "web.admin.home.accounts.many"
+msgstr "%(count)s kont, nowe dziś: %(new)s"
+
+msgid "web.admin.home.accounts.other"
+msgstr "%(count)s konta, nowe dziś: %(new)s"
+
+msgid "web.admin.mode"
+msgstr "Dopuszczanie serwerów"
+
+msgid "web.admin.mode.approved"
+msgstr "Każdy nowy serwer czeka na zatwierdzenie w panelu. Do tego czasu nie ma go na liście serwerów, a przesyłane przez niego statystyki nie są zapisywane."
+
+msgid "web.admin.mode.open"
+msgstr "Każdy serwer od razu wystawia swoją grę. Serwery są nadal zapisywane wraz z dostawcami, więc późniejsza zmiana trybu zachowuje ich historię."

@@ -36,6 +36,21 @@ class SqlAccountStore:
             )
         return Credentials(_account(row), row.password_hash) if row else None
 
+    async def totals(self, since: datetime) -> tuple[int, int]:
+        """Return how many players' accounts there are, and how many of them are new.
+
+        Args:
+            since: Accounts created from then on count as new.
+        """
+        new = func.count().filter(AccountRow.created_at >= since)
+        async with self._sessions() as session:
+            row = (
+                await session.execute(
+                    select(func.count(), new).select_from(AccountRow).where(~AccountRow.server)
+                )
+            ).one()
+            return int(row[0]), int(row[1])
+
     async def find_remembered(self, token_hash: bytes) -> Account | None:
         """Return the account that a remembered login belongs to, if it is recent enough.
 

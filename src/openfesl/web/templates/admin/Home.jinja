@@ -1,0 +1,30 @@
+{#def online: int, hosting: int, accounts: int, new_accounts: int, mode: str #}
+{% set title = _("web.admin.home") %}
+<AdminPage :title="title" current="home">
+  <div id="live"
+       hx-get="{{ here }}"
+       hx-trigger="every 15s, refresh"
+       hx-select="#live"
+       hx-swap="outerMorph">
+    <PageHead labelledby="home-title">
+      <div class="enter-title page-title">
+        <TitleBlock :title="title" id="home-title">{{ _("web.admin.home.subtitle") }}</TitleBlock>
+      </div>
+      <div class="home-numbers">
+        <p>{{ _n("web.shell.online", online) }} · {{ _n("web.admin.home.hosting", hosting) }}</p>
+        <p>
+          {{ _n("web.admin.home.accounts", accounts, new=number(new_accounts)) }} · <Updated inline />
+        </p>
+      </div>
+    </PageHead>
+    <Panel class="enter-panel home">
+      <section aria-labelledby="home-mode" class="home-mode">
+        <Bar id="home-mode" large>{{ _("web.admin.mode") }}</Bar>
+        <div class="bar-text">
+          <p class="home-mode-name">{{ _("web.host.mode." ~ mode) }}</p>
+          <p class="body-text">{{ _("web.admin.mode." ~ mode) }}</p>
+        </div>
+      </section>
+    </Panel>
+  </div>
+</AdminPage>

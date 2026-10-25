@@ -1,6 +1,7 @@
-{#def title: str | None = None, page: str = "" #}
+{#def title: str | None = None, page: str = "", admin: bool = False #}
 {# The shell around every page: the bar with OpenFESL's games and languages, the area dressed in
-   the page's game or OpenFESL's steel, and the footer. #}
+   the page's game or OpenFESL's steel, and the footer. The admin panel's bar names the panel in
+   place of the games. #}
 <!DOCTYPE html>
 <html lang="{{ language }}">
   <head>
@@ -31,22 +32,27 @@
     <a href="#area" class="skip-link">{{ _("web.shell.skip") }}</a>
     <header class="shell-bar">
       <div class="shell-row">
-        <a href="{{ url('/') }}"
-           {% if page == "menu" %} aria-current="page"{% endif %}
-           class="wordmark">OpenFESL</a>
-        <nav aria-label="{{ _('web.shell.games') }}"
-             data-games
-             class="shell-games">
-          <ul id="shell-games">
-            {% for entry in games %}
-              <li>
-                <a href="{{ entry.href }}"
-                   {% if entry.current %} aria-current="true"{% endif %}
-                   class="shell-link">{{ entry.name }} <span class="live-value shell-online">{{ _n("web.shell.online", entry.online) }}</span></a>
-              </li>
-            {% endfor %}
-          </ul>
-        </nav>
+        {% if admin %}
+          <a href="{{ url('/admin/') }}"
+             class="wordmark">OpenFESL <span class="wordmark-panel">{{ _("web.admin.panel") }}</span></a>
+        {% else %}
+          <a href="{{ url('/') }}"
+             {% if page == "menu" %} aria-current="page"{% endif %}
+             class="wordmark">OpenFESL</a>
+          <nav aria-label="{{ _('web.shell.games') }}"
+               data-games
+               class="shell-games">
+            <ul id="shell-games">
+              {% for entry in games %}
+                <li>
+                  <a href="{{ entry.href }}"
+                     {% if entry.current %} aria-current="true"{% endif %}
+                     class="shell-link">{{ entry.name }} <span class="live-value shell-online">{{ _n("web.shell.online", entry.online) }}</span></a>
+                </li>
+              {% endfor %}
+            </ul>
+          </nav>
+        {% endif %}
         {% if languages %}
           <nav aria-label="{{ _('web.shell.language') }}" class="shell-languages">
             {% for entry in languages %}

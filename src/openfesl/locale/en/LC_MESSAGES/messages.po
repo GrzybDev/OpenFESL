@@ -2054,3 +2054,136 @@ msgstr "Nobody online today yet · record: %(record)s on %(day)s"
 
 msgid "web.activity.peak_line.quiet.short"
 msgstr "Today: nobody yet · record: %(record)s"
+
+msgid "web.admin.panel"
+msgstr "Admin"
+
+msgid "web.admin.menu"
+msgstr "Admin panel"
+
+msgid "web.admin.menu.home"
+msgstr "Home"
+
+msgid "web.admin.menu.sign_in"
+msgstr "Sign in"
+
+msgid "web.admin.sign_in"
+msgstr "Sign in"
+
+msgid "web.admin.sign_in.subtitle"
+msgstr "OpenFESL admin panel"
+
+msgid "web.admin.sign_in.through"
+msgstr "Sign in through"
+
+msgid "web.admin.sign_in.none"
+msgstr "Sign-in to the panel is not set up on this instance."
+
+msgid "web.admin.sign_in.kept"
+msgstr "The panel keeps only the account's id, its display name and its role."
+
+msgid "web.admin.access"
+msgstr "Access needs the admin or moderator role on this instance."
+
+msgid "web.admin.signed_in.admin"
+msgstr "Admin · signed in through %(provider)s"
+
+msgid "web.admin.signed_in.moderator"
+msgstr "Moderator · signed in through %(provider)s"
+
+msgid "web.admin.sign_out"
+msgstr "Sign out"
+
+msgid "web.admin.notice.refused"
+msgstr "No access"
+
+msgid "web.admin.notice.refused.title"
+msgstr "The %(provider)s account %(name)s has no access to this panel."
+
+msgid "web.admin.notice.refused.text"
+msgstr "%(provider)s signs in the same account again until it is signed out there."
+
+msgid "web.admin.notice.failed"
+msgstr "Not signed in"
+
+msgid "web.admin.notice.failed.title"
+msgstr "Sign-in did not complete. Try again."
+
+msgid "web.admin.notice.failed.text"
+msgstr "%(provider)s returned without a signed-in account."
+
+msgid "web.admin.notice.unreachable.text"
+msgstr "%(provider)s could not be reached."
+
+msgid "web.admin.notice.signed_out"
+msgstr "Signed out"
+
+msgid "web.admin.notice.signed_out.title"
+msgstr "Signed out."
+
+msgid "web.admin.notice.signed_out.text"
+msgstr "The panel's session has ended. %(provider)s keeps its own session, so the next sign-in may not ask for a password."
+
+msgid "web.admin.notice.expired"
+msgstr "Session expired"
+
+msgid "web.admin.notice.expired.title"
+msgstr "The session expired. Sign in again."
+
+msgid "web.admin.notice.expired.text"
+msgstr "A form that was being filled in is not kept."
+
+msgid "web.admin.notice.expired.text.next"
+msgstr "After signing in, the page that was open opens again. A form that was being filled in is not kept."
+
+msgid "web.admin.refused.expired"
+msgstr "Form expired"
+
+msgid "web.admin.refused.expired.label"
+msgstr "Not saved"
+
+msgid "web.admin.refused.expired.title"
+msgstr "The form expired. Reload the page and try again."
+
+msgid "web.admin.refused.expired.text"
+msgstr "Nothing was changed."
+
+msgid "web.admin.refused.role"
+msgstr "Needs the admin role"
+
+msgid "web.admin.refused.role.label"
+msgstr "Needs the admin role"
+
+msgid "web.admin.refused.role.title"
+msgstr "This page needs the admin role."
+
+msgid "web.admin.refused.role.text"
+msgstr "Signed in as %(name)s with the moderator role."
+
+msgid "web.admin.home"
+msgstr "Home"
+
+msgid "web.admin.home.subtitle"
+msgstr "Needs a decision"
+
+
+msgid "web.admin.home.hosting.one"
+msgstr "%(count)s server hosting"
+
+msgid "web.admin.home.hosting.other"
+msgstr "%(count)s servers hosting"
+
+msgid "web.admin.home.accounts.one"
+msgstr "%(count)s account, %(new)s new today"
+
+msgid "web.admin.home.accounts.other"
+msgstr "%(count)s accounts, %(new)s new today"
+
+msgid "web.admin.mode"
+msgstr "Hosting mode"
+
+msgid "web.admin.mode.approved"
+msgstr "Every new server waits for an admin's approval. Until then it is hidden from the server list and the statistics it sends are not recorded."
+
+msgid "web.admin.mode.open"
+msgstr "Every server lists its game at once. Servers are still recorded with their providers, so changing the mode later keeps their history."

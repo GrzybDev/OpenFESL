@@ -1,0 +1,8 @@
+/* The admin panel's items sit side by side from the start of the bar, however few there are. */
+@layer components {
+  @media (width >= 40rem) {
+    .admin-menu ul {
+      justify-content: flex-start;
+    }
+  }
+}

@@ -1,0 +1,32 @@
+/* The admin panel's sign-in: the provider's button, under what happened at the last attempt. */
+@layer pages {
+  .sign-in {
+    max-width: 600px;
+
+    .alert + .bar {
+      margin-top: 2px;
+    }
+  }
+
+  .sign-in-button {
+    display: grid;
+    margin-top: 6px;
+  }
+
+  .sign-in-note {
+    margin-top: 2px;
+    background: var(--row);
+    padding: 9px 14px;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--ink);
+
+    .sign-in-button + & {
+      margin-top: 6px;
+    }
+
+    & + & {
+      background: var(--row-alt);
+    }
+  }
+}

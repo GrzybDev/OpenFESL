@@ -14,13 +14,18 @@ requires-python = ">=3.14"
 dependencies = [
     "alembic>=1.20.1",
     "asyncpg>=0.32.0",
+    "authlib>=1.9.1",
     "babel>=2.18.0",
     "fastapi>=0.162.0",
+    "httpx2>=2.16.0",
+    "itsdangerous>=2.2.0",
     "jinja2>=3.1.6",
     "jinjax>=0.66",
+    "joserfc>=1.7.7",
     "pwdlib[argon2]>=0.3.1",
     "pydantic>=2.14.1",
     "pydantic-settings>=2.16.1",
+    "python-multipart>=0.0.20",
     "sqlalchemy[asyncio]>=2.1.6",
     "uvicorn[standard]>=0.54.0",
 ]
@@ -38,6 +43,7 @@ dev = [
     "pytest>=9.1.1",
     "ruff>=0.17.2",
     "testcontainers>=4.15.0",
+    "types-authlib>=1.8.0.20260911",
     "websockets>=17.3",
 ]
 
@@ -98,4 +104,4 @@ max_line_length = 120
 preserve_blank_lines = true
 # The JinjaX components that hold blocks of a page, indented as HTML's blocks are; the others stay
 # inline like spans.
-custom_html = "Layout,Panel,PageHead,Notice,Player,GuideStep,Stat,Fact"
+custom_html = "Layout,Panel,PageHead,Notice,Player,GuideStep,Stat,Fact,AdminPage"

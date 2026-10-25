@@ -1,0 +1,42 @@
+{#def next: str, notice, provider #}
+{% set title = _("web.admin.sign_in") %}
+{% set through = provider.name if provider else "" %}
+<AdminPage :title="title" current="sign_in">
+  <PageHead labelledby="sign-in-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="sign-in-title">{{ _("web.admin.sign_in.subtitle") }}</TitleBlock>
+    </div>
+  </PageHead>
+  <Panel tag="section"
+         aria-labelledby="sign-in-through"
+         class="enter-panel sign-in">
+    {% if notice %}
+      {% set kind = notice.kind %}
+      {% if kind == "refused" %}
+        <Alert :label="_('web.admin.notice.refused')" :title="_('web.admin.notice.refused.title', provider=through, name=notice.name)" glyph="guard" alert>{{ _("web.admin.access") }} {{ _("web.admin.notice.refused.text", provider=through) }}</Alert>
+      {% elif kind in ("failed", "unreachable") %}
+        <Alert :label="_('web.admin.notice.failed')" :title="_('web.admin.notice.failed.title')" glyph="warn" alert>{{ _("web.admin.notice." ~ kind ~ ".text", provider=through) }}</Alert>
+      {% elif kind == "signed_out" %}
+        <Alert :label="_('web.admin.notice.signed_out')" :title="_('web.admin.notice.signed_out.title')">{{ _("web.admin.notice.signed_out.text", provider=through) }}</Alert>
+      {% else %}
+        <Alert :label="_('web.admin.notice.expired')" :title="_('web.admin.notice.expired.title')" glyph="clock">{{ _("web.admin.notice.expired.text.next") if next else _("web.admin.notice.expired.text") }}</Alert>
+      {% endif %}
+    {% endif %}
+    <Bar id="sign-in-through" large>{{ _("web.admin.sign_in.through") }}</Bar>
+    {% if provider %}
+      <form method="post"
+            action="{{ url('/admin/sign-in') }}"
+            class="sign-in-button">
+        <CsrfField />
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+        <ActionButton :label="provider.name" />
+      </form>
+    {% else %}
+      <p class="body-text sign-in-note">{{ _("web.admin.sign_in.none") }}</p>
+    {% endif %}
+    {% if not notice %}
+      <p class="body-text sign-in-note">{{ _("web.admin.access") }}</p>
+      <p class="body-text sign-in-note">{{ _("web.admin.sign_in.kept") }}</p>
+    {% endif %}
+  </Panel>
+</AdminPage>

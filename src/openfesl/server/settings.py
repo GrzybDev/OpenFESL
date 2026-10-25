@@ -45,6 +45,16 @@ class Settings(BaseSettings):
         hook_default_url: The relay address OpenFESLHook's releases connect to when no
             OpenFESLHook.ini names another; the guide to playing explains that file to players
             of other servers.
+        session_secret: The key that signs the admin panel's session cookie; without one each
+            start of the server picks its own, which signs every admin out.
+        admin_oidc_name: The name of the admin panel's sign-in provider on its button.
+        admin_oidc_issuer: The OpenID Connect issuer the admins sign in through, whose discovery
+            document names its endpoints, such as https://auth.example.com/application/o/fesl/;
+            without it and the client's id and secret nobody signs in to the panel.
+        admin_oidc_client_id: The panel's client id at the provider.
+        admin_oidc_client_secret: The panel's client secret there.
+        admin_group: The provider's group whose members are admins.
+        moderator_group: The provider's group whose members are moderators.
     """
 
     database_url: str
@@ -60,6 +70,13 @@ class Settings(BaseSettings):
     public_url: str | None = None
     contact_email: str | None = None
     hook_default_url: str = "wss://fesl.grzyb.app"
+    session_secret: SecretStr | None = None
+    admin_oidc_name: str = "Authentik"
+    admin_oidc_issuer: str | None = None
+    admin_oidc_client_id: str | None = None
+    admin_oidc_client_secret: SecretStr | None = None
+    admin_group: str | None = None
+    moderator_group: str | None = None
 
     @field_validator("database_url")
     @classmethod

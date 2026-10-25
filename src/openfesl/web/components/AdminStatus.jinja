@@ -1,0 +1,12 @@
+{# Who is signed in to the admin panel, with the role and the provider, and the button that signs
+   out. #}
+<div class="admin-status">
+  <p>
+    <span aria-hidden="true" class="admin-mark"><Icon name="guard" fill="#0A0A0A" /></span>
+    <span><span class="admin-name">{{ viewer.admin.name }}</span><span class="admin-role">{{ _("web.admin.signed_in." ~ viewer.admin.role.value, provider=viewer.through) }}</span></span>
+  </p>
+  <form method="post" action="{{ url('/admin/sign-out') }}">
+    <CsrfField />
+    <button type="submit" class="admin-sign-out">{{ _("web.admin.sign_out") }}</button>
+  </form>
+</div>

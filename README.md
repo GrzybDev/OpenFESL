@@ -68,6 +68,13 @@ The server reads its settings from the environment.
 | `PUBLIC_URL` | The address the server's web pages are reached at, where the links in mail lead, such as `https://fesl.example.com`; required for mail to go out. The guides to playing and hosting give the relay address that follows from it, such as `wss://fesl.example.com`, or the request's own without it | none |
 | `HOOK_DEFAULT_URL` | The relay address OpenFESLHook's releases connect to without an `OpenFESLHook.ini`; where this server's relay address differs, the guides show the lines of that file | `wss://fesl.grzyb.app` |
 | `CONTACT_EMAIL` | The address at which the operators of dedicated servers reach this server's administrators, such as for a provider file; the guide to hosting shows it | none |
+| `SESSION_SECRET` | The key that signs the admin panel's session cookie; without one each start of the server picks its own, which signs every admin out | none |
+| `ADMIN_OIDC_NAME` | The name of the admin panel's sign-in provider on its button | `Authentik` |
+| `ADMIN_OIDC_ISSUER` | The OpenID Connect issuer the admins sign in through, whose discovery document names its endpoints, such as `https://auth.example.com/application/o/openfesl/`; without it and the client's id and secret nobody signs in to the panel | none |
+| `ADMIN_OIDC_CLIENT_ID` | The panel's client id at the provider | none |
+| `ADMIN_OIDC_CLIENT_SECRET` | The panel's client secret there | none |
+| `ADMIN_GROUP` | The provider's group whose members are admins | none |
+| `MODERATOR_GROUP` | The provider's group whose members are moderators, unless they are admins | none |
 
 The database schema is created and upgraded when the server starts.
 
@@ -80,6 +87,14 @@ The database schema is created and upgraded when the server starts.
 - On shutdown the server closes every session with code 1001, and the hook reconnects when the game does.
 - The image checks its health with `python -m openfesl.server.health`, which loads only the standard library so
   it answers within its timeout on small machines such as a Raspberry Pi.
+
+## Admin panel
+
+The admin panel at `/admin/` signs admins in through one OpenID Connect provider, such as Authentik, with the
+authorization code flow and PKCE. Register it there as a confidential client with the redirect URI
+`<PUBLIC_URL>/admin/sign-in/callback` and the scopes `openid profile`; the panel reads the account's groups from the
+`groups` claim of its ID token. It keeps only the account's id, display name and role, in a signed session cookie
+that is `Secure` when `PUBLIC_URL` starts with `https://`. An admin signs in again after 12 hours.
 
 ## Administration
 

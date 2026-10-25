@@ -1,0 +1,43 @@
+@layer components {
+  .alert {
+    background: var(--row-light);
+    padding: 14px;
+    color: var(--ink);
+  }
+
+  .alert-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .alert-glyph {
+    display: grid;
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    place-items: center;
+    border: 1px solid var(--badge-edge);
+    background: var(--badge);
+  }
+
+  .alert-title {
+    margin-top: 8px;
+    font-family: var(--font-sans);
+    font-size: 20px;
+    line-height: 1.25;
+    font-weight: 700;
+  }
+
+  .alert-text {
+    margin-top: 6px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+}

@@ -164,6 +164,9 @@
   .area-steel {
     --accent: #9fc3e6;
     --accent-hover: #b9d4ee;
+    --menu-current: #545a61;
+    --badge: #c8d3df;
+    --badge-edge: #2b3440;
     --field: #15181b;
     --mottle: #c4cbd7;
     --grit: #f1f5f9;

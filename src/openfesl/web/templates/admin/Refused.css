@@ -1,0 +1,5 @@
+@layer pages {
+  .refused {
+    max-width: 600px;
+  }
+}
