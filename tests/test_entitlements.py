@@ -3,9 +3,21 @@ import asyncio
 import pytest
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
-from support import cli, entitle_game, game, host_game, log_in_player, login, registration
+from support import (
+    cli,
+    enter_as_player,
+    entitle_game,
+    game,
+    host_game,
+    let_in,
+    log_in_player,
+    login,
+    registration,
+)
 
+from openfesl.core.games import Games, Grant, load_games
 from openfesl.protocol.relay import Channel, ConnectionKey
+from openfesl.server import app
 from openfesl.server.cli import main
 
 FESL = ConnectionKey(Channel.FESL, 1)
@@ -159,6 +171,53 @@ async def test_the_game_key_prompt_takes_only_a_key_for_the_game(server_url: str
             FESL, "acct", [("TXN", "NuGetEntitlementCount"), ("groupName", "BFBC2PC")]
         )
         assert owned["entitlementCount"] == "0"
+
+
+@pytest.fixture
+def automatic_grant(monkeypatch: pytest.MonkeyPatch) -> None:
+    # The game's own data marks no entitlement automatic.
+    bfbc2 = load_games().by_id("bfbc2")
+    assert bfbc2 is not None
+    automatic = [Grant(tag="INVENTED:AUTOMATIC", group="BFBC2PC")]
+    granting = bfbc2.model_copy(update={"automatic_grants": automatic})
+    monkeypatch.setattr(app, "load_games", lambda: Games([granting]))
+
+
+def grant(tag: str, master_id: str) -> list[tuple[str, str]]:
+    return [("TXN", "NuGrantEntitlement"), ("entitlementTag", tag), ("masterId", master_id)]
+
+
+@pytest.mark.anyio
+async def test_a_server_grants_the_players_in_its_game_what_the_game_marks_automatic(
+    automatic_grant: None, open_hosting: None, server_url: str
+) -> None:
+    async with game(server_url) as server, game(server_url) as ann, game(server_url) as ben:
+        created = await host_game(server)
+        await enter_as_player(ann, "ann@example.test", "Ann_01")
+        await enter_as_player(ben, "ben@example.test", "Ben_01")
+        await let_in(server, ann, created)
+        # A server finds a player's account as the veteran lookup does.
+        lookup = [
+            ("TXN", "NuLookupUserInfo"),
+            ("userInfo.0.userName", "Ann_01"),
+            ("userInfo.1.userName", "Ben_01"),
+            ("userInfo.[]", "2"),
+        ]
+        found = await server.request(FESL, "acct", lookup)
+        playing, outside = found["userInfo.0.masterUserId"], found["userInfo.1.masterUserId"]
+
+        automatic = grant("INVENTED:AUTOMATIC", playing)
+        assert "errorCode" not in await server.request(FESL, "acct", automatic)
+        unmarked = grant("BFBC2:PC:VIETNAM_ACCESS", playing)
+        assert (await server.request(FESL, "acct", unmarked))["errorCode"] == "21"
+        stranger = grant("INVENTED:AUTOMATIC", outside)
+        assert (await server.request(FESL, "acct", stranger))["errorCode"] == "21"
+
+        owned = [("TXN", "NuGetEntitlements"), ("groupName", "BFBC2PC")]
+        held = await ann.request(FESL, "acct", owned)
+        tags = (held["entitlements.[]"], held["entitlements.0.entitlementTag"])
+        assert tags == ("1", "INVENTED:AUTOMATIC")
+        assert (await ben.request(FESL, "acct", owned))["entitlements.[]"] == "0"
 
 
 @pytest.mark.anyio

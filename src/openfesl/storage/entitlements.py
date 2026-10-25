@@ -126,6 +126,34 @@ class SqlEntitlementStore:
                 Grant(tag=row.tag, group=row.group_name, product=row.product_id) for row in rows
             ]
 
+    async def grant(self, account_id: int, grant: Grant) -> bool:
+        """Grant an account an entitlement, which stays as it is when the account holds it.
+
+        Args:
+            account_id: The account.
+            grant: The entitlement.
+
+        Returns:
+            Whether the account holds it active, which it does not once the admin revoked it.
+        """
+        async with self._sessions.begin() as session:
+            await session.execute(
+                insert(EntitlementRow)
+                .values(
+                    account_id=account_id,
+                    tag=grant.tag,
+                    group_name=grant.group,
+                    product_id=grant.product,
+                )
+                .on_conflict_do_nothing()
+            )
+            status = await session.scalar(
+                select(EntitlementRow.status).where(
+                    EntitlementRow.account_id == account_id, EntitlementRow.tag == grant.tag
+                )
+            )
+            return status == ACTIVE
+
     async def of_account(self, account_id: int, query: EntitlementQuery) -> list[Entitlement]:
         """Return an account's entitlements, filtered by whichever filters are not empty.
 

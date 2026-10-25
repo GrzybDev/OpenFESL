@@ -35,7 +35,7 @@ class Client(BaseModel):
 
 
 class Grant(BaseModel):
-    """An entitlement that a product key grants."""
+    """An entitlement that a product key or a dedicated server grants."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -127,6 +127,8 @@ class Game(BaseModel):
         namespace: The persona namespace; persona names are unique within it.
         clients: The game's client strings.
         keys: The product keys the database starts with; the admin manages them from there.
+        automatic_grants: The entitlements that the game's dedicated servers may grant the
+            players in their games, by tag.
         http: What the game fetches over HTTP.
         records: The records a persona may keep, by name, with the most entries each holds.
         associations: The association list types the game keeps, by name.
@@ -147,6 +149,7 @@ class Game(BaseModel):
     namespace: str
     clients: dict[str, Client]
     keys: list[ProductKey] = []
+    automatic_grants: list[Grant] = []
     http: Http = Http()
     records: dict[str, int] = {}
     associations: dict[str, ListRule] = {}

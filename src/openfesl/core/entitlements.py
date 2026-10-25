@@ -6,7 +6,7 @@ from enum import IntEnum
 from typing import TYPE_CHECKING, Any, Protocol
 
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
-from openfesl.core.games import Grant, ProductKey
+from openfesl.core.games import Game, Grant, ProductKey
 from openfesl.protocol.acct import (
     EntitlementInfo,
     NuEntitleUser,
@@ -123,6 +123,17 @@ class EntitlementStore(Protocol):
             What the key grants, or why it grants nothing.
         """
 
+    async def grant(self, account_id: int, grant: Grant) -> bool:
+        """Grant an account an entitlement, which stays as it is when the account holds it.
+
+        Args:
+            account_id: The account.
+            grant: The entitlement.
+
+        Returns:
+            Whether the account holds it active, which it does not once the admin revoked it.
+        """
+
     async def of_account(self, account_id: int, query: EntitlementQuery) -> list[Entitlement]:
         """Return an account's entitlements, filtered by whichever filters are not empty.
 
@@ -202,23 +213,29 @@ class EntitlementService:
         )
 
     async def grant(self, connection: FeslConnection, request: NuGrantEntitlement) -> Message:
-        """Confirm an entitlement that the logged-in account holds already.
+        """Grant a player what its dedicated server may grant, or confirm what a player holds.
 
-        Nothing new is granted: the SDK names no account, so any game could grant itself
-        anything, while what an account owns comes from product keys and the admin.
+        A player's game grants nothing new: its SDK names no account, so any game could grant
+        itself anything, while what an account owns comes from product keys and the admin. A
+        dedicated server that hosts a game players see grants the players in it the
+        entitlements the game's data lists as automatic.
 
         Args:
             connection: The FESL connection the request came on.
-            request: The entitlement.
+            request: The entitlement, and the player's account when a server grants it.
 
         Raises:
-            TransactionError: When nobody is logged in, a dedicated server asks or the account
-                does not hold the entitlement.
+            TransactionError: When nobody is logged in, a server may not grant the entitlement
+                to the account, or the account does not hold it, as after the admin revoked it.
         """
         account = connection.session.account
-        if account is None:
+        if account is None or connection.game is None:
             raise TransactionError(NOT_LOGGED_IN)
-        if account.server or not await self._store.entitled(account.id, request.entitlement_tag):
+        if account.server:
+            held = await self._grant_automatic(connection, connection.game, request)
+        else:
+            held = await self._store.entitled(account.id, request.entitlement_tag)
+        if not held:
             raise TransactionError(PARAMETERS_ERROR)
         return Message()
 
@@ -257,6 +274,18 @@ class EntitlementService:
         return NuGetEntitlementCountAnswer(
             entitlement_count=len(await self._find(connection, request))
         )
+
+    async def _grant_automatic(
+        self, connection: FeslConnection, game: Game, request: NuGrantEntitlement
+    ) -> bool:
+        tag = request.entitlement_tag
+        grant = next((grant for grant in game.automatic_grants if grant.tag == tag), None)
+        if grant is None or not await self._hosting.admits_player(
+            connection.session, request.master_id
+        ):
+            return False
+        logger.info("A dedicated server grants account %d %s", request.master_id, tag)
+        return await self._store.grant(request.master_id, grant)
 
     async def _find(
         self, connection: FeslConnection, request: NuGetEntitlements

@@ -104,7 +104,8 @@ applies account changes within seconds.
 Where a game handles more than one behaviour, the game's data file in `src/openfesl/games` sets the default and
 `openfesl settings` overrides it. The server reads the policies on every use, so a change applies at once.
 The data file also holds the age limits of the countries that differ from 13 to register and 18 to register
-without a parent's consent. A birth date is checked and never stored.
+without a parent's consent. A birth date is checked and never stored. It also lists the entitlements that a dedicated
+server whose game players see may grant the players in it; Bad Company 2 lists none.
 
 | Policy | Values | Bad Company 2 |
 |---|---|---|

@@ -248,6 +248,7 @@ class GetTelemetryTokenAnswer(Message):
 
 
 class NuGrantEntitlement(Message):
-    """An entitlement the game grants the logged-in account; the SDK names no account."""
+    """An entitlement the game grants; a public dedicated server names the player's account."""
 
     entitlement_tag: Text = ""
+    master_id: int = 0

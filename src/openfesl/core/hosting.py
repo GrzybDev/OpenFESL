@@ -479,12 +479,37 @@ class Hosting:
         Args:
             session: The session.
         """
-        for hosted in self._every():
-            if hosted.type == GAME and hosted.server and hosted.host.session is session:
-                # The admin may have decided otherwise since the game listed.
-                standings = await self._approval.standings([hosted.ugid])
-                return standings.get(hosted.ugid) is Standing.LISTED
-        return False
+        hosted = self._served_by(session)
+        return hosted is not None and await self._listed(hosted)
+
+    async def admits_player(self, session: GameSession, account_id: int) -> bool:
+        """Return whether a session hosts a game that players see as of now, with a player in it.
+
+        Args:
+            session: The session.
+            account_id: The player's account.
+        """
+        hosted = self._served_by(session)
+        if hosted is None or all(
+            player.persona.account_id != account_id for player in hosted.players.values()
+        ):
+            return False
+        return await self._listed(hosted)
+
+    def _served_by(self, session: GameSession) -> HostedGame | None:
+        return next(
+            (
+                hosted
+                for hosted in self._every()
+                if hosted.type == GAME and hosted.server and hosted.host.session is session
+            ),
+            None,
+        )
+
+    async def _listed(self, hosted: HostedGame) -> bool:
+        # The admin may have decided otherwise since the game listed.
+        standings = await self._approval.standings([hosted.ugid])
+        return standings.get(hosted.ugid) is Standing.LISTED
 
     async def follow_approvals(self) -> None:
         """Apply the admin's decisions to the games of dedicated servers until cancelled."""

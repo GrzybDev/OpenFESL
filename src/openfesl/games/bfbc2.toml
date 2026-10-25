@@ -2,6 +2,10 @@ name = "Battlefield: Bad Company 2"
 partition = "/eagames/BFBC2"
 namespace = "battlefield"
 provider_attribute = "B-U-Provider"
+# The entitlements dedicated servers may grant the players in their games, such as
+# { tag = "...", group = "..." }. Public R34 servers ask for those the game marks automatic,
+# which are not known, so none is listed.
+automatic_grants = []
 
 [clients.bfbc2-pc]
 theater_port = 18395
