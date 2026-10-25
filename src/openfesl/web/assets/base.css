@@ -148,6 +148,7 @@
     --bright: #f4f4f4;
     --soft: #c9ccd1;
     /* The menus' fixed shades of the game style, the same in every theme. */
+    --row-pale: #eeeeee;
     --row-hover: #eeeeee;
     --dim: #3d3d38;
     --placeholder: #55554e;
@@ -155,6 +156,7 @@
     --track: #3a3b33;
     --off-block: #26261f;
     --off-text: #8f8f84;
+    --muted-light: #c9c9bc;
     --menu-hover: #1f1f1c;
   }
 

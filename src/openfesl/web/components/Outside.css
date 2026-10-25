@@ -1,0 +1,32 @@
+@layer components {
+  .outside {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 10px;
+    background: var(--row-pale);
+    padding: 0 12px 0 6px;
+    font-size: 14px;
+    line-height: calc(1.25 / 0.875);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+
+    > span:first-child {
+      display: grid;
+      height: 32px;
+      flex: 0 0 32px;
+      place-items: center;
+      background: var(--ink);
+    }
+  }
+
+  .outside-note {
+    margin-left: auto;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    letter-spacing: normal;
+    color: var(--dim);
+    text-transform: none;
+  }
+}

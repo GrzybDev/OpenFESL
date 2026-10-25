@@ -1,0 +1,11 @@
+{#def caption: str, label: str, files #}
+{# A folder's files after a guide's step, each with what the step did to it: added, replaced or
+   left as shipped. #}
+<div>
+  <p class="folder-caption">{{ caption }}</p>
+  <ul aria-label="{{ label }}" class="folder">
+    {% for name, mark in files %}
+      <li{% if mark and mark != "shipped" %} class="folder-changed"{% endif %}>{{ name }}{% if mark %}<span class="folder-mark{% if mark != 'shipped' %} folder-mark-new{% endif %}">{{ _("web.guide." ~ mark) }}</span>{% endif %}</li>
+    {% endfor %}
+  </ul>
+</div>

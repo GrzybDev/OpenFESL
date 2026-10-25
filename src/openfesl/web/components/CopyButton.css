@@ -14,6 +14,17 @@
     text-transform: uppercase;
   }
 
+  .copy-tall {
+    min-height: 52px;
+  }
+
+  .copy-cell {
+    min-height: 48px;
+    width: 100%;
+    justify-content: center;
+    padding-right: 14px;
+  }
+
   .copy-icons {
     display: grid;
 

@@ -1,0 +1,116 @@
+{#def activity, relay: str | None, keys: list, play_key #}
+{% set title = _("web.front.play") %}
+{% set servers = url("/" ~ game.id ~ "/servers") %}
+{% set hook %}<FileName text="dinput8.dll" />{% endset %}
+<Layout :title="title">
+  <div id="live"
+       hx-get="{{ here }}"
+       hx-trigger="every 15s, refresh"
+       hx-select="#live"
+       hx-select-oob="#shell-games:outerMorph"
+       hx-swap="outerMorph">
+    <GameStatus :activity="activity" />
+    <GameMenu current="play" />
+
+    <PageHead labelledby="play-title">
+      <div class="enter-title page-title page-title-wide">
+        <TitleBlock :title="title" id="play-title">{{ _("web.play.subtitle", game=game.name) }}</TitleBlock>
+      </div>
+      <Tab :href="servers" class="tab-link">{{ _("web.game.menu.servers") }}<span class="tab-count"><Count :value="activity.servers" class="count-sm live-value" /></span>
+      <Icon name="go" :size="14" stroke="currentColor" class="go" /></Tab>
+    </PageHead>
+
+    <Panel class="enter-panel">
+      <p class="play-needed">
+        <span>{{ _("web.play.needed") }}</span>
+        <span>{{ _("web.play.original") }} <span>{{ _("games." ~ game.id ~ ".releases") }}</span></span>
+      </p>
+
+      <section aria-labelledby="play-steps" class="play-steps">
+        <h2 id="play-steps" class="sr-only">{{ _("web.play.steps") }}</h2>
+        <ol class="guide-steps">
+          <GuideStep :number="1"
+                     :heading="_('web.play.hook')"
+                     :where="_('web.play.hook.where')">
+            <p class="body-text guide-fill">{{ _("web.play.hook.text", file=hook) }}</p>
+            <a href="https://github.com/GrzybDev/OpenFESLHook/releases/latest/download/dinput8.dll"
+               class="chevron action play-download">
+              <span aria-hidden="true"
+                    class="action-square"><Icon name="down" :size="30" stroke="#0A0A0A" class="go" /></span>
+              <span class="play-download-label"><span>{{ _("web.play.download") }}</span><span>{{ _("web.play.download.file", file="dinput8.dll") }}</span></span>
+            </a>
+            <Outside href="https://github.com/GrzybDev/OpenFESLHook/releases" :label="_('web.play.releases')" note="github.com" />
+          </GuideStep>
+          <GuideStep :number="2"
+                     :heading="_('web.play.copy')"
+                     :where="_('web.play.copy.where')">
+            {% set executable %}<FileName :text="game.executable" />{% endset %}
+            <p class="body-text">{{ _("web.play.copy.text", file=hook, executable=executable) }}</p>
+            <div class="guide-fill">
+              <Folder :caption="_('web.play.folder')" :label="_('web.play.folder.after')" :files="[(game.executable, None), ('dinput8.dll', 'added')]" />
+              {% set removed %}<code>dinput8.dll</code>{% endset %}
+              <p class="guide-aside play-remove">{{ _("web.play.remove", file=removed) }}</p>
+            </div>
+            <Outside href="https://github.com/GrzybDev/OpenFESLHook#installing" :label="_('web.play.instructions')" note="github.com" />
+          </GuideStep>
+          {% if relay %}
+            <GuideStep :number="3"
+                       :heading="_('web.play.server')"
+                       :where="_('web.play.server.where', file='OpenFESLHook.ini', hook='dinput8.dll')">
+              {% set ini %}<FileName text="OpenFESLHook.ini" />{% endset %}
+              {% set line %}<FileName text="Url=" />{% endset %}
+              {% set section %}<FileName text="[Server]" />{% endset %}
+              <p class="body-text">{{ _("web.play.server.text", file=ini, hook=hook, line=line, section=section) }}</p>
+              <HookLines :relay="relay" />
+            </GuideStep>
+          {% endif %}
+          <GuideStep :number="4 if relay else 3"
+                     :heading="_('web.play.account')"
+                     :where="_('web.play.account.where')">
+            {% set key %}{% if play_key %}<FileName :text="play_key.code" />{% endif %}{% endset %}
+            <p class="body-text guide-fill">{% if play_key %}{{ _("web.play.account.text", key=key) }}{% else %}{{ _("web.play.account.plain") }}{% endif %}</p>
+            {% if play_key %}
+              <div class="play-key">
+                <span>{{ play_key.code }}</span>
+                <CopyButton :value="play_key.code" :label="_('web.front.setup.copy')" :note="_('web.front.setup.copied')" size="tall" />
+              </div>
+            {% endif %}
+            <Outside :href="servers" :label="_('web.play.server_list')" :note="_n('web.play.servers', activity.servers)" />
+          </GuideStep>
+        </ol>
+        <p class="body-text side-note">{{ _("web.play.joining") }}</p>
+      </section>
+
+      {% if keys %}
+        <section aria-labelledby="play-keys" class="play-keys">
+          <Bar id="play-keys" :extra="_n('web.play.keys.count', keys|length)" wrap>{{ _("web.play.keys") }}</Bar>
+          <p class="body-text play-keys-text">{{ _("web.play.keys.text") }}</p>
+          <div class="table-scroll">
+            <div role="table" aria-labelledby="play-keys" class="table keys">
+              <div role="rowgroup">
+                <div role="row" class="key-columns">
+                  <div role="columnheader" class="column-head key-code-head">{{ _("web.play.key") }}</div>
+                  <div role="columnheader" class="column-head">{{ _("web.play.unlocks") }}</div>
+                  <div role="columnheader" class="column-head">{{ _("web.play.needed_or_optional") }}</div>
+                  <div role="columnheader"><span class="sr-only">{{ _("web.play.copy_column") }}</span></div>
+                </div>
+              </div>
+              <div role="rowgroup" class="table-rows">
+                {% for key in keys %}
+                  <div role="row" class="key-columns key">
+                    <div role="cell" class="key-code">{{ key.code }}</div>
+                    <div role="cell" class="key-unlocks">{{ _("games." ~ game.id ~ ".key." ~ key.code) }}</div>
+                    <div role="cell">{% if key == play_key %}<span class="key-needed">{{ _("web.play.needed") }}</span>{% else %}<span class="key-optional">{{ _("web.play.optional") }}</span>{% endif %}</div>
+                    <div role="cell" class="key-copy">
+                      <CopyButton :value="key.code" :label="_('web.play.copy_key')" :note="_('web.play.copied_key', key=key.code)" :name="_('web.play.copy_key.name', key=key.code)" size="cell" />
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </section>
+      {% endif %}
+    </Panel>
+  </div>
+</Layout>

@@ -39,7 +39,10 @@ class Settings(BaseSettings):
         smtp_password: The password of that login.
         smtp_sender: The address mail comes from.
         public_url: The address the server's web pages are reached at, where the links in
-            mail lead, such as https://fesl.example.com.
+            mail lead, such as https://fesl.example.com; the relay's address follows from it.
+        hook_default_url: The relay address OpenFESLHook's releases connect to when no
+            OpenFESLHook.ini names another; the guide to playing explains that file to players
+            of other servers.
     """
 
     database_url: str
@@ -53,6 +56,7 @@ class Settings(BaseSettings):
     smtp_password: SecretStr | None = None
     smtp_sender: str | None = None
     public_url: str | None = None
+    hook_default_url: str = "wss://fesl.grzyb.app"
 
     @field_validator("database_url")
     @classmethod

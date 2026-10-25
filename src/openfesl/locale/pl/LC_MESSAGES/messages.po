@@ -1508,3 +1508,194 @@ msgstr "Wiedza sanitariusza SPECACT"
 
 msgid "games.bfbc2.award.di04"
 msgstr "Wiedza zwiadowcy SPECACT"
+
+#, python-format
+msgid "web.play.subtitle"
+msgstr "%(game)s na PC"
+
+msgid "web.play.needed"
+msgstr "Wymagane"
+
+msgid "web.play.optional"
+msgstr "Opcjonalne"
+
+msgid "web.play.original"
+msgstr "Potrzebny jest oryginalny egzemplarz gry; OpenFESL nie zawiera plików gry."
+
+msgid "games.bfbc2.releases"
+msgstr ""
+"OpenFESLHook działa z wydaniem gry na Windows ze Steam, Origin lub "
+"aplikacji EA."
+
+msgid "web.play.steps"
+msgstr "Przygotowanie gry w kilku krokach"
+
+msgid "web.play.hook"
+msgstr "Pobierz hook"
+
+msgid "web.play.hook.where"
+msgstr "Z najnowszego wydania OpenFESLHook"
+
+#, python-format
+msgid "web.play.hook.text"
+msgstr "Pobierz %(file)s. To OpenFESLHook, plik, który łączy grę z OpenFESL."
+
+msgid "web.play.download"
+msgstr "Pobierz"
+
+#, python-format
+msgid "web.play.download.file"
+msgstr "%(file)s · najnowsze wydanie"
+
+msgid "web.play.releases"
+msgstr "Wszystkie wydania"
+
+msgid "web.play.copy"
+msgstr "Skopiuj go obok gry"
+
+msgid "web.play.copy.where"
+msgstr "Do folderu gry"
+
+#, python-format
+msgid "web.play.copy.text"
+msgstr ""
+"Skopiuj %(file)s do folderu gry, obok %(executable)s. Gra wczytuje go "
+"przy uruchomieniu."
+
+msgid "web.play.folder"
+msgstr "Folder gry"
+
+msgid "web.play.folder.after"
+msgstr "Folder gry po tym kroku"
+
+msgid "web.guide.added"
+msgstr "Dodany"
+
+#, python-format
+msgid "web.play.remove"
+msgstr "Usunięcie %(file)s usuwa hook."
+
+msgid "web.play.instructions"
+msgstr "Pełna instrukcja instalacji"
+
+msgid "web.play.server"
+msgstr "Wskaż hookowi ten serwer"
+
+#, python-format
+msgid "web.play.server.where"
+msgstr "W %(file)s, obok %(hook)s"
+
+#, python-format
+msgid "web.play.server.text"
+msgstr ""
+"OpenFESLHook łączy się z wbudowanym serwerem, chyba że %(file)s wskazuje "
+"inny. Zapisz %(file)s obok %(hook)s z tymi wierszami. Jeśli w tym "
+"folderze już jest taki plik, dodaj wiersz %(line)s do jego sekcji "
+"%(section)s."
+
+msgid "web.guide.lines.copy"
+msgstr "Skopiuj wiersze"
+
+msgid "web.guide.lines.copied"
+msgstr "Skopiowano wiersze."
+
+msgid "web.play.account"
+msgstr "Utwórz konto"
+
+msgid "web.play.account.where"
+msgstr "W grze"
+
+#, python-format
+msgid "web.play.account.text"
+msgstr ""
+"Uruchom grę i utwórz konto na jej ekranie logowania. Przy pierwszym "
+"logowaniu gra prosi o klucz produktu: wpisz %(key)s."
+
+msgid "web.play.account.plain"
+msgstr "Uruchom grę i utwórz konto na jej ekranie logowania."
+
+msgid "web.play.server_list"
+msgstr "Lista serwerów"
+
+#, python-format
+msgid "web.play.servers.one"
+msgstr "%(count)s serwer"
+
+#, python-format
+msgid "web.play.servers.few"
+msgstr "%(count)s serwery"
+
+#, python-format
+msgid "web.play.servers.many"
+msgstr "%(count)s serwerów"
+
+#, python-format
+msgid "web.play.servers.other"
+msgstr "%(count)s serwera"
+
+msgid "web.play.joining"
+msgstr ""
+"Do serwerów dołącza się z przeglądarki serwerów w grze; pokazuje ona te "
+"same serwery co ta strona."
+
+msgid "web.play.keys"
+msgstr "Klucze produktu"
+
+#, python-format
+msgid "web.play.keys.count.one"
+msgstr "%(count)s klucz"
+
+#, python-format
+msgid "web.play.keys.count.few"
+msgstr "%(count)s klucze"
+
+#, python-format
+msgid "web.play.keys.count.many"
+msgstr "%(count)s kluczy"
+
+#, python-format
+msgid "web.play.keys.count.other"
+msgstr "%(count)s klucza"
+
+msgid "web.play.keys.text"
+msgstr ""
+"Klucze wpisuje się w grze, gdy o nie poprosi. Każdy dodaje do konta to, "
+"co odblokowuje."
+
+msgid "web.play.key"
+msgstr "Klucz"
+
+msgid "web.play.unlocks"
+msgstr "Odblokowuje"
+
+msgid "web.play.needed_or_optional"
+msgstr "Wymagany czy opcjonalny"
+
+msgid "web.play.copy_column"
+msgstr "Kopiowanie"
+
+msgid "web.play.copy_key"
+msgstr "Skopiuj"
+
+#, python-format
+msgid "web.play.copy_key.name"
+msgstr "Skopiuj %(key)s"
+
+#, python-format
+msgid "web.play.copied_key"
+msgstr "Skopiowano %(key)s."
+
+msgid "games.bfbc2.key.ACTIVATE-GAME"
+msgstr "Gra sieciowa"
+
+msgid "games.bfbc2.key.ACTIVATE-VIETNAM"
+msgstr "Dodatek Vietnam"
+
+msgid "games.bfbc2.key.ACTIVATE-SPECACT"
+msgstr "Zestawy SPECACT"
+
+msgid "games.bfbc2.key.ACTIVATE-PREMIUM"
+msgstr "Odblokowania Edycji Limitowanej"
+
+msgid "games.bfbc2.key.ACTIVATE-VETERAN"
+msgstr "Status weterana"

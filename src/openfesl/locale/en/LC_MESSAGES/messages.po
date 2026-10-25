@@ -1491,3 +1491,180 @@ msgstr "Medic SPECACT knowledge"
 
 msgid "games.bfbc2.award.di04"
 msgstr "Recon SPECACT knowledge"
+
+#, python-format
+msgid "web.play.subtitle"
+msgstr "%(game)s on PC"
+
+msgid "web.play.needed"
+msgstr "Needed"
+
+msgid "web.play.optional"
+msgstr "Optional"
+
+msgid "web.play.original"
+msgstr "An original copy of the game is needed; OpenFESL contains no game files."
+
+msgid "games.bfbc2.releases"
+msgstr ""
+"OpenFESLHook works with the game's Windows release from Steam, Origin or "
+"the EA app."
+
+msgid "web.play.steps"
+msgstr "Set up the game in a few steps"
+
+msgid "web.play.hook"
+msgstr "Get the hook"
+
+msgid "web.play.hook.where"
+msgstr "From the latest OpenFESLHook release"
+
+#, python-format
+msgid "web.play.hook.text"
+msgstr ""
+"Download %(file)s. It is OpenFESLHook, the file that connects the game to"
+" OpenFESL."
+
+msgid "web.play.download"
+msgstr "Download"
+
+#, python-format
+msgid "web.play.download.file"
+msgstr "%(file)s · latest release"
+
+msgid "web.play.releases"
+msgstr "All releases"
+
+msgid "web.play.copy"
+msgstr "Copy it next to the game"
+
+msgid "web.play.copy.where"
+msgstr "Into the game's folder"
+
+#, python-format
+msgid "web.play.copy.text"
+msgstr ""
+"Copy %(file)s into the game's folder, next to %(executable)s. The game "
+"loads it when it starts."
+
+msgid "web.play.folder"
+msgstr "The game's folder"
+
+msgid "web.play.folder.after"
+msgstr "The game's folder after this step"
+
+msgid "web.guide.added"
+msgstr "Added"
+
+#, python-format
+msgid "web.play.remove"
+msgstr "Deleting %(file)s removes the hook."
+
+msgid "web.play.instructions"
+msgstr "Full installation instructions"
+
+msgid "web.play.server"
+msgstr "Point the hook at this server"
+
+#, python-format
+msgid "web.play.server.where"
+msgstr "In %(file)s, next to %(hook)s"
+
+#, python-format
+msgid "web.play.server.text"
+msgstr ""
+"OpenFESLHook connects to its built-in server unless %(file)s names "
+"another. Save %(file)s next to %(hook)s with these lines. When that "
+"folder already has one, add the %(line)s line to its %(section)s section "
+"instead."
+
+msgid "web.guide.lines.copy"
+msgstr "Copy lines"
+
+msgid "web.guide.lines.copied"
+msgstr "Lines copied."
+
+msgid "web.play.account"
+msgstr "Create an account"
+
+msgid "web.play.account.where"
+msgstr "In the game"
+
+#, python-format
+msgid "web.play.account.text"
+msgstr ""
+"Start the game and create an account on its login screen. At the first "
+"login the game asks for a product key: enter %(key)s."
+
+msgid "web.play.account.plain"
+msgstr "Start the game and create an account on its login screen."
+
+msgid "web.play.server_list"
+msgstr "Server list"
+
+#, python-format
+msgid "web.play.servers.one"
+msgstr "%(count)s server"
+
+#, python-format
+msgid "web.play.servers.other"
+msgstr "%(count)s servers"
+
+msgid "web.play.joining"
+msgstr ""
+"Servers are joined from the game's own server browser; it lists the same "
+"servers as this site."
+
+msgid "web.play.keys"
+msgstr "Product keys"
+
+#, python-format
+msgid "web.play.keys.count.one"
+msgstr "%(count)s key"
+
+#, python-format
+msgid "web.play.keys.count.other"
+msgstr "%(count)s keys"
+
+msgid "web.play.keys.text"
+msgstr ""
+"Keys are entered in the game when it asks for a key. Each one adds what "
+"it unlocks to the account."
+
+msgid "web.play.key"
+msgstr "Key"
+
+msgid "web.play.unlocks"
+msgstr "Unlocks"
+
+msgid "web.play.needed_or_optional"
+msgstr "Needed or optional"
+
+msgid "web.play.copy_column"
+msgstr "Copy"
+
+msgid "web.play.copy_key"
+msgstr "Copy"
+
+#, python-format
+msgid "web.play.copy_key.name"
+msgstr "Copy %(key)s"
+
+#, python-format
+msgid "web.play.copied_key"
+msgstr "%(key)s copied."
+
+msgid "games.bfbc2.key.ACTIVATE-GAME"
+msgstr "Online play"
+
+msgid "games.bfbc2.key.ACTIVATE-VIETNAM"
+msgstr "Vietnam expansion"
+
+msgid "games.bfbc2.key.ACTIVATE-SPECACT"
+msgstr "SPECACT kits"
+
+msgid "games.bfbc2.key.ACTIVATE-PREMIUM"
+msgstr "Limited Edition unlocks"
+
+msgid "games.bfbc2.key.ACTIVATE-VETERAN"
+msgstr "Veteran rank"

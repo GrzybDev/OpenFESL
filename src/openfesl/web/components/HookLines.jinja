@@ -1,0 +1,8 @@
+{#def relay: str #}
+{# The lines of OpenFESLHook.ini that point the hook at another server than its default, with a
+   button that copies them. #}
+{% set lines = "[Server]\nUrl=" ~ relay %}
+<div class="hook-lines">
+  <pre>{{ lines }}</pre>
+  <CopyButton :value="lines" :label="_('web.guide.lines.copy')" :note="_('web.guide.lines.copied')" size="tall" />
+</div>

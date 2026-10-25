@@ -1,12 +1,12 @@
-{#def value: str, label: str, note: str, name: str = "" #}
+{#def value: str, label: str, note: str, name: str = "", size: str = "" #}
 {# A button that copies a text, which the page also shows; it needs scripts, so it only shows with
    them. It says it copied for a moment, and the shell announces it (M8). A name tells buttons with
-   the same label apart. #}
+   the same label apart; the size is tall beside a large text, or a table cell's. #}
 <button type="button"
         data-copy="{{ value }}"
         data-copied="{{ _('web.copy.done') }}"
         data-note="{{ note }}"
         {% if name %} aria-label="{{ name }}"{% endif %}
-        class="copy copy-button js-only chevron">
+        class="copy copy-button js-only chevron{% if size %} copy-{{ size }}{% endif %}">
   <span aria-hidden="true" class="copy-icons"><Icon name="copy" :size="18" stroke="currentColor" class="copy-idle" /><Icon name="tick" :size="18" stroke="currentColor" class="copy-done" /></span><span data-label>{{ label }}</span>
 </button>

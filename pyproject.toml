@@ -98,4 +98,4 @@ max_line_length = 120
 preserve_blank_lines = true
 # The JinjaX components that hold blocks of a page, indented as HTML's blocks are; the others stay
 # inline like spans.
-custom_html = "Layout,Panel,PageHead,Notice,Player,Stat,Fact"
+custom_html = "Layout,Panel,PageHead,Notice,Player,GuideStep,Stat,Fact"

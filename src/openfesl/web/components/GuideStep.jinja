@@ -1,0 +1,10 @@
+{#def number: int, heading: str, where: str #}
+{# A step of a guide, as the game's loading screen panels: the number on the accent, where the step
+   happens under the heading, and the step's content. #}
+<li class="guide-step">
+  <h3>
+    <StepNumber :number="number" />{{ heading }}
+  </h3>
+  <p class="guide-where">{{ where }}</p>
+  <div class="guide-body">{{ content }}</div>
+</li>

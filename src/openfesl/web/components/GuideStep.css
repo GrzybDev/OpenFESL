@@ -1,0 +1,72 @@
+@layer components {
+  /* A guide's steps, as many in a line as fit. */
+  .guide-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .guide-step {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+
+    h3 {
+      display: flex;
+      min-height: 48px;
+      align-items: center;
+      gap: 12px;
+      background: var(--ink);
+      padding: 6px 14px 6px 6px;
+      font-size: 17px;
+      line-height: 1.1;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: var(--bright);
+      text-transform: uppercase;
+    }
+  }
+
+  .guide-where {
+    margin-top: 2px;
+    background: var(--row-pale);
+    padding: 8px 14px;
+    font-size: 13px;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    color: var(--ink);
+    text-transform: uppercase;
+  }
+
+  .guide-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 12px;
+    background: var(--score-row-alt);
+    padding: 12px 14px 14px;
+    color: var(--ink);
+  }
+
+  /* A paragraph or block that takes the step's spare height, so that the steps' last lines line
+     up. */
+  .guide-fill {
+    flex: 1;
+  }
+
+  /* A remark in a step, in a smaller and dimmer line. */
+  .guide-aside {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 500;
+    color: var(--dim);
+
+    code {
+      font-family: var(--area-font);
+      font-weight: 700;
+    }
+  }
+}

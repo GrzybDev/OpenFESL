@@ -1,0 +1,176 @@
+/* A game's guide to playing: what is needed, the steps with the hook, and the product keys. */
+@layer pages {
+  .play-needed {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+
+    > :first-child {
+      display: flex;
+      min-height: 44px;
+      flex: none;
+      align-items: center;
+      background: var(--ink);
+      padding-inline: 16px;
+      font-size: 14px;
+      line-height: calc(1.25 / 0.875);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--bright);
+      text-transform: uppercase;
+    }
+
+    > :last-child {
+      flex: 1 1 420px;
+      background: var(--row-light);
+      padding: 11px 14px;
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.4;
+      font-weight: 600;
+      color: var(--ink);
+
+      > span {
+        font-weight: 500;
+      }
+    }
+  }
+
+  .play-steps,
+  .play-keys {
+    margin-top: 14px;
+  }
+
+  .play-download {
+    border: 0;
+  }
+
+  .play-download-label {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    padding: 6px 16px;
+
+    > :first-child {
+      font-size: 30px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    > :last-child {
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.1;
+      font-weight: 600;
+      color: var(--muted-light);
+    }
+  }
+
+  .play-remove {
+    margin-top: 8px;
+  }
+
+  .play-key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+
+    > span {
+      display: flex;
+      min-height: 52px;
+      flex: 1 1 180px;
+      align-items: center;
+      background: var(--row-pale);
+      padding-inline: 14px;
+      font-size: 24px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+    }
+  }
+
+  .play-keys-text {
+    margin-top: 2px;
+    background: var(--row-light);
+    padding: 11px 14px;
+    color: var(--ink);
+  }
+
+  .keys {
+    min-width: 680px;
+  }
+
+  .key-columns {
+    display: grid;
+    grid-template-columns: minmax(220px, 300px) minmax(200px, 1fr) 180px 150px;
+    gap: 2px;
+
+    .column-head {
+      padding-inline: 12px;
+    }
+
+    .key-code-head {
+      padding-inline: 14px;
+    }
+  }
+
+  .key {
+    --cell: var(--row);
+    color: var(--ink);
+
+    &:nth-child(even) {
+      --cell: var(--row-alt);
+    }
+
+    > :not(.key-copy) {
+      display: flex;
+      align-items: center;
+      background: var(--cell);
+      padding-inline: 12px;
+    }
+  }
+
+  .key > .key-code {
+    min-height: 48px;
+    padding-inline: 14px;
+    font-size: 18px;
+    line-height: calc(1.75 / 1.125);
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    overflow-wrap: anywhere;
+  }
+
+  .key-unlocks {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .key-needed {
+    background: var(--ink);
+    padding: 3px 7px;
+    font-size: 12px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--bright);
+    text-transform: uppercase;
+  }
+
+  .key-optional {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .key-copy {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 2px;
+  }
+}

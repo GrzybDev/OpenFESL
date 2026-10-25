@@ -1,0 +1,19 @@
+@layer components {
+  .hook-lines {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+
+    pre {
+      flex: 1 1 240px;
+      background: var(--row-pale);
+      padding: 10px 14px;
+      font-family: var(--area-font);
+      font-size: 18px;
+      line-height: 1.45;
+      font-weight: 700;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+  }
+}

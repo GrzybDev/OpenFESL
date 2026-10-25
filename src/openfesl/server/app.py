@@ -3,7 +3,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager, suppress
 from typing import Any
 
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, Request, WebSocket
 from fastapi.responses import PlainTextResponse
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from starlette.exceptions import HTTPException
@@ -57,6 +57,7 @@ from openfesl.web.languages import LanguageMiddleware
 from openfesl.web.leaderboard import leaderboard_routes
 from openfesl.web.menu import menu_routes
 from openfesl.web.pages import STATIC, Pages, StaticAssets
+from openfesl.web.play import play_routes, relay_address
 from openfesl.web.players import player_routes
 from openfesl.web.security import SecurityHeadersMiddleware
 from openfesl.web.servers import server_routes
@@ -87,11 +88,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     stats = SqlStatStore(sessions)
     persona_store = SqlPersonaStore(sessions)
     records = SqlRecordStore(sessions)
+    entitlements = SqlEntitlementStore(sessions)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         await migrate(engine)
-        entitlements = SqlEntitlementStore(sessions)
         # A new database starts with the games' keys; from then on the admin manages them.
         if not await entitlements.has_keys():
             await entitlements.import_keys(games.keys)
@@ -169,6 +170,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(server_routes(pages, games, census))
     app.include_router(leaderboard_routes(pages, games, census, stats))
     app.include_router(player_routes(pages, games, census, stats, persona_store, records))
+
+    def relay(request: Request) -> str:
+        return relay_address(request, settings.public_url)
+
+    app.include_router(
+        play_routes(pages, games, census, entitlements, relay, settings.hook_default_url)
+    )
     app.include_router(verification_routes(confirm, pages))
     # The last one added sees a request first: the game's HTTP keeps its own answers.
     app.add_middleware(LanguageMiddleware)
