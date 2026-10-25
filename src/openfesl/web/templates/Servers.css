@@ -1,5 +1,25 @@
 /* A game's server list: its filter panel and the rows of servers, whose details open in place. */
 @layer pages {
+  .list-options {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 10px;
+    background: var(--ink);
+    padding-inline: 14px;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+
+    svg {
+      color: var(--accent);
+    }
+  }
+
   .list-guide {
     margin-top: 18px;
 
@@ -94,6 +114,12 @@
       grid-template-rows: 1fr;
       visibility: visible;
       transition: grid-template-rows 200ms var(--ease-menu);
+    }
+
+    @media (width < 40rem) {
+      .server-columns {
+        background-color: var(--accent);
+      }
     }
   }
 

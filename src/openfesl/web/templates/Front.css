@@ -35,6 +35,12 @@
     }
   }
 
+  @media (width >= 40rem) {
+    .front-all {
+      padding-left: 8px;
+    }
+  }
+
   .front-lines {
     display: flex;
     flex-wrap: wrap;

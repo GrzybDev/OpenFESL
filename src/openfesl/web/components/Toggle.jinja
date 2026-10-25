@@ -1,7 +1,8 @@
-{#def label: str, current: bool = False, href: str = "", name: str = "", value: str = "", count: int | None = None, narrow: bool = False #}
+{#def label: str, current: bool = False, href: str = "", name: str = "", value: str = "", count: int | None = None, state: str = "", narrow: bool = False #}
 {# A toggle row of a filter panel, in the accent when it is the current choice: a link to the list
-   with that choice, or a button that sends the form with it. narrow rows sit two to a line. #}
-{% set aside = number(count) if count is not none else '' %}
+   with that choice, or a button that sends the form with it. The state, such as the order of the
+   current sort, stands where the count would; narrow rows sit two to a line. #}
+{% set aside = number(count) if count is not none else state %}
 {% if href %}
   <a href="{{ href }}"
      {% if current %} aria-current="true"{% endif %}

@@ -9,9 +9,12 @@
     gap: 2px;
   }
 
-  /* A table of server rows, at a width that keeps every column readable. */
+  /* A table of server rows, at a width that keeps every column readable; on phones the rows are
+     cards instead. */
   .server-table {
-    min-width: 920px;
+    @media (width >= 40rem) {
+      min-width: 920px;
+    }
   }
 
   .server-cell {
@@ -99,5 +102,75 @@
   .cell-end {
     display: grid;
     place-items: center;
+  }
+
+  @media (width < 40rem) {
+    /* The card's lines break where the row's own pseudo-elements stand. */
+    .server-columns {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0;
+      background: var(--cell);
+
+      &::before,
+      &::after {
+        content: "";
+        flex-basis: 100%;
+        order: 1;
+      }
+
+      &::after {
+        order: 3;
+      }
+    }
+
+    .server-cell {
+      background: transparent;
+    }
+
+    .cell-badges:empty {
+      display: none;
+    }
+
+    .cell-badges {
+      padding-left: 8px;
+    }
+
+    .cell-name {
+      flex: 1 1 0;
+      min-width: 0;
+      padding-left: 8px;
+    }
+
+    .cell-map,
+    .cell-mode {
+      order: 2;
+      min-height: 0;
+      padding: 0 0 8px 12px;
+    }
+
+    .cell-map::after {
+      content: "·";
+      margin-left: 8px;
+    }
+
+    .cell-mode {
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      padding-left: 8px;
+    }
+
+    .cell-players,
+    .cell-region {
+      order: 4;
+      min-height: 0;
+      padding: 0 12px 10px;
+    }
+
+    .cell-players {
+      flex: 1 1 auto;
+    }
   }
 }

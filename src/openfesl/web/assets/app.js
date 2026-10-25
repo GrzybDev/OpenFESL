@@ -31,6 +31,15 @@ document.addEventListener("click", (event) => {
   );
 });
 
+// On phones a form's further options start folded, unless the reader chose one of them.
+document.addEventListener("DOMContentLoaded", () => {
+  if (matchMedia("(width < 40rem)").matches) {
+    for (const fold of document.querySelectorAll("details[data-fold]:not([data-kept])")) {
+      fold.open = false;
+    }
+  }
+});
+
 // Live values: a page's #live region refreshes itself through htmx every 15 s while the tab is
 // visible. A changed number counts to its new value (M5), a server's slots fill or empty one by
 // one (M6), rows glide to their new places (M9), and a failed refresh keeps the last values,

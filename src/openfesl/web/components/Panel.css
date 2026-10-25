@@ -4,4 +4,11 @@
     background: var(--panel);
     padding: 12px;
   }
+
+  /* A panel whose stats need the room on phones keeps a thinner frame there. */
+  @media (width < 40rem) {
+    .panel-thin {
+      padding: 8px;
+    }
+  }
 }

@@ -63,6 +63,29 @@
     background: var(--accent);
   }
 
+  .board-phone-bar {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--ink);
+    padding: 11px 12px;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+
+    .board-strip {
+      right: 0;
+      width: 62%;
+    }
+
+    > :last-child {
+      color: var(--accent);
+    }
+  }
+
   .leader-columns {
     position: relative;
     display: grid;
@@ -91,7 +114,107 @@
   }
 
   .board {
-    min-width: 940px;
+    @media (width >= 40rem) {
+      min-width: 940px;
+    }
+  }
+
+  .leader-stats {
+    display: contents;
+  }
+
+  @media (width < 40rem) {
+    .board {
+      margin-top: 2px;
+    }
+
+    .leader-columns {
+      grid-template-columns: 36px 30px minmax(0, 1fr) auto 44px;
+      grid-template-areas:
+        "place rank name score end"
+        "stats stats stats stats stats"
+        "now now now now now";
+      gap: 0;
+    }
+
+    .leader-columns.line {
+      background: var(--cell);
+
+      .line-cell {
+        background-color: transparent;
+      }
+
+      .line-place {
+        grid-area: place;
+      }
+
+      .line-shield {
+        grid-area: rank;
+      }
+
+      .line-who {
+        padding: 0 8px;
+      }
+
+      .line-score {
+        grid-area: score;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 0 2px;
+        font-size: 17px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .line-now {
+        grid-area: now;
+        gap: 0 8px;
+        padding: 0 12px 2px;
+      }
+
+      :is(.line-score, .line-now)::before {
+        content: attr(data-label);
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--dim);
+      }
+
+      &[aria-current] :is(.line-score, .line-now)::before {
+        color: var(--ink);
+      }
+    }
+
+    .leader-stats {
+      grid-area: stats;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0 6px;
+      padding: 0 12px 4px;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+
+      > .line-cell {
+        display: inline;
+        padding: 0;
+        background: none;
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      > *::before {
+        content: attr(data-label) " ";
+        font-weight: 500;
+      }
+
+      > * + *::before {
+        content: "· " attr(data-label) " ";
+      }
+    }
   }
 
   .board-empty {

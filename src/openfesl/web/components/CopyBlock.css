@@ -17,8 +17,8 @@
   .copy-block-label {
     display: flex;
     align-items: center;
-    padding: 6px 18px;
-    font-size: 32px;
+    padding: 6px 16px;
+    font-size: 26px;
     line-height: 1;
     font-weight: 800;
     letter-spacing: 0.03em;
@@ -28,5 +28,12 @@
   .copy-hint {
     margin: 10px 2px 0;
     color: var(--soft);
+  }
+
+  @media (width >= 40rem) {
+    .copy-block-label {
+      padding-inline: 18px;
+      font-size: 32px;
+    }
   }
 }

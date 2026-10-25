@@ -70,8 +70,9 @@
             <h2 id="board-list"
                 class="sr-only">{{ _("web.leaderboard.caption.online" if view.online else "web.leaderboard.caption", stat=stat) }}</h2>
             <div class="table-scroll table-scroll-flush">
+              <p aria-hidden="true" class="board-phone-bar narrow-only"><span class="board-strip"></span><span>{{ showing }}</span><span>{{ _("web.leaderboard.sorted", stat=stat) }}</span></p>
               <div role="table" aria-labelledby="board-list" class="table board">
-                <div role="rowgroup">
+                <div role="rowgroup" class="phone-sr-only">
                   <div role="row" class="leader-columns board-head">
                     <div aria-hidden="true" class="board-strip"></div>
                     <div role="columnheader" class="column-head board-place"><span aria-hidden="true">#</span><span class="sr-only">{{ _("web.server.position") }}</span></div>
@@ -107,14 +108,30 @@
                         <Shield :rank="rank" />
                       </div>
                       <div role="cell" class="line-who line-cell"><a href="{{ href }}"><span class="line-name">{{ line.name }}</span><span class="line-rank">{{ _("games." ~ game.id ~ ".rank." ~ rank) }}</span></a></div>
-                      <div role="cell" class="line-score line-cell">{{ number(line.values.score|round|int) }}</div>
-                      <div role="cell" class="line-cell">{{ number(line.values.kills|round|int) }}</div>
-                      <div role="cell" class="line-cell">{{ number(line.values.deaths|round|int) }}</div>
-                      <div role="cell" class="line-cell">{{ number(line.kd, 2) }}</div>
-                      <div role="cell" class="line-cell">{{ number(line.values.dog_tags|round|int) }}</div>
                       <div role="cell"
-                           class="line-cell">{{ _("web.leaderboard.hours", hours=number((line.values.time // 3600)|int)) }}</div>
-                      <div role="cell" class="line-now line-cell">
+                           data-label="{{ _('web.leaderboard.column.score') }}"
+                           class="line-score line-cell">{{ number(line.values.score|round|int) }}</div>
+                      {# On phones the other numbers share one line under the name. #}
+                      <div role="none" class="leader-stats">
+                        <div role="cell"
+                             data-label="{{ _('web.leaderboard.stat.kills') }}"
+                             class="line-cell">{{ number(line.values.kills|round|int) }}</div>
+                        <div role="cell"
+                             data-label="{{ _('web.leaderboard.column.deaths') }}"
+                             class="line-cell">{{ number(line.values.deaths|round|int) }}</div>
+                        <div role="cell"
+                             data-label="{{ _('web.leaderboard.stat.kd') }}"
+                             class="line-cell">{{ number(line.kd, 2) }}</div>
+                        <div role="cell"
+                             data-label="{{ _('web.leaderboard.stat.dog_tags') }}"
+                             class="line-cell">{{ number(line.values.dog_tags|round|int) }}</div>
+                        <div role="cell"
+                             data-label="{{ _('web.leaderboard.stat.time') }}"
+                             class="line-cell">{{ _("web.leaderboard.hours", hours=number((line.values.time // 3600)|int)) }}</div>
+                      </div>
+                      <div role="cell"
+                           data-label="{{ _('web.leaderboard.column.now') }}"
+                           class="line-now line-cell">
                       {%- if line.persona_id not in places %}<span class="line-away">{{ _("web.leaderboard.offline_now") }}</span>
                   {%- elif places[line.persona_id] %}<a href="{{ url('/' ~ game.id ~ '/servers/' ~ places[line.persona_id].slug) }}">{{ places[line.persona_id].name }}</a>
       {%- else %}<span class="line-menus">{{ _("web.activity.in_menus") }}</span>{% endif -%}

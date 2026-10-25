@@ -1,9 +1,15 @@
 @layer components {
-  /* A panel's stats, as many as fit in a line. */
+  /* A panel's stats: two a line on phones, as many as fit elsewhere. */
   .stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 2px;
+  }
+
+  @media (width >= 40rem) {
+    .stats {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
   }
 
   .stat {
@@ -23,18 +29,31 @@
 
     dd {
       display: flex;
-      min-height: 84px;
+      min-height: 68px;
       flex: 1;
       background: var(--row-light);
-      padding: 10px 14px;
+      padding: 8px 12px;
       color: var(--ink);
     }
 
     .count {
-      font-size: 44px;
+      font-size: 36px;
       line-height: 1;
       font-weight: 800;
       font-variant-numeric: tabular-nums;
+    }
+  }
+
+  @media (width >= 40rem) {
+    .stat {
+      dd {
+        min-height: 84px;
+        padding: 10px 14px;
+      }
+
+      .count {
+        font-size: 44px;
+      }
     }
   }
 
@@ -62,5 +81,11 @@
     align-items: center;
     justify-content: space-between;
     gap: 4px 12px;
+  }
+
+  @media (width < 40rem) {
+    .stat .stat-link {
+      padding-right: 6px;
+    }
   }
 }

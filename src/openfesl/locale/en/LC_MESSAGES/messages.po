@@ -1824,3 +1824,19 @@ msgstr ""
 "administrators can revoke an approval: its game leaves the server list, "
 "its connection to OpenFESL closes and its next attempts are refused. "
 "Revoking an operator revokes all of its servers."
+
+msgid "web.servers.options"
+msgstr "More options"
+
+msgid "web.servers.sort"
+msgstr "Sort by"
+
+msgid "web.servers.descending"
+msgstr "Descending"
+
+msgid "web.servers.ascending"
+msgstr "Ascending"
+
+#, python-format
+msgid "web.leaderboard.sorted"
+msgstr "By %(stat)s"

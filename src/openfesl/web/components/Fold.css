@@ -1,0 +1,25 @@
+/* A fold of further options or values: its chevron turns when it opens. */
+@layer components {
+  .fold > summary {
+    cursor: pointer;
+    list-style: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+
+  .fold-chevron {
+    transition: transform 160ms var(--ease-menu);
+
+    .fold[open] & {
+      transform: rotate(180deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fold-chevron {
+      transition: none;
+    }
+  }
+}

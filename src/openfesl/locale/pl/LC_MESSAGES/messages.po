@@ -1853,3 +1853,19 @@ msgstr ""
 "Administracja może cofnąć zatwierdzenie: jego gra znika z listy, "
 "połączenie z OpenFESL zostaje zamknięte, a kolejne próby są odrzucane. "
 "Cofnięcie zgody dla operatora obejmuje wszystkie jego serwery."
+
+msgid "web.servers.options"
+msgstr "Więcej opcji"
+
+msgid "web.servers.sort"
+msgstr "Sortowanie"
+
+msgid "web.servers.descending"
+msgstr "Malejąco"
+
+msgid "web.servers.ascending"
+msgstr "Rosnąco"
+
+#, python-format
+msgid "web.leaderboard.sorted"
+msgstr "Według %(stat)s"

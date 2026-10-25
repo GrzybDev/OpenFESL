@@ -15,7 +15,7 @@
            hx-select="#live"
            hx-select-oob="#shell-games:outerMorph"
            hx-swap="outerMorph"
-           class="enter-panel">
+           class="enter-panel panel-thin">
       {# Two stats a line on phones, as many as fit elsewhere. #}
       <dl class="stats">
         <Stat :label="_('web.activity.online_now')" kind="accent">
@@ -30,7 +30,7 @@
         </Stat>
         <Stat :label="_('web.activity.servers')" kind="link">
           <Count :value="activity.servers" class="live-value" />
-          <a href="{{ url('/' ~ game.id ~ '/servers') }}" class="front-all"><span>{{ _("web.front.all_servers") }}</span><span aria-hidden="true"><Icon name="go" stroke="currentColor" /></span></a>
+          <a href="{{ url('/' ~ game.id ~ '/servers') }}" class="front-all"><span class="phone-sr-only">{{ _("web.front.all_servers") }}</span><span aria-hidden="true"><Icon name="go" stroke="currentColor" /></span></a>
         </Stat>
       </dl>
       <div class="front-lines">
@@ -49,7 +49,7 @@
             <div role="table"
                  aria-labelledby="front-busiest"
                  class="table server-table">
-              <div role="rowgroup">
+              <div role="rowgroup" class="phone-sr-only">
                 <div role="row" class="server-columns">
                   <div role="columnheader"
                        class="column-head"><span class="sr-only">{{ _("web.servers.status") }}</span></div>

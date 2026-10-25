@@ -403,10 +403,34 @@
 }
 
 /* Whatever a component or page shows, these hide it: what needs scripts shows only with them, and
-   what replaces it only without. */
+   what replaces it only without; some parts show only on phones or only on wider screens. */
 @layer states {
   html:not(.js) .js-only,
   .js .no-js-only {
     display: none;
+  }
+
+  @media (width < 40rem) {
+    .wide-only {
+      display: none;
+    }
+
+    .phone-sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+      border-width: 0;
+    }
+  }
+
+  @media (width >= 40rem) {
+    .narrow-only {
+      display: none;
+    }
   }
 }
