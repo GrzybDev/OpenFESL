@@ -18,6 +18,7 @@ from openfesl.protocol.packet import Packet
 from openfesl.protocol.relay import (
     SUBPROTOCOL,
     Channel,
+    Close,
     ConnectionKey,
     Data,
     Frame,
@@ -176,6 +177,16 @@ class Game:
 
     async def next_frame(self) -> Frame:
         return decode_frame(await self.websocket.recv(decode=False))
+
+    async def closed(self, key: ConnectionKey) -> None:
+        """Wait until the server closes one of the game's connections."""
+        with anyio.fail_after(5):
+            while not [
+                frame
+                for frame in self.frames
+                if isinstance(frame, Close) and frame.connection == key
+            ]:
+                self.frames.append(await self.next_frame())
 
 
 async def cli(capsys: pytest.CaptureFixture[str], *args: str) -> str:

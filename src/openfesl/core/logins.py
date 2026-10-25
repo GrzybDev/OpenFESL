@@ -49,8 +49,8 @@ class Logins:
             password: The password.
 
         Raises:
-            TransactionError: When no account has the name, the password is wrong or the account
-                belongs to dedicated servers.
+            TransactionError: When no account has the name, the password is wrong, the account
+                belongs to dedicated servers or the admin took it out of use.
         """
         credentials = await self._store.find(nuid)
         if credentials is None:
@@ -63,6 +63,7 @@ class Logins:
             )
         if not valid:
             raise TransactionError(INVALID_PASSWORD)
+        _check_state(credentials.account)
         return credentials
 
     async def recall(self, token: str) -> Account:
@@ -72,11 +73,13 @@ class Logins:
             token: The token the game kept from an earlier login.
 
         Raises:
-            TransactionError: When the token is unknown or too old.
+            TransactionError: When the token is unknown or too old, or the admin took the
+                account out of use.
         """
         account = await self._store.find_remembered(_digest(token))
         if account is None or account.server:
             raise TransactionError(INVALID_PASSWORD)
+        _check_state(account)
         return account
 
     async def remember(self, account_id: int, password_hash: str) -> str:
@@ -94,6 +97,12 @@ class Logins:
         if not await self._store.remember(account_id, _digest(token), password_hash):
             raise TransactionError(INVALID_PASSWORD)
         return token
+
+
+def _check_state(account: Account) -> None:
+    # Only once the password or token proved who logs in, so a state stays private.
+    if code := account.login_error():
+        raise TransactionError(code)
 
 
 def _digest(token: str) -> bytes:

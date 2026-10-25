@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from openfesl.core.account_settings import AccountSettingsService
 from openfesl.core.accounts import AccountService
+from openfesl.core.admin import AdminFeed
 from openfesl.core.associations import AssociationService
 from openfesl.core.browsing import Browsing
 from openfesl.core.connect import connect_routes
@@ -36,6 +37,7 @@ from openfesl.core.theater import Theater, TheaterRoute, theater_routes
 from openfesl.relay.endpoint import relay_endpoint
 from openfesl.server.settings import Settings
 from openfesl.storage.accounts import SqlAccountStore
+from openfesl.storage.admin import SqlAdminLog
 from openfesl.storage.associations import SqlAssociationStore
 from openfesl.storage.database import migrate
 from openfesl.storage.entitlements import SqlEntitlementStore
@@ -104,11 +106,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         commands.update(Browsing(hosting).routes())
         commands.update(Joining(hosting).routes())
         routes.update(PlayNow(hosting).routes())
-        following = asyncio.create_task(hosting.follow_approvals())
+        admin_log = SqlAdminLog(sessions)
+        feed = AdminFeed(admin_log)
+        players.follow(feed)
+        followers = [
+            asyncio.create_task(hosting.follow_approvals()),
+            asyncio.create_task(feed.follow(await admin_log.last())),
+        ]
         yield
-        following.cancel()
-        with suppress(asyncio.CancelledError):
-            await following
+        for follower in followers:
+            follower.cancel()
+            with suppress(asyncio.CancelledError):
+                await follower
         await messages.close()
         await engine.dispose()
 

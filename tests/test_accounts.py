@@ -1,14 +1,32 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
+import anyio
 import pytest
-from support import cli, entitle_game, game, login, registration
+from support import (
+    cli,
+    enter_theater,
+    entitle_game,
+    game,
+    log_in_player,
+    login,
+    registration,
+    text,
+)
 
-from openfesl.protocol.relay import Channel, ConnectionKey
+from openfesl.core import admin
+from openfesl.protocol.relay import Channel, ConnectionKey, Data
 
 pytestmark = pytest.mark.anyio
 
 FESL = ConnectionKey(Channel.FESL, 1)
+THEATER = ConnectionKey(Channel.THEATER, 1)
 SERVER_ACCOUNT = "bfbc2.server.pc@ea.com"
+
+
+@pytest.fixture
+def prompt_actions(monkeypatch: pytest.MonkeyPatch) -> None:
+    # The admin acts in another process; the server reads the log of actions this often.
+    monkeypatch.setattr(admin, "ADMIN_CHECK_INTERVAL", 0.05)
 
 
 async def test_a_player_registers_logs_in_and_a_later_login_sends_the_first_session_away(
@@ -168,3 +186,71 @@ async def test_registration_checks_the_birth_date_against_the_country_age_limits
         assert await register("adult@example.test", 18) == "registered"
         await cli(capsys, "settings", "set", "bfbc2.registration.age_check", "off")
         assert await register("kid@example.test", 5) == "registered"
+
+
+async def test_the_admin_takes_an_account_out_of_use_which_signs_its_player_out(
+    prompt_actions: None, server_url: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    persona = [("TXN", "NuLoginPersona"), ("name", "Ann_01")]
+    again = login("ann@example.test", "secret-pass")
+    async with game(server_url) as ann:
+        token = (await log_in_player(ann, FESL, "ann@example.test"))["encryptedLoginInfo"]
+        await ann.request(FESL, "acct", [("TXN", "NuAddPersona"), ("name", "Ann_01")])
+        lkey = (await ann.request(FESL, "acct", persona))["lkey"]
+        await enter_theater(ann, THEATER, "bfbc2-pc", lkey)
+
+        await cli(capsys, "accounts", "state", "ann@example.test", "banned")
+        await ann.closed(FESL)
+        await ann.closed(THEATER)
+        pushed = [
+            frame.packet.command if frame.connection == THEATER else text(frame.packet)["TXN"]
+            for frame in ann.frames
+            if isinstance(frame, Data)
+        ]
+        # The game names the ban only for Theater's DISC, so it comes before the Goodbye.
+        assert pushed.index("DISC") < pushed.index("Goodbye")
+        assert (await ann.push("Goodbye"))["reason"] == "4"
+
+    async with game(server_url) as ann:
+        await ann.hello(FESL, "bfbc2-pc")
+        silent = [("TXN", "NuLogin"), ("returnEncryptedInfo", "0"), ("encryptedInfo", token)]
+        assert (await ann.request(FESL, "acct", silent))["errorCode"] == "103"
+        for state, code in (("disabled", "102"), ("deactivated", "250")):
+            await cli(capsys, "accounts", "state", "ann@example.test", state)
+            assert (await ann.request(FESL, "acct", again))["errorCode"] == code
+        # Only the right password learns the state.
+        wrong = login("ann@example.test", "wrong-pass")
+        assert (await ann.request(FESL, "acct", wrong))["errorCode"] == "122"
+        await cli(capsys, "accounts", "state", "ann@example.test", "active")
+        assert "errorCode" not in await ann.request(FESL, "acct", again)
+
+        lkey = (await ann.request(FESL, "acct", persona))["lkey"]
+        await enter_theater(ann, THEATER, "bfbc2-pc", lkey)
+        await cli(capsys, "accounts", "state", "ann@example.test", "disabled")
+        # Without a ban the game reads only that its authorization failed.
+        assert (await ann.push("Goodbye"))["reason"] == "4"
+        await ann.closed(THEATER)
+        assert not [
+            frame
+            for frame in ann.frames
+            if isinstance(frame, Data) and frame.packet.command == "DISC"
+        ]
+
+    until = (datetime.now(UTC) + timedelta(seconds=1)).isoformat()
+    await cli(capsys, "accounts", "state", "ann@example.test", "banned", "--until", until)
+    async with game(server_url) as ann:
+        await ann.hello(FESL, "bfbc2-pc")
+        assert (await ann.request(FESL, "acct", again))["errorCode"] == "103"
+        with anyio.fail_after(5):
+            while "errorCode" in await ann.request(FESL, "acct", again):
+                await anyio.sleep(0.1)
+
+    for args, message in [
+        (("nobody@example.test", "banned"), "No player's account"),
+        ((SERVER_ACCOUNT, "banned"), "No player's account"),
+        (("ann@example.test", "active", "--until", "2999-01-01"), "no end date"),
+        # A date that has passed, which argparse refuses with its usage.
+        (("ann@example.test", "banned", "--until", "2000-01-01"), "2"),
+    ]:
+        with pytest.raises(SystemExit, match=message):
+            await cli(capsys, "accounts", "state", *args)

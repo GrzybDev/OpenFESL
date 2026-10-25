@@ -1,11 +1,12 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from openfesl.core.accounts import Account, Credentials
-from openfesl.storage.models import AccountRow, LoginTokenRow
+from openfesl.core.accounts import Account, AccountState, Credentials
+from openfesl.core.admin import AdminAction
+from openfesl.storage.models import AccountRow, AdminActionRow, LoginTokenRow
 
 REMEMBERED_LOGINS = 8
 REMEMBERED_FOR = timedelta(days=180)
@@ -162,6 +163,33 @@ class SqlAccountStore:
                 update(AccountRow).where(AccountRow.id == account_id).values(country=country)
             )
 
+    async def set_state(
+        self, account_id: int, state: AccountState, until: datetime | None, admin: str | None
+    ) -> None:
+        """Change whether an account may log in and record the change among the admin's actions.
+
+        Args:
+            account_id: The account.
+            state: Its new state.
+            until: When the state ends, if it does.
+            admin: The admin who changed it; None for the command line.
+        """
+        async with self._sessions.begin() as session:
+            await session.execute(
+                update(AccountRow)
+                .where(AccountRow.id == account_id)
+                .values(state=state.value, state_until=until, state_changed_at=func.now())
+            )
+            details = {"state": state.value, "until": until.isoformat() if until else None}
+            session.add(
+                AdminActionRow(
+                    admin=admin,
+                    action=AdminAction.ACCOUNT_STATE,
+                    target=str(account_id),
+                    details=details,
+                )
+            )
+
 
 def _account(row: AccountRow) -> Account:
     return Account(
@@ -170,4 +198,6 @@ def _account(row: AccountRow) -> Account:
         country=row.country,
         terms_version=row.terms_version,
         server=row.server,
+        state=AccountState(row.state),
+        state_until=row.state_until,
     )

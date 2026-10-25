@@ -16,7 +16,7 @@ from support import (
 )
 
 from openfesl.core import hosting
-from openfesl.protocol.relay import Channel, Close, ConnectionKey
+from openfesl.protocol.relay import Channel, ConnectionKey
 
 pytestmark = pytest.mark.anyio
 
@@ -73,15 +73,6 @@ async def until_seen(player: Game, count: int) -> None:
     with anyio.fail_after(5):
         while await games_seen(player) != count:
             await anyio.sleep(0.02)
-
-
-async def closed(server: Game, key: ConnectionKey) -> None:
-    """Wait until the server closes one of the game's connections."""
-    with anyio.fail_after(5):
-        while not [
-            frame for frame in server.frames if isinstance(frame, Close) and frame.connection == key
-        ]:
-            server.frames.append(await server.next_frame())
 
 
 async def test_a_server_keeps_the_identity_it_is_issued_and_proves_it_with_its_secret(
@@ -150,7 +141,7 @@ async def test_players_see_a_new_server_once_approved_and_lose_it_when_revoked(
         assert [(key, removed.fields[key]) for key in ("LID", "GID")] == ids
         assert await games_seen(ann) == 0
         # The host learns from its closed Theater connection that it no longer hosts.
-        await closed(server, THEATER)
+        await server.closed(THEATER)
         assert await cli(capsys, "servers", "list") == f"{ugid}  revoked  -  Invented Server #1\n"
 
     async with game(server_url) as server:
@@ -192,7 +183,7 @@ async def test_servers_report_the_provider_whose_file_they_hold(
 
         # Revoking the provider revokes its servers, also those that report it later.
         await cli(capsys, "providers", "revoke", added)
-        await closed(server, THEATER)
+        await server.closed(THEATER)
     assert await cli(capsys, "providers", "list") == f"{added}  revoked  Invented Hosting\n"
     async with game(server_url) as newcomer:
         await connect(newcomer)
@@ -201,7 +192,7 @@ async def test_servers_report_the_provider_whose_file_they_hold(
         ids = [("LID", created.fields["LID"]), ("GID", created.fields["GID"])]
         provider = ("B-U-Provider", masked(file[:16], bytes(8)))
         await newcomer.send_theater(THEATER, "UGAM", [*ids, provider, ("TID", "0")])
-        await closed(newcomer, THEATER)
+        await newcomer.closed(THEATER)
     with pytest.raises(SystemExit, match="No provider has the id"):
         await cli(capsys, "providers", "revoke", "not-an-id")
 

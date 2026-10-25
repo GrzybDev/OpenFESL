@@ -5,11 +5,13 @@ import socket
 import sys
 from collections.abc import AsyncIterator, Sequence
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 from pathlib import Path
 
 import uvicorn
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+from openfesl.core.accounts import Account, AccountState
 from openfesl.core.games import Game, Games, load_games
 from openfesl.core.policies import GamePolicies, setting_key
 from openfesl.core.servers import (
@@ -23,6 +25,7 @@ from openfesl.protocol.packet import MAX_SIZE
 from openfesl.relay.endpoint import close_sessions
 from openfesl.server.health import DEFAULT_PORT
 from openfesl.server.settings import Settings
+from openfesl.storage.accounts import SqlAccountStore
 from openfesl.storage.database import migrate
 from openfesl.storage.entitlements import SqlEntitlementStore
 from openfesl.storage.servers import SqlServerStore
@@ -93,6 +96,19 @@ def main(argv: Sequence[str] | None = None) -> None:
     setting_actions.add_parser("reset", help="return a policy to its default").add_argument(
         "key", help=key_help
     )
+    account_actions = commands.add_parser(
+        "accounts", help="manage players' accounts"
+    ).add_subparsers(dest="action", required=True)
+    account_state = account_actions.add_parser(
+        "state", help="set whether an account may log in; a player online is signed out"
+    )
+    account_state.add_argument("login", help="the name the account logs in with")
+    account_state.add_argument("state", choices=[state.value for state in AccountState])
+    account_state.add_argument(
+        "--until",
+        type=_moment,
+        help="when the state ends, such as 2026-12-01 or 2026-12-01T18:00+01:00 (UTC by default)",
+    )
     args = parser.parse_args(argv)
 
     match args.command:
@@ -112,6 +128,8 @@ def main(argv: Sequence[str] | None = None) -> None:
             asyncio.run(_servers(Settings(), args))
         case "settings":
             asyncio.run(_settings(Settings(), args))
+        case "accounts":
+            asyncio.run(_accounts(Settings(), args))
 
 
 class RelayServer(uvicorn.Server):
@@ -259,3 +277,32 @@ def _policy(games: Games, key: str) -> tuple[Game, str]:
     if game is None or name not in game.policies.names():
         sys.exit(f"No setting is called {key}")
     return game, name
+
+
+async def _accounts(settings: Settings, args: argparse.Namespace) -> None:
+    async with _database(settings) as sessions:
+        store = SqlAccountStore(sessions)
+        account = await _player_account(store, args.login)
+        state = AccountState(args.state)
+        if state is AccountState.ACTIVE and args.until:
+            sys.exit("An active account has no end date")
+        await store.set_state(account.id, state, args.until, admin=None)
+
+
+async def _player_account(store: SqlAccountStore, login: str) -> Account:
+    credentials = await store.find(login)
+    # Every dedicated server of a game logs in with that account, so it is no player's.
+    if credentials is None or credentials.account.server:
+        sys.exit(f"No player's account logs in as {login}")
+    return credentials.account
+
+
+def _moment(text: str) -> datetime:
+    try:
+        moment = datetime.fromisoformat(text)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"{text!r} is no date such as 2026-12-01") from None
+    moment = moment if moment.tzinfo else moment.replace(tzinfo=UTC)
+    if moment <= datetime.now(UTC):
+        raise argparse.ArgumentTypeError(f"{text} has passed")
+    return moment

@@ -1,6 +1,8 @@
 import logging
 import secrets
 from dataclasses import dataclass
+from datetime import UTC, datetime
+from enum import StrEnum
 from typing import Any, Protocol
 
 from openfesl.core.entitlements import UNKNOWN_KEY, EntitlementStore
@@ -46,6 +48,20 @@ CONSOLE_LOGINS = ("NuPS3Login", "NuXBL360Login", "NuGetAccountByPS3Ticket")
 NOT_OFFERED = ("NuPS3AddAccount", "NuXBL360AddAccount", "GameSpyPreAuth", "NuCreateEncryptedToken")
 
 
+class AccountState(StrEnum):
+    """Whether an account may log in, as the admin decided."""
+
+    ACTIVE = "active"
+    DISABLED = "disabled"
+    BANNED = "banned"
+    DEACTIVATED = "deactivated"
+    """Taken out of use at its player's request."""
+
+
+# The NuLogin errors whose texts in the game's login form name each state.
+STATE_ERRORS = {AccountState.DISABLED: 102, AccountState.BANNED: 103, AccountState.DEACTIVATED: 250}
+
+
 @dataclass(frozen=True, slots=True)
 class Account:
     """An account as the services see it.
@@ -56,6 +72,8 @@ class Account:
         country: The ISO code chosen on registration.
         terms_version: The version of the terms the account accepted last.
         server: Whether the account belongs to a game's dedicated servers.
+        state: Whether the admin lets it log in.
+        state_until: When a state other than active ends, if it does.
     """
 
     id: int
@@ -63,6 +81,14 @@ class Account:
     country: str
     terms_version: str | None
     server: bool
+    state: AccountState
+    state_until: datetime | None
+
+    def login_error(self) -> int | None:
+        """Return the NuLogin error that the account's state refuses its logins with, if any."""
+        if self.state_until is not None and self.state_until <= datetime.now(UTC):
+            return None
+        return STATE_ERRORS.get(self.state)
 
 
 @dataclass(frozen=True, slots=True)
@@ -146,6 +172,18 @@ class AccountStore(Protocol):
         Args:
             account_id: The account.
             country: The ISO code of the new country.
+        """
+
+    async def set_state(
+        self, account_id: int, state: AccountState, until: datetime | None, admin: str | None
+    ) -> None:
+        """Change whether an account may log in and record the change among the admin's actions.
+
+        Args:
+            account_id: The account.
+            state: Its new state.
+            until: When the state ends, if it does.
+            admin: The admin who changed it; None for the command line.
         """
 
 

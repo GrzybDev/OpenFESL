@@ -31,6 +31,9 @@ class AccountRow(Base):
     terms_version: Mapped[str | None]
     server: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    state: Mapped[str] = mapped_column(server_default="active")
+    state_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    state_changed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 Index("account_nuid_key", func.lower(AccountRow.nuid), unique=True)

@@ -3,11 +3,12 @@ import logging
 from collections.abc import Callable, Mapping
 from typing import Any
 
-from openfesl.core.accounts import Account
+from openfesl.core.accounts import Account, AccountState
+from openfesl.core.admin import AdminAction, AdminFeed, LoggedAction
 from openfesl.core.connection import Address, Connection, Outbox
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.personas import NOT_LOGGED_IN, Persona
-from openfesl.core.theater import Theater
+from openfesl.core.theater import Theater, TheaterConnection
 from openfesl.protocol.message import Message
 from openfesl.protocol.packet import Packet
 from openfesl.protocol.relay import Channel, Open
@@ -15,6 +16,7 @@ from openfesl.protocol.relay import Channel, Open
 logger = logging.getLogger(__name__)
 
 LOGGED_IN_ELSEWHERE = 2
+AUTHORIZATION_FAILED = 4
 TOO_MANY_LOGINS = 121
 
 
@@ -45,6 +47,21 @@ class Players:
             earlier.disconnect(LOGGED_IN_ELSEWHERE)
             earlier.forget_login()
         self._sessions[session.account.id] = session
+
+    def follow(self, feed: AdminFeed) -> None:
+        """Sign players out whose accounts the admin takes out of use while they are online.
+
+        Args:
+            feed: The admin's actions as they are recorded.
+        """
+        feed.on(AdminAction.ACCOUNT_STATE, self._apply_state)
+
+    def _apply_state(self, action: LoggedAction) -> None:
+        session = self._sessions.get(int(action.target))
+        state = AccountState(action.details["state"])
+        if session is not None and state is not AccountState.ACTIVE:
+            logger.info("Signing account %s out: the admin set it %s", action.target, state)
+            session.sign_out(banned=state is AccountState.BANNED)
 
     def online(self, account_id: int) -> GameSession | None:
         """Return the session a player's account is logged in on, when it is online.
@@ -148,6 +165,7 @@ class GameSession:
         self._players = players
         self._theater = theater
         self._fesl: FeslConnection | None = None
+        self._theater_connections: set[TheaterConnection] = set()
 
     def open(self, opened: Open, outbox: Outbox) -> Connection:
         """Start handling a connection that the game opened, or close one to an unknown host.
@@ -159,6 +177,9 @@ class GameSession:
         if opened.connection.channel is Channel.FESL:
             return FeslConnection(self, outbox, self._routes)
         if connection := self._theater.open(self, opened, outbox):
+            if isinstance(connection, TheaterConnection):
+                self._theater_connections.add(connection)
+                connection.on_close(lambda: self._theater_connections.discard(connection))
             return connection
         logger.info("Refusing a %s connection to %s", opened.connection.channel.name, opened.host)
         outbox.close()
@@ -240,6 +261,23 @@ class GameSession:
         self.account = None
         self.account_key = None
         self.forget_persona()
+
+    def sign_out(self, *, banned: bool) -> None:
+        """Send the game away, its connections closed, as when the admin disabled its account.
+
+        Args:
+            banned: Whether the account was banned, which only Theater's DISC makes the game
+                name; otherwise the game reads that its authorization failed.
+        """
+        theaters = list(self._theater_connections)
+        if banned:
+            for theater in theaters:
+                theater.send("DISC", None)
+        self.disconnect(AUTHORIZATION_FAILED)
+        for theater in theaters:
+            theater.close_connection()
+        self._players.log_out(self)
+        self.forget_login()
 
     def disconnect(self, reason: int) -> None:
         """Send the game away on the connection it logged in on.
