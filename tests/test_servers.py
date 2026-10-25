@@ -140,8 +140,11 @@ async def test_players_see_a_new_server_once_approved_and_lose_it_when_revoked(
         removed = await ann.theater_push(THEATER, "GREM")
         assert [(key, removed.fields[key]) for key in ("LID", "GID")] == ids
         assert await games_seen(ann) == 0
-        # The host learns from its closed Theater connection that it no longer hosts.
-        await server.closed(THEATER)
+        # The host keeps its connection, since a dedicated server drops its players with it and
+        # quits after losing it often; it hears that its game ended, and asks again in vain.
+        ended = await server.theater_push(THEATER, "GREM")
+        assert [(key, ended.fields[key]) for key in ("LID", "GID")] == ids
+        assert (await create(server, ugid, secret)).error == "auth"
         assert await cli(capsys, "servers", "list") == f"{ugid}  revoked  -  Invented Server #1\n"
 
     async with game(server_url) as server:
@@ -183,7 +186,7 @@ async def test_servers_report_the_provider_whose_file_they_hold(
 
         # Revoking the provider revokes its servers, also those that report it later.
         await cli(capsys, "providers", "revoke", added)
-        await server.closed(THEATER)
+        await server.theater_push(THEATER, "GREM")
     assert await cli(capsys, "providers", "list") == f"{added}  revoked  Invented Hosting\n"
     async with game(server_url) as newcomer:
         await connect(newcomer)
@@ -192,7 +195,7 @@ async def test_servers_report_the_provider_whose_file_they_hold(
         ids = [("LID", created.fields["LID"]), ("GID", created.fields["GID"])]
         provider = ("B-U-Provider", masked(file[:16], bytes(8)))
         await newcomer.send_theater(THEATER, "UGAM", [*ids, provider, ("TID", "0")])
-        await newcomer.closed(THEATER)
+        await newcomer.theater_push(THEATER, "GREM")
     with pytest.raises(SystemExit, match="No provider has the id"):
         await cli(capsys, "providers", "revoke", "not-an-id")
 

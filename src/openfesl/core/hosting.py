@@ -560,23 +560,25 @@ class Hosting:
         _label(game, hosted)
 
     def _end(self, hosted: HostedGame) -> None:
-        # The host learns from its closed connection that it no longer hosts; when it goes
-        # online again, it is refused.
+        # A dedicated server that loses its connection drops its players and quits after ten
+        # losses in ten minutes, so the host keeps it: GREM ends the game, and its next CGAM is
+        # refused.
         logger.warning(
             "Removing game %d: the admin revoked %s or its provider", hosted.id, hosted.ugid
         )
-        self._remove(hosted)
-        hosted.host.close_connection()
+        if self._remove(hosted):
+            hosted.host.send("GREM", GameRequest(lid=hosted.lobby.id, gid=hosted.id))
 
-    def _remove(self, hosted: HostedGame) -> None:
+    def _remove(self, hosted: HostedGame) -> bool:
         listed = self._lobbies.get((hosted.host.game.name, hosted.lobby.id), {})
         if listed.pop(hosted.id, None) is None:
-            return
+            return False
         logger.info("Game %d (%r) removed", hosted.id, hosted.name)
         for player in hosted.everyone():
             player.stop_waiting()
             if player.connection is not hosted.host:
                 player.connection.send("GREM", GameRequest(lid=hosted.lobby.id, gid=hosted.id))
+        return True
 
 
 def _same_host(host: TheaterConnection, connection: TheaterConnection) -> bool:
