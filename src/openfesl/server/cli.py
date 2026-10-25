@@ -10,7 +10,8 @@ from pathlib import Path
 import uvicorn
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from openfesl.core.games import load_games
+from openfesl.core.games import Game, Games, load_games
+from openfesl.core.policies import GamePolicies, setting_key
 from openfesl.core.servers import (
     GameServer,
     HostingMode,
@@ -25,6 +26,7 @@ from openfesl.server.settings import Settings
 from openfesl.storage.database import migrate
 from openfesl.storage.entitlements import SqlEntitlementStore
 from openfesl.storage.servers import SqlServerStore
+from openfesl.storage.settings import SqlSettingStore
 
 GOING_AWAY = 1001
 
@@ -77,6 +79,20 @@ def main(argv: Sequence[str] | None = None) -> None:
         "ugid"
     )
     server_actions.add_parser("revoke", help="stop a server from hosting").add_argument("ugid")
+    setting_actions = commands.add_parser(
+        "settings", help="show or override the games' policies"
+    ).add_subparsers(dest="action", required=True)
+    setting_actions.add_parser("list", help="list every policy of every game with its value")
+    key_help = "the game and the policy, such as bfbc2.accounts.concurrent_login"
+    setting_actions.add_parser("get", help="show a policy's value").add_argument(
+        "key", help=key_help
+    )
+    overridden = setting_actions.add_parser("set", help="override a policy's default")
+    overridden.add_argument("key", help=key_help)
+    overridden.add_argument("value", help="the policy's new value")
+    setting_actions.add_parser("reset", help="return a policy to its default").add_argument(
+        "key", help=key_help
+    )
     args = parser.parse_args(argv)
 
     match args.command:
@@ -94,6 +110,8 @@ def main(argv: Sequence[str] | None = None) -> None:
             asyncio.run(_providers(Settings(), args))
         case "servers":
             asyncio.run(_servers(Settings(), args))
+        case "settings":
+            asyncio.run(_settings(Settings(), args))
 
 
 class RelayServer(uvicorn.Server):
@@ -207,3 +225,37 @@ def _provider_of(server: GameServer) -> str:
     if server.provider is not None:
         return server.provider.name
     return server.provider_id.hex().upper() if server.provider_id else "-"
+
+
+async def _settings(settings: Settings, args: argparse.Namespace) -> None:
+    games = load_games()
+    async with _database(settings) as sessions:
+        store = SqlSettingStore(sessions)
+        policies = GamePolicies(store)
+        if args.action == "list":
+            for game in games:
+                current = await policies.of(game)
+                for name in game.policies.names():
+                    value, default = current.text(name), game.policies.text(name)
+                    line = f"{setting_key(game, name)}  {value}"
+                    print(line if value == default else f"{line}  (default {default})")
+            return
+        game, name = _policy(games, args.key)
+        match args.action:
+            case "set":
+                try:
+                    value = game.policies.overridden(name, args.value).text(name)
+                except ValueError:
+                    sys.exit(f"{args.key} takes no value {args.value!r}")
+                await store.change(args.key, value, admin=None)
+            case "reset":
+                await store.change(args.key, None, admin=None)
+        print((await policies.of(game)).text(name))
+
+
+def _policy(games: Games, key: str) -> tuple[Game, str]:
+    game_id, _, name = key.partition(".")
+    game = games.by_id(game_id)
+    if game is None or name not in game.policies.names():
+        sys.exit(f"No setting is called {key}")
+    return game, name

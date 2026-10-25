@@ -80,6 +80,21 @@ The `openfesl` command in the server's container manages what the admin decides:
 | `openfesl servers approve UGID` | Lets players see a server's games |
 | `openfesl servers revoke UGID` | Stops a server from hosting |
 | `openfesl keys import` | Adds the games' product keys that the database lacks, keeping the others |
+| `openfesl settings list` | Lists every game's policies with their values |
+| `openfesl settings get KEY` | Shows a policy's value; the key names the game and the policy, such as `bfbc2.accounts.concurrent_login` |
+| `openfesl settings set KEY VALUE` | Overrides the game's default for this server |
+| `openfesl settings reset KEY` | Returns a policy to the game's default |
+
+Each setting change is recorded with its time.
+
+## Policies
+
+Where a game handles more than one behaviour, the game's data file in `src/openfesl/games` sets the default and
+`openfesl settings` overrides it. The server reads the policies on every use, so a change applies at once.
+
+| Policy | Values | Bad Company 2 |
+|---|---|---|
+| `accounts.concurrent_login` | `replace`: a login signs the account's other game out; `refuse`: a second login is refused, and the game shows its notice about too many login attempts | `replace` |
 
 ## Development
 

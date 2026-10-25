@@ -11,6 +11,12 @@ entitlement = "bfbc2-pc"
 theater_port = 18326
 server_account = "bfbc2.server.pc@ea.com"
 
+# How the services behave where the game handles more than one behaviour; the instance's
+# settings override each.
+[policies]
+# A login while the account plays elsewhere signs the other game out (or: refuse).
+accounts.concurrent_login = "replace"
+
 [http]
 locker = "http://easo.ea.com/fileupload/locker2.jsp"
 

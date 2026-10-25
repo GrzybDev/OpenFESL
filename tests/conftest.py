@@ -44,9 +44,8 @@ async def relay_server(
     await task
     engine = create_async_engine(database_url)
     async with engine.begin() as connection:
-        await connection.execute(
-            text("TRUNCATE account, stat, game_server, provider, setting RESTART IDENTITY CASCADE")
-        )
+        tables = "account, stat, game_server, provider, setting, admin_action"
+        await connection.execute(text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE"))
     await engine.dispose()
 
 

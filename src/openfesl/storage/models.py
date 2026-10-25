@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from typing import Any
 
 from sqlalchemy import (
     BigInteger,
@@ -191,6 +192,18 @@ class SettingRow(Base):
 
     key: Mapped[str] = mapped_column(primary_key=True)
     value: Mapped[str]
+
+
+class AdminActionRow(Base):
+    __tablename__ = "admin_action"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    # None for the command line, which knows no admin.
+    admin: Mapped[str | None]
+    action: Mapped[str]
+    target: Mapped[str]
+    details: Mapped[dict[str, Any]] = mapped_column(JSONB)
 
 
 class ProviderRow(Base):

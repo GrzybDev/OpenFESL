@@ -15,6 +15,7 @@ from openfesl.protocol.relay import Channel, Open
 logger = logging.getLogger(__name__)
 
 LOGGED_IN_ELSEWHERE = 2
+TOO_MANY_LOGINS = 121
 
 
 class Players:
@@ -44,6 +45,14 @@ class Players:
             earlier.disconnect(LOGGED_IN_ELSEWHERE)
             earlier.forget_login()
         self._sessions[session.account.id] = session
+
+    def online(self, account_id: int) -> GameSession | None:
+        """Return the session a player's account is logged in on, when it is online.
+
+        Args:
+            account_id: The account's number.
+        """
+        return self._sessions.get(account_id)
 
     def log_out(self, session: GameSession) -> None:
         """Forget a session's login, unless the account has moved to another session.
@@ -155,16 +164,39 @@ class GameSession:
         outbox.close()
         return _Refused()
 
-    def log_in(self, account: Account, key: str, connection: FeslConnection) -> None:
-        """Make an account the session's login.
+    def admit(self, account: Account, *, replace: bool) -> None:
+        """Check that an account may log in on the session.
 
         Dedicated servers of a game share their account, so only players are kept to one session.
+
+        Args:
+            account: The account that logs in.
+            replace: Whether the login of a player that is logged in elsewhere signs the other
+                session out; otherwise it is refused.
+
+        Raises:
+            TransactionError: When the player is logged in elsewhere and may not replace it.
+        """
+        earlier = self._players.online(account.id)
+        if not replace and not account.server and earlier is not None and earlier is not self:
+            raise TransactionError(TOO_MANY_LOGINS)
+
+    def log_in(
+        self, account: Account, key: str, connection: FeslConnection, *, replace: bool
+    ) -> None:
+        """Make an account the session's login.
 
         Args:
             account: The account that logged in.
             key: The session key handed to the game.
             connection: The FESL connection the login came on.
+            replace: Whether the login of a player that is logged in elsewhere signs the other
+                session out; otherwise it is refused.
+
+        Raises:
+            TransactionError: When the player is logged in elsewhere and may not replace it.
         """
+        self.admit(account, replace=replace)
         self.forget_persona()
         if self.account is not None and self.account.id != account.id:
             self._players.log_out(self)

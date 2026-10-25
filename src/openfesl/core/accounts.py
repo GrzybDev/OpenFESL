@@ -7,6 +7,7 @@ from openfesl.core.entitlements import UNKNOWN_KEY, EntitlementStore
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Game, Games
 from openfesl.core.logins import INVALID_PASSWORD, UNKNOWN_USER, Logins
+from openfesl.core.policies import ConcurrentLogin, GamePolicies
 from openfesl.core.registration import (
     INVALID_VALUE,
     TOO_LONG,
@@ -152,7 +153,12 @@ class AccountService:
     """The acct transactions that register accounts and log them in."""
 
     def __init__(
-        self, store: AccountStore, logins: Logins, entitlements: EntitlementStore, terms: Terms
+        self,
+        store: AccountStore,
+        logins: Logins,
+        entitlements: EntitlementStore,
+        terms: Terms,
+        policies: GamePolicies,
     ) -> None:
         """Serve accounts from a store.
 
@@ -161,11 +167,13 @@ class AccountService:
             logins: Checks passwords and remembered logins.
             entitlements: Where the entitlements that let players in are kept.
             terms: The service's terms.
+            policies: Each game's policies.
         """
         self._store = store
         self._logins = logins
         self._entitlements = entitlements
         self._terms = terms
+        self._policies = policies
 
     async def prepare(self, games: Games) -> list[tuple[Game, Account]]:
         """Create the accounts that the games' dedicated servers log in with.
@@ -210,10 +218,14 @@ class AccountService:
 
         Raises:
             TransactionError: When the account is unknown, the password or token is wrong, the
+                player is logged in elsewhere and the game's policy refuses a second login, the
                 terms are out of date, a player lacks the game's entitlement, or a player and a
                 server account meet.
         """
         assert connection.hello is not None and connection.client is not None
+        assert connection.game is not None
+        policies = await self._policies.of(connection.game)
+        replace = policies.accounts.concurrent_login is ConcurrentLogin.REPLACE
         token = None
         # The client string decides, not the client type the game declares, so a player cannot
         # skip the game's entitlement by connecting as a dedicated server's client.
@@ -222,9 +234,9 @@ class AccountService:
                 raise TransactionError(INVALID_PASSWORD)
             account = await self._server_account(expected, request.nuid)
         else:
-            account, token = await self._player_account(request, connection.client.entitlement)
+            account, token = await self._player_account(connection, request, replace=replace)
         key = secrets.token_urlsafe(20) + "."
-        connection.session.log_in(account, key, connection)
+        connection.session.log_in(account, key, connection, replace=replace)
         logger.info("Account %d (%s) logged in", account.id, account.nuid)
         return NuLoginAnswer(
             lkey=key, nuid=account.nuid, user_id=account.id, encrypted_login_info=token
@@ -319,12 +331,17 @@ class AccountService:
         return Message()
 
     async def _player_account(
-        self, request: NuLogin, entitlement: str | None
+        self, connection: FeslConnection, request: NuLogin, *, replace: bool
     ) -> tuple[Account, str | None]:
+        assert connection.client is not None
+        entitlement = connection.client.entitlement
         credentials = await self._authenticate(
             request.nuid, request.password, request.encrypted_info
         )
         account = credentials.account
+        # Before a token is remembered: an account keeps only its newest tokens, so those of
+        # refused logins would push out the one of the session it is logged in on.
+        connection.session.admit(account, replace=replace)
         if account.terms_version != self._terms.version:
             if request.tos_version != self._terms.version:
                 raise TransactionError(TERMS_OUT_OF_DATE)

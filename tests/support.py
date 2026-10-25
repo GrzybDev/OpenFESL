@@ -8,6 +8,8 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from email.message import Message
 
+import anyio
+import pytest
 from websockets.asyncio.client import ClientConnection, connect
 from websockets.typing import Subprotocol
 
@@ -22,6 +24,7 @@ from openfesl.protocol.relay import (
     decode_frame,
     encode_frame,
 )
+from openfesl.server.cli import main
 
 type Answer = dict[str, str]
 
@@ -173,6 +176,12 @@ class Game:
 
     async def next_frame(self) -> Frame:
         return decode_frame(await self.websocket.recv(decode=False))
+
+
+async def cli(capsys: pytest.CaptureFixture[str], *args: str) -> str:
+    """Run an admin command as the admin does in another process, returning what it printed."""
+    await anyio.to_thread.run_sync(main, list(args))
+    return capsys.readouterr().out
 
 
 def text(packet: Packet) -> Answer:

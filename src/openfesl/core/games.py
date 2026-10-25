@@ -5,6 +5,8 @@ from importlib.resources.abc import Traversable
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
+from openfesl.core.policies import Policies
+
 
 class Partition(BaseModel):
     """The domain partition that holds a game's data, written `/domain/subDomain`."""
@@ -105,6 +107,7 @@ class Game(BaseModel):
     """A game the server serves, as its data file describes it.
 
     Attributes:
+        id: The name of its data file, which the instance's settings know it by.
         name: The game's name.
         partition: Where the game's data lives.
         namespace: The persona namespace; persona names are unique within it.
@@ -116,10 +119,13 @@ class Game(BaseModel):
         lobbies: The Theater lobbies of all of the game's clients.
         provider_attribute: The basic game attribute in which dedicated servers report their
             provider and game lists show the provider's name; hosts cannot set it themselves.
+        policies: How the game's services behave by default where the game handles more than
+            one behaviour.
     """
 
     model_config = ConfigDict(frozen=True)
 
+    id: str
     name: str
     partition: Partition
     namespace: str
@@ -130,6 +136,7 @@ class Game(BaseModel):
     associations: dict[str, ListRule] = {}
     lobbies: list[Lobby] = []
     provider_attribute: str | None = None
+    policies: Policies
 
     @field_validator("partition", mode="before")
     @classmethod
@@ -179,6 +186,14 @@ class Games:
         """Return the starting product keys of every game."""
         return [key for game in self._games for key in game.keys]
 
+    def by_id(self, game_id: str) -> Game | None:
+        """Return the game whose data file has a name, if the server serves it.
+
+        Args:
+            game_id: The data file's name without its extension.
+        """
+        return next((game for game in self._games if game.id == game_id), None)
+
     def find(self, client_string: str) -> tuple[Game, Client] | None:
         """Return the game and client that a client string names, if the server serves it.
 
@@ -206,4 +221,5 @@ def _load(entry: Traversable, folder: Traversable) -> Game:
         url: folder.joinpath(*name.split("/")).read_text("utf-8")
         for url, name in http.get("files", {}).items()
     }
-    return Game.model_validate(data | {"http": http | {"files": contents}})
+    game_id = entry.name.removesuffix(".toml")
+    return Game.model_validate(data | {"id": game_id, "http": http | {"files": contents}})

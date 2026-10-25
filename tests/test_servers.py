@@ -8,6 +8,7 @@ from support import (
     CREATE_GAME,
     Game,
     TheaterAnswer,
+    cli,
     enter_as_player,
     enter_theater,
     game,
@@ -16,7 +17,6 @@ from support import (
 
 from openfesl.core import hosting
 from openfesl.protocol.relay import Channel, Close, ConnectionKey
-from openfesl.server.cli import main
 
 pytestmark = pytest.mark.anyio
 
@@ -28,11 +28,6 @@ THEATER = ConnectionKey(Channel.THEATER, 1)
 def prompt_decisions(monkeypatch: pytest.MonkeyPatch) -> None:
     # The admin decides in another process; the server reads the decisions back this often.
     monkeypatch.setattr(hosting, "APPROVAL_CHECK_INTERVAL", 0.05)
-
-
-async def cli(capsys: pytest.CaptureFixture[str], *args: str) -> str:
-    await anyio.to_thread.run_sync(main, list(args))
-    return capsys.readouterr().out
 
 
 async def connect(server: Game) -> None:

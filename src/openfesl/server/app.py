@@ -23,6 +23,7 @@ from openfesl.core.logins import Logins
 from openfesl.core.messages import MessageService
 from openfesl.core.personas import PersonaService
 from openfesl.core.playnow import PlayNow
+from openfesl.core.policies import GamePolicies
 from openfesl.core.presence import PresenceService
 from openfesl.core.records import RecordService
 from openfesl.core.registration import Terms
@@ -42,6 +43,7 @@ from openfesl.storage.messages import SqlMessageStore
 from openfesl.storage.personas import SqlPersonaStore
 from openfesl.storage.records import SqlRecordStore
 from openfesl.storage.servers import SqlServerStore
+from openfesl.storage.settings import SqlSettingStore
 from openfesl.storage.stats import SqlStatStore
 from openfesl.web.game_http import GameHttpMiddleware
 
@@ -75,7 +77,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             await entitlements.import_keys(games.keys)
         store = SqlAccountStore(sessions)
         logins = Logins(store)
-        accounts = AccountService(store, logins, entitlements, Terms.load())
+        policies = GamePolicies(SqlSettingStore(sessions))
+        accounts = AccountService(store, logins, entitlements, Terms.load(), policies)
         persona_store = SqlPersonaStore(sessions)
         personas = PersonaService(persona_store)
         await personas.prepare(await accounts.prepare(games))
