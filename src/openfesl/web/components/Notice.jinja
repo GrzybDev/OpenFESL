@@ -1,0 +1,10 @@
+{#def title: str, text: str, subtitle: str = "", narrow: bool = False #}
+{# A short page that says one thing: its title block, the text on a light row and the actions the
+   content gives. #}
+<div class="notice-title{% if narrow %} notice-narrow{% endif %}">
+  <TitleBlock :title="title">{{ subtitle }}</TitleBlock>
+</div>
+<div>
+  <Note :text="text" />
+  <div class="actions">{{ content }}</div>
+</div>

@@ -46,9 +46,18 @@ class Terms:
         """Return the terms in the game's language, or in English when there is no translation.
 
         Args:
-            locale: The locale of the game's Hello, such as pl_PL.
+            locale: The locale of the game's Hello, such as pl_PL, or a language code.
         """
-        return self._texts.get(language_of(locale), self._texts["en"])
+        return self._texts[self.language(locale)]
+
+    def language(self, locale: str) -> str:
+        """Return the language of the text that a locale gets, English without a translation.
+
+        Args:
+            locale: The locale of the game's Hello, such as pl_PL, or a language code.
+        """
+        language = language_of(locale)
+        return language if language in self._texts else "en"
 
 
 def countries(locale: str) -> list[tuple[str, str]]:

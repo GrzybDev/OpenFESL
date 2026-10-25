@@ -1,0 +1,11 @@
+@layer components {
+  .note {
+    background: var(--row-light);
+    padding: 12px 14px;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.45;
+    font-weight: 500;
+    color: var(--ink);
+  }
+}

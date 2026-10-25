@@ -44,3 +44,72 @@ msgid "verification.page.unknown.text"
 msgstr ""
 "The link is not valid or has been used already. A confirmed address needs "
 "nothing more."
+
+msgid "web.language.name"
+msgstr "English"
+
+#, python-format
+msgid "web.page.title"
+msgstr "%(page)s · OpenFESL"
+
+msgid "web.shell.skip"
+msgstr "Skip to content"
+
+msgid "web.shell.games"
+msgstr "Games"
+
+msgid "web.shell.language"
+msgstr "Language"
+
+#, python-format
+msgid "web.footer.repository"
+msgstr "%(name)s repository"
+
+msgid "web.footer.licence"
+msgstr "Licence"
+
+msgid "web.footer.terms"
+msgstr "Terms"
+
+msgid "web.footer.affiliation"
+msgstr "OpenFESL is not affiliated with or endorsed by Electronic Arts."
+
+msgid "web.home"
+msgstr "OpenFESL home"
+
+#, python-format
+msgid "web.error.code"
+msgstr "Error %(code)d"
+
+msgid "web.error.404.title"
+msgstr "Page not found"
+
+msgid "web.error.404.text"
+msgstr "No page of this server matches this address."
+
+#, python-format
+msgid "web.error.404.servers"
+msgstr "%(game)s servers"
+
+msgid "web.error.500.title"
+msgstr "The page could not be shown"
+
+msgid "web.error.500.text"
+msgstr "An error occurred on this server. Try again in a moment."
+
+msgid "web.error.500.again"
+msgstr "Try again"
+
+msgid "web.terms.title"
+msgstr "Terms"
+
+msgid "web.terms.version"
+msgstr "Version"
+
+msgid "web.terms.text"
+msgstr "The text the game shows"
+
+msgid "web.terms.shown"
+msgstr ""
+"The game shows these terms when an account is created, and again at the "
+"first login after the text changes."

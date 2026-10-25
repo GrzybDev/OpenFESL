@@ -1,0 +1,44 @@
+@layer pages {
+  .terms-version {
+    letter-spacing: 0.04em;
+    text-transform: none;
+  }
+
+  .terms {
+    max-width: 980px;
+
+    .bar-extra {
+      color: var(--soft);
+    }
+  }
+
+  .terms-text {
+    display: grid;
+    gap: 14px;
+    margin-top: 2px;
+    background: var(--row-light);
+    padding: 16px 16px 18px;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+    font-weight: 500;
+    color: var(--ink);
+
+    p {
+      max-width: 72ch;
+    }
+  }
+
+  .terms-shown {
+    margin-top: 2px;
+    background: var(--row);
+    padding: 11px 14px;
+    color: var(--ink);
+  }
+
+  @media (width >= 40rem) {
+    .terms-text {
+      padding: 18px 18px 20px;
+    }
+  }
+}

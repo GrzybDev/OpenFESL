@@ -8,6 +8,7 @@ authors = [
 license = "GPL-3.0-or-later"
 license-files = [
     "LICENSE.md",
+    "THIRD-PARTY-NOTICES.md",
 ]
 requires-python = ">=3.14"
 dependencies = [
@@ -16,6 +17,7 @@ dependencies = [
     "babel>=2.18.0",
     "fastapi>=0.162.0",
     "jinja2>=3.1.6",
+    "jinjax>=0.66",
     "pwdlib[argon2]>=0.3.1",
     "pydantic>=2.14.1",
     "pydantic-settings>=2.16.1",
@@ -29,6 +31,7 @@ openfesl = "openfesl.server.cli:main"
 [dependency-groups]
 dev = [
     "aiosmtpd>=1.4.6",
+    "djlint>=1.47.0",
     "hypothesis>=6.170.9",
     "import-linter>=2.15",
     "mypy>=2.4.0",
@@ -86,3 +89,13 @@ layers = [
     "openfesl.core",
     "openfesl.protocol",
 ]
+
+[tool.djlint]
+profile = "jinja"
+extension = "jinja"
+indent = 2
+max_line_length = 120
+preserve_blank_lines = true
+# The JinjaX components that hold blocks of a page, indented as HTML's blocks are; the others stay
+# inline like spans.
+custom_html = "Layout,Panel,Notice"

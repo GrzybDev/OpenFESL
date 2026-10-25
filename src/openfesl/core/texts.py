@@ -39,6 +39,20 @@ def languages() -> list[str]:
     return sorted(found, key=lambda language: (language != BASE_LANGUAGE, language))
 
 
+def localize(path: str, language: str) -> str:
+    """Return the address of a web page in a language.
+
+    English pages have no prefix; the others start with their language code, such as /pl/terms.
+
+    Args:
+        path: The page's path without a language prefix, such as /terms.
+        language: The language code.
+    """
+    if language == BASE_LANGUAGE:
+        return path
+    return f"/{language}" + ("" if path == "/" else path)
+
+
 def translate(key: str, language: str) -> str:
     """Return a text from the catalogues, in English where a language has no translation.
 

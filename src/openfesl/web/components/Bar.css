@@ -1,0 +1,25 @@
+@layer components {
+  .bar {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--ink);
+    padding: 11px 14px;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--bright);
+    text-transform: uppercase;
+  }
+
+  .bar-wrap {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    line-height: 1.1;
+  }
+
+  .bar-extra {
+    color: var(--accent);
+  }
+}

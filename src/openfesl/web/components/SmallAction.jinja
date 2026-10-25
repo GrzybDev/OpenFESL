@@ -1,0 +1,6 @@
+{#def href: str, label: str #}
+{# The small action block, with the chevron square in a black frame. #}
+<a href="{{ href }}" class="small-action">
+  <span aria-hidden="true" class="small-action-square"><Chevron :size="16" /></span>
+  <span class="small-action-label">{{ label }}</span>
+</a>

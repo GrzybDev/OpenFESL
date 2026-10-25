@@ -1,0 +1,18 @@
+{#def code: int #}
+{% set title = _("web.error.%d.title" % code) %}
+<Layout :title="title">
+  <Notice :title="title"
+          :subtitle="_('web.error.code', code=code)"
+          :text="_('web.error.%d.text' % code)"
+          :narrow="code == 404">
+    {% if code == 404 %}
+      <Action :href="url('/')" :label="_('web.home')" />
+      {% for entry in games %}
+        <SmallAction :href="entry.href ~ '/servers'" :label="_('web.error.404.servers', game=entry.name)" />
+      {% endfor %}
+    {% else %}
+      <Action :href="here" :label="_('web.error.500.again')" />
+      <SmallAction :href="url('/')" :label="_('web.home')" />
+    {% endif %}
+  </Notice>
+</Layout>

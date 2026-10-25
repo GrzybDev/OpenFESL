@@ -1,0 +1,16 @@
+{#def version: str, text_language: str, paragraphs: list #}
+{% set title = _("web.terms.title") %}
+<Layout :title="title" page="terms">
+  <div class="notice-title notice-narrow">
+    <TitleBlock :title="title">{{ _("web.terms.version") }} <span class="terms-version">{{ version }}</span></TitleBlock>
+  </div>
+  <Panel tag="section" aria-labelledby="terms-text" class="terms">
+    <Bar id="terms-text" :extra="text_language" wrap>{{ _("web.terms.text") }}</Bar>
+    <div class="terms-text">
+      {% for paragraph in paragraphs %}
+        <p>{{ paragraph }}</p>
+      {% endfor %}
+    </div>
+    <p class="body-text terms-shown">{{ _("web.terms.shown") }}</p>
+  </Panel>
+</Layout>

@@ -6,6 +6,7 @@ from typing import Any
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import PlainTextResponse
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from starlette.exceptions import HTTPException
 
 from openfesl.core.account_settings import AccountSettingsService
 from openfesl.core.accounts import AccountService
@@ -50,6 +51,10 @@ from openfesl.storage.servers import SqlServerStore
 from openfesl.storage.settings import SqlSettingStore
 from openfesl.storage.stats import SqlStatStore
 from openfesl.web.game_http import GameHttpMiddleware
+from openfesl.web.languages import LanguageMiddleware
+from openfesl.web.pages import STATIC, Pages, StaticAssets
+from openfesl.web.security import SecurityHeadersMiddleware
+from openfesl.web.shell import shell_routes
 from openfesl.web.verification import verification_routes
 
 
@@ -135,8 +140,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         address = settings.client_address(websocket)
         return GameSession(routes, players, address, theater, hook_version)
 
+    pages = Pages(games)
     app = FastAPI(
-        title="OpenFESL", lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None
+        title="OpenFESL",
+        lifespan=lifespan,
+        docs_url=None,
+        redoc_url=None,
+        openapi_url=None,
+        exception_handlers={HTTPException: pages.not_found, Exception: pages.failure},
     )
 
     async def confirm(token: str) -> Confirmation:
@@ -144,7 +155,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return await verification.confirm(token)
 
     app.add_api_websocket_route("/", relay_endpoint(start_session))
-    app.include_router(verification_routes(confirm))
+    app.mount("/static", StaticAssets(directory=STATIC))
+    app.include_router(shell_routes(pages, Terms.load()))
+    app.include_router(verification_routes(confirm, pages))
+    # The last one added sees a request first: the game's HTTP keeps its own answers.
+    app.add_middleware(LanguageMiddleware)
+    app.add_middleware(SecurityHeadersMiddleware)
     app.add_middleware(GameHttpMiddleware, http=game_http)
 
     @app.get("/health", response_class=PlainTextResponse)

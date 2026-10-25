@@ -43,3 +43,74 @@ msgid "verification.page.unknown.text"
 msgstr ""
 "Ten link jest nieprawidłowy albo został już użyty. Potwierdzony adres nie "
 "wymaga dalszych działań."
+
+msgid "web.language.name"
+msgstr "Polski"
+
+#, python-format
+msgid "web.page.title"
+msgstr "%(page)s · OpenFESL"
+
+msgid "web.shell.skip"
+msgstr "Przejdź do treści"
+
+msgid "web.shell.games"
+msgstr "Gry"
+
+msgid "web.shell.language"
+msgstr "Język"
+
+#, python-format
+msgid "web.footer.repository"
+msgstr "Repozytorium %(name)s"
+
+msgid "web.footer.licence"
+msgstr "Licencja"
+
+msgid "web.footer.terms"
+msgstr "Warunki korzystania"
+
+msgid "web.footer.affiliation"
+msgstr ""
+"OpenFESL nie jest powiązany z firmą Electronic Arts ani przez nią "
+"wspierany."
+
+msgid "web.home"
+msgstr "Strona główna OpenFESL"
+
+#, python-format
+msgid "web.error.code"
+msgstr "Błąd %(code)d"
+
+msgid "web.error.404.title"
+msgstr "Nie znaleziono strony"
+
+msgid "web.error.404.text"
+msgstr "Żadna strona tego serwera nie ma takiego adresu."
+
+#, python-format
+msgid "web.error.404.servers"
+msgstr "Serwery %(game)s"
+
+msgid "web.error.500.title"
+msgstr "Nie udało się wyświetlić strony"
+
+msgid "web.error.500.text"
+msgstr "Na tym serwerze wystąpił błąd. Spróbuj ponownie za chwilę."
+
+msgid "web.error.500.again"
+msgstr "Spróbuj ponownie"
+
+msgid "web.terms.title"
+msgstr "Warunki korzystania"
+
+msgid "web.terms.version"
+msgstr "Wersja"
+
+msgid "web.terms.text"
+msgstr "Tekst wyświetlany przez grę"
+
+msgid "web.terms.shown"
+msgstr ""
+"Gra wyświetla te warunki przy zakładaniu konta i ponownie przy pierwszym "
+"logowaniu po zmianie tekstu."

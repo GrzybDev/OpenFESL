@@ -28,6 +28,28 @@ jobs:
 
       - run: uv run --locked lint-imports
 
+  web:
+    name: Check the web files' formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - run: corepack enable
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm prettier --check .
+
+      - uses: astral-sh/setup-uv@v10.3.0
+        with:
+          python-version: '3.14'
+
+      - run: uv run --locked djlint --check --lint src/openfesl/web
+
   # Dokploy builds the deployed image from this Dockerfile on the server.
   image:
     name: Build the image

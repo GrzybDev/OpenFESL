@@ -12,7 +12,12 @@ dist/
 # Tool caches and reports
 .mypy_cache/
 .ruff_cache/
+.import_linter_cache/
 .pytest_cache/
 .hypothesis/
 .coverage
 htmlcov/
+
+# Web build: the installed packages and the files built from them
+node_modules/
+src/openfesl/web/static/build/

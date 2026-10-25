@@ -1,0 +1,7 @@
+{#def state: str #}
+{% set title = _("verification.page.%s.heading" % state) %}
+<Layout :title="title">
+  <Notice :title="title" :text="_('verification.page.%s.text' % state)">
+    <Action :href="url('/')" :label="_('web.home')" />
+  </Notice>
+</Layout>

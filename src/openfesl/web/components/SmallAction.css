@@ -1,0 +1,30 @@
+@layer components {
+  .small-action {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    border: 1px solid var(--block-edge);
+    background: var(--ink);
+    color: var(--bright);
+  }
+
+  /* Also the square of the guides' download links. */
+  .small-action-square {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    place-items: center;
+    border: 4px solid var(--ink);
+    background: var(--accent);
+  }
+
+  .small-action-label {
+    padding: 6px 16px 6px 10px;
+    font-size: 15px;
+    line-height: 1.15;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+}

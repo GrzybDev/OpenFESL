@@ -36,7 +36,8 @@ With Docker:
 docker compose up --build
 ```
 
-The server listens on `ws://127.0.0.1:8000` with its database next to it. Point the hook at it in `OpenFESLHook.ini`:
+The server listens on `ws://127.0.0.1:8000` with its database next to it and serves its web pages at
+`http://127.0.0.1:8000`. Point the hook at it in `OpenFESLHook.ini`:
 
 ```ini
 [Server]
@@ -120,7 +121,8 @@ server whose game players see may grant the players in it; Bad Company 2 lists n
 
 ## Development
 
-Python 3.14 and [uv](https://docs.astral.sh/uv/). The tests start PostgreSQL in Docker through Testcontainers.
+Python 3.14 and [uv](https://docs.astral.sh/uv/), and Node.js 24 with pnpm for the web pages' fonts, scripts and
+stylesheets. The tests start PostgreSQL in Docker through Testcontainers.
 
 ```sh
 uv sync
@@ -129,10 +131,23 @@ uv run ruff check
 uv run ruff format --check
 uv run mypy
 uv run lint-imports
+uv run djlint --check --lint src/openfesl/web
+```
+
+Vite builds the web pages' files from the locked packages into `src/openfesl/web/static/build`, where the server
+finds them; without a build the pages show without their stylesheet and scripts. `pnpm dev` rebuilds them on every
+change.
+
+```sh
+corepack enable
+pnpm install
+pnpm build
+pnpm prettier --check .
 ```
 
 ## Licence
 
-OpenFESL is licensed under the GNU General Public License v3.0 or later; see [LICENSE.md](LICENSE.md).
+OpenFESL is licensed under the GNU General Public License v3.0 or later; see [LICENSE.md](LICENSE.md). The web pages
+ship third-party components under their own licences, listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 OpenFESL is not affiliated with or endorsed by Electronic Arts.

@@ -1,0 +1,19 @@
+@layer components {
+  .notice-title {
+    max-width: 520px;
+    margin-bottom: 14px;
+  }
+
+  .notice-narrow {
+    max-width: 440px;
+  }
+
+  /* A row of action blocks under a text. */
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+  }
+}

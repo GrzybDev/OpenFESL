@@ -1,0 +1,55 @@
+{#def title: str, page: str = "" #}
+{# The shell around every page: the bar with OpenFESL's games and languages, the area, and the footer. #}
+<!DOCTYPE html>
+<html lang="{{ language }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ _("web.page.title", page=title) }}</title>
+    {% for href in assets.styles %}<link rel="stylesheet" href="{{ href }}">{% endfor %}
+    {% for entry in languages %}
+      <link rel="alternate" hreflang="{{ entry.code }}" href="{{ entry.href }}">
+    {% endfor %}
+  </head>
+  <body>
+    <a href="#area" class="skip-link">{{ _("web.shell.skip") }}</a>
+    <header class="shell-bar">
+      <div class="shell-row">
+        <a href="{{ url('/') }}" class="wordmark">OpenFESL</a>
+        <nav aria-label="{{ _('web.shell.games') }}" class="shell-games">
+          <ul>
+            {% for entry in games %}
+              <li>
+                <a href="{{ entry.href }}" class="shell-link">{{ entry.name }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </nav>
+        {% if languages %}
+          <nav aria-label="{{ _('web.shell.language') }}" class="shell-languages">
+            {% for entry in languages %}
+              <a href="{{ entry.href }}"
+                 hreflang="{{ entry.code }}"
+                 {% if entry.current %} aria-current="true"{% else %} lang="{{ entry.code }}"{% endif %}
+                 class="shell-link">{{ entry.name }}</a>
+            {% endfor %}
+          </nav>
+        {% endif %}
+      </div>
+    </header>
+    <main id="area" class="area">
+      <div class="area-content">{{ content }}</div>
+    </main>
+    <footer class="shell-footer">
+      <div class="shell-row">
+        <span class="footer-name">OpenFESL</span>
+        <a href="https://github.com/GrzybDev/OpenFESL">{{ _("web.footer.repository", name="OpenFESL") }}</a>
+        <a href="https://github.com/GrzybDev/OpenFESLHook">{{ _("web.footer.repository", name="OpenFESLHook") }}</a>
+        <a href="https://github.com/GrzybDev/OpenFESL/blob/main/LICENSE.md">{{ _("web.footer.licence") }}</a>
+        <a href="{{ url('/terms') }}"
+           {% if page == "terms" %} aria-current="page"{% endif %}>{{ _("web.footer.terms") }}</a>
+        <p>{{ _("web.footer.affiliation") }}</p>
+      </div>
+    </footer>
+  </body>
+</html>

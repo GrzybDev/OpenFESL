@@ -1,0 +1,159 @@
+/* The web pages: the quiet OpenFESL shell around an area dressed in a game's menu style, or in
+   OpenFESL's own steel or grey. Components and pages bring their own stylesheets; this one holds
+   the tokens, the reset and what every page shares. */
+@layer reset, base, components, pages;
+
+@layer reset {
+  *,
+  ::before,
+  ::after,
+  ::backdrop {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid;
+  }
+
+  html {
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    tab-size: 4;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  code,
+  pre {
+    font-family: var(--font-mono);
+    font-size: 1em;
+  }
+
+  table {
+    border-collapse: collapse;
+    border-color: inherit;
+    text-indent: 0;
+  }
+
+  summary {
+    display: list-item;
+  }
+
+  ol,
+  ul {
+    list-style: none;
+  }
+
+  svg {
+    display: block;
+    vertical-align: middle;
+  }
+
+  button,
+  input {
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    border-radius: 0;
+    background-color: transparent;
+    opacity: 1;
+  }
+
+  button {
+    appearance: button;
+  }
+
+  ::-webkit-search-decoration {
+    -webkit-appearance: none;
+  }
+
+  [hidden]:where(:not([hidden="until-found"])) {
+    display: none !important;
+  }
+}
+
+@layer base {
+  :root {
+    --font-sans: "Barlow", system-ui, sans-serif;
+    --gutter: clamp(16px, 2.2vw, 32px);
+    --ink: #0a0a0a;
+    --shell: #0f1012;
+    --shell-line: #26282c;
+    --shell-text: #e6e7e9;
+    --shell-bright: #f4f4f4;
+    --shell-link: #c9ccd1;
+    --shell-muted: #a9acb2;
+    color-scheme: dark;
+  }
+
+  html {
+    font-family: var(--font-sans);
+  }
+
+  body {
+    background: var(--shell);
+    color: var(--shell-text);
+    font-family: var(--font-sans);
+  }
+
+  a {
+    text-underline-offset: 3px;
+    text-decoration-thickness: 2px;
+  }
+
+  a:hover {
+    text-decoration-line: underline;
+  }
+
+  :focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px var(--ink);
+  }
+
+  /* The shell's grey, for pages that belong to no game; games' themes come from their data. */
+  .area {
+    --area-font: "Barlow Semi Condensed", "Barlow", system-ui, sans-serif;
+    --accent: #e6e7e9;
+    --field: #0f1012;
+    --panel: #1a1c1f;
+    --panel-edge: #3a3d42;
+    --block-edge: #3a3d42;
+    --row: #c9ccd1;
+    --row-light: #e6e7e9;
+    --subtitle: #26282c;
+    --bright: #f4f4f4;
+    --soft: #c9ccd1;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Text of the sentences on the area's rows and backdrop. */
+  .body-text {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+}

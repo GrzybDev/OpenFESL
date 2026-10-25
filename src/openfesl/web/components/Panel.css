@@ -1,0 +1,7 @@
+@layer components {
+  .panel {
+    border: 1px solid var(--panel-edge);
+    background: var(--panel);
+    padding: 12px;
+  }
+}

@@ -1,0 +1,7 @@
+{#def tag: str = "h2", id: str = "", extra: str = "", wrap: bool = False, large: bool = False #}
+{# A black heading bar over a panel's part, with the content as its label and, in the accent at
+   its end, an extra word such as a count or the current choice. Wrapping bars keep their extra
+   word on a line of its own when they run out of room; large bars head a whole form. #}
+<{{ tag }}{% if id %} id="{{ id }}"{% endif %} class="bar{% if wrap %} bar-wrap{% endif %}{% if large %} bar-large{% endif %}">
+  {%- if extra %}<span>{{ content }}</span><span class="bar-extra">{{ extra }}</span>{% else %}{{ content }}{% endif -%}
+</{{ tag }}>

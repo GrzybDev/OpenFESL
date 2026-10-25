@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Protocol
 from babel.dates import format_datetime
 
 from openfesl.core.fesl import TransactionError
-from openfesl.core.texts import BASE_LANGUAGE, languages, translate
+from openfesl.core.texts import BASE_LANGUAGE, languages, localize, translate
 
 # For annotations only, since the account service uses this module.
 if TYPE_CHECKING:
@@ -142,7 +142,8 @@ class EmailVerification:
         # around a date in the game's language, and Babel refuses locales it does not know.
         if language not in languages():
             language = BASE_LANGUAGE
-        url = self._public_url.rstrip("/") + PATH.format(token=token)
+        # The link opens the page in the language of the mail.
+        url = self._public_url.rstrip("/") + localize(PATH.format(token=token), language)
         expires = format_datetime(link.expires_at, "long", tzinfo=UTC, locale=language)
         subject = translate("verification.mail.subject", language)
         body = translate("verification.mail.body", language).format(link=url, expires=expires)

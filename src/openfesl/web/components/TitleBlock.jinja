@@ -1,0 +1,5 @@
+{#def title: str #}
+{# The title on the accent bar, as the game's title blocks are, and under it the subtitle that the
+   content gives. #}
+<h1 class="title-block">{{ title }}</h1>
+{% if content|trim %}<p class="title-sub">{{ content }}</p>{% endif %}

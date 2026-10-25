@@ -1,0 +1,44 @@
+/* The title bar and its subtitle reach out to the left edge of the window, as the game's do. */
+@layer components {
+  .title-block,
+  .title-sub {
+    display: block;
+    border-image-slice: 0 fill;
+    border-image-outset: 0 0 0 100vw;
+    text-transform: uppercase;
+  }
+
+  .title-block {
+    border-image-source: conic-gradient(var(--accent) 0 0);
+    background: var(--accent);
+    padding: 9px 16px 7px 0;
+    font-size: 30px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+
+  .title-sub {
+    border-image-source: conic-gradient(var(--subtitle) 0 0);
+    background: var(--subtitle);
+    padding: 8px 16px 8px 0;
+    font-size: 13px;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    color: var(--bright);
+  }
+
+  @media (width >= 40rem) {
+    .title-block {
+      padding: 11px 28px 9px 0;
+      font-size: 40px;
+    }
+
+    .title-sub {
+      padding: 9px 28px 9px 0;
+      font-size: 14px;
+    }
+  }
+}

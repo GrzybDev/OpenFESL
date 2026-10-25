@@ -1,0 +1,182 @@
+/* The quiet shell around the area: OpenFESL's bar and footer, which stay put while the area
+   changes from page to page (M12). */
+@layer components {
+  .skip-link {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    z-index: 10;
+    background: var(--shell-bright);
+    padding: 12px 16px;
+    font-weight: 600;
+    color: var(--ink);
+
+    &:focus {
+      top: 8px;
+      left: 8px;
+      width: auto;
+      height: auto;
+      margin: 0;
+      overflow: visible;
+      clip-path: none;
+      white-space: normal;
+    }
+  }
+
+  .shell-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    max-width: 1440px;
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .shell-bar {
+    border-bottom: 1px solid var(--shell-line);
+    background: var(--shell);
+
+    > .shell-row {
+      min-height: 56px;
+      justify-content: space-between;
+      column-gap: 12px;
+    }
+  }
+
+  .wordmark {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--shell-bright);
+  }
+
+  /* On phones the games take a line of their own under the wordmark and the languages. */
+  .shell-games {
+    order: 9999;
+    min-width: 0;
+    flex-basis: calc(100% + 2 * var(--gutter));
+    margin-inline: calc(-1 * var(--gutter));
+    border-top: 1px solid var(--shell-line);
+    padding-inline: 6px;
+
+    > ul {
+      display: flex;
+      flex-wrap: wrap;
+      column-gap: 4px;
+    }
+
+    .shell-link {
+      flex-wrap: wrap;
+      column-gap: 8px;
+      font-size: 15px;
+      color: var(--shell-link);
+    }
+  }
+
+  .shell-languages {
+    display: flex;
+    gap: 2px;
+
+    .shell-link {
+      font-size: 14px;
+      line-height: calc(1.25 / 0.875);
+      color: var(--shell-muted);
+    }
+  }
+
+  .shell-link {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    padding-inline: 10px;
+    font-weight: 600;
+
+    &[aria-current="true"] {
+      border-bottom: 2px solid var(--shell-bright);
+      color: var(--shell-bright);
+    }
+  }
+
+  @media (width >= 40rem) {
+    .shell-bar > .shell-row {
+      justify-content: flex-start;
+      column-gap: 28px;
+    }
+
+    .shell-games {
+      order: 0;
+      flex: 1 1 420px;
+      margin-inline: 0;
+      border-top-width: 0;
+      padding-inline: 0;
+    }
+  }
+
+  .area {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: var(--field);
+    font-family: var(--area-font);
+    color: var(--bright);
+  }
+
+  .area-content {
+    max-width: 1440px;
+    margin-inline: auto;
+    padding: 30px var(--gutter) 56px;
+  }
+
+  .shell-footer {
+    border-top: 1px solid var(--shell-line);
+    background: var(--shell);
+    color: var(--shell-muted);
+
+    > .shell-row {
+      column-gap: 20px;
+      padding-top: 12px;
+      padding-bottom: 22px;
+      font-size: 14px;
+      line-height: calc(1.25 / 0.875);
+      font-weight: 500;
+    }
+
+    a {
+      display: flex;
+      min-height: 44px;
+      min-width: 44px;
+      align-items: center;
+      text-decoration-line: underline;
+
+      &[aria-current="page"] {
+        color: var(--shell-text);
+      }
+    }
+
+    p {
+      margin-top: 4px;
+      flex-basis: 100%;
+      line-height: 1.5;
+    }
+  }
+
+  .footer-name {
+    font-weight: 700;
+    color: var(--shell-text);
+  }
+
+  @media (width >= 40rem) {
+    .shell-footer > .shell-row {
+      column-gap: 24px;
+      padding-top: 18px;
+      padding-bottom: 26px;
+    }
+  }
+}

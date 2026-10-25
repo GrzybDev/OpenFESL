@@ -1,0 +1,4 @@
+{#def tag: str = "div" #}
+{# The large framed container of a page's tables and forms. Further attributes, such as the live
+   region's htmx ones, go on the container. #}
+<{{ tag }} {{ attrs.render(class="panel") }}>{{ content }}</{{ tag }}>

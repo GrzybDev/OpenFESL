@@ -1,5 +1,20 @@
 # syntax=docker/dockerfile:1
 
+# The web pages' stylesheet, fonts and scripts, built by Vite from the locked packages.
+FROM node:24-slim AS assets
+
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+
+WORKDIR /app
+RUN corepack enable
+COPY package.json pnpm-lock.yaml ./
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
+COPY vite.config.js ./
+COPY src/openfesl/web src/openfesl/web
+RUN pnpm build
+
+
 FROM python:3.14-slim AS builder
 
 ENV UV_COMPILE_BYTECODE=1 \
@@ -15,8 +30,9 @@ COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-install-project
 
-COPY LICENSE.md ./
+COPY LICENSE.md THIRD-PARTY-NOTICES.md ./
 COPY src ./src
+COPY --from=assets /app/src/openfesl/web/static/build src/openfesl/web/static/build
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-editable
 

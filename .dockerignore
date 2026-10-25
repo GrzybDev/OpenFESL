@@ -9,3 +9,5 @@
 .hypothesis
 tests
 CLAUDE.md
+node_modules
+src/openfesl/web/static/build

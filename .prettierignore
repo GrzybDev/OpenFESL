@@ -1,0 +1,5 @@
+# Prettier formats the stylesheets, scripts and JSON files; djLint formats the components and
+# pages, and Markdown and YAML keep their own layout.
+*.md
+*.yaml
+*.yml

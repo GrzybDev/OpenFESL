@@ -43,7 +43,7 @@ class Mailbox:
                 await anyio.sleep(0.02)
         message = self.messages.pop(0)
         assert message["To"] == to
-        found = re.search(re.escape(PUBLIC_URL) + r"(/verify/\S+)", message.get_content())
+        found = re.search(re.escape(PUBLIC_URL) + r"(/(?:pl/)?verify/\S+)", message.get_content())
         assert found is not None
         return message, found[1]
 
@@ -96,8 +96,9 @@ async def test_a_new_account_logs_in_once_the_link_sent_to_its_address_confirmed
             assert "errorCode" not in await register(player, "ann@example.test")
         mailbox.answering.set()
         mail, link = await mailbox.receive("ann@example.test")
-        # In the language of the game it registered from.
+        # In the language of the game it registered from, as is the page its link opens.
         assert mail["Content-Language"] == "pl"
+        assert link.startswith("/pl/")
         # The game shows that the account waits for authorization.
         assert await log_in(player, "ann@example.test") == "105"
         assert (await fetch(server_url, link))[0] == 200
