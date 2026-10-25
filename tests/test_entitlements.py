@@ -3,7 +3,7 @@ import asyncio
 import pytest
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
-from support import entitle_game, game, host_game, log_in_player, login, registration
+from support import cli, entitle_game, game, host_game, log_in_player, login, registration
 
 from openfesl.protocol.relay import Channel, ConnectionKey
 from openfesl.server.cli import main
@@ -78,6 +78,41 @@ async def test_keys_grant_entitlements_once_and_a_revoked_one_stays_revoked(
         assert (await player.request(FESL, "acct", entitle))["errorCode"] == "120"
         again = await player.request(FESL, "acct", login("ann@example.test", "secret-pass"))
         assert again["errorCode"] == "120"
+
+
+@pytest.mark.anyio
+async def test_a_key_is_refused_once_used_up_and_to_an_account_that_redeemed_it(
+    server_url: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    limited = await cli(
+        capsys, "keys", "limit", "activate-premium", "--max-uses", "1", "--once-per-account"
+    )
+    assert limited == "ACTIVATE-PREMIUM  uses 0 of 1  once per account\n"
+    redeem = [("TXN", "NuEntitleUser"), ("key", "ACTIVATE-PREMIUM")]
+    async with game(server_url) as first, game(server_url) as second:
+        await log_in_player(first, FESL, "ann@example.test")
+        await log_in_player(second, FESL, "ben@example.test")
+        assert "errorCode" not in await first.request(FESL, "acct", redeem)
+        assert (await first.request(FESL, "acct", redeem))["errorCode"] == "182"
+        assert (await second.request(FESL, "acct", redeem))["errorCode"] == "180"
+
+        # Entered again by the same account, the key grants nothing new and uses nothing up.
+        await cli(capsys, "keys", "limit", "ACTIVATE-PREMIUM", "--any")
+        assert "errorCode" not in await first.request(FESL, "acct", redeem)
+        assert (await second.request(FESL, "acct", redeem))["errorCode"] == "180"
+        unlimited = await cli(capsys, "keys", "limit", "ACTIVATE-PREMIUM", "--unlimited")
+        shown = "ACTIVATE-PREMIUM  uses 1 of unlimited  any number of times per account\n"
+        assert unlimited == shown
+        assert "errorCode" not in await second.request(FESL, "acct", redeem)
+
+    # The key prompt at login refuses a used-up key too.
+    await cli(capsys, "keys", "limit", "ACTIVATE-GAME", "--max-uses", "2")
+    async with game(server_url) as third:
+        await third.hello(FESL, "bfbc2-pc")
+        terms = (await third.request(FESL, "acct", [("TXN", "NuGetTos")]))["version"]
+        await third.request(FESL, "acct", registration("cat@example.test", "secret-pass", terms))
+        entitle = entitle_game("cat@example.test", "secret-pass", "ACTIVATE-GAME")
+        assert (await third.request(FESL, "acct", entitle))["errorCode"] == "180"
 
 
 @pytest.mark.anyio

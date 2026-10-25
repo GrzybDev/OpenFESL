@@ -93,9 +93,24 @@ class ProductKeyRow(Base):
     code: Mapped[str]
     enabled: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    # How many accounts may redeem it; None for any number.
+    max_uses: Mapped[int | None]
+    once_per_account: Mapped[bool] = mapped_column(server_default="false")
 
 
 Index("product_key_code_key", func.upper(ProductKeyRow.code), unique=True)
+
+
+class ProductKeyUseRow(Base):
+    __tablename__ = "product_key_use"
+
+    key_id: Mapped[int] = mapped_column(
+        ForeignKey("product_key.id", ondelete="CASCADE"), primary_key=True
+    )
+    account_id: Mapped[int] = mapped_column(
+        ForeignKey("account.id", ondelete="CASCADE"), primary_key=True, index=True
+    )
+    used_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
 class ProductKeyGrantRow(Base):

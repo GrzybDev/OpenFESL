@@ -37,9 +37,35 @@ def main(argv: Sequence[str] | None = None) -> None:
     serve = commands.add_parser("serve", help="run the server")
     serve.add_argument("--host", default="0.0.0.0", help="address to listen on")
     serve.add_argument("--port", type=int, default=DEFAULT_PORT, help="port to listen on")
-    keys = commands.add_parser("keys", help="manage product keys")
-    keys.add_subparsers(dest="action", required=True).add_parser(
+    key_actions = commands.add_parser("keys", help="manage product keys").add_subparsers(
+        dest="action", required=True
+    )
+    key_actions.add_parser(
         "import", help="add the games' product keys that the database lacks, keeping the others"
+    )
+    limit = key_actions.add_parser(
+        "limit", help="show or change how often a product key may be redeemed"
+    )
+    limit.add_argument("code", help="the key")
+    uses = limit.add_mutually_exclusive_group()
+    uses.add_argument("--max-uses", type=_uses, help="how many accounts may redeem the key")
+    uses.add_argument(
+        "--unlimited", action="store_true", help="let any number of accounts redeem the key"
+    )
+    again = limit.add_mutually_exclusive_group()
+    again.add_argument(
+        "--once-per-account",
+        dest="once_per_account",
+        action="store_const",
+        const=True,
+        help="refuse an account that redeemed the key already",
+    )
+    again.add_argument(
+        "--any",
+        dest="once_per_account",
+        action="store_const",
+        const=False,
+        help="let an account enter the key again, which grants nothing new",
     )
     hosting = commands.add_parser(
         "hosting", help="show or change whether players see only approved servers' games"
@@ -158,6 +184,12 @@ def uvicorn_config(host: str, port: int) -> uvicorn.Config:
         log_config=None,
         access_log=False,
     )
+
+
+def _uses(text: str) -> int:
+    if not text.isdigit() or int(text) < 1:
+        raise argparse.ArgumentTypeError(f"{text!r} is no number of uses such as 1")
+    return int(text)
 
 
 def _moment(text: str) -> datetime:

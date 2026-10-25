@@ -2,6 +2,7 @@ import argparse
 import sys
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from dataclasses import replace
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
@@ -34,7 +35,7 @@ async def run(settings: Settings, args: argparse.Namespace) -> None:
     """
     match args.command:
         case "keys":
-            print(f"Added {await _import_keys(settings)} product keys")
+            await _keys(settings, args)
         case "hosting":
             print(await _hosting(settings, args.mode))
         case "providers":
@@ -59,9 +60,24 @@ async def _database(settings: Settings) -> AsyncIterator[async_sessionmaker[Asyn
         await engine.dispose()
 
 
-async def _import_keys(settings: Settings) -> int:
+async def _keys(settings: Settings, args: argparse.Namespace) -> None:
     async with _database(settings) as sessions:
-        return await SqlEntitlementStore(sessions).import_keys(load_games().keys)
+        store = SqlEntitlementStore(sessions)
+        if args.action == "import":
+            print(f"Added {await store.import_keys(load_games().keys)} product keys")
+            return
+        limits = await store.limits(args.code)
+        if limits is None:
+            sys.exit(f"No product key is {args.code}")
+        once = args.once_per_account
+        if args.unlimited or args.max_uses or once is not None:
+            most = None if args.unlimited else args.max_uses or limits.max_uses
+            once = limits.once_per_account if once is None else once
+            await store.limit(limits.code, most, once, admin=None)
+            limits = replace(limits, max_uses=most, once_per_account=once)
+        ceiling = limits.max_uses or "unlimited"
+        again = "once" if limits.once_per_account else "any number of times"
+        print(f"{limits.code}  uses {limits.uses} of {ceiling}  {again} per account")
 
 
 async def _hosting(settings: Settings, mode: str | None) -> HostingMode:

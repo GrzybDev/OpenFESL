@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any, Protocol
 
-from openfesl.core.entitlements import UNKNOWN_KEY, EntitlementStore
+from openfesl.core.entitlements import EntitlementStore, KeyRefusal
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Game, Games
 from openfesl.core.logins import INVALID_PASSWORD, UNKNOWN_USER, Logins
@@ -387,7 +387,8 @@ class AccountService:
 
         Raises:
             TransactionError: When the login fails, no enabled key has that code, the key does
-                not grant the game, or the account's entitlement to it was taken away.
+                not grant the game, its limits refuse the account, or the account's entitlement
+                to the game was taken away.
         """
         assert connection.client is not None
         credentials = await self._authenticate(
@@ -399,8 +400,10 @@ class AccountService:
         game = connection.client.entitlement
         grants = await self._entitlements.grants(request.key)
         if grants is None or (game and game not in {grant.tag for grant in grants}):
-            raise TransactionError(UNKNOWN_KEY)
-        await self._entitlements.redeem(account.id, request.key)
+            raise TransactionError(KeyRefusal.UNKNOWN)
+        redeemed = await self._entitlements.redeem(account.id, request.key)
+        if isinstance(redeemed, KeyRefusal):
+            raise TransactionError(redeemed)
         if game and not await self._entitlements.entitled(account.id, game):
             raise TransactionError(NOT_ENTITLED)
         logger.info("Account %d redeemed a product key for the game", account.id)

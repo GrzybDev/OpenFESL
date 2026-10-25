@@ -23,6 +23,9 @@ class AdminAction(StrEnum):
     """Confirmed the e-mail address of the account numbered as the target by hand."""
     PERSONA_STATE = "persona_state"
     """Changed the state of the persona numbered as the target; the details hold the state."""
+    KEY_LIMITS = "key_limits"
+    """Changed how often the product key named as the target may be redeemed; the details hold
+    its most uses, none for any number, and whether an account may redeem it only once."""
 
 
 @dataclass(frozen=True, slots=True)

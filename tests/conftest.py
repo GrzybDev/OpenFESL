@@ -44,7 +44,8 @@ async def relay_server(
     await task
     engine = create_async_engine(database_url)
     async with engine.begin() as connection:
-        tables = "account, stat, game_server, provider, setting, admin_action"
+        # The keys too, so that the next server starts with the game data's keys, unlimited.
+        tables = "account, stat, game_server, provider, setting, admin_action, product_key"
         await connection.execute(text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE"))
     await engine.dispose()
 

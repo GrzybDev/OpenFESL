@@ -2,6 +2,7 @@ import logging
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date
+from enum import IntEnum
 from typing import TYPE_CHECKING, Any, Protocol
 
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
@@ -25,7 +26,35 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 NOT_LOGGED_IN = 20
-UNKNOWN_KEY = 181
+
+
+class KeyRefusal(IntEnum):
+    """Why a product key grants nothing, as the error whose text the game shows for it."""
+
+    USED_UP = 180
+    """As many accounts as the key allows redeemed it."""
+    UNKNOWN = 181
+    """No enabled key has the code."""
+    REDEEMED = 182
+    """The account redeemed it already, which the key allows once."""
+
+
+@dataclass(frozen=True, slots=True)
+class KeyLimits:
+    """How often a product key may be redeemed, and how often it was.
+
+    Attributes:
+        code: The key.
+        max_uses: How many accounts may redeem it; None for any number.
+        once_per_account: Whether an account that redeemed it is refused when it enters it
+            again; otherwise that grants nothing new and uses nothing up.
+        uses: How many accounts redeemed it.
+    """
+
+    code: str
+    max_uses: int | None
+    once_per_account: bool
+    uses: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -81,8 +110,8 @@ class EntitlementStore(Protocol):
             What the key grants, or None when no enabled key has that code.
         """
 
-    async def redeem(self, account_id: int, code: str) -> list[Grant] | None:
-        """Grant an account what an enabled product key grants.
+    async def redeem(self, account_id: int, code: str) -> list[Grant] | KeyRefusal:
+        """Grant an account what an enabled product key grants, within the key's limits.
 
         Entitlements the account holds already, revoked ones included, stay as they are.
 
@@ -91,7 +120,7 @@ class EntitlementStore(Protocol):
             code: The key, matched regardless of case.
 
         Returns:
-            What the key grants, or None when no enabled key has that code.
+            What the key grants, or why it grants nothing.
         """
 
     async def of_account(self, account_id: int, query: EntitlementQuery) -> list[Entitlement]:
@@ -148,7 +177,8 @@ class EntitlementService:
             request: The key.
 
         Raises:
-            TransactionError: When nobody is logged in or no enabled key has that code.
+            TransactionError: When nobody is logged in, no enabled key has that code, or the
+                key's limits refuse the account.
         """
         account = connection.session.account
         if account is None:
@@ -156,8 +186,8 @@ class EntitlementService:
         if account.server:
             raise TransactionError(PARAMETERS_ERROR)
         grants = await self._store.redeem(account.id, request.key)
-        if grants is None:
-            raise TransactionError(UNKNOWN_KEY)
+        if isinstance(grants, KeyRefusal):
+            raise TransactionError(grants)
         logger.info("Account %d redeemed a product key", account.id)
         # The game takes an answer without entries for a failed redeem, and names what the key
         # unlocked after the licence whose tag an entry's name matches, so each product gets an

@@ -12,7 +12,7 @@ For Battlefield: Bad Company 2 on PC, the game and its dedicated server:
 
 - Accounts: registration with the terms the game shows and the countries' age limits, optional e-mail verification,
   logins with remembered logins, personas, account details and password changes
-- Product keys and the entitlements they grant
+- Product keys, optionally limited in uses, and the entitlements they grant
 - Stats, ranked stats and leaderboards, and the records players keep per persona (dog tags, clan tag)
 - Friends, block and mute lists, presence, and messages between players, delivered at the next login when the
   recipient is offline
@@ -87,6 +87,7 @@ The `openfesl` command in the server's container manages what the admin decides:
 | `openfesl servers approve UGID` | Lets players see a server's games |
 | `openfesl servers revoke UGID` | Stops a server from hosting |
 | `openfesl keys import` | Adds the games' product keys that the database lacks, keeping the others |
+| `openfesl keys limit CODE [--max-uses N \| --unlimited] [--once-per-account \| --any]` | Shows or changes how often a product key may be redeemed: by how many accounts, and whether an account that redeemed it is refused when it enters it again (otherwise that grants nothing new). At the login's key prompt the game names a used-up key as already in use and one the account redeemed as already entitled; the menu shows its notice of a failed redeem. Keys start unlimited |
 | `openfesl settings list` | Lists every game's policies with their values |
 | `openfesl settings get KEY` | Shows a policy's value; the key names the game and the policy, such as `bfbc2.accounts.concurrent_login` |
 | `openfesl settings set KEY VALUE` | Overrides the game's default for this server |
@@ -95,8 +96,8 @@ The `openfesl` command in the server's container manages what the admin decides:
 | `openfesl accounts verify LOGIN` | Confirms an account's e-mail address by hand, so that it may log in |
 | `openfesl personas state NAME active\|disabled` | Sets whether a player's persona may play; the game names a disabled persona as disabled by customer support when its player picks it or another player wants its name |
 
-The `settings`, `accounts` and `personas` commands record each change with its time. A running server applies
-account changes within seconds.
+The `keys limit`, `settings`, `accounts` and `personas` commands record each change with its time. A running server
+applies account changes within seconds.
 
 ## Policies
 
