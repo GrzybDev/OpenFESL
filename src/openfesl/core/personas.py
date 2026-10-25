@@ -2,6 +2,7 @@ import logging
 import re
 import secrets
 from dataclasses import dataclass
+from enum import StrEnum
 from typing import Any, Protocol
 
 from openfesl.core.accounts import ALREADY_REGISTERED, Account
@@ -30,6 +31,8 @@ logger = logging.getLogger(__name__)
 NOT_LOGGED_IN = 20
 UNKNOWN_PERSONA = 101
 TOO_MANY_PERSONAS = 163
+# The game shows its "disabled by customer support" text for it.
+DISABLED_BY_ADMIN = 164
 
 # The owner type that names a persona in the SDK's owner fields.
 PERSONA = 1
@@ -41,6 +44,13 @@ SERVER_PERSONA_LENGTH = 14
 
 # Dedicated servers name their persona after the part of their login before '@', dots included.
 _NAME = re.compile(r"[A-Za-z0-9_.-]{3,16}")
+
+
+class PersonaState(StrEnum):
+    """Whether the admin lets a persona play, apart from its player removing it."""
+
+    ACTIVE = "active"
+    DISABLED = "disabled"
 
 
 @dataclass(frozen=True, slots=True)
@@ -111,6 +121,30 @@ class PersonaStore(Protocol):
             persona_id: The persona's number.
         """
 
+    async def named(self, name: str) -> list[Persona]:
+        """Return players' personas with a name in every namespace, those they disabled too.
+
+        Args:
+            name: The name, matched regardless of case.
+        """
+
+    async def blocked(self, namespace: str, name: str) -> bool:
+        """Return whether the admin disabled the persona with a name.
+
+        Args:
+            namespace: The namespace.
+            name: The name, matched regardless of case.
+        """
+
+    async def set_state(self, persona_id: int, state: PersonaState, admin: str | None) -> None:
+        """Change whether a persona may play and record the change among the admin's actions.
+
+        Args:
+            persona_id: The persona's number.
+            state: Its new state.
+            admin: The admin who changed it; None for the command line.
+        """
+
 
 class PersonaService:
     """The acct transactions that list, create, disable and log in personas."""
@@ -172,7 +206,8 @@ class PersonaService:
             request: The new persona's name.
 
         Raises:
-            TransactionError: When the name is invalid or taken, or the account has its maximum.
+            TransactionError: When the name is invalid, taken or disabled by the admin, or the
+                account has its maximum.
         """
         account, namespace = _context(connection)
         # The dedicated servers' persona exists already; their shared login proves nothing.
@@ -184,7 +219,8 @@ class PersonaService:
             raise TransactionError(TOO_MANY_PERSONAS)
         persona = await self._store.add(account.id, namespace, request.name)
         if persona is None:
-            raise TransactionError(ALREADY_REGISTERED)
+            blocked = await self._store.blocked(namespace, request.name)
+            raise TransactionError(DISABLED_BY_ADMIN if blocked else ALREADY_REGISTERED)
         logger.info("Account %d created persona %d (%s)", account.id, persona.id, persona.name)
         return Message()
 
@@ -238,9 +274,12 @@ class PersonaService:
             request: The persona's name.
 
         Raises:
-            TransactionError: When the account has no persona of that name.
+            TransactionError: When the account has no persona of that name or the admin
+                disabled it.
         """
         persona = await self._own(connection, request.name)
+        if await self._store.blocked(persona.namespace, persona.name):
+            raise TransactionError(DISABLED_BY_ADMIN)
         key = secrets.token_urlsafe(20) + "."
         connection.session.log_in_persona(persona, key)
         logger.info(

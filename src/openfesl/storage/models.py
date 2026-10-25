@@ -59,7 +59,10 @@ class PersonaRow(Base):
     namespace: Mapped[str]
     name: Mapped[str]
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    # When its player removed it; the admin's decision is the state.
     disabled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    state: Mapped[str] = mapped_column(server_default="active")
+    state_changed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 # Disabled names stay taken, so a name never moves to another account.

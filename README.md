@@ -85,8 +85,9 @@ The `openfesl` command in the server's container manages what the admin decides:
 | `openfesl settings set KEY VALUE` | Overrides the game's default for this server |
 | `openfesl settings reset KEY` | Returns a policy to the game's default |
 | `openfesl accounts state LOGIN active\|disabled\|banned\|deactivated [--until DATE]` | Sets whether an account may log in; the game's login form names the state, and a player online is signed out, with the game's ban notice for a ban. `--until` ends the state at a date such as `2026-12-01` or `2026-12-01T18:00+01:00`, UTC unless it names an offset |
+| `openfesl personas state NAME active\|disabled` | Sets whether a player's persona may play; the game names a disabled persona as disabled by customer support when its player picks it or another player wants its name |
 
-The `settings` and `accounts` commands record each change with its time. A running server applies account changes
+The `settings`, `accounts` and `personas` commands record each change with its time. A running server applies account changes
 within seconds.
 
 ## Policies

@@ -4,8 +4,9 @@ from sqlalchemy import func, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from openfesl.core.personas import Persona
-from openfesl.storage.models import AccountRow, PersonaRow
+from openfesl.core.admin import AdminAction
+from openfesl.core.personas import Persona, PersonaState
+from openfesl.storage.models import AccountRow, AdminActionRow, PersonaRow
 
 _LIKE_SPECIAL = re.compile(r"[\\%_]")
 _BIGINT = range(-(2**63), 2**63)
@@ -121,6 +122,62 @@ class SqlPersonaStore:
         async with self._sessions.begin() as session:
             await session.execute(
                 update(PersonaRow).where(PersonaRow.id == persona_id).values(disabled_at=func.now())
+            )
+
+    async def named(self, name: str) -> list[Persona]:
+        """Return players' personas with a name in every namespace, those they disabled too.
+
+        Args:
+            name: The name, matched regardless of case.
+        """
+        async with self._sessions() as session:
+            rows = await session.scalars(
+                select(PersonaRow)
+                .join(AccountRow, AccountRow.id == PersonaRow.account_id)
+                .where(
+                    func.lower(PersonaRow.name) == func.lower(name), AccountRow.server.is_(False)
+                )
+                .order_by(PersonaRow.namespace)
+            )
+            return [_persona(row) for row in rows]
+
+    async def blocked(self, namespace: str, name: str) -> bool:
+        """Return whether the admin disabled the persona with a name.
+
+        Args:
+            namespace: The namespace.
+            name: The name, matched regardless of case.
+        """
+        async with self._sessions() as session:
+            state = await session.scalar(
+                select(PersonaRow.state).where(
+                    PersonaRow.namespace == namespace,
+                    func.lower(PersonaRow.name) == func.lower(name),
+                )
+            )
+        return state == PersonaState.DISABLED
+
+    async def set_state(self, persona_id: int, state: PersonaState, admin: str | None) -> None:
+        """Change whether a persona may play and record the change among the admin's actions.
+
+        Args:
+            persona_id: The persona's number.
+            state: Its new state.
+            admin: The admin who changed it; None for the command line.
+        """
+        async with self._sessions.begin() as session:
+            await session.execute(
+                update(PersonaRow)
+                .where(PersonaRow.id == persona_id)
+                .values(state=state.value, state_changed_at=func.now())
+            )
+            session.add(
+                AdminActionRow(
+                    admin=admin,
+                    action=AdminAction.PERSONA_STATE,
+                    target=str(persona_id),
+                    details={"state": state.value},
+                )
             )
 
 

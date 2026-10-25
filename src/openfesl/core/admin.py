@@ -19,6 +19,8 @@ class AdminAction(StrEnum):
     ACCOUNT_STATE = "account_state"
     """Changed the state of the account numbered as the target; the details hold the state and
     when it ends, if it does."""
+    PERSONA_STATE = "persona_state"
+    """Changed the state of the persona numbered as the target; the details hold the state."""
 
 
 @dataclass(frozen=True, slots=True)

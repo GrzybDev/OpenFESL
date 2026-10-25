@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from openfesl.core.accounts import Account, AccountState
 from openfesl.core.games import Game, Games, load_games
+from openfesl.core.personas import PersonaState
 from openfesl.core.policies import GamePolicies, setting_key
 from openfesl.core.servers import (
     GameServer,
@@ -28,6 +29,7 @@ from openfesl.server.settings import Settings
 from openfesl.storage.accounts import SqlAccountStore
 from openfesl.storage.database import migrate
 from openfesl.storage.entitlements import SqlEntitlementStore
+from openfesl.storage.personas import SqlPersonaStore
 from openfesl.storage.servers import SqlServerStore
 from openfesl.storage.settings import SqlSettingStore
 
@@ -109,6 +111,13 @@ def main(argv: Sequence[str] | None = None) -> None:
         type=_moment,
         help="when the state ends, such as 2026-12-01 or 2026-12-01T18:00+01:00 (UTC by default)",
     )
+    persona_state = (
+        commands.add_parser("personas", help="manage players' personas")
+        .add_subparsers(dest="action", required=True)
+        .add_parser("state", help="set whether a persona may play; its name stays taken")
+    )
+    persona_state.add_argument("name", help="the persona's name")
+    persona_state.add_argument("state", choices=[state.value for state in PersonaState])
     args = parser.parse_args(argv)
 
     match args.command:
@@ -130,6 +139,8 @@ def main(argv: Sequence[str] | None = None) -> None:
             asyncio.run(_settings(Settings(), args))
         case "accounts":
             asyncio.run(_accounts(Settings(), args))
+        case "personas":
+            asyncio.run(_personas(Settings(), args))
 
 
 class RelayServer(uvicorn.Server):
@@ -306,3 +317,15 @@ def _moment(text: str) -> datetime:
     if moment <= datetime.now(UTC):
         raise argparse.ArgumentTypeError(f"{text} has passed")
     return moment
+
+
+async def _personas(settings: Settings, args: argparse.Namespace) -> None:
+    async with _database(settings) as sessions:
+        store = SqlPersonaStore(sessions)
+        match await store.named(args.name):
+            case []:
+                sys.exit(f"No player's persona is called {args.name}")
+            case [persona]:
+                await store.set_state(persona.id, PersonaState(args.state), admin=None)
+            case _:
+                sys.exit(f"Personas of several games are called {args.name}")

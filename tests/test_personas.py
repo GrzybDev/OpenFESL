@@ -1,5 +1,5 @@
 import pytest
-from support import game, log_in_player, login
+from support import cli, game, log_in_player, login
 
 from openfesl.protocol.relay import Channel, ConnectionKey
 
@@ -136,3 +136,37 @@ async def test_players_find_the_personas_of_others_by_name_with_wildcards(
             assert (await bob.request(FESL, "acct", search(literal)))["users.[]"] == "0"
         few = await bob.request(FESL, "acct", search("*", chunk_size=2))
         assert few["users.[]"] == "2"
+
+
+async def test_the_admin_disables_a_persona_which_keeps_its_name_from_play(
+    server_url: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    async with game(server_url) as ann, game(server_url) as bob:
+        await log_in_player(ann, FESL, "ann@example.test")
+        await log_in_player(bob, FESL, "bob@example.test")
+        for name in ("Ann_01", "Ann_02"):
+            await ann.request(FESL, "acct", persona("NuAddPersona", name))
+
+        await cli(capsys, "personas", "state", "ann_01", "disabled")
+        # Still listed, so its player picks it and the game says why it cannot play.
+        listed = await ann.request(FESL, "acct", [("TXN", "NuGetPersonas"), ("namespace", "")])
+        assert (listed["personas.[]"], listed["personas.0"]) == ("2", "Ann_01")
+        refused = await ann.request(FESL, "acct", persona("NuLoginPersona", "Ann_01"))
+        assert refused["errorCode"] == "164"
+        taken = await bob.request(FESL, "acct", persona("NuAddPersona", "ANN_01"))
+        assert taken["errorCode"] == "164"
+        assert "lkey" in await ann.request(FESL, "acct", persona("NuLoginPersona", "Ann_02"))
+
+        # A name its player gave up stays taken, and the admin can keep it from play as well.
+        await ann.request(FESL, "acct", persona("NuDisablePersona", "Ann_02"))
+        given_up = persona("NuAddPersona", "Ann_02")
+        assert (await bob.request(FESL, "acct", given_up))["errorCode"] == "160"
+        await cli(capsys, "personas", "state", "Ann_02", "disabled")
+        assert (await bob.request(FESL, "acct", given_up))["errorCode"] == "164"
+
+        await cli(capsys, "personas", "state", "Ann_01", "active")
+        assert "lkey" in await ann.request(FESL, "acct", persona("NuLoginPersona", "Ann_01"))
+
+    for name in ("Nobody", "bfbc2.server.p"):
+        with pytest.raises(SystemExit, match="No player's persona"):
+            await cli(capsys, "personas", "state", name, "disabled")
