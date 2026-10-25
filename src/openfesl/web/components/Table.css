@@ -214,4 +214,14 @@
       text-transform: uppercase;
     }
   }
+
+  /* A column's head that is not a link but says the rows are sorted by it. */
+  .column-sorted {
+    gap: 6px;
+
+    svg {
+      flex: none;
+      color: var(--accent);
+    }
+  }
 }

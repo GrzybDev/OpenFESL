@@ -72,6 +72,10 @@ class Players:
         """
         return self._sessions.get(account_id)
 
+    def logged_in(self) -> int:
+        """Return how many accounts are logged in now, in any game."""
+        return len(self._sessions)
+
     def log_out(self, session: GameSession) -> None:
         """Forget a session's login, unless the account has moved to another session.
 

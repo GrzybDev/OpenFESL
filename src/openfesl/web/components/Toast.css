@@ -1,0 +1,98 @@
+/* M11: a toast slides in from the bottom right, and a leaving one fades out. */
+@layer components {
+  .toasts {
+    position: fixed;
+    right: var(--gutter);
+    bottom: 24px;
+    z-index: 20;
+    display: grid;
+    gap: 8px;
+    width: min(460px, calc(100vw - 2 * var(--gutter)));
+  }
+
+  .toast {
+    display: flex;
+    align-items: stretch;
+    background: var(--ink);
+    color: var(--bright);
+    box-shadow: 0 14px 34px rgb(0 0 0 / 0.55);
+    animation: toast-in 200ms var(--ease-menu) both;
+    transition: opacity 200ms var(--ease-menu);
+
+    &.leaving {
+      opacity: 0;
+    }
+  }
+
+  .toast-icon {
+    display: grid;
+    flex: 0 0 56px;
+    place-items: center;
+    background: var(--accent);
+
+    .toast-error & {
+      background: var(--row-light);
+    }
+  }
+
+  .toast-body {
+    flex: 1;
+    min-width: 0;
+    padding: 11px 12px 11px 14px;
+  }
+
+  .toast-label {
+    display: block;
+    color: var(--soft);
+    font-size: 13px;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .toast-text {
+    display: block;
+    margin-top: 3px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.35;
+    font-weight: 600;
+  }
+
+  .toast-dismiss {
+    display: grid;
+    flex: 0 0 44px;
+    align-self: center;
+    height: 44px;
+    margin-right: 4px;
+    place-items: center;
+
+    span {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      background: var(--bar-dark);
+      transition: background-color 120ms var(--ease-menu);
+    }
+
+    &:hover span {
+      background: var(--menu-current);
+    }
+  }
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translate(24px, 12px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toast {
+      animation: fade-in 100ms linear both;
+      transition-duration: 100ms;
+    }
+  }
+}

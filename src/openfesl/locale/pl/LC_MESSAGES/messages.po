@@ -2193,7 +2193,6 @@ msgstr "Start"
 msgid "web.admin.home.subtitle"
 msgstr "Do decyzji"
 
-
 msgid "web.admin.home.hosting.one"
 msgstr "%(count)s serwer prowadzi grę"
 
@@ -2226,3 +2225,141 @@ msgstr "Każdy nowy serwer czeka na zatwierdzenie w panelu. Do tego czasu nie ma
 
 msgid "web.admin.mode.open"
 msgstr "Każdy serwer od razu wystawia swoją grę. Serwery są nadal zapisywane wraz z dostawcami, więc późniejsza zmiana trybu zachowuje ich historię."
+
+msgid "games.bfbc2.short"
+msgstr "Bad Company 2"
+
+msgid "web.admin.servers"
+msgstr "Serwery"
+
+msgid "web.admin.waiting"
+msgstr "Czekają na zatwierdzenie"
+
+msgid "web.admin.waiting.status"
+msgstr "Czeka"
+
+msgid "web.admin.waiting.status.unknown"
+msgstr "Czeka, nieznany dostawca"
+
+msgid "web.admin.waiting.count"
+msgstr "Czekające serwery: %(count)s"
+
+msgid "web.admin.waiting.note"
+msgstr "Najnowsze na górze · zatwierdzenie serwera nieznanego dostawcy wymaga potwierdzenia"
+
+msgid "web.admin.provider"
+msgstr "Dostawca"
+
+msgid "web.admin.provider_id"
+msgstr "Identyfikator dostawcy"
+
+msgid "web.admin.unknown_provider"
+msgstr "Nieznany dostawca"
+
+msgid "web.admin.tried"
+msgstr "Próba uruchomienia"
+
+msgid "web.admin.tried.none"
+msgstr "Teraz nie prowadzi gry"
+
+msgid "web.admin.seen"
+msgstr "Pierwsza próba"
+
+msgid "web.admin.decision"
+msgstr "Decyzja"
+
+msgid "web.admin.attempts"
+msgstr "Próby w ostatniej godzinie"
+
+msgid "web.admin.approve"
+msgstr "Zatwierdź"
+
+msgid "web.admin.approve.of"
+msgstr "Zatwierdź %(name)s"
+
+msgid "web.admin.approve.confirmed"
+msgstr "Zatwierdź %(name)s, z potwierdzeniem"
+
+msgid "web.admin.cancel"
+msgstr "Anuluj"
+
+msgid "web.admin.confirm.approve"
+msgstr "Zatwierdzić ten serwer?"
+
+msgid "web.admin.confirm.approve.known"
+msgstr "Zatwierdzenie wystawia grę serwera na liście serwerów, a przesyłane przez niego statystyki są od tej chwili zapisywane. Zatwierdzenie można później cofnąć."
+
+msgid "web.admin.confirm.approve.unknown"
+msgstr "Identyfikator dostawcy nie pasuje do żadnego dostawcy na tym serwerze. Zatwierdzenie wystawia grę serwera na liście serwerów, a przesyłane przez niego statystyki są od tej chwili zapisywane. Zatwierdzenie można później cofnąć."
+
+msgid "web.admin.warnings"
+msgstr "Ostrzeżenia"
+
+msgid "web.admin.warning.refused.one"
+msgstr "Zatwierdzenie cofnięte · dziś odrzucono %(count)s raz"
+
+msgid "web.admin.warning.refused.few"
+msgstr "Zatwierdzenie cofnięte · dziś odrzucono %(count)s razy"
+
+msgid "web.admin.warning.refused.many"
+msgstr "Zatwierdzenie cofnięte · dziś odrzucono %(count)s razy"
+
+msgid "web.admin.warning.refused.other"
+msgstr "Zatwierdzenie cofnięte · dziś odrzucono %(count)s razy"
+
+msgid "web.admin.warning.text"
+msgstr "Serwer nadal próbuje prowadzić grę. Jego zatwierdzenie cofnięto, więc każda próba jest odrzucana."
+
+msgid "web.admin.warning.last"
+msgstr "Ostatnia odmowa"
+
+msgid "web.admin.warning.revoked"
+msgstr "Cofnięto"
+
+msgid "web.admin.warning.by"
+msgstr "Cofnięte przez"
+
+msgid "web.admin.command_line"
+msgstr "Wiersz poleceń"
+
+msgid "web.admin.calm.label"
+msgstr "Czekające serwery: %(count)s · Ostrzeżenia: %(count)s"
+
+msgid "web.admin.calm.title"
+msgstr "Nic nie wymaga uwagi."
+
+msgid "web.admin.calm.text"
+msgstr "Nowy serwer pojawia się tutaj przy pierwszej próbie uruchomienia gry. Tutaj są też ostrzeżenia, na przykład o serwerze z cofniętym zatwierdzeniem, który nadal próbuje."
+
+msgid "web.admin.toast.saved"
+msgstr "Zapisano"
+
+msgid "web.admin.toast.error"
+msgstr "Błąd"
+
+msgid "web.admin.toast.dismiss"
+msgstr "Zamknij"
+
+msgid "web.admin.toast.approved"
+msgstr "Zatwierdzono %(name)s."
+
+msgid "web.admin.toast.failed"
+msgstr "Zmiana nie została zapisana. Spróbuj ponownie."
+
+msgid "web.admin.home.sessions.one"
+msgstr "%(count)s sesja"
+
+msgid "web.admin.home.sessions.few"
+msgstr "%(count)s sesje"
+
+msgid "web.admin.home.sessions.many"
+msgstr "%(count)s sesji"
+
+msgid "web.admin.home.sessions.other"
+msgstr "%(count)s sesji"
+
+msgid "web.admin.approve.busy"
+msgstr "Zatwierdzanie…"
+
+msgid "web.admin.close"
+msgstr "Zamknij"

@@ -1,12 +1,13 @@
 @layer components {
   .fact {
     display: flex;
+    flex-wrap: wrap;
     min-height: 40px;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 4px 12px;
     background: var(--row);
-    padding-inline: 14px;
+    padding: 6px 14px;
 
     &:nth-child(even) {
       background: var(--row-alt);
@@ -26,5 +27,20 @@
       text-transform: uppercase;
       font-variant-numeric: tabular-nums;
     }
+
+    .fact-plain {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+  }
+
+  /* A list of facts under a panel's part. */
+  .facts {
+    display: grid;
+    gap: 2px;
+    margin-top: 2px;
+    color: var(--ink);
   }
 }

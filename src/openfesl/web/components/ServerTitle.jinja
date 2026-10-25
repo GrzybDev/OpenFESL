@@ -1,0 +1,6 @@
+{#def name: str, game = None #}
+{# A dedicated server's name as the heading of a warning or a decision, with its game's chip. #}
+<p class="server-title">
+  <span>{{ name }}</span>
+  {% if game %}<GameChip :of="game" />{% endif %}
+</p>

@@ -14,7 +14,7 @@ from joserfc.errors import JoseError
 
 from openfesl.core.admins import Admin, GroupRoles, Role
 from openfesl.core.texts import localize
-from openfesl.web.pages import Pages, Viewer
+from openfesl.web.pages import Pages, Toast, Viewer
 from openfesl.web.security import HEADERS
 
 logger = logging.getLogger(__name__)
@@ -166,10 +166,23 @@ class AdminSessions:
         token = request.session.setdefault("csrf", secrets.token_urlsafe(32))
         viewer = None
         if admin is not None:
-            viewer = Viewer(admin, self.provider.name if self.provider else "")
+            shown = request.session.pop("toast", None)
+            toast = Toast(shown["key"], shown["values"], shown["error"]) if shown else None
+            viewer = Viewer(admin, self.provider.name if self.provider else "", toast)
         return self._pages.render(
             request, template, status, steel=True, viewer=viewer, csrf=token, **context
         )
+
+    def toast(self, request: Request, key: str, error: bool = False, **values: str) -> None:
+        """Have the next admin page say what came of a change.
+
+        Args:
+            request: The change's request.
+            key: The text in the catalogues.
+            error: Whether the change failed.
+            values: The text's placeholders.
+        """
+        request.session["toast"] = {"key": key, "values": values, "error": error}
 
     def routes(self) -> APIRouter:
         """Return the sign-in and sign-out pages."""

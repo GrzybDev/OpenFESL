@@ -1,9 +1,10 @@
-/* The admin panel's home: the instance's numbers beside the title, and what needs a decision. */
+/* The admin panel's home: the instance's numbers beside the title, the servers waiting for a
+   decision, the warnings and the hosting mode. */
 @layer pages {
   .home-numbers {
     min-width: 0;
     flex: 0 1 auto;
-    margin-bottom: 14px;
+    margin: 0 0 14px auto;
     text-align: right;
 
     > p:first-child {
@@ -23,6 +24,26 @@
     }
   }
 
+  .home-columns {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .home-decisions {
+    min-width: 0;
+    flex: 999 1 820px;
+    container-type: inline-size;
+  }
+
+  .home-side {
+    display: grid;
+    min-width: 0;
+    flex: 1 1 320px;
+    gap: 14px;
+  }
+
   .home-mode-name {
     margin-bottom: 6px;
     font-size: 17px;
@@ -30,5 +51,159 @@
     font-weight: 800;
     letter-spacing: 0.05em;
     text-transform: uppercase;
+  }
+
+  .waiting {
+    min-width: 820px;
+  }
+
+  .waiting-columns {
+    display: grid;
+    grid-template-columns: 64px minmax(170px, 1fr) minmax(170px, 0.9fr) 140px 116px 150px;
+    gap: 2px;
+  }
+
+  /* Where the table does not fit, each server is a block of its own with the decision across its
+     foot, and the column names are left to screen readers. */
+  @container (width < 820px) {
+    .waiting {
+      min-width: 0;
+    }
+
+    .waiting-head {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .waiting-row {
+      grid-template-columns: 64px minmax(0, 1fr) auto;
+      grid-template-areas:
+        "status name name"
+        "provider provider provider"
+        "tried tried seen"
+        "decide decide decide";
+    }
+
+    .waiting-status {
+      grid-area: status;
+    }
+
+    .waiting-name {
+      grid-area: name;
+    }
+
+    .waiting-row > .waiting-provider {
+      grid-area: provider;
+    }
+
+    .waiting-row > .waiting-tried {
+      grid-area: tried;
+    }
+
+    .waiting-row > .waiting-seen {
+      grid-area: seen;
+    }
+
+    .waiting-decide {
+      grid-area: decide;
+    }
+  }
+
+  .waiting-row {
+    --cell: var(--row);
+    color: var(--ink);
+
+    &:nth-child(even) {
+      --cell: var(--row-alt);
+    }
+
+    &:hover {
+      --cell: var(--row-light);
+    }
+
+    > * {
+      display: flex;
+      min-height: 44px;
+      align-items: center;
+      background: var(--cell);
+      transition: background-color 120ms var(--ease-menu);
+    }
+  }
+
+  .waiting-status {
+    gap: 4px;
+    padding-inline: 6px;
+  }
+
+  .waiting-name {
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    padding-inline: 12px;
+  }
+
+  .waiting-row > .waiting-stack {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 3px;
+    padding: 6px 10px;
+  }
+
+  .waiting-tried {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .waiting-seen {
+    > :first-child {
+      font-size: 15px;
+      line-height: 1;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    > :last-child {
+      font-family: var(--font-sans);
+      font-size: 13px;
+      line-height: 1.2;
+      font-weight: 500;
+    }
+  }
+
+  .waiting-decide {
+    padding: 4px 5px;
+
+    > *,
+    .small-action {
+      flex: 1;
+      width: 100%;
+    }
+  }
+
+  .warning {
+    margin-top: 2px;
+    background: var(--row-light);
+    padding: 12px 14px 14px;
+    color: var(--ink);
+
+    .server-title {
+      margin-top: 10px;
+    }
+
+    .body-text {
+      margin-top: 6px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .waiting-row > * {
+      transition-duration: 100ms;
+    }
   }
 }

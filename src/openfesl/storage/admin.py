@@ -1,8 +1,31 @@
+from typing import Any
+
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.admin import AdminAction, LoggedAction
+from openfesl.core.admins import Admin
 from openfesl.storage.models import AdminActionRow
+
+
+def action_row(
+    action: AdminAction, target: str, details: dict[str, Any], admin: Admin | None
+) -> AdminActionRow:
+    """Return the log's row of an action, for a store to add with the change it records.
+
+    Args:
+        action: What the admin did.
+        target: What it was done to.
+        details: What changed, as the action defines.
+        admin: The admin who did it; None for the command line.
+    """
+    return AdminActionRow(
+        admin=admin.subject if admin else None,
+        admin_name=admin.name if admin else None,
+        action=action,
+        target=target,
+        details=details,
+    )
 
 
 class SqlAdminLog:

@@ -11,15 +11,6 @@
     gap: 2px;
   }
 
-  .column-sorted {
-    gap: 6px;
-
-    svg {
-      flex: none;
-      color: var(--accent);
-    }
-  }
-
   .tag-columns .tag-taken {
     justify-content: flex-start;
     font-size: 14px;

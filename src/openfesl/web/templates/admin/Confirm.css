@@ -1,0 +1,163 @@
+/* A decision's confirmation, drawn as the black-headed panels of the game's dialogs, as a page
+   of its own or as a dialog over the page the decision was made on (M10). */
+@layer pages {
+  .confirm-frame {
+    max-width: 546px;
+  }
+
+  .confirm {
+    max-width: 520px;
+    color: var(--bright);
+
+    .fact dd {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      width: 22px;
+      height: 22px;
+    }
+
+    .provider-id {
+      max-width: none;
+    }
+
+    .body-text {
+      margin-top: 12px;
+      line-height: 1.45;
+    }
+  }
+
+  .confirm-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 44px;
+    background: var(--ink);
+    padding-left: 14px;
+
+    h2 {
+      padding-block: 14px;
+      font-size: 16px;
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+  }
+
+  /* Only a dialog closes; the page's own way back is its cancel button. */
+  .confirm-close {
+    display: none;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    margin-right: 4px;
+    place-items: center;
+
+    span {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      background: var(--bar-dark);
+    }
+
+    .dialog & {
+      display: grid;
+    }
+  }
+
+  .confirm-body {
+    margin-top: 2px;
+    background: var(--row-light);
+    padding: 14px;
+    color: var(--ink);
+
+    .facts {
+      margin-top: 12px;
+    }
+  }
+
+  .confirm-number {
+    font-size: 16px;
+  }
+
+  .confirm-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px;
+    margin-top: 2px;
+
+    form {
+      display: grid;
+    }
+
+    .small-action {
+      justify-content: center;
+      border: 0;
+    }
+  }
+
+  /* M10: the panel scales from .96 and fades in over a fading backdrop; closing reverses. */
+  .dialog {
+    width: min(520px, calc(100vw - 2 * var(--gutter)));
+    max-width: none;
+    max-height: calc(100dvh - 32px);
+    margin: auto;
+    overflow: auto;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    box-shadow: 0 20px 50px rgb(0 0 0 / 0.6);
+    animation: dialog-in 160ms var(--ease-menu) both;
+
+    &::backdrop {
+      background: rgb(0 0 0 / 0.55);
+      animation: fade-in 160ms var(--ease-menu) both;
+    }
+
+    &.closing {
+      animation: dialog-out 120ms var(--ease-menu) both;
+
+      &::backdrop {
+        animation: fade-out 120ms var(--ease-menu) both;
+      }
+    }
+  }
+
+  @keyframes dialog-in {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+  }
+
+  @keyframes dialog-out {
+    to {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+  }
+
+  @keyframes fade-out {
+    to {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dialog,
+    .dialog::backdrop {
+      animation: fade-in 100ms linear both;
+    }
+
+    .dialog.closing,
+    .dialog.closing::backdrop {
+      animation: fade-out 100ms linear both;
+    }
+  }
+}

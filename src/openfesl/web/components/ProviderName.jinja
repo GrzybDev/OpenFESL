@@ -1,0 +1,9 @@
+{#def server #}
+{# The provider a dedicated server reports: its name, or for one the admin does not know, that it
+   is unknown and its id. #}
+{% if server.provider %}
+  <span class="provider-name">{{ server.provider.name }}</span>
+{% else %}
+  <span class="provider-name">{{ _("web.admin.unknown_provider") }}</span>
+  {% if server.provider_id %}<ProviderId :id="server.provider_id" />{% endif %}
+{% endif %}

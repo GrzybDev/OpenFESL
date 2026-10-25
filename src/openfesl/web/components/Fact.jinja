@@ -1,9 +1,9 @@
-{#def label: str #}
+{#def label: str, plain: bool = False #}
 {# A line of a black-on-light list of facts, such as a server's status, with the content as its
-   value; every other line is shaded. #}
+   value; every other line is shaded. A plain value, such as a name, keeps its case. #}
 <div class="fact">
   <dt>{{ label }}</dt>
-  <dd>
+  <dd{% if plain %} class="fact-plain"{% endif %}>
     {{ content }}
   </dd>
 </div>

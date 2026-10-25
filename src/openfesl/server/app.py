@@ -65,6 +65,7 @@ from openfesl.web.admin.auth import (
     SignInProvider,
 )
 from openfesl.web.admin.home import home_routes
+from openfesl.web.admin.servers import ServerViews, decision_routes
 from openfesl.web.front import front_routes
 from openfesl.web.game_http import GameHttpMiddleware
 from openfesl.web.host import host_routes
@@ -207,7 +208,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(verification_routes(confirm, pages))
     sign_in = AdminSessions(pages, _sign_in_provider(settings), settings.public_url)
     app.include_router(sign_in.routes())
-    app.include_router(home_routes(sign_in, games, census, SqlAccountStore(sessions), approval))
+    server_views = ServerViews(games, census, approval, SqlServerStore(sessions))
+    app.include_router(
+        home_routes(sign_in, games, census, players, SqlAccountStore(sessions), server_views)
+    )
+    app.include_router(decision_routes(sign_in, server_views))
     app.add_exception_handler(SignInNeeded, sign_in.sign_in_needed)
     app.add_exception_handler(FormExpired, sign_in.form_expired)
     app.add_exception_handler(NeedsRole, sign_in.needs_role)

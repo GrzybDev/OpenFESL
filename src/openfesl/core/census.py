@@ -200,6 +200,18 @@ class Census:
                     found[player.persona.id] = server
         return found
 
+    def hosted_by(self, game: Game, ugid: str) -> Server | None:
+        """Return the game a dedicated server hosts now, also while players do not see it.
+
+        Args:
+            game: The game the server runs.
+            ugid: The server's persistent game id.
+        """
+        for hosted in self._hosting.every():
+            if hosted.ugid == ugid and hosted.type == GAME and hosted.host.game is game:
+                return self._server(game, hosted, set())
+        return None
+
     def _remember(self, hosted: HostedGame) -> None:
         if hosted.type != GAME or not hosted.listed:
             return

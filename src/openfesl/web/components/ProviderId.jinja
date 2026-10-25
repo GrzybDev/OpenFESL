@@ -1,0 +1,4 @@
+{#def id: bytes #}
+{# A provider's id in hex, in groups of eight as an operator reads it out. #}
+{% set hex = id.hex().upper() %}
+<code class="provider-id">{{ [hex[0:8], hex[8:16], hex[16:24], hex[24:32]]|join(" ") }}</code>

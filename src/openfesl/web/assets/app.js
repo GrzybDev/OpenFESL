@@ -12,24 +12,56 @@ import "./base.css";
 import "./styles.js";
 import "htmx.org";
 
-// M8: a chevron block whose page takes longer than 300 ms to arrive shows that it is loading.
+// M8: a chevron block whose page takes longer than 300 ms to arrive shows that it is loading, and
+// a button that sends a form says what it does meanwhile, such as APPROVING….
 document.addEventListener("click", (event) => {
   const block = event.target instanceof Element ? event.target.closest("a.chevron") : null;
   const plain =
     event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
-  if (!block || !plain || event.defaultPrevented || block.target) {
-    return;
+  if (
+    block &&
+    plain &&
+    !event.defaultPrevented &&
+    !block.target &&
+    !block.hasAttribute("data-dialog")
+  ) {
+    showBusy(block);
   }
-  const timer = setTimeout(() => block.setAttribute("aria-busy", "true"), 300);
+});
+
+document.addEventListener("submit", (event) => {
+  if (!event.defaultPrevented && event.submitter?.matches(".chevron")) {
+    showBusy(event.submitter);
+  }
+});
+
+/**
+ * Marks a chevron block as loading once its page takes longer than 300 ms to arrive.
+ *
+ * @param {HTMLElement} block - The link or button that was used.
+ */
+function showBusy(block) {
+  const label = block.querySelector("[data-label]");
+  const rest = label?.textContent;
+  const timer = setTimeout(() => {
+    block.setAttribute("aria-busy", "true");
+    if (label && block.dataset.busy) {
+      label.textContent = block.dataset.busy;
+    }
+  }, 300);
+  // A page restored from the back-forward cache shows the block as it was.
   addEventListener(
     "pagehide",
     () => {
       clearTimeout(timer);
       block.removeAttribute("aria-busy");
+      if (label) {
+        label.textContent = rest;
+      }
     },
     { once: true },
   );
-});
+}
 
 // On phones a form's further options start folded, unless the reader chose one of them.
 document.addEventListener("DOMContentLoaded", () => {
@@ -238,6 +270,31 @@ function announce(message) {
   }
 }
 
+// M11: a toast that says a change was saved leaves after 4 s; one that says it failed stays until
+// dismissed.
+document.addEventListener("DOMContentLoaded", () => {
+  for (const toast of document.querySelectorAll(".toast[data-leaves]")) {
+    setTimeout(() => leave(toast), 4000);
+  }
+});
+
+document.addEventListener("click", (event) => {
+  const button = event.target instanceof Element ? event.target.closest("[data-dismiss]") : null;
+  if (button) {
+    leave(button.closest(".toast"));
+  }
+});
+
+/**
+ * Fades a toast out and removes it.
+ *
+ * @param {Element} toast - The toast.
+ */
+function leave(toast) {
+  toast.classList.add("leaving");
+  setTimeout(() => toast.remove(), reducedMotion.matches ? 100 : 200);
+}
+
 // M4: a row's details button opens its details in place; without scripts it is a link that
 // opens them with the page.
 document.addEventListener("click", (event) => {
@@ -276,4 +333,92 @@ function toggleDetails(button) {
   const open = !row.hasAttribute("data-open");
   row.toggleAttribute("data-open", open);
   button.setAttribute("aria-expanded", String(open));
+}
+
+// M10: a decision that asks for confirmation opens its confirmation page's panel as a dialog
+// over the page it was made on; without scripts, or when the page does not come, the link
+// opens the confirmation page itself.
+document.addEventListener("click", async (event) => {
+  const link = event.target instanceof Element ? event.target.closest("a[data-dialog]") : null;
+  if (
+    !link ||
+    event.button !== 0 ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey
+  ) {
+    return;
+  }
+  event.preventDefault();
+  const timer = setTimeout(() => link.setAttribute("aria-busy", "true"), 300);
+  const panel = await confirmation(link.href);
+  clearTimeout(timer);
+  link.removeAttribute("aria-busy");
+  if (!panel) {
+    location.assign(link.href);
+    return;
+  }
+  const dialog = document.createElement("dialog");
+  dialog.className = "dialog";
+  dialog.setAttribute("aria-labelledby", panel.getAttribute("aria-labelledby"));
+  dialog.setAttribute("aria-describedby", panel.getAttribute("aria-describedby"));
+  panel.removeAttribute("aria-labelledby");
+  panel.removeAttribute("aria-describedby");
+  dialog.append(panel);
+  // The dialog takes the colours of the area the link is in.
+  (link.closest(".area") ?? document.body).append(dialog);
+  dialog.addEventListener("close", () => {
+    dialog.remove();
+    link.focus();
+  });
+  dialog.addEventListener("cancel", (cancelled) => {
+    cancelled.preventDefault();
+    closeDialog(dialog);
+  });
+  dialog.showModal();
+  dialog.querySelector(".confirm-buttons a")?.focus();
+});
+
+document.addEventListener("click", (event) => {
+  const dialog = event.target instanceof Element ? event.target.closest("dialog.dialog") : null;
+  if (
+    dialog &&
+    event.target.closest("[data-close], .confirm-buttons a") &&
+    !event.metaKey &&
+    !event.ctrlKey
+  ) {
+    event.preventDefault();
+    closeDialog(dialog);
+  }
+});
+
+/**
+ * Fetches a confirmation page and returns its panel, or nothing when the page does not come.
+ *
+ * @param {string} address - The confirmation page's address.
+ * @returns {Promise<Element | null>} The panel, ready to be put on this page.
+ */
+async function confirmation(address) {
+  try {
+    const response = await fetch(address, { headers: { Accept: "text/html" } });
+    if (!response.ok) {
+      return null;
+    }
+    const page = new DOMParser().parseFromString(await response.text(), "text/html");
+    const panel = page.querySelector("[data-confirm]");
+    return panel ? document.importNode(panel, true) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Plays a dialog's closing and closes it.
+ *
+ * @param {HTMLDialogElement} dialog - The dialog.
+ */
+function closeDialog(dialog) {
+  dialog.classList.add("closing");
+  setTimeout(() => dialog.close(), reducedMotion.matches ? 100 : 120);
 }

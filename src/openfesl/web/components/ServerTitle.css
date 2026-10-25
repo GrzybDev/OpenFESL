@@ -1,0 +1,12 @@
+@layer components {
+  .server-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    font-family: var(--font-sans);
+    font-size: 21px;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+}

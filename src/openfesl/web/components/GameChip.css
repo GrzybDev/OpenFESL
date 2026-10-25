@@ -1,0 +1,14 @@
+@layer components {
+  .game-chip {
+    background: var(--accent);
+    padding: 2px 5px;
+    font-family: var(--area-font);
+    font-size: 11px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+}

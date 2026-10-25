@@ -2166,7 +2166,6 @@ msgstr "Home"
 msgid "web.admin.home.subtitle"
 msgstr "Needs a decision"
 
-
 msgid "web.admin.home.hosting.one"
 msgstr "%(count)s server hosting"
 
@@ -2187,3 +2186,129 @@ msgstr "Every new server waits for an admin's approval. Until then it is hidden 
 
 msgid "web.admin.mode.open"
 msgstr "Every server lists its game at once. Servers are still recorded with their providers, so changing the mode later keeps their history."
+
+msgid "games.bfbc2.short"
+msgstr "Bad Company 2"
+
+msgid "web.admin.servers"
+msgstr "Servers"
+
+msgid "web.admin.waiting"
+msgstr "Waiting for approval"
+
+msgid "web.admin.waiting.status"
+msgstr "Waiting"
+
+msgid "web.admin.waiting.status.unknown"
+msgstr "Waiting, unknown provider"
+
+msgid "web.admin.waiting.count"
+msgstr "Servers waiting: %(count)s"
+
+msgid "web.admin.waiting.note"
+msgstr "Newest first · approving a server of an unknown provider asks for confirmation"
+
+msgid "web.admin.provider"
+msgstr "Provider"
+
+msgid "web.admin.provider_id"
+msgstr "Provider id"
+
+msgid "web.admin.unknown_provider"
+msgstr "Unknown provider"
+
+msgid "web.admin.tried"
+msgstr "Tried to host"
+
+msgid "web.admin.tried.none"
+msgstr "Not hosting now"
+
+msgid "web.admin.seen"
+msgstr "First seen"
+
+msgid "web.admin.decision"
+msgstr "Decision"
+
+msgid "web.admin.attempts"
+msgstr "Attempts in the last hour"
+
+msgid "web.admin.approve"
+msgstr "Approve"
+
+msgid "web.admin.approve.of"
+msgstr "Approve %(name)s"
+
+msgid "web.admin.approve.confirmed"
+msgstr "Approve %(name)s, asks for confirmation"
+
+msgid "web.admin.cancel"
+msgstr "Cancel"
+
+msgid "web.admin.confirm.approve"
+msgstr "Approve this server?"
+
+msgid "web.admin.confirm.approve.known"
+msgstr "Approving lists the server's game in the server list, and the statistics it sends are recorded from then on. The approval can be revoked later."
+
+msgid "web.admin.confirm.approve.unknown"
+msgstr "The provider id matches no provider on this instance. Approving lists the server's game in the server list, and the statistics it sends are recorded from then on. The approval can be revoked later."
+
+msgid "web.admin.warnings"
+msgstr "Warnings"
+
+msgid "web.admin.warning.refused.one"
+msgstr "Revoked · refused %(count)s time today"
+
+msgid "web.admin.warning.refused.other"
+msgstr "Revoked · refused %(count)s times today"
+
+msgid "web.admin.warning.text"
+msgstr "It keeps trying to host. Its approval is revoked, so every attempt is refused."
+
+msgid "web.admin.warning.last"
+msgstr "Last refused"
+
+msgid "web.admin.warning.revoked"
+msgstr "Revoked"
+
+msgid "web.admin.warning.by"
+msgstr "Revoked by"
+
+msgid "web.admin.command_line"
+msgstr "The command line"
+
+msgid "web.admin.calm.label"
+msgstr "Servers waiting: %(count)s · Warnings: %(count)s"
+
+msgid "web.admin.calm.title"
+msgstr "Nothing needs attention."
+
+msgid "web.admin.calm.text"
+msgstr "A new server appears here when it first tries to host. Warnings appear here too, such as a revoked server that keeps trying."
+
+msgid "web.admin.toast.saved"
+msgstr "Saved"
+
+msgid "web.admin.toast.error"
+msgstr "Error"
+
+msgid "web.admin.toast.dismiss"
+msgstr "Dismiss"
+
+msgid "web.admin.toast.approved"
+msgstr "Approved %(name)s."
+
+msgid "web.admin.toast.failed"
+msgstr "The change was not saved. Try again."
+
+msgid "web.admin.home.sessions.one"
+msgstr "%(count)s session"
+
+msgid "web.admin.home.sessions.other"
+msgstr "%(count)s sessions"
+
+msgid "web.admin.approve.busy"
+msgstr "Approving…"
+
+msgid "web.admin.close"
+msgstr "Close"

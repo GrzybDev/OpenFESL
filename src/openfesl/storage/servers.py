@@ -4,8 +4,11 @@ from sqlalchemy import ColumnElement, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from openfesl.core.servers import GameServer, HostingMode, Provider, ServerState
-from openfesl.storage.models import GameServerRow, ProviderRow, SettingRow
+from openfesl.core.admin import AdminAction
+from openfesl.core.admins import Admin
+from openfesl.core.servers import Decision, GameServer, HostingMode, Provider, ServerState
+from openfesl.storage.admin import action_row
+from openfesl.storage.models import AdminActionRow, GameServerRow, ProviderRow, SettingRow
 
 HOSTING_MODE = "hosting_mode"
 
@@ -122,12 +125,13 @@ class SqlServerStore:
         found = await self.find([ugid])
         return found[0] if found else None
 
-    async def set_state(self, ugid: str, state: ServerState) -> bool:
-        """Approve or revoke a server.
+    async def set_state(self, ugid: str, state: ServerState, admin: Admin | None) -> bool:
+        """Approve or revoke a server, recording the decision among the admin's actions.
 
         Args:
             ugid: The server's persistent game id.
             state: The admin's decision.
+            admin: The admin who decided; None for the command line.
 
         Returns:
             Whether a server has that id.
@@ -139,7 +143,31 @@ class SqlServerStore:
                 .values(state=state.value)
                 .returning(GameServerRow.ugid)
             )
+            if changed is not None:
+                details = {"state": state.value}
+                session.add(action_row(AdminAction.SERVER_STATE, ugid, details, admin))
         return changed is not None
+
+    async def decisions(self, ugids: Collection[str]) -> dict[str, Decision]:
+        """Return the admin's latest decision about each of some servers that has one.
+
+        Args:
+            ugids: The servers' persistent game ids.
+        """
+        statement = (
+            select(AdminActionRow)
+            .where(
+                AdminActionRow.action == AdminAction.SERVER_STATE.value,
+                AdminActionRow.target.in_(list(ugids)),
+            )
+            .order_by(AdminActionRow.id)
+        )
+        async with self._sessions() as session:
+            rows = await session.scalars(statement)
+            return {
+                row.target: Decision(ServerState(row.details["state"]), row.at, row.admin_name)
+                for row in rows
+            }
 
     async def all(self) -> list[GameServer]:
         """Return every server that ever hosted, oldest first."""
@@ -169,4 +197,5 @@ def _server(row: GameServerRow, provider: ProviderRow | None) -> GameServer:
         state=ServerState(row.state),
         provider_id=row.provider_id,
         provider=_provider(provider) if provider else None,
+        first_seen=row.created_at,
     )

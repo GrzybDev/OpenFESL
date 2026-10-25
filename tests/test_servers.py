@@ -5,14 +5,15 @@ from pathlib import Path
 import anyio
 import pytest
 from support import (
-    CREATE_GAME,
     Game,
     TheaterAnswer,
     cli,
+    connect_server,
+    create,
     enter_as_player,
-    enter_theater,
     game,
-    log_in_server,
+    masked,
+    report,
 )
 
 from openfesl.core import hosting
@@ -28,31 +29,6 @@ THEATER = ConnectionKey(Channel.THEATER, 1)
 def prompt_decisions(monkeypatch: pytest.MonkeyPatch) -> None:
     # The admin decides in another process; the server reads the decisions back this often.
     monkeypatch.setattr(hosting, "APPROVAL_CHECK_INTERVAL", 0.05)
-
-
-async def connect(server: Game) -> None:
-    await enter_theater(server, THEATER, "bfbc2-pc-server", await log_in_server(server, FESL))
-
-
-async def create(
-    server: Game, ugid: str = "", secret: str = "", name: str = "Invented Server #1"
-) -> TheaterAnswer:
-    """List the server's game with the identity it keeps in its serverid.dat, if any."""
-    sent = {**dict(CREATE_GAME), "UGID": ugid, "SECRET": secret, "NAME": name}
-    return await server.theater(THEATER, "CGAM", list(sent.items()))
-
-
-async def report(server: Game, created: TheaterAnswer, *attributes: tuple[str, str]) -> None:
-    """Send a UGAM, then wait for the answer to a request behind it on the same connection."""
-    ids = [("LID", created.fields["LID"]), ("GID", created.fields["GID"])]
-    await server.send_theater(THEATER, "UGAM", [*ids, *attributes, ("TID", "0")])
-    assert (await server.theater(THEATER, "UBRA", [*ids, ("START", "0")])).error is None
-
-
-def masked(provider_id: bytes, mask: bytes) -> str:
-    """Return a provider attribute as a server sends it: the id XORed with a mask, the mask."""
-    data = bytes(byte ^ mask[index % 8] for index, byte in enumerate(provider_id)) + mask
-    return data.hex().upper()
 
 
 async def providers_shown(looker: Game, created: TheaterAnswer) -> list[str]:
@@ -79,7 +55,7 @@ async def test_a_server_keeps_the_identity_it_is_issued_and_proves_it_with_its_s
     server_url: str, capsys: pytest.CaptureFixture[str]
 ) -> None:
     async with game(server_url) as first, game(server_url) as twin:
-        await connect(first)
+        await connect_server(first)
         issued = await create(first)
         assert issued.error is None
         ugid, secret = issued.fields["UGID"], issued.fields["SECRET"]
@@ -87,12 +63,12 @@ async def test_a_server_keeps_the_identity_it_is_issued_and_proves_it_with_its_s
         # What the server's serverid.dat and every hop on the way carry unchanged.
         assert 0 < len(secret) <= 127 and secret.isascii() and secret.isprintable()
         assert not set(' ,%"=') & set(secret)
-        await connect(twin)
+        await connect_server(twin)
         assert (await create(twin, ugid, secret)).error == "bsec"
         assert (await create(twin, ugid, "guessed")).error == "bsec"
 
     async with game(server_url) as restarted:
-        await connect(restarted)
+        await connect_server(restarted)
         # It tries again until the master has seen its first run end, as R34 does.
         with anyio.fail_after(5):
             while (kept := await create(restarted, ugid, secret)).error == "bsec":
@@ -101,7 +77,7 @@ async def test_a_server_keeps_the_identity_it_is_issued_and_proves_it_with_its_s
 
     # Ids the master did not issue, or that no file could hold, are no identity.
     async with game(server_url) as stranger:
-        await connect(stranger)
+        await connect_server(stranger)
         for claimed in (str(uuid.uuid4()), "a\0b"):
             fresh = await create(stranger, claimed, secret)
             assert fresh.error is None
@@ -120,7 +96,7 @@ async def test_players_see_a_new_server_once_approved_and_lose_it_when_revoked(
     assert await cli(capsys, "hosting") == "approved\n"
     async with game(server_url) as server, game(server_url) as ann:
         await enter_as_player(ann, "ann@example.test", "Ann_01")
-        await connect(server)
+        await connect_server(server)
         created = await create(server)
         assert created.error is None
         ugid, secret = created.fields["UGID"], created.fields["SECRET"]
@@ -148,7 +124,7 @@ async def test_players_see_a_new_server_once_approved_and_lose_it_when_revoked(
         assert await cli(capsys, "servers", "list") == f"{ugid}  revoked  -  Invented Server #1\n"
 
     async with game(server_url) as server:
-        await connect(server)
+        await connect_server(server)
         assert (await create(server, ugid, secret)).error == "auth"
     with pytest.raises(SystemExit, match="No server has the id"):
         await cli(capsys, "servers", "approve", str(uuid.uuid4()))
@@ -167,7 +143,7 @@ async def test_servers_report_the_provider_whose_file_they_hold(
     assert out.read_bytes() == file
 
     async with game(server_url) as server:
-        await connect(server)
+        await connect_server(server)
         created = await create(server)
         ugid = created.fields["UGID"]
         listed = f"{ugid}  pending  Invented Hosting  Invented Server #1\n"
@@ -189,7 +165,7 @@ async def test_servers_report_the_provider_whose_file_they_hold(
         await server.theater_push(THEATER, "GREM")
     assert await cli(capsys, "providers", "list") == f"{added}  revoked  Invented Hosting\n"
     async with game(server_url) as newcomer:
-        await connect(newcomer)
+        await connect_server(newcomer)
         created = await create(newcomer)
         assert created.error is None
         ids = [("LID", created.fields["LID"]), ("GID", created.fields["GID"])]
@@ -206,7 +182,7 @@ async def test_open_hosting_lists_every_server_at_once_and_still_records_it(
     assert await cli(capsys, "hosting", "open") == "open\n"
     async with game(server_url) as server, game(server_url) as ann:
         await enter_as_player(ann, "ann@example.test", "Ann_01")
-        await connect(server)
+        await connect_server(server)
         created = await create(server)
         assert created.error is None
         assert await games_seen(ann) == 1

@@ -1,8 +1,9 @@
 {#def title: str, current: str = "" #}
-{# A page of the admin panel in OpenFESL's steel: who is signed in, the panel's menu bar and the
-   page's content. #}
+{# A page of the admin panel in OpenFESL's steel: who is signed in, the panel's menu bar, the
+   page's content and what came of the admin's last change. #}
 <Layout :title="title" admin>
   {% if viewer %}<AdminStatus />{% endif %}
   <AdminMenu :current="current" />
   {{ content }}
+  {% if viewer and viewer.toast %}<Toast />{% endif %}
 </Layout>

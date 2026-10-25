@@ -25,6 +25,9 @@ class AdminAction(StrEnum):
     """Changed the state of the persona numbered as the target; the details hold the state."""
     PLAYER_KICK = "player_kick"
     """Kicked the persona numbered as the target from the games it joins, plays or waits for."""
+    SERVER_STATE = "server_state"
+    """Approved or revoked the dedicated server whose persistent game id is the target; the
+    details hold its new state."""
     KEY_LIMITS = "key_limits"
     """Changed how often the product key named as the target may be redeemed; the details hold
     its most uses, none for any number, and whether an account may redeem it only once."""

@@ -1,5 +1,7 @@
-{#def kind: str, label #}
-{# A value a server publishes, by its name in the catalogues when the game data names it. #}
-{% if label and label.name %}{{ _("games." ~ game.id ~ "." ~ kind ~ "." ~ label.name) }}
+{#def kind: str, label, of = None #}
+{# A value a server publishes, by its name in the catalogues when the game data names it. The
+   game is the page's unless another is named, as on the admin panel's pages. #}
+{% set named = of or game %}
+{% if label and label.name %}{{ _("games." ~ named.id ~ "." ~ kind ~ "." ~ label.name) }}
 {%- elif label %}{{ label.value }}
 {%- else %}<span aria-hidden="true">–</span><span class="sr-only">{{ _("web.server.unpublished") }}</span>{% endif %}

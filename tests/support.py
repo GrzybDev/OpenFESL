@@ -414,3 +414,29 @@ def update_stats(*owners: tuple[str, str, list[Update]]) -> Fields:
             ]
         fields.append((f"u.{number}.s.[]", str(len(updates))))
     return [*fields, ("u.[]", str(len(owners)))]
+
+
+async def connect_server(server: Game) -> None:
+    """Log a dedicated server in to FESL and enter Theater, before it lists a game."""
+    await enter_theater(server, THEATER, "bfbc2-pc-server", await log_in_server(server, FESL))
+
+
+async def create(
+    server: Game, ugid: str = "", secret: str = "", name: str = "Invented Server #1"
+) -> TheaterAnswer:
+    """List the server's game with the identity it keeps in its serverid.dat, if any."""
+    sent = {**dict(CREATE_GAME), "UGID": ugid, "SECRET": secret, "NAME": name}
+    return await server.theater(THEATER, "CGAM", list(sent.items()))
+
+
+async def report(server: Game, created: TheaterAnswer, *attributes: tuple[str, str]) -> None:
+    """Send a UGAM, then wait for the answer to a request behind it on the same connection."""
+    ids = [("LID", created.fields["LID"]), ("GID", created.fields["GID"])]
+    await server.send_theater(THEATER, "UGAM", [*ids, *attributes, ("TID", "0")])
+    assert (await server.theater(THEATER, "UBRA", [*ids, ("START", "0")])).error is None
+
+
+def masked(provider_id: bytes, mask: bytes) -> str:
+    """Return a provider attribute as a server sends it: the id XORed with a mask, the mask."""
+    data = bytes(byte ^ mask[index % 8] for index, byte in enumerate(provider_id)) + mask
+    return data.hex().upper()

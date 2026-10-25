@@ -1,0 +1,68 @@
+{#def view, decision: str, back: str #}
+{# A decision about a dedicated server that asks for confirmation first, as a page of its own:
+   what the server is, what the decision does, and the buttons that cancel or confirm it. Where
+   scripts run, its panel opens as a dialog over the page the decision was made on (M10). #}
+{% set server = view.server %}
+{% set title = _("web.admin.servers") %}
+<AdminPage :title="title" current="servers">
+  <PageHead labelledby="confirm-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="confirm-title">{{ _("web.admin.waiting") }}</TitleBlock>
+    </div>
+  </PageHead>
+  <Panel class="enter-panel confirm-frame">
+    <section aria-labelledby="confirm-question"
+             aria-describedby="confirm-text"
+             data-confirm
+             class="confirm">
+      <div class="confirm-head">
+        <h2 id="confirm-question">{{ _("web.admin.confirm." ~ decision) }}</h2>
+        <button type="button"
+                data-close
+                class="confirm-close"
+                aria-label="{{ _('web.admin.close') }}">
+          <span><Icon name="x" :size="14" stroke="currentColor" /></span>
+        </button>
+      </div>
+      <div class="confirm-body">
+        <ServerTitle :name="server.name" :game="view.game" />
+        <dl class="facts">
+          <Fact :label="_('web.admin.provider')">
+            {% if server.provider %}
+              {{ server.provider.name }}
+            {% else %}
+              <span aria-hidden="true"
+                    class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.unknown_provider") }}
+            {% endif %}
+          </Fact>
+          {% if not server.provider and server.provider_id %}
+            <Fact :label="_('web.admin.provider_id')">
+              <ProviderId :id="server.provider_id" />
+            </Fact>
+          {% endif %}
+          {% if view.hosting %}
+            <Fact :label="_('web.admin.tried')">
+              <Published kind="map" :label="view.hosting.map" :of="view.game" /> · <Published kind="mode" :label="view.hosting.mode" :of="view.game" />
+            </Fact>
+          {% endif %}
+          <Fact :label="_('web.admin.attempts')">
+            <span class="confirm-number">{{ number(view.attempts.last_hour) }}</span>
+          </Fact>
+        </dl>
+        <p id="confirm-text" class="body-text">
+          {{ _("web.admin.confirm." ~ decision ~ (".known" if server.provider else ".unknown")) }}
+        </p>
+      </div>
+      <div class="confirm-buttons">
+        <FormButton icon="x" :href="back">{{ _("web.admin.cancel") }}</FormButton>
+        <form method="post"
+              action="{{ url('/admin/servers/' ~ server.ugid ~ '/' ~ decision) }}">
+          <CsrfField />
+          <input type="hidden" name="confirmed" value="1">
+          <input type="hidden" name="back" value="{{ back }}">
+          <SmallAction :label="_('web.admin.' ~ decision)" :busy="_('web.admin.' ~ decision ~ '.busy')" />
+        </form>
+      </div>
+    </section>
+  </Panel>
+</AdminPage>

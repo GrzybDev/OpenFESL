@@ -1,4 +1,4 @@
-{#def online: int, hosting: int, accounts: int, new_accounts: int, mode: str #}
+{#def online: int, logged_in: int, hosting: int, accounts: int, new_accounts: int, mode: str, waiting: list, warnings: list #}
 {% set title = _("web.admin.home") %}
 <AdminPage :title="title" current="home">
   <div id="live"
@@ -13,18 +13,132 @@
       <div class="home-numbers">
         <p>{{ _n("web.shell.online", online) }} · {{ _n("web.admin.home.hosting", hosting) }}</p>
         <p>
-          {{ _n("web.admin.home.accounts", accounts, new=number(new_accounts)) }} · <Updated inline />
+          {{ _n("web.admin.home.sessions", logged_in) }} · {{ _n("web.admin.home.accounts", accounts, new=number(new_accounts)) }} · <Updated inline />
         </p>
       </div>
     </PageHead>
-    <Panel class="enter-panel home">
-      <section aria-labelledby="home-mode" class="home-mode">
-        <Bar id="home-mode" large>{{ _("web.admin.mode") }}</Bar>
-        <div class="bar-text">
-          <p class="home-mode-name">{{ _("web.host.mode." ~ mode) }}</p>
-          <p class="body-text">{{ _("web.admin.mode." ~ mode) }}</p>
+    <Panel class="enter-panel">
+      <div class="home-columns">
+        <div class="home-decisions">
+          {% if waiting %}
+            <section aria-labelledby="home-waiting">
+              <Bar id="home-waiting" :extra="number(waiting|length)" large>{{ _("web.admin.waiting") }}</Bar>
+              <div class="table-scroll">
+                <div role="table" aria-labelledby="home-waiting" class="table waiting">
+                  <div role="rowgroup" class="waiting-head">
+                    <div role="row" class="waiting-columns">
+                      <div role="columnheader"
+                           class="column-head"><span class="sr-only">{{ _("web.servers.status") }}</span></div>
+                      <div role="columnheader" class="column-head column-name">{{ _("web.servers.name") }}</div>
+                      <div role="columnheader" class="column-head">{{ _("web.admin.provider") }}</div>
+                      <div role="columnheader" class="column-head">{{ _("web.admin.tried") }}</div>
+                      <div role="columnheader"
+                           aria-sort="descending"
+                           class="column-head column-sorted">
+                        {{ _("web.admin.seen") }}<Icon name="down" :size="14" stroke="currentColor" />
+                      </div>
+                      <div role="columnheader"
+                           class="column-head"><span class="sr-only">{{ _("web.admin.decision") }}</span></div>
+                    </div>
+                  </div>
+                  <div role="rowgroup" data-rows class="enter-rows table-rows">
+                    {% for view in waiting %}
+                      {% set server = view.server %}
+                      <div role="row"
+                           data-key="{{ server.ugid }}"
+                           class="waiting-columns waiting-row">
+                        <div role="cell" class="waiting-status">
+                          <span class="sr-only">{{ _("web.admin.waiting.status") if server.provider else _("web.admin.waiting.status.unknown") }}</span>
+                          <span aria-hidden="true"
+                                class="badge"><Icon name="clock" stroke="#0A0A0A" fill="#0A0A0A" /></span>
+                          {% if not server.provider %}
+                            <span aria-hidden="true"
+                                  class="badge"><Icon name="warn" stroke="#0A0A0A" fill="#0A0A0A" /></span>
+                          {% endif %}
+                        </div>
+                        <div role="cell" class="waiting-name">
+                          <span class="server-name">{{ server.name }}</span>
+                          {% if view.game %}<GameChip :of="view.game" />{% endif %}
+                        </div>
+                        <div role="cell" class="waiting-stack waiting-provider">
+                          <ProviderName :server="server" />
+                        </div>
+                        <div role="cell" class="waiting-stack waiting-tried">
+                          {% if view.hosting %}
+                            <span><Published kind="map" :label="view.hosting.map" :of="view.game" /></span>
+                            <span><Published kind="mode" :label="view.hosting.mode" :of="view.game" /></span>
+                          {% else %}
+                            <span aria-hidden="true">–</span><span class="sr-only">{{ _("web.admin.tried.none") }}</span>
+                          {% endif %}
+                        </div>
+                        <div role="cell" class="waiting-stack waiting-seen">
+                          <span>{{ _("web.server.time", time=when(server.first_seen, "Hm")) }}</span>
+                          <span>{{ ago(server.first_seen) }}</span>
+                        </div>
+                        <div role="cell" class="waiting-decide">
+                          {% if server.provider %}
+                            <form method="post"
+                                  action="{{ url('/admin/servers/' ~ server.ugid ~ '/approve') }}">
+                              <CsrfField />
+                              <input type="hidden" name="back" value="{{ here }}">
+                              <SmallAction :label="_('web.admin.approve')" :name="_('web.admin.approve.of', name=server.name)" :busy="_('web.admin.approve.busy')" />
+                            </form>
+                          {% else %}
+                            <SmallAction :href="url('/admin/servers/' ~ server.ugid ~ '/approve') ~ '?back=' ~ here|urlencode" :label="_('web.admin.approve')" :name="_('web.admin.approve.confirmed', name=server.name)" dialog />
+                          {% endif %}
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+              <div class="list-foot">
+                <p>
+                  <span class="list-count">{{ _("web.admin.waiting.count", count=number(waiting|length)) }}</span><span class="list-range">{{ _("web.admin.waiting.note") }}</span>
+                </p>
+              </div>
+            </section>
+          {% elif not warnings %}
+            <Alert :label="_('web.admin.calm.label', count=number(0))" :title="_('web.admin.calm.title')">{{ _("web.admin.calm.text") }}</Alert>
+          {% endif %}
         </div>
-      </section>
+        <div class="home-side">
+          {% if warnings %}
+            <section aria-labelledby="home-warnings">
+              <Bar id="home-warnings" :extra="number(warnings|length)" large>{{ _("web.admin.warnings") }}</Bar>
+              {% for view in warnings %}
+                <div class="warning">
+                  <p class="alert-label">
+                    <span aria-hidden="true" class="alert-glyph"><Icon name="x" stroke="#0A0A0A" /></span>{{ _n("web.admin.warning.refused", view.attempts.refused_today) }}
+                  </p>
+                  <ServerTitle :name="view.server.name" :game="view.game" />
+                  <p class="body-text">{{ _("web.admin.warning.text") }}</p>
+                </div>
+                <dl class="facts">
+                  <Fact :label="_('web.admin.warning.last')">
+                    {{ _("web.server.time", time=when(view.attempts.last, "Hm")) }}
+                  </Fact>
+                  {% if view.decision %}
+                    <Fact :label="_('web.admin.warning.revoked')">
+                      {{ _("web.server.time", time=moment(view.decision.at, "MMMd")) }}
+                    </Fact>
+                    <Fact :label="_('web.admin.warning.by')" plain>
+                      {{ view.decision.admin or _("web.admin.command_line") }}
+                    </Fact>
+                  {% endif %}
+                </dl>
+              {% endfor %}
+            </section>
+          {% endif %}
+          <section aria-labelledby="home-mode">
+            <Bar id="home-mode" large>{{ _("web.admin.mode") }}</Bar>
+            <div class="bar-text">
+              <p class="home-mode-name">{{ _("web.host.mode." ~ mode) }}</p>
+              <p class="body-text">{{ _("web.admin.mode." ~ mode) }}</p>
+            </div>
+          </section>
+        </div>
+      </div>
     </Panel>
   </div>
 </AdminPage>

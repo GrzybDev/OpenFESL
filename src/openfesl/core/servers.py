@@ -5,11 +5,14 @@ import re
 import secrets
 import struct
 import uuid
+from collections import deque
 from collections.abc import Collection
 from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
 from enum import Enum, StrEnum, auto
 from typing import Protocol
 
+from openfesl.core.admins import Admin
 from openfesl.core.theater import UNAUTHORIZED, TheaterError
 
 logger = logging.getLogger(__name__)
@@ -89,6 +92,7 @@ class GameServer:
         state: What the admin decided about it.
         provider_id: The provider id its games last reported, known to the admin or not.
         provider: The provider the admin created with that id, if any.
+        first_seen: When it first tried to host; None for one not stored yet.
     """
 
     ugid: str
@@ -97,6 +101,7 @@ class GameServer:
     state: ServerState = ServerState.PENDING
     provider_id: bytes | None = None
     provider: Provider | None = None
+    first_seen: datetime | None = None
 
     @property
     def revoked(self) -> bool:
@@ -114,6 +119,38 @@ class GameServer:
         if self.state is ServerState.APPROVED or mode is HostingMode.OPEN:
             return Standing.LISTED
         return Standing.HIDDEN
+
+
+@dataclass(frozen=True, slots=True)
+class Attempts:
+    """How often a dedicated server whose games players do not see tried to host lately.
+
+    Attributes:
+        last_hour: Its attempts in the last hour.
+        today: Its attempts since midnight UTC.
+        refused_today: Those of today's attempts that were refused, as the admin revoked it.
+        last: When it last tried; None when it has not since the server started.
+    """
+
+    last_hour: int = 0
+    today: int = 0
+    refused_today: int = 0
+    last: datetime | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class Decision:
+    """The admin's latest decision about a dedicated server.
+
+    Attributes:
+        state: What was decided.
+        at: When.
+        admin: The display name of the admin who decided; None for the command line.
+    """
+
+    state: ServerState
+    at: datetime
+    admin: str | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -189,12 +226,13 @@ class ServerStore(Protocol):
             The server as it is now, or None when no server has that id.
         """
 
-    async def set_state(self, ugid: str, state: ServerState) -> bool:
-        """Approve or revoke a server.
+    async def set_state(self, ugid: str, state: ServerState, admin: Admin | None) -> bool:
+        """Approve or revoke a server, recording the decision among the admin's actions.
 
         Args:
             ugid: The server's persistent game id.
             state: The admin's decision.
+            admin: The admin who decided; None for the command line.
 
         Returns:
             Whether a server has that id.
@@ -202,6 +240,13 @@ class ServerStore(Protocol):
 
     async def all(self) -> list[GameServer]:
         """Return every server that ever hosted, oldest first."""
+
+    async def decisions(self, ugids: Collection[str]) -> dict[str, Decision]:
+        """Return the admin's latest decision about each of some servers that has one.
+
+        Args:
+            ugids: The servers' persistent game ids.
+        """
 
 
 def new_identity() -> Identity:
@@ -263,6 +308,23 @@ class Approval:
             store: Where the hosting mode, the providers and the servers are kept.
         """
         self._store = store
+        self._tried: dict[str, deque[tuple[datetime, bool]]] = {}
+
+    def attempts(self, ugid: str) -> Attempts:
+        """Return how often a server whose games players do not see tried to host lately.
+
+        Args:
+            ugid: The server's persistent game id.
+        """
+        tried = self._tried.get(ugid, ())
+        now = datetime.now(UTC)
+        midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        return Attempts(
+            last_hour=sum(at > now - timedelta(hours=1) for at, _ in tried),
+            today=sum(at >= midnight for at, _ in tried),
+            refused_today=sum(at >= midnight and refused for at, refused in tried),
+            last=tried[-1][0] if tried else None,
+        )
 
     async def admit(self, ugid: str, secret: str, name: str) -> Admission:
         """Let a dedicated server host under the identity it sent, or under a new one.
@@ -294,6 +356,8 @@ class Approval:
             await self._store.add(server)
             logger.info("Issued the server id %s to %r", server.ugid, label)
         standing = server.standing(await self._store.hosting_mode())
+        if standing is not Standing.LISTED:
+            self._note_attempt(server.ugid, refused=standing is Standing.REFUSED)
         if standing is Standing.REFUSED:
             logger.warning("Refusing server %s: the admin revoked it or its provider", ugid)
             raise TheaterError(UNAUTHORIZED)
@@ -328,6 +392,14 @@ class Approval:
         """
         mode = await self._store.hosting_mode()
         return {server.ugid: server.standing(mode) for server in await self._store.find(ugids)}
+
+    def _note_attempt(self, ugid: str, refused: bool) -> None:
+        # Kept for a day, in memory: the counts only tell the admin what a server does lately.
+        tried = self._tried.setdefault(ugid, deque())
+        now = datetime.now(UTC)
+        tried.append((now, refused))
+        while tried[0][0] < now - timedelta(days=1):
+            tried.popleft()
 
 
 def _digest(secret: str) -> bytes:

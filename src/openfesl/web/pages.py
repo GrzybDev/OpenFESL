@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from babel import Locale
-from babel.dates import format_skeleton
+from babel.dates import format_skeleton, format_timedelta
 from babel.numbers import format_decimal
 from fastapi import Request
 from fastapi.exception_handlers import http_exception_handler
@@ -54,16 +54,33 @@ class Assets:
 
 
 @dataclass(frozen=True, slots=True)
+class Toast:
+    """What came of the admin's last change, shown once on the next page.
+
+    Attributes:
+        key: The text in the catalogues.
+        values: The text's placeholders.
+        error: Whether the change failed; such a toast stays until dismissed.
+    """
+
+    key: str
+    values: Mapping[str, str]
+    error: bool
+
+
+@dataclass(frozen=True, slots=True)
 class Viewer:
     """The admin signed in to the admin panel, as its pages show them.
 
     Attributes:
         admin: The admin.
         through: The name of the provider they signed in through.
+        toast: What came of their last change, if it is still to be shown.
     """
 
     admin: Admin
     through: str
+    toast: Toast | None = None
 
 
 def built_assets() -> Assets:
@@ -110,10 +127,11 @@ def _number(context: Context, value: float, places: int | None = None) -> str:
 
 
 @pass_context
-def _moment(context: Context, value: datetime) -> str:
-    # A day with its year and a time of day, as the page's language writes them.
+def _moment(context: Context, value: datetime, day: str = "yMMMd") -> str:
+    # A day, with its year unless the CLDR skeleton for the day leaves it out, and a time of day,
+    # as the page's language writes them.
     locale = _locale(context)
-    day = format_skeleton("yMMMd", value, tzinfo=UTC, locale=locale)
+    day = format_skeleton(day, value, tzinfo=UTC, locale=locale)
     time = format_skeleton("Hm", value, tzinfo=UTC, locale=locale)
     return str(locale.datetime_formats["medium"]).format(time, day)
 
@@ -123,6 +141,13 @@ def _when(context: Context, value: datetime, skeleton: str) -> str:
     # A time in UTC with the fields a CLDR skeleton names, such as MMMEd for "Sat 17 Oct", in the
     # order and words of the page's language.
     return str(format_skeleton(skeleton, value, tzinfo=UTC, locale=_locale(context)))
+
+
+@pass_context
+def _ago(context: Context, value: datetime) -> str:
+    # How long ago a moment was, as the page's language says it, such as "18 minutes ago".
+    elapsed = value - datetime.now(UTC)
+    return str(format_timedelta(elapsed, add_direction=True, locale=_locale(context)))
 
 
 def _locale(context: Context) -> Locale:
@@ -170,6 +195,7 @@ _catalog = Catalog(
         "page_links": page_links,
         "moment": _moment,
         "when": _when,
+        "ago": _ago,
     },
 )
 # The catalogue keeps its own environment, which takes the given one's escaping but not its

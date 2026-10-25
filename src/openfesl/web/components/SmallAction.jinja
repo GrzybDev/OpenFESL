@@ -1,6 +1,17 @@
-{#def href: str, label: str #}
-{# The small action block, with the chevron square in a black frame. #}
-<a href="{{ href }}" class="small-action chevron">
-  <span aria-hidden="true" class="small-action-square"><Chevron :size="16" /></span>
-  <span class="small-action-label">{{ label }}</span>
-</a>
+{#def label: str, href: str = "", name: str = "", busy: str = "", dialog: bool = False #}
+{# The small action block, with the chevron square in a black frame: a link where it leads
+   somewhere, otherwise the button that sends its form. A name tells blocks with the same label
+   apart; a busy label replaces the label while the form's request runs, and a link to a
+   confirmation opens it as a dialog where scripts run. #}
+{% set inside %}<span aria-hidden="true" class="small-action-square"><Chevron :size="16" /></span><span data-label class="small-action-label">{{ label }}</span>{% endset %}
+{% if href %}
+  <a href="{{ href }}"
+     {% if name %} aria-label="{{ name }}"{% endif %}
+     {% if dialog %} data-dialog aria-haspopup="dialog"{% endif %}
+     class="small-action chevron">{{ inside }}</a>
+{% else %}
+  <button type="submit"
+          {% if name %} aria-label="{{ name }}"{% endif %}
+          {% if busy %} data-busy="{{ busy }}"{% endif %}
+          class="small-action chevron">{{ inside }}</button>
+{% endif %}

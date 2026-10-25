@@ -129,7 +129,7 @@ async def _servers(settings: Settings, args: argparse.Namespace) -> None:
                     print(f"{server.ugid}  {state}  {_provider_of(server)}  {server.name}")
             case "approve" | "revoke":
                 state = ServerState.APPROVED if args.action == "approve" else ServerState.REVOKED
-                if not await store.set_state(args.ugid, state):
+                if not await store.set_state(args.ugid, state, admin=None):
                     sys.exit(f"No server has the id {args.ugid}")
 
 
