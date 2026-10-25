@@ -160,11 +160,22 @@ class StatsService:
     async def get_stats(self, connection: FeslConnection, request: GetStats) -> GetStatsAnswer:
         """Return one owner's stats, as a dedicated server loads a joining player's.
 
+        A dedicated server gets them only while it hosts a game players see, as it writes.
+
         Args:
             connection: The FESL connection the request came on.
             request: The owner, period and keys.
+
+        Raises:
+            TransactionError: When a dedicated server that hosts no such game asks, or the
+                request names no owner while the session plays no persona.
         """
         game = game_of(connection)
+        account = connection.session.account
+        # Refused, a server uploads none of the player's stats that session; given them, it
+        # would retry every upload until it quits.
+        if account and account.server and not await self._hosting.admits(connection.session):
+            raise TransactionError(PARAMETERS_ERROR)
         owner = owner_of(connection, request.owner, request.owner_type)
         check_size(1, request.keys)
         found = await self._store.values(

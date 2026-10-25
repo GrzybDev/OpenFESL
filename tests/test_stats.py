@@ -184,11 +184,15 @@ async def test_only_dedicated_servers_that_host_write_and_a_refused_update_chang
         assert (await server.request(FESL, "rank", cheats[1]))["errorCode"] == "21"
         await enter_theater(server, THEATER, "bfbc2-pc-server", lkey)
         created = await server.theater(THEATER, "CGAM", CREATE_GAME)
-        # A new server waits for the admin's approval and writes nothing until it has it.
+        # A new server waits for the admin's approval and writes nothing until it has it, nor
+        # reads its players' stats, which it would otherwise try to upload until it quits.
         assert created.error is None
+        loaded = get_stats(ann, "kills")
+        assert (await server.request(FESL, "rank", loaded))["errorCode"] == "21"
         played = update_stats((ann, "1", [(3, "kills", "5.0000", "", "0")]))
         assert (await server.request(FESL, "rank", played))["errorCode"] == "21"
         await anyio.to_thread.run_sync(main, ["servers", "approve", created.fields["UGID"]])
+        assert (await server.request(FESL, "rank", loaded))["stats.0.value"] == "0.0000"
         assert "errorCode" not in await server.request(FESL, "rank", played)
 
     async with game(server_url) as server:
