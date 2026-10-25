@@ -6,4 +6,32 @@
     <circle cx="10" cy="10" r="7" fill="none" stroke-width="3" stroke-opacity=".3"/>
     <path d="M10 3a7 7 0 0 1 7 7" fill="none" stroke-width="3" stroke-linecap="square"/>
   </symbol>
+  <symbol id="down" viewBox="0 0 20 20">
+    <path d="M3.5 7l6.5 6 6.5-6" fill="none" stroke-width="2.8" stroke-linecap="square"/>
+  </symbol>
+  <symbol id="copy" viewBox="0 0 20 20">
+    <path d="M7.5 7.5h9v9h-9zM12.5 4.5v-1h-9v9h1" fill="none" stroke-width="2"/>
+  </symbol>
+  <symbol id="tick" viewBox="0 0 20 20">
+    <path d="M3.5 10.5l4.5 4.5 8.5-9" fill="none" stroke-width="3" stroke-linecap="square"/>
+  </symbol>
+  <symbol id="retry" viewBox="0 0 20 20">
+    <path d="M16 10a6 6 0 1 1-1.8-4.3" fill="none" stroke-width="2.4" stroke-linecap="square"/>
+    <path d="M16.5 2.5v5h-5" fill="none" stroke-width="2.4" stroke-linecap="square"/>
+  </symbol>
+  <symbol id="alert" viewBox="0 0 20 20">
+    <path d="M8.4 2.5h3.2v9.5H8.4zm0 11.5h3.2v3.5H8.4z"/>
+  </symbol>
+  <symbol id="squad" viewBox="0 0 20 20">
+    <path d="M3 3h6v6H3zm8 0h6v6h-6zM3 11h6v6H3zm8 0h6v6h-6z"/>
+  </symbol>
+  <symbol id="bolt" viewBox="0 0 20 20">
+    <path d="M11.5 1.5 4 11h5l-1.5 7.5L15 9h-5z"/>
+  </symbol>
+  <symbol id="full" viewBox="0 0 20 20">
+    <path d="M2 5h16v10H2z"/>
+  </symbol>
+  <symbol id="empty" viewBox="0 0 20 20">
+    <path d="M3.3 6.3h13.4v7.4H3.3z" fill="none" stroke="#0A0A0A" stroke-width="2.6"/>
+  </symbol>
 </svg>

@@ -1,0 +1,5 @@
+{#def kind: str, label #}
+{# A value a server publishes, by its name in the catalogues when the game data names it. #}
+{% if label and label.name %}{{ _("games." ~ game.id ~ "." ~ kind ~ "." ~ label.name) }}
+{%- elif label %}{{ label.value }}
+{%- else %}<span aria-hidden="true">–</span><span class="sr-only">{{ _("web.server.unpublished") }}</span>{% endif %}

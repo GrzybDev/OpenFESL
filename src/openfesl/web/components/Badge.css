@@ -1,0 +1,11 @@
+@layer components {
+  .badge {
+    display: grid;
+    width: 26px;
+    height: 26px;
+    flex: none;
+    place-items: center;
+    border: 1px solid var(--badge-edge);
+    background: var(--badge);
+  }
+}

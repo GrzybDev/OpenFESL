@@ -130,6 +130,9 @@ class Theme(BaseModel):
         accent: The colour of the title block, selections and action squares; black text
             goes on it.
         accent_hover: The accent of an action square under the pointer.
+        menu_current: The block behind the menu bar's current item.
+        badge: The small badges of a server's state, with a black glyph on them.
+        badge_edge: The badges' border.
         field: The backdrop behind the game's pages.
         mottle: The backdrop's coarse grain.
         grit: The backdrop's fine grain.
@@ -148,6 +151,9 @@ class Theme(BaseModel):
     font: Annotated[str, StringConstraints(pattern=r"^[A-Za-z ]+$")]
     accent: Colour
     accent_hover: Colour
+    menu_current: Colour
+    badge: Colour
+    badge_edge: Colour
     field: Colour
     mottle: Colour
     grit: Colour
@@ -161,16 +167,55 @@ class Theme(BaseModel):
     soft: Colour
 
 
+class Names(BaseModel):
+    """An attribute of hosted games whose values the web pages name, such as the map.
+
+    Attributes:
+        attribute: The attribute, matched regardless of case.
+        names: The names of its values, by value; a name is the end of a text's key in the
+            catalogues. Values match regardless of case.
+        prefix: Whether a value takes the name of the longest of these values it starts with, as
+            when a map is played in several modes under ids that share their start.
+        otherwise: The name of every other value; other values are shown as they are without one.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    attribute: str
+    names: dict[str, str] = {}
+    prefix: bool = False
+    otherwise: str | None = None
+
+
+class Flag(BaseModel):
+    """An attribute of hosted games that marks a game while it holds a value."""
+
+    model_config = ConfigDict(frozen=True)
+
+    attribute: str
+    value: str
+
+
 class Listing(BaseModel):
     """How the web pages read the games that a game's servers host.
 
     Attributes:
         squad: How many players a squad holds, which a server needs free to have room for one.
+        map: The map a game is played on.
+        mode: The game mode, whose names the server list offers in this order.
+        expansion: The content a game needs, such as an expansion.
+        region: Where the server is.
+        hardcore: The mark of a game played under hardcore rules.
     """
 
     model_config = ConfigDict(frozen=True)
 
     squad: int = 1
+    map: Names | None = None
+    mode: Names | None = None
+    expansion: Names | None = None
+    region: Names | None = None
+    hardcore: Flag | None = None
 
 
 class Game(BaseModel):
@@ -179,6 +224,7 @@ class Game(BaseModel):
     Attributes:
         id: The name of its data file, which the instance's settings know it by.
         name: The game's name.
+        executable: The file name of the game's executable, next to which OpenFESLHook goes.
         partition: Where the game's data lives.
         namespace: The persona namespace; persona names are unique within it.
         clients: The game's client strings.
@@ -203,6 +249,7 @@ class Game(BaseModel):
 
     id: str
     name: str
+    executable: str
     partition: Partition
     namespace: str
     clients: dict[str, Client]
@@ -217,6 +264,15 @@ class Game(BaseModel):
     countries: dict[str, Ages] = {}
     theme: Theme
     listing: Listing = Listing()
+
+    @property
+    def play_key(self) -> ProductKey | None:
+        """The starting product key that grants what the game's players need to play, if any."""
+        tags = {client.entitlement for client in self.clients.values() if client.entitlement}
+        return next(
+            (key for key in self.keys if any(grant.tag in tags for grant in key.entitlements)),
+            None,
+        )
 
     def ages(self, country: str) -> Ages:
         """Return the age limits of a country on registration.

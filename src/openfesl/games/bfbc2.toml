@@ -1,4 +1,6 @@
 name = "Battlefield: Bad Company 2"
+# The game's executable, next to which OpenFESLHook goes.
+executable = "BFBC2Game.exe"
 partition = "/eagames/BFBC2"
 namespace = "battlefield"
 provider_attribute = "B-U-Provider"
@@ -47,6 +49,9 @@ FR = { registration_age = 16, parental_age = 16 }
 font = "Barlow Semi Condensed"
 accent = "#DA8602"
 accent_hover = "#F29A12"
+menu_current = "#5B5C57"
+badge = "#94AC54"
+badge_edge = "#2A2F14"
 field = "#1A1B16"
 mottle = "#CED0C2"
 grit = "#F6F6EF"
@@ -59,9 +64,49 @@ subtitle = "#0A0A0A"
 bright = "#F4F4EE"
 soft = "#D9D9CD"
 
-# How the web pages read the games that dedicated servers host. A squad holds four players.
+# How the web pages read the games that dedicated servers host, from the attributes the R34
+# dedicated server publishes. A squad holds four players.
 [listing]
 squad = 4
+hardcore = { attribute = "B-U-type", value = "HARDCORE" }
+
+# The level's id names the map; its modes' levels add a suffix, such as MP_005GR for Rush. The
+# names are those of the game's own map list; other levels show their ids.
+[listing.map]
+attribute = "B-U-level"
+prefix = true
+
+[listing.map.names]
+"Levels/MP_001" = "panama-canal"
+"Levels/MP_002" = "valparaiso"
+"Levels/MP_003" = "laguna-alta"
+"Levels/MP_004" = "isla-inocentes"
+"Levels/MP_005" = "atacama-desert"
+"Levels/MP_006" = "arica-harbor"
+"Levels/MP_007" = "white-pass"
+"Levels/MP_008" = "nelson-bay"
+"Levels/MP_009" = "laguna-presa"
+"Levels/MP_012" = "port-valdez"
+"Levels/NAM_MP_002" = "vantage-point"
+"Levels/NAM_MP_003" = "hill-137"
+"Levels/NAM_MP_005" = "cao-son-temple"
+"Levels/NAM_MP_006" = "phu-bai-valley"
+"Levels/NAM_MP_007" = "operation-hastings"
+
+[listing.mode]
+attribute = "B-U-gamemode"
+names = { CONQUEST = "conquest", RUSH = "rush", SQRUSH = "squad-rush", SQDM = "squad-deathmatch" }
+
+# The Vietnam expansion's levels name it; the others need the base game only.
+[listing.expansion]
+attribute = "B-U-mod"
+names = { VIETNAM = "vietnam" }
+otherwise = "base"
+
+# The server's -location option, UNKNOWN without one.
+[listing.region]
+attribute = "B-U-location"
+names = { UNKNOWN = "unknown" }
 
 [http]
 locker = "http://easo.ea.com/fileupload/locker2.jsp"

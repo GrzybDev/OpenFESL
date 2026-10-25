@@ -1,6 +1,7 @@
-{#def href: str, label: str #}
+{#def href: str, label: str, size: int = 30 #}
 {# The large action block, as the game's JOIN block: a black block with the chevron square. #}
-<a href="{{ href }}" class="action chevron">
+<a href="{{ href }}"
+   class="action chevron{% if size == 32 %} action-large{% endif %}">
   <span aria-hidden="true" class="action-square"><Chevron :size="30" /></span>
   <span class="action-label">{{ label }}</span>
 </a>

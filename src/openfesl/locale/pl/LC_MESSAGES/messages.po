@@ -233,3 +233,185 @@ msgstr "Wszystkie gry"
 
 msgid "games.bfbc2.tagline"
 msgstr "Gra sieciowa na PC"
+
+msgid "web.game.menu.servers"
+msgstr "Serwery"
+
+msgid "web.game.menu.leaderboard"
+msgstr "Ranking"
+
+msgid "web.game.menu.activity"
+msgstr "Aktywność"
+
+msgid "web.game.menu.play"
+msgstr "Jak zagrać"
+
+msgid "web.game.menu.host"
+msgstr "Postaw serwer"
+
+msgid "web.activity.online_now"
+msgstr "Teraz online"
+
+msgid "web.live.again"
+msgstr "Spróbuj ponownie"
+
+msgid "web.front.all_servers"
+msgstr "Wszystkie serwery"
+
+msgid "web.front.busiest"
+msgstr "Najbardziej oblegany serwer z miejscem dla oddziału"
+
+msgid "web.servers.status"
+msgstr "Stan"
+
+msgid "web.servers.name"
+msgstr "Nazwa serwera"
+
+msgid "web.servers.map"
+msgstr "Mapa"
+
+msgid "web.servers.mode"
+msgstr "Tryb gry"
+
+msgid "web.servers.players"
+msgstr "Gracze"
+
+msgid "web.servers.region"
+msgstr "Region"
+
+msgid "web.servers.page"
+msgstr "Strona serwera"
+
+msgid "web.server.since"
+msgstr "Działa od %(time)s UTC"
+
+msgid "web.server.joining"
+msgstr ""
+"Do serwera dołącza się w grze; jej przeglądarka serwerów znajduje go po "
+"nazwie."
+
+msgid "web.server.page"
+msgstr "Strona serwera"
+
+msgid "web.server.page.of"
+msgstr "Strona serwera: %(name)s"
+
+msgid "web.server.copy"
+msgstr "Kopiuj nazwę serwera"
+
+msgid "web.server.copied"
+msgstr "Skopiowano nazwę serwera."
+
+msgid "web.copy.done"
+msgstr "Skopiowano"
+
+msgid "web.server.full"
+msgstr "Pełny"
+
+msgid "web.server.empty"
+msgstr "Pusty"
+
+msgid "web.server.hardcore"
+msgstr "Hardcore"
+
+msgid "web.server.unpublished"
+msgstr "Brak danych"
+
+msgid "web.front.setup"
+msgstr "Przygotowanie gry"
+
+msgid "web.front.setup.steps"
+msgstr "3 kroki"
+
+msgid "web.front.setup.hook"
+msgstr "%(file)s pochodzi z najnowszego wydania OpenFESLHook."
+
+msgid "web.front.setup.download"
+msgstr "Pobierz %(file)s"
+
+msgid "web.front.setup.folder"
+msgstr "Skopiuj %(file)s do folderu gry, obok %(executable)s."
+
+msgid "web.front.setup.account"
+msgstr "Uruchom grę i utwórz konto; gdy gra poprosi o klucz, wpisz %(key)s."
+
+msgid "web.front.setup.account.plain"
+msgstr "Uruchom grę i utwórz konto."
+
+msgid "web.front.setup.copy"
+msgstr "Kopiuj klucz"
+
+msgid "web.front.setup.copied"
+msgstr "Skopiowano klucz."
+
+msgid "web.front.guide"
+msgstr "Pełny poradnik opisuje każdy krok dokładniej."
+
+msgid "web.front.play"
+msgstr "Jak zagrać"
+
+msgid "games.bfbc2.map.panama-canal"
+msgstr "Kanał Panamski"
+
+msgid "games.bfbc2.map.valparaiso"
+msgstr "Valparaiso"
+
+msgid "games.bfbc2.map.laguna-alta"
+msgstr "Laguna Alta"
+
+msgid "games.bfbc2.map.isla-inocentes"
+msgstr "Isla Inocentes"
+
+msgid "games.bfbc2.map.atacama-desert"
+msgstr "Pustynia Atakama"
+
+msgid "games.bfbc2.map.arica-harbor"
+msgstr "Port Arica"
+
+msgid "games.bfbc2.map.white-pass"
+msgstr "Biała Przełęcz"
+
+msgid "games.bfbc2.map.nelson-bay"
+msgstr "Zatoka Nelsona"
+
+msgid "games.bfbc2.map.laguna-presa"
+msgstr "Laguna Presa"
+
+msgid "games.bfbc2.map.port-valdez"
+msgstr "Port Valdez"
+
+msgid "games.bfbc2.map.vantage-point"
+msgstr "Punkt Obserwacyjny"
+
+msgid "games.bfbc2.map.hill-137"
+msgstr "Wzgórze 137"
+
+msgid "games.bfbc2.map.cao-son-temple"
+msgstr "Świątynia Cao Son"
+
+msgid "games.bfbc2.map.phu-bai-valley"
+msgstr "Dolina Phu Bai"
+
+msgid "games.bfbc2.map.operation-hastings"
+msgstr "Operacja Hastings"
+
+msgid "games.bfbc2.mode.conquest"
+msgstr "Podbój"
+
+msgid "games.bfbc2.mode.rush"
+msgstr "Gorączka"
+
+msgid "games.bfbc2.mode.squad-rush"
+msgstr "Gorączka drużynowa"
+
+msgid "games.bfbc2.mode.squad-deathmatch"
+msgstr "Drużynowy DM"
+
+msgid "games.bfbc2.expansion.base"
+msgstr "Gra podstawowa"
+
+msgid "games.bfbc2.expansion.vietnam"
+msgstr "Dodatek Vietnam"
+
+msgid "games.bfbc2.region.unknown"
+msgstr "Nieznany"

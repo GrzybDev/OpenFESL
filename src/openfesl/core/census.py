@@ -1,7 +1,9 @@
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass
+from datetime import datetime
 
-from openfesl.core.games import Game
+from openfesl.core.games import Flag, Game, Names
 from openfesl.core.hosting import GAME, HostedGame, Hosting
 from openfesl.core.session import Players
 
@@ -29,6 +31,19 @@ class Activity:
 
 
 @dataclass(frozen=True, slots=True)
+class Label:
+    """A hosted game's attribute as the pages show it.
+
+    Attributes:
+        name: The end of its name's key in the catalogues, when the game data names the value.
+        value: The value as the host sent it.
+    """
+
+    name: str | None
+    value: str
+
+
+@dataclass(frozen=True, slots=True)
 class Server:
     """A game that a server hosts, as the web pages show it.
 
@@ -38,6 +53,12 @@ class Server:
         players: How many players are in it.
         max_players: How many it takes.
         squad: How many players a squad of the game holds.
+        since: When it was listed.
+        map: The map it is played on, if the host says.
+        mode: Its game mode, if the host says.
+        expansion: The content it needs, if the host says.
+        region: Where the server is, if the host says.
+        hardcore: Whether it is played under hardcore rules.
     """
 
     slug: str
@@ -45,6 +66,12 @@ class Server:
     players: int
     max_players: int
     squad: int
+    since: datetime
+    map: Label | None
+    mode: Label | None
+    expansion: Label | None
+    region: Label | None
+    hardcore: bool
 
     @property
     def free(self) -> int:
@@ -106,12 +133,20 @@ class Census:
         return sorted(hosted, key=lambda entry: entry.id)
 
     def _server(self, game: Game, hosted: HostedGame, taken: set[str]) -> Server:
+        listing = game.listing
+        attributes = {key.casefold(): value for key, value in hosted.basic.items()}
         return Server(
             slug=_unique(slug(hosted.name), taken),
             name=hosted.name,
             players=len(hosted.in_game()),
             max_players=hosted.max_players,
-            squad=game.listing.squad,
+            squad=listing.squad,
+            since=hosted.since,
+            map=_label(listing.map, attributes),
+            mode=_label(listing.mode, attributes),
+            expansion=_label(listing.expansion, attributes),
+            region=_label(listing.region, attributes),
+            hardcore=_marked(listing.hardcore, attributes),
         )
 
 
@@ -133,3 +168,24 @@ def _unique(wanted: str, taken: set[str]) -> str:
         found = f"{wanted}-{number}"
     taken.add(found)
     return found
+
+
+def _label(names: Names | None, attributes: Mapping[str, str]) -> Label | None:
+    # The attributes come with their keys folded, as hosts spell them in any case.
+    value = attributes.get(names.attribute.casefold()) if names else None
+    if names is None or value is None:
+        return None
+    folded = value.casefold()
+    matching = [
+        known
+        for known in names.names
+        if (folded.startswith(known.casefold()) if names.prefix else folded == known.casefold())
+    ]
+    if matching:
+        return Label(names.names[max(matching, key=len)], value)
+    return Label(names.otherwise, value)
+
+
+def _marked(flag: Flag | None, attributes: Mapping[str, str]) -> bool:
+    value = attributes.get(flag.attribute.casefold()) if flag else None
+    return flag is not None and value is not None and value.casefold() == flag.value.casefold()

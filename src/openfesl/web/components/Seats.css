@@ -1,0 +1,19 @@
+/* M6: a refresh fills or empties a server's slots one by one, as the script staggers them. */
+@layer components {
+  .slot {
+    fill: transparent;
+    stroke: #111110;
+    stroke-width: 1.2;
+    transition: fill 40ms linear;
+
+    &.taken {
+      fill: #111110;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slot {
+      transition: none;
+    }
+  }
+}

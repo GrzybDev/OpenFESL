@@ -1,0 +1,9 @@
+{# What a failed refresh of a panel's stats shows until the next one succeeds, with a button
+   that tries again. #}
+<div role="status" data-stale-note hidden class="stale-panel">
+  <span aria-hidden="true" class="stale-mark"><span><Icon name="alert" fill="#0A0A0A" /></span></span>
+  <p>{{ _("web.live.stale", time=now.strftime("%H:%M")) }}</p>
+  <button type="button" data-refresh class="chevron">
+    <Icon name="retry" :size="18" stroke="#F4F4EE" />{{ _("web.live.again") }}
+  </button>
+</div>

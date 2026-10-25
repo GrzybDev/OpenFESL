@@ -1,0 +1,66 @@
+@layer components {
+  /* A panel's stats, as many as fit in a line. */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2px;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+
+    dt {
+      background: var(--ink);
+      padding: 11px 14px;
+      font-size: 14px;
+      line-height: 1.1;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--bright);
+      text-transform: uppercase;
+    }
+
+    dd {
+      display: flex;
+      min-height: 84px;
+      flex: 1;
+      background: var(--row-light);
+      padding: 10px 14px;
+      color: var(--ink);
+    }
+
+    .count {
+      font-size: 44px;
+      line-height: 1;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .stat-accent,
+  .stat-center {
+    align-items: center;
+  }
+
+  .stat .stat-accent {
+    background: var(--accent);
+  }
+
+  html[data-stale] .stat .stat-accent {
+    background: var(--row-light);
+  }
+
+  .stat-stack {
+    flex-direction: column;
+    justify-content: center;
+    gap: 9px;
+  }
+
+  .stat-link {
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px 12px;
+  }
+}

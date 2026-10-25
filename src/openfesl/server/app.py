@@ -51,6 +51,7 @@ from openfesl.storage.records import SqlRecordStore
 from openfesl.storage.servers import SqlServerStore
 from openfesl.storage.settings import SqlSettingStore
 from openfesl.storage.stats import SqlStatStore
+from openfesl.web.front import front_routes
 from openfesl.web.game_http import GameHttpMiddleware
 from openfesl.web.languages import LanguageMiddleware
 from openfesl.web.menu import menu_routes
@@ -160,6 +161,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.mount("/static", StaticAssets(directory=STATIC))
     app.include_router(shell_routes(pages, Terms.load()))
     app.include_router(menu_routes(pages, games, census))
+    app.include_router(front_routes(pages, games, census))
     app.include_router(verification_routes(confirm, pages))
     # The last one added sees a request first: the game's HTTP keeps its own answers.
     app.add_middleware(LanguageMiddleware)

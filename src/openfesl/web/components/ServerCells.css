@@ -1,0 +1,103 @@
+/* The columns of a game's server list, as its server browser lays them out. On phones a row
+   becomes a card in the game's style: its badges, name and end square, then its map and mode, then
+   its players and region. */
+@layer components {
+  .server-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns: 64px minmax(200px, 1fr) 140px 150px 160px 150px 44px;
+    gap: 2px;
+  }
+
+  /* A table of server rows, at a width that keeps every column readable. */
+  .server-table {
+    min-width: 920px;
+  }
+
+  .server-cell {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    background: var(--cell);
+    padding-inline: 10px;
+    color: var(--ink);
+  }
+
+  .cell-badges {
+    gap: 4px;
+    padding-inline: 6px;
+  }
+
+  .cell-name {
+    gap: 6px;
+    padding: 0 0 0 12px;
+  }
+
+  .server-name {
+    display: flex;
+    min-height: 44px;
+    min-width: 0;
+    flex: 1;
+    align-items: center;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.2;
+    font-weight: 600;
+  }
+
+  .cell-map,
+  .cell-mode,
+  .cell-region {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .cell-mode {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 3px;
+  }
+
+  .hardcore-mark {
+    background: var(--ink);
+    padding: 2px 5px;
+    font-size: 11px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--bright);
+  }
+
+  .cell-players {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .cell-taken {
+    display: flex;
+    align-items: baseline;
+    font-size: 16px;
+    line-height: 1;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cell-free {
+    margin-left: 8px;
+    font-size: 12px;
+    line-height: calc(1 / 0.75);
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .cell-end {
+    display: grid;
+    place-items: center;
+  }
+}

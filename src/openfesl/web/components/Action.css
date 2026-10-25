@@ -26,4 +26,8 @@
     letter-spacing: 0.03em;
     text-transform: uppercase;
   }
+
+  .action-large .action-label {
+    font-size: 32px;
+  }
 }

@@ -1,0 +1,87 @@
+/* M2: a hovered item of a game's menu bar brightens, and the current item's block slides from
+   page to page. On phones the items stack two to a line. */
+@layer components {
+  .game-menu {
+    background: var(--ink);
+
+    ul {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      padding-inline: 12px;
+    }
+
+    li {
+      display: flex;
+
+      &:last-child {
+        grid-column: 1 / -1;
+      }
+    }
+  }
+
+  .menu-item {
+    position: relative;
+    display: flex;
+    min-height: 44px;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    padding-inline: 20px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    color: var(--bright);
+    text-transform: uppercase;
+
+    &:hover {
+      text-decoration-line: none;
+    }
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--menu-hover);
+      opacity: 0;
+      transition: opacity 120ms var(--ease-menu);
+    }
+
+    &:hover::before {
+      opacity: 1;
+    }
+  }
+
+  .menu-current {
+    view-transition-name: menu-current;
+    position: absolute;
+    inset: 0;
+    background: var(--menu-current);
+  }
+
+  .menu-label {
+    position: relative;
+  }
+
+  ::view-transition-group(menu-current) {
+    animation-duration: 180ms;
+  }
+
+  @media (width >= 40rem) {
+    .game-menu ul {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      column-gap: 8px;
+    }
+
+    .menu-item {
+      min-width: 150px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .menu-item::before {
+      transition: none;
+    }
+  }
+}

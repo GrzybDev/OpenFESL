@@ -1,0 +1,8 @@
+{#def file: str #}
+{# The block that downloads the hook's latest release, with the chevron square turned down. #}
+{% set name %}<span class="download-file">{{ file }}</span>{% endset %}
+<a href="https://github.com/GrzybDev/OpenFESLHook/releases/latest/download/{{ file }}"
+   class="chevron download">
+  <span aria-hidden="true" class="small-action-square"><Icon name="down" stroke="#0A0A0A" /></span>
+  <span class="download-label">{{ _("web.front.setup.download", file=name) }}</span>
+</a>

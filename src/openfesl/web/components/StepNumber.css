@@ -1,0 +1,14 @@
+/* A step's number on the accent, as the game's loading screen panels number them. */
+@layer components {
+  .step-number {
+    display: grid;
+    height: 36px;
+    flex: 0 0 36px;
+    place-items: center;
+    background: var(--accent);
+    font-size: 20px;
+    line-height: 1;
+    font-weight: 800;
+    color: var(--ink);
+  }
+}

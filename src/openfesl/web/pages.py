@@ -71,13 +71,13 @@ def static_url(name: str) -> str:
 
 
 @pass_context
-def _text(context: Context, key: str, **values: object) -> str:
+def _text(context: Context, key: str, /, **values: object) -> str:
     # Like Jinja's i18n extension with new-style gettext, for catalogues whose ids are keys.
     return _fill(context, translate(key, context["language"]), values)
 
 
 @pass_context
-def _count_text(context: Context, key: str, count: int, **values: object) -> str:
+def _count_text(context: Context, key: str, count: int, /, **values: object) -> str:
     # The text's plural form follows the count, which it shows as %(count)s.
     text = translate_count(key, count, context["language"])
     return _fill(context, text, {"count": _number(context, count), **values})

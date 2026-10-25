@@ -32,8 +32,9 @@ document.addEventListener("click", (event) => {
 });
 
 // Live values: a page's #live region refreshes itself through htmx every 15 s while the tab is
-// visible. A changed number counts to its new value (M5), and a failed refresh keeps the last
-// values, muted, until the next one succeeds.
+// visible. A changed number counts to its new value (M5), a server's slots fill or empty one by
+// one (M6), and a failed refresh keeps the last values, muted, until the next one succeeds or
+// the reader asks again.
 const REFRESH = 15000;
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 let refreshedAt = Date.now();
@@ -51,6 +52,12 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
+document.addEventListener("click", (event) => {
+  if (event.target instanceof Element && event.target.closest("[data-refresh]")) {
+    refresh();
+  }
+});
+
 /** Refreshes the page's live region now, as its next poll would. */
 function refresh() {
   document.getElementById("live")?.dispatchEvent(new Event("refresh"));
@@ -63,6 +70,14 @@ document.addEventListener("htmx:before:swap", () => {
       Number(element.dataset.count),
     ]),
   );
+  // Each slot waits 20 ms per slot between it and the last taken one, so that the slots the
+  // refresh changes fill or empty in turn; the refresh leaves the style attribute alone.
+  for (const meter of document.querySelectorAll("svg[data-taken]")) {
+    const taken = Number(meter.dataset.taken);
+    meter.querySelectorAll(".slot").forEach((slot, index) => {
+      slot.style.transitionDelay = `${(index >= taken ? index - taken : taken - 1 - index) * 20}ms`;
+    });
+  }
 });
 
 document.addEventListener("htmx:after:swap", () => {
@@ -130,3 +145,42 @@ setInterval(() => {
     tick();
   }
 }, 1000);
+
+// M8: a copy button copies its text, says so for 1.5 s and has the page announce it. Without
+// clipboard access it stays as it was; the text it copies is on the page.
+document.addEventListener("click", async (event) => {
+  const button = event.target instanceof Element ? event.target.closest("[data-copy]") : null;
+  if (!button) {
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(button.dataset.copy);
+  } catch {
+    return;
+  }
+  const label = button.querySelector("[data-label]");
+  label.dataset.rest ??= label.textContent;
+  label.textContent = button.dataset.copied;
+  button.classList.add("copied");
+  announce(button.dataset.note);
+  clearTimeout(button.copiedTimer);
+  button.copiedTimer = setTimeout(() => {
+    label.textContent = label.dataset.rest;
+    button.classList.remove("copied");
+  }, 1500);
+});
+
+/**
+ * Has screen readers read a short message about what just happened.
+ *
+ * @param {string} message - The message.
+ */
+function announce(message) {
+  const region = document.getElementById("announce");
+  if (region) {
+    region.textContent = "";
+    requestAnimationFrame(() => {
+      region.textContent = message;
+    });
+  }
+}

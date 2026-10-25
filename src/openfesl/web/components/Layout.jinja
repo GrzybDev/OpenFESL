@@ -20,9 +20,10 @@
     {% endfor %}
     {# A page transition captures the area, so the first frame waits until it is parsed. #}
     <link rel="expect" href="#area" blocking="render">
-    {# Refreshes keep the page as it is when the server answers with an error. #}
+    {# Refreshes keep the page as it is when the server answers with an error, and leave the styles
+       that scripts set for their motion alone. #}
     <meta name="htmx-config"
-          content='{"includeIndicatorCSS": false, "noSwap": [204, 304, "4xx", "5xx"]}'>
+          content='{"includeIndicatorCSS": false, "noSwap": [204, 304, "4xx", "5xx"], "morphIgnore": ["data-htmx-powered", "style"]}'>
     {% if assets.head %}<script src="{{ assets.head }}"></script>{% endif %}
     {% if assets.app %}<script type="module" src="{{ assets.app }}"></script>{% endif %}
   </head>
@@ -93,5 +94,6 @@
         <p>{{ _("web.footer.affiliation") }}</p>
       </div>
     </footer>
+    <p id="announce" class="sr-only" aria-live="polite"></p>
   </body>
 </html>

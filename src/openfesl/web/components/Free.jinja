@@ -1,0 +1,3 @@
+{#def server #}
+{# What a server's players leave free: a number of places, or the word for none or all. #}
+{% if server.free == 0 %}{{ _("web.server.full") }}{% elif server.players == 0 %}{{ _("web.server.empty") }}{% else %}{{ _("web.server.free", count=number(server.free)) }}{% endif %}

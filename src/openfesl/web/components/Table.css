@@ -1,0 +1,75 @@
+/* The parts the pages' tables share: rows of cells two pixels apart under black column heads, in a
+   box that scrolls sideways when a wide table does not fit. */
+@layer components {
+  .table {
+    display: grid;
+    gap: 2px;
+  }
+
+  .table-rows {
+    display: grid;
+    gap: 2px;
+  }
+
+  .table-scroll {
+    margin-inline: -6px;
+    overflow-x: auto;
+    padding: 2px 6px 6px;
+  }
+
+  .column-head {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    background: var(--ink);
+    padding-inline: 10px;
+    font-size: 14px;
+    line-height: calc(1.25 / 0.875);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--bright);
+    text-transform: uppercase;
+  }
+
+  .column-name {
+    padding-inline: 12px;
+  }
+
+  /* The light row under a list's row that holds its details or a list's empty state. */
+  .row-details {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 24px;
+    background: var(--row-light);
+    padding: 14px 16px;
+    color: var(--ink);
+
+    > div:first-child {
+      min-width: 0;
+      flex: 1 1 360px;
+    }
+  }
+
+  .row-facts {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .row-text {
+    margin-top: 6px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+
+  .row-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+}

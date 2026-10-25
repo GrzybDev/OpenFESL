@@ -132,6 +132,9 @@
     --area-font: "Barlow Semi Condensed", "Barlow", system-ui, sans-serif;
     --accent: #e6e7e9;
     --accent-hover: #f4f4f4;
+    --menu-current: #3a3d42;
+    --badge: #c9ccd1;
+    --badge-edge: #3a3d42;
     --field: #0f1012;
     --panel: #1a1c1f;
     --panel-edge: #3a3d42;
@@ -145,6 +148,7 @@
     /* The menus' fixed shades of the game style, the same in every theme. */
     --track: #3a3b33;
     --off-text: #8f8f84;
+    --menu-hover: #1f1f1c;
   }
 
   /* OpenFESL's own menu and admin, in steel so that they never read as a game's pages. */

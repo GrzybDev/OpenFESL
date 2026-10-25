@@ -1,0 +1,15 @@
+{#def current: str = "", exact: bool = True #}
+{# The game's menu bar. The current item sits on the menu's block, which slides to the next current
+   item on the way there (M2). #}
+<nav aria-label="{{ game.name }}" class="game-menu">
+  <ul>
+    {% for item in ["servers", "leaderboard", "activity", "play", "host"] %}
+      <li>
+        <a href="{{ url('/' ~ game.id ~ '/' ~ item) }}"
+           {% if item == current %} aria-current="{{ 'page' if exact else 'true' }}"{% endif %}
+           class="menu-item">
+        {%- if item == current %}<span aria-hidden="true" class="menu-current"></span>{% endif %}<span class="menu-label">{{ _("web.game.menu." ~ item) }}</span></a>
+      </li>
+    {% endfor %}
+  </ul>
+</nav>

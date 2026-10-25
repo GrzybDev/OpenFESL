@@ -1,0 +1,128 @@
+{#def activity, busiest #}
+{% set key = game.play_key.code if game.play_key else None %}
+{% set hook %}<FileName text="dinput8.dll" />{% endset %}
+<Layout :title="game.name">
+  <GameMenu />
+
+  <section aria-labelledby="front-title">
+    <div class="enter-title front-title">
+      <TitleBlock :title="game.name" id="front-title">{{ _("games." ~ game.id ~ ".tagline") }}</TitleBlock>
+    </div>
+
+    <Panel id="live"
+           :hx-get="here"
+           hx-trigger="every 15s, refresh"
+           hx-select="#live"
+           hx-select-oob="#shell-games:outerMorph"
+           hx-swap="outerMorph"
+           class="enter-panel">
+      {# Two stats a line on phones, as many as fit elsewhere. #}
+      <dl class="stats">
+        <Stat :label="_('web.activity.online_now')" kind="accent">
+          <Count :value="activity.online" class="count-ink live-value" />
+        </Stat>
+        <Stat :label="_('web.activity.in_matches')" kind="stack">
+          <span><Count :value="activity.in_matches" class="live-value" /></span>
+          <ShareMeter :activity="activity" />
+        </Stat>
+        <Stat :label="_('web.activity.in_menus')">
+          <Count :value="activity.in_menus" class="live-value" />
+        </Stat>
+        <Stat :label="_('web.activity.servers')" kind="link">
+          <Count :value="activity.servers" class="live-value" />
+          <a href="{{ url('/' ~ game.id ~ '/servers') }}" class="front-all"><span>{{ _("web.front.all_servers") }}</span><span aria-hidden="true"><Icon name="go" stroke="currentColor" /></span></a>
+        </Stat>
+      </dl>
+      <div class="front-lines">
+        <p class="front-updated">
+          <Updated />
+        </p>
+      </div>
+      <StalePanel />
+
+      <section aria-labelledby="front-busiest" class="front-busiest">
+        {% set free %}{% if busiest %}<Free :server="busiest" />{% endif %}{% endset %}
+        <Bar id="front-busiest" :extra="free" wrap>{{ _("web.front.busiest") }}</Bar>
+        {% if busiest %}
+          {% set href = url('/' ~ game.id ~ '/servers/' ~ busiest.slug) %}
+          <div class="table-scroll">
+            <div role="table"
+                 aria-labelledby="front-busiest"
+                 class="table server-table">
+              <div role="rowgroup">
+                <div role="row" class="server-columns">
+                  <div role="columnheader"
+                       class="column-head"><span class="sr-only">{{ _("web.servers.status") }}</span></div>
+                  <div role="columnheader" class="column-head column-name">{{ _("web.servers.name") }}</div>
+                  <div role="columnheader" class="column-head">{{ _("web.servers.map") }}</div>
+                  <div role="columnheader" class="column-head">{{ _("web.servers.mode") }}</div>
+                  <div role="columnheader" class="column-head">{{ _("web.servers.players") }}</div>
+                  <div role="columnheader" class="column-head">{{ _("web.servers.region") }}</div>
+                  <div role="columnheader"><span class="sr-only">{{ _("web.servers.page") }}</span></div>
+                </div>
+              </div>
+              <div role="rowgroup" class="table-rows">
+                <div role="row" class="server-columns">
+                  <ServerCells :server="busiest" :href="href" />
+                </div>
+                <div role="row">
+                  <div role="cell" aria-colspan="7" class="row-details">
+                    <div>
+                      <p class="row-facts">{{ _("web.server.since", time=busiest.since.strftime("%H:%M")) }}{% if busiest.expansion %} · <Published kind="expansion" :label="busiest.expansion" />{% endif %}</p>
+                      <p class="row-text">{{ _("web.server.joining") }}</p>
+                    </div>
+                    <div class="row-actions">
+                      <SmallAction :href="href" :label="_('web.server.page')" />
+                      <CopyButton :value="busiest.name" :label="_('web.server.copy')" :note="_('web.server.copied')" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% else %}
+          <div class="row-details front-none">
+            <p>{{ _("web.activity.no_room") if activity.servers else _("web.activity.no_servers") }}</p>
+            {% if activity.servers %}
+              <SmallAction :href="url('/' ~ game.id ~ '/servers')" :label="_('web.front.all_servers')" />
+            {% else %}
+              <SmallAction :href="url('/' ~ game.id ~ '/host')" :label="_('web.game.menu.host')" />
+            {% endif %}
+          </div>
+        {% endif %}
+      </section>
+      <div class="front-more">
+        <section aria-labelledby="front-setup" class="front-setup">
+          <Bar id="front-setup" :extra="_('web.front.setup.steps')" wrap>{{ _("web.front.setup") }}</Bar>
+          <ol class="front-steps">
+            <li>
+              <div>
+                <StepNumber :number="1" />
+                <p class="body-text">{{ _("web.front.setup.hook", file=hook) }}</p>
+              </div>
+              <Download file="dinput8.dll" />
+            </li>
+            <li>
+              {% set executable %}<FileName :text="game.executable" />{% endset %}
+              <div>
+                <StepNumber :number="2" />
+                <p class="body-text">{{ _("web.front.setup.folder", file=hook, executable=executable) }}</p>
+              </div>
+            </li>
+            <li>
+              {% set code %}{% if key %}<FileName :text="key" />{% endif %}{% endset %}
+              <div><StepNumber :number="3" /><p class="body-text">{% if key %}{{ _("web.front.setup.account", key=code) }}{% else %}{{ _("web.front.setup.account.plain") }}{% endif %}</p></div>
+              {% if key %}
+                <CopyButton :value="key" :label="_('web.front.setup.copy')" :note="_('web.front.setup.copied')" />
+              {% endif %}
+            </li>
+          </ol>
+        </section>
+        <div class="front-guide">
+          <p class="body-text">{{ _("web.front.guide") }}</p>
+          <Action :href="url('/' ~ game.id ~ '/play')" :label="_('web.front.play')" :size="32" />
+        </div>
+      </div>
+    </Panel>
+  </section>
+</Layout>

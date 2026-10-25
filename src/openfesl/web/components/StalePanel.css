@@ -1,0 +1,49 @@
+@layer components {
+  .stale-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    margin-top: 2px;
+    background: var(--row-light);
+    padding: 6px;
+    color: var(--ink);
+
+    p {
+      min-width: 0;
+      flex: 1 1 360px;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.4;
+      font-weight: 600;
+    }
+
+    button {
+      display: flex;
+      min-height: 44px;
+      align-items: center;
+      gap: 10px;
+      background: var(--ink);
+      padding: 0 16px 0 12px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--bright);
+      text-transform: uppercase;
+    }
+  }
+
+  .stale-mark {
+    display: grid;
+    flex: 0 0 44px;
+    place-items: center;
+
+    > span {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      background: var(--accent);
+    }
+  }
+}

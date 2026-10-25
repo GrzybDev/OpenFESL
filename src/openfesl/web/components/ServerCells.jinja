@@ -1,0 +1,21 @@
+{#def server, href: str #}
+{# The cells of a server's row, as the game's server browser lays them out. #}
+{% set cell = "server-cell" %}
+<div role="cell" class="cell-badges {{ cell }}">
+  <Badges :server="server" />
+</div>
+<div role="cell" class="cell-name {{ cell }}"><a href="{{ href }}" class="server-name">{{ server.name }}</a></div>
+<div role="cell" class="cell-map {{ cell }}">
+  <Published kind="map" :label="server.map" />
+</div>
+<div role="cell" class="cell-mode {{ cell }}"><Published kind="mode" :label="server.mode" />{% if server.hardcore %}<span class="hardcore-mark">{{ _("web.server.hardcore") }}</span>{% endif %}</div>
+<div role="cell" class="cell-players {{ cell }}">
+  <span class="cell-taken"><Count :value="server.players" class="count-ink count-sm live-value" />&nbsp;/&nbsp;{{ number(server.max_players) }}<span class="cell-free"><Free :server="server" /></span></span>
+  <Seats :taken="server.players" :slots="server.max_players" />
+</div>
+<div role="cell" class="cell-region {{ cell }}">
+  <Published kind="region" :label="server.region" />
+</div>
+<div role="cell" class="cell-end">
+  <EndSquare :href="href" :label="_('web.server.page.of', name=server.name)" />
+</div>

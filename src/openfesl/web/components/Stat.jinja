@@ -1,0 +1,9 @@
+{#def label: str, kind: str = "center" #}
+{# One of a panel's stats: its label on the black bar and, from the content, its value laid out
+   as its kind says: on the accent, centred, stacked over a meter, with a link. #}
+<div class="stat">
+  <dt>{{ label }}</dt>
+  <dd class="stat-{{ kind }}">
+    {{ content }}
+  </dd>
+</div>

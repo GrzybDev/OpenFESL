@@ -1,0 +1,23 @@
+@layer components {
+  .download {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    align-self: flex-start;
+    background: var(--ink);
+    color: var(--bright);
+  }
+
+  .download-label {
+    padding: 0 16px 0 10px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .download-file {
+    letter-spacing: 0.03em;
+    text-transform: none;
+  }
+}

@@ -1,0 +1,10 @@
+{#def server #}
+{# The badges of a server's state: full, empty or room for a squad, and hardcore. #}
+{% if server.free == 0 %}
+  <Badge name="full" />
+{% elif server.players == 0 %}
+  <Badge name="empty" />
+{% elif server.room %}
+  <Badge name="squad" />
+{% endif %}
+{% if server.hardcore %}<Badge name="bolt" />{% endif %}

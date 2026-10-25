@@ -1,0 +1,13 @@
+{#def taken: int, slots: int, scale: int = 1 #}
+{# A server's slots, taken ones solid, in groups of four as the game's server browser draws them;
+   a refresh fills or empties them one after another (M6). #}
+{% set width = ((slots + 3) // 4 - 1) * 18 + ((slots - 1) % 4 + 1) * 4 - 1 %}
+<svg class="meter{% if attrs.classes %} {{ attrs.classes }}{% endif %}"
+     width="{{ width * scale }}"
+     height="{{ 8 * scale }}"
+     viewBox="0 0 {{ width }} 8"
+     data-taken="{{ taken }}"
+     aria-hidden="true">
+  {%- for slot in range(slots) %}<rect class="slot{% if slot < taken %} taken{% endif %}" x="{{ (slot // 4) * 18 + (slot % 4) * 4 + 0.6 }}" y=".6" width="1.8" height="6.8" />
+{% endfor -%}
+</svg>

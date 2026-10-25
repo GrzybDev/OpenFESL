@@ -220,3 +220,186 @@ msgstr "All games"
 
 msgid "games.bfbc2.tagline"
 msgstr "Online play on PC"
+
+msgid "web.game.menu.servers"
+msgstr "Servers"
+
+msgid "web.game.menu.leaderboard"
+msgstr "Leaderboard"
+
+msgid "web.game.menu.activity"
+msgstr "Activity"
+
+msgid "web.game.menu.play"
+msgstr "Play"
+
+msgid "web.game.menu.host"
+msgstr "Host a server"
+
+msgid "web.activity.online_now"
+msgstr "Online now"
+
+msgid "web.live.again"
+msgstr "Try again"
+
+msgid "web.front.all_servers"
+msgstr "All servers"
+
+msgid "web.front.busiest"
+msgstr "Busiest server with room for a squad"
+
+msgid "web.servers.status"
+msgstr "Status"
+
+msgid "web.servers.name"
+msgstr "Server name"
+
+msgid "web.servers.map"
+msgstr "Map"
+
+msgid "web.servers.mode"
+msgstr "Game mode"
+
+msgid "web.servers.players"
+msgstr "Players"
+
+msgid "web.servers.region"
+msgstr "Region"
+
+msgid "web.servers.page"
+msgstr "Server page"
+
+msgid "web.server.since"
+msgstr "Up since %(time)s UTC"
+
+msgid "web.server.joining"
+msgstr ""
+"Joining happens in the game; its server browser finds this server by name."
+
+msgid "web.server.page"
+msgstr "Server page"
+
+msgid "web.server.page.of"
+msgstr "Server page: %(name)s"
+
+msgid "web.server.copy"
+msgstr "Copy server name"
+
+msgid "web.server.copied"
+msgstr "Server name copied."
+
+msgid "web.copy.done"
+msgstr "Copied"
+
+msgid "web.server.full"
+msgstr "Full"
+
+msgid "web.server.empty"
+msgstr "Empty"
+
+msgid "web.server.hardcore"
+msgstr "Hardcore"
+
+msgid "web.server.unpublished"
+msgstr "Not published"
+
+msgid "web.front.setup"
+msgstr "Set up the game"
+
+msgid "web.front.setup.steps"
+msgstr "3 steps"
+
+msgid "web.front.setup.hook"
+msgstr "%(file)s comes from the latest OpenFESLHook release."
+
+msgid "web.front.setup.download"
+msgstr "Download %(file)s"
+
+msgid "web.front.setup.folder"
+msgstr "Copy %(file)s into the game's folder, next to %(executable)s."
+
+msgid "web.front.setup.account"
+msgstr ""
+"Start the game and create an account. When the game asks for a key, enter "
+"%(key)s."
+
+msgid "web.front.setup.account.plain"
+msgstr "Start the game and create an account."
+
+msgid "web.front.setup.copy"
+msgstr "Copy key"
+
+msgid "web.front.setup.copied"
+msgstr "Key copied."
+
+msgid "web.front.guide"
+msgstr "The full guide covers each step in detail."
+
+msgid "web.front.play"
+msgstr "How to play"
+
+msgid "games.bfbc2.map.panama-canal"
+msgstr "Panama Canal"
+
+msgid "games.bfbc2.map.valparaiso"
+msgstr "Valparaiso"
+
+msgid "games.bfbc2.map.laguna-alta"
+msgstr "Laguna Alta"
+
+msgid "games.bfbc2.map.isla-inocentes"
+msgstr "Isla Inocentes"
+
+msgid "games.bfbc2.map.atacama-desert"
+msgstr "Atacama Desert"
+
+msgid "games.bfbc2.map.arica-harbor"
+msgstr "Arica Harbor"
+
+msgid "games.bfbc2.map.white-pass"
+msgstr "White Pass"
+
+msgid "games.bfbc2.map.nelson-bay"
+msgstr "Nelson Bay"
+
+msgid "games.bfbc2.map.laguna-presa"
+msgstr "Laguna Presa"
+
+msgid "games.bfbc2.map.port-valdez"
+msgstr "Port Valdez"
+
+msgid "games.bfbc2.map.vantage-point"
+msgstr "Vantage Point"
+
+msgid "games.bfbc2.map.hill-137"
+msgstr "Hill 137"
+
+msgid "games.bfbc2.map.cao-son-temple"
+msgstr "Cao Son Temple"
+
+msgid "games.bfbc2.map.phu-bai-valley"
+msgstr "Phu Bai Valley"
+
+msgid "games.bfbc2.map.operation-hastings"
+msgstr "Operation Hastings"
+
+msgid "games.bfbc2.mode.conquest"
+msgstr "Conquest"
+
+msgid "games.bfbc2.mode.rush"
+msgstr "Rush"
+
+msgid "games.bfbc2.mode.squad-rush"
+msgstr "Squad Rush"
+
+msgid "games.bfbc2.mode.squad-deathmatch"
+msgstr "Squad Deathmatch"
+
+msgid "games.bfbc2.expansion.base"
+msgstr "Base game"
+
+msgid "games.bfbc2.expansion.vietnam"
+msgstr "Vietnam expansion"
+
+msgid "games.bfbc2.region.unknown"
+msgstr "Unknown"
