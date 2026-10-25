@@ -1,0 +1,15 @@
+{#def name: str, label: str, glyph: str, count: int, checked: bool = False #}
+{# A checkbox row of a filter panel: the state's badge, its word, how many it would show and the
+   box, which the whole row toggles. #}
+<label class="check-row">
+  <span class="check-glyph"><Badge :name="glyph" /></span>
+  <span class="check-label">{{ label }}</span>
+  <span class="check-count">{{ number(count) }}</span>
+  <span class="check-place">
+    <input type="checkbox"
+           name="{{ name }}"
+           value="1"
+           {% if checked %} checked{% endif %}
+           class="check">
+    <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>
+</label>

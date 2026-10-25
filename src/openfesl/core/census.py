@@ -59,6 +59,7 @@ class Server:
         expansion: The content it needs, if the host says.
         region: Where the server is, if the host says.
         hardcore: Whether it is played under hardcore rules.
+        roster: The names of its players, first in first.
     """
 
     slug: str
@@ -72,6 +73,7 @@ class Server:
     expansion: Label | None
     region: Label | None
     hardcore: bool
+    roster: tuple[str, ...]
 
     @property
     def free(self) -> int:
@@ -135,10 +137,11 @@ class Census:
     def _server(self, game: Game, hosted: HostedGame, taken: set[str]) -> Server:
         listing = game.listing
         attributes = {key.casefold(): value for key, value in hosted.basic.items()}
+        roster = tuple(player.persona.name for player in hosted.in_game())
         return Server(
             slug=_unique(slug(hosted.name), taken),
             name=hosted.name,
-            players=len(hosted.in_game()),
+            players=len(roster),
             max_players=hosted.max_players,
             squad=listing.squad,
             since=hosted.since,
@@ -147,6 +150,7 @@ class Census:
             expansion=_label(listing.expansion, attributes),
             region=_label(listing.region, attributes),
             hardcore=_marked(listing.hardcore, attributes),
+            roster=roster,
         )
 
 

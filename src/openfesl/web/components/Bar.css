@@ -25,6 +25,11 @@
     letter-spacing: 0.07em;
   }
 
+  .bar-legend {
+    display: block;
+    width: 100%;
+  }
+
   .bar-extra {
     color: var(--accent);
   }

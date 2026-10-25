@@ -1,0 +1,12 @@
+{#def id: str, name: str, label: str, value: str, hint: str #}
+{# A search field of a filter panel: its label on the accent over the light field. Further
+   attributes, such as htmx's, go on the field. #}
+<label for="{{ id }}" class="field-label field-label-joined">{{ label }}</label>
+<input id="{{ id }}"
+       name="{{ name }}"
+       type="search"
+       value="{{ value }}"
+       placeholder="{{ hint }}"
+       autocomplete="off"
+       {{ attrs.render() }}
+       class="field-input">

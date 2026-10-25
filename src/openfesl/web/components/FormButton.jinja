@@ -1,0 +1,10 @@
+{#def icon: str, href: str = "" #}
+{# A filter panel's black button with its glyph on a grey square: a link where it leads somewhere,
+   otherwise the button that sends the form. #}
+{% set glyph %}<span aria-hidden="true"
+      class="form-glyph"><Icon :name="icon" :size="14" stroke="#F4F4EE" /></span>{% endset %}
+{% if href %}
+  <a href="{{ href }}" class="form-button">{{ glyph }}{{ content }}</a>
+{% else %}
+  <button type="submit" class="form-button">{{ glyph }}{{ content }}</button>
+{% endif %}

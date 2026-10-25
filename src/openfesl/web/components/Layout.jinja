@@ -20,10 +20,10 @@
     {% endfor %}
     {# A page transition captures the area, so the first frame waits until it is parsed. #}
     <link rel="expect" href="#area" blocking="render">
-    {# Refreshes keep the page as it is when the server answers with an error, and leave the styles
-       that scripts set for their motion alone. #}
+    {# Refreshes keep the page as it is when the server answers with an error, and leave alone the
+       styles that scripts set for their motion and the details a reader opened. #}
     <meta name="htmx-config"
-          content='{"includeIndicatorCSS": false, "noSwap": [204, 304, "4xx", "5xx"], "morphIgnore": ["data-htmx-powered", "style"]}'>
+          content='{"includeIndicatorCSS": false, "noSwap": [204, 304, "4xx", "5xx"], "morphIgnore": ["data-htmx-powered", "style", "data-open", "aria-expanded"]}'>
     {% if assets.head %}<script src="{{ assets.head }}"></script>{% endif %}
     {% if assets.app %}<script type="module" src="{{ assets.app }}"></script>{% endif %}
   </head>

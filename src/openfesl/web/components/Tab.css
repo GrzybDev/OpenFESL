@@ -1,0 +1,75 @@
+/* M3: a panel's tabs, cut at their top right corner like the game's; the chosen tab's accent
+   slides between pages. */
+@layer components {
+  /* On phones the tabs start under the title; elsewhere they sit at the right beside it. */
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-bottom: 14px;
+  }
+
+  @media (width >= 40rem) {
+    .tabs {
+      justify-content: flex-end;
+    }
+  }
+
+  .tab {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 24px 0 16px;
+    font-size: 15px;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--bright);
+    text-transform: uppercase;
+
+    &:hover {
+      text-decoration-line: none;
+    }
+
+    &[aria-current] {
+      color: var(--ink);
+    }
+
+    .go {
+      color: var(--accent);
+    }
+  }
+
+  .tab-base,
+  .tab-current {
+    position: absolute;
+    inset: 0;
+    z-index: -10;
+  }
+
+  .tab-base {
+    background: linear-gradient(225deg, transparent 8.5px, var(--ink) 8.5px);
+  }
+
+  .tab-current {
+    view-transition-name: tab-current;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+    background: var(--accent);
+  }
+
+  .tab-count {
+    font-weight: 600;
+    color: var(--soft);
+
+    [aria-current] > & {
+      color: var(--ink);
+    }
+  }
+
+  ::view-transition-group(tab-current) {
+    animation-duration: 120ms;
+  }
+}

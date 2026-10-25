@@ -415,3 +415,140 @@ msgstr "Dodatek Vietnam"
 
 msgid "games.bfbc2.region.unknown"
 msgstr "Nieznany"
+
+msgid "web.status.in_matches"
+msgstr "%(count)s w meczach"
+
+msgid "web.status.in_menus"
+msgstr "%(count)s w menu"
+
+msgid "web.servers.title"
+msgstr "Serwery"
+
+msgid "web.servers.all"
+msgstr "Wszystkie"
+
+msgid "web.servers.stale.mark"
+msgstr "Nieodświeżone"
+
+msgid "web.servers.stale"
+msgstr ""
+"Nie udało się odświeżyć listy serwerów. Widoczne są wartości z %(time)s UTC."
+
+msgid "web.servers.filters"
+msgstr "Opcje filtrowania"
+
+msgid "web.servers.name.hint"
+msgstr "Fragment nazwy serwera"
+
+msgid "web.servers.any"
+msgstr "Wszystkie"
+
+msgid "web.servers.modes.all"
+msgstr "Wszystkie tryby gry"
+
+msgid "web.servers.maps.all"
+msgstr "Wszystkie mapy"
+
+msgid "web.servers.regions.all"
+msgstr "Wszystkie regiony"
+
+msgid "web.servers.show"
+msgstr "Pokaż tylko"
+
+msgid "web.servers.show.squad"
+msgstr "Miejsce dla oddziału"
+
+msgid "web.servers.show.full"
+msgstr "Pełne"
+
+msgid "web.servers.show.empty"
+msgstr "Puste"
+
+msgid "web.servers.show.hardcore"
+msgstr "Hardcore"
+
+msgid "web.servers.reset"
+msgstr "Wyczyść"
+
+msgid "web.servers.search"
+msgstr "Szukaj"
+
+msgid "web.servers.joining"
+msgstr ""
+"Do serwerów dołącza się z przeglądarki serwerów w grze. Przygotowanie gry "
+"zajmuje trzy kroki."
+
+msgid "web.servers.sorted.players"
+msgstr "Serwery według liczby graczy"
+
+msgid "web.servers.sorted.name"
+msgstr "Serwery według nazwy"
+
+msgid "web.servers.sorted.map"
+msgstr "Serwery według mapy"
+
+msgid "web.servers.sorted.mode"
+msgstr "Serwery według trybu gry"
+
+msgid "web.servers.sorted.region"
+msgstr "Serwery według regionu"
+
+msgid "web.servers.details"
+msgstr "Szczegóły: %(name)s"
+
+msgid "web.servers.roster"
+msgstr "Gracze na tym serwerze"
+
+msgid "web.servers.more"
+msgstr "Jeszcze %(count)s"
+
+msgid "web.servers.taken"
+msgstr "Wszystkie miejsca (%(count)s) są zajęte."
+
+msgid "web.servers.none_match"
+msgstr "Żaden serwer nie pasuje do tych filtrów."
+
+msgid "web.servers.none_match.total.one"
+msgstr "Łącznie działa %(count)s serwer. Usunięcie filtra poszerza listę."
+
+msgid "web.servers.none_match.total.few"
+msgstr "Łącznie działają %(count)s serwery. Usunięcie filtra poszerza listę."
+
+msgid "web.servers.none_match.total.many"
+msgstr "Łącznie działa %(count)s serwerów. Usunięcie filtra poszerza listę."
+
+msgid "web.servers.none_match.total.other"
+msgstr "Łącznie działa %(count)s serwera. Usunięcie filtra poszerza listę."
+
+msgid "web.servers.used"
+msgstr "Użyte filtry"
+
+msgid "web.servers.remove"
+msgstr "Usuń filtr: %(filter)s"
+
+msgid "web.servers.reset_all"
+msgstr "Wyczyść filtry"
+
+msgid "web.servers.none.text"
+msgstr ""
+"Serwer pojawia się na tej liście, gdy prowadzi grę. Serwery dedykowane łączą"
+" się przez OpenFESLHook."
+
+msgid "web.servers.found"
+msgstr "Znalezione serwery: %(count)s"
+
+msgid "web.servers.showing"
+msgstr "Pozycje %(first)s–%(last)s · strona %(page)s z %(pages)s"
+
+msgid "web.servers.pages"
+msgstr "Strony"
+
+msgid "web.servers.previous"
+msgstr "Poprzednia"
+
+msgid "web.servers.next"
+msgstr "Następna"
+
+msgid "web.servers.page_number"
+msgstr "Strona %(page)s"

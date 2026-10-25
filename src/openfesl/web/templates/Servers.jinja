@@ -1,0 +1,234 @@
+{#def activity, filters, servers: list, found: int, total: int, first: int, pages: int, modes, regions: list, shown #}
+{% set title = _("web.servers.title") %}
+{% set list = url("/" ~ game.id ~ "/servers") %}
+{% set modes_data = game.listing.mode.names.values()|list if game.listing.mode else [] %}
+{% set maps_data = game.listing.map.names.values()|unique|list if game.listing.map else [] %}
+{% macro named(kind, name) %}{{ _("games." ~ game.id ~ "." ~ kind ~ "." ~ name) }}{% endmacro %}
+{% macro region_name() %}{% for region, _count in regions if (region.name or region.value) == filters.region %}<Published kind="region" :label="region" />{% else %}{{ filters.region }}{% endfor %}{% endmacro %}
+{% macro sort_header(column, label) %}
+  {% set current = filters.sort == column %}
+  <div role="columnheader"
+       {% if current %} aria-sort="{{ 'descending' if filters.descending else 'ascending' }}"{% endif %}
+       class="column-head column-sort{% if column == 'name' %} column-name{% endif %}"><a href="{{ list ~ filters.changed(sort=column, descending=(not filters.descending) if current else column == 'players').query() }}">{{ label }}{% if current %}<Icon name="down" :size="14" stroke="currentColor" :class="'' if filters.descending else 'ascending'" />{% endif %}</a></div>
+{%- endmacro %}
+{% macro chip(href, filter, label, plain=False) %}
+  <li><a href="{{ href }}"
+   aria-label="{{ _('web.servers.remove', filter=filter) }}"
+   class="filter-chip{% if plain %} filter-chip-plain{% endif %}"><span aria-hidden="true" class="form-glyph"><Icon name="x" :size="14" stroke="#F4F4EE" /></span>{{ label }}</a></li>
+{%- endmacro %}
+<Layout :title="title">
+  <div id="live"
+       hx-get="{{ here }}"
+       hx-trigger="every 15s, refresh"
+       hx-select="#live"
+       hx-select-oob="#shell-games:outerMorph"
+       hx-swap="outerMorph">
+    <GameStatus :activity="activity" />
+    <GameMenu current="servers" />
+
+    <PageHead labelledby="servers-title">
+      <div class="enter-title page-title">
+        <TitleBlock :title="title" id="servers-title">{{ game.name }}</TitleBlock>
+      </div>
+      {% if modes_data %}
+        <nav aria-label="{{ _('web.servers.mode') }}" class="tabs">
+          <Tab :href="list ~ filters.changed(mode=None).query()" :label="_('web.servers.all')" :count="total" :current="not filters.mode" />
+          {% for mode in modes_data %}
+            <Tab :href="list ~ filters.changed(mode=mode).query()" :label="named('mode', mode)" :count="modes[mode]" :current="filters.mode == mode" />
+          {% endfor %}
+        </nav>
+      {% endif %}
+    </PageHead>
+
+    <Panel class="enter-panel">
+      <p role="status"
+         data-stale-note
+         hidden
+         class="list-stale"><span>{{ _("web.servers.stale.mark") }}</span>{{ _("web.servers.stale", time=now.strftime("%H:%M")) }}</p>
+      <div class="list-layout">
+
+        <div class="list-side">
+          <form action="{{ list }}"
+                method="get"
+                role="search"
+                aria-labelledby="filters-title">
+            <Bar id="filters-title" large>{{ _("web.servers.filters") }}</Bar>
+            {# The list's other choices, before the buttons whose own value replaces one of them. #}
+            {% for field, value in [("mode", filters.mode), ("map", filters.map), ("region", filters.region), ("sort", "" if filters.sort == "players" else filters.sort), ("order", "" if filters.descending == (filters.sort == "players") else filters.direction)] %}
+              {% if value %}<input type="hidden" name="{{ field }}" value="{{ value }}">{% endif %}
+            {% endfor %}
+            <SearchField id="filters-name" name="q" :label="_('web.servers.name')" :value="filters.name" :hint="_('web.servers.name.hint')" hx-morph-skip />
+
+            {% if modes_data %}
+              <div role="group" aria-labelledby="filters-mode" class="filter-group">
+                <Bar tag="h3" id="filters-mode" :extra="named('mode', filters.mode) if filters.mode else _('web.servers.any')">{{ _("web.servers.mode") }}</Bar>
+                <div class="toggles">
+                  <Toggle name="mode" value="" :label="_('web.servers.modes.all')" :count="total" :current="not filters.mode" />
+                  {% for mode in modes_data %}
+                    <Toggle name="mode" :value="mode" :label="named('mode', mode)" :count="modes[mode]" :current="filters.mode == mode" />
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+
+            {% if maps_data %}
+              <div role="group" aria-labelledby="filters-map" class="filter-group">
+                <Bar tag="h3" id="filters-map" :extra="named('map', filters.map) if filters.map in maps_data else (filters.map or _('web.servers.any'))">{{ _("web.servers.map") }}</Bar>
+                <div class="toggles toggles-pairs">
+                  <Toggle name="map" value="" :label="_('web.servers.maps.all')" :current="not filters.map" narrow />
+                  {% for map in maps_data %}
+                    <Toggle name="map" :value="map" :label="named('map', map)" :current="filters.map == map" narrow />
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+
+            {% if regions %}
+              <div role="group" aria-labelledby="filters-region" class="filter-group">
+                <Bar tag="h3" id="filters-region" :extra="region_name() if filters.region else _('web.servers.any')">{{ _("web.servers.region") }}</Bar>
+                <div class="toggles">
+                  <Toggle name="region" value="" :label="_('web.servers.regions.all')" :count="total" :current="not filters.region" />
+                  {% for region, region_count in regions %}
+                    {% set label %}<Published kind="region" :label="region" />{% endset %}
+                    <Toggle name="region" :value="region.name or region.value" :label="label" :count="region_count" :current="filters.region == (region.name or region.value)" />
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+
+            <fieldset class="filter-group">
+              <legend class="bar bar-legend">{{ _("web.servers.show") }}</legend>
+              <div class="toggles">
+                {% for state, glyph in [("squad", "squad"), ("full", "full"), ("empty", "empty"), ("hardcore", "bolt")] %}
+                  <CheckRow :name="state" :label="_('web.servers.show.' ~ state)" :glyph="glyph" :count="shown[state]" :checked="state in filters.show" />
+                {% endfor %}
+              </div>
+            </fieldset>
+
+            <div role="group"
+              <div class="form-buttons">
+                <FormButton icon="x" :href="list">{{ _("web.servers.reset") }}</FormButton>
+                <FormButton icon="find">{{ _("web.servers.search") }}</FormButton>
+              </div>
+            </form>
+            <div class="list-guide">
+              <Action :href="url('/' ~ game.id ~ '/play')" :label="_('web.front.play')" :size="32" />
+              <p class="body-text">{{ _("web.servers.joining") }}</p>
+            </div>
+          </div>
+
+          <section aria-labelledby="servers-list" class="list-main">
+            <h2 id="servers-list" class="sr-only">{{ _("web.servers.sorted." ~ filters.sort) }}</h2>
+            <div class="table-scroll table-scroll-flush">
+              <div role="table"
+                   aria-labelledby="servers-list"
+                   class="table server-table">
+                <div role="rowgroup">
+                  <div role="row" class="server-columns">
+                    <div role="columnheader"
+                         class="column-head"><span class="sr-only">{{ _("web.servers.status") }}</span></div>
+                    {{ sort_header("name", _("web.servers.name")) }}
+                    {{ sort_header("map", _("web.servers.map")) }}
+                    {{ sort_header("mode", _("web.servers.mode")) }}
+                    {{ sort_header("players", _("web.servers.players")) }}
+                    {{ sort_header("region", _("web.servers.region")) }}
+                    <div role="columnheader"><span class="sr-only">{{ _("web.servers.page") }}</span></div>
+                  </div>
+                </div>
+                <div role="rowgroup" data-rows class="enter-rows table-rows">
+                  {% for server in servers %}
+                    {% set href = url("/" ~ game.id ~ "/servers/" ~ server.slug) %}
+                    {% set open = filters.open == server.slug %}
+                    <div role="none"
+                         id="row-{{ server.slug }}"
+                         data-key="{{ server.slug }}"
+                         {% if open %} data-open{% endif %}
+                         class="server">
+                      <div role="row" class="server-row server-columns">
+                        <ServerCells :server="server" :href="href" listed>
+                        <a href="{{ list ~ filters.changed(open=None if open else server.slug, page=filters.page).query() }}#row-{{ server.slug }}"
+                           role="button"
+                           aria-expanded="{{ 'true' if open else 'false' }}"
+                           aria-controls="details-{{ server.slug }}"
+                           aria-label="{{ _('web.servers.details', name=server.name) }}"
+                           data-details
+                           class="details-button"><span><Icon name="down" stroke="#F4F4EE" class="details-chevron" /></span></a>
+                        </ServerCells>
+                      </div>
+                      <div role="row" class="drawer">
+                        <div role="cell"
+                             aria-colspan="7"
+                             id="details-{{ server.slug }}"
+                             class="drawer-cell">
+                          <div class="row-details">
+                            <div>
+                              <p class="row-facts">{{ _("web.server.since", time=server.since.strftime("%H:%M")) }}{% if server.expansion %} · <Published kind="expansion" :label="server.expansion" />{% endif %}</p>
+                              {% if server.roster %}
+                                <ul aria-label="{{ _('web.servers.roster') }}"
+                                    class="name-chips server-roster">
+                                  {% for player in server.roster[:4] %}
+                                    <li><a href="{{ url('/' ~ game.id ~ '/players/' ~ player|urlencode) }}">{{ player }}</a></li>
+                                  {% endfor %}
+                                  {% if server.roster|length > 4 %}<li><a href="{{ href }}">{{ _("web.servers.more", count=number(server.roster|length - 4)) }}</a></li>{% endif %}
+                                </ul>
+                              {% endif %}
+                              <p class="row-text server-joining">{% if server.free == 0 %}{{ _("web.servers.taken", count=number(server.max_players)) }} {% endif %}{{ _("web.server.joining") }}</p>
+                            </div>
+                            <div class="row-actions">
+                              <SmallAction :href="href" :label="_('web.server.page')" />
+                              <CopyButton :value="server.name" :label="_('web.server.copy')" :note="_('web.server.copied')" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {% else %}
+                    <div role="row">
+                      <div role="cell" aria-colspan="7" class="row-details list-empty">
+                        {% if total and filters.narrowed %}
+                          <div>
+                            <p class="list-empty-title">{{ _("web.servers.none_match") }}</p>
+                            <p class="body-text">{{ _n("web.servers.none_match.total", total) }}</p>
+                            <h3 id="filters-used">{{ _("web.servers.used") }}</h3>
+                            <ul aria-labelledby="filters-used" class="filter-chips">
+                              {% if filters.name %}{{ chip(list ~ filters.changed(name='').query(), filters.name, filters.name, plain=True) }}{% endif %}
+                              {% if filters.mode %}{{ chip(list ~ filters.changed(mode=None).query(), named("mode", filters.mode), named("mode", filters.mode)) }}{% endif %}
+                              {% if filters.map %}
+                                {% set map_name = named("map", filters.map) if filters.map in maps_data else filters.map %}
+                                {{ chip(list ~ filters.changed(map=None).query(), map_name, map_name) }}
+                              {% endif %}
+                              {% if filters.region %}{{ chip(list ~ filters.changed(region=None).query(), filters.region, region_name()) }}{% endif %}
+                              {% for state in ["squad", "full", "empty", "hardcore"] if state in filters.show %}
+                                {{ chip(list ~ filters.without(state).query(), _("web.servers.show." ~ state), _("web.servers.show." ~ state)) }}
+                              {% endfor %}
+                            </ul>
+                          </div>
+                          <SmallAction :href="list" :label="_('web.servers.reset_all')" />
+                        {% else %}
+                          <div>
+                            <p class="list-empty-title">{{ _("web.activity.no_servers") }}</p>
+                            <p class="body-text">{{ _("web.servers.none.text") }}</p>
+                          </div>
+                          <div class="row-actions">
+                            <SmallAction :href="url('/' ~ game.id ~ '/host')" :label="_('web.game.menu.host')" />
+                            <SmallAction :href="url('/' ~ game.id ~ '/play')" :label="_('web.front.play')" />
+                          </div>
+                        {% endif %}
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+
+            {% set found_count %}<Count :value="found" class="count-ink count-sm" />{% endset %}
+            <div class="list-foot">
+              <p><span class="list-count">{{ _("web.servers.found", count=found_count) }}</span>{% if found %}<span class="list-range">{{ _("web.servers.showing", first=number(first), last=number(first + servers|length - 1), page=number(filters.page), pages=number(pages)) }}</span>{% endif %}</p>
+              <Pager :base="list" :view="filters" :pages="pages" />
+            </div>
+          </section>
+
+        </div>
+      </Panel>
+    </div>
+  </Layout>

@@ -17,6 +17,11 @@
     padding: 2px 6px 6px;
   }
 
+  .table-scroll-flush {
+    margin: -6px;
+    padding: 6px;
+  }
+
   .column-head {
     display: flex;
     min-height: 44px;
@@ -31,8 +36,32 @@
     text-transform: uppercase;
   }
 
-  .column-name {
+  .column-name,
+  .column-sort.column-name a {
     padding-inline: 12px;
+  }
+
+  .column-sort.column-name {
+    padding: 0;
+  }
+
+  /* A sortable column's head is a link; the current column shows its order with an arrow. */
+  .column-sort {
+    padding: 0;
+
+    a {
+      display: flex;
+      min-height: 44px;
+      flex: 1;
+      align-items: center;
+      gap: 6px;
+      padding-inline: 10px;
+    }
+
+    svg {
+      flex: none;
+      color: var(--accent);
+    }
   }
 
   /* The light row under a list's row that holds its details or a list's empty state. */
@@ -71,5 +100,114 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
+  }
+
+  /* The first line of a list's empty state, or of a page with nothing to show. */
+  .list-empty-title {
+    font-family: var(--font-sans);
+    font-size: 20px;
+    line-height: 1.25;
+    font-weight: 700;
+  }
+
+  /* How many a list found, and which of them a page shows, before the page links. */
+  .list-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 20px;
+    margin-top: 12px;
+
+    > p {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 14px;
+    }
+  }
+
+  .list-count {
+    background: var(--row);
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    text-transform: uppercase;
+  }
+
+  .list-range {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--soft);
+  }
+
+  /* A list of names as small light blocks, such as the players on a server. */
+  .name-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+
+    a {
+      display: flex;
+      min-height: 44px;
+      align-items: center;
+      background: var(--row);
+      padding-inline: 12px;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 600;
+    }
+  }
+
+  /* A list beside its filter panel, which goes first on phones and to the right elsewhere. */
+  .list-layout {
+    display: flex;
+    flex-direction: row-reverse;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .list-side {
+    min-width: 0;
+    flex: 1 1 320px;
+  }
+
+  .list-main {
+    position: relative;
+    min-width: 0;
+    flex: 999 1 600px;
+  }
+
+  /* What a failed refresh of a list shows over it until the next one succeeds. */
+  .list-stale {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+    margin-bottom: 2px;
+    background: var(--ink);
+    padding: 11px 14px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.35;
+    font-weight: 600;
+    color: var(--bright);
+
+    > span {
+      background: var(--row);
+      padding: 3px 7px;
+      font-family: var(--area-font);
+      font-size: 12px;
+      line-height: 1.1;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: var(--ink);
+      text-transform: uppercase;
+    }
   }
 }

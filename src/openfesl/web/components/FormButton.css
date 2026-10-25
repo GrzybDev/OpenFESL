@@ -1,0 +1,33 @@
+@layer components {
+  .form-button {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: var(--ink);
+    padding-inline: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--bright);
+    text-transform: uppercase;
+  }
+
+  /* Also the cross on the chips that remove a filter. */
+  .form-glyph {
+    display: grid;
+    width: 22px;
+    height: 22px;
+    place-items: center;
+    background: var(--bar-dark);
+  }
+
+  /* A form's reset and search buttons side by side. */
+  .form-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px;
+    margin-top: 10px;
+  }
+}

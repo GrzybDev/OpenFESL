@@ -1,0 +1,78 @@
+/* The real checkbox covers its drawn box, so the box keeps the browser's own checking and focus. */
+@layer components {
+  .check-row {
+    display: grid;
+    min-height: 44px;
+    grid-template-columns: 44px minmax(0, 1fr) auto 44px;
+    align-items: center;
+    cursor: pointer;
+    background: var(--row);
+    color: var(--ink);
+  }
+
+  .check-glyph {
+    display: grid;
+    place-items: center;
+  }
+
+  .check-label {
+    padding-inline: 4px;
+    font-size: 14px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .check-count {
+    padding-inline: 6px;
+    font-size: 14px;
+    line-height: calc(1.25 / 0.875);
+    font-weight: 600;
+  }
+
+  .check-place {
+    position: relative;
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+  }
+
+  .check {
+    position: absolute;
+    inset: 0;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    opacity: 0;
+  }
+
+  .check-box {
+    display: grid;
+    width: 22px;
+    height: 22px;
+    place-items: center;
+    border: 2px solid var(--ink);
+    background: var(--row-light);
+    color: var(--accent);
+
+    svg {
+      opacity: 0;
+    }
+
+    .check:checked + & {
+      background-color: var(--ink);
+
+      svg {
+        opacity: 1;
+      }
+    }
+
+    .check:focus-visible + & {
+      outline: 3px solid #fff;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 6px var(--ink);
+    }
+  }
+}

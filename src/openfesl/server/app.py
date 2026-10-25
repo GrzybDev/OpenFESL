@@ -57,6 +57,7 @@ from openfesl.web.languages import LanguageMiddleware
 from openfesl.web.menu import menu_routes
 from openfesl.web.pages import STATIC, Pages, StaticAssets
 from openfesl.web.security import SecurityHeadersMiddleware
+from openfesl.web.servers import server_routes
 from openfesl.web.shell import shell_routes
 from openfesl.web.verification import verification_routes
 
@@ -162,6 +163,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(shell_routes(pages, Terms.load()))
     app.include_router(menu_routes(pages, games, census))
     app.include_router(front_routes(pages, games, census))
+    app.include_router(server_routes(pages, games, census))
     app.include_router(verification_routes(confirm, pages))
     # The last one added sees a request first: the game's HTTP keeps its own answers.
     app.add_middleware(LanguageMiddleware)

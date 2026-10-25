@@ -403,3 +403,136 @@ msgstr "Vietnam expansion"
 
 msgid "games.bfbc2.region.unknown"
 msgstr "Unknown"
+
+msgid "web.status.in_matches"
+msgstr "%(count)s in matches"
+
+msgid "web.status.in_menus"
+msgstr "%(count)s in the menus"
+
+msgid "web.servers.title"
+msgstr "Servers"
+
+msgid "web.servers.all"
+msgstr "All servers"
+
+msgid "web.servers.stale.mark"
+msgstr "Not refreshed"
+
+msgid "web.servers.stale"
+msgstr ""
+"The server list could not be refreshed. Showing values from %(time)s UTC."
+
+msgid "web.servers.filters"
+msgstr "Filter options"
+
+msgid "web.servers.name.hint"
+msgstr "Part of a server name"
+
+msgid "web.servers.any"
+msgstr "All"
+
+msgid "web.servers.modes.all"
+msgstr "All modes"
+
+msgid "web.servers.maps.all"
+msgstr "All maps"
+
+msgid "web.servers.regions.all"
+msgstr "All regions"
+
+msgid "web.servers.show"
+msgstr "Show only"
+
+msgid "web.servers.show.squad"
+msgstr "Room for a squad"
+
+msgid "web.servers.show.full"
+msgstr "Full"
+
+msgid "web.servers.show.empty"
+msgstr "Empty"
+
+msgid "web.servers.show.hardcore"
+msgstr "Hardcore"
+
+msgid "web.servers.reset"
+msgstr "Reset"
+
+msgid "web.servers.search"
+msgstr "Search"
+
+msgid "web.servers.joining"
+msgstr ""
+"Servers are joined from the game's own server browser. Setting up the game "
+"takes three steps."
+
+msgid "web.servers.sorted.players"
+msgstr "Servers, sorted by players"
+
+msgid "web.servers.sorted.name"
+msgstr "Servers, sorted by name"
+
+msgid "web.servers.sorted.map"
+msgstr "Servers, sorted by map"
+
+msgid "web.servers.sorted.mode"
+msgstr "Servers, sorted by game mode"
+
+msgid "web.servers.sorted.region"
+msgstr "Servers, sorted by region"
+
+msgid "web.servers.details"
+msgstr "Details: %(name)s"
+
+msgid "web.servers.roster"
+msgstr "Players on this server"
+
+msgid "web.servers.more"
+msgstr "%(count)s more"
+
+msgid "web.servers.taken"
+msgstr "All %(count)s slots are taken."
+
+msgid "web.servers.none_match"
+msgstr "No server matches these filters."
+
+msgid "web.servers.none_match.total.one"
+msgstr ""
+"%(count)s server is online in total. Removing a filter widens the list."
+
+msgid "web.servers.none_match.total.other"
+msgstr ""
+"%(count)s servers are online in total. Removing a filter widens the list."
+
+msgid "web.servers.used"
+msgstr "Filters in use"
+
+msgid "web.servers.remove"
+msgstr "Remove filter: %(filter)s"
+
+msgid "web.servers.reset_all"
+msgstr "Reset filters"
+
+msgid "web.servers.none.text"
+msgstr ""
+"A server appears in this list while it is hosting. Dedicated servers connect"
+" through OpenFESLHook."
+
+msgid "web.servers.found"
+msgstr "Servers found: %(count)s"
+
+msgid "web.servers.showing"
+msgstr "Showing %(first)s–%(last)s · page %(page)s of %(pages)s"
+
+msgid "web.servers.pages"
+msgstr "Pages"
+
+msgid "web.servers.previous"
+msgstr "Previous"
+
+msgid "web.servers.next"
+msgstr "Next"
+
+msgid "web.servers.page_number"
+msgstr "Page %(page)s"

@@ -1,10 +1,13 @@
-{#def server, href: str #}
-{# The cells of a server's row, as the game's server browser lays them out. #}
-{% set cell = "server-cell" %}
+{#def server, href: str, listed: bool = False #}
+{# The cells of a server's row, as the game's server browser lays them out. A listed row reacts to
+   the pointer and opens its details, whose button the content gives. #}
+{% set cell = "server-cell row-cell" if listed else "server-cell" %}
 <div role="cell" class="cell-badges {{ cell }}">
   <Badges :server="server" />
 </div>
-<div role="cell" class="cell-name {{ cell }}"><a href="{{ href }}" class="server-name">{{ server.name }}</a></div>
+<div role="cell"
+     class="cell-name {{ cell }}"><a href="{{ href }}"
+   class="server-name">{{ server.name }}</a>{{ content }}</div>
 <div role="cell" class="cell-map {{ cell }}">
   <Published kind="map" :label="server.map" />
 </div>

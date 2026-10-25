@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import re
 import struct
 import urllib.error
 import urllib.request
@@ -363,6 +364,17 @@ async def fetch(server_url: str, path: str, host: str | None = None) -> tuple[in
             return error.code, error.headers, error.read()
 
     return await asyncio.to_thread(send)
+
+
+def markup(body: bytes) -> str:
+    """Return a page's markup without the whitespace that its templates' layout adds.
+
+    Args:
+        body: The page.
+    """
+    # Only ASCII whitespace: a no-break space belongs to the page's text.
+    text = re.sub(r"\s+", " ", body.decode(), flags=re.ASCII)
+    return re.sub(r"\s*([<>])\s*", r"\1", text, flags=re.ASCII)
 
 
 def block(owner: int, member: int) -> Fields:

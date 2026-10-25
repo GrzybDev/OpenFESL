@@ -1,0 +1,28 @@
+{#def base: str, view, pages: int #}
+{# The links to a list's pages, from a view of the list whose changed(page=...) gives each page. #}
+{% if pages > 1 %}
+  <nav aria-label="{{ _('web.servers.pages') }}" class="pager">
+    {% if view.page > 1 %}
+      <a href="{{ base ~ view.changed(page=view.page - 1).query() }}"
+         class="pager-step pager-back"><Icon name="go" :size="14" stroke="currentColor" />{{ _("web.servers.previous") }}</a>
+    {% else %}
+      <span class="pager-step pager-back"><Icon name="go" :size="14" stroke="currentColor" />{{ _("web.servers.previous") }}</span>
+    {% endif %}
+    {% for shown in page_links(view.page, pages) %}
+      {% if shown is none %}
+        <span aria-hidden="true" class="pager-gap">…</span>
+      {% else %}
+        <a href="{{ base ~ view.changed(page=shown).query() }}"
+           {% if shown == view.page %} aria-current="page"{% endif %}
+           aria-label="{{ _('web.servers.page_number', page=number(shown)) }}"
+           class="pager-page">{{ number(shown) }}</a>
+      {% endif %}
+    {% endfor %}
+    {% if view.page < pages %}
+      <a href="{{ base ~ view.changed(page=view.page + 1).query() }}"
+         class="pager-step pager-next">{{ _("web.servers.next") }}<Icon name="go" :size="14" stroke="currentColor" /></a>
+    {% else %}
+      <span class="pager-step pager-next">{{ _("web.servers.next") }}<Icon name="go" :size="14" stroke="currentColor" /></span>
+    {% endif %}
+  </nav>
+{% endif %}

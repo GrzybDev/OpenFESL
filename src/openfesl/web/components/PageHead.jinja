@@ -1,0 +1,4 @@
+{#def tag: str = "section", labelledby: str = "" #}
+{# The head of a game's page under its menu bar: the title block, which the content wraps in the
+   page-title block, and the page's tabs or a link beside it. #}
+<{{ tag }}{% if labelledby %} aria-labelledby="{{ labelledby }}"{% endif %} class="page-head{% if attrs.classes %} {{ attrs.classes }}{% endif %}">{{ content }}</{{ tag }}>

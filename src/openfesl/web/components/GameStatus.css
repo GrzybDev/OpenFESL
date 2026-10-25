@@ -1,0 +1,33 @@
+@layer components {
+  .game-status {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: -8px;
+    padding-bottom: 10px;
+
+    > div {
+      width: min(100%, 260px);
+      text-align: right;
+    }
+
+    .share-meter {
+      margin: 7px 0 6px;
+    }
+  }
+
+  .game-status-matches {
+    font-size: 19px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .game-status-menus {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: calc(1.25 / 0.875);
+    font-weight: 500;
+    color: var(--soft);
+  }
+}

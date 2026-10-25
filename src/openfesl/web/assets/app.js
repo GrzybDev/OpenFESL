@@ -33,12 +33,13 @@ document.addEventListener("click", (event) => {
 
 // Live values: a page's #live region refreshes itself through htmx every 15 s while the tab is
 // visible. A changed number counts to its new value (M5), a server's slots fill or empty one by
-// one (M6), and a failed refresh keeps the last values, muted, until the next one succeeds or
-// the reader asks again.
+// one (M6), rows glide to their new places (M9), and a failed refresh keeps the last values,
+// muted, until the next one succeeds or the reader asks again.
 const REFRESH = 15000;
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 let refreshedAt = Date.now();
 let counted = new Map();
+let places = new Map();
 
 document.addEventListener("htmx:before:request", (event) => {
   if (document.hidden) {
@@ -63,7 +64,20 @@ function refresh() {
   document.getElementById("live")?.dispatchEvent(new Event("refresh"));
 }
 
-document.addEventListener("htmx:before:swap", () => {
+document.addEventListener("htmx:before:swap", (event) => {
+  // A list under the pointer keeps its order until the pointer leaves it.
+  const held = document.querySelector("[data-rows]:hover");
+  if (held) {
+    event.preventDefault();
+    held.addEventListener("pointerleave", refresh, { once: true });
+    return;
+  }
+  places = new Map(
+    [...document.querySelectorAll("[data-rows] > [data-key]")].map((row) => [
+      row.dataset.key,
+      row.getBoundingClientRect().top,
+    ]),
+  );
   counted = new Map(
     [...document.querySelectorAll("[data-count]")].map((element) => [
       element,
@@ -82,6 +96,8 @@ document.addEventListener("htmx:before:swap", () => {
 
 document.addEventListener("htmx:after:swap", () => {
   refreshedAt = Date.now();
+  document.documentElement.classList.add("refreshed");
+  glide();
   delete document.documentElement.dataset.stale;
   for (const [element, from] of counted) {
     if (element.isConnected) {
@@ -129,6 +145,27 @@ function countTo(element, from) {
     }
   };
   requestAnimationFrame(step);
+}
+
+/** Moves the rows a refresh reordered from their old places to their new ones (M9). */
+function glide() {
+  if (reducedMotion.matches || places.size === 0) {
+    return;
+  }
+  for (const row of document.querySelectorAll("[data-rows] > [data-key]")) {
+    const top = places.get(row.dataset.key);
+    const offset = top === undefined ? -16 : top - row.getBoundingClientRect().top;
+    if (offset !== 0) {
+      const from =
+        top === undefined
+          ? { opacity: 0, transform: `translateY(${offset}px)` }
+          : { transform: `translateY(${offset}px)` };
+      row.animate([from, { opacity: 1, transform: "none" }], {
+        duration: top === undefined ? 160 : 200,
+        easing: "cubic-bezier(.2, .8, .2, 1)",
+      });
+    }
+  }
 }
 
 /** Writes how many seconds ago the live values were refreshed. */
@@ -183,4 +220,44 @@ function announce(message) {
       region.textContent = message;
     });
   }
+}
+
+// M4: a row's details button opens its details in place; without scripts it is a link that
+// opens them with the page.
+document.addEventListener("click", (event) => {
+  const button = event.target instanceof Element ? event.target.closest("[data-details]") : null;
+  if (
+    button &&
+    event.button === 0 &&
+    !event.metaKey &&
+    !event.ctrlKey &&
+    !event.shiftKey &&
+    !event.altKey
+  ) {
+    event.preventDefault();
+    toggleDetails(button);
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (
+    event.key === " " &&
+    event.target instanceof Element &&
+    event.target.matches("[data-details]")
+  ) {
+    event.preventDefault();
+    toggleDetails(event.target);
+  }
+});
+
+/**
+ * Opens or closes the details of the row a details button belongs to.
+ *
+ * @param {Element} button - The row's details button.
+ */
+function toggleDetails(button) {
+  const row = button.closest("[data-key]");
+  const open = !row.hasAttribute("data-open");
+  row.toggleAttribute("data-open", open);
+  button.setAttribute("aria-expanded", String(open));
 }

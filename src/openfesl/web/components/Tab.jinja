@@ -1,0 +1,8 @@
+{#def href: str, label: str = "", count: int | None = None, current: bool = False #}
+{# One of a panel's tabs, as a link with an optional count; the chosen one's accent slides between
+   pages (M3). The content, if any, replaces the label, as on the tabs that lead elsewhere. #}
+<a href="{{ href }}"
+   {% if current %} aria-current="true"{% endif %}
+   class="tab{% if attrs.classes %} {{ attrs.classes }}{% endif %}"><span aria-hidden="true" class="tab-base"></span>
+  {% if current %}<span aria-hidden="true" class="tab-current"></span> {% endif %}
+{%- if content|trim %}{{ content }}{% else %}{{ label }}{% if count is not none %}<span class="tab-count">{{ number(count) }}</span>{% endif %}{% endif %}</a>

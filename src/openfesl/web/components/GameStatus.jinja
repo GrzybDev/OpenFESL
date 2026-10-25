@@ -1,0 +1,13 @@
+{#def activity #}
+{# How many of the game's players are in matches and in the menus, above its menu bar. #}
+{% set in_matches %}<Count :value="activity.in_matches" class="count-sm live-value" />{% endset %}
+{% set in_menus %}<Count :value="activity.in_menus" class="count-sm live-value" />{% endset %}
+<div class="game-status">
+  <div>
+    <p class="game-status-matches">{{ _("web.status.in_matches", count=in_matches) }}</p>
+    <ShareMeter :activity="activity" />
+    <p class="game-status-menus">
+      {{ _("web.status.in_menus", count=in_menus) }} · <Updated inline />
+    </p>
+  </div>
+</div>

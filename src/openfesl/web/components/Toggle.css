@@ -1,0 +1,51 @@
+/* The filter panel's toggle rows, grouped under a bar. */
+@layer components {
+  .toggles {
+    display: grid;
+    gap: 2px;
+    margin-top: 2px;
+  }
+
+  .toggles-pairs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filter-group {
+    margin-top: 10px;
+  }
+
+  .toggle {
+    display: flex;
+    min-height: 44px;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: var(--row);
+    padding-inline: 14px;
+    text-align: left;
+    font-size: 14px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    text-transform: uppercase;
+
+    &[aria-pressed="true"] {
+      background: var(--accent);
+    }
+
+    &[aria-pressed="false"]:hover {
+      background-color: var(--row-light);
+    }
+  }
+
+  .toggle-narrow {
+    justify-content: flex-start;
+    padding-inline: 12px;
+  }
+
+  .toggle-count {
+    font-weight: 600;
+  }
+}

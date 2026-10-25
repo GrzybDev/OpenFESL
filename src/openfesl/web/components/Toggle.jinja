@@ -1,0 +1,9 @@
+{#def label: str, current: bool = False, name: str = "", value: str = "", count: int | None = None, narrow: bool = False #}
+{# A toggle row of a filter panel, in the accent when it is the current choice: a link to the list
+   with that choice, or a button that sends the form with it. narrow rows sit two to a line. #}
+{% set aside = number(count) if count is not none else '' %}
+<button type="submit"
+        name="{{ name }}"
+        value="{{ value }}"
+        aria-pressed="{{ 'true' if current else 'false' }}"
+        class="toggle{% if narrow %} toggle-narrow{% endif %}"><span>{{ label }}</span>{% if aside %}<span class="toggle-count">{{ aside }}</span>{% endif %}</button>
