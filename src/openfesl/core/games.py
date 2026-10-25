@@ -2,8 +2,9 @@ import tomllib
 from collections.abc import Iterable, Iterator
 from importlib.resources import files
 from importlib.resources.abc import Traversable
+from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, StringConstraints, field_validator
 
 from openfesl.core.policies import Policies
 
@@ -117,6 +118,45 @@ class Lobby(BaseModel):
     max_games: int
 
 
+# CSS colours only, so that a data file puts nothing else into the themes' stylesheet.
+type Colour = Annotated[str, StringConstraints(pattern=r"^(#[0-9A-Fa-f]{6}|rgba\([0-9., ]+\))$")]
+
+
+class Theme(BaseModel):
+    """How a game's web pages look: the style of the game's own menus, drawn by OpenFESL.
+
+    Attributes:
+        font: The typeface of the menus' capitals, one of those the web pages ship.
+        accent: The colour of the title block, selections and action squares; black text
+            goes on it.
+        field: The backdrop behind the game's pages.
+        mottle: The backdrop's coarse grain.
+        grit: The backdrop's fine grain.
+        panel: The large container behind tables and forms.
+        panel_edge: The container's border.
+        row: Rows and notes; black text goes on them.
+        row_light: Text boxes and light rows.
+        subtitle: The bar under the title block.
+        bright: Text on the backdrop and on black bars.
+        soft: Secondary text on the backdrop.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    font: Annotated[str, StringConstraints(pattern=r"^[A-Za-z ]+$")]
+    accent: Colour
+    field: Colour
+    mottle: Colour
+    grit: Colour
+    panel: Colour
+    panel_edge: Colour
+    row: Colour
+    row_light: Colour
+    subtitle: Colour
+    bright: Colour
+    soft: Colour
+
+
 class Game(BaseModel):
     """A game the server serves, as its data file describes it.
 
@@ -139,6 +179,7 @@ class Game(BaseModel):
             one behaviour.
         countries: The age limits of the countries whose limits differ from the defaults, by
             ISO code.
+        theme: How the game's web pages look.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -157,6 +198,7 @@ class Game(BaseModel):
     provider_attribute: str | None = None
     policies: Policies
     countries: dict[str, Ages] = {}
+    theme: Theme
 
     def ages(self, country: str) -> Ages:
         """Return the age limits of a country on registration.

@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, Response
 
 from openfesl.core.registration import Terms
 from openfesl.core.texts import translate
-from openfesl.web.pages import Pages
+from openfesl.web.pages import KEEP, STATIC, Pages
 
 
 def shell_routes(pages: Pages, terms: Terms) -> APIRouter:
-    """Return the pages that belong to no game.
+    """Return the pages that belong to no game, the games' themes and OpenFESL's icon.
 
     Args:
         pages: Renders the pages.
@@ -26,5 +26,15 @@ def shell_routes(pages: Pages, terms: Terms) -> APIRouter:
             text_language=translate("web.language.name", language),
             paragraphs=terms.text(language).split("\n\n"),
         )
+
+    @router.get("/themes.css")
+    async def themes(request: Request) -> Response:
+        headers = {"Cache-Control": KEEP} if "v" in request.query_params else None
+        return Response(pages.themes, media_type="text/css", headers=headers)
+
+    # Asked for by browsers that skip the pages' icon links, and for addresses that are no page.
+    @router.get("/favicon.ico")
+    async def favicon() -> FileResponse:
+        return FileResponse(STATIC / "favicon-32.png", media_type="image/png")
 
     return router

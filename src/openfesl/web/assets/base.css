@@ -137,6 +137,29 @@
     --soft: #c9ccd1;
   }
 
+  /* OpenFESL's own menu and admin, in steel so that they never read as a game's pages. */
+  .area-steel {
+    --accent: #9fc3e6;
+    --accent-hover: #b9d4ee;
+    --field: #15181b;
+    --mottle: #c4cbd7;
+    --grit: #f1f5f9;
+    --panel: rgba(60, 68, 78, 0.74);
+    --panel-edge: #8a95a3;
+    --row: #bcc0c5;
+    --row-alt: #b7bbc0;
+    --row-light: #e3e5e8;
+    --subtitle: #0a0a0a;
+    --bright: #f4f4ee;
+    --soft: #d3d8de;
+  }
+
+  /* On a textured field the black blocks stand out on their own. */
+  .area-steel,
+  .area[data-game] {
+    --block-edge: #0a0a0a;
+  }
+
   .sr-only {
     position: absolute;
     width: 1px;

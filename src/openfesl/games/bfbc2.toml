@@ -41,6 +41,22 @@ connect.maintenance = false
 DE = { registration_age = 14, parental_age = 14 }
 FR = { registration_age = 16, parental_age = 16 }
 
+# The game's PC menus as the web pages draw them: their orange, condensed capitals, warm-grey
+# rows and a dark olive field.
+[theme]
+font = "Barlow Semi Condensed"
+accent = "#DA8602"
+field = "#1A1B16"
+mottle = "#CED0C2"
+grit = "#F6F6EF"
+panel = "rgba(83, 85, 59, 0.74)"
+panel_edge = "#8C8E78"
+row = "#BABAB2"
+row_light = "#E2E2DE"
+subtitle = "#0A0A0A"
+bright = "#F4F4EE"
+soft = "#D9D9CD"
+
 [http]
 locker = "http://easo.ea.com/fileupload/locker2.jsp"
 

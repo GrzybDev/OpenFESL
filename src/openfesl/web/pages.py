@@ -91,9 +91,11 @@ class Pages:
         """Prepare the shell for the games the server serves.
 
         Args:
-            games: Every game, listed in the shell.
+            games: Every game, listed in the shell and dressed in its theme.
         """
         self._games = list(games)
+        self.themes = "".join(_theme_rule(game) for game in self._games)
+        self._themes_url = f"/themes.css?v={_digest(self.themes.encode())}"
 
     def render(
         self,
@@ -101,6 +103,8 @@ class Pages:
         template: str,
         status: int = 200,
         *,
+        game: Game | None = None,
+        steel: bool = False,
         switch: bool = True,
         headers: Mapping[str, str] | None = None,
         **context: Any,
@@ -111,6 +115,8 @@ class Pages:
             request: The request the page answers.
             template: The page's component, such as Servers.
             status: The response's status code.
+            game: The game whose area the page belongs to, dressed in the game's theme.
+            steel: Whether the area wears OpenFESL's own steel instead of the shell's grey.
             switch: Whether the shell offers the page in the other languages.
             headers: Headers of the response.
             context: The template's own values.
@@ -122,8 +128,15 @@ class Pages:
             url=lambda target: localize(target, language),
             here=localize(path, language) + query,
             assets=built_assets(),
+            themes=self._themes_url,
+            game=game,
+            steel=steel,
             games=[
-                {"name": entry.name, "href": localize(f"/{entry.id}", language)}
+                {
+                    "name": entry.name,
+                    "href": localize(f"/{entry.id}", language),
+                    "current": entry is game,
+                }
                 for entry in self._games
             ],
             languages=[
@@ -194,6 +207,13 @@ def _address(request: Request) -> tuple[str, str]:
         return state["language"], request.url.path
     # The server's error page sees the address before the language middleware strips it.
     return split_language(request.url.path)
+
+
+def _theme_rule(game: Game) -> str:
+    values = game.theme.model_dump()
+    properties = [f'--area-font:"{values.pop("font")}","Barlow",system-ui,sans-serif']
+    properties += [f"--{name.replace('_', '-')}:{value}" for name, value in values.items()]
+    return f'[data-game="{game.id}"]{{{";".join(properties)}}}\n'
 
 
 # The modification time is part of the key, so that a rebuilt file gets a new version.

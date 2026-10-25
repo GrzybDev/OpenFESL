@@ -134,6 +134,31 @@
     padding: 30px var(--gutter) 56px;
   }
 
+  /* The plain, slightly grainy field behind a game's or OpenFESL's menus: two noise layers tinted
+     by the theme, and a vignette. */
+  .backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+
+    .tint-mottle {
+      flood-color: var(--mottle);
+    }
+
+    .tint-grit {
+      flood-color: var(--grit);
+    }
+  }
+
+  .vignette {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(130% 70% at 50% 0%, rgb(0 0 0 / 0) 40%, rgb(0 0 0 / 0.5) 100%);
+  }
+
   .shell-footer {
     border-top: 1px solid var(--shell-line);
     background: var(--shell);

@@ -74,6 +74,9 @@ async def test_pages_come_in_the_language_their_address_names(server_url: str) -
         status, headers, _ = await fetch(server_url, asset)
         assert (status, headers["Cache-Control"]) == (200, "public, max-age=31536000, immutable")
 
+    status, headers, body = await fetch(server_url, "/favicon.ico")
+    assert (status, headers["Content-Type"], body[:4]) == (200, "image/png", b"\x89PNG")
+
 
 async def test_a_page_that_fails_answers_a_short_error_page_without_details(
     server_url: str, monkeypatch: pytest.MonkeyPatch

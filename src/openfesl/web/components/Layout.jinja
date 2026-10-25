@@ -1,5 +1,6 @@
 {#def title: str, page: str = "" #}
-{# The shell around every page: the bar with OpenFESL's games and languages, the area, and the footer. #}
+{# The shell around every page: the bar with OpenFESL's games and languages, the area dressed in
+   the page's game or OpenFESL's steel, and the footer. #}
 <!DOCTYPE html>
 <html lang="{{ language }}">
   <head>
@@ -7,6 +8,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ _("web.page.title", page=title) }}</title>
     {% for href in assets.styles %}<link rel="stylesheet" href="{{ href }}">{% endfor %}
+    <link rel="stylesheet" href="{{ themes }}">
+    <link rel="icon" href="{{ static('favicon.svg') }}" type="image/svg+xml">
+    <link rel="icon"
+          href="{{ static('favicon-32.png') }}"
+          sizes="32x32"
+          type="image/png">
+    <link rel="apple-touch-icon" href="{{ static('apple-touch-icon.png') }}">
     {% for entry in languages %}
       <link rel="alternate" hreflang="{{ entry.code }}" href="{{ entry.href }}">
     {% endfor %}
@@ -20,7 +28,9 @@
           <ul>
             {% for entry in games %}
               <li>
-                <a href="{{ entry.href }}" class="shell-link">{{ entry.name }}</a>
+                <a href="{{ entry.href }}"
+                   {% if entry.current %} aria-current="true"{% endif %}
+                   class="shell-link">{{ entry.name }}</a>
               </li>
             {% endfor %}
           </ul>
@@ -37,7 +47,28 @@
         {% endif %}
       </div>
     </header>
-    <main id="area" class="area">
+    <main id="area"
+          class="area{% if steel %} area-steel{% endif %}"
+          {% if game %} data-game="{{ game.id }}"{% endif %}>
+      {% if steel or game %}
+        <svg class="backdrop" aria-hidden="true" focusable="false">
+          <filter id="mottle" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency=".004 .009" numOctaves="4" seed="11" />
+          <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 -.15" result="grain" />
+          <feFlood class="tint-mottle" />
+          <feComposite in2="grain" operator="in" />
+          </filter>
+          <filter id="grit" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch" />
+          <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .16 -.03" result="grain" />
+          <feFlood class="tint-grit" />
+          <feComposite in2="grain" operator="in" />
+          </filter>
+          <rect width="100%" height="100%" filter="url(#mottle)" />
+          <rect width="100%" height="100%" filter="url(#grit)" />
+        </svg>
+        <div class="vignette" aria-hidden="true"></div>
+      {% endif %}
       <div class="area-content">{{ content }}</div>
     </main>
     <footer class="shell-footer">
