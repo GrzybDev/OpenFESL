@@ -351,9 +351,23 @@ async def game(
         yield Game(websocket)
 
 
-async def fetch(server_url: str, path: str, host: str | None = None) -> tuple[int, Message, bytes]:
-    """Send a GET to the server, as the hook forwards the game's HTTP when a host is given."""
-    request = urllib.request.Request(server_url.replace("ws://", "http://", 1).rstrip("/") + path)
+async def fetch(
+    server_url: str,
+    path: str,
+    host: str | None = None,
+    headers: Mapping[str, str] | None = None,
+) -> tuple[int, Message, bytes]:
+    """Send a GET to the server, as the hook forwards the game's HTTP when a host is given.
+
+    Args:
+        server_url: The server's relay address.
+        path: The address on the server, with its query.
+        host: The game's host, sent as X-OpenFESL-Host.
+        headers: More request headers, sent again on each redirect followed.
+    """
+    request = urllib.request.Request(
+        server_url.replace("ws://", "http://", 1).rstrip("/") + path, headers=dict(headers or {})
+    )
     if host is not None:
         request.add_header("X-OpenFESL-Host", host)
 

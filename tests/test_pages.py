@@ -67,6 +67,23 @@ async def test_pages_come_in_the_language_their_address_names(server_url: str) -
     assert (status, page.language, page.heading) == (404, "pl", "Nie znaleziono strony")
     assert page.switch() == {"en": "/downloads?from=menu", "pl": "/pl/downloads?from=menu"}
 
+    # Opening an English address from elsewhere leads to the browser's language; the language
+    # switch, other languages' addresses, English-first browsers and the admin panel keep the
+    # address's language.
+    arriving = {"Sec-Fetch-Dest": "document", "Sec-Fetch-Site": "cross-site"}
+    polish = arriving | {"Accept-Language": "pl-PL,pl;q=0.9,en;q=0.8"}
+    cases = [
+        ("/terms", polish, "/pl/terms"),
+        ("/terms", polish | {"Sec-Fetch-Site": "same-origin"}, "/terms"),
+        ("/terms", arriving | {"Accept-Language": "en-GB,pl;q=0.5"}, "/terms"),
+        ("/pl/terms", arriving | {"Accept-Language": "en"}, "/pl/terms"),
+        ("/admin/sign-in", polish, "/admin/sign-in"),
+    ]
+    for path, sent, landed in cases:
+        status, _, body = await fetch(server_url, f"{path}?from=menu", headers=sent)
+        page = Page(body)
+        assert (status, page.switch()[page.language]) == (200, f"{landed}?from=menu")
+
     # Files that name their version are kept by browsers until they change.
     versioned = [asset for asset in page.assets if "?v=" in asset]
     assert versioned
