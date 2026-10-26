@@ -1733,6 +1733,9 @@ msgstr "Administracja"
 msgid "web.host.steps"
 msgstr "Przygotowanie serwera dedykowanego w trzech krokach"
 
+msgid "web.host.steps.open"
+msgstr "Przygotowanie serwera dedykowanego w dwóch krokach"
+
 #, python-format
 msgid "web.host.next_to"
 msgstr "Obok %(file)s"
@@ -1771,29 +1774,14 @@ msgstr ""
 msgid "web.host.provider.request"
 msgstr "Poproś o plik"
 
-msgid "web.host.provider.keep"
-msgstr "Zostaw plik operatora"
-
-#, python-format
-msgid "web.host.provider.keep.text"
-msgstr ""
-"Wystarczy %(file)s z wydania serwera. Z plikiem wydanym przez "
-"administrację tego serwera widać, kto go prowadzi."
-
 msgid "web.host.folder"
 msgstr "Folder serwera"
 
 msgid "web.host.folder.after"
 msgstr "Folder serwera po krokach 1 i 2"
 
-msgid "web.host.folder.open"
-msgstr "Folder serwera w trybie otwartym"
-
 msgid "web.guide.replaced"
 msgstr "Zastąpiony"
-
-msgid "web.guide.shipped"
-msgstr "Z wydania"
 
 msgid "web.host.start"
 msgstr "Uruchom serwer"
@@ -1843,6 +1831,14 @@ msgstr ""
 "%(file)s (lub „Nieznany dostawca” z identyfikatorem pliku), kiedy "
 "połączył się po raz pierwszy, ile razy próbował działać oraz mapę i tryb,"
 " które próbował uruchomić."
+
+#, python-format
+msgid "web.host.seen.open.text"
+msgstr ""
+"Dla każdego serwera: jego nazwę, operatora wskazanego przez %(file)s "
+"(lub „Nieznany dostawca” z identyfikatorem pliku, jak dla pliku "
+"dołączonego do każdego wydania serwera) oraz kiedy połączył się po raz "
+"pierwszy."
 
 msgid "web.host.after"
 msgstr "Po zatwierdzeniu"

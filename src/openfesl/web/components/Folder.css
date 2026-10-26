@@ -42,9 +42,6 @@
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-  }
-
-  .folder-mark-new {
     background: var(--ink);
     padding: 3px 7px;
     color: var(--bright);

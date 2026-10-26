@@ -37,7 +37,7 @@
       </section>
 
       <section aria-labelledby="host-steps" class="host-steps">
-        <h2 id="host-steps" class="sr-only">{{ _("web.host.steps") }}</h2>
+        <h2 id="host-steps" class="sr-only">{{ _("web.host.steps" if approved_only else "web.host.steps.open") }}</h2>
         <ol class="guide-steps">
           <GuideStep :number="1"
                      :heading="_('web.host.hook')"
@@ -78,12 +78,6 @@
             </GuideStep>
           {% else %}
             <GuideStep :number="2"
-                       :heading="_('web.host.provider.keep')"
-                       :where="_('web.host.next_to', file=plain(files.config))">
-              <p class="body-text">{{ _("web.host.provider.keep.text", file=file(files.provider)) }}</p>
-              <Folder :caption="_('web.host.folder')" :label="_('web.host.folder.open')" :files="[('dinput8.dll', 'added'), (files.executable, None), (files.provider, 'shipped'), (files.config, None)]" />
-            </GuideStep>
-            <GuideStep :number="3"
                        :heading="_('web.host.start')"
                        :where="_('web.host.start.listed')">
               <p class="body-text guide-fill">{{ _("web.host.start.open") }}</p>
@@ -96,7 +90,7 @@
       <div class="host-notes">
         <section aria-labelledby="host-seen">
           <Bar id="host-seen" wrap>{{ _("web.host.seen") }}</Bar>
-          <p class="body-text bar-text">{{ _("web.host.seen.text", file=inline(files.provider)) }}</p>
+          <p class="body-text bar-text">{{ _("web.host.seen.text" if approved_only else "web.host.seen.open.text", file=inline(files.provider)) }}</p>
         </section>
         {% if approved_only %}
           <section aria-labelledby="host-after">

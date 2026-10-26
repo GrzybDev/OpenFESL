@@ -1702,6 +1702,9 @@ msgstr "The administrators"
 msgid "web.host.steps"
 msgstr "Set up the dedicated server in three steps"
 
+msgid "web.host.steps.open"
+msgstr "Set up the dedicated server in two steps"
+
 #, python-format
 msgid "web.host.next_to"
 msgstr "Next to %(file)s"
@@ -1740,30 +1743,14 @@ msgstr ""
 msgid "web.host.provider.request"
 msgstr "Request the file"
 
-msgid "web.host.provider.keep"
-msgstr "Keep a provider file"
-
-#, python-format
-msgid "web.host.provider.keep.text"
-msgstr ""
-"The %(file)s that ships with the server release is enough. With a file "
-"issued by this server's administrators, they see which operator runs the "
-"server."
-
 msgid "web.host.folder"
 msgstr "The server's folder"
 
 msgid "web.host.folder.after"
 msgstr "The server's folder after steps 1 and 2"
 
-msgid "web.host.folder.open"
-msgstr "The server's folder in open mode"
-
 msgid "web.guide.replaced"
 msgstr "Replaced"
-
-msgid "web.guide.shipped"
-msgstr "As shipped"
 
 msgid "web.host.start"
 msgstr "Start the server"
@@ -1814,6 +1801,13 @@ msgstr ""
 "For each new server: its name, its operator as named by %(file)s (or "
 "\"Unknown provider\" with the file's id), when it first connected, how "
 "many times it tried to host, and the map and mode it tried to host."
+
+#, python-format
+msgid "web.host.seen.open.text"
+msgstr ""
+"For each server: its name, its operator as named by %(file)s (or "
+"\"Unknown provider\" with the file's id, as for the file every server "
+"release ships) and when it first connected."
 
 msgid "web.host.after"
 msgstr "After approval"

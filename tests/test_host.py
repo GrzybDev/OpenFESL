@@ -33,6 +33,8 @@ async def test_the_hosting_guide_follows_the_hosting_mode(contact: None, server_
     await anyio.to_thread.run_sync(main, ["hosting", "open"])
     _, _, body = await fetch(server_url, "/pl/bfbc2/host")
     page = body.decode()
-    for shown in ("Dowolny serwer", "Zostaw plik operatora", "Z wydania"):
+    for shown in ("Dowolny serwer", "w dwóch krokach", "dołączonego do każdego wydania serwera"):
         assert shown in page
-    assert "Po zatwierdzeniu" not in page
+    # Any server's own provider file does here, so the guide asks for none.
+    for hidden in ("Dodaj plik operatora", "Po zatwierdzeniu"):
+        assert hidden not in page
