@@ -135,10 +135,18 @@
     }
   }
 
+  /* The area takes the height a short page leaves, so the footer stays at the window's foot. */
+  body {
+    display: flex;
+    min-height: 100dvh;
+    flex-direction: column;
+  }
+
   .area {
     view-transition-name: area;
     position: relative;
     isolation: isolate;
+    flex-grow: 1;
     overflow: hidden;
     background: var(--field);
     font-family: var(--area-font);
