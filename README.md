@@ -35,7 +35,10 @@ OpenFESLHook opens one WebSocket per game process to the server's root path with
 carries the game's FESL, Theater and HTTP traffic over it. The hook's
 [relay protocol](https://github.com/GrzybDev/OpenFESLHook/blob/main/docs/relay-protocol.md) describes the frames.
 The game's HTTP requests go to the same host over `https://` (or `http://` for a `ws://` address), with the game's
-host in the `X-OpenFESL-Host` header.
+host in the `X-OpenFESL-Host` header. A game the hook starts from its launcher, because it was started without a
+session, signs in at `POST /launcher/session` first and gets the session it is started with; the relay protocol's
+[launcher sign-in](https://github.com/GrzybDev/OpenFESLHook/blob/main/docs/relay-protocol.md#launcher-sign-in)
+describes the request and its answers.
 
 ## Running locally
 
