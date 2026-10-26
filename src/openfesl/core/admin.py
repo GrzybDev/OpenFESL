@@ -2,8 +2,11 @@ import asyncio
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime
 from enum import StrEnum
 from typing import Any, Protocol
+
+from openfesl.core.admins import Role
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +74,63 @@ class LoggedAction:
     action: AdminAction
     target: str
     details: dict[str, Any]
+
+
+@dataclass(frozen=True, slots=True)
+class AuditEntry:
+    """One of the admin's actions as the audit log lists it.
+
+    Attributes:
+        id: Its number; later actions have higher ones.
+        at: When it was done.
+        admin: The admin's subject at the sign-in provider; None for the command line.
+        name: The admin's display name then, if known.
+        role: The admin's role then, if known.
+        action: What the admin did.
+        target: What it was done to.
+        details: What changed, as the action defines.
+    """
+
+    id: int
+    at: datetime
+    admin: str | None
+    name: str | None
+    role: Role | None
+    action: AdminAction
+    target: str
+    details: dict[str, Any]
+
+
+@dataclass(frozen=True, slots=True)
+class AuditFilter:
+    """Which of the admin's actions the audit log lists; what is None does not filter.
+
+    Attributes:
+        admin: The subject of the admin who did them; empty for the command line.
+        account: The account they were done to, or to whose personas.
+        personas: The account's personas.
+    """
+
+    admin: str | None = None
+    account: int | None = None
+    personas: tuple[int, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class Auditor:
+    """Someone who acted, as the audit log's filter offers them.
+
+    Attributes:
+        subject: The admin's subject; None for the command line.
+        name: Their latest display name, if known.
+        role: Their latest role, if known.
+        count: How many of the actions are theirs.
+    """
+
+    subject: str | None
+    name: str | None
+    role: Role | None
+    count: int
 
 
 class AdminLog(Protocol):

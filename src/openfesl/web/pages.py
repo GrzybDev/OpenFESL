@@ -129,14 +129,23 @@ def _number(context: Context, value: float, places: int | None = None) -> str:
     return format_decimal(value, pattern, locale=language, group_separator=grouped)
 
 
+def moment(value: datetime, language: str, day: str = "yMMMd") -> str:
+    """Return a day and a time of day in UTC as a language writes them.
+
+    Args:
+        value: The moment.
+        language: The language code.
+        day: The CLDR skeleton of the day, which leaves out the year or not.
+    """
+    locale = Locale.parse(translate("web.locale", language))
+    shown = format_skeleton(day, value, tzinfo=UTC, locale=locale)
+    time = format_skeleton("Hm", value, tzinfo=UTC, locale=locale)
+    return str(locale.datetime_formats["medium"]).format(time, shown)
+
+
 @pass_context
 def _moment(context: Context, value: datetime, day: str = "yMMMd") -> str:
-    # A day, with its year unless the CLDR skeleton for the day leaves it out, and a time of day,
-    # as the page's language writes them.
-    locale = _locale(context)
-    day = format_skeleton(day, value, tzinfo=UTC, locale=locale)
-    time = format_skeleton("Hm", value, tzinfo=UTC, locale=locale)
-    return str(locale.datetime_formats["medium"]).format(time, day)
+    return moment(value, context["language"], day)
 
 
 @pass_context

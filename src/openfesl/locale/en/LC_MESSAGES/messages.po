@@ -3809,3 +3809,180 @@ msgstr "Nothing changed in the rules of %(game)s."
 
 msgid "web.admin.refused.role.settings"
 msgstr "Settings are changed with the admin role."
+
+msgid "web.admin.menu.audit"
+msgstr "Audit log"
+
+msgid "web.admin.audit"
+msgstr "Audit log"
+
+msgid "web.admin.audit.subtitle"
+msgstr "Changes made in this panel"
+
+msgid "web.admin.audit.list"
+msgstr "Audit log entries, newest first"
+
+msgid "web.admin.audit.whole"
+msgstr "Whole log"
+
+msgid "web.admin.audit.of_account"
+msgstr "This account in the audit log"
+
+msgid "web.admin.audit.kind"
+msgstr "Kind"
+
+msgid "web.admin.audit.time"
+msgstr "Time"
+
+msgid "web.admin.audit.admin"
+msgstr "Admin"
+
+msgid "web.admin.audit.action"
+msgstr "Action"
+
+msgid "web.admin.audit.details"
+msgstr "Details"
+
+msgid "web.admin.audit.target"
+msgstr "Target"
+
+msgid "web.admin.audit.open"
+msgstr "Open: %(target)s"
+
+msgid "web.admin.audit.none.all"
+msgstr "No change is recorded yet."
+
+msgid "web.admin.audit.none.filtered"
+msgstr "No change matches this filter."
+
+msgid "web.admin.audit.count"
+msgstr "Entries: %(count)s"
+
+msgid "web.admin.audit.order"
+msgstr "Newest first · times in UTC · %(count)s per page"
+
+msgid "web.admin.audit.filter"
+msgstr "Filter by admin"
+
+msgid "web.admin.audit.everyone"
+msgstr "All admins"
+
+msgid "web.admin.audit.note"
+msgstr "Every change made in this panel and on the command line is listed, with what it changed linked. Secrets and file contents never appear in the details."
+
+msgid "web.admin.audit.account"
+msgstr "Account %(number)s · %(name)s"
+
+msgid "web.admin.audit.until"
+msgstr "Until %(time)s UTC"
+
+msgid "web.admin.audit.logins"
+msgstr "Remembered logins: %(count)s"
+
+msgid "web.admin.audit.from_key"
+msgstr "%(tags)s · from %(key)s"
+
+msgid "web.admin.audit.provider_id"
+msgstr "Provider id %(id)s…"
+
+msgid "web.admin.audit.key.starting"
+msgstr "A starting key of the game data"
+
+msgid "web.admin.audit.key.here"
+msgstr "Added here"
+
+msgid "web.admin.audit.nothing"
+msgstr "Grants nothing"
+
+msgid "web.admin.audit.limits.most"
+msgstr "At most %(most)s accounts"
+
+msgid "web.admin.audit.limits.any"
+msgstr "Any number of accounts"
+
+msgid "web.admin.audit.from"
+msgstr "From %(earlier)s to %(now)s"
+
+msgid "web.admin.audit.reset"
+msgstr "Back to the game data's default"
+
+msgid "web.admin.audit.action.account_state.active"
+msgstr "Made account active"
+
+msgid "web.admin.audit.action.account_state.disabled"
+msgstr "Disabled account"
+
+msgid "web.admin.audit.action.account_state.banned"
+msgstr "Banned account"
+
+msgid "web.admin.audit.action.account_state.deactivated"
+msgstr "Deactivated account"
+
+msgid "web.admin.audit.action.account_verified"
+msgstr "Confirmed the address"
+
+msgid "web.admin.audit.action.session_end"
+msgstr "Ended a session"
+
+msgid "web.admin.audit.action.logins_forget"
+msgstr "Removed remembered logins"
+
+msgid "web.admin.audit.action.entitlement_grant"
+msgstr "Granted entitlements"
+
+msgid "web.admin.audit.action.entitlement_state.revoked"
+msgstr "Revoked entitlement"
+
+msgid "web.admin.audit.action.entitlement_state.active"
+msgstr "Granted entitlement again"
+
+msgid "web.admin.audit.action.persona_state.active"
+msgstr "Enabled in-game name"
+
+msgid "web.admin.audit.action.persona_state.disabled"
+msgstr "Disabled in-game name"
+
+msgid "web.admin.audit.action.player_kick"
+msgstr "Kicked from the game"
+
+msgid "web.admin.audit.action.provider_add"
+msgstr "Added provider"
+
+msgid "web.admin.audit.action.provider_revoke"
+msgstr "Revoked provider"
+
+msgid "web.admin.audit.action.server_state.approved"
+msgstr "Approved server"
+
+msgid "web.admin.audit.action.server_state.revoked"
+msgstr "Revoked server"
+
+msgid "web.admin.audit.action.server_state.pending"
+msgstr "Set server waiting"
+
+msgid "web.admin.audit.action.key_add"
+msgstr "Added key"
+
+msgid "web.admin.audit.action.key_state.enabled"
+msgstr "Enabled key"
+
+msgid "web.admin.audit.action.key_state.disabled"
+msgstr "Disabled key"
+
+msgid "web.admin.audit.action.key_grants"
+msgstr "Changed key grants and labels"
+
+msgid "web.admin.audit.action.key_limits"
+msgstr "Changed key limits"
+
+msgid "web.admin.audit.action.setting"
+msgstr "Changed a rule"
+
+msgid "web.admin.audit.action.hosting_mode"
+msgstr "Changed the hosting mode"
+
+msgid "web.admin.role.admin"
+msgstr "Admin"
+
+msgid "web.admin.role.moderator"
+msgstr "Moderator"

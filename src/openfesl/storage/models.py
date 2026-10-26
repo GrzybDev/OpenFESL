@@ -232,6 +232,7 @@ class AdminActionRow(Base):
     # which knows no admin.
     admin: Mapped[str | None]
     admin_name: Mapped[str | None]
+    admin_role: Mapped[str | None]
     action: Mapped[str]
     target: Mapped[str]
     details: Mapped[dict[str, Any]] = mapped_column(JSONB)

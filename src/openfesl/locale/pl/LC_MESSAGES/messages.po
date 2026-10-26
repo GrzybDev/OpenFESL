@@ -3932,3 +3932,180 @@ msgstr "Zasady gry %(game)s pozostały bez zmian."
 
 msgid "web.admin.refused.role.settings"
 msgstr "Ustawienia zmienia rola administratora."
+
+msgid "web.admin.menu.audit"
+msgstr "Dziennik zmian"
+
+msgid "web.admin.audit"
+msgstr "Dziennik zmian"
+
+msgid "web.admin.audit.subtitle"
+msgstr "Zmiany wprowadzone w panelu"
+
+msgid "web.admin.audit.list"
+msgstr "Wpisy dziennika zmian, od najnowszych"
+
+msgid "web.admin.audit.whole"
+msgstr "Cały dziennik"
+
+msgid "web.admin.audit.of_account"
+msgstr "To konto w dzienniku zmian"
+
+msgid "web.admin.audit.kind"
+msgstr "Rodzaj"
+
+msgid "web.admin.audit.time"
+msgstr "Czas"
+
+msgid "web.admin.audit.admin"
+msgstr "Osoba"
+
+msgid "web.admin.audit.action"
+msgstr "Działanie"
+
+msgid "web.admin.audit.details"
+msgstr "Szczegóły"
+
+msgid "web.admin.audit.target"
+msgstr "Cel"
+
+msgid "web.admin.audit.open"
+msgstr "Otwórz: %(target)s"
+
+msgid "web.admin.audit.none.all"
+msgstr "Nie zapisano jeszcze żadnej zmiany."
+
+msgid "web.admin.audit.none.filtered"
+msgstr "Żadna zmiana nie pasuje do tego filtru."
+
+msgid "web.admin.audit.count"
+msgstr "Wpisy: %(count)s"
+
+msgid "web.admin.audit.order"
+msgstr "Od najnowszych · czas w UTC · %(count)s na stronę"
+
+msgid "web.admin.audit.filter"
+msgstr "Filtr osób"
+
+msgid "web.admin.audit.everyone"
+msgstr "Wszystkie osoby"
+
+msgid "web.admin.audit.note"
+msgstr "Dziennik zawiera każdą zmianę wprowadzoną w panelu i w wierszu poleceń, z odnośnikiem do tego, czego dotyczy. W szczegółach nigdy nie pojawiają się sekrety ani zawartość plików."
+
+msgid "web.admin.audit.account"
+msgstr "Konto %(number)s · %(name)s"
+
+msgid "web.admin.audit.until"
+msgstr "Do %(time)s UTC"
+
+msgid "web.admin.audit.logins"
+msgstr "Zapamiętane logowania: %(count)s"
+
+msgid "web.admin.audit.from_key"
+msgstr "%(tags)s · z klucza %(key)s"
+
+msgid "web.admin.audit.provider_id"
+msgstr "Identyfikator dostawcy %(id)s…"
+
+msgid "web.admin.audit.key.starting"
+msgstr "Klucz startowy z danych gry"
+
+msgid "web.admin.audit.key.here"
+msgstr "Dodany tutaj"
+
+msgid "web.admin.audit.nothing"
+msgstr "Niczego nie przyznaje"
+
+msgid "web.admin.audit.limits.most"
+msgstr "Najwyżej %(most)s kont"
+
+msgid "web.admin.audit.limits.any"
+msgstr "Dowolna liczba kont"
+
+msgid "web.admin.audit.from"
+msgstr "Z „%(earlier)s” na „%(now)s”"
+
+msgid "web.admin.audit.reset"
+msgstr "Przywrócono wartość domyślną z danych gry"
+
+msgid "web.admin.audit.action.account_state.active"
+msgstr "Aktywowano konto"
+
+msgid "web.admin.audit.action.account_state.disabled"
+msgstr "Wyłączono konto"
+
+msgid "web.admin.audit.action.account_state.banned"
+msgstr "Zablokowano konto"
+
+msgid "web.admin.audit.action.account_state.deactivated"
+msgstr "Wyłączono konto na prośbę"
+
+msgid "web.admin.audit.action.account_verified"
+msgstr "Potwierdzono adres"
+
+msgid "web.admin.audit.action.session_end"
+msgstr "Zakończono sesję"
+
+msgid "web.admin.audit.action.logins_forget"
+msgstr "Usunięto zapamiętane logowania"
+
+msgid "web.admin.audit.action.entitlement_grant"
+msgstr "Przyznano uprawnienia"
+
+msgid "web.admin.audit.action.entitlement_state.revoked"
+msgstr "Cofnięto uprawnienie"
+
+msgid "web.admin.audit.action.entitlement_state.active"
+msgstr "Ponownie przyznano uprawnienie"
+
+msgid "web.admin.audit.action.persona_state.active"
+msgstr "Włączono nazwę w grze"
+
+msgid "web.admin.audit.action.persona_state.disabled"
+msgstr "Wyłączono nazwę w grze"
+
+msgid "web.admin.audit.action.player_kick"
+msgstr "Wyrzucono z gry"
+
+msgid "web.admin.audit.action.provider_add"
+msgstr "Dodano dostawcę"
+
+msgid "web.admin.audit.action.provider_revoke"
+msgstr "Cofnięto dostawcę"
+
+msgid "web.admin.audit.action.server_state.approved"
+msgstr "Zatwierdzono serwer"
+
+msgid "web.admin.audit.action.server_state.revoked"
+msgstr "Cofnięto zatwierdzenie serwera"
+
+msgid "web.admin.audit.action.server_state.pending"
+msgstr "Serwer czeka na decyzję"
+
+msgid "web.admin.audit.action.key_add"
+msgstr "Dodano klucz"
+
+msgid "web.admin.audit.action.key_state.enabled"
+msgstr "Włączono klucz"
+
+msgid "web.admin.audit.action.key_state.disabled"
+msgstr "Wyłączono klucz"
+
+msgid "web.admin.audit.action.key_grants"
+msgstr "Zmieniono uprawnienia i nazwy klucza"
+
+msgid "web.admin.audit.action.key_limits"
+msgstr "Zmieniono limity klucza"
+
+msgid "web.admin.audit.action.setting"
+msgstr "Zmieniono zasadę"
+
+msgid "web.admin.audit.action.hosting_mode"
+msgstr "Zmieniono tryb dopuszczania serwerów"
+
+msgid "web.admin.role.admin"
+msgstr "Administrator"
+
+msgid "web.admin.role.moderator"
+msgstr "Moderator"

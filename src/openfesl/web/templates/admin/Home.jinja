@@ -104,6 +104,7 @@
               <Alert :label="_('web.admin.calm.label', count=number(0))" :title="_('web.admin.calm.title')">{{ _("web.admin.calm.text") }}</Alert>
               <div class="row-actions">
                 <SmallAction :href="url('/admin/servers?state=approved')" :label="_('web.admin.servers.approved_link')" />
+                <FormButton icon="go" :href="url('/admin/audit')">{{ _("web.admin.menu.audit") }}</FormButton>
               </div>
             </div>
           {% endif %}

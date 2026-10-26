@@ -59,6 +59,7 @@ from openfesl.storage.stats import SqlStatStore
 from openfesl.web.activity import activity_routes
 from openfesl.web.admin.account_decisions import account_decision_routes
 from openfesl.web.admin.accounts import AccountViews, account_routes
+from openfesl.web.admin.audit import audit_routes
 from openfesl.web.admin.auth import (
     AdminSessions,
     FormExpired,
@@ -229,6 +230,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(entitlement_routes(sign_in, account_views, entitlements, games))
     app.include_router(key_routes(sign_in, games, entitlements))
     app.include_router(key_edit_routes(sign_in, games, entitlements))
+    app.include_router(
+        audit_routes(
+            sign_in,
+            games,
+            SqlAdminLog(sessions),
+            SqlAccountStore(sessions),
+            persona_store,
+            server_views.store,
+        )
+    )
     setting_store = SqlSettingStore(sessions)
     app.include_router(
         settings_routes(

@@ -24,6 +24,10 @@ For Battlefield: Bad Company 2 on PC, the game and its dedicated server:
   online, and guides to playing and to hosting a dedicated server
 - Each game's players online, counted every minute and kept as the peak of every hour for seven days and of every
   day for good
+- An admin panel: servers waiting for approval and warnings, the dedicated servers and their providers with
+  `ProviderId.dat` downloads, accounts with their states, sessions, names, remembered logins and entitlements,
+  product keys, the hosting mode and each game's policies, and an audit log. Moderators decide about servers and
+  accounts; changing providers, entitlements, product keys and settings needs the admin role
 
 ## How games connect
 

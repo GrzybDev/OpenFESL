@@ -1,4 +1,5 @@
 import re
+from collections.abc import Collection
 
 from sqlalchemy import func, select, update
 from sqlalchemy.dialects.postgresql import insert
@@ -66,6 +67,17 @@ class SqlPersonaStore:
                     )
                 )
             return found
+
+    async def by_ids(self, persona_ids: Collection[int]) -> dict[int, Persona]:
+        """Return some personas by number, those their players removed too.
+
+        Args:
+            persona_ids: The personas' numbers.
+        """
+        wanted = [number for number in persona_ids if number in _BIGINT]
+        async with self._sessions() as session:
+            rows = await session.scalars(select(PersonaRow).where(PersonaRow.id.in_(wanted)))
+            return {row.id: _persona(row) for row in rows}
 
     async def find(self, namespace: str, name: str) -> Persona | None:
         """Return the enabled persona with a name, matched regardless of case.

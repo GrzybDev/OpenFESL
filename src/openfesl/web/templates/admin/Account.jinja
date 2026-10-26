@@ -312,6 +312,7 @@
             <p class="bar-text body-text">{{ _("web.admin.remembered.none") }}</p>
           {% endif %}
           <p class="body-text side-note">{{ _("web.admin.remembered.note") }} {{ _("web.admin.remembered.note.removal") }}</p>
+          <RowLink :href="url('/admin/audit?account=' ~ account.id)" :label="_('web.admin.audit.of_account')" />
         </section>
       </div>
     </div>

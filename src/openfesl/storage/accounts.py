@@ -1,3 +1,4 @@
+from collections.abc import Collection
 from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import Select, delete, exists, func, select, update
@@ -104,6 +105,19 @@ class SqlAccountStore:
         async with self._sessions() as session:
             row = await session.get(AccountRow, account_id)
         return _record(row) if row and not row.server else None
+
+    async def names(self, account_ids: Collection[int]) -> dict[int, str]:
+        """Return the login names of some accounts, by number.
+
+        Args:
+            account_ids: The accounts.
+        """
+        wanted = [number for number in account_ids if number in _BIGINT]
+        async with self._sessions() as session:
+            rows = await session.execute(
+                select(AccountRow.id, AccountRow.nuid).where(AccountRow.id.in_(wanted))
+            )
+            return {number: nuid for number, nuid in rows}
 
     async def remembered(self, account_id: int) -> list[RememberedLogin]:
         """Return the logins remembered for an account that still log it in, newest first.
