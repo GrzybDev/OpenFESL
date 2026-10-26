@@ -79,6 +79,9 @@ class Http(BaseModel):
 
     Attributes:
         locker: The URL that GetLockerURL hands out, where the server answers the locker.
+        nucleus: The host of the game's Magma/Nucleus account layer, where it fetches the login
+            token its launcher session was started with; none for a game that logs in over FESL
+            alone.
         files: The editorial files by URL, as UTF-8 templates whose `${news_<language>}`
             placeholders take the news text in that language.
     """
@@ -86,6 +89,7 @@ class Http(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     locker: str | None = None
+    nucleus: str | None = None
     files: dict[str, str] = {}
 
 

@@ -1,6 +1,7 @@
 import logging
 import re
 import secrets
+from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
@@ -273,15 +274,35 @@ class PersonaService:
         """
         _, namespace = _context(connection)
         wanted = min(request.max_suggestions, MAXIMUM_SUGGESTIONS)
-        base = re.sub(r"[^A-Za-z0-9_.-]", "", request.name)[:12] or "Player"
         names: list[str] = []
-        for number in range(1, 100):
+        for name in _numbered(_base(request.name)):
             if len(names) >= wanted:
                 break
-            name = f"{base}{number}"
-            if _NAME.fullmatch(name) and await self._store.find(namespace, name) is None:
+            if await self._store.find(namespace, name) is None:
                 names.append(name)
         return NuSuggestPersonasAnswer(names=names)
+
+    async def first_or_new(self, account: Account, namespace: str) -> Persona | None:
+        """Return the account's first persona in a namespace, making one when it has none.
+
+        A new persona is named after the account's login name, with a number when that is taken;
+        none comes back only when every such name is taken.
+
+        Args:
+            account: The account.
+            namespace: The game's persona namespace.
+        """
+        existing = await self._store.of_account(account.id, namespace)
+        if existing:
+            return existing[0]
+        base = _base(account.nuid.split("@")[0])
+        for name in (base, *_numbered(base)):
+            if _NAME.fullmatch(name) and (
+                persona := await self._store.add(account.id, namespace, name)
+            ):
+                logger.info("Account %d was given persona %d (%s)", account.id, persona.id, name)
+                return persona
+        return None
 
     async def login(
         self, connection: FeslConnection, request: PersonaRequest
@@ -362,6 +383,15 @@ class PersonaService:
         if persona is None or persona.account_id != account.id:
             raise TransactionError(UNKNOWN_PERSONA)
         return persona
+
+
+def _base(name: str) -> str:
+    # The start of a name that names may hold, from which names close to it are made.
+    return re.sub(r"[^A-Za-z0-9_.-]", "", name)[:12] or "Player"
+
+
+def _numbered(base: str) -> Iterator[str]:
+    return (name for number in range(1, 100) if _NAME.fullmatch(name := f"{base}{number}"))
 
 
 def _context(connection: FeslConnection) -> tuple[Account, str]:

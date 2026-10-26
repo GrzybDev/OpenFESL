@@ -39,7 +39,9 @@ class GameHttpMiddleware:
             await self._app(scope, receive, send)
             return
         request = Request(scope)
-        answer = self._http.answer(request.method, host, request.url.path, request.query_params)
+        answer = self._http.answer(
+            request.method, host, request.url.path, request.query_params, request.cookies
+        )
         response = Response(
             answer.body, answer.status, {"Cache-Control": CACHE_CONTROL}, answer.media_type
         )

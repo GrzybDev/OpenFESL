@@ -25,6 +25,7 @@ from openfesl.core.games import load_games
 from openfesl.core.history import OnlineHistory
 from openfesl.core.hosting import Hosting
 from openfesl.core.joining import Joining
+from openfesl.core.launcher import LauncherService, LauncherSessions
 from openfesl.core.leaderboards import LeaderboardService
 from openfesl.core.logins import Logins
 from openfesl.core.messages import MessageService
@@ -78,6 +79,7 @@ from openfesl.web.front import front_routes
 from openfesl.web.game_http import GameHttpMiddleware
 from openfesl.web.host import host_routes
 from openfesl.web.languages import LanguageMiddleware
+from openfesl.web.launcher import launcher_routes
 from openfesl.web.leaderboard import leaderboard_routes
 from openfesl.web.menu import menu_routes
 from openfesl.web.pages import STATIC, Pages, StaticAssets
@@ -104,7 +106,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     routes: dict[tuple[str, str], Route[Any]] = {}
     players = Players()
     games = load_games()
-    game_http = GameHttp(games, players, load_texts("news"))
+    launcher_sessions = LauncherSessions()
+    game_http = GameHttp(games, players, load_texts("news"), launcher_sessions)
     commands: dict[str, TheaterRoute[Any]] = {}
     theater = Theater(games, commands)
     # The engine connects on first use, inside the lifespan.
@@ -137,6 +140,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         accounts = AccountService(store, logins, entitlements, Terms.load(), policies, verification)
         personas = PersonaService(persona_store)
         await personas.prepare(await accounts.prepare(games))
+        app.state.launcher = LauncherService(logins, games, personas, launcher_sessions)
         routes.update(connect_routes(games, policies))
         routes.update(telemetry_routes())
         routes.update(accounts.routes())
@@ -214,6 +218,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
     )
     app.include_router(verification_routes(confirm, pages))
+    app.include_router(launcher_routes(lambda: app.state.launcher))
     server_views = ServerViews(games, census, approval, SqlServerStore(sessions))
     sign_in = AdminSessions(
         pages, _sign_in_provider(settings), settings.public_url, server_views.menu_counts
