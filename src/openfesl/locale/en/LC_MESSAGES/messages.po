@@ -3495,6 +3495,9 @@ msgstr "A code has up to %(count)s letters, digits and the characters - _ . : an
 msgid "web.admin.key.code.taken"
 msgstr "A key with this code exists already; codes are compared regardless of case."
 
+msgid "web.admin.key.code.game"
+msgstr "Choose the game the key is for."
+
 msgid "web.admin.key.add.button"
 msgstr "Add key"
 

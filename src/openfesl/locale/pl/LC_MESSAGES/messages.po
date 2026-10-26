@@ -3614,6 +3614,9 @@ msgstr "Kod ma do %(count)s liter, cyfr i znaków - _ . : i zaczyna się literą
 msgid "web.admin.key.code.taken"
 msgstr "Klucz o tym kodzie już istnieje; wielkość liter nie ma znaczenia."
 
+msgid "web.admin.key.code.game"
+msgstr "Wybierz grę, do której należy klucz."
+
 msgid "web.admin.key.add.button"
 msgstr "Dodaj klucz"
 

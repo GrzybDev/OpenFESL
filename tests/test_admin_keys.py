@@ -3,6 +3,9 @@ import pytest
 from identity import IdentityProvider, form_token, sign_in
 from support import FESL, game, log_in_player
 
+from openfesl.core.games import Games, Http, load_games
+from openfesl.server import app
+
 pytestmark = pytest.mark.anyio
 KEEPER = {"sub": "keeper-6", "preferred_username": "invented-keeper", "groups": ["fesl-admins"]}
 WARDEN = {"sub": "warden-6", "preferred_username": "invented-warden", "groups": ["fesl-moderators"]}
@@ -108,3 +111,32 @@ async def test_admins_edit_a_keys_grants_labels_and_limits_which_the_game_and_gu
         emptied |= {"product": ["", ""], "remove": "1", "label.en": "LAN party"}
         await client.post(edit, data=emptied)
         assert "It grants nothing yet." in (await client.get(f"{base}/admin/keys")).text
+
+
+@pytest.fixture
+def several_games(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Bad Company 2 and an invented game without keys; the server starts with both.
+    def load() -> Games:
+        bfbc2 = load_games().by_id("bfbc2")
+        assert bfbc2 is not None
+        other = {"id": "invented", "name": "Invented Game", "namespace": "invented"}
+        return Games(
+            [bfbc2, bfbc2.model_copy(update={**other, "clients": {}, "http": Http(), "keys": []})]
+        )
+
+    monkeypatch.setattr(app, "load_games", load)
+
+
+async def test_a_key_needs_its_game_chosen_when_the_server_serves_several(
+    several_games: None, admin_provider: IdentityProvider, server_url: str
+) -> None:
+    admin_provider.user = KEEPER
+    base = server_url.replace("ws://", "http://").rstrip("/")
+    async with httpx2.AsyncClient() as client:
+        token = form_token((await sign_in(client, base, next="/admin/keys")).text)
+        unchosen = await client.post(f"{base}/admin/keys", data={"csrf": token, "code": "LAN-2026"})
+        chosen = {"csrf": token, "code": "LAN-2026", "game": "invented"}
+        added = await client.post(f"{base}/admin/keys", data=chosen)
+
+    assert unchosen.status_code == 400 and "Choose the game the key is for." in unchosen.text
+    assert added.status_code == 303
