@@ -1,0 +1,35 @@
+{#def mode: str, earlier: str, waiting: int, back: str #}
+{# A change of who can host asks first, as a page of its own: the mode now and the one chosen, and
+   what the change does to the servers. Where scripts run, its panel opens as a dialog over the
+   settings (M10). #}
+{% set title = _("web.admin.settings") %}
+<AdminPage :title="title" current="settings">
+  <PageHead labelledby="mode-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="mode-title">{{ _("web.admin.settings.subtitle") }}</TitleBlock>
+    </div>
+  </PageHead>
+  <Panel class="enter-panel confirm-frame">
+    <Confirmation :question="_('web.admin.confirm.mode')"
+                  :action="url('/admin/settings/hosting')"
+                  :label="_('web.admin.settings.mode.change')"
+                  :busy="_('web.admin.key.saving')"
+                  :back="back"
+                  :hidden="{'mode': mode}">
+      <dl class="facts">
+        <Fact :label="_('web.admin.confirm.mode.now')">
+          {{ _("web.host.mode." ~ earlier) }}
+        </Fact>
+        <Fact :label="_('web.admin.confirm.mode.next')">
+          {{ _("web.host.mode." ~ mode) }}
+        </Fact>
+        {% if earlier == "approved" %}
+          <Fact :label="_('web.admin.waiting')">
+            <span class="confirm-number">{{ number(waiting) }}</span>
+          </Fact>
+        {% endif %}
+      </dl>
+      <p id="confirm-text" class="body-text">{{ _("web.admin.confirm.mode." ~ mode ~ ".text") }}</p>
+    </Confirmation>
+  </Panel>
+</AdminPage>

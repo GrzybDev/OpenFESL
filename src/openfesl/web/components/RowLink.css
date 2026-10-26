@@ -1,0 +1,33 @@
+@layer components {
+  .row-link {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 10px;
+    background: var(--ink);
+    padding: 0 12px 0 14px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--bright);
+    text-transform: uppercase;
+
+    svg {
+      flex: none;
+      color: var(--accent);
+      transition: transform 120ms var(--ease-menu);
+    }
+
+    &:hover svg {
+      transform: translateX(4px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .row-link svg {
+      transition: none;
+    }
+  }
+}

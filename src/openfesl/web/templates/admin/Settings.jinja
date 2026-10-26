@@ -1,0 +1,162 @@
+{#def mode: str, modes: list, waiting: int, games: list, provider, manages: bool, errors #}
+{# The instance's settings: who can host as two tiles, the sign-in provider the deployment sets
+   up, and each game's policies with their defaults. Changing them needs the admin role. #}
+{% set title = _("web.admin.settings") %}
+{% set glyphs = {"approved": "lock", "open": "open", "allow": "tick", "refuse": "x", "replace": "retry"} %}
+{% macro shown(policy, value) %}
+  {%- if policy.kind == "switch" %}{{ _("web.admin.policy.value." ~ value) }}{% elif policy.kind == "choice" %}{{ _("web.admin.policy." ~ policy.name ~ "." ~ value) }}{% else %}{{ value or _("web.admin.policy.version.any") }}{% endif -%}
+{% endmacro %}
+<AdminPage :title="title" current="settings">
+  <PageHead labelledby="settings-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="settings-title">{{ _("web.admin.settings.subtitle") }}</TitleBlock>
+    </div>
+  </PageHead>
+  <Panel class="enter-panel">
+    <div class="settings-columns">
+      <section aria-labelledby="settings-mode">
+        <form method="post" action="{{ url('/admin/settings/hosting') }}">
+          <CsrfField />
+          <fieldset class="settings-mode"{% if not manages %} disabled{% endif %}>
+            <legend id="settings-mode" class="bar bar-wrap">
+              <span>{{ _("web.admin.settings.mode") }}</span><span class="bar-extra">{{ _("web.host.mode." ~ mode) }}</span>
+            </legend>
+            <div class="choice-tiles settings-mode-tiles">
+              {% for option in modes %}
+                <ChoiceTile name="mode" :value="option" :title="_('web.host.mode.' ~ option)" :glyph="glyphs.get(option, 'go')" :checked="option == mode">
+                <span class="choice-text">{{ _("web.admin.settings.mode." ~ option) }}</span>
+                </ChoiceTile>
+              {% endfor %}
+            </div>
+          </fieldset>
+          {% if manages %}
+            <div class="find-button">
+              <FormButton icon="go">{{ _("web.admin.settings.mode.change") }}</FormButton>
+            </div>
+          {% endif %}
+        </form>
+        <p class="body-text side-note">{{ _("web.admin.settings.mode.note") }}</p>
+        {% if mode == "approved" %}
+          <RowLink :href="url('/admin/servers')" :label="_('web.admin.settings.waiting', count=number(waiting))" />
+        {% endif %}
+      </section>
+
+      <section aria-labelledby="settings-sign-in">
+        <Bar id="settings-sign-in" :extra="_('web.admin.settings.sign_in.kind') if provider else ''">{{ _("web.admin.settings.sign_in") }}</Bar>
+        {% if provider %}
+          <p class="bar-text settings-provider">{{ provider.name }}</p>
+          <dl class="facts">
+            <Fact :label="_('web.admin.settings.issuer')" plain>
+              <code class="entitlement-code">{{ provider.issuer }}</code>
+            </Fact>
+            <Fact :label="_('web.admin.settings.roles')" plain>
+              {{ _("web.admin.settings.roles.groups") }}
+            </Fact>
+            <Fact :label="_('web.admin.settings.admins')" plain>
+              <code class="entitlement-code">{{ provider.roles.admins or "–" }}</code>
+            </Fact>
+            <Fact :label="_('web.admin.settings.moderators')" plain>
+              <code class="entitlement-code">{{ provider.roles.moderators or "–" }}</code>
+            </Fact>
+          </dl>
+        {% else %}
+          <p class="bar-text body-text">{{ _("web.admin.settings.sign_in.none") }}</p>
+        {% endif %}
+        <p class="body-text side-note">{{ _("web.admin.settings.sign_in.note") }}</p>
+      </section>
+    </div>
+
+    {% for game, policies in games %}
+      <section aria-labelledby="game-{{ game.id }}-title"
+               id="game-{{ game.id }}"
+               class="settings-game">
+        <h2 id="game-{{ game.id }}-title" class="bar bar-large bar-wrap">
+          <span>{{ _("web.admin.settings.game", game=game.name) }}</span>
+          {% if policies|selectattr("name", "equalto", "connect.maintenance")|selectattr("value", "equalto", "on")|list %}
+            <span class="bar-extra">{{ _("web.admin.policy.connect.maintenance.on") }}</span>
+          {% endif %}
+        </h2>
+        <form method="post" action="{{ url('/admin/settings/games/' ~ game.id) }}">
+          <CsrfField />
+          <fieldset class="settings-policies"{% if not manages %} disabled{% endif %}>
+            <legend class="sr-only">{{ _("web.admin.settings.game", game=game.name) }}</legend>
+            {% for policy in policies %}
+              {% set name = policy.name %}
+              {% set field = "policy-" ~ game.id ~ "-" ~ name|replace(".", "-") %}
+              {% set wrong = name in errors %}
+              {% if loop.first or loop.previtem.section != policy.section %}
+                <h3 class="settings-section">{{ _("web.admin.policy.section." ~ policy.section) }}</h3>
+              {% endif %}
+              <div class="settings-policy settings-{{ policy.kind }}">
+                {% if policy.kind == "switch" %}
+                  <label class="settings-switch-row">
+                    <span class="settings-switch-text">
+                      <span class="settings-policy-name">{{ _("web.admin.policy." ~ name) }}</span>
+                      <span class="settings-policy-text">{{ _("web.admin.policy." ~ name ~ ".text") }}</span>
+                    </span>
+                    <span class="check-place">
+                      <input type="checkbox"
+                             name="{{ name }}"
+                             value="on"
+                             {% if policy.value == "on" %} checked{% endif %}
+                             class="check">
+                      <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span>
+                    </span>
+                  </label>
+                {% elif policy.kind == "choice" %}
+                  <fieldset class="settings-choice">
+                    <legend class="settings-choice-legend">
+                      <span class="settings-policy-name">{{ _("web.admin.policy." ~ name) }}</span>
+                    </legend>
+                    <div class="choice-tiles">
+                      {% for option in policy.options %}
+                        <ChoiceTile :name="name" :value="option" :title="_('web.admin.policy.' ~ name ~ '.' ~ option)" :glyph="glyphs.get(option, 'go')" :checked="option == policy.value">
+                        <span class="choice-text">{{ _("web.admin.policy." ~ name ~ "." ~ option ~ ".text") }}</span>
+                        </ChoiceTile>
+                      {% endfor %}
+                    </div>
+                  </fieldset>
+                {% else %}
+                  <label for="{{ field }}"
+                         class="field-label field-label-joined">{{ _("web.admin.policy." ~ name) }}</label>
+                  <input id="{{ field }}"
+                         name="{{ name }}"
+                         type="text"
+                         value="{{ errors.get(name, policy.value) }}"
+                         inputmode="decimal"
+                         autocomplete="off"
+                         aria-describedby="{{ field }}-note"
+                         {% if wrong %} aria-invalid="true"{% endif %}
+                         class="field-input field-code{% if wrong %} field-invalid{% endif %}">
+                  {% if wrong %}
+                    <p id="{{ field }}-note" class="field-note field-error">
+                      <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.policy.version.wrong") }}
+                    </p>
+                  {% else %}
+                    <p id="{{ field }}-note" class="field-note">{{ _("web.admin.policy." ~ name ~ ".text") }}</p>
+                  {% endif %}
+                {% endif %}
+                <p class="settings-default">
+                  {% if policy.value == policy.default %}
+                    {{ _("web.admin.settings.default") }}
+                  {% else %}
+                    {{ _("web.admin.settings.changed", value=shown(policy, policy.default)) }}
+                  {% endif %}
+                </p>
+              </div>
+            {% endfor %}
+          </fieldset>
+          {% if manages %}
+            <div class="settings-save">
+              <SmallAction :label="_('web.admin.settings.save', game=game.name)" :busy="_('web.admin.key.saving')" />
+            </div>
+          {% endif %}
+        </form>
+        <p class="body-text side-note">{{ _("web.admin.settings.game.note") }}</p>
+      </section>
+    {% endfor %}
+    {% if not manages %}
+      <p class="field-note settings-managed">{{ _("web.admin.settings.managed") }}</p>
+    {% endif %}
+  </Panel>
+</AdminPage>

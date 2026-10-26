@@ -43,6 +43,18 @@
       color: var(--dim);
       cursor: default;
     }
+
+    /* A form shown only for reading keeps its tiles as they are, the choice in the accent. */
+    fieldset:disabled & {
+      border: 0;
+      background: var(--ink);
+      color: var(--bright);
+
+      &:has(:checked) {
+        background: var(--accent);
+        color: var(--ink);
+      }
+    }
   }
 
   /* The radio button stays for keyboards and screen readers; the tile shows the choice. */
@@ -98,6 +110,24 @@
     font-size: 12px;
     line-height: 1.2;
     font-weight: 500;
+  }
+
+  fieldset:disabled .choice-square {
+    background: var(--bar-dark);
+    color: var(--bright);
+  }
+
+  fieldset:disabled :checked ~ .choice-square {
+    background: var(--ink);
+    color: var(--accent);
+  }
+
+  fieldset:disabled .choice-text {
+    color: var(--soft);
+  }
+
+  fieldset:disabled :checked ~ .choice-text {
+    color: var(--dim);
   }
 
   @media (prefers-reduced-motion: reduce) {

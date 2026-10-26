@@ -40,19 +40,27 @@ class SqlServerStore:
             )
         return HostingMode(value) if value else HostingMode.APPROVED
 
-    async def set_hosting_mode(self, mode: HostingMode) -> None:
-        """Change whose games players see.
+    async def set_hosting_mode(self, mode: HostingMode, admin: Admin | None) -> None:
+        """Change whose games players see and record it among the admin's actions.
 
         Args:
             mode: The new mode.
+            admin: The admin who changed it; None for the command line.
         """
         statement = insert(SettingRow).values(key=HOSTING_MODE, value=mode.value)
         async with self._sessions.begin() as session:
+            earlier = await session.scalar(
+                select(SettingRow.value).where(SettingRow.key == HOSTING_MODE).with_for_update()
+            )
             await session.execute(
                 statement.on_conflict_do_update(
                     index_elements=[SettingRow.key], set_={"value": statement.excluded.value}
                 )
             )
+            earlier = earlier or HostingMode.APPROVED.value
+            if earlier != mode.value:
+                details = {"value": mode.value, "from": earlier}
+                session.add(action_row(AdminAction.SETTING, HOSTING_MODE, details, admin))
 
     async def add_provider(self, provider: Provider, admin: Admin | None) -> bool:
         """Keep a new provider, unless another has its name, recording who added it.

@@ -1,0 +1,175 @@
+/* The admin panel's settings: who can host and the sign-in provider side by side, then each
+   game's policies grouped by their section, each with its default. */
+@layer pages {
+  .settings-columns {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px;
+
+    > section {
+      min-width: 0;
+      flex: 1 1 520px;
+    }
+  }
+
+  .settings-mode {
+    border: 0;
+
+    legend {
+      width: 100%;
+    }
+  }
+
+  .settings-mode-tiles {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    margin-top: 2px;
+
+    .choice-tile {
+      min-height: 224px;
+      gap: 10px;
+      padding: 22px 18px;
+    }
+
+    .choice-square {
+      width: 56px;
+      height: 56px;
+
+      svg {
+        width: 30px;
+        height: 30px;
+      }
+    }
+
+    .choice-title {
+      font-size: 21px;
+      letter-spacing: 0.04em;
+    }
+
+    .choice-text {
+      font-size: 15px;
+      line-height: 1.45;
+      font-weight: 500;
+    }
+  }
+
+  .settings-provider {
+    font-family: var(--font-sans);
+    font-size: 19px;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+
+  .settings-game {
+    margin-top: 14px;
+    scroll-margin-top: 16px;
+  }
+
+  .settings-policies {
+    display: grid;
+    gap: 2px;
+    margin-top: 2px;
+    border: 0;
+  }
+
+  .settings-section {
+    margin-top: 10px;
+    background: var(--ink);
+    padding: 11px 14px;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--bright);
+    text-transform: uppercase;
+
+    &:first-of-type {
+      margin-top: 0;
+    }
+  }
+
+  .settings-policy {
+    display: grid;
+    background: var(--row-light);
+    color: var(--ink);
+  }
+
+  .settings-switch-row {
+    display: flex;
+    min-height: 56px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0 8px 14px;
+    cursor: pointer;
+
+    .check-place {
+      flex: none;
+    }
+  }
+
+  .settings-switch-text {
+    display: grid;
+    gap: 3px;
+  }
+
+  .settings-policy-name {
+    font-size: 14px;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .settings-policy-text {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+
+  .settings-choice {
+    border: 0;
+    padding: 12px 14px 0;
+
+    .choice-tiles {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      margin-top: 8px;
+    }
+
+    .choice-tile {
+      min-height: 0;
+    }
+  }
+
+  .settings-default {
+    padding: 6px 14px 10px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.3;
+    font-weight: 600;
+    color: var(--dim);
+  }
+
+  .settings-text .settings-default {
+    background: var(--row);
+  }
+
+  .settings-save {
+    display: grid;
+    margin-top: 2px;
+
+    .small-action {
+      justify-content: center;
+    }
+  }
+
+  .settings-managed {
+    margin-top: 14px;
+  }
+
+  fieldset:disabled .choice-tile,
+  fieldset:disabled .settings-switch-row {
+    cursor: default;
+  }
+}

@@ -191,11 +191,12 @@ class ServerStore(Protocol):
     async def hosting_mode(self) -> HostingMode:
         """Return whose games players see; only approved servers' until the admin opens hosting."""
 
-    async def set_hosting_mode(self, mode: HostingMode) -> None:
-        """Change whose games players see.
+    async def set_hosting_mode(self, mode: HostingMode, admin: Admin | None) -> None:
+        """Change whose games players see and record it among the admin's actions.
 
         Args:
             mode: The new mode.
+            admin: The admin who changed it; None for the command line.
         """
 
     async def add_provider(self, provider: Provider, admin: Admin | None) -> bool:

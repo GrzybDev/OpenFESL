@@ -88,7 +88,7 @@ async def _hosting(settings: Settings, mode: str | None) -> HostingMode:
     async with _database(settings) as sessions:
         store = SqlServerStore(sessions)
         if mode:
-            await store.set_hosting_mode(HostingMode(mode))
+            await store.set_hosting_mode(HostingMode(mode), admin=None)
         return await store.hosting_mode()
 
 

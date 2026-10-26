@@ -1,9 +1,11 @@
 {#def mode: str #}
-{# The admin panel's box that says which hosting mode the instance runs in and what it means. #}
+{# The admin panel's box that says which hosting mode the instance runs in and what it means, with
+   the way to the settings that change it. #}
 <section aria-labelledby="hosting-mode">
   <Bar id="hosting-mode" large>{{ _("web.admin.mode") }}</Bar>
   <div class="bar-text">
     <p class="hosting-mode-name">{{ _("web.host.mode." ~ mode) }}</p>
     <p class="body-text">{{ _("web.admin.mode." ~ mode) }}</p>
   </div>
+  <RowLink :href="url('/admin/settings')" :label="_('web.admin.mode.change')" />
 </section>

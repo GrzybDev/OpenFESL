@@ -256,4 +256,7 @@
   <symbol id="edit" viewBox="0 0 20 20">
     <path d="M4 16l.8-3.6 7.8-7.8 2.8 2.8-7.8 7.8zM11 6.2l2.8 2.8" fill="none" stroke-width="2" stroke-linejoin="round"/>
   </symbol>
+  <symbol id="open" viewBox="0 0 20 20">
+    <path d="M5 9.5h10v7.5H5zM7.4 9.5V7a2.6 2.6 0 0 1 5.1-.8" fill="none" stroke-width="2.2"/>
+  </symbol>
 </svg>

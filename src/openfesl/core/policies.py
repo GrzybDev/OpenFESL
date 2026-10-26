@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING, Annotated, Any, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from openfesl.core.admins import Admin
+
 # For annotations only, since a game's data holds its policies.
 if TYPE_CHECKING:
     from openfesl.core.games import Game
@@ -162,7 +164,7 @@ class SettingStore(Protocol):
             prefix: The start of the keys.
         """
 
-    async def change(self, key: str, value: str | None, admin: str | None) -> None:
+    async def change(self, key: str, value: str | None, admin: Admin | None) -> None:
         """Set or remove a setting and record the change.
 
         Args:

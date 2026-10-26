@@ -3740,3 +3740,195 @@ msgstr "Wybierz grę, dla której graczy jest klucz."
 
 msgid "web.admin.toast.key_saved"
 msgstr "Zapisano %(code)s."
+
+msgid "web.admin.menu.settings"
+msgstr "Ustawienia"
+
+msgid "web.admin.settings"
+msgstr "Ustawienia"
+
+msgid "web.admin.settings.subtitle"
+msgstr "Dopuszczanie serwerów, zasady gier i logowanie"
+
+msgid "web.admin.settings.mode"
+msgstr "Kto może prowadzić gry"
+
+msgid "web.admin.settings.mode.approved"
+msgstr "Każdy nowy serwer czeka w sekcji Serwery na zatwierdzenie. Do tego czasu nie ma go na liście serwerów, a przesyłane przez niego statystyki nie są zapisywane."
+
+msgid "web.admin.settings.mode.open"
+msgstr "Każdy serwer, któremu nie cofnięto zatwierdzenia, od razu trafia na listę, a jego statystyki są zapisywane. Tożsamości i dostawcy są nadal zapisywani, więc późniejsza zmiana zachowuje historię."
+
+msgid "web.admin.settings.mode.change"
+msgstr "Zmień, kto może prowadzić gry"
+
+msgid "web.admin.settings.mode.note"
+msgstr "Zmiana wymaga potwierdzenia i działa od razu, także dla gier prowadzonych teraz."
+
+msgid "web.admin.settings.waiting"
+msgstr "Serwery czekające: %(count)s"
+
+msgid "web.admin.settings.sign_in"
+msgstr "Dostawca logowania"
+
+msgid "web.admin.settings.sign_in.kind"
+msgstr "OpenID Connect"
+
+msgid "web.admin.settings.sign_in.none"
+msgstr "Dostawca logowania nie jest skonfigurowany, więc nikt nie może się zalogować."
+
+msgid "web.admin.settings.sign_in.note"
+msgstr "Dostawcę logowania ustawia się w środowisku wdrożenia; tutaj można go tylko obejrzeć. O każdej zalogowanej osobie przechowywane są tylko identyfikator, wyświetlana nazwa i rola."
+
+msgid "web.admin.settings.issuer"
+msgstr "Wystawca"
+
+msgid "web.admin.settings.roles"
+msgstr "Źródło ról"
+
+msgid "web.admin.settings.roles.groups"
+msgstr "Pole groups tokenu ID"
+
+msgid "web.admin.settings.admins"
+msgstr "Grupa administratorów"
+
+msgid "web.admin.settings.moderators"
+msgstr "Grupa moderatorów"
+
+msgid "web.admin.settings.game"
+msgstr "Zasady gry %(game)s"
+
+msgid "web.admin.settings.game.note"
+msgstr "Każda zasada działa od następnego użycia, na przykład przy następnej rejestracji, logowaniu lub połączeniu."
+
+msgid "web.admin.settings.save"
+msgstr "Zapisz zasady gry %(game)s"
+
+msgid "web.admin.settings.default"
+msgstr "Domyślna wartość z danych gry"
+
+msgid "web.admin.settings.changed"
+msgstr "Zmieniona tutaj · domyślnie z danych gry: %(value)s"
+
+msgid "web.admin.settings.managed"
+msgstr "Ustawienia zmienia rola administratora."
+
+msgid "web.admin.policy.section.registration"
+msgstr "Rejestracja"
+
+msgid "web.admin.policy.section.accounts"
+msgstr "Logowanie"
+
+msgid "web.admin.policy.section.connect"
+msgstr "Połączenia"
+
+msgid "web.admin.policy.registration.age_check"
+msgstr "Sprawdzanie daty urodzenia"
+
+msgid "web.admin.policy.registration.age_check.text"
+msgstr "Data urodzenia z formularza rejestracji jest sprawdzana z limitami wieku kraju, a potem zapominana."
+
+msgid "web.admin.policy.registration.under_parental_age"
+msgstr "Wiek pozwala na rejestrację, ale nie bez zgody rodzica"
+
+msgid "web.admin.policy.registration.under_parental_age.allow"
+msgstr "Rejestracja"
+
+msgid "web.admin.policy.registration.under_parental_age.allow.text"
+msgstr "Konto zostaje utworzone; gra nie ma formularza zgody rodzica."
+
+msgid "web.admin.policy.registration.under_parental_age.refuse"
+msgstr "Odmowa"
+
+msgid "web.admin.policy.registration.under_parental_age.refuse.text"
+msgstr "Rejestracja zostaje odrzucona z komunikatem gry o dacie urodzenia."
+
+msgid "web.admin.policy.accounts.email_verification"
+msgstr "Potwierdzanie adresów e-mail"
+
+msgid "web.admin.policy.accounts.email_verification.text"
+msgstr "Nowe konto może się zalogować dopiero po otwarciu linku wysłanego na jego adres albo po ręcznym potwierdzeniu w panelu."
+
+msgid "web.admin.policy.accounts.concurrent_login"
+msgstr "Logowanie, gdy konto gra gdzie indziej"
+
+msgid "web.admin.policy.accounts.concurrent_login.replace"
+msgstr "Zastąpienie"
+
+msgid "web.admin.policy.accounts.concurrent_login.replace.text"
+msgstr "Druga gra zostaje wylogowana z komunikatem gry o logowaniu w innym miejscu."
+
+msgid "web.admin.policy.accounts.concurrent_login.refuse"
+msgstr "Odmowa"
+
+msgid "web.admin.policy.accounts.concurrent_login.refuse.text"
+msgstr "Nowe logowanie zostaje odrzucone jako zbyt wiele logowań."
+
+msgid "web.admin.policy.connect.minimum_client_version"
+msgstr "Najstarsza wersja gry"
+
+msgid "web.admin.policy.connect.minimum_client_version.text"
+msgstr "Starsze wersje gry dostają prośbę o aktualizację, na przykład 1.0; puste pole wpuszcza każdą wersję."
+
+msgid "web.admin.policy.connect.minimum_hook_version"
+msgstr "Najstarsza wersja OpenFESLHook"
+
+msgid "web.admin.policy.connect.minimum_hook_version.text"
+msgstr "Starsze wersje i te bez numeru wersji dostają prośbę o aktualizację, na przykład 0.2.0; puste pole wpuszcza każdą wersję."
+
+msgid "web.admin.policy.connect.maintenance"
+msgstr "Prace serwisowe"
+
+msgid "web.admin.policy.connect.maintenance.text"
+msgstr "Łączący się gracze dostają informację, że usługa jest zajęta; serwery dedykowane nadal się łączą, a połączeni gracze zostają."
+
+msgid "web.admin.policy.connect.maintenance.on"
+msgstr "Prace serwisowe włączone"
+
+msgid "web.admin.policy.value.on"
+msgstr "włączone"
+
+msgid "web.admin.policy.value.off"
+msgstr "wyłączone"
+
+msgid "web.admin.policy.version.any"
+msgstr "puste, każda wersja"
+
+msgid "web.admin.policy.version.wrong"
+msgstr "Wersja to liczby rozdzielone kropkami, na przykład 1.0, albo puste pole."
+
+msgid "web.admin.mode.change"
+msgstr "Zmień w Ustawieniach"
+
+msgid "web.admin.confirm.mode"
+msgstr "Zmienić, kto może prowadzić gry?"
+
+msgid "web.admin.confirm.mode.now"
+msgstr "Teraz"
+
+msgid "web.admin.confirm.mode.next"
+msgstr "Po zmianie"
+
+msgid "web.admin.confirm.mode.open.text"
+msgstr "Każdy serwer, któremu nie cofnięto zatwierdzenia, od razu wystawia swoją grę, także czekające na zatwierdzenie, a ich statystyki są od tej chwili zapisywane."
+
+msgid "web.admin.confirm.mode.approved.text"
+msgstr "Niezatwierdzone serwery od razu znikają z listy i czekają w sekcji Serwery; przesyłane przez nie statystyki nie są już zapisywane. Zatwierdzone serwery pozostają na liście."
+
+msgid "web.admin.toast.mode.open"
+msgstr "Teraz gry może prowadzić dowolny serwer."
+
+msgid "web.admin.toast.mode.approved"
+msgstr "Teraz gry mogą prowadzić tylko zatwierdzone serwery."
+
+msgid "web.admin.toast.mode_unchanged"
+msgstr "Bez zmian: ten tryb był już ustawiony."
+
+msgid "web.admin.toast.policies"
+msgstr "Zapisano zasady gry %(game)s."
+
+msgid "web.admin.toast.policies_unchanged"
+msgstr "Zasady gry %(game)s pozostały bez zmian."
+
+msgid "web.admin.refused.role.settings"
+msgstr "Ustawienia zmienia rola administratora."

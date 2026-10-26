@@ -3617,3 +3617,195 @@ msgstr "Choose the game whose players the key is for."
 
 msgid "web.admin.toast.key_saved"
 msgstr "Saved %(code)s."
+
+msgid "web.admin.menu.settings"
+msgstr "Settings"
+
+msgid "web.admin.settings"
+msgstr "Settings"
+
+msgid "web.admin.settings.subtitle"
+msgstr "Hosting, game rules and sign-in"
+
+msgid "web.admin.settings.mode"
+msgstr "Who can host"
+
+msgid "web.admin.settings.mode.approved"
+msgstr "Every new server waits under Servers until an admin approves it. Until then it is hidden from the server list and the statistics it sends are not recorded."
+
+msgid "web.admin.settings.mode.open"
+msgstr "Every server that is not revoked is listed at once and its statistics are recorded. Identities and providers are still kept, so a later switch keeps the history."
+
+msgid "web.admin.settings.mode.change"
+msgstr "Change who can host"
+
+msgid "web.admin.settings.mode.note"
+msgstr "A change asks for confirmation and applies at once, to the games hosted now too."
+
+msgid "web.admin.settings.waiting"
+msgstr "Servers waiting: %(count)s"
+
+msgid "web.admin.settings.sign_in"
+msgstr "Sign-in provider"
+
+msgid "web.admin.settings.sign_in.kind"
+msgstr "OpenID Connect"
+
+msgid "web.admin.settings.sign_in.none"
+msgstr "No sign-in provider is set up, so nobody can sign in."
+
+msgid "web.admin.settings.sign_in.note"
+msgstr "The sign-in provider is set in the deployment's environment and is read-only here. For each person who signs in, only the subject, display name and role are kept."
+
+msgid "web.admin.settings.issuer"
+msgstr "Issuer"
+
+msgid "web.admin.settings.roles"
+msgstr "Roles from"
+
+msgid "web.admin.settings.roles.groups"
+msgstr "The groups claim"
+
+msgid "web.admin.settings.admins"
+msgstr "Admin group"
+
+msgid "web.admin.settings.moderators"
+msgstr "Moderator group"
+
+msgid "web.admin.settings.game"
+msgstr "Rules of %(game)s"
+
+msgid "web.admin.settings.game.note"
+msgstr "Each rule applies from its next use, such as the next registration, login or connection."
+
+msgid "web.admin.settings.save"
+msgstr "Save the rules of %(game)s"
+
+msgid "web.admin.settings.default"
+msgstr "The game data's default"
+
+msgid "web.admin.settings.changed"
+msgstr "Changed here · the game data's default is %(value)s"
+
+msgid "web.admin.settings.managed"
+msgstr "Settings are changed with the admin role."
+
+msgid "web.admin.policy.section.registration"
+msgstr "Registration"
+
+msgid "web.admin.policy.section.accounts"
+msgstr "Logins"
+
+msgid "web.admin.policy.section.connect"
+msgstr "Connections"
+
+msgid "web.admin.policy.registration.age_check"
+msgstr "Check the birth date"
+
+msgid "web.admin.policy.registration.age_check.text"
+msgstr "The birth date on the registration form is checked against the country's age limits, then forgotten."
+
+msgid "web.admin.policy.registration.under_parental_age"
+msgstr "Old enough to register, too young without a parent"
+
+msgid "web.admin.policy.registration.under_parental_age.allow"
+msgstr "Register"
+
+msgid "web.admin.policy.registration.under_parental_age.allow.text"
+msgstr "The player registers; the game has no form for a parent's consent."
+
+msgid "web.admin.policy.registration.under_parental_age.refuse"
+msgstr "Refuse"
+
+msgid "web.admin.policy.registration.under_parental_age.refuse.text"
+msgstr "The registration is refused with the game's notice about the birth date."
+
+msgid "web.admin.policy.accounts.email_verification"
+msgstr "Confirm e-mail addresses"
+
+msgid "web.admin.policy.accounts.email_verification.text"
+msgstr "A new account logs in only once the link sent to its address was opened, or an admin confirmed it."
+
+msgid "web.admin.policy.accounts.concurrent_login"
+msgstr "A login while the account plays elsewhere"
+
+msgid "web.admin.policy.accounts.concurrent_login.replace"
+msgstr "Replace"
+
+msgid "web.admin.policy.accounts.concurrent_login.replace.text"
+msgstr "The other game is signed out with the game's notice about signing in elsewhere."
+
+msgid "web.admin.policy.accounts.concurrent_login.refuse"
+msgstr "Refuse"
+
+msgid "web.admin.policy.accounts.concurrent_login.refuse.text"
+msgstr "The new login is refused as too many logins."
+
+msgid "web.admin.policy.connect.minimum_client_version"
+msgstr "Oldest game version"
+
+msgid "web.admin.policy.connect.minimum_client_version.text"
+msgstr "Older games are told to update, such as 1.0; empty lets every version in."
+
+msgid "web.admin.policy.connect.minimum_hook_version"
+msgstr "Oldest OpenFESLHook version"
+
+msgid "web.admin.policy.connect.minimum_hook_version.text"
+msgstr "Older hooks and those that name no version are told to update, such as 0.2.0; empty lets every hook in."
+
+msgid "web.admin.policy.connect.maintenance"
+msgstr "Maintenance"
+
+msgid "web.admin.policy.connect.maintenance.text"
+msgstr "Players who connect are told the service is busy; dedicated servers still connect, and players already connected stay."
+
+msgid "web.admin.policy.connect.maintenance.on"
+msgstr "Maintenance on"
+
+msgid "web.admin.policy.value.on"
+msgstr "on"
+
+msgid "web.admin.policy.value.off"
+msgstr "off"
+
+msgid "web.admin.policy.version.any"
+msgstr "empty, every version"
+
+msgid "web.admin.policy.version.wrong"
+msgstr "A version is numbers with dots between them, such as 1.0, or empty."
+
+msgid "web.admin.mode.change"
+msgstr "Change in Settings"
+
+msgid "web.admin.confirm.mode"
+msgstr "Change who can host?"
+
+msgid "web.admin.confirm.mode.now"
+msgstr "Now"
+
+msgid "web.admin.confirm.mode.next"
+msgstr "After the change"
+
+msgid "web.admin.confirm.mode.open.text"
+msgstr "Every server that is not revoked lists its game at once, those waiting for approval too, and their statistics are recorded from then on."
+
+msgid "web.admin.confirm.mode.approved.text"
+msgstr "Servers that are not approved leave the server list at once and wait under Servers; the statistics they send are no longer recorded. Approved servers stay listed."
+
+msgid "web.admin.toast.mode.open"
+msgstr "Any server can host now."
+
+msgid "web.admin.toast.mode.approved"
+msgstr "Only approved servers can host now."
+
+msgid "web.admin.toast.mode_unchanged"
+msgstr "Nothing changed: that mode was set already."
+
+msgid "web.admin.toast.policies"
+msgstr "Saved the rules of %(game)s."
+
+msgid "web.admin.toast.policies_unchanged"
+msgstr "Nothing changed in the rules of %(game)s."
+
+msgid "web.admin.refused.role.settings"
+msgstr "Settings are changed with the admin role."

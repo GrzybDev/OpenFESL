@@ -72,6 +72,7 @@ from openfesl.web.admin.key_edit import key_edit_routes
 from openfesl.web.admin.keys import key_routes
 from openfesl.web.admin.providers import provider_routes
 from openfesl.web.admin.servers import ServerViews, decision_routes, server_list_routes
+from openfesl.web.admin.settings import settings_routes
 from openfesl.web.front import front_routes
 from openfesl.web.game_http import GameHttpMiddleware
 from openfesl.web.host import host_routes
@@ -228,6 +229,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(entitlement_routes(sign_in, account_views, entitlements, games))
     app.include_router(key_routes(sign_in, games, entitlements))
     app.include_router(key_edit_routes(sign_in, games, entitlements))
+    setting_store = SqlSettingStore(sessions)
+    app.include_router(
+        settings_routes(
+            sign_in,
+            games,
+            GamePolicies(setting_store),
+            setting_store,
+            server_views.store,
+            server_views,
+            hosting.apply_decisions,
+            sign_in.provider,
+        )
+    )
     app.include_router(
         account_decision_routes(
             sign_in,

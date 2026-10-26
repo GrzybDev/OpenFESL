@@ -3,7 +3,9 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.admin import AdminAction
-from openfesl.storage.models import AdminActionRow, SettingRow
+from openfesl.core.admins import Admin
+from openfesl.storage.admin import action_row
+from openfesl.storage.models import SettingRow
 
 
 class SqlSettingStore:
@@ -31,7 +33,7 @@ class SqlSettingStore:
             )
             return {key: value for key, value in rows}
 
-    async def change(self, key: str, value: str | None, admin: str | None) -> None:
+    async def change(self, key: str, value: str | None, admin: Admin | None) -> None:
         """Set or remove a setting and record the change.
 
         Args:
@@ -49,8 +51,4 @@ class SqlSettingStore:
                         index_elements=[SettingRow.key], set_={"value": statement.excluded.value}
                     )
                 )
-            session.add(
-                AdminActionRow(
-                    admin=admin, action=AdminAction.SETTING, target=key, details={"value": value}
-                )
-            )
+            session.add(action_row(AdminAction.SETTING, key, {"value": value}, admin))
