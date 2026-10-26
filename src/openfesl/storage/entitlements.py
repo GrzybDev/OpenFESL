@@ -1,6 +1,6 @@
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 
-from sqlalchemy import ColumnElement, exists, func, select, update
+from sqlalchemy import ColumnElement, delete, exists, func, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -274,15 +274,18 @@ class SqlEntitlementStore:
                     tuple(grants[key.id]),
                     key.created_at,
                     KeyLimits(key.code, key.max_uses, key.once_per_account, uses.get(key.id, 0)),
+                    key.labels,
+                    key.game,
                 )
                 for key in keys
             ]
 
-    async def add_key(self, code: str, admin: Admin) -> bool:
+    async def add_key(self, code: str, game: str, admin: Admin) -> bool:
         """Add an enabled product key that grants nothing yet, and record it.
 
         Args:
             code: The code entered in the game.
+            game: The id of the game whose players it is for.
             admin: The admin who added it.
 
         Returns:
@@ -291,13 +294,58 @@ class SqlEntitlementStore:
         async with self._sessions.begin() as session:
             added = await session.scalar(
                 insert(ProductKeyRow)
-                .values(code=code)
+                .values(code=code, game=game)
                 .on_conflict_do_nothing()
                 .returning(ProductKeyRow.id)
             )
             if added is not None:
                 session.add(action_row(AdminAction.KEY_ADD, code, {"starting": False}, admin))
             return added is not None
+
+    async def edit_key(
+        self,
+        code: str,
+        grants: Sequence[Grant],
+        labels: Mapping[str, str],
+        limits: KeyLimits,
+        admin: Admin,
+    ) -> None:
+        """Replace what a product key grants, its labels and its limits, and record the changes.
+
+        Accounts keep what the key granted them before.
+
+        Args:
+            code: The key as stored.
+            grants: What it grants from now on, each tag once.
+            labels: Its public labels by language.
+            limits: How often it may be redeemed from now on; its uses are left as they are.
+            admin: The admin who changed it.
+        """
+        async with self._sessions.begin() as session:
+            key = await session.scalar(
+                select(ProductKeyRow).where(ProductKeyRow.code == code).with_for_update()
+            )
+            if key is None:
+                return
+            await session.execute(
+                delete(ProductKeyGrantRow).where(ProductKeyGrantRow.key_id == key.id)
+            )
+            session.add_all(
+                ProductKeyGrantRow(
+                    key_id=key.id, tag=grant.tag, group_name=grant.group, product_id=grant.product
+                )
+                for grant in grants
+            )
+            details: dict[str, object] = {"tags": [grant.tag for grant in grants]}
+            session.add(
+                action_row(AdminAction.KEY_GRANTS, code, details | {"labels": labels}, admin)
+            )
+            if (key.max_uses, key.once_per_account) != (limits.max_uses, limits.once_per_account):
+                details = {"max_uses": limits.max_uses, "once_per_account": limits.once_per_account}
+                session.add(action_row(AdminAction.KEY_LIMITS, code, details, admin))
+            key.labels = dict(labels)
+            key.max_uses = limits.max_uses
+            key.once_per_account = limits.once_per_account
 
     async def enable(self, code: str, enabled: bool, admin: Admin) -> bool:
         """Enable or disable a product key and record it.
@@ -391,7 +439,7 @@ class SqlEntitlementStore:
             return KeyLimits(key.code, key.max_uses, key.once_per_account, uses)
 
     async def limit(
-        self, code: str, max_uses: int | None, once_per_account: bool, admin: str | None
+        self, code: str, max_uses: int | None, once_per_account: bool, admin: Admin | None
     ) -> None:
         """Change how often a product key may be redeemed and record it among the admin's actions.
 
@@ -408,14 +456,8 @@ class SqlEntitlementStore:
                 .where(ProductKeyRow.code == code)
                 .values(max_uses=max_uses, once_per_account=once_per_account)
             )
-            session.add(
-                AdminActionRow(
-                    admin=admin,
-                    action=AdminAction.KEY_LIMITS,
-                    target=code,
-                    details={"max_uses": max_uses, "once_per_account": once_per_account},
-                )
-            )
+            details = {"max_uses": max_uses, "once_per_account": once_per_account}
+            session.add(action_row(AdminAction.KEY_LIMITS, code, details, admin))
 
     async def has_keys(self) -> bool:
         """Tell whether any product key exists, enabled or not."""

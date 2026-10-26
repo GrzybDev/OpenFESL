@@ -13,7 +13,7 @@ from openfesl.core.games import Games, Grant
 from openfesl.core.texts import localize
 from openfesl.web.admin.accounts import AccountView, AccountViews
 from openfesl.web.admin.auth import AdminSessions, back_to
-from openfesl.web.admin.keys import KeyView, key_views
+from openfesl.web.keys import KeyView, key_views
 
 SECTION = "accounts"
 # The grant form's choice of one tag typed by hand instead of a product key's.

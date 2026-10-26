@@ -68,6 +68,7 @@ from openfesl.web.admin.auth import (
 )
 from openfesl.web.admin.entitlements import entitlement_routes
 from openfesl.web.admin.home import home_routes
+from openfesl.web.admin.key_edit import key_edit_routes
 from openfesl.web.admin.keys import key_routes
 from openfesl.web.admin.providers import provider_routes
 from openfesl.web.admin.servers import ServerViews, decision_routes, server_list_routes
@@ -193,7 +194,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.mount("/static", StaticAssets(directory=STATIC))
     app.include_router(shell_routes(pages, Terms.load()))
     app.include_router(menu_routes(pages, games, census))
-    app.include_router(front_routes(pages, games, census, history))
+    app.include_router(front_routes(pages, games, census, history, entitlements))
     app.include_router(activity_routes(pages, games, census, history))
     app.include_router(server_routes(pages, games, census))
     app.include_router(leaderboard_routes(pages, games, census, stats))
@@ -226,6 +227,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(account_routes(sign_in, account_views, entitlements, Terms.load().version))
     app.include_router(entitlement_routes(sign_in, account_views, entitlements, games))
     app.include_router(key_routes(sign_in, games, entitlements))
+    app.include_router(key_edit_routes(sign_in, games, entitlements))
     app.include_router(
         account_decision_routes(
             sign_in,

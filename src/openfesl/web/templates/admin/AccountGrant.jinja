@@ -47,8 +47,8 @@
               {% set key = entry.view.key %}
               {% set game = entry.view.game %}
               {% set total = key.grants|length %}
-              <ChoiceTile name="key" :value="key.code" :title="_('games.' ~ game.id ~ '.key.' ~ key.code) if game else key.code" glyph="key" :checked="key.code == chosen" :disabled="not entry.open" :focus="key.code == chosen">
-              {% if game %}<code class="choice-code">{{ key.code }}</code>{% endif %}
+              <ChoiceTile name="key" :value="key.code" :title="entry.view.label(language) or key.code" glyph="key" :checked="key.code == chosen" :disabled="not entry.open" :focus="key.code == chosen">
+              {% if entry.view.label(language) %}<code class="choice-code">{{ key.code }}</code>{% endif %}
               <span class="choice-text">
                 {%- if not entry.open %}{{ _n("web.admin.grant.tags.held", total) }}{% elif entry.had %}{{ _n("web.admin.grant.tags.some", total, held=number(entry.had)) }}{% else %}{{ _n("web.admin.grant.tags", total) }}{% endif -%}
               </span>

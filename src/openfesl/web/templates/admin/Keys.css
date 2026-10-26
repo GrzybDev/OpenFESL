@@ -2,14 +2,30 @@
    in place, beside adding a key and the games' starting keys. Where the table does not fit, each
    key is a block of its own. */
 @layer pages {
-  .key-columns {
+  .admin-key-columns {
     --cell: var(--row);
     display: grid;
     grid-template-columns: 64px minmax(230px, 1fr) 220px 96px 140px 150px;
     gap: 2px;
+
+    .managed & {
+      grid-template-columns: 64px minmax(230px, 1fr) 220px 96px 140px 150px 44px;
+    }
   }
 
-  .server:nth-child(even) > .key-columns {
+  .key-games {
+    margin-top: 2px;
+
+    legend {
+      width: 100%;
+    }
+
+    .choice-tile {
+      min-height: 0;
+    }
+  }
+
+  .server:nth-child(even) > .admin-key-columns {
     --cell: var(--row-alt);
   }
 
@@ -65,18 +81,26 @@
   }
 
   @container (width < 940px) {
-    .key-columns .cell-count {
+    .admin-key-columns .cell-count {
       flex-wrap: wrap;
       gap: 3px 8px;
       padding-block: 6px;
     }
 
-    .server-row.key-columns {
+    .server-row.admin-key-columns {
       grid-template-columns: 64px repeat(2, minmax(0, 1fr));
       grid-template-areas:
         "badges code code"
         "label label grants"
         "source source state";
+
+      .managed & {
+        grid-template-columns: 64px repeat(2, minmax(0, 1fr)) 44px;
+        grid-template-areas:
+          "badges code code end"
+          "label label grants grants"
+          "source source state state";
+      }
 
       > :nth-child(1) {
         grid-area: badges;
@@ -101,6 +125,173 @@
       > :nth-child(6) {
         grid-area: state;
       }
+
+      > :nth-child(7) {
+        grid-area: end;
+        background: var(--cell);
+      }
+    }
+  }
+
+  /* The page that edits a key: its grants as rows of fields, its labels and its limits. */
+  .key-edit-frame {
+    max-width: 746px;
+  }
+
+  .key-edit-code {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--accent);
+    text-transform: none;
+  }
+
+  .key-edit-alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 2px;
+    background: var(--row-light);
+    padding: 10px 14px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 600;
+    color: var(--ink);
+
+    a {
+      text-decoration-line: underline;
+    }
+
+    .badge {
+      width: 22px;
+      height: 22px;
+      flex: none;
+    }
+  }
+
+  .key-edit-grants {
+    display: grid;
+    gap: 2px;
+    margin-top: 2px;
+  }
+
+  .key-edit-columns {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr) 44px;
+    gap: 2px;
+    color: var(--ink);
+
+    .column-head {
+      min-height: 40px;
+      padding-inline: 12px;
+      font-size: 13px;
+    }
+  }
+
+  .key-edit-number {
+    display: grid;
+    place-items: center;
+    background: var(--accent);
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .key-edit-remove {
+    display: grid;
+    place-items: center;
+    background: var(--ink);
+  }
+
+  .key-edit-toggle {
+    position: relative;
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+
+    .check-box {
+      border-color: var(--bright);
+      background: var(--bar-dark);
+      color: var(--bright);
+    }
+  }
+
+  .key-edit-row-error {
+    background: var(--row);
+    padding: 8px 12px 8px 58px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .key-edit-labels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2px;
+    margin-top: 10px;
+  }
+
+  .key-edit-limits {
+    margin-top: 10px;
+  }
+
+  .key-edit-once {
+    position: relative;
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 2px;
+    background: var(--row);
+    padding-left: 14px;
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  .key-edit-note {
+    margin-top: 10px;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  @media (width < 40rem) {
+    .key-edit-columns {
+      grid-template-columns: 44px minmax(0, 1fr) 44px;
+      grid-template-areas:
+        "number tag remove"
+        "number group group"
+        "number product product";
+
+      > :nth-child(1) {
+        grid-area: number;
+      }
+
+      > :nth-child(2) {
+        grid-area: tag;
+      }
+
+      > :nth-child(3) {
+        grid-area: group;
+      }
+
+      > :nth-child(4) {
+        grid-area: product;
+      }
+
+      > :nth-child(5) {
+        grid-area: remove;
+      }
+    }
+
+    .key-edit-grants > :first-child {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
     }
   }
 }

@@ -18,7 +18,7 @@
                   :back="back"
                   glyph="x">
       <p class="confirm-account">
-        <span>{{ _("games." ~ view.game.id ~ ".key." ~ key.code) if view.game else key.code }}</span>
+        <span>{{ view.label(language) or key.code }}</span>
         {% if view.game %}<GameChip :of="view.game" />{% endif %}
       </p>
       <dl class="facts">
@@ -29,7 +29,7 @@
           <code class="entitlement-code">{{ key.grants|map(attribute="tag")|join(", ") or "–" }}</code>
         </Fact>
         <Fact :label="_('web.admin.key.source')">
-          {{ _("web.admin.key.source.game") ~ " · " ~ _("web.admin.key.source.starting") if view.game else _("web.admin.key.source.here") }}
+          {{ _("web.admin.key.source.game") ~ " · " ~ _("web.admin.key.source.starting") if view.starting else _("web.admin.key.source.here") }}
         </Fact>
       </dl>
       <p id="confirm-text" class="body-text">{{ _("web.admin.confirm.key.text") }}</p>

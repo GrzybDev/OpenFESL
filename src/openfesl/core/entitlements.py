@@ -1,6 +1,6 @@
 import logging
-from collections.abc import Sequence
-from dataclasses import dataclass
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import IntEnum
 from typing import TYPE_CHECKING, Any, Protocol
@@ -88,6 +88,9 @@ class StoredKey:
         grants: What it grants.
         created: When it was added.
         limits: How often it may be redeemed, and how often it was.
+        labels: What the public pages call it, by language; none for the languages without one.
+        game: The id of the game whose players it is for, when the admin added it; starting
+            keys belong to the game whose data lists them.
     """
 
     code: str
@@ -95,6 +98,8 @@ class StoredKey:
     grants: tuple[Grant, ...]
     created: datetime
     limits: KeyLimits
+    labels: Mapping[str, str] = field(default_factory=dict)
+    game: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

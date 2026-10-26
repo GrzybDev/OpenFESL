@@ -48,6 +48,9 @@ class AdminAction(StrEnum):
     of the game data."""
     KEY_STATE = "key_state"
     """Enabled or disabled the product key named as the target; the details say which."""
+    KEY_GRANTS = "key_grants"
+    """Changed what the product key named as the target grants and its public labels; the
+    details hold its tags and labels."""
     KEY_LIMITS = "key_limits"
     """Changed how often the product key named as the target may be redeemed; the details hold
     its most uses, none for any number, and whether an account may redeem it only once."""

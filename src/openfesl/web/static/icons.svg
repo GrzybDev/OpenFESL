@@ -253,4 +253,7 @@
   <symbol id="plus" viewBox="0 0 20 20">
     <path d="M10 4v12M4 10h12" fill="none" stroke-width="2.6"/>
   </symbol>
+  <symbol id="edit" viewBox="0 0 20 20">
+    <path d="M4 16l.8-3.6 7.8-7.8 2.8 2.8-7.8 7.8zM11 6.2l2.8 2.8" fill="none" stroke-width="2" stroke-linejoin="round"/>
+  </symbol>
 </svg>

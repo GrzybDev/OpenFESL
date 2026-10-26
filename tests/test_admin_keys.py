@@ -20,8 +20,7 @@ async def test_admins_add_disable_and_enable_product_keys_that_moderators_only_s
 
         # New codes are unique in any case and keep to the characters the game's prompt takes.
         added = await client.post(f"{base}/admin/keys", data={"csrf": token, "code": "LAN-2026"})
-        listed = (await client.get(base + added.headers["location"])).text
-        assert "Added LAN-2026." in listed and "Added here" in listed
+        assert "Added LAN-2026." in (await client.get(base + added.headers["location"])).text
         taken = await client.post(f"{base}/admin/keys", data={"csrf": token, "code": "lan-2026"})
         assert taken.status_code == 400 and "A key with this code exists already" in taken.text
         wrong = await client.post(f"{base}/admin/keys", data={"csrf": token, "code": "a b"})
@@ -43,7 +42,7 @@ async def test_admins_add_disable_and_enable_product_keys_that_moderators_only_s
             await client.post(f"{base}/admin/keys/ACTIVATE-VETERAN/enable", data={"csrf": token})
             assert "errorCode" not in await ann.request(FESL, "acct", redeem)
 
-        again = await client.post(f"{base}/admin/keys/starting-keys", data={"csrf": token})
+        again = await client.post(f"{base}/admin/keys", data={"csrf": token, "starting": "1"})
         assert (
             "Every starting key is here already."
             in (await client.get(base + again.headers["location"])).text
@@ -58,3 +57,54 @@ async def test_admins_add_disable_and_enable_product_keys_that_moderators_only_s
             f"{base}/admin/keys/LAN-2026/disable", data={"csrf": form_token(seen)}
         )
         assert refused.status_code == 403
+
+
+async def test_admins_edit_a_keys_grants_labels_and_limits_which_the_game_and_guide_follow(
+    admin_provider: IdentityProvider, server_url: str
+) -> None:
+    admin_provider.user = KEEPER
+    base = server_url.replace("ws://", "http://").rstrip("/")
+    async with httpx2.AsyncClient() as client:
+        page = (await sign_in(client, base, next="/admin/keys")).text
+        token = form_token(page)
+        await client.post(f"{base}/admin/keys", data={"csrf": token, "code": "LAN-2026"})
+        edit = f"{base}/admin/keys/LAN-2026"
+        assert "Edit key" in (await client.get(edit)).text
+
+        # A grant without a tag saves nothing and says which one it is.
+        wrong = {"csrf": token, "tag": [""], "group": ["Invented"], "product": [""]}
+        refused = await client.post(edit, data=wrong)
+        assert refused.status_code == 400 and "grant 1 has no tag" in refused.text
+
+        saved = {
+            "csrf": token,
+            "tag": ["INVENTED:LAN", ""],
+            "group": ["Invented", ""],
+            "product": ["", ""],
+            "label.en": "LAN party",
+            "max_uses": "1",
+            "once": "1",
+        }
+        done = await client.post(edit, data=saved)
+        listed = (await client.get(base + done.headers["location"])).text
+        assert "Saved LAN-2026." in listed and "LAN party" in listed
+        assert "0 of 1 accounts · once per account" in listed
+        guide = (await client.get(f"{base}/bfbc2/play")).text
+        assert "LAN-2026" in guide and "LAN party" in guide
+        # A language without a label shows the code alone.
+        polish = (await client.get(f"{base}/pl/bfbc2/play")).text
+        assert "LAN-2026" in polish and "LAN party" not in polish
+
+        redeem = [("TXN", "NuEntitleUser"), ("key", "lan-2026")]
+        async with game(server_url) as ann, game(server_url) as bob:
+            await log_in_player(ann, FESL, "ann@example.test")
+            await log_in_player(bob, FESL, "bob@example.test")
+            assert "errorCode" not in await ann.request(FESL, "acct", redeem)
+            assert (await ann.request(FESL, "acct", redeem))["errorCode"] == "182"
+            assert (await bob.request(FESL, "acct", redeem))["errorCode"] == "180"
+
+        # Removing the grant takes it from later entries only.
+        emptied = {"csrf": token, "tag": ["INVENTED:LAN", ""], "group": ["", ""]}
+        emptied |= {"product": ["", ""], "remove": "1", "label.en": "LAN party"}
+        await client.post(edit, data=emptied)
+        assert "It grants nothing yet." in (await client.get(f"{base}/admin/keys")).text

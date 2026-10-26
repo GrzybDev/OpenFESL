@@ -67,12 +67,12 @@
           <GuideStep :number="4 if relay else 3"
                      :heading="_('web.play.account')"
                      :where="_('web.play.account.where')">
-            {% set key %}{% if play_key %}<FileName :text="play_key.code" />{% endif %}{% endset %}
+            {% set key %}{% if play_key %}<FileName :text="play_key.key.code" />{% endif %}{% endset %}
             <p class="body-text guide-fill">{% if play_key %}{{ _("web.play.account.text", key=key) }}{% else %}{{ _("web.play.account.plain") }}{% endif %}</p>
             {% if play_key %}
               <div class="play-key">
-                <span>{{ play_key.code }}</span>
-                <CopyButton :value="play_key.code" :label="_('web.front.setup.copy')" :note="_('web.front.setup.copied')" size="tall" />
+                <span>{{ play_key.key.code }}</span>
+                <CopyButton :value="play_key.key.code" :label="_('web.front.setup.copy')" :note="_('web.front.setup.copied')" size="tall" />
               </div>
             {% endif %}
             <Outside :href="servers" :label="_('web.play.server_list')" :note="_n('web.play.servers', activity.servers)" />
@@ -96,11 +96,12 @@
                 </div>
               </div>
               <div role="rowgroup" class="table-rows">
-                {% for key in keys %}
+                {% for view in keys %}
+                  {% set key = view.key %}
                   <div role="row" class="key-columns key">
                     <div role="cell" class="key-code">{{ key.code }}</div>
-                    <div role="cell" class="key-unlocks">{{ _("games." ~ game.id ~ ".key." ~ key.code) }}</div>
-                    <div role="cell">{% if key == play_key %}<span class="key-needed">{{ _("web.play.needed") }}</span>{% else %}<span class="key-optional">{{ _("web.play.optional") }}</span>{% endif %}</div>
+                    <div role="cell" class="key-unlocks">{{ view.label(language) or "" }}</div>
+                    <div role="cell">{% if view == play_key %}<span class="key-needed">{{ _("web.play.needed") }}</span>{% else %}<span class="key-optional">{{ _("web.play.optional") }}</span>{% endif %}</div>
                     <div role="cell" class="key-copy">
                       <CopyButton :value="key.code" :label="_('web.play.copy_key')" :note="_('web.play.copied_key', key=key.code)" :name="_('web.play.copy_key.name', key=key.code)" size="cell" />
                     </div>

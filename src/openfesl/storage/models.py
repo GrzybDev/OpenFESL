@@ -97,6 +97,10 @@ class ProductKeyRow(Base):
     # How many accounts may redeem it; None for any number.
     max_uses: Mapped[int | None]
     once_per_account: Mapped[bool] = mapped_column(server_default="false")
+    # What the public pages call the key, by language.
+    labels: Mapped[dict[str, str]] = mapped_column(JSONB, server_default="{}")
+    # The game a key added by the admin is for; starting keys belong to their game data's.
+    game: Mapped[str | None]
 
 
 Index("product_key_code_key", func.upper(ProductKeyRow.code), unique=True)

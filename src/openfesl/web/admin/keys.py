@@ -1,8 +1,8 @@
 import re
 from collections.abc import Awaitable, Callable, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Protocol, Self
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -11,53 +11,16 @@ from starlette.exceptions import HTTPException
 
 from openfesl.core.admins import Admin, Role
 from openfesl.core.entitlements import KeyHistory, StoredKey
-from openfesl.core.games import Game, Games, ProductKey
-from openfesl.core.texts import localize
+from openfesl.core.games import Games, ProductKey
+from openfesl.core.texts import languages, localize
 from openfesl.web.admin.auth import AdminSessions, back_to
+from openfesl.web.keys import KeyView, key_views
 
 SECTION = "keys"
 TABS = ("all", "enabled", "disabled")
 # Codes are typed into the game's key prompt and name the key in the panel's addresses.
 MAXIMUM_CODE = 64
 _CODE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]*")
-
-
-@dataclass(frozen=True, slots=True)
-class KeyView:
-    """A product key as the admin panel shows it.
-
-    Attributes:
-        key: The key.
-        game: The game whose data lists it among its starting keys, if any.
-        history: When the admin added it and last enabled or disabled it.
-    """
-
-    key: StoredKey
-    game: Game | None
-    history: KeyHistory = field(default_factory=KeyHistory)
-
-    @property
-    def tab(self) -> str:
-        """The tab of the keys page that lists it besides all: enabled or disabled."""
-        return "enabled" if self.key.enabled else "disabled"
-
-
-def key_views(
-    games: Games, keys: Sequence[StoredKey], history: dict[str, KeyHistory] | None = None
-) -> list[KeyView]:
-    """Return the views of product keys, each with the game that lists it, in their order.
-
-    Args:
-        games: The games the server serves.
-        keys: The keys.
-        history: When the admin added and changed them, by code.
-    """
-    starting = {key.code.upper(): game for game in games for key in game.keys}
-    known = history or {}
-    return [
-        KeyView(key, starting.get(key.code.upper()), known.get(key.code, KeyHistory()))
-        for key in keys
-    ]
 
 
 class KeyStore(Protocol):
@@ -69,11 +32,12 @@ class KeyStore(Protocol):
     async def key_history(self) -> dict[str, KeyHistory]:
         """Return when each product key was added and last enabled or disabled by the admin."""
 
-    async def add_key(self, code: str, admin: Admin) -> bool:
+    async def add_key(self, code: str, game: str, admin: Admin) -> bool:
         """Add an enabled product key that grants nothing yet.
 
         Args:
             code: The code entered in the game.
+            game: The id of the game whose players it is for.
             admin: The admin who added it.
 
         Returns:
@@ -180,6 +144,8 @@ def key_routes(sessions: AdminSessions, games: Games, store: KeyStore) -> APIRou
             ],
             manages=admin.role is Role.ADMIN,
             longest=MAXIMUM_CODE,
+            games=list(games),
+            codes=languages(),
             form=form,
         )
 
@@ -192,24 +158,26 @@ def key_routes(sessions: AdminSessions, games: Games, store: KeyStore) -> APIRou
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         form = await request.form()
         sessions.check(request, form)
+        if form.get("starting"):
+            added = await store.import_keys(games.keys, admin)
+            if added:
+                sessions.toast(request, "web.admin.toast.keys_imported", count=str(added))
+            else:
+                sessions.toast(request, "web.admin.toast.keys_imported_none")
+            return RedirectResponse(_listed(request), 303)
         code = str(form.get("code", "")).strip()
+        chosen = str(form.get("game", ""))
+        every = list(games)
+        game = games.by_id(chosen) or (every[0] if len(every) == 1 else None)
         if len(code) > MAXIMUM_CODE or not _CODE.fullmatch(code):
-            return await page(request, admin, 400, code=code, error="code")
-        if not await store.add_key(code, admin):
-            return await page(request, admin, 400, code=code, error="taken")
+            return await page(request, admin, 400, code=code, game=chosen, error="code")
+        if game is None:
+            return await page(request, admin, 400, code=code, error="game")
+        if not await store.add_key(code, game.id, admin):
+            return await page(request, admin, 400, code=code, game=chosen, error="taken")
         sessions.toast(request, "web.admin.toast.key_added", code=code)
-        return RedirectResponse(_listed(request, code), 303)
-
-    @router.post("/admin/keys/starting-keys")
-    async def starting(request: Request) -> Response:
-        admin = sessions.admin(request, Role.ADMIN, SECTION)
-        sessions.check(request, await request.form())
-        added = await store.import_keys(games.keys, admin)
-        if added:
-            sessions.toast(request, "web.admin.toast.keys_imported", count=str(added))
-        else:
-            sessions.toast(request, "web.admin.toast.keys_imported_none")
-        return RedirectResponse(_listed(request), 303)
+        target = localize(f"/admin/keys/{quote(code)}", request.state.language)
+        return RedirectResponse(target, 303)
 
     @router.get("/admin/keys/{code}/disable", response_class=HTMLResponse)
     async def confirm_disable(request: Request, code: str, back: str = "") -> HTMLResponse:

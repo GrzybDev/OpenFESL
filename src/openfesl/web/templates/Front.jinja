@@ -1,5 +1,5 @@
-{#def activity, busiest, overview #}
-{% set key = game.play_key.code if game.play_key else None %}
+{#def activity, busiest, overview, play_key: str | None = None #}
+{% set key = play_key %}
 {% set hook %}<FileName text="dinput8.dll" />{% endset %}
 <Layout :title="game.name">
   <GameMenu />

@@ -3607,7 +3607,7 @@ msgid "web.admin.key.code.hint"
 msgstr "Kod wpisywany w grze"
 
 msgid "web.admin.key.code.note"
-msgstr "Kody są porównywane bez względu na wielkość liter i po utworzeniu się nie zmieniają. Nowy klucz jest od razu włączony."
+msgstr "Kody są porównywane bez względu na wielkość liter i po utworzeniu się nie zmieniają. Uprawnienia i nazwy ustawia się na stronie klucza; nowy klucz jest od razu włączony."
 
 msgid "web.admin.key.code.code"
 msgstr "Kod ma do %(count)s liter, cyfr i znaków - _ . : i zaczyna się literą lub cyfrą."
@@ -3647,3 +3647,96 @@ msgstr "Bez zmian: %(code)s był już w tym stanie."
 
 msgid "web.admin.refused.role.keys"
 msgstr "Kluczami produktów zarządza rola administratora."
+
+msgid "web.admin.key.edit"
+msgstr "Zmień uprawnienia i nazwy"
+
+msgid "web.admin.key.edit.of"
+msgstr "Zmień %(code)s"
+
+msgid "web.admin.key.edit.title"
+msgstr "Zmiana klucza"
+
+msgid "web.admin.keys.all"
+msgstr "Wszystkie klucze"
+
+msgid "web.admin.key.edit.failed"
+msgstr "Uprawnień nie zapisano:"
+
+msgid "web.admin.key.edit.no-tag"
+msgstr "uprawnienie %(number)s nie ma znacznika"
+
+msgid "web.admin.key.edit.repeated"
+msgstr "uprawnienie %(number)s powtarza znacznik"
+
+msgid "web.admin.key.edit.no-tag.short"
+msgstr "Znacznik jest wymagany."
+
+msgid "web.admin.key.edit.repeated.short"
+msgstr "Każdy znacznik jest przyznawany raz; ten już jest na liście."
+
+msgid "web.admin.key.grant"
+msgstr "Uprawnienie"
+
+msgid "web.admin.key.grant.new"
+msgstr "Nowe uprawnienie"
+
+msgid "web.admin.key.remove"
+msgstr "Usuń"
+
+msgid "web.admin.key.remove.of"
+msgstr "Usuń uprawnienie %(number)s"
+
+msgid "web.admin.key.edit.rows"
+msgstr "Ostatni wiersz dodaje uprawnienie; zaznaczone pole usuwa uprawnienie przy zapisie klucza."
+
+msgid "web.admin.key.label.in"
+msgstr "Nazwa publiczna · %(language)s"
+
+msgid "web.admin.key.edit.label"
+msgstr "Nazwa ma do %(count)s znaków."
+
+msgid "web.admin.key.used.one"
+msgstr "Wpisany na kontach: %(count)s"
+
+msgid "web.admin.key.used.few"
+msgstr "Wpisany na kontach: %(count)s"
+
+msgid "web.admin.key.used.many"
+msgstr "Wpisany na kontach: %(count)s"
+
+msgid "web.admin.key.used.other"
+msgstr "Wpisany na kontach: %(count)s"
+
+msgid "web.admin.key.limits"
+msgstr "Limity użycia"
+
+msgid "web.admin.key.limits.most"
+msgstr "Liczba kont, które mogą go wpisać · opcjonalnie"
+
+msgid "web.admin.key.limits.most.note"
+msgstr "Bez liczby klucz może wpisać dowolna liczba kont; gdy wpisze go tyle kont, gra odrzuca go dla kolejnych."
+
+msgid "web.admin.key.limits.wrong"
+msgstr "Liczba kont musi być liczbą całkowitą od 1."
+
+msgid "web.admin.key.limits.once.note"
+msgstr "Odrzuca konto, które wpisuje klucz ponownie; bez tego ponowne wpisanie niczego nie przyznaje ani nie zużywa."
+
+msgid "web.admin.key.edit.note"
+msgstr "Zapisane uprawnienia działają przy kolejnych wpisaniach klucza; konta zachowują to, co już otrzymały. Nazwa jest wyświetlana na stronie publicznej obok kodu, dopóki klucz jest włączony; bez niej widać tylko kod."
+
+msgid "web.admin.key.save"
+msgstr "Zapisz"
+
+msgid "web.admin.key.saving"
+msgstr "Zapisywanie…"
+
+msgid "web.admin.key.for"
+msgstr "Gra"
+
+msgid "web.admin.key.for.missing"
+msgstr "Wybierz grę, dla której graczy jest klucz."
+
+msgid "web.admin.toast.key_saved"
+msgstr "Zapisano %(code)s."

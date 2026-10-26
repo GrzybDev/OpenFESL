@@ -3490,7 +3490,7 @@ msgid "web.admin.key.code.hint"
 msgstr "The code entered in the game"
 
 msgid "web.admin.key.code.note"
-msgstr "Codes are compared regardless of case and stay fixed after creation. A new key starts enabled."
+msgstr "Codes are compared regardless of case and stay fixed after creation. Grants and labels follow on the key's page; a new key starts enabled."
 
 msgid "web.admin.key.code.code"
 msgstr "A code has up to %(count)s letters, digits and the characters - _ . : and starts with a letter or digit."
@@ -3530,3 +3530,90 @@ msgstr "Nothing changed: %(code)s was in that state already."
 
 msgid "web.admin.refused.role.keys"
 msgstr "Product keys are managed by the admin role."
+
+msgid "web.admin.key.edit"
+msgstr "Edit grants and labels"
+
+msgid "web.admin.key.edit.of"
+msgstr "Edit %(code)s"
+
+msgid "web.admin.key.edit.title"
+msgstr "Edit key"
+
+msgid "web.admin.keys.all"
+msgstr "All keys"
+
+msgid "web.admin.key.edit.failed"
+msgstr "The grants were not saved:"
+
+msgid "web.admin.key.edit.no-tag"
+msgstr "grant %(number)s has no tag"
+
+msgid "web.admin.key.edit.repeated"
+msgstr "grant %(number)s repeats a tag"
+
+msgid "web.admin.key.edit.no-tag.short"
+msgstr "Tag is required."
+
+msgid "web.admin.key.edit.repeated.short"
+msgstr "Each tag is granted once; this one is listed already."
+
+msgid "web.admin.key.grant"
+msgstr "Grant"
+
+msgid "web.admin.key.grant.new"
+msgstr "New grant"
+
+msgid "web.admin.key.remove"
+msgstr "Remove"
+
+msgid "web.admin.key.remove.of"
+msgstr "Remove grant %(number)s"
+
+msgid "web.admin.key.edit.rows"
+msgstr "The last row adds a grant; a ticked box removes its grant when the key is saved."
+
+msgid "web.admin.key.label.in"
+msgstr "Public label · %(language)s"
+
+msgid "web.admin.key.edit.label"
+msgstr "A label has up to %(count)s characters."
+
+msgid "web.admin.key.used.one"
+msgstr "Entered by %(count)s account"
+
+msgid "web.admin.key.used.other"
+msgstr "Entered by %(count)s accounts"
+
+msgid "web.admin.key.limits"
+msgstr "Use limits"
+
+msgid "web.admin.key.limits.most"
+msgstr "Accounts that may enter it · optional"
+
+msgid "web.admin.key.limits.most.note"
+msgstr "Without a number any number of accounts may enter the key; once that many have, the game refuses it for others."
+
+msgid "web.admin.key.limits.wrong"
+msgstr "The number of accounts is a whole number from 1."
+
+msgid "web.admin.key.limits.once.note"
+msgstr "Refuses an account that enters the key again; otherwise entering it again grants nothing new and uses nothing up."
+
+msgid "web.admin.key.edit.note"
+msgstr "Saved grants apply to later entries of this key; accounts keep what they already received. A label is shown on the public page next to the code while the key is enabled; without one only the code is shown."
+
+msgid "web.admin.key.save"
+msgstr "Save"
+
+msgid "web.admin.key.saving"
+msgstr "Saving…"
+
+msgid "web.admin.key.for"
+msgstr "Game"
+
+msgid "web.admin.key.for.missing"
+msgstr "Choose the game whose players the key is for."
+
+msgid "web.admin.toast.key_saved"
+msgstr "Saved %(code)s."

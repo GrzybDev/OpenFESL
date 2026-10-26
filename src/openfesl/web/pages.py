@@ -160,6 +160,12 @@ def _country(context: Context, code: str) -> str:
 
 
 @pass_context
+def _language_name(context: Context, code: str) -> str:
+    # A language's name in the page's language, from its code.
+    return str(Locale.parse(code).get_display_name(_locale(context)))
+
+
+@pass_context
 def _listed(context: Context, items: list[str]) -> str:
     # Names joined as the page's language lists them, such as "A, B and C".
     return str(format_list(items, locale=_locale(context)))
@@ -213,6 +219,7 @@ _catalog = Catalog(
         "ago": _ago,
         "listed": _listed,
         "country": _country,
+        "language_name": _language_name,
     },
 )
 # The catalogue keeps its own environment, which takes the given one's escaping but not its

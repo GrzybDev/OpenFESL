@@ -1,0 +1,164 @@
+{#def view, form, codes: list, longest: int #}
+{# The form that edits what a product key grants, its public label in each language and how often
+   it may be entered: one row per grant with a box that removes it, an empty row for a new grant,
+   the labels and the limits. #}
+{% set key = view.key %}
+{% set title = _("web.admin.keys") %}
+{% macro field_error(text) %}
+  <p class="field-note field-error">
+    <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ text }}
+  </p>
+{% endmacro %}
+<AdminPage :title="title ~ ' · ' ~ key.code" current="keys">
+  <PageHead labelledby="edit-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="edit-title">{{ _("web.admin.key.edit") }}</TitleBlock>
+    </div>
+    <Tab :href="url('/admin/keys')" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.keys.all") }}</Tab>
+  </PageHead>
+  <Panel class="enter-panel key-edit-frame">
+    <form method="post"
+          action="{{ url('/admin/keys/' ~ key.code|urlencode) }}"
+          aria-labelledby="edit-key"
+          class="key-edit">
+      <CsrfField />
+      <h2 id="edit-key" class="bar bar-large bar-wrap">
+        <span>{{ _("web.admin.key.edit.title") }}</span><code class="key-edit-code">{{ key.code }}</code>
+      </h2>
+      {% if form.error in ("no-tag", "repeated") %}
+        <p role="alert" class="key-edit-alert">
+          <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>
+          <span>{{ _("web.admin.key.edit.failed") }} <a href="#grant-tag-{{ form.row }}">{{ _("web.admin.key.edit." ~ form.error, number=form.row) }}</a></span>
+        </p>
+      {% endif %}
+      <div role="table"
+           aria-label="{{ _('web.admin.key.grants') }}"
+           class="key-edit-grants">
+        <div role="row" class="key-edit-columns">
+          <div role="columnheader" class="column-head"><span class="sr-only">{{ _("web.admin.key.grant") }}</span></div>
+          <div role="columnheader" id="grant-head-tag" class="column-head">{{ _("web.admin.entitlement.tag") }}</div>
+          <div role="columnheader" id="grant-head-group" class="column-head">{{ _("web.admin.grant.group") }}</div>
+          <div role="columnheader" id="grant-head-product" class="column-head">{{ _("web.admin.grant.product") }}</div>
+          <div role="columnheader"
+               class="column-head"><span class="sr-only">{{ _("web.admin.key.remove") }}</span></div>
+        </div>
+        {% for row in form.rows %}
+          {% set number = loop.index %}
+          {% set new = loop.last and row.empty %}
+          {% set wrong = form.row == number %}
+          <div role="row" class="key-edit-columns">
+            <div role="cell" id="grant-row-{{ number }}" class="key-edit-number">
+              {%- if new %}<span aria-hidden="true">+</span><span class="sr-only">{{ _("web.admin.key.grant.new") }}</span>{% else %}{{ number }}{% endif -%}
+            </div>
+            <div role="cell">
+              <input id="grant-tag-{{ number }}"
+                     name="tag"
+                     placeholder="{{ _('web.admin.entitlement.tag') }}"
+                     type="text"
+                     value="{{ row.tag }}"
+                     autocomplete="off"
+                     aria-labelledby="grant-head-tag grant-row-{{ number }}"
+                     {% if wrong %} aria-invalid="true" aria-describedby="grant-error"{% endif %}
+                     class="field-input field-code{% if wrong %} field-invalid{% endif %}">
+            </div>
+            <div role="cell">
+              <input name="group"
+                     placeholder="{{ _('web.admin.entitlement.group') }}"
+                     type="text"
+                     value="{{ row.group }}"
+                     autocomplete="off"
+                     aria-labelledby="grant-head-group grant-row-{{ number }}"
+                     class="field-input field-code">
+            </div>
+            <div role="cell">
+              <input name="product"
+                     placeholder="{{ _('web.admin.entitlement.product') }}"
+                     type="text"
+                     value="{{ row.product }}"
+                     autocomplete="off"
+                     aria-labelledby="grant-head-product grant-row-{{ number }}"
+                     class="field-input field-code">
+            </div>
+            <div role="cell" class="key-edit-remove">
+              {% if not new %}
+                <label class="key-edit-toggle">
+                  <input type="checkbox"
+                         name="remove"
+                         value="{{ number }}"
+                         {% if row.removed %} checked{% endif %}
+                         class="check">
+                  <span aria-hidden="true" class="check-box"><Icon name="x" stroke="currentColor" /></span>
+                  <span class="sr-only">{{ _("web.admin.key.remove.of", number=number) }}</span>
+                </label>
+              {% endif %}
+            </div>
+          </div>
+          {% if wrong %}
+            <div role="row">
+              <p role="cell"
+                 id="grant-error"
+                 class="key-edit-row-error">{{ _("web.admin.key.edit." ~ form.error ~ ".short") }}</p>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      <p class="field-note">{{ _("web.admin.key.edit.rows") }}</p>
+
+      <div class="key-edit-labels">
+        {% for language in codes %}
+          <div>
+            <label for="label-{{ language }}"
+                   class="field-label field-label-joined">{{ _("web.admin.key.label.in", language=language_name(language)) }}</label>
+            <input id="label-{{ language }}"
+                   name="label.{{ language }}"
+                   type="text"
+                   value="{{ form.labels.get(language, '') }}"
+                   lang="{{ language }}"
+                   maxlength="{{ longest }}"
+                   autocomplete="off"
+                   class="field-input">
+          </div>
+        {% endfor %}
+      </div>
+      {% if form.error == "label" %}{{ field_error(_("web.admin.key.edit.label", count=number(longest))) }}{% endif %}
+
+      <section aria-labelledby="edit-limits" class="key-edit-limits">
+        <Bar id="edit-limits" :extra="_n('web.admin.key.used', key.limits.uses)">{{ _("web.admin.key.limits") }}</Bar>
+        <label for="edit-uses" class="field-label field-label-joined">{{ _("web.admin.key.limits.most") }}</label>
+        <input id="edit-uses"
+               name="max_uses"
+               type="number"
+               min="1"
+               inputmode="numeric"
+               value="{{ form.max_uses }}"
+               aria-describedby="edit-uses-note"
+               {% if form.error == 'uses' %} aria-invalid="true"{% endif %}
+               class="field-input{% if form.error == 'uses' %} field-invalid{% endif %}">
+        {% if form.error == "uses" %}
+          {{ field_error(_("web.admin.key.limits.wrong")) }}
+        {% else %}
+          <p id="edit-uses-note" class="field-note">{{ _("web.admin.key.limits.most.note") }}</p>
+        {% endif %}
+        <label class="key-edit-once">
+          <span class="check-label">{{ _("web.admin.key.uses.once") }}</span>
+          <span class="check-place">
+            <input type="checkbox"
+                   name="once"
+                   value="1"
+                   {% if form.once %} checked{% endif %}
+                   aria-describedby="edit-once-note"
+                   class="check">
+            <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span>
+          </span>
+        </label>
+        <p id="edit-once-note" class="field-note">{{ _("web.admin.key.limits.once.note") }}</p>
+      </section>
+
+      <p class="field-note key-edit-note">{{ _("web.admin.key.edit.note") }}</p>
+      <div class="confirm-buttons">
+        <FormButton icon="x" :href="url('/admin/keys')">{{ _("web.admin.cancel") }}</FormButton>
+        <SmallAction :label="_('web.admin.key.save')" :busy="_('web.admin.key.saving')" />
+      </div>
+    </form>
+  </Panel>
+</AdminPage>
