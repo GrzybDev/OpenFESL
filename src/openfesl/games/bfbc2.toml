@@ -313,6 +313,13 @@ entitlements = [
     { tag = "BETA_ONLINE_ACCESS", product = "OFB-BFBC:19121" },
 ]
 
+# The VIP code of retail boxes, whose licence the map-pack levels require.
+[[keys]]
+code = "ACTIVATE-VIP"
+entitlements = [
+    { tag = "BFBC2:PC:CIAB", group = "BFBC2PC" },
+]
+
 [[keys]]
 code = "ACTIVATE-VIETNAM"
 entitlements = [

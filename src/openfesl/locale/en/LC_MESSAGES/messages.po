@@ -1657,6 +1657,9 @@ msgstr "%(key)s copied."
 msgid "games.bfbc2.key.ACTIVATE-GAME"
 msgstr "Online play"
 
+msgid "games.bfbc2.key.ACTIVATE-VIP"
+msgstr "VIP map packs"
+
 msgid "games.bfbc2.key.ACTIVATE-VIETNAM"
 msgstr "Vietnam expansion"
 

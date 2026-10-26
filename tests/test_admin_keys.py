@@ -16,7 +16,7 @@ async def test_admins_add_disable_and_enable_product_keys_that_moderators_only_s
         admin_provider.user = KEEPER
         page = (await sign_in(client, base, next="/admin/keys")).text
         token = form_token(page)
-        assert "ACTIVATE-VETERAN" in page and "5 of 5 here" in page and "Keys: 5" in page
+        assert "ACTIVATE-VETERAN" in page and "6 of 6 here" in page and "Keys: 6" in page
 
         # New codes are unique in any case and keep to the characters the game's prompt takes.
         added = await client.post(f"{base}/admin/keys", data={"csrf": token, "code": "LAN-2026"})

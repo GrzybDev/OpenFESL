@@ -12,7 +12,8 @@ async def test_the_guide_names_the_hook_this_server_and_the_enabled_keys(
     status, _, body = await fetch(server_url, "/bfbc2/play")
     page = body.decode()
     assert status == 200
-    for shown in ("dinput8.dll", "BFBC2Game.exe", "Online play", "Veteran rank", "5 keys"):
+    keys = ("Online play", "VIP map packs", "Veteran rank", "6 keys")
+    for shown in ("dinput8.dll", "BFBC2Game.exe", *keys):
         assert shown in page
     # This server is not the hook's default, so the guide tells the hook where it is.
     relay = server_url.rstrip("/")
@@ -30,5 +31,5 @@ async def test_the_guide_names_the_hook_this_server_and_the_enabled_keys(
     _, _, body = await fetch(server_url, "/pl/bfbc2/play")
     page = body.decode()
     assert "Status weterana" not in page
-    for shown in ("4 klucze", "Gra sieciowa", "Wskaż hookowi ten serwer"):
+    for shown in ("5 kluczy", "Gra sieciowa", "Wskaż hookowi ten serwer"):
         assert shown in page
