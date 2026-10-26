@@ -305,6 +305,14 @@ locker = "http://easo.ea.com/fileupload/locker2.jsp"
 "http://easo.ea.com/easo/editorial/BF/2010/BFBC2/config/PC/game.xml" = "bfbc2/game.xml"
 "http://easo.ea.com/easo/editorial/BF/2010/BFBC2/store/PC/overlay.xml" = "bfbc2/overlay.xml"
 
+# The InternalName that Persistence/MP_Template.dbx gives each redeemable product, by its tag.
+[product_names]
+"BFBC2:PC:CIAB" = "BFBC2_CodeInABox_PC"
+"BFBC2:PC:ALLKIT" = "BFBC2_PDLC_KitUpgrades_PC"
+"BFBC2:PC:MAXALLKIT" = "BFBC2_PDLC_MaxSoldier_PC"
+"BFBC2:PC:VIETNAM_PDLC" = "Battlefield Bad Company 2 Vietnam:219316800"
+"BFBC2:PC:LimitedEdition" = "BFBC2_LimitedEdition"
+
 [[keys]]
 code = "ACTIVATE-GAME"
 entitlements = [

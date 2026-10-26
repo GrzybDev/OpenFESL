@@ -419,6 +419,9 @@ class Game(BaseModel):
         theme: How the game's web pages look.
         listing: How the web pages read the games its servers host.
         stats: The stats of the game's players that the web pages show.
+        product_names: The names the game's data gives the products of some entitlements, by
+            tag; a game that redeems a key in its menu refreshes the content it finds by the
+            name of the answer's first product.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -442,6 +445,7 @@ class Game(BaseModel):
     theme: Theme
     listing: Listing = Listing()
     stats: Stats = Stats()
+    product_names: dict[str, str] = {}
 
     @property
     def play_key(self) -> ProductKey | None:

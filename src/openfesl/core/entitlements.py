@@ -250,10 +250,14 @@ class EntitlementService:
         if isinstance(grants, KeyRefusal):
             raise TransactionError(grants)
         logger.info("Account %d redeemed a product key", account.id)
-        # The game takes an answer without entries for a failed redeem, and names what the key
-        # unlocked after the licence whose tag an entry's name matches, so each product gets an
-        # entry named after its first tag, and the grants without a product share one.
+        # The game takes an answer without entries for a failed redeem. It reads only the first
+        # entry and refreshes the content whose name in its data equals the entry's name, so a
+        # product the game names comes first; an empty name would match unnamed content, so the
+        # other products are named after their first tag.
+        names = connection.game.product_names if connection.game else {}
         products: dict[str | None, str] = {}
+        if named := next((grant for grant in grants if grant.tag in names), None):
+            products[named.product] = names[named.tag]
         for grant in grants:
             products.setdefault(grant.product, grant.tag)
         return NuEntitleUserAnswer(
@@ -343,8 +347,8 @@ class EntitlementService:
         account = connection.session.account
         if account is None:
             raise TransactionError(NOT_LOGGED_IN)
-        # The game takes whatever a query by its network card's address finds as a licence of
-        # that PC, and the service binds no entitlement to a device.
+        # The game's SDK can ask for licences bound to a PC's network card, which the service
+        # has none of.
         if request.device_physical_id:
             return []
         owner = request.master_user_id or account.id
