@@ -355,9 +355,9 @@ class EntitlementService:
             return []
         owner = request.master_user_id or account.id
         # Anyone logs in like a dedicated server, so only one that hosts a game players see
-        # reads its players' entitlements, such as their veteran tags.
+        # reads the entitlements of the players in it, such as their veteran tags.
         if owner != account.id and not (
-            account.server and await self._hosting.admits(connection.session)
+            account.server and await self._hosting.admits_player(connection.session, owner)
         ):
             raise TransactionError(PARAMETERS_ERROR)
         query = EntitlementQuery(

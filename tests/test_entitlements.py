@@ -77,11 +77,12 @@ async def test_keys_grant_entitlements_once_and_a_revoked_one_stays_revoked(
         await server.hello(FESL, "bfbc2-pc-server", client_type="server")
         await server.request(FESL, "acct", login("bfbc2.server.pc@ea.com", "from-game-data"))
         players = [*query, ("masterUserId", account["userId"])]
-        # Anyone logs in like a dedicated server; one that hosts reads its players' entitlements.
+        # Anyone logs in like a dedicated server, and even one that hosts reads only the players
+        # in its game.
         assert (await server.request(FESL, "acct", players))["errorCode"] == "21"
         async with game(server_url) as hosting:
             await host_game(hosting)
-            assert (await hosting.request(FESL, "acct", players))["entitlements.[]"] == "2"
+            assert (await hosting.request(FESL, "acct", players))["errorCode"] == "21"
         other = [*query, ("masterUserId", "999999")]
         assert (await player.request(FESL, "acct", other))["errorCode"] == "21"
         redeem = [("TXN", "NuEntitleUser"), ("key", "ACTIVATE-VIETNAM")]
@@ -226,6 +227,12 @@ async def test_a_server_grants_the_players_in_its_game_what_the_game_marks_autom
         assert (await server.request(FESL, "acct", unmarked))["errorCode"] == "21"
         stranger = grant("BFBC2:PC:ADDSVETRANK", outside)
         assert (await server.request(FESL, "acct", stranger))["errorCode"] == "21"
+        # It reads what the players in its game hold, as R34 does on each join, and no one else's.
+        veteran = [("TXN", "NuGetEntitlements"), ("groupName", "AddsVetRank")]
+        read = await server.request(FESL, "acct", [*veteran, ("masterUserId", playing)])
+        assert read["entitlements.[]"] == "1"
+        other = await server.request(FESL, "acct", [*veteran, ("masterUserId", outside)])
+        assert other["errorCode"] == "21"
 
         # Each lands in the group the game's queries ask for.
         for group, tag in (
