@@ -15,9 +15,7 @@ from support import (
     registration,
 )
 
-from openfesl.core.games import Games, Grant, load_games
 from openfesl.protocol.relay import Channel, ConnectionKey
-from openfesl.server import app
 from openfesl.server.cli import main
 
 FESL = ConnectionKey(Channel.FESL, 1)
@@ -173,23 +171,13 @@ async def test_the_game_key_prompt_takes_only_a_key_for_the_game(server_url: str
         assert owned["entitlementCount"] == "0"
 
 
-@pytest.fixture
-def automatic_grant(monkeypatch: pytest.MonkeyPatch) -> None:
-    # The game's own data marks no entitlement automatic.
-    bfbc2 = load_games().by_id("bfbc2")
-    assert bfbc2 is not None
-    automatic = [Grant(tag="INVENTED:AUTOMATIC", group="BFBC2PC")]
-    granting = bfbc2.model_copy(update={"automatic_grants": automatic})
-    monkeypatch.setattr(app, "load_games", lambda: Games([granting]))
-
-
 def grant(tag: str, master_id: str) -> list[tuple[str, str]]:
     return [("TXN", "NuGrantEntitlement"), ("entitlementTag", tag), ("masterId", master_id)]
 
 
 @pytest.mark.anyio
 async def test_a_server_grants_the_players_in_its_game_what_the_game_marks_automatic(
-    automatic_grant: None, open_hosting: None, server_url: str
+    open_hosting: None, server_url: str
 ) -> None:
     async with game(server_url) as server, game(server_url) as ann, game(server_url) as ben:
         created = await host_game(server)
@@ -206,18 +194,23 @@ async def test_a_server_grants_the_players_in_its_game_what_the_game_marks_autom
         found = await server.request(FESL, "acct", lookup)
         playing, outside = found["userInfo.0.masterUserId"], found["userInfo.1.masterUserId"]
 
-        automatic = grant("INVENTED:AUTOMATIC", playing)
-        assert "errorCode" not in await server.request(FESL, "acct", automatic)
+        # R34 grants both of the game's automatic entitlements to each player who lacks them.
+        for tag in ("BFBC2:PC:ADDSVETRANK", "BFBC2NAM:PC:NOVETRANK"):
+            assert "errorCode" not in await server.request(FESL, "acct", grant(tag, playing))
         unmarked = grant("BFBC2:PC:VIETNAM_ACCESS", playing)
         assert (await server.request(FESL, "acct", unmarked))["errorCode"] == "21"
-        stranger = grant("INVENTED:AUTOMATIC", outside)
+        stranger = grant("BFBC2:PC:ADDSVETRANK", outside)
         assert (await server.request(FESL, "acct", stranger))["errorCode"] == "21"
 
-        owned = [("TXN", "NuGetEntitlements"), ("groupName", "BFBC2PC")]
-        held = await ann.request(FESL, "acct", owned)
-        tags = (held["entitlements.[]"], held["entitlements.0.entitlementTag"])
-        assert tags == ("1", "INVENTED:AUTOMATIC")
-        assert (await ben.request(FESL, "acct", owned))["entitlements.[]"] == "0"
+        # Each lands in the group the game's queries ask for.
+        for group, tag in (
+            ("AddsVetRank", "BFBC2:PC:ADDSVETRANK"),
+            ("NoVetRank", "BFBC2NAM:PC:NOVETRANK"),
+        ):
+            owned = [("TXN", "NuGetEntitlements"), ("groupName", group)]
+            held = await ann.request(FESL, "acct", owned)
+            assert (held["entitlements.[]"], held["entitlements.0.entitlementTag"]) == ("1", tag)
+            assert (await ben.request(FESL, "acct", owned))["entitlements.[]"] == "0"
 
 
 @pytest.mark.anyio

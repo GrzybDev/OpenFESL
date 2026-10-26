@@ -4,10 +4,13 @@ executable = "BFBC2Game.exe"
 partition = "/eagames/BFBC2"
 namespace = "battlefield"
 provider_attribute = "B-U-Provider"
-# The entitlements dedicated servers may grant the players in their games, such as
-# { tag = "...", group = "..." }. Public R34 servers ask for those the game marks automatic,
-# which are not known, so none is listed.
-automatic_grants = []
+# The entitlements dedicated servers may grant the players in their games: those the game's data
+# (Persistence/MP_Template.dbx) marks automatic, which R34 servers grant every joining player who
+# lacks them.
+automatic_grants = [
+    { tag = "BFBC2:PC:ADDSVETRANK", group = "AddsVetRank" },
+    { tag = "BFBC2NAM:PC:NOVETRANK", group = "NoVetRank" },
+]
 
 # The files of the R34 dedicated server release that hosting involves: the hook goes next to its
 # executable, the provider file next to its configuration, and the server keeps its identity in
