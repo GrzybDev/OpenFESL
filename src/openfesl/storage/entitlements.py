@@ -1,7 +1,7 @@
 from collections.abc import Mapping, Sequence
 
 from sqlalchemy import ColumnElement, delete, exists, func, select, update
-from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.dialects.postgresql import Insert, insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.admin import AdminAction
@@ -41,25 +41,24 @@ class SqlEntitlementStore:
         """
         self._sessions = sessions
 
-    async def entitled(self, account_id: int, tag: str) -> bool:
+    async def entitled(self, account_id: int, tag: str, product: str | None = None) -> bool:
         """Tell whether an account holds an active entitlement.
 
         Args:
             account_id: The account.
             tag: The entitlement's tag.
+            product: The product the entitlement must belong to, regardless of case; any when
+                omitted.
         """
+        held = exists().where(
+            EntitlementRow.account_id == account_id,
+            EntitlementRow.tag == tag,
+            EntitlementRow.status == ACTIVE,
+        )
+        if product is not None:
+            held = held.where(func.upper(EntitlementRow.product_id) == product.upper())
         async with self._sessions() as session:
-            return bool(
-                await session.scalar(
-                    select(
-                        exists().where(
-                            EntitlementRow.account_id == account_id,
-                            EntitlementRow.tag == tag,
-                            EntitlementRow.status == ACTIVE,
-                        )
-                    )
-                )
-            )
+            return bool(await session.scalar(select(held)))
 
     async def grants(self, code: str) -> list[Grant] | None:
         """Return what an enabled product key grants, without granting it.
@@ -84,7 +83,7 @@ class SqlEntitlementStore:
     async def redeem(self, account_id: int, code: str) -> list[Grant] | KeyRefusal:
         """Grant an account what an enabled product key grants, within the key's limits.
 
-        Entitlements the account holds already, revoked ones included, stay as they are.
+        Entitlements the account holds already keep their status, revoked ones included.
 
         Args:
             account_id: The account.
@@ -118,28 +117,15 @@ class SqlEntitlementStore:
                     select(ProductKeyGrantRow).where(ProductKeyGrantRow.key_id == key.id)
                 )
             )
-            if rows:
-                await session.execute(
-                    insert(EntitlementRow)
-                    .values(
-                        [
-                            {
-                                "account_id": account_id,
-                                "tag": row.tag,
-                                "group_name": row.group_name,
-                                "product_id": row.product_id,
-                            }
-                            for row in rows
-                        ]
-                    )
-                    .on_conflict_do_nothing()
-                )
-            return [
+            grants = [
                 Grant(tag=row.tag, group=row.group_name, product=row.product_id) for row in rows
             ]
+            if grants:
+                await session.execute(_granted(account_id, grants))
+            return grants
 
     async def grant(self, account_id: int, grant: Grant) -> bool:
-        """Grant an account an entitlement, which stays as it is when the account holds it.
+        """Grant an account an entitlement, which keeps its status when the account holds it.
 
         Args:
             account_id: The account.
@@ -149,16 +135,7 @@ class SqlEntitlementStore:
             Whether the account holds it active, which it does not once the admin revoked it.
         """
         async with self._sessions.begin() as session:
-            await session.execute(
-                insert(EntitlementRow)
-                .values(
-                    account_id=account_id,
-                    tag=grant.tag,
-                    group_name=grant.group,
-                    product_id=grant.product,
-                )
-                .on_conflict_do_nothing()
-            )
+            await session.execute(_granted(account_id, [grant]))
             status = await session.scalar(
                 select(EntitlementRow.status).where(
                     EntitlementRow.account_id == account_id, EntitlementRow.tag == grant.tag
@@ -169,7 +146,7 @@ class SqlEntitlementStore:
     async def give(
         self, account_id: int, grants: Sequence[Grant], key: str | None, admin: Admin
     ) -> list[str]:
-        """Grant an account entitlements by hand and record it; those it holds stay as they are.
+        """Grant an account entitlements by hand and record it; those it holds keep their status.
 
         Args:
             account_id: The account.
@@ -183,24 +160,16 @@ class SqlEntitlementStore:
         if not grants:
             return []
         async with self._sessions.begin() as session:
-            added = list(
+            tags = [grant.tag for grant in grants]
+            held = set(
                 await session.scalars(
-                    insert(EntitlementRow)
-                    .values(
-                        [
-                            {
-                                "account_id": account_id,
-                                "tag": grant.tag,
-                                "group_name": grant.group,
-                                "product_id": grant.product,
-                            }
-                            for grant in grants
-                        ]
+                    select(EntitlementRow.tag).where(
+                        EntitlementRow.account_id == account_id, EntitlementRow.tag.in_(tags)
                     )
-                    .on_conflict_do_nothing()
-                    .returning(EntitlementRow.tag)
                 )
             )
+            await session.execute(_granted(account_id, grants))
+            added = [tag for tag in dict.fromkeys(tags) if tag not in held]
             if added:
                 details = {"tags": added, "key": key}
                 target = str(account_id)
@@ -500,6 +469,29 @@ class SqlEntitlementStore:
                     for grant in key.entitlements
                 )
         return added
+
+
+def _granted(account_id: int, grants: Sequence[Grant]) -> Insert:
+    statement = insert(EntitlementRow).values(
+        [
+            {
+                "account_id": account_id,
+                "tag": grant.tag,
+                "group_name": grant.group,
+                "product_id": grant.product,
+            }
+            for grant in grants
+        ]
+    )
+    # A held entitlement keeps its status, revoked included, but takes the group and product a
+    # grant names when it lacks them, since the game's checks compare both.
+    return statement.on_conflict_do_update(
+        index_elements=[EntitlementRow.account_id, EntitlementRow.tag],
+        set_={
+            "group_name": func.coalesce(EntitlementRow.group_name, statement.excluded.group_name),
+            "product_id": func.coalesce(EntitlementRow.product_id, statement.excluded.product_id),
+        },
+    )
 
 
 def _named(code: str) -> ColumnElement[bool]:

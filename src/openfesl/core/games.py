@@ -31,7 +31,8 @@ class Client(BaseModel):
 
     Attributes:
         theater_port: The Theater port that the Hello answer names.
-        entitlement: The tag a player's account needs to play; none for dedicated servers.
+        entitlement: The entitlement a player's account needs to play, with its product when it
+            names one; none for dedicated servers.
         server_account: The account that every dedicated server of the game logs in with, as
             its game data names it; only dedicated servers may use it.
     """
@@ -39,18 +40,29 @@ class Client(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     theater_port: int
-    entitlement: str | None = None
+    entitlement: Grant | None = None
     server_account: str | None = None
 
 
 class Grant(BaseModel):
-    """An entitlement that a product key or a dedicated server grants."""
+    """An entitlement as a product key or a dedicated server grants it, or a client needs it."""
 
     model_config = ConfigDict(frozen=True)
 
     tag: str
     group: str | None = None
     product: str | None = None
+
+    def provides(self, needed: Grant) -> bool:
+        """Tell whether this grant gives a needed entitlement, comparing products without case.
+
+        Args:
+            needed: The entitlement that is needed.
+        """
+        product = needed.product
+        return self.tag == needed.tag and (
+            product is None or (self.product or "").casefold() == product.casefold()
+        )
 
 
 class ProductKey(BaseModel):
@@ -450,9 +462,13 @@ class Game(BaseModel):
     @property
     def play_key(self) -> ProductKey | None:
         """The starting product key that grants what the game's players need to play, if any."""
-        tags = {client.entitlement for client in self.clients.values() if client.entitlement}
+        needed = [client.entitlement for client in self.clients.values() if client.entitlement]
         return next(
-            (key for key in self.keys if any(grant.tag in tags for grant in key.entitlements)),
+            (
+                key
+                for key in self.keys
+                if any(grant.provides(need) for grant in key.entitlements for need in needed)
+            ),
             None,
         )
 

@@ -21,9 +21,10 @@ config = "Win32Game.cfg"
 provider = "ProviderId.dat"
 identity = "serverid.dat"
 
+# A player needs the entitlement R34 servers check on every join, with its product.
 [clients.bfbc2-pc]
 theater_port = 18395
-entitlement = "bfbc2-pc"
+entitlement = { tag = "ONLINE_ACCESS", product = "DR:156691300" }
 
 [clients.bfbc2-pc-server]
 theater_port = 18326
@@ -316,9 +317,7 @@ locker = "http://easo.ea.com/fileupload/locker2.jsp"
 [[keys]]
 code = "ACTIVATE-GAME"
 entitlements = [
-    { tag = "bfbc2-pc" },
     { tag = "ONLINE_ACCESS", product = "DR:156691300" },
-    { tag = "BETA_ONLINE_ACCESS", product = "OFB-BFBC:19121" },
 ]
 
 # The VIP code of retail boxes, whose licence the map-pack levels require.

@@ -64,7 +64,7 @@ async def test_keys_grant_entitlements_once_and_a_revoked_one_stays_revoked(
             {"BFBC2:PC:ADDSVETRANK", "BF3:PC:ADDSVETRANK"},
         )
         count = await player.request(FESL, "acct", [("TXN", "NuGetEntitlementCount")])
-        assert count["entitlementCount"] == "9"
+        assert count["entitlementCount"] == "7"
         # The SDK's query for licences bound to a PC's network card finds none.
         device = [
             ("TXN", "NuGetEntitlements"),
@@ -87,13 +87,26 @@ async def test_keys_grant_entitlements_once_and_a_revoked_one_stays_revoked(
         redeem = [("TXN", "NuEntitleUser"), ("key", "ACTIVATE-VIETNAM")]
         assert (await server.request(FESL, "acct", redeem))["errorCode"] == "21"
 
-    await run(database_url, "UPDATE entitlement SET status = 'REVOKED' WHERE tag = 'bfbc2-pc'")
+    # The game's entitlement lets a player in only with the product R34 checks on every join,
+    # in any case. Held without a product, as an admin may grant it, it takes the key's.
+    again = login("ann@example.test", "secret-pass")
+    entitle = entitle_game("ann@example.test", "secret-pass", "ACTIVATE-GAME")
+    online = "UPDATE entitlement SET {} WHERE tag = 'ONLINE_ACCESS'"
     async with game(server_url) as player:
         await player.hello(FESL, "bfbc2-pc")
-        entitle = entitle_game("ann@example.test", "secret-pass", "ACTIVATE-GAME")
+        await run(database_url, online.format("product_id = 'OFB-INVENTED:1'"))
+        assert (await player.request(FESL, "acct", again))["errorCode"] == "120"
+        await run(database_url, online.format("product_id = NULL"))
+        assert (await player.request(FESL, "acct", again))["errorCode"] == "120"
+        assert "errorCode" not in await player.request(FESL, "acct", entitle)
+        assert "errorCode" not in await player.request(FESL, "acct", again)
+    async with game(server_url) as player:
+        await player.hello(FESL, "bfbc2-pc")
+        await run(database_url, online.format("product_id = 'dr:156691300', status = 'REVOKED'"))
         assert (await player.request(FESL, "acct", entitle))["errorCode"] == "120"
-        again = await player.request(FESL, "acct", login("ann@example.test", "secret-pass"))
-        assert again["errorCode"] == "120"
+        assert (await player.request(FESL, "acct", again))["errorCode"] == "120"
+        await run(database_url, online.format("status = 'ACTIVE'"))
+        assert "errorCode" not in await player.request(FESL, "acct", again)
 
 
 @pytest.mark.anyio
@@ -159,7 +172,9 @@ def test_importing_keys_adds_only_the_missing_ones(
 
 
 @pytest.mark.anyio
-async def test_the_game_key_prompt_takes_only_a_key_for_the_game(server_url: str) -> None:
+async def test_the_game_key_prompt_takes_only_a_key_for_the_game(
+    server_url: str, database_url: str
+) -> None:
     async with game(server_url) as player:
         await player.hello(FESL, "bfbc2-pc")
         terms = (await player.request(FESL, "acct", [("TXN", "NuGetTos")]))["version"]
@@ -167,9 +182,13 @@ async def test_the_game_key_prompt_takes_only_a_key_for_the_game(server_url: str
 
         content = entitle_game("ann@example.test", "secret-pass", "ACTIVATE-VIETNAM")
         assert (await player.request(FESL, "acct", content))["errorCode"] == "181"
-        await player.request(
-            FESL, "acct", entitle_game("ann@example.test", "secret-pass", "ACTIVATE-GAME")
-        )
+        # A key for another product of the game's entitlement could not let the player in.
+        grant_product = "UPDATE product_key_grant SET product_id = '{}' WHERE tag = 'ONLINE_ACCESS'"
+        await run(database_url, grant_product.format("OFB-INVENTED:1"))
+        key = entitle_game("ann@example.test", "secret-pass", "ACTIVATE-GAME")
+        assert (await player.request(FESL, "acct", key))["errorCode"] == "181"
+        await run(database_url, grant_product.format("dr:156691300"))
+        assert "errorCode" not in await player.request(FESL, "acct", key)
         await player.request(FESL, "acct", login("ann@example.test", "secret-pass"))
         owned = await player.request(
             FESL, "acct", [("TXN", "NuGetEntitlementCount"), ("groupName", "BFBC2PC")]

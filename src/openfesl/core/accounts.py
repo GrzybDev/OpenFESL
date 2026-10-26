@@ -437,14 +437,14 @@ class AccountService:
         account = credentials.account
         # Only a key for the game itself, so the game does not loop between its key prompt
         # and NuLogin's 120, and a key for downloadable content is not used up here.
-        game = connection.client.entitlement
+        needed = connection.client.entitlement
         grants = await self._entitlements.grants(request.key)
-        if grants is None or (game and game not in {grant.tag for grant in grants}):
+        if grants is None or (needed and not any(grant.provides(needed) for grant in grants)):
             raise TransactionError(KeyRefusal.UNKNOWN)
         redeemed = await self._entitlements.redeem(account.id, request.key)
         if isinstance(redeemed, KeyRefusal):
             raise TransactionError(redeemed)
-        if game and not await self._entitlements.entitled(account.id, game):
+        if needed and not await self._entitlements.entitled(account.id, needed.tag, needed.product):
             raise TransactionError(NOT_ENTITLED)
         logger.info("Account %d redeemed a product key for the game", account.id)
         return Message()
@@ -468,7 +468,9 @@ class AccountService:
             if request.tos_version != self._terms.version:
                 raise TransactionError(TERMS_OUT_OF_DATE)
             await self._store.accept_terms(account.id, self._terms.version)
-        if entitlement and not await self._entitlements.entitled(account.id, entitlement):
+        if entitlement and not await self._entitlements.entitled(
+            account.id, entitlement.tag, entitlement.product
+        ):
             raise TransactionError(NOT_ENTITLED)
         # The game's own remembered login asks for no token but keeps whatever the answer
         # carries, nothing included, so a token login always gets its token back.

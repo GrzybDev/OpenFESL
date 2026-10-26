@@ -142,12 +142,14 @@ class EntitlementQuery:
 class EntitlementStore(Protocol):
     """Where entitlements and the product keys that grant them are kept."""
 
-    async def entitled(self, account_id: int, tag: str) -> bool:
+    async def entitled(self, account_id: int, tag: str, product: str | None = None) -> bool:
         """Tell whether an account holds an active entitlement.
 
         Args:
             account_id: The account.
             tag: The entitlement's tag.
+            product: The product the entitlement must belong to, regardless of case; any when
+                omitted.
         """
 
     async def grants(self, code: str) -> list[Grant] | None:

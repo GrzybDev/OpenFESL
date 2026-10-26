@@ -194,25 +194,25 @@ async def test_admins_grant_and_revoke_entitlements_which_moderators_only_see(
 
         # Revoking asks first; the game then refuses the login that needs the entitlement.
         revoke = f"{address}/entitlements/revoke"
-        asked = await client.post(revoke, data={"csrf": token, "tag": "bfbc2-pc"})
+        asked = await client.post(revoke, data={"csrf": token, "tag": "ONLINE_ACCESS"})
         assert (
             "Revoke this entitlement?" in (await client.get(base + asked.headers["location"])).text
         )
-        await client.post(revoke, data={"csrf": token, "tag": "bfbc2-pc", "confirmed": "1"})
+        await client.post(revoke, data={"csrf": token, "tag": "ONLINE_ACCESS", "confirmed": "1"})
         revoked = (await client.get(address)).text
-        assert "Revoked bfbc2-pc." in revoked and "· invented-keeper" in revoked
+        assert "Revoked ONLINE_ACCESS." in revoked and "· invented-keeper" in revoked
         again = login("ann@example.test", "secret-pass")
         async with game(server_url) as ann:
             await ann.hello(FESL, "bfbc2-pc")
             assert (await ann.request(FESL, "acct", again))["errorCode"] == "120"
             await client.post(
-                f"{address}/entitlements/restore", data={"csrf": token, "tag": "bfbc2-pc"}
+                f"{address}/entitlements/restore", data={"csrf": token, "tag": "ONLINE_ACCESS"}
             )
             assert "errorCode" not in await ann.request(FESL, "acct", again)
 
         # A key's grants come without using the key up; held tags are skipped.
         form = (await client.get(f"{address}/grant")).text
-        assert "3 tags · already held" in form
+        assert "1 tag · already held" in form
         await client.post(f"{address}/grant", data={"csrf": token, "key": "ACTIVATE-VIETNAM"})
         granted = (await client.get(address)).text
         assert (
