@@ -244,4 +244,7 @@
   <symbol id="download" viewBox="0 0 20 20">
     <path d="M10 3v9.5M5.8 8.6l4.2 4.2 4.2-4.2M4 16.5h12" fill="none" stroke-width="2.4" stroke-linecap="square"/>
   </symbol>
+  <symbol id="lock" viewBox="0 0 20 20">
+    <path d="M5 9.5h10v7.5H5zM7.4 9.5V7a2.6 2.6 0 0 1 5.2 0v2.5" fill="none" stroke-width="2.2"/>
+  </symbol>
 </svg>

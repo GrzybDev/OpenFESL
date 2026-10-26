@@ -1,0 +1,17 @@
+{#def name: str, value: str, title: str, glyph: str, checked: bool = False, disabled: bool = False, focus: bool = False #}
+{# One of a handful of choices as a centred tile: its glyph, its bold title and, as the content, a
+   short description. The chosen tile wears the accent; a tile that cannot be chosen is dashed.
+   The tile is the label of a radio button, so the choice works without scripts. #}
+<label class="choice-tile">
+  <input type="radio"
+         name="{{ name }}"
+         value="{{ value }}"
+         {% if checked %} checked{% endif %}
+         {% if disabled %} disabled{% endif %}
+         {% if focus %} autofocus{% endif %}
+         class="choice-input">
+  <span aria-hidden="true"
+        class="choice-square"><Icon :name="glyph" :size="20" stroke="currentColor" fill="currentColor" /></span>
+  <span class="choice-title">{{ title }}</span>
+  {{ content }}
+</label>

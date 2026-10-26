@@ -39,7 +39,7 @@ class SqlAdminLog:
         """
         self._sessions = sessions
 
-    async def record(self, action: AdminAction, target: str, admin: str | None) -> None:
+    async def record(self, action: AdminAction, target: str, admin: Admin | None) -> None:
         """Record an action that changes nothing stored, such as a kick, for the server to apply.
 
         Args:
@@ -48,7 +48,7 @@ class SqlAdminLog:
             admin: The admin who did it; None for the command line.
         """
         async with self._sessions.begin() as session:
-            session.add(AdminActionRow(admin=admin, action=action, target=target, details={}))
+            session.add(action_row(action, target, {}, admin))
 
     async def last(self) -> int:
         """Return the number of the latest action; 0 before the first."""

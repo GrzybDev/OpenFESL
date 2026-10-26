@@ -5,8 +5,10 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.admin import AdminAction
+from openfesl.core.admins import Admin
 from openfesl.core.personas import Persona, PersonaRecord, PersonaState
-from openfesl.storage.models import AccountRow, AdminActionRow, PersonaRow
+from openfesl.storage.admin import action_row
+from openfesl.storage.models import AccountRow, PersonaRow
 
 _LIKE_SPECIAL = re.compile(r"[\\%_]")
 _BIGINT = range(-(2**63), 2**63)
@@ -180,7 +182,7 @@ class SqlPersonaStore:
             )
         return state == PersonaState.DISABLED
 
-    async def set_state(self, persona_id: int, state: PersonaState, admin: str | None) -> None:
+    async def set_state(self, persona_id: int, state: PersonaState, admin: Admin | None) -> None:
         """Change whether a persona may play and record the change among the admin's actions.
 
         Args:
@@ -194,14 +196,8 @@ class SqlPersonaStore:
                 .where(PersonaRow.id == persona_id)
                 .values(state=state.value, state_changed_at=func.now())
             )
-            session.add(
-                AdminActionRow(
-                    admin=admin,
-                    action=AdminAction.PERSONA_STATE,
-                    target=str(persona_id),
-                    details={"state": state.value},
-                )
-            )
+            details = {"state": state.value}
+            session.add(action_row(AdminAction.PERSONA_STATE, str(persona_id), details, admin))
 
 
 def _persona(row: PersonaRow) -> Persona:

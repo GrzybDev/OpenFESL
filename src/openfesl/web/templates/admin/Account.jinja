@@ -52,7 +52,33 @@
             <Fact :label="_('web.admin.account.now')">
               {{ _("web.admin.account.online.session") if session else _("web.admin.account.offline") }}
             </Fact>
+            <Fact :label="_('web.admin.state')">
+              {% if account.login_error() is none %}
+                {{ _("web.admin.account.state.active") }}
+              {% elif account.state_until %}
+                {{ _("web.admin.account.state.until_time", state=_("web.admin.account.state." ~ account.state), time=_("web.server.time", time=moment(account.state_until))) }}
+              {% else %}
+                {{ _("web.admin.account.state." ~ account.state) }}
+              {% endif %}
+            </Fact>
+            {% if account.verification_expires_at %}
+              <Fact :label="_('web.admin.account.email')">
+                {{ _("web.admin.account.email.waiting") }}
+              </Fact>
+            {% endif %}
           </dl>
+          <div class="account-decide">
+            <FormButton icon="lock" :href="base ~ '/state'" dialog>{{ _("web.admin.account.state.change") }}</FormButton>
+            {% if account.verification_expires_at %}
+              <form method="post" action="{{ base }}/verify">
+                <CsrfField />
+                <FormButton icon="tick">{{ _("web.admin.account.verify") }}</FormButton>
+              </form>
+            {% endif %}
+          </div>
+          {% if account.verification_expires_at %}
+            <p class="body-text side-note">{{ _("web.admin.account.verify.note") }}</p>
+          {% endif %}
         </section>
 
         <section aria-labelledby="account-names" class="account-part">
@@ -84,13 +110,39 @@
                       {{ _("web.admin.persona.active") }}
                     {% endif %}
                   </span>
+                  {% if not entry.removed %}
+                    {% set name_base = base ~ "/names/" ~ entry.persona.id %}
+                    <span class="account-list-actions">
+                      {% if persona.server %}
+                        <a href="{{ name_base }}/kick?back={{ here|urlencode }}"
+                           data-dialog
+                           aria-haspopup="dialog"
+                           aria-label="{{ _('web.admin.account.kick.of', name=entry.persona.name) }}"
+                           class="list-button">{{ _("web.admin.account.kick") }}</a>
+                      {% endif %}
+                      {% if entry.state == "disabled" %}
+                        <form method="post" action="{{ name_base }}/enable">
+                          <CsrfField />
+                          <button type="submit"
+                                  aria-label="{{ _('web.admin.account.enable.of', name=entry.persona.name) }}"
+                                  class="list-button">{{ _("web.admin.account.enable") }}</button>
+                        </form>
+                      {% else %}
+                        <a href="{{ name_base }}/disable?back={{ here|urlencode }}"
+                           data-dialog
+                           aria-haspopup="dialog"
+                           aria-label="{{ _('web.admin.account.disable.of', name=entry.persona.name) }}"
+                           class="list-button">{{ _("web.admin.account.disable") }}</a>
+                      {% endif %}
+                    </span>
+                  {% endif %}
                 </li>
               {% endfor %}
             </ul>
           {% else %}
             <p class="bar-text body-text">{{ _("web.admin.account.names.none") }}</p>
           {% endif %}
-          <p class="body-text side-note">{{ _("web.admin.account.names.note") }}</p>
+          <p class="body-text side-note">{{ _("web.admin.account.names.note") }} {{ _("web.admin.account.names.decide") }}</p>
         </section>
 
         <section aria-labelledby="account-entitlements" class="account-part">
@@ -180,6 +232,10 @@
                 {% endif %}
               </Fact>
             </dl>
+            <div class="account-end">
+              <FormButton icon="x" :href="base ~ '/session/end?back=' ~ here|urlencode" dialog>{{ _("web.admin.account.end") }}</FormButton>
+            </div>
+            <p class="body-text side-note">{{ _("web.admin.sessions.note") }}</p>
           {% else %}
             <p class="bar-text body-text">{{ _("web.admin.sessions.none") }}</p>
           {% endif %}
@@ -195,13 +251,26 @@
                     <span class="account-remembered-when">{{ _("web.admin.remembered.created", time=_("web.server.time", time=moment(login.created))) }}</span>
                     <span class="cell-ago">{{ ago(login.created) }}</span>
                   </span>
+                  <form method="post" action="{{ base }}/remembered/remove">
+                    <CsrfField />
+                    <input type="hidden" name="login" value="{{ login.id }}">
+                    <button type="submit"
+                            aria-label="{{ _('web.admin.remembered.remove.of', time=_('web.server.time', time=moment(login.created))) }}"
+                            class="list-button">{{ _("web.admin.remembered.remove") }}</button>
+                  </form>
                 </li>
               {% endfor %}
             </ul>
+            <form method="post"
+                  action="{{ base }}/remembered/remove"
+                  class="account-end">
+              <CsrfField />
+              <FormButton icon="x">{{ _("web.admin.remembered.remove_all") }}</FormButton>
+            </form>
           {% else %}
             <p class="bar-text body-text">{{ _("web.admin.remembered.none") }}</p>
           {% endif %}
-          <p class="body-text side-note">{{ _("web.admin.remembered.note") }}</p>
+          <p class="body-text side-note">{{ _("web.admin.remembered.note") }} {{ _("web.admin.remembered.note.removal") }}</p>
         </section>
       </div>
     </div>

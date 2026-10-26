@@ -378,7 +378,10 @@ document.addEventListener("click", async (event) => {
     closeDialog(dialog);
   });
   dialog.showModal();
-  dialog.querySelector(".confirm-buttons a")?.focus();
+  // A form's own first field takes the focus; a question starts on its way back.
+  if (!dialog.querySelector("[autofocus]")) {
+    dialog.querySelector(".confirm-buttons a")?.focus();
+  }
 });
 
 document.addEventListener("click", (event) => {

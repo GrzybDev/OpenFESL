@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any, Protocol
 
+from openfesl.core.admins import Admin
 from openfesl.core.entitlements import EntitlementStore, KeyRefusal
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Game, Games
@@ -223,7 +224,7 @@ class AccountStore(Protocol):
         """
 
     async def set_state(
-        self, account_id: int, state: AccountState, until: datetime | None, admin: str | None
+        self, account_id: int, state: AccountState, until: datetime | None, admin: Admin | None
     ) -> None:
         """Change whether an account may log in and record the change among the admin's actions.
 

@@ -3143,3 +3143,180 @@ msgstr "Brak zapamiętanych logowań."
 
 msgid "web.admin.remembered.note"
 msgstr "Przechowywana jest tylko data utworzenia każdego zapamiętanego logowania."
+
+msgid "web.admin.account.state.active"
+msgstr "Aktywne"
+
+msgid "web.admin.account.state.active.text"
+msgstr "Logowanie działa jak zwykle."
+
+msgid "web.admin.account.state.disabled"
+msgstr "Wyłączone"
+
+msgid "web.admin.account.state.disabled.text"
+msgstr "Logowanie jest odrzucane: konto wyłączone."
+
+msgid "web.admin.account.state.banned"
+msgstr "Zablokowane"
+
+msgid "web.admin.account.state.banned.text"
+msgstr "Logowanie jest odrzucane: konto zablokowane."
+
+msgid "web.admin.account.state.deactivated"
+msgstr "Wyłączone na prośbę"
+
+msgid "web.admin.account.state.deactivated.text"
+msgstr "Logowanie jest odrzucane: konto wyłączone na własną prośbę."
+
+msgid "web.admin.account.state.until_time"
+msgstr "%(state)s do %(time)s"
+
+msgid "web.admin.account.state.change"
+msgstr "Zmień stan"
+
+msgid "web.admin.account.state.missing"
+msgstr "Wybierz stan."
+
+msgid "web.admin.account.state.until"
+msgstr "Do · opcjonalnie"
+
+msgid "web.admin.account.state.until.past"
+msgstr "Koniec musi przypadać w przyszłości."
+
+msgid "web.admin.account.state.until.note"
+msgstr "Data i godzina w UTC. Bez nich stan trwa do następnej zmiany; aktywne konto ich nie potrzebuje."
+
+msgid "web.admin.account.state.text"
+msgstr "Konto, które nie jest aktywne, zostaje od razu wylogowane z gry i opuszcza rozgrywkę. Po końcu stanu logowanie działa jak zwykle."
+
+msgid "web.admin.account.state.save"
+msgstr "Zapisz stan"
+
+msgid "web.admin.account.state.saving"
+msgstr "Zapisywanie…"
+
+msgid "web.admin.account.email"
+msgstr "Adres e-mail"
+
+msgid "web.admin.account.email.waiting"
+msgstr "Czeka na potwierdzenie"
+
+msgid "web.admin.account.verify"
+msgstr "Potwierdź adres ręcznie"
+
+msgid "web.admin.account.verify.note"
+msgstr "Logowanie jest możliwe po potwierdzeniu adresu: linkiem z wiadomości albo ręcznie tutaj."
+
+msgid "web.admin.account.kick"
+msgstr "Wyrzuć"
+
+msgid "web.admin.account.kick.of"
+msgstr "Wyrzuć %(name)s z gry"
+
+msgid "web.admin.account.kick.busy"
+msgstr "Wyrzucanie…"
+
+msgid "web.admin.account.enable"
+msgstr "Włącz"
+
+msgid "web.admin.account.enable.of"
+msgstr "Włącz %(name)s"
+
+msgid "web.admin.account.disable"
+msgstr "Wyłącz"
+
+msgid "web.admin.account.disable.of"
+msgstr "Wyłącz %(name)s"
+
+msgid "web.admin.account.disable.busy"
+msgstr "Wyłączanie…"
+
+msgid "web.admin.account.end"
+msgstr "Zakończ sesję"
+
+msgid "web.admin.account.end.busy"
+msgstr "Kończenie…"
+
+msgid "web.admin.account.names.decide"
+msgstr "„Wyrzuć” usuwa nazwę z rozgrywki; „Wyłącz” dodatkowo blokuje nazwę w grze aż do „Włącz”."
+
+msgid "web.admin.account.name"
+msgstr "Nazwa w grze"
+
+msgid "web.admin.account.not_playing"
+msgstr "Poza rozgrywką"
+
+msgid "web.admin.sessions.note"
+msgstr "Zakończenie sesji wymaga potwierdzenia. Gra rozłącza się z OpenFESL i może od razu połączyć się ponownie; nic nie zostaje zablokowane."
+
+msgid "web.admin.remembered.remove"
+msgstr "Usuń"
+
+msgid "web.admin.remembered.remove.of"
+msgstr "Usuń zapamiętane logowanie utworzone %(time)s"
+
+msgid "web.admin.remembered.remove_all"
+msgstr "Usuń wszystkie"
+
+msgid "web.admin.remembered.note.removal"
+msgstr "Po usunięciu gra zapyta o hasło przy następnym logowaniu na tym komputerze."
+
+msgid "web.admin.confirm.account.end"
+msgstr "Zakończyć tę sesję?"
+
+msgid "web.admin.confirm.account.end.text"
+msgstr "Gra rozłącza się z OpenFESL i może od razu połączyć się ponownie; nic nie zostaje zablokowane."
+
+msgid "web.admin.confirm.account.kick"
+msgstr "Wyrzucić tę nazwę z gry?"
+
+msgid "web.admin.confirm.account.kick.text"
+msgstr "Osoba grająca opuszcza grę na serwerze %(server)s, ale pozostaje zalogowana i może znów dołączyć do gry."
+
+msgid "web.admin.confirm.account.kick.idle"
+msgstr "Ta nazwa nie bierze teraz udziału w żadnej grze, więc wyrzucenie niczego nie zmieni."
+
+msgid "web.admin.confirm.account.disable"
+msgstr "Wyłączyć tę nazwę?"
+
+msgid "web.admin.confirm.account.disable.text"
+msgstr "Gra od teraz odrzuca tę nazwę z komunikatem o wyłączeniu przez obsługę, a nazwa opuszcza bieżącą rozgrywkę. Nazwa pozostaje zajęta; „Włącz” w jej wierszu przywraca ją."
+
+msgid "web.admin.toast.account.active"
+msgstr "Logowanie na konto %(name)s znów działa jak zwykle."
+
+msgid "web.admin.toast.account.disabled"
+msgstr "Wyłączono konto %(name)s."
+
+msgid "web.admin.toast.account.banned"
+msgstr "Zablokowano konto %(name)s."
+
+msgid "web.admin.toast.account.deactivated"
+msgstr "Wyłączono konto %(name)s na prośbę."
+
+msgid "web.admin.toast.verified"
+msgstr "Potwierdzono adres konta %(name)s."
+
+msgid "web.admin.toast.verified_already"
+msgstr "Adres konta %(name)s był już potwierdzony."
+
+msgid "web.admin.toast.forgotten"
+msgstr "Usunięto zapamiętane logowania konta %(name)s: %(count)s."
+
+msgid "web.admin.toast.forgotten_none"
+msgstr "Konto %(name)s nie miało już takiego zapamiętanego logowania."
+
+msgid "web.admin.toast.enabled"
+msgstr "Nazwa %(name)s znów może grać."
+
+msgid "web.admin.toast.ended"
+msgstr "Zakończono sesję konta %(name)s."
+
+msgid "web.admin.toast.ended_already"
+msgstr "Konto %(name)s nie było zalogowane."
+
+msgid "web.admin.toast.kick"
+msgstr "Wyrzucono %(name)s z gry."
+
+msgid "web.admin.toast.disable"
+msgstr "Wyłączono nazwę %(name)s."

@@ -7,6 +7,7 @@ from enum import StrEnum
 from typing import Any, Protocol
 
 from openfesl.core.accounts import ALREADY_REGISTERED, Account
+from openfesl.core.admins import Admin
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Game
 from openfesl.protocol.acct import (
@@ -154,7 +155,7 @@ class PersonaStore(Protocol):
             name: The name, matched regardless of case.
         """
 
-    async def set_state(self, persona_id: int, state: PersonaState, admin: str | None) -> None:
+    async def set_state(self, persona_id: int, state: PersonaState, admin: Admin | None) -> None:
         """Change whether a persona may play and record the change among the admin's actions.
 
         Args:

@@ -1,0 +1,108 @@
+/* A handful of choices as centred tiles on black, the chosen one in the accent and the ones that
+   cannot be chosen dashed; the colour changes in 150 ms. */
+@layer components {
+  .choice-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 2px;
+    border: 0;
+  }
+
+  .choice-tile {
+    position: relative;
+    display: flex;
+    min-height: 132px;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: var(--ink);
+    padding: 12px 8px;
+    color: var(--bright);
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 150ms var(--ease-menu);
+
+    &:hover {
+      background: var(--menu-hover);
+    }
+
+    &:has(:checked) {
+      background: var(--accent);
+      color: var(--ink);
+    }
+
+    &:has(:focus-visible) {
+      outline: 3px solid #ffffff;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 6px var(--ink);
+    }
+
+    &:has(:disabled) {
+      border: 2px dashed var(--placeholder);
+      background: transparent;
+      color: var(--dim);
+      cursor: default;
+    }
+  }
+
+  /* The radio button stays for keyboards and screen readers; the tile shows the choice. */
+  .choice-input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: inherit;
+  }
+
+  .choice-square {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    background: var(--bar-dark);
+    color: var(--bright);
+
+    :checked ~ & {
+      background: var(--ink);
+      color: var(--accent);
+    }
+
+    :disabled ~ & {
+      background: var(--placeholder);
+      color: var(--row-light);
+    }
+  }
+
+  .choice-title {
+    font-size: 14px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .choice-text {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.25;
+    font-weight: 600;
+    color: var(--soft);
+
+    :checked ~ &,
+    :disabled ~ & {
+      color: var(--dim);
+    }
+  }
+
+  .choice-code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.2;
+    font-weight: 500;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .choice-tile {
+      transition: none;
+    }
+  }
+}

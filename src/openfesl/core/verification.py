@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Protocol
 
 from babel.dates import format_datetime
 
+from openfesl.core.admins import Admin
 from openfesl.core.fesl import TransactionError
 from openfesl.core.texts import BASE_LANGUAGE, languages, localize, translate
 
@@ -69,7 +70,7 @@ class VerificationStore(Protocol):
             token_hash: The SHA-256 digest of the token the link carries.
         """
 
-    async def confirm_account(self, account_id: int, admin: str | None) -> None:
+    async def confirm_account(self, account_id: int, admin: Admin | None) -> None:
         """Confirm an account's address by hand and record it among the admin's actions.
 
         Args:

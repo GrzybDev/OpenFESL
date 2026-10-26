@@ -57,6 +57,7 @@ from openfesl.storage.servers import SqlServerStore
 from openfesl.storage.settings import SqlSettingStore
 from openfesl.storage.stats import SqlStatStore
 from openfesl.web.activity import activity_routes
+from openfesl.web.admin.account_decisions import account_decision_routes
 from openfesl.web.admin.accounts import AccountViews, account_routes
 from openfesl.web.admin.auth import (
     AdminSessions,
@@ -112,6 +113,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     persona_store = SqlPersonaStore(sessions)
     records = SqlRecordStore(sessions)
     entitlements = SqlEntitlementStore(sessions)
+    feed = AdminFeed(SqlAdminLog(sessions))
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -151,13 +153,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         joining = Joining(hosting)
         commands.update(joining.routes())
         routes.update(PlayNow(hosting).routes())
-        admin_log = SqlAdminLog(sessions)
-        feed = AdminFeed(admin_log)
         players.follow(feed)
         joining.follow(feed)
+        await feed.start()
         followers = [
             asyncio.create_task(hosting.follow_approvals()),
-            asyncio.create_task(feed.follow(await admin_log.last())),
+            asyncio.create_task(feed.follow()),
             asyncio.create_task(history.follow()),
         ]
         yield
@@ -221,6 +222,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(provider_routes(sign_in, games, server_views, hosting.apply_decisions))
     account_views = AccountViews(games, census, players, SqlAccountStore(sessions), persona_store)
     app.include_router(account_routes(sign_in, account_views, entitlements, Terms.load().version))
+    app.include_router(
+        account_decision_routes(
+            sign_in,
+            account_views,
+            SqlAccountStore(sessions),
+            persona_store,
+            SqlAdminLog(sessions),
+            feed.apply,
+        )
+    )
     app.add_exception_handler(SignInNeeded, sign_in.sign_in_needed)
     app.add_exception_handler(FormExpired, sign_in.form_expired)
     app.add_exception_handler(NeedsRole, sign_in.needs_role)

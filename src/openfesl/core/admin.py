@@ -25,6 +25,11 @@ class AdminAction(StrEnum):
     """Changed the state of the persona numbered as the target; the details hold the state."""
     PLAYER_KICK = "player_kick"
     """Kicked the persona numbered as the target from the games it joins, plays or waits for."""
+    SESSION_END = "session_end"
+    """Ended the session that the account numbered as the target is logged in on."""
+    LOGINS_FORGET = "logins_forget"
+    """Removed logins that the game remembers for the account numbered as the target; the
+    details hold how many."""
     PROVIDER_ADD = "provider_add"
     """Added the provider whose id, in hex, is the target; the details hold its name."""
     PROVIDER_REVOKE = "provider_revoke"
@@ -69,7 +74,11 @@ class AdminLog(Protocol):
 
 
 class AdminFeed:
-    """Applies the admin's actions to the running server as the log records them."""
+    """Applies the admin's actions to the running server as the log records them.
+
+    The command line records them in another process, so the log is read every few seconds;
+    the admin panel has its own actions applied at once.
+    """
 
     def __init__(self, log: AdminLog) -> None:
         """Follow a log of the admin's actions.
@@ -79,6 +88,10 @@ class AdminFeed:
         """
         self._log = log
         self._handlers: dict[AdminAction, list[Callable[[LoggedAction], object]]] = {}
+        self._after = 0
+        # The panel's requests and the periodic check may read the log at once; each action
+        # is applied once.
+        self._reading = asyncio.Lock()
 
     def on(self, action: AdminAction, handler: Callable[[LoggedAction], object]) -> None:
         """Call a function for each new action of a kind.
@@ -89,24 +102,27 @@ class AdminFeed:
         """
         self._handlers.setdefault(action, []).append(handler)
 
-    async def follow(self, after: int) -> None:
-        """Hand each new action to its handlers until cancelled.
+    async def start(self) -> None:
+        """Take the actions recorded so far as applied, as when the server starts."""
+        self._after = await self._log.last()
 
-        Args:
-            after: The number of the last action already applied, as when the server started.
-        """
-        while True:
-            await asyncio.sleep(ADMIN_CHECK_INTERVAL)
-            try:
-                actions = await self._log.since(after)
-            except Exception:
-                # The database may be away for a moment; the next check tries again.
-                logger.exception("Could not read the admin's actions")
-                continue
-            for action in actions:
-                after = action.id
+    async def apply(self) -> None:
+        """Hand each action recorded since the last check to its handlers."""
+        async with self._reading:
+            for action in await self._log.since(self._after):
+                self._after = action.id
                 for handler in self._handlers.get(action.action, []):
                     try:
                         handler(action)
                     except Exception:
                         logger.exception("Could not apply the admin's action %d", action.id)
+
+    async def follow(self) -> None:
+        """Apply the actions as the log records them until cancelled."""
+        while True:
+            await asyncio.sleep(ADMIN_CHECK_INTERVAL)
+            try:
+                await self.apply()
+            except Exception:
+                # The database may be away for a moment; the next check tries again.
+                logger.exception("Could not read the admin's actions")

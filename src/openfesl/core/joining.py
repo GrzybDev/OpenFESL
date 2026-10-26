@@ -8,7 +8,7 @@ from typing import Any
 from openfesl.core.accounts import AccountState
 from openfesl.core.admin import AdminAction, AdminFeed, LoggedAction
 from openfesl.core.hosting import NO_GAME, NOT_FOUND, HostedGame, Hosting, Player, PlayerState
-from openfesl.core.personas import Persona
+from openfesl.core.personas import Persona, PersonaState
 from openfesl.core.theater import (
     BAD_PARAMETERS,
     FAILED,
@@ -74,7 +74,9 @@ class Joining:
             feed: The admin's actions as they are recorded.
         """
         feed.on(AdminAction.PLAYER_KICK, self._kick_persona)
+        feed.on(AdminAction.PERSONA_STATE, self._kick_disabled)
         feed.on(AdminAction.ACCOUNT_STATE, self._kick_account)
+        feed.on(AdminAction.SESSION_END, self._kick_signed_out)
 
     def routes(self) -> dict[str, TheaterRoute[Any]]:
         """Return the handlers of the commands that join, queue and leave games."""
@@ -351,11 +353,18 @@ class Joining:
         persona_id = int(action.target)
         self._kick(lambda persona: persona.id == persona_id)
 
+    def _kick_disabled(self, action: LoggedAction) -> None:
+        if PersonaState(action.details["state"]) is PersonaState.DISABLED:
+            self._kick_persona(action)
+
     def _kick_account(self, action: LoggedAction) -> None:
-        # The host's link to a player outlives the player's sign-out, so the host is told too.
         if AccountState(action.details["state"]) is not AccountState.ACTIVE:
-            account_id = int(action.target)
-            self._kick(lambda persona: persona.account_id == account_id)
+            self._kick_signed_out(action)
+
+    def _kick_signed_out(self, action: LoggedAction) -> None:
+        # The host's link to a player outlives the player's sign-out, so the host is told too.
+        account_id = int(action.target)
+        self._kick(lambda persona: persona.account_id == account_id)
 
     def _kick(self, kicked: Callable[[Persona], bool]) -> None:
         for hosted in self._hosting.every():

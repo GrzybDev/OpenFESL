@@ -1,0 +1,59 @@
+{#def view, persona, decision: str, back: str #}
+{# A decision about a player's account or one of its names that asks for confirmation first, as a
+   page of its own: ending its session, kicking a name from its game or disabling a name. Where
+   scripts run, its panel opens as a dialog over the account's page (M10). #}
+{% set account = view.record.account %}
+{% set title = _("web.admin.account") %}
+{% set session = view.session %}
+{% set playing = persona or view.playing %}
+{% set action = "/admin/accounts/" ~ account.id ~ ("/session/end" if decision == "end" else "/names/" ~ persona.record.persona.id ~ "/" ~ decision) %}
+<AdminPage :title="title ~ ' · ' ~ account.nuid" current="accounts">
+  <PageHead labelledby="decision-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="decision-title">{{ account.nuid }}</TitleBlock>
+    </div>
+  </PageHead>
+  <Panel class="enter-panel confirm-frame">
+    <Confirmation :question="_('web.admin.confirm.account.' ~ decision)"
+                  :action="url(action)"
+                  :label="_('web.admin.account.' ~ decision)"
+                  :busy="_('web.admin.account.' ~ decision ~ '.busy')"
+                  :back="back"
+                  glyph="x">
+      <p class="confirm-account">
+        <span>{{ account.nuid }}</span><span>{{ _("web.admin.account.number", number=account.id) }}</span>
+      </p>
+      <dl class="facts">
+        {% if playing %}
+          <Fact :label="_('web.admin.account.name')" plain>
+            {{ playing.record.persona.name }}
+            {% if playing.game %}<GameChip :of="playing.game" />{% endif %}
+          </Fact>
+        {% endif %}
+        {% if session and decision == "end" %}
+          <Fact :label="_('web.admin.session.connected')">
+            {{ _("web.server.time", time=when(session.logged_in_at, "Hm")) }} · {{ ago(session.logged_in_at) }}
+          </Fact>
+        {% endif %}
+        {% if playing and playing.playing %}
+          <Fact :label="_('web.admin.session.playing')" plain>
+            {{ playing.server.name if playing.server else _("web.admin.account.menus") }}
+          </Fact>
+        {% elif decision != "end" %}
+          <Fact :label="_('web.admin.account.now')">
+            {{ _("web.admin.account.not_playing") }}
+          </Fact>
+        {% endif %}
+      </dl>
+      <p id="confirm-text" class="body-text">
+        {% if decision == "kick" and playing.server %}
+          {{ _("web.admin.confirm.account.kick.text", server=playing.server.name) }}
+        {% elif decision == "kick" %}
+          {{ _("web.admin.confirm.account.kick.idle") }}
+        {% else %}
+          {{ _("web.admin.confirm.account." ~ decision ~ ".text") }}
+        {% endif %}
+      </p>
+    </Confirmation>
+  </Panel>
+</AdminPage>

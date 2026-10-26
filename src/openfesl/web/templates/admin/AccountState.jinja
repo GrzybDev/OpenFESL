@@ -1,0 +1,76 @@
+{#def view, states: list, back: str, form #}
+{# The form that changes whether a player's account may log in, as a black-headed panel: the
+   states as tiles, the end of a state that lasts a while, and what a change does. Where scripts
+   run, it opens as a dialog over the account's page (M10). #}
+{% set account = view.record.account %}
+{% set title = _("web.admin.account") %}
+{% set chosen = form.get("state") or account.state %}
+{% set glyphs = {"active": "tick", "disabled": "lock", "banned": "warn", "deactivated": "x"} %}
+<AdminPage :title="title ~ ' · ' ~ account.nuid" current="accounts">
+  <PageHead labelledby="state-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="state-title">{{ account.nuid }}</TitleBlock>
+    </div>
+  </PageHead>
+  <Panel class="enter-panel confirm-frame">
+    <section aria-labelledby="confirm-question"
+             aria-describedby="confirm-text"
+             data-confirm
+             class="confirm">
+      <div class="confirm-head">
+        <h2 id="confirm-question">{{ _("web.admin.account.state.change") }}</h2>
+        <button type="button"
+                data-close
+                class="confirm-close"
+                aria-label="{{ _('web.admin.close') }}">
+          <span><Icon name="x" :size="14" stroke="currentColor" /></span>
+        </button>
+      </div>
+      <form method="post"
+            action="{{ url('/admin/accounts/' ~ account.id ~ '/state') }}">
+        <CsrfField />
+        <div class="confirm-body">
+          <p class="confirm-account">
+            <span>{{ account.nuid }}</span><span>{{ _("web.admin.account.number", number=account.id) }}</span>
+          </p>
+          {% if form.get("error") == "state" %}
+            <p role="alert" class="field-note field-error confirm-error">
+              <span aria-hidden="true"
+                    class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.account.state.missing") }}
+            </p>
+          {% endif %}
+          <fieldset class="choice-tiles state-tiles">
+            <legend class="sr-only">{{ _("web.admin.state") }}</legend>
+            {% for state in states %}
+              <ChoiceTile name="state" :value="state.value" :title="_('web.admin.account.state.' ~ state)" :glyph="glyphs[state.value]" :checked="state == chosen" :focus="state == chosen">
+              <span class="choice-text">{{ _("web.admin.account.state." ~ state ~ ".text") }}</span>
+              </ChoiceTile>
+            {% endfor %}
+          </fieldset>
+          <label for="state-until"
+                 class="field-label field-label-joined state-until">{{ _("web.admin.account.state.until") }}</label>
+          <input id="state-until"
+                 name="until"
+                 type="datetime-local"
+                 value="{{ form.get('until') or (account.state_until.strftime('%Y-%m-%dT%H:%M') if account.state_until else '') }}"
+                 aria-describedby="state-until-note"
+                 {% if form.get('error') == 'until' %} aria-invalid="true"{% endif %}
+                 class="field-input{% if form.get('error') == 'until' %} field-invalid{% endif %}">
+          {% if form.get("error") == "until" %}
+            <p id="state-until-note" role="alert" class="field-note field-error">
+              <span aria-hidden="true"
+                    class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.account.state.until.past") }}
+            </p>
+          {% else %}
+            <p id="state-until-note" class="field-note">{{ _("web.admin.account.state.until.note") }}</p>
+          {% endif %}
+          <p id="confirm-text" class="body-text">{{ _("web.admin.account.state.text") }}</p>
+        </div>
+        <div class="confirm-buttons">
+          <FormButton icon="x" :href="back">{{ _("web.admin.cancel") }}</FormButton>
+          <SmallAction :label="_('web.admin.account.state.save')" :busy="_('web.admin.account.state.saving')" />
+        </div>
+      </form>
+    </section>
+  </Panel>
+</AdminPage>

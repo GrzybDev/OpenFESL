@@ -12,8 +12,10 @@ from openfesl.core.accounts import (
     RememberedLogin,
 )
 from openfesl.core.admin import AdminAction
+from openfesl.core.admins import Admin
 from openfesl.core.verification import Confirmation, Link
-from openfesl.storage.models import AccountRow, AdminActionRow, LoginTokenRow, PersonaRow
+from openfesl.storage.admin import action_row
+from openfesl.storage.models import AccountRow, LoginTokenRow, PersonaRow
 
 REMEMBERED_LOGINS = 8
 REMEMBERED_FOR = timedelta(days=180)
@@ -119,6 +121,32 @@ class SqlAccountStore:
                 .order_by(LoginTokenRow.created_at.desc())
             )
             return [RememberedLogin(token.hex(), created) for token, created in rows]
+
+    async def forget(self, account_id: int, login_ids: list[str] | None, admin: Admin) -> int:
+        """Remove logins that the game remembers for an account and record it.
+
+        Args:
+            account_id: The account.
+            login_ids: The logins by their ids; None removes every one.
+            admin: The admin who removed them.
+
+        Returns:
+            How many were removed.
+        """
+        statement = delete(LoginTokenRow).where(LoginTokenRow.account_id == account_id)
+        if login_ids is not None:
+            hashes = [bytes.fromhex(login) for login in login_ids if _is_hex(login)]
+            statement = statement.where(LoginTokenRow.token_hash.in_(hashes))
+        async with self._sessions.begin() as session:
+            found = await session.execute(statement.returning(LoginTokenRow.token_hash))
+            removed = len(found.all())
+            if removed:
+                session.add(
+                    action_row(
+                        AdminAction.LOGINS_FORGET, str(account_id), {"count": removed}, admin
+                    )
+                )
+            return removed
 
     async def record_login(self, account_id: int) -> None:
         """Note that a player's account logged in now.
@@ -266,7 +294,7 @@ class SqlAccountStore:
             )
 
     async def set_state(
-        self, account_id: int, state: AccountState, until: datetime | None, admin: str | None
+        self, account_id: int, state: AccountState, until: datetime | None, admin: Admin | None
     ) -> None:
         """Change whether an account may log in and record the change among the admin's actions.
 
@@ -283,14 +311,7 @@ class SqlAccountStore:
                 .values(state=state.value, state_until=until, state_changed_at=func.now())
             )
             details = {"state": state.value, "until": until.isoformat() if until else None}
-            session.add(
-                AdminActionRow(
-                    admin=admin,
-                    action=AdminAction.ACCOUNT_STATE,
-                    target=str(account_id),
-                    details=details,
-                )
-            )
+            session.add(action_row(AdminAction.ACCOUNT_STATE, str(account_id), details, admin))
 
     async def renew(self, account_id: int, link: Link) -> bool:
         """Replace the link of an account once its link expired.
@@ -338,7 +359,7 @@ class SqlAccountStore:
             )
         return Confirmation.CONFIRMED
 
-    async def confirm_account(self, account_id: int, admin: str | None) -> None:
+    async def confirm_account(self, account_id: int, admin: Admin | None) -> None:
         """Confirm an account's address by hand and record it among the admin's actions.
 
         Args:
@@ -351,14 +372,15 @@ class SqlAccountStore:
                 .where(AccountRow.id == account_id)
                 .values(verification_hash=None, verification_expires_at=None)
             )
-            session.add(
-                AdminActionRow(
-                    admin=admin,
-                    action=AdminAction.ACCOUNT_VERIFIED,
-                    target=str(account_id),
-                    details={},
-                )
-            )
+            session.add(action_row(AdminAction.ACCOUNT_VERIFIED, str(account_id), {}, admin))
+
+
+def _is_hex(text: str) -> bool:
+    try:
+        bytes.fromhex(text)
+    except ValueError:
+        return False
+    return True
 
 
 def _record(row: AccountRow) -> AccountRecord:

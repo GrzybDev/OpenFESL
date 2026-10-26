@@ -3050,3 +3050,180 @@ msgstr "No login is remembered."
 
 msgid "web.admin.remembered.note"
 msgstr "Only the creation time of each remembered login is stored."
+
+msgid "web.admin.account.state.active"
+msgstr "Active"
+
+msgid "web.admin.account.state.active.text"
+msgstr "Logs in as usual."
+
+msgid "web.admin.account.state.disabled"
+msgstr "Disabled"
+
+msgid "web.admin.account.state.disabled.text"
+msgstr "Logins are refused as a disabled account."
+
+msgid "web.admin.account.state.banned"
+msgstr "Banned"
+
+msgid "web.admin.account.state.banned.text"
+msgstr "Logins are refused as a banned account."
+
+msgid "web.admin.account.state.deactivated"
+msgstr "Deactivated"
+
+msgid "web.admin.account.state.deactivated.text"
+msgstr "Logins are refused as an account closed at its player's request."
+
+msgid "web.admin.account.state.until_time"
+msgstr "%(state)s until %(time)s"
+
+msgid "web.admin.account.state.change"
+msgstr "Change state"
+
+msgid "web.admin.account.state.missing"
+msgstr "Choose a state."
+
+msgid "web.admin.account.state.until"
+msgstr "Until · optional"
+
+msgid "web.admin.account.state.until.past"
+msgstr "The end must be a later date and time."
+
+msgid "web.admin.account.state.until.note"
+msgstr "A date and time in UTC. Without one, the state lasts until it is changed; an active account needs none."
+
+msgid "web.admin.account.state.text"
+msgstr "An account that is not active is signed out of the game at once and leaves the game it plays in. Once a state ends, the account logs in as usual."
+
+msgid "web.admin.account.state.save"
+msgstr "Save state"
+
+msgid "web.admin.account.state.saving"
+msgstr "Saving…"
+
+msgid "web.admin.account.email"
+msgstr "E-mail address"
+
+msgid "web.admin.account.email.waiting"
+msgstr "Waiting for confirmation"
+
+msgid "web.admin.account.verify"
+msgstr "Confirm the address by hand"
+
+msgid "web.admin.account.verify.note"
+msgstr "The account logs in once its address is confirmed, through the link sent to it or here by hand."
+
+msgid "web.admin.account.kick"
+msgstr "Kick"
+
+msgid "web.admin.account.kick.of"
+msgstr "Kick %(name)s from the game"
+
+msgid "web.admin.account.kick.busy"
+msgstr "Kicking…"
+
+msgid "web.admin.account.enable"
+msgstr "Enable"
+
+msgid "web.admin.account.enable.of"
+msgstr "Enable %(name)s"
+
+msgid "web.admin.account.disable"
+msgstr "Disable"
+
+msgid "web.admin.account.disable.of"
+msgstr "Disable %(name)s"
+
+msgid "web.admin.account.disable.busy"
+msgstr "Disabling…"
+
+msgid "web.admin.account.end"
+msgstr "End session"
+
+msgid "web.admin.account.end.busy"
+msgstr "Ending…"
+
+msgid "web.admin.account.names.decide"
+msgstr "Kick takes a name out of its game; Disable also keeps the name out of the game until Enable."
+
+msgid "web.admin.account.name"
+msgstr "In-game name"
+
+msgid "web.admin.account.not_playing"
+msgstr "Not in a game"
+
+msgid "web.admin.sessions.note"
+msgstr "End session asks for confirmation. The game disconnects from OpenFESL and can connect again at once; nothing is blocked."
+
+msgid "web.admin.remembered.remove"
+msgstr "Remove"
+
+msgid "web.admin.remembered.remove.of"
+msgstr "Remove the remembered login created %(time)s"
+
+msgid "web.admin.remembered.remove_all"
+msgstr "Remove all"
+
+msgid "web.admin.remembered.note.removal"
+msgstr "After a removal the game asks for the password at the next login on that PC."
+
+msgid "web.admin.confirm.account.end"
+msgstr "End this session?"
+
+msgid "web.admin.confirm.account.end.text"
+msgstr "The game disconnects from OpenFESL and can connect again at once; nothing is blocked."
+
+msgid "web.admin.confirm.account.kick"
+msgstr "Kick this name from the game?"
+
+msgid "web.admin.confirm.account.kick.text"
+msgstr "The player leaves the game on %(server)s and stays logged in, free to join a game again."
+
+msgid "web.admin.confirm.account.kick.idle"
+msgstr "The name is in no game now, so a kick changes nothing."
+
+msgid "web.admin.confirm.account.disable"
+msgstr "Disable this name?"
+
+msgid "web.admin.confirm.account.disable.text"
+msgstr "The game refuses the name from now on with its text for names disabled by customer support, and the name leaves the game it plays in now. The name stays taken; Enable on its row gives it back."
+
+msgid "web.admin.toast.account.active"
+msgstr "%(name)s logs in as usual again."
+
+msgid "web.admin.toast.account.disabled"
+msgstr "Disabled %(name)s."
+
+msgid "web.admin.toast.account.banned"
+msgstr "Banned %(name)s."
+
+msgid "web.admin.toast.account.deactivated"
+msgstr "Deactivated %(name)s."
+
+msgid "web.admin.toast.verified"
+msgstr "Confirmed the address of %(name)s."
+
+msgid "web.admin.toast.verified_already"
+msgstr "The address of %(name)s was confirmed already."
+
+msgid "web.admin.toast.forgotten"
+msgstr "Removed remembered logins of %(name)s: %(count)s."
+
+msgid "web.admin.toast.forgotten_none"
+msgstr "%(name)s had no such remembered login left."
+
+msgid "web.admin.toast.enabled"
+msgstr "%(name)s can play again."
+
+msgid "web.admin.toast.ended"
+msgstr "Ended the session of %(name)s."
+
+msgid "web.admin.toast.ended_already"
+msgstr "%(name)s was not logged in."
+
+msgid "web.admin.toast.kick"
+msgstr "Kicked %(name)s from the game."
+
+msgid "web.admin.toast.disable"
+msgstr "Disabled the name %(name)s."

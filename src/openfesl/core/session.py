@@ -19,6 +19,8 @@ logger = logging.getLogger(__name__)
 
 LOGGED_IN_ELSEWHERE = 2
 AUTHORIZATION_FAILED = 4
+# Any other Goodbye reason makes the game say only that the connection was lost.
+CONNECTION_ENDED = 0
 TOO_MANY_LOGINS = 121
 
 
@@ -57,6 +59,13 @@ class Players:
             feed: The admin's actions as they are recorded.
         """
         feed.on(AdminAction.ACCOUNT_STATE, self._apply_state)
+        feed.on(AdminAction.SESSION_END, self._end_session)
+
+    def _end_session(self, action: LoggedAction) -> None:
+        session = self._sessions.get(int(action.target))
+        if session is not None:
+            logger.info("Ending the session of account %s, as the admin asked", action.target)
+            session.sign_out(reason=CONNECTION_ENDED)
 
     def _apply_state(self, action: LoggedAction) -> None:
         session = self._sessions.get(int(action.target))
@@ -296,18 +305,20 @@ class GameSession:
         self.account_key = None
         self.forget_persona()
 
-    def sign_out(self, *, banned: bool) -> None:
+    def sign_out(self, *, banned: bool = False, reason: int = AUTHORIZATION_FAILED) -> None:
         """Send the game away, its connections closed, as when the admin disabled its account.
 
         Args:
             banned: Whether the account was banned, which only Theater's DISC makes the game
-                name; otherwise the game reads that its authorization failed.
+                name.
+            reason: The Goodbye reason; the default makes the game read that its
+                authorization failed, while others let it connect again.
         """
         theaters = list(self._theater_connections)
         if banned:
             for theater in theaters:
                 theater.send("DISC", None)
-        self.disconnect(AUTHORIZATION_FAILED)
+        self.disconnect(reason)
         for theater in theaters:
             theater.close_connection()
         self._players.log_out(self)

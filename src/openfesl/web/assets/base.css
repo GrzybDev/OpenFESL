@@ -179,6 +179,9 @@
     --subtitle: #0a0a0a;
     --bright: #f4f4ee;
     --soft: #d3d8de;
+    --dim: #3d4248;
+    --placeholder: #555a60;
+    --menu-hover: #1d2024;
   }
 
   /* On a textured field the black blocks stand out on their own. */
