@@ -1,0 +1,106 @@
+{#def view, keys: list, held, back: str, form #}
+{# The form that grants a player's account entitlements by hand, as a black-headed panel: the
+   enabled product keys as tiles, whose grants the account gets without using the key up, or one
+   tag typed in. Where scripts run, it opens as a dialog over the account's page (M10). #}
+{% set account = view.record.account %}
+{% set title = _("web.admin.account") %}
+{% set missing = form.get("key") == "tag" and not form.get("tag") %}
+{% set open = keys|selectattr("open")|map(attribute="view.key.code")|list %}
+{% set chosen = form.get("key") or (open[0] if open else "tag") %}
+<AdminPage :title="title ~ ' · ' ~ account.nuid" current="accounts">
+  <PageHead labelledby="grant-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="grant-title">{{ account.nuid }}</TitleBlock>
+    </div>
+  </PageHead>
+  <Panel class="enter-panel confirm-frame">
+    <section aria-labelledby="confirm-question"
+             aria-describedby="confirm-text"
+             data-confirm
+             class="confirm">
+      <div class="confirm-head">
+        <h2 id="confirm-question">{{ _("web.admin.entitlements.grant") }}</h2>
+        <button type="button"
+                data-close
+                class="confirm-close"
+                aria-label="{{ _('web.admin.close') }}">
+          <span><Icon name="x" :size="14" stroke="currentColor" /></span>
+        </button>
+      </div>
+      <form method="post"
+            action="{{ url('/admin/accounts/' ~ account.id ~ '/grant') }}"
+            class="grant-form">
+        <CsrfField />
+        <div class="confirm-body">
+          <p class="confirm-account">
+            <span>{{ account.nuid }}</span><span>{{ _("web.admin.account.number", number=account.id) }}</span>
+          </p>
+          {% if form.get("error") == "key" %}
+            <p role="alert" class="field-note field-error confirm-error">
+              <span aria-hidden="true"
+                    class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.grant.key_gone") }}
+            </p>
+          {% endif %}
+          <fieldset class="choice-tiles grant-tiles">
+            <legend class="sr-only">{{ _("web.admin.grant.what") }}</legend>
+            {% for entry in keys %}
+              {% set key = entry.view.key %}
+              {% set game = entry.view.game %}
+              {% set total = key.grants|length %}
+              <ChoiceTile name="key" :value="key.code" :title="_('games.' ~ game.id ~ '.key.' ~ key.code) if game else key.code" glyph="key" :checked="key.code == chosen" :disabled="not entry.open" :focus="key.code == chosen">
+              {% if game %}<code class="choice-code">{{ key.code }}</code>{% endif %}
+              <span class="choice-text">
+                {%- if not entry.open %}{{ _n("web.admin.grant.tags.held", total) }}{% elif entry.had %}{{ _n("web.admin.grant.tags.some", total, held=number(entry.had)) }}{% else %}{{ _n("web.admin.grant.tags", total) }}{% endif -%}
+              </span>
+              </ChoiceTile>
+            {% endfor %}
+            <ChoiceTile name="key" value="tag" :title="_('web.admin.grant.one')" glyph="tag" :checked="chosen == 'tag'" :focus="chosen == 'tag'">
+            <span class="choice-text">{{ _("web.admin.grant.one.text") }}</span>
+            </ChoiceTile>
+          </fieldset>
+        </div>
+        <div class="grant-fields">
+          <div>
+            <label for="grant-tag" class="field-label field-label-joined">{{ _("web.admin.entitlement.tag") }}</label>
+            <input id="grant-tag"
+                   name="tag"
+                   type="text"
+                   value="{{ form.get('tag', '') }}"
+                   autocomplete="off"
+                   {% if missing %} aria-invalid="true" aria-describedby="grant-missing"{% endif %}
+                   class="field-input field-code{% if missing %} field-invalid{% endif %}">
+          </div>
+          <div>
+            <label for="grant-group" class="field-label field-label-joined">{{ _("web.admin.grant.group") }}</label>
+            <input id="grant-group"
+                   name="group"
+                   type="text"
+                   value="{{ form.get('group', '') }}"
+                   autocomplete="off"
+                   class="field-input field-code">
+          </div>
+          <div>
+            <label for="grant-product" class="field-label field-label-joined">{{ _("web.admin.grant.product") }}</label>
+            <input id="grant-product"
+                   name="product"
+                   type="text"
+                   value="{{ form.get('product', '') }}"
+                   autocomplete="off"
+                   class="field-input field-code">
+          </div>
+        </div>
+        {% if missing %}
+          <p id="grant-missing" role="alert" class="field-note field-error">
+            <span aria-hidden="true"
+                  class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.grant.tag_missing") }}
+          </p>
+        {% endif %}
+        <p id="confirm-text" class="field-note grant-note">{{ _("web.admin.grant.note") }}</p>
+        <div class="confirm-buttons">
+          <FormButton icon="x" :href="back">{{ _("web.admin.cancel") }}</FormButton>
+          <SmallAction :label="_('web.admin.grant.button')" :busy="_('web.admin.grant.busy')" />
+        </div>
+      </form>
+    </section>
+  </Panel>
+</AdminPage>

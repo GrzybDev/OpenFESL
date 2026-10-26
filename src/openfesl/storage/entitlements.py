@@ -5,8 +5,17 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.admin import AdminAction
-from openfesl.core.entitlements import Entitlement, EntitlementQuery, KeyLimits, KeyRefusal
+from openfesl.core.admins import Admin
+from openfesl.core.entitlements import (
+    Entitlement,
+    EntitlementQuery,
+    KeyLimits,
+    KeyRefusal,
+    StatusChange,
+    StoredKey,
+)
 from openfesl.core.games import Grant, ProductKey
+from openfesl.storage.admin import action_row
 from openfesl.storage.models import (
     AdminActionRow,
     EntitlementRow,
@@ -16,6 +25,8 @@ from openfesl.storage.models import (
 )
 
 ACTIVE = "ACTIVE"
+# What the game reads for an entitlement the admin took away.
+REVOKED = "DISABLED"
 
 
 class SqlEntitlementStore:
@@ -153,6 +164,105 @@ class SqlEntitlementStore:
                 )
             )
             return status == ACTIVE
+
+    async def give(
+        self, account_id: int, grants: Sequence[Grant], key: str | None, admin: Admin
+    ) -> list[str]:
+        """Grant an account entitlements by hand and record it; those it holds stay as they are.
+
+        Args:
+            account_id: The account.
+            grants: The entitlements.
+            key: The product key whose grants they are, if any; it is not used up.
+            admin: The admin who granted them.
+
+        Returns:
+            The tags granted, without those the account held already, revoked ones included.
+        """
+        if not grants:
+            return []
+        async with self._sessions.begin() as session:
+            added = list(
+                await session.scalars(
+                    insert(EntitlementRow)
+                    .values(
+                        [
+                            {
+                                "account_id": account_id,
+                                "tag": grant.tag,
+                                "group_name": grant.group,
+                                "product_id": grant.product,
+                            }
+                            for grant in grants
+                        ]
+                    )
+                    .on_conflict_do_nothing()
+                    .returning(EntitlementRow.tag)
+                )
+            )
+            if added:
+                details = {"tags": added, "key": key}
+                target = str(account_id)
+                session.add(action_row(AdminAction.ENTITLEMENT_GRANT, target, details, admin))
+            return added
+
+    async def set_status(self, account_id: int, tag: str, active: bool, admin: Admin) -> bool:
+        """Revoke an account's entitlement or grant it again, and record it.
+
+        Args:
+            account_id: The account.
+            tag: The entitlement's tag.
+            active: Whether it is granted again; otherwise it is revoked.
+            admin: The admin who changed it.
+
+        Returns:
+            Whether it changed, which it does not when it was so already.
+        """
+        status = ACTIVE if active else REVOKED
+        async with self._sessions.begin() as session:
+            changed = await session.scalar(
+                update(EntitlementRow)
+                .where(
+                    EntitlementRow.account_id == account_id,
+                    EntitlementRow.tag == tag,
+                    EntitlementRow.status != status,
+                )
+                .values(status=status)
+                .returning(EntitlementRow.id)
+            )
+            if changed is not None:
+                details = {"tag": tag, "status": status}
+                target = str(account_id)
+                session.add(action_row(AdminAction.ENTITLEMENT_STATE, target, details, admin))
+            return changed is not None
+
+    async def changes(self, account_id: int) -> dict[str, StatusChange]:
+        """Return when the admin last revoked or granted again each of an account's entitlements.
+
+        Args:
+            account_id: The account.
+        """
+        async with self._sessions() as session:
+            rows = await session.scalars(
+                select(AdminActionRow)
+                .where(
+                    AdminActionRow.action == AdminAction.ENTITLEMENT_STATE,
+                    AdminActionRow.target == str(account_id),
+                )
+                .order_by(AdminActionRow.id)
+            )
+            return {row.details["tag"]: StatusChange(row.at, row.admin_name) for row in rows}
+
+    async def keys(self) -> list[StoredKey]:
+        """Return every product key with what it grants, in the order they were added."""
+        async with self._sessions() as session:
+            keys = list(await session.scalars(select(ProductKeyRow).order_by(ProductKeyRow.id)))
+            grants: dict[int, list[Grant]] = {key.id: [] for key in keys}
+            for row in await session.scalars(select(ProductKeyGrantRow)):
+                grants[row.key_id].append(
+                    Grant(tag=row.tag, group=row.group_name, product=row.product_id)
+                )
+            return [StoredKey(key.code, key.enabled, tuple(grants[key.id])) for key in keys]
 
     async def of_account(self, account_id: int, query: EntitlementQuery) -> list[Entitlement]:
         """Return an account's entitlements, filtered by whichever filters are not empty.

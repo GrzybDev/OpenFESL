@@ -66,6 +66,7 @@ from openfesl.web.admin.auth import (
     SignInNeeded,
     SignInProvider,
 )
+from openfesl.web.admin.entitlements import entitlement_routes
 from openfesl.web.admin.home import home_routes
 from openfesl.web.admin.providers import provider_routes
 from openfesl.web.admin.servers import ServerViews, decision_routes, server_list_routes
@@ -222,6 +223,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(provider_routes(sign_in, games, server_views, hosting.apply_decisions))
     account_views = AccountViews(games, census, players, SqlAccountStore(sessions), persona_store)
     app.include_router(account_routes(sign_in, account_views, entitlements, Terms.load().version))
+    app.include_router(entitlement_routes(sign_in, account_views, entitlements, games))
     app.include_router(
         account_decision_routes(
             sign_in,

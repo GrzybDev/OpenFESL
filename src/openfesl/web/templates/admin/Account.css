@@ -121,6 +121,33 @@
     margin-top: 12px;
   }
 
+  .grant-tiles {
+    margin-top: 12px;
+  }
+
+  /* The fields of one tag typed by hand, shown while that tile is chosen. */
+  .grant-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 2px;
+    margin-top: 2px;
+
+    .grant-form:not(:has(.choice-input[value="tag"]:checked)) & {
+      display: none;
+    }
+  }
+
+  .field-code {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .grant-note {
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
   .country-code {
     min-width: 28px;
     background: var(--ink);
@@ -208,6 +235,41 @@
     --cell: var(--row-alt);
   }
 
+  .entitlements-managed {
+    min-width: 884px;
+
+    .entitlement-columns {
+      grid-template-columns: 64px minmax(210px, 1fr) 130px 150px 180px 140px;
+    }
+  }
+
+  .entitlement-decide {
+    display: grid;
+    background: var(--cell);
+
+    form {
+      display: grid;
+    }
+  }
+
+  .account-role-note {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 10px 14px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 600;
+
+    .badge {
+      width: 22px;
+      height: 22px;
+      flex: none;
+    }
+  }
+
   .entitlement-label {
     display: none;
     font-size: 11px;
@@ -283,7 +345,8 @@
       grid-template-areas:
         "badge tag tag"
         "group product product"
-        "state state state";
+        "state state state"
+        "decide decide decide";
 
       > :nth-child(1) {
         grid-area: badge;
@@ -316,6 +379,10 @@
 
       > :nth-child(5) {
         grid-area: state;
+      }
+
+      > :nth-child(6) {
+        grid-area: decide;
       }
     }
   }

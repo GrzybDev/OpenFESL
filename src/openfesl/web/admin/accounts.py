@@ -8,8 +8,9 @@ from fastapi.responses import HTMLResponse
 from starlette.datastructures import QueryParams
 
 from openfesl.core.accounts import AccountRecord, RememberedLogin
+from openfesl.core.admins import Role
 from openfesl.core.census import Census, Server
-from openfesl.core.entitlements import EntitlementQuery, EntitlementStore
+from openfesl.core.entitlements import Entitlement, EntitlementQuery, StatusChange
 from openfesl.core.games import Game, Games
 from openfesl.core.personas import PersonaRecord, PersonaState
 from openfesl.core.session import GameSession, Players
@@ -48,6 +49,25 @@ class AccountDirectory(Protocol):
 
     async def remembered(self, account_id: int) -> list[RememberedLogin]:
         """Return the logins remembered for an account that still log it in, newest first.
+
+        Args:
+            account_id: The account.
+        """
+
+
+class HeldEntitlements(Protocol):
+    """Finds the entitlements accounts hold and when the admin last changed them."""
+
+    async def of_account(self, account_id: int, query: EntitlementQuery) -> list[Entitlement]:
+        """Return an account's entitlements, filtered by whichever filters are not empty.
+
+        Args:
+            account_id: The account.
+            query: The filters.
+        """
+
+    async def changes(self, account_id: int) -> dict[str, StatusChange]:
+        """Return when the admin last revoked or granted again each of an account's entitlements.
 
         Args:
             account_id: The account.
@@ -213,7 +233,7 @@ class AccountViews:
 
 
 def account_routes(
-    sessions: AdminSessions, views: AccountViews, entitlements: EntitlementStore, terms: str
+    sessions: AdminSessions, views: AccountViews, entitlements: HeldEntitlements, terms: str
 ) -> APIRouter:
     """Return the accounts page, with its search, and each account's page.
 
@@ -251,7 +271,8 @@ def account_routes(
             return await sessions.render(
                 request, "admin.AccountMissing", 404, admin=admin, number=account_id
             )
-        held = await entitlements.of_account(view.record.account.id, EntitlementQuery())
+        number = view.record.account.id
+        held = await entitlements.of_account(number, EntitlementQuery())
         total, _found = await views.accounts.search("", False, 0, 0)
         return await sessions.render(
             request,
@@ -260,9 +281,11 @@ def account_routes(
             view=view,
             entitlements=held,
             active=sum(entitlement.status == ACTIVE for entitlement in held),
-            remembered=await views.accounts.remembered(view.record.account.id),
+            changes=await entitlements.changes(number),
+            remembered=await views.accounts.remembered(number),
             total=total,
             terms=terms,
+            manages=admin.role is Role.ADMIN,
         )
 
     return router

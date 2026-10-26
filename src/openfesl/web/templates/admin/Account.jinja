@@ -1,4 +1,4 @@
-{#def view, entitlements: list, active: int, remembered: list, total: int, terms: str #}
+{#def view, entitlements: list, active: int, changes, remembered: list, total: int, terms: str, manages: bool #}
 {# A player's account: what is kept about it, its in-game names and entitlements, beside the search,
    the session it is logged in on and the logins its game remembers. #}
 {% set record = view.record %}
@@ -151,7 +151,7 @@
             <div class="table-scroll">
               <div role="table"
                    aria-labelledby="account-entitlements"
-                   class="table entitlements">
+                   class="table entitlements{% if manages %} entitlements-managed{% endif %}">
                 <div role="rowgroup">
                   <div role="row" class="entitlement-columns">
                     <div role="columnheader"
@@ -160,6 +160,10 @@
                     <div role="columnheader" class="column-head">{{ _("web.admin.entitlement.group") }}</div>
                     <div role="columnheader" class="column-head">{{ _("web.admin.entitlement.product") }}</div>
                     <div role="columnheader" class="column-head">{{ _("web.admin.state") }}</div>
+                    {% if manages %}
+                      <div role="columnheader"
+                           class="column-head"><span class="sr-only">{{ _("web.admin.decision") }}</span></div>
+                    {% endif %}
                   </div>
                 </div>
                 <div role="rowgroup" class="table-rows">
@@ -180,9 +184,37 @@
                         <code class="entitlement-code">{{ entitlement.product or "–" }}</code>
                       </div>
                       <div role="cell" class="admin-cell cell-stack">
+                        {% set change = changes.get(entitlement.tag) %}
                         <span class="account-now">{{ _("web.admin.entitlement.active") if held else _("web.admin.entitlement.revoked") }}</span>
-                        <span class="cell-ago">{{ _("web.admin.entitlement.granted", day=when(entitlement.granted, "yMMMd")) }}</span>
+                        <span class="cell-ago">
+                          {% if not held and change %}
+                            {{ _("web.admin.entitlement.revoked_by", time=_("web.server.time", time=moment(change.at)), name=change.by or _("web.admin.command_line")) }}
+                          {% else %}
+                            {{ _("web.admin.entitlement.granted", day=when(entitlement.granted, "yMMMd")) }}
+                          {% endif %}
+                        </span>
                       </div>
+                      {% if manages %}
+                        <div role="cell" class="entitlement-decide">
+                          {% if held %}
+                            <a href="{{ base }}/entitlements/revoke?{{ {'tag': entitlement.tag, 'back': here}|urlencode }}"
+                               data-dialog
+                               aria-haspopup="dialog"
+                               aria-label="{{ _('web.admin.entitlement.revoke.of', tag=entitlement.tag) }}"
+                               class="form-button"><span aria-hidden="true" class="form-glyph"><Icon name="x" :size="14" stroke="#F4F4EE" /></span>{{ _("web.admin.entitlement.revoke") }}</a>
+                          {% else %}
+                            <form method="post" action="{{ base }}/entitlements/restore">
+                              <CsrfField />
+                              <input type="hidden" name="tag" value="{{ entitlement.tag }}">
+                              <button type="submit"
+                                      aria-label="{{ _('web.admin.entitlement.restore.of', tag=entitlement.tag) }}"
+                                      class="form-button">
+                                <span aria-hidden="true" class="form-glyph"><Icon name="tick" :size="14" stroke="#F4F4EE" /></span>{{ _("web.admin.entitlement.restore") }}
+                              </button>
+                            </form>
+                          {% endif %}
+                        </div>
+                      {% endif %}
                     </div>
                   {% endfor %}
                 </div>
@@ -195,7 +227,16 @@
             <p>
               <span class="list-count">{{ _("web.admin.entitlements.count", count=number(entitlements|length)) }}</span><span class="list-range">{{ _("web.admin.entitlements.note") }}</span>
             </p>
+            {% if manages %}
+              <SmallAction :href="base ~ '/grant'" :label="_('web.admin.entitlements.grant')" dialog />
+            {% endif %}
           </div>
+          {% if not manages %}
+            <p class="bar-text account-role-note">
+              <span aria-hidden="true"
+                    class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.entitlements.managed") }}
+            </p>
+          {% endif %}
         </section>
       </div>
 

@@ -1,0 +1,38 @@
+{#def view, entitlement, back: str #}
+{# Revoking one of a player's entitlements asks first, as a page of its own: what the entitlement
+   is, what revoking does, and the buttons that cancel or confirm it. Where scripts run, its panel
+   opens as a dialog over the account's page (M10). #}
+{% set account = view.record.account %}
+{% set title = _("web.admin.account") %}
+<AdminPage :title="title ~ ' · ' ~ account.nuid" current="accounts">
+  <PageHead labelledby="revoke-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="revoke-title">{{ account.nuid }}</TitleBlock>
+    </div>
+  </PageHead>
+  <Panel class="enter-panel confirm-frame">
+    <Confirmation :question="_('web.admin.confirm.entitlement')"
+                  :action="url('/admin/accounts/' ~ account.id ~ '/entitlements/revoke')"
+                  :label="_('web.admin.entitlement.revoke')"
+                  :busy="_('web.admin.entitlement.revoke.busy')"
+                  :back="back"
+                  :hidden="{'tag': entitlement.tag}"
+                  glyph="x">
+      <p class="confirm-account">
+        <span>{{ account.nuid }}</span><span>{{ _("web.admin.account.number", number=account.id) }}</span>
+      </p>
+      <dl class="facts">
+        <Fact :label="_('web.admin.entitlement.tag')">
+          <code class="entitlement-code">{{ entitlement.tag }}</code>
+        </Fact>
+        <Fact :label="_('web.admin.entitlement.group_product')">
+          <code class="entitlement-code">{{ entitlement.group or "–" }} · {{ entitlement.product or "–" }}</code>
+        </Fact>
+        <Fact :label="_('web.admin.entitlement.granted_at')">
+          {{ _("web.server.time", time=moment(entitlement.granted)) }}
+        </Fact>
+      </dl>
+      <p id="confirm-text" class="body-text">{{ _("web.admin.confirm.entitlement.text") }}</p>
+    </Confirmation>
+  </Panel>
+</AdminPage>

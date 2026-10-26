@@ -1,8 +1,9 @@
-{#def question: str, action: str, label: str, busy: str, back: str, glyph: str = "go" #}
+{#def question: str, action: str, label: str, busy: str, back: str, glyph: str = "go", hidden: dict | None = None #}
 {# The black-headed panel that asks before a decision, as the game's dialogs: the question, the
    content that says what it does (with the text that describes it as confirm-text), and the
-   buttons that go back or send the decision. Where scripts run, a link with data-dialog opens
-   it over its page (M10); only there does it close with its own button. #}
+   buttons that go back or send the decision, whose form sends the hidden fields too. Where
+   scripts run, a link with data-dialog opens it over its page (M10); only there does it close
+   with its own button. #}
 <section aria-labelledby="confirm-question"
          aria-describedby="confirm-text"
          data-confirm
@@ -23,6 +24,7 @@
       <CsrfField />
       <input type="hidden" name="confirmed" value="1">
       <input type="hidden" name="back" value="{{ back }}">
+      {% for name, value in (hidden or {}).items() %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
       <SmallAction :label="label" :busy="busy" :glyph="glyph" />
     </form>
   </div>

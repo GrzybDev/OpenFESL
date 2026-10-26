@@ -3227,3 +3227,105 @@ msgstr "Kicked %(name)s from the game."
 
 msgid "web.admin.toast.disable"
 msgstr "Disabled the name %(name)s."
+
+msgid "web.admin.entitlement.revoked_by"
+msgstr "Revoked %(time)s · %(name)s"
+
+msgid "web.admin.entitlement.revoke"
+msgstr "Revoke"
+
+msgid "web.admin.entitlement.revoke.of"
+msgstr "Revoke %(tag)s"
+
+msgid "web.admin.entitlement.revoke.busy"
+msgstr "Revoking…"
+
+msgid "web.admin.entitlement.restore"
+msgstr "Grant again"
+
+msgid "web.admin.entitlement.restore.of"
+msgstr "Grant %(tag)s again"
+
+msgid "web.admin.entitlement.group_product"
+msgstr "Group · product id"
+
+msgid "web.admin.entitlement.granted_at"
+msgstr "Granted"
+
+msgid "web.admin.entitlements.grant"
+msgstr "Grant entitlements"
+
+msgid "web.admin.entitlements.managed"
+msgstr "Entitlements are changed by the admin role."
+
+msgid "web.admin.grant.what"
+msgstr "What to grant"
+
+msgid "web.admin.grant.key_gone"
+msgstr "That product key is no longer enabled; choose another."
+
+msgid "web.admin.grant.tags.one"
+msgstr "%(count)s tag"
+
+msgid "web.admin.grant.tags.other"
+msgstr "%(count)s tags"
+
+msgid "web.admin.grant.tags.held.one"
+msgstr "%(count)s tag · already held"
+
+msgid "web.admin.grant.tags.held.other"
+msgstr "%(count)s tags · already held"
+
+msgid "web.admin.grant.tags.some.one"
+msgstr "%(count)s tag · %(held)s held"
+
+msgid "web.admin.grant.tags.some.other"
+msgstr "%(count)s tags · %(held)s held"
+
+msgid "web.admin.grant.one"
+msgstr "One tag"
+
+msgid "web.admin.grant.one.text"
+msgstr "Tag, group and product id"
+
+msgid "web.admin.grant.group"
+msgstr "Group · optional"
+
+msgid "web.admin.grant.product"
+msgstr "Product id · optional"
+
+msgid "web.admin.grant.tag_missing"
+msgstr "Tag is required."
+
+msgid "web.admin.grant.note"
+msgstr "Tags the account already holds are skipped; disabled keys are not listed, and a key granted here is not used up. The game reads entitlements at the next login."
+
+msgid "web.admin.grant.button"
+msgstr "Grant"
+
+msgid "web.admin.grant.busy"
+msgstr "Granting…"
+
+msgid "web.admin.confirm.entitlement"
+msgstr "Revoke this entitlement?"
+
+msgid "web.admin.confirm.entitlement.text"
+msgstr "The account keeps its other entitlements. The game reads entitlements at login, so the change applies from the next login. Entering the key again does not restore it; Grant again on its row does."
+
+msgid "web.admin.toast.granted"
+msgstr "Granted %(tags)s to %(name)s."
+
+msgid "web.admin.toast.granted_none"
+msgstr "%(name)s holds every tag of that choice already."
+
+msgid "web.admin.toast.revoked"
+msgstr "Revoked %(tag)s."
+
+msgid "web.admin.toast.restored"
+msgstr "Granted %(tag)s again."
+
+msgid "web.admin.toast.entitlement_unchanged"
+msgstr "Nothing changed: %(tag)s was in that state already."
+
+msgid "web.admin.refused.role.accounts"
+msgstr "Entitlements are granted and revoked by the admin role."

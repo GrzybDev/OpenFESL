@@ -3320,3 +3320,123 @@ msgstr "Wyrzucono %(name)s z gry."
 
 msgid "web.admin.toast.disable"
 msgstr "Wyłączono nazwę %(name)s."
+
+msgid "web.admin.entitlement.revoked_by"
+msgstr "Cofnięte %(time)s · %(name)s"
+
+msgid "web.admin.entitlement.revoke"
+msgstr "Cofnij"
+
+msgid "web.admin.entitlement.revoke.of"
+msgstr "Cofnij %(tag)s"
+
+msgid "web.admin.entitlement.revoke.busy"
+msgstr "Cofanie…"
+
+msgid "web.admin.entitlement.restore"
+msgstr "Przyznaj ponownie"
+
+msgid "web.admin.entitlement.restore.of"
+msgstr "Przyznaj ponownie %(tag)s"
+
+msgid "web.admin.entitlement.group_product"
+msgstr "Grupa · identyfikator produktu"
+
+msgid "web.admin.entitlement.granted_at"
+msgstr "Przyznane"
+
+msgid "web.admin.entitlements.grant"
+msgstr "Przyznaj uprawnienia"
+
+msgid "web.admin.entitlements.managed"
+msgstr "Uprawnienia zmienia rola administratora."
+
+msgid "web.admin.grant.what"
+msgstr "Co przyznać"
+
+msgid "web.admin.grant.key_gone"
+msgstr "Ten klucz produktu nie jest już włączony; wybierz inny."
+
+msgid "web.admin.grant.tags.one"
+msgstr "%(count)s znacznik"
+
+msgid "web.admin.grant.tags.few"
+msgstr "%(count)s znaczniki"
+
+msgid "web.admin.grant.tags.many"
+msgstr "%(count)s znaczników"
+
+msgid "web.admin.grant.tags.other"
+msgstr "%(count)s znacznika"
+
+msgid "web.admin.grant.tags.held.one"
+msgstr "%(count)s znacznik · już przyznany"
+
+msgid "web.admin.grant.tags.held.few"
+msgstr "%(count)s znaczniki · już przyznane"
+
+msgid "web.admin.grant.tags.held.many"
+msgstr "%(count)s znaczników · już przyznanych"
+
+msgid "web.admin.grant.tags.held.other"
+msgstr "%(count)s znacznika · już przyznane"
+
+msgid "web.admin.grant.tags.some.one"
+msgstr "%(count)s znacznik · przyznane: %(held)s"
+
+msgid "web.admin.grant.tags.some.few"
+msgstr "%(count)s znaczniki · przyznane: %(held)s"
+
+msgid "web.admin.grant.tags.some.many"
+msgstr "%(count)s znaczników · przyznane: %(held)s"
+
+msgid "web.admin.grant.tags.some.other"
+msgstr "%(count)s znacznika · przyznane: %(held)s"
+
+msgid "web.admin.grant.one"
+msgstr "Jeden znacznik"
+
+msgid "web.admin.grant.one.text"
+msgstr "Znacznik, grupa i identyfikator produktu"
+
+msgid "web.admin.grant.group"
+msgstr "Grupa · opcjonalnie"
+
+msgid "web.admin.grant.product"
+msgstr "Identyfikator produktu · opcjonalnie"
+
+msgid "web.admin.grant.tag_missing"
+msgstr "Znacznik jest wymagany."
+
+msgid "web.admin.grant.note"
+msgstr "Znaczniki, które konto już ma, są pomijane; wyłączone klucze nie są wyświetlane, a klucz przyznany tutaj nie jest zużywany. Gra odczyta uprawnienia przy następnym logowaniu."
+
+msgid "web.admin.grant.button"
+msgstr "Przyznaj"
+
+msgid "web.admin.grant.busy"
+msgstr "Przyznawanie…"
+
+msgid "web.admin.confirm.entitlement"
+msgstr "Cofnąć to uprawnienie?"
+
+msgid "web.admin.confirm.entitlement.text"
+msgstr "Konto zachowuje pozostałe uprawnienia. Gra odczytuje uprawnienia przy logowaniu, więc zmiana działa od następnego logowania. Ponowne wpisanie klucza nie przywraca uprawnienia; robi to „Przyznaj ponownie” w jego wierszu."
+
+msgid "web.admin.toast.granted"
+msgstr "Przyznano kontu %(name)s: %(tags)s."
+
+msgid "web.admin.toast.granted_none"
+msgstr "Konto %(name)s ma już wszystkie te znaczniki."
+
+msgid "web.admin.toast.revoked"
+msgstr "Cofnięto %(tag)s."
+
+msgid "web.admin.toast.restored"
+msgstr "Ponownie przyznano %(tag)s."
+
+msgid "web.admin.toast.entitlement_unchanged"
+msgstr "Bez zmian: %(tag)s było już w tym stanie."
+
+msgid "web.admin.refused.role.accounts"
+msgstr "Uprawnienia przyznaje i cofa rola administratora."

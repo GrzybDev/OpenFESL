@@ -21,6 +21,7 @@ from support import (
 
 pytestmark = pytest.mark.anyio
 WARDEN = {"sub": "warden-5", "preferred_username": "invented-warden", "groups": ["fesl-moderators"]}
+KEEPER = {"sub": "keeper-5", "preferred_username": "invented-keeper", "groups": ["fesl-admins"]}
 
 
 async def test_the_admin_finds_accounts_by_name_and_sees_what_each_one_holds(
@@ -175,3 +176,62 @@ async def test_moderators_decide_about_accounts_their_sessions_logins_and_names(
             confirmed = (await client.get(base + bob_account.group(1))).text
             assert "Confirmed the address of bob@example.test." in confirmed
             assert "Waiting for confirmation" not in confirmed
+
+
+async def test_admins_grant_and_revoke_entitlements_which_moderators_only_see(
+    admin_provider: IdentityProvider, server_url: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    base = server_url.replace("ws://", "http://").rstrip("/")
+    async with game(server_url) as ann:
+        await log_in_player(ann, FESL, "ann@example.test")
+    async with httpx2.AsyncClient() as client:
+        admin_provider.user = KEEPER
+        page = (await sign_in(client, base, next="/admin/accounts?q=ann")).text
+        account = re.search(r'href="(/admin/accounts/\d+)" class="account-link"', page)
+        assert account
+        address = base + account.group(1)
+        token = form_token(page)
+
+        # Revoking asks first; the game then refuses the login that needs the entitlement.
+        revoke = f"{address}/entitlements/revoke"
+        asked = await client.post(revoke, data={"csrf": token, "tag": "bfbc2-pc"})
+        assert (
+            "Revoke this entitlement?" in (await client.get(base + asked.headers["location"])).text
+        )
+        await client.post(revoke, data={"csrf": token, "tag": "bfbc2-pc", "confirmed": "1"})
+        revoked = (await client.get(address)).text
+        assert "Revoked bfbc2-pc." in revoked and "· invented-keeper" in revoked
+        again = login("ann@example.test", "secret-pass")
+        async with game(server_url) as ann:
+            await ann.hello(FESL, "bfbc2-pc")
+            assert (await ann.request(FESL, "acct", again))["errorCode"] == "120"
+            await client.post(
+                f"{address}/entitlements/restore", data={"csrf": token, "tag": "bfbc2-pc"}
+            )
+            assert "errorCode" not in await ann.request(FESL, "acct", again)
+
+        # A key's grants come without using the key up; held tags are skipped.
+        form = (await client.get(f"{address}/grant")).text
+        assert "3 tags · already held" in form
+        await client.post(f"{address}/grant", data={"csrf": token, "key": "ACTIVATE-VIETNAM"})
+        granted = (await client.get(address)).text
+        assert (
+            "Granted BFBC2:PC:VIETNAM_ACCESS, BFBC2:PC:VIETNAM_PDLC to ann@example.test." in granted
+        )
+        assert "uses 0 of unlimited" in await cli(capsys, "keys", "limit", "ACTIVATE-VIETNAM")
+        missing = await client.post(f"{address}/grant", data={"csrf": token, "key": "tag"})
+        assert missing.status_code == 400 and "Tag is required." in missing.text
+        one = {"csrf": token, "key": "tag", "tag": "INVENTED:TAG", "group": "Invented"}
+        await client.post(f"{address}/grant", data=one)
+        assert "INVENTED:TAG" in (await client.get(address)).text
+
+    async with httpx2.AsyncClient() as client:
+        admin_provider.user = WARDEN
+        seen = (await sign_in(client, base, next=account.group(1))).text
+        assert "Entitlements are changed by the admin role." in seen
+        assert "Grant entitlements" not in seen and "BFBC2:PC:VIETNAM_PDLC" in seen
+        refused = await client.post(
+            f"{address}/grant", data={"csrf": form_token(seen), "key": "tag"}
+        )
+        assert refused.status_code == 403
+        assert "Entitlements are granted and revoked by the admin role." in refused.text

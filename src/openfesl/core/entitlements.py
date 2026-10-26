@@ -79,6 +79,34 @@ class Entitlement:
 
 
 @dataclass(frozen=True, slots=True)
+class StoredKey:
+    """A product key as the admin panel lists it.
+
+    Attributes:
+        code: The code entered in the game.
+        enabled: Whether the game accepts it.
+        grants: What it grants.
+    """
+
+    code: str
+    enabled: bool
+    grants: tuple[Grant, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class StatusChange:
+    """When the admin last revoked an entitlement or granted it again, and who did.
+
+    Attributes:
+        at: When.
+        by: The admin's display name; None for the command line.
+    """
+
+    at: datetime
+    by: str | None
+
+
+@dataclass(frozen=True, slots=True)
 class EntitlementQuery:
     """Filters for an account's entitlements; an empty one does not filter."""
 

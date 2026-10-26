@@ -247,4 +247,7 @@
   <symbol id="lock" viewBox="0 0 20 20">
     <path d="M5 9.5h10v7.5H5zM7.4 9.5V7a2.6 2.6 0 0 1 5.2 0v2.5" fill="none" stroke-width="2.2"/>
   </symbol>
+  <symbol id="key" viewBox="0 0 20 20">
+    <path d="M7.2 6.2a3.8 3.8 0 1 0 0 7.6a3.8 3.8 0 1 0 0-7.6zM11 10h7M15.2 10v3.2M17.8 10v2.4" fill="none" stroke-width="2.2"/>
+  </symbol>
 </svg>

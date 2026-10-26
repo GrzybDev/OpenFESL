@@ -37,6 +37,12 @@ class AdminAction(StrEnum):
     SERVER_STATE = "server_state"
     """Approved or revoked the dedicated server whose persistent game id is the target; the
     details hold its new state."""
+    ENTITLEMENT_GRANT = "entitlement_grant"
+    """Granted the account numbered as the target entitlements by hand; the details hold their
+    tags and the product key whose grants they were, if any."""
+    ENTITLEMENT_STATE = "entitlement_state"
+    """Revoked an entitlement of the account numbered as the target, or granted it again; the
+    details hold its tag and new status."""
     KEY_LIMITS = "key_limits"
     """Changed how often the product key named as the target may be redeemed; the details hold
     its most uses, none for any number, and whether an account may redeem it only once."""
