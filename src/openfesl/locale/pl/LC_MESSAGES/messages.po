@@ -3440,3 +3440,210 @@ msgstr "Bez zmian: %(tag)s było już w tym stanie."
 
 msgid "web.admin.refused.role.accounts"
 msgstr "Uprawnienia przyznaje i cofa rola administratora."
+
+msgid "web.admin.menu.keys"
+msgstr "Klucze produktów"
+
+msgid "web.admin.keys"
+msgstr "Klucze produktów"
+
+msgid "web.admin.keys.subtitle"
+msgstr "Klucze wpisywane w grze"
+
+msgid "web.admin.keys.states"
+msgstr "Stan klucza"
+
+msgid "web.admin.keys.tab.all"
+msgstr "Wszystkie"
+
+msgid "web.admin.keys.tab.enabled"
+msgstr "Włączone"
+
+msgid "web.admin.keys.tab.disabled"
+msgstr "Wyłączone"
+
+msgid "web.admin.keys.list.all"
+msgstr "Wszystkie klucze produktów"
+
+msgid "web.admin.keys.list.enabled"
+msgstr "Włączone klucze produktów"
+
+msgid "web.admin.keys.list.disabled"
+msgstr "Wyłączone klucze produktów"
+
+msgid "web.admin.keys.none.all"
+msgstr "Nie ma jeszcze żadnego klucza produktu."
+
+msgid "web.admin.keys.none.enabled"
+msgstr "Żaden klucz produktu nie jest włączony."
+
+msgid "web.admin.keys.none.disabled"
+msgstr "Żaden klucz produktu nie jest wyłączony."
+
+msgid "web.admin.keys.count"
+msgstr "Klucze: %(count)s"
+
+msgid "web.admin.keys.order"
+msgstr "Najpierw klucze startowe w kolejności z danych gry, potem klucze dodane tutaj"
+
+msgid "web.admin.keys.starting"
+msgstr "Klucze startowe"
+
+msgid "web.admin.keys.starting.here"
+msgstr "%(here)s z %(count)s tutaj"
+
+msgid "web.admin.keys.starting.text.one"
+msgstr "Dane gry %(game)s zawierają %(count)s klucz startowy. Ponowne dodanie kluczy startowych dodaje tylko brakujące; klucze, które już są, pozostają bez zmian."
+
+msgid "web.admin.keys.starting.text.few"
+msgstr "Dane gry %(game)s zawierają %(count)s klucze startowe. Ponowne dodanie kluczy startowych dodaje tylko brakujące; klucze, które już są, pozostają bez zmian."
+
+msgid "web.admin.keys.starting.text.many"
+msgstr "Dane gry %(game)s zawierają %(count)s kluczy startowych. Ponowne dodanie kluczy startowych dodaje tylko brakujące; klucze, które już są, pozostają bez zmian."
+
+msgid "web.admin.keys.starting.text.other"
+msgstr "Dane gry %(game)s zawierają %(count)s klucza startowego. Ponowne dodanie kluczy startowych dodaje tylko brakujące; klucze, które już są, pozostają bez zmian."
+
+msgid "web.admin.keys.starting.again"
+msgstr "Dodaj ponownie klucze startowe"
+
+msgid "web.admin.keys.managed"
+msgstr "Klucze produktów dodaje, zmienia, włącza i wyłącza rola administratora."
+
+msgid "web.admin.key.code"
+msgstr "Kod"
+
+msgid "web.admin.key.label"
+msgstr "Nazwa publiczna"
+
+msgid "web.admin.key.label.none"
+msgstr "Bez nazwy"
+
+msgid "web.admin.key.grants"
+msgstr "Przyznaje"
+
+msgid "web.admin.key.source"
+msgstr "Źródło"
+
+msgid "web.admin.key.source.game"
+msgstr "Dane gry"
+
+msgid "web.admin.key.source.here"
+msgstr "Dodany tutaj"
+
+msgid "web.admin.key.source.starting"
+msgstr "Klucz startowy"
+
+msgid "web.admin.key.state.enabled"
+msgstr "Włączony"
+
+msgid "web.admin.key.state.disabled"
+msgstr "Wyłączony"
+
+msgid "web.admin.key.line.disabled"
+msgstr "Wyłączony %(time)s · %(name)s"
+
+msgid "web.admin.key.line.starting"
+msgstr "klucz startowy z danych gry"
+
+msgid "web.admin.key.line.here"
+msgstr "dodany tutaj %(time)s"
+
+msgid "web.admin.key.game"
+msgstr "Gra"
+
+msgid "web.admin.key.uses"
+msgstr "Użycia"
+
+msgid "web.admin.key.uses.any"
+msgstr "Konta: %(uses)s, bez limitu"
+
+msgid "web.admin.key.uses.most"
+msgstr "Konta: %(uses)s z %(most)s"
+
+msgid "web.admin.key.uses.once"
+msgstr "raz na konto"
+
+msgid "web.admin.key.uses.again"
+msgstr "konto może wpisać go ponownie"
+
+msgid "web.admin.key.grants_of"
+msgstr "Co przyznaje %(code)s"
+
+msgid "web.admin.key.grants.none"
+msgstr "Na razie niczego nie przyznaje."
+
+msgid "web.admin.key.note.enabled"
+msgstr "Wpisywany w grze, gdy prosi ona o klucz; każdy znacznik trafia na konto raz."
+
+msgid "web.admin.key.note.disabled"
+msgstr "Gdy klucz jest wyłączony, gra go odrzuca, a strona publiczna nic o nim nie pokazuje. Konta zachowują to, co przyznał."
+
+msgid "web.admin.key.how.enabled"
+msgstr "Wyłączenie wymaga potwierdzenia. Klucze nie są usuwane; wyłączenie wycofuje klucz."
+
+msgid "web.admin.key.how.disabled"
+msgstr "Włączenie działa od razu."
+
+msgid "web.admin.key.disable"
+msgstr "Wyłącz"
+
+msgid "web.admin.key.disable.busy"
+msgstr "Wyłączanie…"
+
+msgid "web.admin.key.enable"
+msgstr "Włącz"
+
+msgid "web.admin.key.enable.of"
+msgstr "Włącz %(code)s"
+
+msgid "web.admin.key.enable.busy"
+msgstr "Włączanie…"
+
+msgid "web.admin.key.add"
+msgstr "Dodaj klucz"
+
+msgid "web.admin.key.code.hint"
+msgstr "Kod wpisywany w grze"
+
+msgid "web.admin.key.code.note"
+msgstr "Kody są porównywane bez względu na wielkość liter i po utworzeniu się nie zmieniają. Nowy klucz jest od razu włączony."
+
+msgid "web.admin.key.code.code"
+msgstr "Kod ma do %(count)s liter, cyfr i znaków - _ . : i zaczyna się literą lub cyfrą."
+
+msgid "web.admin.key.code.taken"
+msgstr "Klucz o tym kodzie już istnieje; wielkość liter nie ma znaczenia."
+
+msgid "web.admin.key.add.button"
+msgstr "Dodaj klucz"
+
+msgid "web.admin.key.add.busy"
+msgstr "Dodawanie…"
+
+msgid "web.admin.confirm.key"
+msgstr "Wyłączyć ten klucz?"
+
+msgid "web.admin.confirm.key.text"
+msgstr "Gra od teraz odrzuca ten klucz, a jego nazwa znika ze strony publicznej. Konta, które go wpisały, zachowują to, co przyznał. Klucz można tutaj włączyć ponownie."
+
+msgid "web.admin.toast.key_added"
+msgstr "Dodano %(code)s."
+
+msgid "web.admin.toast.keys_imported"
+msgstr "Dodano brakujące klucze startowe: %(count)s."
+
+msgid "web.admin.toast.keys_imported_none"
+msgstr "Wszystkie klucze startowe już tu są."
+
+msgid "web.admin.toast.key_enabled"
+msgstr "Włączono %(code)s."
+
+msgid "web.admin.toast.key_disabled"
+msgstr "Wyłączono %(code)s."
+
+msgid "web.admin.toast.key_unchanged"
+msgstr "Bez zmian: %(code)s był już w tym stanie."
+
+msgid "web.admin.refused.role.keys"
+msgstr "Kluczami produktów zarządza rola administratora."

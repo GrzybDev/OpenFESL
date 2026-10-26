@@ -250,4 +250,7 @@
   <symbol id="key" viewBox="0 0 20 20">
     <path d="M7.2 6.2a3.8 3.8 0 1 0 0 7.6a3.8 3.8 0 1 0 0-7.6zM11 10h7M15.2 10v3.2M17.8 10v2.4" fill="none" stroke-width="2.2"/>
   </symbol>
+  <symbol id="plus" viewBox="0 0 20 20">
+    <path d="M10 4v12M4 10h12" fill="none" stroke-width="2.6"/>
+  </symbol>
 </svg>

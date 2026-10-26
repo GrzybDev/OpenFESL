@@ -1,0 +1,38 @@
+{#def view, back: str #}
+{# Disabling a product key asks first, as a page of its own: which key it is, what it grants and
+   where it comes from, and what disabling does. Where scripts run, its panel opens as a dialog
+   over the keys page (M10). #}
+{% set key = view.key %}
+{% set title = _("web.admin.keys") %}
+<AdminPage :title="title" current="keys">
+  <PageHead labelledby="disable-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="disable-title">{{ _("web.admin.keys.subtitle") }}</TitleBlock>
+    </div>
+  </PageHead>
+  <Panel class="enter-panel confirm-frame">
+    <Confirmation :question="_('web.admin.confirm.key')"
+                  :action="url('/admin/keys/' ~ key.code|urlencode ~ '/disable')"
+                  :label="_('web.admin.key.disable')"
+                  :busy="_('web.admin.key.disable.busy')"
+                  :back="back"
+                  glyph="x">
+      <p class="confirm-account">
+        <span>{{ _("games." ~ view.game.id ~ ".key." ~ key.code) if view.game else key.code }}</span>
+        {% if view.game %}<GameChip :of="view.game" />{% endif %}
+      </p>
+      <dl class="facts">
+        <Fact :label="_('web.admin.key.code')">
+          <code class="entitlement-code">{{ key.code }}</code>
+        </Fact>
+        <Fact :label="_('web.admin.key.grants')">
+          <code class="entitlement-code">{{ key.grants|map(attribute="tag")|join(", ") or "–" }}</code>
+        </Fact>
+        <Fact :label="_('web.admin.key.source')">
+          {{ _("web.admin.key.source.game") ~ " · " ~ _("web.admin.key.source.starting") if view.game else _("web.admin.key.source.here") }}
+        </Fact>
+      </dl>
+      <p id="confirm-text" class="body-text">{{ _("web.admin.confirm.key.text") }}</p>
+    </Confirmation>
+  </Panel>
+</AdminPage>

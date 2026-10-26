@@ -43,6 +43,11 @@ class AdminAction(StrEnum):
     ENTITLEMENT_STATE = "entitlement_state"
     """Revoked an entitlement of the account numbered as the target, or granted it again; the
     details hold its tag and new status."""
+    KEY_ADD = "key_add"
+    """Added the product key named as the target; the details say whether it is a starting key
+    of the game data."""
+    KEY_STATE = "key_state"
+    """Enabled or disabled the product key named as the target; the details say which."""
     KEY_LIMITS = "key_limits"
     """Changed how often the product key named as the target may be redeemed; the details hold
     its most uses, none for any number, and whether an account may redeem it only once."""

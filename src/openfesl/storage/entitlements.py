@@ -9,6 +9,7 @@ from openfesl.core.admins import Admin
 from openfesl.core.entitlements import (
     Entitlement,
     EntitlementQuery,
+    KeyHistory,
     KeyLimits,
     KeyRefusal,
     StatusChange,
@@ -262,7 +263,83 @@ class SqlEntitlementStore:
                 grants[row.key_id].append(
                     Grant(tag=row.tag, group=row.group_name, product=row.product_id)
                 )
-            return [StoredKey(key.code, key.enabled, tuple(grants[key.id])) for key in keys]
+            counted = await session.execute(
+                select(ProductKeyUseRow.key_id, func.count()).group_by(ProductKeyUseRow.key_id)
+            )
+            uses = {key_id: count for key_id, count in counted}
+            return [
+                StoredKey(
+                    key.code,
+                    key.enabled,
+                    tuple(grants[key.id]),
+                    key.created_at,
+                    KeyLimits(key.code, key.max_uses, key.once_per_account, uses.get(key.id, 0)),
+                )
+                for key in keys
+            ]
+
+    async def add_key(self, code: str, admin: Admin) -> bool:
+        """Add an enabled product key that grants nothing yet, and record it.
+
+        Args:
+            code: The code entered in the game.
+            admin: The admin who added it.
+
+        Returns:
+            Whether it was added, which it is not when a key has the code in any case.
+        """
+        async with self._sessions.begin() as session:
+            added = await session.scalar(
+                insert(ProductKeyRow)
+                .values(code=code)
+                .on_conflict_do_nothing()
+                .returning(ProductKeyRow.id)
+            )
+            if added is not None:
+                session.add(action_row(AdminAction.KEY_ADD, code, {"starting": False}, admin))
+            return added is not None
+
+    async def enable(self, code: str, enabled: bool, admin: Admin) -> bool:
+        """Enable or disable a product key and record it.
+
+        Args:
+            code: The key as stored.
+            enabled: Whether the game accepts it from now on.
+            admin: The admin who changed it.
+
+        Returns:
+            Whether it changed, which it does not when it was so already.
+        """
+        async with self._sessions.begin() as session:
+            changed = await session.scalar(
+                update(ProductKeyRow)
+                .where(ProductKeyRow.code == code, ProductKeyRow.enabled != enabled)
+                .values(enabled=enabled)
+                .returning(ProductKeyRow.id)
+            )
+            if changed is not None:
+                details = {"enabled": enabled}
+                session.add(action_row(AdminAction.KEY_STATE, code, details, admin))
+            return changed is not None
+
+    async def key_history(self) -> dict[str, KeyHistory]:
+        """Return when each product key was added and last enabled or disabled by the admin."""
+        actions = [AdminAction.KEY_ADD, AdminAction.KEY_STATE]
+        async with self._sessions() as session:
+            rows = await session.scalars(
+                select(AdminActionRow)
+                .where(AdminActionRow.action.in_(actions))
+                .order_by(AdminActionRow.id)
+            )
+            found: dict[str, KeyHistory] = {}
+            for row in rows:
+                change = StatusChange(row.at, row.admin_name)
+                known = found.get(row.target, KeyHistory())
+                if row.action == AdminAction.KEY_ADD:
+                    found[row.target] = KeyHistory(change, known.changed)
+                else:
+                    found[row.target] = KeyHistory(known.added, change)
+            return found
 
     async def of_account(self, account_id: int, query: EntitlementQuery) -> list[Entitlement]:
         """Return an account's entitlements, filtered by whichever filters are not empty.
@@ -345,11 +422,13 @@ class SqlEntitlementStore:
         async with self._sessions() as session:
             return bool(await session.scalar(select(exists().select_from(ProductKeyRow))))
 
-    async def import_keys(self, keys: Sequence[ProductKey]) -> int:
+    async def import_keys(self, keys: Sequence[ProductKey], admin: Admin | None = None) -> int:
         """Add the keys whose codes do not exist yet, leaving existing keys untouched.
 
         Args:
             keys: Keys from the games' data files.
+            admin: The admin who added them, whose additions are recorded; none for the server
+                and the command line.
 
         Returns:
             How many keys were added.
@@ -366,6 +445,9 @@ class SqlEntitlementStore:
                 if key_id is None:
                     continue
                 added += 1
+                if admin is not None:
+                    details = {"starting": True}
+                    session.add(action_row(AdminAction.KEY_ADD, key.code, details, admin))
                 session.add_all(
                     ProductKeyGrantRow(
                         key_id=key_id,

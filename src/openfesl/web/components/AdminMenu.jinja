@@ -1,7 +1,7 @@
 {#def current: str = "" #}
 {# The admin panel's menu bar, as a game's: the current item sits on the menu's block (M2), and an
    item with something waiting shows how much. Before signing in it holds the sign-in alone. #}
-{% set items = [("home", "/admin/"), ("servers", "/admin/servers"), ("providers", "/admin/providers"), ("accounts", "/admin/accounts")] if viewer else [("sign_in", "/admin/sign-in")] %}
+{% set items = [("home", "/admin/"), ("servers", "/admin/servers"), ("providers", "/admin/providers"), ("accounts", "/admin/accounts"), ("keys", "/admin/keys")] if viewer else [("sign_in", "/admin/sign-in")] %}
 <nav aria-label="{{ _('web.admin.menu') }}" class="game-menu admin-menu">
   <ul>
     {% for item, path in items %}

@@ -3329,3 +3329,204 @@ msgstr "Nothing changed: %(tag)s was in that state already."
 
 msgid "web.admin.refused.role.accounts"
 msgstr "Entitlements are granted and revoked by the admin role."
+
+msgid "web.admin.menu.keys"
+msgstr "Product keys"
+
+msgid "web.admin.keys"
+msgstr "Product keys"
+
+msgid "web.admin.keys.subtitle"
+msgstr "Keys entered in the game"
+
+msgid "web.admin.keys.states"
+msgstr "Key state"
+
+msgid "web.admin.keys.tab.all"
+msgstr "All"
+
+msgid "web.admin.keys.tab.enabled"
+msgstr "Enabled"
+
+msgid "web.admin.keys.tab.disabled"
+msgstr "Disabled"
+
+msgid "web.admin.keys.list.all"
+msgstr "All product keys"
+
+msgid "web.admin.keys.list.enabled"
+msgstr "Enabled product keys"
+
+msgid "web.admin.keys.list.disabled"
+msgstr "Disabled product keys"
+
+msgid "web.admin.keys.none.all"
+msgstr "No product key exists yet."
+
+msgid "web.admin.keys.none.enabled"
+msgstr "No product key is enabled."
+
+msgid "web.admin.keys.none.disabled"
+msgstr "No product key is disabled."
+
+msgid "web.admin.keys.count"
+msgstr "Keys: %(count)s"
+
+msgid "web.admin.keys.order"
+msgstr "Starting keys first, in the game data's order, then keys added here"
+
+msgid "web.admin.keys.starting"
+msgstr "Starting keys"
+
+msgid "web.admin.keys.starting.here"
+msgstr "%(here)s of %(count)s here"
+
+msgid "web.admin.keys.starting.text.one"
+msgstr "The game data of %(game)s lists %(count)s starting key. Adding the starting keys again adds only the missing ones; keys that are here stay as they are."
+
+msgid "web.admin.keys.starting.text.other"
+msgstr "The game data of %(game)s lists %(count)s starting keys. Adding the starting keys again adds only the missing ones; keys that are here stay as they are."
+
+msgid "web.admin.keys.starting.again"
+msgstr "Add starting keys again"
+
+msgid "web.admin.keys.managed"
+msgstr "Product keys are added, edited, enabled and disabled with the admin role."
+
+msgid "web.admin.key.code"
+msgstr "Code"
+
+msgid "web.admin.key.label"
+msgstr "Public label"
+
+msgid "web.admin.key.label.none"
+msgstr "No label"
+
+msgid "web.admin.key.grants"
+msgstr "Grants"
+
+msgid "web.admin.key.source"
+msgstr "Source"
+
+msgid "web.admin.key.source.game"
+msgstr "Game data"
+
+msgid "web.admin.key.source.here"
+msgstr "Added here"
+
+msgid "web.admin.key.source.starting"
+msgstr "Starting key"
+
+msgid "web.admin.key.state.enabled"
+msgstr "Enabled"
+
+msgid "web.admin.key.state.disabled"
+msgstr "Disabled"
+
+msgid "web.admin.key.line.disabled"
+msgstr "Disabled %(time)s · %(name)s"
+
+msgid "web.admin.key.line.starting"
+msgstr "a starting key from the game data"
+
+msgid "web.admin.key.line.here"
+msgstr "added here %(time)s"
+
+msgid "web.admin.key.game"
+msgstr "Game"
+
+msgid "web.admin.key.uses"
+msgstr "Uses"
+
+msgid "web.admin.key.uses.any"
+msgstr "%(uses)s accounts so far, no limit"
+
+msgid "web.admin.key.uses.most"
+msgstr "%(uses)s of %(most)s accounts"
+
+msgid "web.admin.key.uses.once"
+msgstr "once per account"
+
+msgid "web.admin.key.uses.again"
+msgstr "an account may enter it again"
+
+msgid "web.admin.key.grants_of"
+msgstr "Grants of %(code)s"
+
+msgid "web.admin.key.grants.none"
+msgstr "It grants nothing yet."
+
+msgid "web.admin.key.note.enabled"
+msgstr "Entered in the game when it asks for a key; each tag is granted to an account once."
+
+msgid "web.admin.key.note.disabled"
+msgstr "While disabled, the game refuses this key and nothing of it is shown on the public page. Accounts keep what it granted."
+
+msgid "web.admin.key.how.enabled"
+msgstr "Disable asks for confirmation. Keys are never deleted; disabling retires one."
+
+msgid "web.admin.key.how.disabled"
+msgstr "Enable acts at once."
+
+msgid "web.admin.key.disable"
+msgstr "Disable"
+
+msgid "web.admin.key.disable.busy"
+msgstr "Disabling…"
+
+msgid "web.admin.key.enable"
+msgstr "Enable"
+
+msgid "web.admin.key.enable.of"
+msgstr "Enable %(code)s"
+
+msgid "web.admin.key.enable.busy"
+msgstr "Enabling…"
+
+msgid "web.admin.key.add"
+msgstr "Add a key"
+
+msgid "web.admin.key.code.hint"
+msgstr "The code entered in the game"
+
+msgid "web.admin.key.code.note"
+msgstr "Codes are compared regardless of case and stay fixed after creation. A new key starts enabled."
+
+msgid "web.admin.key.code.code"
+msgstr "A code has up to %(count)s letters, digits and the characters - _ . : and starts with a letter or digit."
+
+msgid "web.admin.key.code.taken"
+msgstr "A key with this code exists already; codes are compared regardless of case."
+
+msgid "web.admin.key.add.button"
+msgstr "Add key"
+
+msgid "web.admin.key.add.busy"
+msgstr "Adding…"
+
+msgid "web.admin.confirm.key"
+msgstr "Disable this key?"
+
+msgid "web.admin.confirm.key.text"
+msgstr "The game refuses this key from now on, and its label leaves the public page. Accounts that entered it keep what it granted. The key can be enabled again here."
+
+msgid "web.admin.toast.key_added"
+msgstr "Added %(code)s."
+
+msgid "web.admin.toast.keys_imported"
+msgstr "Added the missing starting keys: %(count)s."
+
+msgid "web.admin.toast.keys_imported_none"
+msgstr "Every starting key is here already."
+
+msgid "web.admin.toast.key_enabled"
+msgstr "Enabled %(code)s."
+
+msgid "web.admin.toast.key_disabled"
+msgstr "Disabled %(code)s."
+
+msgid "web.admin.toast.key_unchanged"
+msgstr "Nothing changed: %(code)s was in that state already."
+
+msgid "web.admin.refused.role.keys"
+msgstr "Product keys are managed by the admin role."

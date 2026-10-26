@@ -1,0 +1,230 @@
+{#def listing, keys: list, counts, starting: list, manages: bool, longest: int, form #}
+{# The product keys entered in the game: the keys of a tab, whose rows open their grants and
+   their limits in place with enable and disable, beside adding a key and adding the games'
+   starting keys again. Changing keys needs the admin role. #}
+{% set title = _("web.admin.keys") %}
+{% set list = url("/admin/keys") %}
+{% set tab = listing.tab %}
+{% macro code(text) %}<code class="entitlement-code">{{ text }}</code>{% endmacro %}
+{% macro label_of(view) %}
+  {%- if view.game %}{{ _("games." ~ view.game.id ~ ".key." ~ view.key.code) }}{% endif -%}
+{% endmacro %}
+{% macro uses(limits) %}
+  {%- if limits.max_uses is none %}{{ _("web.admin.key.uses.any", uses=number(limits.uses)) }}{% else %}{{ _("web.admin.key.uses.most", uses=number(limits.uses), most=number(limits.max_uses)) }}{% endif %} · {{ _("web.admin.key.uses.once") if limits.once_per_account else _("web.admin.key.uses.again") }}
+{%- endmacro %}
+<AdminPage :title="title" current="keys">
+  <PageHead labelledby="keys-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="keys-title">{{ _("web.admin.keys.subtitle") }}</TitleBlock>
+    </div>
+    <nav aria-label="{{ _('web.admin.keys.states') }}" class="tabs">
+      {% for name in ["all", "enabled", "disabled"] %}
+        <Tab :href="list ~ listing.link(tab=name)" :label="_('web.admin.keys.tab.' ~ name)" :count="counts[name]" :current="tab == name" />
+      {% endfor %}
+    </nav>
+  </PageHead>
+
+  <Panel class="enter-panel">
+    <div class="list-layout admin-layout">
+      <section aria-labelledby="keys-list" class="list-main admin-list">
+        <h2 id="keys-list" class="sr-only">{{ _("web.admin.keys.list." ~ tab) }}</h2>
+        <div class="table-scroll table-scroll-flush">
+          <div role="table" aria-labelledby="keys-list" class="table">
+            <div role="rowgroup" class="admin-list-head">
+              <div role="row" class="key-columns">
+                <div role="columnheader"
+                     class="column-head"><span class="sr-only">{{ _("web.admin.state") }}</span></div>
+                <div role="columnheader" class="column-head column-name">{{ _("web.admin.key.code") }}</div>
+                <div role="columnheader" class="column-head">{{ _("web.admin.key.label") }}</div>
+                <div role="columnheader" class="column-head">{{ _("web.admin.key.grants") }}</div>
+                <div role="columnheader" class="column-head">{{ _("web.admin.key.source") }}</div>
+                <div role="columnheader" class="column-head">{{ _("web.admin.state") }}</div>
+              </div>
+            </div>
+            <div role="rowgroup" data-rows class="enter-rows table-rows">
+              {% for view in keys %}
+                {% set key = view.key %}
+                {% set open = listing.open == key.code %}
+                {% set base = list ~ "/" ~ key.code|urlencode %}
+                {% set changed = view.history.changed %}
+                {% set added = view.history.added %}
+                <div role="none"
+                     id="key-{{ key.code }}"
+                     data-key="{{ key.code }}"
+                     {% if open %} data-open{% endif %}
+                     class="server">
+                  <div role="row" class="server-row key-columns">
+                    <div role="cell" class="admin-cell row-cell admin-badges">
+                      <span class="sr-only">{{ _("web.admin.key.state." ~ view.tab) }}</span>
+                      <span aria-hidden="true"
+                            class="badge"><Icon :name="'tick' if key.enabled else 'x'" stroke="#0A0A0A" /></span>
+                    </div>
+                    <div role="cell" class="admin-cell row-cell admin-name-cell">
+                      <span class="admin-server-name">{{ code(key.code) }}
+                        {%- if view.game %}<GameChip :of="view.game" />{% endif %}
+                      </span>
+                      <a href="{{ list ~ listing.link(open=None if open else key.code) }}#key-{{ key.code }}"
+                         role="button"
+                         aria-expanded="{{ 'true' if open else 'false' }}"
+                         aria-controls="details-{{ key.code }}"
+                         aria-label="{{ _('web.servers.details', name=key.code) }}"
+                         data-details
+                         class="details-button"><span><Icon name="down" stroke="#F4F4EE" class="details-chevron" /></span></a>
+                    </div>
+                    <div role="cell" class="admin-cell row-cell cell-stack key-label">
+                      <span aria-hidden="true" class="cell-label">{{ _("web.admin.key.label") }}</span>
+                      {% if view.game %}
+                        <span class="key-label-main">{{ label_of(view) }}</span>
+                      {% else %}
+                        <span class="cell-ago">{{ _("web.admin.key.label.none") }}</span>
+                      {% endif %}
+                    </div>
+                    <div role="cell" class="admin-cell row-cell cell-count">
+                      <span aria-hidden="true"
+                            class="cell-label">{{ _("web.admin.key.grants") }}</span>{{ _n("web.admin.grant.tags", key.grants|length) }}
+                    </div>
+                    <div role="cell" class="admin-cell row-cell cell-stack">
+                      <span aria-hidden="true" class="cell-label">{{ _("web.admin.key.source") }}</span>
+                      <span class="cell-hosted">{{ _("web.admin.key.source.game") if view.game else _("web.admin.key.source.here") }}</span>
+                      <span class="cell-ago">
+                        {%- if view.game %}{{ _("web.admin.key.source.starting") }}{% else %}{{ when(key.created, "yMMMd") }}{% if added %} · {{ added.by or _("web.admin.command_line") }}{% endif %}{% endif -%}
+                      </span>
+                    </div>
+                    <div role="cell" class="admin-cell row-cell cell-stack">
+                      <span aria-hidden="true" class="cell-label">{{ _("web.admin.state") }}</span>
+                      <span class="account-now">{{ _("web.admin.key.state." ~ view.tab) }}</span>
+                      {% if changed and not key.enabled %}
+                        <span class="cell-ago">{{ _("web.server.time", time=moment(changed.at)) }}</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                  <div role="row" class="drawer">
+                    <div role="cell"
+                         aria-colspan="6"
+                         id="details-{{ key.code }}"
+                         class="drawer-cell">
+                      <div class="row-details admin-details">
+                        <div>
+                          <p class="row-facts">
+                            {% if not key.enabled and changed %}
+                              {{ _("web.admin.key.line.disabled", time=_("web.server.time", time=moment(changed.at)), name=changed.by or _("web.admin.command_line")) }}
+                            {% else %}
+                              {{ _("web.admin.key.state." ~ view.tab) }}
+                            {% endif %}
+                            · {{ _("web.admin.key.line.starting") if view.game else _("web.admin.key.line.here", time=_("web.server.time", time=moment(key.created))) }}
+                          </p>
+                          <dl class="facts admin-facts">
+                            {% if view.game %}
+                              <Fact :label="_('web.admin.key.game')">
+                                <GameChip :of="view.game" full />
+                              </Fact>
+                            {% endif %}
+                            <Fact :label="_('web.admin.key.uses')">
+                              {{ uses(key.limits) }}
+                            </Fact>
+                          </dl>
+                          {% if key.grants %}
+                            <div role="table"
+                                 aria-label="{{ _('web.admin.key.grants_of', code=key.code) }}"
+                                 class="key-grants">
+                              <div role="row" class="key-grant-columns key-grant-head">
+                                <span role="columnheader">{{ _("web.admin.entitlement.tag") }}</span>
+                                <span role="columnheader">{{ _("web.admin.entitlement.group") }}</span>
+                                <span role="columnheader">{{ _("web.admin.entitlement.product") }}</span>
+                              </div>
+                              {% for grant in key.grants %}
+                                <div role="row" class="key-grant-columns key-grant">
+                                  <span role="cell">{{ grant.tag }}</span>
+                                  <span role="cell">{{ grant.group or "–" }}</span>
+                                  <span role="cell">{{ grant.product or "–" }}</span>
+                                </div>
+                              {% endfor %}
+                            </div>
+                          {% else %}
+                            <p class="row-text">{{ _("web.admin.key.grants.none") }}</p>
+                          {% endif %}
+                          <p class="row-text">{{ _("web.admin.key.note." ~ view.tab) }}</p>
+                        </div>
+                        {% if manages %}
+                          <div class="admin-decide">
+                            {% if key.enabled %}
+                              <FormButton icon="x" :href="base ~ '/disable?back=' ~ here|urlencode" dialog>{{ _("web.admin.key.disable") }}</FormButton>
+                            {% else %}
+                              <form method="post" action="{{ base }}/enable">
+                                <CsrfField />
+                                <input type="hidden" name="back" value="{{ here }}">
+                                <ActionButton :label="_('web.admin.key.enable')" :name="_('web.admin.key.enable.of', code=key.code)" :busy="_('web.admin.key.enable.busy')" />
+                              </form>
+                            {% endif %}
+                            <p class="row-text">{{ _("web.admin.key.how." ~ view.tab) }}</p>
+                          </div>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div role="row">
+                  <div role="cell" aria-colspan="6" class="row-details list-empty">
+                    <div>
+                      <p class="list-empty-title">{{ _("web.admin.keys.none." ~ tab) }}</p>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <div class="list-foot">
+          <p>
+            <span class="list-count">{{ _("web.admin.keys.count", count=number(keys|length)) }}</span><span class="list-range">{{ _("web.admin.keys.order") }}</span>
+          </p>
+        </div>
+      </section>
+
+      <div class="list-side admin-side">
+        {% if manages %}
+          <form method="post"
+                action="{{ list }}"
+                aria-labelledby="add-key-title"
+                class="provider-add">
+            <Bar id="add-key-title" large>{{ _("web.admin.key.add") }}</Bar>
+            <CsrfField />
+            <label for="add-code" class="field-label field-label-joined">{{ _("web.admin.key.code") }}</label>
+            <input id="add-code"
+                   name="code"
+                   type="text"
+                   value="{{ form.get('code', '') }}"
+                   required
+                   maxlength="{{ longest }}"
+                   placeholder="{{ _('web.admin.key.code.hint') }}"
+                   autocomplete="off"
+                   aria-describedby="add-code-note"
+                   {% if form.get('error') %} aria-invalid="true"{% endif %}
+                   class="field-input field-code{% if form.get('error') %} field-invalid{% endif %}">
+            {% if form.get("error") %}
+              <p id="add-code-note" class="field-note field-error">
+                <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.key.code." ~ form.get('error'), count=number(longest)) }}
+              </p>
+            {% else %}
+              <p id="add-code-note" class="field-note">{{ _("web.admin.key.code.note") }}</p>
+            {% endif %}
+            <ActionButton :label="_('web.admin.key.add.button')" :busy="_('web.admin.key.add.busy')" />
+          </form>
+          {% for game, here_already in starting %}
+            <section aria-labelledby="starting-{{ game.id }}">
+              <Bar id="starting-{{ game.id }}" :extra="_('web.admin.keys.starting.here', here=number(here_already), count=number(game.keys|length))">{{ _("web.admin.keys.starting") }}</Bar>
+              <p class="bar-text body-text">{{ _n("web.admin.keys.starting.text", game.keys|length, game=game.name) }}</p>
+              <form method="post" action="{{ list }}/starting-keys" class="find-button">
+                <CsrfField />
+                <FormButton icon="plus">{{ _("web.admin.keys.starting.again") }}</FormButton>
+              </form>
+            </section>
+          {% endfor %}
+        {% else %}
+          <p class="field-note">{{ _("web.admin.keys.managed") }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </Panel>
+</AdminPage>

@@ -86,11 +86,15 @@ class StoredKey:
         code: The code entered in the game.
         enabled: Whether the game accepts it.
         grants: What it grants.
+        created: When it was added.
+        limits: How often it may be redeemed, and how often it was.
     """
 
     code: str
     enabled: bool
     grants: tuple[Grant, ...]
+    created: datetime
+    limits: KeyLimits
 
 
 @dataclass(frozen=True, slots=True)
@@ -104,6 +108,19 @@ class StatusChange:
 
     at: datetime
     by: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class KeyHistory:
+    """When a product key was added and last enabled or disabled through the admin, and by whom.
+
+    Attributes:
+        added: The addition, when the admin made it.
+        changed: The latest change of whether it is enabled, if any.
+    """
+
+    added: StatusChange | None = None
+    changed: StatusChange | None = None
 
 
 @dataclass(frozen=True, slots=True)

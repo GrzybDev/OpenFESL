@@ -1,0 +1,106 @@
+/* The admin panel's product keys page: the keys of a tab, whose rows open their grants and limits
+   in place, beside adding a key and the games' starting keys. Where the table does not fit, each
+   key is a block of its own. */
+@layer pages {
+  .key-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns: 64px minmax(230px, 1fr) 220px 96px 140px 150px;
+    gap: 2px;
+  }
+
+  .server:nth-child(even) > .key-columns {
+    --cell: var(--row-alt);
+  }
+
+  .key-label {
+    font-family: var(--font-sans);
+  }
+
+  .key-label-main {
+    font-size: 15px;
+    line-height: 1.2;
+    font-weight: 600;
+  }
+
+  .key-grants {
+    display: grid;
+    gap: 2px;
+    margin-top: 2px;
+  }
+
+  .key-grant-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+    gap: 2px;
+
+    > span {
+      display: flex;
+      min-height: 40px;
+      align-items: center;
+      padding: 4px 12px;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .key-grant-head {
+    background: var(--ink);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--bright);
+    text-transform: uppercase;
+
+    > span {
+      min-height: 0;
+      padding-block: 9px;
+    }
+  }
+
+  .key-grant > span {
+    background: var(--row);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  @container (width < 940px) {
+    .key-columns .cell-count {
+      flex-wrap: wrap;
+      gap: 3px 8px;
+      padding-block: 6px;
+    }
+
+    .server-row.key-columns {
+      grid-template-columns: 64px repeat(2, minmax(0, 1fr));
+      grid-template-areas:
+        "badges code code"
+        "label label grants"
+        "source source state";
+
+      > :nth-child(1) {
+        grid-area: badges;
+      }
+
+      > :nth-child(2) {
+        grid-area: code;
+      }
+
+      > :nth-child(3) {
+        grid-area: label;
+      }
+
+      > :nth-child(4) {
+        grid-area: grants;
+      }
+
+      > :nth-child(5) {
+        grid-area: source;
+      }
+
+      > :nth-child(6) {
+        grid-area: state;
+      }
+    }
+  }
+}
