@@ -1,7 +1,10 @@
+import asyncio
 import struct
 from typing import TYPE_CHECKING, Any, cast
 from unittest.mock import Mock
+from urllib.parse import urlsplit
 
+import anyio
 import pytest
 from websockets.asyncio.client import ClientConnection, connect
 from websockets.exceptions import ConnectionClosed, InvalidStatus
@@ -179,3 +182,34 @@ async def test_stopping_the_server_ends_sessions_with_a_close_code_windows_accep
 
     assert closed.value.rcvd is not None
     assert closed.value.rcvd.code == 1001
+
+
+async def test_a_hook_under_wine_keeps_its_session_past_the_keepalive_timeout(
+    relay_server: tuple[str, RelayServer],
+) -> None:
+    # The client answers as Wine's WinHTTP does, with an empty pong to every ping whatever it
+    # carries. Short intervals stand in for the production ones.
+    url, server = relay_server
+    server.config.ws_ping_interval = 0.1
+    server.config.ws_ping_timeout = 0.3
+    reader, writer = await asyncio.open_connection("127.0.0.1", urlsplit(url).port)
+    writer.write(
+        b"GET / HTTP/1.1\r\nHost: 127.0.0.1\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"
+        b"Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\nSec-WebSocket-Version: 13\r\n"
+        b"Sec-WebSocket-Protocol: " + SUBPROTOCOL.encode() + b"\r\n\r\n"
+    )
+    assert (await reader.readuntil(b"\r\n\r\n")).startswith(b"HTTP/1.1 101")
+
+    pings = []
+    with anyio.move_on_after(1.5):
+        while True:
+            opcode, length = await reader.readexactly(2)
+            payload = await reader.readexactly(length & 0x7F)
+            assert opcode & 0x0F != 0x8, f"the server closed the session: {payload!r}"
+            if opcode & 0x0F == 0x9:
+                pings.append(payload)
+                writer.write(bytes([0x8A, 0x80]) + bytes(4))
+    writer.close()
+
+    assert len(pings) >= 3
+    assert set(pings) == {b""}

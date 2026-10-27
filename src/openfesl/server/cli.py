@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import uvicorn
+from uvicorn.protocols.websockets.websockets_sansio_impl import WebSocketsSansIOProtocol
 
 from openfesl.core.accounts import AccountState
 from openfesl.core.personas import PersonaState
@@ -173,12 +174,40 @@ class RelayServer(uvicorn.Server):
         await super().shutdown(sockets)
 
 
+class EmptyPingProtocol(WebSocketsSansIOProtocol):
+    """Uvicorn's WebSocket protocol, with keepalive pings that carry no payload.
+
+    Wine's WinHTTP answers a ping with an empty pong and leaves the ping's payload unread, which
+    breaks the next frame it reads, so a ping with a payload would end the relay session of every
+    hook that runs under Wine, such as dedicated servers in Linux containers.
+    """
+
+    def send_keepalive_ping(self) -> None:
+        """Send Uvicorn's keepalive ping (as of 0.54) with an empty payload.
+
+        Uvicorn sends four random bytes and matches the pong against the payload in flight, so
+        Wine's empty pong matches an empty one.
+        """
+        self.ping_timer = None
+        if self.close_sent or self.transport.is_closing():
+            return
+        self.pending_ping_payload = b""
+        self.ping_sent_at = self.loop.time()
+        self.conn.send_ping(b"")
+        self.transport.write(b"".join(self.conn.data_to_send()))
+        if self.ping_timeout is not None:
+            self.pong_timer = self.loop.call_later(self.ping_timeout, self.keepalive_timeout)
+        else:
+            self.schedule_ping()
+
+
 def uvicorn_config(host: str, port: int) -> uvicorn.Config:
     """Return Uvicorn's settings for the server.
 
-    One worker holds every session, since sessions reach each other in memory. Server pings
-    find dead peers, as the game sends nothing of its own on a quiet connection, and client IPs
-    come from the trusted proxy's header in the settings rather than Uvicorn's.
+    One worker holds every session, since sessions reach each other in memory. Server pings,
+    with no payload, find dead peers, as the game sends nothing of its own on a quiet
+    connection, and client IPs come from the trusted proxy's header in the settings rather than
+    Uvicorn's.
 
     Args:
         host: The address to listen on.
@@ -190,7 +219,7 @@ def uvicorn_config(host: str, port: int) -> uvicorn.Config:
         host=host,
         port=port,
         workers=1,
-        ws="websockets-sansio",
+        ws=EmptyPingProtocol,
         ws_max_size=WEBSOCKET_MAX_SIZE,
         ws_per_message_deflate=False,
         proxy_headers=False,
