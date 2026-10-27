@@ -312,6 +312,7 @@ async def _rows(
         elif action is AdminAction.GAME_ICON:
             game = games.by_id(target)
             shown = game.name if game else target
+            href = page(f"/admin/settings#presence-{target}")
             kind = f"game_icon.{'stored' if details.get('stored') else 'removed'}"
         elif action is AdminAction.SETTING:
             shown, href = _setting(say, page, games, target)

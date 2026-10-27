@@ -1,13 +1,13 @@
 {#def icon: str, href: str = "", dialog: bool = False #}
 {# A filter panel's black button with its glyph on a grey square: a link where it leads somewhere,
    otherwise the button that sends the form. A link to a confirmation opens it as a dialog where
-   scripts run. #}
+   scripts run. Other attributes go on the link or button, such as those of a details button. #}
 {% set glyph %}<span aria-hidden="true"
       class="form-glyph"><Icon :name="icon" :size="14" stroke="#F4F4EE" /></span>{% endset %}
 {% if href %}
   <a href="{{ href }}"
      {% if dialog %} data-dialog aria-haspopup="dialog"{% endif %}
-     class="form-button">{{ glyph }}{{ content }}</a>
+     {{ attrs.render(class="form-button") }}>{{ glyph }}{{ content }}</a>
 {% else %}
-  <button type="submit" class="form-button">{{ glyph }}{{ content }}</button>
+  <button type="submit" {{ attrs.render(class="form-button") }}>{{ glyph }}{{ content }}</button>
 {% endif %}

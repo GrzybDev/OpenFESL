@@ -3690,6 +3690,78 @@ msgstr "Changed here · the game data's default is %(value)s"
 msgid "web.admin.settings.managed"
 msgstr "Settings are changed with the admin role."
 
+msgid "web.admin.icon"
+msgstr "Discord presence"
+
+msgid "web.admin.icon.set"
+msgstr "Icon set"
+
+msgid "web.admin.icon.none"
+msgstr "No icon"
+
+msgid "web.admin.icon.of"
+msgstr "Icon of %(game)s"
+
+msgid "web.admin.icon.image"
+msgstr "Image"
+
+msgid "web.admin.icon.image.value"
+msgstr "PNG, %(width)s × %(height)s, %(size)s KB"
+
+msgid "web.admin.icon.address"
+msgstr "Address"
+
+msgid "web.admin.icon.stored"
+msgstr "Set"
+
+msgid "web.admin.icon.preview"
+msgstr "Preview in Discord"
+
+msgid "web.admin.icon.replace"
+msgstr "Replace"
+
+msgid "web.admin.icon.remove"
+msgstr "Remove"
+
+msgid "web.admin.icon.empty"
+msgstr "No icon: Discord shows the application's icon. A square image of at least 128 × 128 suits presence best."
+
+msgid "web.admin.icon.file.none"
+msgstr "No file chosen"
+
+msgid "web.admin.icon.choose"
+msgstr "Choose"
+
+msgid "web.admin.icon.file.text"
+msgstr "A PNG image, or an ICO file whose largest PNG image is taken. Only that PNG image is kept."
+
+msgid "web.admin.icon.store"
+msgstr "Store icon"
+
+msgid "web.admin.icon.storing"
+msgstr "Storing…"
+
+msgid "web.admin.icon.refused.bitmaps"
+msgstr "The ICO file holds bitmaps only. Save its largest image as PNG and store that."
+
+msgid "web.admin.icon.refused.format"
+msgstr "The file is neither a PNG image nor an ICO file."
+
+msgid "web.admin.icon.refused.size"
+msgstr "The image is larger than %(most)s MB, the most an icon may take."
+
+msgid "web.admin.icon.unreachable"
+msgstr "Discord fetches images only from a public HTTPS address. This service's address is %(address)s, so presence shows no images."
+
+msgid "web.admin.icon.unreachable.note"
+msgstr "The icon is still stored and shows once the server runs at its public address."
+
+msgid "web.admin.icon.note"
+msgstr "Discord shows the icon as the large image of every player's presence in this game, with OpenFESL's icon in its corner. A game without one shows the Discord application's icon."
+
+msgid "web.admin.icon.managed"
+msgstr "Changing the icon needs the admin role."
+
 msgid "web.admin.policy.section.registration"
 msgstr "Registration"
 
@@ -3806,6 +3878,15 @@ msgstr "Saved the rules of %(game)s."
 
 msgid "web.admin.toast.policies_unchanged"
 msgstr "Nothing changed in the rules of %(game)s."
+
+msgid "web.admin.toast.icon.stored"
+msgstr "Icon set for %(game)s."
+
+msgid "web.admin.toast.icon.removed"
+msgstr "Icon removed from %(game)s."
+
+msgid "web.admin.toast.icon.none"
+msgstr "Nothing changed: %(game)s has no icon."
 
 msgid "web.admin.refused.role.settings"
 msgstr "Settings are changed with the admin role."

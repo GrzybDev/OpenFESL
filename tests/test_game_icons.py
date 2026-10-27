@@ -5,6 +5,7 @@ import pytest
 from support import cli, fetch, png_image
 
 from openfesl.core.game_icons import icon_png
+from openfesl.web.game_icons import reaches_discord
 
 pytestmark = pytest.mark.anyio
 
@@ -52,3 +53,20 @@ async def test_an_icon_stored_from_an_ico_file_is_served_as_its_largest_png(
 def test_a_file_without_a_whole_png_image_is_refused(data: bytes) -> None:
     with pytest.raises(ValueError):
         icon_png(data)
+
+
+@pytest.mark.parametrize(
+    ("public_url", "reaches"),
+    [
+        ("https://fesl.example.com", True),
+        ("https://203.0.113.7", False),
+        ("http://fesl.example.com", False),
+        ("https://localhost:8000", False),
+        ("https://192.168.1.10", False),
+        (None, False),
+    ],
+)
+def test_discord_reaches_presence_images_only_at_a_public_https_address(
+    public_url: str | None, reaches: bool
+) -> None:
+    assert reaches_discord(public_url) is reaches

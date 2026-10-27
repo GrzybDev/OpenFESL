@@ -1,0 +1,236 @@
+@layer components {
+  .game-icon {
+    margin-block: 10px 14px;
+    scroll-margin-top: 16px;
+
+    .game-icon-warning {
+      margin-top: 2px;
+    }
+  }
+
+  .game-icon-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px 18px;
+    margin-top: 2px;
+    background: var(--row-light);
+    padding: 14px;
+    color: var(--ink);
+  }
+
+  .game-icon-image {
+    flex: none;
+    width: 96px;
+    height: 96px;
+    object-fit: contain;
+  }
+
+  .game-icon-facts {
+    display: grid;
+    min-width: 0;
+    flex: 1 1 300px;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 6px 14px;
+
+    > div {
+      display: contents;
+    }
+
+    dt {
+      padding-top: 2px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--dim);
+      text-transform: uppercase;
+    }
+
+    dd {
+      min-width: 0;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.35;
+      font-weight: 600;
+    }
+  }
+
+  /* Discord's own dark theme, which the preview imitates. */
+  .game-icon-card {
+    display: grid;
+    min-width: 0;
+    flex: 0 1 330px;
+    gap: 10px;
+    border-radius: 12px;
+    background: #232428;
+    padding: 14px;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    color: #dbdee1;
+  }
+
+  .game-icon-card-kicker {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #b5bac1;
+    text-transform: uppercase;
+  }
+
+  .game-icon-card-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .game-icon-card-art {
+    position: relative;
+    flex: none;
+
+    > img:first-child {
+      width: 72px;
+      height: 72px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+  }
+
+  .game-icon-card-badge {
+    position: absolute;
+    right: -6px;
+    bottom: -6px;
+    width: 26px;
+    height: 26px;
+    border: 3px solid #232428;
+    border-radius: 50%;
+    background: #232428;
+  }
+
+  .game-icon-card-text {
+    display: grid;
+    min-width: 0;
+    gap: 1px;
+  }
+
+  .game-icon-card-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #f2f3f5;
+  }
+
+  .game-icon-card-line {
+    overflow: hidden;
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .game-icon-buttons {
+    display: flex;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+
+  .game-icon-replace[aria-expanded="true"] {
+    background: var(--menu-current);
+  }
+
+  .game-icon-empty {
+    flex: none;
+    width: 96px;
+    height: 96px;
+    border: 2px dashed var(--placeholder);
+    padding: 26px;
+    opacity: 0.45;
+  }
+
+  .game-icon-text {
+    min-width: 0;
+    flex: 1 1 300px;
+    align-self: center;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+
+  /* Closed while the game has an icon, until Replace opens it as the panel's drawers open. */
+  .game-icon-drawer {
+    display: grid;
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    transition:
+      grid-template-rows 200ms var(--ease-menu),
+      visibility 0s linear 200ms;
+
+    [data-open] > & {
+      grid-template-rows: 1fr;
+      visibility: visible;
+      transition: grid-template-rows 200ms var(--ease-menu);
+    }
+  }
+
+  .game-icon-upload {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .game-icon-file {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 10px;
+    margin-top: 2px;
+    background: var(--row-light);
+    padding-left: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    text-transform: uppercase;
+    cursor: pointer;
+
+    &:focus-within {
+      outline: 3px solid var(--ink);
+      outline-offset: -3px;
+    }
+  }
+
+  .game-icon-file-name {
+    min-width: 0;
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    overflow-wrap: anywhere;
+  }
+
+  /* Without scripts the browser's own field names the file chosen. */
+  .game-icon-file-input {
+    min-width: 0;
+    flex: 1;
+    padding-block: 8px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    letter-spacing: 0;
+    text-transform: none;
+
+    .js & {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .game-icon-drawer,
+    [data-open] > .game-icon-drawer {
+      transition: none;
+    }
+  }
+}

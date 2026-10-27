@@ -73,6 +73,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// A file field hides the browser's own control behind its label, which names the file chosen.
+document.addEventListener("change", (event) => {
+  const input = event.target;
+  const name =
+    input instanceof HTMLInputElement && input.type === "file"
+      ? input.closest("label")?.querySelector("[data-file-name]")
+      : null;
+  if (name) {
+    name.textContent = input.files[0]?.name ?? name.dataset.none;
+  }
+});
+
 // A chart wider than the screen starts scrolled to its latest values.
 document.addEventListener("DOMContentLoaded", () => {
   for (const box of document.querySelectorAll("[data-scroll-end]")) {

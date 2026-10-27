@@ -1,23 +1,37 @@
+import math
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
+from datetime import datetime
 from enum import StrEnum
 from typing import Protocol
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
-from starlette.datastructures import FormData
+from starlette.datastructures import FormData, UploadFile
 from starlette.exceptions import HTTPException
 
 from openfesl.core.admins import Admin, Role
+from openfesl.core.game_icons import (
+    MAX_ICON_SIZE,
+    IconProblem,
+    IconRefused,
+    StoredIcon,
+    icon_png,
+    png_size,
+)
 from openfesl.core.games import Game, Games
 from openfesl.core.policies import GamePolicies, Policies, SettingStore, setting_key
 from openfesl.core.servers import HostingMode
 from openfesl.core.texts import localize
 from openfesl.web.admin.auth import AdminSessions, SignInProvider
 from openfesl.web.admin.servers import ServerViews
+from openfesl.web.game_icons import ICON_PATH, icon_version, reaches_discord
 
 SECTION = "settings"
+# An icon file holds a few small images, so only this much of an upload is read into memory and
+# a larger one is refused.
+MAX_UPLOAD = 16 * MAX_ICON_SIZE
 
 
 class HostingSetting(Protocol):
@@ -33,6 +47,71 @@ class HostingSetting(Protocol):
             mode: The new mode.
             admin: The admin who changed it.
         """
+
+
+class IconStore(Protocol):
+    """Where the settings page reads and changes the games' icons."""
+
+    async def stored(self) -> dict[str, StoredIcon]:
+        """Return each game's icon with when it was stored and by whom, by the game's id."""
+
+    async def store(self, game: str, png: bytes, admin: Admin | None) -> None:
+        """Store a game's icon in place of the one it had, and record the change.
+
+        Args:
+            game: The game's id.
+            png: The icon as a PNG image.
+            admin: The admin who stored it.
+        """
+
+    async def remove(self, game: str, admin: Admin | None) -> bool:
+        """Remove a game's icon and record the change.
+
+        Args:
+            game: The game's id.
+            admin: The admin who removed it.
+
+        Returns:
+            Whether the game had an icon.
+        """
+
+
+@dataclass(frozen=True, slots=True)
+class IconView:
+    """A game's icon as the settings page shows it.
+
+    Attributes:
+        width: Its width in pixels.
+        height: Its height in pixels.
+        kilobytes: Its size, in whole kilobytes rounded up.
+        address: Its public address, which presence names.
+        src: Its address on the page, which changes with the image so that a new one shows.
+        at: When it was stored, if known.
+        by: The display name of the admin who stored it; None for the command line.
+    """
+
+    width: int
+    height: int
+    kilobytes: int
+    address: str
+    src: str
+    at: datetime | None
+    by: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class IconRefusal:
+    """A file the settings page refused as a game's icon.
+
+    Attributes:
+        game: The game's id.
+        problem: Why.
+        name: The file's name as the browser sent it.
+    """
+
+    game: str
+    problem: IconProblem
+    name: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -91,12 +170,15 @@ def settings_routes(
     servers: ServerViews,
     apply: Callable[[], Awaitable[None]],
     provider: SignInProvider | None,
+    icons: IconStore,
+    public_url: str | None,
+    apply_actions: Callable[[], Awaitable[None]],
 ) -> APIRouter:
-    """Return the settings page: who can host, each game's policies and the sign-in provider.
+    """Return the settings page: who can host, the sign-in provider, each game's icon and rules.
 
     Moderators see the settings; changing them needs the admin role. A change of the hosting
     mode asks first and applies to the games hosted now too; policies apply from their next
-    use.
+    use, and an icon from presence's next update.
 
     Args:
         sessions: Signs admins in and renders the panel's pages.
@@ -107,15 +189,26 @@ def settings_routes(
         servers: Counts the servers waiting for a decision.
         apply: Lists, hides or ends the servers' games as the hosting mode now says.
         provider: The admin panel's sign-in provider, if the deployment sets one up.
+        icons: Where the games' icons are kept.
+        public_url: The address the server's web pages are reached at, from which Discord
+            fetches the icons; the request's own when None.
+        apply_actions: Hands the admin's recorded actions to the running server, such as a
+            changed icon to presence.
     """
     router = APIRouter()
 
     async def page(
-        request: Request, admin: Admin, status: int = 200, errors: dict[str, str] | None = None
+        request: Request,
+        admin: Admin,
+        status: int = 200,
+        errors: dict[str, str] | None = None,
+        refused: IconRefusal | None = None,
     ) -> HTMLResponse:
         mode = await hosting.hosting_mode()
         waiting = await servers.waiting(await servers.all())
         shown = [(game, policy_views(game, await policies.of(game))) for game in games]
+        base = (public_url or str(request.base_url)).rstrip("/")
+        stored = await icons.stored()
         return await sessions.render(
             request,
             "admin.Settings",
@@ -128,6 +221,12 @@ def settings_routes(
             provider=provider,
             manages=admin.role is Role.ADMIN,
             errors=errors or {},
+            icons={game: _icon_view(base, game, icon) for game, icon in stored.items()},
+            base=base,
+            reachable=reaches_discord(public_url),
+            replacing=request.query_params.get("icon", ""),
+            refused=refused,
+            largest=MAX_ICON_SIZE // (1024 * 1024),
         )
 
     @router.get("/admin/settings", response_class=HTMLResponse)
@@ -193,7 +292,64 @@ def settings_routes(
         target = localize("/admin/settings", request.state.language)
         return RedirectResponse(f"{target}#game-{game.id}", 303)
 
+    @router.post("/admin/settings/games/{game_id}/icon")
+    async def store_icon(request: Request, game_id: str) -> Response:
+        admin = sessions.admin(request, Role.ADMIN, SECTION)
+        async with request.form() as form:
+            sessions.check(request, form)
+            game = games.by_id(game_id)
+            if game is None:
+                raise HTTPException(404)
+            upload = form.get("icon")
+            name, data = "", b""
+            if isinstance(upload, UploadFile):
+                name, data = upload.filename or "", await upload.read(MAX_UPLOAD + 1)
+            try:
+                if len(data) > MAX_UPLOAD:
+                    raise IconRefused(IconProblem.SIZE)
+                png = icon_png(data)
+            except IconRefused as refusal:
+                refused = IconRefusal(game.id, refusal.problem, name)
+                return await page(request, admin, 400, refused=refused)
+        await icons.store(game.id, png, admin)
+        await apply_actions()
+        sessions.toast(request, "web.admin.toast.icon.stored", game=game.name)
+        return RedirectResponse(_presence(request, game.id), 303)
+
+    @router.post("/admin/settings/games/{game_id}/icon/remove")
+    async def remove_icon(request: Request, game_id: str) -> Response:
+        admin = sessions.admin(request, Role.ADMIN, SECTION)
+        sessions.check(request, await request.form())
+        game = games.by_id(game_id)
+        if game is None:
+            raise HTTPException(404)
+        if await icons.remove(game.id, admin):
+            await apply_actions()
+            sessions.toast(request, "web.admin.toast.icon.removed", game=game.name)
+        else:
+            sessions.toast(request, "web.admin.toast.icon.none", game=game.name)
+        return RedirectResponse(_presence(request, game.id), 303)
+
     return router
+
+
+def _presence(request: Request, game_id: str) -> str:
+    # The settings page at a game's presence section.
+    return f"{localize('/admin/settings', request.state.language)}#presence-{game_id}"
+
+
+def _icon_view(base: str, game_id: str, icon: StoredIcon) -> IconView:
+    width, height = png_size(icon.png)
+    path = ICON_PATH.format(game=game_id)
+    return IconView(
+        width,
+        height,
+        math.ceil(len(icon.png) / 1024),
+        base + path,
+        f"{path}?v={icon_version(icon.png)}",
+        icon.at,
+        icon.by,
+    )
 
 
 def _read(game: Game, form: FormData) -> tuple[dict[str, str], dict[str, str]]:

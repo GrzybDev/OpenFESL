@@ -3815,6 +3815,78 @@ msgstr "Zmieniona tutaj · domyślnie z danych gry: %(value)s"
 msgid "web.admin.settings.managed"
 msgstr "Ustawienia zmienia rola administratora."
 
+msgid "web.admin.icon"
+msgstr "Aktywność na Discordzie"
+
+msgid "web.admin.icon.set"
+msgstr "Ikona ustawiona"
+
+msgid "web.admin.icon.none"
+msgstr "Bez ikony"
+
+msgid "web.admin.icon.of"
+msgstr "Ikona gry %(game)s"
+
+msgid "web.admin.icon.image"
+msgstr "Obraz"
+
+msgid "web.admin.icon.image.value"
+msgstr "PNG, %(width)s × %(height)s, %(size)s KB"
+
+msgid "web.admin.icon.address"
+msgstr "Adres"
+
+msgid "web.admin.icon.stored"
+msgstr "Ustawiono"
+
+msgid "web.admin.icon.preview"
+msgstr "Podgląd na Discordzie"
+
+msgid "web.admin.icon.replace"
+msgstr "Zastąp"
+
+msgid "web.admin.icon.remove"
+msgstr "Usuń"
+
+msgid "web.admin.icon.empty"
+msgstr "Brak ikony: Discord pokazuje ikonę aplikacji. Najlepiej sprawdza się kwadratowy obraz o wymiarach co najmniej 128 × 128."
+
+msgid "web.admin.icon.file.none"
+msgstr "Nie wybrano pliku"
+
+msgid "web.admin.icon.choose"
+msgstr "Wybierz"
+
+msgid "web.admin.icon.file.text"
+msgstr "Obraz PNG albo plik ICO, z którego brany jest największy obraz PNG. Zapisywany jest tylko ten obraz PNG."
+
+msgid "web.admin.icon.store"
+msgstr "Zapisz ikonę"
+
+msgid "web.admin.icon.storing"
+msgstr "Zapisywanie…"
+
+msgid "web.admin.icon.refused.bitmaps"
+msgstr "Plik ICO zawiera wyłącznie mapy bitowe. Jego największy obraz można zapisać jako PNG i przesłać ten plik."
+
+msgid "web.admin.icon.refused.format"
+msgstr "Plik nie jest ani obrazem PNG, ani plikiem ICO."
+
+msgid "web.admin.icon.refused.size"
+msgstr "Obraz przekracza %(most)s MB, czyli największy dopuszczalny rozmiar ikony."
+
+msgid "web.admin.icon.unreachable"
+msgstr "Discord pobiera obrazy tylko z publicznego adresu HTTPS. Adres tego serwisu to %(address)s, więc aktywność jest wyświetlana bez obrazów."
+
+msgid "web.admin.icon.unreachable.note"
+msgstr "Ikona pozostaje zapisana i pojawi się, gdy serwer zacznie działać pod publicznym adresem."
+
+msgid "web.admin.icon.note"
+msgstr "Discord pokazuje ikonę jako duży obraz aktywności każdej osoby grającej w tę grę, z ikoną OpenFESL w rogu. Gra bez ikony pokazuje ikonę aplikacji na Discordzie."
+
+msgid "web.admin.icon.managed"
+msgstr "Ikonę zmienia rola administratora."
+
 msgid "web.admin.policy.section.registration"
 msgstr "Rejestracja"
 
@@ -3931,6 +4003,15 @@ msgstr "Zapisano zasady gry %(game)s."
 
 msgid "web.admin.toast.policies_unchanged"
 msgstr "Zasady gry %(game)s pozostały bez zmian."
+
+msgid "web.admin.toast.icon.stored"
+msgstr "Ustawiono ikonę gry %(game)s."
+
+msgid "web.admin.toast.icon.removed"
+msgstr "Usunięto ikonę gry %(game)s."
+
+msgid "web.admin.toast.icon.none"
+msgstr "Bez zmian: gra %(game)s nie ma ikony."
 
 msgid "web.admin.refused.role.settings"
 msgstr "Ustawienia zmienia rola administratora."

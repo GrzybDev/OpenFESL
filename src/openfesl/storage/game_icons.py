@@ -1,11 +1,12 @@
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin
+from openfesl.core.game_icons import StoredIcon
 from openfesl.storage.admin import action_row
-from openfesl.storage.models import GameIconRow
+from openfesl.storage.models import AdminActionRow, GameIconRow
 
 
 class SqlGameIconStore:
@@ -32,6 +33,25 @@ class SqlGameIconStore:
         """
         async with self._sessions() as session:
             return await session.scalar(select(GameIconRow.png).where(GameIconRow.game == game))
+
+    async def stored(self) -> dict[str, StoredIcon]:
+        """Return each game's icon with when it was stored and by whom, by the game's id."""
+        # The latest change of each game's icon is the one that stored the icon it has.
+        latest = (
+            select(AdminActionRow.target, func.max(AdminActionRow.id).label("id"))
+            .where(AdminActionRow.action == AdminAction.GAME_ICON)
+            .group_by(AdminActionRow.target)
+            .subquery()
+        )
+        async with self._sessions() as session:
+            rows = await session.execute(
+                select(
+                    GameIconRow.game, GameIconRow.png, AdminActionRow.at, AdminActionRow.admin_name
+                )
+                .outerjoin(latest, latest.c.target == GameIconRow.game)
+                .outerjoin(AdminActionRow, AdminActionRow.id == latest.c.id)
+            )
+            return {game: StoredIcon(png, at, by) for game, png, at, by in rows}
 
     async def store(self, game: str, png: bytes, admin: Admin | None) -> None:
         """Store a game's icon in place of the one it had, and record the change.

@@ -265,6 +265,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             server_views,
             hosting.apply_decisions,
             sign_in.provider,
+            icons,
+            settings.public_url,
+            feed.apply,
         )
     )
     app.include_router(

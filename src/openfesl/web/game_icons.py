@@ -1,5 +1,7 @@
 import hashlib
 from collections.abc import Awaitable, Callable
+from ipaddress import ip_address
+from urllib.parse import urlsplit
 
 from fastapi import APIRouter, Request
 from fastapi.responses import Response
@@ -43,12 +45,40 @@ def presence_art(public_url: str | None) -> PresenceArt:
     return PresenceArt(game=base + ICON_PATH, service=base + SERVICE_ICON)
 
 
+def icon_version(png: bytes) -> str:
+    """Return a digest of an icon that changes with the image, as its entity tag carries it.
+
+    Args:
+        png: The icon.
+    """
+    return hashlib.sha256(png).hexdigest()[:32]
+
+
+def reaches_discord(public_url: str | None) -> bool:
+    """Tell whether Discord can fetch presence's images: only from a public HTTPS address.
+
+    Args:
+        public_url: The address the server's web pages are reached at, if the deployment sets it.
+    """
+    if not public_url:
+        return False
+    parts = urlsplit(public_url)
+    host = parts.hostname or ""
+    if parts.scheme != "https" or host == "localhost" or host.endswith(".localhost"):
+        return False
+    try:
+        return ip_address(host).is_global
+    except ValueError:
+        # A host name, which only its DNS records place; taken as public.
+        return True
+
+
 def _icon(icons: GameIcons, game_id: str) -> Callable[[Request], Awaitable[Response]]:
     async def show_icon(request: Request) -> Response:
         png = await icons.icon(game_id)
         if png is None:
             raise HTTPException(404)
-        tag = f'"{hashlib.sha256(png).hexdigest()[:32]}"'
+        tag = f'"{icon_version(png)}"'
         headers = {"Cache-Control": ICON_CACHE, "ETag": tag}
         asked = request.headers.get("If-None-Match", "")
         if tag in {part.strip().removeprefix("W/") for part in asked.split(",")}:
