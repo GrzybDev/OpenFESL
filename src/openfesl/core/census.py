@@ -285,15 +285,7 @@ def _label(names: Names | None, attributes: Mapping[str, str]) -> Label | None:
     value = attributes.get(names.attribute.casefold()) if names else None
     if names is None or value is None:
         return None
-    folded = value.casefold()
-    matching = [
-        known
-        for known in names.names
-        if (folded.startswith(known.casefold()) if names.prefix else folded == known.casefold())
-    ]
-    if matching:
-        return Label(names.names[max(matching, key=len)], value)
-    return Label(names.otherwise, value)
+    return Label(names.name_of(value), value)
 
 
 def _marked(flag: Flag | None, attributes: Mapping[str, str]) -> bool:

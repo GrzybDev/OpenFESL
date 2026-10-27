@@ -57,6 +57,9 @@ class AdminAction(StrEnum):
     KEY_LIMITS = "key_limits"
     """Changed how often the product key named as the target may be redeemed; the details hold
     its most uses, none for any number, and whether an account may redeem it only once."""
+    GAME_ICON = "game_icon"
+    """Stored or removed the icon of the game whose id is the target; the details say whether
+    the game has one now."""
 
 
 @dataclass(frozen=True, slots=True)

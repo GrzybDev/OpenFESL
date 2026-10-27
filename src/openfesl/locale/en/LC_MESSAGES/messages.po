@@ -3981,8 +3981,30 @@ msgstr "Changed a rule"
 msgid "web.admin.audit.action.hosting_mode"
 msgstr "Changed the hosting mode"
 
+msgid "web.admin.audit.action.game_icon.stored"
+msgstr "Set game icon"
+
+msgid "web.admin.audit.action.game_icon.removed"
+msgstr "Removed game icon"
+
 msgid "web.admin.role.admin"
 msgstr "Admin"
 
 msgid "web.admin.role.moderator"
 msgstr "Moderator"
+
+msgid "presence.menus"
+msgstr "In the menus"
+
+msgid "presence.queued"
+msgstr "Waiting in the queue"
+
+msgid "presence.joining"
+msgstr "Joining a match"
+
+msgid "presence.match"
+msgstr "In a match"
+
+#, python-brace-format
+msgid "presence.mode_on_map"
+msgstr "{mode} on {map}"

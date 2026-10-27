@@ -216,6 +216,20 @@ class Names(BaseModel):
     prefix: bool = False
     otherwise: str | None = None
 
+    def name_of(self, value: str) -> str | None:
+        """Return the name of one of the attribute's values, if the game data names it.
+
+        Args:
+            value: The value as a host sent it.
+        """
+        folded = value.casefold()
+        matching = [
+            known
+            for known in self.names
+            if (folded.startswith(known.casefold()) if self.prefix else folded == known.casefold())
+        ]
+        return self.names[max(matching, key=len)] if matching else self.otherwise
+
 
 class Flag(BaseModel):
     """An attribute of hosted games that marks a game while it holds a value."""

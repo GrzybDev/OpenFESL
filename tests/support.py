@@ -4,6 +4,7 @@ import re
 import struct
 import urllib.error
 import urllib.request
+import zlib
 from collections.abc import AsyncIterator, Mapping, Sequence
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
@@ -245,18 +246,20 @@ def entitle_game(nuid: str, password: str, key: str) -> Fields:
     return [("TXN", "NuEntitleGame"), ("key", key), ("nuid", nuid), ("password", password)]
 
 
-async def log_in_player(game: Game, key: ConnectionKey, nuid: str) -> Answer:
+async def log_in_player(game: Game, key: ConnectionKey, nuid: str, locale: str = "en_US") -> Answer:
     """Register a player with the current terms and log it in on a new FESL connection."""
-    await game.hello(key, "bfbc2-pc")
+    await game.hello(key, "bfbc2-pc", locale=locale)
     terms = (await game.request(key, "acct", [("TXN", "NuGetTos")]))["version"]
     await game.request(key, "acct", registration(nuid, "secret-pass", terms))
     await game.request(key, "acct", entitle_game(nuid, "secret-pass", "ACTIVATE-GAME"))
     return await game.request(key, "acct", login(nuid, "secret-pass"))
 
 
-async def log_in_persona(game: Game, key: ConnectionKey, nuid: str, name: str) -> tuple[int, str]:
+async def log_in_persona(
+    game: Game, key: ConnectionKey, nuid: str, name: str, locale: str = "en_US"
+) -> tuple[int, str]:
     """Log a new player in as a new persona and return the persona's number and session key."""
-    await log_in_player(game, key, nuid)
+    await log_in_player(game, key, nuid, locale)
     await game.request(key, "acct", [("TXN", "NuAddPersona"), ("name", name)])
     playing = await game.request(key, "acct", [("TXN", "NuLoginPersona"), ("name", name)])
     return int(playing["userId"]), playing["lkey"]
@@ -454,3 +457,20 @@ def masked(provider_id: bytes, mask: bytes) -> str:
     """Return a provider attribute as a server sends it: the id XORed with a mask, the mask."""
     data = bytes(byte ^ mask[index % 8] for index, byte in enumerate(provider_id)) + mask
     return data.hex().upper()
+
+
+def png_image(width: int, height: int) -> bytes:
+    """Return a grey PNG image of a size, as an icon file holds it."""
+
+    def chunk(kind: bytes, data: bytes) -> bytes:
+        checksum = zlib.crc32(kind + data)
+        return struct.pack(">I", len(data)) + kind + data + struct.pack(">I", checksum)
+
+    rows = b"".join(b"\x00" + b"\x80" * width for _ in range(height))
+    header = struct.pack(">IIBBBBB", width, height, 8, 0, 0, 0, 0)
+    return (
+        b"\x89PNG\r\n\x1a\n"
+        + chunk(b"IHDR", header)
+        + chunk(b"IDAT", zlib.compress(rows))
+        + chunk(b"IEND", b"")
+    )

@@ -30,7 +30,7 @@ GLYPHS = {
     AdminAction.ENTITLEMENT_GRANT: "plus",
     AdminAction.KEY_ADD: "plus",
 }
-_TAKEN = {"disabled", "banned", "deactivated", "revoked", "DISABLED", "off"}
+_TAKEN = {"disabled", "banned", "deactivated", "revoked", "DISABLED", "off", "removed"}
 
 
 class AuditLog(Protocol):
@@ -309,6 +309,10 @@ async def _rows(
                 said = say("web.admin.audit.limits." + ("most" if most else "any"), most=most or 0)
                 if details.get("once_per_account"):
                     said += " · " + say("web.admin.key.uses.once")
+        elif action is AdminAction.GAME_ICON:
+            game = games.by_id(target)
+            shown = game.name if game else target
+            kind = f"game_icon.{'stored' if details.get('stored') else 'removed'}"
         elif action is AdminAction.SETTING:
             shown, href = _setting(say, page, games, target)
             said = _setting_value(say, games, target, details)

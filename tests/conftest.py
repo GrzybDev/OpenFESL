@@ -51,7 +51,7 @@ async def relay_server(
         # The keys too, so that the next server starts with the game data's keys, unlimited.
         tables = (
             "account, stat, game_server, provider, setting, admin_action, product_key, "
-            "activity_hour, activity_day"
+            "activity_hour, activity_day, game_icon"
         )
         await connection.execute(text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE"))
     await engine.dispose()

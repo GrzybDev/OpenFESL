@@ -1,0 +1,58 @@
+import hashlib
+from collections.abc import Awaitable, Callable
+
+from fastapi import APIRouter, Request
+from fastapi.responses import Response
+from starlette.exceptions import HTTPException
+
+from openfesl.core.game_icons import GameIcons
+from openfesl.core.games import Games
+from openfesl.core.rich_presence import PresenceArt
+
+# Where each game's icon is served, {game} standing for the game's id.
+ICON_PATH = "/{game}/icon.png"
+# OpenFESL's own icon among the static files, the small image of presence.
+SERVICE_ICON = "/static/apple-touch-icon.png"
+# Discord's image proxy and browsers keep an icon for an hour, so that one the admin replaces
+# shows soon; asking again costs only a 304.
+ICON_CACHE = "public, max-age=3600"
+
+
+def game_icon_routes(games: Games, icons: GameIcons) -> APIRouter:
+    """Return each game's icon at its own address, for Discord presence to show.
+
+    Args:
+        games: The games, each with its icon's address.
+        icons: Where the games' icons are kept.
+    """
+    router = APIRouter()
+    for game in games:
+        router.add_api_route(ICON_PATH.format(game=game.id), _icon(icons, game.id))
+    return router
+
+
+def presence_art(public_url: str | None) -> PresenceArt:
+    """Return the public addresses of presence's images, none without the server's address.
+
+    Args:
+        public_url: The address the server's web pages are reached at.
+    """
+    if not public_url:
+        return PresenceArt()
+    base = public_url.rstrip("/")
+    return PresenceArt(game=base + ICON_PATH, service=base + SERVICE_ICON)
+
+
+def _icon(icons: GameIcons, game_id: str) -> Callable[[Request], Awaitable[Response]]:
+    async def show_icon(request: Request) -> Response:
+        png = await icons.icon(game_id)
+        if png is None:
+            raise HTTPException(404)
+        tag = f'"{hashlib.sha256(png).hexdigest()[:32]}"'
+        headers = {"Cache-Control": ICON_CACHE, "ETag": tag}
+        asked = request.headers.get("If-None-Match", "")
+        if tag in {part.strip().removeprefix("W/") for part in asked.split(",")}:
+            return Response(status_code=304, headers=headers)
+        return Response(png, media_type="image/png", headers=headers)
+
+    return show_icon

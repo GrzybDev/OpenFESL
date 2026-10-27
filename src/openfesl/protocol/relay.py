@@ -1,6 +1,10 @@
+import json
 import struct
 from dataclasses import dataclass
 from enum import IntEnum
+
+from pydantic import BaseModel, ConfigDict
+from pydantic.alias_generators import to_camel
 
 from openfesl.protocol.packet import Packet, PacketError
 
@@ -76,6 +80,69 @@ class Presence:
 
 
 type Frame = Open | Data | Close | Presence
+
+
+class PresenceRequest(BaseModel):
+    """The hook's presence frame: whether the player's chat client is to show presence."""
+
+    enabled: bool = False
+
+
+class Party(BaseModel):
+    """How many players a match holds of how many it takes."""
+
+    model_config = ConfigDict(frozen=True)
+
+    size: int
+    max: int
+
+
+class Activity(BaseModel):
+    """What the player's chat client shows about the game; the hook leaves out what is missing.
+
+    Attributes:
+        name: The game's name.
+        details: The first line below the name.
+        state: The second line.
+        large_image: The game's image, a public image address or an asset key of the application.
+        large_text: The large image's tooltip.
+        small_image: The image in the large one's corner.
+        small_text: The small image's tooltip.
+        started_at: The start of the elapsed time, in milliseconds of Unix time.
+        party: The players of the match.
+        page: The path on the relay server's website that the activity's button opens.
+    """
+
+    model_config = ConfigDict(frozen=True, alias_generator=to_camel, validate_by_name=True)
+
+    name: str | None = None
+    details: str | None = None
+    state: str | None = None
+    large_image: str | None = None
+    large_text: str | None = None
+    small_image: str | None = None
+    small_text: str | None = None
+    started_at: int | None = None
+    party: Party | None = None
+    page: str | None = None
+
+
+class PresenceUpdate(BaseModel):
+    """The server's presence frame: the chat application, and the activity or none to clear it."""
+
+    model_config = ConfigDict(frozen=True)
+
+    application: str
+    activity: Activity | None = None
+
+    def encode(self) -> bytes:
+        """Return the frame's body as JSON, without the activity's missing fields."""
+        activity = (
+            self.activity.model_dump(by_alias=True, exclude_none=True) if self.activity else None
+        )
+        return json.dumps(
+            {"application": self.application, "activity": activity}, separators=(",", ":")
+        ).encode("ascii")
 
 
 def decode_frame(message: bytes) -> Frame:

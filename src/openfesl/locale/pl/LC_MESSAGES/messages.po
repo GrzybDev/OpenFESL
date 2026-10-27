@@ -4106,8 +4106,30 @@ msgstr "Zmieniono zasadę"
 msgid "web.admin.audit.action.hosting_mode"
 msgstr "Zmieniono tryb dopuszczania serwerów"
 
+msgid "web.admin.audit.action.game_icon.stored"
+msgstr "Ustawiono ikonę gry"
+
+msgid "web.admin.audit.action.game_icon.removed"
+msgstr "Usunięto ikonę gry"
+
 msgid "web.admin.role.admin"
 msgstr "Administrator"
 
 msgid "web.admin.role.moderator"
 msgstr "Moderator"
+
+msgid "presence.menus"
+msgstr "W menu"
+
+msgid "presence.queued"
+msgstr "Oczekiwanie w kolejce"
+
+msgid "presence.joining"
+msgstr "Dołączanie do meczu"
+
+msgid "presence.match"
+msgstr "W trakcie meczu"
+
+#, python-brace-format
+msgid "presence.mode_on_map"
+msgstr "{mode} na mapie {map}"

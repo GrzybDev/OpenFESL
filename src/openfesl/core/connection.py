@@ -2,7 +2,7 @@ from ipaddress import IPv4Address, IPv6Address
 from typing import Protocol
 
 from openfesl.protocol.packet import Packet
-from openfesl.protocol.relay import Open
+from openfesl.protocol.relay import Open, PresenceUpdate
 
 type Address = IPv4Address | IPv6Address
 
@@ -32,6 +32,17 @@ class Outbox(Protocol):
         """Whether half of the session's queue waits for the game, so that what can wait should."""
 
 
+class PresenceOutbox(Protocol):
+    """Where the presence of a session goes, for the chat client on the player's PC."""
+
+    def send(self, update: PresenceUpdate) -> None:
+        """Queue presence for the hook.
+
+        Args:
+            update: The chat application and what it shows.
+        """
+
+
 class Connection(Protocol):
     """The core's side of one game connection."""
 
@@ -55,6 +66,13 @@ class Session(Protocol):
         Args:
             opened: The host the game looked up and the ports on both ends.
             outbox: Where the connection's packets go.
+        """
+
+    def follow_presence(self, outbox: PresenceOutbox | None) -> None:
+        """Send the player's presence whenever it changes, as the hook asked, or stop.
+
+        Args:
+            outbox: Where presence goes; none when the hook asks for none.
         """
 
     async def end(self) -> None:

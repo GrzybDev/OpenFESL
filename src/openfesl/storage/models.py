@@ -280,3 +280,10 @@ class ActivityDayRow(Base):
     online: Mapped[int]
     in_matches: Mapped[int]
     servers: Mapped[int]
+
+
+class GameIconRow(Base):
+    __tablename__ = "game_icon"
+
+    game: Mapped[str] = mapped_column(primary_key=True)
+    png: Mapped[bytes] = mapped_column(LargeBinary)

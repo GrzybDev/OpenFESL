@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from openfesl.core.accounts import Account, AccountState
 from openfesl.core.admin import AdminAction
+from openfesl.core.game_icons import icon_png
 from openfesl.core.games import Game, Games, load_games
 from openfesl.core.personas import Persona, PersonaState
 from openfesl.core.policies import GamePolicies, setting_key
@@ -23,6 +24,7 @@ from openfesl.storage.accounts import SqlAccountStore
 from openfesl.storage.admin import SqlAdminLog
 from openfesl.storage.database import migrate
 from openfesl.storage.entitlements import SqlEntitlementStore
+from openfesl.storage.game_icons import SqlGameIconStore
 from openfesl.storage.personas import SqlPersonaStore
 from openfesl.storage.servers import SqlServerStore
 from openfesl.storage.settings import SqlSettingStore
@@ -52,6 +54,8 @@ async def run(settings: Settings, args: argparse.Namespace) -> None:
             await _personas(settings, args)
         case "kick":
             await _kick(settings, args)
+        case "icons":
+            await _icons(settings, args)
 
 
 @asynccontextmanager
@@ -208,6 +212,24 @@ async def _kick(settings: Settings, args: argparse.Namespace) -> None:
     async with _database(settings) as sessions:
         persona = await _player_persona(SqlPersonaStore(sessions), args.name)
         await SqlAdminLog(sessions).record(AdminAction.PLAYER_KICK, str(persona.id), admin=None)
+
+
+async def _icons(settings: Settings, args: argparse.Namespace) -> None:
+    game = load_games().by_id(args.game)
+    if game is None:
+        sys.exit(f"No game has the id {args.game}")
+    async with _database(settings) as sessions:
+        store = SqlGameIconStore(sessions)
+        match args.action:
+            case "set":
+                try:
+                    png = icon_png(args.file.read_bytes())
+                except (ValueError, OSError) as error:
+                    sys.exit(str(error))
+                await store.store(game.id, png, admin=None)
+            case "remove":
+                if not await store.remove(game.id, admin=None):
+                    sys.exit(f"{game.name} has no icon")
 
 
 async def _player_persona(store: SqlPersonaStore, name: str) -> Persona:

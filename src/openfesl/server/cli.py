@@ -134,6 +134,17 @@ def main(argv: Sequence[str] | None = None) -> None:
     commands.add_parser(
         "kick", help="kick a player's persona from the games it joins, plays or waits for"
     ).add_argument("name", help="the persona's name")
+    icon_actions = commands.add_parser(
+        "icons", help="manage the games' icons that Discord presence shows"
+    ).add_subparsers(dest="action", required=True)
+    stored = icon_actions.add_parser(
+        "set", help="store a game's icon from a PNG file or an ICO file's largest PNG image"
+    )
+    stored.add_argument("game", help="the game's id, such as bfbc2")
+    stored.add_argument("file", type=Path, help="the PNG or ICO file")
+    icon_actions.add_parser("remove", help="remove a game's icon").add_argument(
+        "game", help="the game's id, such as bfbc2"
+    )
     args = parser.parse_args(argv)
 
     settings = Settings()

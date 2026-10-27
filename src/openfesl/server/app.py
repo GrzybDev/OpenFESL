@@ -35,6 +35,7 @@ from openfesl.core.policies import GamePolicies
 from openfesl.core.presence import PresenceService
 from openfesl.core.records import RecordService
 from openfesl.core.registration import Terms
+from openfesl.core.rich_presence import RichPresence
 from openfesl.core.servers import Approval
 from openfesl.core.session import GameSession, Players
 from openfesl.core.stats import StatsService
@@ -50,6 +51,7 @@ from openfesl.storage.admin import SqlAdminLog
 from openfesl.storage.associations import SqlAssociationStore
 from openfesl.storage.database import migrate
 from openfesl.storage.entitlements import SqlEntitlementStore
+from openfesl.storage.game_icons import SqlGameIconStore
 from openfesl.storage.history import SqlHistoryStore
 from openfesl.storage.messages import SqlMessageStore
 from openfesl.storage.personas import SqlPersonaStore
@@ -77,6 +79,7 @@ from openfesl.web.admin.servers import ServerViews, decision_routes, server_list
 from openfesl.web.admin.settings import settings_routes
 from openfesl.web.front import front_routes
 from openfesl.web.game_http import GameHttpMiddleware
+from openfesl.web.game_icons import game_icon_routes, presence_art
 from openfesl.web.host import host_routes
 from openfesl.web.languages import LanguageMiddleware
 from openfesl.web.launcher import launcher_routes
@@ -116,6 +119,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     approval = Approval(SqlServerStore(sessions))
     hosting = Hosting(approval)
     census = Census(hosting, players)
+    art = presence_art(settings.public_url)
+    rich_presence = RichPresence(hosting, settings.discord_application_id, art)
+    icons = SqlGameIconStore(sessions)
     history = OnlineHistory(SqlHistoryStore(sessions), census, games)
     stats = SqlStatStore(sessions)
     persona_store = SqlPersonaStore(sessions)
@@ -165,10 +171,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         players.follow(feed)
         joining.follow(feed)
         await feed.start()
+        await rich_presence.follow_icons(icons, feed)
         followers = [
             asyncio.create_task(hosting.follow_approvals()),
             asyncio.create_task(feed.follow()),
             asyncio.create_task(history.follow()),
+            asyncio.create_task(rich_presence.follow_changes()),
         ]
         yield
         for follower in followers:
@@ -180,7 +188,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     def start_session(websocket: WebSocket, hook_version: str | None) -> GameSession:
         address = settings.client_address(websocket)
-        return GameSession(routes, players, address, theater, hook_version)
+        return GameSession(routes, players, address, theater, hook_version, rich_presence)
 
     pages = Pages(games, census)
     app = FastAPI(
@@ -198,6 +206,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app.add_api_websocket_route("/", relay_endpoint(start_session))
     app.mount("/static", StaticAssets(directory=STATIC))
+    app.include_router(game_icon_routes(games, icons))
     app.include_router(shell_routes(pages, Terms.load()))
     app.include_router(menu_routes(pages, games, census))
     app.include_router(front_routes(pages, games, census, history, entitlements))

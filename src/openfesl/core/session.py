@@ -2,11 +2,11 @@ import hmac
 import logging
 from collections.abc import Callable, Mapping
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from openfesl.core.accounts import Account, AccountState
 from openfesl.core.admin import AdminAction, AdminFeed, LoggedAction
-from openfesl.core.connection import Address, Connection, Outbox
+from openfesl.core.connection import Address, Connection, Outbox, PresenceOutbox
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Game
 from openfesl.core.personas import NOT_LOGGED_IN, Persona
@@ -14,6 +14,9 @@ from openfesl.core.theater import Theater, TheaterConnection
 from openfesl.protocol.message import Message
 from openfesl.protocol.packet import Packet
 from openfesl.protocol.relay import Channel, Open
+
+if TYPE_CHECKING:
+    from openfesl.core.rich_presence import RichPresence
 
 logger = logging.getLogger(__name__)
 
@@ -175,6 +178,7 @@ class GameSession:
         address: Address | None,
         theater: Theater,
         hook_version: str | None,
+        rich_presence: RichPresence,
     ) -> None:
         """Start a session for a game process.
 
@@ -184,6 +188,7 @@ class GameSession:
             address: The public address of the player's PC, when known.
             theater: The Theater service its Theater connections and datagrams go to.
             hook_version: The version of OpenFESLHook that carries the game, when it names one.
+            rich_presence: Sends the player's presence when the hook asks for it.
         """
         self.address = address
         self.hook_version = hook_version
@@ -195,6 +200,7 @@ class GameSession:
         self._routes = routes
         self._players = players
         self._theater = theater
+        self._rich_presence = rich_presence
         self._fesl: FeslConnection | None = None
         self._theater_connections: set[TheaterConnection] = set()
 
@@ -208,6 +214,12 @@ class GameSession:
         """The client string that the game's Hello named on the connection it logged in on."""
         hello = self._fesl.hello if self._fesl is not None else None
         return hello.client_string if hello is not None else None
+
+    @property
+    def locale(self) -> str:
+        """The locale that the game's Hello named on the connection it logged in on, if any."""
+        hello = self._fesl.hello if self._fesl is not None else None
+        return hello.locale if hello is not None else ""
 
     def open(self, opened: Open, outbox: Outbox) -> Connection:
         """Start handling a connection that the game opened, or close one to an unknown host.
@@ -349,8 +361,20 @@ class GameSession:
         """Whether the game falls behind with what it is sent, so that what can wait should."""
         return self._fesl is not None and self._fesl.busy
 
+    def follow_presence(self, outbox: PresenceOutbox | None) -> None:
+        """Send the player's presence whenever it changes, as the hook asked, or stop.
+
+        Args:
+            outbox: Where presence goes; none when the hook asks for none.
+        """
+        if outbox is None:
+            self._rich_presence.forget(self)
+        else:
+            self._rich_presence.follow(self, outbox)
+
     async def end(self) -> None:
         """Forget the session after all of its connections have closed."""
+        self._rich_presence.forget(self)
         self.forget_persona()
         self._players.log_out(self)
 

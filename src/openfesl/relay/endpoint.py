@@ -6,6 +6,7 @@ from collections.abc import Awaitable, Callable
 
 from fastapi import WebSocket
 from fastapi.websockets import WebSocketDisconnect, WebSocketState
+from pydantic import ValidationError
 
 from openfesl.core.connection import Connection, Session
 from openfesl.protocol.packet import Packet
@@ -18,6 +19,8 @@ from openfesl.protocol.relay import (
     FrameError,
     Open,
     Presence,
+    PresenceRequest,
+    PresenceUpdate,
     decode_frame,
     encode_frame,
 )
@@ -122,6 +125,16 @@ class _Outbox:
         return self._link.busy
 
 
+class _PresenceOutbox:
+    """The core's way to the presence that the hook shows."""
+
+    def __init__(self, link: _Link) -> None:
+        self._link = link
+
+    def send(self, update: PresenceUpdate) -> None:
+        self._link.send(Presence(update.encode()))
+
+
 class _Link:
     """One OpenFESLHook WebSocket, its game connections and the frames waiting to go out."""
 
@@ -131,7 +144,7 @@ class _Link:
         self._serving: set[asyncio.Task[None]] = set()
         self._websocket = websocket
         self._session = session
-        self._outgoing: asyncio.Queue[Data | Close] = asyncio.Queue(SEND_LIMIT)
+        self._outgoing: asyncio.Queue[Data | Close | Presence] = asyncio.Queue(SEND_LIMIT)
         self._dequeued = asyncio.Event()
         self._failure: tuple[int, str] | None = None
         self._failed = asyncio.Event()
@@ -169,11 +182,11 @@ class _Link:
         """Whether at least half of the queue waits for the hook."""
         return self._outgoing.qsize() >= self._outgoing.maxsize // 2
 
-    def send(self, frame: Data | Close) -> None:
+    def send(self, frame: Data | Close | Presence) -> None:
         """Queue a frame for the hook, or end the session when the hook falls too far behind.
 
         Args:
-            frame: A packet for a game connection, or the request to close it.
+            frame: A packet for a game connection, the request to close it, or presence.
         """
         try:
             self._outgoing.put_nowait(frame)
@@ -262,9 +275,15 @@ class _Link:
                 if inbound := self.inbound.pop(key, None):
                     logger.info("Session %d: %s closed by the game", self.number, _name(key))
                     inbound.packets.put_nowait(None)
-            case Presence():
-                # The server builds no presence, and the hook shows none that it is not sent.
-                logger.debug("Session %d: the hook asked for presence", self.number)
+            case Presence(body):
+                try:
+                    request = PresenceRequest.model_validate_json(body)
+                except ValidationError:
+                    logger.warning(
+                        "Session %d: dropped presence that is not a request", self.number
+                    )
+                    return
+                self._session.follow_presence(_PresenceOutbox(self) if request.enabled else None)
 
     async def _write(self) -> None:
         while True:

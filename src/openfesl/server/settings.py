@@ -1,12 +1,16 @@
 from enum import StrEnum
 from ipaddress import ip_address
+from typing import Annotated
 
 from fastapi.requests import HTTPConnection
-from pydantic import SecretStr, field_validator
+from pydantic import SecretStr, StringConstraints, field_validator
 from pydantic_settings import BaseSettings
 from sqlalchemy.engine import make_url
 
 from openfesl.core.connection import Address
+
+# A Discord application's id, a snowflake of up to 20 digits.
+type ApplicationId = Annotated[str, StringConstraints(pattern=r"^[0-9]{1,20}$")]
 
 
 class SmtpSecurity(StrEnum):
@@ -39,7 +43,8 @@ class Settings(BaseSettings):
         smtp_password: The password of that login.
         smtp_sender: The address mail comes from.
         public_url: The address the server's web pages are reached at, where the links in
-            mail lead, such as https://fesl.example.com; the relay's address follows from it.
+            mail lead and Discord fetches presence's images from, such as
+            https://fesl.example.com; the relay's address follows from it.
         contact_email: The address at which the operators of dedicated servers reach this
             server's administrators, such as for a provider file.
         hook_default_url: The relay address OpenFESLHook's releases connect to when no
@@ -55,6 +60,9 @@ class Settings(BaseSettings):
         admin_oidc_client_secret: The panel's client secret there.
         admin_group: The provider's group whose members are admins.
         moderator_group: The provider's group whose members are moderators.
+        discord_application_id: The id of the Discord application whose Rich Presence shows
+            what players do in their games, sent to the hooks that ask for it; without one no
+            presence is sent.
     """
 
     database_url: str
@@ -77,6 +85,7 @@ class Settings(BaseSettings):
     admin_oidc_client_secret: SecretStr | None = None
     admin_group: str | None = None
     moderator_group: str | None = None
+    discord_application_id: ApplicationId | None = None
 
     @field_validator("database_url")
     @classmethod
@@ -86,6 +95,12 @@ class Settings(BaseSettings):
         if url.drivername in {"postgres", "postgresql"}:
             url = url.set(drivername="postgresql+asyncpg")
         return url.render_as_string(hide_password=False)
+
+    @field_validator("discord_application_id", mode="before")
+    @classmethod
+    def _empty_as_unset(cls, value: object) -> object:
+        # Hosts such as Dokploy switch a variable off by leaving it empty.
+        return value or None
 
     def client_address(self, connection: HTTPConnection) -> Address | None:
         """Return the address of the client behind a request or WebSocket.
