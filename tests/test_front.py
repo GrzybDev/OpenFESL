@@ -8,7 +8,7 @@ ATACAMA_HARDCORE = [
     ("B-U-level", "Levels/MP_005"),
     ("B-U-gamemode", "CONQUEST"),
     ("B-U-type", "HARDCORE"),
-    ("B-U-mod", "BC2"),
+    ("B-U-gameMod", "BC2"),
     ("B-U-location", "UNKNOWN"),
 ]
 

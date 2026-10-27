@@ -124,7 +124,7 @@ names = { CONQUEST = "conquest", RUSH = "rush", SQRUSH = "squad-rush", SQDM = "s
 
 # The Vietnam expansion's levels name it; the others need the base game only.
 [listing.expansion]
-attribute = "B-U-mod"
+attribute = "B-U-gameMod"
 names = { VIETNAM = "vietnam" }
 otherwise = "base"
 
