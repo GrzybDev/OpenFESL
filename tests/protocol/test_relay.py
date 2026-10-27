@@ -8,6 +8,7 @@ from openfesl.protocol.relay import (
     Data,
     FrameError,
     Open,
+    Presence,
     decode_frame,
     encode_frame,
 )
@@ -30,14 +31,28 @@ def test_the_relay_protocol_example_decodes_and_the_answer_encodes_byte_for_byte
     assert encode_frame(Close(THEATER_1)) == bytes.fromhex("03020001")
 
 
+def test_the_hooks_presence_request_decodes_and_presence_encodes_on_the_session_channel() -> None:
+    # The request in OpenFESLHook's docs/relay-protocol.md.
+    request = bytes.fromhex("04000000 7B22656E 61626C65 64223A74 7275657D")
+
+    assert decode_frame(request) == Presence(b'{"enabled":true}')
+    assert encode_frame(Presence(b'{"activity":null}')) == bytes.fromhex("04000000") + (
+        b'{"activity":null}'
+    )
+
+
 @pytest.mark.parametrize(
     "message",
     [
         pytest.param(bytes.fromhex("0201"), id="short header"),
-        pytest.param(bytes.fromhex("04010001"), id="unknown type"),
+        pytest.param(bytes.fromhex("09010001"), id="unknown type"),
         pytest.param(bytes.fromhex("03040001"), id="unknown channel"),
         pytest.param(bytes.fromhex("03010000"), id="connection 0"),
         pytest.param(bytes.fromhex("03010001 00"), id="close with a body"),
+        pytest.param(bytes.fromhex("04010001 7B7D"), id="presence on a game channel"),
+        pytest.param(bytes.fromhex("04000001 7B7D"), id="presence for a connection"),
+        pytest.param(bytes.fromhex("04000000"), id="presence without a body"),
+        pytest.param(bytes.fromhex("03000000"), id="close on the session channel"),
         pytest.param(bytes.fromhex("01010001 4A564A57 05") + b"host", id="open host too short"),
         pytest.param(bytes.fromhex("01010001 4A564A57 00"), id="open without a host"),
         pytest.param(

@@ -14,8 +14,10 @@ from openfesl.protocol.relay import (
     Close,
     ConnectionKey,
     Data,
+    Frame,
     FrameError,
     Open,
+    Presence,
     decode_frame,
     encode_frame,
 )
@@ -227,7 +229,7 @@ class _Link:
             if self._failure:
                 return
 
-    def _dispatch(self, frame: Open | Data | Close) -> None:
+    def _dispatch(self, frame: Frame) -> None:
         match frame:
             case Open(key):
                 if key in self.inbound:
@@ -260,6 +262,9 @@ class _Link:
                 if inbound := self.inbound.pop(key, None):
                     logger.info("Session %d: %s closed by the game", self.number, _name(key))
                     inbound.packets.put_nowait(None)
+            case Presence():
+                # The server builds no presence, and the hook shows none that it is not sent.
+                logger.debug("Session %d: the hook asked for presence", self.number)
 
     async def _write(self) -> None:
         while True:

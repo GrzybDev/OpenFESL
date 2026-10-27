@@ -6,6 +6,8 @@ from openfesl.protocol.packet import Packet, PacketError
 
 SUBPROTOCOL = "openfesl.v1"
 MAX_HOST_LENGTH = 253
+# The channel of frames about the whole session rather than one game connection.
+SESSION_CHANNEL = 0
 
 _HEADER = struct.Struct(">BBH")
 _OPEN = struct.Struct(">HHB")
@@ -27,6 +29,7 @@ class FrameType(IntEnum):
     OPEN = 1
     DATA = 2
     CLOSE = 3
+    PRESENCE = 4
 
 
 @dataclass(frozen=True, slots=True)
@@ -62,7 +65,17 @@ class Close:
     connection: ConnectionKey
 
 
-type Frame = Open | Data | Close
+@dataclass(frozen=True, slots=True)
+class Presence:
+    """What the player's chat client shows about the game, as UTF-8 JSON on the session channel.
+
+    The hook asks for it in its first frame; the server answers whenever it changes.
+    """
+
+    body: bytes
+
+
+type Frame = Open | Data | Close | Presence
 
 
 def decode_frame(message: bytes) -> Frame:
@@ -77,12 +90,14 @@ def decode_frame(message: bytes) -> Frame:
     if len(message) < _HEADER.size:
         raise FrameError(f"{len(message)} bytes are shorter than the frame header")
     frame_type, channel, number = _HEADER.unpack_from(message)
+    body = message[_HEADER.size :]
+    if frame_type == FrameType.PRESENCE or channel == SESSION_CHANNEL:
+        return _decode_presence(frame_type, channel, number, body)
     if channel not in Channel:
         raise FrameError(f"unknown channel {channel}")
     if number == 0:
         raise FrameError("connection number 0 is never used")
     connection = ConnectionKey(Channel(channel), number)
-    body = message[_HEADER.size :]
     match frame_type:
         case FrameType.OPEN:
             return _decode_open(connection, body)
@@ -99,17 +114,28 @@ def decode_frame(message: bytes) -> Frame:
             raise FrameError(f"unknown frame type {frame_type}")
 
 
-def encode_frame(frame: Data | Close) -> bytes:
+def encode_frame(frame: Data | Close | Presence) -> bytes:
     """Return the WebSocket message for a frame that the server sends.
 
     Args:
-        frame: A packet for a game connection, or the request to close it.
+        frame: A packet for a game connection, the request to close it, or presence.
     """
     match frame:
         case Data(connection, packet):
             return _encode_header(FrameType.DATA, connection) + packet.encode()
         case Close(connection):
             return _encode_header(FrameType.CLOSE, connection)
+        case Presence(body):
+            return _HEADER.pack(FrameType.PRESENCE, SESSION_CHANNEL, 0) + body
+
+
+def _decode_presence(frame_type: int, channel: int, number: int, body: bytes) -> Presence:
+    # Only presence travels on the session channel, and only there, never empty.
+    if frame_type != FrameType.PRESENCE or channel != SESSION_CHANNEL or number != 0:
+        raise FrameError(f"frame type {frame_type} on channel {channel}, connection {number}")
+    if not body:
+        raise FrameError("presence carries no body")
+    return Presence(body)
 
 
 def _decode_open(connection: ConnectionKey, body: bytes) -> Open:

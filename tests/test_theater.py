@@ -14,7 +14,7 @@ from support import (
 )
 
 from openfesl.core import theater
-from openfesl.protocol.relay import Channel, ConnectionKey, Data
+from openfesl.protocol.relay import Channel, Close, ConnectionKey, Data
 
 pytestmark = pytest.mark.anyio
 
@@ -102,7 +102,7 @@ async def test_theater_keeps_a_connection_that_answers_pings_and_closes_one_that
             frame = await server.next_frame()
             if not isinstance(frame, Data):
                 break
-        assert frame.connection == THEATER
+        assert frame == Close(THEATER)
 
 
 async def test_a_dedicated_server_lists_updates_and_removes_its_game(

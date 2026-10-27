@@ -17,6 +17,7 @@ from openfesl.protocol.relay import (
     Channel,
     ConnectionKey,
     Data,
+    Presence,
     decode_frame,
     encode_frame,
 )
@@ -66,6 +67,8 @@ async def test_a_dedicated_server_is_greeted_and_kept_alive_while_other_connecti
 ) -> None:
     async with connect(server_url, subprotocols=[Subprotocol(SUBPROTOCOL)]) as websocket:
         assert websocket.subprotocol == SUBPROTOCOL
+        # The hook asks for presence first, since it cannot tell this game's servers from players.
+        await websocket.send(encode_frame(Presence(b'{"enabled":true}')))
         await websocket.send(open_frame(SERVER_FESL, "bfbc2-pc-server.fesl.ea.com", 19021, 50001))
         await send(websocket, SERVER_FESL, Packet("fsys", 0xC0, 1, format_fields(SERVER_HELLO)))
 
@@ -142,6 +145,7 @@ async def test_a_websocket_without_the_relay_subprotocol_is_refused(server_url: 
     [
         pytest.param("hello", 1003, id="text message"),
         pytest.param(bytes.fromhex("09010001"), 1002, id="unknown frame type"),
+        pytest.param(bytes.fromhex("04010001 7B7D"), 1002, id="presence on a game connection"),
         pytest.param(bytes.fromhex("02010001 66737973"), 1002, id="data that is not a packet"),
     ],
 )
