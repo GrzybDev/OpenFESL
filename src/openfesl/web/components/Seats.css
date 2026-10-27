@@ -1,4 +1,4 @@
-/* M6: a refresh fills or empties a server's slots one by one, as the script staggers them. */
+/* A refresh fills or empties a server's slots one by one, as the script staggers them. */
 @layer components {
   .slot {
     fill: transparent;

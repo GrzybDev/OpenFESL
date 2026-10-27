@@ -1,4 +1,4 @@
-/* M5: a number a refresh changed gets an underline in the accent, or in black on the accent,
+/* A number a refresh changed gets an underline in the accent, or in black on the accent,
    that fades out. */
 @layer components {
   .count {

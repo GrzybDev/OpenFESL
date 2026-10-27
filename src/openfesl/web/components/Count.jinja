@@ -1,4 +1,4 @@
 {#def value: int #}
-{# A number that a refresh may change; it then counts to its new value over an underline (M5). #}
+{# A number that a refresh may change; it then counts to its new value over an underline. #}
 <span class="count{% if attrs.classes %} {{ attrs.classes }}{% endif %}"
       data-count="{{ value }}">{{ number(value) }}</span>

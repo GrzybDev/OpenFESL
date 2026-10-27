@@ -1,6 +1,6 @@
 {#def href: str, label: str = "", count: int | None = None, current: bool = False #}
 {# One of a panel's tabs, as a link with an optional count; the chosen one's accent slides between
-   pages (M3). The content, if any, replaces the label, as on the tabs that lead elsewhere. #}
+   pages. The content, if any, replaces the label, as on the tabs that lead elsewhere. #}
 <a href="{{ href }}"
    {% if current %} aria-current="true"{% endif %}
    class="tab{% if attrs.classes %} {{ attrs.classes }}{% endif %}"><span aria-hidden="true" class="tab-base"></span>

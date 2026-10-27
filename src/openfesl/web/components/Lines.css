@@ -110,7 +110,7 @@
     color: var(--ink);
   }
 
-  /* M4: a player's line lights up under the pointer and brightens its end square. */
+  /* A player's line lights up under the pointer and brightens its end square. */
   .line-cell {
     transition: background-color 120ms var(--ease-menu);
   }

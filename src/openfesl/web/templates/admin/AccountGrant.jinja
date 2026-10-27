@@ -1,7 +1,7 @@
 {#def view, keys: list, held, back: str, form #}
 {# The form that grants a player's account entitlements by hand, as a black-headed panel: the
    enabled product keys as tiles, whose grants the account gets without using the key up, or one
-   tag typed in. Where scripts run, it opens as a dialog over the account's page (M10). #}
+   tag typed in. Where scripts run, it opens as a dialog over the account's page. #}
 {% set account = view.record.account %}
 {% set title = _("web.admin.account") %}
 {% set missing = form.get("key") == "tag" and not form.get("tag") %}

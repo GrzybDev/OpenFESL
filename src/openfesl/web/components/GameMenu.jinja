@@ -1,6 +1,6 @@
 {#def current: str = "", exact: bool = True #}
 {# The game's menu bar. The current item sits on the menu's block, which slides to the next current
-   item on the way there (M2). #}
+   item on the way there. #}
 <nav aria-label="{{ game.name }}" class="game-menu">
   <ul>
     {% for item in ["servers", "leaderboard", "activity", "play", "host"] %}

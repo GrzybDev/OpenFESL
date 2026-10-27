@@ -391,7 +391,7 @@
     text-transform: uppercase;
   }
 
-  /* M7: progress bars grow from zero on first view. */
+  /* Progress bars grow from zero on first view. */
   .grow {
     transform-box: fill-box;
     transform-origin: left;

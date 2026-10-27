@@ -1,7 +1,7 @@
 {#def view, states: list, back: str, form #}
 {# The form that changes whether a player's account may log in, as a black-headed panel: the
    states as tiles, the end of a state that lasts a while, and what a change does. Where scripts
-   run, it opens as a dialog over the account's page (M10). #}
+   run, it opens as a dialog over the account's page. #}
 {% set account = view.record.account %}
 {% set title = _("web.admin.account") %}
 {% set chosen = form.get("state") or account.state %}

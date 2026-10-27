@@ -1,4 +1,4 @@
-/* M11: a toast slides in from the bottom right, and a leaving one fades out. */
+/* A toast slides in from the bottom right, and a leaving one fades out. */
 @layer components {
   .toasts {
     position: fixed;

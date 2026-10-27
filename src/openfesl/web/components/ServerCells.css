@@ -190,7 +190,7 @@
     }
   }
 
-  /* M4: a server's row tints under the pointer and brightens its end square; an open row takes
+  /* A server's row tints under the pointer and brightens its end square; an open row takes
      the accent from the left, its chevron turns, and its details open by their height. */
   .row-cell {
     position: relative;

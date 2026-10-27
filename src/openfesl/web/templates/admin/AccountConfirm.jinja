@@ -1,7 +1,7 @@
 {#def view, persona, decision: str, back: str #}
 {# A decision about a player's account or one of its names that asks for confirmation first, as a
    page of its own: ending its session, kicking a name from its game or disabling a name. Where
-   scripts run, its panel opens as a dialog over the account's page (M10). #}
+   scripts run, its panel opens as a dialog over the account's page. #}
 {% set account = view.record.account %}
 {% set title = _("web.admin.account") %}
 {% set session = view.session %}

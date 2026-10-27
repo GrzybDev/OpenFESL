@@ -1,5 +1,5 @@
 /* A decision's confirmation, drawn as the black-headed panels of the game's dialogs, in a frame
-   as a page of its own or as a dialog over the page the decision was made on (M10). */
+   as a page of its own or as a dialog over the page the decision was made on. */
 @layer components {
   .confirm-frame {
     max-width: 546px;
@@ -102,7 +102,7 @@
     }
   }
 
-  /* M10: the panel scales from .96 and fades in over a fading backdrop; closing reverses. */
+  /* The panel scales from .96 and fades in over a fading backdrop; closing reverses. */
   .dialog {
     width: min(520px, calc(100vw - 2 * var(--gutter)));
     max-width: none;

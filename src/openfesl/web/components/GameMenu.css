@@ -1,4 +1,4 @@
-/* M2: a hovered item of a game's menu bar brightens, and the current item's block slides from
+/* A hovered item of a game's menu bar brightens, and the current item's block slides from
    page to page. On phones the items stack two to a line. */
 @layer components {
   .game-menu {

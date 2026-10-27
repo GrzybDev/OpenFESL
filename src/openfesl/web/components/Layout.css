@@ -1,5 +1,5 @@
 /* The quiet shell around the area: OpenFESL's bar and footer, which stay put while the area
-   changes from page to page (M12). */
+   changes from page to page. */
 @layer components {
   .skip-link {
     position: absolute;

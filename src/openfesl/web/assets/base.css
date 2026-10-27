@@ -221,9 +221,9 @@
     opacity: 0.62;
   }
 
-  /* M1: the title block slides in, the panel rises after it and the first rows follow; a page
-     that arrives through a page transition (M12) does not enter a second time, and rows that a
-     refresh adds or moves glide instead (M9). */
+  /* The title block slides in, the panel rises after it and the first rows follow; a page
+     that arrives through a page transition does not enter a second time, and rows that a
+     refresh adds or moves glide instead. */
   .enter-title {
     animation: enter-title 220ms var(--ease-menu) both;
   }
@@ -313,7 +313,7 @@
     }
   }
 
-  /* M12: the shell stays while the area slides 16 px in the direction of navigation; switching
+  /* The shell stays while the area slides 16 px in the direction of navigation; switching
      games or languages cross-fades the whole area. */
   @view-transition {
     navigation: auto;

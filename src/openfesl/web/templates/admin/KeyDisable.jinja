@@ -1,7 +1,7 @@
 {#def view, back: str #}
 {# Disabling a product key asks first, as a page of its own: which key it is, what it grants and
    where it comes from, and what disabling does. Where scripts run, its panel opens as a dialog
-   over the keys page (M10). #}
+   over the keys page. #}
 {% set key = view.key %}
 {% set title = _("web.admin.keys") %}
 <AdminPage :title="title" current="keys">

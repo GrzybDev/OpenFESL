@@ -12,7 +12,7 @@ import "./base.css";
 import "./styles.js";
 import "htmx.org";
 
-// M8: a chevron block whose page takes longer than 300 ms to arrive shows that it is loading, and
+// A chevron block whose page takes longer than 300 ms to arrive shows that it is loading, and
 // a button that sends a form says what it does meanwhile, such as APPROVING….
 document.addEventListener("click", (event) => {
   const block = event.target instanceof Element ? event.target.closest("a.chevron") : null;
@@ -81,8 +81,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Live values: a page's #live region refreshes itself through htmx every 15 s while the tab is
-// visible. A changed number counts to its new value (M5), a server's slots fill or empty one by
-// one (M6), rows glide to their new places (M9), and a failed refresh keeps the last values,
+// visible. A changed number counts to its new value, a server's slots fill or empty one by
+// one, rows glide to their new places, and a failed refresh keeps the last values,
 // muted, until the next one succeeds or the reader asks again.
 const REFRESH = 15000;
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
@@ -196,7 +196,7 @@ function countTo(element, from) {
   requestAnimationFrame(step);
 }
 
-/** Moves the rows a refresh reordered from their old places to their new ones (M9). */
+/** Moves the rows a refresh reordered from their old places to their new ones. */
 function glide() {
   if (reducedMotion.matches || places.size === 0) {
     return;
@@ -232,7 +232,7 @@ setInterval(() => {
   }
 }, 1000);
 
-// M8: a copy button copies its text, says so for 1.5 s and has the page announce it. Without
+// A copy button copies its text, says so for 1.5 s and has the page announce it. Without
 // clipboard access it stays as it was; the text it copies is on the page.
 document.addEventListener("click", async (event) => {
   const button = event.target instanceof Element ? event.target.closest("[data-copy]") : null;
@@ -271,7 +271,7 @@ function announce(message) {
   }
 }
 
-// M11: a toast that says a change was saved leaves after 4 s; one that says it failed stays until
+// A toast that says a change was saved leaves after 4 s; one that says it failed stays until
 // dismissed.
 document.addEventListener("DOMContentLoaded", () => {
   for (const toast of document.querySelectorAll(".toast[data-leaves]")) {
@@ -296,7 +296,7 @@ function leave(toast) {
   setTimeout(() => toast.remove(), reducedMotion.matches ? 100 : 200);
 }
 
-// M4: a row's details button opens its details in place; without scripts it is a link that
+// A row's details button opens its details in place; without scripts it is a link that
 // opens them with the page.
 document.addEventListener("click", (event) => {
   const button = event.target instanceof Element ? event.target.closest("[data-details]") : null;
@@ -336,7 +336,7 @@ function toggleDetails(button) {
   button.setAttribute("aria-expanded", String(open));
 }
 
-// M10: a decision that asks for confirmation opens its confirmation page's panel as a dialog
+// A decision that asks for confirmation opens its confirmation page's panel as a dialog
 // over the page it was made on; without scripts, or when the page does not come, the link
 // opens the confirmation page itself.
 document.addEventListener("click", async (event) => {

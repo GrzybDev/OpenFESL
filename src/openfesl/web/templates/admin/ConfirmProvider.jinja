@@ -1,6 +1,6 @@
 {#def view, file_name: str, back: str #}
 {# The revocation of a provider, which asks first, as a page of its own: the provider, its servers
-   and what revoking it does. Where scripts run, its panel opens as a dialog (M10). #}
+   and what revoking it does. Where scripts run, its panel opens as a dialog. #}
 {% set provider = view.provider %}
 {% set title = _("web.admin.providers") %}
 {% set approved = view.servers|selectattr("tab", "equalto", "approved")|list %}

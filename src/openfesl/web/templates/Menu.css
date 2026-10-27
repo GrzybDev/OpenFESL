@@ -303,7 +303,7 @@
     }
   }
 
-  /* M13: a game's tile lifts and lights its edge in the game's colour under the pointer or focus,
+  /* A game's tile lifts and lights its edge in the game's colour under the pointer or focus,
      and the chosen tile's chevron block slides in. Without either, the first tile is the chosen
      one. */
   .tile {

@@ -4,7 +4,7 @@
 // The pages draw what needs scripts, such as copy buttons, only when this runs.
 document.documentElement.classList.add("js");
 
-// M12: the page that arrives tells its transition which way to move: back through the history
+// The page that arrives tells its transition which way to move: back through the history
 // slides the other way, and another game's pages or another language cross-fade as a whole.
 addEventListener("pagereveal", (event) => {
   const activation = window.navigation?.activation;

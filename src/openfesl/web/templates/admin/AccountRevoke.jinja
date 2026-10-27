@@ -1,7 +1,7 @@
 {#def view, entitlement, back: str #}
 {# Revoking one of a player's entitlements asks first, as a page of its own: what the entitlement
    is, what revoking does, and the buttons that cancel or confirm it. Where scripts run, its panel
-   opens as a dialog over the account's page (M10). #}
+   opens as a dialog over the account's page. #}
 {% set account = view.record.account %}
 {% set title = _("web.admin.account") %}
 <AdminPage :title="title ~ ' · ' ~ account.nuid" current="accounts">

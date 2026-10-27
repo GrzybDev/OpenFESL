@@ -1,4 +1,4 @@
-/* M8: a copy button shows a tick in place of its icon for a moment after it copied. */
+/* A copy button shows a tick in place of its icon for a moment after it copied. */
 @layer components {
   .copy-button {
     display: flex;

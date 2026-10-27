@@ -1,6 +1,6 @@
 {#def taken: int, slots: int, scale: int = 1 #}
 {# A server's slots, taken ones solid, in groups of four as the game's server browser draws them;
-   a refresh fills or empties them one after another (M6). #}
+   a refresh fills or empties them one after another. #}
 {% set width = ((slots + 3) // 4 - 1) * 18 + ((slots - 1) % 4 + 1) * 4 - 1 %}
 <svg class="meter{% if attrs.classes %} {{ attrs.classes }}{% endif %}"
      width="{{ width * scale }}"

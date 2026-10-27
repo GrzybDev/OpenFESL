@@ -1,4 +1,4 @@
-/* M8: a chevron block's chevron moves on hover, the block gives on press, and a page that takes
+/* A chevron block's chevron moves on hover, the block gives on press, and a page that takes
    long to arrive turns the chevron into a spinning segment. */
 @layer components {
   .chevron {

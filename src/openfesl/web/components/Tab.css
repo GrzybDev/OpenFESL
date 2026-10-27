@@ -1,4 +1,4 @@
-/* M3: a panel's tabs, cut at their top right corner like the game's; the chosen tab's accent
+/* A panel's tabs, cut at their top right corner like the game's; the chosen tab's accent
    slides between pages. */
 @layer components {
   /* On phones the tabs start under the title; elsewhere they sit at the right beside it. */

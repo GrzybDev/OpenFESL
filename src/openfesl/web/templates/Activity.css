@@ -176,7 +176,7 @@
     }
   }
 
-  /* M7: the bars grow from the bottom on first view, 20 ms apart, and a refresh moves them to
+  /* The bars grow from the bottom on first view, 20 ms apart, and a refresh moves them to
      their new heights. */
   .chart-bar {
     width: 100%;
