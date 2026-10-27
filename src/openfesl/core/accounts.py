@@ -317,8 +317,8 @@ class AccountService:
         assert connection.game is not None
         policies = await self._policies.of(connection.game)
         token = None
-        # The client string decides, not the client type the game declares, so a player cannot
-        # skip the game's entitlement by connecting as a dedicated server's client.
+        # The client the Hello stands for decides: a dedicated server's client logs in nothing
+        # but its server account, so posing as a server cannot skip the game's entitlement.
         if expected := connection.client.server_account:
             if connection.hello.client_type != "server":
                 raise TransactionError(INVALID_PASSWORD)

@@ -57,15 +57,16 @@ async def hello_error(
 async def test_hello_refuses_outdated_clients_and_players_during_maintenance(
     server_url: str, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    # These games send version 2.0, older than 2.10; the game names both refusals.
+    # The test games send version 2.0, older than 2.10; the game names both refusals. The
+    # dedicated server greets with the game's own client string, as R34 does.
     await cli(capsys, "settings", "set", "bfbc2.connect.minimum_client_version", "2.10")
     assert await hello_error(server_url, "bfbc2-pc") == "-254"
-    assert await hello_error(server_url, "bfbc2-pc-server", "server") == "0"
+    assert await hello_error(server_url, "bfbc2-pc", "server") == "0"
     await cli(capsys, "settings", "set", "bfbc2.connect.minimum_client_version", "2.0")
     assert await hello_error(server_url, "bfbc2-pc") == "0"
     await cli(capsys, "settings", "set", "bfbc2.connect.maintenance", "on")
     assert await hello_error(server_url, "bfbc2-pc") == "-253"
-    assert await hello_error(server_url, "bfbc2-pc-server", "server") == "0"
+    assert await hello_error(server_url, "bfbc2-pc", "server") == "0"
     await cli(capsys, "settings", "reset", "bfbc2.connect.maintenance")
     assert await hello_error(server_url, "bfbc2-pc") == "0"
     with pytest.raises(SystemExit, match="takes no value"):
@@ -78,7 +79,7 @@ async def test_hello_refuses_outdated_hooks_of_players_and_dedicated_servers(
     await cli(capsys, "settings", "set", "bfbc2.connect.minimum_hook_version", "0.2.0")
     old = "OpenFESLHook/0.1.0 (Windows)"
     assert await hello_error(server_url, "bfbc2-pc", user_agent=old) == "-254"
-    assert await hello_error(server_url, "bfbc2-pc-server", "server", user_agent=old) == "-254"
+    assert await hello_error(server_url, "bfbc2-pc", "server", user_agent=old) == "-254"
     assert await hello_error(server_url, "bfbc2-pc") == "-254"
     pre_release = "OpenFESLHook/0.2.0-dev (Windows)"
     assert await hello_error(server_url, "bfbc2-pc", user_agent=pre_release) == "-254"

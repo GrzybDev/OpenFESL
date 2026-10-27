@@ -45,6 +45,12 @@ def connect_routes(games: Games, policies: GamePolicies) -> dict[tuple[str, str]
             logger.warning("Refusing a FESL Hello from %s", request.client_string)
             raise TransactionError(SYSTEM_ERROR)
         game, client = found
+        name = request.client_string
+        # Some games' dedicated servers greet with the game's own client string and tell
+        # themselves apart by their client type.
+        if request.client_type == "server" and client.server_client:
+            name = client.server_client
+            client = game.clients[name]
         allowed = (await policies.of(game)).connect
         # Dedicated servers have versions of their own and retry without end when refused.
         if not client.server_account:
@@ -82,7 +88,7 @@ def connect_routes(games: Games, policies: GamePolicies) -> dict[tuple[str, str]
             ),
             activity_timeout_secs=0,
             cur_time=datetime.now(UTC),
-            theater_ip=THEATER_HOST.format(request.client_string),
+            theater_ip=THEATER_HOST.format(name),
             theater_port=client.theater_port,
         )
 

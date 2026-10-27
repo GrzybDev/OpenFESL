@@ -155,7 +155,7 @@ async def test_a_host_that_fills_every_field_still_fits_its_row_in_the_games_buf
     escaped = "%" * 300
     async with game(server_url) as server, game(server_url) as player:
         lkey = await log_in_server(server, FESL)
-        await server.open(THEATER, "bfbc2-pc-server.theater.ea.com", port=18326)
+        await server.open(THEATER, "bfbc2-pc-server.theater.ea.com", port=19026)
         connect = [("PROT", "2"), ("VERS", escaped), ("PLAT", escaped)]
         assert (await server.theater(THEATER, "CONN", connect)).error is None
         assert (await server.theater(THEATER, "USER", [("LKEY", lkey)])).error is None

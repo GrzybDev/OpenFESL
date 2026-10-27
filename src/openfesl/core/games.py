@@ -35,6 +35,9 @@ class Client(BaseModel):
             names one; none for dedicated servers.
         server_account: The account that every dedicated server of the game logs in with, as
             its game data names it; only dedicated servers may use it.
+        server_client: The client that a Hello with this client string stands for when it
+            declares the client type server, for dedicated servers that greet with the
+            game's own client string.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -42,6 +45,7 @@ class Client(BaseModel):
     theater_port: int
     entitlement: Grant | None = None
     server_account: str | None = None
+    server_client: str | None = None
 
 
 class Grant(BaseModel):
@@ -513,6 +517,19 @@ class Game(BaseModel):
         for code, insignia in self.stats.awards.insignias.items():
             if insignia.tier > len(self.theme.tiers):
                 raise ValueError(f"insignia {code} has tier {insignia.tier}, which the theme lacks")
+        return self
+
+    @model_validator(mode="after")
+    def _check_server_clients(self) -> Self:
+        for name, client in self.clients.items():
+            if client.server_client is None:
+                continue
+            server = self.clients.get(client.server_client)
+            if server is None or server.server_account is None:
+                raise ValueError(
+                    f"client {name} names {client.server_client} for its dedicated servers, "
+                    "which is no client with a server account"
+                )
         return self
 
 

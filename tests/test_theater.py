@@ -48,7 +48,7 @@ async def test_a_dedicated_server_logs_in_to_theater_and_learns_its_public_addre
 ) -> None:
     async with game(server_url) as server, game(server_url) as player:
         lkey = await log_in_server(server, FESL)
-        await server.open(THEATER, "bfbc2-pc-server.theater.ea.com", port=18326)
+        await server.open(THEATER, "bfbc2-pc-server.theater.ea.com", port=19026)
         connected = await server.theater(THEATER, "CONN", [("PROT", "2"), ("PLAT", "PC")])
         assert connected.error is None
         assert (connected.fields["activityTimeoutSecs"], connected.fields["PROT"]) == ("240", "2")
@@ -62,7 +62,7 @@ async def test_a_dedicated_server_logs_in_to_theater_and_learns_its_public_addre
         unknown = await server.theater(THEATER, "ZZZZ")
         assert unknown.error == "misc"
 
-        await server.open(DATAGRAMS, "bfbc2-pc-server.theater.ea.com", port=18326)
+        await server.open(DATAGRAMS, "bfbc2-pc-server.theater.ea.com", port=19026)
         echo = [("TID", "1"), ("TYPE", "1"), ("UID", "5")]
         await server.send_theater(DATAGRAMS, "ECHO", echo)
         answer = await server.theater_push(DATAGRAMS, "ECHO")
@@ -175,7 +175,7 @@ async def test_a_session_without_a_public_ipv4_address_can_neither_echo_host_nor
 ) -> None:
     async with game(server_url, {"CF-Connecting-IP": "2001:db8::7"}) as server:
         await enter_theater(server, THEATER, "bfbc2-pc-server", await log_in_server(server, FESL))
-        await server.open(DATAGRAMS, "bfbc2-pc-server.theater.ea.com", port=18326)
+        await server.open(DATAGRAMS, "bfbc2-pc-server.theater.ea.com", port=19026)
         await server.send_theater(DATAGRAMS, "ECHO", [("TID", "1"), ("TYPE", "1")])
 
         assert (await server.theater(THEATER, "CGAM", CREATE_GAME)).error == "misc"

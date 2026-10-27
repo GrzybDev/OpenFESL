@@ -21,13 +21,18 @@ config = "Win32Game.cfg"
 provider = "ProviderId.dat"
 identity = "serverid.dat"
 
-# A player needs the entitlement R34 servers check on every join, with its product.
+# A player needs the entitlement R34 servers check on every join, with its product. The R34
+# dedicated server greets with this client string too, declaring the client type server.
 [clients.bfbc2-pc]
 theater_port = 18395
 entitlement = { tag = "ONLINE_ACCESS", product = "DR:156691300" }
+server_client = "bfbc2-pc-server"
 
+# The R34 dedicated server's FESL and Theater hosts start with this client string, which its
+# -feslclient option also puts in its Hello. It opens Theater on port 19026 whatever the Hello
+# answer names.
 [clients.bfbc2-pc-server]
-theater_port = 18326
+theater_port = 19026
 server_account = "bfbc2.server.pc@ea.com"
 
 # How the services behave where the game handles more than one behaviour; the instance's

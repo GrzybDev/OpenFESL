@@ -35,6 +35,10 @@ type Update = tuple[int, str, str, str, str]
 FESL = ConnectionKey(Channel.FESL, 1)
 THEATER = ConnectionKey(Channel.THEATER, 1)
 
+# The Theater port and product of each client, as the game and the R34 dedicated server send
+# them; the server names the game's product on its own host.
+THEATER_CLIENTS = {"bfbc2-pc": (18395, "bfbc2-pc"), "bfbc2-pc-server": (19026, "bfbc2-pc")}
+
 # What the R34 dedicated server sends: no lobby, no attributes, empty UGID and SECRET.
 CREATE_GAME = [
     ("LID", "-1"),
@@ -274,8 +278,12 @@ async def log_in_again(game: Game, key: ConnectionKey, nuid: str, name: str) -> 
 
 
 async def log_in_server(game: Game, key: ConnectionKey) -> str:
-    """Log a dedicated server in to FESL with its persona and return the persona's key."""
-    await game.hello(key, "bfbc2-pc-server", client_type="server")
+    """Log a dedicated server in to FESL with its persona and return the persona's key.
+
+    It greets as the R34 release does, with the game's own client string and the client type
+    server.
+    """
+    await game.hello(key, "bfbc2-pc", client_type="server")
     await game.request(key, "acct", login("bfbc2.server.pc@ea.com", "from-game-data"))
     persona = [("TXN", "NuLoginPersona"), ("name", "bfbc2.server.p")]
     return (await game.request(key, "acct", persona))["lkey"]
@@ -283,8 +291,9 @@ async def log_in_server(game: Game, key: ConnectionKey) -> str:
 
 async def enter_theater(game: Game, key: ConnectionKey, client_string: str, lkey: str) -> None:
     """Open a Theater connection and log in with a persona key, as the game's SDK does."""
-    await game.open(key, f"{client_string}.theater.ea.com", port=18326)
-    connect = [("PROT", "2"), ("PROD", client_string), ("PLAT", "PC")]
+    port, product = THEATER_CLIENTS[client_string]
+    await game.open(key, f"{client_string}.theater.ea.com", port=port)
+    connect = [("PROT", "2"), ("PROD", product), ("PLAT", "PC")]
     connected = await game.theater(key, "CONN", connect)
     assert connected.error is None
     assert (await game.theater(key, "USER", [("LKEY", lkey), ("NAME", "")])).error is None

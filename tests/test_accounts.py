@@ -113,15 +113,20 @@ async def test_registration_and_login_refuse_what_the_game_must_correct(
         )
 
 
-async def test_dedicated_servers_share_the_server_account_of_their_game(server_url: str) -> None:
+async def test_dedicated_servers_share_the_server_account_that_players_cannot_use(
+    server_url: str,
+) -> None:
     async with game(server_url) as first, game(server_url) as second:
-        for server in (first, second):
-            await server.hello(FESL, "bfbc2-pc-server", client_type="server")
+        # The first greets as the R34 release does, the second as with -feslclient.
+        for server, client_string in ((first, "bfbc2-pc"), (second, "bfbc2-pc-server")):
+            await server.hello(FESL, client_string, client_type="server")
             answer = await server.request(FESL, "acct", login(SERVER_ACCOUNT, "from-game-data"))
             assert answer["nuid"] == SERVER_ACCOUNT
 
+        # A player's login would answer 101 for an unknown account, so a server's Hello with
+        # the game's client string never takes the player path.
         other = ConnectionKey(Channel.FESL, 2)
-        await first.hello(other, "bfbc2-pc-server", client_type="server")
+        await first.hello(other, "bfbc2-pc", client_type="server")
         refused = await first.request(other, "acct", login("someone@example.test", "secret"))
         assert refused["errorCode"] == "122"
         # Answered after the second server's login, so a Goodbye would have arrived by now.

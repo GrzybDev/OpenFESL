@@ -138,7 +138,7 @@ class FeslConnection:
         Args:
             hello: The game's Hello.
             game: The game its client string names.
-            client: The client string's settings.
+            client: The client the Hello stands for.
         """
         self.hello = hello
         self.game = game

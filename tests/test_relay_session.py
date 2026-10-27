@@ -31,11 +31,11 @@ pytestmark = pytest.mark.anyio
 SERVER_FESL = ConnectionKey(Channel.FESL, 1)
 OTHER_FESL = ConnectionKey(Channel.FESL, 2)
 
-# The dedicated server's Hello in the key order its SDK writes.
+# The R34 dedicated server's Hello as released, in the key order its SDK writes.
 SERVER_HELLO = [
     ("TXN", "Hello"),
-    ("clientString", "bfbc2-pc-server"),
-    ("sku", "125170"),
+    ("clientString", "bfbc2-pc"),
+    ("sku", "PC"),
     ("locale", "en_US"),
     ("clientPlatform", "PC"),
     ("clientVersion", "2.0"),
@@ -76,7 +76,7 @@ async def test_a_dedicated_server_is_greeted_and_kept_alive_while_other_connecti
         assert (key, answer.command, answer.kind, answer.number) == (SERVER_FESL, "fsys", 0x80, 1)
         assert fields["TXN"] == "Hello"
         assert fields["theaterIp"] == "bfbc2-pc-server.theater.ea.com"
-        assert fields["theaterPort"] == "18326"
+        assert fields["theaterPort"] == "19026"
         assert (fields["domainPartition.domain"], fields["domainPartition.subDomain"]) == (
             "eagames",
             "BFBC2",
