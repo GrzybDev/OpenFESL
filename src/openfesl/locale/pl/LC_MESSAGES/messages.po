@@ -6351,3 +6351,7 @@ msgstr "Gracz tego konta"
 
 msgid "web.admin.audit.action.deletion_request"
 msgstr "Prośba o usunięcie"
+
+#, python-brace-format
+msgid "web.deals.daily.name"
+msgstr "Okazja dnia: {faction}"

@@ -13,6 +13,7 @@ from support import fetch
 
 from openfesl.core.catalogues import Catalogues
 from openfesl.core.chests import ChestRefusal, ChestRefused, Chests
+from openfesl.core.deals import HotDeals
 from openfesl.core.drops import Drops
 from openfesl.core.games import Game, load_games
 from openfesl.core.heroes import Heroes
@@ -20,10 +21,12 @@ from openfesl.core.personas import Persona
 from openfesl.core.purchases import Purchases
 from openfesl.core.store import Product
 from openfesl.storage.catalogues import SqlCatalogueStore
+from openfesl.storage.deals import SqlDealStore
 from openfesl.storage.entitlements import SqlEntitlementStore
 from openfesl.storage.heroes import SqlHeroStore
 from openfesl.storage.personas import SqlPersonaStore
 from openfesl.storage.purchases import SqlPurchaseStore
+from openfesl.storage.settings import SqlSettingStore
 from openfesl.storage.stats import SqlStatStore
 from openfesl.storage.store import SqlProductStore
 
@@ -60,7 +63,8 @@ async def services(
     # A source of chance that gives the same drops on every run.
     drops = Drops(catalogues, entitlements, Random(20120625))
     products, paid = SqlProductStore(sessions), SqlPurchaseStore(sessions)
-    purchases = Purchases(products, paid, catalogues, heroes, entitlements, drops)
+    deals = HotDeals(products, SqlDealStore(sessions), SqlSettingStore(sessions), catalogues)
+    purchases = Purchases(products, paid, catalogues, heroes, entitlements, drops, deals)
     chests = Chests(products, paid, heroes, drops)
     yield Services(game, purchases, chests, SqlPersonaStore(sessions))
     await engine.dispose()

@@ -5,11 +5,12 @@ from typing import Annotated
 from fastapi import APIRouter, Path, Request
 from fastapi.responses import Response
 
+from openfesl.core.deals import Deal, HotDeals
 from openfesl.core.games import Game
 from openfesl.core.item_writes import ItemWrites
 from openfesl.core.magma import Magma
 from openfesl.core.purchases import Purchases
-from openfesl.core.store import Deal, Offer, Store
+from openfesl.core.store import Offer, Store
 from openfesl.protocol.magma import (
     BundleEntry,
     ProductEntry,
@@ -27,7 +28,12 @@ EntitlementId = Annotated[int, Path(alias="entitlementId")]
 
 
 def store_router(
-    game: Game, magma: Magma, store: Store, purchases: Purchases, writes: ItemWrites
+    game: Game,
+    magma: Magma,
+    store: Store,
+    deals: HotDeals,
+    purchases: Purchases,
+    writes: ItemWrites,
 ) -> APIRouter:
     """Return the routes of a game's store and of the items it sells on its Magma host.
 
@@ -35,6 +41,7 @@ def store_router(
         game: The game whose store they serve.
         magma: Answers about who asks.
         store: The games' stores.
+        deals: The stores' hot deals.
         purchases: Sells the stores' products.
         writes: Changes the items the heroes use.
     """
@@ -95,8 +102,8 @@ def store_router(
 
     # The game asks in the language of its menus, such as en.
     @router.get("/{language}/game/hotDeals")
-    async def deals(language: str) -> Response:
-        listed = await store.hot_deals(game, game.language_of(language))
+    async def hot(language: str) -> Response:
+        listed = await deals.hot_deals(game, game.language_of(language))
         entries = [_deal(deal) for deal in listed]
         return Response(hot_deals(entries), media_type=XML)
 
@@ -120,7 +127,7 @@ def _deal(deal: Deal) -> BundleEntry:
         name=deal.name,
         description=deal.description,
         tag=lead.ownership.tag(lead.item_id) if lead else "",
-        game_order=bundle.game_order,
+        game_order=deal.order,
         published=bundle.starts or listed.created,
         created=listed.created,
         random=bundle.box is not None,

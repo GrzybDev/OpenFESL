@@ -17,6 +17,7 @@ from pydantic import (
 
 from openfesl.core.catalogue import CatalogueRules
 from openfesl.core.chests import ChestRules
+from openfesl.core.deal_rules import DealRules
 from openfesl.core.game_pages import Listing, PageKind, Site, Stats, Theme
 from openfesl.core.hero_rules import HeroRules
 from openfesl.core.policies import Policies
@@ -239,6 +240,8 @@ class Game(BaseModel):
         currencies: The currencies of the players' wallets, by the code the game knows each by.
         store: How the game's store prices and sells the items of its catalogue; none for a
             game without one.
+        deals: How the store's hot deals change by themselves; none for a game whose hot deals
+            are the admin's alone.
         account_stats: The stats that belong to a player's account rather than to one of its
             personas, by patterns that their keys match whole.
         records: The records a persona may keep, by name, with the most entries each holds.
@@ -282,6 +285,7 @@ class Game(BaseModel):
     http: Http = Http()
     currencies: dict[str, Currency] = {}
     store: StoreRules | None = None
+    deals: DealRules | None = None
     account_stats: list[re.Pattern[str]] = []
     records: dict[str, int] = {}
     associations: dict[str, ListRule] = {}
@@ -419,6 +423,17 @@ class Game(BaseModel):
         for box in boxes:
             if box.faction not in {None, *factions} or box.hero_class not in {None, *classes}:
                 raise ValueError(f"the box {box.key} names a faction or class the heroes lack")
+        return self
+
+    @model_validator(mode="after")
+    def _check_deals(self) -> Self:
+        if self.deals is None:
+            return self
+        # Deals are priced from the store's products and made for the heroes' factions.
+        if self.store is None or self.heroes is None:
+            raise ValueError("hot deals need a store and heroes")
+        if self.deals.currency not in self.currencies:
+            raise ValueError(f"hot deals are priced in an unknown currency: {self.deals.currency}")
         return self
 
     @model_validator(mode="after")

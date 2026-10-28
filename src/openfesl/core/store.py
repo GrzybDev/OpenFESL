@@ -14,6 +14,10 @@ from openfesl.core.texts import BASE_LANGUAGE
 
 logger = logging.getLogger(__name__)
 
+# Who made a bundle: the admin, or the hot deals' rotation by itself.
+ADMIN = "admin"
+AUTO = "auto"
+
 
 @dataclass(frozen=True, slots=True)
 class NewProduct:
@@ -63,6 +67,7 @@ class Product:
         price: The price.
         original_price: The price before a sale, while it is on sale.
         sort: Its place among the products.
+        published: Whether it is sold alone, rather than only as a part of bundles and boxes.
     """
 
     id: int
@@ -72,6 +77,7 @@ class Product:
     price: int
     original_price: int | None
     sort: int
+    published: bool = True
 
 
 @dataclass(frozen=True, slots=True)
@@ -91,6 +97,10 @@ class Bundle:
         ends: Until when it is sold; for good when none.
         members: The numbers of the products it holds, which need not be sold alone.
         box: The number of the box of which it gives one product at random, if it is one.
+        section: The name of the hot deals' section it is listed in; after them when none.
+        pool: What the rotation picked it from, such as a set's name, which a later period
+            of its section does not pick again for a while.
+        source: Who made it: the admin, or the rotation by itself.
     """
 
     name: str
@@ -105,6 +115,9 @@ class Bundle:
     ends: datetime | None = None
     members: tuple[int, ...] = ()
     box: int | None = None
+    section: str | None = None
+    pool: str | None = None
+    source: str = ADMIN
 
 
 @dataclass(frozen=True, slots=True)
@@ -122,25 +135,6 @@ class ListedBundle:
     created: datetime
     bundle: Bundle
     members: list[Product]
-
-
-@dataclass(frozen=True, slots=True)
-class Deal:
-    """A bundle as a game lists it among its hot deals, in one language.
-
-    Attributes:
-        listed: The bundle.
-        product_id: The id the game buys it by.
-        name: Its name in the language.
-        description: What the game shows about it in the language.
-        members: Its products as offers, named in the language.
-    """
-
-    listed: ListedBundle
-    product_id: str
-    name: str
-    description: str
-    members: list[Offer]
 
 
 @dataclass(frozen=True, slots=True)
@@ -217,19 +211,12 @@ class ProductStore(Protocol):
             The bundle's number.
         """
 
-    async def bundles(self, game: str) -> list[ListedBundle]:
-        """Return the bundles a game's store sells now, in their order among the hot deals.
+    async def bundles(self, game: str, now: datetime) -> list[ListedBundle]:
+        """Return the bundles a game's store sells at a moment, by their order among the hot deals.
 
         Args:
             game: The game's data-file name.
-        """
-
-    async def bundle(self, game: str, number: int) -> ListedBundle | None:
-        """Return a bundle a game's store sells now, if it sells one by a number.
-
-        Args:
-            game: The game's data-file name.
-            number: The bundle's number.
+            now: The moment.
         """
 
     async def box(self, game: str, number: int) -> Box | None:
@@ -316,33 +303,6 @@ class Store:
             The bundle's number.
         """
         return await self._store.add_bundle(game.id, bundle)
-
-    async def hot_deals(self, game: Game, language: str) -> list[Deal]:
-        """Return the bundles a game's store sells now, named in a language.
-
-        A name or description that the game's texts lack is shown as it was given.
-
-        Args:
-            game: The game.
-            language: The language code; English where the game's texts lack it.
-        """
-        if game.store is None:
-            return []
-        catalogue = await self._catalogues.of(game, language)
-
-        def text(given: str | None) -> str:
-            return catalogue.text(given) or given if given else ""
-
-        return [
-            Deal(
-                listed,
-                game.store.product_id(listed.id),
-                text(listed.bundle.name),
-                text(listed.bundle.description),
-                [offer(game, catalogue, product) for product in listed.members],
-            )
-            for listed in await self._store.bundles(game.id)
-        ]
 
     async def _imported(self, action: LoggedAction) -> None:
         game = self._games.by_id(action.target)

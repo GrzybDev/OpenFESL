@@ -249,6 +249,8 @@ class StoreProductRow(Base):
 
 class StoreBundleRow(Base):
     __tablename__ = "store_bundle"
+    # One bundle of each pick of a section's period, however many servers make it at once.
+    __table_args__ = (UniqueConstraint("game", "section", "pool", "starts_at"),)
 
     id: Mapped[int] = mapped_column(BigInteger, STORE_ID, primary_key=True)
     game: Mapped[str]
@@ -270,6 +272,11 @@ class StoreBundleRow(Base):
     box_id: Mapped[int | None] = mapped_column(
         ForeignKey("store_box.id", ondelete="CASCADE"), index=True
     )
+    # The hot deals' section it is listed in, and what the rotation picked it from.
+    section: Mapped[str | None]
+    pool: Mapped[str | None]
+    # admin or auto, for the rotation's own.
+    source: Mapped[str] = mapped_column(server_default="admin")
 
 
 class StoreBundleMemberRow(Base):

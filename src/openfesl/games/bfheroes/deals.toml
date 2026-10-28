@@ -1,0 +1,21 @@
+# The hot deals' rotation: what the store's hot deals sell besides the admin's own offers, in
+# the sections of the autumn 2012 window, which the first look after a section's change makes
+# and the store keeps. Each switch, size and schedule below is a default that the setting
+# bfheroes.deals.<path> overrides, such as bfheroes.deals.sections.daily.enabled = off. Times are
+# the zone's midnights, a period's days counted from Mondays. Prices worked out from items end
+# in 99, as the store's did in 2012.
+[deals]
+enabled = true
+zone = "UTC"
+currency = "_PF"
+price_ending = 99
+
+# Deal of the Day: three clothing pieces of one faction, worn in three slots, 30% off for a day
+# (three pieces at -29% on 2012-08-28; single items at half price in 2010).
+[deals.sections.daily]
+kind = "items"
+schedule = { every = 1 }
+pieces = 3
+slots = ["hat", "facial", "neck", "body", "jacket", "hands", "legs", "feet", "waist"]
+discount = 30
+name = "web.deals.daily.name"

@@ -14,6 +14,7 @@ from openfesl.core.browsing import Browsing
 from openfesl.core.catalogues import Catalogues
 from openfesl.core.census import Census
 from openfesl.core.connect import connect_routes
+from openfesl.core.deals import HotDeals
 from openfesl.core.display_names import DisplayNames
 from openfesl.core.drops import Drops
 from openfesl.core.entitlements import EntitlementService
@@ -108,6 +109,7 @@ class GameServices:
         self.catalogues = Catalogues(stores.catalogues, icons, games)
         self.store = Store(stores.products, self.catalogues, games)
         drops = Drops(self.catalogues, stores.entitlements)
+        self.deals = HotDeals(stores.products, stores.deals, stores.settings, self.catalogues)
         self.purchases = Purchases(
             stores.products,
             stores.purchases,
@@ -115,6 +117,7 @@ class GameServices:
             self.heroes,
             stores.entitlements,
             drops,
+            self.deals,
         )
         self.item_writes = ItemWrites(stores.entitlements)
         self.policies = GamePolicies(stores.settings)

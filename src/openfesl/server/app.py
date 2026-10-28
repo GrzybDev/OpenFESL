@@ -105,7 +105,12 @@ def _add_middleware(
             [
                 servers_router(game, services.magma),
                 store_router(
-                    game, services.magma, services.store, services.purchases, services.item_writes
+                    game,
+                    services.magma,
+                    services.store,
+                    services.deals,
+                    services.purchases,
+                    services.item_writes,
                 ),
             ],
         )

@@ -6121,3 +6121,7 @@ msgstr "The account's player"
 
 msgid "web.admin.audit.action.deletion_request"
 msgstr "Deletion requested"
+
+#, python-brace-format
+msgid "web.deals.daily.name"
+msgstr "Deal of the Day: {faction}"

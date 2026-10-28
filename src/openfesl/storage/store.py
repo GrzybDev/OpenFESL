@@ -1,4 +1,5 @@
 from collections.abc import Collection, Sequence
+from datetime import datetime
 
 from sqlalchemy import ColumnElement, delete, exists, func, insert, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
@@ -107,7 +108,7 @@ class SqlProductStore:
                 )
                 .order_by(StoreProductRow.sort, StoreProductRow.id)
             )
-            return [_product(row) for row in rows]
+            return [product_of(row) for row in rows]
 
     async def product(self, game: str, number: int, account: bool = False) -> Product | None:
         """Return a product a game's store sells, if it lists one by a number.
@@ -126,7 +127,7 @@ class SqlProductStore:
                     StoreProductRow.account.is_(account),
                 )
             )
-            return _product(row) if row else None
+            return product_of(row) if row else None
 
     async def add_bundle(self, game: str, bundle: Bundle) -> int:
         """Add a bundle to a game's store.
@@ -154,6 +155,9 @@ class SqlProductStore:
                     starts_at=bundle.starts,
                     ends_at=bundle.ends,
                     box_id=bundle.box,
+                    section=bundle.section,
+                    pool=bundle.pool,
+                    source=bundle.source,
                 )
                 .returning(StoreBundleRow.id)
             )
@@ -165,32 +169,19 @@ class SqlProductStore:
                 )
             return number
 
-    async def bundles(self, game: str) -> list[ListedBundle]:
-        """Return the bundles a game's store sells now, in their order among the hot deals.
+    async def bundles(self, game: str, now: datetime) -> list[ListedBundle]:
+        """Return the bundles a game's store sells at a moment, by their order among the hot deals.
 
         Args:
             game: The game's data-file name.
+            now: The moment.
         """
-        return await self._bundles(StoreBundleRow.game == game)
-
-    async def bundle(self, game: str, number: int) -> ListedBundle | None:
-        """Return a bundle a game's store sells now, if it sells one by a number.
-
-        Args:
-            game: The game's data-file name.
-            number: The bundle's number.
-        """
-        found = await self._bundles(StoreBundleRow.game == game, StoreBundleRow.id == number)
-        return found[0] if found else None
-
-    async def _bundles(self, *chosen: ColumnElement[bool]) -> list[ListedBundle]:
-        now = func.now()
         async with self._sessions() as session:
             rows = list(
                 await session.scalars(
                     select(StoreBundleRow)
                     .where(
-                        *chosen,
+                        StoreBundleRow.game == game,
                         StoreBundleRow.published,
                         or_(StoreBundleRow.starts_at.is_(None), StoreBundleRow.starts_at <= now),
                         or_(StoreBundleRow.ends_at.is_(None), StoreBundleRow.ends_at > now),
@@ -206,29 +197,8 @@ class SqlProductStore:
             )
         held: dict[int, list[Product]] = {}
         for bundle_id, product in members:
-            held.setdefault(bundle_id, []).append(_product(product))
-        return [
-            ListedBundle(
-                row.id,
-                row.created_at,
-                Bundle(
-                    name=row.name,
-                    description=row.description,
-                    currency=row.currency,
-                    price=row.price,
-                    original_price=row.original_price,
-                    faction=row.faction,
-                    hero_class=row.hero_class,
-                    game_order=row.game_order,
-                    starts=row.starts_at,
-                    ends=row.ends_at,
-                    members=tuple(product.id for product in held.get(row.id, [])),
-                    box=row.box_id,
-                ),
-                held.get(row.id, []),
-            )
-            for row in rows
-        ]
+            held.setdefault(bundle_id, []).append(product_of(product))
+        return [_listed(row, held.get(row.id, [])) for row in rows]
 
     async def box(self, game: str, number: int) -> Box | None:
         """Return a box of a game's store with its drops, if it has one by a number.
@@ -272,10 +242,35 @@ class SqlProductStore:
                 hero_class=row.hero_class,
                 currency=row.currency,
                 drops=tuple(
-                    Drop(tier, weight, _product(product)) for tier, weight, product in drops
+                    Drop(tier, weight, product_of(product)) for tier, weight, product in drops
                 ),
-                fallback=_product(fallback) if fallback else None,
+                fallback=product_of(fallback) if fallback else None,
             )
+
+
+def _listed(row: StoreBundleRow, members: list[Product]) -> ListedBundle:
+    return ListedBundle(
+        row.id,
+        row.created_at,
+        Bundle(
+            name=row.name,
+            description=row.description,
+            currency=row.currency,
+            price=row.price,
+            original_price=row.original_price,
+            faction=row.faction,
+            hero_class=row.hero_class,
+            game_order=row.game_order,
+            starts=row.starts_at,
+            ends=row.ends_at,
+            members=tuple(product.id for product in members),
+            box=row.box_id,
+            section=row.section,
+            pool=row.pool,
+            source=row.source,
+        ),
+        members,
+    )
 
 
 async def _stock_boxes(session: AsyncSession, game: str, boxes: Sequence[NewBox]) -> None:
@@ -336,7 +331,12 @@ async def _lock(session: AsyncSession, game: str) -> None:
     await session.execute(select(func.pg_advisory_xact_lock(func.hashtext(f"store:{game}"))))
 
 
-def _product(row: StoreProductRow) -> Product:
+def product_of(row: StoreProductRow) -> Product:
+    """Return a product as a row of the store keeps it.
+
+    Args:
+        row: The row.
+    """
     return Product(
         id=row.id,
         item_id=row.item_id,
@@ -345,4 +345,5 @@ def _product(row: StoreProductRow) -> Product:
         price=row.price,
         original_price=row.original_price,
         sort=row.sort,
+        published=row.published,
     )

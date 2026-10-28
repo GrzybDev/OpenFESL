@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Protocol, TypeGuard
 
 from openfesl.core.catalogues import Catalogues, Item
+from openfesl.core.deals import HotDeals
 from openfesl.core.drops import Drops
 from openfesl.core.entitlements import EntitlementStore
 from openfesl.core.games import Game
@@ -130,6 +131,7 @@ class Purchases:
         heroes: Heroes,
         entitlements: EntitlementStore,
         drops: Drops,
+        deals: HotDeals,
     ) -> None:
         """Sell the products a store keeps, paid and given in another.
 
@@ -140,6 +142,7 @@ class Purchases:
             heroes: The heroes who buy, with their factions, classes and levels.
             entitlements: Where the items the heroes hold are kept.
             drops: Opens the boxes the heroes buy.
+            deals: The hot deals, which sell the bundles they list.
         """
         self._products = products
         self._store = store
@@ -147,6 +150,7 @@ class Purchases:
         self._heroes = heroes
         self._entitlements = entitlements
         self._drops = drops
+        self._deals = deals
 
     async def purchase(self, game: Game, persona: Persona, product_id: str) -> Offer | None:
         """Sell a hero a product, a bundle or a box of its game's store, for its price.
@@ -172,7 +176,7 @@ class Purchases:
         product = await self._products.product(game.id, number) if number is not None else None
         hero = await self._hero(game, persona)
         if product is None and number is not None:
-            listed = await self._products.bundle(game.id, number)
+            listed = await self._deals.bundle(game, number)
             if listed is None:
                 raise PurchaseRefused(UNKNOWN_PRODUCT)
             bundle = listed.bundle
