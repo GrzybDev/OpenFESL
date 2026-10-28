@@ -20,6 +20,7 @@ from openfesl.web.account.session import PlayerSessionMiddleware
 from openfesl.web.game_http import GameHttpMiddleware
 from openfesl.web.languages import LanguageMiddleware
 from openfesl.web.magma import magma_app
+from openfesl.web.magma_servers import servers_router
 from openfesl.web.pages import STATIC, Pages, StaticAssets
 from openfesl.web.security import SecurityHeadersMiddleware
 from openfesl.web.site import SiteBarMiddleware
@@ -96,5 +97,15 @@ def _add_middleware(
     )
     app.add_middleware(LanguageMiddleware)
     app.add_middleware(SecurityHeadersMiddleware)
-    magma = {game.http.magma: magma_app(game, services.magma) for game in games if game.http.magma}
+    magma = {
+        game.http.magma: magma_app(
+            game,
+            services.magma,
+            [
+                servers_router(game, services.magma),
+            ],
+        )
+        for game in games
+        if game.http.magma
+    }
     app.add_middleware(GameHttpMiddleware, http=services.game_http, magma=magma)

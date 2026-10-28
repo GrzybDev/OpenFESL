@@ -10,6 +10,7 @@ from openfesl.core.connection import Address, Connection, Outbox, PresenceOutbox
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Client, Game
 from openfesl.core.personas import NOT_LOGGED_IN, Persona
+from openfesl.core.relay_tokens import RelayTokens
 from openfesl.core.theater import Theater, TheaterConnection
 from openfesl.protocol.message import Message
 from openfesl.protocol.packet import Packet
@@ -180,6 +181,7 @@ class GameSession:
         theater: Theater,
         hook_version: str | None,
         rich_presence: RichPresence,
+        relay_tokens: RelayTokens,
     ) -> None:
         """Start a session for a game process.
 
@@ -190,6 +192,7 @@ class GameSession:
             theater: The Theater service its Theater connections and datagrams go to.
             hook_version: The version of OpenFESLHook that carries the game, when it names one.
             rich_presence: Sends the player's presence when the hook asks for it.
+            relay_tokens: Knows the session by its WebSocket's token until the session ends.
         """
         self.address = address
         self.hook_version = hook_version
@@ -202,6 +205,7 @@ class GameSession:
         self._players = players
         self._theater = theater
         self._rich_presence = rich_presence
+        self._relay_tokens = relay_tokens
         self._fesl: FeslConnection | None = None
         self._theater_connections: set[TheaterConnection] = set()
 
@@ -380,6 +384,7 @@ class GameSession:
 
     async def end(self) -> None:
         """Forget the session after all of its connections have closed."""
+        self._relay_tokens.forget(self)
         self._rich_presence.forget(self)
         self.forget_persona()
         self._players.log_out(self)

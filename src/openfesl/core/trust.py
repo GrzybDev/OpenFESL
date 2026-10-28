@@ -97,11 +97,22 @@ class ServerTrust:
             session: The session.
             account_id: The account.
         """
+        return await self.persona_of(session, account_id) is not None
+
+    async def persona_of(self, session: GameSession, account_id: int) -> Persona | None:
+        """Return the persona of an account whose data a dedicated server session keeps, if any.
+
+        A player in the game now comes before one that left it.
+
+        Args:
+            session: The session.
+            account_id: The account.
+        """
         hosted = self._served_by(session) if _server_login(session) else None
-        return (
-            hosted is not None
-            and any(persona.account_id == account_id for persona in _kept(hosted))
-            and await self._listed(hosted)
+        if hosted is None or not await self._listed(hosted):
+            return None
+        return next(
+            (persona for persona in _kept(hosted) if persona.account_id == account_id), None
         )
 
     def _served_by(self, session: GameSession) -> HostedGame | None:

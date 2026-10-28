@@ -2,6 +2,7 @@ import asyncio
 import itertools
 import logging
 import re
+import secrets
 from collections.abc import Awaitable, Callable
 
 from fastapi import WebSocket
@@ -39,8 +40,11 @@ _links: set[_Link] = set()
 
 # How the hook names itself in the handshake, such as OpenFESLHook/0.1.0 (Windows).
 _HOOK_AGENT = re.compile(r"OpenFESLHook/(\d+(?:\.\d+)*(?:-[0-9A-Za-z.-]+)?)(?:\s|$)")
+# The upgrade's answer header that hands the hook its WebSocket's token, which the hook then
+# sends with the game process's HTTP requests (relay protocol, Connection).
+RELAY_TOKEN_HEADER = "x-openfesl-relay-token"
 
-type SessionStarter = Callable[[WebSocket, str | None], Session]
+type SessionStarter = Callable[[WebSocket, str | None, str], Session]
 
 
 async def close_sessions(code: int, timeout: float = 5) -> None:
@@ -64,7 +68,8 @@ def relay_endpoint(start_session: SessionStarter) -> Callable[[WebSocket], Await
 
     Args:
         start_session: Creates the core's session for an accepted WebSocket, given the
-            version of the hook that opened it, when its User-Agent names one.
+            version of the hook that opened it, when its User-Agent names one, and the secret
+            token its upgrade was answered with.
     """
 
     async def endpoint(websocket: WebSocket) -> None:
@@ -72,9 +77,11 @@ def relay_endpoint(start_session: SessionStarter) -> Callable[[WebSocket], Await
             # Closing before the handshake makes the server answer 403.
             await websocket.close(_PROTOCOL_ERROR)
             return
-        await websocket.accept(SUBPROTOCOL)
+        token = secrets.token_urlsafe(32)
+        await websocket.accept(SUBPROTOCOL, headers=[(RELAY_TOKEN_HEADER.encode(), token.encode())])
+        # The session knows its token before anything else runs, so no request beats it.
         agent = _HOOK_AGENT.match(websocket.headers.get("user-agent", ""))
-        session = start_session(websocket, agent[1] if agent else None)
+        session = start_session(websocket, agent[1] if agent else None, token)
         await _Link(websocket, session).run()
 
     return endpoint

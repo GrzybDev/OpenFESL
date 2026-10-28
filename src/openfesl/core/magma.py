@@ -4,7 +4,8 @@ from openfesl.core.entitlements import Entitlement, EntitlementStore
 from openfesl.core.games import Game
 from openfesl.core.launcher import LauncherSession, LauncherSessions
 from openfesl.core.personas import Persona, PersonaStore
-from openfesl.core.session import Players
+from openfesl.core.relay_tokens import RelayTokens
+from openfesl.core.session import GameSession, Players
 from openfesl.core.trust import ServerTrust
 from openfesl.core.wallets import Wallets
 
@@ -24,6 +25,8 @@ UNKNOWN_SESSION = "UNKNOWN_SESSION"
 VALIDATION_FAILED = "VALIDATION_FAILED"
 USER_DOES_NOT_MATCH = "USER_DOES_NOT_MATCH"
 NOT_NUMERIC = "NOT_NUMERIC"
+# OpenFESL's own cause for a game process that asks what only a dedicated server may.
+NOT_A_SERVER = "NOT_A_SERVER"
 
 
 class MagmaError(Exception):
@@ -44,12 +47,14 @@ class MagmaError(Exception):
 class Magma:
     """Answers Magma about the personas of the account whose launcher session a cookie names.
 
-    A dedicated server's session also reads the personas whose data the server keeps.
+    A dedicated server's session also reads the personas whose data the server keeps, and its
+    calls without a session are known by the relay token of its game process.
     """
 
     def __init__(
         self,
         sessions: LauncherSessions,
+        relay_tokens: RelayTokens,
         players: Players,
         trust: ServerTrust,
         personas: PersonaStore,
@@ -60,6 +65,7 @@ class Magma:
 
         Args:
             sessions: The launcher's sign-ins, by session id.
+            relay_tokens: The game processes' relay sessions, by the token of their WebSocket.
             players: The game sessions that accounts are logged in on.
             trust: Which dedicated servers keep the data of which personas.
             personas: Where the personas are found.
@@ -67,6 +73,7 @@ class Magma:
             wallets: The balances the personas spend.
         """
         self._sessions = sessions
+        self._relay_tokens = relay_tokens
         self._players = players
         self._trust = trust
         self._personas = personas
@@ -90,6 +97,49 @@ class Magma:
             logger.info("A Magma request named an unknown launcher session")
             raise MagmaError(NOT_LOGGED_IN, UNKNOWN_SESSION)
         return session
+
+    async def server(self, relay_token: str | None, game: Game) -> GameSession:
+        """Return the dedicated server whose game process a request's relay token names.
+
+        Args:
+            relay_token: The token the hook added to the request; none when it added none.
+            game: The game whose Magma host was asked.
+
+        Raises:
+            MagmaError: When the request carries no token or one of no open relay session, or
+                the session is no dedicated server of the game hosting a game players see.
+        """
+        if not relay_token:
+            raise MagmaError(NOT_LOGGED_IN, NO_SESSION)
+        session = self._relay_tokens.find(relay_token)
+        if session is None:
+            logger.info("A Magma request carried the relay token of no open session")
+            raise MagmaError(NOT_LOGGED_IN, UNKNOWN_SESSION)
+        if session.game is not game or not await self._trust.serves(session):
+            logger.info("A game process that serves no game asked Magma as a dedicated server")
+            raise MagmaError(VALIDATION_FAILED, NOT_A_SERVER)
+        return session
+
+    async def name(self, relay_token: str | None, game: Game, account_id: int) -> str:
+        """Return the name an account plays as in the game a dedicated server hosts.
+
+        The name is the persona's, never the account's login name, which may be an address.
+
+        Args:
+            relay_token: The token the hook added to the request; none when it added none.
+            game: The game whose Magma host was asked.
+            account_id: The player's account.
+
+        Raises:
+            MagmaError: When the token names no dedicated server of the game, or the server
+                keeps no persona of the account.
+        """
+        server = await self.server(relay_token, game)
+        persona = await self._trust.persona_of(server, account_id)
+        if persona is None:
+            logger.info("A dedicated server asked Magma for the name of account %d", account_id)
+            raise MagmaError(VALIDATION_FAILED, USER_DOES_NOT_MATCH)
+        return persona.name
 
     async def entitlements(
         self, session_id: str | None, game: Game, persona_id: int, tag: str = ""

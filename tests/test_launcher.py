@@ -7,6 +7,7 @@ from support import FESL, cli, game, launcher_sign_in, log_in_player
 from openfesl.core.accounts import Account, AccountState
 from openfesl.core.launcher import LauncherSession, LauncherSessions
 from openfesl.core.personas import Persona
+from openfesl.core.relay_tokens import RelayTokens
 from openfesl.core.session import GameSession, Players
 
 if TYPE_CHECKING:
@@ -22,7 +23,9 @@ async def test_a_launcher_session_is_kept_while_its_account_plays_and_a_ttl_afte
     sessions = LauncherSessions(players, ttl=10.0, clock=lambda: now[0])
     session = LauncherSession(token="a-token", account_id=1, account_name="ann", persona_name="ann")
     # A dedicated server logged in with the account, which reads Magma only when players join.
-    server = GameSession({}, players, None, cast("Theater", None), None, cast("RichPresence", None))
+    server = GameSession(
+        {}, players, None, cast("Theater", None), None, cast("RichPresence", None), RelayTokens()
+    )
     server.account = Account(
         id=1,
         nuid="ann",

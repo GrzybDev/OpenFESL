@@ -14,7 +14,7 @@ from openfesl.core.personas import PersonaState
 from openfesl.core.policies import SITE_CONFIRMATION
 from openfesl.core.servers import HostingMode
 from openfesl.protocol.packet import MAX_SIZE
-from openfesl.relay.endpoint import close_sessions
+from openfesl.relay.endpoint import RELAY_TOKEN_HEADER, close_sessions
 from openfesl.server.commands import extract_catalogue, run
 from openfesl.server.health import DEFAULT_PORT
 from openfesl.server.settings import Settings
@@ -185,6 +185,15 @@ def main(argv: Sequence[str] | None = None) -> None:
 class RelayServer(uvicorn.Server):
     """Uvicorn, ending relay sessions with a close code the hook can read before it stops."""
 
+    def __init__(self, config: uvicorn.Config) -> None:
+        """Serve as Uvicorn does, with the relay tokens of WebSocket handshakes kept out of the log.
+
+        Args:
+            config: Uvicorn's settings.
+        """
+        super().__init__(config)
+        logging.getLogger("uvicorn.error").addFilter(_RELAY_TOKEN_MASK)
+
     async def shutdown(self, sockets: list[socket.socket] | None = None) -> None:
         """End every relay session with 1001, then stop as Uvicorn does.
 
@@ -223,6 +232,22 @@ class EmptyPingProtocol(WebSocketsSansIOProtocol):
             self.pong_timer = self.loop.call_later(self.ping_timeout, self.keepalive_timeout)
         else:
             self.schedule_ping()
+
+
+class _RelayTokenMask(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        # At DEBUG, the WebSocket library logs each header of a handshake as "> %s: %s".
+        args = record.args
+        if (
+            isinstance(args, tuple)
+            and len(args) == 2
+            and str(args[0]).lower() == RELAY_TOKEN_HEADER
+        ):
+            record.args = (args[0], "(masked)")
+        return True
+
+
+_RELAY_TOKEN_MASK = _RelayTokenMask()
 
 
 def uvicorn_config(host: str, port: int) -> uvicorn.Config:

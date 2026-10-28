@@ -89,6 +89,12 @@ class Game:
         self.frames: list[Frame] = []
         self._numbers: dict[ConnectionKey, int] = {}
 
+    @property
+    def relay_token(self) -> str | None:
+        """The token the server answered the WebSocket's upgrade with, if it sent one."""
+        response = self.websocket.response
+        return response.headers.get("X-OpenFESL-Relay-Token") if response else None
+
     async def open(self, key: ConnectionKey, host: str, port: int = 18390) -> None:
         body = struct.pack(">HHB", port, 50000 + key.number, len(host)) + host.encode("ascii")
         await self.websocket.send(struct.pack(">BBH", 1, key.channel, key.number) + body)

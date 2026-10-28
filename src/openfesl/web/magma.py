@@ -1,6 +1,7 @@
+from collections.abc import Sequence
 from typing import Annotated
 
-from fastapi import Cookie, FastAPI, Path, Query, Request
+from fastapi import APIRouter, Cookie, FastAPI, Path, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import Response
 
@@ -24,7 +25,7 @@ SessionId = Annotated[str | None, Cookie(alias="magma")]
 UserId = Annotated[int, Path(alias="userId")]
 
 
-def magma_app(game: Game, magma: Magma) -> FastAPI:
+def magma_app(game: Game, magma: Magma, routers: Sequence[APIRouter] = ()) -> FastAPI:
     """Return the application that answers a game's requests to its Magma host.
 
     The game reads the document and never the HTTP status: a <success> root or the list asked
@@ -34,6 +35,7 @@ def magma_app(game: Game, magma: Magma) -> FastAPI:
     Args:
         game: The game whose Magma host it answers.
         magma: Answers about who asks.
+        routers: The routes of the game's Magma areas beyond who asks, such as its store.
     """
     app = FastAPI(
         docs_url=None,
@@ -83,6 +85,8 @@ def magma_app(game: Game, magma: Magma) -> FastAPI:
     async def data_collection() -> Response:
         return _xml(success())
 
+    for router in routers:
+        app.include_router(router)
     return app
 
 

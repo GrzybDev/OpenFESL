@@ -40,6 +40,7 @@ from openfesl.core.presence import PresenceService
 from openfesl.core.proofs import ProofMail
 from openfesl.core.records import RecordService
 from openfesl.core.registration import Terms
+from openfesl.core.relay_tokens import RelayTokens
 from openfesl.core.rich_presence import RichPresence
 from openfesl.core.servers import Approval
 from openfesl.core.session import GameSession, Players
@@ -84,8 +85,10 @@ class GameServices:
         self.trust = ServerTrust(self.hosting, self.approval)
         self.wallets = Wallets(stores.wallets)
         self.heroes = Heroes(stores.heroes, stores.stats)
+        self._relay_tokens = RelayTokens()
         self.magma = Magma(
             self._launcher_sessions,
+            self._relay_tokens,
             self.players,
             self.trust,
             stores.personas,
@@ -221,14 +224,25 @@ class GameServices:
                 await follower
         await messages.close()
 
-    def start_session(self, websocket: WebSocket, hook_version: str | None) -> GameSession:
+    def start_session(
+        self, websocket: WebSocket, hook_version: str | None, relay_token: str
+    ) -> GameSession:
         """Create the core's session for a game that connected to the relay.
 
         Args:
             websocket: The accepted WebSocket that carries the game.
             hook_version: The version of the hook that opened it, when its User-Agent names one.
+            relay_token: The secret token the WebSocket's upgrade was answered with.
         """
         address = self._settings.client_address(websocket)
-        return GameSession(
-            self._routes, self.players, address, self._theater, hook_version, self.rich_presence
+        session = GameSession(
+            self._routes,
+            self.players,
+            address,
+            self._theater,
+            hook_version,
+            self.rich_presence,
+            self._relay_tokens,
         )
+        self._relay_tokens.add(relay_token, session)
+        return session

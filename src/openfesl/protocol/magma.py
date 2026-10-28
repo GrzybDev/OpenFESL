@@ -62,6 +62,17 @@ def token(value: str) -> bytes:
     return success(element)
 
 
+def name(value: str) -> bytes:
+    """Return the answer to nucleus/name, whose root the game requires to be exactly name.
+
+    Args:
+        value: The name.
+    """
+    root = Element("name")
+    root.text = value
+    return _document(root)
+
+
 def entitlements(entries: Iterable[EntitlementEntry]) -> bytes:
     """Return a list of entitlements, which the game reads whatever its root is named.
 
