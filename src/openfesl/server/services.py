@@ -12,6 +12,7 @@ from openfesl.core.associations import AssociationService
 from openfesl.core.browsing import Browsing
 from openfesl.core.census import Census
 from openfesl.core.connect import connect_routes
+from openfesl.core.display_names import DisplayNames
 from openfesl.core.entitlements import EntitlementService
 from openfesl.core.fesl import Route
 from openfesl.core.game_http import GameHttp
@@ -97,7 +98,7 @@ class GameServices:
 
         Args:
             app: The application, whose state hands the pages the launcher sign-in, the site's
-                sign-in with its e-mailed proofs, and its registration.
+                sign-in with its e-mailed proofs, its registration and the display names.
         """
         settings, games, stores = self._settings, self._games, self._stores
         routes, commands = self._routes, self._commands
@@ -137,6 +138,7 @@ class GameServices:
         app.state.proof_mail = ProofMail(
             stores.identities, stores.accounts, sign_in, outbox, mailings
         )
+        app.state.display_names = DisplayNames(stores.accounts, stores.personas, games)
         app.state.registration = WebRegistration(
             stores.accounts,
             stores.identities,

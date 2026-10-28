@@ -279,6 +279,28 @@ class SqlAccountStore:
             )
         return bool(taken)
 
+    async def name_account(self, account_id: int, name: str) -> bool:
+        """Give an account without a display name one.
+
+        Args:
+            account_id: The account.
+            name: The display name.
+
+        Returns:
+            Whether the account has it now, which it has not when another account uses it,
+            ignoring case.
+        """
+        try:
+            async with self._sessions.begin() as session:
+                await session.execute(
+                    update(AccountRow)
+                    .where(AccountRow.id == account_id, AccountRow.display_name.is_(None))
+                    .values(display_name=name)
+                )
+        except IntegrityError:
+            return False
+        return True
+
     async def accept_terms(self, account_id: int, version: str) -> None:
         """Record that an account accepted a version of the terms.
 

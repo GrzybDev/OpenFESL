@@ -25,6 +25,8 @@ WAITING = "waiting"
 # The answer of a service whose identity no account uses yet: the account to link it to after a
 # proof, or none for the step that creates one.
 PENDING = "pending"
+# The page where an account without a display name chooses one before any other of its pages.
+DISPLAY_NAME = "/account/display-name"
 # The notices' times, which the session keeps as ISO text.
 _TIMES = ("sent", "since", "expires", "last", "until")
 
@@ -44,6 +46,21 @@ def start(request: Request, account: Account, way: str) -> None:
         "way": way,
     }
     renew_form_token(request)
+
+
+def landing(request: Request, account: Account, back: str) -> RedirectResponse:
+    """Send a browser that has just signed an account in on to the page it is to open.
+
+    An account without a display name, as one made in a game, chooses one first.
+
+    Args:
+        request: The request that signed it in.
+        account: The account.
+        back: The page to open after signing in, if any; the account page when empty.
+    """
+    if account.display_name is None:
+        return open_page(request, DISPLAY_NAME, back)
+    return RedirectResponse(back or localize("/account", request.state.language), 303)
 
 
 def end(request: Request) -> None:
@@ -130,7 +147,7 @@ def proved(
         )
     else:
         toast(request, "web.account.toast.signed_in", account=name)
-    return RedirectResponse(back or localize("/account", request.state.language), 303)
+    return landing(request, account, back)
 
 
 def shown(notice: Mapping[str, Any] | None) -> dict[str, Any] | None:

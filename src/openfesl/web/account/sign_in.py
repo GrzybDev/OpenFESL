@@ -14,6 +14,7 @@ from openfesl.web.account.session import (
     SITE,
     WAITING,
     end,
+    landing,
     open_page,
     refused_notice,
     shown,
@@ -96,7 +97,7 @@ class SignInPages:
                 return await self._render(request, back, notice, address, status)
             request.session.pop(WAITING, None)
             start(request, account, way="")
-            return RedirectResponse(back or _account(request), 303)
+            return landing(request, account, back)
 
         @router.post("/sign-in/confirmation")
         async def confirmation(request: Request) -> Response:

@@ -1,0 +1,65 @@
+{#def next: str, account, made_in, value: str, suggestion, error: str, taken: bool, notice: str, played: list, personas: list, accepted: bool, services: list #}
+{# The display name that an account made in a game chooses once, at its first web sign-in: why it
+   is asked, the field filled in from a name the account plays under when one fits and is free,
+   and beside it what the account holds, which stays private. #}
+{% set title = _("web.account.display_name") %}
+<AccountPage :title="title"
+             :subtitle="_('web.account.display_name.subtitle')"
+             page="display_name">
+  <div class="account-page-main">
+    <Panel tag="form"
+           method="post"
+           :action="url('/account/display-name')"
+           aria-labelledby="display-name-bar"
+           class="enter-panel account-page-panel">
+      <CsrfField />
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+      {% if taken %}
+        <Alert :label="_('web.account.display_name.not_saved')" :title="_('web.account.display_name.taken')" glyph="warn" alert />
+      {% elif notice == "form" %}
+        <Alert :label="_('web.account.display_name.not_saved')" :title="_('web.account.notice.form')" glyph="warn" alert>{{ _("web.account.notice.form.text") }}</Alert>
+      {% endif %}
+      <Alert :label="_('web.account.display_name.first')" :title="_('web.account.display_name.made_in', game=made_in.name) if made_in else _('web.account.display_name.none')" glyph="tag">{{ _("web.account.display_name.why", personas=listed(personas)) }}</Alert>
+      <div class="account-page-form">
+        <Bar id="display-name-bar" :extra="_('web.account.public')" large>{{ title }}</Bar>
+        {% set note %}{% if suggestion %}{{ _("web.account.display_name.suggested", name=suggestion.name, game=_("games." ~ suggestion.game.id ~ ".short")) }} {% endif %}{{ _("web.account.display_name.rule") }}{% endset %}
+        <TextField id="display-name" name="display_name" autocomplete="nickname" pattern="[A-Za-z0-9_\\-]{4,16}" :minlength="4" :maxlength="16" :label="title" :value="value" :note="note" :error="error" />
+        <ActionButton :label="_('web.account.display_name.action')" :busy="_('web.account.display_name.busy')" />
+      </div>
+    </Panel>
+    <form method="post"
+          action="{{ url('/sign-out') }}"
+          class="account-page-after">
+      <CsrfField />
+      <FormButton icon="sign-out">{{ _("web.account.menu.sign_out") }}</FormButton>
+      <p class="body-text">{{ _("web.account.display_name.sign_out") }}</p>
+    </form>
+  </div>
+  <div class="account-page-side">
+    <section aria-labelledby="display-name-account">
+      <Bar id="display-name-account" :extra="_('web.account.private')" large>{{ _("web.account.display_name.account") }}</Bar>
+      <dl class="facts">
+        <Fact :label="_('web.account.address')" plain>
+          {{ account.nuid }}
+        </Fact>
+        {% if made_in %}
+          <Fact :label="_('web.account.display_name.made')">
+            <GameChip :of="made_in" />
+          </Fact>
+        {% endif %}
+        {% for entry in played %}
+          <Fact :label="_('games.' ~ entry.game.id ~ '.personas')|capitalize" plain>
+            {{ listed(entry.names) }}
+          </Fact>
+        {% endfor %}
+        <Fact :label="_('web.account.terms.short')">
+          {{ _("web.account.display_name.terms" if accepted else "web.account.display_name.terms.not") }}
+        </Fact>
+      </dl>
+    </section>
+    <p class="body-text side-note">
+      {{ _("web.account.display_name.after") }}
+      {% if services %}{{ _("web.account.display_name.after.services", services=listed(services)) }}{% endif %}
+    </p>
+  </div>
+</AccountPage>

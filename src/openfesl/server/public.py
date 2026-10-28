@@ -4,6 +4,7 @@ from openfesl.core.games import Games
 from openfesl.server.services import GameServices
 from openfesl.server.settings import Settings
 from openfesl.server.stores import Stores
+from openfesl.web.account.display_name import DisplayNamePages
 from openfesl.web.account.proof import ProofPages
 from openfesl.web.account.register import RegisterPages
 from openfesl.web.account.services import SignInServices
@@ -106,3 +107,12 @@ def include_public_routes(
     app.include_router(sign_in_services.routes())
     app.include_router(proof.routes())
     app.include_router(register.routes())
+    display_name = DisplayNamePages(
+        pages,
+        games,
+        stores.accounts.account,
+        lambda: app.state.display_names,
+        services.terms,
+        sign_in_services,
+    )
+    app.include_router(display_name.routes())

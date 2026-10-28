@@ -35,7 +35,8 @@ async def test_a_linked_identity_signs_in_at_once_and_a_new_one_goes_to_the_acco
         )
         plain.user = {"id": 4711, "login": "ann-plain"}
         signed_in = await sign_in_through(client, base, "plain", next="/pl/terms")
-        assert signed_in.headers["location"] == "/pl/terms"
+        # The account, made in a game, chooses its display name first and then goes on.
+        assert signed_in.headers["location"] == "/account/display-name?next=%2Fpl%2Fterms"
         assert "przez Invented Plain" in (await client.get(f"{base}/pl/terms")).text
         await sign_out(client, base)
 
@@ -124,11 +125,12 @@ async def test_a_verified_address_of_an_account_links_its_service_only_after_a_p
         linked = await client.post(
             f"{base}/sign-in/proof", data={"csrf": form_token(page.text), "password": PASSWORD}
         )
-        assert linked.headers["location"] == "/terms"
+        assert linked.headers["location"] == "/account/display-name?next=%2Fterms"
         shown = (await client.get(f"{base}/terms")).text
         assert "Invented Connect linked as ann-connect. Signed in as ann@example.test." in shown
         await sign_out(client, base)
-        assert (await sign_in_through(client, base, "connect")).headers["location"] == "/account"
+        signed_in = await sign_in_through(client, base, "connect")
+        assert signed_in.headers["location"] == "/account/display-name"
         await sign_out(client, base)
 
         # A linked service proves the account too, but only with the identity linked to it; the
@@ -217,7 +219,7 @@ async def test_a_link_sent_to_the_address_proves_the_account_once_its_page_is_co
             assert "Linking adds the Invented Connect account bob-connect" in page.text
             assert page.headers["cache-control"] == "no-store"
         used = await elsewhere.post(f"{base}{link}", data={"csrf": form_token(page.text)})
-        assert used.headers["location"] == "/account"
+        assert used.headers["location"] == "/account/display-name"
         shown = (await elsewhere.get(f"{base}/terms")).text
         assert "Invented Connect linked as bob-connect. Signed in as bob@example.test." in shown
         used = await elsewhere.post(f"{base}{link}", data={"csrf": form_token(page.text)})

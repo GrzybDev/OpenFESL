@@ -2408,6 +2408,9 @@ msgstr "Zalogowano jako %(account)s."
 msgid "web.account.toast.created"
 msgstr "Konto zostało utworzone."
 
+msgid "web.account.toast.named"
+msgstr "Zapisano nazwę wyświetlaną: %(name)s."
+
 msgid "web.admin.toast.failed"
 msgstr "Zmiana nie została zapisana. Spróbuj ponownie."
 
@@ -5021,3 +5024,66 @@ msgstr "Konto OpenFESL"
 
 msgid "web.account.confirm.unknown.text"
 msgstr "Link jest nieprawidłowy lub został już użyty. Potwierdzony adres nie wymaga dalszych działań."
+
+msgid "web.account.notice.needed"
+msgstr "Wymagane logowanie"
+
+msgid "web.account.notice.needed.title"
+msgstr "%(page)s wymaga zalogowanego konta."
+
+msgid "web.account.page.display_name"
+msgstr "Strona nazwy wyświetlanej"
+
+msgid "web.account.private"
+msgstr "Prywatne"
+
+msgid "web.account.display_name.subtitle"
+msgstr "Wybierana raz przez konta utworzone w grze"
+
+msgid "web.account.display_name.not_saved"
+msgstr "Nie zapisano"
+
+msgid "web.account.display_name.taken"
+msgstr "Inne konto używa tej nazwy wyświetlanej."
+
+msgid "web.account.display_name.first"
+msgstr "Pierwsze logowanie na stronie"
+
+msgid "web.account.display_name.made_in"
+msgstr "To konto zostało utworzone w grze %(game)s i nie ma jeszcze nazwy wyświetlanej."
+
+msgid "web.account.display_name.none"
+msgstr "To konto nie ma jeszcze nazwy wyświetlanej."
+
+msgid "web.account.display_name.why"
+msgstr "Profile, rankingi i listy znajomych pokazują nazwę wyświetlaną; %(personas)s zachowują swoje nazwy. Można ją później zmienić na stronie konta."
+
+msgid "web.account.display_name.suggested"
+msgstr "Wpisana na podstawie nazwy %(name)s, której konto używa w %(game)s; spełnia zasady i jest wolna."
+
+msgid "web.account.display_name.action"
+msgstr "Zapisz nazwę wyświetlaną"
+
+msgid "web.account.display_name.busy"
+msgstr "Zapisywanie"
+
+msgid "web.account.display_name.sign_out"
+msgstr "Wylogowanie zostawia konto bez nazwy wyświetlanej; następne logowanie na stronie zapyta o nią ponownie. Gry działają bez zmian."
+
+msgid "web.account.display_name.account"
+msgstr "To konto"
+
+msgid "web.account.display_name.made"
+msgstr "Utworzone w"
+
+msgid "web.account.display_name.terms"
+msgstr "Aktualna wersja zaakceptowana"
+
+msgid "web.account.display_name.terms.not"
+msgstr "Aktualna wersja jeszcze niezaakceptowana"
+
+msgid "web.account.display_name.after"
+msgstr "Po zapisaniu otworzy się strona konta."
+
+msgid "web.account.display_name.after.services"
+msgstr "Można na niej łączyć usługi takie jak %(services)s."

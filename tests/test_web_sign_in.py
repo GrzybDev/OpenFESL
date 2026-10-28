@@ -41,7 +41,11 @@ async def test_an_account_made_in_a_game_signs_in_with_its_address_and_game_pass
             assert f'value="{address}"' in refused.text
 
         signed_in = await post_sign_in(client, base, "ANN@example.test", PASSWORD)
-        assert (signed_in.status_code, signed_in.headers["location"]) == (303, "/account")
+        # An account made in a game chooses its display name before any other page.
+        assert (signed_in.status_code, signed_in.headers["location"]) == (
+            303,
+            "/account/display-name",
+        )
         menu = markup((await client.get(f"{base}/pl")).content)
         assert "Brak nazwy wyświetlanej" in menu and "adresem e-mail" in menu
         assert 'href="/pl/account/display-name"' in menu and 'href="/pl/account"' not in menu
@@ -49,7 +53,8 @@ async def test_an_account_made_in_a_game_signs_in_with_its_address_and_game_pass
 
         await execute(
             database_url,
-            "UPDATE account SET display_name = 'Invented_Ann' WHERE nuid = 'ann@example.test'",
+            "UPDATE account SET display_name = 'Invented_' || initcap(split_part(nuid, '@', 1))"
+            " WHERE nuid IN ('ann@example.test', 'bob@example.test')",
         )
         menu = markup((await client.get(f"{base}/terms")).content)
         assert "Invented_Ann" in menu and "with the e-mail address" in menu

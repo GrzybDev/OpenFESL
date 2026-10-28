@@ -1,5 +1,5 @@
-/* The proof's page: the account's address as a fact over the game password, one black row per
-   linked service, and the way back under the panel. */
+/* The proof's page: the account's address as a fact over the game password and one black row per
+   linked service. */
 @layer pages {
   .proof-fact {
     display: flex;
@@ -100,19 +100,6 @@
     letter-spacing: 0;
     text-transform: none;
     overflow-wrap: anywhere;
-  }
-
-  .proof-cancel {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px 14px;
-    margin-top: 10px;
-
-    p {
-      flex: 1 1 260px;
-      color: var(--soft);
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {

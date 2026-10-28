@@ -52,6 +52,21 @@
     }
   }
 
+  /* A form under the panel that leaves the page, such as Cancel, with the sentence that explains
+     it beside the button. */
+  .account-page-after {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+    margin-top: 10px;
+
+    p {
+      flex: 1 1 260px;
+      color: var(--soft);
+    }
+  }
+
   /* A block joined to the bar above it. */
   .account-page-joined {
     margin-top: 2px;

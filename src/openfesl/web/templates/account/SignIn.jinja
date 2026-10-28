@@ -47,6 +47,8 @@
           <Alert :label="_('web.account.notice.deactivated')" :title="_('web.account.notice.deactivated.title')" glyph="lock" alert>{{ _("web.account.notice.deactivated.text", date=when(notice.since, "yMMMd")) }}</Alert>
         {% elif kind == "signed_out" %}
           <Alert :label="_('web.account.notice.signed_out')" :title="_('web.account.notice.signed_out.title')" glyph="tick">{{ _("web.account.notice.signed_out.text") }}{% if services %} {{ _("web.account.notice.signed_out.services") }}{% endif %}</Alert>
+        {% elif kind == "needed" %}
+          <Alert :label="_('web.account.notice.needed')" :title="_('web.account.notice.needed.title', page=_('web.account.page.' ~ notice.page))" glyph="user">{{ _("web.account.notice.next") }}</Alert>
         {% elif kind == "expired" %}
           <Alert :label="_('web.account.notice.expired')" :title="_('web.account.notice.expired.title')" glyph="clock">{% if next %}{{ _("web.account.notice.next") }}{% endif %}</Alert>
         {% else %}

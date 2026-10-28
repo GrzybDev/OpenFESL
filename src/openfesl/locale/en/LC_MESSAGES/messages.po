@@ -2360,6 +2360,9 @@ msgstr "Signed in as %(account)s."
 msgid "web.account.toast.created"
 msgstr "Account created."
 
+msgid "web.account.toast.named"
+msgstr "Display name saved: %(name)s."
+
 msgid "web.admin.toast.failed"
 msgstr "The change was not saved. Try again."
 
@@ -4889,3 +4892,66 @@ msgstr "OpenFESL account"
 
 msgid "web.account.confirm.unknown.text"
 msgstr "The link is not valid or has been used already. A confirmed address needs nothing more."
+
+msgid "web.account.notice.needed"
+msgstr "Sign-in needed"
+
+msgid "web.account.notice.needed.title"
+msgstr "%(page)s needs a signed-in account."
+
+msgid "web.account.page.display_name"
+msgstr "The display name page"
+
+msgid "web.account.private"
+msgstr "Private"
+
+msgid "web.account.display_name.subtitle"
+msgstr "Asked once for accounts made in a game"
+
+msgid "web.account.display_name.not_saved"
+msgstr "Not saved"
+
+msgid "web.account.display_name.taken"
+msgstr "Another account uses this display name."
+
+msgid "web.account.display_name.first"
+msgstr "First sign-in on the web"
+
+msgid "web.account.display_name.made_in"
+msgstr "This account was made in %(game)s and has no display name yet."
+
+msgid "web.account.display_name.none"
+msgstr "This account has no display name yet."
+
+msgid "web.account.display_name.why"
+msgstr "Profiles, leaderboards and friends lists show the display name; %(personas)s keep their own names. The account page can change it later."
+
+msgid "web.account.display_name.suggested"
+msgstr "Filled in from %(name)s, a name the account plays under in %(game)s, which fits the rules and is free."
+
+msgid "web.account.display_name.action"
+msgstr "Save display name"
+
+msgid "web.account.display_name.busy"
+msgstr "Saving"
+
+msgid "web.account.display_name.sign_out"
+msgstr "Signing out leaves the account without a display name; the next web sign-in asks again. Games are not affected."
+
+msgid "web.account.display_name.account"
+msgstr "This account"
+
+msgid "web.account.display_name.made"
+msgstr "Made in"
+
+msgid "web.account.display_name.terms"
+msgstr "Current version accepted"
+
+msgid "web.account.display_name.terms.not"
+msgstr "Current version not accepted yet"
+
+msgid "web.account.display_name.after"
+msgstr "After saving, the account page opens."
+
+msgid "web.account.display_name.after.services"
+msgstr "It links services such as %(services)s."

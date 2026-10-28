@@ -119,7 +119,7 @@
     </Panel>
     <form method="post"
           action="{{ url('/sign-in/proof/cancel') }}"
-          class="proof-cancel">
+          class="account-page-after">
       <CsrfField />
       <FormButton icon="x">{{ _("web.account.proof.cancel") }}</FormButton>
       <p class="body-text">{{ _("web.account.proof.cancel.text", service=service.name) }}</p>

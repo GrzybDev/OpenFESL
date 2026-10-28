@@ -210,6 +210,18 @@ class AccountStore(Protocol):
             name: The display name.
         """
 
+    async def name_account(self, account_id: int, name: str) -> bool:
+        """Give an account without a display name one.
+
+        Args:
+            account_id: The account.
+            name: The display name.
+
+        Returns:
+            Whether the account has it now, which it has not when another account uses it,
+            ignoring case.
+        """
+
     async def accept_terms(self, account_id: int, version: str) -> None:
         """Record that an account accepted a version of the terms.
 

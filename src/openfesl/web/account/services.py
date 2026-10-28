@@ -13,6 +13,7 @@ from openfesl.web.account.session import (
     PENDING,
     SITE,
     WAITING,
+    landing,
     open_page,
     pending_identity,
     proved,
@@ -190,7 +191,7 @@ class SignInServices:
             return RedirectResponse(localize(target, language), 303)
         request.session.pop(WAITING, None)
         start(request, account, way=service.name)
-        return RedirectResponse(back or localize("/account", language), 303)
+        return landing(request, account, back)
 
     async def _proved(
         self, request: Request, service: SignInService, answer: ServiceAnswer
