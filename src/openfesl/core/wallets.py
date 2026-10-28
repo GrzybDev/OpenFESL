@@ -2,8 +2,11 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Protocol
 
-from openfesl.core.games import Game, Scope
+from openfesl.core.games import Credits, Game, Scope
 from openfesl.core.personas import Persona
+
+# Games keep a balance in a signed 32-bit integer, so no balance may pass this.
+MOST_BALANCE = 2**31 - 1
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,6 +55,21 @@ class WalletStore(Protocol):
             wallets: The wallets.
         """
 
+    async def credit_from_server(
+        self, wallet: Wallet, amount: int, transaction: str, credits: Credits
+    ) -> int | None:
+        """Credit a wallet with what a dedicated server sends, up to the most its window allows.
+
+        Args:
+            wallet: The wallet.
+            amount: The amount the server sends.
+            transaction: The id the server gave the credit.
+            credits: What servers may credit to the wallet within a window.
+
+        Returns:
+            The balance, or None when the ledger holds the transaction id already.
+        """
+
 
 class Wallets:
     """The balances that players spend in the currencies of their games."""
@@ -76,17 +94,29 @@ class Wallets:
             game: The persona's game.
             persona: The persona.
         """
-        wallets = [
-            Wallet(
-                game.id,
-                code,
-                persona.account_id,
-                persona.id if currency.scope is Scope.PERSONA else None,
-                currency.allowance,
-            )
-            for code, currency in game.currencies.items()
-        ]
+        wallets = [_wallet(game, persona, code) for code in game.currencies]
         return dict(zip(game.currencies, await self._store.balances(wallets), strict=True))
+
+    async def credit_from_server(
+        self, game: Game, persona: Persona, code: str, amount: int, transaction: str
+    ) -> int | None:
+        """Credit what a dedicated server says a persona earned, as far as the currency allows.
+
+        Args:
+            game: The persona's game.
+            persona: The persona, whose data the server keeps.
+            code: The currency, one that the game's servers may credit.
+            amount: The amount the server sends.
+            transaction: The id the server gave the credit, which is credited once.
+
+        Returns:
+            The balance, or None when the credit with that id was credited already.
+        """
+        credits = game.currencies[code].credits
+        assert credits is not None
+        return await self._store.credit_from_server(
+            _wallet(game, persona, code), amount, transaction, credits
+        )
 
     async def of_personas(
         self, game: Game, personas: Sequence[Persona], code: str
@@ -120,3 +150,10 @@ class Wallets:
             for code in codes
         ]
         return await self._store.peek(wallets)
+
+
+def _wallet(game: Game, persona: Persona, code: str) -> Wallet:
+    # A persona spends its account's balance in a currency that the account's personas share.
+    currency = game.currencies[code]
+    owner = persona.id if currency.scope is Scope.PERSONA else None
+    return Wallet(game.id, code, persona.account_id, owner, currency.allowance)

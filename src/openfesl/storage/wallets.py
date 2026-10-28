@@ -1,14 +1,18 @@
 from collections.abc import Sequence
+from datetime import timedelta
 
 from sqlalchemy import ColumnElement, and_, func, or_, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from openfesl.core.wallets import Wallet
+from openfesl.core.games import Credits
+from openfesl.core.wallets import MOST_BALANCE, Wallet
 from openfesl.storage.models import WalletEntryRow, WalletRow
 
-# The ledger's reason for the amount that a wallet opens with.
+# The ledger's reasons for the amount that a wallet opens with and for a dedicated server's
+# credit.
 ALLOWANCE = "allowance"
+SERVER = "server"
 
 
 class SqlWalletStore:
@@ -73,6 +77,32 @@ class SqlWalletStore:
             )
             found = {(row[0], row[1], row[2], row[3]): int(row[4]) for row in rows}
         return [found.get(_key(wallet), wallet.allowance) for wallet in wallets]
+
+    async def credit_from_server(
+        self, wallet: Wallet, amount: int, transaction: str, credits: Credits
+    ) -> int | None:
+        """Credit a wallet with what a dedicated server sends, up to the most its window allows.
+
+        Args:
+            wallet: The wallet.
+            amount: The amount the server sends.
+            transaction: The id the server gave the credit.
+            credits: What servers may credit to the wallet within a window.
+
+        Returns:
+            The balance, or None when the ledger holds the transaction id already.
+        """
+        async with self._sessions.begin() as session:
+            wallet_id, _ = await _locked(session, wallet)
+            credited = await session.scalar(
+                select(func.coalesce(func.sum(WalletEntryRow.delta), 0)).where(
+                    WalletEntryRow.wallet_id == wallet_id,
+                    WalletEntryRow.reason == SERVER,
+                    WalletEntryRow.created_at > func.now() - timedelta(seconds=credits.within),
+                )
+            )
+            allowed = min(amount, credits.most - int(credited or 0))
+            return await credit(session, wallet, allowed, SERVER, transaction)
 
 
 async def open_wallets(session: AsyncSession, wallets: Sequence[Wallet]) -> None:
@@ -143,6 +173,53 @@ async def spend(session: AsyncSession, wallet: Wallet, amount: int, reason: str)
     return int(balance)
 
 
+async def credit(
+    session: AsyncSession, wallet: Wallet, amount: int, reason: str, transaction: str | None = None
+) -> int | None:
+    """Add an amount to a wallet, opening it first, and record it in its ledger.
+
+    The wallet is locked while it changes, and its balance never passes the most a game holds:
+    the ledger records what was added. A transaction id that the ledger holds already, also one
+    that another credit commits meanwhile, adds nothing.
+
+    Args:
+        session: The transaction to credit in.
+        wallet: The wallet.
+        amount: The amount; one below zero adds nothing.
+        reason: Why, as the ledger keeps it.
+        transaction: The id the credit's sender gave it, which the ledger keeps once; none for
+            a credit without one.
+
+    Returns:
+        The balance, or None when the ledger holds the transaction id already.
+    """
+    wallet_id, balance = await _locked(session, wallet)
+    added = max(0, min(amount, MOST_BALANCE - balance))
+    entry = {
+        "wallet_id": wallet_id,
+        "delta": added,
+        "balance": balance + added,
+        "reason": reason,
+        "transaction": transaction,
+    }
+    recorded = await session.scalar(
+        insert(WalletEntryRow)
+        .values(entry)
+        .on_conflict_do_nothing(
+            index_elements=[WalletEntryRow.transaction],
+            index_where=WalletEntryRow.transaction.is_not(None),
+        )
+        .returning(WalletEntryRow.id)
+    )
+    if recorded is None:
+        return None
+    if added:
+        await session.execute(
+            update(WalletRow).where(WalletRow.id == wallet_id).values(balance=balance + added)
+        )
+    return balance + added
+
+
 async def grant_up_to(session: AsyncSession, wallet: Wallet, total: int, reason: str) -> None:
     """Credit a wallet with what a reason has yet to grant it of a total, taking none back.
 
@@ -155,26 +232,25 @@ async def grant_up_to(session: AsyncSession, wallet: Wallet, total: int, reason:
         total: What the reason grants the wallet in all.
         reason: Why, as the ledger keeps it.
     """
-    await open_wallets(session, [wallet])
-    wallet_id = await session.scalar(
-        select(WalletRow.id).where(_matching([wallet])).with_for_update()
-    )
+    wallet_id, _ = await _locked(session, wallet)
     granted = await session.scalar(
         select(func.coalesce(func.sum(WalletEntryRow.delta), 0)).where(
             WalletEntryRow.wallet_id == wallet_id, WalletEntryRow.reason == reason
         )
     )
     missing = total - int(granted or 0)
-    if missing <= 0:
-        return
-    balance = await session.scalar(
-        update(WalletRow)
-        .where(WalletRow.id == wallet_id)
-        .values(balance=WalletRow.balance + missing)
-        .returning(WalletRow.balance)
+    if missing > 0:
+        await credit(session, wallet, missing, reason)
+
+
+async def _locked(session: AsyncSession, wallet: Wallet) -> tuple[int, int]:
+    # Opened first, so that there is a row to lock; returns its id and balance.
+    await open_wallets(session, [wallet])
+    locked = await session.execute(
+        select(WalletRow.id, WalletRow.balance).where(_matching([wallet])).with_for_update()
     )
-    entry = {"wallet_id": wallet_id, "delta": missing, "balance": balance, "reason": reason}
-    await session.execute(insert(WalletEntryRow).values(entry))
+    wallet_id, balance = locked.one()
+    return wallet_id, balance
 
 
 def _key(wallet: Wallet) -> tuple[str, str, int, int | None]:

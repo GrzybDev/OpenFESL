@@ -6,7 +6,14 @@ from importlib.resources import files
 from importlib.resources.abc import Traversable
 from typing import Self
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    NonNegativeInt,
+    PositiveInt,
+    field_validator,
+    model_validator,
+)
 
 from openfesl.core.catalogue import CatalogueRules
 from openfesl.core.game_pages import Listing, PageKind, Site, Stats, Theme
@@ -175,18 +182,36 @@ class Scope(StrEnum):
     PERSONA = "persona"
 
 
+class Credits(BaseModel):
+    """What a game's dedicated servers may credit to a balance in a currency.
+
+    Attributes:
+        most: The most they credit to one balance within the window; a credit beyond it is
+            credited up to it.
+        within: The window, in seconds.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    most: NonNegativeInt
+    within: PositiveInt
+
+
 class Currency(BaseModel):
     """A currency that a game's players spend from their wallets.
 
     Attributes:
         scope: Who holds a balance in it.
         allowance: What each balance in it starts with.
+        credits: What the game's dedicated servers may credit to its balances; none for a
+            currency they may not credit.
     """
 
     model_config = ConfigDict(frozen=True)
 
     scope: Scope
     allowance: int = 0
+    credits: Credits | None = None
 
 
 class Game(BaseModel):

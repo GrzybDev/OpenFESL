@@ -7,7 +7,7 @@ from openfesl.core.personas import Persona, PersonaStore
 from openfesl.core.relay_tokens import RelayTokens
 from openfesl.core.session import GameSession, Players
 from openfesl.core.trust import ServerTrust
-from openfesl.core.wallets import Wallets
+from openfesl.core.wallets import MOST_BALANCE, Wallets
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +25,16 @@ UNKNOWN_SESSION = "UNKNOWN_SESSION"
 VALIDATION_FAILED = "VALIDATION_FAILED"
 USER_DOES_NOT_MATCH = "USER_DOES_NOT_MATCH"
 NOT_NUMERIC = "NOT_NUMERIC"
-# OpenFESL's own cause for a game process that asks what only a dedicated server may.
+# OpenFESL's own causes for a game process that asks what only a dedicated server may, and for
+# a credit of a currency, amount or id that no server may send.
 NOT_A_SERVER = "NOT_A_SERVER"
+INVALID_CREDIT = "INVALID_CREDIT"
+# The original service's refusal of a credit whose id it credited already, which a game tells
+# apart from other refusals by its cause.
+INTERNAL_ERROR = "INTERNAL_ERROR"
+DUPLICATE_TRANSACTION_UUID = "DUPLICATE_TRANSACTION_UUID"
+# The id of a credit is a GUID that the game formats, far shorter than this.
+MOST_TRANSACTION = 64
 
 
 class MagmaError(Exception):
@@ -140,6 +148,52 @@ class Magma:
             logger.info("A dedicated server asked Magma for the name of account %d", account_id)
             raise MagmaError(VALIDATION_FAILED, USER_DOES_NOT_MATCH)
         return persona.name
+
+    async def credit(
+        self,
+        relay_token: str | None,
+        game: Game,
+        persona_id: int,
+        code: str,
+        amount: int,
+        transaction: str,
+    ) -> None:
+        """Credit what a dedicated server says that a player's persona earned in its game.
+
+        Args:
+            relay_token: The token the hook added to the request; none when it added none.
+            game: The game whose Magma host was asked.
+            persona_id: The persona.
+            code: The currency.
+            amount: The amount.
+            transaction: The id the server gave the credit, which is credited once.
+
+        Raises:
+            MagmaError: When the token names no dedicated server of the game, the server keeps
+                no such persona, the game's servers may not credit the currency, the amount or
+                id does not fit, or the credit with that id was credited already.
+        """
+        server = await self.server(relay_token, game)
+        persona = await self._personas.find_by_id(persona_id)
+        if (
+            persona is None
+            or persona.namespace != game.namespace
+            or not await self._trust.keeps_persona(server, persona.id)
+        ):
+            logger.info(
+                "A dedicated server credited persona %d, which it keeps no data of", persona_id
+            )
+            raise MagmaError(VALIDATION_FAILED, USER_DOES_NOT_MATCH)
+        currency = game.currencies.get(code)
+        if (
+            currency is None
+            or currency.credits is None
+            or not 1 <= amount <= MOST_BALANCE
+            or len(transaction) > MOST_TRANSACTION
+        ):
+            raise MagmaError(VALIDATION_FAILED, INVALID_CREDIT)
+        if await self._wallets.credit_from_server(game, persona, code, amount, transaction) is None:
+            raise MagmaError(INTERNAL_ERROR, DUPLICATE_TRANSACTION_UUID)
 
     async def entitlements(
         self, session_id: str | None, game: Game, persona_id: int, tag: str = ""

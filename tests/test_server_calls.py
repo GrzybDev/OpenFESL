@@ -1,12 +1,19 @@
+import asyncio
 import logging
 import secrets
+import uuid
 from xml.etree import ElementTree
 
 import anyio
 import pytest
-from heroes import MAGMA, create_hero, start
+from accounts import select_value
+from heroes import MAGMA, create_hero, start, wallets
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from support import THEATER, Game, TheaterAnswer, cli, fetch, game, let_in
 from test_player_servers import SERVER_GAME, register, until_listed
+
+from openfesl.core.wallets import Wallet
+from openfesl.storage.wallets import credit
 
 pytestmark = [pytest.mark.anyio, pytest.mark.usefixtures("prompt_decisions")]
 
@@ -103,3 +110,64 @@ async def test_a_dedicated_server_looks_up_its_players_hero_names_by_its_relay_t
     )
     assert "x-openfesl-relay-token: (masked)" in logged
     assert token not in logged and ann.relay_token not in logged
+
+
+async def test_a_dedicated_server_credits_a_rounds_valor_once_within_its_cap(
+    server_url: str, database_url: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    await make_heroes(server_url, (PLAYER, "Bramble"), (HOST, "Keeper"))
+    # Ann's second hero stays out of the server's game.
+    briar = await create_hero(server_url.replace("ws://", "http://").rstrip("/"), PLAYER, "Briar")
+    async with game(server_url) as ann, game(server_url) as server:
+        cookie, account, hero = await start(server_url, ann, PLAYER)
+        created, _ = await host(server_url, server)
+        await approve(capsys, server, ann, created)
+        token = server.relay_token
+
+        async def send(code: str, amount: int, transaction: str, persona: int = hero) -> bytes:
+            path = f"/nucleus/wallets/{persona}/{code}/{amount}/{transaction}"
+            return await ask(server_url, path, token, post=True)
+
+        first = str(uuid.uuid4())
+        credited = await send("_DV", 250, first)
+        repeated = await send("_DV", 250, first)
+        # Two sends of one credit at once, as a retry might, credit it once.
+        twice = await asyncio.gather(*(send("_DV", 100, "retried-round") for _ in range(2)))
+        beyond_cap = await send("_DV", 900, str(uuid.uuid4()))
+        # Hero Points come with levels, so a server's are recorded and credited 0.
+        hero_points = await send("_DH", 3, str(uuid.uuid4()))
+        refused = [
+            await send("_PF", 100, str(uuid.uuid4())),
+            await send("_DV", 0, str(uuid.uuid4())),
+            await send("_DV", 2**31, str(uuid.uuid4())),
+            await send("_DV", 5, "x" * 65),
+            await send("_DV", 5, str(uuid.uuid4()), persona=briar),
+        ]
+        balances = await wallets(server_url, cookie, hero)
+
+        # Whatever credits a balance, it never passes the game's 32-bit balance.
+        engine = create_async_engine(database_url)
+        funds = Wallet("bfheroes", "_PF", account, None, 2500)
+        async with async_sessionmaker(engine).begin() as session:
+            topped = [await credit(session, funds, amount, "reward") for amount in (2**31, 5)]
+        await engine.dispose()
+        topped_up = await wallets(server_url, cookie, hero)
+
+    assert credited == b"<success />"
+    assert repeated == (
+        b'<error code="INTERNAL_ERROR"><failure cause="DUPLICATE_TRANSACTION_UUID" /></error>'
+    )
+    assert sorted(cause(body) or "" for body in twice) == ["", "DUPLICATE_TRANSACTION_UUID"]
+    assert cause(beyond_cap) is None and cause(hero_points) is None
+    assert [cause(body) for body in refused] == [*["INVALID_CREDIT"] * 4, "USER_DOES_NOT_MATCH"]
+    assert balances == {"_DH": 0, "_DV": 1000, "_PF": 2500}
+    ledger = await select_value(
+        database_url,
+        "SELECT string_agg(currency || ':' || reason || ':' || delta, ' ' ORDER BY wallet_entry.id)"
+        " FROM wallet_entry JOIN wallet ON wallet.id = wallet_id"
+        " WHERE account_id = :account AND currency <> '_PF'",
+        account=account,
+    )
+    assert ledger == "_DV:server:250 _DV:server:100 _DV:server:650 _DH:server:0"
+    assert topped == [2**31 - 1, 2**31 - 1]
+    assert topped_up["_PF"] == 2**31 - 1

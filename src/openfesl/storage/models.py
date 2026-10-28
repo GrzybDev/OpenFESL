@@ -12,6 +12,7 @@ from sqlalchemy import (
     SmallInteger,
     UniqueConstraint,
     func,
+    text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -189,6 +190,15 @@ class WalletRow(Base):
 
 class WalletEntryRow(Base):
     __tablename__ = "wallet_entry"
+    # A credit's sender gives it an id so that it is credited once, however often it is sent.
+    __table_args__ = (
+        Index(
+            "wallet_entry_transaction_key",
+            "transaction",
+            unique=True,
+            postgresql_where=text('"transaction" IS NOT NULL'),
+        ),
+    )
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
     wallet_id: Mapped[int] = mapped_column(ForeignKey("wallet.id", ondelete="CASCADE"), index=True)
@@ -197,6 +207,7 @@ class WalletEntryRow(Base):
     balance: Mapped[int] = mapped_column(BigInteger)
     reason: Mapped[str]
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    transaction: Mapped[str | None]
 
 
 class ProductKeyRow(Base):

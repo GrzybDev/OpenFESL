@@ -44,9 +44,15 @@ magma = "www.battlefieldheroes.com"
 # of, so each account starts with an allowance of this server's choosing.
 [currencies._DH]
 scope = "persona"
+# Dedicated servers credit a round's Hero Points at its end, but a hero earns its points with its
+# levels here, so theirs are recorded and credited 0 (BFHeroes.exe 1.89 0x00696ea9).
+credits = { most = 0, within = 600 }
 
 [currencies._DV]
 scope = "account"
+# A round's missions pay 10 to 90 Valor Points each, team awards more and a booster doubles them,
+# which dedicated servers credit at the round's end (0x00696ea9).
+credits = { most = 1000, within = 600 }
 
 [currencies._PF]
 scope = "account"

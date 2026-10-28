@@ -5,8 +5,8 @@ from fastapi.responses import Response
 
 from openfesl.core.games import Game
 from openfesl.core.magma import Magma
-from openfesl.protocol.magma import name
-from openfesl.web.magma import XML
+from openfesl.protocol.magma import name, success
+from openfesl.web.magma import XML, UserId
 
 # The token of the relay session whose game process sent a request, which the hook adds while
 # the process's WebSocket is open.
@@ -29,5 +29,16 @@ def servers_router(game: Game, magma: Magma) -> APIRouter:
     @router.get("/nucleus/name/{userId}")
     async def player_name(account_id: AccountId, relay_token: RelayToken = None) -> Response:
         return Response(name(await magma.name(relay_token, game, account_id)), media_type=XML)
+
+    @router.post("/nucleus/wallets/{userId}/{currency}/{amount}/{transaction}")
+    async def credit(
+        persona_id: UserId,
+        currency: str,
+        amount: int,
+        transaction: str,
+        relay_token: RelayToken = None,
+    ) -> Response:
+        await magma.credit(relay_token, game, persona_id, currency, amount, transaction)
+        return Response(success(), media_type=XML)
 
     return router
