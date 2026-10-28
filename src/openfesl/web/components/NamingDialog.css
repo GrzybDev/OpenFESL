@@ -1,8 +1,24 @@
-/* The creator's naming part: the name field whose edge and status line follow the server's
-   answer, and the starting kit of each faction and class. */
+/* The creator's naming step: the class and faction, the name field whose edge and status line
+   follow the check, and the starting kit of the chosen class. */
 @layer components {
-  .naming {
-    margin-top: 30px;
+  .naming-who {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+    font: 800 16px/1.25 var(--site-heading);
+  }
+
+  .naming-disc {
+    display: grid;
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border: 2px solid #000;
+    border-radius: 50%;
+    background: var(--faction);
+    color: var(--faction-ink);
   }
 
   .naming-label {
@@ -50,6 +66,7 @@
     font-weight: 700;
     line-height: 1.35;
     color: #5c4a3c;
+    animation: site-fade-in 120ms linear;
 
     &:is([data-check="format"], [data-check="taken"], [data-check="refused"]) {
       color: #8c1e18;
@@ -68,9 +85,23 @@
     display: grid;
     gap: 4px;
     font-weight: 400;
+
+    .js & > [data-other] {
+      display: none;
+    }
   }
 
   .naming-kit-who {
     font-weight: 700;
+
+    .js & {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .name-status {
+      animation-duration: 100ms;
+    }
   }
 }

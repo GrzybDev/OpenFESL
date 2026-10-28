@@ -14,6 +14,7 @@ import "@fontsource/urbanist/800.css";
 import "./base.css";
 import "./styles.js";
 import { closeMenu } from "./site.js";
+import "./creator.js";
 import "htmx.org";
 
 // A chevron block whose page takes longer than 300 ms to arrive shows that it is loading, and

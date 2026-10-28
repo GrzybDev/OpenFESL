@@ -20,13 +20,13 @@ from openfesl.core.texts import localize, translate_count
 from openfesl.web.account.session import signed_in
 from openfesl.web.pages import Pages, listed
 from openfesl.web.sessions import form_matches, form_token
-from openfesl.web.site import site_bar
+from openfesl.web.site import NAME_CHECK, site_bar
 
 CREATOR = "/user/createHero"
 
 
 class CreatorPages:
-    """The site's hero creator and the page of a hero just created."""
+    """The site's hero creator, the page of a hero just created and the check of a wanted name."""
 
     def __init__(self, pages: Pages, games: Games, heroes: Heroes, catalogues: Catalogues) -> None:
         """Prepare the creator of each game whose heroes are made on its site.
@@ -43,7 +43,7 @@ class CreatorPages:
         self._catalogues = catalogues
 
     def routes(self) -> APIRouter:
-        """Return each game's creator and its page of a created hero."""
+        """Return each game's creator, its page of a created hero and its check of names."""
         router = APIRouter()
         for game in self._games:
             if game.heroes:
@@ -52,6 +52,7 @@ class CreatorPages:
                     base + CREATOR, self._creator(game), response_class=HTMLResponse
                 )
                 router.add_api_route(base + CREATOR, self._create(game), methods=["POST"])
+                router.add_api_route(base + NAME_CHECK, self._check(game))
                 router.add_api_route(
                     base + "/heroes/{hero_id}/created",
                     self._created(game),
@@ -84,6 +85,15 @@ class CreatorPages:
             return RedirectResponse(target, 303)
 
         return create
+
+    def _check(self, game: Game) -> Callable[[Request, str], Awaitable[Response]]:
+        async def check_name(request: Request, name: str = "") -> Response:
+            checked = await self._heroes.check(game, name.strip())
+            return self._pages.render(
+                request, "heroes.NameCheck", game=game, name=name.strip(), check=checked.value
+            )
+
+        return check_name
 
     def _created(self, game: Game) -> Callable[[Request, int], Awaitable[Response]]:
         async def show_created(request: Request, hero_id: int) -> Response:

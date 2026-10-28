@@ -10,6 +10,9 @@ from openfesl.core.heroes import Heroes, Roster
 from openfesl.core.wallets import Wallets
 from openfesl.web.pages import Player
 
+# The check of a hero name as it is typed, which a script asks for and which shows no page.
+NAME_CHECK = "/heroes/name"
+
 
 @dataclass(frozen=True, slots=True)
 class SiteBar:
@@ -73,7 +76,8 @@ class SiteBarMiddleware:
             game = self._games.get(scope["path"].split("/")[1])
             if player and game:
                 state["read_site_bar"] = partial(self._bar, game, player)
-                if scope["method"] == "GET":
+                checked = scope["path"] == f"/{game.id}{NAME_CHECK}"
+                if scope["method"] == "GET" and not checked:
                     state["site_bar"] = await self._bar(game, player)
         await self._app(scope, receive, send)
 

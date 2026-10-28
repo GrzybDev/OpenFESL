@@ -137,6 +137,9 @@ msgstr "No hero yet"
 msgid "web.bar.create"
 msgstr "Create a hero"
 
+msgid "web.dialog.close"
+msgstr "Close"
+
 msgid "web.slots.title"
 msgstr "Hero slots"
 
@@ -194,11 +197,44 @@ msgstr "The hero was not created: the form had expired. No hero slot was used, a
 msgid "web.creator.who"
 msgstr "%(hero_class)s of the %(faction)s"
 
+msgid "web.creator.bubble"
+msgstr "Reporting for duty!"
+
+msgid "web.creator.bubble.who"
+msgstr "%(who)s."
+
+msgid "web.creator.bubble.right"
+msgstr "Faction and class change on the right."
+
+msgid "web.creator.bubble.below"
+msgstr "Faction and class change below."
+
+msgid "web.creator.figure"
+msgstr "Skin tone %(skin)s, hair colour %(hair_colour)s, %(hair)s, %(beard)s."
+
+msgid "web.creator.figure.hair"
+msgstr "hair style %(style)s"
+
+msgid "web.creator.figure.no_hair"
+msgstr "no hair"
+
+msgid "web.creator.figure.beard"
+msgstr "facial hair %(style)s"
+
+msgid "web.creator.figure.no_beard"
+msgstr "no facial hair"
+
+msgid "web.creator.figure.caption"
+msgstr "The game shows the hero with its own models."
+
 msgid "web.creator.faction"
 msgstr "Faction"
 
 msgid "web.creator.class"
 msgstr "Class"
+
+msgid "web.creator.look"
+msgstr "Hair style and facial hair"
 
 msgid "web.creator.hair_style"
 msgstr "Hair style"
@@ -218,6 +254,9 @@ msgstr "Style %(number)s"
 msgid "web.creator.none"
 msgstr "None"
 
+msgid "web.creator.look.note"
+msgstr "%(faction)s styles. Each list keeps its place when the faction changes."
+
 msgid "web.creator.skin_tone"
 msgstr "Skin tone"
 
@@ -233,6 +272,12 @@ msgstr "Hair colour %(n)s of %(count)s"
 msgid "web.creator.of"
 msgstr "%(n)s of %(count)s"
 
+msgid "web.creator.surprise"
+msgstr "Surprise me"
+
+msgid "web.creator.done"
+msgstr "I'm done"
+
 msgid "web.creator.naming"
 msgstr "Name the hero"
 
@@ -242,11 +287,20 @@ msgstr "Hero name"
 msgid "web.creator.name.hint"
 msgstr "2 to 16 letters, digits, _ or -. Names ignore capitals, so Mossgrove and mossgrove are one name."
 
+msgid "web.creator.name.checking"
+msgstr "Checking %(name)s …"
+
 msgid "web.creator.name.format"
 msgstr "Use 2 to 16 letters, digits, _ or -."
 
+msgid "web.creator.name.taken"
+msgstr "%(name)s is taken. Names ignore capitals."
+
 msgid "web.creator.name.refused"
 msgstr "%(name)s was taken a moment earlier. No hero slot was used."
+
+msgid "web.creator.name.free"
+msgstr "%(name)s is free."
 
 msgid "web.creator.slot"
 msgstr "Hero slot"
@@ -284,8 +338,20 @@ msgstr "%(count)s emote"
 msgid "web.creator.kit.emotes.other"
 msgstr "%(count)s emotes"
 
+msgid "web.creator.ready"
+msgstr "Ready: %(name)s takes slot %(slot)s."
+
+msgid "web.creator.needs.name"
+msgstr "Still needed: a name."
+
+msgid "web.creator.needs.free"
+msgstr "Still needed: a free name."
+
 msgid "web.creator.create"
 msgstr "Create hero"
+
+msgid "web.creator.back"
+msgstr "Back"
 
 msgid "web.created.title"
 msgstr "Hero created"

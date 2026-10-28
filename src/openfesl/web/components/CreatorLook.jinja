@@ -1,17 +1,47 @@
 {#def rules, look #}
-{# The creator's look on parchment: the hair styles and facial hair of each faction, and the skin
-   tone and hair colour swatches. #}
+{# The creator's look on parchment: the hair styles and facial hair of each faction as numbered
+   tiles behind two tabs, and the skin tone and hair colour swatches. #}
+{% set faction = rules.factions[look.faction] %}
 <div class="creator-look">
   <svg aria-hidden="true" focusable="false" class="site-texture">
     <rect width="100%" height="100%" filter="url(#site-parchment)" />
     <rect width="100%" height="100%" filter="url(#site-grain)" />
   </svg>
-  {% for field, lists in [("hair_style", "hair_styles"), ("facial_hair", "facial_hair")] %}
-    <div class="look-panel">
+  <div role="tablist"
+       aria-label="{{ _('web.creator.look') }}"
+       class="look-tabs js-only">
+    <button type="button"
+            role="tab"
+            id="tab-hair"
+            aria-selected="true"
+            aria-controls="look-hair"
+            class="look-tab">
+      <Icon name="hair" :size="24" stroke="currentColor" />
+      {{ _("web.creator.hair_style") }}
+    </button>
+    <button type="button"
+            role="tab"
+            id="tab-beard"
+            aria-selected="false"
+            aria-controls="look-beard"
+            tabindex="-1"
+            class="look-tab">
+      <Icon name="beard" :size="24" stroke="currentColor" />
+      {{ _("web.creator.facial_hair") }}
+    </button>
+  </div>
+  {% for part, field, lists in [("hair", "hair_style", "hair_styles"), ("beard", "facial_hair", "facial_hair")] %}
+    <div role="tabpanel"
+         id="look-{{ part }}"
+         aria-labelledby="tab-{{ part }}"
+         data-look="{{ part }}"
+         class="look-panel">
       {% for faction_id, choice in rules.factions.items() %}
         {% set items = choice[lists] %}
         {% set chosen = look[field] if faction_id == look.faction else -1 %}
-        <fieldset class="look-list">
+        <fieldset data-for="{{ faction_id }}"
+                  {% if faction_id != look.faction %} data-other{% endif %}
+                  class="look-list">
           <legend class="look-legend">{{ _("web.creator." ~ field ~ ".of", faction=_("games." ~ game.id ~ ".faction." ~ faction_id)) }}</legend>
           <div class="look-grid">
             {% for item in [0] + items %}
@@ -19,10 +49,9 @@
                 <input type="radio"
                        name="{{ field }}"
                        value="{{ item }}"
+                       data-place="{{ loop.index0 }}"
                        {% if item == chosen %} checked{% endif %}>
-                <span class="look-face">
-                  <span>{{ _("web.creator.style", number=loop.index0) if loop.index0 else _("web.creator.none") }}</span>
-                </span>
+                <span class="look-face">{{ _("web.creator.style", number=loop.index0) if loop.index0 else _("web.creator.none") }}</span>
               </label>
             {% endfor %}
           </div>
@@ -30,11 +59,16 @@
       {% endfor %}
     </div>
   {% endfor %}
+  <p class="look-note js-only">
+    <span aria-hidden="true"
+          class="look-note-disc"><Icon :name="faction.glyph" :size="13" stroke="currentColor" /></span>
+    <span data-look-note>{{ _("web.creator.look.note", faction=_("games." ~ game.id ~ ".faction." ~ look.faction)) }}</span>
+  </p>
   {% for field, count, order, attribute in [("skin_tone", rules.skin_tones|length, rules.skin_order, "data-skin"), ("hair_colour", rules.hair_colours|length, rules.hair_order, "data-hair-colour")] %}
     <fieldset class="swatches">
       <legend>
         <span class="swatch-label">{{ _("web.creator." ~ field) }}</span>
-        <span class="swatch-value">{{ _("web.creator.of", n=look[field], count=count) }}</span>
+        <span data-swatch-value class="swatch-value">{{ _("web.creator.of", n=look[field], count=count) }}</span>
       </legend>
       <div class="swatch-row">
         {% for value in order %}

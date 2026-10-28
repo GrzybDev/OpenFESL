@@ -13,6 +13,14 @@ from openfesl.core.stats import PERSONA, Owner, StatStore, bucket_of, partition_
 from openfesl.protocol.rank import Period
 
 
+class NameCheck(StrEnum):
+    """What a wanted hero name meets: the naming rule broken, a name in use, or a free one."""
+
+    FORMAT = "format"
+    TAKEN = "taken"
+    FREE = "free"
+
+
 class Refusal(StrEnum):
     """Why a hero was not created."""
 
@@ -156,6 +164,14 @@ class HeroStore(Protocol):
             namespace: The game's persona namespace.
         """
 
+    async def taken(self, namespace: str, name: str) -> bool:
+        """Tell whether a persona has a name, ignoring capitals, those taken out of use too.
+
+        Args:
+            namespace: The namespace.
+            name: The name.
+        """
+
     async def create(self, hero: NewHero) -> Persona:
         """Store a hero with its stats and items; the account's first becomes its default.
 
@@ -216,6 +232,19 @@ class Heroes:
                 )
             )
         return Roster(heroes, rules.slots, records.default_id)
+
+    async def check(self, game: Game, name: str) -> NameCheck:
+        """Tell whether a name may be given to a new hero.
+
+        Args:
+            game: The game, which has hero rules.
+            name: The wanted name.
+        """
+        if not re.fullmatch(_rules(game).name, name):
+            return NameCheck.FORMAT
+        if await self._store.taken(game.namespace, name):
+            return NameCheck.TAKEN
+        return NameCheck.FREE
 
     async def create(self, game: Game, account_id: int, look: Look, name: str) -> Persona:
         """Create a hero with its starting stats and items.

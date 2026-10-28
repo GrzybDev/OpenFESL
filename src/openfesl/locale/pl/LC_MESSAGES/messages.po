@@ -140,6 +140,9 @@ msgstr "Jeszcze bez bohatera"
 msgid "web.bar.create"
 msgstr "Utwórz bohatera"
 
+msgid "web.dialog.close"
+msgstr "Zamknij"
+
 msgid "web.slots.title"
 msgstr "Miejsca na bohaterów"
 
@@ -209,11 +212,44 @@ msgstr "Bohater nie powstał: formularz wygasł. Żadne miejsce nie zostało uż
 msgid "web.creator.who"
 msgstr "%(hero_class)s · %(faction)s"
 
+msgid "web.creator.bubble"
+msgstr "Melduję się na służbę!"
+
+msgid "web.creator.bubble.who"
+msgstr "%(who)s."
+
+msgid "web.creator.bubble.right"
+msgstr "Frakcję i klasę zmienia się po prawej."
+
+msgid "web.creator.bubble.below"
+msgstr "Frakcję i klasę zmienia się poniżej."
+
+msgid "web.creator.figure"
+msgstr "Odcień skóry %(skin)s, kolor włosów %(hair_colour)s, %(hair)s, %(beard)s."
+
+msgid "web.creator.figure.hair"
+msgstr "fryzura %(style)s"
+
+msgid "web.creator.figure.no_hair"
+msgstr "bez włosów"
+
+msgid "web.creator.figure.beard"
+msgstr "zarost %(style)s"
+
+msgid "web.creator.figure.no_beard"
+msgstr "bez zarostu"
+
+msgid "web.creator.figure.caption"
+msgstr "Gra pokazuje bohatera za pomocą własnych modeli."
+
 msgid "web.creator.faction"
 msgstr "Frakcja"
 
 msgid "web.creator.class"
 msgstr "Klasa"
+
+msgid "web.creator.look"
+msgstr "Fryzura i zarost"
 
 msgid "web.creator.hair_style"
 msgstr "Fryzura"
@@ -233,6 +269,9 @@ msgstr "Styl %(number)s"
 msgid "web.creator.none"
 msgstr "Brak"
 
+msgid "web.creator.look.note"
+msgstr "Style: %(faction)s. Każda lista zachowuje wybraną pozycję po zmianie frakcji."
+
 msgid "web.creator.skin_tone"
 msgstr "Odcień skóry"
 
@@ -248,6 +287,12 @@ msgstr "Kolor włosów %(n)s z %(count)s"
 msgid "web.creator.of"
 msgstr "%(n)s z %(count)s"
 
+msgid "web.creator.surprise"
+msgstr "Zaskocz mnie"
+
+msgid "web.creator.done"
+msgstr "Gotowe"
+
 msgid "web.creator.naming"
 msgstr "Nadaj nazwę bohaterowi"
 
@@ -257,11 +302,20 @@ msgstr "Nazwa bohatera"
 msgid "web.creator.name.hint"
 msgstr "Od 2 do 16 liter, cyfr, _ lub -. Wielkość liter się nie liczy, więc Mossgrove i mossgrove to ta sama nazwa."
 
+msgid "web.creator.name.checking"
+msgstr "Sprawdzanie nazwy %(name)s…"
+
 msgid "web.creator.name.format"
 msgstr "Nazwa ma od 2 do 16 znaków: litery, cyfry, _ lub -."
 
+msgid "web.creator.name.taken"
+msgstr "Nazwa %(name)s jest zajęta. Wielkość liter się nie liczy."
+
 msgid "web.creator.name.refused"
 msgstr "Nazwa %(name)s została zajęta przed chwilą. Żadne miejsce nie zostało użyte."
+
+msgid "web.creator.name.free"
+msgstr "Nazwa %(name)s jest wolna."
 
 msgid "web.creator.slot"
 msgstr "Miejsce"
@@ -317,8 +371,20 @@ msgstr "%(count)s emotek"
 msgid "web.creator.kit.emotes.other"
 msgstr "%(count)s emotki"
 
+msgid "web.creator.ready"
+msgstr "Gotowe: %(name)s zajmie miejsce %(slot)s."
+
+msgid "web.creator.needs.name"
+msgstr "Brakuje jeszcze nazwy."
+
+msgid "web.creator.needs.free"
+msgstr "Brakuje jeszcze wolnej nazwy."
+
 msgid "web.creator.create"
 msgstr "Utwórz bohatera"
+
+msgid "web.creator.back"
+msgstr "Wróć"
 
 msgid "web.created.title"
 msgstr "Bohater utworzony"

@@ -1,13 +1,62 @@
 {#def rules, look, roster, name: str, refused: str, kits: dict, slot: int #}
-{# The one-screen creator: the faction, class and look on the wooden panel, then the naming part,
-   whose Create hero sends the form; the server checks the name. #}
+{# The one-screen creator: the hero on the stage at the left, the faction, class and look on the
+   wooden panel at the right, and the naming step. Without scripts every list shows, the naming
+   is the form's last part, and the name is checked when the form is sent. #}
+{% set faction = rules.factions[look.faction] %}
+{% set hair = faction.hair_styles.index(look.hair_style) + 1 if look.hair_style else 0 %}
+{% set beard = faction.facial_hair.index(look.facial_hair) + 1 if look.facial_hair else 0 %}
+{% set who = {} %}
+{% for faction_id in rules.factions %}
+  {% for class_id in rules.classes %}
+    {% set kept = who.update({faction_id ~ "." ~ class_id: _("web.creator.who", hero_class=_("games." ~ game.id ~ ".class." ~ class_id), faction=_("games." ~ game.id ~ ".faction." ~ faction_id))}) %}
+  {% endfor %}
+{% endfor %}
+{% set current = look.faction ~ "." ~ look.hero_class %}
+{% set factions = {} %}
+{% set glyphs = {} %}
+{% for faction_id, choice in rules.factions.items() %}
+  {% set kept = factions.update({faction_id: _("games." ~ game.id ~ ".faction." ~ faction_id)}) %}
+  {% set kept = glyphs.update({faction_id: static("icons.svg") ~ "#" ~ choice.glyph}) %}
+{% endfor %}
+{% set classes = {} %}
+{% for class_id, choice in rules.classes.items() %}
+  {% set kept = classes.update({class_id: static("icons.svg") ~ "#" ~ choice.glyph}) %}
+{% endfor %}
+{# The texts the page's script fills in, their placeholders kept for it. #}
+{% set texts = {
+  "who": who,
+  "bubble_who": _("web.creator.bubble.who", who="%(who)s"),
+  "look": _("web.creator.figure", skin="%(skin)s", hair_colour="%(hair_colour)s", hair="%(hair)s", beard="%(beard)s"),
+  "hair": _("web.creator.figure.hair", style="%(style)s"),
+  "no_hair": _("web.creator.figure.no_hair"),
+  "beard": _("web.creator.figure.beard", style="%(style)s"),
+  "no_beard": _("web.creator.figure.no_beard"),
+  "note": _("web.creator.look.note", faction="%(faction)s"),
+  "factions": factions,
+  "glyphs": glyphs,
+  "classes": classes,
+  "checking": _("web.creator.name.checking", name="%(name)s"),
+  "ready": _("web.creator.ready", name="%(name)s", slot=slot),
+  "needs_name": _("web.creator.needs.name"),
+  "needs_free": _("web.creator.needs.free"),
+  "of_skin": _("web.creator.of", n="%(n)s", count=rules.skin_tones|length),
+  "of_hair": _("web.creator.of", n="%(n)s", count=rules.hair_colours|length),
+} %}
 <form method="post"
       action="{{ url('/' ~ game.id ~ '/user/createHero') }}"
       aria-labelledby="creator-title"
+      data-creator
+      data-name-check="{{ url('/' ~ game.id ~ '/heroes/name') }}"
       data-faction="{{ look.faction }}"
+      data-class="{{ look.hero_class }}"
+      data-skin="{{ look.skin_tone }}"
+      data-hair-colour="{{ look.hair_colour }}"
+      {% if refused %} data-naming-open{% endif %}
       class="creator enter-panel">
+  <script type="application/json" data-creator-texts>{{ texts|tojson }}</script>
   <input type="hidden" name="csrf" value="{{ csrf }}">
   <div class="creator-box">
+    <CreatorStage :look="look" :who="who[current]" :hair="hair" :beard="beard" />
     <div class="creator-panel">
       <svg aria-hidden="true"
            focusable="false"
@@ -54,7 +103,20 @@
         </div>
       </fieldset>
       <CreatorLook :rules="rules" :look="look" />
+      <div class="creator-actions js-only">
+        <button type="button" data-surprise class="creator-button creator-surprise">
+          <Icon name="dice" :size="18" stroke="#FEDE01" />
+          {{ _("web.creator.surprise") }}
+        </button>
+        <button type="button"
+                aria-haspopup="dialog"
+                data-done
+                class="creator-button creator-done">
+          <Icon name="play" :size="16" stroke="#FEDE01" />
+          {{ _("web.creator.done") }}
+        </button>
+      </div>
     </div>
   </div>
-  <CreatorNaming :rules="rules" :roster="roster" :name="name" :refused="refused" :kits="kits" :slot="slot" />
+  <NamingDialog :rules="rules" :look="look" :roster="roster" :name="name" :refused="refused" :kits="kits" :slot="slot" :who="who[current]" />
 </form>

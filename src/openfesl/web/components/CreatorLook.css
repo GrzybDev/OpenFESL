@@ -1,4 +1,4 @@
-/* The creator's look: the tiles of each faction's lists and the swatches. */
+/* The creator's look: the tabs, the tiles of each faction's lists and the swatches. */
 @layer components {
   /* The look, on parchment: the hair and facial hair tiles and the colour swatches. */
   .creator-look {
@@ -12,8 +12,42 @@
     color: #1f1712;
   }
 
+  .look-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+    border-bottom: 3px solid #000;
+  }
+
+  .look-tab {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: -3px;
+    padding: 0 14px 0 8px;
+    border: 3px solid #000;
+    border-radius: 8px 8px 0 0;
+    background: #f1e9de;
+    color: #1f1712;
+    font: 800 16px/1 var(--site-heading);
+    text-transform: lowercase;
+    cursor: pointer;
+    transition: background-color 150ms var(--ease-menu);
+
+    &[aria-selected="true"] {
+      background: #f2c12e;
+      color: #0a0a0a;
+    }
+  }
+
   .look-panel + .look-panel {
     margin-top: 12px;
+  }
+
+  .js .look-panel + .look-panel {
+    margin-top: 0;
   }
 
   .look-list {
@@ -22,12 +56,29 @@
     & + & {
       margin-top: 12px;
     }
+
+    .js & + & {
+      margin-top: 0;
+    }
+
+    &.fading .look-face {
+      animation: creator-fade 120ms linear;
+    }
   }
 
   .look-legend {
     margin-bottom: 6px;
     font: 800 16px/1.2 var(--site-heading);
     text-transform: lowercase;
+
+    .js & {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
   }
 
   .look-grid {
@@ -37,10 +88,9 @@
   }
 
   .look-face {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
+    display: grid;
+    min-height: 44px;
+    place-items: center;
     padding: 6px 4px;
     border: 2px solid #000;
     border-radius: 8px;
@@ -57,6 +107,27 @@
       outline-offset: 2px;
       box-shadow: 0 0 0 6px #0a0a0a;
     }
+  }
+
+  .look-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #5c4a3c;
+  }
+
+  .look-note-disc {
+    display: grid;
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--faction);
+    color: var(--faction-ink);
   }
 
   .swatches {
@@ -123,6 +194,18 @@
     &:has(:focus-visible)::before {
       outline: 3px solid #fff;
       outline-offset: 6px;
+    }
+  }
+
+  @keyframes creator-fade {
+    50% {
+      opacity: 0.2;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .look-list.fading .look-face {
+      animation: none;
     }
   }
 

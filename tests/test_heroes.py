@@ -32,6 +32,13 @@ async def test_a_hero_made_on_the_site_is_the_hero_the_game_logs_in_with(
         page = markup((await client.get(f"{base}{CREATOR}")).content)
         assert "0 of 4 used" in page
 
+        checks = [
+            (await client.get(f"{base}/bfheroes/heroes/name", params={"name": name})).text
+            for name in ("x", "Mossgrove")
+        ]
+        assert 'data-check="format"' in checks[0] and "Mossgrove is free." in markup(
+            checks[1].encode()
+        )
         invalid = await create(client, base, "Moss grove")
         assert invalid.status_code == 400 and 'aria-invalid="true"' in invalid.text
         # A form from another site creates nothing, so the name stays free.
@@ -114,6 +121,8 @@ async def test_names_ignore_capitals_and_slots_run_out_without_a_hero_made_twice
     async with httpx2.AsyncClient() as ann, httpx2.AsyncClient() as twin:
         for client in (ann, twin):
             await post_sign_in(client, base, "ann@example.test", PASSWORD)
+        check = await ann.get(f"{base}/bfheroes/heroes/name", params={"name": "copperpot"})
+        assert "copperpot is taken. Names ignore capitals." in markup(check.content)
         taken = await create(ann, base, "copperpot")
         assert taken.status_code == 409
         assert "copperpot was not created: the name was taken a moment earlier." in markup(

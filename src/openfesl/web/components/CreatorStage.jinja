@@ -1,0 +1,38 @@
+{#def look, who: str, hair: int, beard: int #}
+{# The creator's stage: on the ground under the sky, the hero's class glyph on its faction's
+   colour over its look in words, with its speech bubble, and the note that the game shows the
+   hero with its own models. #}
+<figure class="creator-stage">
+  <div aria-hidden="true" class="stage-sky">
+    <svg class="stage-clouds">
+      <rect width="100%" height="100%" filter="url(#site-clouds)" />
+    </svg>
+    <svg viewBox="0 0 600 160" preserveAspectRatio="none" class="stage-ground">
+      <path d="M0 26C90 8 200 14 300 24S480 34 600 14V160H0z" class="ground-grass" />
+      <path d="M0 96C140 82 300 90 430 100S560 108 600 100V160H0z" class="ground-band" />
+      <path d="M60 42l6-10 4 10M150 32l5-9 4 9M250 40l5-9 4 9M420 46l5-10 5 10M520 32l4-8 4 8" class="ground-tufts" />
+    </svg>
+  </div>
+  <div data-hop class="stage-hero">
+    {% set hair_text = _("web.creator.figure.hair", style=hair) if hair else _("web.creator.figure.no_hair") %}
+    {% set beard_text = _("web.creator.figure.beard", style=beard) if beard else _("web.creator.figure.no_beard") %}
+    <div class="stage-stand-in">
+      <span aria-hidden="true"
+            data-class-glyph
+            class="stage-glyph"><Icon :name="game.heroes.classes[look.hero_class].glyph" :size="72" stroke="currentColor" /></span>
+      <p data-look-text class="stage-look">{{ _("web.creator.figure", skin=look.skin_tone, hair_colour=look.hair_colour, hair=hair_text, beard=beard_text) }}</p>
+    </div>
+    <div data-bubble class="stage-bubble">
+      <svg aria-hidden="true" viewBox="0 0 30 24" class="bubble-tail">
+        <path d="M31 2L1 12L31 21z" class="bubble-tail-fill" />
+        <path d="M30 2.5L2 12L30 20.5" class="bubble-tail-line" />
+      </svg>
+      <p class="bubble-title">{{ _("web.creator.bubble") }}</p>
+      <p class="bubble-text">
+        <span data-bubble-who>{{ _("web.creator.bubble.who", who=who) }}</span>
+        <span class="bubble-wide">{{ _("web.creator.bubble.right") }}</span><span class="bubble-narrow">{{ _("web.creator.bubble.below") }}</span>
+      </p>
+    </div>
+  </div>
+  <figcaption class="stage-caption">{{ _("web.creator.figure.caption") }}</figcaption>
+</figure>

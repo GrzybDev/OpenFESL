@@ -47,6 +47,22 @@ class SqlHeroStore:
             )
         return HeroRecords(personas, default_id)
 
+    async def taken(self, namespace: str, name: str) -> bool:
+        """Tell whether a persona has a name, ignoring capitals, those taken out of use too.
+
+        Args:
+            namespace: The namespace.
+            name: The name.
+        """
+        async with self._sessions() as session:
+            found = await session.scalar(
+                select(PersonaRow.id).where(
+                    PersonaRow.namespace == namespace,
+                    func.lower(PersonaRow.name) == func.lower(name),
+                )
+            )
+        return found is not None
+
     async def create(self, hero: NewHero) -> Persona:
         """Store a hero with its stats and items; the account's first becomes its default.
 

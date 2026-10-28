@@ -1,0 +1,132 @@
+/* A dialog of a game's own site: a pale box with a red title tab over a dark backdrop, scaling
+   in and fading. Without scripts it stays in the page's flow as part of its form. */
+@layer components {
+  .site-dialog {
+    position: static;
+    width: auto;
+    max-width: none;
+    margin: 30px 0 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #1f1712;
+
+    &:modal {
+      position: fixed;
+      inset: 0;
+      width: min(520px, calc(100% - 16px));
+      max-height: calc(100dvh - 16px);
+      margin: auto;
+      overflow: auto;
+      animation: site-dialog-in 160ms var(--ease-menu);
+    }
+
+    &.closing:modal {
+      opacity: 0;
+      scale: 0.96;
+      transition:
+        opacity 120ms var(--ease-menu),
+        scale 120ms var(--ease-menu);
+    }
+
+    /* Scripts open it as a dialog when it is needed. */
+    .js &:not(:modal) {
+      display: none;
+    }
+
+    &::backdrop {
+      background: rgb(0 0 0 / 0.75);
+      animation: site-fade-in 160ms linear;
+    }
+  }
+
+  .site-dialog-box {
+    position: relative;
+    padding: 0 18px 18px;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #f1e9de;
+    box-shadow:
+      inset 0 0 0 3px #f8f4ef,
+      0 6px 0 rgb(0 0 0 / 0.4);
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .site-dialog-close {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    cursor: pointer;
+  }
+
+  .site-dialog-title {
+    display: inline-block;
+    margin-left: -18px;
+    padding: 11px 30px 10px 18px;
+    border-radius: 5px 0 0;
+    background: #893531;
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 100%, 0 100%);
+    font: 800 19px/1.2 var(--site-heading);
+    color: #fff;
+    text-shadow: var(--site-outline-thin);
+  }
+
+  .site-dialog-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 12px;
+    margin-top: 16px;
+  }
+
+  .site-dialog-why {
+    min-height: 1.4em;
+    margin-top: 8px;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #5c4a3c;
+
+    &.flash {
+      animation: site-flash 600ms linear;
+    }
+  }
+
+  @keyframes site-dialog-in {
+    from {
+      opacity: 0;
+      scale: 0.96;
+    }
+  }
+
+  @keyframes site-flash {
+    from {
+      background: #ffe27a;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-dialog:modal {
+      animation: site-fade-in 100ms linear;
+    }
+
+    .site-dialog.closing:modal {
+      scale: none;
+      transition: opacity 100ms linear;
+    }
+  }
+
+  @media (width < 40rem) {
+    .site-dialog-box {
+      padding: 0 14px 14px;
+    }
+
+    .site-dialog-title {
+      margin-left: -14px;
+      padding-left: 14px;
+    }
+  }
+}

@@ -1,5 +1,5 @@
 {#def name: str, check: str #}
-{# Why the server refused a wanted hero name, under the creator's name field. #}
+{# What a wanted hero name meets, as the naming dialog says it while the name is typed. #}
 <p id="name-status"
    role="status"
    data-check="{{ check }}"
@@ -7,8 +7,14 @@
   {% if check == "format" %}
     <Icon name="warn" :size="18" stroke="currentColor" />
     {{ _("web.creator.name.format") }}
+  {% elif check == "taken" %}
+    <Icon name="warn" :size="18" stroke="currentColor" />
+    {{ _("web.creator.name.taken", name=name) }}
   {% elif check == "refused" %}
     <Icon name="warn" :size="18" stroke="currentColor" />
     {{ _("web.creator.name.refused", name=name) }}
+  {% elif check == "free" %}
+    <Icon name="tick" :size="18" stroke="currentColor" />
+    {{ _("web.creator.name.free", name=name) }}
   {% endif %}
 </p>
