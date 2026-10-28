@@ -7051,3 +7051,192 @@ msgstr "Keys can be bought at any time."
 
 msgid "web.account.page.keys"
 msgstr "Buying keys"
+
+msgid "web.ingame.title"
+msgstr "Store"
+
+msgid "web.ingame.wallets"
+msgstr "Wallets"
+
+msgid "web.ingame.hero"
+msgstr "%(faction)s %(hero_class)s · level %(level)s"
+
+msgid "games.bfheroes.faction.royal.short"
+msgstr "Royal"
+
+msgid "games.bfheroes.faction.national.short"
+msgstr "National"
+
+msgid "web.ingame.lead"
+msgstr "Items for %(hero)s. Items belong to the hero they are bought for; %(currencies)s belong to the account."
+
+msgid "web.ingame.items.one"
+msgstr "%(count)s item"
+
+msgid "web.ingame.items.other"
+msgstr "%(count)s items"
+
+msgid "web.ingame.owned.one"
+msgstr "%(count)s owned"
+
+msgid "web.ingame.owned.other"
+msgstr "%(count)s owned"
+
+msgid "web.ingame.owned.none"
+msgstr "none owned"
+
+msgid "web.ingame.low.one"
+msgstr "%(count)s running low"
+
+msgid "web.ingame.low.other"
+msgstr "%(count)s running low"
+
+msgid "web.ingame.empty"
+msgstr "No offers for this hero"
+
+msgid "games.bfheroes.store.weapons"
+msgstr "Weapons"
+
+msgid "games.bfheroes.store.clothing"
+msgstr "Clothing"
+
+msgid "games.bfheroes.store.widgets"
+msgstr "Widgets"
+
+msgid "games.bfheroes.store.emotes"
+msgstr "Emotes"
+
+msgid "games.bfheroes.store.boosts"
+msgstr "Boosts"
+
+msgid "games.bfheroes.store.note"
+msgstr "Abilities are bought with Hero Points in the game's menu, not here."
+
+msgid "web.ingame.back.categories"
+msgstr "Back to the categories"
+
+msgid "web.ingame.back.category"
+msgstr "Back to %(category)s"
+
+msgid "web.ingame.back.points"
+msgstr "Back to the price points"
+
+msgid "web.ingame.from"
+msgstr "from"
+
+msgid "web.ingame.equipped"
+msgstr "Equipped"
+
+msgid "web.ingame.left.none"
+msgstr "Not owned"
+
+msgid "web.ingame.left.permanent"
+msgstr "Permanent"
+
+msgid "web.ingame.left.uses.one"
+msgstr "%(count)s use left"
+
+msgid "web.ingame.left.uses.other"
+msgstr "%(count)s uses left"
+
+msgid "web.ingame.left.days.one"
+msgstr "%(count)s day left"
+
+msgid "web.ingame.left.days.other"
+msgstr "%(count)s days left"
+
+msgid "web.ingame.left.hours.one"
+msgstr "%(count)s hour left"
+
+msgid "web.ingame.left.hours.other"
+msgstr "%(count)s hours left"
+
+msgid "web.ingame.left.until"
+msgstr "%(left)s, until %(day)s"
+
+msgid "web.ingame.left.low"
+msgstr "%(left)s · running low"
+
+msgid "web.ingame.for.anyone"
+msgstr "Any hero"
+
+msgid "web.ingame.for.faction"
+msgstr "%(faction)s, any class"
+
+msgid "web.ingame.for.classes"
+msgstr "%(classes)s of either faction"
+
+msgid "web.ingame.for.both"
+msgstr "%(faction)s %(classes)s"
+
+msgid "web.ingame.owned_for_good"
+msgstr "%(hero)s owns this permanently; there is nothing to buy."
+
+msgid "web.ingame.points"
+msgstr "Price points"
+
+msgid "web.ingame.term.days.one"
+msgstr "%(count)s day"
+
+msgid "web.ingame.term.days.other"
+msgstr "%(count)s days"
+
+msgid "web.ingame.term.uses.one"
+msgstr "%(count)s use"
+
+msgid "web.ingame.term.uses.other"
+msgstr "%(count)s uses"
+
+msgid "web.ingame.term.permanent"
+msgstr "Permanent"
+
+msgid "web.ingame.price"
+msgstr "%(amount)s %(currency)s"
+
+msgid "web.ingame.short"
+msgstr "%(amount)s short"
+
+msgid "web.ingame.reason"
+msgstr "The account has %(balance)s; this costs %(price)s."
+
+msgid "web.ingame.outcome"
+msgstr "After buying: %(left)s; the account keeps %(balance)s."
+
+msgid "web.ingame.need.link"
+msgstr "Where %(currency)s come from"
+
+msgid "web.ingame.need.title"
+msgstr "Need more %(currency)s"
+
+msgid "web.ingame.need.box"
+msgstr "Not enough %(currency)s"
+
+msgid "web.ingame.need.price"
+msgstr "Price"
+
+msgid "web.ingame.need.what"
+msgstr "%(item)s, %(term)s"
+
+msgid "web.ingame.need.has"
+msgstr "The account has"
+
+msgid "web.ingame.need.short"
+msgstr "Short"
+
+msgid "games.bfheroes.currency._PF.earned"
+msgstr "Funds are never sold; the Funds page lists where they come from."
+
+msgid "web.ingame.need.help"
+msgstr "How %(currency)s are earned"
+
+msgid "web.ingame.need.help.note"
+msgstr "Opens in the system browser; the game leaves full screen first."
+
+msgid "web.ingame.need.alternative"
+msgstr "%(term)s costs %(price)s, which the account has."
+
+msgid "web.ingame.offline.title"
+msgstr "The store is offline"
+
+msgid "web.ingame.offline.text"
+msgstr "The store could not open for this hero. Reopening the store tries again."

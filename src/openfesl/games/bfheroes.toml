@@ -337,14 +337,15 @@ written = [
 granted = ["mission"]
 # The highest level, which the game's rank table ends with (1.89 0x006add86 clamps to it), so a
 # level a server pushes past it stays at it. The Hero Points each hero earns with its levels, one
-# on each even level as the original service gave them, and the uses left at which the heroes page
-# says an item runs low. The game announces the points that a level-up brings (BFHeroes.exe 1.89
-# 0x004e543e), but the code that levels heroes up and grants them is not part of it, so this
-# server grants them as the level changes.
+# on each even level as the original service gave them, and the uses or days left at which the
+# heroes page and the in-game store say an item runs low. The game announces the points that a
+# level-up brings (BFHeroes.exe 1.89 0x004e543e), but the code that levels heroes up and grants
+# them is not part of it, so this server grants them as the level changes.
 highest_level = 30
 points = "_DH"
 points_every = 2
-running_low = 3
+running_low = 5
+running_low_days = 3
 # Further hero slots and new names cost Funds, the currency of the account; renames follow the
 # rule of new names, and a bought slot stays with the account.
 currency = "_PF"

@@ -1,0 +1,45 @@
+{#def kit, visit, currencies: str #}
+{# The in-game store's first panel: its categories, each with how many of its items the hero may
+   have, owns and runs low on; a category with nothing for the hero is listed without a link. #}
+{% set window = visit.window %}
+{% set title = _("web.ingame.title") %}
+<InGameWindow :kit="kit" :visit="visit" :title="title">
+  <main id="panel" class="panel">
+    <InGameHead>{{ title }}</InGameHead>
+    <div class="panel-body">
+      <p class="lead">{{ _("web.ingame.lead", hero=window.hero.persona.name, currencies=currencies) }}</p>
+      <ul class="list">
+        {% for shelf in window.shelves %}
+          {% set name = _("games." ~ kit.game.id ~ ".store." ~ shelf.category.key) %}
+          <li>
+            {% if shelf.wares %}
+              {% set owned = shelf.wares | selectattr("left") | list | length %}
+              {% set low = shelf.wares | selectattr("low") | list | length %}
+              <a href="{{ visit.link(shelf.category.key) }}" class="row">
+                <span aria-hidden="true" class="row-disc">
+                  <InGameGlyph :name="shelf.category.glyph" :size="20" stroke="#0a0a0a" />
+                </span>
+                <span class="row-name">{{ name }}</span>
+                <span class="row-sub">
+                  {{ _n("web.ingame.items", shelf.wares | length) }} ·
+                  {{ _n("web.ingame.owned", owned) if owned else _("web.ingame.owned.none") }}
+                  {%- if low %}<span class="row-low"> · {{ _n("web.ingame.low", low) }}</span>{% endif %}
+                </span>
+                <InGameGlyph name="go" :size="15" stroke="#1f1712" class="row-go" />
+              </a>
+            {% else %}
+              <div class="row row-empty">
+                <span aria-hidden="true" class="row-disc">
+                  <InGameGlyph :name="shelf.category.glyph" :size="20" stroke="#3b2d23" />
+                </span>
+                <span class="row-name">{{ name }}</span>
+                <span class="row-sub">{{ _("web.ingame.empty") }}</span>
+              </div>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+      <p class="foot">{{ _("games." ~ kit.game.id ~ ".store.note") }}</p>
+    </div>
+  </main>
+</InGameWindow>

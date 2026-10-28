@@ -1,6 +1,8 @@
 import hashlib
 import json
 import os
+import re
+from base64 import b64encode
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -253,6 +255,27 @@ def page_links(page: int, pages: int) -> list[int | None]:
     return links
 
 
+# The browser that games show their pages in predates SVG inside HTML but draws SVG images, so
+# those pages draw each glyph as an image in its colours.
+@cache
+def _glyph(name: str, size: int, stroke: str = "", fill: str = "") -> str:
+    box, body = _symbols()[name]
+    paint = (f' stroke="{stroke}"' if stroke else "") + (f' fill="{fill}"' if fill else "")
+    image = (
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="{box}">'
+        f"<g{paint}>{body}</g></svg>"
+    )
+    return f"data:image/svg+xml;base64,{b64encode(image.encode()).decode()}"
+
+
+@cache
+def _symbols() -> dict[str, tuple[str, str]]:
+    # The sprite is OpenFESL's own file, one symbol per element as written there.
+    sprite = (STATIC / "icons.svg").read_text("utf-8")
+    pattern = re.compile(r'<symbol id="([^"]+)" viewBox="([^"]+)">(.*?)</symbol>', re.DOTALL)
+    return {name: (box, body) for name, box, body in pattern.findall(sprite)}
+
+
 def _fill(context: Context, text: str, values: Mapping[str, object]) -> str:
     if context.eval_ctx.autoescape:
         text = escape(text)
@@ -268,6 +291,7 @@ _catalog = Catalog(
         "once_token": once_token,
         "static": static_url,
         "page_links": page_links,
+        "glyph": _glyph,
         "moment": _moment,
         "when": _when,
         "ago": _ago,
@@ -283,6 +307,27 @@ _catalog.jinja_env.trim_blocks = True
 _catalog.jinja_env.lstrip_blocks = True
 _catalog.add_folder(Path(__file__).with_name("components"))
 _catalog.add_folder(Path(__file__).with_name("templates"), prefix="page")
+
+
+def render_alone(
+    template: str,
+    language: str,
+    status: int = 200,
+    headers: Mapping[str, str] | None = None,
+    **context: Any,
+) -> HTMLResponse:
+    """Render a page outside the shell, such as one that a game shows in its own browser.
+
+    Args:
+        template: The page's component, such as ingame.Store.
+        language: The language of its texts.
+        status: The response's status code.
+        headers: Headers of the response.
+        context: The template's own values.
+    """
+    shared = {"language": language, "now": datetime.now(UTC)}
+    page = _catalog.render(f"page:{template}", **context, _globals=shared)
+    return HTMLResponse(page, status, headers)
 
 
 class Pages:

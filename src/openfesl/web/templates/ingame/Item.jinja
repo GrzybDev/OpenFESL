@@ -1,0 +1,69 @@
+{#def kit, visit, shelf, ware, wearer: str, chosen = None #}
+{# An item of the in-game store: who may use it, what the hero has of it, and its price points as
+   tiles, each with what buying it leaves. Without scripts the tiles reload the page. #}
+{% set key = shelf.category.key %}
+{% set category = _("games." ~ kit.game.id ~ ".store." ~ key) %}
+{% set hero = visit.window.hero.persona.name %}
+{% set back = visit.link(key, hl=ware.item.id) ~ "#item-" ~ ware.item.id %}
+{% set back_label = _("web.ingame.back.category", category=category[:1].lower() ~ category[1:]) %}
+{% set buyable = ware.buyable %}
+<InGameWindow :kit="kit" :visit="visit" :title="ware.name">
+  <main id="panel" class="panel">
+    <InGameHead :back="back" :back_label="back_label" :heading="false">{{ category }}</InGameHead>
+    <div class="panel-body">
+      <div class="ware">
+        <span aria-hidden="true" class="icon">
+          <InGameGlyph :name="shelf.category.glyph" :size="28" stroke="#3b2d23" />
+        </span>
+        <h1 class="ware-name">{{ ware.name }}</h1>
+        <p class="ware-for">{{ wearer }}</p>
+        {% if ware.description %}
+          <p class="ware-text">
+            {% for part in ware.description %}
+              {{ part }}
+              {% if not loop.last %}<br>{% endif %}
+            {% endfor %}
+          </p>
+        {% endif %}
+      </div>
+      <p class="standing{% if ware.low %} status-low{% elif ware.left %} status-held{% endif %}">
+        <b>{{ hero }}</b> ·
+        <InGameStanding :ware="ware" until />
+      </p>
+      {% if not buyable %}
+        <p class="owned">{{ _("web.ingame.owned_for_good", hero=hero) }}</p>
+      {% else %}
+        <p id="points-label" class="label">{{ _("web.ingame.points") }}</p>
+        <form method="get"
+              action="{{ visit.path(key, ware.item.id) }}"
+              role="group"
+              aria-labelledby="points-label"
+              class="tiles{% if buyable | selectattr('short') | list %} tiles-tall{% endif %}">
+          <input type="hidden" name="personaId" value="{{ visit.persona.id }}">
+          {% if visit.equipped %}<input type="hidden" name="eqp" value="{{ visit.equipped }}">{% endif %}
+          {% for point in buyable %}
+            {% set product = point.offer.product %}
+            <button type="submit"
+                    name="pick"
+                    value="{{ product.id }}"
+                    aria-pressed="{{ 'true' if point is sameas chosen else 'false' }}"
+                    data-pick="pick-{{ product.id }}"
+                    class="tile">
+              <span class="tile-title">
+                <InGameCoin :kit="kit" :currency="product.currency" :size="12" />
+                <InGameTerm :ownership="product.ownership" />
+              </span>
+              <span class="tile-price"><InGamePrice :kit="kit" :amount="product.price" :currency="product.currency" /></span>
+              {% if point.short %}
+                <span class="tile-short">{{ _("web.ingame.short", amount=number(point.short)) }}</span>
+              {% endif %}
+            </button>
+          {% endfor %}
+        </form>
+        {% for point in buyable %}
+          <InGamePick :kit="kit" :visit="visit" :shelf="shelf" :ware="ware" :point="point" :shown="point is sameas chosen" />
+        {% endfor %}
+      {% endif %}
+    </div>
+  </main>
+</InGameWindow>

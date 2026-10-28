@@ -1,0 +1,175 @@
+/* Need more of a currency. */
+
+.box {
+  position: relative;
+  margin-top: 2px;
+  padding: 0 14px 10px;
+  border: 3px solid #000000;
+  -webkit-border-radius: 8px;
+  border-radius: 8px;
+  background: #f1e9de;
+  -webkit-box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
+}
+
+.box-tab {
+  display: inline-block;
+  margin: 0 0 0 -14px;
+  padding: 7px 20px 7px 14px;
+  -webkit-border-radius: 5px 0 8px 0;
+  border-radius: 5px 0 8px 0;
+  background: #893531;
+  color: #ffffff;
+  font:
+    700 16px/20px "Trebuchet MS",
+    Arial,
+    sans-serif;
+  text-shadow:
+    1px 0 0 #000,
+    -1px 0 0 #000,
+    0 1px 0 #000,
+    0 -1px 0 #000,
+    0 2px 0 #000;
+}
+
+.facts {
+  margin: 6px 0 0;
+}
+
+.fact {
+  overflow: hidden;
+  padding: 6px 0;
+  border-bottom: 1px dashed #a8977f;
+}
+
+.fact:last-child {
+  border-bottom: 0;
+}
+
+.fact dt {
+  float: left;
+  color: #5c4a3c;
+  line-height: 19px;
+}
+
+.fact dd {
+  float: right;
+  margin: 0;
+  font:
+    700 14px/19px Arial,
+    Helvetica,
+    sans-serif;
+}
+
+.fact .fact-note {
+  float: none;
+  clear: both;
+  color: #5c4a3c;
+  font:
+    400 12px/16px Arial,
+    Helvetica,
+    sans-serif;
+}
+
+.fact .fact-short {
+  color: #8c1e18;
+}
+
+.how {
+  margin: 6px 0 0;
+  color: #2b2018;
+  line-height: 18px;
+}
+
+.ext-note {
+  margin: 0;
+  color: #5c4a3c;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.alt {
+  margin: 14px 0 0;
+  color: #2b2018;
+  line-height: 18px;
+}
+
+.box + .button,
+.alt + .button {
+  margin-top: 10px;
+}
+
+/* The store could not open. */
+
+.offline {
+  height: 100%;
+  padding: 150px 28px 0;
+  border-top: 2px solid #000000;
+  background: #262626;
+  text-align: center;
+}
+
+.offline-disc {
+  display: block;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto;
+  padding-top: 22px;
+  border: 3px solid #000000;
+  -webkit-border-radius: 48px;
+  border-radius: 48px;
+  background: #c9ccd1;
+  -webkit-box-shadow: 0 4px 0 #000000;
+  box-shadow: 0 4px 0 #000000;
+}
+
+.offline-title {
+  margin: 22px 0 0;
+  color: #ffffff;
+  font:
+    700 22px/26px "Trebuchet MS",
+    Arial,
+    sans-serif;
+  text-shadow:
+    1.5px 0 0 #000,
+    -1.5px 0 0 #000,
+    0 1.5px 0 #000,
+    0 -1.5px 0 #000,
+    1px 1px 0 #000,
+    -1px 1px 0 #000,
+    1px -1px 0 #000,
+    -1px -1px 0 #000,
+    0 3px 0 #000;
+}
+
+.offline-text {
+  margin: 12px 0 0;
+  color: #d9cfc4;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    transition: opacity 100ms linear;
+  }
+
+  .panel.from-right,
+  .panel.from-left {
+    transform: none;
+  }
+
+  .row,
+  .tile {
+    transition: none;
+  }
+
+  a.row:active,
+  .button:active {
+    transform: none;
+  }
+
+  .row-hl {
+    animation-duration: 100ms;
+  }
+}

@@ -1,0 +1,50 @@
+{#def kit, visit, shelf, highlight: str = "" #}
+{# A category of the in-game store: each item the hero may have, with what it has of it and the
+   lowest price in each currency. An item just bought is highlighted on the way back. #}
+{% set key = shelf.category.key %}
+{% set name = _("games." ~ kit.game.id ~ ".store." ~ key) %}
+{# Drawn once, as a category may list hundreds of items. #}
+{% set icon %}<InGameGlyph :name="shelf.category.glyph" :size="20" stroke="#3b2d23" />{% endset %}
+{% set go %}<InGameGlyph name="go" :size="14" stroke="#1f1712" class="row-go" />{% endset %}
+{% set coins = {} %}
+{% for wallet in kit.wallets %}
+  {% set coin %}<InGameCoin :kit="kit" :currency="wallet.currency" :size="11" />{% endset %}
+  {% set kept = coins.update({wallet.currency: coin}) %}
+{% endfor %}
+<InGameWindow :kit="kit" :visit="visit" :title="name">
+  <main id="panel" class="panel">
+    <InGameHead :back="visit.link()" :back_label="_('web.ingame.back.categories')">{{ name }}</InGameHead>
+    <div class="panel-body">
+      <ul class="list">
+        {% for ware in shelf.wares %}
+          {% set cheapest = ware.cheapest %}
+          <li>
+            <a id="item-{{ ware.item.id }}"
+               href="{{ visit.link(key, ware.item.id) }}"
+               class="row row-ware{% if cheapest %} priced{% endif %}{% if highlight == ware.item.id | string %} row-hl{% endif %}">
+              <span aria-hidden="true" class="icon">{{ icon }}</span>
+              <span class="row-name">{{ ware.name }}</span>
+              <span class="row-sub{% if ware.low %} status-low{% elif ware.left %} status-held{% endif %}">
+                <InGameStanding :ware="ware" />
+              </span>
+              {% if cheapest %}
+                <span class="row-prices">
+                  <span class="hidden">{{ _("web.ingame.from") }}</span>
+                  {% for point in cheapest %}
+                    {% set currency = point.offer.product.currency %}
+                    <span class="row-price">
+                      {{ number(point.offer.product.price) }}
+                      {{ coins[currency] }}
+                      <span class="hidden">{{ _("games." ~ kit.game.id ~ ".currency." ~ currency) }}</span>
+                    </span>
+                  {% endfor %}
+                </span>
+              {% endif %}
+              {{ go }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </main>
+</InGameWindow>

@@ -169,7 +169,8 @@ class HeroRules(BaseModel):
             paid in.
         rename_price: What a new name costs.
         slot_price: What a further hero slot costs.
-        running_low: The uses left at which an item limited by uses counts as running low.
+        running_low: The uses left at which an item limited by uses runs low.
+        running_low_days: The days left at which a rental runs low; one with hours left does.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -196,6 +197,7 @@ class HeroRules(BaseModel):
     rename_price: PositiveInt
     slot_price: PositiveInt
     running_low: PositiveInt
+    running_low_days: PositiveInt
 
     def faction_of(self, team: int | None) -> str | None:
         """Return the faction whose team number a hero's faction stat holds, if it is one.

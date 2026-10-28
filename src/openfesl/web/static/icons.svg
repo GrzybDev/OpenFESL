@@ -395,4 +395,26 @@
   <symbol id="chest" viewBox="0 0 24 24">
     <path d="M3 10.5h18V20H3zM3 10.5c0-3.2 2-5.5 5-5.5h8c3 0 5 2.3 5 5.5M10 10.5v4h4v-4" fill="none" stroke-width="2.2" stroke-linejoin="round"/>
   </symbol>
+  <symbol id="weapon" viewBox="0 0 24 24">
+    <path d="M2.5 8.5h15.5l1.5-2h2v6h-7l-1.5 2.5H10l-1 4H5l1.2-4.5H2.5z" fill="none" stroke-width="2" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="shirt" viewBox="0 0 24 24">
+    <path d="M8.5 3.5L12 6l3.5-2.5 5 3-2 4.5-2.5-1v10.5h-8V10l-2.5 1-2-4.5z" fill="none" stroke-width="2" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="flask" viewBox="0 0 24 24">
+    <path d="M9 3h6M10.2 3v6L5.1 17.8A1.9 1.9 0 0 0 6.8 20.5h10.4a1.9 1.9 0 0 0 1.7-2.7L13.8 9V3M7.6 14.5h8.8" fill="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="emote" viewBox="0 0 24 24">
+    <path d="M3.5 4.5h17v11.5h-8.5l-5 4v-4H3.5z" fill="none" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M8.5 11c1.8 1.6 5.2 1.6 7 0M9 8h.01M15 8h.01" fill="none" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="boost" viewBox="0 0 24 24">
+    <path d="M13.5 2.5L5 13.5h6.2L10 21.5l8.5-11h-6.2z" fill="none" stroke-width="2" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="external" viewBox="0 0 24 24">
+    <path d="M14 4.5h5.5V10M19.5 4.5L11 13M10 6H4.5v13.5H18V14" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="unplugged" viewBox="0 0 24 24">
+    <path d="M9 3v4.5M15 3v4.5M6.5 7.5h11V11a5.5 5.5 0 0 1-11 0zM12 16.5V21M3.5 3.5l17 17" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
 </svg>

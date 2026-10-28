@@ -1,0 +1,17 @@
+{#def back: str = "", back_label: str = "", heading: bool = True #}
+{# The head of an in-game store panel: the way back and the panel's title on a wooden plaque,
+   which is the page's heading unless the page names its subject in its own. #}
+<div class="panel-head{% if back %} has-back{% endif %}">
+  {% if back %}
+    <a href="{{ back }}" aria-label="{{ back_label }}" class="back">
+      <InGameGlyph name="back" :size="18" stroke="#fede01" />
+    </a>
+  {% endif %}
+  <div class="plaque">
+    {% if heading %}
+      <h1 class="plaque-title">{{ content }}</h1>
+    {% else %}
+      <p class="plaque-title">{{ content }}</p>
+    {% endif %}
+  </div>
+</div>

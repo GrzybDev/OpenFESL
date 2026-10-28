@@ -1,0 +1,6 @@
+{#def ware, until: bool = False #}
+{# What a hero has of an item: whether it is equipped, how much is left and whether that runs low. #}
+{% if ware.equipped %}<span class="badge">{{ _("web.ingame.equipped") }}</span>{% endif %}
+{% if ware.low %}<InGameGlyph name="warn" :size="13" fill="#8c1e18" />{% endif %}
+{% set left %}<InGameLeft :left="ware.left" :until="until" />{% endset %}
+{{ _("web.ingame.left.low", left=left | trim) if ware.low else left | trim }}

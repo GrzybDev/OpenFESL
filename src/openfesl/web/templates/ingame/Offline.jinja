@@ -1,0 +1,12 @@
+{#def kit, title: str #}
+{# The page every failure of the in-game store answers with; its title makes the game show its own
+   offline page in its place, and other browsers show this one. #}
+<InGameWindow :kit="kit" :title="title">
+  <main class="offline">
+    <span aria-hidden="true" class="offline-disc">
+      <InGameGlyph name="unplugged" :size="46" stroke="#0a0a0a" />
+    </span>
+    <h1 class="offline-title">{{ _("web.ingame.offline.title") }}</h1>
+    <p class="offline-text">{{ _("web.ingame.offline.text") }}</p>
+  </main>
+</InGameWindow>

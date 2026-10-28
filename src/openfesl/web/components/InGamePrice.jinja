@@ -1,0 +1,3 @@
+{#def kit, amount: int, currency: str #}
+{# An amount of a currency in words, such as 899 Funds. #}
+{{ _("web.ingame.price", amount=number(amount), currency=_("games." ~ kit.game.id ~ ".currency." ~ currency)) }}

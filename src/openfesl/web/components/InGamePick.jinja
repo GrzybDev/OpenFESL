@@ -1,0 +1,26 @@
+{#def kit, visit, shelf, ware, point, shown: bool #}
+{# What buying a price point leaves, or for a price above the balance both amounts and the way
+   to need more. #}
+{% set product = point.offer.product %}
+{% set key = shelf.category.key %}
+<div id="pick-{{ product.id }}"
+     class="pick{% if not shown %} pick-off{% endif %}">
+  {% if point.short %}
+    <p class="reason">
+      <InGameGlyph name="warn" :size="14" fill="#8c1e18" />
+      {% set balance %}<InGamePrice :kit="kit" :amount="point.balance" :currency="product.currency" />{% endset %}
+      {{ _("web.ingame.reason", balance=balance | trim, price=number(product.price)) }}
+    </p>
+  {% else %}
+    {% set after %}<InGameLeft :left="point.after" until lower />{% endset %}
+    {% set kept %}<InGamePrice :kit="kit" :amount="point.balance - product.price" :currency="product.currency" />{% endset %}
+    <p class="outcome">{{ _("web.ingame.outcome", left=after | trim, balance=kept | trim) }}</p>
+  {% endif %}
+  {% if point.short %}
+    <a href="{{ visit.link(key, ware.item.id, 'need', product=product.id) }}"
+       class="need-link">
+      {{ _("web.ingame.need.link", currency=_("games." ~ kit.game.id ~ ".currency." ~ product.currency)) -}}
+      <InGameGlyph name="go" :size="12" stroke="#7a1d16" />
+    </a>
+  {% endif %}
+</div>

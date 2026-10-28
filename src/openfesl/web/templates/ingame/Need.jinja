@@ -1,0 +1,59 @@
+{#def kit, visit, shelf, ware, point, alternative = None, help: str = "" #}
+{# Need more: a price point above the balance, how much is short and how the currency is earned,
+   with the page that tells more where there is one, and another price point the account can pay. #}
+{% set product = point.offer.product %}
+{% set currency = _("games." ~ kit.game.id ~ ".currency." ~ product.currency) %}
+{% set title = _("web.ingame.need.title", currency=currency) %}
+{% set back = visit.link(shelf.category.key, ware.item.id, pick=product.id) %}
+<InGameWindow :kit="kit" :visit="visit" :title="title">
+  <main id="panel" class="panel">
+    <InGameHead :back="back" :back_label="_('web.ingame.back.points')">{{ title }}</InGameHead>
+    <div class="panel-body">
+      <div class="box">
+        <h2 class="box-tab">{{ _("web.ingame.need.box", currency=currency) }}</h2>
+        <dl class="facts">
+          <div class="fact">
+            <dt>{{ _("web.ingame.need.price") }}</dt>
+            <dd>
+              <InGamePrice :kit="kit" :amount="product.price" :currency="product.currency" />
+            </dd>
+            {% set term %}<InGameTerm :ownership="product.ownership" lower />{% endset %}
+            <dd class="fact-note">
+              {{ _("web.ingame.need.what", item=ware.name, term=term | trim) }}
+            </dd>
+          </div>
+          <div class="fact">
+            <dt>{{ _("web.ingame.need.has") }}</dt>
+            <dd>
+              <InGamePrice :kit="kit" :amount="point.balance" :currency="product.currency" />
+            </dd>
+          </div>
+          <div class="fact">
+            <dt>{{ _("web.ingame.need.short") }}</dt>
+            <dd class="fact-short">
+              <InGamePrice :kit="kit" :amount="point.short" :currency="product.currency" />
+            </dd>
+          </div>
+        </dl>
+        <p class="how">{{ _("games." ~ kit.game.id ~ ".currency." ~ product.currency ~ ".earned") }}</p>
+        {% if help %}
+          <a href="{{ help }}" target="_blank" class="ext">
+            <InGameGlyph name="external" :size="14" stroke="#7a1d16" />
+            {{- _("web.ingame.need.help", currency=currency) }}
+          </a>
+          <p class="ext-note">{{ _("web.ingame.need.help.note") }}</p>
+        {% endif %}
+      </div>
+      {% if alternative %}
+        {% set other = alternative.offer.product %}
+        {% set term %}<InGameTerm :ownership="other.ownership" />{% endset %}
+        {% set price %}<InGamePrice :kit="kit" :amount="other.price" :currency="other.currency" />{% endset %}
+        <p class="alt">{{ _("web.ingame.need.alternative", term=term | trim, price=price | trim) }}</p>
+      {% endif %}
+      <a href="{{ back }}" class="button button-dark">
+        <InGameGlyph name="back" :size="16" stroke="#fede01" />
+        {{ _("web.ingame.back.points") }}
+      </a>
+    </div>
+  </main>
+</InGameWindow>

@@ -1,0 +1,292 @@
+/* The pages that a game shows in its own browser: the in-game store in a window of about 410 by
+   560 pixels. That browser is WebKit 533 of 2010, so the layout keeps to floats and positions,
+   prefixed corners with radii in pixels, shadows and motion, and no custom properties, cascade
+   layers, flexbox or grid; the pages inline this sheet and the store's others, as the window
+   loads a page alone through the hook. */
+
+*,
+*:before,
+*:after {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #0f1012;
+  color: #1f1712;
+  font:
+    13px/1.4 Arial,
+    Helvetica,
+    sans-serif;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+  -webkit-box-shadow: 0 0 0 6px #0a0a0a;
+  box-shadow: 0 0 0 6px #0a0a0a;
+}
+
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.window {
+  position: relative;
+  max-width: 640px;
+  height: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+  background: #d7c8af;
+}
+
+/* The hero who buys, and the account's wallets. */
+
+.hero {
+  position: relative;
+  height: 62px;
+  border-bottom: 2px solid #000000;
+  background: #1e1815;
+}
+
+.hero-who {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  right: 160px;
+  height: 40px;
+  padding-left: 50px;
+}
+
+.hero-disc {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  padding-top: 7px;
+  border: 2px solid #000000;
+  -webkit-border-radius: 20px;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.hero-name,
+.hero-kind {
+  margin: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.hero-name {
+  color: #ffffff;
+  font:
+    700 16px/21px "Trebuchet MS",
+    Arial,
+    sans-serif;
+}
+
+.hero-kind {
+  color: #c9bfb3;
+  font-size: 12px;
+  line-height: 17px;
+}
+
+.wallets {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: right;
+}
+
+.wallets li {
+  height: 23px;
+  color: #ffffff;
+  font:
+    700 14px/23px "Trebuchet MS",
+    Arial,
+    sans-serif;
+  white-space: nowrap;
+}
+
+.wallet-name {
+  color: #d9cfc4;
+  font:
+    400 12px Arial,
+    Helvetica,
+    sans-serif;
+}
+
+.coin {
+  display: inline-block;
+  width: 19px;
+  height: 19px;
+  margin-right: 5px;
+  border: 2px solid #000000;
+  -webkit-border-radius: 9.5px;
+  border-radius: 9.5px;
+  line-height: 0;
+  text-align: center;
+  vertical-align: -5px;
+}
+
+.coin .glyph {
+  margin-top: 1px;
+}
+
+/* The panels: one per page, sliding in from the side its address lies on. */
+
+.panel {
+  position: absolute;
+  top: 62px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  -webkit-transition:
+    -webkit-transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition:
+    transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.panel.from-right {
+  opacity: 0;
+  -webkit-transform: translateX(24px);
+  transform: translateX(24px);
+  -webkit-transition: none;
+  transition: none;
+}
+
+.panel.from-left {
+  opacity: 0;
+  -webkit-transform: translateX(-24px);
+  transform: translateX(-24px);
+  -webkit-transition: none;
+  transition: none;
+}
+
+.panel-head {
+  position: relative;
+  height: 56px;
+  padding: 8px 12px 0;
+}
+
+.panel-head.has-back {
+  padding-left: 66px;
+}
+
+.panel-body {
+  position: absolute;
+  top: 56px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin: 0;
+  padding: 2px 12px 12px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.back {
+  position: absolute;
+  top: 5px;
+  left: 12px;
+  display: block;
+  width: 44px;
+  height: 44px;
+  padding-top: 11px;
+  border: 2px solid #000000;
+  -webkit-border-radius: 22px;
+  border-radius: 22px;
+  background: #1a1412;
+  text-align: center;
+}
+
+.back:hover {
+  background: #4a3f3a;
+}
+
+.plaque {
+  display: inline-block;
+  max-width: 100%;
+  padding: 3px 16px 4px;
+  border: 2px solid #120b07;
+  -webkit-border-radius: 6px;
+  border-radius: 6px;
+  background: #7b4a22;
+  -webkit-box-shadow: 0 3px 0 #000000;
+  box-shadow: 0 3px 0 #000000;
+  -webkit-transform: rotate(-1.2deg);
+  transform: rotate(-1.2deg);
+}
+
+.plaque-title {
+  margin: 0;
+  overflow: hidden;
+  color: #ffffff;
+  font:
+    italic 700 22px/1.2 "Trebuchet MS",
+    Arial,
+    sans-serif;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-transform: lowercase;
+  text-shadow:
+    1.5px 0 0 #000,
+    -1.5px 0 0 #000,
+    0 1.5px 0 #000,
+    0 -1.5px 0 #000,
+    1px 1px 0 #000,
+    -1px 1px 0 #000,
+    1px -1px 0 #000,
+    -1px -1px 0 #000,
+    0 3px 0 #000;
+}
+
+.lead {
+  margin: 0 0 10px;
+  color: #2b2018;
+  line-height: 18px;
+}
+
+.foot {
+  margin: 4px 0 0;
+  color: #5c4a3c;
+  font-size: 12px;
+  line-height: 17px;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list li {
+  margin: 0 0 6px;
+}

@@ -203,6 +203,13 @@ async def test_the_heroes_page_lists_each_hero_and_changes_the_hero_the_game_log
         hero=first,
     )
     legacy = await select_value(database_url, "SELECT id FROM persona WHERE name = 'Oldlamp'")
+    await execute(
+        database_url,
+        "INSERT INTO entitlement (account_id, persona_id, tag, status, expires_at) SELECT"
+        " account_id, id, '3015-tlmd', 'ACTIVE', now() + interval '2 days' FROM persona"
+        " WHERE id = :hero",
+        hero=legacy,
+    )
     async with httpx2.AsyncClient() as client:
         asked = await client.get(f"{base}/bfheroes/heroes")
         assert asked.headers["location"] == "/sign-in?next=%2Fbfheroes%2Fheroes"
@@ -216,6 +223,7 @@ async def test_the_heroes_page_lists_each_hero_and_changes_the_hero_the_game_log
         assert "12 items · 1 running low Chests none yet" in shown and "0 unspent of 0" in shown
         assert "items · none running low Chests 1 to open" in shown
         assert "1 chest to open : Tin_Tankard 1." in shown
+        assert "1 item · 1 running low" in shown
         heroes = (first, second, legacy)
         offered = [f"/bfheroes/heroes/{hero}/default" in page.text for hero in heroes]
         assert offered == [False, True, False]

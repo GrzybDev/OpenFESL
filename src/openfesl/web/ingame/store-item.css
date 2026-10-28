@@ -1,0 +1,240 @@
+/* An item and its price points. */
+
+.ware {
+  position: relative;
+  min-height: 72px;
+  margin: 0 0 6px;
+  padding-left: 76px;
+}
+
+.ware .icon {
+  top: 0;
+  left: 0;
+  width: 64px;
+  height: 64px;
+  padding-top: 16px;
+}
+
+.ware-name {
+  margin: 0;
+  font:
+    700 18px/22px "Trebuchet MS",
+    Arial,
+    sans-serif;
+}
+
+.ware-for {
+  margin: 2px 0 0;
+  color: #5c4a3c;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* Two lines at most, so that the price points and the buttons stay in the game's window. */
+.ware-text {
+  display: -webkit-box;
+  max-height: 34px;
+  margin: 3px 0 0;
+  overflow: hidden;
+  color: #2b2018;
+  line-height: 17px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.standing {
+  margin: 0 0 8px;
+  padding: 6px 10px;
+  border: 2px dashed #a8977f;
+  -webkit-border-radius: 6px;
+  border-radius: 6px;
+  line-height: 18px;
+}
+
+.standing b {
+  color: #1f1712;
+}
+
+.owned {
+  margin: 0;
+  color: #2b2018;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.label {
+  margin: 0 0 4px;
+  color: #5c4a3c;
+  font:
+    700 11px/14px Arial,
+    Helvetica,
+    sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tiles {
+  overflow: hidden;
+  margin: 0;
+}
+
+.tile {
+  float: left;
+  width: 48.7%;
+  height: 54px;
+  margin: 0 2.6% 8px 0;
+  padding: 6px 4px 0;
+  border: 2px solid #000000;
+  -webkit-border-radius: 6px;
+  border-radius: 6px;
+  background: #f1e9de;
+  -webkit-box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  text-align: center;
+  -webkit-transition: background-color 120ms linear;
+  transition: background-color 120ms linear;
+}
+
+.tile:nth-of-type(2n + 1) {
+  clear: left;
+}
+
+.tile:nth-of-type(2n) {
+  margin-right: 0;
+}
+
+/* A tile that says what is short keeps to three tight lines, so that five price points, what
+   buying leaves and the buttons fit the game's window. */
+.tiles-tall .tile {
+  height: 60px;
+  margin-bottom: 6px;
+  padding-top: 3px;
+}
+
+.tile:hover {
+  background: #f8f4ef;
+}
+
+.tile[aria-pressed="true"] {
+  background: #f2c12e;
+}
+
+.tile-title {
+  display: block;
+  font:
+    700 15px/20px "Trebuchet MS",
+    Arial,
+    sans-serif;
+}
+
+.tile-title .coin {
+  margin-right: 6px;
+  vertical-align: -4px;
+}
+
+.tile-price {
+  display: block;
+  color: #2b2018;
+  line-height: 19px;
+}
+
+.tile-short {
+  display: block;
+  color: #8c1e18;
+  font:
+    700 12px/14px Arial,
+    Helvetica,
+    sans-serif;
+}
+
+.tiles-tall .tile-price {
+  line-height: 17px;
+}
+
+.pick {
+  clear: both;
+  padding-top: 2px;
+}
+
+.pick-off {
+  display: none;
+}
+
+.outcome {
+  margin: 0 0 8px;
+  color: #2b2018;
+  line-height: 18px;
+}
+
+.reason {
+  margin: 0 0 8px;
+  color: #8c1e18;
+  font-weight: 700;
+  line-height: 18px;
+}
+
+.reason .glyph {
+  margin-right: 4px;
+  vertical-align: -2px;
+}
+
+.button {
+  display: inline-block;
+  height: 46px;
+  margin: 0;
+  padding: 0 18px 0 14px;
+  border: 2px solid #000000;
+  -webkit-border-radius: 23px;
+  border-radius: 23px;
+  background: #1a1412;
+  -webkit-box-shadow: 0 3px 0 #000000;
+  box-shadow: 0 3px 0 #000000;
+  color: #ffffff;
+  cursor: pointer;
+  font:
+    700 15px/42px "Trebuchet MS",
+    Arial,
+    sans-serif;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.button .glyph {
+  margin-right: 6px;
+  vertical-align: -3px;
+}
+
+.button:hover {
+  background: #4a3f3a;
+}
+
+.button:active {
+  -webkit-box-shadow: 0 1px 0 #000000;
+  box-shadow: 0 1px 0 #000000;
+  -webkit-transform: translateY(2px);
+  transform: translateY(2px);
+}
+
+.need-link,
+.ext {
+  display: inline-block;
+  min-height: 44px;
+  margin: 4px 0 0;
+  color: #7a1d16;
+  font:
+    700 14px/44px "Trebuchet MS",
+    Arial,
+    sans-serif;
+  text-decoration: underline;
+}
+
+.need-link .glyph {
+  margin-left: 5px;
+  vertical-align: -1px;
+}
+
+.ext .glyph {
+  margin-right: 5px;
+  vertical-align: -2px;
+}

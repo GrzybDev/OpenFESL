@@ -1,0 +1,221 @@
+/* The rows of the categories and of a category's items. */
+
+.row {
+  position: relative;
+  display: block;
+  height: 56px;
+  padding: 0 34px 0 58px;
+  border: 2px solid #000000;
+  -webkit-border-radius: 6px;
+  border-radius: 6px;
+  background: #f1e9de;
+  -webkit-box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+  color: #1f1712;
+  text-decoration: none;
+  -webkit-transition: background-color 150ms linear;
+  transition: background-color 150ms linear;
+}
+
+a.row:hover {
+  background: #f8f4ef;
+}
+
+a.row:active {
+  -webkit-box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+  -webkit-transform: translateY(2px);
+  transform: translateY(2px);
+}
+
+.row-empty {
+  border-style: dashed;
+  border-color: #3b2d23;
+  background: transparent;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+.row-disc {
+  position: absolute;
+  top: 8px;
+  left: 9px;
+  width: 36px;
+  height: 36px;
+  padding-top: 6px;
+  border: 2px solid #000000;
+  -webkit-border-radius: 18px;
+  border-radius: 18px;
+  background: #f2c12e;
+  text-align: center;
+}
+
+.row-empty .row-disc {
+  border: 2px dashed #3b2d23;
+  background: transparent;
+}
+
+.row-name {
+  display: block;
+  overflow: hidden;
+  padding-top: 7px;
+  font:
+    700 17px/21px "Trebuchet MS",
+    Arial,
+    sans-serif;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.row-empty .row-name {
+  color: #2b2018;
+}
+
+.row-sub {
+  display: block;
+  overflow: hidden;
+  color: #5c4a3c;
+  line-height: 18px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* A category's line wraps rather than cutting off what runs low; an item's keeps to one line. */
+.row:not(.row-ware) {
+  height: auto;
+  min-height: 56px;
+  padding-bottom: 6px;
+}
+
+.row:not(.row-ware) .row-sub {
+  white-space: normal;
+}
+
+.row-low {
+  color: #8c1e18;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.row-go {
+  position: absolute;
+  top: 19px;
+  right: 12px;
+}
+
+.row-ware {
+  height: 60px;
+  padding: 0 30px 0 62px;
+}
+
+.row-ware .row-name {
+  padding-top: 8px;
+  font-size: 15px;
+  line-height: 19px;
+}
+
+.row-ware .row-sub {
+  line-height: 20px;
+}
+
+.row-ware.priced .row-name,
+.row-ware.priced .row-sub {
+  margin-right: 88px;
+}
+
+.row-ware .row-go {
+  top: 21px;
+  right: 9px;
+}
+
+.row-prices {
+  position: absolute;
+  top: 7px;
+  right: 28px;
+  width: 84px;
+  font:
+    700 13px/21px "Trebuchet MS",
+    Arial,
+    sans-serif;
+  text-align: right;
+}
+
+.row-price {
+  display: block;
+}
+
+.row-price .coin {
+  width: 17px;
+  height: 17px;
+  margin: 0 0 0 4px;
+  vertical-align: -4px;
+}
+
+.row-hl {
+  -webkit-animation: highlight 900ms linear;
+  animation: highlight 900ms linear;
+}
+
+@-webkit-keyframes highlight {
+  0%,
+  22% {
+    background-color: #ffe27a;
+  }
+  100% {
+    background-color: #f1e9de;
+  }
+}
+
+@keyframes highlight {
+  0%,
+  22% {
+    background-color: #ffe27a;
+  }
+  100% {
+    background-color: #f1e9de;
+  }
+}
+
+.icon {
+  position: absolute;
+  top: 6px;
+  left: 7px;
+  width: 44px;
+  height: 44px;
+  padding-top: 10px;
+  border: 2px solid #3b2d23;
+  -webkit-border-radius: 4px;
+  border-radius: 4px;
+  background: #cdbfa6;
+  text-align: center;
+}
+
+.status-low {
+  color: #8c1e18;
+}
+
+.status-held {
+  color: #2b2018;
+}
+
+.status-low .glyph {
+  margin-right: 3px;
+  vertical-align: -2px;
+}
+
+.badge {
+  display: inline-block;
+  margin-right: 5px;
+  padding: 0 5px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  background: #1a1412;
+  color: #fede01;
+  font:
+    700 10px/16px Arial,
+    Helvetica,
+    sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: 1px;
+}

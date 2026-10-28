@@ -10,6 +10,7 @@ from pydantic import (
     model_validator,
 )
 
+from openfesl.core.game_pages import Glyph
 from openfesl.core.inventory import COUNTED, PERMANENT, RENTED, Ownership
 
 # For annotations only, since the catalogue's module reads the games' data, which holds these.
@@ -156,6 +157,48 @@ class Rounding(BaseModel):
         return rounded if rounded > 0 else price
 
 
+class StoreCategory(BaseModel):
+    """A category of a game's in-game store, which lists the items of some kinds.
+
+    Attributes:
+        key: Its name, which its address and the ids of its texts hold.
+        kinds: The kinds of its items, as the catalogue knows them.
+        glyph: The glyph of its tile.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    key: Annotated[str, Field(pattern=r"^[a-z][a-z-]*$")]
+    kinds: frozenset[str]
+    glyph: Glyph
+
+
+class InGameStore(BaseModel):
+    """The store that a game opens in its own browser, where a hero buys during a match.
+
+    Attributes:
+        currencies: The currencies it sells for, in the order it lists prices in; products
+            priced in others are left out.
+        categories: Its categories, in order.
+        help: The addresses of the pages that tell how a currency is earned, by currency, as
+            the game opens them in the system browser.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    currencies: list[str]
+    categories: list[StoreCategory]
+    help: dict[str, str] = {}
+
+    def category(self, key: str) -> StoreCategory | None:
+        """Return a category by its name, if the store has one.
+
+        Args:
+            key: The category's name.
+        """
+        return next((category for category in self.categories if category.key == key), None)
+
+
 class StoreRules(BaseModel):
     """How a game's store prices and sells the items of its catalogue, as its data seeds it.
 
@@ -172,6 +215,7 @@ class StoreRules(BaseModel):
             in that currency.
         excluded: The items never sold nor dropped.
         boxes: The boxes and their drops.
+        in_game: The store the game opens in its own browser; none for a game without one.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -183,6 +227,7 @@ class StoreRules(BaseModel):
     prices: list[PriceRule]
     excluded: Exclusions = Exclusions()
     boxes: list[BoxRule] = []
+    in_game: InGameStore | None = None
 
     def product_id(self, number: int) -> str:
         """Return the id that the game buys a product by.

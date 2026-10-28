@@ -412,6 +412,25 @@ class Heroes:
             )
         )
 
+    async def worn(self, game: Game, persona_id: int) -> set[int]:
+        """Return the numbers of the items a hero wears, has on its equipment bar or as emotes.
+
+        Args:
+            game: The game, which has hero rules.
+            persona_id: The hero's persona.
+        """
+        rules = _rules(game)
+        owner = Owner(PERSONA, persona_id)
+        keys = [rules.stats.appearance, rules.stats.equipment, rules.stats.emotes]
+        bucket = bucket_of(Period.ALL_TIME, 0)
+        values = await self._stats.values(partition_of(game), [owner], keys, bucket)
+        worn: set[int] = set()
+        for key in keys:
+            found, stat = values.get((owner, key)), rules.written_stat(key)
+            if found and stat:
+                worn.update(stat.numbers(found.value, found.text) or ())
+        return worn - {0}
+
 
 def random_look(rules: HeroRules) -> Look:
     """Return a complete hero of random faction, class and look, as the creator opens with.

@@ -1,0 +1,10 @@
+{#def ownership, lower: bool = False #}
+{# How a product is owned once bought: for a number of days, of uses, or for good. #}
+{% if ownership.days %}
+  {% set text = _n("web.ingame.term.days", ownership.days) %}
+{% elif ownership.uses %}
+  {% set text = _n("web.ingame.term.uses", ownership.uses) %}
+{% else %}
+  {% set text = _("web.ingame.term.permanent") %}
+{% endif %}
+{{ text[:1].lower() ~ text[1:] if lower else text }}

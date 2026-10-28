@@ -1,5 +1,6 @@
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -11,6 +12,7 @@ from openfesl.core.entitlements import ACTIVE, EntitlementStore
 from openfesl.core.games import Game, Games
 from openfesl.core.hero_items import held
 from openfesl.core.heroes import Hero, Heroes, HeroRefused, Refusal, Roster
+from openfesl.core.store_window import running_low
 from openfesl.core.texts import localize, translate
 from openfesl.core.wallets import Wallets
 from openfesl.web.account.session import open_page, signed_in
@@ -43,7 +45,7 @@ class HeroCard:
         points: The Hero Points it has to spend, and those it earned in all.
         items: The items it holds: the starting kit of its faction and class and those kept for
             it while they are in use and have time left.
-        low: How many of the items kept for it have few uses left.
+        low: How many of the items kept for it run low: few uses, days or hours left.
         chests: How many treasure chests it has to open; none in a game without them.
     """
 
@@ -295,16 +297,7 @@ class HeroesPages:
         for slot, (hero, earned) in enumerate(zip(roster.heroes, points, strict=True), 1):
             kept = await self._entitlements.of_persona(hero.persona.id)
             owned = held(rules, hero.faction, hero.hero_class, kept)
-            # A stack of treasure chests counts chests rather than the uses of an item.
             chests = game.chests.tag if game.chests else None
-            low = sum(
-                1
-                for item in kept
-                if item.status == ACTIVE
-                and item.uses is not None
-                and item.uses <= rules.running_low
-                and item.tag != chests
-            )
             stacks = [
                 item.uses or 0 for item in kept if item.tag == chests and item.status == ACTIVE
             ]
@@ -316,7 +309,7 @@ class HeroesPages:
                     xp_needed=catalogue.xp_to_next(hero.level),
                     points=earned,
                     items=len(owned),
-                    low=low,
+                    low=running_low(rules, kept, datetime.now(UTC)),
                     chests=sum(stacks) if chests else None,
                 )
             )

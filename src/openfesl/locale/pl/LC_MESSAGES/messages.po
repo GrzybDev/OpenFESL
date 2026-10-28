@@ -7417,3 +7417,240 @@ msgstr "Klucze można kupić w każdej chwili."
 
 msgid "web.account.page.keys"
 msgstr "Kupowanie kluczy"
+
+msgid "web.ingame.title"
+msgstr "Sklep"
+
+msgid "web.ingame.wallets"
+msgstr "Portfele"
+
+msgid "web.ingame.hero"
+msgstr "%(hero_class)s · %(faction)s · poziom %(level)s"
+
+msgid "games.bfheroes.faction.royal.short"
+msgstr "Royal Army"
+
+msgid "games.bfheroes.faction.national.short"
+msgstr "National Army"
+
+msgid "web.ingame.lead"
+msgstr "Przedmioty dla bohatera %(hero)s. Przedmiot należy do bohatera, dla którego został kupiony; %(currencies)s należą do konta."
+
+msgid "web.ingame.items.one"
+msgstr "%(count)s przedmiot"
+
+msgid "web.ingame.items.few"
+msgstr "%(count)s przedmioty"
+
+msgid "web.ingame.items.many"
+msgstr "%(count)s przedmiotów"
+
+msgid "web.ingame.items.other"
+msgstr "%(count)s przedmiotu"
+
+msgid "web.ingame.owned.one"
+msgstr "%(count)s w posiadaniu"
+
+msgid "web.ingame.owned.few"
+msgstr "%(count)s w posiadaniu"
+
+msgid "web.ingame.owned.many"
+msgstr "%(count)s w posiadaniu"
+
+msgid "web.ingame.owned.other"
+msgstr "%(count)s w posiadaniu"
+
+msgid "web.ingame.owned.none"
+msgstr "nic w posiadaniu"
+
+msgid "web.ingame.low.one"
+msgstr "%(count)s na wyczerpaniu"
+
+msgid "web.ingame.low.few"
+msgstr "%(count)s na wyczerpaniu"
+
+msgid "web.ingame.low.many"
+msgstr "%(count)s na wyczerpaniu"
+
+msgid "web.ingame.low.other"
+msgstr "%(count)s na wyczerpaniu"
+
+msgid "web.ingame.empty"
+msgstr "Brak ofert dla tego bohatera"
+
+msgid "games.bfheroes.store.weapons"
+msgstr "Bronie"
+
+msgid "games.bfheroes.store.clothing"
+msgstr "Ubrania"
+
+msgid "games.bfheroes.store.widgets"
+msgstr "Gadżety"
+
+msgid "games.bfheroes.store.emotes"
+msgstr "Emotki"
+
+msgid "games.bfheroes.store.boosts"
+msgstr "Wzmocnienia"
+
+msgid "games.bfheroes.store.note"
+msgstr "Umiejętności kupuje się za Hero Points w menu gry, nie tutaj."
+
+msgid "web.ingame.back.categories"
+msgstr "Powrót do kategorii"
+
+msgid "web.ingame.back.category"
+msgstr "Powrót do listy: %(category)s"
+
+msgid "web.ingame.back.points"
+msgstr "Powrót do wariantów"
+
+msgid "web.ingame.from"
+msgstr "od"
+
+msgid "web.ingame.equipped"
+msgstr "W użyciu"
+
+msgid "web.ingame.left.none"
+msgstr "Nie w posiadaniu"
+
+msgid "web.ingame.left.permanent"
+msgstr "Na stałe"
+
+msgid "web.ingame.left.uses.one"
+msgstr "%(count)s użycie"
+
+msgid "web.ingame.left.uses.few"
+msgstr "%(count)s użycia"
+
+msgid "web.ingame.left.uses.many"
+msgstr "%(count)s użyć"
+
+msgid "web.ingame.left.uses.other"
+msgstr "%(count)s użycia"
+
+msgid "web.ingame.left.days.one"
+msgstr "%(count)s dzień"
+
+msgid "web.ingame.left.days.few"
+msgstr "%(count)s dni"
+
+msgid "web.ingame.left.days.many"
+msgstr "%(count)s dni"
+
+msgid "web.ingame.left.days.other"
+msgstr "%(count)s dnia"
+
+msgid "web.ingame.left.hours.one"
+msgstr "%(count)s godzina"
+
+msgid "web.ingame.left.hours.few"
+msgstr "%(count)s godziny"
+
+msgid "web.ingame.left.hours.many"
+msgstr "%(count)s godzin"
+
+msgid "web.ingame.left.hours.other"
+msgstr "%(count)s godziny"
+
+msgid "web.ingame.left.until"
+msgstr "%(left)s, do %(day)s"
+
+msgid "web.ingame.left.low"
+msgstr "%(left)s · na wyczerpaniu"
+
+msgid "web.ingame.for.anyone"
+msgstr "Każdy bohater"
+
+msgid "web.ingame.for.faction"
+msgstr "%(faction)s, dowolna klasa"
+
+msgid "web.ingame.for.classes"
+msgstr "%(classes)s, dowolna frakcja"
+
+msgid "web.ingame.for.both"
+msgstr "%(classes)s · %(faction)s"
+
+msgid "web.ingame.owned_for_good"
+msgstr "%(hero)s ma ten przedmiot na stałe; nie ma tu nic do kupienia."
+
+msgid "web.ingame.points"
+msgstr "Warianty"
+
+msgid "web.ingame.term.days.one"
+msgstr "%(count)s dzień"
+
+msgid "web.ingame.term.days.few"
+msgstr "%(count)s dni"
+
+msgid "web.ingame.term.days.many"
+msgstr "%(count)s dni"
+
+msgid "web.ingame.term.days.other"
+msgstr "%(count)s dnia"
+
+msgid "web.ingame.term.uses.one"
+msgstr "%(count)s użycie"
+
+msgid "web.ingame.term.uses.few"
+msgstr "%(count)s użycia"
+
+msgid "web.ingame.term.uses.many"
+msgstr "%(count)s użyć"
+
+msgid "web.ingame.term.uses.other"
+msgstr "%(count)s użycia"
+
+msgid "web.ingame.term.permanent"
+msgstr "Na stałe"
+
+msgid "web.ingame.price"
+msgstr "%(amount)s %(currency)s"
+
+msgid "web.ingame.short"
+msgstr "brakuje %(amount)s"
+
+msgid "web.ingame.reason"
+msgstr "Konto ma %(balance)s; ten wariant kosztuje %(price)s."
+
+msgid "web.ingame.outcome"
+msgstr "Po zakupie: %(left)s; na koncie zostanie %(balance)s."
+
+msgid "web.ingame.need.link"
+msgstr "Skąd biorą się %(currency)s"
+
+msgid "web.ingame.need.title"
+msgstr "Potrzeba więcej: %(currency)s"
+
+msgid "web.ingame.need.box"
+msgstr "Za mało: %(currency)s"
+
+msgid "web.ingame.need.price"
+msgstr "Cena"
+
+msgid "web.ingame.need.what"
+msgstr "%(item)s, %(term)s"
+
+msgid "web.ingame.need.has"
+msgstr "Konto ma"
+
+msgid "web.ingame.need.short"
+msgstr "Brakuje"
+
+msgid "games.bfheroes.currency._PF.earned"
+msgstr "Funds nigdy nie są sprzedawane; ich źródła wymienia strona Funds."
+
+msgid "web.ingame.need.help"
+msgstr "Jak zdobywa się %(currency)s"
+
+msgid "web.ingame.need.help.note"
+msgstr "Otwiera się w przeglądarce systemowej; gra najpierw wychodzi z trybu pełnoekranowego."
+
+msgid "web.ingame.need.alternative"
+msgstr "Wariant %(term)s kosztuje %(price)s, a tyle konto ma."
+
+msgid "web.ingame.offline.title"
+msgstr "Sklep jest niedostępny"
+
+msgid "web.ingame.offline.text"
+msgstr "Sklep nie mógł się otworzyć dla tego bohatera. Ponowne otwarcie sklepu to kolejna próba."

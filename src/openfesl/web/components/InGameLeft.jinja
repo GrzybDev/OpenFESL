@@ -1,0 +1,13 @@
+{#def left, until: bool = False, lower: bool = False #}
+{# What a hero has left of an item, such as 4 days left, with the day a rental ends when asked. #}
+{% if left is none %}
+  {% set text = _("web.ingame.left.none") %}
+{% elif left.unit == "permanent" %}
+  {% set text = _("web.ingame.left.permanent") %}
+{% else %}
+  {% set text = _n("web.ingame.left." ~ left.unit, left.count) %}
+  {% if until and left.until %}
+    {% set text = _("web.ingame.left.until", left=text, day=when(left.until, "yMMMd")) %}
+  {% endif %}
+{% endif %}
+{{ text[:1].lower() ~ text[1:] if lower else text }}

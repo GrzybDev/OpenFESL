@@ -431,6 +431,15 @@ class Game(BaseModel):
         for box in boxes:
             if box.faction not in {None, *factions} or box.hero_class not in {None, *classes}:
                 raise ValueError(f"the box {box.key} names a faction or class the heroes lack")
+        # The in-game store sells to heroes and says that their account pays.
+        if window := self.store.in_game if self.store else None:
+            paying = {
+                code
+                for code, currency in self.currencies.items()
+                if currency.scope is Scope.ACCOUNT
+            }
+            if self.heroes is None or not set(window.currencies) <= paying:
+                raise ValueError("the in-game store needs heroes and currencies of the account")
         return self
 
     @model_validator(mode="after")

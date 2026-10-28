@@ -56,6 +56,7 @@ from openfesl.core.start_links import StartLinks
 from openfesl.core.stats import StatsService
 from openfesl.core.store import Store
 from openfesl.core.store_items import StoreItems
+from openfesl.core.store_window import StoreWindows
 from openfesl.core.telemetry import telemetry_routes
 from openfesl.core.texts import load_texts
 from openfesl.core.theater import Theater, TheaterRoute, theater_routes
@@ -131,6 +132,9 @@ class GameServices:
         )
         self.chests = Chests(stores.products, stores.purchases, self.heroes, drops)
         self.item_writes = ItemWrites(stores.entitlements)
+        self.windows = StoreWindows(
+            stores.products, self.catalogues, self.heroes, stores.entitlements, self.wallets
+        )
         self.policies = GamePolicies(stores.settings)
         self.terms = Terms.load()
         self.store_items = StoreItems(

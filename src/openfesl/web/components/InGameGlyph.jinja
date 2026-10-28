@@ -1,0 +1,8 @@
+{#def name: str, size: int = 16, stroke: str = "", fill: str = "" #}
+{# A glyph of the sprite as an image in the colours given, which the game's browser draws: it
+   predates SVG inside HTML. #}
+<img src="{{ glyph(name, size, stroke, fill) }}"
+     width="{{ size }}"
+     height="{{ size }}"
+     alt=""
+     class="glyph{% if attrs.classes %} {{ attrs.classes }}{% endif %}">

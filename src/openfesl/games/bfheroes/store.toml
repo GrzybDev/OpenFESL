@@ -723,3 +723,19 @@ drops = ["970 perm", "971 perm", "972 perm", "643 perm", "1470 perm", "1359 perm
 weight = 2
 drops = ["3025 perm", "3015 perm", "3038 perm", "3042 perm", "3041 perm", "3043 perm", "973 perm",
     "974 perm"]
+
+# The store the game opens in its own browser during a match (/<lang>/game/store), with the
+# categories of its store menu. Abilities are bought with Hero Points in the game's own menu, so it
+# sells for Valor Points and Funds alone, listed in that order. A hero short of Funds is pointed at
+# the page that the game's own Get Funds button opens in the system browser; Valor Points come
+# from matches alone.
+[store.in_game]
+currencies = ["_DV", "_PF"]
+help = { _PF = "/store/purchaseFunds" }
+categories = [
+    { key = "weapons", kinds = ["weapon"], glyph = "weapon" },
+    { key = "clothing", kinds = ["appearance"], glyph = "shirt" },
+    { key = "widgets", kinds = ["ability"], glyph = "flask" },
+    { key = "emotes", kinds = ["emote"], glyph = "emote" },
+    { key = "boosts", kinds = ["convenience"], glyph = "boost" },
+]

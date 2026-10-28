@@ -1,0 +1,49 @@
+{#def kit, title: str, visit = None #}
+{# A page that a game shows in its own browser: the hero who buys, with the account's wallets,
+   above the store's panel. It brings its stylesheet, script and glyphs inline, as the game's
+   window loads the page alone through the hook. #}
+<!DOCTYPE html>
+<html lang="{{ language }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title }}</title>
+    {{ kit.styles }}
+  </head>
+  <body>
+    {% if visit %}
+      {% set hero = visit.window.hero %}
+      {% set game_id = kit.game.id %}
+      {% set glyph = kit.game.heroes.classes[hero.hero_class].glyph %}
+      {% set ink = kit.game.heroes.factions[hero.faction].ink %}
+      {% set faction = _("games." ~ game_id ~ ".faction." ~ hero.faction ~ ".short") %}
+      {% set hero_class = _("games." ~ game_id ~ ".class." ~ hero.hero_class) %}
+      <div class="window">
+        <header class="hero">
+          <div class="hero-who">
+            <span aria-hidden="true"
+                  class="hero-disc"
+                  data-faction="{{ hero.faction }}">
+              <InGameGlyph :name="glyph" :size="22" :stroke="ink" />
+            </span>
+            <p class="hero-name">{{ hero.persona.name }}</p>
+            <p class="hero-kind">{{ _("web.ingame.hero", faction=faction, hero_class=hero_class, level=number(hero.level)) }}</p>
+          </div>
+          <ul aria-label="{{ _('web.ingame.wallets') }}" class="wallets">
+            {% for wallet in kit.wallets %}
+              <li>
+                <InGameCoin :kit="kit" :currency="wallet.currency" />
+                {{ number(visit.window.balances.get(wallet.currency, 0)) }}
+                <span class="wallet-name">{{ _("games." ~ game_id ~ ".currency." ~ wallet.currency) }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </header>
+        {{ content }}
+      </div>
+    {% else %}
+      {{ content }}
+    {% endif %}
+    {{ kit.script }}
+  </body>
+</html>

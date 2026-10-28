@@ -1,0 +1,6 @@
+{#def kit, currency: str, size: int = 13 #}
+{# The coin of a currency, in the colours the game's site gives its wallet. #}
+{% set wallet = kit.coins.get(currency) %}
+<span aria-hidden="true" class="coin" data-coin="{{ currency }}">
+  {% if wallet %}<InGameGlyph :name="wallet.glyph" :size="size" :stroke="wallet.ink" />{% endif %}
+</span>
