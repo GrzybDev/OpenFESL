@@ -3,7 +3,8 @@ from pathlib import Path
 import httpx2
 import pytest
 from identity import IdentityProvider, form_token, sign_in
-from support import cli, connect_server, create, game, masked, report
+from support import THEATER, cli, connect_server, create, game, masked, report
+from test_player_servers import SERVER_GAME, register, start
 
 pytestmark = pytest.mark.anyio
 KEEPER = {"sub": "keeper-3", "preferred_username": "invented-keeper", "groups": ["fesl-admins"]}
@@ -97,3 +98,33 @@ async def test_servers_move_between_tabs_through_the_admins_decisions(
         approved = await client.get(f"{base}/admin/servers", params={"state": "approved"})
         assert "Invented Night Rush" in approved.text
         assert 'class="menu-count"' not in approved.text
+
+
+async def test_a_server_of_a_game_without_providers_is_approved_in_one_step(
+    admin_provider: IdentityProvider, server_url: str
+) -> None:
+    admin_provider.user = KEEPER
+    base = server_url.replace("ws://", "http://").rstrip("/")
+    await register(server_url, "host@example.test")
+    async with httpx2.AsyncClient() as client, game(server_url) as server:
+        await start(server_url, server, "host@example.test", role="host")
+        created = await server.theater(THEATER, "CGAM", SERVER_GAME)
+        ugid = created.fields["UGID"]
+
+        # Battlefield Heroes servers report no provider, so none is unknown or missing.
+        home = (await sign_in(client, base, next="/admin/")).text
+        page = (await client.get(f"{base}/admin/servers", params={"open": ugid})).text
+        reject = (await client.get(f"{base}/admin/servers/{ugid}/reject")).text
+        for shown in (home, page, reject):
+            assert "Invented Heroes Server" in shown
+            assert "Unknown provider" not in shown and "unknown provider" not in shown
+        assert "The server has not reported a provider id yet." not in page
+        assert "Approve lists its game in the server list." in page
+
+        approved = await client.post(
+            f"{base}/admin/servers/{ugid}/approve",
+            data={"csrf": form_token(page), "back": "/admin/servers"},
+        )
+        assert approved.headers["location"] == "/admin/servers"
+        listed = await client.get(f"{base}/admin/servers", params={"state": "approved"})
+        assert "Approved Invented Heroes Server." in listed.text

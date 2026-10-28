@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 from openfesl.core.hosted_games import HostedGame
 from openfesl.core.hosting import GAME, Hosting
+from openfesl.core.personas import Persona
 from openfesl.core.servers import Approval, Standing
 
 if TYPE_CHECKING:
@@ -54,6 +55,55 @@ class ServerTrust:
             return False
         return await self._listed(hosted)
 
+    async def serves(self, session: GameSession) -> bool:
+        """Return whether a session is a dedicated server hosting a game players see as of now.
+
+        Args:
+            session: The session.
+        """
+        return _server_login(session) and await self.admits(session)
+
+    async def serves_player(self, session: GameSession, account_id: int) -> bool:
+        """Return whether a session is a dedicated server hosting a player in a game players see.
+
+        Args:
+            session: The session.
+            account_id: The player's account.
+        """
+        return _server_login(session) and await self.admits_player(session, account_id)
+
+    async def keeps_persona(self, session: GameSession, persona_id: int) -> bool:
+        """Return whether a session is a dedicated server that keeps a persona's data as of now.
+
+        A server keeps the data of the personas in the game players see that it hosts, and of
+        those it reported in that game earlier: it reports a player's results as the player
+        leaves, which may be after it reported the player gone.
+
+        Args:
+            session: The session.
+            persona_id: The persona.
+        """
+        hosted = self._served_by(session) if _server_login(session) else None
+        return (
+            hosted is not None
+            and any(persona.id == persona_id for persona in _kept(hosted))
+            and await self._listed(hosted)
+        )
+
+    async def keeps_account(self, session: GameSession, account_id: int) -> bool:
+        """Return whether a session is a dedicated server keeping the data of an account's persona.
+
+        Args:
+            session: The session.
+            account_id: The account.
+        """
+        hosted = self._served_by(session) if _server_login(session) else None
+        return (
+            hosted is not None
+            and any(persona.account_id == account_id for persona in _kept(hosted))
+            and await self._listed(hosted)
+        )
+
     def _served_by(self, session: GameSession) -> HostedGame | None:
         return next(
             (
@@ -93,3 +143,16 @@ class ServerTrust:
             elif hosted.listed != listed:
                 hosted.listed = listed
                 logger.info("Game %d %s", hosted.id, "listed" if listed else "hidden")
+
+
+def _server_login(session: GameSession) -> bool:
+    # The servers of some games share a server account, which only the server client their Hello
+    # stands for logs in with; those of others log in as players do, through the game's client.
+    account, client = session.account, session.client
+    return account is not None and (
+        account.server or (client is not None and client.servers_log_in_as_players)
+    )
+
+
+def _kept(hosted: HostedGame) -> list[Persona]:
+    return [*(player.persona for player in hosted.players.values()), *hosted.entered.values()]

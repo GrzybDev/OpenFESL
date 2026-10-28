@@ -13,7 +13,7 @@ os.environ.setdefault("TESTCONTAINERS_HOST_OVERRIDE", "127.0.0.1")
 
 from testcontainers.community.postgres import PostgresContainer
 
-from openfesl.core import admin, history
+from openfesl.core import admin, history, trust
 from openfesl.server.cli import RelayServer, main, uvicorn_config
 from openfesl.storage.database import migrate
 from openfesl.storage.history import SqlHistoryStore
@@ -83,6 +83,12 @@ async def admin_provider(monkeypatch: pytest.MonkeyPatch) -> AsyncIterator[Ident
 def prompt_actions(monkeypatch: pytest.MonkeyPatch) -> None:
     # The admin acts in another process; the server reads the log of actions this often.
     monkeypatch.setattr(admin, "ADMIN_CHECK_INTERVAL", 0.05)
+
+
+@pytest.fixture
+def prompt_decisions(monkeypatch: pytest.MonkeyPatch) -> None:
+    # The admin decides in another process; the server reads the decisions back this often.
+    monkeypatch.setattr(trust, "APPROVAL_CHECK_INTERVAL", 0.05)
 
 
 @pytest.fixture

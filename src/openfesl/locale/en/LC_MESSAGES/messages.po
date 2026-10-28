@@ -2247,6 +2247,9 @@ msgstr "Provider id"
 msgid "web.admin.unknown_provider"
 msgstr "Unknown provider"
 
+msgid "web.admin.provider.not_reported"
+msgstr "The game reports no provider"
+
 msgid "web.admin.tried"
 msgstr "Tried to host"
 

@@ -57,7 +57,7 @@
                           {% if view.game %}<GameChip :of="view.game" />{% endif %}
                         </div>
                         <div role="cell" class="waiting-stack waiting-provider">
-                          <ProviderName :server="server" />
+                          <ProviderName :view="view" />
                         </div>
                         <div role="cell" class="waiting-stack waiting-tried">
                           {% if view.hosting %}
@@ -72,7 +72,7 @@
                           <span>{{ ago(server.first_seen) }}</span>
                         </div>
                         <div role="cell" class="waiting-decide">
-                          {% if server.provider %}
+                          {% if not view.provider_unknown %}
                             <form method="post"
                                   action="{{ url('/admin/servers/' ~ server.ugid ~ '/approve') }}">
                               <CsrfField />
@@ -93,7 +93,7 @@
               </div>
               <div class="list-foot">
                 <p>
-                  <span class="list-count">{{ _("web.admin.waiting.count", count=number(waiting|length)) }}</span><span class="list-range">{{ _("web.admin.waiting.note") }}</span>
+                  <span class="list-count">{{ _("web.admin.waiting.count", count=number(waiting|length)) }}</span><span class="list-range">{{ _("web.admin.waiting.note" if waiting|selectattr("reports_provider")|list else "web.admin.servers.order.waiting") }}</span>
                 </p>
                 <a href="{{ url('/admin/servers') }}"
                    class="home-more">{{ _("web.admin.details_link") }}<Icon name="go" :size="14" stroke="currentColor" /></a>

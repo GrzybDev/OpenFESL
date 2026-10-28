@@ -4,6 +4,8 @@ from openfesl.core.entitlements import Entitlement, EntitlementStore
 from openfesl.core.games import Game
 from openfesl.core.launcher import LauncherSession, LauncherSessions
 from openfesl.core.personas import Persona, PersonaStore
+from openfesl.core.session import Players
+from openfesl.core.trust import ServerTrust
 from openfesl.core.wallets import Wallets
 
 logger = logging.getLogger(__name__)
@@ -40,11 +42,16 @@ class MagmaError(Exception):
 
 
 class Magma:
-    """Answers Magma about the personas of the account whose launcher session a cookie names."""
+    """Answers Magma about the personas of the account whose launcher session a cookie names.
+
+    A dedicated server's session also reads the personas whose data the server keeps.
+    """
 
     def __init__(
         self,
         sessions: LauncherSessions,
+        players: Players,
+        trust: ServerTrust,
         personas: PersonaStore,
         entitlements: EntitlementStore,
         wallets: Wallets,
@@ -53,11 +60,15 @@ class Magma:
 
         Args:
             sessions: The launcher's sign-ins, by session id.
+            players: The game sessions that accounts are logged in on.
+            trust: Which dedicated servers keep the data of which personas.
             personas: Where the personas are found.
             entitlements: Where the personas' items are kept.
             wallets: The balances the personas spend.
         """
         self._sessions = sessions
+        self._players = players
+        self._trust = trust
         self._personas = personas
         self._entitlements = entitlements
         self._wallets = wallets
@@ -94,7 +105,7 @@ class Magma:
 
         Raises:
             MagmaError: When the request names no session that is known, or the persona is
-                not one of its account's in the game.
+                not the game's, or neither its account's nor one its account keeps as a server.
         """
         persona = await self._persona(session_id, game, persona_id)
         return await self._entitlements.of_persona(persona.id, tag)
@@ -109,7 +120,7 @@ class Magma:
 
         Raises:
             MagmaError: When the request names no session that is known, or the persona is
-                not one of its account's in the game.
+                not the game's, or neither its account's nor one its account keeps as a server.
         """
         persona = await self._persona(session_id, game, persona_id)
         return await self._wallets.of_persona(game, persona)
@@ -119,11 +130,19 @@ class Magma:
         persona = await self._personas.find_by_id(persona_id)
         if (
             persona is None
-            or persona.account_id != account_id
             or persona.namespace != game.namespace
+            or not (persona.account_id == account_id or await self._keeps(account_id, persona))
         ):
             logger.info(
-                "Account %d asked Magma about persona %d, not its own", account_id, persona_id
+                "Account %d asked Magma about persona %d, which it may not read",
+                account_id,
+                persona_id,
             )
             raise MagmaError(VALIDATION_FAILED, USER_DOES_NOT_MATCH)
         return persona
+
+    async def _keeps(self, account_id: int, persona: Persona) -> bool:
+        # A dedicated server asks with the session of the account it logged in with, about the
+        # personas of its players.
+        hosting = self._players.online(account_id)
+        return hosting is not None and await self._trust.keeps_persona(hosting, persona.id)

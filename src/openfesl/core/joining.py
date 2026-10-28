@@ -197,6 +197,7 @@ class Joining:
         player = self._hosting.player(connection, request)
         player.stop_waiting()
         player.state = PlayerState.ENTERED
+        self._hosting.own(connection, request).entered[player.persona.id] = player.persona
         connection.send("PENT", PlayerEnteredAnswer(pid=request.pid), tid)
 
     async def exited(self, connection: TheaterConnection, request: PlayerRequest, tid: int) -> None:

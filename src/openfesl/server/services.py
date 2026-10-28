@@ -67,15 +67,17 @@ class GameServices:
         self.players = Players()
         self._launcher_sessions = LauncherSessions(self.players)
         self.game_http = GameHttp(games, self.players, load_texts("news"))
+        self.approval = Approval(stores.servers)
+        self.hosting = Hosting(self.approval)
+        self.trust = ServerTrust(self.hosting, self.approval)
         self.magma = Magma(
             self._launcher_sessions,
+            self.players,
+            self.trust,
             stores.personas,
             stores.entitlements,
             Wallets(stores.wallets),
         )
-        self.approval = Approval(stores.servers)
-        self.hosting = Hosting(self.approval)
-        self.trust = ServerTrust(self.hosting, self.approval)
         self.census = Census(self.hosting, self.players)
         art = presence_art(settings.public_url)
         self.rich_presence = RichPresence(self.hosting, settings.discord_application_id, art)

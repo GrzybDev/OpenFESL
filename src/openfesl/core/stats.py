@@ -163,14 +163,15 @@ class StatsService:
     async def get_stats(self, connection: FeslConnection, request: GetStats) -> GetStatsAnswer:
         """Return one owner's stats, as a dedicated server loads a joining player's.
 
-        A dedicated server gets them only while it hosts a game players see, as it writes.
+        A dedicated server that logs in with a server account gets them only while it hosts a
+        game players see, as it writes; one that logs in as a player reads as players do.
 
         Args:
             connection: The FESL connection the request came on.
             request: The owner, period and keys.
 
         Raises:
-            TransactionError: When a dedicated server that hosts no such game asks, or the
+            TransactionError: When a server account that hosts no such game asks, or the
                 request names no owner while the session plays no persona.
         """
         game = game_of(connection)
@@ -229,8 +230,9 @@ class StatsService:
         """Update stats as a dedicated server reports its players' rounds, all or nothing.
 
         Only the game's dedicated servers write, and only while they host a game players see:
-        players' stats come from the rounds they play, and a client could write any number. The
-        stats of an account are written only for a player in the server's game.
+        players' stats come from the rounds they play, and a client could write any number. A
+        server that logs in as a player writes only for the personas it keeps, and any server
+        writes the stats of an account only for an account whose persona it keeps.
 
         Args:
             connection: The FESL connection the request came on.
@@ -238,14 +240,11 @@ class StatsService:
 
         Raises:
             TransactionError: When the session is not a dedicated server's that hosts such a
-                game, an owner is not a persona of the game, the game or a player in the server's
-                game, or the request is too large.
+                game, an owner is not a persona of the game, the game or a player the server may
+                write for, or the request is too large.
         """
         game = game_of(connection)
-        account = connection.session.account
-        if account is None or not account.server:
-            raise TransactionError(PARAMETERS_ERROR)
-        if not await self._trust.admits(connection.session):
+        if not await self._trust.serves(connection.session):
             raise TransactionError(PARAMETERS_ERROR)
         day = _today()
         changes: list[Change] = []
@@ -282,13 +281,18 @@ class StatsService:
         return owners
 
     async def _check_writable(self, connection: FeslConnection, game: Game, owner: Owner) -> None:
+        session = connection.session
         if owner.type == PERSONA:
             persona = await self._personas.find_by_id(owner.id)
             if persona is None or persona.namespace != game.namespace:
                 raise TransactionError(UNKNOWN_PERSONA)
-        elif owner.type == ACCOUNT and not await self._trust.admits_player(
-            connection.session, owner.id
-        ):
+            # Only dedicated servers have the game's server account; a server that logs in as a
+            # player could be any player's game, so it writes only for the personas it keeps.
+            account = session.account
+            if (account and account.server) or await self._trust.keeps_persona(session, owner.id):
+                return
+            raise TransactionError(PARAMETERS_ERROR)
+        if owner.type == ACCOUNT and not await self._trust.keeps_account(session, owner.id):
             raise TransactionError(PARAMETERS_ERROR)
 
 

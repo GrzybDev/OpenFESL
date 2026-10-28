@@ -1,9 +1,12 @@
-{#def server #}
+{#def view #}
 {# The provider a dedicated server reports: its name, or for one the admin does not know, that it
-   is unknown and its id. #}
+   is unknown and its id; nothing for a server whose game reports no provider. #}
+{% set server = view.server %}
 {% if server.provider %}
   <span class="provider-name">{{ server.provider.name }}</span>
-{% else %}
+{% elif view.reports_provider %}
   <span class="provider-name">{{ _("web.admin.unknown_provider") }}</span>
   {% if server.provider_id %}<ProviderId :id="server.provider_id" />{% endif %}
+{% else %}
+  <span aria-hidden="true">–</span><span class="sr-only">{{ _("web.admin.provider.not_reported") }}</span>
 {% endif %}

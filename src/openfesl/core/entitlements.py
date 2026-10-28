@@ -156,7 +156,7 @@ class EntitlementService:
         account = connection.session.account
         if account is None or connection.game is None:
             raise TransactionError(NOT_LOGGED_IN)
-        if account.server:
+        if account.server or await self._trust.serves(connection.session):
             held = await self._grant_automatic(connection, connection.game, request)
         else:
             held = await self._store.entitled(account.id, request.entitlement_tag)
@@ -225,9 +225,7 @@ class EntitlementService:
         owner = request.master_user_id or account.id
         # Anyone logs in like a dedicated server, so only one that hosts a game players see
         # reads the entitlements of the players in it, such as their veteran tags.
-        if owner != account.id and not (
-            account.server and await self._trust.admits_player(connection.session, owner)
-        ):
+        if owner != account.id and not await self._trust.serves_player(connection.session, owner):
             raise TransactionError(PARAMETERS_ERROR)
         query = EntitlementQuery(
             id=request.entitlement_id,

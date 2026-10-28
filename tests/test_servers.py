@@ -16,19 +16,12 @@ from support import (
     report,
 )
 
-from openfesl.core import trust
 from openfesl.protocol.relay import Channel, ConnectionKey
 
 pytestmark = pytest.mark.anyio
 
 FESL = ConnectionKey(Channel.FESL, 1)
 THEATER = ConnectionKey(Channel.THEATER, 1)
-
-
-@pytest.fixture
-def prompt_decisions(monkeypatch: pytest.MonkeyPatch) -> None:
-    # The admin decides in another process; the server reads the decisions back this often.
-    monkeypatch.setattr(trust, "APPROVAL_CHECK_INTERVAL", 0.05)
 
 
 async def providers_shown(looker: Game, created: TheaterAnswer) -> list[str]:

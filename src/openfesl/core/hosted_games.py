@@ -100,6 +100,8 @@ class HostedGame:
         basic: The `B-U-` attributes by full key.
         details: The `D-` attributes by full key.
         players: Its players that are past the queue, by PID.
+        entered: The personas its host reported in the game since it listed it, by id, those
+            that left included.
         queue: Its waiting players, first in line first.
         pids: The numbers its next players get.
         since: When the host listed it.
@@ -129,6 +131,7 @@ class HostedGame:
     basic: dict[str, str]
     details: dict[str, str] = field(default_factory=dict)
     players: dict[int, Player] = field(default_factory=dict)
+    entered: dict[int, Persona] = field(default_factory=dict)
     queue: list[Player] = field(default_factory=list)
     pids: Iterator[int] = field(default_factory=lambda: itertools.count(1))
     since: datetime = field(default_factory=lambda: datetime.now(UTC))

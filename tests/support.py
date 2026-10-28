@@ -36,9 +36,13 @@ type Update = tuple[int, str, str, str, str]
 FESL = ConnectionKey(Channel.FESL, 1)
 THEATER = ConnectionKey(Channel.THEATER, 1)
 
-# The Theater port and product of each client, as the game and the R34 dedicated server send
+# The Theater port and product of each client, as the games and the R34 dedicated server send
 # them; the server names the game's product on its own host.
-THEATER_CLIENTS = {"bfbc2-pc": (18395, "bfbc2-pc"), "bfbc2-pc-server": (19026, "bfbc2-pc")}
+THEATER_CLIENTS = {
+    "bfbc2-pc": (18395, "bfbc2-pc"),
+    "bfbc2-pc-server": (19026, "bfbc2-pc"),
+    "bfwest-pc": (18275, "bfwest-pc"),
+}
 
 # What the R34 dedicated server sends: no lobby, no attributes, empty UGID and SECRET.
 CREATE_GAME = [

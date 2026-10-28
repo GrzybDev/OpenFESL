@@ -8,7 +8,7 @@ from openfesl.core.accounts import Account, AccountState
 from openfesl.core.admin import AdminAction, AdminFeed, LoggedAction
 from openfesl.core.connection import Address, Connection, Outbox, PresenceOutbox
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
-from openfesl.core.games import Game
+from openfesl.core.games import Client, Game
 from openfesl.core.personas import NOT_LOGGED_IN, Persona
 from openfesl.core.theater import Theater, TheaterConnection
 from openfesl.protocol.message import Message
@@ -208,6 +208,11 @@ class GameSession:
     def game(self) -> Game | None:
         """The game that the session's login came from."""
         return self._fesl.game if self._fesl is not None else None
+
+    @property
+    def client(self) -> Client | None:
+        """The client that the game's Hello stands for on the connection it logged in on."""
+        return self._fesl.client if self._fesl is not None else None
 
     @property
     def client_string(self) -> str | None:

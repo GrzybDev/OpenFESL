@@ -67,6 +67,16 @@ class ServerView:
             return "revoked"
         return "approved" if self.server.state is ServerState.APPROVED else "waiting"
 
+    @property
+    def reports_provider(self) -> bool:
+        """Whether its game reports a provider at all, as a server of an unknown game may."""
+        return self.game is None or self.game.provider_attribute is not None
+
+    @property
+    def provider_unknown(self) -> bool:
+        """Whether its game reports a provider that the admin has not created."""
+        return self.reports_provider and self.server.provider is None
+
 
 class ServerViews:
     """Puts together what the admin panel shows about the dedicated servers."""
@@ -299,9 +309,9 @@ def decision_routes(
 ) -> APIRouter:
     """Return the admin's decisions about dedicated servers, each confirmed where it asks to be.
 
-    Approving a server of a known provider is one step; approving one of an unknown provider or
-    one that was revoked, rejecting and revoking ask first, which without scripts is a page of
-    its own.
+    Approving a server of a known provider, or of a game that reports none, is one step;
+    approving one of an unknown provider or one that was revoked, rejecting and revoking ask
+    first, which without scripts is a page of its own.
 
     Args:
         sessions: Signs admins in and renders the panel's pages.
@@ -325,7 +335,7 @@ def asks_first(decision: str, view: ServerView) -> bool:
         decision: approve, reject or revoke.
         view: The server.
     """
-    return decision != "approve" or view.server.provider is None or view.tab == "revoked"
+    return decision != "approve" or view.provider_unknown or view.tab == "revoked"
 
 
 def _confirmation(

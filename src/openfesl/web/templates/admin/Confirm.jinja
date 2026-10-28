@@ -6,7 +6,7 @@
 {% set tab = view.tab %}
 {% set title = _("web.admin.servers") %}
 {% if decision == "approve" %}
-  {% set text = "web.admin.confirm.approve." ~ ("again" if tab == "revoked" else "known" if server.provider else "unknown") %}
+  {% set text = "web.admin.confirm.approve." ~ ("again" if tab == "revoked" else "unknown" if view.provider_unknown else "known") %}
 {% else %}
   {% set text = "web.admin.confirm." ~ decision ~ ".text" %}
 {% endif %}
@@ -44,14 +44,16 @@
                   class="badge"><Icon name="x" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.state.revoked") }}
           </Fact>
         {% endif %}
-        <Fact :label="_('web.admin.provider')">
-          {% if server.provider %}
-            {{ server.provider.name }}
-          {% else %}
-            <span aria-hidden="true"
-                  class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.unknown_provider") }}
-          {% endif %}
-        </Fact>
+        {% if view.reports_provider %}
+          <Fact :label="_('web.admin.provider')">
+            {% if server.provider %}
+              {{ server.provider.name }}
+            {% else %}
+              <span aria-hidden="true"
+                    class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.unknown_provider") }}
+            {% endif %}
+          </Fact>
+        {% endif %}
         {% if not server.provider and server.provider_id %}
           <Fact :label="_('web.admin.provider_id')">
             <ProviderId :id="server.provider_id" />

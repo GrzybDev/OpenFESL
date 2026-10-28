@@ -33,6 +33,9 @@ class Client(BaseModel):
         server_client: The client that a Hello with this client string stands for when it
             declares the client type server, for dedicated servers that greet with the
             game's own client string.
+        servers_log_in_as_players: Whether the game's dedicated servers log in as this client
+            does, each with a player's account and persona, so that only the game a session
+            hosts tells a server from a player.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -41,6 +44,7 @@ class Client(BaseModel):
     entitlement: Grant | None = None
     server_account: str | None = None
     server_client: str | None = None
+    servers_log_in_as_players: bool = False
 
 
 class Grant(BaseModel):

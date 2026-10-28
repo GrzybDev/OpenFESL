@@ -2287,6 +2287,9 @@ msgstr "Identyfikator dostawcy"
 msgid "web.admin.unknown_provider"
 msgstr "Nieznany dostawca"
 
+msgid "web.admin.provider.not_reported"
+msgstr "Gra nie podaje dostawcy"
+
 msgid "web.admin.tried"
 msgstr "Próba uruchomienia"
 
