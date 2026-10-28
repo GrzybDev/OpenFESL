@@ -349,6 +349,32 @@ class PurchaseRow(Base):
     refunded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
+class RewardClaimRow(Base):
+    __tablename__ = "reward_claim"
+    # Each reward once for each account, and each of its factions' parts once; the account's own
+    # part has no faction.
+    __table_args__ = (
+        UniqueConstraint(
+            "game", "account_id", "key", "faction", postgresql_nulls_not_distinct=True
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    game: Mapped[str]
+    account_id: Mapped[int] = mapped_column(
+        ForeignKey("account.id", ondelete="CASCADE"), index=True
+    )
+    key: Mapped[str]
+    faction: Mapped[str | None]
+    # The hero its items went to.
+    persona_id: Mapped[int | None] = mapped_column(
+        ForeignKey("persona.id", ondelete="SET NULL"), index=True
+    )
+    # What the account and the hero got.
+    outcome: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    claimed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class ProductKeyRow(Base):
     __tablename__ = "product_key"
 

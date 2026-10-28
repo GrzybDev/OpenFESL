@@ -118,12 +118,13 @@ def _definitions(
 
 def _named(game: Game, found: Sequence[CatalogueItem]) -> set[str]:
     # The texts that the site and Magma show, by the ids that text_id gives: the items' names
-    # and the hot deals' texts.
+    # and the texts of the hot deals and rewards.
     rules = game.catalogue
     if rules is None:
         return set()
     items = catalogue_items(rules, found)
     texts = game.deals.texts if game.deals else set()
+    texts |= game.rewards.texts if game.rewards else set()
     return {name for item in items.values() for name in item.names} | {text_id(t) for t in texts}
 
 
@@ -148,8 +149,8 @@ def _texts(rules: CatalogueRules, folder: Path, named: set[str]) -> dict[str, di
 
 def _shown(game: Game, found: Sequence[CatalogueItem], english: Mapping[str, str]) -> set[int]:
     # The items whose icons the site may show: what heroes start with or the game grants them,
-    # what the store sells, which is only what the game names, or its boxes drop, and the
-    # withheld items, whose icons the admin panel shows.
+    # what the store sells, which is only what the game names, or its boxes drop, what rewards
+    # give, and the withheld items, whose icons the admin panel shows.
     rules = game.catalogue
     if rules is None:
         return set()
@@ -174,6 +175,8 @@ def _shown(game: Game, found: Sequence[CatalogueItem], english: Mapping[str, str
         dropped = {item for box in store.boxes for tier in box.tiers for item, _ in tier.drops}
         dropped |= {box.fallback[0] for box in store.boxes if box.fallback}
         shown |= {item for item in dropped if item in items and store.sellable(items[item])}
+    if rewards := game.rewards:
+        shown |= rewards.given_items
     return shown
 
 

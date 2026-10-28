@@ -16,9 +16,9 @@ pages = ["play"]
 # owner, yet it names a hero and an account by the same owner type, telling them apart by the id
 # alone (BFHeroes.exe 1.89 0x006aa1fb).
 account_stats = ["c_tut", "c_ltm", "c_slm", "cdm", "edm", "dmc", "pi[0-9]+"]
-# The parts of the game's data kept in files of their own: the store's starting set and the hot
-# deals' rotation.
-include = ["bfheroes/store.toml", "bfheroes/deals.toml"]
+# The parts of the game's data kept in files of their own: the store's starting set, the hot
+# deals' rotation and the site's rewards.
+include = ["bfheroes/store.toml", "bfheroes/deals.toml", "bfheroes/rewards.toml"]
 
 # The one client string of versions 1.46 and 1.89, which their dedicated servers greet FESL with
 # too. The game takes its Theater address from the Hello answer; the port is the one that its

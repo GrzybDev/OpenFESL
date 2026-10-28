@@ -6,16 +6,15 @@ from pathlib import Path
 from random import Random
 from xml.etree import ElementTree
 
-import anyio
 import pytest
-from accounts import execute, select_value
+from accounts import select_value
 from heroes import MAGMA, wallets
+from living import NATIONAL, ROYAL, Invented, import_catalogue, setting, worn
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from store import ROYAL_SOLDIER, attribute, buy, deals, grant, shopper
-from support import cli, fetch
+from support import fetch
 
 from openfesl.core.calendar import Schedule, periods
-from openfesl.core.catalogue import CatalogueDocument, CatalogueFile, CatalogueItem
 from openfesl.core.catalogues import Catalogues
 from openfesl.core.deal_rules import DealRules
 from openfesl.core.deals import HotDeals
@@ -28,15 +27,7 @@ from openfesl.storage.store import SqlProductStore
 
 pytestmark = pytest.mark.anyio
 
-ROYAL, NATIONAL = "1", "2"
 HAT, NECK, JACKET, LEGS = "0", "2", "4", "6"
-
-type Invented = dict[int, tuple[str, str, dict[str, str]]]
-
-
-def worn(name: str, side: str, slot: str) -> tuple[str, str, dict[str, str]]:
-    return name, "appearance", {"faction": side, "slot": slot}
-
 
 # An invented catalogue: a cap, a scarf and a coat of each faction, which the Deal of the Day
 # puts together; seven pairs of Royal trousers, each a set of its own; two boosts; and the tonic
@@ -58,6 +49,7 @@ BOOST_PAIR = "WEST_Custom_Bundle_XPVPBoostBundle"
 # The game's own names of the Widget Supply Drops, which may give a boost.
 WIDGET_DROPS = ("WEST_Custom_Bundle_WidgetSupplyDrop", "WEST_Custom_Bundle_WidgetSupplyDrop2")
 DAILY = "web.deals.daily.name"
+TEXTS = {BOOST_PAIR: "Invented Boost Pair"} | dict.fromkeys(WIDGET_DROPS, "Invented Widget Drop")
 
 # The invented catalogue's deals: the Deal of the Day, a set each Monday that comes back no
 # sooner than six weeks after it left, and the boost pair always.
@@ -131,21 +123,6 @@ MONDAY = datetime(2026, 11, 2, tzinfo=UTC)
 type Line = tuple[str | None, str, int, int | None]
 
 
-def catalogue_file(folder: Path, invented: Invented) -> Path:
-    """Write an invented catalogue as `openfesl catalogue extract` writes it."""
-    items = [
-        CatalogueItem(id=number, kind=kind, fields=fields)
-        for number, (_, kind, fields) in invented.items()
-    ]
-    english = {f"WEST_Custom_Item_{number}": name for number, (name, _, _) in invented.items()}
-    english[BOOST_PAIR] = "Invented Boost Pair"
-    english |= dict.fromkeys(WIDGET_DROPS, "Invented Widget Drop")
-    document = CatalogueDocument(format=1, game="bfheroes", items=tuple(items))
-    file = folder / "catalogue.zip"
-    file.write_bytes(CatalogueFile(document, {"en": english}, {}).write())
-    return file
-
-
 class Rotation:
     """The invented catalogue's hot deals, read at a time that the test sets."""
 
@@ -171,19 +148,6 @@ class Rotation:
         ]
 
 
-async def import_catalogue(
-    server_url: str,
-    folder: Path,
-    capsys: pytest.CaptureFixture[str],
-    invented: Invented = INVENTED,
-) -> None:
-    """Import an invented catalogue as the admin does, and wait for the store to fill from it."""
-    await cli(capsys, "catalogue", "import", str(catalogue_file(folder, invented)))
-    with anyio.fail_after(5):
-        while not len(ElementTree.fromstring((await fetch(server_url, "/ofb/products", MAGMA))[2])):
-            await anyio.sleep(0.05)
-
-
 @pytest.fixture
 async def rotation(
     prompt_actions: None,
@@ -193,23 +157,12 @@ async def rotation(
     capsys: pytest.CaptureFixture[str],
     bfheroes: Game,
 ) -> AsyncIterator[Rotation]:
-    await import_catalogue(server_url, tmp_path, capsys)
+    await import_catalogue(server_url, tmp_path, capsys, INVENTED, TEXTS)
     engine = create_async_engine(database_url)
     found = Rotation(bfheroes.model_copy(update={"deals": RULES}), async_sessionmaker(engine))
     await found.catalogues.load()
     yield found
     await engine.dispose()
-
-
-async def setting(database_url: str, key: str, value: str) -> None:
-    """Change a setting as the admin does."""
-    await execute(
-        database_url,
-        "INSERT INTO setting (key, value) VALUES (:key, :value)"
-        " ON CONFLICT (key) DO UPDATE SET value = :value",
-        key=key,
-        value=value,
-    )
 
 
 async def test_deals_change_at_midnight_and_sets_on_mondays_at_prices_ending_in_99(
@@ -339,7 +292,7 @@ async def test_the_game_lists_and_sells_the_deal_of_the_day_and_the_admins_offer
         for number, item in INVENTED.items()
         if item[2].get("slot") != LEGS and number != 2153
     }
-    await import_catalogue(server_url, tmp_path, capsys, kept)
+    await import_catalogue(server_url, tmp_path, capsys, kept, TEXTS)
     cookie, hero = await shopper(server_url, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
     boost = await select_value(
         database_url, "SELECT id FROM store_product WHERE item_id = 9000 AND published"

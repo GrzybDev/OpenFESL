@@ -21,6 +21,7 @@ from openfesl.core.deal_rules import DealRules, OfferSection
 from openfesl.core.game_pages import Listing, PageKind, Site, Stats, Theme
 from openfesl.core.hero_rules import HeroRules
 from openfesl.core.policies import Policies
+from openfesl.core.reward_rules import RewardRules
 from openfesl.core.store_rules import StoreRules
 from openfesl.core.texts import BASE_LANGUAGE
 
@@ -242,6 +243,8 @@ class Game(BaseModel):
             game without one.
         deals: How the store's hot deals change by themselves; none for a game whose hot deals
             are the admin's alone.
+        rewards: How the game's site gives rewards that accounts claim; none for a game
+            without them.
         account_stats: The stats that belong to a player's account rather than to one of its
             personas, by patterns that their keys match whole.
         records: The records a persona may keep, by name, with the most entries each holds.
@@ -286,6 +289,7 @@ class Game(BaseModel):
     currencies: dict[str, Currency] = {}
     store: StoreRules | None = None
     deals: DealRules | None = None
+    rewards: RewardRules | None = None
     account_stats: list[re.Pattern[str]] = []
     records: dict[str, int] = {}
     associations: dict[str, ListRule] = {}
@@ -443,6 +447,28 @@ class Game(BaseModel):
         boxes = {box.key for box in self.store.boxes if box.kind == "box"}
         if unknown := {offer.box for offer in offers if offer.box} - boxes:
             raise ValueError(f"hot deals sell boxes the store lacks: {sorted(unknown)}")
+        return self
+
+    @model_validator(mode="after")
+    def _check_rewards(self) -> Self:
+        if self.rewards is None:
+            return self
+        # Rewards give items to heroes, Funds to the account, box drops and chest keys.
+        currency = self.currencies.get(self.rewards.currency)
+        if self.heroes is None or currency is None or currency.scope is not Scope.ACCOUNT:
+            raise ValueError("rewards need heroes and Funds that the account holds")
+        parts = [part for event in self.rewards.events.values() for part in event.parts.values()]
+        gifts = self.rewards.gifts
+        if {part.faction for part in parts} - {None, *self.heroes.factions}:
+            raise ValueError("rewards name a faction the heroes lack")
+        boxes = {box.key for box in self.store.boxes} if self.store else set()
+        if unknown := {gift.box for gift in gifts if gift.box} - boxes:
+            raise ValueError(f"rewards give boxes the store lacks: {sorted(unknown)}")
+        if self.chests is None and any(gift.keys for gift in gifts):
+            raise ValueError("rewards give keys of a game without treasure chests")
+        withheld = self.catalogue.withheld if self.catalogue else frozenset()
+        if given := sorted(self.rewards.given_items & withheld):
+            raise ValueError(f"rewards give withheld items: {given}")
         return self
 
     @model_validator(mode="after")

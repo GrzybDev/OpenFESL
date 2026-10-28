@@ -6125,3 +6125,15 @@ msgstr "Deletion requested"
 #, python-brace-format
 msgid "web.deals.daily.name"
 msgstr "Deal of the Day: {faction}"
+
+msgid "web.rewards.birthday.name"
+msgstr "Birthday party pack"
+
+msgid "web.rewards.birthday.description"
+msgstr "For the game's birthday: a party hat, flares, clothes and a tricycle emote for a hero of the faction, and Funds for the account."
+
+msgid "web.rewards.birthday.keys.name"
+msgstr "Birthday keys"
+
+msgid "web.rewards.birthday.keys.description"
+msgstr "For the game's birthday: treasure chest keys for the account."

@@ -6355,3 +6355,15 @@ msgstr "Prośba o usunięcie"
 #, python-brace-format
 msgid "web.deals.daily.name"
 msgstr "Okazja dnia: {faction}"
+
+msgid "web.rewards.birthday.name"
+msgstr "Urodzinowy zestaw imprezowy"
+
+msgid "web.rewards.birthday.description"
+msgstr "Na urodziny gry: imprezowa czapka, race, ubrania i emotka z trójkołowcem dla bohatera tej frakcji oraz Funds dla konta."
+
+msgid "web.rewards.birthday.keys.name"
+msgstr "Urodzinowe klucze"
+
+msgid "web.rewards.birthday.keys.description"
+msgstr "Na urodziny gry: klucze do skrzyń skarbów dla konta."
