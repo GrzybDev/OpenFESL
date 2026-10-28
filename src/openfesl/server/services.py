@@ -58,6 +58,7 @@ from openfesl.core.sign_in import WebSignIn
 from openfesl.core.start_links import StartLinks
 from openfesl.core.stats import StatsService
 from openfesl.core.store import Store
+from openfesl.core.store_front import StoreFront
 from openfesl.core.store_items import StoreItems
 from openfesl.core.store_window import StoreWindows
 from openfesl.core.telemetry import telemetry_routes
@@ -146,6 +147,7 @@ class GameServices:
         self.store_items = StoreItems(
             stores.products, self.deals, self.catalogues, stores.entitlements, self.wallets
         )
+        self.store_front = StoreFront(stores.products, self.catalogues, stores.entitlements)
 
     @asynccontextmanager
     async def running(self, app: FastAPI) -> AsyncIterator[None]:

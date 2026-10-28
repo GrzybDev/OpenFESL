@@ -1,0 +1,168 @@
+{#def heroes: list, choice, kinds: list, glyphs, tiles: list, total: int, pages: int, size: int, low: int, imported: bool, on_sale: int, empty, here: str #}
+{# The store front: every item the store sells alone, in one form of tiles: the hero the list is
+   for, the categories with how many items fit it, the hero's own items and a search, then the
+   items with their lowest prices and what the hero holds of each. Signed out the list shows
+   every item with its requirements; without scripts Show items sends the form. #}
+{% set title = _("web.site.page.store") %}
+{% set hero = choice.hero %}
+{% set kind_name = _("games." ~ game.id ~ ".item_kind." ~ choice.kind) if choice.kind else "" %}
+<Layout :title="title">
+  <section aria-labelledby="store-front-title" class="creator-head">
+    <div class="creator-intro">
+      <Plaque id="store-front-title">{{ title }}</Plaque>
+      <p class="site-lead">{{ _("web.store.front.lead") }}</p>
+    </div>
+  </section>
+  {% if not player %}
+    <p class="store-front-line">
+      <Icon name="sign-in" :size="22" stroke="#FEDE01" />
+      <span>{{ _("web.store.front.signed_out") }}</span>
+      <a href="{{ url('/sign-in') }}?{{ {'next': here ~ choice.query()}|urlencode }}"
+         class="site-button site-button-go"><Icon name="sign-in" :size="16" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+    </p>
+  {% elif not heroes %}
+    <div class="store-front-none">
+      <span aria-hidden="true" class="store-none-disc"><Icon name="plus" :size="26" stroke="currentColor" /></span>
+      <p>
+        <strong>{{ _("web.store.front.no_hero.title") }}</strong>
+        {{ _("web.store.front.no_hero") }}
+      </p>
+      <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
+         class="site-button site-button-go"><Icon name="plus" :size="16" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+    </div>
+  {% endif %}
+  <div data-store-front class="store-front">
+    {% if on_sale %}
+      <form method="get"
+            action="{{ here }}"
+            data-store-filter
+            class="store-filter">
+        {% if hero %}
+          <fieldset class="store-field">
+            <legend class="store-legend">{{ _("web.store.hero") }}</legend>
+            <p class="store-hint">{{ _("web.store.front.hero.hint") }}</p>
+            <div class="store-heroes">
+              {% for shown in heroes %}
+                <StoreHero :hero="shown" :checked="shown == hero" />
+              {% endfor %}
+            </div>
+          </fieldset>
+        {% endif %}
+        <fieldset class="store-field">
+          <legend class="store-legend">{{ _("web.store.front.kind") }}</legend>
+          <div class="store-kinds">
+            {% for kind, count in kinds %}
+              <label class="store-kind">
+                <input type="radio"
+                       name="kind"
+                       value="{{ kind }}"
+                       {% if kind == choice.kind %}checked{% endif %}
+                       class="sr-only">
+                <span class="store-kind-card">
+                  <Icon :name="glyphs.get(kind, 'bag') if kind else 'items'" :size="22" stroke="currentColor" />
+                  <span class="store-kind-name">{{ _("games." ~ game.id ~ ".item_kind." ~ kind) if kind else _("web.store.front.kind.all") }}</span>
+                  <span class="store-kind-count{% if not count %} store-kind-none{% endif %}">{{ _n("web.store.front.count", count) }}</span>
+                </span>
+              </label>
+            {% endfor %}
+          </div>
+        </fieldset>
+        <div class="store-filter-row">
+          {% if hero %}
+            <label class="store-owned">
+              <input type="checkbox"
+                     name="owned"
+                     value="1"
+                     {% if choice.owned %}checked{% endif %}
+                     class="sr-only">
+              <span class="store-owned-pill">
+                <span aria-hidden="true" class="store-owned-disc">
+                  <Icon :name="'tick' if choice.owned else 'bag'" :size="16" stroke="currentColor" />
+                </span>
+                {{ _("web.store.front.owned_by", hero=hero.persona.name) }}
+              </span>
+            </label>
+          {% endif %}
+          <div class="store-search">
+            <label for="store-search" class="store-legend">{{ _("web.store.front.search") }}</label>
+            <span class="store-search-box">
+              <Icon name="find" :size="18" stroke="currentColor" />
+              <input id="store-search"
+                     type="search"
+                     name="q"
+                     value="{{ choice.search }}"
+                     maxlength="64"
+                     autocomplete="off"
+                     class="store-search-input">
+            </span>
+          </div>
+          <button type="submit" class="site-button no-js-only">
+            <Icon name="find" :size="16" stroke="#FEDE01" />{{ _("web.store.front.show") }}
+          </button>
+        </div>
+      </form>
+    {% endif %}
+    <section aria-labelledby="store-results" class="store-results">
+      <div class="store-results-head{% if not on_sale %} sr-only{% endif %}">
+        <h2 id="store-results" class="site-heading">
+          {% if choice.search and not tiles %}
+            {{ _("web.store.front.no_match", query=choice.search) }}
+          {% elif choice.owned and kind_name %}
+            {{ _("web.store.front.owned.kind", kind=kind_name, hero=hero.persona.name, count=number(total)) }}
+          {% elif choice.owned and choice.search %}
+            {{ _n("web.store.front.owned.found", total, hero=hero.persona.name) }}
+          {% elif choice.owned %}
+            {{ _n("web.store.front.owned", total, hero=hero.persona.name) }}
+          {% elif hero and kind_name %}
+            {{ _("web.store.front.results.kind", kind=kind_name, hero=hero.persona.name, count=number(total)) }}
+          {% elif hero %}
+            {{ _n("web.store.front.results", total, hero=hero.persona.name) }}
+          {% elif kind_name %}
+            {{ _("web.store.front.on_sale.kind", kind=kind_name, count=number(total)) }}
+          {% else %}
+            {{ _n("web.store.front.on_sale", total) }}
+          {% endif %}
+        </h2>
+        {% if tiles %}
+          <p class="store-results-sub">
+            {% if low %}
+              {{ _n("web.store.front.low_first", low) }} ·
+            {% endif %}
+            {{ _("web.store.front.page", page=number(choice.page), pages=number(pages), size=number(size)) }}
+          </p>
+        {% endif %}
+      </div>
+      {% if tiles %}
+        <ul role="list" class="store-tiles enter-rows">
+          {% for tile in tiles %}
+            <li>
+              <StoreTile :tile="tile" :glyph="glyphs.get(tile.kind, 'bag')" />
+            </li>
+          {% endfor %}
+        </ul>
+        <div class="store-pages">
+          <Pager :base="here" :view="choice" :pages="pages" />
+        </div>
+      {% elif empty %}
+        <div class="store-front-none store-front-empty">
+          <span aria-hidden="true"
+                class="store-none-disc"><Icon :name="empty.glyph" :size="26" stroke="currentColor" /></span>
+          <div>
+            <p>
+              <strong>{{ empty.title }}</strong>
+            </p>
+            {% if empty.text %}<p>{{ empty.text }}</p>{% endif %}
+            {% if empty.links %}
+              <p class="store-front-links">
+                {% for label, query in empty.links %}
+                  <a href="{{ here ~ query }}"
+                     class="store-front-link">{{ label }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+                {% endfor %}
+              </p>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+    </section>
+  </div>
+</Layout>

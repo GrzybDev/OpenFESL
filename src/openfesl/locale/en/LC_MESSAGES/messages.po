@@ -7859,3 +7859,170 @@ msgstr "Turned off the game's own server mark"
 msgid "web.admin.audit.game_mark"
 msgstr "Official servers hosting it: %(count)s"
 
+msgid "web.site.page.store"
+msgstr "Store"
+
+msgid "web.store.front.lead"
+msgstr ""
+"Every item on sale on this service, by category. Items are bought for one "
+"hero; the tiles say what the chosen hero can use and already owns. Prices "
+"are the lowest of each item's price points."
+
+msgid "web.store.front.hero.hint"
+msgstr "The list shows what this hero can use and what it owns."
+
+msgid "web.store.front.kind"
+msgstr "Category"
+
+msgid "web.store.front.kind.all"
+msgstr "All items"
+
+msgid "web.store.front.count.one"
+msgstr "%(count)s item"
+
+msgid "web.store.front.count.other"
+msgstr "%(count)s items"
+
+msgid "web.store.front.owned_by"
+msgstr "Owned by %(hero)s"
+
+msgid "web.store.front.search"
+msgstr "Search items"
+
+msgid "web.store.front.show"
+msgstr "Show items"
+
+msgid "web.store.front.results.one"
+msgstr "%(count)s item for %(hero)s"
+
+msgid "web.store.front.results.other"
+msgstr "%(count)s items for %(hero)s"
+
+msgid "web.store.front.results.kind"
+msgstr "%(kind)s for %(hero)s · %(count)s"
+
+msgid "web.store.front.on_sale.one"
+msgstr "%(count)s item on sale"
+
+msgid "web.store.front.on_sale.other"
+msgstr "%(count)s items on sale"
+
+msgid "web.store.front.on_sale.kind"
+msgstr "%(kind)s on sale · %(count)s"
+
+msgid "web.store.front.owned.one"
+msgstr "%(hero)s owns %(count)s item"
+
+msgid "web.store.front.owned.other"
+msgstr "%(hero)s owns %(count)s items"
+
+msgid "web.store.front.owned.kind"
+msgstr "%(kind)s owned by %(hero)s · %(count)s"
+
+msgid "web.store.front.owned.found.one"
+msgstr "%(count)s item owned by %(hero)s matches"
+
+msgid "web.store.front.owned.found.other"
+msgstr "%(count)s items owned by %(hero)s match"
+
+msgid "web.store.front.low_first.one"
+msgstr "%(count)s running low · shown first"
+
+msgid "web.store.front.low_first.other"
+msgstr "%(count)s running low · shown first"
+
+msgid "web.store.front.page"
+msgstr "Page %(page)s of %(pages)s · %(size)s a page"
+
+msgid "web.store.front.from"
+msgstr "from"
+
+msgid "web.store.front.any_hero"
+msgstr "Any hero"
+
+msgid "web.store.front.from_level"
+msgstr "from level %(level)s"
+
+msgid "web.store.front.low"
+msgstr "%(left)s · running low"
+
+msgid "web.store.front.unsold"
+msgstr "Not on sale here"
+
+msgid "web.store.front.unsold.granted"
+msgstr "Not on sale here; it came with the hero"
+
+msgid "web.store.front.signed_out"
+msgstr ""
+"Sign in to see what each hero owns and to buy. Prices and requirements "
+"show for everyone."
+
+msgid "web.store.front.no_hero.title"
+msgstr "No hero yet"
+
+msgid "web.store.front.no_hero"
+msgstr "Items are bought for a hero. Every item can be browsed meanwhile."
+
+msgid "web.store.front.no_match"
+msgstr "No item matches “%(query)s”"
+
+msgid "web.store.front.none.closed"
+msgstr ""
+"The store lists its items once the game's catalogue is imported on this "
+"service."
+
+msgid "web.store.front.none.empty"
+msgstr "Nothing is on sale now."
+
+msgid "web.store.front.none.query"
+msgstr "Nothing called “%(query)s”."
+
+msgid "web.store.front.none.query.hero"
+msgstr "Nothing called “%(query)s” for %(hero)s."
+
+msgid "web.store.front.none.query.hint"
+msgstr ""
+"Names are searched in every language this service imported; an item "
+"number also works."
+
+msgid "web.store.front.none.clear"
+msgstr "Clear the search"
+
+msgid "web.store.front.none.show_for"
+msgstr "Show them for %(hero)s"
+
+msgid "web.store.front.none.all"
+msgstr "All items for %(hero)s"
+
+msgid "web.store.front.none.owned"
+msgstr "%(hero)s owns no item here."
+
+msgid "web.store.front.none.kind"
+msgstr "Nothing in %(kind)s fits %(hero)s."
+
+msgid "web.store.front.none.faction"
+msgstr ""
+"Every item in %(kind)s on sale is for the %(faction)s, and %(hero)s is in "
+"the %(own)s."
+
+msgid "web.store.front.none.class"
+msgstr "Every item in %(kind)s on sale is for another class: %(classes)s."
+
+msgid "games.bfheroes.item_kind.appearance.item"
+msgstr "Appearance"
+
+msgid "games.bfheroes.item_kind.weapon.item"
+msgstr "Weapon"
+
+msgid "games.bfheroes.item_kind.ability.item"
+msgstr "Ability"
+
+msgid "games.bfheroes.item_kind.mission.item"
+msgstr "Mission"
+
+msgid "games.bfheroes.item_kind.convenience.item"
+msgstr "Convenience"
+
+msgid "games.bfheroes.item_kind.emote.item"
+msgstr "Emote"
+

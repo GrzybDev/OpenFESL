@@ -1,0 +1,144 @@
+/* An item on the store front: a dark band with its icon or OpenFESL's tile of its kind, then its
+   kind, name, requirements, lowest prices and, over a dashed rule, what the chosen hero holds of
+   it in green, running low in dark red. The tile lifts under the pointer. */
+@layer components {
+  .store-tile {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    overflow: hidden;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #f1e9de;
+    box-shadow:
+      inset 0 0 0 2px #f8f4ef,
+      0 3px 0 rgb(0 0 0 / 0.3);
+    color: #1f1712;
+    transition: translate 200ms var(--ease-menu);
+
+    /* The shadow above would replace the dark ring around the focus outline. */
+    &:focus-visible {
+      box-shadow:
+        inset 0 0 0 2px #f8f4ef,
+        0 0 0 6px var(--ink);
+    }
+
+    &:is(a):hover {
+      translate: 0 -3px;
+      text-decoration: none;
+
+      .store-tile-name {
+        text-decoration-line: underline;
+      }
+    }
+  }
+
+  .store-tile-art {
+    display: grid;
+    place-items: center;
+    padding: 14px;
+    border-bottom: 3px solid #000;
+    background: #3b2d23;
+  }
+
+  .store-tile-icon {
+    display: grid;
+    width: 72px;
+    height: 72px;
+    place-items: center;
+    border: 2px solid #000;
+    background: #cdbfa6;
+    object-fit: contain;
+  }
+
+  .store-tile-drawn {
+    color: #5c4a3c;
+  }
+
+  .store-tile-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 3px;
+    padding: 10px 12px 12px;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .store-tile-kind {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font: 800 11px/1.2 var(--site-heading);
+    letter-spacing: 0.08em;
+    color: #5c4a3c;
+    text-transform: uppercase;
+  }
+
+  .store-tile-name {
+    font: 800 17px/1.2 var(--site-heading);
+    overflow-wrap: anywhere;
+  }
+
+  .store-tile-requires {
+    color: #5c4a3c;
+  }
+
+  .store-tile-prices {
+    margin-top: 2px;
+
+    .store-coin {
+      display: inline-grid;
+      margin-right: 4px;
+      vertical-align: -5px;
+    }
+  }
+
+  .store-tile-price {
+    white-space: nowrap;
+  }
+
+  .store-tile-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px dashed #a8977f;
+    font-weight: 700;
+    color: #5c4a3c;
+
+    svg {
+      flex: none;
+    }
+  }
+
+  .store-tile-held {
+    color: #2f5a14;
+  }
+
+  .store-tile-low {
+    color: #8c1e18;
+  }
+
+  @media (width < 40rem) {
+    .store-tile-art {
+      padding: 10px;
+    }
+
+    .store-tile-icon {
+      width: 56px;
+      height: 56px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .store-tile {
+      transition: none;
+
+      &:is(a):hover {
+        translate: none;
+      }
+    }
+  }
+}

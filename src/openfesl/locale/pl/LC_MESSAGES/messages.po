@@ -8295,3 +8295,210 @@ msgstr "Wyłączono własny znak serwera w grze"
 msgid "web.admin.audit.game_mark"
 msgstr "Oficjalne serwery prowadzące grę: %(count)s"
 
+msgid "web.site.page.store"
+msgstr "Sklep"
+
+msgid "web.store.front.lead"
+msgstr ""
+"Wszystkie przedmioty, które sprzedaje ten serwis, według kategorii. "
+"Przedmioty kupuje się dla jednego bohatera; kafelki pokazują, czego "
+"wybrany bohater może używać i co już ma. Podana cena to najniższa z cen "
+"danego przedmiotu."
+
+msgid "web.store.front.hero.hint"
+msgstr "Lista pokazuje, czego ten bohater może używać i co ma."
+
+msgid "web.store.front.kind"
+msgstr "Kategoria"
+
+msgid "web.store.front.kind.all"
+msgstr "Wszystkie"
+
+msgid "web.store.front.count.one"
+msgstr "%(count)s przedmiot"
+
+msgid "web.store.front.count.few"
+msgstr "%(count)s przedmioty"
+
+msgid "web.store.front.count.many"
+msgstr "%(count)s przedmiotów"
+
+msgid "web.store.front.count.other"
+msgstr "%(count)s przedmiotu"
+
+msgid "web.store.front.owned_by"
+msgstr "Ekwipunek: %(hero)s"
+
+msgid "web.store.front.search"
+msgstr "Szukaj przedmiotów"
+
+msgid "web.store.front.show"
+msgstr "Pokaż przedmioty"
+
+msgid "web.store.front.results.one"
+msgstr "%(hero)s: %(count)s przedmiot"
+
+msgid "web.store.front.results.few"
+msgstr "%(hero)s: %(count)s przedmioty"
+
+msgid "web.store.front.results.many"
+msgstr "%(hero)s: %(count)s przedmiotów"
+
+msgid "web.store.front.results.other"
+msgstr "%(hero)s: %(count)s przedmiotu"
+
+msgid "web.store.front.results.kind"
+msgstr "%(kind)s dla: %(hero)s · %(count)s"
+
+msgid "web.store.front.on_sale.one"
+msgstr "W sprzedaży: %(count)s przedmiot"
+
+msgid "web.store.front.on_sale.few"
+msgstr "W sprzedaży: %(count)s przedmioty"
+
+msgid "web.store.front.on_sale.many"
+msgstr "W sprzedaży: %(count)s przedmiotów"
+
+msgid "web.store.front.on_sale.other"
+msgstr "W sprzedaży: %(count)s przedmiotu"
+
+msgid "web.store.front.on_sale.kind"
+msgstr "%(kind)s w sprzedaży · %(count)s"
+
+msgid "web.store.front.owned.one"
+msgstr "%(hero)s · przedmioty: %(count)s"
+
+msgid "web.store.front.owned.few"
+msgstr "%(hero)s · przedmioty: %(count)s"
+
+msgid "web.store.front.owned.many"
+msgstr "%(hero)s · przedmioty: %(count)s"
+
+msgid "web.store.front.owned.other"
+msgstr "%(hero)s · przedmioty: %(count)s"
+
+msgid "web.store.front.owned.kind"
+msgstr "%(kind)s · ekwipunek: %(hero)s · %(count)s"
+
+msgid "web.store.front.owned.found.one"
+msgstr "%(hero)s · pasujące przedmioty: %(count)s"
+
+msgid "web.store.front.owned.found.few"
+msgstr "%(hero)s · pasujące przedmioty: %(count)s"
+
+msgid "web.store.front.owned.found.many"
+msgstr "%(hero)s · pasujące przedmioty: %(count)s"
+
+msgid "web.store.front.owned.found.other"
+msgstr "%(hero)s · pasujące przedmioty: %(count)s"
+
+msgid "web.store.front.low_first.one"
+msgstr "Kończy się: %(count)s · na początku listy"
+
+msgid "web.store.front.low_first.few"
+msgstr "Kończy się: %(count)s · na początku listy"
+
+msgid "web.store.front.low_first.many"
+msgstr "Kończy się: %(count)s · na początku listy"
+
+msgid "web.store.front.low_first.other"
+msgstr "Kończy się: %(count)s · na początku listy"
+
+msgid "web.store.front.page"
+msgstr "Strona %(page)s z %(pages)s · %(size)s na stronie"
+
+msgid "web.store.front.from"
+msgstr "od"
+
+msgid "web.store.front.any_hero"
+msgstr "Każdy bohater"
+
+msgid "web.store.front.from_level"
+msgstr "od poziomu %(level)s"
+
+msgid "web.store.front.low"
+msgstr "%(left)s · kończy się"
+
+msgid "web.store.front.unsold"
+msgstr "Nie jest tu w sprzedaży"
+
+msgid "web.store.front.unsold.granted"
+msgstr "Nie jest tu w sprzedaży; bohater otrzymał go na start"
+
+msgid "web.store.front.signed_out"
+msgstr ""
+"Po zalogowaniu widać, co ma każdy bohater, i można kupować. Ceny i "
+"wymagania są widoczne dla wszystkich."
+
+msgid "web.store.front.no_hero.title"
+msgstr "Brak bohatera"
+
+msgid "web.store.front.no_hero"
+msgstr ""
+"Przedmioty kupuje się dla bohatera. Do tego czasu można przeglądać "
+"wszystkie."
+
+msgid "web.store.front.no_match"
+msgstr "Brak przedmiotów pasujących do „%(query)s”"
+
+msgid "web.store.front.none.closed"
+msgstr ""
+"Sklep pokaże przedmioty po zaimportowaniu katalogu gry w tym serwisie."
+
+msgid "web.store.front.none.empty"
+msgstr "Obecnie nic nie jest w sprzedaży."
+
+msgid "web.store.front.none.query"
+msgstr "Brak przedmiotów o nazwie „%(query)s”."
+
+msgid "web.store.front.none.query.hero"
+msgstr "Brak przedmiotów o nazwie „%(query)s” dla: %(hero)s."
+
+msgid "web.store.front.none.query.hint"
+msgstr ""
+"Wyszukiwanie obejmuje nazwy we wszystkich zaimportowanych językach; można "
+"też podać numer przedmiotu."
+
+msgid "web.store.front.none.clear"
+msgstr "Wyczyść wyszukiwanie"
+
+msgid "web.store.front.none.show_for"
+msgstr "Pokaż je dla: %(hero)s"
+
+msgid "web.store.front.none.all"
+msgstr "Wszystkie przedmioty dla: %(hero)s"
+
+msgid "web.store.front.none.owned"
+msgstr "%(hero)s nie ma tu żadnego przedmiotu."
+
+msgid "web.store.front.none.kind"
+msgstr "W kategorii %(kind)s nic nie pasuje do bohatera %(hero)s."
+
+msgid "web.store.front.none.faction"
+msgstr ""
+"Wszystkie przedmioty z kategorii %(kind)s w sprzedaży są dla frakcji "
+"%(faction)s, a %(hero)s należy do frakcji %(own)s."
+
+msgid "web.store.front.none.class"
+msgstr ""
+"Wszystkie przedmioty z kategorii %(kind)s w sprzedaży są dla innej klasy: "
+"%(classes)s."
+
+msgid "games.bfheroes.item_kind.appearance.item"
+msgstr "Wygląd"
+
+msgid "games.bfheroes.item_kind.weapon.item"
+msgstr "Broń"
+
+msgid "games.bfheroes.item_kind.ability.item"
+msgstr "Umiejętność"
+
+msgid "games.bfheroes.item_kind.mission.item"
+msgstr "Misja"
+
+msgid "games.bfheroes.item_kind.convenience.item"
+msgstr "Udogodnienie"
+
+msgid "games.bfheroes.item_kind.emote.item"
+msgstr "Gest"
+

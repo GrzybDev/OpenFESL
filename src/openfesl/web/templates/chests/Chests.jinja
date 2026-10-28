@@ -45,7 +45,7 @@
     </section>
   {% elif total %}
     <section aria-labelledby="chests-heroes" class="chests-heroes">
-      <h2 id="chests-heroes" class="chests-heading">{{ _n("web.chests.total", total) }}</h2>
+      <h2 id="chests-heroes" class="site-heading chests-heading">{{ _n("web.chests.total", total) }}</h2>
       <ul role="list" class="chest-cards enter-rows">
         {% for held in heroes %}
           <ChestCard :held="held" :keys="keys" :price="price" />

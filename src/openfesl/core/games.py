@@ -512,6 +512,12 @@ class Game(BaseModel):
         return self
 
     @model_validator(mode="after")
+    def _check_store_page(self) -> Self:
+        if "store" in self.pages and not (self.store and self.heroes and self.site):
+            raise ValueError("the store page needs a store, heroes and a site")
+        return self
+
+    @model_validator(mode="after")
     def _check_chests_page(self) -> Self:
         if "treasure-chests" in self.pages and not (self.chests and self.heroes and self.site):
             raise ValueError("the treasure chests page needs chests, heroes and a site")

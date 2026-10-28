@@ -1,0 +1,162 @@
+/* The store's hero tiles and the labels over its choices: a tile takes the yellow fill when
+   chosen, lifts under the pointer and flashes after a purchase; unavailable heroes stay choosable
+   behind a dashed edge. */
+@layer components {
+  .store-legend {
+    font: 800 13px/1.2 var(--site-heading);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #5c4a3c;
+  }
+
+  .store-hint {
+    margin: 4px 0 10px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #5c4a3c;
+  }
+
+  .store-heroes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+    gap: 10px;
+  }
+
+  .store-hero {
+    display: flex;
+    min-width: 0;
+    cursor: pointer;
+    transition: translate 160ms var(--ease-menu);
+
+    &:hover {
+      translate: 0 -2px;
+    }
+  }
+
+  .store-hero-card {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    padding: 0 10px 12px;
+    overflow: hidden;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #f1e9de;
+    box-shadow:
+      inset 0 0 0 2px #f8f4ef,
+      0 3px 0 rgb(0 0 0 / 0.3);
+    text-align: center;
+    transition:
+      background-color 150ms var(--ease-menu),
+      box-shadow 150ms var(--ease-menu);
+
+    .store-hero-off & {
+      border-style: dashed;
+      background: #e4dccf;
+      box-shadow:
+        inset 0 0 0 2px #e4dccf,
+        0 3px 0 rgb(0 0 0 / 0.3);
+    }
+
+    :checked + & {
+      background: #f2c12e;
+      box-shadow:
+        inset 0 0 0 2px #ffe27a,
+        0 3px 0 rgb(0 0 0 / 0.3);
+    }
+
+    :focus-visible + & {
+      outline: 3px solid #fff;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 6px #0a0a0a;
+    }
+  }
+
+  .store-hero-tab {
+    display: flex;
+    min-height: 28px;
+    align-items: center;
+    align-self: stretch;
+    justify-content: center;
+    gap: 6px;
+    margin: 0 -10px;
+    background: var(--faction, #3b2d23);
+    color: var(--faction-ink, #fff);
+    font: 800 12px/1 var(--site-heading);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .store-hero-disc {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    margin-top: 4px;
+    border: 2px solid #000;
+    border-radius: 50%;
+    background: var(--faction, #cdbfa6);
+    color: var(--faction-ink, #3b2d23);
+  }
+
+  .store-hero-name {
+    font: 800 17px/1.15 var(--site-heading);
+    overflow-wrap: anywhere;
+  }
+
+  .store-hero-kind {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+
+  .store-hero-status {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #5c4a3c;
+  }
+
+  .store-hero-holds {
+    color: #1f1712;
+  }
+
+  /* The tile of the hero a purchase was just made for. */
+  .store-hero-changed {
+    animation: store-flash 600ms var(--ease-menu);
+  }
+
+  @keyframes store-flash {
+    from {
+      background: #ffe27a;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .store-hero {
+      transition: none;
+
+      &:hover {
+        translate: none;
+      }
+    }
+
+    .store-hero-card {
+      transition: none;
+    }
+
+    .store-hero-changed {
+      animation: none;
+    }
+  }
+
+  @media (width < 40rem) {
+    .store-heroes {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+    }
+  }
+}

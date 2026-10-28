@@ -20,7 +20,7 @@ from openfesl.core.purchases import (
 )
 from openfesl.core.store import Product
 from openfesl.core.store_items import HeroChoice, Kind, PricePoint, StoreItem, StoreItems, Unfit
-from openfesl.core.texts import localize
+from openfesl.core.texts import localize, translate
 from openfesl.web.account.session import open_page, signed_in
 from openfesl.web.pages import Pages
 from openfesl.web.sessions import SentForms, form_matches, form_token, purchase_matches, toast
@@ -182,6 +182,7 @@ class StorePages:
             offered=offered,
             texts=texts,
             reveal=request.session.pop(REVEAL, None) if not review else None,
+            back=_back(game, sold, chosen, language),
             csrf=form_token(request),
         )
         return self._pages.render(request, "store.StoreItem", 400 if review else 200, **context)
@@ -302,6 +303,17 @@ class StorePages:
         page = localize(f"/{game.id}{ITEM.format(number=_number(number))}", request.state.language)
         chosen = {key: value for key, value in (("hero", hero), ("price", price)) if value}
         return f"{page}?{urlencode(chosen)}" if chosen else page
+
+
+def _back(
+    game: Game, sold: StoreItem, chosen: HeroChoice | None, language: str
+) -> tuple[str, str] | None:
+    # The list an item is found in, with the hero it was chosen for, and its name.
+    if sold.kind is not Kind.ITEM or game.site is None or "store" not in game.pages:
+        return None
+    page = localize(f"/{game.id}{game.site.path('store')}", language)
+    hero = f"?hero={chosen.hero.persona.id}" if chosen else ""
+    return page + hero, translate("web.site.page.store", language)
 
 
 def _number(text: str) -> int:

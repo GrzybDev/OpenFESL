@@ -1,5 +1,6 @@
 // The web pages' fonts, stylesheets and htmx, and their motion beyond what the stylesheets do on
 // their own. Every page works the same without it.
+import { announce } from "./announce.js";
 import "@fontsource/barlow/500.css";
 import "@fontsource/barlow/600.css";
 import "@fontsource/barlow/700.css";
@@ -21,6 +22,7 @@ import "./store.js";
 import "./chests.js";
 import "./catalogue.js";
 import "./settings.js";
+import "./store-front.js";
 import "htmx.org";
 
 // A chevron block whose page takes longer than 300 ms to arrive shows that it is loading, and
@@ -321,21 +323,6 @@ document.addEventListener("click", async (event) => {
     button.classList.remove("copied");
   }, 1500);
 });
-
-/**
- * Has screen readers read a short message about what just happened.
- *
- * @param {string} message - The message.
- */
-function announce(message) {
-  const region = document.getElementById("announce");
-  if (region) {
-    region.textContent = "";
-    requestAnimationFrame(() => {
-      region.textContent = message;
-    });
-  }
-}
 
 // A toast that says a change was saved leaves after 4 s; one that says it failed stays until
 // dismissed.

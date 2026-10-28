@@ -7,6 +7,7 @@ from openfesl.core.entitlements import ACTIVE, Entitlement, EntitlementStore
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, TransactionError
 from openfesl.core.games import Game
 from openfesl.core.hero_rules import HeroRules, WrittenStat
+from openfesl.core.inventory import PERMANENT, Held
 from openfesl.core.personas import Persona
 from openfesl.core.stats import (
     ACCOUNT,
@@ -44,6 +45,23 @@ def held(
     # The tags of what is neither worn nor used, such as a treasure chest's, name no item.
     items = {int(number) for number in tags if number.isascii() and number.isdecimal()}
     return items | granted(rules, faction, hero_class)
+
+
+def holding(item_id: int, kept: Iterable[Entitlement]) -> Held:
+    """Return how a hero holds an item it holds: as its entitlement says, else for good.
+
+    The game grants a hero its loadout itself, so an item held without an entitlement is held
+    for good.
+
+    Args:
+        item_id: The item's number.
+        kept: The entitlements kept for the hero that are in use and have time left.
+    """
+    prefix = f"{item_id}-"
+    for entry in kept:
+        if entry.tag.startswith(prefix):
+            return Held(entry.tag.removeprefix(prefix), entry.expires, entry.uses)
+    return Held(PERMANENT)
 
 
 def granted(rules: HeroRules | None, faction: str | None, hero_class: str | None) -> set[int]:

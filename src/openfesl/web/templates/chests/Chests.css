@@ -7,9 +7,6 @@
 
   .chests-heading {
     margin-bottom: 16px;
-    font: 800 23px/1.2 var(--site-heading);
-    color: #fff;
-    text-shadow: var(--site-outline);
   }
 
   .chest-cards {

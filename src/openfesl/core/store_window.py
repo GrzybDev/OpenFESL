@@ -247,12 +247,12 @@ class StoreWindows:
                 held = Held(PERMANENT)
             if held and held.type == COUNTED and item_id in (uses or {}):
                 held = Held(COUNTED, None, min(held.uses or 0, (uses or {})[item_id]))
-            left = _left(held, now)
+            left = left_of(held, now)
             points = [
                 PricePoint(
                     found,
                     balances.get(found.product.currency, 0),
-                    _left(fold(held, found.product.ownership, now), now),
+                    left_of(fold(held, found.product.ownership, now), now),
                 )
                 for found in sorted(
                     offers, key=lambda found: price_order(rules.currencies, found.product)
@@ -264,7 +264,7 @@ class StoreWindows:
                     name=catalogue.name(item_id) or str(item_id),
                     description=list(store.describe(catalogue, item_id)),
                     left=left,
-                    low=_low(left, game.heroes),
+                    low=runs_low(left, game.heroes),
                     equipped=item_id in worn.values(),
                     points=points,
                 )
@@ -290,7 +290,7 @@ def running_low(rules: HeroRules, kept: Iterable[Entitlement], now: datetime) ->
         for entry in kept
         if entry.status == ACTIVE
         and _item(entry.tag) is not None
-        and _low(_left(_held(entry), now), rules)
+        and runs_low(left_of(_held(entry), now), rules)
     )
 
 
@@ -305,7 +305,13 @@ def _held(entitlement: Entitlement) -> Held:
     return Held(entitlement.tag.partition("-")[2], entitlement.expires, entitlement.uses)
 
 
-def _left(held: Held | None, now: datetime) -> Left | None:
+def left_of(held: Held | None, now: datetime) -> Left | None:
+    """Return what a hero has left of an item it holds; none when nothing is left.
+
+    Args:
+        held: How the hero holds the item; none when it does not.
+        now: The time that what is left counts from.
+    """
     if held is None:
         return None
     if held.type == COUNTED:
@@ -322,7 +328,13 @@ def _left(held: Held | None, now: datetime) -> Left | None:
     return Left(DAYS, (remaining + _DAY / 2) // _DAY, held.expires)
 
 
-def _low(left: Left | None, rules: HeroRules) -> bool:
+def runs_low(left: Left | None, rules: HeroRules) -> bool:
+    """Tell whether what a hero has left of an item runs low, as the in-game store marks it.
+
+    Args:
+        left: What the hero has left; none when it has nothing.
+        rules: The game's hero rules, which say when an item runs low.
+    """
     if left is None:
         return False
     return (

@@ -37,6 +37,7 @@ from openfesl.web.servers import server_routes
 from openfesl.web.sessions import SentForms
 from openfesl.web.shell import shell_routes
 from openfesl.web.store import StorePages
+from openfesl.web.store_front import StoreFrontPages
 
 
 def include_public_routes(
@@ -141,6 +142,9 @@ def include_public_routes(
         StorePages(
             pages, games, services.store_items, sent, services.purchases, services.catalogues
         ).routes()
+    )
+    app.include_router(
+        StoreFrontPages(pages, games, services.store_front, services.catalogues).routes()
     )
     app.include_router(FundsPages(pages, games, services.wallets).routes())
     app.include_router(launcher_routes(lambda: app.state.launcher))

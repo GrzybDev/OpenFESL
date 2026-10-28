@@ -1,8 +1,7 @@
-{#def sold, roster, choices: list, offered, texts, reveal #}
-{# A page of the game's store: what it sells and for whom on the right, and on the left the hero
-   it is bought for, its price and the purchase, or why no hero can buy it. A box just opened
-   shows what it gave first. #}
-{% set rules = game.heroes %}
+{#def sold, roster, choices: list, offered, texts, reveal, back #}
+{# A page of the game's store: the way back to the list it is found in, what it sells and for
+   whom on the right, and on the left the hero it is bought for, its price and the purchase, or
+   why no hero can buy it. A box just opened shows what it gave first. #}
 {% set able = choices|rejectattr("unfit")|rejectattr("owned")|list %}
 {# Heroes that lack an ability's level before it, or whose own item was taken out of use, still
    choose and see why; the others can never have it now. #}
@@ -10,6 +9,9 @@
 <Layout :title="sold.name">
   {% if reveal %}<BoxReveal :reveal="reveal" />{% endif %}
   <section aria-labelledby="store-title" class="store-head">
+    {% if back %}
+      <a href="{{ back[0] }}" class="store-back"><Icon name="back" :size="12" stroke="currentColor" />{{ back[1] }}</a>
+    {% endif %}
     <Plaque id="store-title">{{ sold.name }}</Plaque>
     <p class="site-lead">{{ texts.lead(sold) }}</p>
   </section>
@@ -65,39 +67,7 @@
                   {% for choice in choices %}
                     {% set hero = choice.hero %}
                     {% set changed = toast and not toast.error and toast.values.get("hero") == hero.persona.name %}
-                    <label {% if hero.faction %}data-faction="{{ hero.faction }}"{% endif %}
-                           class="store-hero{% if choice.unfit %} store-hero-off{% endif %}">
-                      <input type="radio"
-                             name="hero"
-                             value="{{ hero.persona.id }}"
-                             aria-describedby="hero-{{ hero.persona.id }}"
-                             {% if choice.unfit %}aria-disabled="true"{% endif %}
-                             {% if offered and choice == offered.choice %}checked{% endif %}
-                             class="sr-only">
-                      <span class="store-hero-card">
-                        <span class="store-hero-tab">
-                          {% if hero.faction %}
-                            <Icon :name="rules.factions[hero.faction].glyph" :size="16" stroke="currentColor" />
-                            {{ _("games." ~ game.id ~ ".faction." ~ hero.faction) }}
-                          {% endif %}
-                        </span>
-                        <span aria-hidden="true" class="store-hero-disc">
-                          {% if hero.hero_class %}
-                            <Icon :name="rules.classes[hero.hero_class].glyph" :size="24" stroke="currentColor" />
-                          {% endif %}
-                        </span>
-                        <span class="store-hero-name">{{ hero.persona.name }}</span>
-                        <span class="store-hero-kind">
-                          {% if hero.hero_class %}
-                            {{ _("web.heroes.kind", hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class), level=hero.level) }}
-                          {% else %}
-                            {{ _("web.heroes.level", level=hero.level) }}
-                          {% endif %}
-                        </span>
-                        <span id="hero-{{ hero.persona.id }}"
-                              class="store-hero-status{% if choice.held and not choice.unfit %} store-hero-holds{% endif %}{% if changed %} store-hero-changed{% endif %}">{{ texts.tile(sold, choice) }}</span>
-                      </span>
-                    </label>
+                    <StoreHero :hero="hero" :checked="offered and choice == offered.choice" :status="texts.tile(sold, choice)" :off="choice.unfit" :holds="choice.held and not choice.unfit" :changed="changed" />
                   {% endfor %}
                 </div>
               </fieldset>

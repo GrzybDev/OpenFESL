@@ -1,0 +1,334 @@
+/* The store front: the sign-in line or the no-hero panel under the head, then the filter's tiles
+   (heroes, categories in seven columns or two on phones), the Owned by pill and the search, then
+   the outlined title over the items' tiles and the pager. Chosen tiles take the yellow fill. */
+@layer pages {
+  .store-front-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 18px;
+    margin-top: 24px;
+    padding: 14px 18px;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #893531;
+    box-shadow:
+      inset 0 0 0 2px #c54d47,
+      0 4px 0 rgb(0 0 0 / 0.3);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
+
+    > span {
+      flex: 1 1 320px;
+    }
+  }
+
+  .store-front-none {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 20px;
+    margin-top: 24px;
+    padding: 16px 18px;
+    border: 3px dashed #3b2d23;
+    border-radius: 8px;
+    background: rgb(241 233 222 / 0.6);
+    font-size: 14px;
+    line-height: 1.45;
+
+    > p,
+    > div {
+      flex: 1 1 320px;
+      min-width: 0;
+    }
+
+    strong {
+      display: block;
+      font: 800 18px/1.25 var(--site-heading);
+    }
+  }
+
+  .store-front-empty {
+    margin-top: 16px;
+    padding: 24px clamp(16px, 3vw, 32px);
+  }
+
+  .store-front-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 24px;
+    margin-top: 6px;
+  }
+
+  .store-front-link {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 6px;
+    font: 800 15px/1.1 var(--site-heading);
+    color: #7a1d16;
+    text-decoration-line: underline;
+  }
+
+  .store-front {
+    margin-top: 10px;
+
+    .store-heroes {
+      grid-template-columns: repeat(auto-fill, minmax(170px, 210px));
+    }
+
+    .pager {
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .pager-page,
+    .pager-step {
+      border: 3px solid #000;
+      border-radius: 22px;
+      background: #f1e9de;
+      color: #1f1712;
+      font: 800 16px/1 var(--site-heading);
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .pager-page[aria-current] {
+      background: #1a1412;
+      color: #fede01;
+    }
+
+    .pager-step:not(a) {
+      opacity: 0.45;
+    }
+
+    .pager-step svg {
+      color: inherit;
+    }
+  }
+
+  .store-kinds {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
+    gap: 10px;
+  }
+
+  .store-kind {
+    display: flex;
+    min-width: 0;
+    cursor: pointer;
+    transition: translate 160ms var(--ease-menu);
+
+    &:hover {
+      translate: 0 -2px;
+    }
+  }
+
+  .store-kind-card {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-width: 0;
+    padding: 10px 8px;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #f1e9de;
+    box-shadow:
+      inset 0 0 0 2px #f8f4ef,
+      0 3px 0 rgb(0 0 0 / 0.3);
+    text-align: center;
+    transition:
+      background-color 150ms var(--ease-menu),
+      box-shadow 150ms var(--ease-menu);
+
+    :checked + & {
+      background: #f2c12e;
+      box-shadow:
+        inset 0 0 0 2px #ffe27a,
+        0 3px 0 rgb(0 0 0 / 0.3);
+    }
+
+    :focus-visible + & {
+      outline: 3px solid #fff;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 6px #0a0a0a;
+    }
+  }
+
+  .store-kind-name {
+    margin-top: 2px;
+    font: 800 16px/1.15 var(--site-heading);
+    overflow-wrap: anywhere;
+  }
+
+  .store-kind-count {
+    font-size: 12px;
+    font-weight: 700;
+    color: #5c4a3c;
+  }
+
+  .store-kind-none {
+    color: #8c1e18;
+  }
+
+  .store-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 14px 22px;
+    margin-top: 18px;
+  }
+
+  .store-owned {
+    display: flex;
+    cursor: pointer;
+  }
+
+  .store-owned-pill {
+    display: inline-flex;
+    min-height: 48px;
+    align-items: center;
+    gap: 10px;
+    padding: 0 18px 0 7px;
+    border: 2px solid #1f1712;
+    border-radius: 26px;
+    font: 800 15px/1.1 var(--site-heading);
+    transition: background-color 150ms var(--ease-menu);
+
+    :checked + & {
+      background: #f2c12e;
+      box-shadow: inset 0 0 0 2px #ffe27a;
+    }
+
+    :focus-visible + & {
+      outline: 3px solid #fff;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 6px #0a0a0a;
+    }
+  }
+
+  .store-owned-disc {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    border: 2px solid #1f1712;
+    border-radius: 50%;
+    background: #f1e9de;
+
+    :checked + .store-owned-pill & {
+      background: #1a1412;
+      color: #fede01;
+    }
+  }
+
+  .store-search {
+    display: grid;
+    flex: 0 1 440px;
+    gap: 6px;
+    min-width: min(100%, 240px);
+  }
+
+  .store-search-box {
+    display: flex;
+    min-height: 48px;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    border: 3px solid #000;
+    border-radius: 6px;
+    background: #fff;
+    color: #1f1712;
+
+    &:focus-within {
+      outline: 3px solid #fff;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 6px #0a0a0a;
+    }
+  }
+
+  .store-search-input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    font-size: 16px;
+    outline: none;
+  }
+
+  .store-results {
+    margin-top: 30px;
+  }
+
+  .store-results-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 20px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #3b2d23;
+  }
+
+  .store-results-sub {
+    font-size: 13px;
+    font-weight: 700;
+    color: #5c4a3c;
+  }
+
+  .store-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr));
+    gap: 22px 18px;
+    margin-top: 18px;
+  }
+
+  .store-pages {
+    margin-top: 26px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .store-kind {
+      transition: none;
+
+      &:hover {
+        translate: none;
+      }
+    }
+
+    .store-kind-card,
+    .store-owned-pill {
+      transition: none;
+    }
+  }
+
+  @media (width < 40rem) {
+    .store-front .store-heroes {
+      display: flex;
+      overflow-x: auto;
+      margin-inline: -16px;
+      padding: 2px 16px 8px;
+
+      > .store-hero {
+        flex: 0 0 152px;
+      }
+    }
+
+    .store-kinds {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .store-tiles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px 10px;
+    }
+
+    .store-results-head {
+      flex-direction: column;
+    }
+  }
+}

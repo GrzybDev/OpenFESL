@@ -8,7 +8,7 @@ from openfesl.core.deals import HotDeals
 from openfesl.core.drops import Box
 from openfesl.core.entitlements import ACTIVE, Entitlement, EntitlementStore
 from openfesl.core.games import Game, Scope
-from openfesl.core.hero_items import held
+from openfesl.core.hero_items import held, holding
 from openfesl.core.heroes import Hero
 from openfesl.core.inventory import PERMANENT, Held, Ownership
 from openfesl.core.store import ListedBundle, ProductStore, price_order
@@ -215,7 +215,7 @@ class StoreItems:
                 name=catalogue.name(item.id) or str(item.id),
                 description=game.store.describe(catalogue, item.id),
                 item=item,
-                requirement=_requirement(game, item),
+                requirement=requirement(game, item),
                 prices=tuple(
                     PricePoint(found.id, found.ownership, found.currency, found.price)
                     for found in sold
@@ -315,8 +315,13 @@ class StoreItems:
         )
 
 
-def _requirement(game: Game, item: Item) -> Requirement:
-    # An item that fits every faction or class of the game asks for none.
+def requirement(game: Game, item: Item) -> Requirement:
+    """Return which heroes may have an item; one that fits every faction or class asks for none.
+
+    Args:
+        game: The game, which has heroes.
+        item: The item, from the game's catalogue.
+    """
     rules = game.heroes
     assert rules is not None
     factions = item.factions if not set(rules.factions) <= item.factions else frozenset()
@@ -329,11 +334,7 @@ def _held(item: Item | None, holds: set[int], kept: list[Entitlement]) -> Held |
     # grants it the item itself, as its faction and class's loadout or a base item.
     if item is None or (item.id not in holds and not item.base):
         return None
-    prefix = f"{item.id}-"
-    for entry in kept:
-        if entry.tag.startswith(prefix):
-            return Held(entry.tag.removeprefix(prefix), entry.expires, entry.uses)
-    return Held(PERMANENT)
+    return holding(item.id, kept)
 
 
 def _drops(catalogue: Catalogue, box: Box) -> tuple[Content, ...]:

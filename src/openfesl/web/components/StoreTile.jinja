@@ -1,0 +1,46 @@
+{#def tile, glyph: str #}
+{# An item on the store front: its icon, or OpenFESL's tile with the glyph of its kind where the
+   page shows none, its kind and name, which heroes may have it, its lowest price in each
+   currency, and what the chosen hero holds of it. The whole tile leads to the item's page. #}
+{% set states = {"held": "tick", "low": "warn", "level": "warn", "none": "bag"} %}
+{% set inside %}
+  <span class="store-tile-art">
+    {% if tile.icon %}
+      <img src="{{ tile.icon }}"
+           width="72"
+           height="72"
+           alt=""
+           loading="lazy"
+           class="store-tile-icon">
+    {% else %}
+      <span aria-hidden="true"
+            class="store-tile-icon store-tile-drawn"><Icon :name="glyph" :size="34" stroke="currentColor" /></span>
+    {% endif %}
+  </span>
+  <span class="store-tile-body">
+    <span class="store-tile-kind"><Icon :name="glyph" :size="13" stroke="currentColor" />{{ _("games." ~ game.id ~ ".item_kind." ~ tile.kind ~ ".item") }}</span>
+    <span class="store-tile-name">{{ tile.name }}</span>
+    <span class="store-tile-requires">{{ tile.requires }}</span>
+    {% if tile.prices %}
+      <span class="store-tile-prices">
+        {{ _("web.store.front.from") }}
+        {% for price in tile.prices %}
+          <span class="store-tile-price"><span aria-hidden="true"
+      data-wallet="{{ price.currency }}"
+      class="store-coin"><Icon :name="price.glyph" :size="12" stroke="currentColor" /></span><strong>{{ price.amount }}</strong> {{ price.name }}</span>
+          {%- if not loop.last %}<span aria-hidden="true"> · </span>{% endif %}
+        {% endfor %}
+      </span>
+    {% else %}
+      <span class="store-tile-prices">{{ tile.unsold }}</span>
+    {% endif %}
+    {% if tile.line %}
+      <span class="store-tile-line store-tile-{{ tile.state }}"><Icon :name="states[tile.state]" :size="14" stroke="currentColor" fill="currentColor" />{{ tile.line }}</span>
+    {% endif %}
+  </span>
+{% endset %}
+{% if tile.href %}
+  <a href="{{ tile.href }}" class="store-tile">{{ inside }}</a>
+{% else %}
+  <div class="store-tile">{{ inside }}</div>
+{% endif %}

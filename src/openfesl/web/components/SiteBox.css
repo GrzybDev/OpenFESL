@@ -57,6 +57,14 @@
     text-shadow: var(--site-outline-thin);
   }
 
+  /* An outlined heading on the parchment, over one of a page's lists. */
+  .site-heading {
+    font: 800 23px/1.2 var(--site-heading);
+    color: #fff;
+    overflow-wrap: anywhere;
+    text-shadow: var(--site-outline);
+  }
+
   .site-actions {
     display: flex;
     flex-wrap: wrap;
