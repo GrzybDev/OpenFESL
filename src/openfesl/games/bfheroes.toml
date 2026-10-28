@@ -72,13 +72,14 @@ connect.minimum_hook_version = ""
 # its clients do, so they are kept out too.
 connect.maintenance = false
 
-# The game's website of autumn 2012, as the web pages draw it: its yellow links and Play Now badge
-# on a dark frame, red-brown menus and boxes, green buttons, parchment rows and white headings. Its
-# heading typeface is not free, so one that the pages ship takes its place.
+# The game's website of autumn 2012, as the web pages draw it: the red-brown of its menus as the
+# accent, lifted to read with black text, on a dark frame with red-brown boxes, green buttons,
+# parchment rows and white headings. Its heading typeface is not free, so one that the pages ship
+# takes its place.
 [theme]
 font = "Barlow"
-accent = "#FEDE01"
-accent_hover = "#FFE366"
+accent = "#C8673A"
+accent_hover = "#D98763"
 menu_current = "#521F1C"
 badge = "#77813B"
 badge_edge = "#4F5627"
