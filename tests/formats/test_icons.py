@@ -41,3 +41,12 @@ def test_a_file_that_is_no_picture_is_refused() -> None:
         webp(b"<html></html>")
     with pytest.raises(ValueError, match="cannot be read"):
         webp(picture("GIF"))
+
+
+def test_a_lossy_picture_keeps_its_size_and_transparency() -> None:
+    converted = webp(picture("TGA"), quality=90)
+
+    assert b"VP8 " in converted and b"ALPH" in converted
+    with Image.open(BytesIO(converted)) as decoded:
+        assert decoded.size == (4, 2)
+        assert decoded.getchannel("A").getpixel((0, 0)) == 0

@@ -1,6 +1,6 @@
 import pytest
 
-from openfesl.formats.definitions import Definition, read_definitions, read_tree
+from openfesl.formats.definitions import Definition, read_children, read_definitions, read_tree
 
 ITEMS = b"""\xef\xbb\xbf<!-- invented -->
 <database>
@@ -34,6 +34,13 @@ def test_items_keep_their_single_values_with_nested_ones_named_by_both_elements(
         Definition(12, {"faction": "1", "slot": "0", "values.range": "2", "values.damage": "3"}),
         Definition(13, {"slot": ""}),
     ]
+
+
+def test_the_repeated_values_of_items_keep_their_order_and_attributes() -> None:
+    assert read_children(ITEMS, "item", "template") == {
+        12: [("mesh_a", {"layer": "5"}), ("mesh_b", {"layer": "6"})],
+        13: [],
+    }
 
 
 def test_each_level_of_a_definition_is_an_item_with_the_values_of_the_levels_before_it() -> None:

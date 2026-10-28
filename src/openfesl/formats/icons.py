@@ -6,11 +6,12 @@ from PIL import Image
 _SOURCES = ("DDS", "TGA", "PNG")
 
 
-def webp(data: bytes) -> bytes:
-    """Return a picture as a lossless WebP picture with its transparency, as browsers show it.
+def webp(data: bytes, quality: int | None = None) -> bytes:
+    """Return a picture as a WebP picture with its transparency, as browsers show it.
 
     Args:
         data: The picture as a DDS, TGA or PNG file.
+        quality: The quality of a lossy picture, from 0 to 100; lossless without one.
 
     Raises:
         ValueError: When the picture is in none of those formats or cannot be decoded.
@@ -22,5 +23,9 @@ def webp(data: bytes) -> bytes:
     except (OSError, SyntaxError) as error:
         raise ValueError(f"the picture cannot be read: {error}") from None
     converted = BytesIO()
-    pixels.save(converted, "WEBP", lossless=True)
+    if quality is None:
+        pixels.save(converted, "WEBP", lossless=True)
+    else:
+        # Exact keeps the colour of transparent pixels, which filtering blends into the edges.
+        pixels.save(converted, "WEBP", quality=quality, exact=True)
     return converted.getvalue()

@@ -5,6 +5,7 @@ from pathlib import Path
 from zipfile import ZipFile
 
 import pytest
+from model_files import IDENTITY, channel, material, rigs, skeleton, skinned_mesh, u32
 from PIL import Image
 
 # A player's own copy of Battlefield Heroes, 1.89 or 1.46, which the opt-in tests only read.
@@ -29,7 +30,10 @@ DEFINITIONS = {
     "Items.xml": """<database><items>
         <item id="1"><faction>1</faction><kits>7</kits><slot>0</slot><minLevel>1</minLevel>
           <default>True</default><template layer="1">invented_hat</template></item>
-        <item id="2"><faction>2</faction><kits>2</kits><slot>11</slot><minLevel>1</minLevel></item>
+        <item id="2"><faction>2</faction><kits>2</kits><slot>11</slot><minLevel>1</minLevel>
+          <layer>55</layer><template>Invented_Hair</template><template>GER_F_Hair</template>
+          <template>invented_tail</template><template>invented_lost</template>
+          <template>invented_unwritten</template><template /></item>
         </items></database>""",
     "Weapons.xml": """<weapons><!-- invented_rifle --><item id="3000"><faction>3</faction>
         <kits>4</kits><class>1</class><values><range>3</range></values></item></weapons>""",
@@ -86,6 +90,65 @@ ICONS = {
 }
 
 
+# The scripts of the parts that heroes wear, by folder: a hat, the cap that a rule puts in its
+# place, the hair with an earlier folder's other layout of it, a female hero's hair, a tail of a
+# type without a region, a part whose texture the copy lacks, and a mesh that no item names.
+TEMPLATES = {
+    "Invented/invented_hat": "SoldierMeshItem invented_hat\ngeometryTemplate.itemType CIT_Hat",
+    "Invented/Invented_Cap": "SoldierMeshItem Invented_Cap\ngeometryTemplate.itemType CIT_HAT",
+    "Borrowed/Invented_Hair": (
+        "SoldierTextureItem Invented_Hair\ngeometryTemplate.itemType CIT_Headhair\n"
+        'geometryTemplate.fileName "Objects/Items/Invented/Invented_Hair/Invented_Hair.tga"\n'
+        "geometryTemplate.setCoordinate 9/9"
+    ),
+    "Invented/Invented_Hair": (
+        "SoldierTextureItem Invented_Hair\ngeometryTemplate.itemType CIT_Headhair\n"
+        'geometryTemplate.fileName "Objects/Items/Invented/Invented_Hair/Invented_Hair.tga"\n'
+        "geometryTemplate.setCoordinate 2\x7f\x7f/3\ngeometryTemplate.setColor 30/15/10"
+    ),
+    "Invented/GER_F_Hair": "SoldierTextureItem GER_F_Hair\ngeometryTemplate.itemType CIT_HeadHair",
+    "Invented/invented_tail": "SoldierMeshItem invented_tail\ngeometryTemplate.itemType CIT_Tail",
+    "Invented/invented_lost": (
+        "SoldierTextureItem invented_lost\ngeometryTemplate.itemType CIT_Hat\n"
+        "geometryTemplate.fileName Objects/Items/Invented/invented_lost/invented_lost.tga"
+    ),
+    "Invented/invented_spare": "SoldierMeshItem invented_spare\ngeometryTemplate.itemType CIT_Hat",
+}
+REGIONS = """rem ** invented regions **
+skinnedMeshRenderer.setCustomTextureCoordOffsetAndScale CIT_Hat\t0/808/317/216
+skinnedMeshRenderer.setCustomTextureCoordOffsetAndScale\tCIT_HeadHair\t369/512/463/296
+"""
+MESH_RULES = """Customization.createMeshRule "Replace the hat"
+Customization.addInputMesh "invented_hat"
+Customization.addReplacementGroup
+Customization.setReplacementMesh "invented_cap"
+Customization.addGeomDependency "invented_hair"
+"""
+# Each soldier's animation systems: the menu's, the icons', whose National poses lie elsewhere
+# than the game names them, and the face's in rounds.
+SOLDIERS = {"british_male_soldier": "BMS", "german_male_soldier": "GMS"}
+FRONTEND = "animationSystem.createBundle idle\nanimationBundle.addAnimation {path}/idle.baf\n"
+FRONTEND += "".join(
+    f"animationSystem.createBundle {emote}\nanimationBundle.isLooping 0\n"
+    f"animationBundle.fadeOutTime 0.3\nanimationBundle.addAnimation {{path}}/emote_wave.baf\n"
+    f"animationSystem.createTrigger Trigger {emote}\nanimationTrigger.fadeInTime 0.2\n"
+    f"animationTrigger.addBundle {emote}\n"
+    for emote in ("wave", "Cheer", "Yes", "thanks", "flex")
+)
+ICONS_SYSTEM = (
+    "animationSystem.createBundle default\n"
+    "animationBundle.addAnimation {royal}/{pose}_UIPose_Default.baf\n"
+    "animationSystem.createBundle hands\n"
+    "animationBundle.addAnimation {royal}/{pose}_UIPose_Hands.baf\n"
+)
+FACES = (
+    "animationSystem.createBundle face_idle1\nanimationBundle.isLooping 0\n"
+    "animationBundle.addAnimation {path}/face_idle1.baf\n"
+    "animationSystem.createTrigger RandomTrigger face_rnd_idle\n"
+    "animationTrigger.addBundle face_idle1\n"
+)
+
+
 def invented_copy(folder: Path) -> None:
     """Write the files of an invented copy of Battlefield Heroes' catalogue into a folder."""
     mod = folder / "mods" / "bfheroes"
@@ -94,6 +157,12 @@ def invented_copy(folder: Path) -> None:
     with ZipFile(mod / "Objects" / "Items_server.zip", "w") as definitions:
         for name, text in DEFINITIONS.items():
             definitions.writestr(name, text.encode())
+        for at, script in TEMPLATES.items():
+            name = at.rpartition("/")[2]
+            definitions.writestr(f"{at}/{name}.con", f"GeometryTemplate.create {script}\r\n")
+        definitions.writestr("ItemSettings.con", REGIONS)
+        definitions.writestr("MeshRules.con", MESH_RULES)
+    invented_models(mod)
     (mod / "Localization" / "strings.csv").write_bytes("\r\n".join(TEXTS).encode("utf-16"))
     with ZipFile(mod / "Menu_client.zip", "w") as menu:
         for number, (name, form) in enumerate(ICONS.items()):
@@ -106,6 +175,47 @@ def invented_copy(folder: Path) -> None:
     code = level_table_code(EXPERIENCE)
     code += table_read_code(DATA, DATA + len(DAILY_CHECK) + len(padding))
     (folder / "BFHeroes.exe").write_bytes(windows_executable(code, data))
+
+
+def invented_models(mod: Path) -> None:
+    """Write the meshes, textures, skeletons and animations of the invented parts."""
+    rig = rigs([(0, IDENTITY), (1, IDENTITY)])
+    mesh = skinned_mesh(11, 0, [1], [1, 3, 2], rig + u32(1) + material([], (0, 0, 3, 4)))
+    hair = BytesIO()
+    Image.new("RGBA", (4, 4), (90, 60, 30, 200)).save(hair, "TGA")
+    with ZipFile(mod / "Objects" / "Items_client.zip", "w") as files:
+        for at in ("Invented/invented_hat", "Invented/Invented_Cap", "Invented/invented_spare"):
+            name = at.rpartition("/")[2]
+            files.writestr(f"{at}/Meshes/{name}.skinnedmesh", mesh)
+        files.writestr("Invented/Invented_Hair/Invented_Hair.tga", hair.getvalue())
+        files.writestr("Invented/GER_F_Hair/GER_F_Hair.tga", hair.getvalue())
+    # Both nodes held still over two frames.
+    still = [channel((True, [value]), frames=2) for value in (0, 0, 0, 32767, 0, 0, 0)]
+    node = struct.pack("<H", sum(len(found) // 2 - 1 for found in still)) + b"".join(still)
+    animation = u32(4) + struct.pack("<3H", 2, 0, 1) + struct.pack("<IB", 2, 10) + node * 2
+    royal = "Objects/soldiers/british_male_soldier/Animations/Common"
+    with ZipFile(mod / "Objects" / "Soldiers_server.zip", "w") as soldiers:
+        for soldier, pose in SOLDIERS.items():
+            path = f"Objects/Soldiers/{soldier}/Animations/Common"
+            systems = {
+                "Frontend": FRONTEND.format(path=path),
+                "Icons": ICONS_SYSTEM.format(royal=royal, pose=pose),
+                "3p": FACES.format(path=path),
+            }
+            soldiers.writestr(f"{soldier}/{soldier}.ske", skeleton([("root", -1), ("head", 0)]))
+            for system, script in systems.items():
+                soldiers.writestr(f"{soldier}/AnimationSystem{system}.inc", script)
+            for name in (
+                "idle",
+                "emote_wave",
+                "face_idle1",
+                *(f"{pose}_UIPose_{p}" for p in ("Default", "Hands")),
+            ):
+                soldiers.writestr(f"{soldier}/Animations/Common/{name}.baf", animation)
+    warp = BytesIO()
+    Image.new("RGBA", (4, 1), (128, 100, 80, 255)).save(warp, "DDS")
+    with ZipFile(mod / "Common_client.zip", "w") as common:
+        common.writestr("Textures/defaultLightWarpSkinned.dds", warp.getvalue())
 
 
 def windows_executable(code: bytes, data: bytes) -> bytes:

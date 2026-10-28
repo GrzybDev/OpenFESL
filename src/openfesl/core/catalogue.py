@@ -1,9 +1,10 @@
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Final, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, TypeAdapter, model_validator
 
+from openfesl.core.hero_models import HeroModels, ModelRules
 from openfesl.core.texts import BASE_LANGUAGE
 from openfesl.formats.catalogue_archive import CatalogueArchive, read_archive, write_archive
 
@@ -128,6 +129,8 @@ class CatalogueRules(BaseModel):
         slots: The slots by their numbers.
         daily_missions: The table of each day's daily mission in the executable.
         experience: The table of the XP from each level to the next in the executable.
+        models: Where the copy keeps the models that the game draws its heroes with, if the
+            catalogue carries them.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -146,11 +149,20 @@ class CatalogueRules(BaseModel):
     slots: dict[str, int]
     daily_missions: DailyMissions
     experience: Experience
+    models: ModelRules | None = None
 
     @model_validator(mode="after")
     def _check_english(self) -> Self:
         if BASE_LANGUAGE not in self.languages.values():
             raise ValueError(f"the language table needs a column for {BASE_LANGUAGE}")
+        return self
+
+    @model_validator(mode="after")
+    def _check_models(self) -> Self:
+        if self.models and not set(self.models.figures) <= set(self.factions):
+            raise ValueError("the heroes' models name a faction that the catalogue lacks")
+        if self.models and self.models.items not in {found.file for found in self.items}:
+            raise ValueError("the heroes' models name a file that defines no items")
         return self
 
 
@@ -198,6 +210,7 @@ class CatalogueDocument(BaseModel):
         daily_missions: The number of each day's daily mission, by the day of the year from
             1 January as 0.
         experience: The XP that a hero needs from each level to the next, by level from 0.
+        models: What the game draws its heroes with, if the catalogue carries it.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -208,6 +221,7 @@ class CatalogueDocument(BaseModel):
     tables: dict[str, Element] = {}
     daily_missions: tuple[int, ...] = ()
     experience: tuple[int, ...] = ()
+    models: HeroModels | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -215,14 +229,18 @@ class CatalogueFile:
     """A game's catalogue whole, as a file carries it from a copy of the game to a server.
 
     Attributes:
-        document: The catalogue but its texts and icons.
+        document: The catalogue but its texts, icons, models and textures.
         texts: Its texts by language code, each by id as the language table writes it.
         icons: Its icons as WebP pictures, by name.
+        models: The models of its heroes as binary glTF files, by name.
+        textures: The textures of its heroes' models as WebP pictures, by name.
     """
 
     document: CatalogueDocument
     texts: dict[str, dict[str, str]]
     icons: dict[str, bytes]
+    models: dict[str, bytes] = field(default_factory=dict)
+    textures: dict[str, bytes] = field(default_factory=dict)
 
     @classmethod
     def read(cls, data: bytes) -> Self:
@@ -239,6 +257,8 @@ class CatalogueFile:
             CatalogueDocument.model_validate_json(archive.document),
             {language: _TEXTS.validate_json(texts) for language, texts in archive.texts.items()},
             archive.icons,
+            archive.models,
+            archive.textures,
         )
 
     def write(self) -> bytes:
@@ -248,4 +268,6 @@ class CatalogueFile:
             for language, found in self.texts.items()
         }
         document = self.document.model_dump_json(exclude_defaults=True).encode()
-        return write_archive(CatalogueArchive(document, texts, self.icons))
+        return write_archive(
+            CatalogueArchive(document, texts, self.icons, self.models, self.textures)
+        )

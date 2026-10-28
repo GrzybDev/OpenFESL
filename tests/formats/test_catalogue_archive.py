@@ -11,6 +11,8 @@ ARCHIVE = CatalogueArchive(
     b'{"format":1,"game":"invented","items":[]}',
     {"pt-BR": b'{"A":"b"}', "en": b'{"A":"a"}'},
     {"item1": b"RIFF\0\0\0\0WEBPinvented", "emote2": b"RIFF\0\0\0\0WEBPother"},
+    {"invented_hat": b"glTFhat", "invented-skeleton": b"glTFskeleton"},
+    {"invented_hair": b"RIFF\0\0\0\0WEBPhair"},
 )
 
 
@@ -26,6 +28,9 @@ def test_a_catalogue_archive_reads_back_into_the_same_bytes() -> None:
             "texts/pt-BR.json",
             "icons/emote2.webp",
             "icons/item1.webp",
+            "models/invented-skeleton.glb",
+            "models/invented_hat.glb",
+            "textures/invented_hair.webp",
         ]
 
 
@@ -46,6 +51,7 @@ def archive_of(*files: tuple[str, bytes]) -> bytes:
         (archive_of(("texts/en.json", b"{}")), "no catalogue.json"),
         (archive_of(("catalogue.json", b"{}"), ("icons/../x.webp", b"")), "which no catalogue"),
         (archive_of(("catalogue.json", b"{}"), ("icons/Item1.webp", b"")), "which no catalogue"),
+        (archive_of(("catalogue.json", b"{}"), ("models/hat.webp", b"")), "which no catalogue"),
         (archive_of(("catalogue.json", b"{}"), ("catalogue.json", b"{}")), "twice"),
     ],
 )

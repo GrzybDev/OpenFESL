@@ -52,6 +52,32 @@ def read_definitions(data: bytes, element: str, levels: str | None = None) -> li
     return found
 
 
+def read_children(
+    data: bytes, element: str, child: str
+) -> dict[int, list[tuple[str, dict[str, str]]]]:
+    """Read the children of a name that each item of an XML file of item definitions has.
+
+    These are the repeated values that read_definitions leaves out, such as an item's parts.
+
+    Args:
+        data: The XML file.
+        element: The name of the elements that define items.
+        child: The name of the children.
+
+    Returns:
+        The text and attributes of each child, in order, by the item's number.
+
+    Raises:
+        ValueError: When the file is no XML or an item has no number.
+    """
+    return {
+        _number(definition): [
+            ((found.text or "").strip(), dict(found.attrib)) for found in definition.findall(child)
+        ]
+        for definition in _parse(data).iter(element)
+    }
+
+
 def read_tree(data: bytes) -> dict[str, Any]:
     """Read an XML file whole, as nested elements that JSON can hold.
 

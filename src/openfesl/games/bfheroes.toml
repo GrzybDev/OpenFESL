@@ -219,6 +219,62 @@ days = 366
 [catalogue.experience]
 levels = 30
 
+# The models that the game's menu draws its heroes with, so that the site draws them alike: the
+# parts that each worn item adds by layer, the scripts that create them with their meshes and
+# textures, the region of each item type in the 1024 px texture into which a hero's textures are
+# painted (RendDX9.dll 1.89 0x1013d871), the rules that take parts off a hero, and the skeletons
+# with the animations of the menu's hero (BFHeroes.exe 1.89 0x00d88650), which play 30 frames a
+# second.
+[catalogue.models]
+files = "mods/bfheroes/Objects/Items_client.zip"
+mount = "Objects/Items"
+mesh = "{folder}/meshes/{name}.skinnedmesh"
+items = "Items.xml"
+template = "template"
+layer = "layer"
+regions = "ItemSettings.con"
+mesh_rules = "MeshRules.con"
+# The parts of the female heroes, whose kits the game leaves out (GameLogicInit.con).
+left_out = "^(bri|ger)_f_"
+atlas = 1024
+quality = 90
+animations = "mods/bfheroes/Objects/Soldiers_server.zip"
+animation_mount = "Objects/Soldiers"
+frame_rate = 30
+# The ramp that the menu's shader (RaShaderPortrait.fx) shades its models with: the default one,
+# as the menu loads no level with its own.
+warp = ["mods/bfheroes/Common_client.zip", "Textures/defaultLightWarpSkinned.dds"]
+
+# The menu's idle, the random idles of the face in rounds, the poses of item icons, and the
+# emotes with which the creator's hero answers a choice: a nod to a faction, a flex to a class, a
+# wave to Surprise me, and a cheer once it is created.
+[catalogue.models.clips]
+idle = ["idle"]
+faces = ["face_rnd_idle"]
+poses = ["hands", "default"]
+nod = ["yes"]
+flex = ["flex"]
+wave = ["wave"]
+cheer = ["cheer"]
+
+[catalogue.models.figures.royal]
+skeleton = "british_male_soldier/british_male_soldier.ske"
+systems = [
+    "british_male_soldier/AnimationSystemFrontend.inc",
+    "british_male_soldier/AnimationSystemIcons.inc",
+    "british_male_soldier/AnimationSystem3p.inc",
+]
+
+# The National icons' system names its poses in the Royal folder, which lacks them.
+[catalogue.models.figures.national]
+skeleton = "german_male_soldier/german_male_soldier.ske"
+systems = [
+    "german_male_soldier/AnimationSystemFrontend.inc",
+    "german_male_soldier/AnimationSystemIcons.inc",
+    "german_male_soldier/AnimationSystem3p.inc",
+]
+relocated = { "british_male_soldier/animations/common/gms_uipose_default.baf" = "german_male_soldier/animations/common/gms_uipose_default.baf", "british_male_soldier/animations/common/gms_uipose_hands.baf" = "german_male_soldier/animations/common/gms_uipose_hands.baf" }
+
 # How the services behave where the game handles more than one behaviour; the instance's
 # settings override each.
 [policies]

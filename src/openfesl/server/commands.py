@@ -21,7 +21,8 @@ from openfesl.core.servers import (
     new_provider,
     provider_file,
 )
-from openfesl.extraction import ExtractionError, extract, find_game
+from openfesl.extraction.catalogue import extract, find_game
+from openfesl.extraction.copies import ExtractionError
 from openfesl.server.settings import Settings
 from openfesl.storage.accounts import SqlAccountStore
 from openfesl.storage.admin import SqlAdminLog
@@ -85,7 +86,8 @@ def extract_catalogue(folder: Path, out: Path | None) -> None:
         sys.exit(str(error))
     print(
         f"Wrote the catalogue of {game.name} to {out}: {len(catalogue.document.items)} items, "
-        f"texts in {len(catalogue.texts)} languages and {len(catalogue.icons)} icons"
+        f"texts in {len(catalogue.texts)} languages, {len(catalogue.icons)} icons and "
+        f"{len(catalogue.models)} hero models with {len(catalogue.textures)} textures"
     )
 
 

@@ -12,7 +12,7 @@ from support import cli, fetch
 
 from openfesl.core.drops import below_value
 from openfesl.core.games import load_games
-from openfesl.extraction import extract, find_game
+from openfesl.extraction.catalogue import extract, find_game
 from openfesl.storage.models import StoreBoxRow
 from openfesl.storage.store import SqlProductStore
 

@@ -13,7 +13,7 @@ from openfesl.core.deal_rules import ItemSection, OfferSection
 from openfesl.core.games import Game, load_games
 from openfesl.core.store import Product
 from openfesl.core.texts import translate
-from openfesl.extraction import extract, find_game
+from openfesl.extraction.catalogue import extract, find_game
 from openfesl.storage.catalogues import SqlCatalogueStore
 from openfesl.storage.database import migrate
 

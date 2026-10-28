@@ -11,7 +11,7 @@ from openfesl.core.catalogue import CatalogueFile
 from openfesl.core.catalogues import Catalogues
 from openfesl.core.games import Game, load_games
 from openfesl.core.hero_items import fits
-from openfesl.extraction import extract, find_game
+from openfesl.extraction.catalogue import extract, find_game
 from openfesl.formats.definitions import read_definitions
 from openfesl.storage.catalogues import IconFolder, SqlCatalogueStore
 from openfesl.storage.database import migrate
@@ -62,6 +62,33 @@ def test_the_copy_gives_every_kind_of_item_with_names_and_icons(
     assert {item.icon for item in with_icons} == set(catalogue.icons)
     assert all(icon[8:12] == b"WEBP" for icon in catalogue.icons.values())
     assert set(document.tables) == {"DefaultCustomization.xml", "Colors.xml"}
+
+
+def test_the_copy_gives_the_models_of_every_heros_choices_in_the_creator(
+    catalogue: CatalogueFile, written: Path, bfheroes: Game
+) -> None:
+    models = catalogue.document.models
+    rules = bfheroes.heroes
+    assert models and rules
+    dressed: set[int] = set()
+    for faction, figure in rules.factions.items():
+        rig = models.rigs[faction]
+        assert rig.model in catalogue.models
+        roles = ("idle", "faces", "poses", "nod", "flex", "wave", "cheer")
+        assert all(rig.roles[role] for role in roles)
+        # The parts of each hair style, facial hair and starting outfit are all there.
+        outfits = [item for found in rules.loadouts[faction].values() for item in found.appearance]
+        for item in (*figure.hair_styles, *figure.facial_hair, *outfits):
+            assert models.layers[item], item
+            assert all(name in models.templates for _, name in models.layers[item]), item
+        dressed |= {*figure.base_items, *figure.hair_styles, *figure.facial_hair, *outfits}
+    for name, template in models.templates.items():
+        assert template.type in models.regions
+        assert name in (catalogue.models if template.kind == "mesh" else catalogue.textures)
+    assert models.warp in catalogue.textures
+    # Only the creator's parts, which keep the file at about 9 MiB for 1.89.
+    assert set(models.layers) <= dressed
+    assert written.stat().st_size < 12 * 2**20
 
 
 def test_the_copy_gives_the_daily_missions_and_the_xp_of_each_level(

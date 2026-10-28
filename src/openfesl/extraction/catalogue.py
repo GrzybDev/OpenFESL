@@ -1,7 +1,6 @@
 import re
 from collections.abc import Mapping, Sequence
 from pathlib import Path, PurePosixPath
-from zipfile import BadZipFile, ZipFile
 
 from openfesl.core.catalogue import (
     FORMAT,
@@ -14,17 +13,16 @@ from openfesl.core.catalogue import (
 )
 from openfesl.core.catalogues import catalogue_items
 from openfesl.core.games import Game, Games
+from openfesl.core.hero_rules import HeroRules
 from openfesl.core.texts import BASE_LANGUAGE
+from openfesl.extraction.copies import ExtractionError, archive, member, members, path
+from openfesl.extraction.hero_models import extract_models
 from openfesl.formats.definitions import read_definitions, read_tree
 from openfesl.formats.executable import Executable
 from openfesl.formats.icons import webp
 from openfesl.formats.language_table import read_language_table
 
 _ICON_NAME = re.compile(r"[a-z0-9_]{1,64}")
-
-
-class ExtractionError(Exception):
-    """Tells why a folder's copy of a game gives no catalogue."""
 
 
 def find_game(games: Games, folder: Path) -> Game:
@@ -53,7 +51,8 @@ def extract(game: Game, folder: Path) -> CatalogueFile:
     Returns:
         What the server uses of the catalogue, converted for browsers: the fields of the items
         that the game's rules read, the texts that the rules name in each language of the
-        language table, and the icons of the items that the site may show.
+        language table, the icons of the items that the site may show, and the models that its
+        creator dresses heroes in, where the rules name them.
 
     Raises:
         ExtractionError: When the copy lacks a file of the catalogue or a file is not as the
@@ -66,6 +65,10 @@ def extract(game: Game, folder: Path) -> CatalogueFile:
     texts = _texts(rules, folder, _named(game, items))
     items, icons = _icons(rules, folder, items, _shown(game, items, texts[BASE_LANGUAGE]))
     daily_missions, experience = _executable(rules, folder / game.executable, items)
+    dressed = _dressed(game.heroes) if game.heroes else set()
+    models, files, textures = (
+        extract_models(rules, folder, items, dressed) if rules.models else (None, {}, {})
+    )
     document = CatalogueDocument(
         format=FORMAT,
         game=game.id,
@@ -73,26 +76,29 @@ def extract(game: Game, folder: Path) -> CatalogueFile:
         tables=tables,
         daily_missions=daily_missions,
         experience=experience,
+        models=models,
     )
-    return CatalogueFile(document, texts, icons)
+    return CatalogueFile(document, texts, icons, files, textures)
 
 
 def _read_fields(game: Game) -> set[str]:
-    # The fields of the definitions that the game's rules read: who may use an item, and the
-    # values that the store's prices match.
+    # The fields of the definitions that the game's rules read: who may use an item, the values
+    # that the store's prices match, and the layer that older copies set for all of an item's
+    # parts.
     rules = game.catalogue
     fields = {name for name in rules.fields.model_dump().values() if name} if rules else set()
     prices = game.store.prices if game.store else []
-    return fields | {field for rule in prices for field in rule.fields}
+    fields |= {field for rule in prices for field in rule.fields}
+    return fields | ({rules.models.layer} if rules and rules.models else set())
 
 
 def _definitions(
     rules: CatalogueRules, folder: Path, read: set[str]
 ) -> tuple[list[CatalogueItem], dict[str, Element]]:
-    with _archive(folder, rules.definitions) as archive:
+    with archive(folder, rules.definitions) as definitions:
         items: dict[int, CatalogueItem] = {}
         for item_file in rules.items:
-            data = _member(archive, rules.definitions, item_file.file)
+            data = member(definitions, rules.definitions, item_file.file)
             try:
                 found = read_definitions(data, item_file.element, item_file.levels)
             except ValueError as error:
@@ -109,7 +115,7 @@ def _definitions(
         tables = {}
         for name in rules.tables:
             try:
-                tree = read_tree(_member(archive, rules.definitions, name))
+                tree = read_tree(member(definitions, rules.definitions, name))
             except ValueError as error:
                 raise ExtractionError(f"{name}: {error}") from None
             tables[name] = Element.model_validate(tree)
@@ -131,13 +137,13 @@ def _named(game: Game, found: Sequence[CatalogueItem]) -> set[str]:
 
 
 def _texts(rules: CatalogueRules, folder: Path, named: set[str]) -> dict[str, dict[str, str]]:
-    path = _path(folder, rules.texts)
+    table = path(folder, rules.texts)
     try:
-        columns = read_language_table(path.read_bytes())
+        columns = read_language_table(table.read_bytes())
     except UnicodeError:
-        raise ExtractionError(f"{path} is no UTF-16 language table") from None
+        raise ExtractionError(f"{table} is no UTF-16 language table") from None
     except OSError:
-        raise ExtractionError(f"{path} cannot be read") from None
+        raise ExtractionError(f"{table} cannot be read") from None
     # An older copy may have a language's column without its texts.
     texts = {
         language: {name: text for name, text in columns[column].items() if text_id(name) in named}
@@ -145,7 +151,7 @@ def _texts(rules: CatalogueRules, folder: Path, named: set[str]) -> dict[str, di
         if columns.get(column)
     }
     if BASE_LANGUAGE not in texts:
-        raise ExtractionError(f"{path} has no column of English texts")
+        raise ExtractionError(f"{table} has no column of English texts")
     return texts
 
 
@@ -187,9 +193,8 @@ def _icons(
 ) -> tuple[list[CatalogueItem], dict[str, bytes]]:
     patterns = {item_file.kind: item_file.icons for item_file in rules.items}
     icons: dict[str, bytes] = {}
-    with _archive(folder, rules.icons) as archive:
-        # Archives name their files in whatever case the game's makers used.
-        members = {info.filename.lower(): info for info in archive.infolist()}
+    with archive(folder, rules.icons) as menu:
+        found = members(menu)
         named = []
         for item in items:
             first = item.levels[0] if item.levels else item.id
@@ -197,12 +202,12 @@ def _icons(
                 pattern.replace("{id}", str(item.id)).replace("{first}", str(first)).lower()
                 for pattern in (patterns.get(item.kind, []) if item.id in shown else [])
             )
-            source = next((path for path in paths if path in members), None)
+            source = next((path for path in paths if path in found), None)
             name = PurePosixPath(source).stem if source else ""
             if source and _ICON_NAME.fullmatch(name):
                 if name not in icons:
                     try:
-                        icons[name] = webp(archive.read(members[source]))
+                        icons[name] = webp(menu.read(found[source]))
                     except ValueError as error:
                         raise ExtractionError(f"{source}: {error}") from None
                 item = item.model_copy(update={"icon": name})
@@ -210,19 +215,30 @@ def _icons(
     return named, icons
 
 
+def _dressed(heroes: HeroRules) -> set[int]:
+    # The items whose parts the creator dresses its heroes in: what every hero of a faction holds,
+    # the faction's hair styles and facial hair, and each class's starting outfit.
+    dressed = set()
+    for faction, classes in heroes.loadouts.items():
+        rules = heroes.factions[faction]
+        dressed |= {*rules.base_items, *rules.hair_styles, *rules.facial_hair}
+        dressed |= {item for loadout in classes.values() for item in loadout.appearance}
+    return dressed
+
+
 def _executable(
-    rules: CatalogueRules, path: Path, items: list[CatalogueItem]
+    rules: CatalogueRules, file: Path, items: list[CatalogueItem]
 ) -> tuple[tuple[int, ...], tuple[int, ...]]:
     try:
-        executable = Executable(path.read_bytes())
+        executable = Executable(file.read_bytes())
         table = executable.table_read_after(rules.daily_missions.after)
         daily = tuple(executable.int32s(table, rules.daily_missions.days))
         calls = executable.longest_call_run()
     except (OSError, ValueError) as error:
-        raise ExtractionError(f"{path}: {error}") from None
+        raise ExtractionError(f"{file}: {error}") from None
     numbers = {item.id for item in items}
     if not set(daily) <= numbers:
-        raise ExtractionError(f"{path} has no table of daily missions that the catalogue has")
+        raise ExtractionError(f"{file} has no table of daily missions that the catalogue has")
     experience = tuple(xp for _, xp in calls if xp is not None)
     if (
         len(calls) != rules.experience.levels
@@ -230,24 +246,5 @@ def _executable(
         or any(level not in (None, index) for index, (level, _) in enumerate(calls))
         or list(experience[1:]) != sorted(set(experience[1:]))
     ):
-        raise ExtractionError(f"{path} has no table of the XP of each level")
+        raise ExtractionError(f"{file} has no table of the XP of each level")
     return daily, experience
-
-
-def _path(folder: Path, relative: str) -> Path:
-    return folder.joinpath(*PurePosixPath(relative).parts)
-
-
-def _archive(folder: Path, relative: str) -> ZipFile:
-    path = _path(folder, relative)
-    try:
-        return ZipFile(path)
-    except OSError, BadZipFile:
-        raise ExtractionError(f"{path} is missing or no ZIP archive") from None
-
-
-def _member(archive: ZipFile, relative: str, name: str) -> bytes:
-    try:
-        return archive.read(name)
-    except KeyError:
-        raise ExtractionError(f"{relative} holds no {name}") from None
