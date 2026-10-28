@@ -6907,3 +6907,177 @@ msgstr "Zakup %(item)s dla %(hero)s został już dokonany; ponowne wysłanie nic
 
 msgid "web.store.done.uses"
 msgstr "Kupiono %(item)s dla %(hero)s: %(uses)s; teraz zostało: %(left)s. Wydano %(price)s %(currency)s."
+
+msgid "web.store.forever"
+msgstr "na stałe"
+
+msgid "web.store.price.box"
+msgstr "1 skrzynka"
+
+msgid "web.store.price.bundle"
+msgstr "Zestaw jak na liście"
+
+msgid "web.store.countdown"
+msgstr "%(days)s d %(time)s"
+
+msgid "web.store.lead.box"
+msgstr "Losowa skrzynka: otwiera się zaraz po zakupie i daje jeden przedmiot z listy."
+
+msgid "web.store.lead.deal.one"
+msgstr "Gorąca oferta: %(count)s przedmiot dla jednego bohatera w jednej cenie."
+
+msgid "web.store.lead.deal.few"
+msgstr "Gorąca oferta: %(count)s przedmioty dla jednego bohatera w jednej cenie."
+
+msgid "web.store.lead.deal.many"
+msgstr "Gorąca oferta: %(count)s przedmiotów dla jednego bohatera w jednej cenie."
+
+msgid "web.store.lead.deal.other"
+msgstr "Gorąca oferta: %(count)s przedmiotu dla jednego bohatera w jednej cenie."
+
+msgid "web.store.lead.sale"
+msgstr "Cena jest o %(off)s%% niższa niż zwykle."
+
+msgid "web.store.lead.until"
+msgstr "W sprzedaży do %(until)s."
+
+msgid "web.store.hint.box"
+msgstr "Jedna skrzynka daje jeden przedmiot."
+
+msgid "web.store.hint.deal"
+msgstr "Jedna cena za cały zestaw; obowiązuje do końca oferty."
+
+msgid "web.store.hint.bundle"
+msgstr "Jedna cena za cały zestaw."
+
+msgid "web.store.tile.can"
+msgstr "Może tego używać"
+
+msgid "web.store.ended.note"
+msgstr "Ta oferta skończyła się %(moment)s."
+
+msgid "web.store.ended.alone"
+msgstr "Jej przedmioty zostają w sklepie w zwykłych cenach."
+
+msgid "web.store.ended.why"
+msgstr "Oferta się skończyła."
+
+msgid "web.store.sum.box"
+msgstr "%(hero)s dostanie jeden przedmiot z: %(item)s. Skrzynka otwiera się zaraz po zakupie."
+
+msgid "web.store.sum.deal.one"
+msgstr "%(hero)s dostanie %(count)s przedmiot z zestawu %(item)s, jak na liście."
+
+msgid "web.store.sum.deal.few"
+msgstr "%(hero)s dostanie %(count)s przedmioty z zestawu %(item)s, jak na liście."
+
+msgid "web.store.sum.deal.many"
+msgstr "%(hero)s dostanie %(count)s przedmiotów z zestawu %(item)s, jak na liście."
+
+msgid "web.store.sum.deal.other"
+msgstr "%(hero)s dostanie %(count)s przedmiotu z zestawu %(item)s, jak na liście."
+
+msgid "web.store.was"
+msgstr "wcześniej "
+
+msgid "web.store.contents.deal"
+msgstr "Zawartość zestawu"
+
+msgid "web.store.contents.box"
+msgstr "Możliwa zawartość"
+
+msgid "web.store.sticker"
+msgstr "-%(off)s%%"
+
+msgid "web.store.sticker.label"
+msgstr "%(off)s%% taniej"
+
+msgid "web.store.deal.ends_in"
+msgstr "Oferta kończy się za"
+
+msgid "web.store.chance"
+msgstr "szansa "
+
+msgid "web.store.about"
+msgstr "Opis"
+
+msgid "web.store.about.deal"
+msgstr "Wynajem, który bohater już ma, wydłuża się, a użycia się dodają; przedmioty posiadane na stałe są pomijane, a cena się nie zmienia."
+
+msgid "web.store.about.box"
+msgstr "Skrzynka nie daje przedmiotu posiadanego na stałe; posiadany wynajem się wydłuża, a użycia się dodają."
+
+msgid "web.store.box.worth"
+msgstr "Każda skrzynka daje jeden z tych przedmiotów, wart co najmniej jej cenę: %(price)s."
+
+msgid "web.store.box.plain"
+msgstr "Każda skrzynka daje jeden z tych przedmiotów."
+
+msgid "web.store.box.chances"
+msgstr "Szanse ustala ten serwis."
+
+msgid "web.store.confirm.gives.one"
+msgstr "%(count)s przedmiot"
+
+msgid "web.store.confirm.gives.few"
+msgstr "Jeden z %(count)s przedmiotów"
+
+msgid "web.store.confirm.gives.many"
+msgstr "Jeden z %(count)s przedmiotów"
+
+msgid "web.store.confirm.gives.other"
+msgstr "Jeden z %(count)s przedmiotów"
+
+msgid "web.store.row.gives"
+msgstr "Daje"
+
+msgid "web.store.confirm.contents.one"
+msgstr "%(count)s przedmiot, jak na liście"
+
+msgid "web.store.confirm.contents.few"
+msgstr "%(count)s przedmioty, jak na liście"
+
+msgid "web.store.confirm.contents.many"
+msgstr "%(count)s przedmiotów, jak na liście"
+
+msgid "web.store.confirm.contents.other"
+msgstr "%(count)s przedmiotu, jak na liście"
+
+msgid "web.store.row.contents"
+msgstr "Zawartość"
+
+msgid "web.store.confirm.box"
+msgstr "Skrzynka otwiera się zaraz po zakupie i daje jeden z przedmiotów z listy."
+
+msgid "web.store.confirm.worth"
+msgstr "Każdy jest wart co najmniej %(price)s."
+
+msgid "web.store.confirm.deal"
+msgstr "Oferta kończy się %(moment)s; zakup, który dotrze później, zostanie odrzucony i nic nie będzie kosztować."
+
+msgid "web.store.confirm.was"
+msgstr "%(price)s (wcześniej %(was)s)"
+
+msgid "web.store.confirm.open"
+msgstr "Kup i otwórz za %(price)s %(currency)s"
+
+msgid "web.store.reveal.title"
+msgstr "Skrzynka otwarta"
+
+msgid "web.store.reveal.for"
+msgstr "Przedmiot dla: %(hero)s"
+
+msgid "web.store.reveal.after"
+msgstr "%(game)s pokaże go od następnego logowania."
+
+msgid "web.store.reveal.line"
+msgstr "%(ownership)s · cena w sklepie %(worth)s; skrzynka kosztowała %(price)s."
+
+msgid "web.store.refused.ended"
+msgstr "Nic nie zostało kupione: oferta %(item)s skończyła się %(moment)s, zanim dotarł zakup. Nie wydano %(currency)s."
+
+msgid "web.store.done.deal"
+msgstr "Kupiono %(item)s dla %(hero)s. Wydano %(price)s %(currency)s."
+
+msgid "web.store.done.box"
+msgstr "Otwarto %(item)s dla %(hero)s: %(won)s, %(ownership)s. Wydano %(price)s %(currency)s."

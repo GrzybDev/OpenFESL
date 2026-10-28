@@ -7,14 +7,17 @@ import pytest
 from accounts import PASSWORD, execute, post_sign_in, select_value
 from heroes import create_hero
 from identity import form_token
-from store import CHEER, ITEMS, ROYAL_SOLDIER, stock
+from store import CHEER, ITEMS, ROYAL_SOLDIER, grant, stock, without_rotation
 from support import visible
+
+from openfesl.core.store import Bundle
+from openfesl.storage.store import SqlProductStore
 
 pytestmark = pytest.mark.anyio
 
-# The invented catalogue's products: the Royal coat for 30 days, the Royal pet, 25 bandages and
-# the cheer for good where it is stocked.
-COAT_MONTH, PET, BANDAGES, CHEER_FOR_GOOD = 2, 5, 6, 25
+# The invented catalogue's products: the Royal coat for good and for 30 days, the National
+# tunic, the Royal pet and 25 bandages, and the cheer for good where it is stocked.
+COAT, COAT_MONTH, TUNIC, PET, BANDAGES, CHEER_FOR_GOOD = 1, 2, 3, 5, 6, 25
 PAGE = "/bfheroes/store/buy/{}"
 
 
@@ -78,6 +81,7 @@ async def test_a_store_page_shows_each_hero_what_it_holds_or_why_it_cannot_have_
     assert "30 days 1,300 Funds Permanent 2,600 Funds 100 short" in offered
     assert "Brassbuckle gets Invented Coat for 30 days, until" in offered
     assert "Price 1,300 Funds Funds now 2,500 After 1,200" in offered
+    assert "About A long coat with brass buttons. Keeps the rain out." in offered
     assert (
         "Invented Coat is for the Royal Army only, and Mudlark is in the National Army. "
         "Another hero of the account can get it."
@@ -162,3 +166,83 @@ async def test_a_hero_buys_an_item_on_its_page_and_refused_purchases_spend_nothi
     ) in taken
     assert await select_value(database_url, "SELECT count(*) FROM purchase") == 1
     assert "1,200 Funds" in forged
+
+
+@pytest.mark.usefixtures("prompt_actions")
+async def test_hot_deals_and_random_boxes_sell_on_their_pages_while_they_run(
+    base: str,
+    server_url: str,
+    database_url: str,
+    products: SqlProductStore,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    await stock(server_url, tmp_path, capsys)
+    await without_rotation(database_url)
+    now = datetime.now(UTC)
+    royal_set = Bundle(
+        "WEST_Custom_Bundle_Invented",
+        "WEST_Custom_Bundle_Invented_HotDealsDesc",
+        "_PF",
+        2000,
+        original_price=3675,
+        faction="royal",
+        ends=now + timedelta(days=1, hours=2),
+        members=(COAT, PET, BANDAGES),
+    )
+    deal = await products.add_bundle("bfheroes", royal_set)
+    ended = await products.add_bundle(
+        "bfheroes", Bundle("Old Set", None, "_PF", 10, ends=now, members=(TUNIC,))
+    )
+    box = await select_value(
+        database_url, "SELECT id FROM store_box WHERE key = 'royal-soldier-supply-drop'"
+    )
+    assert isinstance(box, int)
+    drop = await products.add_bundle(
+        "bfheroes", Bundle("Royal Soldier Supply Drop", None, "_PF", 629, faction="royal", box=box)
+    )
+    brass = await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    await create_hero(base, "ann@example.test", "Mudlark")
+
+    async with httpx2.AsyncClient() as client:
+        await post_sign_in(client, base, "ann@example.test", PASSWORD)
+        offered = await shown(client, base, deal)
+        _, form = await confirmation(client, base, deal, brass, deal)
+        dealt = await bought(client, base, deal, form)
+        gone = await shown(client, base, ended)
+        late = await bought(client, base, ended, form | {"price": str(ended), "paid": "10"})
+        await grant(database_url, brass, "_PF", 1000)
+        boxed = await shown(client, base, drop)
+        _, form = await confirmation(client, base, drop, brass, drop)
+        opened = await bought(client, base, drop, form)
+        again = await shown(client, base, drop)
+
+    assert (
+        "Hot deal: 3 items for one hero at one price. The price is 45% lower than usual. Sold until"
+    ) in offered
+    assert "-45% 45% off Deal ends in 1 d 01:" in offered
+    assert "Invented Coat Permanent Invented Monkey Permanent Invented Bandage 25 uses" in offered
+    assert "About A coat, a pet, bandages." in offered
+    assert "Mudlark Commando · level 1 Royal Army only" in offered
+    assert "Brassbuckle gets the 3 items of Invented Set as listed." in offered
+    assert "Invented Set bought for Brassbuckle. 2,000 Funds spent." in dealt
+    assert "This deal ended on" in gone and "The deal has ended." in gone
+    assert "Nothing was bought: Old Set ended on" in late
+    assert "Invented Monkey Permanent chance 100%" in boxed
+    assert (
+        "Each box gives one of these items, worth at least the box's price of 629 Funds." in boxed
+    )
+    # The hero owns the deal's pet for good, so the box gives its tonics instead.
+    assert (
+        "Royal Soldier Supply Drop opened for Brassbuckle: Invented Tonic, 110 uses. "
+        "629 Funds spent."
+    ) in opened
+    assert (
+        "Box opened Item for Brassbuckle Invented Tonic 110 uses · store price 770 Funds; "
+        "the box cost 629 Funds."
+    ) in opened
+    assert "Box opened" not in again
+    assert (
+        await select_value(database_url, "SELECT string_agg(kind, ' ' ORDER BY id) FROM purchase")
+        == "bundle box"
+    )

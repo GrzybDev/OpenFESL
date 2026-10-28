@@ -1,12 +1,25 @@
 // The store pages' buy panel: choosing another hero or price asks the server for the panel's lower
-// part and the confirmation of that choice, and Buy opens the confirmation as a dialog. Without
-// scripts the panel sends its choice and the confirmation is a page of its own.
-import { closeDialog, flash } from "./naming.js";
+// part and the confirmation of that choice; Buy opens the confirmation as a dialog; a hot deal's
+// time left counts down; a box just bought opens over the page. Without scripts the panel sends
+// its choice and the confirmation is a page of its own.
+import { closeDialog, fill, flash, reducedMotion } from "./naming.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.querySelector("[data-buy]");
   if (form) {
     buyPanel(form);
+  }
+  for (const timer of document.querySelectorAll("[role=timer][data-left]")) {
+    countDown(timer);
+  }
+  const reveal = document.querySelector("dialog[data-reveal]");
+  if (reveal) {
+    // The box was bought with the page's Buy button, which takes the focus back.
+    closes(reveal, document.querySelector("[data-buy-open]"));
+    // Open in the page's flow without scripts, it opens over the page with them.
+    reveal.close();
+    reveal.classList.add("revealing");
+    reveal.showModal();
   }
 });
 
@@ -55,6 +68,11 @@ function buyPanel(form) {
     history.replaceState(null, "", `${location.pathname}?${query}`);
     // The tile that was chosen keeps the focus, though the price tiles were drawn again.
     form.querySelector(`[name=${changed.name}][value="${changed.value}"]`)?.focus();
+    for (const timer of document.querySelectorAll("[role=timer][data-left]")) {
+      if (timer.dataset.ended) {
+        endDeal();
+      }
+    }
   });
 
   form.addEventListener("click", (event) => {
@@ -96,4 +114,44 @@ function closes(dialog, opener) {
     event.preventDefault();
     closeDialog(dialog, dialog.opener ?? opener);
   });
+}
+
+/**
+ * Counts a hot deal's time left down each second while the page is shown, and marks the deal
+ * ended when it runs out.
+ *
+ * @param {HTMLElement} timer - The time left, with the server's seconds to its end and its wording.
+ */
+function countDown(timer) {
+  const ends = Date.now() + Number(timer.dataset.left) * 1000;
+  const tick = () => {
+    if (document.hidden) {
+      return;
+    }
+    const left = Math.max(Math.floor((ends - Date.now()) / 1000), 0);
+    const clock = [Math.floor((left % 86400) / 3600), Math.floor((left % 3600) / 60), left % 60]
+      .map((part) => String(part).padStart(2, "0"))
+      .join(":");
+    timer.textContent = fill(timer.dataset.format, { days: Math.floor(left / 86400), time: clock });
+    if (!left) {
+      clearInterval(interval);
+      timer.dataset.ended = "true";
+      endDeal();
+    }
+  };
+  const interval = setInterval(tick, 1000);
+  tick();
+}
+
+/** Shows that the page's hot deal has ended: its note, and its buy button unavailable. */
+function endDeal() {
+  document.querySelector("[data-deal-ended]")?.removeAttribute("hidden");
+  document.querySelector("[data-summary]")?.remove();
+  const buy = document.querySelector("[data-buy-open]");
+  const why = document.querySelector("[data-why]");
+  if (buy && why) {
+    buy.setAttribute("aria-disabled", "true");
+    why.textContent = why.dataset.ended;
+    why.animate([{ opacity: 0 }, { opacity: 1 }], { duration: reducedMotion.matches ? 100 : 120 });
+  }
 }

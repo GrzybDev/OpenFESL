@@ -1,5 +1,5 @@
-/* What a store page sells, in the 2012 green box: the item's tile, its row on a dark stripe and
-   the facts. */
+/* What a store page sells, in the 2012 green box: the hot deal's sticker and time left, the
+   box's glyph or the items' tiles, the rows of items on alternating dark stripes, and the facts. */
 @layer components {
   .store-contents {
     position: relative;
@@ -17,6 +17,56 @@
       margin-left: -16px;
       padding-left: 16px;
     }
+  }
+
+  .store-sticker {
+    position: absolute;
+    top: 44px;
+    right: -18px;
+    z-index: 3;
+    display: grid;
+    width: 84px;
+    height: 84px;
+    place-items: center;
+    rotate: 9deg;
+    font: 800 21px/1 var(--site-heading);
+    color: #fff;
+
+    > * {
+      grid-area: 1 / 1;
+    }
+  }
+
+  .store-sticker-burst {
+    width: 100%;
+    height: 100%;
+    fill: #a3221b;
+    stroke: #000;
+  }
+
+  .store-timer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 14px 70px 0 0;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: rgb(0 0 0 / 0.25);
+
+    > svg {
+      flex: 0 0 auto;
+    }
+
+    strong {
+      font: 800 18px/1.2 var(--site-heading);
+      font-variant-numeric: tabular-nums;
+      color: #fede01;
+    }
+  }
+
+  .store-timer-end {
+    display: block;
+    color: #e4ddb8;
   }
 
   .store-art {
@@ -40,6 +90,11 @@
     border: 2px solid #000;
     background: #cdbfa6;
     color: #3b2d23;
+  }
+
+  .store-icon-small {
+    width: 76px;
+    height: 76px;
   }
 
   .store-rows {
@@ -82,6 +137,11 @@
     }
   }
 
+  .store-chance {
+    font: 800 16px/1 var(--site-heading);
+    color: #fede01;
+  }
+
   .store-facts {
     margin-top: 14px;
 
@@ -99,5 +159,17 @@
     dd {
       margin-top: 2px;
     }
+
+    dd > p + p {
+      margin-top: 6px;
+    }
+  }
+
+  .store-rule {
+    margin-top: 14px;
+    padding: 8px 10px;
+    border: 2px dashed #e4ddb8;
+    border-radius: 6px;
+    font-weight: 700;
   }
 }

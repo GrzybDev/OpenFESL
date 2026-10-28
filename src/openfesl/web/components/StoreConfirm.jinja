@@ -43,7 +43,11 @@
     </dd>
     <dt>{{ _("web.rename.price") }}</dt>
     <dd>
-      {{ texts.priced(price.price, price.currency) }}
+      {% if price.original_price %}
+        {{ _("web.store.confirm.was", price=texts.priced(price.price, price.currency), was=number(price.original_price)) }}
+      {% else %}
+        {{ texts.priced(price.price, price.currency) }}
+      {% endif %}
     </dd>
     <dt>{{ _("web.rename.funds_now", currency=currency) }}</dt>
     <dd>
@@ -58,7 +62,7 @@
   <div class="site-dialog-actions">
     <button type="submit" class="site-button site-button-go site-button-large">
       <Icon name="bag" :size="18" stroke="currentColor" />
-      {{ _("web.store.confirm.buy", price=number(price.price), currency=currency) }}
+      {{ _("web.store.confirm." ~ ("open" if sold.kind == "box" else "buy"), price=number(price.price), currency=currency) }}
     </button>
     {% if dialog %}
       <button type="button" data-close class="site-button site-button-ghost">{{ _("web.rename.cancel") }}</button>

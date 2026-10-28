@@ -132,7 +132,7 @@ class GameServices:
         self.policies = GamePolicies(stores.settings)
         self.terms = Terms.load()
         self.store_items = StoreItems(
-            stores.products, self.catalogues, stores.entitlements, self.wallets
+            stores.products, self.deals, self.catalogues, stores.entitlements, self.wallets
         )
 
     @asynccontextmanager

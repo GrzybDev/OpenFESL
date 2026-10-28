@@ -1,26 +1,87 @@
 {#def sold, texts #}
-{# The item a store page sells, in the green box beside the buy panel: its row and which heroes
-   may have it. #}
+{# What a store page sells, in the green box beside the buy panel: a hot deal's sticker and the
+   time it has left, the items a bundle holds or a box may give with their chances, which heroes
+   may have it and what else holds for it. #}
+{% set box = sold.kind == "box" %}
 <section aria-labelledby="contents-title" class="store-contents">
   <Splash />
   <div class="store-box store-box-green">
-    <span aria-hidden="true" class="store-disc"><Icon name="bag" :size="22" stroke="#0A0A0A" /></span>
-    <h2 id="contents-title" class="store-tab">{{ _("web.store.contents.item") }}</h2>
+    <span aria-hidden="true"
+          class="store-disc"><Icon :name="'bag' if sold.kind == 'item' else sold.kind" :size="22" stroke="#0A0A0A" /></span>
+    <h2 id="contents-title" class="store-tab">{{ _("web.store.contents." ~ sold.kind) }}</h2>
+    {% set price = sold.prices[0] %}
+    {% if sold.kind == "deal" and price.original_price and price.original_price > price.price %}
+      {% set off = texts.off(price) %}
+      <p class="store-sticker">
+        <svg aria-hidden="true" viewBox="0 0 100 100" class="store-sticker-burst">
+          <use href="{{ static('icons.svg') }}#sticker" />
+        </svg>
+        <span aria-hidden="true">{{ _("web.store.sticker", off=off) }}</span><span class="sr-only">{{ _("web.store.sticker.label", off=off) }}</span>
+      </p>
+    {% endif %}
+    {% if sold.kind == "deal" and sold.ends and not sold.ended %}
+      <div class="store-timer">
+        <Icon name="clock" :size="24" stroke="#FEDE01" />
+        <p>
+          {{ _("web.store.deal.ends_in") }}
+          <strong role="timer"
+                  data-left="{{ seconds_left(sold.ends) }}"
+                  data-format="{{ _('web.store.countdown') }}">{{ texts.countdown(sold.ends) }}</strong>
+          <span class="store-timer-end">{{ texts.moment(sold.ends) }}</span>
+        </p>
+      </div>
+    {% endif %}
     <div aria-hidden="true" class="store-art">
-      <span class="store-icon"><Icon name="bag" :size="28" stroke="currentColor" /></span>
+      {% if box %}
+        <span class="store-icon"><Icon name="box" :size="28" stroke="currentColor" /></span>
+      {% else %}
+        {# A tile for each of a bundle's first three items, as the 2012 page showed their icons. #}
+        {% for _content in (sold.contents or [sold])[:3] %}
+          <span class="store-icon{% if sold.contents|length > 1 %} store-icon-small{% endif %}"><Icon :name="'bag' if sold.kind == 'item' else 'deal'" :size="28" stroke="currentColor" /></span>
+        {% endfor %}
+      {% endif %}
     </div>
     <ul role="list" class="store-rows">
-      <li>
-        <span aria-hidden="true" class="store-row-icon"><Icon name="bag" :size="18" stroke="currentColor" /></span>
-        <span class="store-row-text"><strong>{{ sold.name }}</strong>
-          <span>{{ texts.chosen(sold) }}</span></span>
-      </li>
+      {% if sold.kind == "item" %}
+        <li>
+          <span aria-hidden="true" class="store-row-icon"><Icon name="bag" :size="18" stroke="currentColor" /></span>
+          <span class="store-row-text"><strong>{{ sold.name }}</strong>
+            <span>{{ texts.chosen(sold) }}</span></span>
+        </li>
+      {% endif %}
+      {% for content in sold.contents %}
+        <li>
+          <span aria-hidden="true" class="store-row-icon"><Icon name="bag" :size="18" stroke="currentColor" /></span>
+          <span class="store-row-text"><strong>{{ content.name }}</strong>
+            <span>{{ texts.ownership(content.ownership) }}</span></span>
+          {% if content.chance is not none %}
+            <span class="store-chance"><span class="sr-only">{{ _("web.store.chance") }}</span>{{ texts.percent(content.chance) }}</span>
+          {% endif %}
+        </li>
+      {% endfor %}
     </ul>
     <dl class="store-facts">
       <dt>{{ _("web.store.requires") }}</dt>
       <dd>
         {{ texts.requires(sold.requirement) }}
       </dd>
+      {% if sold.kind != "item" or sold.description %}
+        <dt>{{ _("web.store.about") }}</dt>
+        <dd>
+          {% for paragraph in sold.description %}<p>{{ paragraph }}</p>{% endfor %}
+          {% if sold.kind != "item" %}<p>{{ _("web.store.about." ~ sold.kind) }}</p>{% endif %}
+        </dd>
+      {% endif %}
     </dl>
+    {% if box %}
+      <p class="store-rule">
+        {% if sold.worth is not none %}
+          {{ _("web.store.box.worth", price=texts.priced(sold.worth, price.currency)) }}
+        {% else %}
+          {{ _("web.store.box.plain") }}
+        {% endif %}
+        {{ _("web.store.box.chances") }}
+      </p>
+    {% endif %}
   </div>
 </section>

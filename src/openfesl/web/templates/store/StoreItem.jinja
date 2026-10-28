@@ -1,12 +1,14 @@
-{#def sold, roster, choices: list, offered, texts #}
+{#def sold, roster, choices: list, offered, texts, reveal #}
 {# A page of the game's store: what it sells and for whom on the right, and on the left the hero
-   it is bought for, its price and the purchase, or why no hero can buy it. #}
+   it is bought for, its price and the purchase, or why no hero can buy it. A box just opened
+   shows what it gave first. #}
 {% set rules = game.heroes %}
 {% set able = choices|rejectattr("unfit")|rejectattr("owned")|list %}
 {# Heroes that lack an ability's level before it, or whose own item was taken out of use, still
    choose and see why; the others can never have it now. #}
 {% set barred = choices|selectattr("unfit", "in", ["faction", "class", "level"])|list %}
 <Layout :title="sold.name">
+  {% if reveal %}<BoxReveal :reveal="reveal" />{% endif %}
   <section aria-labelledby="store-title" class="store-head">
     <Plaque id="store-title">{{ sold.name }}</Plaque>
     <p class="site-lead">{{ texts.lead(sold) }}</p>

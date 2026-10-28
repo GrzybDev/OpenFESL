@@ -7,6 +7,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.exceptions import HTTPException
 
+from openfesl.core.catalogues import Catalogues
 from openfesl.core.games import Game, Games, Scope
 from openfesl.core.heroes import Roster
 from openfesl.core.purchases import (
@@ -17,7 +18,8 @@ from openfesl.core.purchases import (
     PurchaseRefused,
     Purchases,
 )
-from openfesl.core.store_items import HeroChoice, PricePoint, StoreItem, StoreItems, Unfit
+from openfesl.core.store import Product
+from openfesl.core.store_items import HeroChoice, Kind, PricePoint, StoreItem, StoreItems, Unfit
 from openfesl.core.texts import localize
 from openfesl.web.account.session import open_page, signed_in
 from openfesl.web.pages import Pages
@@ -26,6 +28,8 @@ from openfesl.web.site import site_bar
 from openfesl.web.store_quote import Quote, QuoteTexts, quote
 
 ITEM = "/store/buy/{number}"
+# The box a purchase opened, which the next page of the store shows once.
+REVEAL = "store_reveal"
 
 
 class StorePages:
@@ -38,6 +42,7 @@ class StorePages:
         items: StoreItems,
         sent: SentForms,
         purchases: Purchases,
+        catalogues: Catalogues,
     ) -> None:
         """Prepare the store pages of each game whose heroes buy on its site.
 
@@ -47,12 +52,14 @@ class StorePages:
             items: Finds what a page sells and what each hero may buy of it.
             sent: Lets each confirmation buy once.
             purchases: Sells it, as the game's own store does.
+            catalogues: Name what a box gave in the page's language.
         """
         self._pages = pages
         self._games = games
         self._items = items
         self._sent = sent
         self._purchases = purchases
+        self._catalogues = catalogues
 
     def routes(self) -> APIRouter:
         """Return each game's store pages, their review of a choice and their purchase."""
@@ -117,15 +124,19 @@ class StorePages:
                     if bought:
                         toast(request, "web.store.done.again", error=False, **_paid(texts, offered))
                         return RedirectResponse(back, 303)
-                    await self._purchases.purchase(
+                    won = await self._purchases.purchase(
                         game, persona, game.store.product_id(offered.price.number)
                     )
             except PurchaseRefused as cause:
                 key, values = await self._refused(request, game, texts, offered, cause.cause)
                 toast(request, key, error=True, **values)
                 return RedirectResponse(back, 303)
-            key, more = await self._done(request, game, texts, offered)
-            toast(request, key, error=False, **_paid(texts, offered), **more)
+            if won is not None:
+                more = await self._reveal(request, game, texts, offered, won.product)
+                toast(request, "web.store.done.box", error=False, **_paid(texts, offered), **more)
+            else:
+                key, more = await self._done(request, game, texts, offered)
+                toast(request, key, error=False, **_paid(texts, offered), **more)
             return RedirectResponse(back, 303)
 
         return buy
@@ -170,6 +181,7 @@ class StorePages:
             choices=choices,
             offered=offered,
             texts=texts,
+            reveal=request.session.pop(REVEAL, None) if not review else None,
             csrf=form_token(request),
         )
         return self._pages.render(request, "store.StoreItem", 400 if review else 200, **context)
@@ -195,6 +207,8 @@ class StorePages:
     ) -> tuple[str, dict[str, str]] | None:
         # A purchase the page would not have offered, checked before anything is spent.
         values = _paid(texts, offered)
+        if offered.sold.ended and offered.sold.ends:
+            return "web.store.refused.ended", values | {"moment": texts.moment(offered.sold.ends)}
         if paid != str(offered.price.price):
             return "web.store.refused.price", values
         if offered.choice.owned:
@@ -223,16 +237,40 @@ class StorePages:
             return "web.store.refused." + ("taken" if taken else "owned"), values
         if cause in (NOT_FOR_HERO, LEVEL_MISSING):
             return "web.store.refused.unfit", values
-        # A product the store no longer sells.
+        # A bundle no longer listed: its deal ended or was taken off, or the product is gone.
+        again = await self._items.find(game, offered.sold.number, texts.language)
+        if again and again.ended and again.ends:
+            return "web.store.refused.ended", values | {"moment": texts.moment(again.ends)}
         return "web.store.refused.gone", values
+
+    async def _reveal(
+        self, request: Request, game: Game, texts: QuoteTexts, offered: Quote, won: Product
+    ) -> dict[str, str]:
+        # What a box gave, which the next page shows once, named in the page's language.
+        catalogue = await self._catalogues.of(game, texts.language)
+        name = catalogue.name(won.item_id) or str(won.item_id)
+        request.session[REVEAL] = {
+            "hero": offered.choice.hero.persona.name,
+            "item": name,
+            "line": texts.text(
+                "web.store.reveal.line",
+                ownership=texts.ownership(won.ownership),
+                worth=texts.priced(won.price, won.currency),
+                price=texts.priced(offered.price.price, offered.price.currency),
+            ),
+        }
+        return {"won": name, "ownership": texts.ownership(won.ownership, inline=True)}
 
     async def _done(
         self, request: Request, game: Game, texts: QuoteTexts, offered: Quote
     ) -> tuple[str, dict[str, str]]:
         # What the hero holds now, as the message after the purchase names it.
         sold = offered.sold
+        if sold.kind is Kind.DEAL:
+            return "web.store.done.deal", {}
         [now] = await self._choices(request, game, sold, None, offered.choice)
         held, gained = now.held, offered.price.ownership
+        assert gained is not None
         if held and held.uses is not None and gained.uses:
             uses = texts.ownership(gained)
             return "web.store.done.uses", {

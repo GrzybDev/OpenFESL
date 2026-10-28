@@ -12,6 +12,9 @@ rentals = { 1 = 5, 3 = 10, 7 = 20, 30 = 50 }
 # rentals stay exact, as a week of a Super weapon (672) would fall below the 629 of the class
 # supply drops that promise to be worth their price if it ended in 99.
 rounding = { _DV = { step = 50 } }
+# An item's description is the game's own text, as its script bridge's getItemDescription reads it
+# (BFHeroes.exe 1.89 0x009fe31e).
+descriptions = ["WEST_FE_WEAPON_DESCRIPTION_{id}", "WEST_Custom_Item_Info_{id}"]
 
 # Never sold nor dropped: the hair, facial hair and heads a hero's look takes from its creation;
 # the weapons and class abilities of the loadouts, which the game grants every hero itself

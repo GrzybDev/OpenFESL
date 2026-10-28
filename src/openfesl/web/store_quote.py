@@ -4,7 +4,7 @@ from datetime import datetime
 
 from openfesl.core.games import Scope
 from openfesl.core.inventory import COUNTED, PERMANENT, RENTED, Held, fold
-from openfesl.core.store_items import HeroChoice, PricePoint, StoreItem, Unfit
+from openfesl.core.store_items import HeroChoice, Kind, PricePoint, StoreItem, Unfit
 from openfesl.core.texts import translate
 from openfesl.web.store_texts import StoreTexts
 
@@ -17,8 +17,8 @@ class Quote:
         sold: What the page sells.
         choice: The hero.
         price: The price.
-        after: How the hero holds the item once it is bought; none when buying gains the hero
-            nothing.
+        after: How the hero holds the item alone once it is bought; none for a bundle or a box,
+            or when buying gains the hero nothing.
     """
 
     sold: StoreItem
@@ -38,8 +38,8 @@ class Quote:
 
     @property
     def open(self) -> bool:
-        """Whether the hero may have it at all: it fits and gains something."""
-        return self.choice.unfit is None and not self.choice.owned
+        """Whether the hero may have it at all: it fits, gains something, and the deal runs."""
+        return self.choice.unfit is None and not self.choice.owned and not self.sold.ended
 
     @property
     def buyable(self) -> bool:
@@ -56,7 +56,9 @@ def quote(sold: StoreItem, choice: HeroChoice, price: PricePoint, now: datetime)
         price: The price.
         now: The time the purchase would be made.
     """
-    return Quote(sold, choice, price, fold(choice.held, price.ownership, now))
+    gained = price.ownership
+    after = fold(choice.held, gained, now) if gained and sold.kind is Kind.ITEM else None
+    return Quote(sold, choice, price, after)
 
 
 class QuoteTexts(StoreTexts):
@@ -76,6 +78,11 @@ class QuoteTexts(StoreTexts):
         sold, choice = offered.sold, offered.choice
         hero, item, held = choice.hero, sold.name, choice.held
         name = hero.persona.name
+        if sold.ended and sold.ends:
+            said = [self.text("web.store.ended.note", moment=self.moment(sold.ends))]
+            if sold.sold_alone:
+                said.append(self.text("web.store.ended.alone"))
+            return "clock", " ".join(said)
         another = [self.text("web.store.note.others")] if others else []
         match choice.unfit:
             case Unfit.FACTION:
@@ -110,7 +117,7 @@ class QuoteTexts(StoreTexts):
                 return "warn", " ".join([line, *another])
             case Unfit.ORDER:
                 return "warn", self.text("web.store.note.order", item=item, hero=name)
-        if held is None:
+        if held is None or sold.kind is not Kind.ITEM:
             return None
         if held.type == PERMANENT:
             said = [self.text("web.store.note.permanent", hero=name, item=item)]
@@ -140,7 +147,12 @@ class QuoteTexts(StoreTexts):
         """
         sold, held, after = offered.sold, offered.choice.held, offered.after
         name, item = offered.choice.hero.persona.name, sold.name
+        if sold.kind is Kind.BOX:
+            return self.text("web.store.sum.box", hero=name, item=item)
+        if sold.kind is Kind.DEAL:
+            return self.count("web.store.sum.deal", len(sold.contents), hero=name, item=item)
         gained = offered.price.ownership
+        assert gained is not None
         if gained.type == RENTED and after and after.expires:
             time = self.count("web.store.price.days", gained.days or 0)
             key = "web.store.sum.longer" if held and held.expires else "web.store.sum.rental"
@@ -167,6 +179,8 @@ class QuoteTexts(StoreTexts):
         Args:
             offered: The purchase offered.
         """
+        if offered.sold.ended:
+            return self.text("web.store.ended.why")
         if not offered.short:
             return ""
         code = offered.price.currency
@@ -193,8 +207,15 @@ class QuoteTexts(StoreTexts):
         Args:
             offered: The purchase offered.
         """
-        gained, after = offered.price.ownership, offered.after
+        sold, gained, after = offered.sold, offered.price.ownership, offered.after
         held = offered.choice.held
+        if sold.kind is Kind.BOX:
+            gives = self.count("web.store.confirm.gives", len(sold.contents))
+            return self.text("web.store.row.gives"), gives
+        if sold.kind is Kind.DEAL:
+            contents = self.count("web.store.confirm.contents", len(sold.contents))
+            return self.text("web.store.row.contents"), contents
+        assert gained is not None
         if gained.type == COUNTED:
             uses = self.ownership(gained)
             if held and held.uses is not None and after and after.uses is not None:
@@ -218,7 +239,20 @@ class QuoteTexts(StoreTexts):
         Args:
             offered: The purchase offered.
         """
-        held, gained = offered.choice.held, offered.price.ownership
+        sold, held = offered.sold, offered.choice.held
+        if sold.kind is Kind.BOX:
+            said = [self.text("web.store.confirm.box")]
+            if sold.worth is not None:
+                [price] = sold.prices
+                said.append(
+                    self.text(
+                        "web.store.confirm.worth", price=self.priced(sold.worth, price.currency)
+                    )
+                )
+            return " ".join(said)
+        if sold.kind is Kind.DEAL and sold.ends:
+            return self.text("web.store.confirm.deal", moment=self.moment(sold.ends))
+        gained = offered.price.ownership
         kept = self.text("web.store.confirm.kept")
         if gained and gained.type == RENTED and held and held.expires:
             return " ".join(

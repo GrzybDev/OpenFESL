@@ -14,7 +14,7 @@ from openfesl.core.inventory import COUNTED, PERMANENT, RENTED, Ownership
 
 # For annotations only, since the catalogue's module reads the games' data, which holds these.
 if TYPE_CHECKING:
-    from openfesl.core.catalogues import Item
+    from openfesl.core.catalogues import Catalogue, Item
 
 type Written = Annotated[Ownership, BeforeValidator(Ownership.read)]
 
@@ -166,6 +166,8 @@ class StoreRules(BaseModel):
             number.
         rentals: The share of an item's value that a rental costs in percent, by its days.
         rounding: How a rental's price is rounded down, by currency; kept exact in others.
+        descriptions: The ids of the game's texts that describe an item, with {id} for its
+            number; the first one the catalogue holds describes it.
         prices: The price rules; the first rule of each currency that covers an item prices it
             in that currency.
         excluded: The items never sold nor dropped.
@@ -177,6 +179,7 @@ class StoreRules(BaseModel):
     ids: Annotated[str, Field(pattern=r"^[^/?#% ]*\{id\}[^/?#% ]*$")]
     rentals: dict[PositiveInt, Annotated[int, Field(gt=0, le=100)]] = {}
     rounding: dict[str, Rounding] = {}
+    descriptions: list[str] = []
     prices: list[PriceRule]
     excluded: Exclusions = Exclusions()
     boxes: list[BoxRule] = []
@@ -246,6 +249,19 @@ class StoreRules(BaseModel):
         if ownership.type == COUNTED and rule.use_price and uses:
             return rule.use_price * uses
         return None
+
+    def describe(self, catalogue: Catalogue, item_id: int) -> tuple[str, ...]:
+        """Return the game's own text about an item, in paragraphs; none when it has none.
+
+        Args:
+            catalogue: The game's catalogue, with its texts in the language shown.
+            item_id: The item's number.
+        """
+        for name in self.descriptions:
+            if text := catalogue.text(name.replace("{id}", str(item_id))):
+                # The game's texts break lines with |n.
+                return tuple(part.strip() for part in text.split("|n") if part.strip())
+        return ()
 
     def price_of(self, item: Item, ownership: Ownership, currency: str) -> int | None:
         """Return what owning an item in a way costs in a currency, if a rule prices it so.

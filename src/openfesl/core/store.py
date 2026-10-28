@@ -243,6 +243,14 @@ class ProductStore(Protocol):
             item_id: The item's number.
         """
 
+    async def bundle(self, game: str, number: int) -> ListedBundle | None:
+        """Return a bundle of a game's store by its number, whether it is sold now or not.
+
+        Args:
+            game: The game's data-file name.
+            number: The bundle's number.
+        """
+
 
 class Store:
     """The games' stores, whose products their data seeds from the imported catalogues."""
@@ -409,3 +417,15 @@ def price_order(currencies: Sequence[str], product: Product) -> tuple[int, bool,
         ownership.days or ownership.uses or 0,
         product.price,
     )
+
+
+def discount(price: int, original: int) -> int:
+    """Return the share of its usual price that a sale takes off a price, in whole percent.
+
+    Rounded down, so that it never claims more than the sale takes off.
+
+    Args:
+        price: The price on sale.
+        original: The usual price, above it.
+    """
+    return 100 * (original - price) // original

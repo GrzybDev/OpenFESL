@@ -5,6 +5,7 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from functools import cache
+from math import ceil
 from pathlib import Path
 from typing import Any
 
@@ -189,6 +190,14 @@ def _ago(context: Context, value: datetime) -> str:
 
 
 @pass_context
+def _seconds_left(context: Context, ends: datetime) -> int:
+    # The whole seconds from the page's time to a moment, rounded up, which its countdown counts
+    # down from: the browser's clock may be ahead of the server's or behind it.
+    now: datetime = context["now"]
+    return max(ceil((ends - now).total_seconds()), 0)
+
+
+@pass_context
 def _country(context: Context, code: str) -> str:
     # A country's name in the page's language, from its ISO code.
     return str(_locale(context).territories.get(code.upper(), code))
@@ -262,6 +271,7 @@ _catalog = Catalog(
         "moment": _moment,
         "when": _when,
         "ago": _ago,
+        "seconds_left": _seconds_left,
         "listed": _listed,
         "country": _country,
         "language_name": _language_name,

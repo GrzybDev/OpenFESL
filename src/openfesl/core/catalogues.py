@@ -1,5 +1,7 @@
 import asyncio
+import html
 import logging
+import re
 import secrets
 from collections import ChainMap
 from collections.abc import Iterable, Mapping
@@ -248,6 +250,24 @@ class Catalogue:
         """
         experience = self.contents.experience
         return experience[level] if 0 < level < len(experience) else None
+
+
+# The markup of the game's texts for its own browser: paragraph and line breaks, which part them,
+# and the other tags.
+_BREAK = re.compile(r"<\s*(?:p|br)\s*/?\s*>|\|n", re.IGNORECASE)
+_TAG = re.compile(r"<[^>]*>")
+
+
+def paragraphs(text: str) -> tuple[str, ...]:
+    """Return a text of the game's language table as plain paragraphs, without its markup.
+
+    The game's deal texts mark up paragraphs, emphasis and notes for the game's own browser.
+
+    Args:
+        text: The text.
+    """
+    parts = (html.unescape(_TAG.sub("", part)) for part in _BREAK.split(text))
+    return tuple(" ".join(part.split()) for part in parts if part.strip())
 
 
 @dataclass(frozen=True, slots=True)

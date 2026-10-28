@@ -189,16 +189,7 @@ class SqlProductStore:
                     .order_by(StoreBundleRow.game_order, StoreBundleRow.id)
                 )
             )
-            members = await session.execute(
-                select(StoreBundleMemberRow.bundle_id, StoreProductRow)
-                .join(StoreProductRow, StoreProductRow.id == StoreBundleMemberRow.product_id)
-                .where(StoreBundleMemberRow.bundle_id.in_([row.id for row in rows]))
-                .order_by(StoreProductRow.sort, StoreProductRow.id)
-            )
-        held: dict[int, list[Product]] = {}
-        for bundle_id, product in members:
-            held.setdefault(bundle_id, []).append(product_of(product))
-        return [_listed(row, held.get(row.id, [])) for row in rows]
+            return await _with_members(session, rows)
 
     async def box(self, game: str, number: int) -> Box | None:
         """Return a box of a game's store with its drops, if it has one by a number.
@@ -238,6 +229,24 @@ class SqlProductStore:
             )
             return [product_of(row) for row in rows]
 
+    async def bundle(self, game: str, number: int) -> ListedBundle | None:
+        """Return a bundle of a game's store by its number, whether it is sold now or not.
+
+        Args:
+            game: The game's data-file name.
+            number: The bundle's number.
+        """
+        async with self._sessions() as session:
+            row = await session.scalar(
+                select(StoreBundleRow).where(
+                    StoreBundleRow.id == number,
+                    StoreBundleRow.game == game,
+                    StoreBundleRow.published,
+                )
+            )
+            found = await _with_members(session, [row] if row else [])
+        return found[0] if found else None
+
     async def _box(self, *chosen: ColumnElement[bool]) -> Box | None:
         async with self._sessions() as session:
             row = await session.scalar(select(StoreBoxRow).where(*chosen))
@@ -266,6 +275,19 @@ class SqlProductStore:
                 ),
                 fallback=product_of(fallback) if fallback else None,
             )
+
+
+async def _with_members(session: AsyncSession, rows: list[StoreBundleRow]) -> list[ListedBundle]:
+    members = await session.execute(
+        select(StoreBundleMemberRow.bundle_id, StoreProductRow)
+        .join(StoreProductRow, StoreProductRow.id == StoreBundleMemberRow.product_id)
+        .where(StoreBundleMemberRow.bundle_id.in_([row.id for row in rows]))
+        .order_by(StoreProductRow.sort, StoreProductRow.id)
+    )
+    held: dict[int, list[Product]] = {}
+    for bundle_id, product in members:
+        held.setdefault(bundle_id, []).append(product_of(product))
+    return [_listed(row, held.get(row.id, [])) for row in rows]
 
 
 def _listed(row: StoreBundleRow, members: list[Product]) -> ListedBundle:

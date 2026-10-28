@@ -11,6 +11,14 @@
     <span>{{ note[1] }}</span>
   </p>
 {% endif %}
+{% if sold.kind == "deal" and sold.ends and not sold.ended %}
+  <p hidden data-deal-ended class="store-note">
+    <Icon name="clock" :size="20" stroke="#5C4A3C" />
+    <span>{{ _("web.store.ended.note", moment=texts.moment(sold.ends)) }}
+      {% if sold.sold_alone %}{{ _("web.store.ended.alone") }}{% endif %}
+    </span>
+  </p>
+{% endif %}
 {% if offered.choice.unfit is none and not offered.choice.owned %}
   <fieldset class="store-field">
     <legend class="store-legend">{{ _("web.rename.price") }}</legend>
@@ -27,12 +35,15 @@
                  class="sr-only">
           <span class="store-price-card">
             <span aria-hidden="true" class="store-price-disc">
-              <Icon :name="texts.glyph(price)" :size="22" stroke="#FEDE01" />
+              <Icon :name="texts.glyph(sold, price)" :size="22" stroke="#FEDE01" />
             </span>
-            <span class="store-price-title">{{ texts.ownership(price.ownership) }}</span>
+            <span class="store-price-title">{{ texts.price_label(sold, price) }}</span>
             <span class="store-price-amount">
               <span aria-hidden="true"
                     class="store-coin"><Icon :name="texts.coin(price.currency)" :size="12" stroke="currentColor" /></span>
+              {% if price.original_price %}
+                <s><span class="sr-only">{{ _("web.store.was") }}</span>{{ number(price.original_price) }}</s>
+              {% endif %}
               <strong>{{ number(price.price) }}</strong> {{ texts.currency(price.currency) }}
             </span>
             <span id="price-{{ price.number }}" class="store-price-short">
@@ -44,7 +55,7 @@
     </div>
   </fieldset>
   <div class="store-sum">
-    <p class="store-sum-line">{{ texts.summary(offered) }}</p>
+    {% if not sold.ended %}<p data-summary class="store-sum-line">{{ texts.summary(offered) }}</p>{% endif %}
     {% set currency = texts.currency(offered.price.currency) %}
     <p class="store-amounts">
       <span>{{ _("web.rename.price") }} <strong>{{ texts.priced(offered.price.price, offered.price.currency) }}</strong></span>
@@ -66,9 +77,13 @@
         <Icon name="bag" :size="18" :stroke="'#FEDE01' if offered.buyable else 'currentColor'" />
         {{ _("web.store.buy", price=number(offered.price.price), currency=currency) }}
       </button>
-      <p id="buy-why" role="status" data-why class="store-why">
+      <p id="buy-why"
+         role="status"
+         data-why
+         data-ended="{{ _('web.store.ended.why') }}"
+         class="store-why">
         {{ texts.why(offered) }}
-        {% if offered.short and offered.price.currency == game.heroes.currency %}<FundsLink />{% endif %}
+        {% if offered.short and not sold.ended and offered.price.currency == game.heroes.currency %}<FundsLink />{% endif %}
       </p>
     </div>
   </div>

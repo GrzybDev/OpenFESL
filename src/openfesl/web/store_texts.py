@@ -4,10 +4,12 @@ from datetime import UTC, datetime, timedelta
 from babel import Locale
 from babel.dates import format_skeleton
 from babel.lists import format_list
+from babel.numbers import format_percent
 
 from openfesl.core.games import Game
 from openfesl.core.inventory import COUNTED, PERMANENT, RENTED, Ownership
-from openfesl.core.store_items import HeroChoice, PricePoint, Requirement, StoreItem, Unfit
+from openfesl.core.store import discount
+from openfesl.core.store_items import HeroChoice, Kind, PricePoint, Requirement, StoreItem, Unfit
 from openfesl.core.texts import translate, translate_count
 from openfesl.web.pages import moment, number
 
@@ -91,17 +93,59 @@ class StoreTexts:
         """
         return str(format_skeleton("yMMMd", value, tzinfo=UTC, locale=self._locale()))
 
-    def ownership(self, ownership: Ownership) -> str:
+    def countdown(self, ends: datetime) -> str:
+        """Return the time left until a moment, as days and a clock, such as 1 d 23:22:40.
+
+        Args:
+            ends: The moment.
+        """
+        left = max(int((ends - self._now).total_seconds()), 0)
+        days, rest = divmod(left, 86400)
+        clock = f"{rest // 3600:02}:{rest % 3600 // 60:02}:{rest % 60:02}"
+        return self.text("web.store.countdown", days=days, time=clock)
+
+    def percent(self, share: float) -> str:
+        """Return a share as a percentage with at most one decimal, as the language writes it.
+
+        Args:
+            share: The share, from 0 to 1.
+        """
+        return str(format_percent(share, "#,##0.#%", locale=self._locale()))
+
+    def off(self, price: PricePoint) -> str:
+        """Return the share of its usual price that a sale takes off a price, in whole percent.
+
+        Args:
+            price: The price, which is on sale.
+        """
+        assert price.original_price
+        return self.amount(discount(price.price, price.original_price))
+
+    def ownership(self, ownership: Ownership, inline: bool = False) -> str:
         """Return how a hero owns an item: for good, a number of days or of uses.
 
         Args:
             ownership: The ownership.
+            inline: Whether it goes inside a sentence, which writes it in lower case.
         """
         if ownership.type == RENTED:
             return self.count("web.store.price.days", ownership.days or 0)
         if ownership.type == COUNTED:
             return self.count("web.store.price.uses", ownership.uses or 0)
-        return self.text("web.store.price.permanent")
+        return self.text("web.store.forever" if inline else "web.store.price.permanent")
+
+    def price_label(self, sold: StoreItem, price: PricePoint) -> str:
+        """Return the title of a price's tile.
+
+        Args:
+            sold: What the page sells.
+            price: The price.
+        """
+        if sold.kind is Kind.BOX:
+            return self.text("web.store.price.box")
+        if price.ownership is None:
+            return self.text("web.store.price.bundle")
+        return self.ownership(price.ownership)
 
     def chosen(self, sold: StoreItem) -> str:
         """Return what an item alone gives as its row says: the uses or time chosen, or for good.
@@ -109,19 +153,22 @@ class StoreTexts:
         Args:
             sold: What the page sells, an item alone.
         """
-        types = {price.ownership.type for price in sold.prices}
+        types = {price.ownership.type for price in sold.prices if price.ownership}
         if COUNTED in types:
             return self.text("web.store.chosen.uses")
         return self.text(
             "web.store.chosen.time" if RENTED in types else "web.store.price.permanent"
         )
 
-    def glyph(self, price: PricePoint) -> str:
-        """Return the glyph of a price's tile: a rental's clock, uses or for good.
+    def glyph(self, sold: StoreItem, price: PricePoint) -> str:
+        """Return the glyph of a price's tile: a box, a deal, a rental's clock, uses or for good.
 
         Args:
+            sold: What the page sells.
             price: The price.
         """
+        if sold.kind is not Kind.ITEM or price.ownership is None:
+            return sold.kind.value
         return _GLYPHS.get(price.ownership.type, "infinity")
 
     def coin(self, code: str) -> str:
@@ -175,7 +222,17 @@ class StoreTexts:
         Args:
             sold: What the page sells.
         """
-        types = {price.ownership.type for price in sold.prices}
+        if sold.kind is Kind.BOX:
+            return self.text("web.store.lead.box")
+        if sold.kind is Kind.DEAL:
+            said = [self.count("web.store.lead.deal", len(sold.contents))]
+            [price] = sold.prices
+            if price.original_price and price.original_price > price.price:
+                said.append(self.text("web.store.lead.sale", off=self.off(price)))
+            if sold.ends and not sold.ended:
+                said.append(self.text("web.store.lead.until", until=self.moment(sold.ends)))
+            return " ".join(said)
+        types = {price.ownership.type for price in sold.prices if price.ownership}
         if COUNTED in types:
             return self.text("web.store.lead.uses")
         if RENTED in types:
@@ -189,9 +246,13 @@ class StoreTexts:
         Args:
             sold: What the page sells.
         """
+        if sold.kind is Kind.BOX:
+            return self.text("web.store.hint.box")
+        if sold.kind is Kind.DEAL:
+            return self.text("web.store.hint.deal" if sold.ends else "web.store.hint.bundle")
         codes = dict.fromkeys(price.currency for price in sold.prices)
         currencies = self._or([self.currency(code) for code in codes])
-        types = {price.ownership.type for price in sold.prices}
+        types = {price.ownership.type for price in sold.prices if price.ownership}
         if COUNTED in types:
             key = "web.store.hint.uses"
         elif RENTED in types:
@@ -221,6 +282,8 @@ class StoreTexts:
                 return self.text("web.store.tile.taken")
             case Unfit.ORDER:
                 return self.text("web.store.tile.order")
+        if sold.kind is not Kind.ITEM:
+            return self.text("web.store.tile.can")
         if held is None:
             return self.text("web.store.tile.not_owned")
         if held.type == PERMANENT:

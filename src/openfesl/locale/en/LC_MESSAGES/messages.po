@@ -6625,3 +6625,153 @@ msgstr "The purchase of %(item)s for %(hero)s was made already; sending it again
 
 msgid "web.store.done.uses"
 msgstr "%(uses)s of %(item)s bought for %(hero)s; %(left)s left now. %(price)s %(currency)s spent."
+
+msgid "web.store.forever"
+msgstr "permanent"
+
+msgid "web.store.price.box"
+msgstr "1 box"
+
+msgid "web.store.price.bundle"
+msgstr "Bundle as listed"
+
+msgid "web.store.countdown"
+msgstr "%(days)s d %(time)s"
+
+msgid "web.store.lead.box"
+msgstr "Random box: it opens right after the purchase and gives one item from the list."
+
+msgid "web.store.lead.deal.one"
+msgstr "Hot deal: %(count)s item for one hero at one price."
+
+msgid "web.store.lead.deal.other"
+msgstr "Hot deal: %(count)s items for one hero at one price."
+
+msgid "web.store.lead.sale"
+msgstr "The price is %(off)s%% lower than usual."
+
+msgid "web.store.lead.until"
+msgstr "Sold until %(until)s."
+
+msgid "web.store.hint.box"
+msgstr "One box gives one item."
+
+msgid "web.store.hint.deal"
+msgstr "One price for the whole bundle; it ends with the deal."
+
+msgid "web.store.hint.bundle"
+msgstr "One price for the whole bundle."
+
+msgid "web.store.tile.can"
+msgstr "Can use it"
+
+msgid "web.store.ended.note"
+msgstr "This deal ended on %(moment)s."
+
+msgid "web.store.ended.alone"
+msgstr "Its items stay in the store at their usual prices."
+
+msgid "web.store.ended.why"
+msgstr "The deal has ended."
+
+msgid "web.store.sum.box"
+msgstr "%(hero)s gets one item from %(item)s. The box opens right after the purchase."
+
+msgid "web.store.sum.deal.one"
+msgstr "%(hero)s gets the %(count)s item of %(item)s as listed."
+
+msgid "web.store.sum.deal.other"
+msgstr "%(hero)s gets the %(count)s items of %(item)s as listed."
+
+msgid "web.store.was"
+msgstr "was "
+
+msgid "web.store.contents.deal"
+msgstr "Bundle contents"
+
+msgid "web.store.contents.box"
+msgstr "Possible contents"
+
+msgid "web.store.sticker"
+msgstr "-%(off)s%%"
+
+msgid "web.store.sticker.label"
+msgstr "%(off)s%% off"
+
+msgid "web.store.deal.ends_in"
+msgstr "Deal ends in"
+
+msgid "web.store.chance"
+msgstr "chance "
+
+msgid "web.store.about"
+msgstr "About"
+
+msgid "web.store.about.deal"
+msgstr "A rental the hero has already runs longer and uses are added; items it owns permanently are left out at the same price."
+
+msgid "web.store.about.box"
+msgstr "An item the hero owns permanently is never given; a rental it has runs longer and uses are added."
+
+msgid "web.store.box.worth"
+msgstr "Each box gives one of these items, worth at least the box's price of %(price)s."
+
+msgid "web.store.box.plain"
+msgstr "Each box gives one of these items."
+
+msgid "web.store.box.chances"
+msgstr "The chances are set by this service."
+
+msgid "web.store.confirm.gives.one"
+msgstr "%(count)s item"
+
+msgid "web.store.confirm.gives.other"
+msgstr "One of %(count)s items"
+
+msgid "web.store.row.gives"
+msgstr "Gives"
+
+msgid "web.store.confirm.contents.one"
+msgstr "%(count)s item, as listed"
+
+msgid "web.store.confirm.contents.other"
+msgstr "%(count)s items, as listed"
+
+msgid "web.store.row.contents"
+msgstr "Contents"
+
+msgid "web.store.confirm.box"
+msgstr "The box opens right after the purchase and gives one of the listed items."
+
+msgid "web.store.confirm.worth"
+msgstr "Each is worth at least %(price)s."
+
+msgid "web.store.confirm.deal"
+msgstr "The deal ends on %(moment)s; a purchase that arrives later is refused and costs nothing."
+
+msgid "web.store.confirm.was"
+msgstr "%(price)s (was %(was)s)"
+
+msgid "web.store.confirm.open"
+msgstr "Buy and open for %(price)s %(currency)s"
+
+msgid "web.store.reveal.title"
+msgstr "Box opened"
+
+msgid "web.store.reveal.for"
+msgstr "Item for %(hero)s"
+
+msgid "web.store.reveal.after"
+msgstr "%(game)s lists it from its next login."
+
+msgid "web.store.reveal.line"
+msgstr "%(ownership)s · store price %(worth)s; the box cost %(price)s."
+
+msgid "web.store.refused.ended"
+msgstr "Nothing was bought: %(item)s ended on %(moment)s, before the purchase arrived. No %(currency)s were spent."
+
+msgid "web.store.done.deal"
+msgstr "%(item)s bought for %(hero)s. %(price)s %(currency)s spent."
+
+msgid "web.store.done.box"
+msgstr "%(item)s opened for %(hero)s: %(won)s, %(ownership)s. %(price)s %(currency)s spent."

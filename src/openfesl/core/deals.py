@@ -167,20 +167,20 @@ class HotDeals:
         if game.store is None:
             return []
         catalogue = await self._catalogues.of(game, language)
-        deals = []
-        for order, listed in enumerate(await self.current(game), 1):
-            bundle = listed.bundle
-            members = [offer(game, catalogue, product) for product in listed.members]
-            name = _text(game, catalogue, bundle.name, language, bundle.faction)
-            names = [member.name for member in members]
-            description = (
-                _text(game, catalogue, bundle.description, language, bundle.faction)
-                if bundle.description
-                else format_list(names, locale=Locale.parse(language, sep="-"))
-            )
-            product_id = game.store.product_id(listed.id)
-            deals.append(Deal(listed, product_id, order, name, description, members))
-        return deals
+        return [
+            _deal(game, catalogue, listed, order, language)
+            for order, listed in enumerate(await self.current(game), 1)
+        ]
+
+    async def deal(self, game: Game, listed: ListedBundle, language: str) -> Deal:
+        """Return one bundle of a game's store named in a language, as its hot deals name it.
+
+        Args:
+            game: The game, which has a store.
+            listed: The bundle, sold now or not; its place among the hot deals is 0.
+            language: The language code; English where the texts lack it.
+        """
+        return _deal(game, await self._catalogues.of(game, language), listed, 0, language)
 
     async def _rotate(self, game: Game, rules: DealRules, now: datetime) -> None:
         catalogue = await self._catalogues.of(game, BASE_LANGUAGE)
@@ -237,6 +237,23 @@ def _picked(
     if isinstance(section, ItemSection):
         return pick_items(game, rules, section, catalogue, history, random)
     return pick_offers(game, rules, section, offers, catalogue, history, random)
+
+
+def _deal(
+    game: Game, catalogue: Catalogue, listed: ListedBundle, order: int, language: str
+) -> Deal:
+    assert game.store is not None
+    bundle = listed.bundle
+    members = [offer(game, catalogue, product) for product in listed.members]
+    name = _text(game, catalogue, bundle.name, language, bundle.faction)
+    names = [member.name for member in members]
+    description = (
+        _text(game, catalogue, bundle.description, language, bundle.faction)
+        if bundle.description
+        else format_list(names, locale=Locale.parse(language, sep="-"))
+    )
+    product_id = game.store.product_id(listed.id)
+    return Deal(listed, product_id, order, name, description, members)
 
 
 def _text(game: Game, catalogue: Catalogue, name: str, language: str, faction: str | None) -> str:

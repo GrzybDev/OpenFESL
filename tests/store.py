@@ -67,12 +67,17 @@ NAMES = {
 }
 
 
-# A bundle's name and description in English and Polish.
+# A bundle's name and description and the coat's description in English and Polish, marked up
+# as the game's texts are.
 BUNDLE_TEXTS = {
     "WEST_Custom_Bundle_Invented": ("Invented Set", "Wymyślony zestaw"),
     "WEST_Custom_Bundle_Invented_HotDealsDesc": (
-        "A coat, a pet, bandages.",
+        "A coat, a pet, <b>bandages</b>.",
         "Płaszcz, zwierzak, bandaże.",
+    ),
+    "WEST_Custom_Item_Info_3": (
+        "A long coat with brass buttons. |n|nKeeps the rain out.",
+        "Długi płaszcz z mosiężnymi guzikami. |n|nChroni przed deszczem.",
     ),
 }
 # The Royal coat's and a bundle's names in Brazilian Portuguese.
