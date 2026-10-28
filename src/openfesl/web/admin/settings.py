@@ -175,7 +175,7 @@ def settings_routes(
     public_url: str | None,
     apply_actions: Callable[[], Awaitable[None]],
 ) -> APIRouter:
-    """Return the settings page: who can host, the sign-in provider, each game's icon and rules.
+    """Return the settings page: hosting, sign-in, the site's policy, each game's icon and rules.
 
     Moderators see the settings; changing them needs the admin role. A change of the hosting
     mode asks first and applies to the games hosted now too; policies apply from their next
@@ -184,7 +184,7 @@ def settings_routes(
     Args:
         sessions: Signs admins in and renders the panel's pages.
         games: The games, each with its policies.
-        policies: Reads each game's policies with the instance's overrides.
+        policies: Reads the site's and each game's policies with the instance's overrides.
         store: Where the overrides are kept.
         hosting: Where the hosting mode is kept.
         servers: Counts the servers waiting for a decision.
@@ -210,6 +210,7 @@ def settings_routes(
         shown = [(game, policy_views(game, await policies.of(game))) for game in games]
         base = (public_url or str(request.base_url)).rstrip("/")
         stored = await icons.stored()
+        site = await policies.site_confirmation()
         return await sessions.render(
             request,
             "admin.Settings",
@@ -219,6 +220,7 @@ def settings_routes(
             modes=[HostingMode.APPROVED.value, HostingMode.OPEN.value],
             waiting=len(waiting),
             games=shown,
+            site=site,
             provider=provider,
             manages=admin.role is Role.ADMIN,
             errors=errors or {},
@@ -266,6 +268,20 @@ def settings_routes(
         await apply()
         toast(request, f"web.admin.toast.mode.{chosen}")
         return RedirectResponse(back, 303)
+
+    @router.post("/admin/settings/site")
+    async def change_site(request: Request) -> Response:
+        admin = sessions.admin(request, Role.ADMIN, SECTION)
+        form = await request.form()
+        check_form(request, form)
+        on = form.get("accounts.email_verification") == "on"
+        if on == await policies.site_confirmation():
+            toast(request, "web.admin.toast.site_unchanged")
+        else:
+            await policies.set_site_confirmation(on, admin)
+            toast(request, "web.admin.toast.site")
+        target = localize("/admin/settings", request.state.language)
+        return RedirectResponse(f"{target}#site", 303)
 
     @router.post("/admin/settings/games/{game_id}")
     async def change_policies(request: Request, game_id: str) -> Response:

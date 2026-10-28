@@ -1,7 +1,7 @@
-{#def mode: str, modes: list, waiting: int, games: list, provider, manages: bool, errors, icons, base: str, reachable: bool, replacing: str, refused, largest: int #}
+{#def mode: str, modes: list, waiting: int, games: list, site: bool, provider, manages: bool, errors, icons, base: str, reachable: bool, replacing: str, refused, largest: int #}
 {# The instance's settings: who can host as two tiles, the sign-in provider the deployment sets
-   up, and for each game the icon its Discord presence shows and its policies with their
-   defaults. Changing them needs the admin role. #}
+   up, the site's policy, and for each game the icon its Discord presence shows and its policies
+   with their defaults. Changing them needs the admin role. #}
 {% set title = _("web.admin.settings") %}
 {% set glyphs = {"approved": "lock", "open": "open", "allow": "tick", "refuse": "x", "replace": "retry"} %}
 {% macro shown(policy, value) %}
@@ -66,6 +66,40 @@
         <p class="body-text side-note">{{ _("web.admin.settings.sign_in.note") }}</p>
       </section>
     </div>
+
+    <section aria-labelledby="site-title" id="site" class="settings-game">
+      <h2 id="site-title" class="bar bar-large">{{ _("web.admin.settings.site") }}</h2>
+      <form method="post" action="{{ url('/admin/settings/site') }}">
+        <CsrfField />
+        <fieldset class="settings-policies"{% if not manages %} disabled{% endif %}>
+          <legend class="sr-only">{{ _("web.admin.settings.site") }}</legend>
+          <div class="settings-policy settings-switch">
+            <label class="settings-switch-row">
+              <span class="settings-switch-text">
+                <span class="settings-policy-name">{{ _("web.admin.policy.accounts.email_verification") }}</span>
+                <span class="settings-policy-text">{{ _("web.admin.policy.site.email_verification.text") }}</span>
+              </span>
+              <span class="check-place">
+                <input type="checkbox"
+                       name="accounts.email_verification"
+                       value="on"
+                       {% if site %} checked{% endif %}
+                       class="check">
+                <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span>
+              </span>
+            </label>
+            <p class="settings-default">
+              {{ _("web.admin.settings.site.default") if site else _("web.admin.settings.site.changed") }}
+            </p>
+          </div>
+        </fieldset>
+        {% if manages %}
+          <div class="settings-save">
+            <SmallAction :label="_('web.admin.settings.site.save')" :busy="_('web.admin.key.saving')" />
+          </div>
+        {% endif %}
+      </form>
+    </section>
 
     {% for game, policies in games %}
       <section aria-labelledby="game-{{ game.id }}-title"

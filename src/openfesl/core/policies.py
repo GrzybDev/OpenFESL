@@ -226,6 +226,16 @@ class GamePolicies:
         values = await self._store.settings(SITE_CONFIRMATION)
         return values.get(SITE_CONFIRMATION) != "off"
 
+    async def set_site_confirmation(self, on: bool, admin: Admin | None) -> None:
+        """Turn the site's confirmation of new accounts' addresses on or off.
+
+        Args:
+            on: Whether accounts registered on the site wait for their link.
+            admin: The admin who changed it; None for the command line.
+        """
+        # On is the default, so only off is kept.
+        await self._store.change(SITE_CONFIRMATION, None if on else "off", admin)
+
 
 def _older(version: str, minimum: str) -> bool:
     """Return whether a version is older than a minimum, comparing their numbers one by one.

@@ -56,6 +56,14 @@ async def test_admins_change_who_can_host_and_the_rules_that_moderators_only_see
         assert await hello_error(server_url, "bfbc2-pc") == "-253"
         await client.post(rules, data={**DEFAULTS, "csrf": token})
         assert await hello_error(server_url, "bfbc2-pc") == "0"
+
+        # The site's own rule, for the accounts registered on its pages, is on by default.
+        site = f"{base}/admin/settings/site"
+        await client.post(site, data={"csrf": token})
+        assert "Saved the rules of this site." in (await client.get(f"{base}/admin/settings")).text
+        listed = await cli(capsys, "settings", "list")
+        assert "site.accounts.email_verification  off  (default on)" in listed
+        await client.post(site, data={"csrf": token, "accounts.email_verification": "on"})
         assert "(default" not in await cli(capsys, "settings", "list")
 
     async with httpx2.AsyncClient() as client:

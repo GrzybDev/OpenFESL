@@ -3748,6 +3748,18 @@ msgstr "Rules of %(game)s"
 msgid "web.admin.settings.game.note"
 msgstr "Each rule applies from its next use, such as the next registration, login or connection."
 
+msgid "web.admin.settings.site"
+msgstr "Rules of this site"
+
+msgid "web.admin.settings.site.save"
+msgstr "Save the rules of this site"
+
+msgid "web.admin.settings.site.default"
+msgstr "The default"
+
+msgid "web.admin.settings.site.changed"
+msgstr "Changed here · the default is on"
+
 msgid "web.admin.settings.save"
 msgstr "Save the rules of %(game)s"
 
@@ -3868,6 +3880,9 @@ msgstr "Confirm e-mail addresses"
 msgid "web.admin.policy.accounts.email_verification.text"
 msgstr "A new account logs in only once the link sent to its address was opened, or an admin confirmed it."
 
+msgid "web.admin.policy.site.email_verification.text"
+msgstr "An account registered on this site signs in only once the link sent to its address was opened, or an admin confirmed it. While this is on, the site offers registration only with the server's mail."
+
 msgid "web.admin.policy.accounts.concurrent_login"
 msgstr "A login while the account plays elsewhere"
 
@@ -3957,6 +3972,12 @@ msgstr "Icon removed from %(game)s."
 
 msgid "web.admin.toast.icon.none"
 msgstr "Nothing changed: %(game)s has no icon."
+
+msgid "web.admin.toast.site"
+msgstr "Saved the rules of this site."
+
+msgid "web.admin.toast.site_unchanged"
+msgstr "Nothing changed in the rules of this site."
 
 msgid "web.admin.refused.role.settings"
 msgstr "Settings are changed with the admin role."

@@ -163,10 +163,9 @@ async def _settings(settings: Settings, args: argparse.Namespace) -> None:
         if args.key == SITE_CONFIRMATION:
             if args.action == "set" and args.value not in ("on", "off"):
                 sys.exit(f"{args.key} takes on or off, not {args.value!r}")
-            # The default is on, so only off is kept.
-            turned_off = args.action == "set" and args.value == "off"
             if args.action != "get":
-                await store.change(args.key, "off" if turned_off else None, admin=None)
+                on = args.action == "reset" or args.value == "on"
+                await policies.set_site_confirmation(on, admin=None)
             print(_switch(await policies.site_confirmation()))
             return
         game, name = _policy(games, args.key)

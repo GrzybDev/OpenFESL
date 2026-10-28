@@ -3872,6 +3872,18 @@ msgstr "Zasady gry %(game)s"
 msgid "web.admin.settings.game.note"
 msgstr "Każda zasada działa od następnego użycia, na przykład przy następnej rejestracji, logowaniu lub połączeniu."
 
+msgid "web.admin.settings.site"
+msgstr "Zasady tej strony"
+
+msgid "web.admin.settings.site.save"
+msgstr "Zapisz zasady tej strony"
+
+msgid "web.admin.settings.site.default"
+msgstr "Wartość domyślna"
+
+msgid "web.admin.settings.site.changed"
+msgstr "Zmienione tutaj · domyślnie włączone"
+
 msgid "web.admin.settings.save"
 msgstr "Zapisz zasady gry %(game)s"
 
@@ -3992,6 +4004,9 @@ msgstr "Potwierdzanie adresów e-mail"
 msgid "web.admin.policy.accounts.email_verification.text"
 msgstr "Nowe konto może się zalogować dopiero po otwarciu linku wysłanego na jego adres albo po ręcznym potwierdzeniu w panelu."
 
+msgid "web.admin.policy.site.email_verification.text"
+msgstr "Konto zarejestrowane na tej stronie loguje się dopiero po otwarciu linku wysłanego na jego adres albo po potwierdzeniu przez administratora. Gdy to jest włączone, strona oferuje rejestrację tylko z pocztą serwera."
+
 msgid "web.admin.policy.accounts.concurrent_login"
 msgstr "Logowanie, gdy konto gra gdzie indziej"
 
@@ -4081,6 +4096,12 @@ msgstr "Usunięto ikonę gry %(game)s."
 
 msgid "web.admin.toast.icon.none"
 msgstr "Bez zmian: gra %(game)s nie ma ikony."
+
+msgid "web.admin.toast.site"
+msgstr "Zapisano zasady tej strony."
+
+msgid "web.admin.toast.site_unchanged"
+msgstr "Zasady tej strony pozostały bez zmian."
 
 msgid "web.admin.refused.role.settings"
 msgstr "Ustawienia zmienia rola administratora."
