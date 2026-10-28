@@ -92,7 +92,7 @@ name = "Each layer imports only the layers below it"
 type = "layers"
 layers = [
     "openfesl.server",
-    "openfesl.relay | openfesl.web | openfesl.storage",
+    "openfesl.relay | openfesl.web | openfesl.storage | openfesl.extraction",
     "openfesl.core",
     "openfesl.protocol | openfesl.formats",
 ]

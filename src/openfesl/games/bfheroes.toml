@@ -52,6 +52,136 @@ scope = "account"
 scope = "account"
 allowance = 2500
 
+# The game's catalogue: its items, their names and icons, the daily missions and the XP of each
+# level, which `openfesl catalogue extract` reads from a player's copy and the server imports;
+# none of it ships with the server. The game loads every definition file below in one go, and
+# a file decides its items' kind, while their numbers are unique across the files
+# (BFHeroes.exe 1.89 0x0066290d).
+[catalogue]
+definitions = "mods/bfheroes/Objects/Items_server.zip"
+texts = "mods/bfheroes/Localization/strings.csv"
+icons = "mods/bfheroes/Menu_client.zip"
+# The look, equipment, emotes and missions that a new hero of each team and kit starts with, and
+# the colours of skin and hair (0x006615e6).
+tables = ["DefaultCustomization.xml", "Colors.xml"]
+
+# The columns of the language table; 1.46 has some others, a few of them empty.
+[catalogue.languages]
+ENG_US = "en"
+GER_DE = "de"
+FRE_FR = "fr"
+ITA_IT = "it"
+POL_PL = "pl"
+POR_PT = "pt"
+RUS_RU = "ru"
+SPA_ES = "es"
+TUR_TR = "tr"
+DUT_NL = "nl"
+POR_BR = "pt-BR"
+SWE_SE = "sv"
+JPN_JP = "ja"
+KOR_KR = "ko"
+
+# What the fields of a definition mean: the factions and kits as bit masks, the slot of what is
+# worn, the lowest level, which 1.89 sets to 1 for every item but the missions, and the one team
+# that a mission is for.
+[catalogue.fields]
+factions = "faction"
+classes = "kits"
+slot = "slot"
+level = "minLevel"
+team = "teamPrereq"
+
+[catalogue.factions]
+royal = 1
+national = 2
+
+# A mission names its team by the team's id instead, which is 0 for either team
+# (DefaultCustomization.xml).
+[catalogue.teams]
+national = 1
+royal = 2
+
+# A mission's kit mask has a second bit for each class, for its female heroes, whom the game
+# leaves out (GameLogicInit.con).
+[catalogue.classes]
+commando = 9
+soldier = 18
+gunner = 36
+
+[catalogue.slots]
+hat = 0
+facial = 1
+neck = 2
+body = 3
+jacket = 4
+hands = 5
+legs = 6
+feet = 7
+chest = 8
+waist = 9
+head = 10
+hair = 11
+facial_hair = 12
+
+# The icons lie where the game's menu draws them from: each worn item, weapon, emote and mission
+# by its number, and an ability by its first level unless it is used up, which has its own.
+[[catalogue.items]]
+file = "Items.xml"
+kind = "appearance"
+name = "WEST_Custom_Item_{id}"
+icons = ["External/FlashMenu/images/items/item{id}.dds"]
+
+[[catalogue.items]]
+file = "Weapons.xml"
+kind = "weapon"
+name = "WEST_Custom_Item_{id}"
+icons = ["HUD/Texture/Ingame/Weapons/weapon{id}.tga"]
+
+# Each <upgrade> of an ability is one of its levels and an item of its own (0x006627a1).
+[[catalogue.items]]
+file = "Abilities.xml"
+kind = "ability"
+levels = "upgrade"
+name = "WEST_Custom_Item_{id}"
+icons = [
+    "External/FlashMenu/images/items/citem{id}.png",
+    "External/FlashMenu/images/items/ability{first}.tga",
+]
+
+[[catalogue.items]]
+file = "Emotes.xml"
+kind = "emote"
+name = "WEST_Custom_Item_{id}"
+icons = ["External/FlashMenu/images/items/emote{id}.png"]
+
+[[catalogue.items]]
+file = "Boosters.xml"
+kind = "convenience"
+name = "WEST_Custom_Item_{id}"
+icons = [
+    "External/FlashMenu/images/items/citem{id}.png",
+    "External/FlashMenu/images/items/citem{id}.tga",
+]
+
+[[catalogue.items]]
+file = "Missions.xml"
+kind = "mission"
+name = "AUTO_RULES_MISSION_{id}"
+icons = ["External/FlashMenu/images/items/mission{id}.png"]
+
+# The daily mission of each day, by the day of the year of the FESL server's clock in UTC with
+# 1 January as 0, long enough for a leap year: a table of mission numbers that the game reads
+# right after it checks the day's range (1.89 0x007c13b0, 1.46 0x007979da).
+[catalogue.daily_missions]
+after = "adjustedDayInYear < 366"
+days = 366
+
+# The XP from each level to the next, which the game sets once per level from level 0, unused,
+# to 29; level 30 is the highest (1.89 0x004874e8, 1.46 0x00482c82).
+[catalogue.experience]
+levels = 30
+
 # How the services behave where the game handles more than one behaviour; the instance's
 # settings override each.
 [policies]

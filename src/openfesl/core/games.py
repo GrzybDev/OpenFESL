@@ -8,6 +8,7 @@ from typing import Self
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
+from openfesl.core.catalogue import CatalogueRules
 from openfesl.core.game_pages import Listing, PageKind, Stats, Theme
 from openfesl.core.policies import Policies
 
@@ -223,6 +224,8 @@ class Game(BaseModel):
         product_names: The names the game's data gives the products of some entitlements, by
             tag; a game that redeems a key in its menu refreshes the content it finds by the
             name of the answer's first product.
+        catalogue: Where a copy of the game keeps its catalogue of items, which the server
+            imports from a player's copy, and what it means; none for a game without one.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -250,6 +253,7 @@ class Game(BaseModel):
     listing: Listing = Listing()
     stats: Stats = Stats()
     product_names: dict[str, str] = {}
+    catalogue: CatalogueRules | None = None
 
     @property
     def play_key(self) -> ProductKey | None:

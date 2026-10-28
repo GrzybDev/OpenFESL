@@ -18,6 +18,9 @@ dist/
 .coverage
 htmlcov/
 
+# Catalogues extracted from a copy of a game, which hold its texts and icons
+*-catalogue.zip
+
 # Web build: the installed packages and the files built from them
 node_modules/
 src/openfesl/web/static/build/

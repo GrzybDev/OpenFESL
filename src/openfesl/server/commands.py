@@ -3,6 +3,7 @@ import sys
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import replace
+from pathlib import Path
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
@@ -19,6 +20,7 @@ from openfesl.core.servers import (
     new_provider,
     provider_file,
 )
+from openfesl.extraction import ExtractionError, extract, find_game
 from openfesl.server.settings import Settings
 from openfesl.storage.accounts import SqlAccountStore
 from openfesl.storage.admin import SqlAdminLog
@@ -56,6 +58,31 @@ async def run(settings: Settings, args: argparse.Namespace) -> None:
             await _kick(settings, args)
         case "icons":
             await _icons(settings, args)
+
+
+def extract_catalogue(folder: Path, out: Path | None) -> None:
+    """Write the catalogue of the game whose copy a folder holds into a file for the server.
+
+    It needs no server and no database, so that players run it on their own computers.
+
+    Args:
+        folder: The folder of the copy's executable.
+        out: The file to write; <game>-catalogue.zip in the current folder when omitted.
+    """
+    try:
+        game = find_game(load_games(), folder)
+        catalogue = extract(game, folder)
+    except ExtractionError as error:
+        sys.exit(str(error))
+    out = out or Path(f"{game.id}-catalogue.zip")
+    try:
+        out.write_bytes(catalogue.write())
+    except OSError as error:
+        sys.exit(str(error))
+    print(
+        f"Wrote the catalogue of {game.name} to {out}: {len(catalogue.document.items)} items, "
+        f"texts in {len(catalogue.texts)} languages and {len(catalogue.icons)} icons"
+    )
 
 
 @asynccontextmanager

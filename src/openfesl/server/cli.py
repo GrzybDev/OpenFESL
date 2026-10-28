@@ -15,7 +15,7 @@ from openfesl.core.policies import SITE_CONFIRMATION
 from openfesl.core.servers import HostingMode
 from openfesl.protocol.packet import MAX_SIZE
 from openfesl.relay.endpoint import close_sessions
-from openfesl.server.commands import run
+from openfesl.server.commands import extract_catalogue, run
 from openfesl.server.health import DEFAULT_PORT
 from openfesl.server.settings import Settings
 
@@ -150,8 +150,25 @@ def main(argv: Sequence[str] | None = None) -> None:
     icon_actions.add_parser("remove", help="remove a game's icon").add_argument(
         "game", help="the game's id, such as bfbc2"
     )
+    catalogue_actions = commands.add_parser(
+        "catalogue", help="bring a game's catalogue of items from a copy of the game"
+    ).add_subparsers(dest="action", required=True)
+    extract = catalogue_actions.add_parser(
+        "extract",
+        help="read a game's catalogue from a copy of the game into a file, without a server",
+    )
+    extract.add_argument("folder", type=Path, help="the folder of the game's executable")
+    extract.add_argument(
+        "-o",
+        "--out",
+        type=Path,
+        help="the file to write, <game>-catalogue.zip here by default; an existing one is replaced",
+    )
     args = parser.parse_args(argv)
 
+    if args.command == "catalogue" and args.action == "extract":
+        extract_catalogue(args.folder, args.out)
+        return
     settings = Settings()
     if args.command != "serve":
         asyncio.run(run(settings, args))
