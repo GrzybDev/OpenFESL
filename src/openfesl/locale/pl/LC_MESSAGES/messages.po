@@ -24,6 +24,18 @@ msgstr ""
 "nowy link. Konto z niepotwierdzonym adresem nie może się logować; nie trzeba "
 "podejmować żadnych innych działań.\n"
 
+msgid "account.mail.proof.subject"
+msgstr "Połączenie usługi logowania z kontem OpenFESL"
+
+#, python-brace-format
+msgid "account.mail.proof.body"
+msgstr ""
+"Logowanie przez {service} poprosiło o połączenie tej usługi z kontem OpenFESL {account}. Ten link otwiera stronę, na której przycisk łączy {service} i loguje:\n"
+"\n"
+"{link}\n"
+"\n"
+"Link jest ważny do {expires} i działa jeden raz. Bez niego nic się nie zmienia.\n"
+
 msgid "verification.page.confirmed.heading"
 msgstr "Adres e-mail potwierdzony"
 
@@ -4655,3 +4667,39 @@ msgstr "Usługa %(service)s nie jest jeszcze połączona. Dowodem jest konto w u
 
 msgid "web.account.proof.deactivated.text"
 msgstr "Prośba o usunięcie dezaktywowała je dnia %(date)s. Usługa %(service)s nie została połączona; usunięcie kończy administrator."
+
+msgid "web.account.proof.check.mail"
+msgstr "Nie wysłano linku; usługa %(service)s nie jest jeszcze połączona."
+
+msgid "web.account.proof.link_sent"
+msgstr "Link został wysłany na adres %(address)s."
+
+msgid "web.account.proof.link_sent.text"
+msgstr "Jest ważny do %(expires)s i działa jeden raz. Na stronie, którą otwiera, przycisk łączy usługę %(service)s z kontem %(account)s i loguje; nowy link zastępuje poprzedni."
+
+msgid "web.account.proof.mail"
+msgstr "Lub przez e-mail"
+
+msgid "web.account.proof.mail.first"
+msgstr "Przez e-mail"
+
+msgid "web.account.proof.mail.text"
+msgstr "Link wysłany na adres %(address)s otwiera stronę, na której przycisk łączy usługę %(service)s i loguje. Jest ważny przez godzinę i działa jeden raz."
+
+msgid "web.account.proof.mail.send"
+msgstr "Wyślij link na adres %(address)s"
+
+msgid "web.account.proof.link.expired"
+msgstr "Link wygasł"
+
+msgid "web.account.proof.link.expired.text"
+msgstr "Ponowne logowanie przez usługę %(service)s pozwala wysłać nowy."
+
+msgid "web.account.proof.link.unknown"
+msgstr "Nieprawidłowy link"
+
+msgid "web.account.proof.link.unknown.text"
+msgstr "Link jest nieprawidłowy lub został już użyty."
+
+msgid "web.account.proof.link.open.text"
+msgstr "Połączenie dodaje konto %(name)s w usłudze %(service)s jako sposób logowania do konta OpenFESL %(account)s i loguje do niego. Bez tego nic się nie zmienia."

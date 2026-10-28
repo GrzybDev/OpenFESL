@@ -90,7 +90,15 @@ def include_public_routes(
         turnstile,
         sign_in_services,
     )
-    proof = ProofPages(pages, games, sign_in_services, lambda: app.state.sign_in, turnstile)
+    proof = ProofPages(
+        pages,
+        games,
+        sign_in_services,
+        lambda: app.state.sign_in,
+        lambda: app.state.proof_mail,
+        settings.sends_mail,
+        turnstile,
+    )
     app.include_router(sign_in.routes())
     app.include_router(sign_in_services.routes())
     app.include_router(proof.routes())

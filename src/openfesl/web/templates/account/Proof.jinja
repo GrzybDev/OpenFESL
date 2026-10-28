@@ -1,14 +1,16 @@
-{#def notice, service, identity, account, password: bool, linked: list, check: str, password_games: list, personas: list #}
+{#def notice, service, identity, account, password: bool, linked: list, mail: bool, check: str, password_games: list, personas: list #}
 {# The proof that links a service's new identity to the account its verified address belongs to:
    the service's answer, then the account's proofs (its game password, a sign-in through one of
-   its linked services), and beside them what linking changes. Naming the account reveals
-   nothing new, as the service verified that the visitor owns the address. #}
+   its linked services, a link sent to its address), and beside them what linking changes.
+   Naming the account reveals nothing new, as the service verified that the visitor owns the
+   address. #}
 {% set name = account.display_name or account.nuid %}
+{% set address %}<span class="proof-address">{{ account.nuid }}</span>{% endset %}
 {% set title = _("web.account.proof", service=service.name) %}
 {% set games = listed(password_games) %}
 <AccountPage :title="title"
              :subtitle="_('web.account.proof.subtitle')"
-             :turnstile="check != '' and password">
+             :turnstile="check != '' and (password or mail)">
   <div class="account-page-main">
     <Panel tag="section"
            aria-labelledby="proof-title"
@@ -16,11 +18,18 @@
       {% if notice %}
         {% set kind = notice.kind %}
         {% if kind == "wrong" %}
-          <Alert :label="_('web.account.proof.not_linked')" :title="_('web.account.proof.wrong', account=name)" glyph="warn" alert>{{ _("web.account.proof.wrong.text", service=service.name) }}</Alert>
+          {% set reset %}<a href="{{ url('/password-reset') }}">{{ _("web.account.notice.wrong.reset.link") }}</a>{% endset %}
+          <Alert :label="_('web.account.proof.not_linked')" :title="_('web.account.proof.wrong', account=name)" glyph="warn" alert>{{ _("web.account.proof.wrong.text", service=service.name) }}{% if mail %} {{ _("web.account.notice.wrong.reset", reset=reset) }}{% endif %}</Alert>
         {% elif kind == "check" %}
           <Alert :label="_('web.account.proof.not_linked')" :title="_('web.account.notice.check')" glyph="warn" alert>{{ _("web.account.proof.check.text", service=service.name) }}</Alert>
         {% elif kind == "paused" %}
-          <Alert :label="_('web.account.notice.paused')" :title="_('web.account.proof.paused')" glyph="clock" alert>{{ _("web.account.proof.paused.text") }}</Alert>
+          <Alert :label="_('web.account.notice.paused')" :title="_('web.account.proof.paused')" glyph="clock" alert>{{ _("web.account.proof.paused.text") }}{% if mail %} {{ _("web.account.notice.paused.reset") }}{% endif %}</Alert>
+        {% elif kind == "check_mail" %}
+          <Alert :label="_('web.account.notice.not_sent')" :title="_('web.account.notice.check')" glyph="warn" alert>{{ _("web.account.proof.check.mail", service=service.name) }}</Alert>
+        {% elif kind == "link_sent" %}
+          <Alert :label="_('web.account.notice.link_sent')" :title="_('web.account.proof.link_sent', address=account.nuid)" glyph="tick">{{ _("web.account.proof.link_sent.text", expires=moment(notice.expires), service=service.name, account=name) }}</Alert>
+        {% elif kind == "link_wait" %}
+          <Alert :label="_('web.account.notice.link_sent')" :title="_('web.account.notice.link_wait', time=when(notice.last, 'Hm'))" glyph="tick">{{ _("web.account.notice.link_wait.text", time=when(notice.until, 'Hm')) }}</Alert>
         {% elif kind == "other" %}
           <Alert :label="_('web.account.proof.not_linked')" :title="_('web.account.proof.another', linked=notice.service, account=name)" glyph="warn" alert>{{ _("web.account.proof.another.text", service=service.name, linked=notice.service, account=name) }}</Alert>
         {% elif kind == "deactivated" %}
@@ -54,6 +63,7 @@
                          :focus="notice is not none and notice.kind == 'wrong'">
             <div class="field-note password-note">
               <p id="proof-password-note">{{ _("web.account.proof.password.note", account=name, games=games, service=service.name) }}</p>
+              {% if mail %}<a href="{{ url('/password-reset') }}">{{ _("web.account.sign_in.forgotten") }}</a>{% endif %}
             </div>
           </PasswordField>
           {% if check %}<TurnstileCheck :key="check" />{% endif %}
@@ -85,6 +95,27 @@
           {% endfor %}
         </form>
       {% endif %}
+      {% if mail %}
+        <form method="post"
+              action="{{ url('/sign-in/proof/mail') }}"
+              aria-labelledby="proof-mail"
+              class="account-page-form">
+          <CsrfField />
+          <Bar id="proof-mail" large>{{ _("web.account.proof.mail" if password or linked else "web.account.proof.mail.first") }}</Bar>
+          <p id="proof-mail-text"
+             class="bar-text body-text">{{ _("web.account.proof.mail.text", address=account.nuid, service=service.name) }}</p>
+          {% if check %}<TurnstileCheck :key="check" />{% endif %}
+          <div class="proof-mail-send">
+            <button type="submit"
+                    aria-describedby="proof-mail-text"
+                    data-busy="{{ _('web.account.notice.sending') }}"
+                    class="small-action chevron">
+              <span aria-hidden="true" class="small-action-square"><Chevron :size="16" glyph="mail" /></span>
+              <span data-label class="small-action-label">{{ _("web.account.proof.mail.send", address=address) }}</span>
+            </button>
+          </div>
+        </form>
+      {% endif %}
     </Panel>
     <form method="post"
           action="{{ url('/sign-in/proof/cancel') }}"
@@ -102,7 +133,7 @@
         <InfoRow glyph="key" :label="_('web.account.proof.changes.way')">{{ _("web.account.proof.changes.way.text", service=service.name, account=name, ways=listed(ways)) }}</InfoRow>
         <InfoRow glyph="people" :label="_('web.account.proof.changes.rest')">{{ _("web.account.proof.changes.rest.text", personas=listed(personas)) }}</InfoRow>
         <InfoRow glyph="lock" :label="_('web.account.proof.changes.why')">{{ _("web.account.proof.changes.why.text") }}</InfoRow>
-        {% if check and password %}
+        {% if check and (password or mail) %}
           <InfoRow glyph="shield-check" :label="_('web.account.how.check')">{{ _("web.account.proof.changes.check.text") }}</InfoRow>
         {% endif %}
       </ul>

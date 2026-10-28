@@ -1,0 +1,21 @@
+{#def service: str, action: str, account: str = "", name: str = "", notice: str = "" #}
+{# What an e-mailed proof link opens. A working one asks first, as mail scanners open links too,
+   and its button links; one that no longer works is expired, when signing in through its service
+   again offers a new one, or used already or unknown. #}
+{% set state = "open" if account else "expired" if service else "unknown" %}
+{% set title = _("web.account.proof", service=service) if account else _("web.account.proof.link." ~ state) %}
+<Layout :title="title" page="sign_in">
+  <Notice :title="title"
+          :text="_('web.account.proof.link.' ~ state ~ '.text', service=service, name=name, account=account)"
+          :rows="[_('web.account.notice.form')] if notice else []"
+          narrow>
+    {% if account %}
+      <form method="post" action="{{ action }}">
+        <CsrfField />
+        <ActionButton :label="title" :busy="_('web.account.proof.busy')" />
+      </form>
+    {% else %}
+      <Action :href="url('/sign-in')" :label="_('web.account.sign_in')" />
+    {% endif %}
+  </Notice>
+</Layout>

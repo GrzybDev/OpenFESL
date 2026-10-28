@@ -1,13 +1,17 @@
-from sqlalchemy import select
+from datetime import UTC, datetime
+
+from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.identities import Identity, LinkedIdentity
-from openfesl.storage.models import SignInIdentityRow
+from openfesl.core.proofs import KeptProof
+from openfesl.core.verification import Link
+from openfesl.storage.models import SignInIdentityRow, SignInProofRow
 
 
 class SqlIdentityStore:
-    """The identities at sign-in services linked to accounts, in PostgreSQL."""
+    """The identities at sign-in services linked to accounts and the proof links, in PostgreSQL."""
 
     def __init__(self, sessions: async_sessionmaker[AsyncSession]) -> None:
         """Use a database through its session factory.
@@ -72,3 +76,59 @@ class SqlIdentityStore:
                 .returning(SignInIdentityRow.account_id)
             )
         return linked is not None
+
+    async def keep_proof(self, account_id: int, identity: Identity, link: Link) -> None:
+        """Keep a proof link, which replaces the account's earlier ones for the same service.
+
+        Args:
+            account_id: The account it proves.
+            identity: The identity it links to the account.
+            link: The link as the store keeps it.
+        """
+        async with self._sessions.begin() as session:
+            await session.execute(
+                delete(SignInProofRow).where(
+                    SignInProofRow.account_id == account_id,
+                    SignInProofRow.service == identity.service,
+                )
+            )
+            session.add(
+                SignInProofRow(
+                    token_hash=link.token_hash,
+                    account_id=account_id,
+                    service=identity.service,
+                    subject=identity.subject,
+                    name=identity.name,
+                    expires_at=link.expires_at,
+                )
+            )
+
+    async def proof_of(self, token_hash: bytes) -> KeptProof | None:
+        """Return the proof link that a token names, without using it; None for an unknown one.
+
+        Args:
+            token_hash: The SHA-256 digest of the token the link carries.
+        """
+        async with self._sessions() as session:
+            row = await session.get(SignInProofRow, token_hash)
+        return _kept(row) if row else None
+
+    async def take_proof(self, token_hash: bytes) -> KeptProof | None:
+        """Take a proof link out of use and return it; None for one the store does not keep.
+
+        Args:
+            token_hash: The SHA-256 digest of the token the link carries.
+        """
+        async with self._sessions.begin() as session:
+            row = await session.scalar(
+                delete(SignInProofRow)
+                .where(SignInProofRow.token_hash == token_hash)
+                .returning(SignInProofRow)
+            )
+            # Before the commit, which expires the row's attributes.
+            return _kept(row) if row else None
+
+
+def _kept(row: SignInProofRow) -> KeptProof:
+    identity = Identity(row.service, row.subject, row.name, None)
+    return KeptProof(row.account_id, identity, row.expires_at <= datetime.now(UTC))

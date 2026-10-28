@@ -23,6 +23,18 @@ msgstr ""
 "sends a new link. An account whose address is not confirmed cannot log in; "
 "nothing else needs to be done.\n"
 
+msgid "account.mail.proof.subject"
+msgstr "Link a sign-in service to an OpenFESL account"
+
+#, python-brace-format
+msgid "account.mail.proof.body"
+msgstr ""
+"A sign-in through {service} asked to link it to the OpenFESL account {account}. This link opens a page whose button links {service} and signs in:\n"
+"\n"
+"{link}\n"
+"\n"
+"The link is valid until {expires} and works once. Without it, nothing changes.\n"
+
 msgid "verification.page.confirmed.heading"
 msgstr "E-mail address confirmed"
 
@@ -4531,3 +4543,39 @@ msgstr "%(service)s is not linked yet. The %(linked)s account linked to %(accoun
 
 msgid "web.account.proof.deactivated.text"
 msgstr "A deletion request deactivated it on %(date)s. %(service)s was not linked; an admin completes the deletion."
+
+msgid "web.account.proof.check.mail"
+msgstr "No link was sent; %(service)s is not linked yet."
+
+msgid "web.account.proof.link_sent"
+msgstr "A link was sent to %(address)s."
+
+msgid "web.account.proof.link_sent.text"
+msgstr "It is valid until %(expires)s and works once. On the page it opens, a button links %(service)s to %(account)s and signs in; a new link replaces the previous one."
+
+msgid "web.account.proof.mail"
+msgstr "Or by e-mail"
+
+msgid "web.account.proof.mail.first"
+msgstr "By e-mail"
+
+msgid "web.account.proof.mail.text"
+msgstr "A link sent to %(address)s opens a page whose button links %(service)s and signs in. It is valid for one hour and works once."
+
+msgid "web.account.proof.mail.send"
+msgstr "Send a link to %(address)s"
+
+msgid "web.account.proof.link.expired"
+msgstr "Link expired"
+
+msgid "web.account.proof.link.expired.text"
+msgstr "Signing in through %(service)s again offers a new one."
+
+msgid "web.account.proof.link.unknown"
+msgstr "Link not valid"
+
+msgid "web.account.proof.link.unknown.text"
+msgstr "The link is not valid or has been used already."
+
+msgid "web.account.proof.link.open.text"
+msgstr "Linking adds the %(service)s account %(name)s as a way in to the OpenFESL account %(account)s and signs in. Without it, nothing changes."

@@ -6,8 +6,10 @@ from fastapi.responses import HTMLResponse, Response
 
 from openfesl.core.accounts import Account
 from openfesl.core.games import Games
+from openfesl.core.limits import Wait
+from openfesl.core.proofs import PATH, ProofFound, ProofGone, ProofMail
 from openfesl.core.sign_in import ProofTarget, Refusal, SignInRefused, WebSignIn
-from openfesl.core.texts import translate
+from openfesl.core.texts import localize, translate
 from openfesl.web.account.services import PROOF, SignInServices
 from openfesl.web.account.session import (
     PENDING,
@@ -24,6 +26,8 @@ from openfesl.web.sessions import form_matches, form_token, take_notice
 from openfesl.web.turnstile import Turnstile
 
 _STATUS = {Refusal.WRONG: 400, Refusal.PAUSED: 429, Refusal.DEACTIVATED: 403}
+# The link's token is a secret, so neither caches nor other sites may keep the page's address.
+HEADERS = {"Cache-Control": "no-store", "Referrer-Policy": "no-referrer"}
 
 
 class ProofPages:
@@ -35,6 +39,8 @@ class ProofPages:
         games: Games,
         services: SignInServices,
         sign_in: Callable[[], WebSignIn],
+        proof_mail: Callable[[], ProofMail],
+        mail: bool,
         turnstile: Turnstile | None,
     ) -> None:
         """Prepare the proof's page.
@@ -44,13 +50,17 @@ class ProofPages:
             games: The games, which the page names where the game password is used.
             services: The sign-in services, through which a linked one proves the account.
             sign_in: Returns the sign-in checks, once the application has started.
-            turnstile: Cloudflare's check of the forms that take a password; None when the
-                deployment sets none up.
+            proof_mail: Returns the proofs by e-mail, once the application has started.
+            mail: Whether the server sends mail, which the proof by e-mail and resets need.
+            turnstile: Cloudflare's check of the forms that take a password or send mail; None
+                when the deployment sets none up.
         """
         self._pages = pages
         self._games = games
         self._services = services
         self._sign_in = sign_in
+        self._proof_mail = proof_mail
+        self._mail = mail
         self._turnstile = turnstile
 
     def routes(self) -> APIRouter:
@@ -97,13 +107,85 @@ class ProofPages:
                 return to_sign_in(request, "", "form")
             return await self._services.start(request, service_id, "", proof=True)
 
+        @router.post(PROOF + "/mail")
+        async def by_mail(request: Request) -> Response:
+            form = await request.form()
+            target = await self._target(request)
+            pending = pending_identity(request)
+            if not form_matches(request, form) or target is None or pending is None:
+                return to_sign_in(request, "", "form")
+            if not self._mail:
+                return open_page(request, PROOF)
+            if self._turnstile and not await self._turnstile.passed(request, form):
+                return self._render(request, target, {"kind": "check_mail"}, 400)
+            identity, _ = pending
+            service = self._services.view(identity.service, request.state.language)
+            name = service.name if service else identity.service
+            sent = await self._proof_mail().send(
+                target.account, identity, name, request.state.language
+            )
+            if isinstance(sent, Wait):
+                wait = {"kind": "link_wait", "last": sent.last, "until": sent.until}
+                return self._render(request, target, wait, 429)
+            return self._render(request, target, {"kind": "link_sent", "expires": sent.expires})
+
         @router.post(PROOF + "/cancel")
         async def cancel(request: Request) -> Response:
             if form_matches(request, await request.form()):
                 request.session.pop(PENDING, None)
             return open_page(request, "/sign-in")
 
+        # Opening the link only asks, as mail scanners open links too; its button links.
+        @router.get(PATH, response_class=HTMLResponse)
+        async def open_link(request: Request, token: str) -> Response:
+            return self._link_page(request, token, await self._proof_mail().find(token))
+
+        # After the proof's own forms, which the token's pattern would match too.
+        @router.post(PATH)
+        async def use_link(request: Request, token: str) -> Response:
+            proof_mail = self._proof_mail()
+            if not form_matches(request, await request.form()):
+                return self._link_page(request, token, await proof_mail.find(token), "form")
+            try:
+                used = await proof_mail.use(token)
+            except SignInRefused as refused:
+                return to_sign_in(request, "", **refused_notice(request, refused))
+            if isinstance(used, ProofGone):
+                return self._link_page(request, token, used)
+            view = self._services.view(used.identity.service, request.state.language)
+            name = view.name if view else used.identity.service
+            return proved(request, used.account, used.identity, name, used.linked)
+
         return router
+
+    def _link_page(
+        self, request: Request, token: str, found: ProofFound | ProofGone, notice: str = ""
+    ) -> HTMLResponse:
+        language = request.state.language
+        if isinstance(found, ProofGone):
+            view = self._services.view(found.service or "", language)
+            service = view.name if view and found.service else ""
+            status, name, account = 404 if found.service is None else 410, "", ""
+        else:
+            view = self._services.view(found.identity.service, language)
+            service = view.name if view else found.identity.service
+            status = 400 if notice else 200
+            name = found.identity.name
+            account = found.account.display_name or found.account.nuid
+        return self._pages.render(
+            request,
+            "account.ProofLink",
+            status,
+            steel=True,
+            switch=False,
+            headers=HEADERS,
+            csrf=form_token(request),
+            action=localize(PATH.format(token=token), language),
+            service=service,
+            name=name,
+            account=account,
+            notice=notice,
+        )
 
     async def _target(self, request: Request) -> ProofTarget | None:
         pending = pending_identity(request)
@@ -147,6 +229,7 @@ class ProofPages:
             account=target.account,
             password=target.password,
             linked=linked,
+            mail=self._mail,
             check=self._turnstile.site_key if self._turnstile else "",
             password_games=password_games(self._games, language),
             personas=[translate(f"games.{game.id}.personas", language) for game in self._games],

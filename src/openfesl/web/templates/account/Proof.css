@@ -89,6 +89,19 @@
     color: var(--soft);
   }
 
+  .proof-mail-send {
+    display: flex;
+    margin-top: 6px;
+  }
+
+  /* The address in the button's capitals keeps its own case. */
+  .proof-address {
+    font-family: var(--font-sans);
+    letter-spacing: 0;
+    text-transform: none;
+    overflow-wrap: anywhere;
+  }
+
   .proof-cancel {
     display: flex;
     flex-wrap: wrap;

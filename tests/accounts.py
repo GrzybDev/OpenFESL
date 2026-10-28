@@ -1,5 +1,7 @@
 """Helpers of the tests of the site's accounts: accounts made in a game and the ways to sign in."""
 
+from urllib.parse import urlsplit
+
 import httpx2
 from identity import form_token
 from sqlalchemy import text
@@ -32,9 +34,19 @@ async def sign_in_through(
     page = await client.get(f"{base}/sign-in")
     form = {"csrf": form_token(page.text), "service": service, "next": next}
     started = await client.post(f"{base}/sign-in/service", data=form)
+    return await returned(client, base, started)
+
+
+async def returned(
+    client: httpx2.AsyncClient, base: str, started: httpx2.Response
+) -> httpx2.Response:
+    """Follow a sign-in from the redirect to the service back to the site's callback.
+
+    The service sends the browser to the public address, which the tests' server is not at.
+    """
     assert started.status_code == 302, started.text
-    back = await client.get(started.headers["location"])
-    return await client.get(back.headers["location"])
+    back = urlsplit((await client.get(started.headers["location"])).headers["location"])
+    return await client.get(f"{base}{back.path}?{back.query}")
 
 
 async def sign_out(client: httpx2.AsyncClient, base: str) -> httpx2.Response:

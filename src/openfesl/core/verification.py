@@ -1,4 +1,3 @@
-import asyncio
 import hashlib
 import logging
 import secrets
@@ -7,11 +6,9 @@ from datetime import UTC, datetime, timedelta
 from enum import Enum, auto
 from typing import TYPE_CHECKING, Protocol
 
-from babel.dates import format_datetime
-
 from openfesl.core.admins import Admin
 from openfesl.core.fesl import TransactionError
-from openfesl.core.texts import BASE_LANGUAGE, languages, localize, translate
+from openfesl.core.mail import Outbox
 
 # For annotations only, since the account service uses this module.
 if TYPE_CHECKING:
@@ -90,47 +87,38 @@ class VerificationStore(Protocol):
         """
 
 
-class Mailer(Protocol):
-    """Sends e-mail."""
+def new_link(valid_for: timedelta | None = None) -> tuple[str, Link]:
+    """Return a fresh token and the link it makes, as the store keeps it.
 
-    async def send(self, to: str, subject: str, body: str, language: str) -> None:
-        """Hand a plain-text e-mail to the mail server.
-
-        Args:
-            to: The recipient's address.
-            subject: The subject.
-            body: The text.
-            language: The language code of the text.
-
-        Raises:
-            OSError: When the mail server cannot be reached or refuses the e-mail.
-        """
-
-
-def new_link() -> tuple[str, Link]:
-    """Return a fresh token and the link it makes, as the store keeps it."""
+    Args:
+        valid_for: How long the link works; a confirmation link's time when None.
+    """
     token = secrets.token_urlsafe(32)
-    return token, Link(_digest(token), datetime.now(UTC) + VALID_FOR)
+    lasts = VALID_FOR if valid_for is None else valid_for
+    return token, Link(digest(token), datetime.now(UTC) + lasts)
+
+
+def digest(token: str) -> bytes:
+    """Return the digest that the store keeps of a link's token, which it never keeps itself.
+
+    Args:
+        token: The token.
+    """
+    return hashlib.sha256(token.encode("utf-8", "surrogateescape")).digest()
 
 
 class EmailVerification:
     """Confirms the e-mail addresses of new accounts with links sent to them."""
 
-    def __init__(
-        self, store: VerificationStore, mailer: Mailer | None, public_url: str | None
-    ) -> None:
+    def __init__(self, store: VerificationStore, outbox: Outbox) -> None:
         """Send links that lead to the server's verification page.
 
         Args:
             store: Where the links are kept.
-            mailer: Sends the e-mail; None when the deployment set no mail server.
-            public_url: The address the server's pages are reached at, such as
-                https://fesl.example.com; None when the deployment set none.
+            outbox: Sends the mail.
         """
         self._store = store
-        self._mailer = mailer
-        self._public_url = public_url
-        self._deliveries: set[asyncio.Task[None]] = set()
+        self._outbox = outbox
 
     def send(self, to: str, token: str, link: Link, language: str) -> None:
         """Start sending an account's address the link that confirms it.
@@ -147,22 +135,9 @@ class EmailVerification:
             language: The language code of the game it registers or logs in from; English
                 where the catalogues hold no texts in it.
         """
-        if self._mailer is None or self._public_url is None:
-            logger.error("Cannot send a verification link: no mail server or public URL is set")
-            return
-        # The date and the mail's language follow the texts, which would otherwise be English
-        # around a date in the game's language, and Babel refuses locales it does not know.
-        if language not in languages():
-            language = BASE_LANGUAGE
-        # The link opens the page in the language of the mail.
-        url = self._public_url.rstrip("/") + localize(PATH.format(token=token), language)
-        expires = format_datetime(link.expires_at, "long", tzinfo=UTC, locale=language)
-        subject = translate("verification.mail.subject", language)
-        body = translate("verification.mail.body", language).format(link=url, expires=expires)
-        delivery = asyncio.create_task(_deliver(self._mailer, to, subject, body, language))
-        # The loop keeps only weak references to its tasks.
-        self._deliveries.add(delivery)
-        delivery.add_done_callback(self._deliveries.discard)
+        self._outbox.send(
+            to, "verification.mail", PATH.format(token=token), link.expires_at, language
+        )
 
     async def require(self, account: Account, language: str) -> None:
         """Refuse the login of an account whose address waits to be confirmed.
@@ -206,17 +181,6 @@ class EmailVerification:
         Args:
             token: The token the link carries.
         """
-        confirmation = await self._store.confirm(_digest(token))
+        confirmation = await self._store.confirm(digest(token))
         logger.info("A verification link was opened: %s", confirmation.name.lower())
         return confirmation
-
-
-async def _deliver(mailer: Mailer, to: str, subject: str, body: str, language: str) -> None:
-    try:
-        await mailer.send(to, subject, body, language)
-    except OSError:
-        logger.exception("Could not send a verification link")
-
-
-def _digest(token: str) -> bytes:
-    return hashlib.sha256(token.encode("utf-8", "surrogateescape")).digest()

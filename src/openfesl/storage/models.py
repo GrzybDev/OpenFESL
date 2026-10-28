@@ -71,6 +71,19 @@ class SignInIdentityRow(Base):
     linked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class SignInProofRow(Base):
+    __tablename__ = "sign_in_proof"
+
+    token_hash: Mapped[bytes] = mapped_column(LargeBinary, primary_key=True)
+    account_id: Mapped[int] = mapped_column(
+        ForeignKey("account.id", ondelete="CASCADE"), index=True
+    )
+    service: Mapped[str]
+    subject: Mapped[str]
+    name: Mapped[str]
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
 class PersonaRow(Base):
     __tablename__ = "persona"
 

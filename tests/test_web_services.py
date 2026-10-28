@@ -1,11 +1,14 @@
 import json
 from collections.abc import AsyncIterator
+from datetime import timedelta
 
 import httpx2
 import pytest
-from accounts import PASSWORD, execute, sign_in_through, sign_out
+from accounts import PASSWORD, execute, returned, sign_in_through, sign_out
 from identity import IdentityProvider, form_token, identity_provider
-from support import cli, markup
+from support import Mailbox, cli, markup
+
+from openfesl.core import proofs
 
 pytestmark = pytest.mark.anyio
 
@@ -122,10 +125,8 @@ async def test_an_unreachable_service_leaves_the_other_ways_in(
 async def follow(
     client: httpx2.AsyncClient, base: str, started: httpx2.Response
 ) -> httpx2.Response:
-    """Follow a sign-in from the service's redirect to the page the site then opens."""
-    assert started.status_code == 302, started.text
-    back = await client.get(started.headers["location"])
-    done = await client.get(back.headers["location"])
+    """Follow a sign-in through a service to the page the site then opens."""
+    done = await returned(client, base, started)
     assert done.status_code == 303, done.text
     return await client.get(f"{base}{done.headers['location']}")
 
@@ -219,3 +220,55 @@ async def test_a_verified_address_of_an_account_links_its_service_only_after_a_p
         )
         assert cancelled.headers["location"] == "/sign-in"
         assert (await client.get(f"{base}/sign-in/proof")).headers["location"] == "/sign-in"
+
+
+async def test_a_link_sent_to_the_address_proves_the_account_once_its_page_is_confirmed(
+    mailbox: Mailbox,
+    services: tuple[IdentityProvider, IdentityProvider],
+    base: str,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    connect, _ = services
+    async with httpx2.AsyncClient() as client:
+        connect.user = {
+            "sub": "c-bob",
+            "preferred_username": "bob-connect",
+            "email": "bob@example.test",
+            "email_verified": True,
+        }
+        await sign_in_through(client, base, "connect")
+        page = await client.get(f"{base}/sign-in/proof")
+        assert "Send a link to" in page.text
+        sent = await client.post(f"{base}/sign-in/proof/mail", data={"csrf": form_token(page.text)})
+        assert "A link was sent to bob@example.test." in sent.text
+        mail, link = await mailbox.receive("bob@example.test")
+        assert "A sign-in through Invented Connect asked to link it" in mail.get_content()
+        again = await client.post(
+            f"{base}/sign-in/proof/mail", data={"csrf": form_token(page.text)}
+        )
+        assert again.status_code == 429
+
+    # The link works in any browser, once. Opening it only asks, as mail scanners open links.
+    async with httpx2.AsyncClient() as elsewhere:
+        for _ in range(2):
+            page = await elsewhere.get(f"{base}{link}")
+            assert "Linking adds the Invented Connect account bob-connect" in page.text
+            assert page.headers["cache-control"] == "no-store"
+        used = await elsewhere.post(f"{base}{link}", data={"csrf": form_token(page.text)})
+        assert used.headers["location"] == "/account"
+        shown = (await elsewhere.get(f"{base}/terms")).text
+        assert "Invented Connect linked as bob-connect. Signed in as bob@example.test." in shown
+        used = await elsewhere.post(f"{base}{link}", data={"csrf": form_token(page.text)})
+        assert used.status_code == 404
+        assert "The link is not valid or has been used already." in used.text
+
+    monkeypatch.setattr(proofs, "VALID_FOR", timedelta(0))
+    async with httpx2.AsyncClient() as client:
+        connect.user = {"sub": "c-ann", "email": "ann@example.test", "email_verified": True}
+        await sign_in_through(client, base, "connect")
+        page = await client.get(f"{base}/sign-in/proof")
+        await client.post(f"{base}/sign-in/proof/mail", data={"csrf": form_token(page.text)})
+        _, expired = await mailbox.receive("ann@example.test")
+        gone = await client.get(f"{base}{expired}")
+        assert gone.status_code == 410
+        assert "Signing in through Invented Connect again offers a new one." in gone.text

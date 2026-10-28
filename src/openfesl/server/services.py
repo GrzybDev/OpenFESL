@@ -25,11 +25,13 @@ from openfesl.core.leaderboards import LeaderboardService
 from openfesl.core.limits import Attempts, Mailings
 from openfesl.core.logins import Logins
 from openfesl.core.magma import Magma
+from openfesl.core.mail import Outbox
 from openfesl.core.messages import MessageService
 from openfesl.core.personas import PersonaService
 from openfesl.core.playnow import PlayNow
 from openfesl.core.policies import GamePolicies
 from openfesl.core.presence import PresenceService
+from openfesl.core.proofs import ProofMail
 from openfesl.core.records import RecordService
 from openfesl.core.registration import Terms
 from openfesl.core.rich_presence import RichPresence
@@ -94,7 +96,7 @@ class GameServices:
 
         Args:
             app: The application, whose state hands the pages the e-mail verification, the
-                launcher sign-in and the site's sign-in.
+                launcher sign-in, the site's sign-in and its e-mailed proofs.
         """
         settings, games, stores = self._settings, self._games, self._stores
         routes, commands = self._routes, self._commands
@@ -104,7 +106,8 @@ class GameServices:
         mailer = None
         if settings.smtp_host and settings.smtp_sender:
             mailer = SmtpMailer(settings, settings.smtp_host, settings.smtp_sender)
-        verification = EmailVerification(stores.accounts, mailer, settings.public_url)
+        outbox = Outbox(mailer, settings.public_url)
+        verification = EmailVerification(stores.accounts, outbox)
         app.state.verification = verification
         accounts = AccountService(
             stores.accounts,
@@ -118,7 +121,8 @@ class GameServices:
         personas = PersonaService(stores.personas)
         await personas.prepare(await accounts.prepare(games))
         app.state.launcher = LauncherService(logins, games, personas, self._launcher_sessions)
-        app.state.sign_in = WebSignIn(
+        mailings = Mailings()
+        sign_in = WebSignIn(
             stores.accounts,
             stores.identities,
             logins,
@@ -126,7 +130,11 @@ class GameServices:
             games,
             verification,
             Attempts(),
-            Mailings(),
+            mailings,
+        )
+        app.state.sign_in = sign_in
+        app.state.proof_mail = ProofMail(
+            stores.identities, stores.accounts, sign_in, outbox, mailings
         )
         routes.update(connect_routes(games, policies))
         routes.update(telemetry_routes())
