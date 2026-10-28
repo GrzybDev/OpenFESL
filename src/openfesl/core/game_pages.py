@@ -200,12 +200,18 @@ class Site(BaseModel):
     Attributes:
         menus: The header's menus, in order; a menu without one of the game's pages is left out.
         wallets: The currencies whose balances the bar shows a signed-in account, in order.
+        host: The host of the game's website, whose addresses the game opens in the system
+            browser; OpenFESLHook sends them to /open/<host>/<path>.
+        addresses: The pages those addresses open, by the address's path, as paths below the
+            game's own pages; every other address opens the game's front page.
     """
 
     model_config = ConfigDict(frozen=True)
 
     menus: list[Menu]
     wallets: list[SiteWallet] = []
+    host: str | None = None
+    addresses: dict[str, str] = {}
 
 
 class Insignia(BaseModel):

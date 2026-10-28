@@ -230,7 +230,11 @@ soft = "#DDDDDD"
 # The game's website of autumn 2012, whose site container, header and menus the pages wear over
 # a painted sky. Its menus list the game's pages under the headings the site gave them, and its
 # header bar shows the account's Funds and Valor Points, which every hero of the account shares.
+# The game opens two of its addresses in the system browser (SwiffPlayer.dll 1.89): the creator,
+# when the account has no hero, and the Funds page, which 1.46 names purchaseBattlefunds.
 [site]
+host = "www.battlefieldheroes.com"
+addresses = { "/user/createHero" = "/user/createHero?from=game" }
 wallets = [
     { currency = "_PF", glyph = "coin", fill = "#F2C12E", ink = "#0A0A0A" },
     { currency = "_DV", glyph = "valor", fill = "#B9453E", ink = "#FFFFFF" },

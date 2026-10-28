@@ -18,7 +18,7 @@ def split_language(path: str) -> tuple[str, str]:
     return BASE_LANGUAGE, path
 
 
-def _preferred_language(accept_language: str) -> str:
+def preferred_language(accept_language: str) -> str:
     """Return the language of the pages that a browser ranks highest, English when none.
 
     Args:
@@ -91,14 +91,15 @@ def _arriving_language(scope: Scope, path: str) -> str | None:
     # Browsers name a page opened by hand or from another site in Sec-Fetch-Site; without the
     # header, as from the game, the dedicated servers or scripts, nothing is redirected. The
     # admin panel and the site's sign-in carry their own language through a sign-in, whose
-    # return from the service arrives from another site.
+    # return from the service arrives from another site, and the games' addresses choose the
+    # page and its language in one step.
     headers = Headers(scope=scope)
     arriving = (
         scope["method"] == "GET"
         and path not in ("/admin", "/sign-in/callback")
-        and not path.startswith("/admin/")
+        and not path.startswith(("/admin/", "/open/"))
         and headers.get("sec-fetch-dest") == "document"
         and headers.get("sec-fetch-site") in ("none", "cross-site")
     )
-    preferred = _preferred_language(headers.get("accept-language", "")) if arriving else None
+    preferred = preferred_language(headers.get("accept-language", "")) if arriving else None
     return preferred if preferred != BASE_LANGUAGE else None
