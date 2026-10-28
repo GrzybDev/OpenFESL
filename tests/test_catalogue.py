@@ -74,6 +74,7 @@ async def test_a_copy_of_the_game_gives_a_file_of_its_items_texts_icons_and_tabl
         "WEST_Custom_Item_2000": "Wymyślony zryw",
         "west_custom_item_5000 ": "Wymyślone machnięcie",
         "AUTO_RULES_MISSION_6000": "Wymyślona codzienna",
+        "WEST_Custom_Bundle_NewRoyalEmoteBundle": "Wymyślona para gestów",
     }
     assert extracted.texts["en"]["WEST_Custom_Item_3000"] == "Practice Rifle"
     assert document.daily_missions == tuple(DAILY)

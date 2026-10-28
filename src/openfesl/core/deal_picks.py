@@ -1,12 +1,16 @@
-from collections.abc import Mapping
+import logging
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 from random import Random
 
 from openfesl.core.catalogues import Catalogue, Item
-from openfesl.core.deal_rules import DealRules, ItemSection
+from openfesl.core.deal_rules import DealRules, ItemSection, Offer, OfferSection
 from openfesl.core.games import Game
 from openfesl.core.inventory import PERMANENT, Ownership
 from openfesl.core.store import AUTO, Bundle, NewProduct, Product
+
+logger = logging.getLogger(__name__)
+
 
 type Priced = Mapping[tuple[int, Ownership, str], Product]
 
@@ -19,10 +23,14 @@ class History:
     """What a section's new period must not repeat, and what the store's products cost.
 
     Attributes:
+        recent: What the section picked that ended within its gap or still runs, by pool.
+        live: What the rotation's other sections sell when the period starts, by pool.
         live_items: The items of the rotation's bundles that run when the period starts.
         products: The store's products, sold alone or not, by item, ownership and currency.
     """
 
+    recent: frozenset[str]
+    live: frozenset[str]
     live_items: frozenset[int]
     products: Priced
 
@@ -38,6 +46,40 @@ class NewDeal:
 
     bundle: Bundle
     products: tuple[NewProduct, ...]
+
+
+def pick_offers(
+    game: Game,
+    rules: DealRules,
+    section: OfferSection,
+    catalogue: Catalogue,
+    history: History,
+    random: Random,
+) -> list[NewDeal]:
+    """Return the deals of a period of a section of offers: every offer, or a few of each faction.
+
+    An offer that the section sold within its gap, or another section sells, is left out, as
+    is one with an item the catalogue lacks or the store does not price.
+
+    Args:
+        game: The game.
+        rules: The game's hot-deal rules.
+        section: The section.
+        catalogue: The game's imported catalogue.
+        history: What the section must not repeat, and what the products cost.
+        random: The source of chance.
+    """
+    groups: dict[str | None, list[NewDeal]] = {}
+    for given in rules.offers(section):
+        if given.name in history.recent or given.name in history.live:
+            continue
+        deal = _offer_deal(game, rules, section, catalogue, history, given, random)
+        if deal is not None:
+            groups.setdefault(deal.bundle.faction, []).append(deal)
+    picked = []
+    for deals in groups.values():
+        picked += random.sample(deals, min(section.size, len(deals))) if section.size else deals
+    return _ordered(game, picked)
 
 
 def pick_items(
@@ -109,6 +151,58 @@ def pick_items(
     return _ordered(game, deals)
 
 
+def _offer_deal(
+    game: Game,
+    rules: DealRules,
+    section: OfferSection,
+    catalogue: Catalogue,
+    history: History,
+    given: Offer,
+    random: Random,
+) -> NewDeal | None:
+    assert game.store is not None and game.heroes is not None
+    items = [catalogue.item(item_id) for item_id, _ in given.members]
+    found = [item for item in items if item is not None and game.store.sellable(item)]
+    fit = _fit(found, list(game.heroes.factions), list(game.heroes.classes))
+    products = [
+        _product(game, catalogue, history, member, rules.currency) for member in given.members
+    ]
+    members = tuple(product for product in products if product)
+    if len(found) < len(items) or fit is None or len(members) < len(products):
+        logger.debug("Leaving out the offer %s, whose items are not all sold", given.name)
+        return None
+    worth = sum(product.price for product in members)
+    low, high = section.discount
+    discount = random.choice(range(low, high + 1, 5))
+    price = given.price or rules.rounded(worth * (100 - discount) // 100)
+    bundle = Bundle(
+        name=given.name,
+        description=given.description,
+        currency=rules.currency,
+        price=price,
+        original_price=worth if worth > price else None,
+        faction=fit[0],
+        hero_class=fit[1],
+        pool=given.name,
+        source=AUTO,
+    )
+    return NewDeal(bundle, members)
+
+
+def _product(
+    game: Game, catalogue: Catalogue, history: History, member: tuple[int, Ownership], currency: str
+) -> NewProduct | None:
+    # An item's product as the store prices it, or as its rules price it once it is added.
+    item_id, ownership = member
+    product = history.products.get((item_id, ownership, currency))
+    if product is not None:
+        return NewProduct(item_id, ownership, currency, product.price, published=False)
+    item = catalogue.item(item_id)
+    rules = game.store
+    price = rules.price_of(item, ownership, currency) if rules and item else None
+    return NewProduct(item_id, ownership, currency, price, published=False) if price else None
+
+
 def _sold(history: History, item_id: int, currency: str) -> bool:
     # Whether the store sells an item alone for good in a currency.
     product = history.products.get((item_id, FOR_GOOD, currency))
@@ -117,6 +211,23 @@ def _sold(history: History, item_id: int, currency: str) -> bool:
 
 def _price(history: History, item_id: int, rules: DealRules) -> int:
     return history.products[(item_id, FOR_GOOD, rules.currency)].price
+
+
+def _fit(
+    items: Sequence[Item], factions: Sequence[str], classes: Sequence[str]
+) -> tuple[str | None, str | None] | None:
+    # The one faction and class that every item fits, none where they fit all; nothing when
+    # they fit none, or more than one but not all.
+    shared_factions = frozenset(factions).intersection(*(item.factions for item in items))
+    shared_classes = frozenset(classes).intersection(*(item.classes for item in items))
+    if len(shared_factions) not in (1, len(factions)) or len(shared_classes) not in (
+        1,
+        len(classes),
+    ):
+        return None
+    faction = min(shared_factions) if len(shared_factions) < len(factions) else None
+    hero_class = min(shared_classes) if len(shared_classes) < len(classes) else None
+    return faction, hero_class
 
 
 def _ordered(game: Game, deals: list[NewDeal]) -> list[NewDeal]:

@@ -8,7 +8,8 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from openfesl.core.catalogues import Catalogue, Catalogues
-from openfesl.core.deal_picks import History, pick_items
+from openfesl.core.deal_picks import History, pick_items, pick_offers
+from openfesl.core.deal_rules import ItemSection, OfferSection
 from openfesl.core.games import Game, load_games
 from openfesl.core.store import Product
 from openfesl.extraction import extract, find_game
@@ -52,10 +53,10 @@ def sold_alone(game: Game, catalogue: Catalogue) -> History:
         for ownership in rule.sold
         if (price := rules.price(rule, ownership))
     }
-    return History(frozenset(), products)
+    return History(frozenset(), frozenset(), frozenset(), products)
 
 
-async def test_the_deal_of_the_day_of_the_game_data_is_made_of_the_copys_items(
+async def test_every_deal_of_the_game_data_is_made_of_the_copys_items_and_named_by_its_texts(
     catalogue: Catalogue,
     bfheroes: Game,
 ) -> None:
@@ -64,13 +65,32 @@ async def test_the_deal_of_the_day_of_the_game_data_is_made_of_the_copys_items(
     assert rules is not None
     history = sold_alone(game, catalogue)
 
-    made = {
-        name: {
-            deal.bundle.faction
-            for deal in pick_items(game, rules, section, catalogue, history, Random(1))
+    made: dict[str, set[str]] = {}
+    for name, section in rules.sections.items():
+        if isinstance(section, ItemSection):
+            deals = pick_items(game, rules, section, catalogue, history, Random(1))
+        else:
+            every = section.model_copy(update={"size": None})
+            deals = pick_offers(game, rules, every, catalogue, history, Random(1))
+        made[name] = {deal.bundle.faction or "" for deal in deals} | {
+            deal.bundle.name for deal in deals if isinstance(section, OfferSection)
         }
-        for name, section in rules.sections.items()
-    }
 
-    # Each faction's Deal of the Day.
+    # Each faction's Deal of the Day, and every offer of the other sections.
     assert made["daily"] == {"royal", "national"}
+    for name, section in rules.sections.items():
+        if isinstance(section, OfferSection):
+            assert {offer.name for offer in rules.offers(section)} <= made[name], name
+    named = [
+        text
+        for offer in rules.sets
+        + tuple(
+            offer
+            for section in rules.sections.values()
+            if isinstance(section, OfferSection)
+            for offer in section.offers
+        )
+        for text in (offer.name, offer.description)
+        if text
+    ]
+    assert [text for text in named if catalogue.text(text) is None] == []

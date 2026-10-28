@@ -20,7 +20,10 @@ type Written = Annotated[Ownership, BeforeValidator(Ownership.read)]
 
 
 def _read_drop(text: object) -> object:
-    # A drop as game data writes it: an item's number and its ownership, such as 2153 x75.
+    # A drop as game data writes it: an item's number and its ownership, such as 2153 x75, or
+    # the number alone for an item owned for good.
+    if isinstance(text, int) and not isinstance(text, bool):
+        return text, Ownership(PERMANENT)
     if not isinstance(text, str):
         return text
     item, _, written = text.partition(" ")

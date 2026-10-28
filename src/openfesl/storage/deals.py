@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from sqlalchemy import exists, func, insert, select
 from sqlalchemy.dialects.postgresql import insert as upsert
@@ -26,7 +26,9 @@ class SqlDealStore:
         """
         self._sessions = sessions
 
-    async def generate(self, game: str, section: str, period: Period, make: Maker) -> None:
+    async def generate(
+        self, game: str, section: str, period: Period, gap: int, make: Maker
+    ) -> None:
         """Store the bundles of a period of a section once, as the first to look makes them.
 
         Stores on other servers take turns, and a period that has bundles keeps them.
@@ -35,6 +37,7 @@ class SqlDealStore:
             game: The game's data-file name.
             section: The section's name.
             period: The period.
+            gap: The days after a pick left the section before it may come back.
             make: Makes the bundles from what the section must not repeat.
         """
         async with self._sessions.begin() as session:
@@ -49,17 +52,27 @@ class SqlDealStore:
             )
             if await session.scalar(select(made)):
                 return
-            history = await _history(session, game, section, period.start)
+            history = await _history(session, game, section, period.start, gap)
             deals = make(history)
             numbers = await _numbers(session, game, history, deals)
             for deal in deals:
                 await _add(session, game, section, period, deal, numbers)
 
 
-async def _history(session: AsyncSession, game: str, section: str, start: datetime) -> History:
+async def _history(
+    session: AsyncSession, game: str, section: str, start: datetime, gap: int
+) -> History:
     ours = (StoreBundleRow.game == game, StoreBundleRow.source == AUTO)
     running = (StoreBundleRow.starts_at <= start, StoreBundleRow.ends_at > start)
+    recent = await session.scalars(
+        select(StoreBundleRow.pool).where(
+            *ours,
+            StoreBundleRow.section == section,
+            StoreBundleRow.ends_at > start - timedelta(days=gap),
+        )
+    )
     others = (*ours, *running, StoreBundleRow.section != section)
+    live = await session.scalars(select(StoreBundleRow.pool).where(*others))
     items = await session.scalars(
         select(StoreProductRow.item_id)
         .join(StoreBundleMemberRow, StoreBundleMemberRow.product_id == StoreProductRow.id)
@@ -68,6 +81,8 @@ async def _history(session: AsyncSession, game: str, section: str, start: dateti
     )
     products = await session.scalars(select(StoreProductRow).where(StoreProductRow.game == game))
     return History(
+        recent=frozenset(pool for pool in recent if pool),
+        live=frozenset(pool for pool in live if pool),
         live_items=frozenset(items),
         products={
             (row.item_id, Ownership(row.type, row.days, row.uses), row.currency): product_of(row)

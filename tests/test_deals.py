@@ -27,9 +27,9 @@ from openfesl.storage.store import SqlProductStore
 pytestmark = pytest.mark.anyio
 
 # An invented catalogue: a cap, a scarf and a coat of each faction, which the Deal of the Day
-# puts together, and two boosts.
+# puts together; seven pairs of Royal trousers, each a set of its own; and two boosts.
 ROYAL, NATIONAL = "1", "2"
-HAT, NECK, JACKET = "0", "2", "4"
+HAT, NECK, JACKET, LEGS = "0", "2", "4", "6"
 CLOTHES = {
     101: ("Invented Cap", ROYAL, HAT),
     102: ("Invented Scarf", ROYAL, NECK),
@@ -37,11 +37,15 @@ CLOTHES = {
     201: ("Invented Helmet", NATIONAL, HAT),
     202: ("Invented Collar", NATIONAL, NECK),
     203: ("Invented Tunic", NATIONAL, JACKET),
+    **{310 + n: (f"Invented Trousers {n}", ROYAL, LEGS) for n in range(1, 8)},
 }
 BOOSTS = {9000: "Invented XP Boost", 9005: "Invented Valor Boost"}
+# The game's own name of the boost pair, which the game data lists among the popular deals.
+BOOST_PAIR = "WEST_Custom_Bundle_XPVPBoostBundle"
 DAILY = "web.deals.daily.name"
 
-# The invented catalogue's deals: the Deal of the Day.
+# The invented catalogue's deals: the Deal of the Day, a set each Monday that comes back no
+# sooner than six weeks after it left, and the boost pair always.
 RULES = DealRules.model_validate(
     {
         "currency": "_PF",
@@ -55,7 +59,23 @@ RULES = DealRules.model_validate(
                 "discount": 30,
                 "name": DAILY,
             },
+            "new": {
+                "kind": "offers",
+                "schedule": {"every": 7},
+                "size": 1,
+                "discount": [50, 50],
+                "gap": 42,
+                "sets": True,
+            },
+            "popular": {
+                "kind": "offers",
+                "schedule": {"every": 7},
+                "offers": [
+                    {"name": BOOST_PAIR, "members": ["9000 30d", "9005 30d"], "price": 8399}
+                ],
+            },
         },
+        "sets": [{"name": f"Invented Set {n}", "members": [310 + n]} for n in range(1, 8)],
     }
 )
 # A Sunday, a second before midnight in UTC.
@@ -73,6 +93,7 @@ def catalogue_file(folder: Path, clothes: dict[int, tuple[str, str, str]]) -> Pa
     ] + [CatalogueItem(id=number, kind="convenience", fields={}) for number in BOOSTS]
     names = {number: name for number, (name, _, _) in clothes.items()} | BOOSTS
     english = {f"WEST_Custom_Item_{number}": name for number, name in names.items()}
+    english[BOOST_PAIR] = "Invented Boost Pair"
     document = CatalogueDocument(format=1, game="bfheroes", items=tuple(items))
     file = folder / "catalogue.zip"
     file.write_bytes(CatalogueFile(document, {"en": english}, {}).write())
@@ -145,7 +166,7 @@ async def setting(database_url: str, key: str, value: str) -> None:
     )
 
 
-async def test_deals_change_at_midnight_at_prices_ending_in_99(
+async def test_deals_change_at_midnight_and_sets_on_mondays_at_prices_ending_in_99(
     rotation: Rotation, database_url: str
 ) -> None:
     sunday = await rotation.listed()
@@ -159,16 +180,25 @@ async def test_deals_change_at_midnight_at_prices_ending_in_99(
     rotation.now = MONDAY + timedelta(hours=23, minutes=59)
     later = await rotation.listed()
 
-    # Three pieces of 2,600 Funds at 30% off for each faction, Royal first, rounded down to end
-    # in 99.
+    # Three pieces of 2,600 Funds at 30% off for each faction, Royal first, a set's piece at
+    # half price and the boost pair at its own price, each rounded down to end in 99.
     for listed in (sunday, monday):
-        assert listed == [("daily", DAILY, 5399, 7800), ("daily", DAILY, 5399, 7800)]
+        assert listed == [
+            ("daily", DAILY, 5399, 7800),
+            ("daily", DAILY, 5399, 7800),
+            ("new", listed[2][1], 1299, 2600),
+            ("popular", BOOST_PAIR, 8399, 12598),
+        ]
     assert later == monday
-    assert periods == {("daily", MONDAY, MONDAY + timedelta(days=1))}
+    assert periods == {
+        ("daily", MONDAY, MONDAY + timedelta(days=1)),
+        ("new", MONDAY, MONDAY + timedelta(days=7)),
+        ("popular", MONDAY, MONDAY + timedelta(days=7)),
+    }
     # Sunday's deals left the list, so they are no longer sold either.
     assert await rotation.deals.bundle(rotation.game, ended) is None
     made = "SELECT count(*) FROM store_bundle WHERE source = 'auto'"
-    assert await select_value(database_url, made) == 4
+    assert await select_value(database_url, made) == 8
 
 
 async def test_a_deal_of_the_day_of_two_deals_makes_two_for_each_faction(
@@ -195,19 +225,31 @@ async def test_a_deal_of_the_day_of_two_deals_makes_two_for_each_faction(
     ]
 
 
+async def test_a_set_comes_back_no_sooner_than_six_weeks_after_it_left(
+    rotation: Rotation,
+) -> None:
+    picked = []
+    for week in range(8):
+        rotation.now = MONDAY + timedelta(weeks=week)
+        picked += [name for section, name, _, _ in await rotation.listed() if section == "new"]
+
+    # Seven sets, each new for a week: the first may come back in the eighth.
+    assert len(set(picked[:7])) == 7
+    assert picked[7] == picked[0]
+
+
 async def test_switched_off_sections_are_left_out_and_without_the_rotation_admin_offers_stay(
     rotation: Rotation, database_url: str
 ) -> None:
     coat = await select_value(database_url, "SELECT id FROM store_product WHERE item_id = 103")
     assert isinstance(coat, int)
-    for name, section in (("Invented Offer", "daily"), ("Invented Extra", None)):
+    for name, section in (("Invented Offer", "new"), ("Invented Extra", None)):
         bundle = Bundle(name, None, "_PF", 999, members=(coat,), section=section)
         await rotation.products.add_bundle("bfheroes", bundle)
 
     every = await rotation.listed()
-    await setting(database_url, "bfheroes.deals.sections.daily.enabled", "off")
-    without_daily = await rotation.listed()
-    await setting(database_url, "bfheroes.deals.sections.daily.enabled", "on")
+    await setting(database_url, "bfheroes.deals.sections.new.enabled", "off")
+    without_new = await rotation.listed()
     await setting(database_url, "bfheroes.deals.enabled", "off")
     without_rotation = await rotation.listed()
 
@@ -215,11 +257,13 @@ async def test_switched_off_sections_are_left_out_and_without_the_rotation_admin
     assert [(section, name) for section, name, _, _ in every] == [
         ("daily", DAILY),
         ("daily", DAILY),
-        ("daily", "Invented Offer"),
+        ("new", every[2][1]),
+        ("new", "Invented Offer"),
+        ("popular", BOOST_PAIR),
         (None, "Invented Extra"),
     ]
-    assert [name for _, name, _, _ in without_daily] == ["Invented Extra"]
-    assert [name for _, name, _, _ in without_rotation] == ["Invented Offer", "Invented Extra"]
+    assert [name for _, name, _, _ in without_new] == [DAILY, DAILY, BOOST_PAIR, "Invented Extra"]
+    assert [name for _, name, _, _ in without_rotation] == ["Invented Extra"]
 
 
 async def test_two_servers_looking_at_once_make_a_period_once(
@@ -230,7 +274,7 @@ async def test_two_servers_looking_at_once_make_a_period_once(
     listed = await asyncio.gather(first.current(rotation.game), second.current(rotation.game))
 
     made = "SELECT count(*) FROM store_bundle WHERE source = 'auto'"
-    assert await select_value(database_url, made) == 2
+    assert await select_value(database_url, made) == 4
     assert [bundle.id for bundle in listed[0]] == [bundle.id for bundle in listed[1]]
 
 
@@ -242,7 +286,9 @@ async def test_the_game_lists_and_sells_the_deal_of_the_day_and_the_admins_offer
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    await import_catalogue(server_url, tmp_path, capsys)
+    # Without the trousers, so that the Deal of the Day has one piece for each of its slots.
+    clothes = {number: item for number, item in CLOTHES.items() if item[2] != LEGS}
+    await import_catalogue(server_url, tmp_path, capsys, clothes)
     cookie, hero = await shopper(server_url, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
     boost = await select_value(
         database_url, "SELECT id FROM store_product WHERE item_id = 9000 AND published"
@@ -259,13 +305,15 @@ async def test_the_game_lists_and_sells_the_deal_of_the_day_and_the_admins_offer
     royal = english[0].get("productId", "").removeprefix("OFB-DBFH:")
     bought = [await buy(server_url, cookie, hero, number) for number in (royal, offered)]
 
-    # The game data's Deal of the Day of each faction, then the admin's offer.
+    # The game data's sections whose items the catalogue has: the Deal of the Day of each
+    # faction and the boost pair, then the admin's offer.
     assert [
         (attribute(deal, "Product Name"), attribute(deal, "gameOrder")) for deal in english
     ] == [
         ("Deal of the Day: Royal Army", "1"),
         ("Deal of the Day: National Army", "2"),
-        ("Invented Offer", "3"),
+        ("Invented Boost Pair", "3"),
+        ("Invented Offer", "4"),
     ]
     assert attribute(english[0], "hotdealsDescription") == (
         "Invented Cap, Invented Scarf, and Invented Coat"

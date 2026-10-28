@@ -1,9 +1,10 @@
 # The hot deals' rotation: what the store's hot deals sell besides the admin's own offers, in
 # the sections of the autumn 2012 window, which the first look after a section's change makes
 # and the store keeps. Each switch, size and schedule below is a default that the setting
-# bfheroes.deals.<path> overrides, such as bfheroes.deals.sections.daily.enabled = off. Times are
-# the zone's midnights, a period's days counted from Mondays. Prices worked out from items end
-# in 99, as the store's did in 2012.
+# bfheroes.deals.<path> overrides, such as bfheroes.deals.sections.sale.enabled = off. Times are
+# the zone's midnights, a period's days counted from Mondays. Set names and descriptions are
+# the game's own bundle texts; prices worked out from items end in 99, as the store's did in
+# 2012 (archived hot deals, HD yyyymmdd; product ids in parentheses).
 [deals]
 enabled = true
 zone = "UTC"
@@ -19,3 +20,638 @@ pieces = 3
 slots = ["hat", "facial", "neck", "body", "jacket", "hands", "legs", "feet", "waist"]
 discount = 30
 name = "web.deals.daily.name"
+
+# New sets: six sets of each faction every Monday at half their items' price, none again
+# within six weeks of leaving (sets struck at a median 46% off in July 2012).
+[deals.sections.new]
+kind = "offers"
+schedule = { every = 7 }
+size = 6
+discount = [50, 50]
+gap = 42
+sets = true
+
+# On sale: two sets or emote pairs of each faction for 72 hours from Mondays and Thursdays, 25
+# to 50% off (79 hours left on the half-price emote bundles in October 2011).
+[deals.sections.sale]
+kind = "offers"
+schedule = { every = 7, starts = [0, 3], lasts = 3 }
+size = 2
+discount = [25, 50]
+gap = 42
+sets = true
+
+# The emote pairs that were half price in October 2011.
+# New Royal Emote Bundle (41039, HD 20111007)
+[[deals.sections.sale.offers]]
+name = "WEST_Custom_Bundle_NewRoyalEmoteBundle"
+members = [5047, 5048]
+
+# New National Emote Bundle (41041, HD 20111007)
+[[deals.sections.sale.offers]]
+name = "WEST_Custom_Bundle_NewNationalEmoteBundle"
+members = [5043, 5046]
+
+# Popular: the standing list of every 2012 capture, always at its October 2012 price.
+[deals.sections.popular]
+kind = "offers"
+schedule = { every = 7 }
+
+# Haggard's Heroic Set (22314, HD 20121019)
+[[deals.sections.popular.offers]]
+name = "WEST_Custom_Bundle_HaggardsHeroicSet"
+members = [1129, 1130, 1131, 1132, 1133, 1134, "9040 7d"]
+price = 10499
+
+# Haggard's Heroic Set + M16 (22287, HD 20121019)
+[[deals.sections.popular.offers]]
+name = "WEST_Custom_Bundle_HaggardsHeroicSet+M16"
+members = [1129, 1130, 1131, 1132, 1133, 1134, 3015, "9040 7d"]
+price = 14699
+
+# Haggard's Heroic Set + M95 (22296, HD 20121019)
+[[deals.sections.popular.offers]]
+name = "WEST_Custom_Bundle_HaggardsHeroicSet+M95"
+members = [1129, 1130, 1131, 1132, 1133, 1134, 3025, "9040 7d"]
+price = 14699
+
+# Haggard's Heroic Set + M249 (22305, HD 20121019)
+[[deals.sections.popular.offers]]
+name = "WEST_Custom_Bundle_HaggardsHeroicSet+M249"
+members = [1129, 1130, 1131, 1132, 1133, 1134, 3038, "9040 7d"]
+price = 14699
+
+# Kirilenko's Krafty Set (24041, HD 20121019)
+[[deals.sections.popular.offers]]
+name = "WEST_Custom_Bundle_KirilenkosKraftySet"
+members = [1135, 1136, 1137, 1138, 1139, 1140, 1141, "9040 7d"]
+price = 11399
+
+# Kirilenko's Krafty Set + AK74 (22370, HD 20121019)
+[[deals.sections.popular.offers]]
+name = "WEST_Custom_Bundle_KirilenkosKraftySet+AK74"
+members = [1135, 1136, 1137, 1138, 1139, 1140, 1141, 3041, "9040 7d"]
+price = 15899
+
+# Kirilenko's Krafty Set + SVD (22380, HD 20121019)
+[[deals.sections.popular.offers]]
+name = "WEST_Custom_Bundle_KirilenkosKraftySet+SVD"
+members = [1135, 1136, 1137, 1138, 1139, 1140, 1141, 3042, "9040 7d"]
+price = 15899
+
+# Kirilenko's Krafty Set + PKM (22360, HD 20121019)
+[[deals.sections.popular.offers]]
+name = "WEST_Custom_Bundle_KirilenkosKraftySet+PKM"
+members = [1135, 1136, 1137, 1138, 1139, 1140, 1141, 3043, "9040 7d"]
+price = 15899
+
+# Modern Soldier Kit (24736, HD 20121019)
+[[deals.sections.popular.offers]]
+name = "WEST_Custom_Bundle_ModernSoldierKit"
+members = ["2005 x25", "2153 x25", 3015, 3148, "9040 7d"]
+price = 11969
+
+# Modern Commando Kit (24738, HD 20121019)
+[[deals.sections.popular.offers]]
+name = "WEST_Custom_Bundle_ModernCommandoKit"
+members = ["2005 x25", "2153 x25", 3025, 3152, "9040 7d"]
+price = 11969
+
+# Modern Gunner Kit (24737, HD 20121019)
+[[deals.sections.popular.offers]]
+name = "WEST_Custom_Bundle_ModernGunnerKit"
+members = ["2005 x25", "2153 x25", 3038, 3150, "9040 7d"]
+price = 11969
+
+# Modern Soldier Gear (24733, HD 20121019)
+[[deals.sections.popular.offers]]
+name = "WEST_Custom_Bundle_ModernSoldierGear"
+members = ["2005 x25", "2153 x25", 3041, 3149, "9040 7d"]
+price = 11969
+
+# Modern Commando Gear (24735, HD 20121019)
+[[deals.sections.popular.offers]]
+name = "WEST_Custom_Bundle_ModernCommandoGear"
+members = ["2005 x25", "2153 x25", 3042, 3153, "9040 7d"]
+price = 11969
+
+# Modern Gunner Gear (24734, HD 20121019)
+[[deals.sections.popular.offers]]
+name = "WEST_Custom_Bundle_ModernGunnerGear"
+members = ["2005 x25", "2153 x25", 3043, 3151, "9040 7d"]
+price = 11969
+
+# XP/VP Boost Bundle (22437, HD 20121019)
+[[deals.sections.popular.offers]]
+name = "WEST_Custom_Bundle_XPVPBoostBundle"
+description = "WEST_Custom_Bundle_XPVPBoostBundle_HotDealsDesc"
+members = ["9000 30d", "9005 30d"]
+price = 8399
+
+# Leet Hero Set (35093, HD 20121019)
+[[deals.sections.popular.offers]]
+name = "WEST_Custom_Bundle_LeetHeroSet"
+members = [1351, 1352, 1353, 1354, 1355, 1356, 1357, 1358, 3195, 5042]
+price = 13499
+
+# Hell Trooper Set (35091, HD 20121019)
+[[deals.sections.popular.offers]]
+name = "WEST_Custom_Bundle_HellTrooperSet"
+members = [1343, 1344, 1345, 1346, 1347, 1348, 1349, 1350, 3198]
+price = 11939
+
+# Classic Royal Emote Bundle (22347, HD 20121019)
+[[deals.sections.popular.offers]]
+name = "WEST_Custom_Bundle_ClassicRoyalEmoteBundle"
+members = [5005, 5009, 5012, 5014]
+price = 5039
+
+# Classic National Emote Bundle (22424, HD 20121019)
+[[deals.sections.popular.offers]]
+name = "WEST_Custom_Bundle_ClassicNationalEmoteBundle"
+members = [5005, 5010, 5011, 5013]
+price = 5039
+
+# The sets that New and On sale pick from: the archived sets whose items are all in 1.89, of one
+# faction each (Royal first).
+# Templar Bundle (18834, HD 20100402)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_TemplarBundle"
+members = [401, 453, 477, 513, 930]
+
+# Hunter Haggard Set (20915, HD 20100402)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_HunterHaggardSet"
+members = [154, 168, 571, 1032, 1040, 1129, 1131, 1132, 1133]
+
+# Wasteland Wanderer Set (20036, HD 20100402)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_WastelandWandererSet"
+members = [46, 58, 143, 202, 259, 518, 1027, 1029, 1033, 1034]
+
+# Morczor's Set (19920, HD 20100402)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_MorczorsSet"
+members = [154, 400, 1004, 1006, 1106, 1126, 1127]
+
+# Honor Guard Set (19115, HD 20110106)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_HonorGuardSet"
+members = [1064, 1065, 1067, 1068, 1069, 1070]
+
+# Tier 1 Elite Set (23797, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_Tier1EliteSet"
+members = [1261, 1262, 1263, 1264, 1265, 1266, 1267, 1268]
+
+# Tier 1 Elite Soldier Set (23481, HD 20110406)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_Tier1EliteSoldierSet"
+members = [1261, 1262, 1263, 1264, 1265, 1266, 1267, 1268, 3148]
+
+# Tier 1 Elite Commando Set (23482, HD 20110406)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_Tier1EliteCommandoSet"
+members = [1261, 1262, 1263, 1264, 1265, 1266, 1267, 1268, 3152]
+
+# Tier 1 Elite Gunner Set (23798, HD 20110406)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_Tier1EliteGunnerSet"
+members = [1261, 1262, 1263, 1264, 1265, 1266, 1267, 1268, 3150]
+
+# Tier 1 Operative's Set (24039, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_Tier1OperativesSet"
+members = [1267, 1277, 1278, 1279, 1280, 1281, 1282, 1290]
+
+# Tier 1 Operative's Set + Elite M16 (24036, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_Tier1OperativesSet+EliteM16"
+members = [1267, 1277, 1278, 1279, 1280, 1281, 1282, 1290, 3148]
+
+# Tier 1 Operative's Set + Elite M249 (24037, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_Tier1OperativesSet+EliteM249"
+members = [1267, 1277, 1278, 1279, 1280, 1281, 1282, 1290, 3150]
+
+# Tier 1 Operative's Set + Elite M-21 (24038, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_Tier1OperativesSet+EliteM-21"
+members = [1267, 1277, 1278, 1279, 1280, 1281, 1282, 1290, 3152]
+
+# Burly Bruce (shirt version) (23255, HD 20110406)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_BurlyBruce(shirtversion)"
+members = [1241, 1242, 1243, 1244, 1246, 1247, 1248, 1249, 1250]
+
+# Burly Bruce (shirtless version) (23265, HD 20110406)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_BurlyBruce(shirtlessversion)"
+members = [1241, 1242, 1243, 1245, 1246, 1247, 1248, 1249, 1250]
+
+# Burly Bruce Mega Bundle (23240, HD 20110406)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_BurlyBruceMegaBundle"
+members = [1241, 1242, 1243, 1244, 1245, 1246, 1247, 1248, 1249, 1250, "2165 x25", "2167 x25", "2169 x25", 5041]
+
+# Sidney's Skyranger Set (22322, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_SidneysSkyrangerSet"
+members = [1211, 1212, 1213, 1214, 1215, 1221, "2155 x25"]
+
+# Sidney's Skyranger Rocket Set (22329, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_SidneysSkyrangerRocketSet"
+members = [589, 1211, 1212, 1213, 1214, 1215, 1221, "2155 x25"]
+
+# Rippin' Rocket Set + Fuel (22337, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_RippinRocketSet+Fuel"
+members = [139, 530, 531, 532, 534, 561, 578, 589, "2155 x25"]
+
+# Royal Rancher Set (23013, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_RoyalRancherSet"
+members = [158, 377, 399, 400, 916]
+
+# Titan Security Set (33504, HD 20120106)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_TitanSecuritySet"
+members = [1337, 1338, 1339, 1340, 1341, 1342, "2173 x25"]
+
+# Captain Royal Set (37633, HD 20120106)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_CaptainRoyalSet"
+members = [1401, 1402, 1403, 1404, 1405, 1406, 1407, "2180 x25"]
+
+# Frost's Biting Set (38031, HD 20120106)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_FrostsBitingSet"
+members = [1416, 1417, 1418, 1419, 1421, 1422, "2181 x25"]
+
+# Cruel Barbarian Set (38861, HD 20120106)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_CruelBarbarianSet"
+description = "WEST_Custom_Bundle_CruelBarbarianSet_HotDealsDesc"
+members = [1441, 1442, 1443, 1445, 1446, 1447, 5044]
+
+# Aviator Set (40029, HD 20120106)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_AviatorSet"
+description = "WEST_Custom_Bundle_AviatorSet_HotDealsDesc"
+members = [1095, 1096, 1098, 1099, 1100]
+
+# Royal 10 (49518, HD 20120408)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_Royal10"
+members = [214, 245, 263, 273, 305, 378, 384, 427, 469, 1481]
+
+# Royal FVA Winner! (49516, HD 20120408)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_RoyalFVAWinner"
+members = [265, 1313, 1314, 1316, 1660, 1692, 1697, 1698]
+
+# Nigel's Ninja Bundle (22352, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_NigelsNinjaBundle"
+members = [514, 1022, 1023, 1024, 1032, 1035]
+
+# VC Hunter Set (24520, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_VCHunterSet"
+members = [1299, 1300, 1301, 1302, 1303, 1304, 1305, 1306, 1307]
+
+# Jack's Swashbuckler Set (36876, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_JacksSwashbucklerSet"
+members = [1377, 1378, 1379, 1380, 1381, 1382, 1383, 1384, "2177 x25", 3202]
+
+# Inventor's Set (47818, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_InventorsSet"
+description = "WEST_Custom_Bundle_InventorsSet_HotDealsDesc"
+members = [1659, 1660, 1661, 1662, 1663, 1664, 1666, 5055]
+
+# Brass-Bender's Set (49014, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_BrassBendersSet"
+description = "WEST_Custom_Bundle_BrassBendersSet_HotDealsDesc"
+members = [1692, 1694, 1695, 1696, 1697, 1698, 1699, "2190 x25"]
+
+# Road Ranger's Set (46267, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_RoadRangersSet"
+description = "WEST_Custom_Bundle_RoadRangersSet_HotDealsDesc"
+members = [1560, 1561, 1562, 1563, 1564, 1565, 1566, 1584, 1593]
+
+# Dire Wolf's Squire Set (51890, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_DireWolfSquireSet"
+description = "WEST_Custom_Bundle_DireWolfSquireSet_HotDealsDesc"
+members = [552, 553, 554, 555, 556]
+
+# Dire Wolf's Knight Set (51576, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_DireWolfKnightSet"
+description = "WEST_Custom_Bundle_DireWolfKnightSet_HotDealsDesc"
+members = [975, 976, 977, 994, 995, 996]
+
+# Spaceman's Set (50209, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_SpacemansSet"
+description = "WEST_Custom_Bundle_SpacemansSet_HotDealsDesc"
+members = [1727, 1753, 1754, 1755, 1756, 1757, 1758]
+
+# Space Explorer's Set (50016, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_SpaceExplorersSet"
+description = "WEST_Custom_Bundle_SpaceExplorersSet_HotDealsDesc"
+members = [1715, 1716, 1717, 1718]
+
+# El Nacho Dorado's Set (51024, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_ElNachoDoradoSet"
+description = "WEST_Custom_Bundle_ElNachoDoradoSet_HotDealsDesc"
+members = [1789, 1790, 1791, 1792, 1793, 1794, 1802, "2194 x25"]
+
+# Long-shot McGee's Set (50729, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_Long-shotMcGeeSet"
+description = "WEST_Custom_Bundle_Long-shotMcGeeSet_HotDealsDesc"
+members = [1862, 1863, 1865, 1867, 1868, 1869, 1870, 1884]
+
+# Astronaut's Set (49729, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_AstronautsSet"
+description = "WEST_Custom_Bundle_AstronautsSet_HotDealsDesc"
+members = [1759, 1760, 1761, 1762, 1763, 1764]
+
+# El Hermoso's Set (50675, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_ElHermosoSet"
+description = "WEST_Custom_Bundle_ElHermosoSet_HotDealsDesc"
+members = [1845, 1846, 1849, 1850, 1852, 1853, 1854, 1855, 1856, 1857]
+
+# Donald's Dress-White Set (48503, HD 20121019)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_DonaldsDressWhiteSet"
+description = "WEST_Custom_Bundle_DonaldsDressWhiteSet_HotDealsDesc"
+members = [1313, 1314, 1315, 1316, 1317]
+
+# Agent Cobb's Set (55380, HD 20121019)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_AgentCobbsSet"
+description = "WEST_Custom_Bundle_AgentCobbsSet_HotDealsDesc"
+members = [840, 856, 857, 858, 859, 903, 941, 946]
+
+# Sam PI's Set (55654, HD 20121019)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_SamPIsSet"
+description = "WEST_Custom_Bundle_SamPIsSet_HotDealsDesc"
+members = [846, 912, 942, 944, 945, 947]
+
+# Punk Girl Set (35094, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_PunkGirlSet"
+members = [1359, 3195]
+
+# Black Knight Bundle (18833, HD 20100402)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_BlackKnightBundle"
+members = [185, 411, 413, 484, 523]
+
+# Klassy Kirilenko Set (20916, HD 20100402)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_KlassyKirilenkoSet"
+members = [148, 171, 299, 483, 1116, 1138, 1139, 1140]
+
+# CarlGustaf's Set (19918, HD 20100402)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_CarlGustafsSet"
+members = [171, 407, 409, 410, 483, 1120, 1121, 1125, 1128]
+
+# Dead Ninja Set (20037, HD 20100402)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_DeadNinjaSet"
+members = [215, 409, 410, 487, 502, 594, 1036]
+
+# Honor Protector Set (19116, HD 20110106)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_HonorProtectorSet"
+members = [1071, 1072, 1074, 1075, 1076, 1077]
+
+# Specialist Tier 1 Set (23801, HD 20110406)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_SpecialistTier1Set"
+members = [1269, 1270, 1271, 1272, 1273, 1274, 1275, 1276]
+
+# Specialist Tier 1 Soldier Set (23800, HD 20110406)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_SpecialistTier1SoldierSet"
+members = [1269, 1270, 1271, 1272, 1273, 1274, 1275, 1276, 3149]
+
+# Specialist Tier 1 Gunner Set (23799, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_SpecialistTier1GunnerSet"
+members = [1269, 1270, 1271, 1272, 1273, 1274, 1275, 1276, 3151]
+
+# Specialist Tier 1 Commando Set (23802, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_SpecialistTier1CommandoSet"
+members = [1269, 1270, 1271, 1272, 1273, 1274, 1275, 1276, 3153]
+
+# Captain's Tier 1 Set (24035, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_CaptainsTier1Set"
+members = [1274, 1284, 1285, 1286, 1287, 1288, 1289]
+
+# Captain's Tier 1 Set + Tier 1 PKM (23980, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_CaptainsTier1Set+Tier1PKM"
+members = [1274, 1284, 1285, 1286, 1287, 1288, 1289, 3151]
+
+# Captain's Tier 1 Set + Tier 1 AK-74 (23979, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_CaptainsTier1Set+Tier1AK-74"
+members = [1274, 1284, 1285, 1286, 1287, 1288, 1289, 3149]
+
+# Captain's Tier 1 Set + Tier 1 SV-98 (23982, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_CaptainsTier1Set+Tier1SV-98"
+members = [1274, 1284, 1285, 1286, 1287, 1288, 1289, 3153]
+
+# Savage Sly (shirt version) (23290, HD 20110406)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_SavageSly(shirtversion)"
+members = [1251, 1252, 1253, 1254, 1256, 1257, 1258, 1259, 1260]
+
+# Savage Sly (shirtless version) (23300, HD 20110406)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_SavageSly(shirtlessversion)"
+members = [1251, 1252, 1253, 1255, 1256, 1257, 1258, 1259, 1260]
+
+# Savage Sly Mega Bundle (23275, HD 20110406)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_SavageSlyMegaBundle"
+members = [1251, 1252, 1253, 1254, 1255, 1256, 1257, 1258, 1259, 1260, "2166 x25", "2168 x25", "2170 x25", 5040]
+
+# Steiner's Stratospheric Set (22399, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_SteinersStratosphericSet"
+members = [1216, 1217, 1218, 1219, 1220, 1222, "2158 x25"]
+
+# Steiner's Strat.Turbojet Set (22406, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_SteinersStrat.TurbojetSet"
+members = [597, 1216, 1217, 1218, 1219, 1220, 1222, "2158 x25"]
+
+# Thor's Turbojet Set + Fuel (22414, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_ThorsTurbojetSet+Fuel"
+members = [136, 542, 545, 546, 547, 548, 593, 597, "2158 x25"]
+
+# Teutonic Tourist Set (23019, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_TeutonicTouristSet"
+members = [475, 476, 494, 507, 544]
+
+# CEC Advanced Set (33503, HD 20120106)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_CECAdvancedSet"
+members = [1331, 1332, 1333, 1334, 1335, 1336, "2174 x25"]
+
+# Metallo Set (37634, HD 20120106)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_MetalloSet"
+members = [1396, 1397, 1398, 1399, 1400, 1423, 1424, "2179 x25"]
+
+# Ace Set (40030, HD 20120106)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_AceSet"
+description = "WEST_Custom_Bundle_AceSet_HotDealsDesc"
+members = [1101, 1102, 1103, 1104]
+
+# Brutal Ravager Set (38858, HD 20120106)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_BrutalRavagerSet"
+description = "WEST_Custom_Bundle_BrutalRavagerSet_HotDealsDesc"
+members = [1455, 1456, 1457, 1458, 1460, 1461, 1462, 5045]
+
+# Bane's Toxic Set (38030, HD 20120106)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_BanesToxicSet"
+members = [1432, 1433, 1434, 1435, 1437, 1438, "2182 x25"]
+
+# National 10 (49466, HD 20120408)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_National10"
+members = [175, 200, 295, 299, 433, 435, 478, 506, 541, 1482]
+
+# National FVA Winner! (49517, HD 20120408)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_NationalFVAWinner"
+members = [137, 410, 485, 1115, 1257, 1298, 1701, 1703]
+
+# Black Ninja Bundle (22429, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_BlackNinjaBundle"
+members = [487, 496, 502, 511, 1025, 1036]
+
+# GOS Dark Ops Set (24521, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_GOSDarkOpsSet"
+members = [1291, 1292, 1293, 1294, 1295, 1296, 1298]
+
+# Blackbeard's Buccaneer Set (36878, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_BlackbeardsBuccaneerSet"
+members = [1386, 1387, 1389, 1390, 1391, 1392, "2178 x25", 3201]
+
+# Dr. Doktor's Set (47819, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_DrDoktorsSet"
+description = "WEST_Custom_Bundle_DrDoktorsSet_HotDealsDesc"
+members = [1667, 1668, 1669, 1670, 1671, 1673, 5054]
+
+# Track Hunter's Set (46268, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_TrackHuntersSet"
+description = "WEST_Custom_Bundle_TrackHuntersSet_HotDealsDesc"
+members = [1567, 1568, 1569, 1570, 1571, 1572, 1573, 1574, 1649]
+
+# Destroyer Drone's Set (49015, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_DestroyerDronesSet"
+description = "WEST_Custom_Bundle_DestroyerDronesSet_HotDealsDesc"
+members = [1700, 1701, 1702, 1703, 1704, 1710, "2191 x25"]
+
+# Black Jack Bill's Set (50722, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_BlackJackBillSet"
+description = "WEST_Custom_Bundle_BlackJackBillSet_HotDealsDesc"
+members = [1809, 1811, 1812, 1813, 1875, 1881, 1888]
+
+# Lion's Knight Set (51575, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_LionKnightSet"
+description = "WEST_Custom_Bundle_LionKnightSet_HotDealsDesc"
+members = [601, 602, 603, 604, 605, 606]
+
+# Lion's Squire Set (51889, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_LionSquireSet"
+description = "WEST_Custom_Bundle_LionSquireSet_HotDealsDesc"
+members = [557, 558, 559, 599, 600]
+
+# Galactic Set (49923, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_GalacticSet"
+description = "WEST_Custom_Bundle_GalacticSet_HotDealsDesc"
+members = [1728, 1741, 1742, 1743, 1744, 1745, 1746]
+
+# Navaja Roja's Set (50674, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_NavajaRojaSet"
+description = "WEST_Custom_Bundle_NavajaRojaSet_HotDealsDesc"
+members = [1803, 1804, 1806, 1807, 1808, 1871, 1874, 1879, 1925]
+
+# El Diablo Rojo's Set (51025, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_ElDiabloRojoSet"
+description = "WEST_Custom_Bundle_ElDiabloRojoSet_HotDealsDesc"
+members = [1795, 1796, 1797, 1798, 1799, 1800, 1801, "2195 x25"]
+
+# Kosmonaut's Set (49735, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_KosmonautsSet"
+description = "WEST_Custom_Bundle_KosmonautsSet_HotDealsDesc"
+members = [1747, 1748, 1749, 1750, 1751, 1752]
+
+# Space Seeker's Set (50021, HD 20120702)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_SpaceSeekersSet"
+description = "WEST_Custom_Bundle_SpaceSeekersSet_HotDealsDesc"
+members = [1719, 1720, 1721, 1722]
+
+# Fritz's Formal Set (48504, HD 20121019)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_FritzsFormalSet"
+description = "WEST_Custom_Bundle_FritzsFormalSet_HotDealsDesc"
+members = [1308, 1309, 1310, 1311, 1312]
+
+# Agent Eks' Set (55381, HD 20121019)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_AgentEksSet"
+description = "WEST_Custom_Bundle_AgentEksSet_HotDealsDesc"
+members = [861, 865, 870, 873, 878, 881, 886]
+
+# Jimmy's Set (55655, HD 20121019)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_JimmysSet"
+description = "WEST_Custom_Bundle_JimmysSet_HotDealsDesc"
+members = [866, 868, 871, 874, 882, 885]
+
+# Black Widow Set (35092, HD 20111007)
+[[deals.sets]]
+name = "WEST_Custom_Bundle_BlackWidowSet"
+members = [1360, 3198]

@@ -63,7 +63,7 @@ def extract(game: Game, folder: Path) -> CatalogueFile:
     if rules is None:
         raise ExtractionError(f"{game.name} has no catalogue")
     items, tables = _definitions(rules, folder, _read_fields(game))
-    texts = _texts(rules, folder, _named(rules, items))
+    texts = _texts(rules, folder, _named(game, items))
     items, icons = _icons(rules, folder, items, _shown(game, items, texts[BASE_LANGUAGE]))
     daily_missions, experience = _executable(rules, folder / game.executable, items)
     document = CatalogueDocument(
@@ -116,10 +116,15 @@ def _definitions(
     return list(items.values()), tables
 
 
-def _named(rules: CatalogueRules, found: Sequence[CatalogueItem]) -> set[str]:
-    # The texts that the site and Magma show, by the ids that text_id gives: the items' names.
+def _named(game: Game, found: Sequence[CatalogueItem]) -> set[str]:
+    # The texts that the site and Magma show, by the ids that text_id gives: the items' names
+    # and the hot deals' texts.
+    rules = game.catalogue
+    if rules is None:
+        return set()
     items = catalogue_items(rules, found)
-    return {name for item in items.values() for name in item.names}
+    texts = game.deals.texts if game.deals else set()
+    return {name for item in items.values() for name in item.names} | {text_id(t) for t in texts}
 
 
 def _texts(rules: CatalogueRules, folder: Path, named: set[str]) -> dict[str, dict[str, str]]:

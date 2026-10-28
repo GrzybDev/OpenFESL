@@ -10,8 +10,8 @@ from babel.lists import format_list
 
 from openfesl.core.calendar import Period, periods
 from openfesl.core.catalogues import Catalogue, Catalogues
-from openfesl.core.deal_picks import History, NewDeal, pick_items
-from openfesl.core.deal_rules import DealRules
+from openfesl.core.deal_picks import History, NewDeal, pick_items, pick_offers
+from openfesl.core.deal_rules import DealRules, ItemSection, OfferSection
 from openfesl.core.games import Game
 from openfesl.core.overrides import overridden
 from openfesl.core.policies import SettingStore
@@ -31,7 +31,9 @@ type Maker = Callable[[History], list[NewDeal]]
 class DealStore(Protocol):
     """Where the rotation keeps the bundles it made."""
 
-    async def generate(self, game: str, section: str, period: Period, make: Maker) -> None:
+    async def generate(
+        self, game: str, section: str, period: Period, gap: int, make: Maker
+    ) -> None:
         """Store the bundles of a period of a section once, as the first to look makes them.
 
         Stores on other servers take turns, and a period that has bundles keeps them.
@@ -40,6 +42,7 @@ class DealStore(Protocol):
             game: The game's data-file name.
             section: The section's name.
             period: The period.
+            gap: The days after a pick left the section before it may come back.
             make: Makes the bundles from what the section must not repeat.
         """
 
@@ -183,16 +186,32 @@ class HotDeals:
         catalogue = await self._catalogues.of(game, BASE_LANGUAGE)
         if not catalogue.imported:
             return
-        for name, section in rules.sections.items():
+        # Offers before items, so that a period's items avoid the offers that run with them.
+        ordered = sorted(rules.sections.items(), key=lambda pair: pair[1].kind == "items")
+        for name, section in ordered:
             if not section.enabled:
                 continue
             for period in periods(section.schedule, now, rules.zone):
                 made = (game.id, name, period.start)
                 if made in self._made:
                     continue
-                make = partial(pick_items, game, rules, section, catalogue, random=self._random)
-                await self._store.generate(game.id, name, period, make)
+                gap = section.gap if isinstance(section, OfferSection) else 0
+                make = partial(_picked, game, rules, section, catalogue, self._random)
+                await self._store.generate(game.id, name, period, gap, make)
                 self._made.add(made)
+
+
+def _picked(
+    game: Game,
+    rules: DealRules,
+    section: ItemSection | OfferSection,
+    catalogue: Catalogue,
+    random: Random,
+    history: History,
+) -> list[NewDeal]:
+    if isinstance(section, ItemSection):
+        return pick_items(game, rules, section, catalogue, history, random)
+    return pick_offers(game, rules, section, catalogue, history, random)
 
 
 def _text(game: Game, catalogue: Catalogue, name: str, language: str, faction: str | None) -> str:
