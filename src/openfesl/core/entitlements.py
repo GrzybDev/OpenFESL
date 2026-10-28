@@ -118,6 +118,30 @@ class EntitlementStore(Protocol):
                 item when empty.
         """
 
+    async def holder(self, entitlement_id: int) -> int | None:
+        """Return the persona whose item in use an entitlement is, if it is one.
+
+        Args:
+            entitlement_id: The entitlement.
+        """
+
+    async def use_up(self, entitlement_id: int, uses: int) -> None:
+        """Take uses from a persona's item in use, leaving it none rather than fewer.
+
+        Args:
+            entitlement_id: The item's entitlement.
+            uses: How many uses were used.
+        """
+
+    async def take_out(self, entitlement_id: int, status: str) -> None:
+        """Take a persona's item out of use, or out of its list, as its game says.
+
+        Args:
+            entitlement_id: The item's entitlement, which is in use.
+            status: DISABLED, which ends a rental or an item limited by uses and keeps any
+                other listed out of use, or DELETED, which removes it.
+        """
+
 
 class EntitlementService:
     """The acct transactions that list entitlements and let dedicated servers grant them."""

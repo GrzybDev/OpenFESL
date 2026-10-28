@@ -23,6 +23,7 @@ from openfesl.core.hero_items import OwnWrites
 from openfesl.core.heroes import Heroes
 from openfesl.core.history import OnlineHistory
 from openfesl.core.hosting import Hosting
+from openfesl.core.item_writes import ItemWrites
 from openfesl.core.joining import Joining
 from openfesl.core.keys import KeyService
 from openfesl.core.launcher import LauncherService, LauncherSessions
@@ -108,6 +109,7 @@ class GameServices:
         self.purchases = Purchases(
             stores.products, stores.purchases, self.catalogues, self.heroes, stores.entitlements
         )
+        self.item_writes = ItemWrites(stores.entitlements)
         self.policies = GamePolicies(stores.settings)
         self.terms = Terms.load()
 

@@ -9,7 +9,7 @@ from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin
 from openfesl.core.entitlements import ACTIVE, Entitlement, EntitlementQuery, StatusChange
 from openfesl.core.games import Grant
-from openfesl.core.inventory import Held, Ownership, fold
+from openfesl.core.inventory import COUNTED, DELETED, RENTED, Held, Ownership, fold
 from openfesl.storage.admin import action_row
 from openfesl.storage.models import AdminActionRow, EntitlementRow
 
@@ -18,6 +18,8 @@ REVOKED = "DISABLED"
 
 # What an account owns itself, apart from what its personas own each.
 _ACCOUNTS = EntitlementRow.persona_id.is_(None)
+# A persona's item that the admin has not taken away, which its game may change.
+_IN_USE = (EntitlementRow.persona_id.is_not(None), EntitlementRow.status == ACTIVE)
 # A persona's item is named before the first '-' of its tag, how it is owned after.
 _item_number = func.split_part(EntitlementRow.tag, "-", 1)
 
@@ -194,6 +196,64 @@ class SqlEntitlementStore:
         async with self._sessions() as session:
             rows = await session.scalars(statement.order_by(EntitlementRow.id))
             return [_entitlement(row) for row in rows]
+
+    async def holder(self, entitlement_id: int) -> int | None:
+        """Return the persona whose item in use an entitlement is, if it is one.
+
+        Args:
+            entitlement_id: The entitlement.
+        """
+        async with self._sessions() as session:
+            return await session.scalar(
+                select(EntitlementRow.persona_id).where(
+                    EntitlementRow.id == entitlement_id, *_IN_USE
+                )
+            )
+
+    async def use_up(self, entitlement_id: int, uses: int) -> None:
+        """Take uses from a persona's item in use, leaving it none rather than fewer.
+
+        Args:
+            entitlement_id: The item's entitlement.
+            uses: How many uses were used.
+        """
+        async with self._sessions.begin() as session:
+            await session.execute(
+                update(EntitlementRow)
+                .where(EntitlementRow.id == entitlement_id, *_IN_USE)
+                .values(
+                    use_count=func.greatest(func.coalesce(EntitlementRow.use_count, 0) - uses, 0)
+                )
+            )
+
+    async def take_out(self, entitlement_id: int, status: str) -> None:
+        """Take a persona's item out of use, or out of its list, as its game says.
+
+        Args:
+            entitlement_id: The item's entitlement, which is in use.
+            status: DISABLED, which ends a rental or an item limited by uses and keeps any
+                other listed out of use, or DELETED, which removes it.
+        """
+        async with self._sessions.begin() as session:
+            row = await session.scalar(
+                select(EntitlementRow)
+                .where(EntitlementRow.id == entitlement_id, *_IN_USE)
+                .with_for_update()
+            )
+            if row is None:
+                return
+            ownership = _held(row).type
+            # The game disables the items that ran out (inferred), so a rental or uses end as
+            # they do by themselves, and the hero may rent or buy the item again.
+            if status == DELETED:
+                await session.delete(row)
+            elif ownership == RENTED:
+                now = datetime.now(UTC)
+                row.expires_at = min(row.expires_at or now, now)
+            elif ownership == COUNTED:
+                row.use_count = 0
+            else:
+                row.status = status
 
 
 async def add_item(

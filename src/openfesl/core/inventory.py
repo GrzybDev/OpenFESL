@@ -8,6 +8,10 @@ from datetime import datetime, timedelta
 PERMANENT = "unlm"
 RENTED = "tlmd"
 COUNTED = "lmct"
+# The statuses with which a game takes one of its hero's items out of use: an item it may no
+# longer use, and one it no longer lists (BFHeroes.exe 1.89 0x0069d7f4).
+DISABLED = "DISABLED"
+DELETED = "DELETED"
 # Every type a tag may name, in the order in which a game prefers them, any other one first
 # (0x007baaa6).
 _PREFERRED = (PERMANENT, "tlmg", "tlmp", RENTED, "lmrd", COUNTED)
