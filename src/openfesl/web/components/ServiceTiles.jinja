@@ -1,9 +1,10 @@
-{#def services: list, next: str = "", labelledby: str = "" #}
+{#def services: list, next: str = "", labelledby: str = "", action: str = "/sign-in/service" #}
 {# The sign-in services as centred tiles, each a button that continues on the service's own page,
-   which the tile names: its neutral glyph, its name and the host. While the page leaves, the
-   pressed tile wears the accent and its glyph turns into the spinning segment. #}
+   which the tile names: its neutral glyph, its name and the host. The form signs in, or links the
+   service on the account page. While the page leaves, the pressed tile wears the accent and its
+   glyph turns into the spinning segment. #}
 <form method="post"
-      action="{{ url('/sign-in/service') }}"
+      action="{{ url(action) }}"
       {% if labelledby %} aria-labelledby="{{ labelledby }}"{% endif %}
       class="service-tiles">
   <CsrfField />

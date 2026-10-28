@@ -1,4 +1,4 @@
-from collections.abc import Awaitable, Callable, Mapping
+from collections.abc import Awaitable, Callable, Mapping, Sequence
 from datetime import UTC, datetime, timedelta
 from typing import Any
 from urllib.parse import urlencode
@@ -9,6 +9,7 @@ from starlette.types import ASGIApp, Receive, Scope, Send
 
 from openfesl.core.accounts import Account
 from openfesl.core.identities import Identity
+from openfesl.core.problems import Problem
 from openfesl.core.sign_in import Refusal, SignInRefused
 from openfesl.core.texts import localize
 from openfesl.core.verification import VALID_FOR
@@ -27,6 +28,9 @@ WAITING = "waiting"
 PENDING = "pending"
 # The page where an account without a display name chooses one before any other of its pages.
 DISPLAY_NAME = "/account/display-name"
+ACCOUNT = "/account"
+# What the account page's last form left for one of its parts to say, until the page shows it.
+FORM = "account_form"
 # The notices' times, which the session keeps as ISO text.
 _TIMES = ("sent", "since", "expires", "last", "until")
 
@@ -197,6 +201,48 @@ def open_page(request: Request, path: str, back: str = "") -> RedirectResponse:
     """
     target = localize(path, request.state.language)
     return RedirectResponse(f"{target}?{urlencode({'next': back})}" if back else target, 303)
+
+
+def answered(
+    request: Request, part: str, problems: Sequence[Problem] = (), **said: str | bool
+) -> RedirectResponse:
+    """Return to a part of the account page, which says what came of the form sent from it.
+
+    Where scripts run, only that part is swapped in place; without them the page opens at it.
+
+    Args:
+        request: The form's request.
+        part: The part's id, such as profile.
+        problems: What is wrong with the values the form sent.
+        said: What else the part says, such as which form it was and the value it sent; nothing
+            for a saved change, which a toast reports.
+    """
+    if problems or said:
+        kept = [[problem.field, problem.kind, problem.detail] for problem in problems]
+        request.session[FORM] = {"part": part, "problems": kept, **said}
+    return RedirectResponse(f"{localize(ACCOUNT, request.state.language)}#{part}", 303)
+
+
+async def account_of(
+    request: Request, accounts: Callable[[int], Awaitable[Account | None]]
+) -> Account | RedirectResponse:
+    """Return the account signed in with a request, or the page that has to come first.
+
+    A visitor who is not signed in signs in and comes back to the account page; an account
+    without a display name chooses one first.
+
+    Args:
+        request: The request of one of the account page's pages or forms.
+        accounts: Returns an account by its number.
+    """
+    player = signed_in(request)
+    account = await accounts(player.account_id) if player else None
+    if account is None:
+        notify(request, "needed", page="account")
+        return open_page(request, "/sign-in", localize(ACCOUNT, request.state.language))
+    if account.display_name is None:
+        return open_page(request, DISPLAY_NAME)
+    return account
 
 
 class PlayerSessionMiddleware:

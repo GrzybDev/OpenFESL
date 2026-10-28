@@ -1,9 +1,9 @@
-from collections.abc import Awaitable, Callable, Sequence
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Any
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from fastapi.responses import HTMLResponse, Response
 
 from openfesl.core.account_management import AccountManagement, AccountOverview
 from openfesl.core.accounts import Account
@@ -16,20 +16,16 @@ from openfesl.core.rankings import RankingStore
 from openfesl.core.registration import Terms, countries
 from openfesl.core.sign_in import LinkSent, WebSignIn
 from openfesl.core.stats import bucket_of, partition_of
-from openfesl.core.texts import localize, translate
+from openfesl.core.texts import translate
 from openfesl.core.verification import VALID_FOR
 from openfesl.protocol.rank import Period
 from openfesl.web.account.fields import field_errors
 from openfesl.web.account.services import SignInServices
-from openfesl.web.account.session import DISPLAY_NAME, open_page, shown, signed_in
+from openfesl.web.account.session import ACCOUNT, FORM, account_of, answered, open_page, shown
 from openfesl.web.account.sign_in import password_games
 from openfesl.web.pages import Pages, Toast
-from openfesl.web.sessions import form_matches, form_token, notify, toast
+from openfesl.web.sessions import form_matches, form_token, toast
 from openfesl.web.turnstile import Turnstile
-
-ACCOUNT = "/account"
-# What the account page's last form left for one of its parts to say, until the page shows it.
-FORM = "account_form"
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,48 +41,6 @@ class PersonaLine:
     persona: Persona
     rank: int | None = None
     score: int = 0
-
-
-def answered(
-    request: Request, part: str, problems: Sequence[Problem] = (), **said: str | bool
-) -> RedirectResponse:
-    """Return to a part of the account page, which says what came of the form sent from it.
-
-    Where scripts run, only that part is swapped in place; without them the page opens at it.
-
-    Args:
-        request: The form's request.
-        part: The part's id, such as profile.
-        problems: What is wrong with the values the form sent.
-        said: What else the part says, such as which form it was and the value it sent; nothing
-            for a saved change, which a toast reports.
-    """
-    if problems or said:
-        kept = [[problem.field, problem.kind, problem.detail] for problem in problems]
-        request.session[FORM] = {"part": part, "problems": kept, **said}
-    return RedirectResponse(f"{localize(ACCOUNT, request.state.language)}#{part}", 303)
-
-
-async def account_of(
-    request: Request, accounts: Callable[[int], Awaitable[Account | None]]
-) -> Account | RedirectResponse:
-    """Return the account signed in with a request, or the page that has to come first.
-
-    A visitor who is not signed in signs in and comes back to the account page; an account
-    without a display name chooses one first.
-
-    Args:
-        request: The request of one of the account page's pages or forms.
-        accounts: Returns an account by its number.
-    """
-    player = signed_in(request)
-    account = await accounts(player.account_id) if player else None
-    if account is None:
-        notify(request, "needed", page="account")
-        return open_page(request, "/sign-in", localize(ACCOUNT, request.state.language))
-    if account.display_name is None:
-        return open_page(request, DISPLAY_NAME)
-    return account
 
 
 class AccountPages:
@@ -233,6 +187,7 @@ class AccountPages:
         )
         if self._turnstile:
             self._turnstile.allow(page)
+        self._services.allow_forms(page)
         return page
 
     async def _lines(self, game: Game, personas: list[Persona]) -> list[PersonaLine]:

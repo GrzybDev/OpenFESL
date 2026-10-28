@@ -1,15 +1,19 @@
 {#def overview, said: dict, errors: dict, games: list, services: list, mail: bool #}
 {# The account page's sign-in and security: the ways in, the first of which is the game password.
    Its fold sets it or changes it with the current one, and leads to its removal, which asks
-   first and is offered only while a linked service stays a way in. #}
+   first and is offered only while a linked service stays a way in. Each linked service unlinks
+   unless it is the last way in, and the services not linked yet link through their tiles. #}
 {% set form = said.get("form") %}
 {% set notice = said.get("notice") %}
 {% set password_errors = errors if form == "password" else {} %}
 {% set used = listed(games) %}
+{% set offered = services|rejectattr("id", "in", overview.linked|map(attribute="service")|list)|list %}
 {% set fields = [("current_password", "current-password", _("web.account.password.current")), ("password", "new-password", _("web.account.password.new") if overview.password else _("web.account.password"))] %}
 <AccountPart id="sign-in" :title="_('web.account.security')" :extra="_n('web.account.ways', overview.ways_in)">
 {% if notice == "form" %}
   <Alert :label="_('web.account.notice.not_saved')" :title="_('web.account.notice.form')" glyph="warn" alert>{{ _("web.account.notice.form.text") }}</Alert>
+{% elif notice in ("failed", "unreachable", "other_account", "service_linked") %}
+  <Alert :label="_('web.account.link.not_linked')" :title="_('web.account.link.' ~ notice, service=said.service)" glyph="warn" alert>{{ _("web.account.link." ~ notice ~ ".text", service=said.service) }}</Alert>
 {% elif notice == "last" %}
   <Alert :label="_('web.account.notice.not_saved')" :title="_('web.account.ways.last')" glyph="warn" alert />
 {% elif password_errors %}
@@ -96,8 +100,58 @@
           {% endif %}
         </details>
       </li>
+      {% for identity in overview.linked %}
+        {% set view = (services|selectattr("id", "equalto", identity.service)|list or [none])|first %}
+        {% set name = view.name if view else identity.service %}
+        <li>
+          <div class="way">
+            <span aria-hidden="true"
+                  class="badge way-glyph"><Icon :name="view.glyph if view else 'key'" :size="22" stroke="#0A0A0A" /></span>
+            <span class="way-text">
+              <span class="way-name">{{ name }}
+                {% if player and player.way == name %}<span class="way-chip">{{ _("web.account.ways.this_session") }}</span>{% endif %}
+              </span>
+              <span class="way-state">{{ _("web.account.ways.linked", name=identity.name, date=when(identity.linked, "yMMMd")) }}</span>
+            </span>
+            {% if overview.ways_in > 1 or not view %}
+              <AccountForm :action="'/account/services/' ~ identity.service ~ '/unlink'" part="sign-in">
+              <button type="submit" class="form-button">
+                <span aria-hidden="true" class="form-glyph"><Icon name="x" :size="14" stroke="#F4F4EE" /></span>{{ _("web.account.ways.unlink") }}<span class="sr-only"> {{ name }}</span>
+              </button>
+              </AccountForm>
+            {% else %}
+              <button type="button"
+                      disabled
+                      aria-describedby="way-last"
+                      class="form-button">
+                <span aria-hidden="true" class="form-glyph"><Icon name="x" :size="14" stroke="#F4F4EE" /></span>{{ _("web.account.ways.unlink") }}<span class="sr-only"> {{ name }}</span>
+              </button>
+            {% endif %}
+          </div>
+        </li>
+        {% if view and overview.ways_in == 1 %}
+          <li id="way-last" class="way-reason">
+            <span aria-hidden="true"
+                  class="badge"><Icon name="lock" :size="14" stroke="#0A0A0A" fill="#0A0A0A" /></span>
+            <span>{{ _("web.account.ways.last_service", service=name) }}</span>
+          </li>
+        {% endif %}
+      {% endfor %}
     </ul>
-    <p class="body-text side-note">{{ _("web.account.ways.note") }}</p>
+    <p class="body-text side-note">{{ _("web.account.ways.note") }}{% if overview.linked %} {{ _("web.account.ways.unlink.note") }}{% endif %}</p>
   </section>
+  {% if services %}
+    <div class="account-side security-more">
+      <section aria-labelledby="link-title">
+        <Bar tag="h3" id="link-title">{{ _("web.account.link") }}</Bar>
+        {% if offered %}
+          <ServiceTiles :services="offered" labelledby="link-title" action="/account/services/link" />
+          <p class="body-text side-note">{{ _("web.account.link.note") }}</p>
+        {% else %}
+          <p class="bar-text body-text">{{ _("web.account.link.all") }}</p>
+        {% endif %}
+      </section>
+    </div>
+  {% endif %}
 </div>
 </AccountPart>

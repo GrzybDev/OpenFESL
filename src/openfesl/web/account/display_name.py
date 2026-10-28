@@ -10,9 +10,8 @@ from openfesl.core.problems import Problem
 from openfesl.core.registration import Terms
 from openfesl.core.texts import localize, translate
 from openfesl.web.account.fields import field_errors
-from openfesl.web.account.page import answered
 from openfesl.web.account.services import SignInServices
-from openfesl.web.account.session import DISPLAY_NAME, SITE, open_page, signed_in
+from openfesl.web.account.session import DISPLAY_NAME, SITE, answered, open_page, signed_in
 from openfesl.web.pages import Pages
 from openfesl.web.sessions import form_matches, form_token, inside, notify, toast
 

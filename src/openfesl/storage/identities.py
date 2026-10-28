@@ -1,3 +1,4 @@
+from collections.abc import Collection
 from datetime import UTC, datetime
 
 from sqlalchemy import delete, select
@@ -7,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from openfesl.core.identities import Identity, LinkedIdentity
 from openfesl.core.proofs import KeptProof
 from openfesl.core.verification import Link
+from openfesl.storage.accounts import lock_ways_in
 from openfesl.storage.models import SignInIdentityRow, SignInProofRow
 
 
@@ -76,6 +78,32 @@ class SqlIdentityStore:
                 .returning(SignInIdentityRow.account_id)
             )
         return linked is not None
+
+    async def unlink(self, account_id: int, service: str, services: Collection[str]) -> bool:
+        """Unlink an account's identity at a service, which no longer signs it in.
+
+        Args:
+            account_id: The account.
+            service: The service's id.
+            services: The ids of the configured sign-in services, whose identities alone sign in.
+
+        Returns:
+            Whether it was unlinked, which it is not when the account has none there or when it
+            is the account's last way in, with no game password and no other identity at a
+            configured service.
+        """
+        async with self._sessions.begin() as session:
+            if not await lock_ways_in(session, account_id, services, unlinked=service):
+                return False
+            unlinked = await session.scalar(
+                delete(SignInIdentityRow)
+                .where(
+                    SignInIdentityRow.account_id == account_id,
+                    SignInIdentityRow.service == service,
+                )
+                .returning(SignInIdentityRow.subject)
+            )
+        return unlinked is not None
 
     async def keep_proof(self, account_id: int, identity: Identity, link: Link) -> None:
         """Keep a proof link, which replaces the account's earlier ones for the same service.

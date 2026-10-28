@@ -1,6 +1,6 @@
 import httpx2
 import pytest
-from accounts import PASSWORD, execute, post_registration, post_sign_in
+from accounts import PASSWORD, execute, post_registration, post_sign_in, returned
 from identity import IdentityProvider, form_token
 from support import FESL, Mailbox, cli, entitle_game, game, log_in_persona, login, markup
 
@@ -212,3 +212,68 @@ async def test_a_wrong_current_game_password_counts_toward_the_addresss_pause(
         )
     async with httpx2.AsyncClient() as other:
         assert (await post_sign_in(other, base, "bob@example.test", PASSWORD)).status_code == 429
+
+
+async def test_services_link_to_the_account_once_and_unlink_unless_they_are_the_last_way_in(
+    services: tuple[IdentityProvider, IdentityProvider], database_url: str, base: str
+) -> None:
+    connect, plain = services
+    await execute(
+        database_url,
+        "UPDATE account SET display_name = 'Invented_Ann' WHERE nuid = 'ann@example.test'",
+    )
+    await execute(
+        database_url,
+        "INSERT INTO sign_in_identity (service, subject, account_id, name)"
+        " SELECT 'connect', 'c-bob', id, 'bob-connect' FROM account"
+        " WHERE nuid = 'bob@example.test'",
+    )
+    async with httpx2.AsyncClient() as client:
+        await post_sign_in(client, base, "ann@example.test", PASSWORD)
+        page = await client.get(f"{base}/account")
+        csrf = form_token(page.text)
+        assert page.text.count('action="/account/services/link"') == 1
+
+        async def link(service: str) -> str:
+            started = await client.post(
+                f"{base}/account/services/link", data={"csrf": csrf, "service": service}
+            )
+            done = await returned(client, base, started)
+            assert done.headers["location"] == "/account#sign-in"
+            return (await client.get(f"{base}/account")).text
+
+        plain.user = {"id": 4711, "login": "ann-plain"}
+        assert "Invented Plain linked as ann-plain." in await link("plain")
+        # An identity opens one account, which the refusal does not name.
+        connect.user = {"sub": "c-bob"}
+        refused = await link("connect")
+        assert "This Invented Connect account already opens another OpenFESL account." in refused
+        assert "bob" not in refused
+        connect.cancel = True
+        assert "Linking Invented Connect did not complete." in await link("connect")
+
+        # With the game password gone, the service is the last way in and stays, as an identity
+        # of a service the deployment no longer configures signs nothing in.
+        await execute(
+            database_url,
+            "INSERT INTO sign_in_identity (service, subject, account_id, name)"
+            " SELECT 'retired', 'r-ann', id, 'ann-retired' FROM account"
+            " WHERE nuid = 'ann@example.test'",
+        )
+        removal = {"csrf": csrf, "confirmed": "1"}
+        await client.post(f"{base}/account/game-password/remove", data=removal)
+        kept = await client.post(f"{base}/account/services/plain/unlink", data={"csrf": csrf})
+        assert kept.headers["location"] == "/account#sign-in"
+        shown = (await client.get(f"{base}/account")).text
+        assert "The last way in cannot be removed." in shown
+        assert "Invented Plain is the last way in." in shown
+        await client.post(f"{base}/account/services/retired/unlink", data={"csrf": csrf})
+        assert "retired unlinked." in (await client.get(f"{base}/account")).text
+
+        await client.post(
+            f"{base}/account/game-password", data={"csrf": csrf, "password": "Lamp-Kettle-88"}
+        )
+        await client.post(f"{base}/account/services/plain/unlink", data={"csrf": csrf})
+        shown = (await client.get(f"{base}/account")).text
+        assert "Invented Plain unlinked. Link a service lists it again." in shown
+        assert shown.count('name="service"') == 2

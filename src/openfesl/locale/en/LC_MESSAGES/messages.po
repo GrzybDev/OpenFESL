@@ -5309,3 +5309,68 @@ msgstr ""
 
 msgid "web.account.games.set_password"
 msgstr "Set a game password under Sign-in and security"
+
+msgid "web.account.ways.this_session"
+msgstr "This session"
+
+msgid "web.account.ways.linked"
+msgstr "Linked as %(name)s · %(date)s"
+
+msgid "web.account.ways.unlink"
+msgstr "Unlink"
+
+msgid "web.account.ways.unlink.note"
+msgstr "Unlinking a service leaves the account and all it holds as they are."
+
+msgid "web.account.ways.last_service"
+msgstr ""
+"%(service)s is the last way in. It can be unlinked once another service is linked or a game password is set."
+
+msgid "web.account.link"
+msgstr "Link a service"
+
+msgid "web.account.link.note"
+msgstr ""
+"Only services this site offers that are not linked yet appear here. A linked service signs in without the game password."
+
+msgid "web.account.link.all"
+msgstr "Every service this site offers is linked."
+
+msgid "web.account.link.not_linked"
+msgstr "Not linked"
+
+msgid "web.account.link.failed"
+msgstr "Linking %(service)s did not complete."
+
+msgid "web.account.link.failed.text"
+msgstr ""
+"%(service)s returned without a signed-in account. The account's ways in are as they were."
+
+msgid "web.account.link.unreachable"
+msgstr "%(service)s could not be reached."
+
+msgid "web.account.link.unreachable.text"
+msgstr "Nothing was linked; the account's ways in are as they were."
+
+msgid "web.account.link.other_account"
+msgstr "This %(service)s account already opens another OpenFESL account."
+
+msgid "web.account.link.other_account.text"
+msgstr ""
+"A service account opens one OpenFESL account only. Signing in through %(service)s opens that other account; once %(service)s is unlinked there, this account can link it."
+
+msgid "web.account.link.service_linked"
+msgstr "Another %(service)s account is linked to this account already."
+
+msgid "web.account.link.service_linked.text"
+msgstr ""
+"An account links one account of each service; unlinking the other one first lets this one be linked."
+
+msgid "web.account.toast.service_linked"
+msgstr "%(service)s linked as %(name)s."
+
+msgid "web.account.toast.unlinked"
+msgstr "%(service)s unlinked."
+
+msgid "web.account.toast.unlinked.offered"
+msgstr "%(service)s unlinked. Link a service lists it again."

@@ -5474,3 +5474,67 @@ msgstr ""
 
 msgid "web.account.games.set_password"
 msgstr "Ustaw hasło do gier w sekcji Logowanie i bezpieczeństwo"
+
+msgid "web.account.ways.this_session"
+msgstr "Ta sesja"
+
+msgid "web.account.ways.linked"
+msgstr "Połączono jako %(name)s · %(date)s"
+
+msgid "web.account.ways.unlink"
+msgstr "Odłącz"
+
+msgid "web.account.ways.unlink.note"
+msgstr "Odłączenie usługi zostawia konto i wszystko, co ma, bez zmian."
+
+msgid "web.account.ways.last_service"
+msgstr ""
+"%(service)s to ostatni sposób logowania. Można go odłączyć po połączeniu innej usługi lub ustawieniu hasła do gier."
+
+msgid "web.account.link"
+msgstr "Połącz usługę"
+
+msgid "web.account.link.note"
+msgstr ""
+"Pojawiają się tu tylko usługi, które ta strona oferuje i które nie są jeszcze połączone. Połączona usługa loguje bez hasła do gier."
+
+msgid "web.account.link.all"
+msgstr "Wszystkie usługi oferowane przez tę stronę są połączone."
+
+msgid "web.account.link.not_linked"
+msgstr "Nie połączono"
+
+msgid "web.account.link.failed"
+msgstr "Łączenie z usługą %(service)s nie zostało ukończone."
+
+msgid "web.account.link.failed.text"
+msgstr "Usługa %(service)s nie zwróciła zalogowanego konta. Sposoby logowania konta pozostały bez zmian."
+
+msgid "web.account.link.unreachable"
+msgstr "Nie udało się połączyć z usługą %(service)s."
+
+msgid "web.account.link.unreachable.text"
+msgstr ""
+"Nic nie zostało połączone; sposoby logowania konta pozostały bez zmian."
+
+msgid "web.account.link.other_account"
+msgstr "To konto w usłudze %(service)s otwiera już inne konto OpenFESL."
+
+msgid "web.account.link.other_account.text"
+msgstr "Konto usługi otwiera tylko jedno konto OpenFESL. Logowanie przez usługę %(service)s otwiera tamto konto; po odłączeniu od niego usługi %(service)s to konto może ją połączyć."
+
+msgid "web.account.link.service_linked"
+msgstr "Do tego konta jest już połączone inne konto w usłudze %(service)s."
+
+msgid "web.account.link.service_linked.text"
+msgstr ""
+"Konto łączy po jednym koncie każdej usługi; odłączenie tamtego pozwoli połączyć to."
+
+msgid "web.account.toast.service_linked"
+msgstr "Połączono usługę %(service)s jako %(name)s."
+
+msgid "web.account.toast.unlinked"
+msgstr "Odłączono usługę %(service)s."
+
+msgid "web.account.toast.unlinked.offered"
+msgstr "Odłączono usługę %(service)s. Sekcja Połącz usługę znów ją pokazuje."

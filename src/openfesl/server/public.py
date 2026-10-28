@@ -77,7 +77,11 @@ def include_public_routes(
     app.include_router(launcher_routes(lambda: app.state.launcher))
     turnstile = settings.turnstile
     sign_in_services = SignInServices(
-        settings.sign_in_services, settings.public_url, lambda: app.state.sign_in
+        settings.sign_in_services,
+        settings.public_url,
+        lambda: app.state.sign_in,
+        stores.accounts.account,
+        lambda: app.state.account_management,
     )
     sign_in = SignInPages(
         pages,

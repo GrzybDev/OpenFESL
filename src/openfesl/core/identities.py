@@ -1,3 +1,4 @@
+from collections.abc import Collection
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
@@ -65,4 +66,18 @@ class IdentityStore(Protocol):
         Returns:
             Whether it was linked, which it is not when it opens another account or the account
             has an identity of that service already.
+        """
+
+    async def unlink(self, account_id: int, service: str, services: Collection[str]) -> bool:
+        """Unlink an account's identity at a service, which no longer signs it in.
+
+        Args:
+            account_id: The account.
+            service: The service's id.
+            services: The ids of the configured sign-in services, whose identities alone sign in.
+
+        Returns:
+            Whether it was unlinked, which it is not when the account has none there or when it
+            is the account's last way in, with no game password and no other identity at a
+            configured service.
         """

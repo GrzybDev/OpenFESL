@@ -1,11 +1,12 @@
 from collections.abc import Collection
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum, auto
 
 from openfesl.core.accounts import Account, AccountStore
 from openfesl.core.fesl import TransactionError
 from openfesl.core.games import Game, Games
-from openfesl.core.identities import IdentityStore, LinkedIdentity
+from openfesl.core.identities import Identity, IdentityStore, LinkedIdentity
 from openfesl.core.limits import Attempts
 from openfesl.core.logins import Logins
 from openfesl.core.personas import Persona, PersonaStore
@@ -24,6 +25,15 @@ class GamePersonas:
 
     game: Game
     personas: list[Persona]
+
+
+class LinkRefusal(Enum):
+    """Why an identity at a sign-in service was not linked to an account."""
+
+    OTHER_ACCOUNT = auto()
+    """The identity opens another account, which is not named."""
+    SERVICE_LINKED = auto()
+    """The account has another identity of the same service, and one is the most."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -170,3 +180,34 @@ class AccountManagement:
             Whether it was removed, which it is not while it is the account's last way in.
         """
         return await self._accounts.remove_password(account.id, self._services)
+
+    async def link(self, account: Account, identity: Identity) -> LinkRefusal | None:
+        """Link an identity at a sign-in service to an account, which it signs in from then on.
+
+        An identity opens one account only, and an account has one identity per service.
+
+        Args:
+            account: The account, signed in on the site.
+            identity: Who signed in through the service.
+
+        Returns:
+            Why it was not linked; None once it is linked, as also when it was already.
+        """
+        if await self._identities.link(account.id, identity):
+            return None
+        owner = await self._identities.account_of(identity.service, identity.subject)
+        if owner == account.id:
+            return None
+        return LinkRefusal.OTHER_ACCOUNT if owner is not None else LinkRefusal.SERVICE_LINKED
+
+    async def unlink(self, account: Account, service: str) -> bool:
+        """Unlink an account's identity at a sign-in service, unless it is the last way in.
+
+        Args:
+            account: The account.
+            service: The service's id.
+
+        Returns:
+            Whether it was unlinked.
+        """
+        return await self._identities.unlink(account.id, service, self._services)

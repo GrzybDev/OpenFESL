@@ -377,7 +377,7 @@ class SqlAccountStore:
             service is linked to the account, as the password is then its last way in.
         """
         async with self._sessions.begin() as session:
-            if not await lock_ways_in(session, account_id, services):
+            if not await lock_ways_in(session, account_id, services, unlinked=None):
                 return False
             await _set_password(session, account_id, None)
         return True
@@ -586,8 +586,10 @@ class SqlAccountStore:
             session.add(action_row(AdminAction.ACCOUNT_VERIFIED, str(account_id), {}, admin))
 
 
-async def lock_ways_in(session: AsyncSession, account_id: int, services: Collection[str]) -> bool:
-    """Lock an account's ways in and return whether an identity at a sign-in service is one.
+async def lock_ways_in(
+    session: AsyncSession, account_id: int, services: Collection[str], unlinked: str | None
+) -> bool:
+    """Lock an account's ways in and return whether one stays after a change to them.
 
     The lock makes concurrent changes to the same account's ways in wait for each other, so
     that two of them cannot together leave it without one.
@@ -596,19 +598,21 @@ async def lock_ways_in(session: AsyncSession, account_id: int, services: Collect
         session: The transaction that changes them.
         account_id: The account.
         services: The ids of the configured sign-in services, whose identities alone sign in.
+        unlinked: The service whose identity the change unlinks; None for a change that removes
+            the game password.
     """
-    await session.execute(
-        select(AccountRow.id).where(AccountRow.id == account_id).with_for_update()
+    password = await session.scalar(
+        select(AccountRow.password_hash).where(AccountRow.id == account_id).with_for_update()
     )
-    linked = await session.scalar(
-        select(
-            exists().where(
-                SignInIdentityRow.account_id == account_id,
-                SignInIdentityRow.service.in_(services),
-            )
-        )
+    # Unlinking beside the game password, or an identity that signs nothing in, leaves a way in.
+    if unlinked is not None and (password is not None or unlinked not in services):
+        return True
+    others = exists().where(
+        SignInIdentityRow.account_id == account_id,
+        SignInIdentityRow.service != (unlinked or ""),
+        SignInIdentityRow.service.in_(services),
     )
-    return bool(linked)
+    return bool(await session.scalar(select(others)))
 
 
 async def _set_password(

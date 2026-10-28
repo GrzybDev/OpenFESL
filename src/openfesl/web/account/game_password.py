@@ -7,9 +7,8 @@ from openfesl.core.account_management import AccountManagement, AccountOverview
 from openfesl.core.accounts import Account
 from openfesl.core.games import Games
 from openfesl.core.texts import localize, translate
-from openfesl.web.account.page import ACCOUNT, account_of, answered
 from openfesl.web.account.services import SignInServices
-from openfesl.web.account.session import renew
+from openfesl.web.account.session import ACCOUNT, account_of, answered, renew
 from openfesl.web.pages import Pages, listed
 from openfesl.web.sessions import form_matches, toast
 
