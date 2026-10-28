@@ -131,3 +131,14 @@
     cursor: not-allowed;
   }
 }
+
+/* The session's buttons share one row. */
+@layer components {
+  .security-sign-out {
+    margin-top: 2px;
+
+    form {
+      display: grid;
+    }
+  }
+}

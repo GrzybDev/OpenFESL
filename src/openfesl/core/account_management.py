@@ -45,6 +45,7 @@ class AccountOverview:
         created: When it was made.
         password: Whether it has a game password.
         linked: The identities at sign-in services linked to it, the oldest first.
+        remembered: How many logins the games remember for it.
         games: Every game with the account's personas in it, the game it was made in first.
         ways_in: How many ways in it has: its game password and its identities at the
             configured services, as one of a service no longer configured signs nothing in.
@@ -54,6 +55,7 @@ class AccountOverview:
     created: datetime
     password: bool
     linked: list[LinkedIdentity]
+    remembered: int
     games: list[GamePersonas]
     ways_in: int
 
@@ -111,6 +113,7 @@ class AccountManagement:
             record.created,
             password,
             linked,
+            len(await self._accounts.remembered(account.id)),
             [
                 GamePersonas(game, await self._personas.of_account(account.id, game.namespace))
                 for game in games
@@ -211,3 +214,13 @@ class AccountManagement:
             Whether it was unlinked.
         """
         return await self._identities.unlink(account.id, service, self._services)
+
+    async def sign_out_everywhere(self, account: Account) -> None:
+        """End every web session of an account and the logins the games remember for it.
+
+        Each game then asks for the game password once more on each PC.
+
+        Args:
+            account: The account.
+        """
+        await self._accounts.end_sessions(account.id)

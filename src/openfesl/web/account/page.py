@@ -1,5 +1,6 @@
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, Request
@@ -21,7 +22,17 @@ from openfesl.core.verification import VALID_FOR
 from openfesl.protocol.rank import Period
 from openfesl.web.account.fields import field_errors
 from openfesl.web.account.services import SignInServices
-from openfesl.web.account.session import ACCOUNT, FORM, account_of, answered, open_page, shown
+from openfesl.web.account.session import (
+    ACCOUNT,
+    FORM,
+    PLAYER,
+    account_of,
+    answered,
+    end,
+    open_page,
+    shown,
+    to_sign_in,
+)
 from openfesl.web.account.sign_in import password_games
 from openfesl.web.pages import Pages, Toast
 from openfesl.web.sessions import form_matches, form_token, toast
@@ -90,7 +101,7 @@ class AccountPages:
         self._turnstile = turnstile
 
     def routes(self) -> APIRouter:
-        """Return the account page and the forms of its profile."""
+        """Return the account page, the forms of its profile and the sign-out everywhere."""
         router = APIRouter()
 
         @router.get(ACCOUNT, response_class=HTMLResponse)
@@ -117,6 +128,17 @@ class AccountPages:
             name = dict(countries(request.state.language))[country.upper()]
             toast(request, "web.account.toast.country", country=name)
             return answered(request, "profile")
+
+        @router.post("/sign-out/everywhere")
+        async def sign_out_everywhere(request: Request) -> Response:
+            account = await account_of(request, self._accounts)
+            if not isinstance(account, Account):
+                return account
+            if not form_matches(request, await request.form()):
+                return answered(request, "sign-in", notice="form")
+            await self._management().sign_out_everywhere(account)
+            end(request)
+            return to_sign_in(request, "", "everywhere")
 
         @router.post(ACCOUNT + "/confirmation")
         async def confirmation(request: Request) -> Response:
@@ -182,6 +204,7 @@ class AccountPages:
             password_games=password_games(self._games, language),
             game_names=[translate(f"games.{game.id}.short", language) for game in self._games],
             services=self._services.views(language),
+            since=datetime.fromisoformat(request.session[PLAYER]["since"]),
             personas=[translate(f"games.{game.id}.personas", language) for game in self._games],
             failed=Toast("web.toast.failed", {}, error=True),
         )

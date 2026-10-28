@@ -265,6 +265,20 @@ class AccountStore(Protocol):
             password_hash: The new password's hash.
         """
 
+    async def end_sessions(self, account_id: int) -> None:
+        """End an account's web sessions and the logins the games remember for it.
+
+        Args:
+            account_id: The account.
+        """
+
+    async def remembered(self, account_id: int) -> list[RememberedLogin]:
+        """Return the logins remembered for an account that still log it in, newest first.
+
+        Args:
+            account_id: The account.
+        """
+
     async def remove_password(self, account_id: int, services: Collection[str]) -> bool:
         """Remove an account's password, ending its web sessions and remembered logins.
 

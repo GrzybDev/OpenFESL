@@ -365,6 +365,22 @@ class SqlAccountStore:
         async with self._sessions.begin() as session:
             await _set_password(session, account_id, password_hash)
 
+    async def end_sessions(self, account_id: int) -> None:
+        """End an account's web sessions and the logins the games remember for it.
+
+        Args:
+            account_id: The account.
+        """
+        async with self._sessions.begin() as session:
+            await session.execute(
+                update(AccountRow)
+                .where(AccountRow.id == account_id)
+                .values(session_epoch=AccountRow.session_epoch + 1)
+            )
+            await session.execute(
+                delete(LoginTokenRow).where(LoginTokenRow.account_id == account_id)
+            )
+
     async def remove_password(self, account_id: int, services: Collection[str]) -> bool:
         """Remove an account's password, ending its web sessions and remembered logins.
 

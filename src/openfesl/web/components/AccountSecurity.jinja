@@ -1,8 +1,9 @@
-{#def overview, said: dict, errors: dict, games: list, services: list, mail: bool #}
+{#def overview, said: dict, errors: dict, games: list, services: list, mail: bool, since, password_games: list #}
 {# The account page's sign-in and security: the ways in, the first of which is the game password.
    Its fold sets it or changes it with the current one, and leads to its removal, which asks
    first and is offered only while a linked service stays a way in. Each linked service unlinks
-   unless it is the last way in, and the services not linked yet link through their tiles. #}
+   unless it is the last way in, and the services not linked yet link through their tiles. Beside
+   them, this browser's session and the logins the games remember, which sign out everywhere ends. #}
 {% set form = said.get("form") %}
 {% set notice = said.get("notice") %}
 {% set password_errors = errors if form == "password" else {} %}
@@ -140,8 +141,8 @@
     </ul>
     <p class="body-text side-note">{{ _("web.account.ways.note") }}{% if overview.linked %} {{ _("web.account.ways.unlink.note") }}{% endif %}</p>
   </section>
-  {% if services %}
-    <div class="account-side security-more">
+  <div class="account-side security-more">
+    {% if services %}
       <section aria-labelledby="link-title">
         <Bar tag="h3" id="link-title">{{ _("web.account.link") }}</Bar>
         {% if offered %}
@@ -151,7 +152,32 @@
           <p class="bar-text body-text">{{ _("web.account.link.all") }}</p>
         {% endif %}
       </section>
-    </div>
-  {% endif %}
+    {% endif %}
+    <section aria-labelledby="sessions-title">
+      <Bar tag="h3" id="sessions-title">{{ _("web.account.sessions") }}</Bar>
+      <dl class="facts">
+        <Fact :label="_('web.account.sessions.browser')" plain>
+          {{ _("web.account.sessions.through", service=player.way, time=moment(since)) if player.way else _("web.account.sessions.address", time=moment(since)) }}
+        </Fact>
+        <Fact :label="listed(password_games)" plain>
+          {{ _n("web.account.sessions.remembered", overview.remembered) }}
+        </Fact>
+      </dl>
+      <div class="form-buttons security-sign-out">
+        <form method="post" action="{{ url('/sign-out') }}">
+          <CsrfField />
+          <FormButton icon="sign-out">{{ _("web.account.menu.sign_out") }}</FormButton>
+        </form>
+        <form method="post" action="{{ url('/sign-out/everywhere') }}">
+          <CsrfField />
+          <button type="submit" aria-describedby="sessions-note" class="form-button">
+            <span aria-hidden="true"
+                  class="form-glyph"><Icon name="sign-out" :size="14" stroke="#F4F4EE" /></span>{{ _("web.account.sessions.everywhere") }}
+          </button>
+        </form>
+      </div>
+      <p id="sessions-note" class="field-note">{{ _("web.account.sessions.everywhere.note") }}</p>
+    </section>
+  </div>
 </div>
 </AccountPart>

@@ -5374,3 +5374,42 @@ msgstr "%(service)s unlinked."
 
 msgid "web.account.toast.unlinked.offered"
 msgstr "%(service)s unlinked. Link a service lists it again."
+
+msgid "web.account.sessions"
+msgstr "Sessions"
+
+msgid "web.account.sessions.browser"
+msgstr "This browser"
+
+msgid "web.account.sessions.through"
+msgstr "Through %(service)s · %(time)s"
+
+msgid "web.account.sessions.address"
+msgstr "With the e-mail address · %(time)s"
+
+msgid "web.account.sessions.remembered.one"
+msgstr "%(count)s remembered login"
+
+msgid "web.account.sessions.remembered.other"
+msgstr "%(count)s remembered logins"
+
+msgid "web.account.sessions.everywhere"
+msgstr "Sign out everywhere"
+
+msgid "web.account.sessions.everywhere.note"
+msgstr ""
+"Sign out everywhere ends this account's sessions in every browser, this one included, and the logins that games remember; each PC then asks for the game password once."
+
+msgid "web.account.notice.everywhere"
+msgstr "Signed out everywhere"
+
+msgid "web.account.notice.everywhere.title"
+msgstr "Every session of this account has ended."
+
+msgid "web.account.notice.everywhere.text"
+msgstr ""
+"This browser and every other one are signed out, and each PC asks for the game password once."
+
+msgid "web.account.notice.everywhere.services"
+msgstr ""
+"A service keeps its own session, so the next sign-in through it may not ask for its password."

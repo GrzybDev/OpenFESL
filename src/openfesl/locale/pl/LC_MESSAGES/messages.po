@@ -5538,3 +5538,48 @@ msgstr "Odłączono usługę %(service)s."
 
 msgid "web.account.toast.unlinked.offered"
 msgstr "Odłączono usługę %(service)s. Sekcja Połącz usługę znów ją pokazuje."
+
+msgid "web.account.sessions"
+msgstr "Sesje"
+
+msgid "web.account.sessions.browser"
+msgstr "Ta przeglądarka"
+
+msgid "web.account.sessions.through"
+msgstr "Przez %(service)s · %(time)s"
+
+msgid "web.account.sessions.address"
+msgstr "Adresem e-mail · %(time)s"
+
+msgid "web.account.sessions.remembered.one"
+msgstr "%(count)s zapamiętane logowanie"
+
+msgid "web.account.sessions.remembered.few"
+msgstr "%(count)s zapamiętane logowania"
+
+msgid "web.account.sessions.remembered.many"
+msgstr "%(count)s zapamiętanych logowań"
+
+msgid "web.account.sessions.remembered.other"
+msgstr "%(count)s zapamiętanego logowania"
+
+msgid "web.account.sessions.everywhere"
+msgstr "Wyloguj wszędzie"
+
+msgid "web.account.sessions.everywhere.note"
+msgstr ""
+"Wylogowanie wszędzie kończy sesje tego konta we wszystkich przeglądarkach, także w tej, oraz logowania zapamiętane przez gry; każdy komputer raz poprosi wtedy o hasło do gier."
+
+msgid "web.account.notice.everywhere"
+msgstr "Wylogowano wszędzie"
+
+msgid "web.account.notice.everywhere.title"
+msgstr "Wszystkie sesje tego konta zostały zakończone."
+
+msgid "web.account.notice.everywhere.text"
+msgstr ""
+"Ta i każda inna przeglądarka zostały wylogowane, a każdy komputer raz poprosi o hasło do gier."
+
+msgid "web.account.notice.everywhere.services"
+msgstr ""
+"Usługa zachowuje własną sesję, więc następne logowanie przez nią może nie pytać o jej hasło."

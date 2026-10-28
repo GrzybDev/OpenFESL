@@ -277,3 +277,38 @@ async def test_services_link_to_the_account_once_and_unlink_unless_they_are_the_
         shown = (await client.get(f"{base}/account")).text
         assert "Invented Plain unlinked. Link a service lists it again." in shown
         assert shown.count('name="service"') == 2
+
+
+async def test_signing_out_everywhere_ends_every_web_session_and_the_remembered_logins(
+    server_url: str, database_url: str, base: str
+) -> None:
+    await execute(
+        database_url,
+        "UPDATE account SET display_name = 'Invented_Ann' WHERE nuid = 'ann@example.test'",
+    )
+    async with game(server_url) as player:
+        await player.hello(FESL, "bfbc2-pc")
+        await player.request(
+            FESL, "acct", entitle_game("ann@example.test", PASSWORD, "ACTIVATE-GAME")
+        )
+        token = (await player.request(FESL, "acct", login("ann@example.test", PASSWORD)))[
+            "encryptedLoginInfo"
+        ]
+    async with httpx2.AsyncClient() as client, httpx2.AsyncClient() as elsewhere:
+        await post_sign_in(client, base, "ann@example.test", PASSWORD)
+        await post_sign_in(elsewhere, base, "ann@example.test", PASSWORD)
+        page = await client.get(f"{base}/account")
+        assert "1 remembered login" in page.text
+        ended = await client.post(
+            f"{base}/sign-out/everywhere", data={"csrf": form_token(page.text)}
+        )
+        assert ended.headers["location"] == "/sign-in"
+        assert (
+            "Every session of this account has ended." in (await client.get(f"{base}/sign-in")).text
+        )
+        for browser in (client, elsewhere):
+            assert (await browser.get(f"{base}/account")).headers["location"].startswith("/sign-in")
+    async with game(server_url) as player:
+        await player.hello(FESL, "bfbc2-pc")
+        remembered = [("TXN", "NuLogin"), ("returnEncryptedInfo", "0"), ("encryptedInfo", token)]
+        assert (await player.request(FESL, "acct", remembered))["errorCode"] == "122"
