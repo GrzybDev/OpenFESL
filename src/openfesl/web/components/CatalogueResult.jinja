@@ -1,0 +1,44 @@
+{#def result, views: list, most: int #}
+{# What came of the last import: the game that uses the new catalogue with its numbers before and
+   after (the new ones alone after a first import), or why the file was refused, which says that
+   the catalogue stays as it was. #}
+{% macro megabytes(size) %}{{ _("web.admin.catalogue.megabytes", count=number((size / 1048576)|round(1))) }}{% endmacro %}
+{% if result.kind == "imported" %}
+  {% set view = views|selectattr("game.id", "equalto", result.game)|first %}
+  {% set before, after = result.before, result.after %}
+  <div role="status" class="alert catalogue-done">
+    <p class="alert-label">
+      <span aria-hidden="true"
+            class="alert-glyph"><Icon name="tick" stroke="#0A0A0A" /></span>{{ _("web.admin.catalogue.done") }}
+    </p>
+    <p class="alert-title">{{ _("web.admin.catalogue.done.title", game=view.game.name) }}</p>
+    <dl class="facts catalogue-changes">
+      {% for name in ("items", "languages", "icons") %}
+        <Fact :label="_('web.admin.catalogue.' ~ name)" plain>
+          {%- if before %}{{ _("web.admin.catalogue.from_to", before=number(before[name]), after=number(after[name])) }}{% else %}{{ number(after[name]) }}{% endif -%}
+        </Fact>
+      {% endfor %}
+    </dl>
+    <p class="alert-text">
+      {% if view.imported %}{{ _("web.server.time", time=moment(view.imported.at)) }} · {{ view.imported.name or _("web.admin.command_line") }}.{% endif %}
+      <a href="{{ url('/admin/audit') }}">{{ _("web.admin.catalogue.done.audit") }}</a>
+    </p>
+  </div>
+{% else %}
+  {% set problem, detail = result.get("problem", ""), result.get("detail", "") %}
+  {% if result.kind == "large" %}
+    {% set title = _("web.admin.catalogue.refused.large", size=megabytes(result.size), most=megabytes(most)) %}
+  {% elif problem == "format" %}
+    {% set title = _("web.admin.catalogue.refused.format", found=detail, read=result.read) %}
+  {% elif problem in ("game", "unknown") %}
+    {% set title = _("web.admin.catalogue.refused." ~ problem, game=detail, id=detail) %}
+  {% elif problem == "unpacked" %}
+    {% set title = _("web.admin.catalogue.refused.unpacked", most=megabytes(most)) %}
+  {% else %}
+    {% set title = _("web.admin.catalogue.refused.archive", file=result.file) %}
+  {% endif %}
+  <Alert :label="_('web.admin.catalogue.refused')" :title="title" glyph="warn" alert>
+  {% if problem in ("archive", "format") %}{{ _("web.admin.catalogue.refused." ~ problem ~ ".text") }}{% endif %}
+  {{ _("web.admin.catalogue.unchanged") }}
+  </Alert>
+{% endif %}

@@ -7464,6 +7464,129 @@ msgstr ""
 "Until one is imported, the game's pages show items by their numbers, "
 "without names."
 
+msgid "web.admin.catalogue.import"
+msgstr "Import a catalogue"
+
+msgid "web.admin.catalogue.step.make"
+msgstr "Make the file on a computer with a copy of the game"
+
+msgid "web.admin.catalogue.step.make.text"
+msgstr ""
+"The folder of a copy is the one that holds %(exe)s. The command needs no "
+"server and writes %(file)s in the current folder."
+
+msgid "web.admin.catalogue.folder"
+msgstr "path/to/%(game)s"
+
+msgid "web.admin.catalogue.command.copy"
+msgstr "Copy command"
+
+msgid "web.admin.catalogue.command.copied"
+msgstr "Command copied."
+
+msgid "web.admin.catalogue.step.choose"
+msgstr "Choose the file"
+
+msgid "web.admin.catalogue.file"
+msgstr "Catalogue file"
+
+msgid "web.admin.catalogue.file.choose"
+msgstr "Choose file"
+
+msgid "web.admin.catalogue.file.none"
+msgstr "No file chosen"
+
+msgid "web.admin.catalogue.file.hint"
+msgstr "The ZIP archive that the command wrote, usually under 10 MB."
+
+msgid "web.admin.catalogue.file.needed"
+msgstr "Choose a catalogue file first."
+
+msgid "web.admin.catalogue.step.import"
+msgstr "Import the file"
+
+msgid "web.admin.catalogue.replaces"
+msgstr ""
+"The import replaces the whole catalogue at once: items, their texts in "
+"every language, icons, hero models, daily missions and XP per level."
+
+msgid "web.admin.catalogue.submit"
+msgstr "Import catalogue"
+
+msgid "web.admin.catalogue.host"
+msgstr "From the command line on the server's host:"
+
+msgid "web.admin.catalogue.host.copy"
+msgstr "Copy the import command"
+
+msgid "web.admin.catalogue.no_files"
+msgstr "No files kept"
+
+msgid "web.admin.catalogue.no_files.text"
+msgstr ""
+"This service keeps no files, so an import keeps no icons or hero models, "
+"and pages show placeholders instead. FILES_PATH names the folder that "
+"keeps them."
+
+msgid "web.admin.catalogue.confirm.check"
+msgstr "Replace the current catalogue of %(game)s as a whole"
+
+msgid "web.admin.catalogue.done"
+msgstr "Imported"
+
+msgid "web.admin.catalogue.done.title"
+msgstr "%(game)s uses the new catalogue."
+
+msgid "web.admin.catalogue.done.audit"
+msgstr "The audit log records the import."
+
+msgid "web.admin.catalogue.from_to"
+msgstr "%(before)s → %(after)s"
+
+msgid "web.admin.catalogue.refused"
+msgstr "Not imported"
+
+msgid "web.admin.catalogue.unchanged"
+msgstr "The catalogue stays as it was."
+
+msgid "web.admin.catalogue.refused.archive"
+msgstr "%(file)s is not a catalogue file."
+
+msgid "web.admin.catalogue.refused.archive.text"
+msgstr ""
+"A catalogue file is the ZIP archive that openfesl catalogue extract "
+"writes."
+
+msgid "web.admin.catalogue.refused.format"
+msgstr ""
+"This catalogue file has format %(found)s; this service reads format "
+"%(read)s."
+
+msgid "web.admin.catalogue.refused.format.text"
+msgstr "Extract the catalogue again with the OpenFESL version this service runs."
+
+msgid "web.admin.catalogue.refused.game"
+msgstr ""
+"This file holds the catalogue of %(game)s, which this service serves "
+"without a catalogue."
+
+msgid "web.admin.catalogue.refused.unknown"
+msgstr ""
+"This file holds the catalogue of a game this service does not serve "
+"(%(id)s)."
+
+msgid "web.admin.catalogue.refused.large"
+msgstr "The file sent has %(size)s; a catalogue file holds at most %(most)s."
+
+msgid "web.admin.catalogue.refused.unpacked"
+msgstr "This file unpacks to more than %(most)s, more than any catalogue holds."
+
+msgid "web.admin.catalogue.managed"
+msgstr "Catalogues are imported with the admin role."
+
+msgid "web.admin.catalogue.megabytes"
+msgstr "%(count)s MB"
+
 msgid "games.bfheroes.item_kind.appearance"
 msgstr "Appearance"
 
@@ -7482,3 +7605,5 @@ msgstr "Convenience"
 msgid "games.bfheroes.item_kind.emote"
 msgstr "Emotes"
 
+msgid "web.admin.refused.role.catalogues"
+msgstr "Catalogues are imported with the admin role."

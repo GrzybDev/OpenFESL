@@ -16,6 +16,10 @@ _TIME = (1980, 1, 1, 0, 0, 0)
 _SYSTEM = 3
 
 
+class ArchiveTooLarge(ValueError):
+    """Raised for an archive that unpacks to more than MAX_SIZE."""
+
+
 @dataclass(frozen=True, slots=True)
 class CatalogueArchive:
     """The file in which a game's catalogue goes from a copy of the game to a server.
@@ -79,9 +83,9 @@ def read_archive(data: bytes) -> CatalogueArchive:
         data: The file.
 
     Raises:
+        ArchiveTooLarge: When the archive unpacks to more than MAX_SIZE.
         ValueError: When the file is no catalogue archive: no ZIP archive, one without the
-            document, with files of other names or twice the same, or one that unpacks to more
-            than MAX_SIZE.
+            document, or with files of other names or twice the same.
     """
     try:
         with ZipFile(BytesIO(data)) as zip_file:
@@ -90,7 +94,7 @@ def read_archive(data: bytes) -> CatalogueArchive:
             if len(set(names)) < len(names):
                 raise ValueError("the archive holds a file twice")
             if sum(info.file_size for info in members) > MAX_SIZE:
-                raise ValueError("the archive unpacks to more than a catalogue can hold")
+                raise ArchiveTooLarge("the archive unpacks to more than a catalogue can hold")
             document = None
             parts: dict[re.Pattern[str], dict[str, bytes]] = {
                 pattern: {} for pattern in (_TEXTS, _ICON, _MODEL, _TEXTURE)

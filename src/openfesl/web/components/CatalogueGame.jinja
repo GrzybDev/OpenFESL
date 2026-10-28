@@ -1,12 +1,15 @@
-{#def view, keeps_files: bool #}
+{#def view, result, keeps_files: bool #}
 {# A game's block on the catalogues page: when and by whom its catalogue was imported, its items by
    kind, its languages, the icons and hero models kept, its daily missions and XP per level; before
-   the first import, what the game's pages show meanwhile. The content follows the numbers. #}
+   the first import, what the game's pages show meanwhile. The numbers that an import just changed
+   count from their old values; the content follows the numbers. #}
 {% set game = view.game %}
 {% set contents = view.contents %}
 {% set key = "game-" ~ game.id %}
+{% set before = result.before if result and result.kind == "imported" and result.game == game.id else none %}
 {% macro count(value, name="") -%}
-  <span data-count="{{ value }}">{{ number(value) }}</span>
+  <span data-count="{{ value }}"
+        {% if before and name %} data-count-from="{{ before[name] }}"{% endif %}>{{ number(value) }}</span>
 {%- endmacro %}
 <section aria-labelledby="{{ key }}-title"
          id="{{ key }}"

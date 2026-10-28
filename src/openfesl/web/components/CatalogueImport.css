@@ -1,0 +1,217 @@
+/* The import of a catalogue: what came of the last one on top, then its three steps on the panel's
+   rows, the file field with its name and the chooser, and the command for the server's host on
+   black. */
+@layer components {
+  .catalogue-import {
+    display: grid;
+    min-width: 0;
+    flex: 1 1 400px;
+    gap: 2px;
+    scroll-margin-top: 16px;
+  }
+
+  .catalogue-role {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--row-light);
+    padding: 12px 14px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.35;
+    font-weight: 600;
+    color: var(--ink);
+
+    .badge {
+      width: 26px;
+      height: 26px;
+      flex: none;
+    }
+  }
+
+  .catalogue-result:empty {
+    display: none;
+  }
+
+  .catalogue-changes {
+    margin-top: 10px;
+  }
+
+  .catalogue-done .alert-text a {
+    text-decoration: underline;
+  }
+
+  .catalogue-steps {
+    display: grid;
+    gap: 2px;
+    list-style: none;
+  }
+
+  .catalogue-step {
+    display: grid;
+    gap: 10px;
+    background: var(--row);
+    padding: 12px 14px 14px;
+    color: var(--ink);
+
+    h3 {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 16px;
+      line-height: 1.15;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .step-number {
+      background: var(--ink);
+      color: var(--bright);
+    }
+  }
+
+  .catalogue-step-text,
+  .catalogue-step-hint {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+
+  .catalogue-step-hint {
+    font-size: 14px;
+    color: var(--dim);
+  }
+
+  .catalogue-command {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 2px;
+
+    code {
+      min-width: 0;
+      flex: 1 1 220px;
+      background: var(--row-light);
+      padding: 11px 12px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+      color: var(--ink);
+    }
+
+    .copy-button {
+      flex: none;
+    }
+  }
+
+  .catalogue-file {
+    display: grid;
+    gap: 2px;
+    cursor: pointer;
+  }
+
+  .catalogue-file-label {
+    background: var(--accent);
+    padding: 8px 14px;
+    font-size: 13px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    text-transform: uppercase;
+  }
+
+  .catalogue-file-row {
+    position: relative;
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 10px;
+    background: var(--row-light);
+    padding-left: 12px;
+  }
+
+  .catalogue-file-glyph {
+    display: grid;
+    flex: none;
+  }
+
+  .catalogue-file-name {
+    min-width: 0;
+    flex: 1;
+    padding-block: 8px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.3;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  /* With scripts the browser's own field covers the row, so a file dropped on it is chosen too. */
+  .js .catalogue-file-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .catalogue-file-choose {
+    display: grid;
+    align-self: stretch;
+    place-items: center;
+    background: var(--ink);
+    padding-inline: 14px;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--bright);
+    text-transform: uppercase;
+  }
+
+  .catalogue-file:has(:focus-visible) .catalogue-file-row {
+    outline: 3px solid #ffffff;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px var(--ink);
+  }
+
+  .catalogue-confirm-box {
+    display: flex;
+    min-height: 52px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--row-light);
+    padding: 8px 0 8px 14px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.35;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .catalogue-host {
+    display: grid;
+    gap: 8px;
+    background: var(--ink);
+    padding: 12px 14px 14px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.35;
+    font-weight: 600;
+    color: var(--soft);
+
+    code {
+      background: var(--field);
+      font-weight: 500;
+      color: var(--soft);
+    }
+
+    .copy-icons {
+      background: var(--bar-dark);
+    }
+  }
+}

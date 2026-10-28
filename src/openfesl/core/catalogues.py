@@ -17,6 +17,8 @@ from openfesl.core.catalogue import (
     CatalogueDocument,
     CatalogueFile,
     CatalogueItem,
+    CatalogueProblem,
+    CatalogueRefused,
     CatalogueRules,
     Element,
     text_id,
@@ -399,14 +401,18 @@ class Catalogues:
             admin: The admin who imports it; None for the command line.
 
         Raises:
-            ValueError: When the file holds no catalogue that this server reads, or one of a
-                game that it serves without a catalogue.
+            CatalogueRefused: When the file holds no catalogue that this server reads, or one of
+                a game that it serves without a catalogue or not at all.
         """
         catalogue = await asyncio.to_thread(CatalogueFile.read, data)
         game_id = catalogue.document.game
         game = self._games.by_id(game_id)
-        if game is None or game.catalogue is None:
-            raise ValueError(f"the server serves no game {game_id} with a catalogue")
+        if game is None:
+            reason = f"the server serves no game {game_id}"
+            raise CatalogueRefused(CatalogueProblem.UNKNOWN, game_id, reason)
+        if game.catalogue is None:
+            reason = f"the server serves {game_id} without a catalogue"
+            raise CatalogueRefused(CatalogueProblem.GAME, game_id, reason)
         revision = secrets.token_hex(8)
         groups = {
             "icons": catalogue.icons,

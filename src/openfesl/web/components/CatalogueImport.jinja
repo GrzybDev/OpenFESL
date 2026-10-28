@@ -1,0 +1,105 @@
+{#def views: list, manages: bool, keeps_files: bool, result, most: int #}
+{# The import of a catalogue in three steps: making the file from a copy of the game, choosing it
+   and sending it, with what came of the last import on top. A replacement is confirmed with a
+   required box, and the page comes back with the result. Moderators see the role note alone. #}
+{% set first = views[0].game %}
+{% set replaced = views|selectattr("contents.revision")|list %}
+{% set file = first.id ~ "-catalogue.zip" %}
+{% set extract = 'openfesl catalogue extract "' ~ _("web.admin.catalogue.folder", game=first.name) ~ '"' %}
+{% set host = "openfesl catalogue import " ~ file %}
+{% macro megabytes(size) %}{{ _("web.admin.catalogue.megabytes", count=number((size / 1048576)|round(1))) }}{% endmacro %}
+<section aria-labelledby="import-title" id="import" class="catalogue-import">
+  <h2 id="import-title" class="bar bar-large">{{ _("web.admin.catalogue.import") }}</h2>
+  {% if not manages %}
+    <p class="catalogue-role">
+      <span aria-hidden="true"
+            class="badge"><Icon name="lock" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.catalogue.managed") }}
+    </p>
+  {% else %}
+    <div class="catalogue-result">
+      {% if result and result.kind != "needed" %}
+        <CatalogueResult :result="result" :views="views" :most="most" />
+      {% endif %}
+    </div>
+    {% if not keeps_files %}
+      <div class="alert catalogue-no-files">
+        <p class="alert-label">
+          <span aria-hidden="true"
+                class="alert-glyph"><Icon name="doc" stroke="#0A0A0A" /></span>{{ _("web.admin.catalogue.no_files") }}
+        </p>
+        <p class="alert-text">{{ _("web.admin.catalogue.no_files.text") }}</p>
+      </div>
+    {% endif %}
+    <form method="post"
+          enctype="multipart/form-data"
+          action="{{ url('/admin/catalogues') }}"
+          class="catalogue-form">
+      <CsrfField />
+      <ol class="catalogue-steps">
+        <li class="catalogue-step">
+          <h3>
+            <StepNumber :number="1" />{{ _("web.admin.catalogue.step.make") }}
+          </h3>
+          <p class="catalogue-step-text">{{ _("web.admin.catalogue.step.make.text", exe=first.executable, file=file) }}</p>
+          <div class="catalogue-command">
+            <code>{{ extract }}</code>
+            <CopyButton :value="extract" :label="_('web.admin.catalogue.command.copy')" :note="_('web.admin.catalogue.command.copied')" />
+          </div>
+        </li>
+        <li class="catalogue-step">
+          <h3>
+            <StepNumber :number="2" />{{ _("web.admin.catalogue.step.choose") }}
+          </h3>
+          <label class="catalogue-file">
+            <span class="catalogue-file-label">{{ _("web.admin.catalogue.file") }}</span>
+            <span class="catalogue-file-row">
+              <span aria-hidden="true" class="catalogue-file-glyph"><Icon name="doc" stroke="currentColor" /></span>
+              <span data-file-name
+                    data-none="{{ _('web.admin.catalogue.file.none') }}"
+                    class="catalogue-file-name js-only">{{ _("web.admin.catalogue.file.none") }}</span>
+              <input type="file"
+                     name="file"
+                     accept=".zip,application/zip"
+                     required
+                     aria-describedby="catalogue-file-note"
+                     {% if result and result.kind == "needed" %} aria-invalid="true"{% endif %}
+                     class="catalogue-file-input">
+              <span aria-hidden="true"
+                    class="catalogue-file-choose js-only">{{ _("web.admin.catalogue.file.choose") }}</span>
+            </span>
+          </label>
+          {% if result and result.kind == "needed" %}
+            <p role="alert" class="field-note field-error catalogue-needed">
+              <span aria-hidden="true"
+                    class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.catalogue.file.needed") }}
+            </p>
+          {% endif %}
+          <p id="catalogue-file-note" class="catalogue-step-hint">{{ _("web.admin.catalogue.file.hint") }}</p>
+        </li>
+        <li class="catalogue-step">
+          <h3>
+            <StepNumber :number="3" />{{ _("web.admin.catalogue.step.import") }}
+          </h3>
+          <p class="catalogue-step-text">{{ _("web.admin.catalogue.replaces") }}</p>
+          {% if replaced %}
+            <label class="catalogue-confirm-box">
+              <span>{{ _("web.admin.catalogue.confirm.check", game=listed(replaced|map(attribute="game.name")|list)) }}</span>
+              <span class="check-place">
+                <input type="checkbox" name="confirmed" value="1" required class="check">
+                <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span>
+              </span>
+            </label>
+          {% endif %}
+          <ActionButton :label="_('web.admin.catalogue.submit')" />
+        </li>
+      </ol>
+    </form>
+    <div class="catalogue-host">
+      <p>{{ _("web.admin.catalogue.host") }}</p>
+      <div class="catalogue-command">
+        <code>{{ host }}</code>
+        <CopyButton :value="host" :label="_('web.admin.catalogue.host.copy')" :note="_('web.admin.catalogue.command.copied')" size="icon" />
+      </div>
+    </div>
+  {% endif %}
+</section>

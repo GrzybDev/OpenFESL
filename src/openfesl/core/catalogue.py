@@ -1,16 +1,56 @@
 import json
 from dataclasses import dataclass, field
+from enum import StrEnum
 from typing import Final, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, TypeAdapter, model_validator
 
 from openfesl.core.hero_models import HeroModels, ModelRules
 from openfesl.core.texts import BASE_LANGUAGE
-from openfesl.formats.catalogue_archive import CatalogueArchive, read_archive, write_archive
+from openfesl.formats.catalogue_archive import (
+    DOCUMENT,
+    ArchiveTooLarge,
+    CatalogueArchive,
+    read_archive,
+    write_archive,
+)
 
 # The version of the catalogue's document; a server imports only its own.
 FORMAT: Final = 1
 _TEXTS = TypeAdapter(dict[str, str])
+
+
+class CatalogueProblem(StrEnum):
+    """Why a file holds no catalogue that the server imports."""
+
+    ARCHIVE = "archive"
+    """It is no catalogue's file: no ZIP archive, one without the catalogue's document or with
+    files that no catalogue has, or a document that is not a catalogue."""
+    FORMAT = "format"
+    """Its document is of another format than the server's, which the detail names."""
+    UNPACKED = "unpacked"
+    """It unpacks to more than any catalogue holds."""
+    GAME = "game"
+    """It holds the catalogue of the game the detail names, which the server serves without one."""
+    UNKNOWN = "unknown"
+    """It holds the catalogue of a game the server does not serve, which the detail names."""
+
+
+class CatalogueRefused(ValueError):
+    """Raised for a file that holds no catalogue that the server imports, saying why."""
+
+    def __init__(self, problem: CatalogueProblem, detail: str, reason: str) -> None:
+        """Say why the file was refused.
+
+        Args:
+            problem: Why, as pages say it.
+            detail: What the problem names: the document's format or the game's id; empty for
+                the others.
+            reason: Why, in the words of the logs and the command line.
+        """
+        super().__init__(reason)
+        self.problem = problem
+        self.detail = detail
 
 
 def text_id(name: str) -> str:
@@ -250,16 +290,28 @@ class CatalogueFile:
             data: The file.
 
         Raises:
-            ValueError: When the file holds no catalogue that this server reads.
+            CatalogueRefused: When the file holds no catalogue that this server reads.
         """
-        archive = read_archive(data)
-        return cls(
-            CatalogueDocument.model_validate_json(archive.document),
-            {language: _TEXTS.validate_json(texts) for language, texts in archive.texts.items()},
-            archive.icons,
-            archive.models,
-            archive.textures,
-        )
+        try:
+            archive = read_archive(data)
+        except ArchiveTooLarge as error:
+            raise CatalogueRefused(CatalogueProblem.UNPACKED, "", str(error)) from None
+        except ValueError as error:
+            raise CatalogueRefused(CatalogueProblem.ARCHIVE, "", str(error)) from None
+        _check_format(archive.document)
+        try:
+            return cls(
+                CatalogueDocument.model_validate_json(archive.document),
+                {
+                    language: _TEXTS.validate_json(texts)
+                    for language, texts in archive.texts.items()
+                },
+                archive.icons,
+                archive.models,
+                archive.textures,
+            )
+        except ValueError as error:
+            raise CatalogueRefused(CatalogueProblem.ARCHIVE, "", str(error)) from None
 
     def write(self) -> bytes:
         """Return the catalogue's file, the same bytes for the same catalogue."""
@@ -271,3 +323,17 @@ class CatalogueFile:
         return write_archive(
             CatalogueArchive(document, texts, self.icons, self.models, self.textures)
         )
+
+
+def _check_format(document: bytes) -> None:
+    try:
+        found = json.loads(document).get("format")
+    except ValueError, AttributeError:
+        raise CatalogueRefused(
+            CatalogueProblem.ARCHIVE, "", f"{DOCUMENT} is no JSON object"
+        ) from None
+    if not isinstance(found, int):
+        raise CatalogueRefused(CatalogueProblem.ARCHIVE, "", f"{DOCUMENT} names no format")
+    if found != FORMAT:
+        reason = f"the catalogue has format {found}, and this server reads format {FORMAT}"
+        raise CatalogueRefused(CatalogueProblem.FORMAT, str(found), reason)

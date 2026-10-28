@@ -1,5 +1,7 @@
-{#def views: list, others: list, keeps_files: bool #}
-{# Each game's imported catalogue; games without catalogue rules are listed as taking none. #}
+{#def views: list, others: list, manages: bool, keeps_files: bool, result, most: int #}
+{# Each game's imported catalogue beside the import of a new one: one import for all games, as the
+   file names its game. Games without catalogue rules are listed as taking none. Importing needs the
+   admin role. #}
 {% set title = _("web.admin.catalogue.title") %}
 <AdminPage :title="title" current="catalogues">
   <PageHead labelledby="catalogues-title">
@@ -11,7 +13,7 @@
     <div data-catalogues class="catalogue-layout">
       <div class="catalogue-games">
         {% for view in views %}
-          <CatalogueGame :view="view" :keeps_files="keeps_files" />
+          <CatalogueGame :view="view" :result="result" :keeps_files="keeps_files" />
         {% endfor %}
         {% if others %}
           <section aria-labelledby="catalogue-others">
@@ -26,6 +28,9 @@
           </section>
         {% endif %}
       </div>
+      {% if views %}
+        <CatalogueImport :views="views" :manages="manages" :keeps_files="keeps_files" :result="result" :most="most" />
+      {% endif %}
     </div>
   </Panel>
 </AdminPage>

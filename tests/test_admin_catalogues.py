@@ -1,13 +1,17 @@
 import html
 import re
+from io import BytesIO
 from pathlib import Path
+from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 import anyio
 import httpx2
 import pytest
-from identity import IdentityProvider, sign_in
+from identity import IdentityProvider, form_token, sign_in
 from support import cli
 from test_catalogue_import import extracted
+
+from openfesl.core.catalogue import CatalogueFile
 
 pytestmark = pytest.mark.anyio
 KEEPER = {"sub": "keeper-9", "preferred_username": "invented-keeper", "groups": ["fesl-admins"]}
@@ -15,10 +19,40 @@ WARDEN = {"sub": "warden-9", "preferred_username": "invented-warden", "groups": 
 PAGE = "/admin/catalogues"
 
 
+def unpacking_to(size: int) -> bytes:
+    """Return a ZIP archive whose one icon unpacks to a number of bytes."""
+    written = BytesIO()
+    info = ZipInfo("icons/item1.webp")
+    info.compress_type = ZIP_DEFLATED
+    with ZipFile(written, "w") as archive, archive.open(info, "w", force_zip64=True) as icon:
+        chunk = bytes(2**20)
+        for _ in range(size // len(chunk)):
+            icon.write(chunk)
+    return written.getvalue()
+
+
 def facts(page: str, label: str) -> list[str]:
     """Return the values of a page's facts with a label, as their text reads."""
     found = re.findall(rf"<dt>{label}</dt>\s*<dd[^>]*>(.*?)</dd>", page, re.DOTALL)
     return [" ".join(re.sub(r"<[^>]+>", "", value).split()) for value in found]
+
+
+def of_game(file: bytes, game: str) -> bytes:
+    """Return a catalogue's file as if another game's copy had made it."""
+    catalogue = CatalogueFile.read(file)
+    return CatalogueFile(catalogue.document.model_copy(update={"game": game}), {}, {}).write()
+
+
+async def send(
+    client: httpx2.AsyncClient, base: str, token: str, name: str, data: bytes | None
+) -> str:
+    """Send the import's form as a browser without scripts does, returning the page after it."""
+    files = {"file": (name, data, "application/zip")} if data is not None else None
+    sent = await client.post(
+        base + PAGE, data={"csrf": token, "confirmed": "1"}, files=files or {"file": ("", b"")}
+    )
+    assert sent.status_code == 303, sent.text
+    return html.unescape((await client.get(base + PAGE)).text)
 
 
 @pytest.mark.usefixtures("prompt_actions")
@@ -41,7 +75,7 @@ async def test_admins_and_moderators_see_what_each_games_catalogue_holds(
 
         await cli(capsys, "catalogue", "import", str(await extracted(tmp_path, capsys)))
         with anyio.fail_after(5):
-            while "Not imported" in (imported := (await client.get(base + PAGE)).text):
+            while "No catalogue imported" in (imported := (await client.get(base + PAGE)).text):
                 await anyio.sleep(0.05)
         imported = html.unescape(imported)
         log = (await client.get(f"{base}/admin/audit")).text
@@ -66,3 +100,82 @@ async def test_admins_and_moderators_see_what_each_games_catalogue_holds(
         admin_provider.user = WARDEN
         seen = html.unescape((await sign_in(client, base, next=PAGE)).text)
     assert facts(seen, "Items") == ["12"]
+
+
+async def test_admins_import_a_catalogue_on_the_page_where_each_refusal_says_why(
+    files: Path,
+    admin_provider: IdentityProvider,
+    server_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    base = server_url.replace("ws://", "http://").rstrip("/")
+    first = (await extracted(tmp_path, capsys)).read_bytes()
+    old = CatalogueFile.read(first)
+    later = CatalogueFile(
+        old.document.model_copy(update={"items": old.document.items[:2]}),
+        {"en": {"WEST_Custom_Item_2": "Invented Hair"}},
+        {"item1": old.icons["item1"]},
+    ).write()
+    format_two = BytesIO()
+    with ZipFile(format_two, "w") as archive:
+        archive.writestr("catalogue.json", '{"format": 2, "game": "bfheroes", "items": []}')
+
+    async with httpx2.AsyncClient() as client:
+        admin_provider.user = KEEPER
+        page = html.unescape((await sign_in(client, base, next=PAGE)).text)
+        token = form_token(page)
+        assert 'openfesl catalogue extract "path/to/Battlefield Heroes"' in page
+        assert "openfesl catalogue import bfheroes-catalogue.zip" in page
+
+        # Each refusal names its own reason, and none changes the catalogue.
+        refused = {
+            "invented.zip is not a catalogue file.": ("invented.zip", b"invented"),
+            "This catalogue file has format 2; this service reads format 1.": (
+                "old.zip",
+                format_two.getvalue(),
+            ),
+            "This file holds the catalogue of Battlefield: Bad Company 2, which this service "
+            "serves without a catalogue.": ("bfbc2.zip", of_game(first, "bfbc2")),
+            "This file holds the catalogue of a game this service does not serve (mohairborne).": (
+                "airborne.zip",
+                of_game(first, "mohairborne"),
+            ),
+            "This file unpacks to more than 256\u00a0MB, more than any catalogue holds.": (
+                "bomb.zip",
+                unpacking_to(257 * 2**20),
+            ),
+        }
+        for reason, (name, data) in refused.items():
+            answer = await send(client, base, token, name, data)
+            assert reason in answer and "The catalogue stays as it was." in answer, reason
+            assert "No catalogue imported yet." in answer
+        assert "Choose a catalogue file first." in await send(client, base, token, "", None)
+
+        # A first import lists its new numbers alone, as does the block, with who imported it.
+        imported = await send(client, base, token, "bfheroes-catalogue.zip", first)
+        assert "Battlefield Heroes uses the new catalogue." in imported
+        assert "The audit log records the import." in imported
+        assert facts(imported, "Items") == ["12", "12"]
+        assert facts(imported, "Icons") == ["5 kept", "5"]
+        assert facts(imported, "Imported")[0].endswith(" UTC · invented-keeper")
+        assert "data-count-from" not in imported
+        # From now on the form asks before it replaces the catalogue.
+        assert "Replace the current catalogue of Battlefield Heroes as a whole" in imported
+
+        # A replacement compares the numbers, and the block counts from the old ones.
+        replaced = await send(client, base, token, "bfheroes-catalogue.zip", later)
+        for name, before, after in (("Items", 12, 2), ("Languages", 2, 1), ("Icons", 5, 1)):
+            kept = f"{after} kept" if name == "Icons" else str(after)
+            assert facts(replaced, name) == [kept, f"{before} → {after}"], name
+        assert re.search(r'data-count="2"\s+data-count-from="12"', replaced)
+        assert len(list((files / "catalogues" / "bfheroes").iterdir())) == 1
+
+    async with httpx2.AsyncClient() as client:
+        admin_provider.user = WARDEN
+        seen = html.unescape((await sign_in(client, base, next=PAGE)).text)
+        assert "Catalogues are imported with the admin role." in seen
+        assert "data-catalogue-upload" not in seen
+        attempt = {"file": ("bfheroes-catalogue.zip", first, "application/zip")}
+        denied = await client.post(base + PAGE, data={"csrf": form_token(seen)}, files=attempt)
+        assert denied.status_code == 403

@@ -7895,6 +7895,129 @@ msgid "web.admin.catalogue.missing.text"
 msgstr ""
 "Do czasu importu strony gry pokazują same numery przedmiotów, bez nazw."
 
+msgid "web.admin.catalogue.import"
+msgstr "Import katalogu"
+
+msgid "web.admin.catalogue.step.make"
+msgstr "Utwórz plik na komputerze z kopią gry"
+
+msgid "web.admin.catalogue.step.make.text"
+msgstr ""
+"Folder kopii to ten, w którym leży %(exe)s. Polecenie nie potrzebuje "
+"serwera i zapisuje %(file)s w bieżącym folderze."
+
+msgid "web.admin.catalogue.folder"
+msgstr "ścieżka/do/%(game)s"
+
+msgid "web.admin.catalogue.command.copy"
+msgstr "Kopiuj polecenie"
+
+msgid "web.admin.catalogue.command.copied"
+msgstr "Polecenie skopiowane."
+
+msgid "web.admin.catalogue.step.choose"
+msgstr "Wskaż plik"
+
+msgid "web.admin.catalogue.file"
+msgstr "Plik katalogu"
+
+msgid "web.admin.catalogue.file.choose"
+msgstr "Wybierz plik"
+
+msgid "web.admin.catalogue.file.none"
+msgstr "Nie wybrano pliku"
+
+msgid "web.admin.catalogue.file.hint"
+msgstr "Archiwum ZIP zapisane przez polecenie, zwykle poniżej 10 MB."
+
+msgid "web.admin.catalogue.file.needed"
+msgstr "Najpierw trzeba wybrać plik katalogu."
+
+msgid "web.admin.catalogue.step.import"
+msgstr "Zaimportuj plik"
+
+msgid "web.admin.catalogue.replaces"
+msgstr ""
+"Import zastępuje cały katalog naraz: przedmioty, ich teksty we wszystkich"
+" językach, ikony, modele bohaterów, misje dnia i progi doświadczenia."
+
+msgid "web.admin.catalogue.submit"
+msgstr "Importuj katalog"
+
+msgid "web.admin.catalogue.host"
+msgstr "Z wiersza poleceń na komputerze serwera:"
+
+msgid "web.admin.catalogue.host.copy"
+msgstr "Kopiuj polecenie importu"
+
+msgid "web.admin.catalogue.no_files"
+msgstr "Pliki nie są przechowywane"
+
+msgid "web.admin.catalogue.no_files.text"
+msgstr ""
+"Ten serwis nie przechowuje plików, więc import nie zachowuje ikon ani "
+"modeli bohaterów, a strony pokazują zamiast nich grafiki zastępcze. "
+"Folder na pliki wskazuje FILES_PATH."
+
+msgid "web.admin.catalogue.confirm.check"
+msgstr "Zastąp w całości obecny katalog gry %(game)s"
+
+msgid "web.admin.catalogue.done"
+msgstr "Zaimportowano"
+
+msgid "web.admin.catalogue.done.title"
+msgstr "%(game)s korzysta z nowego katalogu."
+
+msgid "web.admin.catalogue.done.audit"
+msgstr "Import jest zapisany w dzienniku zmian."
+
+msgid "web.admin.catalogue.from_to"
+msgstr "%(before)s → %(after)s"
+
+msgid "web.admin.catalogue.refused"
+msgstr "Nie zaimportowano"
+
+msgid "web.admin.catalogue.unchanged"
+msgstr "Katalog pozostaje bez zmian."
+
+msgid "web.admin.catalogue.refused.archive"
+msgstr "%(file)s nie jest plikiem katalogu."
+
+msgid "web.admin.catalogue.refused.archive.text"
+msgstr "Plik katalogu to archiwum ZIP zapisane przez openfesl catalogue extract."
+
+msgid "web.admin.catalogue.refused.format"
+msgstr ""
+"Ten plik katalogu ma format %(found)s; ten serwis odczytuje format "
+"%(read)s."
+
+msgid "web.admin.catalogue.refused.format.text"
+msgstr ""
+"Katalog trzeba wyodrębnić ponownie wersją OpenFESL, na której działa ten "
+"serwis."
+
+msgid "web.admin.catalogue.refused.game"
+msgstr ""
+"Ten plik zawiera katalog gry %(game)s, którą ten serwis obsługuje bez "
+"katalogu."
+
+msgid "web.admin.catalogue.refused.unknown"
+msgstr "Ten plik zawiera katalog gry, której ten serwis nie obsługuje (%(id)s)."
+
+msgid "web.admin.catalogue.refused.large"
+msgstr "Wysłany plik ma %(size)s; plik katalogu ma najwyżej %(most)s."
+
+msgid "web.admin.catalogue.refused.unpacked"
+msgstr ""
+"Ten plik po rozpakowaniu zajmuje ponad %(most)s, więcej niż jakikolwiek "
+"katalog."
+
+msgid "web.admin.catalogue.managed"
+msgstr "Import katalogów wymaga roli administratora."
+
+msgid "web.admin.catalogue.megabytes"
+msgstr "%(count)s MB"
+
 msgid "games.bfheroes.item_kind.appearance"
 msgstr "Wygląd"
 
@@ -7913,3 +8036,5 @@ msgstr "Udogodnienia"
 msgid "games.bfheroes.item_kind.emote"
 msgstr "Gesty"
 
+msgid "web.admin.refused.role.catalogues"
+msgstr "Import katalogów wymaga roli administratora."
