@@ -76,7 +76,8 @@ class Settings(BaseSettings):
             "oauth2", ...}; their tiles show in this order. Their pages send the browser back
             to /sign-in/callback.
         files_path: The folder where the server keeps the files it serves besides its own,
-            such as the icons of the games' imported catalogues; without one it keeps none.
+            such as the icons and hero models of the games' imported catalogues; without one
+            it keeps none.
     """
 
     database_url: str

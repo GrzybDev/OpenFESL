@@ -40,7 +40,7 @@ class SqlCatalogueStore:
             if row is None:
                 return None
             document = CatalogueDocument.model_validate(row.document)
-            return StoredCatalogue(document, row.revision, row.icons)
+            return StoredCatalogue(document, row.revision, row.icons, row.models, row.textures)
 
     async def texts(self, partition: str, language: str) -> dict[str, str]:
         """Return the texts of a game's catalogue in a language by id; empty without any.
@@ -75,7 +75,13 @@ class SqlCatalogueStore:
             admin: The admin who imported it; None for the command line.
         """
         document = catalogue.document
-        details = {"items": len(document.items), "languages": len(texts), "icons": catalogue.icons}
+        details = {
+            "items": len(document.items),
+            "languages": len(texts),
+            "icons": catalogue.icons,
+            "models": catalogue.models,
+            "textures": catalogue.textures,
+        }
         async with self._sessions.begin() as session:
             # The texts go with the catalogue's row.
             await session.execute(delete(CatalogueRow).where(CatalogueRow.partition == partition))
@@ -85,6 +91,8 @@ class SqlCatalogueStore:
                     document=document.model_dump(mode="json", exclude_defaults=True),
                     revision=catalogue.revision,
                     icons=catalogue.icons,
+                    models=catalogue.models,
+                    textures=catalogue.textures,
                 )
             )
             await session.flush()
@@ -108,29 +116,29 @@ class SqlCatalogueStore:
             yield
 
 
-class IconFolder:
-    """The icons of the games' imported catalogues as files, a folder per game and import."""
+class CatalogueFolder:
+    """The files of the games' imported catalogues, in a folder per game and import."""
 
     def __init__(self, path: Path) -> None:
-        """Keep the icons in a folder of the deployment's files.
+        """Keep the files in a folder of the deployment's files.
 
         Args:
             path: The folder where the deployment keeps files.
         """
         self._path = path / "catalogues"
 
-    async def write(self, game: str, revision: str, icons: Mapping[str, bytes]) -> None:
-        """Keep the icons of an import.
+    async def write(self, game: str, revision: str, files: Mapping[str, bytes]) -> None:
+        """Keep the files of an import.
 
         Args:
             game: The game's data-file name.
             revision: The import.
-            icons: The icons as WebP pictures, by name.
+            files: The files, by their paths.
         """
-        await asyncio.to_thread(self._write, self._path / game / revision, icons)
+        await asyncio.to_thread(self._write, self._path / game / revision, files)
 
     async def drop(self, game: str, revision: str) -> None:
-        """Remove the icons of an import.
+        """Remove the files of an import.
 
         Args:
             game: The game's data-file name.
@@ -139,19 +147,30 @@ class IconFolder:
         await asyncio.to_thread(shutil.rmtree, self._path / game / revision, ignore_errors=True)
 
     async def keep_only(self, game: str, revision: str) -> None:
-        """Remove the icons of a game's other imports.
+        """Remove the files of a game's other imports.
 
         Args:
             game: The game's data-file name.
-            revision: The import whose icons stay.
+            revision: The import whose files stay.
         """
         await asyncio.to_thread(self._keep_only, self._path / game, revision)
 
+    async def located(self, game: str, revision: str, path: str) -> Path | None:
+        """Return where a file of an import lies, if it is kept.
+
+        Args:
+            game: The game's data-file name.
+            revision: The import.
+            path: The file's path in the import's folder.
+        """
+        found = self._path / game / revision / path
+        return found if await asyncio.to_thread(found.is_file) else None
+
     @staticmethod
-    def _write(folder: Path, icons: Mapping[str, bytes]) -> None:
-        folder.mkdir(parents=True)
-        for name, icon in icons.items():
-            (folder / f"{name}.webp").write_bytes(icon)
+    def _write(folder: Path, files: Mapping[str, bytes]) -> None:
+        for path, data in files.items():
+            (folder / path).parent.mkdir(parents=True, exist_ok=True)
+            (folder / path).write_bytes(data)
 
     @staticmethod
     def _keep_only(folder: Path, revision: str) -> None:

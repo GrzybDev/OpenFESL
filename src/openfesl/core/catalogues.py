@@ -8,7 +8,8 @@ from collections.abc import Iterable, Mapping
 from contextlib import AbstractAsyncContextManager
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Protocol
+from pathlib import Path
+from typing import Final, Protocol
 
 from openfesl.core.admin import AdminAction, AdminFeed, LoggedAction
 from openfesl.core.admins import Admin
@@ -25,6 +26,12 @@ from openfesl.core.texts import BASE_LANGUAGE
 
 logger = logging.getLogger(__name__)
 
+# The names of an import, and of a file it keeps in its folder.
+REVISION: Final = re.compile(r"[0-9a-f]{16}")
+KEPT_FILE: Final = re.compile(
+    r"(?:icons|textures)/[a-z0-9_-]{1,64}\.webp|models/[a-z0-9_-]{1,64}\.glb"
+)
+
 
 @dataclass(frozen=True, slots=True)
 class StoredCatalogue:
@@ -32,13 +39,17 @@ class StoredCatalogue:
 
     Attributes:
         document: The catalogue.
-        revision: The import it comes from, which names the folder of its icons.
+        revision: The import it comes from, which names the folder of its files.
         icons: How many of its icons the server keeps.
+        models: How many models of its heroes the server keeps.
+        textures: How many textures of its heroes' models the server keeps.
     """
 
     document: CatalogueDocument
     revision: str
     icons: int
+    models: int = 0
+    textures: int = 0
 
 
 class CatalogueStore(Protocol):
@@ -88,20 +99,24 @@ class CatalogueStore(Protocol):
         """
 
 
-class IconStore(Protocol):
-    """Where the icons of the games' imported catalogues are kept, a folder per import."""
+class CatalogueFiles(Protocol):
+    """Where the files of the games' imported catalogues are kept, a folder per import.
 
-    async def write(self, game: str, revision: str, icons: Mapping[str, bytes]) -> None:
-        """Keep the icons of an import.
+    The files are the catalogues' icons and the models and textures of their heroes, each by
+    its path in its import's folder, as KEPT_FILE names it.
+    """
+
+    async def write(self, game: str, revision: str, files: Mapping[str, bytes]) -> None:
+        """Keep the files of an import.
 
         Args:
             game: The game's data-file name.
             revision: The import.
-            icons: The icons as WebP pictures, by name.
+            files: The files, by their paths.
         """
 
     async def drop(self, game: str, revision: str) -> None:
-        """Remove the icons of an import.
+        """Remove the files of an import.
 
         Args:
             game: The game's data-file name.
@@ -109,11 +124,20 @@ class IconStore(Protocol):
         """
 
     async def keep_only(self, game: str, revision: str) -> None:
-        """Remove the icons of a game's other imports.
+        """Remove the files of a game's other imports.
 
         Args:
             game: The game's data-file name.
-            revision: The import whose icons stay.
+            revision: The import whose files stay.
+        """
+
+    async def located(self, game: str, revision: str, path: str) -> Path | None:
+        """Return where a file of an import lies, if it is kept.
+
+        Args:
+            game: The game's data-file name.
+            revision: The import.
+            path: The file's path in the import's folder.
         """
 
 
@@ -163,6 +187,8 @@ class Contents:
     Attributes:
         revision: The import it comes from; none before the first.
         icons: How many of its icons the server keeps.
+        models: How many models of its heroes the server keeps.
+        textures: How many textures of its heroes' models the server keeps.
         items: The items by number.
         daily_missions: The number of each day's daily mission, by the day of the year.
         experience: The XP from each level to the next, by level.
@@ -170,6 +196,8 @@ class Contents:
 
     revision: str | None = None
     icons: int = 0
+    models: int = 0
+    textures: int = 0
     items: Mapping[int, Item] = field(default_factory=dict)
     daily_missions: tuple[int, ...] = ()
     experience: tuple[int, ...] = ()
@@ -279,12 +307,16 @@ class ImportedCatalogue:
         items: How many items the catalogue has.
         languages: In how many languages it has texts.
         icons: How many of its icons the server keeps; none where the deployment keeps no files.
+        models: How many models of its heroes the server keeps, likewise.
+        textures: How many textures of its heroes' models the server keeps, likewise.
     """
 
     game: Game
     items: int
     languages: int
     icons: int
+    models: int
+    textures: int
 
 
 class Catalogues:
@@ -293,16 +325,17 @@ class Catalogues:
     The texts of each language are read once a page or the game asks for them.
     """
 
-    def __init__(self, store: CatalogueStore, icons: IconStore | None, games: Games) -> None:
+    def __init__(self, store: CatalogueStore, files: CatalogueFiles | None, games: Games) -> None:
         """Keep the catalogues in stores.
 
         Args:
             store: Where the catalogues and their texts are kept.
-            icons: Where their icons are kept; none where the deployment keeps no files.
+            files: Where their icons, models and textures are kept; none where the deployment
+                keeps no files.
             games: The games the server serves.
         """
         self._store = store
-        self._icons = icons
+        self._files = files
         self._games = games
         self._contents: dict[str, Contents] = {}
         self._texts: dict[tuple[str, str], tuple[str, dict[str, str]]] = {}
@@ -348,7 +381,7 @@ class Catalogues:
     async def import_file(self, data: bytes, admin: Admin | None) -> ImportedCatalogue:
         """Replace a game's catalogue with the one a file holds.
 
-        The catalogue and all its texts change at once, and the icons of earlier imports are
+        The catalogue and all its texts change at once, and the files of earlier imports are
         removed once they did.
 
         Args:
@@ -365,24 +398,39 @@ class Catalogues:
         if game is None or game.catalogue is None:
             raise ValueError(f"the server serves no game {game_id} with a catalogue")
         revision = secrets.token_hex(8)
-        icons = self._icons if catalogue.icons else None
-        stored = StoredCatalogue(catalogue.document, revision, len(catalogue.icons) if icons else 0)
+        groups = {
+            "icons": catalogue.icons,
+            "models": catalogue.models,
+            "textures": catalogue.textures,
+        }
+        files = {
+            file_path(group, name): data
+            for group, found in groups.items()
+            for name, data in found.items()
+        }
+        counts = (len(found) if self._files is not None else 0 for found in groups.values())
+        stored = StoredCatalogue(catalogue.document, revision, *counts)
         partition = partition_of(game)
-        # Imports of a game take turns, as each removes the icons of every other import.
+        # Imports of a game take turns, as each removes the files of every other import.
         async with self._store.importing(partition):
-            if icons is not None:
-                await icons.write(game.id, revision, catalogue.icons)
             try:
+                if self._files is not None and files:
+                    await self._files.write(game.id, revision, files)
                 await self._store.replace(partition, game.id, stored, catalogue.texts, admin)
             except BaseException:
-                if icons is not None:
-                    await icons.drop(game.id, revision)
+                if self._files is not None:
+                    await self._files.drop(game.id, revision)
                 raise
-            if self._icons is not None:
-                await self._icons.keep_only(game.id, revision)
+            if self._files is not None:
+                await self._files.keep_only(game.id, revision)
         self._contents[game.id] = _contents(game.catalogue, stored)
         return ImportedCatalogue(
-            game, len(catalogue.document.items), len(catalogue.texts), stored.icons
+            game,
+            len(catalogue.document.items),
+            len(catalogue.texts),
+            stored.icons,
+            stored.models,
+            stored.textures,
         )
 
     async def _imported(self, action: LoggedAction) -> None:
@@ -410,6 +458,16 @@ class Catalogues:
         texts = {text_id(name): text for name, text in stored.items()}
         self._texts[(game.id, language)] = (revision, texts)
         return texts
+
+
+def file_path(group: str, name: str) -> str:
+    """Return the path of a file that an import keeps in its folder.
+
+    Args:
+        group: The file's group: icons, models or textures.
+        name: The file's name in its group, as the catalogue names it.
+    """
+    return f"{group}/{name}{'.glb' if group == 'models' else '.webp'}"
 
 
 def catalogue_items(rules: CatalogueRules, items: Iterable[CatalogueItem]) -> dict[int, Item]:
@@ -452,7 +510,13 @@ def _contents(rules: CatalogueRules, stored: StoredCatalogue) -> Contents:
     document = stored.document
     found = catalogue_items(rules, document.items)
     return Contents(
-        stored.revision, stored.icons, found, document.daily_missions, document.experience
+        stored.revision,
+        stored.icons,
+        stored.models,
+        stored.textures,
+        found,
+        document.daily_missions,
+        document.experience,
     )
 
 

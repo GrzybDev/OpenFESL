@@ -624,9 +624,11 @@ class CatalogueRow(Base):
 
     partition: Mapped[str] = mapped_column(primary_key=True)
     document: Mapped[dict[str, Any]] = mapped_column(JSONB)
-    # The import the document comes from, whose folder holds its icons.
+    # The import the document comes from, whose folder holds its files.
     revision: Mapped[str]
     icons: Mapped[int]
+    models: Mapped[int] = mapped_column(server_default="0")
+    textures: Mapped[int] = mapped_column(server_default="0")
     imported_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

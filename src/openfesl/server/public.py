@@ -15,6 +15,7 @@ from openfesl.web.account.services import SignInServices
 from openfesl.web.account.sign_in import SignInPages
 from openfesl.web.account.terms import TermsPages
 from openfesl.web.activity import activity_routes
+from openfesl.web.catalogue_files import catalogue_file_routes
 from openfesl.web.chest_keys import KeyPages
 from openfesl.web.chests import ChestsPages
 from openfesl.web.creator import CreatorPages
@@ -58,6 +59,10 @@ def include_public_routes(
     census, history = services.census, services.history
     sent = SentForms()
     app.include_router(game_icon_routes(games, stores.game_icons))
+    if services.catalogue_files is not None:
+        app.include_router(
+            catalogue_file_routes(games, services.catalogues, services.catalogue_files)
+        )
     app.include_router(shell_routes(pages, services.terms))
     app.include_router(menu_routes(pages, games, census))
     app.include_router(front_routes(pages, games, census, history, stores.keys))

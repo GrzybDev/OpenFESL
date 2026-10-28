@@ -13,7 +13,7 @@ from openfesl.core.games import Game, load_games
 from openfesl.core.hero_items import fits
 from openfesl.extraction.catalogue import extract, find_game
 from openfesl.formats.definitions import read_definitions
-from openfesl.storage.catalogues import IconFolder, SqlCatalogueStore
+from openfesl.storage.catalogues import CatalogueFolder, SqlCatalogueStore
 from openfesl.storage.database import migrate
 
 pytestmark = NEEDS_COPY
@@ -119,7 +119,7 @@ async def test_the_server_reads_the_copys_catalogue_as_the_game_does(
     engine = create_async_engine(database_url)
     await migrate(engine)
     catalogues = Catalogues(
-        SqlCatalogueStore(async_sessionmaker(engine)), IconFolder(tmp_path), load_games()
+        SqlCatalogueStore(async_sessionmaker(engine)), CatalogueFolder(tmp_path), load_games()
     )
     try:
         await catalogues.import_file(written.read_bytes(), admin=None)
@@ -143,7 +143,10 @@ async def test_the_server_reads_the_copys_catalogue_as_the_game_does(
     assert english.name(6127)
     assert english.xp_to_next(1) == 600 and english.xp_to_next(30) is None
     [kept] = (tmp_path / "catalogues" / "bfheroes").iterdir()
-    assert len(list(kept.iterdir())) == english.contents.icons
+    contents = english.contents
+    assert len(list((kept / "icons").iterdir())) == contents.icons
+    assert len(list((kept / "models").iterdir())) == contents.models
+    assert len(list((kept / "textures").iterdir())) == contents.textures
     # What a new hero's game writes of its loadout fits it, and its first mission comes with
     # level 1 and needs no other first, so the server takes the game's own writes of a new hero.
     # Without the catalogue, the server holds the base items that it marks for each faction.

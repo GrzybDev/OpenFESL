@@ -4706,7 +4706,9 @@ msgid "web.admin.audit.logins"
 msgstr "Remembered logins: %(count)s"
 
 msgid "web.admin.audit.catalogue"
-msgstr "Items: %(items)s · languages: %(languages)s · icons: %(icons)s"
+msgstr ""
+"Items: %(items)s · languages: %(languages)s · icons: %(icons)s · hero models: "
+"%(models)s · textures: %(textures)s"
 
 msgid "web.admin.audit.from_key"
 msgstr "%(tags)s · from %(key)s"

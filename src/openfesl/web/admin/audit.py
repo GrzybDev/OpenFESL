@@ -343,6 +343,8 @@ async def _rows(
                 items=details.get("items", 0),
                 languages=details.get("languages", 0),
                 icons=details.get("icons", 0),
+                models=details.get("models", 0),
+                textures=details.get("textures", 0),
             )
         rows.append(
             AuditRow(

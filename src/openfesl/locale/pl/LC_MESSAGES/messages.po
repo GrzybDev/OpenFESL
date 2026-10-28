@@ -4898,7 +4898,9 @@ msgid "web.admin.audit.logins"
 msgstr "Zapamiętane logowania: %(count)s"
 
 msgid "web.admin.audit.catalogue"
-msgstr "Przedmioty: %(items)s · języki: %(languages)s · ikony: %(icons)s"
+msgstr ""
+"Przedmioty: %(items)s · języki: %(languages)s · ikony: %(icons)s · modele "
+"bohaterów: %(models)s · tekstury: %(textures)s"
 
 msgid "web.admin.audit.from_key"
 msgstr "%(tags)s · z klucza %(key)s"

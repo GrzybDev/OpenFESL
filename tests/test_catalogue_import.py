@@ -3,6 +3,7 @@ from collections.abc import AsyncIterator
 from datetime import date
 from pathlib import Path
 
+import anyio
 import httpx2
 import pytest
 from game_files import invented_copy
@@ -12,12 +13,12 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from support import cli
 
 from openfesl.core.admin import AdminFeed
-from openfesl.core.catalogue import CatalogueFile
+from openfesl.core.catalogue import CatalogueFile, CatalogueItem
 from openfesl.core.catalogues import Catalogues
 from openfesl.core.games import Game, load_games
 from openfesl.core.stats import partition_of
 from openfesl.storage.admin import SqlAdminLog
-from openfesl.storage.catalogues import IconFolder, SqlCatalogueStore
+from openfesl.storage.catalogues import CatalogueFolder, SqlCatalogueStore
 from openfesl.storage.database import migrate
 
 pytestmark = pytest.mark.anyio
@@ -33,6 +34,18 @@ async def extracted(folder: Path, capsys: pytest.CaptureFixture[str]) -> Path:
 
 
 @pytest.fixture
+def files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Name the folder of the deployment's files, before a server starts with it."""
+    folder = tmp_path / "files"
+    monkeypatch.setenv("FILES_PATH", str(folder))
+    return folder
+
+
+def kept_files(folder: Path) -> list[str]:
+    return sorted(str(path.relative_to(folder).as_posix()) for path in folder.rglob("*.*"))
+
+
+@pytest.fixture
 async def sessions(database_url: str) -> AsyncIterator[async_sessionmaker[AsyncSession]]:
     engine = create_async_engine(database_url)
     await migrate(engine)
@@ -42,25 +55,26 @@ async def sessions(database_url: str) -> AsyncIterator[async_sessionmaker[AsyncS
     await engine.dispose()
 
 
-async def test_an_imported_catalogue_names_items_in_the_pages_language_with_its_icons_kept(
+async def test_an_imported_catalogue_names_items_in_the_pages_language_and_serves_its_files(
+    files: Path,
     admin_provider: IdentityProvider,
     server_url: str,
     database_url: str,
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
-    monkeypatch: pytest.MonkeyPatch,
     bfheroes: Game,
 ) -> None:
     file = await extracted(tmp_path, capsys)
-    monkeypatch.setenv("FILES_PATH", str(tmp_path / "files"))
 
     printed = await cli(capsys, "catalogue", "import", str(file))
 
     assert printed == (
-        "Imported the catalogue of Battlefield Heroes: 12 items, texts in 2 languages and 5 icons\n"
+        "Imported the catalogue of Battlefield Heroes: 12 items, texts in 2 languages, 5 icons "
+        "and 4 hero models with 2 textures\n"
     )
-    [kept] = (tmp_path / "files" / "catalogues" / "bfheroes").iterdir()
-    assert len(list(kept.iterdir())) == 5 and (kept / "item1.webp").read_bytes()[8:12] == b"WEBP"
+    [kept] = (files / "catalogues" / "bfheroes").iterdir()
+    assert len(kept_files(kept / "icons")) == 5 and len(kept_files(kept / "models")) == 4
+    assert kept_files(kept / "textures") == ["defaultlightwarpskinned.webp", "invented_hair.webp"]
     engine = create_async_engine(database_url)
     catalogues = Catalogues(SqlCatalogueStore(async_sessionmaker(engine)), None, load_games())
     await catalogues.load()
@@ -68,6 +82,7 @@ async def test_an_imported_catalogue_names_items_in_the_pages_language_with_its_
     await engine.dispose()
 
     assert polish.imported and polish.contents.icons == 5
+    assert (polish.contents.models, polish.contents.textures) == (4, 2)
     hat, hair, rifle, wave = polish.item(1), polish.item(2), polish.item(3000), polish.item(5000)
     assert hat and hair and rifle and wave
     assert (hat.kind, hat.slot, hat.level) == ("appearance", "hat", 1)
@@ -100,18 +115,36 @@ async def test_an_imported_catalogue_names_items_in_the_pages_language_with_its_
     assert (polish.xp_to_next(1), polish.xp_to_next(29)) == (100, 2_900)
     assert polish.xp_to_next(30) is None and polish.xp_to_next(0) is None
 
-    admin_provider.user = KEEPER
+    # Browsers keep an import's files for good, as a new import comes under a new address.
     base = server_url.replace("ws://", "http://").rstrip("/")
+    folder = f"{base}/catalogues/bfheroes/{kept.name}"
+    async with httpx2.AsyncClient() as client:
+        model = await client.get(f"{folder}/models/invented_hat.glb")
+        texture = await client.get(f"{folder}/textures/invented_hair.webp")
+        missing = [
+            await client.get(f"{base}/catalogues/bfheroes/{'0' * 16}/icons/item1.webp"),
+            await client.get(f"{folder}/icons/item1.png"),
+            await client.get(f"{folder}/models/invented_lost.glb"),
+            await client.get(f"{base}/catalogues/bfbc2/{kept.name}/icons/item1.webp"),
+        ]
+    assert model.status_code == 200 and model.headers["content-type"] == "model/gltf-binary"
+    assert model.content == (kept / "models" / "invented_hat.glb").read_bytes()
+    assert model.headers["cache-control"] == "public, max-age=31536000, immutable"
+    assert texture.headers["content-type"] == "image/webp"
+    assert [response.status_code for response in missing] == [404] * 4
+
+    admin_provider.user = KEEPER
     async with httpx2.AsyncClient() as client:
         log = (await sign_in(client, base, next="/admin/audit")).text
     assert "Imported catalogue" in log and "Battlefield Heroes" in log
-    assert "Items: 12 · languages: 2 · icons: 5" in log
+    assert "Items: 12 · languages: 2 · icons: 5 · hero models: 4 · textures: 2" in log
 
 
 async def test_a_new_import_replaces_the_whole_catalogue_for_every_server_that_follows(
     sessions: async_sessionmaker[AsyncSession],
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
     bfheroes: Game,
 ) -> None:
     first = (await extracted(tmp_path, capsys)).read_bytes()
@@ -121,8 +154,8 @@ async def test_a_new_import_replaces_the_whole_catalogue_for_every_server_that_f
         {"en": {"WEST_Custom_Item_2": "Invented Hair"}},
         {"item1": old.icons["item1"]},
     ).write()
-    icons = tmp_path / "files"
-    importing = Catalogues(SqlCatalogueStore(sessions), IconFolder(icons), load_games())
+    files = tmp_path / "files"
+    importing = Catalogues(SqlCatalogueStore(sessions), CatalogueFolder(files), load_games())
     following = Catalogues(SqlCatalogueStore(sessions), None, load_games())
     feed = AdminFeed(SqlAdminLog(sessions))
     following.follow(feed)
@@ -137,39 +170,57 @@ async def test_a_new_import_replaces_the_whole_catalogue_for_every_server_that_f
     await feed.apply()
 
     assert (imported.items, imported.languages, imported.icons) == (2, 1, 1)
+    assert (imported.models, imported.textures) == (0, 0)
     for catalogue in (await following.of(bfheroes, "pl"), await importing.of(bfheroes, "pl")):
         assert catalogue.name(1) is None and catalogue.name(2) == "Invented Hair"
         assert catalogue.item(3000) is None and catalogue.contents.icons == 1
-    [kept] = (icons / "catalogues" / "bfheroes").iterdir()
-    assert [icon.name for icon in kept.iterdir()] == ["item1.webp"]
+        assert catalogue.contents.models == 0
+    # The earlier import's hero models went with its folder.
+    [kept] = (files / "catalogues" / "bfheroes").iterdir()
+    assert kept_files(kept) == ["icons/item1.webp"]
 
-    # A file of no catalogue, or of a game without one, leaves the catalogue as it is.
+    # A file of no catalogue, or of a game without one, leaves the catalogue as it is, and so
+    # does an import whose files fill the disk part way, which leaves none of them.
     bad_company = CatalogueFile(old.document.model_copy(update={"game": "bfbc2"}), {}, {})
     for refused in (b"invented", bad_company.write()):
         with pytest.raises(ValueError):
             await importing.import_file(refused, admin=None)
+    written: list[Path] = []
+    write_bytes = Path.write_bytes
+
+    def full_disk(path: Path, data: bytes) -> int:
+        if written:
+            raise OSError("No space left on device")
+        written.append(path)
+        return write_bytes(path, data)
+
+    with monkeypatch.context() as patched:
+        patched.setattr(Path, "write_bytes", full_disk)
+        with pytest.raises(OSError, match="No space left"):
+            await importing.import_file(first, admin=None)
+    assert written and not written[0].exists()
     await following.load()
     assert (await following.of(bfheroes, "en")).name(2) == "Invented Hair"
-    assert [folder.name for folder in (icons / "catalogues" / "bfheroes").iterdir()] == [kept.name]
+    assert [folder.name for folder in (files / "catalogues" / "bfheroes").iterdir()] == [kept.name]
 
 
-async def test_imports_at_once_on_two_servers_leave_the_icons_of_the_one_kept(
+async def test_imports_at_once_on_two_servers_leave_the_files_of_the_one_kept(
     sessions: async_sessionmaker[AsyncSession],
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
     bfheroes: Game,
 ) -> None:
     data = (await extracted(tmp_path, capsys)).read_bytes()
-    icons = tmp_path / "files"
+    files = tmp_path / "files"
     first, second = (
-        Catalogues(SqlCatalogueStore(sessions), IconFolder(icons), load_games()) for _ in "ab"
+        Catalogues(SqlCatalogueStore(sessions), CatalogueFolder(files), load_games()) for _ in "ab"
     )
 
     await asyncio.gather(first.import_file(data, None), second.import_file(data, None))
 
     kept = await SqlCatalogueStore(sessions).current(partition_of(bfheroes))
     assert kept is not None
-    folders = [folder.name for folder in (icons / "catalogues" / "bfheroes").iterdir()]
+    folders = [folder.name for folder in (files / "catalogues" / "bfheroes").iterdir()]
     assert folders == [kept.revision]
 
 
@@ -187,3 +238,29 @@ async def test_a_file_that_holds_no_catalogue_is_refused_on_the_command_line(
         await cli(capsys, "catalogue", "import", str(unreadable))
     with pytest.raises(SystemExit, match="No such file"):
         await cli(capsys, "catalogue", "import", str(tmp_path / "missing.zip"))
+
+
+@pytest.mark.usefixtures("prompt_actions")
+async def test_the_icon_of_a_withheld_item_is_kept_for_the_admin_panel_alone(
+    files: Path, server_url: str, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    old = CatalogueFile.read((await extracted(tmp_path, capsys)).read_bytes())
+    # One of the shirts that the game data withholds.
+    shirt = CatalogueItem(id=257, kind="appearance", icon="item257")
+    file = tmp_path / "withheld.zip"
+    document = old.document.model_copy(update={"items": (*old.document.items, shirt)})
+    icons = {**old.icons, "item257": old.icons["item1"]}
+    file.write_bytes(CatalogueFile(document, old.texts, icons).write())
+
+    await cli(capsys, "catalogue", "import", str(file))
+
+    [kept] = (files / "catalogues" / "bfheroes").iterdir()
+    base = server_url.replace("ws://", "http://").rstrip("/")
+    folder = f"{base}/catalogues/bfheroes/{kept.name}/icons"
+    async with httpx2.AsyncClient() as client:
+        with anyio.fail_after(5):
+            while (await client.get(f"{folder}/item257.webp")).status_code != 404:
+                await anyio.sleep(0.05)
+        hat = await client.get(f"{folder}/item1.webp")
+    assert hat.status_code == 200
+    assert (kept / "icons" / "item257.webp").is_file()

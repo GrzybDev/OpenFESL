@@ -67,7 +67,7 @@ from openfesl.core.web_registration import WebRegistration
 from openfesl.server.mail import SmtpMailer
 from openfesl.server.settings import Settings
 from openfesl.server.stores import Stores
-from openfesl.storage.catalogues import IconFolder
+from openfesl.storage.catalogues import CatalogueFolder
 from openfesl.web.game_icons import presence_art
 
 
@@ -116,8 +116,8 @@ class GameServices:
         self.rich_presence = RichPresence(self.hosting, settings.discord_application_id, art)
         self.history = OnlineHistory(stores.history, self.census, games)
         self.feed = AdminFeed(stores.admin_log)
-        icons = IconFolder(settings.files_path) if settings.files_path else None
-        self.catalogues = Catalogues(stores.catalogues, icons, games)
+        self.catalogue_files = CatalogueFolder(settings.files_path) if settings.files_path else None
+        self.catalogues = Catalogues(stores.catalogues, self.catalogue_files, games)
         self.store = Store(stores.products, self.catalogues, games)
         drops = Drops(self.catalogues, stores.entitlements)
         self.deals = HotDeals(stores.products, stores.deals, stores.settings, self.catalogues)
