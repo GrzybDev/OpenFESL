@@ -1,13 +1,14 @@
 from collections.abc import Collection
 
-from sqlalchemy import select, update
-from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy import String, cast, func, literal, select, update
+from sqlalchemy.dialects.postgresql import JSONB, insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.reward_claims import Grant
 from openfesl.core.rewards import RewardRefusal, RewardRefused
+from openfesl.core.stats import PERSONA, Bucket
 from openfesl.storage.entitlements import add_account_item, add_item
-from openfesl.storage.models import RewardClaimRow
+from openfesl.storage.models import RewardBaselineRow, RewardClaimRow, StatRow
 from openfesl.storage.wallets import credit
 
 # The ledger's reason for the Funds that rewards give.
@@ -44,6 +45,63 @@ class SqlRewardStore:
                 )
             )
             return {(key, faction) for key, faction in rows}
+
+    async def baselines(
+        self,
+        game: str,
+        partition: str,
+        key: str,
+        stat: str,
+        bucket: Bucket,
+        personas: Collection[int],
+    ) -> dict[int, int]:
+        """Return the values a stat of heroes had when an event began, taking them on first use.
+
+        The first use takes every hero's value at once, so that a hero without the stat then
+        counts from 0; later uses read what it took.
+
+        Args:
+            game: The game's data-file name.
+            partition: The game's partition, which holds the stats.
+            key: The event's key, of its year.
+            stat: The stat.
+            bucket: The period of the stat's values.
+            personas: The heroes whose values to return.
+
+        Returns:
+            The values the heroes had, by persona; a hero without one had none.
+        """
+        taken = select(
+            literal(game),
+            literal(key),
+            literal(stat),
+            func.coalesce(
+                func.jsonb_object_agg(cast(StatRow.owner_id, String), StatRow.value),
+                cast(literal("{}"), JSONB),
+            ),
+        ).where(
+            StatRow.partition == partition,
+            StatRow.owner_type == PERSONA,
+            StatRow.period == bucket.period,
+            StatRow.period_start == bucket.start,
+            StatRow.key == stat,
+        )
+        columns = ["game", "key", "stat", "values"]
+        read = select(RewardBaselineRow.values).where(
+            RewardBaselineRow.game == game,
+            RewardBaselineRow.key == key,
+            RewardBaselineRow.stat == stat,
+        )
+        async with self._sessions.begin() as session:
+            values = await session.scalar(read)
+            if values is None:
+                # Only the first use takes them, also when two take them at once.
+                await session.execute(
+                    insert(RewardBaselineRow).from_select(columns, taken).on_conflict_do_nothing()
+                )
+                values = await session.scalar(read)
+        held = values or {}
+        return {persona: int(held[str(persona)]) for persona in personas if str(persona) in held}
 
     async def grant(self, grant: Grant) -> list[int]:
         """Record a claim and give what it grants, all of it or none.

@@ -15,8 +15,14 @@ from openfesl.core.inventory import Ownership
 from openfesl.core.overrides import overridden
 from openfesl.core.policies import SettingStore
 from openfesl.core.reward_claims import Grant, RewardStore
-from openfesl.core.reward_rules import Gift, Milestone, Part, RewardRules
-from openfesl.core.stats import PERSONA, Owner, StatStore, bucket_of, partition_of
+from openfesl.core.reward_rules import Gift, Goal, Milestone, Part, RewardRules
+from openfesl.core.stats import (
+    PERSONA,
+    Owner,
+    StatStore,
+    bucket_of,
+    partition_of,
+)
 from openfesl.core.store import ProductStore
 from openfesl.core.wallets import Wallet
 from openfesl.protocol.rank import Period
@@ -154,7 +160,7 @@ class Rewards:
         now = self._clock()
         heroes = (await self._heroes.roster(game, account_id)).heroes
         found = [
-            *self._events(game, rules, heroes, now),
+            *await self._events(game, rules, heroes, now),
             *self._starters(game, rules, heroes, now),
             *await self._milestones(game, rules, heroes),
             *await self._first_chest(game, rules, heroes),
@@ -212,28 +218,56 @@ class Rewards:
         )
         return await self._store.grant(grant)
 
-    def _events(
+    async def _events(
         self, game: Game, rules: RewardRules, heroes: list[Hero], now: datetime
     ) -> list[Reward]:
         found = []
         for key, part, ends, day in _running(rules, now):
-            gift = part.on(day)
-            fitting = tuple(h.persona.id for h in heroes if self._fits(game, part.faction, gift, h))
-            description = _dated(part.description, day) if part.description else None
-            found.append(
-                Reward(
-                    key,
-                    part.faction,
-                    _dated(part.name, day),
-                    description,
-                    gift,
-                    _state(not gift.for_hero or bool(fitting)),
-                    fitting,
-                    ends,
-                    day,
-                )
+            gift, goal = part.on(day), part.goal
+            counting = [h for h in heroes if not goal or goal.hero_class in (None, h.hero_class)]
+            fitting = tuple(
+                h.persona.id for h in counting if self._fits(game, part.faction, gift, h)
             )
+            description = _dated(part.description, day) if part.description else None
+            reward = Reward(
+                key,
+                part.faction,
+                _dated(part.name, day),
+                description,
+                gift,
+                _state(not gift.for_hero or bool(fitting)),
+                fitting,
+                ends,
+                day,
+            )
+            if goal:
+                hero, progress = await self._best(game, key, goal, part.faction, counting)
+                reached = bool(fitting) and progress >= goal.count
+                reward = replace(
+                    reward, state=_state(reached), hero=hero, progress=progress, goal=goal.count
+                )
+            found.append(reward)
         return found
+
+    async def _best(
+        self, game: Game, key: str, goal: Goal, faction: str | None, heroes: list[Hero]
+    ) -> tuple[int | None, int]:
+        # The hero of the faction that came furthest since the event began, and how far.
+        counted = [hero.persona.id for hero in heroes if hero.faction == faction]
+        bucket = bucket_of(Period.ALL_TIME, 0)
+        partition = partition_of(game)
+        before = await self._store.baselines(game.id, partition, key, goal.stat, bucket, counted)
+        owners = [Owner(PERSONA, persona) for persona in counted]
+        now = await self._stats.values(partition, owners, [goal.stat], bucket)
+        progress = {
+            owner.id: int(now[(owner, goal.stat)].value) - before.get(owner.id, 0)
+            for owner in owners
+            if (owner, goal.stat) in now
+        }
+        if not progress:
+            return None, 0
+        best = max(progress, key=progress.__getitem__)
+        return best, max(progress[best], 0)
 
     def _starters(
         self, game: Game, rules: RewardRules, heroes: list[Hero], now: datetime

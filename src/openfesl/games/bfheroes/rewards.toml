@@ -89,6 +89,46 @@ name = "REWARDS_HALLOWEEN_DAY_{day}_NATIONAL_NAME"
 description = "REWARDS_HALLOWEEN_DAY_{day}_NATIONAL_DESCRIPTION"
 gift = { box = "national-trick-or-treat" }
 
+# The Halloween missions, 19 October to 1 November: 700 kills with the faction's machete on one
+# Commando bring the Golden Machete for any of the account's Commandos of that faction, and 10
+# faction wins on Perilous Port (stats map 12) with one hero the faction's Halloween shirt, as
+# the game's texts state (tid 273594; the forum's 1,000 kills lost to the texts' 700). Each
+# hero's kills and wins count from the event's start, on ranked servers, which alone submit
+# stats.
+[rewards.events.halloween-machete]
+window = { dates = ["10-19", "10-31"] }
+
+[rewards.events.halloween-machete.parts.royal]
+faction = "royal"
+name = "REWARDS_HALLOWEEN_MACHETE_MISSION_ROYAL_NAME"
+description = "REWARDS_HALLOWEEN_MACHETE_MISSION_ROYAL_DESCRIPTION"
+goal = { stat = "kw106", count = 700, hero_class = "commando" }
+gift = { items = [3206] }
+
+[rewards.events.halloween-machete.parts.national]
+faction = "national"
+name = "REWARDS_HALLOWEEN_MACHETE_MISSION_NATIONAL_NAME"
+description = "REWARDS_HALLOWEEN_MACHETE_MISSION_NATIONAL_DESCRIPTION"
+goal = { stat = "kw64", count = 700, hero_class = "commando" }
+gift = { items = [3205] }
+
+[rewards.events.halloween-map]
+window = { dates = ["10-19", "10-31"] }
+
+[rewards.events.halloween-map.parts.royal]
+faction = "royal"
+name = "REWARDS_HALLOWEEN_MAP_MISSION_ROYAL_NAME"
+description = "REWARDS_HALLOWEEN_MAP_MISSION_ROYAL_DESCRIPTION"
+goal = { stat = "m_win12", count = 10 }
+gift = { items = [1512] }
+
+[rewards.events.halloween-map.parts.national]
+faction = "national"
+name = "REWARDS_HALLOWEEN_MAP_MISSION_NATIONAL_NAME"
+description = "REWARDS_HALLOWEEN_MAP_MISSION_NATIONAL_DESCRIPTION"
+goal = { stat = "m_win12", count = 10 }
+gift = { items = [1511] }
+
 # The Bento week of the Rising Sun, 21 to 27 November: each day one free Bento Box of the
 # faction ("one free ... each day until November 27", the 2011-11-21 update, tid 284786).
 [rewards.events.bento]
@@ -106,6 +146,27 @@ faction = "national"
 name = "REWARDS_NATIONAL_BENTO_BOX_DAY_{day}_NAME"
 description = "REWARDS_NATIONAL_BENTO_BOX_DAY_{day}_DESCRIPTION"
 gift = { box = "national-bento-box" }
+
+# The Rising Sun mission, 21 to 30 November, off unless switched on: 400 kills with the
+# faction's Dragon's or Drake's Fire on one Gunner bring its blue or crimson version for any of
+# the account's Gunners of that faction (the 2011-11-21 update, tid 284786).
+[rewards.events.rising-sun]
+enabled = false
+window = { dates = ["11-21", "11-30"] }
+
+[rewards.events.rising-sun.parts.royal]
+faction = "royal"
+name = "REWARDS_RISING_SUN_DRAGONS_FIRE_NAME"
+description = "REWARDS_RISING_SUN_DRAGONS_FIRE_DESCRIPTION"
+goal = { stat = "kw110", count = 400, hero_class = "gunner" }
+gift = { items = [3209] }
+
+[rewards.events.rising-sun.parts.national]
+faction = "national"
+name = "REWARDS_RISING_SUN_DRAKES_FIRE_NAME"
+description = "REWARDS_RISING_SUN_DRAKES_FIRE_DESCRIPTION"
+goal = { stat = "kw35", count = 400, hero_class = "gunner" }
+gift = { items = [3211] }
 
 # Christmas, 1 to 24 December: Santa's Gift for Royal heroes and Nikolaus' Gift for National
 # ones, each day one free roll of the faction's Visit; on the 2nd, 9th and 17th the 2011

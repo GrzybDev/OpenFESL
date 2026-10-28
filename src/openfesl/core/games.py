@@ -463,6 +463,7 @@ class Game(BaseModel):
         gifts = rewards.gifts
         factions = {part.faction for part in parts} | set(packs)
         classes = {name for found in packs.values() for name in found}
+        classes |= {part.goal.hero_class for part in parts if part.goal and part.goal.hero_class}
         if factions - {None, *self.heroes.factions} or classes - set(self.heroes.classes):
             raise ValueError("rewards name a faction or class the heroes lack")
         boxes = {box.key for box in self.store.boxes} if self.store else set()

@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Protocol
 
 from openfesl.core.inventory import Ownership
+from openfesl.core.stats import Bucket
 from openfesl.core.wallets import Wallet
 
 
@@ -45,6 +46,32 @@ class RewardStore(Protocol):
             game: The game's data-file name.
             account_id: The account.
             keys: The keys of the rewards to look at.
+        """
+
+    async def baselines(
+        self,
+        game: str,
+        partition: str,
+        key: str,
+        stat: str,
+        bucket: Bucket,
+        personas: Collection[int],
+    ) -> dict[int, int]:
+        """Return the values a stat of heroes had when an event began, taking them on first use.
+
+        The first use takes every hero's value at once, so that a hero without the stat then
+        counts from 0; later uses read what it took.
+
+        Args:
+            game: The game's data-file name.
+            partition: The game's partition, which holds the stats.
+            key: The event's key, of its year.
+            stat: The stat.
+            bucket: The period of the stat's values.
+            personas: The heroes whose values to return.
+
+        Returns:
+            The values the heroes had, by persona; a hero without one had none.
         """
 
     async def grant(self, grant: Grant) -> list[int]:

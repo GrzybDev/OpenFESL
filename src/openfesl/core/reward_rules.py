@@ -30,6 +30,22 @@ class Gift(BaseModel):
         return bool(self.items or self.box)
 
 
+class Goal(BaseModel):
+    """What one hero must reach within its event for a part of the event to be claimed.
+
+    Attributes:
+        stat: The hero's stat that counts, from the event's start.
+        count: What the hero's count must reach.
+        hero_class: The class of the heroes that count and that the gift goes to; any when none.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    stat: str
+    count: PositiveInt
+    hero_class: str | None = None
+
+
 class Part(BaseModel):
     """What an event gives the heroes of one faction, or the account itself.
 
@@ -41,6 +57,7 @@ class Part(BaseModel):
         description: The id of the text about it, likewise.
         gift: What it gives.
         days: What it gives instead on some days of a daily event, by the day from 1.
+        goal: What one hero of the faction must reach first; nothing when none.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -51,6 +68,7 @@ class Part(BaseModel):
     description: str | None = None
     gift: Gift
     days: dict[PositiveInt, Gift] = {}
+    goal: Goal | None = None
 
     def on(self, day: int | None) -> Gift:
         """Return what the part gives on a day of its event.
@@ -210,4 +228,6 @@ class RewardRules(BaseModel):
             factions = [part.faction for part in event.parts.values()]
             if len(factions) != len(set(factions)):
                 raise ValueError(f"the event {key} has two parts for one faction")
+            if event.daily and any(part.goal for part in event.parts.values()):
+                raise ValueError(f"the event {key} has goals on its days")
         return self

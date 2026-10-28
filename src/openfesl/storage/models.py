@@ -375,6 +375,18 @@ class RewardClaimRow(Base):
     claimed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class RewardBaselineRow(Base):
+    __tablename__ = "reward_baseline"
+
+    game: Mapped[str] = mapped_column(primary_key=True)
+    # The event of a year whose goals count from it, and the stat it holds.
+    key: Mapped[str] = mapped_column(primary_key=True)
+    stat: Mapped[str] = mapped_column(primary_key=True)
+    # Every hero's value of the stat when it was taken, by persona.
+    values: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    taken_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class ProductKeyRow(Base):
     __tablename__ = "product_key"
 

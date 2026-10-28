@@ -126,7 +126,13 @@ async def test_every_reward_of_the_game_data_names_the_copys_items_and_texts(
                 ]
                 for item_id, _ in gift.items:
                     item = catalogue.item(item_id)
-                    if item is None or part.faction not in item.factions:
+                    # A mission's item fits the class whose heroes reach its goal.
+                    hero_class = part.goal.hero_class if part.goal else None
+                    if (
+                        item is None
+                        or part.faction not in item.factions
+                        or hero_class not in (None, *item.classes)
+                    ):
                         unfit.append((key, day, item_id))
                 assert gift.box is None or gift.box in boxes
     packs = rules.starter.packs if rules.starter else {}

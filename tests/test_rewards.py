@@ -38,7 +38,7 @@ pytestmark = pytest.mark.anyio
 
 # An invented catalogue: the masks that Santa's and Nikolaus' Visits may give, the Royal
 # birthday pack, the tonics that the Visits and the rewards give instead of an item a hero owns
-# for good, and the Royal soldier's starter pack.
+# for good, the Royal soldier's starter pack and the Royal Halloween missions' rewards.
 INVENTED = {
     1081: worn("Invented Mask", ROYAL, "1"),
     1084: worn("Invented Visor", NATIONAL, "1"),
@@ -51,6 +51,8 @@ INVENTED = {
     3015: ("Invented Rifle", "weapon", {"faction": ROYAL, "kits": "2"}),
     9000: ("Invented XP Boost", "convenience", {}),
     9040: ("Invented Stamina Boost", "convenience", {}),
+    3206: ("Invented Golden Machete", "weapon", {"faction": ROYAL, "kits": "1"}),
+    1512: worn("Invented Halloween Shirt", ROYAL, "3"),
 }
 # The fifth day of Christmas, and the birthday a year apart.
 CHRISTMAS = datetime(2026, 12, 5, 12, tzinfo=UTC)
@@ -320,6 +322,69 @@ async def test_a_new_hero_and_goals_bring_their_gifts_once_and_a_first_chest_bri
     # The starter pack is gone a month after the hero's creation.
     assert f"starter:{hero}" not in always(a_month_on)
     assert always(a_month_on)[level] == (RewardState.CLAIMED, 10)
+
+
+async def kills(database_url: str, hero: int, stat: str, value: int) -> None:
+    """Set a hero's stat as its dedicated server reports it at a round's end."""
+    await execute(
+        database_url,
+        "INSERT INTO stat SELECT partition, owner_type, owner_id, period, period_start, :key,"
+        " :value, '' FROM stat WHERE owner_id = :hero AND key = 'level'"
+        " ON CONFLICT (partition, owner_type, owner_id, period, period_start, key)"
+        " DO UPDATE SET value = :value",
+        hero=hero,
+        key=stat,
+        value=value,
+    )
+
+
+async def test_a_mission_counts_from_its_events_start_and_closes_at_its_deadline(
+    site: Site, base: str, database_url: str
+) -> None:
+    commando = await create_hero(
+        base, "ann@example.test", "Cutthroat", faction="royal", **{"class": "commando"}
+    )
+    soldier = await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    machete, shirt = "halloween-machete:2026", "halloween-map:2026"
+    # Machete kills from before Halloween, which do not count.
+    await kills(database_url, commando, "kw106", 50)
+
+    def missions(rewards: list[Reward]) -> dict[str, tuple[RewardState, int | None, int | None]]:
+        return {
+            r.key: (r.state, r.hero, r.progress) for r in rewards if r.faction == "royal" and r.goal
+        }
+
+    site.now = datetime(2026, 10, 19, tzinfo=UTC)
+    started = missions(await site.available(commando))
+    await kills(database_url, commando, "kw106", 600)
+    short = await site.claim(commando, machete, "royal")
+    await kills(database_url, commando, "kw106", 750)
+    # Wins on Perilous Port by a hero that had none when Halloween began.
+    await kills(database_url, soldier, "m_win12", 10)
+    reached = missions(await site.available(commando))
+    claimed = [await site.claim(hero, machete, "royal") for hero in (soldier, commando)]
+    site.now = datetime(2026, 11, 1, tzinfo=UTC)
+    late = await site.claim(soldier, shirt, "royal")
+    site.now = datetime(2026, 11, 25, tzinfo=UTC)
+    rising_off = missions(await site.available(commando))
+    await setting(database_url, "bfheroes.rewards.events.rising-sun.enabled", "on")
+    rising_on = missions(await site.available(commando))
+
+    assert started == {
+        machete: (RewardState.LOCKED, commando, 0),
+        shirt: (RewardState.LOCKED, None, 0),
+    }
+    assert short is RewardRefusal.LOCKED
+    assert reached == {
+        machete: (RewardState.CLAIMABLE, commando, 700),
+        shirt: (RewardState.CLAIMABLE, soldier, 10),
+    }
+    # The Golden Machete goes to a Commando of the faction alone.
+    assert claimed == [RewardRefusal.UNFIT, [3206]]
+    assert late is RewardRefusal.UNKNOWN
+    # The Rising Sun mission runs only once switched on, and needs a Gunner the account lacks.
+    assert rising_off == {}
+    assert rising_on == {"rising-sun:2026": (RewardState.LOCKED, None, 0)}
 
 
 def always(rewards: list[Reward]) -> dict[str, tuple[RewardState, int | None]]:
