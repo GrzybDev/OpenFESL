@@ -16,13 +16,15 @@ from openfesl.core.wallets import Wallets
 class Unfit(StrEnum):
     """Why a hero may not have what a store page sells.
 
-    Its faction, class or level, or an ability's level before the one sold, which it lacks.
+    Its faction, class or level, an ability's level before the one sold, which it lacks, or its
+    own item that the game or an admin took out of use, to which a purchase adds nothing.
     """
 
     FACTION = "faction"
     CLASS = "class"
     LEVEL = "level"
     ORDER = "order"
+    TAKEN = "taken"
 
 
 @dataclass(frozen=True, slots=True)
@@ -194,9 +196,10 @@ class StoreItems:
         }
         now, item, choices = self._clock(), sold.item, []
         for index, hero in enumerate(heroes):
+            rows = await self._entitlements.of_persona(hero.persona.id)
             kept = [
                 entry
-                for entry in await self._entitlements.of_persona(hero.persona.id)
+                for entry in rows
                 if entry.status == ACTIVE and (entry.expires is None or entry.expires > now)
             ]
             unfit = sold.requirement.unfit(hero)
@@ -204,6 +207,12 @@ class StoreItems:
             if unfit is None and item.id in item.levels[1:]:
                 previous = item.levels[item.levels.index(item.id) - 1]
                 unfit = None if previous in holds else Unfit.ORDER
+            if unfit is None and item:
+                # The game or an admin took the hero's own item out of use; the store adds
+                # nothing to it.
+                prefix = f"{item.id}-"
+                if any(entry.tag.startswith(prefix) and entry.status != ACTIVE for entry in rows):
+                    unfit = Unfit.TAKEN
             hers = balances | {code: found[index][0] for code, found in own.items()}
             choices.append(HeroChoice(hero, unfit, _held(item, holds, kept), hers))
         return choices

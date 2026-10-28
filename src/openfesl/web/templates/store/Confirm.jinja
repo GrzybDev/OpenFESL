@@ -1,0 +1,8 @@
+{#def sold, offered, texts, back: str #}
+{# The confirmation of a purchase as a page of its own, where the store page has no scripts to
+   open its dialog. #}
+<Layout :title="_('web.store.confirm.title')">
+  <div class="rename-page">
+    <StoreConfirm :offered="offered" :texts="texts" :back="back" />
+  </div>
+</Layout>

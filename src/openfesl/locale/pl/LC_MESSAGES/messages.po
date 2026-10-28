@@ -6686,6 +6686,9 @@ msgstr "Wymaga poziomu %(level)s"
 msgid "web.store.tile.order"
 msgstr "Wymaga poprzedniego poziomu"
 
+msgid "web.store.tile.taken"
+msgstr "Nie może dostać ponownie"
+
 msgid "web.store.tile.not_owned"
 msgstr "Nie posiada"
 
@@ -6727,6 +6730,9 @@ msgstr "%(item)s jest tylko dla klasy %(classes)s, a %(hero)s to %(hero_class)s.
 
 msgid "web.store.note.level"
 msgstr "%(hero)s ma poziom %(level)s; %(item)s wymaga poziomu %(needed)s."
+
+msgid "web.store.note.taken"
+msgstr "%(hero)s nie może ponownie dostać %(item)s: przedmiot wycofano z użytku."
 
 msgid "web.store.note.order"
 msgstr "%(item)s to kolejny poziom umiejętności; %(hero)s potrzebuje najpierw poprzedniego."
@@ -6823,3 +6829,81 @@ msgstr "Użycia według wyboru"
 
 msgid "web.store.requires"
 msgstr "Wymagania"
+
+msgid "web.store.next_login"
+msgstr "%(game)s pokaże kupione tu przedmioty od następnego logowania."
+
+msgid "web.store.why.account"
+msgstr "Konto ma %(balance)s %(currency)s; to kosztuje %(price)s."
+
+msgid "web.store.why.hero"
+msgstr "%(hero)s ma %(balance)s %(currency)s; to kosztuje %(price)s."
+
+msgid "web.store.buy"
+msgstr "Kup · %(price)s %(currency)s"
+
+msgid "web.store.confirm.title"
+msgstr "Potwierdź zakup"
+
+msgid "web.store.confirm.until"
+msgstr "%(time)s, do %(day)s"
+
+msgid "web.store.confirm.uses"
+msgstr "%(uses)s (%(left)s → %(total)s)"
+
+msgid "web.store.confirm.kept"
+msgstr "Kupione przedmioty zostają przy bohaterze, dla którego zostały kupione."
+
+msgid "web.store.confirm.adds"
+msgstr "Nowy czas zacznie się, gdy skończy się obecny wynajem, %(day)s."
+
+msgid "web.store.confirm.buy"
+msgstr "Kup za %(price)s %(currency)s"
+
+msgid "web.store.row.item"
+msgstr "Przedmiot"
+
+msgid "web.store.row.hero"
+msgstr "Bohater"
+
+msgid "web.store.row.time"
+msgstr "Czas"
+
+msgid "web.store.row.uses"
+msgstr "Użycia"
+
+msgid "web.store.refused.form"
+msgstr "Nic nie zostało kupione: formularz wygasł. Nic nie zostało wydane."
+
+msgid "web.store.refused.gone"
+msgstr "Nic nie zostało kupione: sklep już tego nie sprzedaje. Nic nie zostało wydane."
+
+msgid "web.store.refused.price"
+msgstr "Nic nie zostało kupione: cena %(item)s zmieniła się na %(price)s %(currency)s. Nie wydano %(currency)s; strona pokazuje nową cenę."
+
+msgid "web.store.refused.owned"
+msgstr "Nic nie zostało kupione: %(hero)s posiada %(item)s na stałe. Nie wydano %(currency)s."
+
+msgid "web.store.refused.taken"
+msgstr "Nic nie zostało kupione: %(hero)s nie może ponownie dostać %(item)s, bo przedmiot wycofano z użytku. Nie wydano %(currency)s."
+
+msgid "web.store.refused.unfit"
+msgstr "Nic nie zostało kupione: %(hero)s nie może mieć %(item)s. Nie wydano %(currency)s."
+
+msgid "web.store.refused.funds.account"
+msgstr "Nic nie zostało kupione: gdy dotarł zakup, konto miało %(balance)s %(currency)s, a %(item)s kosztuje %(price)s. Nie wydano %(currency)s."
+
+msgid "web.store.refused.funds.hero"
+msgstr "Nic nie zostało kupione: gdy dotarł zakup, bohater %(hero)s miał %(balance)s %(currency)s, a %(item)s kosztuje %(price)s. Nie wydano %(currency)s."
+
+msgid "web.store.done.rental"
+msgstr "Kupiono %(item)s dla %(hero)s: %(time)s, do %(day)s. Wydano %(price)s %(currency)s."
+
+msgid "web.store.done.permanent"
+msgstr "Kupiono %(item)s dla %(hero)s na stałe. Wydano %(price)s %(currency)s."
+
+msgid "web.store.done.again"
+msgstr "Zakup %(item)s dla %(hero)s został już dokonany; ponowne wysłanie niczego więcej nie kupiło. Nie wydano więcej %(currency)s."
+
+msgid "web.store.done.uses"
+msgstr "Kupiono %(item)s dla %(hero)s: %(uses)s; teraz zostało: %(left)s. Wydano %(price)s %(currency)s."

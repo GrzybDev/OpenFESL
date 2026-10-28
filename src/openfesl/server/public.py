@@ -98,7 +98,9 @@ def include_public_routes(
     )
     app.include_router(open_routes(games))
     app.include_router(PlayNowPages(pages, games, services.start_links).routes())
-    app.include_router(StorePages(pages, games, services.store_items).routes())
+    app.include_router(
+        StorePages(pages, games, services.store_items, sent, services.purchases).routes()
+    )
     app.include_router(FundsPages(pages, games, services.wallets).routes())
     app.include_router(launcher_routes(lambda: app.state.launcher))
     turnstile = settings.turnstile

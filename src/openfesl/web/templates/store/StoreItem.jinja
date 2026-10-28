@@ -1,9 +1,10 @@
 {#def sold, roster, choices: list, offered, texts #}
 {# A page of the game's store: what it sells and for whom on the right, and on the left the hero
-   it is bought for and its price, or why no hero can buy it. #}
+   it is bought for, its price and the purchase, or why no hero can buy it. #}
 {% set rules = game.heroes %}
 {% set able = choices|rejectattr("unfit")|rejectattr("owned")|list %}
-{# Heroes that lack an ability's level before it still choose; the others can never have it now. #}
+{# Heroes that lack an ability's level before it, or whose own item was taken out of use, still
+   choose and see why; the others can never have it now. #}
 {% set barred = choices|selectattr("unfit", "in", ["faction", "class", "level"])|list %}
 <Layout :title="sold.name">
   <section aria-labelledby="store-title" class="store-head">
@@ -50,13 +51,18 @@
                  class="site-button site-button-go site-button-large"><Icon name="plus" :size="18" stroke="currentColor" />{{ _("web.bar.create") }}</a>
             {% endif %}
           {% else %}
-            <form data-buy class="store-form">
+            <form method="post"
+                  action="{{ url('/' ~ game.id ~ '/store/buy/' ~ sold.number) }}"
+                  data-buy
+                  class="store-form">
+              <input type="hidden" name="csrf" value="{{ csrf }}">
               <fieldset class="store-field">
                 <legend class="store-legend">{{ _("web.store.hero") }}</legend>
                 <p class="store-hint">{{ _("web.store.hero.hint") }}</p>
                 <div class="store-heroes">
                   {% for choice in choices %}
                     {% set hero = choice.hero %}
+                    {% set changed = toast and not toast.error and toast.values.get("hero") == hero.persona.name %}
                     <label {% if hero.faction %}data-faction="{{ hero.faction }}"{% endif %}
                            class="store-hero{% if choice.unfit %} store-hero-off{% endif %}">
                       <input type="radio"
@@ -87,7 +93,7 @@
                           {% endif %}
                         </span>
                         <span id="hero-{{ hero.persona.id }}"
-                              class="store-hero-status{% if choice.held and not choice.unfit %} store-hero-holds{% endif %}">{{ texts.tile(sold, choice) }}</span>
+                              class="store-hero-status{% if choice.held and not choice.unfit %} store-hero-holds{% endif %}{% if changed %} store-hero-changed{% endif %}">{{ texts.tile(sold, choice) }}</span>
                       </span>
                     </label>
                   {% endfor %}
@@ -99,6 +105,7 @@
                    data-price="{{ offered.price.number }}">
                 <StorePanel :offered="offered" :texts="texts" :others="able|length > (1 if offered.open else 0)" />
               </div>
+              <p class="store-hint store-login">{{ _("web.store.next_login", game=game.name) }}</p>
             </form>
           {% endif %}
         </div>
@@ -106,4 +113,11 @@
     {% endif %}
     <StoreContents :sold="sold" :texts="texts" />
   </div>
+  {% if offered %}
+    <dialog id="buy-confirm"
+            {% if offered.buyable %}aria-labelledby="confirm-title"{% endif %}
+            class="site-dialog js-only">
+      {% if offered.buyable %}<StoreConfirm :offered="offered" :texts="texts" dialog />{% endif %}
+    </dialog>
+  {% endif %}
 </Layout>

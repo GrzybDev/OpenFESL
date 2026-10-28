@@ -1,6 +1,7 @@
 /* A page of the store: the title and how it is sold, then the buy panel beside the green box of
    what it sells, which wraps under it on narrow screens. The hero tiles take the yellow fill when
-   chosen and lift under the pointer; unavailable heroes stay choosable behind a dashed edge. */
+   chosen, lift under the pointer and flash after a purchase; unavailable heroes stay choosable
+   behind a dashed edge. */
 @layer pages {
   .store-columns {
     display: flex;
@@ -191,6 +192,17 @@
     color: #1f1712;
   }
 
+  /* The tile of the hero a purchase was just made for. */
+  .store-hero-changed {
+    animation: store-flash 600ms var(--ease-menu);
+  }
+
+  @keyframes store-flash {
+    from {
+      background: #ffe27a;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .store-hero {
       transition: none;
@@ -202,6 +214,10 @@
 
     .store-hero-card {
       transition: none;
+    }
+
+    .store-hero-changed {
+      animation: none;
     }
   }
 

@@ -6428,6 +6428,9 @@ msgstr "Needs level %(level)s"
 msgid "web.store.tile.order"
 msgstr "Needs the level before"
 
+msgid "web.store.tile.taken"
+msgstr "Cannot get it again"
+
 msgid "web.store.tile.not_owned"
 msgstr "Not owned"
 
@@ -6457,6 +6460,9 @@ msgstr "%(item)s is for the %(classes)s class only, and %(hero)s is a %(hero_cla
 
 msgid "web.store.note.level"
 msgstr "%(hero)s is level %(level)s; %(item)s needs level %(needed)s."
+
+msgid "web.store.note.taken"
+msgstr "%(hero)s cannot get %(item)s again: it was taken out of use."
 
 msgid "web.store.note.order"
 msgstr "%(item)s is a further level of an ability; %(hero)s needs the level before it first."
@@ -6541,3 +6547,81 @@ msgstr "Uses as chosen"
 
 msgid "web.store.requires"
 msgstr "Requires"
+
+msgid "web.store.next_login"
+msgstr "%(game)s lists items bought here from its next login."
+
+msgid "web.store.why.account"
+msgstr "The account has %(balance)s %(currency)s; this costs %(price)s."
+
+msgid "web.store.why.hero"
+msgstr "%(hero)s has %(balance)s %(currency)s; this costs %(price)s."
+
+msgid "web.store.buy"
+msgstr "Buy · %(price)s %(currency)s"
+
+msgid "web.store.confirm.title"
+msgstr "Confirm the purchase"
+
+msgid "web.store.confirm.until"
+msgstr "%(time)s, until %(day)s"
+
+msgid "web.store.confirm.uses"
+msgstr "%(uses)s (%(left)s → %(total)s)"
+
+msgid "web.store.confirm.kept"
+msgstr "Bought items stay with the hero they are bought for."
+
+msgid "web.store.confirm.adds"
+msgstr "The new time starts when the current rental ends, on %(day)s."
+
+msgid "web.store.confirm.buy"
+msgstr "Buy for %(price)s %(currency)s"
+
+msgid "web.store.row.item"
+msgstr "Item"
+
+msgid "web.store.row.hero"
+msgstr "Hero"
+
+msgid "web.store.row.time"
+msgstr "Time"
+
+msgid "web.store.row.uses"
+msgstr "Uses"
+
+msgid "web.store.refused.form"
+msgstr "Nothing was bought: the form had expired. Nothing was spent."
+
+msgid "web.store.refused.gone"
+msgstr "Nothing was bought: the store no longer sells this. Nothing was spent."
+
+msgid "web.store.refused.price"
+msgstr "Nothing was bought: the price of %(item)s changed to %(price)s %(currency)s. No %(currency)s were spent; the page shows the new price."
+
+msgid "web.store.refused.owned"
+msgstr "Nothing was bought: %(hero)s owns %(item)s permanently. No %(currency)s were spent."
+
+msgid "web.store.refused.taken"
+msgstr "Nothing was bought: %(hero)s cannot get %(item)s again, as it was taken out of use. No %(currency)s were spent."
+
+msgid "web.store.refused.unfit"
+msgstr "Nothing was bought: %(hero)s cannot have %(item)s. No %(currency)s were spent."
+
+msgid "web.store.refused.funds.account"
+msgstr "Nothing was bought: the account had %(balance)s %(currency)s when the purchase arrived, and %(item)s costs %(price)s. No %(currency)s were spent."
+
+msgid "web.store.refused.funds.hero"
+msgstr "Nothing was bought: %(hero)s had %(balance)s %(currency)s when the purchase arrived, and %(item)s costs %(price)s. No %(currency)s were spent."
+
+msgid "web.store.done.rental"
+msgstr "%(item)s bought for %(hero)s: %(time)s, until %(day)s. %(price)s %(currency)s spent."
+
+msgid "web.store.done.permanent"
+msgstr "%(item)s bought for %(hero)s: permanent. %(price)s %(currency)s spent."
+
+msgid "web.store.done.again"
+msgstr "The purchase of %(item)s for %(hero)s was made already; sending it again bought nothing more. No more %(currency)s were spent."
+
+msgid "web.store.done.uses"
+msgstr "%(uses)s of %(item)s bought for %(hero)s; %(left)s left now. %(price)s %(currency)s spent."

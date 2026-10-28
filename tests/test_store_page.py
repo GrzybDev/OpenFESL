@@ -1,17 +1,20 @@
+import re
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import httpx2
 import pytest
-from accounts import PASSWORD, post_sign_in
+from accounts import PASSWORD, execute, post_sign_in, select_value
 from heroes import create_hero
+from identity import form_token
 from store import CHEER, ITEMS, ROYAL_SOLDIER, stock
 from support import visible
 
 pytestmark = pytest.mark.anyio
 
-# The invented catalogue's products: the Royal coat for 30 days, 25 bandages and the cheer for
-# good where it is stocked.
-COAT_MONTH, BANDAGES, CHEER_FOR_GOOD = 2, 6, 25
+# The invented catalogue's products: the Royal coat for 30 days, the Royal pet, 25 bandages and
+# the cheer for good where it is stocked.
+COAT_MONTH, PET, BANDAGES, CHEER_FOR_GOOD = 2, 5, 6, 25
 PAGE = "/bfheroes/store/buy/{}"
 
 
@@ -20,6 +23,29 @@ async def shown(client: httpx2.AsyncClient, base: str, number: int, **chosen: in
     page = await client.get(f"{base}{PAGE.format(number)}", params=chosen)
     assert page.status_code == 200, page.text
     return visible(page.content)
+
+
+async def confirmation(
+    client: httpx2.AsyncClient, base: str, number: int, hero: int, price: int
+) -> tuple[str, dict[str, str]]:
+    """Send a store page's choice as the page does without scripts.
+
+    Returns:
+        The confirmation page's text, and the fields its form sends.
+    """
+    page = await client.get(f"{base}{PAGE.format(number)}")
+    chosen = {"csrf": form_token(page.text), "hero": str(hero), "price": str(price)}
+    answer = await client.post(f"{base}{PAGE.format(number)}", data=chosen)
+    assert answer.status_code == 200, answer.text
+    fields = dict(re.findall(r'name="(csrf|hero|price|paid|once)"\s+value="([^"]*)"', answer.text))
+    return visible(answer.content), fields
+
+
+async def bought(client: httpx2.AsyncClient, base: str, number: int, form: dict[str, str]) -> str:
+    """Send a confirmation's form, and return the text of the page it leads back to."""
+    answer = await client.post(f"{base}{PAGE.format(number)}/confirm", data=form)
+    assert answer.status_code == 303, answer.text
+    return visible((await client.get(f"{base}{answer.headers['location']}")).content)
 
 
 @pytest.mark.usefixtures("prompt_actions")
@@ -61,3 +87,78 @@ async def test_a_store_page_shows_each_hero_what_it_holds_or_why_it_cannot_have_
     assert "Brassbuckle Soldier · level 1 Owns it permanently" in cheer
     assert "Brassbuckle owns Invented Cheer permanently. There is nothing more to buy" in cheer
     assert "Kup dla jednego bohatera" in polish and "Tylko Royal Army" in polish
+
+
+@pytest.mark.usefixtures("prompt_actions")
+async def test_a_hero_buys_an_item_on_its_page_and_refused_purchases_spend_nothing(
+    base: str,
+    server_url: str,
+    database_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    await stock(server_url, tmp_path, capsys, [*ITEMS, CHEER])
+    brass = await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+
+    async with httpx2.AsyncClient() as client:
+        await post_sign_in(client, base, "ann@example.test", PASSWORD)
+        review, form = await confirmation(client, base, COAT_MONTH, brass, COAT_MONTH)
+        # The same purchase confirmed in another window before the first one buys.
+        _, other = await confirmation(client, base, COAT_MONTH, brass, COAT_MONTH)
+        done = await bought(client, base, COAT_MONTH, form)
+        # The confirmation sent again, as Back and sending it do, buys nothing more.
+        again = await bought(client, base, COAT_MONTH, form)
+        # A second month is more than the account has left: the page says so, and a purchase
+        # confirmed before is refused when it arrives.
+        short = await bought(client, base, COAT_MONTH, other)
+        # A price that changed since the page showed it, and a form from another site.
+        stale = await bought(client, base, PET, form | {"price": str(PET), "paid": "800"})
+        forged = await bought(client, base, PET, form | {"csrf": "forged"})
+        # A confirmation without its one-time token buys nothing.
+        sent = {name: value for name, value in form.items() if name != "once"}
+        tokenless = await bought(client, base, PET, sent | {"price": str(PET), "paid": "900"})
+        # The cheer, which the game grants every hero.
+        cheer = {"price": str(CHEER_FOR_GOOD), "paid": "1680"}
+        granted = await bought(client, base, CHEER_FOR_GOOD, form | cheer)
+        # The pet taken out of use, as an admin's revocation or the game's status write leaves it.
+        await execute(
+            database_url,
+            "INSERT INTO entitlement (account_id, persona_id, tag, status) SELECT account_id, id,"
+            " '521-unlm', 'DISABLED' FROM persona WHERE id = :hero",
+            hero=brass,
+        )
+        pet = await shown(client, base, PET)
+        taken = await bought(client, base, PET, form | {"price": str(PET), "paid": "900"})
+
+    assert "Confirm the purchase Item Invented Coat Hero Brassbuckle Time 30 days, until" in review
+    assert "Price 1,300 Funds Funds now 2,500 Funds after 1,200" in review
+    end = datetime.now(UTC) + timedelta(days=30)
+    day = f"{end.day} {end:%b %Y}"
+    assert f"Invented Coat bought for Brassbuckle: 30 days, until {day}. 1,300 Funds spent." in done
+    assert "Brassbuckle Soldier · level 1 Owns it · 30 days left" in done
+    assert "The account has 1,200 Funds; this costs 1,300. How Funds are earned" in done
+    assert (
+        "The purchase of Invented Coat for Brassbuckle was made already; sending it again bought "
+        "nothing more. No more Funds were spent."
+    ) in again
+    assert (
+        "Nothing was bought: the account had 1,200 Funds when the purchase arrived, and "
+        "Invented Coat costs 1,300. No Funds were spent."
+    ) in short
+    assert (
+        "Nothing was bought: the price of Invented Monkey changed to 900 Funds. No Funds were "
+        "spent; the page shows the new price."
+    ) in stale
+    for expired in (forged, tokenless):
+        assert "Nothing was bought: the form had expired. Nothing was spent." in expired
+    assert (
+        "Nothing was bought: Brassbuckle owns Invented Cheer permanently. No Funds were spent."
+    ) in granted
+    assert "Brassbuckle Soldier · level 1 Cannot get it again" in pet
+    assert "Brassbuckle cannot get Invented Monkey again: it was taken out of use." in pet
+    assert (
+        "Nothing was bought: Brassbuckle cannot get Invented Monkey again, as it was taken out "
+        "of use. No Funds were spent."
+    ) in taken
+    assert await select_value(database_url, "SELECT count(*) FROM purchase") == 1
+    assert "1,200 Funds" in forged

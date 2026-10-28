@@ -1,7 +1,8 @@
 {#def offered, texts, others: bool #}
 {# The lower part of a store page's buy panel for the chosen hero: what the hero holds or why it
    cannot have it, the price tiles, what it gets for the chosen price with the balance before and
-   after. Scripts swap it when another hero or price is chosen. #}
+   after, and the buy button, unavailable with the reason beside it. Scripts swap it when another
+   hero or price is chosen. #}
 {% set sold = offered.sold %}
 {% set note = texts.note(offered, others) %}
 {% if note %}
@@ -56,5 +57,19 @@
         {% endif %}
       </span>
     </p>
+    <div class="store-actions">
+      <button type="submit"
+              data-buy-open
+              aria-describedby="buy-why"
+              {% if not offered.buyable %}aria-disabled="true"{% endif %}
+              class="site-button site-button-large">
+        <Icon name="bag" :size="18" :stroke="'#FEDE01' if offered.buyable else 'currentColor'" />
+        {{ _("web.store.buy", price=number(offered.price.price), currency=currency) }}
+      </button>
+      <p id="buy-why" role="status" data-why class="store-why">
+        {{ texts.why(offered) }}
+        {% if offered.short and offered.price.currency == game.heroes.currency %}<FundsLink />{% endif %}
+      </p>
+    </div>
   </div>
 {% endif %}

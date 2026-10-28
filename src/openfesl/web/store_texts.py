@@ -1,7 +1,8 @@
 import math
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from babel import Locale
+from babel.dates import format_skeleton
 from babel.lists import format_list
 
 from openfesl.core.games import Game
@@ -81,6 +82,14 @@ class StoreTexts:
             value: The moment.
         """
         return self.text("web.store.utc", time=moment(value, self.language))
+
+    def day(self, value: datetime) -> str:
+        """Return a day in UTC as the language writes it, such as 26 Nov 2026.
+
+        Args:
+            value: The day.
+        """
+        return str(format_skeleton("yMMMd", value, tzinfo=UTC, locale=self._locale()))
 
     def ownership(self, ownership: Ownership) -> str:
         """Return how a hero owns an item: for good, a number of days or of uses.
@@ -208,6 +217,8 @@ class StoreTexts:
                 return self.text("web.store.tile.class", classes=self.classes(requirement.classes))
             case Unfit.LEVEL:
                 return self.text("web.store.tile.level", level=requirement.level)
+            case Unfit.TAKEN:
+                return self.text("web.store.tile.taken")
             case Unfit.ORDER:
                 return self.text("web.store.tile.order")
         if held is None:

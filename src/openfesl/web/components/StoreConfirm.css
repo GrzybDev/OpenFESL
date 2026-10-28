@@ -1,0 +1,26 @@
+/* The confirmation of a purchase: its rows with the values on the right, and the note under
+   them. */
+@layer components {
+  .store-confirm-facts {
+    margin-top: 14px;
+    font-size: 15px;
+    line-height: 1.3;
+
+    > dt {
+      color: #1f1712;
+    }
+
+    > dd {
+      overflow-wrap: anywhere;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .store-confirm-note {
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: #2b2018;
+  }
+}

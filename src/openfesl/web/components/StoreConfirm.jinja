@@ -1,0 +1,69 @@
+{#def offered, texts, back: str = "", dialog: bool = False #}
+{# The confirmation of a purchase for one hero: the item, the hero, what changes, the price and
+   the balance before and after, and the button that buys it. Pages open it as a dialog; without
+   scripts it is a page of its own. #}
+{% set sold = offered.sold %}
+{% set price = offered.price %}
+{% set currency = texts.currency(price.currency) %}
+{% set change = texts.change(offered) %}
+<form method="post"
+      action="{{ url('/' ~ game.id ~ '/store/buy/' ~ sold.number ~ '/confirm') }}"
+      data-once
+      class="site-dialog-box">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <input type="hidden"
+         name="hero"
+         value="{{ offered.choice.hero.persona.id }}">
+  <input type="hidden" name="price" value="{{ price.number }}">
+  <input type="hidden" name="paid" value="{{ price.price }}">
+  <input type="hidden" name="once" value="{{ once_token() }}">
+  {% if dialog %}
+    <button type="button"
+            data-close
+            class="site-dialog-close"
+            aria-label="{{ _('web.dialog.close') }}">
+      <Icon name="x" :size="18" stroke="currentColor" />
+    </button>
+    <h2 id="confirm-title" class="site-dialog-title">{{ _("web.store.confirm.title") }}</h2>
+  {% else %}
+    <h1 id="confirm-title" class="site-dialog-title">{{ _("web.store.confirm.title") }}</h1>
+  {% endif %}
+  <dl class="site-facts store-confirm-facts">
+    <dt>{{ _("web.store.row.item") }}</dt>
+    <dd>
+      {{ sold.name }}
+    </dd>
+    <dt>{{ _("web.store.row.hero") }}</dt>
+    <dd>
+      {{ offered.choice.hero.persona.name }}
+    </dd>
+    <dt>{{ change[0] }}</dt>
+    <dd>
+      {{ change[1] }}
+    </dd>
+    <dt>{{ _("web.rename.price") }}</dt>
+    <dd>
+      {{ texts.priced(price.price, price.currency) }}
+    </dd>
+    <dt>{{ _("web.rename.funds_now", currency=currency) }}</dt>
+    <dd>
+      {{ number(offered.balance) }}
+    </dd>
+    <dt>{{ _("web.rename.funds_after", currency=currency) }}</dt>
+    <dd>
+      {{ number(offered.balance - price.price) }}
+    </dd>
+  </dl>
+  <p class="store-confirm-note">{{ texts.confirm_note(offered) }}</p>
+  <div class="site-dialog-actions">
+    <button type="submit" class="site-button site-button-go site-button-large">
+      <Icon name="bag" :size="18" stroke="currentColor" />
+      {{ _("web.store.confirm.buy", price=number(price.price), currency=currency) }}
+    </button>
+    {% if dialog %}
+      <button type="button" data-close class="site-button site-button-ghost">{{ _("web.rename.cancel") }}</button>
+    {% else %}
+      <a href="{{ back }}" class="site-button site-button-ghost">{{ _("web.rename.cancel") }}</a>
+    {% endif %}
+  </div>
+</form>

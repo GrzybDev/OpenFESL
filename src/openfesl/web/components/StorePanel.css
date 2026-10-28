@@ -1,5 +1,6 @@
 /* The lower part of the buy panel: the note about the chosen hero, the price tiles with their
-   coins and the amount a balance lacks, and the purchase summary over a dashed rule. */
+   coins and the amount a balance lacks, the purchase summary over a dashed rule, and the buy
+   button with the reason beside it while it is unavailable. */
 @layer components {
   .store-note {
     display: flex;
@@ -144,6 +145,31 @@
 
     .site-short {
       color: #8c1e18;
+    }
+  }
+
+  .store-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    margin-top: 14px;
+  }
+
+  .store-why {
+    flex: 1 1 260px;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: #8c1e18;
+
+    a {
+      color: #7a1d16;
+      text-decoration-line: underline;
+    }
+
+    &.flash {
+      animation: site-flash 600ms linear;
     }
   }
 
