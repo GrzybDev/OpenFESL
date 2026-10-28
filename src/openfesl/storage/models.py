@@ -3,6 +3,7 @@ from typing import Any
 
 from sqlalchemy import (
     BigInteger,
+    CheckConstraint,
     DateTime,
     Double,
     ForeignKey,
@@ -490,15 +491,37 @@ class AssociationRow(Base):
 
 class RelationshipRow(Base):
     __tablename__ = "relationship"
-    # One side of a relationship between two accounts; the other side is a row of its own.
-    __table_args__ = (UniqueConstraint("game", "tag", "owner_id", "member_id"),)
+    # One side of a relationship of an account with an account or a dedicated server; the other
+    # side is a row of its own. Each side is either an account or a server, by its name.
+    __table_args__ = (
+        UniqueConstraint(
+            "game",
+            "tag",
+            "owner_id",
+            "owner_server",
+            "member_id",
+            "member_server",
+            name="relationship_side_key",
+            postgresql_nulls_not_distinct=True,
+        ),
+        CheckConstraint(
+            "(owner_id IS NULL) <> (owner_server IS NULL)", name="relationship_one_owner"
+        ),
+        CheckConstraint(
+            "(member_id IS NULL) <> (member_server IS NULL)", name="relationship_one_member"
+        ),
+    )
 
     # The number the owner names its side by.
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
     game: Mapped[str]
     tag: Mapped[str]
-    owner_id: Mapped[int] = mapped_column(ForeignKey("account.id", ondelete="CASCADE"))
-    member_id: Mapped[int] = mapped_column(ForeignKey("account.id", ondelete="CASCADE"), index=True)
+    owner_id: Mapped[int | None] = mapped_column(ForeignKey("account.id", ondelete="CASCADE"))
+    owner_server: Mapped[str | None]
+    member_id: Mapped[int | None] = mapped_column(
+        ForeignKey("account.id", ondelete="CASCADE"), index=True
+    )
+    member_server: Mapped[str | None]
     # Whether each side asked for the relationship or accepted it; both sides' rows say it.
     owner_agrees: Mapped[bool]
     member_agrees: Mapped[bool]

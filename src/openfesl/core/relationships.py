@@ -7,8 +7,11 @@ from typing import Protocol
 from weakref import WeakKeyDictionary
 
 from openfesl.core.games import Game
+from openfesl.core.hosted_games import HostedGame
+from openfesl.core.hosting import GAME, Hosting
 from openfesl.core.relationship_rules import RelationshipRules
 from openfesl.core.session import GameSession, Players
+from openfesl.core.trust import ServerTrust
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +29,7 @@ class Refusal(StrEnum):
     UNKNOWN_TAG = "UNKNOWN_TAG"
     UNKNOWN_USER = "USER_NOT_FOUND"
     NAMELESS = "NO_DISPLAY_NAME"
+    UNKNOWN_SERVER = "SERVER_NOT_FOUND"
     LIST_FULL = "LIST_FULL"
     UNKNOWN_RELATIONSHIP = "RELATIONSHIP_NOT_FOUND"
     STATUS_TOO_LONG = "STATUS_TOO_LONG"
@@ -47,23 +51,36 @@ class RelationshipRefused(Exception):
 
 
 @dataclass(frozen=True, slots=True)
-class Relationship:
-    """A relationship between two accounts as one of them sees it.
+class Party:
+    """An account or a dedicated server, as one side of a relationship.
 
     Attributes:
-        id: The number this account names it by; the other account's side has its own.
+        account_id: The account; none for a server.
+        server: The name a server goes by; none for an account.
+    """
+
+    account_id: int | None = None
+    server: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class Relationship:
+    """A relationship as one of its sides sees it.
+
+    Attributes:
+        id: The number this side names it by; the other side has its own.
         tag: The list it is on, such as friends.
-        member_id: The other account.
-        name: The other account's display name.
-        own: Whether this account asked for it or accepted it.
-        theirs: Whether the other account asked for it or accepted it.
-        new: Whether the other account changed it since this account last acknowledged it.
-        modified: When either account last changed it.
+        member: The other side.
+        name: The other side's display name, or a server's name.
+        own: Whether this side asked for it or accepted it.
+        theirs: Whether the other side asked for it or accepted it.
+        new: Whether the other side changed it since this side last acknowledged it.
+        modified: When either side last changed it.
     """
 
     id: int
     tag: str
-    member_id: int
+    member: Party
     name: str
     own: bool
     theirs: bool
@@ -72,16 +89,16 @@ class Relationship:
 
     @property
     def mutual(self) -> bool:
-        """Whether both accounts agreed to it, as friends have."""
+        """Whether both sides agreed to it, as friends have."""
         return self.own and self.theirs
 
 
 @dataclass(frozen=True, slots=True)
 class Presence:
-    """What an account's game last reported of what it does, kept while that game is logged in.
+    """What a game last reported of what it does, kept while it is logged in.
 
     Attributes:
-        account_id: The account.
+        account_id: The account the game is logged in with.
         text: The game's status line, read back only by games.
     """
 
@@ -105,63 +122,68 @@ class Found:
 
 
 class RelationshipStore(Protocol):
-    """Where the relationships between accounts are kept."""
+    """Where the relationships between accounts and dedicated servers are kept."""
 
-    async def roster(self, game: str, account_id: int) -> list[Relationship]:
-        """Return an account's relationships in a game with accounts that are in use, oldest first.
+    async def roster(self, game: str, owner: Party) -> list[Relationship]:
+        """Return the relationships of one side in a game with servers and accounts in use.
 
         Args:
             game: The game's id.
-            account_id: The account.
+            owner: The side.
+
+        Returns:
+            The relationships, oldest first.
         """
 
     async def increase(
-        self, game: str, tag: str, account_id: int, member_id: int, most: int
+        self, game: str, tag: str, owner: Party, member: Party, most: int
     ) -> Relationship:
-        """Ask another account for a relationship, or accept the one it asked for.
+        """Ask another side for a relationship, or accept the one it asked for.
 
         Args:
             game: The game's id.
             tag: The list it is on.
-            account_id: The account that asks or accepts.
-            member_id: The other account.
-            most: The most relationships of the tag the account may ask for or accept.
+            owner: The side that asks or accepts.
+            member: The other side.
+            most: The most relationships of the tag the asking side may ask for or accept.
 
         Returns:
-            The relationship as the asking account sees it now.
+            The relationship as the asking side sees it now.
 
         Raises:
-            RelationshipRefused: When either account is not one that others may ask, as one
-                out of use or without a display name, or the asking account has the most
+            RelationshipRefused: When either side is an account that others may not ask, as
+                one out of use or without a display name, or the asking side has the most
                 relationships it may have.
         """
 
     async def decrease(
-        self, game: str, tag: str, account_id: int, member_id: int
+        self, game: str, tag: str, owner: Party, member: Party, *, ends: bool
     ) -> Relationship | None:
-        """End a relationship on both sides, whoever asked for it.
+        """Withdraw one side's agreement to a relationship, or end it on both sides.
+
+        A relationship that neither side agrees to is gone.
 
         Args:
             game: The game's id.
             tag: The list it is on.
-            account_id: The account that ends it.
-            member_id: The other account.
+            owner: The side that withdraws.
+            member: The other side.
+            ends: Whether the relationship ends on both sides, whoever asked for it.
 
         Returns:
-            The relationship as the account sees it now that neither side wants it; none when
-            there was none.
+            The relationship as the withdrawing side sees it now; none when there was none.
         """
 
-    async def acknowledge(self, game: str, account_id: int, relationship_id: int) -> bool:
-        """Mark an account's side of a relationship seen, so that it is no longer new to it.
+    async def acknowledge(self, game: str, owner: Party, relationship_id: int) -> bool:
+        """Mark one side of a relationship seen, so that it is no longer new to that side.
 
         Args:
             game: The game's id.
-            account_id: The account.
-            relationship_id: The number the account names the relationship by.
+            owner: The side.
+            relationship_id: The number the side names the relationship by.
 
         Returns:
-            Whether the account has such a relationship.
+            Whether the side has such a relationship.
         """
 
     async def search(self, namespace: str, pattern: str, limit: int) -> list[Found]:
@@ -176,85 +198,100 @@ class RelationshipStore(Protocol):
 
 
 class Relationships:
-    """The relationships between a game's accounts and the status lines their games report."""
+    """The relationships of a game's accounts and servers and the status lines of their games."""
 
-    def __init__(self, store: RelationshipStore, players: Players) -> None:
+    def __init__(
+        self, store: RelationshipStore, players: Players, hosting: Hosting, trust: ServerTrust
+    ) -> None:
         """Keep relationships in a store and status lines while their games are logged in.
 
         Args:
             store: Where the relationships are kept.
             players: The game sessions that accounts are logged in on.
+            hosting: The games that dedicated servers host, which name the servers.
+            trust: Which dedicated servers host games that players see.
         """
         self._store = store
         self._players = players
+        self._hosting = hosting
+        self._trust = trust
         # Weakly, so a status line goes with the session of the game that reported it.
         self._presence: WeakKeyDictionary[GameSession, Presence] = WeakKeyDictionary()
 
-    async def roster(self, game: Game, account_id: int) -> list[Relationship]:
-        """Return an account's relationships with accounts that are in use, oldest first.
+    async def roster(self, game: Game, owner: Party) -> list[Relationship]:
+        """Return the relationships of an account or a server with those in use, oldest first.
 
         Args:
             game: The game.
-            account_id: The account.
+            owner: The account or server.
         """
-        return await self._store.roster(game.id, account_id)
+        return await self._store.roster(game.id, owner)
 
-    async def increase(self, game: Game, account_id: int, member_id: int, tag: str) -> Relationship:
-        """Ask another account for a relationship, or accept the one it asked for.
+    async def increase(self, game: Game, owner: Party, member: Party, tag: str) -> Relationship:
+        """Ask another side for a relationship, or accept the one it asked for.
+
+        Accounts are friends with accounts and on the VIP lists of servers; an account asks only
+        servers that host a game players see.
 
         Args:
             game: The game.
-            account_id: The account that asks or accepts.
-            member_id: The other account.
+            owner: The account or server that asks or accepts.
+            member: The other side.
             tag: The list it is to be on.
 
         Raises:
-            RelationshipRefused: When the account asks itself, the game keeps no such list,
-                either account may not be asked or the account's list is full.
+            RelationshipRefused: When a side asks itself, the game keeps no such list, either
+                side may not be asked or the asking side's list is full.
         """
         rules = _rules(game)
-        _check(rules, account_id, member_id, tag)
-        relationship = await self._store.increase(game.id, tag, account_id, member_id, rules.most)
-        logger.info(
-            "Account %d asked for or accepted a relationship with account %d", account_id, member_id
-        )
+        _check(rules, owner, member, tag)
+        if member.server is not None:
+            session = self._server_named(member.server)
+            if session is None or session.game is not game or not await self._trust.serves(session):
+                raise RelationshipRefused(Refusal.UNKNOWN_SERVER)
+        relationship = await self._store.increase(game.id, tag, owner, member, rules.most)
+        logger.info("%s asked for or accepted a relationship with %s", owner, member)
         return relationship
 
-    async def decrease(self, game: Game, account_id: int, member_id: int, tag: str) -> Relationship:
-        """End a relationship on both sides: cancel a request, decline one or remove a friend.
+    async def decrease(self, game: Game, owner: Party, member: Party, tag: str) -> Relationship:
+        """Withdraw from a relationship: cancel or decline a request, remove a friend or a VIP.
+
+        An account ends the relationship on both sides. A server only withdraws its own
+        agreement, so that a player it takes off its list sees its VIP status revoked.
 
         Args:
             game: The game.
-            account_id: The account that ends it.
-            member_id: The other account.
+            owner: The account or server that withdraws.
+            member: The other side.
             tag: The list it is on.
 
         Returns:
-            The relationship as the account sees it now that neither side wants it.
+            The relationship as the withdrawing side sees it now.
 
         Raises:
             RelationshipRefused: When the game keeps no such list or there is no such
                 relationship.
         """
-        _check(_rules(game), account_id, member_id, tag)
-        ended = await self._store.decrease(game.id, tag, account_id, member_id)
-        if ended is None:
+        _check(_rules(game), owner, member, tag)
+        ends = owner.account_id is not None
+        changed = await self._store.decrease(game.id, tag, owner, member, ends=ends)
+        if changed is None:
             raise RelationshipRefused(Refusal.UNKNOWN_RELATIONSHIP)
-        logger.info("Account %d ended its relationship with account %d", account_id, member_id)
-        return ended
+        logger.info("%s withdrew from its relationship with %s", owner, member)
+        return changed
 
-    async def acknowledge(self, game: Game, account_id: int, relationship_id: int) -> None:
-        """Mark a relationship seen by an account, which its game does once it showed it.
+    async def acknowledge(self, game: Game, owner: Party, relationship_id: int) -> None:
+        """Mark a relationship seen by one side, which its game does once it showed it.
 
         Args:
             game: The game.
-            account_id: The account.
-            relationship_id: The number the account names the relationship by.
+            owner: The account or server.
+            relationship_id: The number the side names the relationship by.
 
         Raises:
-            RelationshipRefused: When the account has no such relationship.
+            RelationshipRefused: When the side has no such relationship.
         """
-        if not await self._store.acknowledge(game.id, account_id, relationship_id):
+        if not await self._store.acknowledge(game.id, owner, relationship_id):
             raise RelationshipRefused(Refusal.UNKNOWN_RELATIONSHIP)
 
     async def search(self, game: Game, pattern: str) -> list[Found]:
@@ -276,12 +313,12 @@ class Relationships:
         return await self._store.search(game.namespace, pattern, rules.search_limit)
 
     def report(self, account_id: int, text: str) -> None:
-        """Keep the status line that an account's game reports while that game is logged in.
+        """Keep the status line that a game reports while it is logged in with an account.
 
         A report from an account that no game is logged in with is dropped.
 
         Args:
-            account_id: The account.
+            account_id: The account; a dedicated server's is the one it logged in with.
             text: The status line.
 
         Raises:
@@ -297,27 +334,61 @@ class Relationships:
             self._presence[session] = Presence(account_id, text)
 
     def presence_of(self, relationship: Relationship) -> Presence | None:
-        """Return what the game of a relationship's other account last reported, while it plays.
+        """Return what the game of a relationship's other side last reported, while it runs.
 
-        Only friends see each other's presence; a request shows none.
+        Only sides that both agreed see each other's presence; a request shows none.
 
         Args:
             relationship: The relationship.
         """
-        if not relationship.mutual:
-            return None
-        account_id = relationship.member_id
-        session = self._players.online(account_id)
+        member = relationship.member
+        session: GameSession | None = None
+        if relationship.mutual and member.server is not None:
+            session = self._server_named(member.server)
+        elif relationship.mutual and member.account_id is not None:
+            session = self._players.online(member.account_id)
         presence = self._presence.get(session) if session is not None else None
         # A session that another account logged in on keeps nothing of the earlier one.
-        return presence if presence is not None and presence.account_id == account_id else None
+        logged_in = session.account if session is not None else None
+        if presence is None or logged_in is None or presence.account_id != logged_in.id:
+            return None
+        return presence
+
+    def names(self, session: GameSession) -> set[str]:
+        """Return the names a dedicated server goes by: its game's persistent id and its hero's.
+
+        Args:
+            session: The dedicated server's session.
+        """
+        hosted = self._trust.served_by(session)
+        return _names(hosted) if hosted is not None else set()
+
+    def _server_named(self, server: str) -> GameSession | None:
+        return next(
+            (
+                hosted.host.session
+                for hosted in self._hosting.every()
+                if hosted.type == GAME and hosted.server and server in _names(hosted)
+            ),
+            None,
+        )
 
 
-def _check(rules: RelationshipRules, account_id: int, member_id: int, tag: str) -> None:
-    if tag != rules.friends:
+def _check(rules: RelationshipRules, owner: Party, member: Party, tag: str) -> None:
+    # Accounts are friends with each other, and servers keep accounts on their VIP lists.
+    with_server = owner.server is not None or member.server is not None
+    servers_only = owner.account_id is None and member.account_id is None
+    if servers_only or tag != (rules.vip if with_server else rules.friends):
         raise RelationshipRefused(Refusal.UNKNOWN_TAG)
-    if member_id == account_id:
+    if member == owner:
         raise RelationshipRefused(Refusal.SELF)
+
+
+def _names(hosted: HostedGame) -> set[str]:
+    # The game calls what a server goes by its GUID, which is a hosted game's persistent id;
+    # whether a 1.89 server sends that or its hero's name is not known yet, so either is taken.
+    persona = hosted.host.session.persona
+    return {hosted.ugid, persona.name} if persona is not None else {hosted.ugid}
 
 
 def _rules(game: Game) -> RelationshipRules:

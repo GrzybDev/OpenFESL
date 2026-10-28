@@ -38,7 +38,7 @@ class ServerTrust:
         Args:
             session: The session.
         """
-        hosted = self._served_by(session)
+        hosted = self.served_by(session)
         return hosted is not None and await self._listed(hosted)
 
     async def admits_player(self, session: GameSession, account_id: int) -> bool:
@@ -48,7 +48,7 @@ class ServerTrust:
             session: The session.
             account_id: The player's account.
         """
-        hosted = self._served_by(session)
+        hosted = self.served_by(session)
         if hosted is None or all(
             player.persona.account_id != account_id for player in hosted.players.values()
         ):
@@ -83,7 +83,7 @@ class ServerTrust:
             session: The session.
             persona_id: The persona.
         """
-        hosted = self._served_by(session) if _server_login(session) else None
+        hosted = self.served_by(session) if _server_login(session) else None
         return (
             hosted is not None
             and any(persona.id == persona_id for persona in _kept(hosted))
@@ -108,14 +108,19 @@ class ServerTrust:
             session: The session.
             account_id: The account.
         """
-        hosted = self._served_by(session) if _server_login(session) else None
+        hosted = self.served_by(session) if _server_login(session) else None
         if hosted is None or not await self._listed(hosted):
             return None
         return next(
             (persona for persona in _kept(hosted) if persona.account_id == account_id), None
         )
 
-    def _served_by(self, session: GameSession) -> HostedGame | None:
+    def served_by(self, session: GameSession) -> HostedGame | None:
+        """Return the game that a session lists as a dedicated server, listed or not, if any.
+
+        Args:
+            session: The session.
+        """
         return next(
             (
                 hosted

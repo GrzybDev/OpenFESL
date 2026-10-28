@@ -269,3 +269,21 @@ class Magma:
         # personas of its players.
         hosting = self._players.online(account_id)
         return hosting is not None and await self._trust.keeps_persona(hosting, persona.id)
+
+    async def serving(self, session_id: str | None, game: Game) -> GameSession:
+        """Return the session of the dedicated server whose launcher session a cookie names.
+
+        Args:
+            session_id: The magma cookie's value; none when the request carries no cookie.
+            game: The game whose Magma host was asked.
+
+        Raises:
+            MagmaError: When the request names no session that is known, or its account is not
+                logged in as a dedicated server of the game that hosts a game players see.
+        """
+        account_id = self.session(session_id).account_id
+        hosting = self._players.online(account_id)
+        if hosting is None or hosting.game is not game or not await self._trust.serves(hosting):
+            logger.info("Account %d asked Magma as a server, which it does not run", account_id)
+            raise MagmaError(VALIDATION_FAILED, NOT_A_SERVER)
+        return hosting

@@ -101,7 +101,9 @@ class GameServices:
             stores.entitlements,
             self.wallets,
         )
-        self.relationships = Relationships(stores.relationships, self.players)
+        self.relationships = Relationships(
+            stores.relationships, self.players, self.hosting, self.trust
+        )
         self.census = Census(self.hosting, self.players)
         art = presence_art(settings.public_url)
         self.rich_presence = RichPresence(self.hosting, settings.discord_application_id, art)

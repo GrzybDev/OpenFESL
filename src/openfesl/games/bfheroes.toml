@@ -384,8 +384,11 @@ max_games = 10000
 # at most 100 of them (mainMenu_west.swf, MenuFriends.updateFriendsList). Its player search finds
 # accounts by display name, in the website's namespace, and heroes by name, and sends searches of
 # at least 2 characters besides its wildcard * (0x0069f6d4, 0x006a0eb0); 50 names are answered.
+# Its dedicated servers keep VIP lists of accounts, tagged bvip (0x00691a2a), naming themselves by
+# what the game calls a server GUID, by which it also joins a bookmarked server (0x00e1aab8).
 [relationships]
 friends = "friends"
+vip = "bvip"
 most = 100
 web_namespace = "bfheroes_web"
 search_minimum = 2

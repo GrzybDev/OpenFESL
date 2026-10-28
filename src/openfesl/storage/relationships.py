@@ -1,18 +1,25 @@
 from sqlalchemy import ColumnElement, and_, delete, func, or_, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.orm import InstrumentedAttribute, outerjoin
 
 from openfesl.core.accounts import AccountState
 from openfesl.core.personas import PersonaState
-from openfesl.core.relationships import Found, Refusal, Relationship, RelationshipRefused
-from openfesl.storage.models import AccountRow, PersonaRow, RelationshipRow
+from openfesl.core.relationships import Found, Party, Refusal, Relationship, RelationshipRefused
+from openfesl.storage.models import AccountRow, GameServerRow, PersonaRow, RelationshipRow
 from openfesl.storage.personas import like
 
-_SIDE = ("game", "tag", "owner_id", "member_id")
+_SIDE = ("game", "tag", "owner_id", "owner_server", "member_id", "member_server")
+# Each side with its member's name: an account's display name, or the name a server last listed
+# its game under when it goes by the game's persistent id, or else the name it goes by.
+_MEMBERS = outerjoin(
+    RelationshipRow, AccountRow, AccountRow.id == RelationshipRow.member_id
+).outerjoin(GameServerRow, GameServerRow.ugid == RelationshipRow.member_server)
+_NAME = func.coalesce(AccountRow.display_name, GameServerRow.name, RelationshipRow.member_server)
 
 
 class SqlRelationshipStore:
-    """Relationships between accounts in PostgreSQL, one row for each side."""
+    """Relationships of accounts and dedicated servers in PostgreSQL, one row for each side."""
 
     def __init__(self, sessions: async_sessionmaker[AsyncSession]) -> None:
         """Use a database through its session factory.
@@ -22,107 +29,109 @@ class SqlRelationshipStore:
         """
         self._sessions = sessions
 
-    async def roster(self, game: str, account_id: int) -> list[Relationship]:
-        """Return an account's relationships in a game with accounts that are in use, oldest first.
+    async def roster(self, game: str, owner: Party) -> list[Relationship]:
+        """Return the relationships of one side in a game with servers and accounts in use.
 
         Args:
             game: The game's id.
-            account_id: The account.
+            owner: The side.
+
+        Returns:
+            The relationships, oldest first.
         """
         async with self._sessions() as session:
-            return await _sides(
-                session, RelationshipRow.game == game, RelationshipRow.owner_id == account_id
-            )
+            return await _sides(session, RelationshipRow.game == game, *_owned_by(owner))
 
     async def increase(
-        self, game: str, tag: str, account_id: int, member_id: int, most: int
+        self, game: str, tag: str, owner: Party, member: Party, most: int
     ) -> Relationship:
-        """Ask another account for a relationship, or accept the one it asked for.
+        """Ask another side for a relationship, or accept the one it asked for.
 
         Args:
             game: The game's id.
             tag: The list it is on.
-            account_id: The account that asks or accepts.
-            member_id: The other account.
-            most: The most relationships of the tag the account may ask for or accept.
+            owner: The side that asks or accepts.
+            member: The other side.
+            most: The most relationships of the tag the asking side may ask for or accept.
 
         Returns:
-            The relationship as the asking account sees it now.
+            The relationship as the asking side sees it now.
 
         Raises:
-            RelationshipRefused: When either account is not one that others may ask, as one
-                out of use or without a display name, or the asking account has the most
+            RelationshipRefused: When either side is an account that others may not ask, as
+                one out of use or without a display name, or the asking side has the most
                 relationships it may have.
         """
         async with self._sessions.begin() as session:
-            askable = await _lock(session, account_id, member_id)
+            askable = await _lock(session, owner, member)
             # An account that others cannot see could ask for what they would never see.
-            if account_id not in askable:
+            if owner.account_id is not None and owner.account_id not in askable:
                 raise RelationshipRefused(Refusal.NAMELESS)
-            if member_id not in askable:
+            if member.account_id is not None and member.account_id not in askable:
                 raise RelationshipRefused(Refusal.UNKNOWN_USER)
             agrees = await session.scalar(
-                select(RelationshipRow.owner_agrees).where(*_side(game, tag, account_id, member_id))
+                select(RelationshipRow.owner_agrees).where(*_side(game, tag, owner, member))
             )
             if not agrees:
-                if await _agreed(session, game, tag, account_id) >= most:
+                if await _agreed(session, game, tag, owner) >= most:
                     raise RelationshipRefused(Refusal.LIST_FULL)
                 # The side that changed it has seen the change; the other side has not.
-                await _upsert(
-                    session, (game, tag, account_id, member_id), owner_agrees=True, new=False
-                )
-                await _upsert(
-                    session, (game, tag, member_id, account_id), member_agrees=True, new=True
-                )
-            [relationship] = await _sides(session, *_side(game, tag, account_id, member_id))
+                await _upsert(session, (game, tag, owner, member), owner_agrees=True, new=False)
+                await _upsert(session, (game, tag, member, owner), member_agrees=True, new=True)
+            [relationship] = await _sides(session, *_side(game, tag, owner, member))
             return relationship
 
     async def decrease(
-        self, game: str, tag: str, account_id: int, member_id: int
+        self, game: str, tag: str, owner: Party, member: Party, *, ends: bool
     ) -> Relationship | None:
-        """End a relationship on both sides, whoever asked for it.
+        """Withdraw one side's agreement to a relationship, or end it on both sides.
+
+        A relationship that neither side agrees to is gone.
 
         Args:
             game: The game's id.
             tag: The list it is on.
-            account_id: The account that ends it.
-            member_id: The other account.
+            owner: The side that withdraws.
+            member: The other side.
+            ends: Whether the relationship ends on both sides, whoever asked for it.
 
         Returns:
-            The relationship as the account sees it now that neither side wants it; none when
-            there was none.
+            The relationship as the withdrawing side sees it now; none when there was none.
         """
         async with self._sessions.begin() as session:
-            ended = (
+            withdrawn = (
                 await session.execute(
-                    select(RelationshipRow.id, AccountRow.display_name, func.now())
-                    .join(AccountRow, AccountRow.id == RelationshipRow.member_id)
-                    .where(*_side(game, tag, account_id, member_id))
+                    select(RelationshipRow.id, _NAME, func.now())
+                    .select_from(_MEMBERS)
+                    .where(*_side(game, tag, owner, member))
                 )
             ).first()
-            if ended is None:
+            if withdrawn is None:
                 return None
-            await session.execute(
-                delete(RelationshipRow).where(
-                    or_(
-                        and_(*_side(game, tag, account_id, member_id)),
-                        and_(*_side(game, tag, member_id, account_id)),
-                    )
-                )
+            if not ends:
+                await _upsert(session, (game, tag, owner, member), owner_agrees=False, new=False)
+                await _upsert(session, (game, tag, member, owner), member_agrees=False, new=True)
+            pair = or_(
+                and_(*_side(game, tag, owner, member)), and_(*_side(game, tag, member, owner))
             )
-            side, name, now = ended
-            return Relationship(side, tag, member_id, name or "", False, False, False, now)
+            agreed = or_(RelationshipRow.owner_agrees, RelationshipRow.member_agrees)
+            gone = (pair,) if ends else (pair, ~agreed)
+            await session.execute(delete(RelationshipRow).where(*gone))
+            kept = await _sides(session, *_side(game, tag, owner, member))
+            side, name, now = withdrawn
+            ended = Relationship(side, tag, member, name or "", False, False, False, now)
+            return kept[0] if kept else ended
 
-    async def acknowledge(self, game: str, account_id: int, relationship_id: int) -> bool:
-        """Mark an account's side of a relationship seen, so that it is no longer new to it.
+    async def acknowledge(self, game: str, owner: Party, relationship_id: int) -> bool:
+        """Mark one side of a relationship seen, so that it is no longer new to that side.
 
         Args:
             game: The game's id.
-            account_id: The account.
-            relationship_id: The number the account names the relationship by.
+            owner: The side.
+            relationship_id: The number the side names the relationship by.
 
         Returns:
-            Whether the account has such a relationship.
+            Whether the side has such a relationship.
         """
         async with self._sessions.begin() as session:
             seen = await session.scalar(
@@ -130,7 +139,7 @@ class SqlRelationshipStore:
                 .where(
                     RelationshipRow.id == relationship_id,
                     RelationshipRow.game == game,
-                    RelationshipRow.owner_id == account_id,
+                    *_owned_by(owner),
                 )
                 .values(new=False)
                 .returning(RelationshipRow.id)
@@ -172,10 +181,11 @@ class SqlRelationshipStore:
         return sorted(found, key=lambda each: each.name.casefold())[:limit]
 
 
-async def _lock(session: AsyncSession, *account_ids: int) -> set[int]:
+async def _lock(session: AsyncSession, *parties: Party) -> set[int]:
     # Changes of the same accounts' relationships wait for each other, locked in id order so
     # that two accounts asking each other at once never wait on each other; the key stays free
     # for rows that refer to the accounts. Returns the accounts that others may ask.
+    account_ids = [party.account_id for party in parties if party.account_id is not None]
     rows = await session.execute(
         select(AccountRow.id, and_(*_askable()))
         .where(AccountRow.id.in_(account_ids))
@@ -185,24 +195,28 @@ async def _lock(session: AsyncSession, *account_ids: int) -> set[int]:
     return {account_id for account_id, askable in rows if askable}
 
 
-async def _agreed(session: AsyncSession, game: str, tag: str, account_id: int) -> int:
+async def _agreed(session: AsyncSession, game: str, tag: str, owner: Party) -> int:
     count = await session.scalar(
         select(func.count()).where(
             RelationshipRow.game == game,
             RelationshipRow.tag == tag,
-            RelationshipRow.owner_id == account_id,
+            *_owned_by(owner),
             RelationshipRow.owner_agrees,
         )
     )
     return count or 0
 
 
-async def _upsert(session: AsyncSession, side: tuple[str, str, int, int], **changes: bool) -> None:
+async def _upsert(
+    session: AsyncSession, side: tuple[str, str, Party, Party], **changes: bool
+) -> None:
+    game, tag, owner, member = side
+    columns = (game, tag, owner.account_id, owner.server, member.account_id, member.server)
     # A new side agrees to nothing that the change does not say.
     agreeing = {"owner_agrees": False, "member_agrees": False, **changes}
     await session.execute(
         insert(RelationshipRow)
-        .values({**dict(zip(_SIDE, side, strict=True)), **agreeing})
+        .values({**dict(zip(_SIDE, columns, strict=True)), **agreeing})
         .on_conflict_do_update(index_elements=_SIDE, set_={**changes, "modified_at": func.now()})
     )
 
@@ -213,19 +227,20 @@ async def _sides(session: AsyncSession, *where: ColumnElement[bool]) -> list[Rel
             RelationshipRow.id,
             RelationshipRow.tag,
             RelationshipRow.member_id,
-            AccountRow.display_name,
+            RelationshipRow.member_server,
+            _NAME,
             RelationshipRow.owner_agrees,
             RelationshipRow.member_agrees,
             RelationshipRow.new,
             RelationshipRow.modified_at,
         )
-        .join(AccountRow, AccountRow.id == RelationshipRow.member_id)
-        .where(*where, *_askable())
+        .select_from(_MEMBERS)
+        .where(*where, or_(RelationshipRow.member_server.is_not(None), and_(*_askable())))
         .order_by(RelationshipRow.created_at, RelationshipRow.id)
     )
     return [
-        Relationship(side, tag, member_id, name or "", own, theirs, new, modified)
-        for side, tag, member_id, name, own, theirs, new, modified in rows
+        Relationship(side, tag, Party(account_id, server), name or "", own, theirs, new, modified)
+        for side, tag, account_id, server, name, own, theirs, new, modified in rows
     ]
 
 
@@ -239,10 +254,22 @@ def _askable() -> tuple[ColumnElement[bool], ...]:
     )
 
 
-def _side(game: str, tag: str, owner_id: int, member_id: int) -> tuple[ColumnElement[bool], ...]:
+def _owned_by(owner: Party) -> tuple[ColumnElement[bool], ...]:
+    return (
+        _equals(RelationshipRow.owner_id, owner.account_id),
+        _equals(RelationshipRow.owner_server, owner.server),
+    )
+
+
+def _side(game: str, tag: str, owner: Party, member: Party) -> tuple[ColumnElement[bool], ...]:
     return (
         RelationshipRow.game == game,
         RelationshipRow.tag == tag,
-        RelationshipRow.owner_id == owner_id,
-        RelationshipRow.member_id == member_id,
+        *_owned_by(owner),
+        _equals(RelationshipRow.member_id, member.account_id),
+        _equals(RelationshipRow.member_server, member.server),
     )
+
+
+def _equals[T](column: InstrumentedAttribute[T | None], value: T | None) -> ColumnElement[bool]:
+    return column.is_(None) if value is None else column == value
