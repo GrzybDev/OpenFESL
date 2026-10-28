@@ -41,6 +41,7 @@
 
   /* The name, and the default hero's stamp beside it, or above it when both do not fit. */
   .hero-heading {
+    position: relative;
     display: flex;
     flex-wrap: wrap-reverse;
     align-items: center;
@@ -98,5 +99,34 @@
     border-top: 1px dashed #a8977f;
     font-size: 14px;
     color: #5c4a3c;
+  }
+
+  /* A hero just made the default one: its stamp lands, and the previous one's fades. */
+  .hero-stamp-landing {
+    animation: hero-stamp-land 180ms var(--ease-menu) both;
+  }
+
+  .hero-stamp-leaving {
+    position: absolute;
+    top: 0;
+    right: 0;
+    animation: fade-out 180ms var(--ease-menu) both;
+  }
+
+  @keyframes hero-stamp-land {
+    from {
+      opacity: 0;
+      scale: 1.35;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-stamp-landing {
+      animation: fade-in 100ms linear both;
+    }
+
+    .hero-stamp-leaving {
+      animation: fade-out 100ms linear both;
+    }
   }
 }

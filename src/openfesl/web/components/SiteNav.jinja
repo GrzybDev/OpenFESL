@@ -1,5 +1,6 @@
 {# The menus of a game's own site: a tab per menu that lists one of the game's pages, open without
-   scripts as a disclosure; the tab of the current page's menu wears the menus' colour. #}
+   scripts as a disclosure, and a signed-in account's heroes; the tab of the current page's menu
+   wears the menus' colour. #}
 {% set glyphs = {"play": "book", "leaderboard": "bars", "host": "server", "servers": "server", "activity": "bars"} %}
 <nav aria-label="{{ game.name }}" class="site-nav">
   <ul class="site-tabs">
@@ -32,5 +33,13 @@
         </li>
       {% endif %}
     {% endfor %}
+    {% if player and game.heroes %}
+      {% set mine = "/" ~ game.id ~ "/heroes" %}
+      <li>
+        <a href="{{ url(mine) }}"
+           {% if path == mine %} aria-current="page"{% endif %}
+           class="site-tab{% if path.startswith(mine) or path.endswith('/createHero') %} site-tab-current{% endif %}">{{ _("web.site.heroes") }}</a>
+      </li>
+    {% endif %}
   </ul>
 </nav>

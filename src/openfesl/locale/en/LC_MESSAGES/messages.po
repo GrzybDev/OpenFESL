@@ -386,6 +386,117 @@ msgstr "The starting kit is in place: %(kit)s."
 msgid "web.created.another"
 msgstr "Create another hero"
 
+msgid "web.created.make_default"
+msgstr "Make %(hero)s the default hero"
+
+msgid "web.site.heroes"
+msgstr "My heroes"
+
+msgid "web.bar.heroes"
+msgstr "Heroes"
+
+msgid "web.selector.label"
+msgstr "Heroes of this account"
+
+msgid "web.selector.free"
+msgstr "Slot %(slot)s · free"
+
+msgid "web.selector.all"
+msgstr "All heroes and slots"
+
+msgid "web.heroes.title"
+msgstr "My heroes"
+
+msgid "web.heroes.lead"
+msgstr "Heroes are created on this site and played in %(game)s. OpenFESLHook's launcher logs the game in as the default hero, %(hero)s. Heroes cannot be deleted."
+
+msgid "web.heroes.lead.none"
+msgstr "No hero yet. Heroes are created on this site and played in %(game)s; the game opens this site when an account without heroes logs in."
+
+msgid "web.heroes.list"
+msgstr "Heroes"
+
+msgid "web.heroes.slot"
+msgstr "Slot %(slot)s"
+
+msgid "web.heroes.free"
+msgstr "Free hero slot"
+
+msgid "web.heroes.free.text"
+msgstr "Pick a faction, a class, a look and a name."
+
+msgid "web.heroes.none.text.one"
+msgstr "A hero takes a faction, a class, a look and a name. %(count)s slot is free. Heroes cannot be deleted."
+
+msgid "web.heroes.none.text.other"
+msgstr "A hero takes a faction, a class, a look and a name. %(count)s slots are free. Heroes cannot be deleted."
+
+msgid "web.heroes.mugshot.none"
+msgstr "No mugshot yet"
+
+msgid "web.heroes.level.label"
+msgstr "Level"
+
+msgid "web.heroes.xp.to"
+msgstr "XP to level %(level)s"
+
+msgid "web.heroes.xp.label"
+msgstr "%(xp)s of %(needed)s XP to level %(level)s"
+
+msgid "web.heroes.points.of"
+msgstr "%(unspent)s unspent of %(earned)s"
+
+msgid "web.heroes.points.scope"
+msgstr "this hero only"
+
+msgid "web.heroes.items"
+msgstr "Items"
+
+msgid "web.heroes.items.count.one"
+msgstr "%(count)s item"
+
+msgid "web.heroes.items.count.other"
+msgstr "%(count)s items"
+
+msgid "web.heroes.items.low.one"
+msgstr "%(count)s running low"
+
+msgid "web.heroes.items.low.other"
+msgstr "%(count)s running low"
+
+msgid "web.heroes.items.none_low"
+msgstr "none running low"
+
+msgid "web.heroes.enlisted"
+msgstr "Enlisted"
+
+msgid "web.heroes.make_default"
+msgstr "Make default"
+
+msgid "web.heroes.toast.default"
+msgstr "%(hero)s is now the default hero: OpenFESLHook's launcher logs %(game)s in as %(hero)s."
+
+msgid "web.heroes.back"
+msgstr "Back to my heroes"
+
+msgid "web.heroes.wallet.shared"
+msgstr "account, all heroes"
+
+msgid "web.heroes.wallet.own"
+msgstr "each hero its own"
+
+msgid "web.heroes.wallet.none"
+msgstr "none yet"
+
+msgid "web.heroes.wallet.note"
+msgstr "Funds come from the starting allowance and are never sold."
+
+msgid "web.account.page.heroes"
+msgstr "The heroes page"
+
+msgid "games.bfheroes.currency._DH"
+msgstr "Hero Points"
+
 msgid "web.heroes.stamp"
 msgstr "Default"
 

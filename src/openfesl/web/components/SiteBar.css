@@ -25,6 +25,10 @@
     background: #000;
     box-shadow: 0 0 2px 1px #262626;
     color: #fff;
+
+    &:hover {
+      text-decoration: none;
+    }
   }
 
   .hero-pill-none {
@@ -84,6 +88,67 @@
     background: #f2c12e;
     color: #0a0a0a;
     font: 800 13px/1.1 var(--site-heading);
+  }
+
+  /* The pill of a hero just made the default one shows it with a fade. */
+  .hero-pill-changed > * {
+    animation: site-fade-in 150ms var(--ease-menu) both;
+
+    @media (prefers-reduced-motion: reduce) {
+      animation-duration: 100ms;
+      animation-timing-function: linear;
+    }
+  }
+
+  /* The toggle of the hero selector, with the count of heroes and a turning chevron. */
+  .heroes-toggle {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px 0 14px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: #fff;
+    font: 800 19px/1 var(--site-heading);
+    text-transform: lowercase;
+    transition:
+      background-color 150ms var(--ease-menu),
+      border-color 150ms var(--ease-menu);
+
+    &:hover {
+      text-decoration: none;
+    }
+
+    &[aria-expanded="true"] {
+      border-color: #84aad1;
+      background: #2e2420;
+    }
+  }
+
+  .heroes-count {
+    display: grid;
+    min-width: 26px;
+    height: 26px;
+    place-items: center;
+    padding-inline: 6px;
+    border: 2px solid #000;
+    border-radius: 13px;
+    background: #f2c12e;
+    color: #0a0a0a;
+    font-size: 14px;
+  }
+
+  .heroes-turn {
+    transition: rotate 160ms var(--ease-menu);
+
+    [aria-expanded="true"] > & {
+      rotate: 180deg;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
   }
 
   .site-wallets {

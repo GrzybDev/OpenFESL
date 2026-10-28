@@ -419,6 +419,135 @@ msgstr "Wyposażenie startowe jest gotowe: %(kit)s."
 msgid "web.created.another"
 msgstr "Utwórz kolejnego bohatera"
 
+msgid "web.created.make_default"
+msgstr "Ustaw %(hero)s jako domyślnego bohatera"
+
+msgid "web.site.heroes"
+msgstr "Moi bohaterowie"
+
+msgid "web.bar.heroes"
+msgstr "Bohaterowie"
+
+msgid "web.selector.label"
+msgstr "Bohaterowie tego konta"
+
+msgid "web.selector.free"
+msgstr "Miejsce %(slot)s · wolne"
+
+msgid "web.selector.all"
+msgstr "Wszyscy bohaterowie i miejsca"
+
+msgid "web.heroes.title"
+msgstr "Moi bohaterowie"
+
+msgid "web.heroes.lead"
+msgstr "Bohaterów tworzy się na tej stronie, a gra się nimi w %(game)s. Program uruchamiający OpenFESLHook uruchamia grę z domyślnym bohaterem: %(hero)s. Bohaterów nie można usuwać."
+
+msgid "web.heroes.lead.none"
+msgstr "Jeszcze nie ma bohatera. Bohaterów tworzy się na tej stronie, a gra się nimi w %(game)s; gra otwiera tę stronę, gdy loguje się konto bez bohaterów."
+
+msgid "web.heroes.list"
+msgstr "Bohaterowie"
+
+msgid "web.heroes.slot"
+msgstr "Miejsce %(slot)s"
+
+msgid "web.heroes.free"
+msgstr "Wolne miejsce"
+
+msgid "web.heroes.free.text"
+msgstr "Do wyboru frakcja, klasa, wygląd i nazwa."
+
+msgid "web.heroes.none.text.one"
+msgstr "Bohater ma frakcję, klasę, wygląd i nazwę. Wolne jest %(count)s miejsce. Bohaterów nie można usuwać."
+
+msgid "web.heroes.none.text.few"
+msgstr "Bohater ma frakcję, klasę, wygląd i nazwę. Wolne są %(count)s miejsca. Bohaterów nie można usuwać."
+
+msgid "web.heroes.none.text.many"
+msgstr "Bohater ma frakcję, klasę, wygląd i nazwę. Wolnych jest %(count)s miejsc. Bohaterów nie można usuwać."
+
+msgid "web.heroes.none.text.other"
+msgstr "Bohater ma frakcję, klasę, wygląd i nazwę. Wolne jest %(count)s miejsca. Bohaterów nie można usuwać."
+
+msgid "web.heroes.mugshot.none"
+msgstr "Jeszcze bez portretu"
+
+msgid "web.heroes.level.label"
+msgstr "Poziom"
+
+msgid "web.heroes.xp.to"
+msgstr "XP do poziomu %(level)s"
+
+msgid "web.heroes.xp.label"
+msgstr "%(xp)s z %(needed)s XP do poziomu %(level)s"
+
+msgid "web.heroes.points.of"
+msgstr "Do wydania: %(unspent)s z %(earned)s"
+
+msgid "web.heroes.points.scope"
+msgstr "tylko ten bohater"
+
+msgid "web.heroes.items"
+msgstr "Przedmioty"
+
+msgid "web.heroes.items.count.one"
+msgstr "%(count)s przedmiot"
+
+msgid "web.heroes.items.count.few"
+msgstr "%(count)s przedmioty"
+
+msgid "web.heroes.items.count.many"
+msgstr "%(count)s przedmiotów"
+
+msgid "web.heroes.items.count.other"
+msgstr "%(count)s przedmiotu"
+
+msgid "web.heroes.items.low.one"
+msgstr "%(count)s się kończy"
+
+msgid "web.heroes.items.low.few"
+msgstr "%(count)s się kończą"
+
+msgid "web.heroes.items.low.many"
+msgstr "%(count)s się kończy"
+
+msgid "web.heroes.items.low.other"
+msgstr "%(count)s się kończy"
+
+msgid "web.heroes.items.none_low"
+msgstr "żaden się nie kończy"
+
+msgid "web.heroes.enlisted"
+msgstr "W służbie od"
+
+msgid "web.heroes.make_default"
+msgstr "Ustaw jako domyślnego"
+
+msgid "web.heroes.toast.default"
+msgstr "%(hero)s jest teraz domyślnym bohaterem: program uruchamiający OpenFESLHook uruchamia grę %(game)s z tym bohaterem."
+
+msgid "web.heroes.back"
+msgstr "Wróć do moich bohaterów"
+
+msgid "web.heroes.wallet.shared"
+msgstr "konto, wszyscy bohaterowie"
+
+msgid "web.heroes.wallet.own"
+msgstr "każdy bohater osobno"
+
+msgid "web.heroes.wallet.none"
+msgstr "jeszcze brak"
+
+msgid "web.heroes.wallet.note"
+msgstr "Funds pochodzą z przydziału startowego i nigdy nie są sprzedawane."
+
+msgid "web.account.page.heroes"
+msgstr "Strona bohaterów"
+
+msgid "games.bfheroes.currency._DH"
+msgstr "Hero Points"
+
 msgid "web.heroes.stamp"
 msgstr "Domyślny"
 

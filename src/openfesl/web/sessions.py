@@ -64,7 +64,7 @@ def toast(request: Request, key: str, error: bool = False, **values: str) -> Non
         request: The change's request.
         key: The text in the catalogues.
         error: Whether the change failed.
-        values: The text's placeholders.
+        values: The text's placeholders, and what else the next page marks as changed.
     """
     request.session["toast"] = {"key": key, "values": values, "error": error}
 

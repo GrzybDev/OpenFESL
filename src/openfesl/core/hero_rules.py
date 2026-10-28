@@ -108,6 +108,8 @@ class HeroRules(BaseModel):
         loadouts: What a new hero starts with, by faction and class.
         starting_items: The items a new hero is granted with their uses, by their Magma tag:
             those the game does not grant itself.
+        points: The currency of the points each hero earns with its levels and spends alone.
+        running_low: The uses left at which an item limited by uses counts as running low.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -125,6 +127,8 @@ class HeroRules(BaseModel):
     starting_stats: dict[str, float] = {}
     loadouts: dict[str, dict[str, Loadout]]
     starting_items: dict[str, PositiveInt] = {}
+    points: str
+    running_low: PositiveInt
 
     @model_validator(mode="after")
     def _check_lists(self) -> Self:

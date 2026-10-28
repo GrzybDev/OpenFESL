@@ -22,6 +22,10 @@
           {{ _("web.creator.lead.kept") }}
         </p>
       {% endif %}
+      {% if roster and roster.heroes %}
+        <a href="{{ url('/' ~ game.id ~ '/heroes') }}"
+           class="site-link"><Icon name="back" :size="13" stroke="currentColor" />{{ _("web.heroes.back") }}</a>
+      {% endif %}
     </div>
     {% if player %}
       <SlotPanel :roster="roster" :taking="slot if roster.free else 0">

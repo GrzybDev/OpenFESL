@@ -43,6 +43,15 @@ class WalletStore(Protocol):
             wallets: The wallets.
         """
 
+    async def earned(self, wallets: Sequence[Wallet]) -> list[int]:
+        """Return what wallets ever received, from their ledgers, without opening any.
+
+        A new wallet counts the allowance it opens with.
+
+        Args:
+            wallets: The wallets.
+        """
+
 
 class Wallets:
     """The balances that players spend in the currencies of their games."""
@@ -78,6 +87,23 @@ class Wallets:
             for code, currency in game.currencies.items()
         ]
         return dict(zip(game.currencies, await self._store.balances(wallets), strict=True))
+
+    async def of_personas(
+        self, game: Game, personas: Sequence[Persona], code: str
+    ) -> list[tuple[int, int]]:
+        """Return what personas have of a currency they each hold, and earned, opening nothing.
+
+        Args:
+            game: The personas' game.
+            personas: The personas.
+            code: The currency, which each persona holds on its own.
+        """
+        allowance = game.currencies[code].allowance
+        wallets = [
+            Wallet(game.id, code, persona.account_id, persona.id, allowance) for persona in personas
+        ]
+        balances = await self._store.peek(wallets)
+        return list(zip(balances, await self._store.earned(wallets), strict=True))
 
     async def of_account(self, game: Game, account_id: int, codes: Sequence[str]) -> list[int]:
         """Return what an account has to spend in currencies its personas share, opening nothing.

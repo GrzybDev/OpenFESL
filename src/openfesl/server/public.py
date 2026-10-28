@@ -18,6 +18,7 @@ from openfesl.web.activity import activity_routes
 from openfesl.web.creator import CreatorPages
 from openfesl.web.front import front_routes
 from openfesl.web.game_icons import game_icon_routes
+from openfesl.web.heroes import HeroesPages
 from openfesl.web.host import host_routes
 from openfesl.web.launcher import launcher_routes
 from openfesl.web.leaderboard import leaderboard_routes
@@ -79,6 +80,16 @@ def include_public_routes(
     )
 
     app.include_router(CreatorPages(pages, games, services.heroes, services.catalogues).routes())
+    app.include_router(
+        HeroesPages(
+            pages,
+            games,
+            services.heroes,
+            services.wallets,
+            stores.entitlements,
+            services.catalogues,
+        ).routes()
+    )
     app.include_router(open_routes(games))
     app.include_router(launcher_routes(lambda: app.state.launcher))
     turnstile = settings.turnstile

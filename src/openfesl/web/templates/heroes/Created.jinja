@@ -25,12 +25,26 @@
           {% if default %}<p>{{ _("web.created.stays", hero=default.persona.name, game=game.name) }}</p>{% endif %}
         {% endif %}
         {% if kit %}<p class="created-kit">{{ _("web.created.kit", kit=kit) }}</p>{% endif %}
-        {% if roster.free %}
-          <p class="site-actions">
+        <div class="site-actions">
+          {% if hero.playable and not (default and default.persona.id == hero.persona.id) %}
+            <form method="post"
+                  action="{{ url('/' ~ game.id ~ '/heroes/' ~ hero.persona.id ~ '/default') }}">
+              <input type="hidden" name="csrf" value="{{ csrf }}">
+              <input type="hidden" name="next" value="{{ here }}">
+              <button type="submit"
+                      class="site-button site-button-yellow site-button-large">
+                <Icon name="star" :size="18" stroke="currentColor" />
+                {{ _("web.created.make_default", hero=name) }}
+              </button>
+            </form>
+          {% endif %}
+          <a href="{{ url('/' ~ game.id ~ '/heroes') }}"
+             class="site-link-light">{{ _("web.heroes.back") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+          {% if roster.free %}
             <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
-               class="site-button"><Icon name="plus" :size="16" stroke="#FEDE01" />{{ _("web.created.another") }}</a>
-          </p>
-        {% endif %}
+               class="site-link-light">{{ _("web.created.another") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+          {% endif %}
+        </div>
       </div>
     </section>
     <HeroSummary :hero="hero" :slot="slot" :slots="roster.slots" :default="default and default.persona.id == hero.persona.id" />

@@ -50,6 +50,7 @@
   </header>
   {% if player %}
     <SiteBar />
+    {% if bar and bar.roster and bar.roster.heroes %}<HeroSelector />{% endif %}
   {% else %}
     <SiteSignIn />
   {% endif %}

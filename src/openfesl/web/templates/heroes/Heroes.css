@@ -1,0 +1,92 @@
+/* The heroes page: the cards in a grid under the beam, four across on wide screens and one on
+   phones, the dashed card of a free slot, and the empty hanger before the first hero. */
+@layer pages {
+  .hero-rack {
+    margin-top: 30px;
+  }
+
+  .hero-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+    gap: 34px 20px;
+  }
+
+  .free-slot {
+    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px 16px;
+    border: 3px dashed #3b2d23;
+    border-radius: 0 8px 8px;
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .free-slot-tab {
+    position: absolute;
+    top: -34px;
+    left: -3px;
+    display: flex;
+    height: 34px;
+    align-items: center;
+    padding: 0 14px;
+    border: 3px dashed #3b2d23;
+    border-bottom: 0;
+    border-radius: 8px 8px 0 0;
+    font: 800 13px/1 var(--site-heading);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .free-slot-disc {
+    display: grid;
+    width: 72px;
+    height: 72px;
+    place-items: center;
+    border: 3px dashed #3b2d23;
+    border-radius: 50%;
+  }
+
+  .free-slot-title {
+    font: 800 23px/1.15 var(--site-heading);
+    color: #fff;
+    text-shadow: var(--site-outline);
+  }
+
+  .heroes-none {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin-top: 30px;
+    padding: 30px 20px;
+    border: 3px dashed #3b2d23;
+    border-radius: 8px;
+    text-align: center;
+
+    > p {
+      max-width: 60ch;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .free-slot-title {
+      font-size: 28px;
+    }
+  }
+
+  .heroes-none-hanger {
+    width: 120px;
+    height: 80px;
+    fill: none;
+    stroke: #3b2d23;
+    stroke-width: 3;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+}

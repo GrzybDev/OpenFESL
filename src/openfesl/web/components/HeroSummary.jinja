@@ -19,7 +19,8 @@
         {% if default %}<span class="sr-only">{{ _("web.heroes.default.sr") }}</span>{% endif %}
       </h3>
       {% if default %}
-        <span aria-hidden="true" class="hero-stamp">{{ _("web.heroes.stamp") }}</span>
+        <span aria-hidden="true"
+              class="hero-stamp{% if toast and toast.key == 'web.heroes.toast.default' %} hero-stamp-landing{% endif %}">{{ _("web.heroes.stamp") }}</span>
       {% endif %}
     </div>
     <p class="hero-kind">

@@ -267,6 +267,10 @@ hair_order = [1, 3, 5, 2, 4]
 stats = { faction = "c_team", class = "c_kit", skin_tone = "c_skc", hair_colour = "c_hrc", hair_style = "c_hrs", facial_hair = "c_fhrs", appearance = "c_apr", equipment = "c_eqp", emotes = "c_emo", level = "level", xp = "xp" }
 starting_stats = { c_ft = 0, level = 1 }
 starting_items = { "2005-lmct" = 10 }
+# The Hero Points each hero earns with its levels, and the uses left at which the heroes page says
+# an item runs low.
+points = "_DH"
+running_low = 3
 
 # Royal Army first, as the 2012 creator listed them.
 [heroes.factions.royal]

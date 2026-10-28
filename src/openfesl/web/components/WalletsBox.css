@@ -1,0 +1,86 @@
+/* The info boxes under the heroes (the 2012 bfhBox): a coloured box with a dark title tab, a yellow
+   corner disc and a splatter under it; the brown one holds the wallets. */
+@layer components {
+  .info-boxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: 40px 22px;
+    margin-top: 64px;
+  }
+
+  .info-box {
+    position: relative;
+    padding: 0 18px 18px;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: var(--box);
+    box-shadow:
+      inset 0 0 0 2px var(--box-edge),
+      0 4px 0 rgb(0 0 0 / 0.3);
+    color: var(--box-ink);
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .info-box-brown {
+    --box: #938166;
+    --box-edge: #c9c099;
+    --box-ink: #0f0b08;
+  }
+
+  .info-box-title {
+    display: inline-block;
+    margin-left: -18px;
+    padding: 10px 30px 9px 18px;
+    border-radius: 5px 0 0;
+    background: rgb(0 0 0 / 0.3);
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 100%, 0 100%);
+    font: 800 18px/1.2 var(--site-heading);
+    color: #fff;
+    text-shadow: var(--site-outline-thin);
+  }
+
+  .info-box-disc {
+    position: absolute;
+    top: -14px;
+    right: -14px;
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border: 3px solid #000;
+    border-radius: 50%;
+    background: #f2c12e;
+  }
+
+  .wallet-rows {
+    margin-top: 12px;
+
+    > div {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 2px 10px;
+      padding-block: 6px;
+      border-bottom: 1px dashed #3b2d23;
+    }
+
+    dd {
+      font: 800 19px/1.2 var(--site-heading);
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .wallet-heroes {
+    flex-direction: column;
+
+    dd {
+      font: inherit;
+    }
+  }
+
+  .info-box-note {
+    margin-top: 12px;
+  }
+}

@@ -36,7 +36,54 @@ document.addEventListener("keydown", (event) => {
     closeMenu(menu, 140, 100);
     menu.querySelector("summary").focus();
   }
+  const toggle = document.querySelector("[data-selector-toggle][aria-expanded=true]");
+  if (toggle && event.key === "Escape") {
+    showSelector(toggle, false);
+    toggle.focus();
+  }
 });
+
+// The hero selector opens under the bar from its toggle, which without scripts is a link to the
+// heroes page; as a button it also answers Space.
+for (const toggle of document.querySelectorAll("[data-selector-toggle]")) {
+  toggle.setAttribute("role", "button");
+  toggle.setAttribute("aria-expanded", "false");
+  toggle.setAttribute("aria-controls", "hero-selector");
+  toggle.addEventListener("click", (event) => {
+    event.preventDefault();
+    showSelector(toggle, toggle.getAttribute("aria-expanded") !== "true");
+  });
+  toggle.addEventListener("keydown", (event) => {
+    if (event.key === " ") {
+      event.preventDefault();
+      showSelector(toggle, toggle.getAttribute("aria-expanded") !== "true");
+    }
+  });
+}
+
+/**
+ * Opens or closes the hero selector, playing its motion.
+ *
+ * @param {HTMLElement} toggle - The bar's toggle.
+ * @param {boolean} open - Whether to open it.
+ */
+function showSelector(toggle, open) {
+  const selector = document.getElementById("hero-selector");
+  toggle.setAttribute("aria-expanded", String(open));
+  clearTimeout(selector.closing);
+  if (open) {
+    selector.hidden = false;
+    requestAnimationFrame(() => selector.classList.add("open"));
+  } else {
+    selector.classList.remove("open");
+    selector.closing = setTimeout(
+      () => {
+        selector.hidden = true;
+      },
+      reducedMotion.matches ? 100 : 160,
+    );
+  }
+}
 
 /**
  * Plays a menu's closing and closes it.

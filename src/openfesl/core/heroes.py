@@ -185,6 +185,21 @@ class HeroStore(Protocol):
                 request at the same time.
         """
 
+    async def set_default(
+        self, account_id: int, game: str, namespace: str, persona_id: int
+    ) -> bool:
+        """Make one of an account's heroes its default hero.
+
+        Args:
+            account_id: The account.
+            game: The game's data-file name.
+            namespace: The game's persona namespace.
+            persona_id: The hero's persona.
+
+        Returns:
+            Whether the hero is one of the account's.
+        """
+
 
 class Heroes:
     """The heroes of games whose heroes are made on their site."""
@@ -245,6 +260,22 @@ class Heroes:
         if await self._store.taken(game.namespace, name):
             return NameCheck.TAKEN
         return NameCheck.FREE
+
+    async def make_default(self, game: Game, account_id: int, persona_id: int) -> bool:
+        """Make one of an account's heroes the one the game is started as.
+
+        Args:
+            game: The game, which has hero rules.
+            account_id: The account.
+            persona_id: The hero's persona.
+
+        Returns:
+            Whether the hero is one of the account's and one the game can play.
+        """
+        roster = await self.roster(game, account_id)
+        if not any(hero.persona.id == persona_id and hero.playable for hero in roster.heroes):
+            return False
+        return await self._store.set_default(account_id, game.id, game.namespace, persona_id)
 
     async def create(self, game: Game, account_id: int, look: Look, name: str) -> Persona:
         """Create a hero with its starting stats and items.

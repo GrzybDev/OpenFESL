@@ -1,10 +1,11 @@
 {# The bar of a game's own site for a signed-in account: its default hero, or a way to create the
-   first, and the balances it has to spend. #}
+   first, the toggle of the hero selector, and the balances it has to spend. #}
 <div class="site-bar">
   {% if bar and bar.roster %}
     {% set hero = bar.roster.default %}
     {% if hero %}
-      <p class="hero-pill">
+      <a href="{{ url('/' ~ game.id ~ '/heroes') }}"
+         class="hero-pill{% if toast and toast.key == 'web.heroes.toast.default' %} hero-pill-changed{% endif %}">
         <span aria-hidden="true"
               {% if hero.faction %} data-faction="{{ hero.faction }}"{% endif %}
               class="hero-pill-disc">
@@ -14,8 +15,13 @@
         </span>
         <span class="hero-pill-text"><span class="hero-pill-label">{{ _("web.bar.default") }}</span><span class="hero-pill-name">{{ hero.persona.name }}</span></span>
         <span class="hero-pill-level"><span class="sr-only">{{ _("web.bar.level") }}</span>{{ hero.level }}</span>
-      </p>
-    {% elif not bar.roster.heroes %}
+      </a>
+    {% endif %}
+    {% if bar.roster.heroes %}
+      <a href="{{ url('/' ~ game.id ~ '/heroes') }}"
+         data-selector-toggle
+         class="heroes-toggle">{{ _("web.bar.heroes") }}<span class="heroes-count">{{ bar.roster.heroes|length }}</span><Icon name="down" :size="14" stroke="#FEDE01" class="heroes-turn" /></a>
+    {% else %}
       <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
          class="hero-pill hero-pill-none">
         <span aria-hidden="true" class="hero-pill-disc"><Icon name="plus" :size="18" stroke="currentColor" /></span>

@@ -1,0 +1,115 @@
+{#def card #}
+{# A hero's card, a folder hanging from the beam on two strings: its faction's tab, the default
+   hero's stamp, its name, class and level, its XP, its facts and what can be done with it. #}
+{% set hero = card.hero %}
+{% set rules = game.heroes %}
+{% set id = hero.persona.id %}
+{# A hero becoming the default one: its stamp lands, and the previous default's stamp fades. #}
+{% set switched = toast and toast.key == "web.heroes.toast.default" %}
+<li id="hero-{{ id }}"
+    {% if hero.faction %} data-faction="{{ hero.faction }}"{% endif %}
+    class="hero-hanger">
+  <span aria-hidden="true" class="hero-beam"></span>
+  <div class="hero-folder">
+    <span aria-hidden="true" class="hero-string hero-string-left"></span>
+    <span aria-hidden="true" class="hero-string hero-string-right"></span>
+    <article aria-labelledby="hero-name-{{ id }}" class="hero-card">
+      {% if hero.faction %}
+        <p class="hero-tab">
+          <Icon :name="rules.factions[hero.faction].glyph" :size="18" stroke="currentColor" />
+          {{ _("games." ~ game.id ~ ".faction." ~ hero.faction) }}
+        </p>
+      {% endif %}
+      <div class="hero-heading">
+        <h3 id="hero-name-{{ id }}"
+            class="hero-name{% if hero.persona.name|length > 13 %} hero-name-long{% endif %}">
+          {{ hero.persona.name }}
+          {% if card.default %}<span class="sr-only">{{ _("web.heroes.default.sr") }}</span>{% endif %}
+        </h3>
+        {% if card.default %}
+          <span aria-hidden="true"
+                class="hero-stamp{% if switched %} hero-stamp-landing{% endif %}">{{ _("web.heroes.stamp") }}</span>
+        {% elif switched and toast.values.previous == hero.persona.name %}
+          <span aria-hidden="true" class="hero-stamp hero-stamp-leaving">{{ _("web.heroes.stamp") }}</span>
+        {% endif %}
+      </div>
+      <div class="hero-face">
+        <div class="hero-mugshot">
+          {% if hero.hero_class %}
+            <Icon :name="rules.classes[hero.hero_class].glyph" :size="38" stroke="currentColor" />
+          {% endif %}
+          <span>{{ _("web.heroes.mugshot.none") }}</span>
+          <svg aria-hidden="true" viewBox="0 0 18 34" class="hero-clip">
+            <path d="M12 11v14.5a3.5 3.5 0 0 1-7 0V6.5a5 5 0 0 1 10 0V24" />
+          </svg>
+        </div>
+        <dl class="hero-rank">
+          {% if hero.hero_class %}
+            <div>
+              <dt class="sr-only">{{ _("web.creator.class") }}</dt>
+              <dd class="hero-kind">
+                <span aria-hidden="true"
+                      class="hero-glyph"><Icon :name="rules.classes[hero.hero_class].glyph" :size="18" stroke="currentColor" /></span>
+                {{ _("games." ~ game.id ~ ".class." ~ hero.hero_class) }}
+              </dd>
+            </div>
+          {% endif %}
+          <div class="hero-level">
+            <dt>{{ _("web.heroes.level.label") }}</dt>
+            <dd>
+              {{ hero.level }}
+            </dd>
+          </div>
+        </dl>
+      </div>
+      {% if card.xp_needed %}
+        <div class="hero-xp">
+          <p>
+            <span>{{ _("web.heroes.xp.to", level=hero.level + 1) }}</span>
+            <span class="hero-xp-numbers">{{ number(hero.xp) }} / {{ number(card.xp_needed) }}</span>
+          </p>
+          {% set share = [hero.xp / card.xp_needed, 1]|min %}
+          <svg role="img"
+               aria-label="{{ _('web.heroes.xp.label', xp=number(hero.xp), needed=number(card.xp_needed), level=hero.level + 1) }}"
+               viewBox="0 0 100 1"
+               preserveAspectRatio="none"
+               class="hero-xp-bar">
+            <rect width="{{ (share * 100)|round(2) }}" height="1" class="hero-xp-fill" />
+          </svg>
+        </div>
+      {% endif %}
+      <dl class="hero-facts">
+        <dt>{{ _("games." ~ game.id ~ ".currency." ~ rules.points) }}</dt>
+        <dd>
+          <strong>{{ _("web.heroes.points.of", unspent=number(card.points[0]), earned=number(card.points[1])) }}</strong>
+          <span class="hero-scope">· {{ _("web.heroes.points.scope") }}</span>
+        </dd>
+        <dt>{{ _("web.heroes.items") }}</dt>
+        <dd>
+          <strong>{{ _n("web.heroes.items.count", card.items) }}</strong>
+          {% if card.low %}
+            <strong class="hero-low">· {{ _n("web.heroes.items.low", card.low) }}</strong>
+          {% else %}
+            <span class="hero-scope">· {{ _("web.heroes.items.none_low") }}</span>
+          {% endif %}
+        </dd>
+        <dt>{{ _("web.heroes.enlisted") }}</dt>
+        <dd>
+          {{ when(hero.created, "yMMMd") }}
+        </dd>
+      </dl>
+      {# A hero made before the creator has no faction, class or look to start the game with. #}
+      {% if not card.default and hero.playable %}
+        <form method="post"
+              action="{{ url('/' ~ game.id ~ '/heroes/' ~ id ~ '/default') }}"
+              class="hero-actions">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <button type="submit" class="site-button site-button-yellow">
+            <Icon name="star" :size="15" stroke="currentColor" />
+            {{ _("web.heroes.make_default") }}
+          </button>
+        </form>
+      {% endif %}
+    </article>
+  </div>
+</li>

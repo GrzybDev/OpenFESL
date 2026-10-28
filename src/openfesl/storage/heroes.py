@@ -63,6 +63,41 @@ class SqlHeroStore:
             )
         return found is not None
 
+    async def set_default(
+        self, account_id: int, game: str, namespace: str, persona_id: int
+    ) -> bool:
+        """Make one of an account's heroes its default hero.
+
+        Args:
+            account_id: The account.
+            game: The game's data-file name.
+            namespace: The game's persona namespace.
+            persona_id: The hero's persona.
+
+        Returns:
+            Whether the hero is one of the account's.
+        """
+        async with self._sessions.begin() as session:
+            owned = await session.scalar(
+                select(PersonaRow.id).where(
+                    PersonaRow.id == persona_id,
+                    PersonaRow.account_id == account_id,
+                    PersonaRow.namespace == namespace,
+                    PersonaRow.disabled_at.is_(None),
+                )
+            )
+            if owned is None:
+                return False
+            chosen = {"account_id": account_id, "game": game, "default_persona_id": persona_id}
+            statement = insert(HeroAccountRow).values(chosen)
+            await session.execute(
+                statement.on_conflict_do_update(
+                    index_elements=[HeroAccountRow.account_id, HeroAccountRow.game],
+                    set_={"default_persona_id": statement.excluded.default_persona_id},
+                )
+            )
+            return True
+
     async def create(self, hero: NewHero) -> Persona:
         """Store a hero with its stats and items; the account's first becomes its default.
 

@@ -344,6 +344,13 @@ class Game(BaseModel):
         return self
 
     @model_validator(mode="after")
+    def _check_heroes(self) -> Self:
+        points = self.currencies.get(self.heroes.points) if self.heroes else None
+        if self.heroes and (points is None or points.scope is not Scope.PERSONA):
+            raise ValueError("the heroes' points need a currency that each persona holds")
+        return self
+
+    @model_validator(mode="after")
     def _check_host_page(self) -> Self:
         if "host" in self.pages and self.server_files is None:
             raise ValueError("the host page needs the server_files that hosting involves")

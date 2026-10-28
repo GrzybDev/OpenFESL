@@ -3,7 +3,7 @@ from xml.etree import ElementTree
 
 import httpx2
 import pytest
-from accounts import PASSWORD, post_sign_in, select_value
+from accounts import PASSWORD, execute, post_sign_in, select_value
 from heroes import CREATOR, create, create_hero
 from identity import form_token
 from support import FESL, fetch, game, launcher_sign_in, markup, visible
@@ -176,3 +176,59 @@ async def test_names_ignore_capitals_and_slots_run_out_without_a_hero_made_twice
         )
         == "Brassbuckle"
     )
+
+
+async def test_the_heroes_page_lists_each_hero_and_changes_the_hero_the_game_logs_in_with(
+    base: str, server_url: str, database_url: str
+) -> None:
+    first = await create_hero(base, "ann@example.test", "Brassbuckle", faction="royal")
+    second = await create_hero(base, "ann@example.test", "Tin_Tankard", **{"class": "soldier"})
+    stranger = await create_hero(base, "bob@example.test", "Mudlark")
+    await execute(
+        database_url,
+        "UPDATE entitlement SET use_count = 2 WHERE persona_id = :hero",
+        hero=first,
+    )
+    # A hero the launcher made before the site's creator, without a faction, class or look.
+    await execute(
+        database_url,
+        "INSERT INTO persona (account_id, namespace, name)"
+        " SELECT account_id, namespace, 'Oldlamp' FROM persona WHERE id = :hero",
+        hero=first,
+    )
+    legacy = await select_value(database_url, "SELECT id FROM persona WHERE name = 'Oldlamp'")
+    async with httpx2.AsyncClient() as client:
+        asked = await client.get(f"{base}/bfheroes/heroes")
+        assert asked.headers["location"] == "/sign-in?next=%2Fbfheroes%2Fheroes"
+        await post_sign_in(client, base, "ann@example.test", PASSWORD)
+        page = await client.get(f"{base}/bfheroes/heroes")
+        shown = visible(page.content)
+        # Slot by slot: the first hero is the default one, the others can become it, apart from
+        # the one the game could not start with.
+        assert shown.index("Brassbuckle") < shown.index("Tin_Tankard") < shown.index("Oldlamp")
+        assert "3 of 4 used" in shown and "Free hero slot" in shown
+        assert "12 items · 1 running low" in shown and "0 unspent of 0" in shown
+        heroes = (first, second, legacy)
+        offered = [f"/bfheroes/heroes/{hero}/default" in page.text for hero in heroes]
+        assert offered == [False, True, False]
+
+        # A form from another site changes nothing.
+        forged = {"csrf": "forged", "next": "/bfheroes/play"}
+        await client.post(f"{base}/bfheroes/heroes/{second}/default", data=forged)
+        unchanged = visible((await client.get(f"{base}/bfheroes/heroes")).content)
+        assert "Default hero Brassbuckle" in unchanged
+        # The selector of every page returns to that page.
+        form = {"csrf": form_token(page.text), "next": "/bfheroes/play"}
+        made = await client.post(f"{base}/bfheroes/heroes/{second}/default", data=form)
+        assert made.headers["location"] == "/bfheroes/play"
+        play = visible((await client.get(f"{base}/bfheroes/play")).content)
+        assert "Tin_Tankard is now the default hero" in play
+        assert "Default hero Tin_Tankard" in play
+        # Another account's hero stays as it is, as does a persona without a faction and class.
+        await client.post(f"{base}/bfheroes/heroes/{stranger}/default", data=form)
+        await client.post(f"{base}/bfheroes/heroes/{legacy}/default", data=form)
+    session = (await launcher_sign_in(server_url, "ann@example.test", PASSWORD)).json()
+    assert session["personaName"] == "Tin_Tankard"
+    assert (await launcher_sign_in(server_url, "bob@example.test", PASSWORD)).json()[
+        "personaName"
+    ] == "Mudlark"

@@ -1,0 +1,58 @@
+{#def roster, cards: list #}
+{# An account's heroes: its slots, each hero's card hanging from the beam with a free slot's card
+   after them, or the way to the first hero, and the account's wallets. #}
+{% set title = _("web.heroes.title") %}
+{% set rules = game.heroes %}
+<Layout :title="title">
+  <section aria-labelledby="heroes-title" class="creator-head">
+    <div class="creator-intro">
+      <Plaque id="heroes-title">{{ title }}</Plaque>
+      {% if roster.default %}
+        {% set hero %}<strong>{{ roster.default.persona.name }}</strong>{% endset %}
+        <p class="site-lead">{{ _("web.heroes.lead", game=game.name, hero=hero) }}</p>
+      {% else %}
+        <p class="site-lead">{{ _("web.heroes.lead.none", game=game.name) }}</p>
+      {% endif %}
+    </div>
+    <SlotPanel :roster="roster">{{ _n("web.slots.free", rules.slots) }}</SlotPanel>
+  </section>
+  {% if cards %}
+    <section aria-labelledby="heroes-list" class="hero-rack">
+      <h2 id="heroes-list" class="sr-only">{{ _("web.heroes.list") }}</h2>
+      <ul role="list" class="hero-cards enter-rows">
+        {% for card in cards %}
+          <HeroCard :card="card" />
+        {% endfor %}
+        {% for number in range(roster.heroes|length + 1, roster.slots + 1) %}
+          <li class="hero-hanger">
+            <span aria-hidden="true" class="hero-beam"></span>
+            <div class="hero-folder">
+              <span aria-hidden="true" class="hero-string hero-string-left"></span>
+              <span aria-hidden="true" class="hero-string hero-string-right"></span>
+              <article aria-labelledby="slot-{{ number }}" class="free-slot">
+                <p class="free-slot-tab">{{ _("web.heroes.slot", slot=number) }}</p>
+                <span aria-hidden="true"
+                      class="free-slot-disc"><Icon name="plus" :size="32" stroke="currentColor" /></span>
+                <h3 id="slot-{{ number }}" class="free-slot-title">{{ _("web.heroes.free") }}</h3>
+                <p>{{ _("web.heroes.free.text") }}</p>
+                <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
+                   class="site-button site-button-go"><Icon name="plus" :size="16" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+              </article>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% else %}
+    <section aria-labelledby="heroes-none" class="heroes-none enter-panel">
+      <svg aria-hidden="true" viewBox="0 0 120 80" class="heroes-none-hanger">
+        <path d="M60 8a8 8 0 1 1 8 8c-4 0-8 3-8 8v4M60 28L12 64h96z" />
+      </svg>
+      <h2 id="heroes-none" class="free-slot-title">{{ _("web.bar.no_hero") }}</h2>
+      <p>{{ _n("web.heroes.none.text", rules.slots) }}</p>
+      <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
+         class="site-button site-button-go site-button-large"><Icon name="plus" :size="18" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+    </section>
+  {% endif %}
+  <WalletsBox :cards="cards" />
+</Layout>

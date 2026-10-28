@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 
-from sqlalchemy import and_, or_, select
+from sqlalchemy import ColumnElement, and_, func, or_, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -70,6 +70,53 @@ class SqlWalletStore:
         async with self._sessions() as session:
             return await _held(session, wallets)
 
+    async def earned(self, wallets: Sequence[Wallet]) -> list[int]:
+        """Return what wallets ever received, from their ledgers, without opening any.
+
+        A new wallet counts the allowance it opens with.
+
+        Args:
+            wallets: The wallets.
+        """
+        if not wallets:
+            return []
+        async with self._sessions() as session:
+            rows = await session.execute(
+                select(
+                    WalletRow.game,
+                    WalletRow.currency,
+                    WalletRow.account_id,
+                    WalletRow.persona_id,
+                    func.coalesce(func.sum(WalletEntryRow.delta), 0),
+                )
+                .outerjoin(
+                    WalletEntryRow,
+                    and_(WalletEntryRow.wallet_id == WalletRow.id, WalletEntryRow.delta > 0),
+                )
+                .where(_matching(wallets))
+                .group_by(WalletRow.id)
+            )
+            found = {(row[0], row[1], row[2], row[3]): int(row[4]) for row in rows}
+        return [found.get(_key(wallet), wallet.allowance) for wallet in wallets]
+
+
+def _key(wallet: Wallet) -> tuple[str, str, int, int | None]:
+    return (wallet.game, wallet.currency, wallet.account_id, wallet.persona_id)
+
+
+def _matching(wallets: Sequence[Wallet]) -> ColumnElement[bool]:
+    return or_(
+        *(
+            and_(
+                WalletRow.game == wallet.game,
+                WalletRow.currency == wallet.currency,
+                WalletRow.account_id == wallet.account_id,
+                WalletRow.persona_id.is_not_distinct_from(wallet.persona_id),
+            )
+            for wallet in wallets
+        )
+    )
+
 
 async def _held(session: AsyncSession, wallets: Sequence[Wallet]) -> list[int]:
     held = await session.execute(
@@ -79,24 +126,7 @@ async def _held(session: AsyncSession, wallets: Sequence[Wallet]) -> list[int]:
             WalletRow.account_id,
             WalletRow.persona_id,
             WalletRow.balance,
-        ).where(
-            or_(
-                *(
-                    and_(
-                        WalletRow.game == wallet.game,
-                        WalletRow.currency == wallet.currency,
-                        WalletRow.account_id == wallet.account_id,
-                        WalletRow.persona_id.is_not_distinct_from(wallet.persona_id),
-                    )
-                    for wallet in wallets
-                )
-            )
-        )
+        ).where(_matching(wallets))
     )
-    found = {(row.game, row.currency, row.account_id, row.persona_id): row.balance for row in held}
-    return [
-        found.get(
-            (wallet.game, wallet.currency, wallet.account_id, wallet.persona_id), wallet.allowance
-        )
-        for wallet in wallets
-    ]
+    found = {(row[0], row[1], row[2], row[3]): row[4] for row in held}
+    return [found.get(_key(wallet), wallet.allowance) for wallet in wallets]

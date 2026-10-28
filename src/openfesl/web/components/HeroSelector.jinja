@@ -1,0 +1,74 @@
+{# The hero selector under the site's bar: the account's heroes as small cards hanging from a beam,
+   each with its default star or a way to make it the default hero, then its free slots and the
+   way to the heroes page. The bar's toggle opens it; without scripts that toggle leads to the
+   heroes page instead. #}
+{% set roster = bar.roster %}
+{% set rules = game.heroes %}
+<section id="hero-selector"
+         aria-label="{{ _('web.selector.label') }}"
+         hidden
+         data-selector
+         class="selector">
+  <div class="selector-inner">
+    <div aria-hidden="true" class="selector-beam"></div>
+    <ul role="list" class="selector-cards">
+      {% for hero in roster.heroes %}
+        <li {% if hero.faction %}data-faction="{{ hero.faction }}"{% endif %}
+            class="selector-hanger">
+          <article aria-labelledby="selector-{{ hero.persona.id }}"
+                   class="selector-card">
+            <p class="selector-tab">
+              {% if hero.faction %}
+                <Icon :name="rules.factions[hero.faction].glyph" :size="16" stroke="currentColor" />
+                {{ _("games." ~ game.id ~ ".faction." ~ hero.faction) }}
+              {% endif %}
+            </p>
+            <span aria-hidden="true" class="selector-mug">
+              {% if hero.hero_class %}
+                <Icon :name="rules.classes[hero.hero_class].glyph" :size="34" stroke="currentColor" />
+              {% endif %}
+            </span>
+            <h3 id="selector-{{ hero.persona.id }}" class="selector-name">{{ hero.persona.name }}</h3>
+            <p class="selector-kind">
+              {% if hero.hero_class %}
+                {{ _("web.heroes.kind", hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class), level=hero.level) }}
+              {% else %}
+                {{ _("web.heroes.level", level=hero.level) }}
+              {% endif %}
+            </p>
+            {% if hero.persona.id == roster.default_id %}
+              <p class="selector-default">
+                <span aria-hidden="true" class="selector-star"><Icon name="star" :size="15" stroke="#0A0A0A" /></span>
+                {{ _("web.bar.default") }}
+              </p>
+            {% elif hero.playable %}
+              <form method="post"
+                    action="{{ url('/' ~ game.id ~ '/heroes/' ~ hero.persona.id ~ '/default') }}">
+                <input type="hidden" name="csrf" value="{{ csrf }}">
+                <input type="hidden" name="next" value="{{ here }}">
+                <button type="submit" class="site-button site-button-yellow selector-button">
+                  <Icon name="star" :size="15" stroke="currentColor" />
+                  {{ _("web.heroes.make_default") }} <span class="sr-only">{{ hero.persona.name }}</span>
+                </button>
+              </form>
+            {% endif %}
+          </article>
+        </li>
+      {% endfor %}
+      {% for number in range(roster.heroes|length + 1, roster.slots + 1) %}
+        <li class="selector-hanger">
+          <div class="selector-free">
+            <span aria-hidden="true" class="selector-plus"><Icon name="plus" :size="26" stroke="currentColor" /></span>
+            <p>{{ _("web.selector.free", slot=number) }}</p>
+            <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
+               class="site-button site-button-go selector-button"><Icon name="plus" :size="15" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+    <p class="selector-foot">
+      <span>{{ _("web.slots.used.label", used=roster.heroes|length, slots=roster.slots) }}</span>
+      <a href="{{ url('/' ~ game.id ~ '/heroes') }}">{{ _("web.selector.all") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+    </p>
+  </div>
+</section>
