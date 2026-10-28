@@ -9,7 +9,8 @@ from typing import TYPE_CHECKING
 from openfesl.core.admin import AdminAction, AdminFeed, LoggedAction
 from openfesl.core.connection import PresenceOutbox
 from openfesl.core.game_icons import GameIcons
-from openfesl.core.games import Game, Names
+from openfesl.core.game_pages import Names
+from openfesl.core.games import Game
 from openfesl.core.hosting import GAME, HostedGame, Hosting, Player, PlayerState
 from openfesl.core.texts import language_of, translate
 from openfesl.protocol.relay import Activity, Party, PresenceUpdate

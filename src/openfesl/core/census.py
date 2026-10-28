@@ -4,7 +4,8 @@ from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 from itertools import count
 
-from openfesl.core.games import Flag, Game, Names, Roster
+from openfesl.core.game_pages import Flag, Names, Roster
+from openfesl.core.games import Game
 from openfesl.core.hosting import GAME, HostedGame, Hosting
 from openfesl.core.session import Players
 

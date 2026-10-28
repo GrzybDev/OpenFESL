@@ -17,7 +17,8 @@ from support import (
     markup,
 )
 
-from openfesl.core.games import Games, Roster, load_games
+from openfesl.core.game_pages import Roster
+from openfesl.core.games import Games, load_games
 from openfesl.server import app
 
 pytestmark = pytest.mark.anyio
