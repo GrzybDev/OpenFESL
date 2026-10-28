@@ -21,6 +21,7 @@ from openfesl.core.deal_rules import DealRules, OfferSection
 from openfesl.core.game_pages import Listing, PageKind, Site, Stats, Theme
 from openfesl.core.hero_rules import HeroRules
 from openfesl.core.policies import Policies
+from openfesl.core.relationship_rules import RelationshipRules
 from openfesl.core.reward_rules import RewardRules
 from openfesl.core.store_rules import StoreRules
 from openfesl.core.texts import BASE_LANGUAGE
@@ -249,6 +250,8 @@ class Game(BaseModel):
             personas, by patterns that their keys match whole.
         records: The records a persona may keep, by name, with the most entries each holds.
         associations: The association list types the game keeps, by name.
+        relationships: The relationships between accounts that the game keeps through Magma;
+            none for a game without them.
         lobbies: The Theater lobbies of all of the game's clients.
         provider_attribute: The basic game attribute in which dedicated servers report their
             provider and game lists show the provider's name; hosts cannot set it themselves.
@@ -293,6 +296,7 @@ class Game(BaseModel):
     account_stats: list[re.Pattern[str]] = []
     records: dict[str, int] = {}
     associations: dict[str, ListRule] = {}
+    relationships: RelationshipRules | None = None
     lobbies: list[Lobby] = []
     provider_attribute: str | None = None
     policies: Policies

@@ -44,6 +44,7 @@ from openfesl.core.proofs import ProofMail
 from openfesl.core.purchases import Purchases
 from openfesl.core.records import RecordService
 from openfesl.core.registration import Terms
+from openfesl.core.relationships import Relationships
 from openfesl.core.relay_tokens import RelayTokens
 from openfesl.core.rich_presence import RichPresence
 from openfesl.core.servers import Approval
@@ -100,6 +101,7 @@ class GameServices:
             stores.entitlements,
             self.wallets,
         )
+        self.relationships = Relationships(stores.relationships, self.players)
         self.census = Census(self.hosting, self.players)
         art = presence_art(settings.public_url)
         self.rich_presence = RichPresence(self.hosting, settings.discord_application_id, art)

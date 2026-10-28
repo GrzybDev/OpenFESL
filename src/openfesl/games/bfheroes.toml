@@ -378,3 +378,10 @@ id = 1
 name = "bfwestPC01"
 locale = "en_US"
 max_games = 10000
+
+# Friends, whom the game keeps between accounts rather than heroes: its Magma relationship paths
+# name the account it logged in with (BFHeroes.exe 1.89 0x00691bd4), and its friends list shows
+# at most 100 of them (mainMenu_west.swf, MenuFriends.updateFriendsList).
+[relationships]
+friends = "friends"
+most = 100

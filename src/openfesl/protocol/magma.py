@@ -94,6 +94,76 @@ def entitlements(entries: Iterable[EntitlementEntry]) -> bytes:
     return _document(root)
 
 
+@dataclass(frozen=True, slots=True)
+class RelationshipEntry:
+    """A relationship as the game reads it from a roster or the answer to a change.
+
+    Attributes:
+        id: The number the game names it by when it acknowledges it.
+        new: Whether the other side changed it since it was last acknowledged.
+        state: Who agreed to it, as bits: 1 the side whose roster it is, 2 the other side.
+        tag: The list it is on, such as friends.
+        real_id: The other side: an account's number, or a server's name.
+        type: Whether the other side is an account, nucleus, or a server.
+        status: The other side's status line; empty for none.
+        name: The other side's display name.
+        modified: When it last changed.
+        entity_modified: When the other side was last seen in its game; the game reads one
+            more than 12 minutes old as gone.
+    """
+
+    id: int
+    new: bool
+    state: int
+    tag: str
+    real_id: str
+    type: str
+    status: str
+    name: str
+    modified: datetime
+    entity_modified: datetime
+
+
+def roster(entries: Iterable[RelationshipEntry]) -> bytes:
+    """Return the relationships of an account or a server, which the game caches by their ids.
+
+    Args:
+        entries: The relationships, in order.
+    """
+    root = Element("roster")
+    root.extend(_relationship(entry) for entry in entries)
+    return _document(root)
+
+
+def relationship(entry: RelationshipEntry) -> bytes:
+    """Return the answer to a change of a relationship: the relationship as it is now.
+
+    Args:
+        entry: The relationship.
+    """
+    return success(_relationship(entry))
+
+
+def status_update(body: bytes) -> str | None:
+    """Return the status line of a relationship status update, or none when it holds none.
+
+    Args:
+        body: The update as the game posts it, raw although it is sent as a form.
+    """
+    # 1.46 writes the line between the tags as it is, which need not be well-formed XML, and
+    # 1.89 in a CDATA section; neither escapes it.
+    start = body.find(b"<status>")
+    if start < 0:
+        return None
+    start += len(b"<status>")
+    closing = b"</status>"
+    if body.startswith(b"<![CDATA[", start):
+        start += len(b"<![CDATA[")
+        closing = b"]]></status>"
+    end = body.find(closing, start)
+    return body[start:end].decode("utf-8", "replace") if end >= 0 else None
+
+
 def billing_accounts(balances: Mapping[str, int]) -> bytes:
     """Return a persona's wallets, the balance it has to spend in each currency.
 
@@ -273,8 +343,26 @@ def _date(moment: datetime) -> str:
     return moment.astimezone(UTC).strftime("%Y-%m-%dT%H:%MZ")
 
 
+def _relationship(entry: RelationshipEntry) -> Element:
+    # The game rejects an entry that lacks any of the children before modified.
+    element = Element("relationship", id=str(entry.id))
+    for name, text in (
+        ("new", "true" if entry.new else "false"),
+        ("state", str(entry.state)),
+        ("tag", entry.tag),
+        ("realid", entry.real_id),
+        ("type", entry.type),
+        ("status", entry.status),
+        ("name", entry.name),
+        ("modified", _moment(entry.modified)),
+        ("entityModified", _moment(entry.entity_modified)),
+    ):
+        SubElement(element, name).text = text
+    return element
+
+
 def _moment(moment: datetime) -> str:
-    # The dates of a store's products and bundles, to the second in UTC.
+    # The dates of store products, bundles and relationships, to the second in UTC.
     return moment.astimezone(UTC).strftime("%Y-%m-%d %H:%M:%S")
 
 

@@ -488,6 +488,28 @@ class AssociationRow(Base):
     )
 
 
+class RelationshipRow(Base):
+    __tablename__ = "relationship"
+    # One side of a relationship between two accounts; the other side is a row of its own.
+    __table_args__ = (UniqueConstraint("game", "tag", "owner_id", "member_id"),)
+
+    # The number the owner names its side by.
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    game: Mapped[str]
+    tag: Mapped[str]
+    owner_id: Mapped[int] = mapped_column(ForeignKey("account.id", ondelete="CASCADE"))
+    member_id: Mapped[int] = mapped_column(ForeignKey("account.id", ondelete="CASCADE"), index=True)
+    # Whether each side asked for the relationship or accepted it; both sides' rows say it.
+    owner_agrees: Mapped[bool]
+    member_agrees: Mapped[bool]
+    # Whether the member changed the relationship since the owner last acknowledged it.
+    new: Mapped[bool]
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    modified_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+
 class MessageRow(Base):
     __tablename__ = "message"
 
