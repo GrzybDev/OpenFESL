@@ -7,9 +7,10 @@ from enum import StrEnum
 from typing import Any, Protocol
 
 from openfesl.core.admins import Admin
-from openfesl.core.entitlements import EntitlementStore, KeyRefusal
+from openfesl.core.entitlements import EntitlementStore
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Game, Games
+from openfesl.core.keys import KeyRefusal, KeyStore
 from openfesl.core.logins import INVALID_PASSWORD, UNKNOWN_USER, Logins
 from openfesl.core.policies import ConcurrentLogin, GamePolicies, Policies
 from openfesl.core.registration import (
@@ -244,6 +245,7 @@ class AccountService:
         store: AccountStore,
         logins: Logins,
         entitlements: EntitlementStore,
+        keys: KeyStore,
         terms: Terms,
         policies: GamePolicies,
         verification: EmailVerification,
@@ -254,6 +256,7 @@ class AccountService:
             store: Where accounts are kept.
             logins: Checks passwords and remembered logins.
             entitlements: Where the entitlements that let players in are kept.
+            keys: Where the product keys that grant them are kept.
             terms: The service's terms.
             policies: Each game's policies.
             verification: Confirms the e-mail addresses of new accounts.
@@ -261,6 +264,7 @@ class AccountService:
         self._store = store
         self._logins = logins
         self._entitlements = entitlements
+        self._keys = keys
         self._terms = terms
         self._policies = policies
         self._verification = verification
@@ -438,10 +442,10 @@ class AccountService:
         # Only a key for the game itself, so the game does not loop between its key prompt
         # and NuLogin's 120, and a key for downloadable content is not used up here.
         needed = connection.client.entitlement
-        grants = await self._entitlements.grants(request.key)
+        grants = await self._keys.grants(request.key)
         if grants is None or (needed and not any(grant.provides(needed) for grant in grants)):
             raise TransactionError(KeyRefusal.UNKNOWN)
-        redeemed = await self._entitlements.redeem(account.id, request.key)
+        redeemed = await self._keys.redeem(account.id, request.key)
         if isinstance(redeemed, KeyRefusal):
             raise TransactionError(redeemed)
         if needed and not await self._entitlements.entitled(account.id, needed.tag, needed.product):

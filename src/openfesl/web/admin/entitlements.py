@@ -8,12 +8,12 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.exceptions import HTTPException
 
 from openfesl.core.admins import Admin, Role
-from openfesl.core.entitlements import Entitlement, EntitlementQuery, StatusChange, StoredKey
+from openfesl.core.entitlements import Entitlement, EntitlementQuery, StatusChange
 from openfesl.core.games import Games, Grant
 from openfesl.core.texts import localize
 from openfesl.web.admin.accounts import AccountView, AccountViews
 from openfesl.web.admin.auth import AdminSessions, back_to
-from openfesl.web.keys import KeyView, key_views
+from openfesl.web.keys import KeySource, KeyView, key_views
 
 SECTION = "accounts"
 # The grant form's choice of one tag typed by hand instead of a product key's.
@@ -37,9 +37,6 @@ class EntitlementAdmin(Protocol):
         Args:
             account_id: The account.
         """
-
-    async def keys(self) -> list[StoredKey]:
-        """Return every product key with what it grants, in the order they were added."""
 
     async def give(
         self, account_id: int, grants: Sequence[Grant], key: str | None, admin: Admin
@@ -89,7 +86,11 @@ class KeyChoice:
 
 
 def entitlement_routes(
-    sessions: AdminSessions, views: AccountViews, store: EntitlementAdmin, games: Games
+    sessions: AdminSessions,
+    views: AccountViews,
+    store: EntitlementAdmin,
+    keys: KeySource,
+    games: Games,
 ) -> APIRouter:
     """Return granting entitlements to an account, revoking them and granting them again.
 
@@ -99,7 +100,8 @@ def entitlement_routes(
     Args:
         sessions: Signs admins in and renders the panel's pages.
         views: Puts together what the panel shows about the accounts.
-        store: Where the entitlements and product keys are kept.
+        store: Where the entitlements are kept.
+        keys: Lists the product keys whose grants the form offers.
         games: The games, whose data names their starting keys.
     """
     router = APIRouter()
@@ -118,9 +120,9 @@ def entitlement_routes(
     ) -> HTMLResponse:
         found = await store.of_account(view.record.account.id, EntitlementQuery())
         held = {entitlement.tag for entitlement in found}
-        keys = [
+        choices = [
             KeyChoice(entry, sum(grant.tag in held for grant in entry.key.grants))
-            for entry in key_views(games, await store.keys())
+            for entry in key_views(games, await keys.keys())
             if entry.key.enabled
         ]
         return await sessions.render(
@@ -129,7 +131,7 @@ def entitlement_routes(
             status,
             admin=admin,
             view=view,
-            keys=keys,
+            keys=choices,
             held=held,
             back=page_of(request, view),
             form=form,
@@ -154,8 +156,8 @@ def entitlement_routes(
             group, product = fields["group"] or None, fields["product"] or None
             grants, code = [Grant(tag=fields["tag"], group=group, product=product)], None
         else:
-            keys = await store.keys()
-            found = next((key for key in keys if key.enabled and key.code == chosen), None)
+            stored = await keys.keys()
+            found = next((key for key in stored if key.enabled and key.code == chosen), None)
             if found is None:
                 return await grant_page(request, admin, view, 400, key=chosen, error="key")
             grants, code = list(found.grants), found.code

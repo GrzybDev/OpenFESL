@@ -8,8 +8,8 @@ from starlette.datastructures import FormData
 from starlette.exceptions import HTTPException
 
 from openfesl.core.admins import Admin, Role
-from openfesl.core.entitlements import KeyHistory, KeyLimits, StoredKey
 from openfesl.core.games import Games, Grant
+from openfesl.core.keys import KeyHistory, KeyLimits, StoredKey
 from openfesl.core.texts import languages, localize
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.keys import SECTION, KeyList

@@ -7,12 +7,13 @@ from fastapi.responses import HTMLResponse
 from openfesl.core.census import Census
 from openfesl.core.games import Game, Games
 from openfesl.core.history import OnlineHistory
+from openfesl.web.keys import KeySource
 from openfesl.web.pages import Pages
-from openfesl.web.play import KeyList, game_keys, play_key
+from openfesl.web.play import game_keys, play_key
 
 
 def front_routes(
-    pages: Pages, games: Games, census: Census, history: OnlineHistory, keys: KeyList
+    pages: Pages, games: Games, census: Census, history: OnlineHistory, keys: KeySource
 ) -> APIRouter:
     """Return each game's front page: who plays it now, where to join, and how to set it up.
 
@@ -38,7 +39,7 @@ def _front(
     games: Games,
     census: Census,
     history: OnlineHistory,
-    keys: KeyList,
+    keys: KeySource,
     game: Game,
 ) -> Callable[[Request], Awaitable[HTMLResponse]]:
     async def show_front(request: Request) -> HTMLResponse:

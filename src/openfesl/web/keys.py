@@ -1,9 +1,17 @@
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from typing import Protocol
 
-from openfesl.core.entitlements import KeyHistory, StoredKey
 from openfesl.core.games import Game, Games
+from openfesl.core.keys import KeyHistory, StoredKey
 from openfesl.core.texts import translate
+
+
+class KeySource(Protocol):
+    """Lists the product keys."""
+
+    async def keys(self) -> list[StoredKey]:
+        """Return every product key with what it grants, in the order they were added."""
 
 
 @dataclass(frozen=True, slots=True)

@@ -25,6 +25,7 @@ from openfesl.core.games import load_games
 from openfesl.core.history import OnlineHistory
 from openfesl.core.hosting import Hosting
 from openfesl.core.joining import Joining
+from openfesl.core.keys import KeyService
 from openfesl.core.launcher import LauncherService, LauncherSessions
 from openfesl.core.leaderboards import LeaderboardService
 from openfesl.core.logins import Logins
@@ -53,6 +54,7 @@ from openfesl.storage.database import migrate
 from openfesl.storage.entitlements import SqlEntitlementStore
 from openfesl.storage.game_icons import SqlGameIconStore
 from openfesl.storage.history import SqlHistoryStore
+from openfesl.storage.keys import SqlKeyStore
 from openfesl.storage.messages import SqlMessageStore
 from openfesl.storage.personas import SqlPersonaStore
 from openfesl.storage.records import SqlRecordStore
@@ -127,14 +129,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     persona_store = SqlPersonaStore(sessions)
     records = SqlRecordStore(sessions)
     entitlements = SqlEntitlementStore(sessions)
+    keys = SqlKeyStore(sessions)
     feed = AdminFeed(SqlAdminLog(sessions))
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         await migrate(engine)
         # A new database starts with the games' keys; from then on the admin manages them.
-        if not await entitlements.has_keys():
-            await entitlements.import_keys(games.keys)
+        if not await keys.has_keys():
+            await keys.import_keys(games.keys)
         store = SqlAccountStore(sessions)
         logins = Logins(store)
         policies = GamePolicies(SqlSettingStore(sessions))
@@ -143,7 +146,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             mailer = SmtpMailer(settings, settings.smtp_host, settings.smtp_sender)
         verification = EmailVerification(store, mailer, settings.public_url)
         app.state.verification = verification
-        accounts = AccountService(store, logins, entitlements, Terms.load(), policies, verification)
+        accounts = AccountService(
+            store, logins, entitlements, keys, Terms.load(), policies, verification
+        )
         personas = PersonaService(persona_store)
         await personas.prepare(await accounts.prepare(games))
         app.state.launcher = LauncherService(logins, games, personas, launcher_sessions)
@@ -153,6 +158,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         routes.update(AccountSettingsService(store, logins, policies).routes())
         routes.update(personas.routes())
         routes.update(EntitlementService(entitlements, hosting).routes())
+        routes.update(KeyService(keys).routes())
         routes.update(game_http.routes())
         routes.update(StatsService(stats, persona_store, hosting).routes())
         routes.update(LeaderboardService(stats).routes())
@@ -209,7 +215,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(game_icon_routes(games, icons))
     app.include_router(shell_routes(pages, Terms.load()))
     app.include_router(menu_routes(pages, games, census))
-    app.include_router(front_routes(pages, games, census, history, entitlements))
+    app.include_router(front_routes(pages, games, census, history, keys))
     app.include_router(activity_routes(pages, games, census, history))
     app.include_router(server_routes(pages, games, census))
     app.include_router(leaderboard_routes(pages, games, census, stats))
@@ -218,9 +224,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def relay(request: Request) -> str:
         return relay_address(request, settings.public_url)
 
-    app.include_router(
-        play_routes(pages, games, census, entitlements, relay, settings.hook_default_url)
-    )
+    app.include_router(play_routes(pages, games, census, keys, relay, settings.hook_default_url))
     app.include_router(
         host_routes(
             pages, games, census, approval, settings.contact_email, relay, settings.hook_default_url
@@ -241,9 +245,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(provider_routes(sign_in, games, server_views, hosting.apply_decisions))
     account_views = AccountViews(games, census, players, SqlAccountStore(sessions), persona_store)
     app.include_router(account_routes(sign_in, account_views, entitlements, Terms.load().version))
-    app.include_router(entitlement_routes(sign_in, account_views, entitlements, games))
-    app.include_router(key_routes(sign_in, games, entitlements))
-    app.include_router(key_edit_routes(sign_in, games, entitlements))
+    app.include_router(entitlement_routes(sign_in, account_views, entitlements, keys, games))
+    app.include_router(key_routes(sign_in, games, keys))
+    app.include_router(key_edit_routes(sign_in, games, keys))
     app.include_router(
         audit_routes(
             sign_in,

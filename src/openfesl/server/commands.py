@@ -23,8 +23,8 @@ from openfesl.server.settings import Settings
 from openfesl.storage.accounts import SqlAccountStore
 from openfesl.storage.admin import SqlAdminLog
 from openfesl.storage.database import migrate
-from openfesl.storage.entitlements import SqlEntitlementStore
 from openfesl.storage.game_icons import SqlGameIconStore
+from openfesl.storage.keys import SqlKeyStore
 from openfesl.storage.personas import SqlPersonaStore
 from openfesl.storage.servers import SqlServerStore
 from openfesl.storage.settings import SqlSettingStore
@@ -70,7 +70,7 @@ async def _database(settings: Settings) -> AsyncIterator[async_sessionmaker[Asyn
 
 async def _keys(settings: Settings, args: argparse.Namespace) -> None:
     async with _database(settings) as sessions:
-        store = SqlEntitlementStore(sessions)
+        store = SqlKeyStore(sessions)
         if args.action == "import":
             print(f"Added {await store.import_keys(load_games().keys)} product keys")
             return

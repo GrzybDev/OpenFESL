@@ -1,24 +1,15 @@
 from collections.abc import Awaitable, Callable
-from typing import Protocol
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 
 from openfesl.core.census import Census
-from openfesl.core.entitlements import StoredKey
 from openfesl.core.games import Game, Games
-from openfesl.web.keys import KeyView, key_views
+from openfesl.web.keys import KeySource, KeyView, key_views
 from openfesl.web.pages import Pages
 
 
-class KeyList(Protocol):
-    """Lists the product keys."""
-
-    async def keys(self) -> list[StoredKey]:
-        """Return every product key with what it grants, in the order they were added."""
-
-
-async def game_keys(games: Games, store: KeyList, game: Game) -> list[KeyView]:
+async def game_keys(games: Games, store: KeySource, game: Game) -> list[KeyView]:
     """Return the enabled product keys for a game's players, starting keys first.
 
     Args:
@@ -60,7 +51,7 @@ def play_routes(
     pages: Pages,
     games: Games,
     census: Census,
-    keys: KeyList,
+    keys: KeySource,
     relay: Callable[[Request], str],
     hook_default: str,
 ) -> APIRouter:
@@ -88,7 +79,7 @@ def _guide(
     pages: Pages,
     games: Games,
     census: Census,
-    keys: KeyList,
+    keys: KeySource,
     relay: Callable[[Request], str],
     hook_default: str,
     game: Game,

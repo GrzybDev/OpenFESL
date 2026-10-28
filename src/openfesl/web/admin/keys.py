@@ -10,8 +10,8 @@ from starlette.datastructures import QueryParams
 from starlette.exceptions import HTTPException
 
 from openfesl.core.admins import Admin, Role
-from openfesl.core.entitlements import KeyHistory, StoredKey
 from openfesl.core.games import Games, ProductKey
+from openfesl.core.keys import KeyHistory, StoredKey
 from openfesl.core.texts import languages, localize
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.keys import KeyView, key_views
@@ -23,7 +23,7 @@ MAXIMUM_CODE = 64
 _CODE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]*")
 
 
-class KeyStore(Protocol):
+class KeyAdmin(Protocol):
     """Where the admin panel reads and changes the product keys."""
 
     async def keys(self) -> list[StoredKey]:
@@ -103,7 +103,7 @@ class KeyList:
         return f"?{query}" if query else ""
 
 
-def key_routes(sessions: AdminSessions, games: Games, store: KeyStore) -> APIRouter:
+def key_routes(sessions: AdminSessions, games: Games, store: KeyAdmin) -> APIRouter:
     """Return the product keys page with adding, enabling and disabling keys.
 
     Moderators see the keys; changing them needs the admin role. Disabling asks first, which
@@ -206,7 +206,7 @@ def _listed(request: Request, open: str | None = None) -> str:
 
 def _decide(
     sessions: AdminSessions,
-    store: KeyStore,
+    store: KeyAdmin,
     find: Callable[[str], Awaitable[KeyView]],
     enabled: bool,
 ) -> Callable[[Request, str], Awaitable[Response]]:
