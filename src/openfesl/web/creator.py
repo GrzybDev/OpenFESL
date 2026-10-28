@@ -30,7 +30,8 @@ CREATOR = "/user/createHero"
 class CreatorPages:
     """The site's hero creator and the page of a hero just created, with what their scripts ask.
 
-    The scripts check a wanted name and load the game's model of a hero with a look.
+    The scripts check a wanted name and load the game's model of a hero with a look, where the
+    game's art is shown to the viewer.
     """
 
     def __init__(
@@ -119,10 +120,10 @@ class CreatorPages:
     def _figure(self, game: Game) -> Callable[[Request], Awaitable[Response]]:
         async def show_figure(request: Request) -> Response:
             look = read_look(_rules(game), request.query_params)
-            figure = self._figures.figure(game, look) if look else None
+            figure = self._document(request, game, look) if look else None
             if figure is None:
                 raise HTTPException(404)
-            return JSONResponse(figure_document(game, figure))
+            return JSONResponse(figure)
 
         return show_figure
 
@@ -150,7 +151,7 @@ class CreatorPages:
                 if hero.faction and hero.hero_class
                 else "",
                 from_game=_from_game(request.query_params),
-                figure=self._document(game, hero.look) if hero.look else None,
+                figure=self._document(request, game, hero.look) if hero.look else None,
             )
 
         return show_created
@@ -185,13 +186,14 @@ class CreatorPages:
             },
             next=localize(f"/{game.id}{CREATOR}", request.state.language)
             + ("?from=game" if from_game else ""),
-            figure=self._document(game, look),
+            figure=self._document(request, game, look),
             csrf=form_token(request),
         )
         return self._pages.render(request, "heroes.Creator", status, **context)
 
-    def _document(self, game: Game, look: Look) -> dict[str, Any] | None:
-        figure = self._figures.figure(game, look)
+    def _document(self, request: Request, game: Game, look: Look) -> dict[str, Any] | None:
+        # The game's model of a hero, where the game's art is shown to the viewer.
+        figure = self._figures.figure(game, look) if self._pages.shows_art(request, game) else None
         return figure_document(game, figure) if figure else None
 
     async def _kits(self, game: Game, language: str) -> dict[tuple[str, str], str]:

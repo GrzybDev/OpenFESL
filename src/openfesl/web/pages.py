@@ -29,13 +29,14 @@ from starlette.types import Scope
 
 from openfesl.core.admins import Admin
 from openfesl.core.census import Census
+from openfesl.core.game_art import GameArt
 from openfesl.core.games import Game
 from openfesl.core.hero_rules import HeroRules
 from openfesl.core.texts import languages, localize, translate, translate_count
 from openfesl.web.languages import split_language
 from openfesl.web.mugshots import mugshot_url
 from openfesl.web.security import HEADERS
-from openfesl.web.sessions import form_token, once_token
+from openfesl.web.sessions import admin_signed_in, form_token, once_token
 
 STATIC = Path(__file__).with_name("static")
 # Vite writes the built scripts, stylesheet and fonts here, named after their content.
@@ -348,22 +349,36 @@ def render_alone(
 class Pages:
     """Renders the web pages in the OpenFESL shell, in the language their address names."""
 
-    def __init__(self, games: Iterable[Game], census: Census, sign_in_check: bool) -> None:
+    def __init__(
+        self, games: Iterable[Game], census: Census, art: GameArt, sign_in_check: bool
+    ) -> None:
         """Prepare the shell for the games the server serves.
 
         Args:
             games: Every game, listed in the shell with its players online and dressed in its
                 theme.
             census: Counts the players of each game.
+            art: Says to whom each game's art is shown.
             sign_in_check: Whether the sign-in with an e-mail address asks for Cloudflare
                 Turnstile's check, which only the sign-in pages load, so that the pages of a
                 game's own site link to them instead of taking the password.
         """
         self._games = list(games)
         self._census = census
+        self._art = art
         self._sign_in_check = sign_in_check
         self.themes = "".join(_theme_rule(game) for game in self._games)
         self._themes_url = f"/themes.css?v={_digest(self.themes.encode())}"
+
+    def shows_art(self, request: Request, game: Game) -> bool:
+        """Return whether a page shows a game's imported files and portraits to its viewer.
+
+        Args:
+            request: The page's request, whose sessions say whether its viewer is signed in.
+            game: The game.
+        """
+        player = request.scope.get("state", {}).get("player")
+        return self._art.shown(game, player is not None or admin_signed_in(request))
 
     def render(
         self,
@@ -417,6 +432,8 @@ class Pages:
             steel=steel,
             viewer=viewer,
             player=player,
+            # Whether the page shows a game's art to its viewer, or placeholders instead.
+            shows_art=lambda shown: self.shows_art(request, shown),
             csrf=csrf or session.get("csrf", ""),
             toast=_take_toast(session) if player or viewer else None,
             # The time the page's values are from.

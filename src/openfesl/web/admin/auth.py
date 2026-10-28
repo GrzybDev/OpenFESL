@@ -1,7 +1,7 @@
 import logging
 from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from typing import Any
 from urllib.parse import urlencode
 
@@ -14,6 +14,7 @@ from openfesl.core.texts import localize
 from openfesl.web.oidc import ServiceClient, SignInFailed, SignInService
 from openfesl.web.pages import Pages, Viewer
 from openfesl.web.sessions import (
+    ADMIN_LIFETIME,
     check_form,
     form_token,
     inside,
@@ -24,8 +25,6 @@ from openfesl.web.sessions import (
 
 logger = logging.getLogger(__name__)
 
-# A signed-in admin signs in again after this long, as a stolen cookie should not last.
-SESSION_LIFETIME = timedelta(hours=12)
 # The panel's pages in each language, the only ones that a sign-in or a form returns to.
 PANEL = ("/admin/", "/pl/admin/")
 
@@ -136,7 +135,7 @@ class AdminSessions:
         here = localize(request.url.path, request.state.language)
         if signed_in is None:
             raise SignInNeeded(here)
-        if datetime.now(UTC) - datetime.fromisoformat(signed_in["since"]) > SESSION_LIFETIME:
+        if datetime.now(UTC) - datetime.fromisoformat(signed_in["since"]) > ADMIN_LIFETIME:
             request.session.pop("admin")
             notify(request, "expired")
             raise SignInNeeded(here)

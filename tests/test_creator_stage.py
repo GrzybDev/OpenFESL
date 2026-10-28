@@ -50,9 +50,13 @@ for (const context of [WebGLRenderingContext, WebGL2RenderingContext]) {
 
 
 async def import_models(base: str, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    """Import the invented copy's catalogue as the admin does, and wait for the server."""
+    """Import the invented copy's catalogue as the admin does, and wait for the server.
+
+    The models are shown to signed-in players, as the game's art is by default.
+    """
     await cli(capsys, "catalogue", "import", str(await extracted(tmp_path, capsys)))
     async with httpx2.AsyncClient() as client:
+        await post_sign_in(client, base, "ann@example.test", PASSWORD)
         with anyio.fail_after(5):
             while (await client.get(f"{base}{FIGURE}", params=ROYAL)).status_code != 200:
                 await anyio.sleep(0.05)
@@ -231,6 +235,7 @@ async def test_the_stage_draws_and_moves_the_hero_as_the_games_menu_does(
     await cli(capsys, "catalogue", "extract", COPY, "-o", str(catalogue))
     await cli(capsys, "catalogue", "import", str(catalogue))
     async with httpx2.AsyncClient() as client:
+        await post_sign_in(client, base, "ann@example.test", PASSWORD)
         with anyio.fail_after(30):
             while (await client.get(f"{base}{FIGURE}", params=ROYAL)).status_code != 200:
                 await anyio.sleep(0.1)

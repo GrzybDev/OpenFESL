@@ -2,14 +2,30 @@ import asyncio
 import secrets
 from collections.abc import AsyncIterator, Mapping
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from weakref import WeakValueDictionary
 
 from fastapi import Request
 
+# A signed-in admin signs in again after this long, as a stolen cookie should not last.
+ADMIN_LIFETIME = timedelta(hours=12)
+
 
 class FormExpired(Exception):
     """Raised for a form whose token does not match the session's; nothing changes."""
+
+
+def admin_signed_in(request: Request) -> bool:
+    """Return whether an admin is signed in to the admin panel with a request, while it holds.
+
+    Args:
+        request: The request.
+    """
+    session = request.scope.get("session") or {}
+    signed_in = session.get("admin")
+    since = datetime.fromisoformat(signed_in["since"]) if signed_in else None
+    return since is not None and datetime.now(UTC) - since <= ADMIN_LIFETIME
 
 
 def form_token(request: Request) -> str:

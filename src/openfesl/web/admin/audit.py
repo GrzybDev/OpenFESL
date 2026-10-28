@@ -17,6 +17,7 @@ from openfesl.core.texts import localize, translate
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.settings import policy_views
 from openfesl.web.pages import moment
+from openfesl.web.pages import number as grouped
 
 PAGE_SIZE = 50
 # The glyph of each kind of action: what it takes away, gives, adds or changes.
@@ -32,6 +33,8 @@ GLYPHS = {
     AdminAction.KEY_ADD: "plus",
     AdminAction.CATALOGUE_IMPORT: "doc",
 }
+# The glyph of each choice of who sees a game's art, as its tile on the catalogues page wears it.
+ART_GLYPHS = {"everyone": "eye", "signed_in": "key", "nobody": "edit"}
 _TAKEN = {"disabled", "banned", "deactivated", "revoked", "DISABLED", "off", "removed"}
 
 
@@ -347,6 +350,18 @@ async def _rows(
                 models=details.get("models", 0),
                 textures=details.get("textures", 0),
             )
+        elif action is AdminAction.CATALOGUE_ART:
+            game = games.by_id(target)
+            shown = game.name if game else target
+            href = page(f"/admin/catalogues#game-{target}")
+            kind = f"catalogue_art.{details.get('viewers')}"
+            said = say(
+                "web.admin.audit.catalogue_art",
+                **{
+                    name: grouped(details.get(name, 0), language)
+                    for name in ("icons", "models", "textures", "portraits")
+                },
+            )
         rows.append(
             AuditRow(
                 entry,
@@ -364,6 +379,8 @@ async def _rows(
 def _glyph(action: AdminAction, kind: str, details: dict[str, Any]) -> str:
     if action in GLYPHS:
         return GLYPHS[action]
+    if action is AdminAction.CATALOGUE_ART:
+        return ART_GLYPHS.get(details.get("viewers", ""), "edit")
     if action is AdminAction.SERVER_OFFICIAL:
         return "star" if details.get("official") else "star-off"
     state = kind.rpartition(".")[2]

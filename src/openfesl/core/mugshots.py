@@ -39,6 +39,13 @@ class MugshotStore(Protocol):
             namespace: The namespace of its game's personas, which the hero must be in.
         """
 
+    async def count(self, namespace: str) -> int:
+        """Return how many heroes of a game have a mugshot.
+
+        Args:
+            namespace: The namespace of the game's personas.
+        """
+
 
 class Mugshots:
     """The mugshots that games render of their heroes and upload."""
@@ -83,3 +90,11 @@ class Mugshots:
             persona_id: The hero.
         """
         return await self._store.image(persona_id, game.namespace)
+
+    async def count(self, game: Game) -> int:
+        """Return how many of a game's heroes have a mugshot.
+
+        Args:
+            game: The game.
+        """
+        return await self._store.count(game.namespace)

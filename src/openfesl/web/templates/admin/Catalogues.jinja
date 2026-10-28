@@ -1,7 +1,7 @@
-{#def views: list, others: list, manages: bool, keeps_files: bool, result, most: int #}
-{# Each game's imported catalogue beside the import of a new one: one import for all games, as the
-   file names its game. Games without catalogue rules are listed as taking none. Importing needs the
-   admin role. #}
+{#def views: list, others: list, manages: bool, keeps_files: bool, result, most: int, failed #}
+{# Each game's imported catalogue with who sees its art, beside the import of a new one: one import
+   for all games, as the file names its game. Games without catalogue rules are listed as taking
+   none. Importing and choosing who sees the art need the admin role. #}
 {% set title = _("web.admin.catalogue.title") %}
 <AdminPage :title="title" current="catalogues">
   <PageHead labelledby="catalogues-title">
@@ -13,7 +13,9 @@
     <div data-catalogues class="catalogue-layout">
       <div class="catalogue-games">
         {% for view in views %}
-          <CatalogueGame :view="view" :result="result" :keeps_files="keeps_files" />
+          <CatalogueGame :view="view" :result="result" :keeps_files="keeps_files">
+          <CatalogueArt :view="view" :manages="manages" />
+          </CatalogueGame>
         {% endfor %}
         {% if others %}
           <section aria-labelledby="catalogue-others">
@@ -33,4 +35,7 @@
       {% endif %}
     </div>
   </Panel>
+  <template data-art-failed>
+    <Toast :shown="failed" />
+  </template>
 </AdminPage>

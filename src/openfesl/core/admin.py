@@ -70,6 +70,9 @@ class AdminAction(StrEnum):
     CATALOGUE_IMPORT = "catalogue_import"
     """Replaced the catalogue of the game named as the target with one from a player's copy; the
     details hold how many items it has, in how many languages and how many icons were kept."""
+    CATALOGUE_ART = "catalogue_art"
+    """Chose who sees the art of the game named as the target; the details hold the viewers and
+    how many icons, hero models, textures and portraits the choice covers."""
 
 
 @dataclass(frozen=True, slots=True)

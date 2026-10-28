@@ -1,0 +1,102 @@
+{#def view, manages: bool #}
+{# Who sees a game's art, in its block after its numbers: three tiles to everyone, to signed-in
+   players or to nobody, the default or who chose when, and beside them who sees what on the game's
+   pages with the art and without it. Where scripts run a choice is saved once it rests and a toast
+   reports it; without them Save sends it. Moderators see the tiles read-only with the role note. #}
+{% set game = view.game %}
+{% set art = view.art %}
+{% set key = "art-" ~ game.id %}
+{% set glyphs = {"everyone": "eye", "signed_in": "key", "nobody": "edit"} %}
+{% set rows = ([("creator", "model")] if art.models else []) + [("card", "portrait")] %}
+{% macro cell(shown, row) %}
+  <td data-shown="{{ 'game' if shown else 'placeholder' }}">
+    <span class="catalogue-strip-cell">
+      {% if shown %}
+        <span aria-hidden="true" class="catalogue-strip-game"></span>
+        <span>{{ _("web.admin.catalogue.art.strip." ~ row) }}</span>
+      {% else %}
+        <span aria-hidden="true"
+              class="catalogue-strip-placeholder"><Icon name="user" :size="22" stroke="currentColor" /></span>
+        <span>{{ _("web.admin.catalogue.art.strip.placeholder") }}</span>
+      {% endif %}
+    </span>
+  </td>
+{% endmacro %}
+<section aria-labelledby="{{ key }}-title"
+         id="{{ key }}"
+         data-art-section
+         class="catalogue-art">
+  <h3 id="{{ key }}-title" class="bar bar-wrap catalogue-art-bar">
+    <span>{{ _("web.admin.catalogue.art.title") }}</span><span data-art-word
+      data-saving="{{ _('web.admin.catalogue.art.state.saving') }}"
+      class="bar-extra{% if art.viewers == 'nobody' %} catalogue-art-off{% endif %}">{{ _("web.admin.catalogue.art." ~ art.viewers) }}</span>
+  </h3>
+  <div class="catalogue-art-columns">
+    <div class="catalogue-art-main">
+      <form method="post"
+            action="{{ url('/admin/catalogues/' ~ game.id ~ '/art') }}"
+            data-art
+            data-saved="{{ art.viewers }}">
+        <CsrfField />
+        <fieldset class="catalogue-art-choice"{% if not manages %} disabled{% endif %}>
+          <legend class="catalogue-art-legend">
+            <span class="catalogue-art-name">{{ _("web.admin.catalogue.art.choice") }}</span>
+            <span class="catalogue-art-text">{{ _("web.admin.catalogue.art.text.portraits" if art.portraits else "web.admin.catalogue.art.text") }}</span>
+          </legend>
+          <div class="choice-tiles catalogue-art-tiles">
+            {% for option in ("everyone", "signed_in", "nobody") %}
+              <ChoiceTile name="shown" :value="option" :title="_('web.admin.catalogue.art.' ~ option)" :glyph="glyphs[option]" :checked="option == art.viewers">
+              <span class="choice-text">{{ _("web.admin.catalogue.art." ~ option ~ ".text") }}</span>
+              </ChoiceTile>
+            {% endfor %}
+          </div>
+        </fieldset>
+        {% if manages %}
+          <div class="settings-save no-js-only">
+            <SmallAction :label="_('web.admin.catalogue.art.save')" />
+          </div>
+        {% endif %}
+      </form>
+      <p class="catalogue-art-line">
+        {% if art.chosen %}
+          {{ _("web.admin.catalogue.art.chosen", time=_("web.server.time", time=moment(art.chosen.at)), who=art.chosen.name or _("web.admin.command_line")) }}
+        {% else %}
+          {{ _("web.admin.catalogue.art.default") }}
+        {% endif %}
+        <a href="{{ url('/admin/audit') }}">{{ _("web.admin.catalogue.art.audit") }}</a>
+      </p>
+      <p class="catalogue-art-line">{{ _("web.admin.catalogue.art.game") }}</p>
+      {% if not manages %}
+        <p class="catalogue-role">
+          <span aria-hidden="true"
+                class="badge"><Icon name="lock" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.catalogue.art.managed") }}
+        </p>
+      {% endif %}
+    </div>
+    <div data-strip class="catalogue-strip">
+      <table>
+        <caption>{{ _("web.admin.catalogue.art.strip") }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">
+              <span class="sr-only">{{ _("web.admin.catalogue.art.strip.where") }}</span>
+            </th>
+            <th scope="col">{{ _("web.admin.catalogue.art.strip.signed_out") }}</th>
+            <th scope="col">{{ _("web.admin.catalogue.art.strip.signed_in") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row, art_name in rows %}
+            <tr>
+              <th scope="row">{{ _("web.admin.catalogue.art.strip." ~ row) }}</th>
+              {{ cell(art.viewers == "everyone", art_name) }}
+              {{ cell(art.viewers != "nobody", art_name) }}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p class="catalogue-strip-note">{{ _("web.admin.catalogue.art.strip.hidden") }}</p>
+      <p class="catalogue-strip-note">{{ _("web.admin.catalogue.art.strip.game") }}</p>
+    </div>
+  </div>
+</section>

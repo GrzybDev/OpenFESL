@@ -1,0 +1,196 @@
+/* Who sees a game's art: the choice's three tiles in one row down to phones with its lines on the
+   panel's rows, beside the strip of who sees what on black; the strip goes under the choice on
+   narrow blocks. The chosen tile's glyph spins while a choice is saved, and the strip's
+   changed cells cross-fade. */
+@layer components {
+  .catalogue-art {
+    display: grid;
+    gap: 2px;
+    margin-top: 12px;
+    container-type: inline-size;
+    scroll-margin-top: 16px;
+  }
+
+  .catalogue-art-bar {
+    font-size: 14px;
+  }
+
+  /* The header's word is muted while nothing is shown and while a choice is saved. */
+  .catalogue-art-off {
+    color: var(--soft);
+  }
+
+  .catalogue-art-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+
+    @container (width >= 720px) {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+
+  .catalogue-art-main {
+    display: grid;
+    align-content: start;
+    gap: 2px;
+
+    form {
+      display: grid;
+      gap: 2px;
+    }
+  }
+
+  .catalogue-art-choice {
+    border: 0;
+  }
+
+  .catalogue-art-legend {
+    display: grid;
+    width: 100%;
+    gap: 4px;
+    background: var(--row-light);
+    padding: 12px 14px;
+    color: var(--ink);
+  }
+
+  .catalogue-art-name {
+    font-size: 15px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .catalogue-art-text {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+
+  /* The three tiles keep one row down to 390 px. */
+  .choice-tiles.catalogue-art-tiles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 2px;
+
+    .choice-tile {
+      min-height: 0;
+      padding: 12px 6px;
+    }
+  }
+
+  .catalogue-art-tiles .choice-square svg.spinning {
+    animation: spin 900ms linear infinite;
+  }
+
+  .catalogue-art-line {
+    background: var(--row);
+    padding: 10px 14px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 600;
+    color: var(--ink);
+
+    a {
+      text-decoration: underline;
+    }
+  }
+
+  .catalogue-strip {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    background: var(--ink);
+    padding: 12px 14px 14px;
+    color: var(--soft);
+
+    /* Fixed columns wrap their texts on narrow blocks instead of widening the strip. */
+    table {
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: separate;
+      border-spacing: 2px;
+    }
+
+    caption {
+      padding-bottom: 6px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: var(--bright);
+      text-align: left;
+      text-transform: uppercase;
+    }
+
+    thead th {
+      padding: 2px 4px 6px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-align: left;
+      text-transform: uppercase;
+    }
+
+    tbody th {
+      padding-right: 8px;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      line-height: 1.25;
+      font-weight: 700;
+      color: var(--bright);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    td {
+      background: var(--tile-cell);
+      padding: 8px;
+      vertical-align: top;
+    }
+  }
+
+  .catalogue-strip-cell {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.25;
+    font-weight: 600;
+  }
+
+  .catalogue-strip-game,
+  .catalogue-strip-placeholder {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    flex: none;
+    place-items: center;
+  }
+
+  /* The game's side is drawn as a labelled outline, never a file of the game. */
+  .catalogue-strip-game {
+    border: 2px dashed var(--soft);
+  }
+
+  .catalogue-strip-placeholder {
+    background: var(--accent);
+    color: var(--ink);
+  }
+
+  .catalogue-strip-note {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.4;
+    font-weight: 600;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .catalogue-art-tiles .choice-square svg.spinning {
+      animation: none;
+    }
+  }
+}

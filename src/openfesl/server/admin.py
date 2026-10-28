@@ -77,6 +77,8 @@ def include_admin_routes(
             stores.admin_log,
             services.catalogue_files is not None,
             services.feed.apply,
+            services.game_art,
+            services.mugshots,
         )
     )
     app.include_router(

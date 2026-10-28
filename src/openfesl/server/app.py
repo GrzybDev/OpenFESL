@@ -59,7 +59,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             yield
         await engine.dispose()
 
-    pages = Pages(games, services.census, settings.turnstile is not None)
+    pages = Pages(games, services.census, services.game_art, settings.turnstile is not None)
     app = FastAPI(
         title="OpenFESL",
         lifespan=lifespan,

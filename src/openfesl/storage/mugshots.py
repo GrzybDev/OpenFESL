@@ -62,3 +62,18 @@ class SqlMugshotStore:
                 )
             ).first()
         return (found.image, found.version) if found else None
+
+    async def count(self, namespace: str) -> int:
+        """Return how many heroes of a game have a mugshot.
+
+        Args:
+            namespace: The namespace of the game's personas.
+        """
+        async with self._sessions() as session:
+            found = await session.scalar(
+                select(func.count())
+                .select_from(MugshotRow)
+                .join(PersonaRow, PersonaRow.id == MugshotRow.persona_id)
+                .where(PersonaRow.namespace == namespace)
+            )
+        return found or 0

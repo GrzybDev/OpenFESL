@@ -7669,4 +7669,122 @@ msgid "games.bfheroes.item_kind.emote"
 msgstr "Emotes"
 
 msgid "web.admin.refused.role.catalogues"
-msgstr "Catalogues are imported with the admin role."
+msgstr ""
+"Catalogues are imported, and who sees each game's art is chosen, with the "
+"admin role."
+
+msgid "web.admin.catalogue.art.title"
+msgstr "The game's art"
+
+msgid "web.admin.catalogue.art.choice"
+msgstr "Show the game's art"
+
+msgid "web.admin.catalogue.art.text"
+msgstr ""
+"Item icons, the creator's hero models and the portraits the game renders "
+"of heroes. Where they are not shown, pages show placeholders; item names,"
+" prices, missions, chests and rewards stay in use for everyone."
+
+msgid "web.admin.catalogue.art.text.portraits"
+msgstr ""
+"No icons or hero models are kept, so the choice covers only the portraits"
+" the game renders of heroes; where they are not shown, hero cards show "
+"placeholders."
+
+msgid "web.admin.catalogue.art.everyone"
+msgstr "To everyone"
+
+msgid "web.admin.catalogue.art.everyone.text"
+msgstr "Also without signing in."
+
+msgid "web.admin.catalogue.art.signed_in"
+msgstr "To signed-in players"
+
+msgid "web.admin.catalogue.art.signed_in.text"
+msgstr "Without signing in, placeholders."
+
+msgid "web.admin.catalogue.art.nobody"
+msgstr "To nobody"
+
+msgid "web.admin.catalogue.art.nobody.text"
+msgstr "Placeholders everywhere."
+
+msgid "web.admin.catalogue.art.state.saving"
+msgstr "Saving…"
+
+msgid "web.admin.catalogue.art.default"
+msgstr "Default setting."
+
+msgid "web.admin.catalogue.art.chosen"
+msgstr "Chosen %(time)s · %(who)s."
+
+msgid "web.admin.catalogue.art.audit"
+msgstr "The audit log records each change."
+
+msgid "web.admin.catalogue.art.game"
+msgstr "Pages change at once."
+
+msgid "web.admin.catalogue.art.strip"
+msgstr "Who sees what"
+
+msgid "web.admin.catalogue.art.strip.where"
+msgstr "Where"
+
+msgid "web.admin.catalogue.art.strip.signed_out"
+msgstr "Not signed in"
+
+msgid "web.admin.catalogue.art.strip.signed_in"
+msgstr "Signed in"
+
+msgid "web.admin.catalogue.art.strip.creator"
+msgstr "Hero creator"
+
+msgid "web.admin.catalogue.art.strip.model"
+msgstr "The game's model"
+
+msgid "web.admin.catalogue.art.strip.card"
+msgstr "Hero card"
+
+msgid "web.admin.catalogue.art.strip.portrait"
+msgstr "The game's portrait"
+
+msgid "web.admin.catalogue.art.strip.placeholder"
+msgstr "Placeholder"
+
+msgid "web.admin.catalogue.art.strip.hidden"
+msgstr ""
+"Where the art is not shown, pages show placeholders and the game's files "
+"do not open at their addresses."
+
+msgid "web.admin.catalogue.art.strip.game"
+msgstr "The game counts as signed in through its session."
+
+msgid "web.admin.catalogue.art.managed"
+msgstr "Choosing who sees the game's art needs the admin role."
+
+msgid "web.admin.catalogue.art.save"
+msgstr "Save"
+
+msgid "web.admin.catalogue.art.saved.everyone"
+msgstr "%(game)s shows the game's art to everyone."
+
+msgid "web.admin.catalogue.art.saved.signed_in"
+msgstr "%(game)s shows the game's art to signed-in players."
+
+msgid "web.admin.catalogue.art.saved.nobody"
+msgstr "%(game)s shows placeholders instead of the game's art."
+
+msgid "web.admin.audit.action.catalogue_art.everyone"
+msgstr "Showed the game's art to everyone"
+
+msgid "web.admin.audit.action.catalogue_art.signed_in"
+msgstr "Showed the game's art to signed-in players"
+
+msgid "web.admin.audit.action.catalogue_art.nobody"
+msgstr "Replaced the game's art with placeholders"
+
+msgid "web.admin.audit.catalogue_art"
+msgstr ""
+"Icons: %(icons)s · hero models: %(models)s · textures: %(textures)s · "
+"portraits: %(portraits)s"
+

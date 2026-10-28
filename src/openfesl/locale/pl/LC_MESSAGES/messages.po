@@ -8100,4 +8100,123 @@ msgid "games.bfheroes.item_kind.emote"
 msgstr "Gesty"
 
 msgid "web.admin.refused.role.catalogues"
-msgstr "Import katalogów wymaga roli administratora."
+msgstr ""
+"Import katalogów i wybór, komu pokazywać grafiki z gry, wymagają roli "
+"administratora."
+
+msgid "web.admin.catalogue.art.title"
+msgstr "Grafiki z gry"
+
+msgid "web.admin.catalogue.art.choice"
+msgstr "Pokazuj grafiki z gry"
+
+msgid "web.admin.catalogue.art.text"
+msgstr ""
+"Ikony przedmiotów, modele bohaterów w kreatorze i portrety bohaterów "
+"tworzone przez grę. Tam, gdzie nie są pokazywane, strony pokazują "
+"grafiki zastępcze; nazwy przedmiotów, ceny, misje, skrzynie i nagrody "
+"pozostają w użyciu dla wszystkich."
+
+msgid "web.admin.catalogue.art.text.portraits"
+msgstr ""
+"Nie są przechowywane ani ikony, ani modele bohaterów, więc wybór dotyczy "
+"tylko portretów bohaterów tworzonych przez grę; tam, gdzie nie są "
+"pokazywane, karty bohaterów pokazują grafiki zastępcze."
+
+msgid "web.admin.catalogue.art.everyone"
+msgstr "Wszystkim"
+
+msgid "web.admin.catalogue.art.everyone.text"
+msgstr "Także bez zalogowania."
+
+msgid "web.admin.catalogue.art.signed_in"
+msgstr "Po zalogowaniu"
+
+msgid "web.admin.catalogue.art.signed_in.text"
+msgstr "Bez zalogowania grafiki zastępcze."
+
+msgid "web.admin.catalogue.art.nobody"
+msgstr "Nikomu"
+
+msgid "web.admin.catalogue.art.nobody.text"
+msgstr "Wszędzie grafiki zastępcze."
+
+msgid "web.admin.catalogue.art.state.saving"
+msgstr "Zapisywanie…"
+
+msgid "web.admin.catalogue.art.default"
+msgstr "Ustawienie domyślne."
+
+msgid "web.admin.catalogue.art.chosen"
+msgstr "Wybrano %(time)s · %(who)s."
+
+msgid "web.admin.catalogue.art.audit"
+msgstr "Każda zmiana jest zapisywana w dzienniku zmian."
+
+msgid "web.admin.catalogue.art.game"
+msgstr "Strony zmieniają się od razu."
+
+msgid "web.admin.catalogue.art.strip"
+msgstr "Kto co widzi"
+
+msgid "web.admin.catalogue.art.strip.where"
+msgstr "Gdzie"
+
+msgid "web.admin.catalogue.art.strip.signed_out"
+msgstr "Bez zalogowania"
+
+msgid "web.admin.catalogue.art.strip.signed_in"
+msgstr "Po zalogowaniu"
+
+msgid "web.admin.catalogue.art.strip.creator"
+msgstr "Kreator bohatera"
+
+msgid "web.admin.catalogue.art.strip.model"
+msgstr "Model z gry"
+
+msgid "web.admin.catalogue.art.strip.card"
+msgstr "Karta bohatera"
+
+msgid "web.admin.catalogue.art.strip.portrait"
+msgstr "Portret z gry"
+
+msgid "web.admin.catalogue.art.strip.placeholder"
+msgstr "Grafika zastępcza"
+
+msgid "web.admin.catalogue.art.strip.hidden"
+msgstr ""
+"Tam, gdzie grafiki nie są pokazywane, strony pokazują grafiki zastępcze, "
+"a pliki z gry nie otwierają się pod swoimi adresami."
+
+msgid "web.admin.catalogue.art.strip.game"
+msgstr "Gra jest zalogowana dzięki własnej sesji."
+
+msgid "web.admin.catalogue.art.managed"
+msgstr "Wybór, komu pokazywać grafiki z gry, wymaga roli administratora."
+
+msgid "web.admin.catalogue.art.save"
+msgstr "Zapisz"
+
+msgid "web.admin.catalogue.art.saved.everyone"
+msgstr "%(game)s pokazuje grafiki z gry wszystkim."
+
+msgid "web.admin.catalogue.art.saved.signed_in"
+msgstr "%(game)s pokazuje grafiki z gry po zalogowaniu."
+
+msgid "web.admin.catalogue.art.saved.nobody"
+msgstr "%(game)s pokazuje grafiki zastępcze zamiast grafik z gry."
+
+msgid "web.admin.audit.action.catalogue_art.everyone"
+msgstr "Pokazano grafiki z gry wszystkim"
+
+msgid "web.admin.audit.action.catalogue_art.signed_in"
+msgstr "Pokazano grafiki z gry po zalogowaniu"
+
+msgid "web.admin.audit.action.catalogue_art.nobody"
+msgstr "Zastąpiono grafiki z gry grafikami zastępczymi"
+
+msgid "web.admin.audit.catalogue_art"
+msgstr ""
+"Ikony: %(icons)s · modele bohaterów: %(models)s · tekstury: %(textures)s "
+"· portrety: %(portraits)s"
+

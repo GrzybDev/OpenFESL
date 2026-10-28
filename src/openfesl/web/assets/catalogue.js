@@ -241,3 +241,127 @@ function number(bytes) {
     maximumFractionDigits: 1,
   }).format(bytes / 2 ** 20);
 }
+
+// Who sees a game's art: a tile takes the accent at once and the choice is saved once it rests for
+// 400 ms, so arrow keys passing over a tile save nothing. A save that takes longer than 300 ms
+// spins the chosen tile's glyph; a newer choice waits for the running save, the last one
+// winning. The saved section comes in place with the strip's changed cells cross-fading and its
+// toast; a failed save returns the accent to the saved tile and says so in a toast that
+// stays.
+const stillMotion = matchMedia("(prefers-reduced-motion: reduce)");
+
+document.addEventListener("change", (event) => {
+  const form = event.target instanceof Element ? event.target.closest("form[data-art]") : null;
+  if (form) {
+    clearTimeout(form.restTimer);
+    form.restTimer = setTimeout(() => saveArt(form), 400);
+  }
+});
+
+/**
+ * Saves the chosen tile of a game's art, unless it is the saved one or a save is running.
+ *
+ * @param {HTMLFormElement} form - The choice's form.
+ */
+async function saveArt(form) {
+  const chosen = form.querySelector("input:checked")?.value;
+  if (form.dataset.saving || !chosen || chosen === form.dataset.saved) {
+    return;
+  }
+  form.dataset.saving = chosen;
+  const section = form.closest("[data-art-section]");
+  const timer = setTimeout(() => spin(section, chosen), 300);
+  let page = null;
+  try {
+    const answer = await fetch(form.action, { method: "POST", body: new FormData(form) });
+    page = answer.ok ? new DOMParser().parseFromString(await answer.text(), "text/html") : null;
+  } catch {
+    page = null;
+  }
+  clearTimeout(timer);
+  const fresh = page?.getElementById(section.id);
+  if (!fresh) {
+    delete form.dataset.saving;
+    unspin(section);
+    form.querySelector(`input[value="${form.dataset.saved}"]`).checked = true;
+    toast(document.querySelector("[data-art-failed]").content.cloneNode(true));
+    return;
+  }
+  // A choice made while this one was saved is kept, and saved next.
+  const latest = form.querySelector("input:checked")?.value;
+  const before = [...section.querySelectorAll("[data-strip] td")].map((cell) => cell.dataset.shown);
+  const focused = section.contains(document.activeElement) ? document.activeElement.value : null;
+  const placed = document.importNode(fresh, true);
+  section.replaceWith(placed);
+  // The keyboard stays on the tile it was on.
+  if (focused) {
+    placed.querySelector(`input[value="${focused}"]`)?.focus();
+  }
+  placed.querySelectorAll("[data-strip] td").forEach((cell, index) => {
+    if (cell.dataset.shown !== before[index] && !stillMotion.matches) {
+      cell.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, easing: "linear" });
+    }
+  });
+  const said = page.querySelector(".toast");
+  if (said) {
+    toast(document.importNode(said, true));
+  }
+  const next = placed.querySelector("form[data-art]");
+  if (latest && latest !== next.dataset.saved) {
+    next.querySelector(`input[value="${latest}"]`).checked = true;
+    saveArt(next);
+  }
+}
+
+/**
+ * Turns the chosen tile's glyph into the spinning segment and says the choice is being saved.
+ *
+ * @param {Element} section - The game's art section.
+ * @param {string} chosen - The choice being saved.
+ */
+function spin(section, chosen) {
+  const glyph = section.querySelector(`input[value="${chosen}"] ~ .choice-square svg`);
+  const use = glyph.querySelector("use");
+  glyph.dataset.glyph = use.getAttribute("href");
+  use.setAttribute("href", glyph.dataset.glyph.replace(/#.*$/, "#busy"));
+  glyph.classList.add("spinning");
+  const word = section.querySelector("[data-art-word]");
+  word.dataset.word = word.textContent;
+  word.textContent = word.dataset.saving;
+  word.classList.add("catalogue-art-off");
+}
+
+/**
+ * Gives the tile that was being saved its glyph back, and the header its word.
+ *
+ * @param {Element} section - The game's art section.
+ */
+function unspin(section) {
+  const glyph = section.querySelector("svg.spinning");
+  if (glyph) {
+    glyph.querySelector("use").setAttribute("href", glyph.dataset.glyph);
+    glyph.classList.remove("spinning");
+  }
+  const word = section.querySelector("[data-art-word]");
+  word.textContent = word.dataset.word ?? word.textContent;
+  word.classList.toggle(
+    "catalogue-art-off",
+    section.querySelector("form[data-art]").dataset.saved === "nobody",
+  );
+}
+
+/**
+ * Shows a toast at the bottom right of the window.
+ *
+ * @param {Node} shown - The toast.
+ */
+function toast(shown) {
+  let place = document.querySelector(".toasts");
+  if (!place) {
+    place = document.createElement("div");
+    place.className = "toasts";
+    document.getElementById("area").append(place);
+  }
+  place.replaceChildren(shown);
+  place.dispatchEvent(new Event("swapped", { bubbles: true }));
+}
