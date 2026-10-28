@@ -1,0 +1,83 @@
+/* A game's block on the catalogues page: its facts on the panel's rows, its items by kind as tiles
+   with the number first, three to a row and two on phones, and a languages line under its count. */
+@layer components {
+  .catalogue-game {
+    display: grid;
+    gap: 2px;
+    scroll-margin-top: 16px;
+
+    .facts {
+      margin-top: 0;
+    }
+  }
+
+  .catalogue-missing-word {
+    color: var(--soft);
+  }
+
+  .catalogue-kinds {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px;
+
+    @media (width < 40rem) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .catalogue-kind {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 4px;
+    background: var(--row-light);
+    padding: 10px 14px;
+    color: var(--ink);
+
+    dt {
+      font-size: 12px;
+      line-height: 1.1;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    dd {
+      font-size: 26px;
+      line-height: 1;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .catalogue-language-fact .catalogue-languages {
+    flex-basis: 100%;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .catalogue-missing {
+    background: var(--row-light);
+    padding: 14px;
+    color: var(--ink);
+  }
+
+  .catalogue-missing-title {
+    font-family: var(--font-sans);
+    font-size: 20px;
+    line-height: 1.25;
+    font-weight: 700;
+  }
+
+  .catalogue-missing-text {
+    margin-top: 6px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+}

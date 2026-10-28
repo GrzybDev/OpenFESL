@@ -39,8 +39,15 @@ class SqlCatalogueStore:
             row = await session.get(CatalogueRow, partition)
             if row is None:
                 return None
+            languages = await session.scalars(
+                select(CatalogueTextRow.language)
+                .where(CatalogueTextRow.partition == partition)
+                .order_by(CatalogueTextRow.language)
+            )
             document = CatalogueDocument.model_validate(row.document)
-            return StoredCatalogue(document, row.revision, row.icons, row.models, row.textures)
+            return StoredCatalogue(
+                document, row.revision, row.icons, row.models, row.textures, tuple(languages)
+            )
 
     async def texts(self, partition: str, language: str) -> dict[str, str]:
         """Return the texts of a game's catalogue in a language by id; empty without any.

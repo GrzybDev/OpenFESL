@@ -9,6 +9,7 @@ from openfesl.web.admin.account_decisions import account_decision_routes
 from openfesl.web.admin.accounts import AccountViews, account_routes
 from openfesl.web.admin.audit import audit_routes
 from openfesl.web.admin.auth import AdminSessions, NeedsRole, SignInNeeded, SignInProvider
+from openfesl.web.admin.catalogues import catalogue_routes
 from openfesl.web.admin.entitlements import entitlement_routes
 from openfesl.web.admin.home import home_routes
 from openfesl.web.admin.key_edit import key_edit_routes
@@ -45,8 +46,13 @@ def include_admin_routes(
     """
     census, players, apply = services.census, services.players, services.trust.apply_decisions
     server_views = ServerViews(games, census, services.approval, stores.servers)
+    sections = frozenset({"catalogues"} if any(game.catalogue for game in games) else ())
     sign_in = AdminSessions(
-        pages, _sign_in_provider(settings), settings.public_url, server_views.menu_counts
+        pages,
+        _sign_in_provider(settings),
+        settings.public_url,
+        server_views.menu_counts,
+        sections,
     )
     app.include_router(sign_in.routes())
     app.include_router(home_routes(sign_in, games, census, players, stores.accounts, server_views))
@@ -63,6 +69,15 @@ def include_admin_routes(
     )
     app.include_router(key_routes(sign_in, games, stores.keys))
     app.include_router(key_edit_routes(sign_in, games, stores.keys))
+    app.include_router(
+        catalogue_routes(
+            sign_in,
+            games,
+            services.catalogues,
+            stores.admin_log,
+            services.catalogue_files is not None,
+        )
+    )
     app.include_router(
         audit_routes(
             sign_in, games, stores.admin_log, stores.accounts, stores.personas, stores.servers

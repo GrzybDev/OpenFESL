@@ -1,0 +1,49 @@
+/* The admin panel's catalogues: the games' blocks beside the import, which follows them on phones,
+   and the games that take no catalogue under them. */
+@layer pages {
+  .catalogue-layout {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .catalogue-games {
+    display: grid;
+    min-width: 0;
+    flex: 999 1 560px;
+    gap: 14px;
+  }
+
+  .catalogue-others {
+    display: grid;
+    gap: 2px;
+    margin-top: 2px;
+    list-style: none;
+
+    li {
+      display: flex;
+      flex-wrap: wrap;
+      min-height: 44px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px 12px;
+      background: var(--row);
+      padding: 6px 14px;
+      color: var(--ink);
+    }
+  }
+
+  .catalogue-other-name {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .catalogue-other-state {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+}

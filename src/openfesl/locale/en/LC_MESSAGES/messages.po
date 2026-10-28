@@ -7392,3 +7392,93 @@ msgstr "Hero creator, hero slots, renames, treasure chests and Funds:"
 
 msgid "games.bfheroes.notice.here"
 msgstr "Hero creator, hero slots, renames, treasure chests and Funds are on this service's website."
+
+msgid "web.admin.menu.catalogues"
+msgstr "Catalogues"
+
+msgid "web.admin.catalogue.title"
+msgstr "Catalogues"
+
+msgid "web.admin.catalogue.subtitle"
+msgstr "Items, texts, icons and hero models from a copy of the game"
+
+msgid "web.admin.catalogue.state.imported"
+msgstr "Imported"
+
+msgid "web.admin.catalogue.state.missing"
+msgstr "Not imported"
+
+msgid "web.admin.catalogue.imported"
+msgstr "Imported"
+
+msgid "web.admin.catalogue.items"
+msgstr "Items"
+
+msgid "web.admin.catalogue.languages"
+msgstr "Languages"
+
+msgid "web.admin.catalogue.icons"
+msgstr "Icons"
+
+msgid "web.admin.catalogue.icons.kept"
+msgstr "%(count)s kept"
+
+msgid "web.admin.catalogue.icons.none"
+msgstr "None kept: this service keeps no files"
+
+msgid "web.admin.catalogue.models"
+msgstr "Hero models"
+
+msgid "web.admin.catalogue.models.kept"
+msgstr "%(count)s kept · %(textures)s textures"
+
+msgid "web.admin.catalogue.daily"
+msgstr "Daily missions"
+
+msgid "web.admin.catalogue.daily.days.one"
+msgstr "%(count)s day"
+
+msgid "web.admin.catalogue.daily.days.other"
+msgstr "%(count)s days"
+
+msgid "web.admin.catalogue.levels"
+msgstr "XP per level"
+
+msgid "web.admin.catalogue.levels.count.one"
+msgstr "%(count)s level"
+
+msgid "web.admin.catalogue.levels.count.other"
+msgstr "%(count)s levels"
+
+msgid "web.admin.catalogue.others"
+msgstr "Other games"
+
+msgid "web.admin.catalogue.none"
+msgstr "Takes no catalogue"
+
+msgid "web.admin.catalogue.missing"
+msgstr "No catalogue imported yet."
+
+msgid "web.admin.catalogue.missing.text"
+msgstr ""
+"Until one is imported, the game's pages show items by their numbers, "
+"without names."
+
+msgid "games.bfheroes.item_kind.appearance"
+msgstr "Appearance"
+
+msgid "games.bfheroes.item_kind.weapon"
+msgstr "Weapons"
+
+msgid "games.bfheroes.item_kind.ability"
+msgstr "Abilities"
+
+msgid "games.bfheroes.item_kind.mission"
+msgstr "Missions"
+
+msgid "games.bfheroes.item_kind.convenience"
+msgstr "Convenience"
+
+msgid "games.bfheroes.item_kind.emote"
+msgstr "Emotes"
+

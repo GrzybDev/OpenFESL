@@ -30,7 +30,7 @@ GLYPHS = {
     AdminAction.PROVIDER_REVOKE: "x",
     AdminAction.ENTITLEMENT_GRANT: "plus",
     AdminAction.KEY_ADD: "plus",
-    AdminAction.CATALOGUE_IMPORT: "edit",
+    AdminAction.CATALOGUE_IMPORT: "doc",
 }
 _TAKEN = {"disabled", "banned", "deactivated", "revoked", "DISABLED", "off", "removed"}
 
@@ -338,6 +338,7 @@ async def _rows(
         elif action is AdminAction.CATALOGUE_IMPORT:
             game = games.by_id(target)
             shown = game.name if game else target
+            href = page(f"/admin/catalogues#game-{target}")
             said = say(
                 "web.admin.audit.catalogue",
                 items=details.get("items", 0),

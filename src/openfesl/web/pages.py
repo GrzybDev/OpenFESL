@@ -83,11 +83,14 @@ class Viewer:
         admin: The admin.
         through: The name of the provider they signed in through.
         counts: The numbers the menu shows by its items, such as the servers waiting.
+        sections: The sections of the panel that the served games add to its menu, such as
+            catalogues.
     """
 
     admin: Admin
     through: str
     counts: Mapping[str, int] = field(default_factory=dict)
+    sections: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True, slots=True)
@@ -206,10 +209,20 @@ def _country(context: Context, code: str) -> str:
     return str(_locale(context).territories.get(code.upper(), code))
 
 
+def language_name(code: str, language: str) -> str:
+    """Return a language's name as another language writes it.
+
+    Args:
+        code: The named language's code, such as pt-BR.
+        language: The code of the language it is written in.
+    """
+    locale = Locale.parse(translate("web.locale", language))
+    return str(Locale.parse(code, sep="-").get_display_name(locale))
+
+
 @pass_context
 def _language_name(context: Context, code: str) -> str:
-    # A language's name in the page's language, from its code.
-    return str(Locale.parse(code).get_display_name(_locale(context)))
+    return language_name(code, context["language"])
 
 
 def listed(items: list[str], language: str) -> str:

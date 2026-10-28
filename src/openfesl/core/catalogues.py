@@ -45,6 +45,7 @@ class StoredCatalogue:
         icons: How many of its icons the server keeps.
         models: How many models of its heroes the server keeps.
         textures: How many textures of its heroes' models the server keeps.
+        languages: The codes of the languages it has texts in.
     """
 
     document: CatalogueDocument
@@ -52,6 +53,7 @@ class StoredCatalogue:
     icons: int
     models: int = 0
     textures: int = 0
+    languages: tuple[str, ...] = ()
 
 
 class CatalogueStore(Protocol):
@@ -191,6 +193,7 @@ class Contents:
         icons: How many of its icons the server keeps.
         models: How many models of its heroes the server keeps.
         textures: How many textures of its heroes' models the server keeps.
+        languages: The codes of the languages it has texts in.
         items: The items by number.
         daily_missions: The number of each day's daily mission, by the day of the year.
         experience: The XP from each level to the next, by level.
@@ -202,6 +205,7 @@ class Contents:
     icons: int = 0
     models: int = 0
     textures: int = 0
+    languages: tuple[str, ...] = ()
     items: Mapping[int, Item] = field(default_factory=dict)
     daily_missions: tuple[int, ...] = ()
     experience: tuple[int, ...] = ()
@@ -414,8 +418,11 @@ class Catalogues:
             for group, found in groups.items()
             for name, data in found.items()
         }
-        counts = (len(found) if self._files is not None else 0 for found in groups.values())
-        stored = StoredCatalogue(catalogue.document, revision, *counts)
+        icons, models, textures = (
+            len(found) if self._files is not None else 0 for found in groups.values()
+        )
+        languages = tuple(sorted(catalogue.texts))
+        stored = StoredCatalogue(catalogue.document, revision, icons, models, textures, languages)
         partition = partition_of(game)
         # Imports of a game take turns, as each removes the files of every other import.
         async with self._store.importing(partition):
@@ -433,7 +440,7 @@ class Catalogues:
         return ImportedCatalogue(
             game,
             len(catalogue.document.items),
-            len(catalogue.texts),
+            len(languages),
             stored.icons,
             stored.models,
             stored.textures,
@@ -520,6 +527,7 @@ def _contents(rules: CatalogueRules, stored: StoredCatalogue) -> Contents:
         stored.icons,
         stored.models,
         stored.textures,
+        stored.languages,
         found,
         document.daily_missions,
         document.experience,

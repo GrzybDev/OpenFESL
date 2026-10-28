@@ -84,6 +84,7 @@ class AdminSessions:
         provider: SignInProvider | None,
         public_url: str | None,
         menu_counts: Callable[[], Awaitable[Mapping[str, int]]],
+        sections: frozenset[str] = frozenset(),
     ) -> None:
         """Prepare the sign-in through the provider.
 
@@ -94,9 +95,12 @@ class AdminSessions:
                 admin back; the request's own when None.
             menu_counts: Returns the numbers the menu shows by its items, such as the servers
                 waiting for a decision.
+            sections: The sections of the panel that the served games add to its menu, such as
+                catalogues.
         """
         self._pages = pages
         self._menu_counts = menu_counts
+        self._sections = sections
         self.provider = provider
         self._client = (
             ServiceClient(
@@ -162,7 +166,7 @@ class AdminSessions:
         viewer = None
         if admin is not None:
             through = self.provider.name if self.provider else ""
-            viewer = Viewer(admin, through, await self._menu_counts())
+            viewer = Viewer(admin, through, await self._menu_counts(), self._sections)
         return self._pages.render(
             request, template, status, steel=True, viewer=viewer, csrf=token, **context
         )

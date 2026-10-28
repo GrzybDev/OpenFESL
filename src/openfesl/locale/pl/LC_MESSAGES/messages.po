@@ -7812,3 +7812,104 @@ msgstr "Kreator bohaterów, miejsca na bohaterów, zmiany nazw, skrzynie skarbó
 
 msgid "games.bfheroes.notice.here"
 msgstr "Kreator bohaterów, miejsca na bohaterów, zmiany nazw, skrzynie skarbów i Funds są na stronie tego serwisu."
+
+msgid "web.admin.menu.catalogues"
+msgstr "Katalogi"
+
+msgid "web.admin.catalogue.title"
+msgstr "Katalogi"
+
+msgid "web.admin.catalogue.subtitle"
+msgstr "Przedmioty, teksty, ikony i modele bohaterów z kopii gry"
+
+msgid "web.admin.catalogue.state.imported"
+msgstr "Zaimportowany"
+
+msgid "web.admin.catalogue.state.missing"
+msgstr "Brak katalogu"
+
+msgid "web.admin.catalogue.imported"
+msgstr "Zaimportowano"
+
+msgid "web.admin.catalogue.items"
+msgstr "Przedmioty"
+
+msgid "web.admin.catalogue.languages"
+msgstr "Języki"
+
+msgid "web.admin.catalogue.icons"
+msgstr "Ikony"
+
+msgid "web.admin.catalogue.icons.kept"
+msgstr "zachowane: %(count)s"
+
+msgid "web.admin.catalogue.icons.none"
+msgstr "Brak: serwis nie przechowuje plików"
+
+msgid "web.admin.catalogue.models"
+msgstr "Modele bohaterów"
+
+msgid "web.admin.catalogue.models.kept"
+msgstr "zachowane: %(count)s · tekstury: %(textures)s"
+
+msgid "web.admin.catalogue.daily"
+msgstr "Misje dnia"
+
+msgid "web.admin.catalogue.daily.days.one"
+msgstr "%(count)s dzień"
+
+msgid "web.admin.catalogue.daily.days.few"
+msgstr "%(count)s dni"
+
+msgid "web.admin.catalogue.daily.days.many"
+msgstr "%(count)s dni"
+
+msgid "web.admin.catalogue.daily.days.other"
+msgstr "%(count)s dnia"
+
+msgid "web.admin.catalogue.levels"
+msgstr "Progi doświadczenia"
+
+msgid "web.admin.catalogue.levels.count.one"
+msgstr "%(count)s poziom"
+
+msgid "web.admin.catalogue.levels.count.few"
+msgstr "%(count)s poziomy"
+
+msgid "web.admin.catalogue.levels.count.many"
+msgstr "%(count)s poziomów"
+
+msgid "web.admin.catalogue.levels.count.other"
+msgstr "%(count)s poziomu"
+
+msgid "web.admin.catalogue.others"
+msgstr "Inne gry"
+
+msgid "web.admin.catalogue.none"
+msgstr "Nie korzysta z katalogu"
+
+msgid "web.admin.catalogue.missing"
+msgstr "Katalog nie został jeszcze zaimportowany."
+
+msgid "web.admin.catalogue.missing.text"
+msgstr ""
+"Do czasu importu strony gry pokazują same numery przedmiotów, bez nazw."
+
+msgid "games.bfheroes.item_kind.appearance"
+msgstr "Wygląd"
+
+msgid "games.bfheroes.item_kind.weapon"
+msgstr "Broń"
+
+msgid "games.bfheroes.item_kind.ability"
+msgstr "Umiejętności"
+
+msgid "games.bfheroes.item_kind.mission"
+msgstr "Misje"
+
+msgid "games.bfheroes.item_kind.convenience"
+msgstr "Udogodnienia"
+
+msgid "games.bfheroes.item_kind.emote"
+msgstr "Gesty"
+

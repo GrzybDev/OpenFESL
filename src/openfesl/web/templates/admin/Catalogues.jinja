@@ -1,0 +1,31 @@
+{#def views: list, others: list, keeps_files: bool #}
+{# Each game's imported catalogue; games without catalogue rules are listed as taking none. #}
+{% set title = _("web.admin.catalogue.title") %}
+<AdminPage :title="title" current="catalogues">
+  <PageHead labelledby="catalogues-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="catalogues-title">{{ _("web.admin.catalogue.subtitle") }}</TitleBlock>
+    </div>
+  </PageHead>
+  <Panel class="enter-panel">
+    <div data-catalogues class="catalogue-layout">
+      <div class="catalogue-games">
+        {% for view in views %}
+          <CatalogueGame :view="view" :keeps_files="keeps_files" />
+        {% endfor %}
+        {% if others %}
+          <section aria-labelledby="catalogue-others">
+            <Bar id="catalogue-others">{{ _("web.admin.catalogue.others") }}</Bar>
+            <ul class="catalogue-others">
+              {% for game in others %}
+                <li>
+                  <span class="catalogue-other-name">{{ game.name }}</span><span class="catalogue-other-state">{{ _("web.admin.catalogue.none") }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          </section>
+        {% endif %}
+      </div>
+    </div>
+  </Panel>
+</AdminPage>

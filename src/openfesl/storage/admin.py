@@ -76,6 +76,22 @@ class SqlAdminLog:
             )
             return total or 0, [_entry(row) for row in rows]
 
+    async def latest(self, action: AdminAction, target: str) -> AuditEntry | None:
+        """Return the latest action of a kind done to a target, if any was.
+
+        Args:
+            action: The kind.
+            target: What it was done to.
+        """
+        async with self._sessions() as session:
+            row = await session.scalar(
+                select(AdminActionRow)
+                .where(AdminActionRow.action == action, AdminActionRow.target == target)
+                .order_by(AdminActionRow.id.desc())
+                .limit(1)
+            )
+            return _entry(row) if row else None
+
     async def auditors(self, chosen: AuditFilter) -> list[Auditor]:
         """Return who acted among the actions a filter lets through by anyone, most first.
 

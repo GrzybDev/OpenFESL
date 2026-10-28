@@ -1,0 +1,72 @@
+{#def view, keeps_files: bool #}
+{# A game's block on the catalogues page: when and by whom its catalogue was imported, its items by
+   kind, its languages, the icons and hero models kept, its daily missions and XP per level; before
+   the first import, what the game's pages show meanwhile. The content follows the numbers. #}
+{% set game = view.game %}
+{% set contents = view.contents %}
+{% set key = "game-" ~ game.id %}
+{% macro count(value, name="") -%}
+  <span data-count="{{ value }}">{{ number(value) }}</span>
+{%- endmacro %}
+<section aria-labelledby="{{ key }}-title"
+         id="{{ key }}"
+         class="catalogue-game">
+  <h2 id="{{ key }}-title" class="bar bar-large bar-wrap">
+    <span>{{ game.name }}</span><span class="bar-extra{% if not contents.revision %} catalogue-missing-word{% endif %}">{{ _("web.admin.catalogue.state.imported" if contents.revision else "web.admin.catalogue.state.missing") }}</span>
+  </h2>
+  {% if contents.revision %}
+    <dl class="facts catalogue-facts">
+      {% if view.imported %}
+        <Fact :label="_('web.admin.catalogue.imported')" plain>
+          {{ _("web.server.time", time=moment(view.imported.at)) }} · {{ view.imported.name or _("web.admin.command_line") }}
+        </Fact>
+      {% endif %}
+      <Fact :label="_('web.admin.catalogue.items')" plain>
+        {{ count(contents.items|length, "items") }}
+      </Fact>
+    </dl>
+    {% if view.kinds %}
+      <dl class="catalogue-kinds">
+        {% for kind, found in view.kinds %}
+          <div class="catalogue-kind">
+            <dt>{{ _("games." ~ game.id ~ ".item_kind." ~ kind) }}</dt>
+            <dd>
+              {{ count(found) }}
+            </dd>
+          </div>
+        {% endfor %}
+      </dl>
+    {% endif %}
+    <dl class="facts catalogue-facts">
+      <div class="fact catalogue-language-fact">
+        <dt>{{ _("web.admin.catalogue.languages") }}</dt>
+        <dd class="fact-plain">
+          {{ count(view.languages|length, "languages") }}
+        </dd>
+        <dd class="catalogue-languages">
+          {{ listed(view.languages) }}
+        </dd>
+      </div>
+      <Fact :label="_('web.admin.catalogue.icons')" plain>
+        {%- if keeps_files or contents.icons %}{{ _("web.admin.catalogue.icons.kept", count=count(contents.icons, "icons")) }}{% else %}{{ _("web.admin.catalogue.icons.none") }}{% endif -%}
+      </Fact>
+      {% if game.catalogue.models %}
+        <Fact :label="_('web.admin.catalogue.models')" plain>
+          {%- if keeps_files or contents.models %}{{ _("web.admin.catalogue.models.kept", count=count(contents.models, "models"), textures=count(contents.textures, "textures")) }}{% else %}{{ _("web.admin.catalogue.icons.none") }}{% endif -%}
+        </Fact>
+      {% endif %}
+      <Fact :label="_('web.admin.catalogue.daily')" plain>
+        {{ _n("web.admin.catalogue.daily.days", contents.daily_missions|length) }}
+      </Fact>
+      <Fact :label="_('web.admin.catalogue.levels')" plain>
+        {{ _n("web.admin.catalogue.levels.count", contents.experience|length) }}
+      </Fact>
+    </dl>
+  {% else %}
+    <div class="catalogue-missing">
+      <p class="catalogue-missing-title">{{ _("web.admin.catalogue.missing") }}</p>
+      <p class="catalogue-missing-text">{{ _("web.admin.catalogue.missing.text") }}</p>
+    </div>
+  {% endif %}
+  {{ content }}
+</section>
