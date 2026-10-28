@@ -78,37 +78,28 @@
 
   .hero-mugshot {
     position: relative;
-    display: flex;
     flex: 0 0 92px;
     height: 100px;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
     border: 2px solid #000;
-    background: var(--faction, #cdbfa6);
+    background: #cdbfa6;
     box-shadow: 3px 3px 0 rgb(0 0 0 / 0.25);
-    color: var(--faction-ink, #3b2d23);
     rotate: -2.5deg;
 
-    > span {
-      padding-inline: 4px;
-      font-size: 11px;
-      font-weight: 700;
-      line-height: 1.15;
-      text-align: center;
-      color: #fff;
-
-      .hero-hanger:not([data-faction]) & {
-        color: #3b2d23;
-      }
+    /* The head and shoulders of the game's portrait, a hero 1024 pixels square: 183 x 200
+       pixels from 434, 160. */
+    .hero-portrait {
+      top: -80%;
+      left: -237.2%;
+      width: 559.6%;
     }
   }
 
+  /* In the corner, where it never covers the face. */
   .hero-clip {
     position: absolute;
+    z-index: 1;
     top: -14px;
-    left: 34px;
+    left: 4px;
     width: 18px;
     height: 34px;
     fill: none;

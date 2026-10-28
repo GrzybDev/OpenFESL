@@ -3,8 +3,8 @@
    wooden panel at the right, and the naming step. Without scripts every list shows, the naming
    is the form's last part, and the name is checked when the form is sent. #}
 {% set faction = rules.factions[look.faction] %}
-{% set hair = faction.hair_styles.index(look.hair_style) + 1 if look.hair_style else 0 %}
-{% set beard = faction.facial_hair.index(look.facial_hair) + 1 if look.facial_hair else 0 %}
+{% set hair = faction.place(look.hair_style) %}
+{% set beard = faction.place(look.facial_hair) %}
 {% set who = {} %}
 {% for faction_id in rules.factions %}
   {% for class_id in rules.classes %}

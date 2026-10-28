@@ -33,6 +33,7 @@ from openfesl.core.games import Game
 from openfesl.core.hero_rules import HeroRules
 from openfesl.core.texts import languages, localize, translate, translate_count
 from openfesl.web.languages import split_language
+from openfesl.web.mugshots import mugshot_url
 from openfesl.web.security import HEADERS
 from openfesl.web.sessions import form_token, once_token
 
@@ -290,6 +291,7 @@ _catalog = Catalog(
         "number": _number,
         "once_token": once_token,
         "static": static_url,
+        "mugshot": mugshot_url,
         "page_links": page_links,
         "glyph": _glyph,
         "moment": _moment,

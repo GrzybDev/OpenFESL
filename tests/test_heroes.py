@@ -4,7 +4,7 @@ from xml.etree import ElementTree
 import httpx2
 import pytest
 from accounts import PASSWORD, execute, post_sign_in, select_value
-from heroes import CREATOR, MAGMA, create, create_hero
+from heroes import CREATOR, MAGMA, create, create_hero, pictures
 from identity import form_token
 from support import FESL, fetch, game, launcher_sign_in, markup, once_token, visible
 
@@ -224,6 +224,8 @@ async def test_the_heroes_page_lists_each_hero_and_changes_the_hero_the_game_log
         assert "items · none running low Chests 1 to open" in shown
         assert "1 chest to open : Tin_Tankard 1." in shown
         assert "1 item · 1 running low" in shown
+        # The hero made before the creator has no class to show, on its card or in the selector.
+        assert pictures(page.text).count("") == 2
         heroes = (first, second, legacy)
         offered = [f"/bfheroes/heroes/{hero}/default" in page.text for hero in heroes]
         assert offered == [False, True, False]

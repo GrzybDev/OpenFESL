@@ -35,6 +35,17 @@ class Faction(BaseModel):
     ink: Colour
     glyph: Glyph
 
+    def place(self, item: int) -> int:
+        """Return the place, from 1, of a hair style or facial hair in the faction's lists.
+
+        Args:
+            item: The item's number; none, as 0, and an item that neither list holds have 0.
+        """
+        for listed in (self.hair_styles, self.facial_hair):
+            if item in listed:
+                return listed.index(item) + 1
+        return 0
+
 
 class HeroClass(BaseModel):
     """A class that a game's heroes play.

@@ -140,13 +140,19 @@
   }
 
   .selector-mug {
-    display: grid;
+    position: relative;
     width: 84px;
     height: 76px;
-    place-items: center;
     border: 2px solid #000;
-    background: var(--faction, #cdbfa6);
-    color: var(--faction-ink, #3b2d23);
+    background: #cdbfa6;
+
+    /* The head and shoulders of the game's portrait, a hero 1024 pixels square: 211 x 190
+       pixels from 420, 165. */
+    .hero-portrait {
+      top: -86.8%;
+      left: -199.1%;
+      width: 485.3%;
+    }
   }
 
   .selector-name {

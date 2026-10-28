@@ -1,5 +1,6 @@
 """Helpers of the tests of heroes, which games such as Battlefield Heroes make on their site."""
 
+import re
 from xml.etree import ElementTree
 
 import httpx2
@@ -40,6 +41,15 @@ async def create_hero(base: str, address: str, name: str, **chosen: str) -> int:
         created = await create(client, base, name, **chosen)
     assert created.status_code == 303, created.text
     return int(created.headers["location"].split("/")[3])
+
+
+def pictures(page: str) -> list[str]:
+    """Return what each hero picture on a page shows: a portrait's address or a glyph's name."""
+    shown = []
+    for spot in re.findall(r'class="hero-picture[^"]*"[^>]*>(.*?)</span>', page, re.DOTALL):
+        found = re.search(r'src="([^"]+)"|#([\w-]+)"', spot)
+        shown.append((found.group(1) or found.group(2)) if found else "")
+    return shown
 
 
 async def start(

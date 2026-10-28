@@ -27,6 +27,7 @@ from openfesl.web.host import host_routes
 from openfesl.web.launcher import launcher_routes
 from openfesl.web.leaderboard import leaderboard_routes
 from openfesl.web.menu import menu_routes
+from openfesl.web.mugshots import mugshot_routes
 from openfesl.web.open import open_routes
 from openfesl.web.pages import Pages
 from openfesl.web.play import play_routes, relay_address
@@ -91,6 +92,7 @@ def include_public_routes(
         )
     )
 
+    app.include_router(mugshot_routes(games, services.mugshots))
     app.include_router(CreatorPages(pages, games, services.heroes, services.catalogues).routes())
     app.include_router(
         HeroesPages(

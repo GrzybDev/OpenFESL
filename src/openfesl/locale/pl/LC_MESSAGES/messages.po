@@ -521,8 +521,8 @@ msgstr "Bohater ma frakcję, klasę, wygląd i nazwę. Wolnych jest %(count)s mi
 msgid "web.heroes.none.text.other"
 msgstr "Bohater ma frakcję, klasę, wygląd i nazwę. Wolne jest %(count)s miejsca. Bohaterów nie można usuwać."
 
-msgid "web.heroes.mugshot.none"
-msgstr "Jeszcze bez portretu"
+msgid "web.heroes.mugshot.game"
+msgstr "Portret bohatera %(name)s z gry"
 
 msgid "web.heroes.level.label"
 msgstr "Poziom"

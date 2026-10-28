@@ -470,8 +470,8 @@ msgstr "A hero takes a faction, a class, a look and a name. %(count)s slot is fr
 msgid "web.heroes.none.text.other"
 msgstr "A hero takes a faction, a class, a look and a name. %(count)s slots are free. Heroes cannot be deleted."
 
-msgid "web.heroes.mugshot.none"
-msgstr "No mugshot yet"
+msgid "web.heroes.mugshot.game"
+msgstr "Portrait of %(name)s from the game"
 
 msgid "web.heroes.level.label"
 msgstr "Level"

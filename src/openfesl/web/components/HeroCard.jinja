@@ -36,10 +36,7 @@
       </div>
       <div class="hero-face">
         <div class="hero-mugshot">
-          {% if hero.hero_class %}
-            <Icon :name="rules.classes[hero.hero_class].glyph" :size="38" stroke="currentColor" />
-          {% endif %}
-          <span>{{ _("web.heroes.mugshot.none") }}</span>
+          <HeroPicture :hero="hero" />
           <svg aria-hidden="true" viewBox="0 0 18 34" class="hero-clip">
             <path d="M12 11v14.5a3.5 3.5 0 0 1-7 0V6.5a5 5 0 0 1 10 0V24" />
           </svg>

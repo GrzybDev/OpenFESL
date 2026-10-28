@@ -8,7 +8,7 @@ from openfesl.core.personas import Persona
 from openfesl.core.stats import PERSONA, bucket_of
 from openfesl.core.wallets import Wallet
 from openfesl.protocol.rank import Period
-from openfesl.storage.models import EntitlementRow, HeroAccountRow, PersonaRow, StatRow
+from openfesl.storage.models import EntitlementRow, HeroAccountRow, MugshotRow, PersonaRow, StatRow
 from openfesl.storage.personas import persona_of
 from openfesl.storage.wallets import spend
 
@@ -37,16 +37,20 @@ class SqlHeroStore:
             namespace: The game's persona namespace.
         """
         async with self._sessions() as session:
-            rows = await session.scalars(
-                select(PersonaRow)
-                .where(
-                    PersonaRow.account_id == account_id,
-                    PersonaRow.namespace == namespace,
-                    PersonaRow.disabled_at.is_(None),
+            rows = (
+                await session.execute(
+                    select(PersonaRow, MugshotRow.version)
+                    .outerjoin(MugshotRow, MugshotRow.persona_id == PersonaRow.id)
+                    .where(
+                        PersonaRow.account_id == account_id,
+                        PersonaRow.namespace == namespace,
+                        PersonaRow.disabled_at.is_(None),
+                    )
+                    .order_by(PersonaRow.id)
                 )
-                .order_by(PersonaRow.id)
-            )
-            personas = [(persona_of(row), row.created_at) for row in rows]
+            ).all()
+            personas = [(persona_of(row), row.created_at) for row, _ in rows]
+            portraits = {row.id: version for row, version in rows if version is not None}
             kept = (
                 await session.execute(
                     select(HeroAccountRow.default_persona_id, HeroAccountRow.bought_slots).where(
@@ -55,7 +59,7 @@ class SqlHeroStore:
                 )
             ).first()
         default_id, bought = kept if kept else (None, 0)
-        return HeroRecords(personas, default_id, bought)
+        return HeroRecords(personas, default_id, bought, portraits)
 
     async def taken(self, namespace: str, name: str) -> bool:
         """Tell whether a persona has a name, ignoring capitals, those taken out of use too.

@@ -77,6 +77,9 @@ class Hero:
         hero_class: Its class's name, when the game knows it.
         level: Its level.
         xp: The XP it gathered within its level.
+        look: The choices it was created with; none for a hero made before the creator.
+        portrait: The version of the portrait that its game rendered of it and uploaded last;
+            none before the first.
     """
 
     persona: Persona
@@ -85,6 +88,8 @@ class Hero:
     hero_class: str | None
     level: int
     xp: int
+    look: Look | None
+    portrait: int | None
 
     @property
     def playable(self) -> bool:
@@ -131,11 +136,13 @@ class HeroRecords:
         personas: The heroes' personas, oldest first, with when each was created.
         default_id: The persona of the default hero, once there is one.
         bought: The slots the account bought on top of the game's free ones.
+        portraits: The version of each hero's last portrait from its game, by persona.
     """
 
     personas: list[tuple[Persona, datetime]]
     default_id: int | None
     bought: int
+    portraits: Mapping[int, int]
 
 
 @dataclass(frozen=True, slots=True)
@@ -266,7 +273,10 @@ class Heroes:
         rules = _rules(game)
         records = await self._store.records(account_id, game.id, game.namespace)
         owners = [Owner(PERSONA, persona.id) for persona, _ in records.personas]
-        keys = [rules.stats.faction, rules.stats.hero_class, rules.stats.level, rules.stats.xp]
+        stats = rules.stats
+        chosen = [stats.faction, stats.hero_class, stats.skin_tone, stats.hair_colour]
+        chosen += [stats.hair_style, stats.facial_hair]
+        keys = [*chosen, stats.level, stats.xp]
         bucket = bucket_of(Period.ALL_TIME, 0)
         values = await self._stats.values(partition_of(game), owners, keys, bucket)
 
@@ -274,17 +284,22 @@ class Heroes:
             found = values.get((owner, key))
             return int(found.value) if found else None
 
-        heroes = [
-            Hero(
-                persona=persona,
-                created=created,
-                faction=rules.faction_of(stat(owner, rules.stats.faction)),
-                hero_class=rules.class_of(stat(owner, rules.stats.hero_class)),
-                level=max(stat(owner, rules.stats.level) or 1, 1),
-                xp=stat(owner, rules.stats.xp) or 0,
+        heroes = []
+        for (persona, created), owner in zip(records.personas, owners, strict=True):
+            team, kit, *look = (stat(owner, key) for key in chosen)
+            faction, hero_class = rules.faction_of(team), rules.class_of(kit)
+            heroes.append(
+                Hero(
+                    persona=persona,
+                    created=created,
+                    faction=faction,
+                    hero_class=hero_class,
+                    level=max(stat(owner, stats.level) or 1, 1),
+                    xp=stat(owner, stats.xp) or 0,
+                    look=_created_look(faction, hero_class, look),
+                    portrait=records.portraits.get(persona.id),
+                )
             )
-            for (persona, created), owner in zip(records.personas, owners, strict=True)
-        ]
         return Roster(heroes, rules.slots + records.bought, records.default_id)
 
     async def check(self, game: Game, name: str) -> NameCheck:
@@ -481,6 +496,16 @@ def read_look(rules: HeroRules, chosen: Mapping[str, str]) -> Look | None:
 
 
 _LOOK_FIELDS = ("skin_tone", "hair_colour", "hair_style", "facial_hair")
+
+
+def _created_look(
+    faction: str | None, hero_class: str | None, chosen: list[int | None]
+) -> Look | None:
+    # A hero made before the creator lacks the stats of its choices.
+    if faction is None or hero_class is None or None in chosen:
+        return None
+    skin, hair_colour, hair_style, facial_hair = (number or 0 for number in chosen)
+    return Look(faction, hero_class, skin, hair_colour, hair_style, facial_hair)
 
 
 def _placed(item: int, own: list[int], lists: list[list[int]]) -> int | None:

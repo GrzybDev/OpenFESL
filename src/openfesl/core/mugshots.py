@@ -1,6 +1,7 @@
 import logging
 from typing import Protocol
 
+from openfesl.core.games import Game
 from openfesl.core.magma import VALIDATION_FAILED, MagmaError
 from openfesl.core.personas import Persona
 from openfesl.formats import png
@@ -28,6 +29,14 @@ class MugshotStore(Protocol):
 
         Returns:
             The mugshot's version, which each different picture raises.
+        """
+
+    async def image(self, persona_id: int, namespace: str) -> tuple[bytes, int] | None:
+        """Return a hero's mugshot as a PNG picture with its version, if its game uploaded one.
+
+        Args:
+            persona_id: The hero.
+            namespace: The namespace of its game's personas, which the hero must be in.
         """
 
 
@@ -65,3 +74,12 @@ class Mugshots:
         version = await self._store.replace(persona.id, image)
         logger.info("Persona %d has mugshot %d, %d x %d", persona.id, version, width, height)
         return version
+
+    async def image(self, game: Game, persona_id: int) -> tuple[bytes, int] | None:
+        """Return a hero's mugshot as a PNG picture with its version, if its game uploaded one.
+
+        Args:
+            game: The hero's game.
+            persona_id: The hero.
+        """
+        return await self._store.image(persona_id, game.namespace)

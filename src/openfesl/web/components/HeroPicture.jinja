@@ -1,0 +1,22 @@
+{#def hero #}
+{# A hero's picture filling the spot of a card: the portrait that its game rendered and uploaded,
+   which the spot crops to the head and shoulders; until the game sends one, its class's glyph on
+   its faction's colour. A portrait loads once its spot is shown: every signed-in page holds the
+   closed selector. #}
+{% if hero.portrait %}
+  <span class="hero-picture">
+    <img src="{{ mugshot(game.id, hero.persona.id, hero.portrait) }}"
+         alt="{{ _('web.heroes.mugshot.game', name=hero.persona.name) }}"
+         loading="lazy"
+         decoding="async"
+         class="hero-portrait">
+  </span>
+{% else %}
+  <span aria-hidden="true"
+        {% if hero.faction %} data-faction="{{ hero.faction }}"{% endif %}
+        class="hero-picture hero-picture-none">
+    {% if hero.hero_class %}
+      <Icon :name="game.heroes.classes[hero.hero_class].glyph" :size="38" stroke="currentColor" />
+    {% endif %}
+  </span>
+{% endif %}

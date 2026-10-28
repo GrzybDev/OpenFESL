@@ -23,11 +23,7 @@
                 {{ _("games." ~ game.id ~ ".faction." ~ hero.faction) }}
               {% endif %}
             </p>
-            <span aria-hidden="true" class="selector-mug">
-              {% if hero.hero_class %}
-                <Icon :name="rules.classes[hero.hero_class].glyph" :size="34" stroke="currentColor" />
-              {% endif %}
-            </span>
+            <span class="selector-mug"><HeroPicture :hero="hero" /></span>
             <h3 id="selector-{{ hero.persona.id }}" class="selector-name">{{ hero.persona.name }}</h3>
             <p class="selector-kind">
               {% if hero.hero_class %}

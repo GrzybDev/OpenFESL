@@ -2,7 +2,7 @@ from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from openfesl.storage.models import MugshotRow
+from openfesl.storage.models import MugshotRow, PersonaRow
 
 
 class SqlMugshotStore:
@@ -36,7 +36,8 @@ class SqlMugshotStore:
                         "image": image,
                         "updated_at": func.now(),
                     },
-                    # The game uploads the same picture again and again, which keeps its version.
+                    # The game uploads the same picture again and again, which keeps its version
+                    # and so the addresses that pages show it at.
                     where=MugshotRow.image != upsert.excluded.image,
                 ).returning(MugshotRow.version)
             )
@@ -44,3 +45,20 @@ class SqlMugshotStore:
                 return changed
             kept = select(MugshotRow.version).where(MugshotRow.persona_id == persona_id)
             return (await session.execute(kept)).scalar_one()
+
+    async def image(self, persona_id: int, namespace: str) -> tuple[bytes, int] | None:
+        """Return a hero's mugshot as a PNG picture with its version, if its game uploaded one.
+
+        Args:
+            persona_id: The hero.
+            namespace: The namespace of its game's personas, which the hero must be in.
+        """
+        async with self._sessions() as session:
+            found = (
+                await session.execute(
+                    select(MugshotRow.image, MugshotRow.version)
+                    .join(PersonaRow, PersonaRow.id == MugshotRow.persona_id)
+                    .where(MugshotRow.persona_id == persona_id, PersonaRow.namespace == namespace)
+                )
+            ).first()
+        return (found.image, found.version) if found else None

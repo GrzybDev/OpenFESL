@@ -1,0 +1,27 @@
+/* A hero's picture filling the spot of a card: the game's portrait, which the spot crops to the
+   head and shoulders, or its class's glyph on its faction's colour. */
+@layer components {
+  .hero-picture {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .hero-portrait {
+    position: absolute;
+    max-width: none;
+    height: auto;
+  }
+
+  .hero-picture-none {
+    display: grid;
+    place-items: center;
+    background: var(--faction, #cdbfa6);
+    color: var(--faction-ink, #3b2d23);
+
+    > svg {
+      width: 44%;
+      height: 44%;
+    }
+  }
+}
