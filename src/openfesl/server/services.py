@@ -35,6 +35,7 @@ from openfesl.core.logins import Logins
 from openfesl.core.magma import Magma
 from openfesl.core.mail import Outbox
 from openfesl.core.messages import MessageService
+from openfesl.core.mugshots import Mugshots
 from openfesl.core.password_resets import PasswordResets
 from openfesl.core.personas import PersonaService
 from openfesl.core.playnow import PlayNow
@@ -104,6 +105,7 @@ class GameServices:
         self.relationships = Relationships(
             stores.relationships, self.players, self.hosting, self.trust
         )
+        self.mugshots = Mugshots(stores.mugshots)
         self.census = Census(self.hosting, self.players)
         art = presence_art(settings.public_url)
         self.rich_presence = RichPresence(self.hosting, settings.discord_application_id, art)

@@ -12,6 +12,7 @@ from openfesl.storage.history import SqlHistoryStore
 from openfesl.storage.identities import SqlIdentityStore
 from openfesl.storage.keys import SqlKeyStore
 from openfesl.storage.messages import SqlMessageStore
+from openfesl.storage.mugshots import SqlMugshotStore
 from openfesl.storage.personas import SqlPersonaStore
 from openfesl.storage.purchases import SqlPurchaseStore
 from openfesl.storage.records import SqlRecordStore
@@ -43,6 +44,7 @@ class Stores:
         self.identities = SqlIdentityStore(sessions)
         self.keys = SqlKeyStore(sessions)
         self.messages = SqlMessageStore(sessions)
+        self.mugshots = SqlMugshotStore(sessions)
         self.personas = SqlPersonaStore(sessions)
         self.records = SqlRecordStore(sessions)
         self.relationships = SqlRelationshipStore(sessions)

@@ -239,7 +239,8 @@ class Magma:
             game: The game whose Magma host was asked.
             persona_id: The persona.
             own: Whether only the account's own personas are returned, for what only a
-                player may do, such as buying; a server's players are refused then.
+                player may do, such as buying or uploading a mugshot; a server's players are
+                refused then.
 
         Raises:
             MagmaError: When the request names no session that is known, or the persona is

@@ -133,6 +133,19 @@ class HeroAccountRow(Base):
     bought_slots: Mapped[int] = mapped_column(server_default="0")
 
 
+class MugshotRow(Base):
+    __tablename__ = "mugshot"
+
+    # The picture of a hero that its game rendered last, which goes with the hero.
+    persona_id: Mapped[int] = mapped_column(
+        ForeignKey("persona.id", ondelete="CASCADE"), primary_key=True
+    )
+    # Raised with each new picture, so that a copy can tell it is out of date.
+    version: Mapped[int]
+    image: Mapped[bytes] = mapped_column(LargeBinary)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class EntitlementRow(Base):
     __tablename__ = "entitlement"
 

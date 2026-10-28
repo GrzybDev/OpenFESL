@@ -6,7 +6,7 @@ import struct
 import urllib.error
 import urllib.request
 import zlib
-from collections.abc import AsyncIterator, Mapping, Sequence
+from collections.abc import AsyncIterator, Iterable, Mapping, Sequence
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from email import message_from_bytes, policy
@@ -385,7 +385,7 @@ async def fetch(
     path: str,
     host: str | None = None,
     headers: Mapping[str, str] | None = None,
-    body: bytes | None = None,
+    body: bytes | Iterable[bytes] | None = None,
 ) -> tuple[int, Message, bytes]:
     """Send a GET to the server, or a POST with a body, as the hook forwards the game's HTTP.
 
@@ -394,7 +394,7 @@ async def fetch(
         path: The address on the server, with its query.
         host: The game's host, sent as X-OpenFESL-Host.
         headers: More request headers, sent again on each redirect followed.
-        body: The body of a POST.
+        body: The body of a POST, whole or in pieces sent one after another.
     """
     request = urllib.request.Request(
         server_url.replace("ws://", "http://", 1).rstrip("/") + path,
