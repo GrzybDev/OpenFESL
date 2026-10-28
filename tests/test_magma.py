@@ -1,3 +1,4 @@
+import asyncio
 from xml.etree import ElementTree
 
 import pytest
@@ -11,11 +12,17 @@ MAGMA = "www.battlefieldheroes.com"
 NO_STORE = "no-store, no-transform"
 
 
-async def play(server_url: str, account: str) -> tuple[dict[str, str], int]:
+async def play(server_url: str, account: str, *made: str) -> tuple[dict[str, str], list[int]]:
     """Register an account in another game, then start Battlefield Heroes with it as the hook does.
 
+    Args:
+        server_url: The server's relay address.
+        account: The account's login name.
+        made: Further heroes the account makes, besides the one the launcher gives it.
+
     Returns:
-        The magma cookie the game sends and the number of the hero it plays.
+        The magma cookie the game sends and the numbers of the heroes it plays, the launcher's
+        first.
     """
     async with game(server_url) as registering:
         await log_in_player(registering, FESL, account)
@@ -23,13 +30,28 @@ async def play(server_url: str, account: str) -> tuple[dict[str, str], int]:
     cookie = {"Cookie": f"magma={session['sessionId']}"}
     _, _, body = await fetch(server_url, "/nucleus/authToken", MAGMA, cookie)
     token = ElementTree.fromstring(body).findtext("token") or ""
+    heroes = []
     async with game(server_url) as player:
         await player.hello(FESL, "bfwest-pc", client_type="client-noreg")
         silent = [("TXN", "NuLogin"), ("returnEncryptedInfo", "0"), ("encryptedInfo", token)]
         await player.request(FESL, "acct", silent)
-        hero = [("TXN", "NuLoginPersona"), ("name", session["personaName"])]
-        playing = await player.request(FESL, "acct", hero)
-    return cookie, int(playing["userId"])
+        for name in made:
+            await player.request(FESL, "acct", [("TXN", "NuAddPersona"), ("name", name)])
+        for name in (session["personaName"], *made):
+            hero = [("TXN", "NuLoginPersona"), ("name", name)]
+            heroes.append(int((await player.request(FESL, "acct", hero))["userId"]))
+    return cookie, heroes
+
+
+async def wallets(server_url: str, cookie: dict[str, str], hero: int) -> dict[str, int]:
+    """Return the balances in a hero's wallets, by currency, as the game loads them."""
+    _, _, body = await fetch(server_url, f"/nucleus/wallets/{hero}", MAGMA, cookie)
+    answer = ElementTree.fromstring(body)
+    assert answer.tag == "billingAccounts"
+    return {
+        wallet.findtext("currency") or "": int(wallet.findtext("balance") or "")
+        for wallet in answer.iter("walletAccount")
+    }
 
 
 def refusal(body: bytes) -> tuple[str | None, str | None, str | None]:
@@ -111,10 +133,10 @@ async def test_a_token_request_without_a_known_session_gets_an_error_the_game_lo
     }
 
 
-async def test_a_heros_items_load_by_its_number_beside_the_stores_empty_lists(
+async def test_a_hero_loads_its_items_its_wallets_and_the_stores_empty_lists(
     server_url: str, database_url: str
 ) -> None:
-    cookie, hero = await play(server_url, "hero@example.test")
+    cookie, [hero] = await play(server_url, "hero@example.test")
     # A consumable with uses left and a rental, as the database keeps a hero's items.
     engine = create_async_engine(database_url)
     async with engine.begin() as connection:
@@ -139,6 +161,7 @@ async def test_a_heros_items_load_by_its_number_beside_the_stores_empty_lists(
     refreshed = f"/nucleus/entitlements/{hero}?entitlementTag=3002-unlm"
     _, _, body = await fetch(server_url, refreshed, MAGMA, cookie)
     found = [entry.findtext("entitlementTag") for entry in ElementTree.fromstring(body)]
+    balances = await wallets(server_url, cookie, hero)
     store = [
         await fetch(server_url, path, MAGMA, cookie)
         for path in ("/ofb/products", "/en/game/hotDeals")
@@ -147,6 +170,8 @@ async def test_a_heros_items_load_by_its_number_beside_the_stores_empty_lists(
     assert (status, headers["Cache-Control"]) == (200, NO_STORE)
     assert items == [["2005-lmct", "3", ""], ["3002-tlmd", "0", "2026-11-03T17:30Z"]]
     assert found == ["3002-tlmd"]
+    # Every currency the game keeps a balance in, the account's Funds with their allowance.
+    assert balances == {"_DH": 0, "_DV": 0, "_PF": 2500}
     for status, _, body in store:
         assert (status, body) == (200, b"<products />")
 
@@ -155,15 +180,48 @@ async def test_a_hero_of_another_account_is_refused_with_the_errors_the_game_map
     server_url: str,
 ) -> None:
     cookie, _ = await play(server_url, "ann@example.test")
-    _, other = await play(server_url, "bob@example.test")
+    _, [other] = await play(server_url, "bob@example.test")
+    paths = (
+        f"/nucleus/entitlements/{other}",
+        f"/nucleus/wallets/{other}",
+        "/nucleus/entitlements/bob",
+    )
 
-    refusals = [
-        refusal((await fetch(server_url, path, MAGMA, cookie))[2])
-        for path in (f"/nucleus/entitlements/{other}", "/nucleus/entitlements/bob")
-    ]
+    refusals = [refusal((await fetch(server_url, path, MAGMA, cookie))[2]) for path in paths]
 
-    # The game reports them as errors 6011 and 6009.
+    # The game reports them as errors 6011, 6002 and 6009.
     assert refusals == [
         ("VALIDATION_FAILED", "USER_DOES_NOT_MATCH", None),
+        ("VALIDATION_FAILED", "USER_DOES_NOT_MATCH", None),
         ("VALIDATION_FAILED", "NOT_NUMERIC", "userId"),
+    ]
+
+
+async def test_an_account_is_granted_its_starting_funds_once_for_all_its_heroes(
+    server_url: str, database_url: str
+) -> None:
+    # The game makes no heroes itself; its SDK's NuAddPersona makes a second one here.
+    cookie, [first, second] = await play(server_url, "ann@example.test", "ann_two")
+    other_cookie, [other] = await play(server_url, "bob@example.test")
+
+    loads = [await wallets(server_url, cookie, hero) for hero in (first, second, first)]
+    # A game and the server it joins may load a hero at the same moment.
+    loads += await asyncio.gather(*(wallets(server_url, other_cookie, other) for _ in range(2)))
+    engine = create_async_engine(database_url)
+    async with engine.connect() as connection:
+        ledger = await connection.execute(
+            text(
+                "SELECT nuid, persona_id, currency, delta, wallet_entry.balance, reason"
+                " FROM wallet_entry JOIN wallet ON wallet.id = wallet_id"
+                " JOIN account ON account.id = account_id ORDER BY nuid"
+            )
+        )
+        entries = [tuple(entry) for entry in ledger]
+    await engine.dispose()
+
+    assert loads == [{"_DH": 0, "_DV": 0, "_PF": 2500}] * 5
+    # One balance of Funds per account, shared by its heroes, which its ledger opened.
+    assert entries == [
+        ("ann@example.test", None, "_PF", 2500, 2500, "allowance"),
+        ("bob@example.test", None, "_PF", 2500, 2500, "allowance"),
     ]

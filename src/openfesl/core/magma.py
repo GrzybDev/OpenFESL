@@ -4,6 +4,7 @@ from openfesl.core.entitlements import Entitlement, EntitlementStore
 from openfesl.core.games import Game
 from openfesl.core.launcher import LauncherSession, LauncherSessions
 from openfesl.core.personas import Persona, PersonaStore
+from openfesl.core.wallets import Wallets
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +43,11 @@ class Magma:
     """Answers Magma about the personas of the account whose launcher session a cookie names."""
 
     def __init__(
-        self, sessions: LauncherSessions, personas: PersonaStore, entitlements: EntitlementStore
+        self,
+        sessions: LauncherSessions,
+        personas: PersonaStore,
+        entitlements: EntitlementStore,
+        wallets: Wallets,
     ) -> None:
         """Find the askers among the launcher's sign-ins and their personas in the stores.
 
@@ -50,10 +55,12 @@ class Magma:
             sessions: The launcher's sign-ins, by session id.
             personas: Where the personas are found.
             entitlements: Where the personas' items are kept.
+            wallets: The balances the personas spend.
         """
         self._sessions = sessions
         self._personas = personas
         self._entitlements = entitlements
+        self._wallets = wallets
 
     def session(self, session_id: str | None) -> LauncherSession:
         """Return the launcher session that a request's magma cookie names.
@@ -91,6 +98,21 @@ class Magma:
         """
         persona = await self._persona(session_id, game, persona_id)
         return await self._entitlements.of_persona(persona.id, tag)
+
+    async def wallets(self, session_id: str | None, game: Game, persona_id: int) -> dict[str, int]:
+        """Return what a persona of the asking account has to spend in each currency, by code.
+
+        Args:
+            session_id: The magma cookie's value; none when the request carries no cookie.
+            game: The game whose Magma host was asked.
+            persona_id: The persona.
+
+        Raises:
+            MagmaError: When the request names no session that is known, or the persona is
+                not one of its account's in the game.
+        """
+        persona = await self._persona(session_id, game, persona_id)
+        return await self._wallets.of_persona(game, persona)
 
     async def _persona(self, session_id: str | None, game: Game, persona_id: int) -> Persona:
         account_id = self.session(session_id).account_id

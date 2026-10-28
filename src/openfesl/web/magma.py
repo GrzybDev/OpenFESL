@@ -8,6 +8,7 @@ from openfesl.core.games import Game
 from openfesl.core.magma import NOT_NUMERIC, VALIDATION_FAILED, Magma, MagmaError
 from openfesl.protocol.magma import (
     EntitlementEntry,
+    billing_accounts,
     entitlements,
     error,
     products,
@@ -64,6 +65,10 @@ def magma_app(game: Game, magma: Magma) -> FastAPI:
             for entitlement in held
         ]
         return _xml(entitlements(entries))
+
+    @app.get("/nucleus/wallets/{userId}")
+    async def wallets(persona_id: UserId, session_id: SessionId = None) -> Response:
+        return _xml(billing_accounts(await magma.wallets(session_id, game, persona_id)))
 
     # The store has no products, while a game still needs both lists to load a persona.
     @app.get("/ofb/products")

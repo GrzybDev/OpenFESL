@@ -10,6 +10,7 @@ from sqlalchemy import (
     Index,
     LargeBinary,
     SmallInteger,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.dialects.postgresql import JSONB
@@ -107,6 +108,38 @@ Index(
     unique=True,
     postgresql_where=EntitlementRow.persona_id.is_not(None),
 )
+
+
+class WalletRow(Base):
+    __tablename__ = "wallet"
+    # An account's balance in a currency of a game that its personas share, or a persona's own.
+    __table_args__ = (
+        UniqueConstraint(
+            "account_id", "game", "currency", "persona_id", postgresql_nulls_not_distinct=True
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    account_id: Mapped[int] = mapped_column(ForeignKey("account.id", ondelete="CASCADE"))
+    game: Mapped[str]
+    currency: Mapped[str]
+    persona_id: Mapped[int | None] = mapped_column(
+        ForeignKey("persona.id", ondelete="CASCADE"), index=True
+    )
+    # The sum of the wallet's ledger, changed only together with an entry in it.
+    balance: Mapped[int] = mapped_column(BigInteger)
+
+
+class WalletEntryRow(Base):
+    __tablename__ = "wallet_entry"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    wallet_id: Mapped[int] = mapped_column(ForeignKey("wallet.id", ondelete="CASCADE"), index=True)
+    delta: Mapped[int] = mapped_column(BigInteger)
+    # The wallet's balance after the change.
+    balance: Mapped[int] = mapped_column(BigInteger)
+    reason: Mapped[str]
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
 class ProductKeyRow(Base):

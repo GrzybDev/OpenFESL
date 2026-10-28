@@ -28,6 +28,22 @@ theater_port = 18275
 [http]
 magma = "www.battlefieldheroes.com"
 
+# The currencies of the wallets the game loads with each hero, by code: Hero Points, Valor Points
+# and Funds. The game keeps a balance in each, and its ability refund fails without the Hero Points
+# one (BFHeroes.exe 1.89 0x007dc1ac). A hero earns Hero Points with its own levels, while Funds
+# were one balance per account and the website read Valor Points without naming a hero, so an
+# account's heroes share those two. Funds were bought with money, which this server takes none
+# of, so each account starts with an allowance of this server's choosing.
+[currencies._DH]
+scope = "persona"
+
+[currencies._DV]
+scope = "account"
+
+[currencies._PF]
+scope = "account"
+allowance = 2500
+
 # How the services behave where the game handles more than one behaviour; the instance's
 # settings override each.
 [policies]

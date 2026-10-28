@@ -1,5 +1,6 @@
 import tomllib
 from collections.abc import Iterable, Iterator
+from enum import StrEnum
 from importlib.resources import files
 from importlib.resources.abc import Traversable
 from typing import Self
@@ -160,6 +161,27 @@ class ServerFiles(BaseModel):
     identity: str
 
 
+class Scope(StrEnum):
+    """Who holds a balance in a currency: an account for all its personas, or each its own."""
+
+    ACCOUNT = "account"
+    PERSONA = "persona"
+
+
+class Currency(BaseModel):
+    """A currency that a game's players spend from their wallets.
+
+    Attributes:
+        scope: Who holds a balance in it.
+        allowance: What each balance in it starts with.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    scope: Scope
+    allowance: int = 0
+
+
 class Game(BaseModel):
     """A game the server serves, as its data file describes it.
 
@@ -176,6 +198,7 @@ class Game(BaseModel):
         automatic_grants: The entitlements that the game's dedicated servers may grant the
             players in their games, by tag.
         http: What the game fetches over HTTP.
+        currencies: The currencies of the players' wallets, by the code the game knows each by.
         records: The records a persona may keep, by name, with the most entries each holds.
         associations: The association list types the game keeps, by name.
         lobbies: The Theater lobbies of all of the game's clients.
@@ -207,6 +230,7 @@ class Game(BaseModel):
     keys: list[ProductKey] = []
     automatic_grants: list[Grant] = []
     http: Http = Http()
+    currencies: dict[str, Currency] = {}
     records: dict[str, int] = {}
     associations: dict[str, ListRule] = {}
     lobbies: list[Lobby] = []

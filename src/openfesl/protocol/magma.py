@@ -1,4 +1,4 @@
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from xml.etree.ElementTree import Element, SubElement, tostring
@@ -80,6 +80,20 @@ def entitlements(entries: Iterable[EntitlementEntry]) -> bytes:
             ("status", entry.status),
         ):
             SubElement(entitlement, name).text = text
+    return _document(root)
+
+
+def billing_accounts(balances: Mapping[str, int]) -> bytes:
+    """Return a persona's wallets, the balance it has to spend in each currency.
+
+    Args:
+        balances: The balances, by currency code.
+    """
+    root = Element("billingAccounts")
+    for currency, balance in balances.items():
+        wallet = SubElement(root, "walletAccount")
+        SubElement(wallet, "currency").text = currency
+        SubElement(wallet, "balance").text = str(balance)
     return _document(root)
 
 

@@ -1,6 +1,14 @@
 from datetime import UTC, datetime, timedelta, timezone
 
-from openfesl.protocol.magma import EntitlementEntry, entitlements, error, products, success, token
+from openfesl.protocol.magma import (
+    EntitlementEntry,
+    billing_accounts,
+    entitlements,
+    error,
+    products,
+    success,
+    token,
+)
 
 
 def test_magma_documents_are_the_bytes_the_game_parses() -> None:
@@ -15,6 +23,12 @@ def test_magma_documents_are_the_bytes_the_game_parses() -> None:
         b'<error code="VALIDATION_FAILED"><failure cause="NOT_NUMERIC" field="userId" /></error>'
     )
     assert products() == b"<products />"
+    assert billing_accounts({"_DH": 1, "_PF": 2500}) == (
+        b"<billingAccounts>"
+        b"<walletAccount><currency>_DH</currency><balance>1</balance></walletAccount>"
+        b"<walletAccount><currency>_PF</currency><balance>2500</balance></walletAccount>"
+        b"</billingAccounts>"
+    )
 
 
 def test_an_entitlement_list_gives_dates_to_the_minute_in_utc() -> None:

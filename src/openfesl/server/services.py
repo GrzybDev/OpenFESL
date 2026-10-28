@@ -39,6 +39,7 @@ from openfesl.core.telemetry import telemetry_routes
 from openfesl.core.texts import load_texts
 from openfesl.core.theater import Theater, TheaterRoute, theater_routes
 from openfesl.core.verification import EmailVerification
+from openfesl.core.wallets import Wallets
 from openfesl.server.mail import SmtpMailer
 from openfesl.server.settings import Settings
 from openfesl.server.stores import Stores
@@ -65,7 +66,12 @@ class GameServices:
         self.players = Players()
         self._launcher_sessions = LauncherSessions(self.players)
         self.game_http = GameHttp(games, self.players, load_texts("news"))
-        self.magma = Magma(self._launcher_sessions, stores.personas, stores.entitlements)
+        self.magma = Magma(
+            self._launcher_sessions,
+            stores.personas,
+            stores.entitlements,
+            Wallets(stores.wallets),
+        )
         self.approval = Approval(stores.servers)
         self.hosting = Hosting(self.approval)
         self.census = Census(self.hosting, self.players)
