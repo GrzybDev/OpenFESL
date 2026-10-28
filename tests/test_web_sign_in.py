@@ -188,6 +188,10 @@ async def test_the_cloudflare_check_guards_the_password_form_before_anything_is_
         strip = await client.get(f"{base}/bfheroes/play")
         assert 'name="password"' not in strip.text and "openfesl_session" not in strip.cookies
         assert ("/sign-in?next=%2Fbfheroes%2Fplay", "Sign in") in links(markup(strip.content))
+        # The creator that the game opens points to no sign-in fields above it then.
+        arrival = await client.get(f"{base}/bfheroes/user/createHero", params={"from": "game"})
+        assert "Heroes belong to that account" in arrival.text
+        assert "sign-in above" not in arrival.text
         page = await client.get(f"{base}/sign-in", params={"next": "/bfheroes/play"})
         assert 'data-sitekey="invented-site-key"' in page.text
         assert "Cloudflare Turnstile to tell people from automated requests" in page.text

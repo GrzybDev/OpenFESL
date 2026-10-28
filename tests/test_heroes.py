@@ -5,6 +5,7 @@ import httpx2
 import pytest
 from accounts import PASSWORD, post_sign_in, select_value
 from heroes import CREATOR, create, create_hero
+from identity import form_token
 from support import FESL, fetch, game, launcher_sign_in, markup, visible
 
 pytestmark = pytest.mark.anyio
@@ -22,15 +23,19 @@ async def test_a_hero_made_on_the_site_is_the_hero_the_game_logs_in_with(
     assert refused.json() == {"error": "no-hero"}
 
     async with httpx2.AsyncClient() as client:
-        signed_out = (await client.get(f"{base}{CREATOR}")).text
-        assert "Sign in to create a hero" in visible(signed_out.encode())
-        assert 'name="faction"' not in signed_out
+        signed_out = visible((await client.get(f"{base}{CREATOR}")).content)
+        assert "Sign in to create a hero" in signed_out
+        from_game = (await client.get(f"{base}{CREATOR}?from=game")).text
+        assert "The creator opens after signing in." in visible(from_game.encode())
+        assert "or use the sign-in above with the e-mail address" in visible(from_game.encode())
+        assert 'name="faction"' not in from_game
         # A number in another script is no number of the look.
         odd = await client.post(f"{base}{CREATOR}", data={"skin_tone": "²"})
         assert odd.status_code == 400
         await post_sign_in(client, base, "ann@example.test", PASSWORD)
-        page = markup((await client.get(f"{base}{CREATOR}")).content)
-        assert "0 of 4 used" in page
+        page = markup((await client.get(f"{base}{CREATOR}?from=game")).content)
+        assert "Battlefield Heroes sent this page" in page
+        assert 'name="from" value="game"' in page and "0 of 4 used" in page
 
         checks = [
             (await client.get(f"{base}/bfheroes/heroes/name", params={"name": name})).text
@@ -50,14 +55,20 @@ async def test_a_hero_made_on_the_site_is_the_hero_the_game_logs_in_with(
         # The page that answers a form still shows the site's bar.
         assert "2,500 Funds 0 Valor Points" in shown
 
-        created = await create(client, base, "Mossgrove")
+        created = await create(client, base, "Mossgrove", **{"from": "game"})
+        assert created.headers["location"].endswith("/created?from=game")
         arrived = await client.get(f"{base}{created.headers['location']}")
         done = markup(arrived.content)
         assert "Mossgrove is the default hero, in slot 1 of 4." in done
-        shown = visible(arrived.content)
-        assert "OpenFESLHook's launcher logs Battlefield Heroes in as Mossgrove." in shown
+        assert "when it starts again, it logs in as Mossgrove" in done
         # The bar shows the default hero from now on.
-        assert "Default hero Mossgrove" in shown
+        assert "Default hero Mossgrove" in visible(arrived.content)
+        # The game may have used another account, whose sign-in returns to the creator.
+        other = {"csrf": form_token(arrived.text), "next": f"{CREATOR}?from=game"}
+        switched = await client.post(f"{base}/sign-out", data=other)
+        assert switched.headers["location"] == (
+            "/sign-in?next=%2Fbfheroes%2Fuser%2FcreateHero%3Ffrom%3Dgame"
+        )
 
     # The launcher logs the game in with the new hero, which it finds with its choices, its
     # loadout and the bandages the game does not grant itself.

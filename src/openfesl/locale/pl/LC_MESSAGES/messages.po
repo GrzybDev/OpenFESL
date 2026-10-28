@@ -182,6 +182,9 @@ msgstr "Wybrane tu frakcja, klasa i wygląd zostają z bohaterem na stałe."
 msgid "web.creator.lead.full"
 msgstr "Nowy bohater potrzebuje wolnego miejsca."
 
+msgid "web.creator.waiting"
+msgstr "Kreator otworzy się po zalogowaniu."
+
 msgid "web.creator.signed_out"
 msgstr "Tworzenie bohatera wymaga zalogowania"
 
@@ -398,6 +401,9 @@ msgstr "Utworzono bohatera %(hero)s"
 msgid "web.created.default"
 msgstr "%(hero)s jest domyślnym bohaterem, w miejscu %(slot)s z %(slots)s."
 
+msgid "web.created.from_game"
+msgstr "Gra %(game)s zamknęła się po otwarciu tej strony; po ponownym uruchomieniu użyje bohatera %(hero)s."
+
 msgid "web.created.logs_in"
 msgstr "Program uruchamiający OpenFESLHook uruchamia grę %(game)s z bohaterem %(hero)s."
 
@@ -424,6 +430,33 @@ msgstr "%(hero_class)s · poziom %(level)s"
 
 msgid "web.heroes.level"
 msgstr "Poziom %(level)s"
+
+msgid "web.arrival.title"
+msgstr "Tę stronę otworzyła gra %(game)s"
+
+msgid "web.arrival.text"
+msgstr "Gra otwiera tę stronę, gdy konto, którym się loguje, nie ma bohatera, a potem się zamyka."
+
+msgid "web.arrival.next"
+msgstr "Wystarczy utworzyć bohatera poniżej; po ponownym uruchomieniu gra %(game)s użyje tego bohatera."
+
+msgid "web.arrival.signed_in"
+msgstr "Zalogowano tu jako %(account)s. Jeśli gra użyła innego konta:"
+
+msgid "web.arrival.switch"
+msgstr "wyloguj się i zaloguj na tamto konto"
+
+msgid "web.arrival.sign_in"
+msgstr "Bohaterowie należą do tamtego konta: wystarczy się na nie zalogować, a kreator otworzy się tutaj."
+
+msgid "web.arrival.strip"
+msgstr "albo logowanie powyżej, z adresem e-mail i hasłem do gier, których używa program uruchamiający"
+
+msgid "web.arrival.has_hero"
+msgstr "Konto ma już bohatera"
+
+msgid "web.arrival.has_hero.text"
+msgstr "Gra %(game)s otworzyła tę stronę, bo przy logowaniu konto nie miało bohatera. Od tego czasu powstał bohater %(hero)s, więc gra użyje go od następnego uruchomienia."
 
 msgid "games.bfheroes.faction.royal"
 msgstr "Royal Army"

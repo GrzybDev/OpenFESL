@@ -1,5 +1,6 @@
 /* The head of the creator and of the page after it: the plaque and its lead beside the slots,
-   and the dashed panel that says why no hero can be created now. */
+   the dashed panel that says why no hero can be created now, and the place the creator takes
+   once its visitor signs in. */
 @layer pages {
   .creator-head {
     display: flex;
@@ -63,5 +64,20 @@
     > .site-actions {
       margin-top: 14px;
     }
+  }
+
+  .creator-waiting {
+    display: grid;
+    min-height: 120px;
+    place-items: center;
+    margin-top: 22px;
+    padding: 16px;
+    border: 2px dashed #8a7a6c;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
+    text-align: center;
+    color: #5c4a3c;
   }
 }

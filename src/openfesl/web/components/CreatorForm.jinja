@@ -1,4 +1,4 @@
-{#def rules, look, roster, name: str, refused: str, kits: dict, slot: int #}
+{#def rules, look, roster, name: str, refused: str, from_game: bool, kits: dict, slot: int #}
 {# The one-screen creator: the hero on the stage at the left, the faction, class and look on the
    wooden panel at the right, and the naming step. Without scripts every list shows, the naming
    is the form's last part, and the name is checked when the form is sent. #}
@@ -55,6 +55,7 @@
       class="creator enter-panel">
   <script type="application/json" data-creator-texts>{{ texts|tojson }}</script>
   <input type="hidden" name="csrf" value="{{ csrf }}">
+  {% if from_game %}<input type="hidden" name="from" value="game">{% endif %}
   <div class="creator-box">
     <CreatorStage :look="look" :who="who[current]" :hair="hair" :beard="beard" />
     <div class="creator-panel">

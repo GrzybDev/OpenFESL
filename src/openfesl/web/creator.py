@@ -1,4 +1,4 @@
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Mapping
 from typing import Any
 
 from fastapi import APIRouter, Request
@@ -63,7 +63,7 @@ class CreatorPages:
     def _creator(self, game: Game) -> Callable[[Request], Awaitable[Response]]:
         async def show_creator(request: Request) -> Response:
             look = random_look(_rules(game))
-            return await self._render(request, game, look)
+            return await self._render(request, game, look, _from_game(request.query_params))
 
         return show_creator
 
@@ -73,16 +73,19 @@ class CreatorPages:
             fields = {key: str(value) for key, value in form.items()}
             rules = _rules(game)
             player = signed_in(request)
+            from_game = _from_game(fields)
             look = read_look(rules, fields) or random_look(rules)
             name = fields.get("name", "").strip()
             if player is None or not form_matches(request, form):
-                return await self._render(request, game, look, name, notice="form")
+                return await self._render(request, game, look, from_game, name, notice="form")
             try:
                 hero = await self._heroes.create(game, player.account_id, look, name)
             except HeroRefused as refused:
-                return await self._render(request, game, look, name, refused=refused.refusal)
+                return await self._render(
+                    request, game, look, from_game, name, refused=refused.refusal
+                )
             target = localize(f"/{game.id}/heroes/{hero.id}/created", request.state.language)
-            return RedirectResponse(target, 303)
+            return RedirectResponse(target + ("?from=game" if from_game else ""), 303)
 
         return create
 
@@ -118,6 +121,7 @@ class CreatorPages:
                 kit=kits[(hero.faction, hero.hero_class)]
                 if hero.faction and hero.hero_class
                 else "",
+                from_game=_from_game(request.query_params),
             )
 
         return show_created
@@ -127,6 +131,7 @@ class CreatorPages:
         request: Request,
         game: Game,
         look: Look,
+        from_game: bool,
         name: str = "",
         refused: Refusal | None = None,
         notice: str = "",
@@ -142,13 +147,15 @@ class CreatorPages:
             name=name,
             refused=refused.value if refused else "",
             notice=notice,
+            from_game=from_game,
             kits={
                 f"{faction}.{hero_class}": text
                 for (faction, hero_class), text in (
                     await self._kits(game, request.state.language)
                 ).items()
             },
-            next=localize(f"/{game.id}{CREATOR}", request.state.language),
+            next=localize(f"/{game.id}{CREATOR}", request.state.language)
+            + ("?from=game" if from_game else ""),
             csrf=form_token(request),
         )
         return self._pages.render(request, "heroes.Creator", status, **context)
@@ -186,3 +193,8 @@ def _count(key: str, count: int, language: str) -> str:
 def _rules(game: Game) -> HeroRules:
     assert game.heroes is not None
     return game.heroes
+
+
+def _from_game(values: Mapping[str, str]) -> bool:
+    # The game opened the creator, which its page and the pages after it say.
+    return values.get("from") == "game"

@@ -1,0 +1,53 @@
+/* Why the game opened the page, on the orange box above the creator. */
+@layer components {
+  .arrival {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 22px;
+    margin-bottom: 30px;
+    padding: 16px 20px;
+  }
+
+  .arrival-disc {
+    display: grid;
+    flex: 0 0 auto;
+    width: 64px;
+    height: 64px;
+    place-items: center;
+    border: 3px solid #000;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 3px 0 #000;
+  }
+
+  .arrival-text {
+    flex: 1 1 420px;
+    min-width: 0;
+
+    > p {
+      max-width: 78ch;
+      margin-top: 8px;
+    }
+  }
+
+  .arrival-other {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+    margin-top: 6px;
+    font-size: 14px;
+
+    button {
+      min-height: 44px;
+      padding-inline: 4px;
+      color: inherit;
+      font-weight: 700;
+      text-decoration-line: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 3px;
+      cursor: pointer;
+    }
+  }
+}

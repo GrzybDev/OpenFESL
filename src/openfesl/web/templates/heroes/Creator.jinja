@@ -1,5 +1,6 @@
-{#def rules, roster, look, name: str, refused: str, notice: str, kits: dict, next: str #}
-{# The hero creator: the slots, and the one-screen creator, or why no hero can be created now. #}
+{#def rules, roster, look, name: str, refused: str, notice: str, from_game: bool, kits: dict, next: str #}
+{# The hero creator: why the game opened it, the slots, and the one-screen creator, or why no hero
+   can be created now. #}
 {% set title = _("web.creator.title") %}
 {% set slot = roster.heroes|length + 1 if roster else 1 %}
 <Layout :title="title">
@@ -8,6 +9,7 @@
   {% elif notice == "form" %}
     <SiteMessage :shown="{'key': 'web.creator.refused.form', 'values': {}, 'error': True}" />
   {% endif %}
+  {% if from_game %}<ArrivalNotice :roster="roster" :next="next" />{% endif %}
   <section aria-labelledby="creator-title" class="creator-head">
     <div class="creator-intro">
       <Plaque id="creator-title">{{ title }}</Plaque>
@@ -31,7 +33,9 @@
       </SlotPanel>
     {% endif %}
   </section>
-  {% if not player %}
+  {% if not player and from_game %}
+    <p class="creator-waiting">{{ _("web.creator.waiting") }}</p>
+  {% elif not player %}
     <section aria-labelledby="creator-closed"
              class="creator-closed creator-unavailable">
       <span aria-hidden="true"
@@ -54,6 +58,6 @@
       <p>{{ _("web.creator.full.text") }}</p>
     </section>
   {% else %}
-    <CreatorForm :rules="rules" :look="look" :roster="roster" :name="name" :refused="refused" :kits="kits" :slot="slot" />
+    <CreatorForm :rules="rules" :look="look" :roster="roster" :name="name" :refused="refused" :from_game="from_game" :kits="kits" :slot="slot" />
   {% endif %}
 </Layout>

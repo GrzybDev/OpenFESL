@@ -1,4 +1,4 @@
-{#def roster, hero, slot: int, kit: str #}
+{#def roster, hero, slot: int, kit: str, from_game: bool #}
 {# The page a new hero arrives on: what was created, where it stands and what follows, beside the
    new hero's card. #}
 {% set title = _("web.created.title") %}
@@ -19,7 +19,7 @@
         <h2 id="created-what" class="site-box-title">{{ _("web.created.what", hero=name) }}</h2>
         {% if default and default.persona.id == hero.persona.id %}
           <p>{{ _("web.created.default", hero=name, slot=slot, slots=roster.slots) }}</p>
-          <p>{{ _("web.created.logs_in", game=game.name, hero=name) }}</p>
+          <p>{{ _("web.created.from_game" if from_game else "web.created.logs_in", game=game.name, hero=name) }}</p>
         {% else %}
           <p>{{ _("web.created.further", slot=slot, slots=roster.slots, game=game.name) }}</p>
           {% if default %}<p>{{ _("web.created.stays", hero=default.persona.name, game=game.name) }}</p>{% endif %}

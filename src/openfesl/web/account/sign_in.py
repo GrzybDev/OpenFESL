@@ -131,10 +131,13 @@ class SignInPages:
 
         @router.post("/sign-out")
         async def sign_out(request: Request) -> Response:
-            if not form_matches(request, await request.form()):
-                return to_sign_in(request, "", "form")
+            form = await request.form()
+            # A page that offers signing in with another account names itself to return to.
+            back = inside(str(form.get("next", "")), SITE)
+            if not form_matches(request, form):
+                return to_sign_in(request, back, "form")
             end(request)
-            return to_sign_in(request, "", "signed_out")
+            return to_sign_in(request, back, "signed_out")
 
         return router
 

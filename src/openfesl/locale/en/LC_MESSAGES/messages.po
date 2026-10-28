@@ -173,6 +173,9 @@ msgstr "Faction, class and the look chosen here stay with the hero."
 msgid "web.creator.lead.full"
 msgstr "A new hero needs a free hero slot."
 
+msgid "web.creator.waiting"
+msgstr "The creator opens after signing in."
+
 msgid "web.creator.signed_out"
 msgstr "Sign in to create a hero"
 
@@ -365,6 +368,9 @@ msgstr "%(hero)s was created"
 msgid "web.created.default"
 msgstr "%(hero)s is the default hero, in slot %(slot)s of %(slots)s."
 
+msgid "web.created.from_game"
+msgstr "%(game)s closed when it sent this page; when it starts again, it logs in as %(hero)s."
+
 msgid "web.created.logs_in"
 msgstr "OpenFESLHook's launcher logs %(game)s in as %(hero)s."
 
@@ -391,6 +397,33 @@ msgstr "%(hero_class)s · level %(level)s"
 
 msgid "web.heroes.level"
 msgstr "Level %(level)s"
+
+msgid "web.arrival.title"
+msgstr "%(game)s sent this page"
+
+msgid "web.arrival.text"
+msgstr "The game opens this page when the account it logs in with has no hero, and then closes."
+
+msgid "web.arrival.next"
+msgstr "Create a hero below; when %(game)s starts again, it logs in with that hero."
+
+msgid "web.arrival.signed_in"
+msgstr "Signed in here as %(account)s. If the game used another account:"
+
+msgid "web.arrival.switch"
+msgstr "sign out and sign in with that one"
+
+msgid "web.arrival.sign_in"
+msgstr "Heroes belong to that account: sign in with it, and the creator opens here."
+
+msgid "web.arrival.strip"
+msgstr "or use the sign-in above with the e-mail address and game password the launcher uses"
+
+msgid "web.arrival.has_hero"
+msgstr "The account has a hero now"
+
+msgid "web.arrival.has_hero.text"
+msgstr "%(game)s sent this page because the account had no hero when the game logged in. %(hero)s has been created since, so the game logs in with it from its next start."
 
 msgid "games.bfheroes.faction.royal"
 msgstr "Royal Army"

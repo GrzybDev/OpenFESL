@@ -1,0 +1,33 @@
+{#def roster, next: str #}
+{# Why the page opened: the game sends a player here when the account it logged in with has no
+   hero, and closes. The browser may be signed in to another account than the game, or to none. #}
+<section aria-labelledby="arrival-title"
+         class="site-box site-box-orange arrival">
+  <span aria-hidden="true" class="arrival-disc"><Icon name="window-closed" :size="32" stroke="#0A0A0A" /></span>
+  <div class="arrival-text">
+    {% if roster and roster.default %}
+      <h2 id="arrival-title" class="site-box-title">{{ _("web.arrival.has_hero") }}</h2>
+      <p>{{ _("web.arrival.has_hero.text", game=game.name, hero=roster.default.persona.name) }}</p>
+    {% else %}
+      <h2 id="arrival-title" class="site-box-title">{{ _("web.arrival.title", game=game.name) }}</h2>
+      {% if player %}
+        <p>{{ _("web.arrival.text") }} {{ _("web.arrival.next", game=game.name) }}</p>
+        <form method="post" action="{{ url('/sign-out') }}" class="arrival-other">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <input type="hidden" name="next" value="{{ next }}">
+          {% set account %}<strong>{{ player.name }}</strong>{% endset %}
+          <span>{{ _("web.arrival.signed_in", account=account) }}</span>
+          <button type="submit">{{ _("web.arrival.switch") }}</button>
+        </form>
+      {% else %}
+        <p>{{ _("web.arrival.text") }} {{ _("web.arrival.sign_in") }}</p>
+        <div class="arrival-other">
+          <a href="{{ url('/sign-in') }}?{{ {'next': next}|urlencode }}"
+             class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+          {# The strip above takes the address and password only where the sign-in asks for no check. #}
+          {% if not sign_in_check %}<span>{{ _("web.arrival.strip") }}</span>{% endif %}
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
+</section>
