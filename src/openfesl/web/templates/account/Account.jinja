@@ -8,6 +8,7 @@
   {"id": "profile", "label": _("web.account.profile")},
   {"id": "sign-in", "label": _("web.account.index.sign_in"), "count": overview.ways_in, "noun": _n("web.account.index.ways", overview.ways_in)},
   {"id": "games", "label": _("web.account.games"), "count": games|length, "noun": _n("web.account.index.games", games|length)},
+  {"id": "deletion", "label": _("web.account.deletion")},
 ] %}
 <Layout :title="title" page="account" :turnstile="check != ''">
   <PageHead labelledby="account-title" class="account-head">
@@ -21,6 +22,7 @@
     <AccountProfile :overview="overview" :made_in="made_in" :said="said if said.get('part') == 'profile' else {}" :errors="errors" :countries="countries" :sent="sent" :waits="waits" :mail="mail" :check="check" :accepted="accepted" :password_games="password_games" :personas="personas" />
     <AccountSecurity :overview="overview" :said="said if said.get('part') == 'sign-in' else {}" :errors="errors" :games="game_names" :services="services" :mail="mail" :since="since" :password_games="password_games" />
     <AccountGames :games="games" :password="overview.password" />
+    <AccountDeletion :overview="overview" :said="said if said.get('part') == 'deletion' else {}" :personas="personas" />
   </div>
   <template id="toast-failed">
     <Toast :shown="failed" />

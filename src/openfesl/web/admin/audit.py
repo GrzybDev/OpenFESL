@@ -22,6 +22,7 @@ PAGE_SIZE = 50
 # The glyph of each kind of action: what it takes away, gives, adds or changes.
 GLYPHS = {
     AdminAction.ACCOUNT_VERIFIED: "tick",
+    AdminAction.DELETION_REQUEST: "x",
     AdminAction.PLAYER_KICK: "x",
     AdminAction.SESSION_END: "x",
     AdminAction.LOGINS_FORGET: "x",
@@ -196,6 +197,10 @@ def audit_routes(
             owned = tuple(record.persona.id for record in found[listing.account])
         chosen = AuditFilter(listing.admin, listing.account, owned)
         total, entries = await log.entries(chosen, (listing.page - 1) * PAGE_SIZE, PAGE_SIZE)
+        # Everyone's actions, players' deletion requests included, which no admin filter lists.
+        everyone = total
+        if listing.admin is not None:
+            everyone, _ = await log.entries(AuditFilter(None, listing.account, owned), 0, 0)
         rows = await _rows(request.state.language, games, entries, accounts, personas, servers)
         named = await accounts.names([listing.account]) if listing.account is not None else {}
         return await sessions.render(
@@ -208,6 +213,7 @@ def audit_routes(
             pages=ceil(total / PAGE_SIZE),
             size=PAGE_SIZE,
             auditors=await log.auditors(chosen),
+            everyone=everyone,
             account=named.get(listing.account) if listing.account is not None else None,
         )
 
@@ -249,6 +255,7 @@ async def _rows(
         if action in (
             AdminAction.ACCOUNT_STATE,
             AdminAction.ACCOUNT_VERIFIED,
+            AdminAction.DELETION_REQUEST,
             AdminAction.SESSION_END,
             AdminAction.LOGINS_FORGET,
             AdminAction.ENTITLEMENT_GRANT,

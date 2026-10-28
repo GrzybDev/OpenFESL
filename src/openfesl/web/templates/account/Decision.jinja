@@ -1,6 +1,7 @@
-{#def name: str, question: str, text: str, action: str, label: str, busy: str, back: str #}
-{# A change to the account that asks first, as a page of its own: the question and what the change
-   does. Where scripts run, its panel opens as a dialog over the account page. #}
+{#def name: str, question: str, text: str, action: str, label: str, busy: str, back: str, facts: list = [], confirm: str = "", value: str = "", error: str = "" #}
+{# A change to the account that asks first, as a page of its own: the question, what the change does,
+   what the account holds and, for a change that cannot be undone here, the display name typed to
+   confirm it. Where scripts run, its panel opens as a dialog over the account page. #}
 {% set title = _("web.account.page") %}
 <Layout :title="title" page="account">
   <PageHead labelledby="decision-title">
@@ -14,8 +15,35 @@
                   :label="label"
                   :busy="busy"
                   :back="back"
-                  glyph="x">
+                  glyph="x"
+                  form="decision-form">
       <p id="confirm-text" class="body-text">{{ text }}</p>
+      {% if facts %}
+        <dl class="facts">
+          {% for label, fact in facts %}<Fact :label="label">{{ fact }}</Fact>{% endfor %}
+        </dl>
+      {% endif %}
+      {% if confirm %}
+        <div class="decision-confirm">
+          <label for="decision-name" class="field-label">{{ _("web.account.deletion.confirm") }}</label>
+          <input id="decision-name"
+                 name="confirm_name"
+                 form="decision-form"
+                 type="text"
+                 value="{{ value }}"
+                 required
+                 autocomplete="off"
+                 spellcheck="false"
+                 aria-describedby="decision-note"
+                 {% if error %} aria-invalid="true" autofocus{% endif %}
+                 class="field-input{% if error %} field-invalid{% endif %}">
+          {% if error %}
+            <FieldError id="decision-note">{{ error }}</FieldError>
+          {% else %}
+            <p id="decision-note" class="field-note">{{ _("web.account.deletion.confirm.note", name=confirm) }}</p>
+          {% endif %}
+        </div>
+      {% endif %}
     </Confirmation>
   </Panel>
 </Layout>

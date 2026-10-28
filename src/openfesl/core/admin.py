@@ -24,6 +24,9 @@ class AdminAction(StrEnum):
     when it ends, if it does."""
     ACCOUNT_VERIFIED = "account_verified"
     """Confirmed the e-mail address of the account numbered as the target by hand."""
+    DELETION_REQUEST = "deletion_request"
+    """Not the admin's: the player of the account numbered as the target asked on the site for
+    its deletion, which deactivated it; the details hold its new state as for account_state."""
     PERSONA_STATE = "persona_state"
     """Changed the state of the persona numbered as the target; the details hold the state."""
     PLAYER_KICK = "player_kick"

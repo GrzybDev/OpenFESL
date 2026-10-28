@@ -1,0 +1,18 @@
+{#def name: str, since #}
+{# The page after a deletion request: the account is deactivated and this browser signed out, so the
+   shell offers sign-in again; signing in by any way in now says the account is deactivated. #}
+{% set title = _("web.account.deletion.done") %}
+<Layout :title="title" page="sign_in">
+  <div class="enter-title notice-title">
+    <TitleBlock :title="title">{{ _("web.account.deletion.done.subtitle", name=name) }}</TitleBlock>
+  </div>
+  <div class="enter-panel">
+    <div class="notice-rows">
+      <Alert :label="_('web.account.notice.deactivated')" :title="_('web.account.deletion.done.title', date=when(since, 'yMMMd'), time=when(since, 'Hm'))" glyph="lock">{{ _("web.account.deletion.done.text") }}</Alert>
+      <p class="notice-row">{{ _("web.account.deletion.done.ways") }}</p>
+    </div>
+    <div class="actions">
+      <SmallAction :href="url('/')" :label="_('web.home')" />
+    </div>
+  </div>
+</Layout>

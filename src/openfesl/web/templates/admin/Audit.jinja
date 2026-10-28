@@ -1,12 +1,11 @@
-{#def listing, rows: list, total: int, pages: int, size: int, auditors: list, account #}
+{#def listing, rows: list, total: int, pages: int, size: int, auditors: list, everyone: int, account #}
 {# The log of the admin's actions, newest first: when, who, what was done to what with a link to
    it, and what changed, beside the filter by admin. An account's own log also lists what was
-   done to its in-game names. #}
+   done to its in-game names. A player's deletion request is listed as the player's own. #}
 {% set title = _("web.admin.audit") %}
 {% set list = url("/admin/audit") %}
-{% set everyone = auditors|sum(attribute="count") %}
-{% macro who(subject, name, role) %}
-  {%- if subject is none %}{{ _("web.admin.command_line") }}{% else %}{{ name or subject }}{% endif -%}
+{% macro who(subject, name, role, action="") %}
+  {%- if action == "deletion_request" %}{{ _("web.admin.audit.player") }}{% elif subject is none %}{{ _("web.admin.command_line") }}{% else %}{{ name or subject }}{% endif -%}
 {% endmacro %}
 <AdminPage :title="title" current="audit">
   <PageHead labelledby="audit-title">
@@ -60,7 +59,7 @@
                   </div>
                   <div role="cell" class="admin-cell cell-stack">
                     <span aria-hidden="true" class="cell-label">{{ _("web.admin.audit.admin") }}</span>
-                    <span class="audit-who">{{ who(entry.admin, entry.name, entry.role) }}</span>
+                    <span class="audit-who">{{ who(entry.admin, entry.name, entry.role, entry.action) }}</span>
                     {% if entry.role %}<span class="audit-role">{{ _("web.admin.role." ~ entry.role) }}</span>{% endif %}
                   </div>
                   <div role="cell" class="admin-cell cell-stack audit-action">

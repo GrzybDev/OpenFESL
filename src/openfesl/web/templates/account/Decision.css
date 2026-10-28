@@ -1,0 +1,17 @@
+/* The display name typed to confirm a change, under what the account holds: white with a thin edge,
+   as it stands on the confirmation's light block. */
+@layer pages {
+  .decision-confirm {
+    display: grid;
+    margin-top: 12px;
+
+    .field-input {
+      background: #ffffff;
+      box-shadow: inset 0 0 0 1px var(--placeholder);
+    }
+
+    .field-note {
+      margin-top: 2px;
+    }
+  }
+}

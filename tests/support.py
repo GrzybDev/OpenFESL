@@ -544,13 +544,17 @@ class Mailbox:
         self.messages.append(message)
         return "250 OK"
 
-    async def receive(self, to: str) -> tuple[EmailMessage, str]:
-        """Wait for the next message to an address and return it with the path of its link."""
+    async def receive(self, to: str, link: bool = True) -> tuple[EmailMessage, str]:
+        """Wait for the next message to an address and return it with the path of its link.
+
+        A message that has no link, as the test expects with link False, comes with an empty
+        path.
+        """
         with anyio.fail_after(5):
             while not self.messages:
                 await anyio.sleep(0.02)
         message = self.messages.pop(0)
         assert message["To"] == to
         found = re.search(re.escape(PUBLIC_URL) + r"(/\S+)", message.get_content())
-        assert found is not None
-        return message, found[1]
+        assert (found is not None) == link
+        return message, found[1] if found else ""

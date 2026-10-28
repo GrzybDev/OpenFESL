@@ -70,6 +70,14 @@ msgstr ""
 "\n"
 "It is valid until {expires} and works once. Without it, the game password stays as it is.\n"
 
+msgid "account.mail.deletion.subject"
+msgstr "OpenFESL account deactivated"
+
+#, python-brace-format
+msgid "account.mail.deletion.body"
+msgstr ""
+"The OpenFESL account {name} with this e-mail address was deactivated on {at}, as a deletion request on the site asked. It no longer signs in on the site or logs in to games. An admin completes the deletion of the account with everything on it; until then, only an admin can withdraw the request.\n"
+
 msgid "web.language.name"
 msgstr "English"
 
@@ -5413,3 +5421,109 @@ msgstr ""
 msgid "web.account.notice.everywhere.services"
 msgstr ""
 "A service keeps its own session, so the next sign-in through it may not ask for its password."
+
+msgid "web.account.deletion"
+msgstr "Deletion"
+
+msgid "web.account.deletion.not_requested"
+msgstr "Not requested"
+
+msgid "web.account.deletion.kept"
+msgstr "What the account keeps"
+
+msgid "web.account.deletion.kept.what"
+msgstr "Kept"
+
+msgid "web.account.deletion.kept.who"
+msgstr "Seen by"
+
+msgid "web.account.deletion.kept.personas"
+msgstr "%(personas)s and their statistics"
+
+msgid "web.account.deletion.kept.address"
+msgstr "E-mail address and country"
+
+msgid "web.account.deletion.kept.services"
+msgstr "Each linked service's id, name and link date"
+
+msgid "web.account.deletion.kept.terms"
+msgstr "The version of the accepted terms"
+
+msgid "web.account.deletion.seen.everyone"
+msgstr "Everyone"
+
+msgid "web.account.deletion.seen.games"
+msgstr "Everyone, on each game's pages"
+
+msgid "web.account.deletion.seen.account"
+msgstr "This account and OpenFESL's admins"
+
+msgid "web.account.deletion.seen.hash"
+msgstr "Nobody: kept only as a hash"
+
+msgid "web.account.deletion.seen.birth"
+msgstr "Not kept: checked once against the country's age limit"
+
+msgid "web.account.deletion.request"
+msgstr "Delete the account"
+
+msgid "web.account.deletion.request.title"
+msgstr "A deletion request deactivates the account at once."
+
+msgid "web.account.deletion.request.text"
+msgstr ""
+"Sign-in on this site and logins in every game stop right away. An admin then deletes the account with %(held)s."
+
+msgid "web.account.deletion.request.text.empty"
+msgstr ""
+"Sign-in on this site and logins in every game stop right away. An admin then deletes the account with everything on it."
+
+msgid "web.account.deletion.action"
+msgstr "Request deletion"
+
+msgid "web.account.deletion.request.next"
+msgstr ""
+"The next step lists what is on the account and asks for the display name."
+
+msgid "web.account.deletion.question"
+msgstr "Request deletion of %(name)s?"
+
+msgid "web.account.deletion.question.text"
+msgstr ""
+"The account is deactivated at once: sign-in on this site and logins in every game stop, and this browser is signed out. An admin then deletes the account with everything on it; until then, only an admin can withdraw the request."
+
+msgid "web.account.deletion.busy"
+msgstr "Requesting"
+
+msgid "web.account.deletion.confirm"
+msgstr "Display name, to confirm"
+
+msgid "web.account.deletion.confirm.note"
+msgstr "The request is made only when this reads %(name)s."
+
+msgid "web.account.error.confirm_name.mismatch"
+msgstr "No request was made: %(detail)s is not this account's display name."
+
+msgid "web.account.deletion.done"
+msgstr "Deletion requested"
+
+msgid "web.account.deletion.done.subtitle"
+msgstr "%(name)s is deactivated"
+
+msgid "web.account.deletion.done.title"
+msgstr ""
+"The account was deactivated on %(date)s at %(time)s, and this browser was signed out."
+
+msgid "web.account.deletion.done.text"
+msgstr ""
+"It no longer signs in on this site or logs in to games. An admin completes the deletion of the account with everything on it."
+
+msgid "web.account.deletion.done.ways"
+msgstr ""
+"Signing in by any of its ways in now shows that the account is deactivated."
+
+msgid "web.admin.audit.player"
+msgstr "The account's player"
+
+msgid "web.admin.audit.action.deletion_request"
+msgstr "Deletion requested"

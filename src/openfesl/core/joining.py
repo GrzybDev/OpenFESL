@@ -77,6 +77,7 @@ class Joining:
         feed.on(AdminAction.PLAYER_KICK, self._kick_persona)
         feed.on(AdminAction.PERSONA_STATE, self._kick_disabled)
         feed.on(AdminAction.ACCOUNT_STATE, self._kick_account)
+        feed.on(AdminAction.DELETION_REQUEST, self._kick_account)
         feed.on(AdminAction.SESSION_END, self._kick_signed_out)
 
     def routes(self) -> dict[str, TheaterRoute[Any]]:

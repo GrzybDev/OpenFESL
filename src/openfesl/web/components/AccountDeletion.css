@@ -1,0 +1,83 @@
+/* The account page's deletion: the table of what the account keeps on alternating rows under its
+   grey head, beside the request on its light block above its action. */
+@layer components {
+  .deletion-kept {
+    flex: 999 1 620px;
+  }
+
+  .deletion-table {
+    overflow-x: auto;
+
+    table {
+      width: 100%;
+      margin-top: 2px;
+      border-collapse: separate;
+      border-spacing: 0 2px;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.35;
+      color: var(--ink);
+    }
+
+    th,
+    td {
+      background: var(--row);
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    tbody th {
+      font-weight: 700;
+    }
+
+    td {
+      font-weight: 500;
+    }
+
+    tbody tr:nth-child(even) > * {
+      background: var(--row-alt);
+    }
+
+    thead th {
+      background: var(--bar-dark);
+      padding-block: 9px;
+      font-family: var(--area-font);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--bright);
+      text-transform: uppercase;
+    }
+  }
+
+  .deletion-request {
+    flex: 1 1 340px;
+
+    .bar-text {
+      margin-top: 0;
+    }
+
+    .action {
+      margin-top: 6px;
+    }
+  }
+
+  .deletion-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .deletion-title {
+    margin-top: 8px;
+    font-family: var(--font-sans);
+    font-size: 20px;
+    line-height: 1.25;
+    font-weight: 700;
+  }
+
+  .deletion-request .body-text:not(.side-note) {
+    margin-top: 6px;
+  }
+}

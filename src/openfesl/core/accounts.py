@@ -265,6 +265,16 @@ class AccountStore(Protocol):
             password_hash: The new password's hash.
         """
 
+    async def request_deletion(self, account_id: int) -> datetime:
+        """Deactivate an account at its player's request, ending its web sessions, and record it.
+
+        Args:
+            account_id: The account.
+
+        Returns:
+            When it was deactivated.
+        """
+
     async def end_sessions(self, account_id: int) -> None:
         """End an account's web sessions and the logins the games remember for it.
 

@@ -62,6 +62,7 @@ class Players:
             feed: The admin's actions as they are recorded.
         """
         feed.on(AdminAction.ACCOUNT_STATE, self._apply_state)
+        feed.on(AdminAction.DELETION_REQUEST, self._apply_state)
         feed.on(AdminAction.SESSION_END, self._end_session)
 
     def _end_session(self, action: LoggedAction) -> None:

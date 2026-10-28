@@ -152,6 +152,7 @@ class GameServices:
             stores.personas,
             logins,
             attempts,
+            outbox,
             games,
             [service.id for service in settings.sign_in_services],
         )

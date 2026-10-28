@@ -1,7 +1,7 @@
 import httpx2
 import pytest
 from accounts import PASSWORD, execute, post_registration, post_sign_in, returned
-from identity import IdentityProvider, form_token
+from identity import IdentityProvider, form_token, sign_in
 from support import FESL, Mailbox, cli, entitle_game, game, log_in_persona, login, markup
 
 from openfesl.core.games import load_games
@@ -312,3 +312,68 @@ async def test_signing_out_everywhere_ends_every_web_session_and_the_remembered_
         await player.hello(FESL, "bfbc2-pc")
         remembered = [("TXN", "NuLogin"), ("returnEncryptedInfo", "0"), ("encryptedInfo", token)]
         assert (await player.request(FESL, "acct", remembered))["errorCode"] == "122"
+
+
+async def request_deletion(client: httpx2.AsyncClient, base: str, name: str) -> httpx2.Response:
+    """Send the deletion request with the display name typed to confirm it."""
+    question = await client.get(f"{base}/account/deletion")
+    form = {"csrf": form_token(question.text), "confirmed": "1", "confirm_name": name}
+    return await client.post(f"{base}/account/deletion", data=form)
+
+
+async def test_a_deletion_request_deactivates_the_account_everywhere_once_its_name_is_typed(
+    mailbox: Mailbox, server_url: str, database_url: str
+) -> None:
+    base = server_url.replace("ws://", "http://").rstrip("/")
+    async with game(server_url) as player:
+        await log_in_persona(player, FESL, "kim@example.test", "Invented_Kim")
+        await execute(
+            database_url,
+            "UPDATE account SET display_name = 'Kim_Online' WHERE nuid = 'kim@example.test'",
+        )
+        async with httpx2.AsyncClient() as client, httpx2.AsyncClient() as elsewhere:
+            await post_sign_in(client, base, "kim@example.test", PASSWORD)
+            await post_sign_in(elsewhere, base, "kim@example.test", PASSWORD)
+            shown = markup((await client.get(f"{base}/account/deletion")).content)
+            assert "Request deletion of Kim_Online?" in shown
+            assert "Battlefield: Bad Company 2" in shown and "1 soldier" in shown
+            refused = await request_deletion(client, base, "Kim")
+            assert refused.status_code == 400
+            assert "No request was made: Kim is not this account&#39;s display name." in (
+                refused.text
+            )
+
+            requested = await request_deletion(client, base, "Kim_Online")
+            assert requested.headers["location"] == "/account/deletion/done"
+            done = await client.get(f"{base}/account/deletion/done")
+            assert "Kim_Online is deactivated" in markup(done.content)
+            assert 'href="/sign-in"' in done.text
+            mail, _ = await mailbox.receive("kim@example.test", link=False)
+            assert "only an admin can withdraw the request" in mail.get_content()
+            for browser in (client, elsewhere):
+                answer = await browser.get(f"{base}/account")
+                assert answer.headers["location"].startswith("/sign-in")
+            assert (
+                await post_sign_in(client, base, "kim@example.test", PASSWORD)
+            ).status_code == 403
+            # The game the account was logged in to signs it out at once.
+            await player.closed(FESL)
+
+
+async def test_admins_find_a_players_deletion_request_in_the_audit_log(
+    admin_provider: IdentityProvider, database_url: str, base: str
+) -> None:
+    await execute(
+        database_url,
+        "UPDATE account SET display_name = 'Invented_Ann' WHERE nuid = 'ann@example.test'",
+    )
+    async with httpx2.AsyncClient() as client:
+        await post_sign_in(client, base, "ann@example.test", PASSWORD)
+        await request_deletion(client, base, "Invented_Ann")
+    admin_provider.user = {"sub": "keeper-8", "groups": ["fesl-admins"]}
+    async with httpx2.AsyncClient() as admin:
+        await sign_in(admin, base)
+        log = (await admin.get(f"{base}/admin/audit")).text
+        assert "Deletion requested" in log and "The account&#39;s player" in log
+        # The player is none of the admins, nor the command line.
+        assert "The command line" not in log

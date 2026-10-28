@@ -9,6 +9,7 @@ from openfesl.core.games import Game, Games
 from openfesl.core.identities import Identity, IdentityStore, LinkedIdentity
 from openfesl.core.limits import Attempts
 from openfesl.core.logins import Logins
+from openfesl.core.mail import Outbox
 from openfesl.core.personas import Persona, PersonaStore
 from openfesl.core.problems import Problem, password_problem
 from openfesl.core.registration import is_country
@@ -70,6 +71,7 @@ class AccountManagement:
         personas: PersonaStore,
         logins: Logins,
         attempts: Attempts,
+        outbox: Outbox,
         games: Games,
         services: Collection[str],
     ) -> None:
@@ -82,6 +84,7 @@ class AccountManagement:
             logins: Checks and hashes game passwords.
             attempts: Counts the failed attempts with each address, which a wrong current game
                 password adds to as a wrong one at sign-in does.
+            outbox: Sends the mail that confirms a deletion request.
             games: The games, each of which the overview names with the account's personas.
             services: The ids of the configured sign-in services, whose identities alone sign
                 in.
@@ -91,6 +94,7 @@ class AccountManagement:
         self._personas = personas
         self._logins = logins
         self._attempts = attempts
+        self._outbox = outbox
         self._games = games
         self._services = services
 
@@ -224,3 +228,27 @@ class AccountManagement:
             account: The account.
         """
         await self._accounts.end_sessions(account.id)
+
+    async def request_deletion(
+        self, account: Account, name: str, language: str
+    ) -> datetime | Problem:
+        """Deactivate an account at its player's request, for an admin to delete it.
+
+        Its web sessions end, games refuse its logins, and a mail to its address confirms the
+        request; only an admin can withdraw it.
+
+        Args:
+            account: The account.
+            name: The display name typed to confirm the request, which must be the account's.
+            language: The language code of the page the request came from.
+
+        Returns:
+            When it was deactivated, or what is wrong with the name typed; nothing changes then.
+        """
+        if name != account.display_name:
+            return Problem("confirm_name", "mismatch", name)
+        deactivated = await self._accounts.request_deletion(account.id)
+        if self._outbox.sends:
+            times = {"at": deactivated}
+            self._outbox.send(account.nuid, "account.mail.deletion", language, {}, times, name=name)
+        return deactivated

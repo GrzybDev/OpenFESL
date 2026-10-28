@@ -71,6 +71,14 @@ msgstr ""
 "\n"
 "Jest ważny do {expires} i działa jeden raz. Bez niego hasło do gier pozostaje bez zmian.\n"
 
+msgid "account.mail.deletion.subject"
+msgstr "Konto OpenFESL zostało dezaktywowane"
+
+#, python-brace-format
+msgid "account.mail.deletion.body"
+msgstr ""
+"Konto OpenFESL {name} z tym adresem e-mail zostało dezaktywowane {at} na prośbę o usunięcie wysłaną na stronie. Nie loguje się już na stronie ani w grach. Administrator dokończy usuwanie konta ze wszystkim, co ma; do tego czasu tylko administrator może wycofać prośbę.\n"
+
 msgid "web.language.name"
 msgstr "Polski"
 
@@ -5583,3 +5591,109 @@ msgstr ""
 msgid "web.account.notice.everywhere.services"
 msgstr ""
 "Usługa zachowuje własną sesję, więc następne logowanie przez nią może nie pytać o jej hasło."
+
+msgid "web.account.deletion"
+msgstr "Usuwanie"
+
+msgid "web.account.deletion.not_requested"
+msgstr "Nie zgłoszono"
+
+msgid "web.account.deletion.kept"
+msgstr "Co przechowuje konto"
+
+msgid "web.account.deletion.kept.what"
+msgstr "Przechowywane"
+
+msgid "web.account.deletion.kept.who"
+msgstr "Kto widzi"
+
+msgid "web.account.deletion.kept.personas"
+msgstr "%(personas)s i ich statystyki"
+
+msgid "web.account.deletion.kept.address"
+msgstr "Adres e-mail i kraj"
+
+msgid "web.account.deletion.kept.services"
+msgstr "Identyfikator, nazwa i data połączenia każdej usługi"
+
+msgid "web.account.deletion.kept.terms"
+msgstr "Wersja zaakceptowanych warunków"
+
+msgid "web.account.deletion.seen.everyone"
+msgstr "Wszyscy"
+
+msgid "web.account.deletion.seen.games"
+msgstr "Wszyscy, na stronach każdej gry"
+
+msgid "web.account.deletion.seen.account"
+msgstr "To konto i administratorzy OpenFESL"
+
+msgid "web.account.deletion.seen.hash"
+msgstr "Nikt: przechowywane tylko jako skrót"
+
+msgid "web.account.deletion.seen.birth"
+msgstr "Nieprzechowywana: sprawdzona raz z limitem wieku kraju"
+
+msgid "web.account.deletion.request"
+msgstr "Usunięcie konta"
+
+msgid "web.account.deletion.request.title"
+msgstr "Prośba o usunięcie od razu dezaktywuje konto."
+
+msgid "web.account.deletion.request.text"
+msgstr ""
+"Logowanie na tej stronie i w każdej grze od razu przestaje działać. Administrator usuwa potem konto wraz z tym, co ma: %(held)s."
+
+msgid "web.account.deletion.request.text.empty"
+msgstr ""
+"Logowanie na tej stronie i w każdej grze od razu przestaje działać. Administrator usuwa potem konto wraz ze wszystkim, co ma."
+
+msgid "web.account.deletion.action"
+msgstr "Poproś o usunięcie"
+
+msgid "web.account.deletion.request.next"
+msgstr "Następny krok wymienia, co ma konto, i prosi o nazwę wyświetlaną."
+
+msgid "web.account.deletion.question"
+msgstr "Poprosić o usunięcie konta %(name)s?"
+
+msgid "web.account.deletion.question.text"
+msgstr ""
+"Konto zostanie od razu dezaktywowane: logowanie na tej stronie i w każdej grze przestanie działać, a ta przeglądarka zostanie wylogowana. Administrator usunie potem konto ze wszystkim, co ma; do tego czasu tylko administrator może wycofać prośbę."
+
+msgid "web.account.deletion.busy"
+msgstr "Wysyłanie"
+
+msgid "web.account.deletion.confirm"
+msgstr "Nazwa wyświetlana, dla potwierdzenia"
+
+msgid "web.account.deletion.confirm.note"
+msgstr "Prośba zostanie wysłana tylko wtedy, gdy wpisano tu %(name)s."
+
+msgid "web.account.error.confirm_name.mismatch"
+msgstr ""
+"Nie wysłano prośby: %(detail)s to nie jest nazwa wyświetlana tego konta."
+
+msgid "web.account.deletion.done"
+msgstr "Poproszono o usunięcie"
+
+msgid "web.account.deletion.done.subtitle"
+msgstr "Konto %(name)s jest dezaktywowane"
+
+msgid "web.account.deletion.done.title"
+msgstr ""
+"Konto zostało dezaktywowane %(date)s o %(time)s, a ta przeglądarka została wylogowana."
+
+msgid "web.account.deletion.done.text"
+msgstr ""
+"Nie loguje się już na tej stronie ani w grach. Administrator dokończy usuwanie konta ze wszystkim, co ma."
+
+msgid "web.account.deletion.done.ways"
+msgstr ""
+"Logowanie dowolnym sposobem pokazuje teraz, że konto jest dezaktywowane."
+
+msgid "web.admin.audit.player"
+msgstr "Gracz tego konta"
+
+msgid "web.admin.audit.action.deletion_request"
+msgstr "Prośba o usunięcie"

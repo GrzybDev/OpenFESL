@@ -1,0 +1,53 @@
+{#def overview, said: dict, personas: list #}
+{# The account page's deletion: what the account keeps and who sees it, beside the request, which
+   asks first and lists what is on the account. #}
+{% set played = namespace(counts=[]) %}
+{% for entry in overview.games if entry.personas %}
+  {% set played.counts = played.counts + [_n("games." ~ entry.game.id ~ ".personas.count", entry.personas|length)] %}
+{% endfor %}
+{% set seen = _("web.account.deletion.seen.account") %}
+<AccountPart id="deletion" :title="_('web.account.deletion')">
+{% if said.get("notice") == "form" %}
+  <Alert :label="_('web.account.deletion.not_requested')" :title="_('web.account.notice.form')" glyph="warn" alert>{{ _("web.account.notice.form.text") }}</Alert>
+{% endif %}
+<div class="account-sides">
+  <section aria-labelledby="kept-title" class="account-side deletion-kept">
+    <Bar tag="h3" id="kept-title">{{ _("web.account.deletion.kept") }}</Bar>
+    <div class="deletion-table">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">{{ _("web.account.deletion.kept.what") }}</th>
+            <th scope="col">{{ _("web.account.deletion.kept.who") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for what, who in [
+            (_("web.account.display_name"), _("web.account.deletion.seen.everyone")),
+            (_("web.account.deletion.kept.personas", personas=listed(personas))|capitalize, _("web.account.deletion.seen.games")),
+            (_("web.account.deletion.kept.address"), seen),
+            (_("web.account.deletion.kept.services"), seen),
+            (_("web.account.deletion.kept.terms"), seen),
+            (_("web.account.password"), _("web.account.deletion.seen.hash")),
+            (_("web.account.birth"), _("web.account.deletion.seen.birth")),
+          ] %}
+            <tr>
+              <th scope="row">{{ what }}</th>
+              <td>{{ who }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section aria-labelledby="request-title" class="account-side deletion-request">
+    <div id="request-text" class="bar-text">
+      <h3 id="request-title" class="deletion-label">{{ _("web.account.deletion.request") }}</h3>
+      <p class="deletion-title">{{ _("web.account.deletion.request.title") }}</p>
+      <p class="body-text">{{ _("web.account.deletion.request.text", held=listed(played.counts)) if played.counts else _("web.account.deletion.request.text.empty") }}</p>
+    </div>
+    <Action :href="url('/account/deletion')" :label="_('web.account.deletion.action')" glyph="x" dialog />
+    <p class="body-text side-note">{{ _("web.account.deletion.request.next") }}</p>
+  </section>
+</div>
+</AccountPart>

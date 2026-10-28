@@ -83,13 +83,15 @@ class SqlAdminLog:
             chosen: Which actions; its admin is not applied.
         """
         anyone = AuditFilter(account=chosen.account, personas=chosen.personas)
+        # A player's deletion request is no admin's action, nor the command line's.
+        by_admins = AdminActionRow.action != AdminAction.DELETION_REQUEST
         name = func.max(AdminActionRow.admin_name)
         role = func.max(AdminActionRow.admin_role)
         count = func.count()
         async with self._sessions() as session:
             rows = await session.execute(
                 select(AdminActionRow.admin, name, role, count)
-                .where(*_conditions(anyone))
+                .where(*_conditions(anyone), by_admins)
                 .group_by(AdminActionRow.admin)
                 .order_by(count.desc(), name)
             )
@@ -127,6 +129,7 @@ class SqlAdminLog:
 _ACCOUNT_ACTIONS = [
     AdminAction.ACCOUNT_STATE,
     AdminAction.ACCOUNT_VERIFIED,
+    AdminAction.DELETION_REQUEST,
     AdminAction.SESSION_END,
     AdminAction.LOGINS_FORGET,
     AdminAction.ENTITLEMENT_GRANT,
@@ -139,7 +142,7 @@ def _conditions(chosen: AuditFilter) -> list[ColumnElement[bool]]:
     conditions: list[ColumnElement[bool]] = [AdminActionRow.action.in_(list(AdminAction))]
     if chosen.admin is not None:
         conditions.append(
-            AdminActionRow.admin.is_(None)
+            AdminActionRow.admin.is_(None) & (AdminActionRow.action != AdminAction.DELETION_REQUEST)
             if chosen.admin == ""
             else AdminActionRow.admin == chosen.admin
         )

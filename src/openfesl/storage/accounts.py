@@ -365,6 +365,34 @@ class SqlAccountStore:
         async with self._sessions.begin() as session:
             await _set_password(session, account_id, password_hash)
 
+    async def request_deletion(self, account_id: int) -> datetime:
+        """Deactivate an account at its player's request, ending its web sessions, and record it.
+
+        Args:
+            account_id: The account.
+
+        Returns:
+            When it was deactivated.
+        """
+        state = AccountState.DEACTIVATED
+        changed = datetime.now(UTC)
+        async with self._sessions.begin() as session:
+            await session.execute(
+                update(AccountRow)
+                .where(AccountRow.id == account_id)
+                .values(
+                    state=state.value,
+                    state_until=None,
+                    state_changed_at=changed,
+                    session_epoch=AccountRow.session_epoch + 1,
+                )
+            )
+            details = {"state": state.value, "until": None}
+            session.add(
+                action_row(AdminAction.DELETION_REQUEST, str(account_id), details, admin=None)
+            )
+        return changed
+
     async def end_sessions(self, account_id: int) -> None:
         """End an account's web sessions and the logins the games remember for it.
 
