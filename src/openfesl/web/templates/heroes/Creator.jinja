@@ -76,6 +76,9 @@
           <BuySlotButton :why="'creator-why' if short else ''" plus />
           <a href="{{ url('/' ~ game.id ~ '/heroes') }}"
              class="site-link"><Icon name="back" :size="13" stroke="currentColor" />{{ _("web.heroes.back") }}</a>
+          {% if short %}
+            <FundsLink class="site-link"><Icon name="go" :size="12" stroke="currentColor" /></FundsLink>
+          {% endif %}
         </p>
         {% if short %}
           <p id="creator-why" class="creator-why">

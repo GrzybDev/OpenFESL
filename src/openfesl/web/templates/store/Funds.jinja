@@ -1,0 +1,108 @@
+{#def from_game: bool, points: list, allowance: int, given = None #}
+{# The Funds page: why the game opened it, the account's balances or the way to see them, and the
+   rule that Funds are not sold, with the sources they come from on this server. #}
+{% set rules = game.heroes %}
+{% set funds = _("games." ~ game.id ~ ".currency." ~ rules.currency) %}
+<Layout :title="funds">
+  {% if from_game %}<FundsArrival :currency="funds" />{% endif %}
+  <section aria-labelledby="funds-title">
+    <Plaque id="funds-title">{{ funds }}</Plaque>
+    <p class="site-lead funds-lead">{{ _("games." ~ game.id ~ ".funds.lead") }}</p>
+  </section>
+  {% if bar %}
+    <section aria-labelledby="balances-title" class="funds-balances">
+      <h2 id="balances-title" class="sr-only">{{ _("web.funds.balances") }}</h2>
+      <ul role="list" class="funds-cards enter-rows">
+        {% for wallet, balance in bar.wallets %}
+          <li class="funds-card-hanger">
+            <Splash />
+            <article aria-labelledby="wallet-{{ wallet.currency }}"
+                     data-wallet="{{ wallet.currency }}"
+                     class="store-box store-box-pale funds-card">
+              <div class="funds-card-head">
+                <span aria-hidden="true"
+                      class="funds-coin"><Icon :name="wallet.glyph" :size="28" stroke="currentColor" /></span>
+                <h3 id="wallet-{{ wallet.currency }}" class="funds-card-title">
+                  {{ _("games." ~ game.id ~ ".currency." ~ wallet.currency) }}
+                </h3>
+              </div>
+              <p class="funds-amount">{{ number(balance) }}</p>
+              <p class="funds-note">
+                <strong>{{ _("web.funds.shared") }}</strong>
+                <span>{{ _("web.funds.never_sold") if wallet.currency == rules.currency else _("games." ~ game.id ~ ".currency." ~ wallet.currency ~ ".earned") }}</span>
+              </p>
+            </article>
+          </li>
+        {% endfor %}
+        <li class="funds-card-hanger">
+          <Splash />
+          <article aria-labelledby="wallet-{{ rules.points }}"
+                   class="store-box store-box-pale funds-card">
+            <div class="funds-card-head">
+              <span aria-hidden="true"
+                    class="funds-coin funds-coin-points"><Icon name="star" :size="28" stroke="currentColor" /></span>
+              <h3 id="wallet-{{ rules.points }}" class="funds-card-title">
+                {{ _("games." ~ game.id ~ ".currency." ~ rules.points) }}
+              </h3>
+            </div>
+            <dl class="funds-heroes">
+              {% for hero, (unspent, earned) in points %}
+                <dt>{{ hero.persona.name }}</dt>
+                <dd>
+                  {{ _("web.heroes.points.of", unspent=number(unspent), earned=number(earned)) }}
+                </dd>
+              {% else %}
+                <dt>{{ _("web.bar.no_hero") }}</dt>
+                <dd>
+                  <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
+                     class="site-link">{{ _("web.bar.create") }}</a>
+                </dd>
+              {% endfor %}
+            </dl>
+            <p class="funds-note">
+              <strong>{{ _("web.funds.own") }}</strong>
+              <span>{{ _("games." ~ game.id ~ ".currency." ~ rules.points ~ ".earned") }}</span>
+            </p>
+          </article>
+        </li>
+      </ul>
+    </section>
+  {% else %}
+    <section aria-labelledby="balances-title" class="funds-signed-out">
+      <span aria-hidden="true" class="funds-coin"><Icon name="coin" :size="22" stroke="currentColor" /></span>
+      <div>
+        <h2 id="balances-title" class="funds-signed-out-title">{{ _("web.funds.balances") }}</h2>
+        <p>{{ _("web.funds.signed_out") }}</p>
+        {% if not from_game %}
+          <p class="site-actions">
+            <a href="{{ url('/sign-in') }}?{{ {'next': here}|urlencode }}"
+               class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+            <a href="{{ url('/register') }}" class="site-link">{{ _("web.account.sign_in.create") }}</a>
+          </p>
+        {% endif %}
+      </div>
+    </section>
+  {% endif %}
+  <section aria-labelledby="sources-title" class="funds-sources">
+    <h2 id="sources-title" class="funds-title">{{ _("web.funds.not_sold", currency=funds) }}</h2>
+    <p class="site-lead">
+      {{ _("web.funds.no_payments") }} {{ _("web.funds.source" if allowance else "web.funds.no_source", currency=funds) }}
+    </p>
+    {% if allowance %}
+      <div class="funds-source-grid enter-rows">
+        <section aria-labelledby="source-allowance" class="funds-source">
+          <Splash />
+          <div class="store-box store-box-pale">
+            <span aria-hidden="true" class="store-disc"><Icon name="plus" :size="22" stroke="#0A0A0A" /></span>
+            <h3 id="source-allowance" class="site-dialog-title">{{ _("web.funds.allowance") }}</h3>
+            <p class="funds-source-amount">{{ _("web.funds.allowance.amount", amount=number(allowance), currency=funds) }}</p>
+            <p class="funds-source-text">{{ _("web.funds.allowance.text") }}</p>
+            {% if given and player.name %}
+              <p class="funds-source-text">{{ _("web.funds.allowance.given", account=player.name, date=when(given, "yMMMd")) }}</p>
+            {% endif %}
+          </div>
+        </section>
+      </div>
+    {% endif %}
+  </section>
+</Layout>

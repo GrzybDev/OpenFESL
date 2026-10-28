@@ -6,8 +6,8 @@ from pydantic import BaseModel, ConfigDict, PositiveInt, StringConstraints
 # CSS colours only, so that a data file puts nothing else into the themes' stylesheet.
 type Colour = Annotated[str, StringConstraints(pattern=r"^(#[0-9A-Fa-f]{6}|rgba\([0-9., ]+\))$")]
 # The kinds of web pages a game may list; the server list brings the servers' pages with it and
-# the leaderboard the players' pages.
-type PageKind = Literal["servers", "leaderboard", "activity", "play", "host"]
+# the leaderboard the players' pages. The Funds page belongs to a game with heroes and a site.
+type PageKind = Literal["servers", "leaderboard", "activity", "play", "host", "funds"]
 
 
 class Theme(BaseModel):
@@ -165,12 +165,15 @@ class Menu(BaseModel):
     Attributes:
         name: The end of the key of its name in the catalogues, after games.<game>.menu.
         pages: The kinds of pages it lists, in order; those the game does not have are left out.
+        section: The path below the game's pages under which every page belongs to the menu,
+            such as the store's items, which it lists none of; none when only its pages do.
     """
 
     model_config = ConfigDict(frozen=True)
 
     name: str
     pages: list[PageKind]
+    section: str | None = None
 
 
 class SiteWallet(BaseModel):
@@ -207,6 +210,8 @@ class Site(BaseModel):
         start_links: Whether OpenFESLHook's launcher opens the site's start links,
             openfesl-<game id>: addresses with a one-time code, so that the site starts the game
             as the account's default hero; for games whose heroes are made on their site.
+        paths: The paths below the game's pages of the kinds of pages that keep the website's
+            own address rather than their kind's name.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -216,6 +221,15 @@ class Site(BaseModel):
     host: str | None = None
     addresses: dict[str, str] = {}
     start_links: bool = False
+    paths: dict[PageKind, str] = {}
+
+    def path(self, kind: PageKind) -> str:
+        """Return the path of a kind of page below the game's pages, such as /play.
+
+        Args:
+            kind: The kind of page.
+        """
+        return self.paths.get(kind, f"/{kind}")
 
 
 class Insignia(BaseModel):

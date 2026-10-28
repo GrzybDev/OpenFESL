@@ -1,0 +1,6 @@
+{# The link to the page that tells how a game's Funds are earned, where the game lists that page;
+   what is given as content follows its text, such as a glyph. Other attributes go on the link. #}
+{% if "funds" in game.pages %}
+  <a href="{{ url('/' ~ game.id ~ game.site.path('funds')) }}"
+     {{ attrs.render() }}>{{ _("web.funds.earned", currency=_("games." ~ game.id ~ ".currency." ~ game.heroes.currency)) }}{{ content }}</a>
+{% endif %}

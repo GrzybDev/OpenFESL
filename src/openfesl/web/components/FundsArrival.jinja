@@ -1,0 +1,32 @@
+{#def currency: str #}
+{# Why the Funds page opened: the game's Get Funds buttons open it in the system browser and keep
+   the game running. The browser may be signed in to another account than the game, or to none. #}
+<section aria-labelledby="arrival-title"
+         class="site-box site-box-orange arrival funds-arrival">
+  <span aria-hidden="true" class="arrival-disc"><Icon name="window-closed" :size="32" stroke="#0A0A0A" /></span>
+  <div class="arrival-text">
+    <h2 id="arrival-title" class="site-box-title">{{ _("web.arrival.title", game=game.name) }}</h2>
+    {% if player %}
+      {% set account %}<strong>{{ player.name }}</strong>{% endset %}
+      <p>{{ _("web.funds.arrival.signed_in", account=account, currency=currency) }}</p>
+    {% else %}
+      <p>{{ _("web.funds.arrival.signed_out", currency=currency) }}</p>
+    {% endif %}
+  </div>
+  {% if player %}
+    <form method="post" action="{{ url('/sign-out') }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="hidden" name="next" value="{{ here }}">
+      <button type="submit" class="site-button site-button-large">
+        <Icon name="sign-out" :size="18" stroke="#FEDE01" />
+        {{ _("web.funds.arrival.switch") }}
+      </button>
+    </form>
+  {% else %}
+    <p class="site-actions funds-arrival-actions">
+      <a href="{{ url('/sign-in') }}?{{ {'next': here}|urlencode }}"
+         class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+      <a href="{{ url('/register') }}" class="funds-arrival-link">{{ _("web.account.sign_in.create") }}</a>
+    </p>
+  {% endif %}
+</section>

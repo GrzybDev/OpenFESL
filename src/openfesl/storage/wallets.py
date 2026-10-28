@@ -1,5 +1,5 @@
 from collections.abc import Sequence
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from sqlalchemy import ColumnElement, and_, func, or_, select, update
 from sqlalchemy.dialects.postgresql import insert
@@ -83,6 +83,19 @@ class SqlWalletStore:
             )
             found = {(row[0], row[1], row[2], row[3]): int(row[4]) for row in rows}
         return [found.get(_key(wallet), wallet.allowance) for wallet in wallets]
+
+    async def opened(self, wallet: Wallet) -> datetime | None:
+        """Return when a wallet received its allowance, if its ledger records one.
+
+        Args:
+            wallet: The wallet.
+        """
+        async with self._sessions() as session:
+            return await session.scalar(
+                select(WalletEntryRow.created_at)
+                .join(WalletRow, WalletRow.id == WalletEntryRow.wallet_id)
+                .where(_matching([wallet]), WalletEntryRow.reason == ALLOWANCE)
+            )
 
     async def credit_from_server(
         self, wallet: Wallet, amount: int, transaction: str, credits: Credits

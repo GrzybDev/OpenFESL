@@ -1,0 +1,191 @@
+/* The Funds page: the balance cards in a row of three that stacks on phones, each with its coin,
+   number and whom it belongs to; the signed-out box in their place; and the outlined heading over
+   the sources of Funds. */
+@layer pages {
+  .funds-lead {
+    max-width: 70ch;
+  }
+
+  .funds-balances {
+    margin-top: 30px;
+  }
+
+  /* A single source keeps the width of a balance card. */
+  .funds-cards,
+  .funds-source-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: 34px 22px;
+  }
+
+  .funds-card-hanger,
+  .funds-source {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+  }
+
+  .funds-card,
+  .funds-source > .store-box {
+    flex: 1;
+  }
+
+  .funds-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px 18px;
+  }
+
+  .funds-card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .funds-coin {
+    display: grid;
+    flex: 0 0 auto;
+    width: 52px;
+    height: 52px;
+    place-items: center;
+    border: 3px solid #000;
+    border-radius: 50%;
+    background: var(--coin, #f2c12e);
+    color: var(--coin-ink, #0a0a0a);
+  }
+
+  .funds-coin-points {
+    background: #1a1412;
+    color: #fede01;
+  }
+
+  .funds-card-title {
+    font: 800 19px/1.2 var(--site-heading);
+    color: #fff;
+    text-shadow: var(--site-outline-thin);
+  }
+
+  .funds-amount {
+    font: 800 36px/1.1 var(--site-heading);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .funds-note {
+    font-size: 14px;
+    line-height: 1.45;
+
+    > span {
+      color: #5c4a3c;
+    }
+  }
+
+  .funds-heroes {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    font-size: 14px;
+    line-height: 1.3;
+
+    > dt,
+    > dd {
+      padding-block: 6px;
+      border-top: 1px dashed #a8977f;
+    }
+
+    > dt {
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    > dd {
+      text-align: right;
+    }
+
+    > :nth-last-child(-n + 2) {
+      border-bottom: 1px dashed #a8977f;
+    }
+
+    .site-link {
+      min-height: 0;
+    }
+  }
+
+  .funds-signed-out {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 30px;
+    padding: 14px 16px;
+    border: 3px dashed #3b2d23;
+    border-radius: 8px;
+    background: rgb(241 233 222 / 0.7);
+    font-size: 14px;
+    line-height: 1.5;
+
+    .funds-coin {
+      width: 44px;
+      height: 44px;
+    }
+  }
+
+  .funds-signed-out-title {
+    font: 800 19px/1.2 var(--site-heading);
+    color: #fff;
+    text-shadow: var(--site-outline-thin);
+  }
+
+  .funds-sources {
+    margin-top: 54px;
+
+    .site-lead {
+      max-width: 72ch;
+      margin-top: 10px;
+    }
+  }
+
+  .funds-source-grid {
+    margin-top: 22px;
+  }
+
+  .funds-title {
+    font: 800 28px/1.15 var(--site-heading);
+    color: #fff;
+    text-shadow: var(--site-outline);
+  }
+
+  .funds-source-amount {
+    margin-top: 12px;
+    font: 800 22px/1.2 var(--site-heading);
+  }
+
+  .funds-source-text {
+    margin-top: 6px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .funds-arrival {
+    form {
+      flex: 0 0 auto;
+    }
+  }
+
+  .funds-arrival-actions {
+    margin-top: 0;
+  }
+
+  .funds-arrival-link {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    font: 800 15px/1.1 var(--site-heading);
+    color: #0f0b08;
+    text-decoration-line: underline;
+  }
+
+  @media (width < 40rem) {
+    .funds-title {
+      font-size: 26px;
+    }
+  }
+}

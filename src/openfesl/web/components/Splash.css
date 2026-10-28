@@ -1,0 +1,13 @@
+/* An ink splatter under a box: its parent is positioned and isolated, so it sits behind the box
+   and in front of the parchment. */
+@layer components {
+  .splash {
+    position: absolute;
+    bottom: -18px;
+    left: 4%;
+    z-index: -1;
+    width: 92%;
+    height: 30px;
+    fill: #1b100c;
+  }
+}

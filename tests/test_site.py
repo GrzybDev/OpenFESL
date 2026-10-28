@@ -52,10 +52,15 @@ async def test_the_games_own_addresses_open_its_pages_in_the_browsers_language(b
     async with httpx2.AsyncClient() as client:
         creator = await client.get(f"{site}/user/createHero", headers=arriving)
         funds = await client.get(f"{site}/store/purchaseFunds", headers=arriving)
+        older = await client.get(f"{site}/store/purchaseBattlefunds", headers=arriving)
+        redeem = await client.get(f"{site}/store/redeem", headers=arriving)
         english = await client.get(f"{site}/user/createHero")
         unknown = await client.get(f"{base}/open/example.test/user/createHero", headers=arriving)
     assert creator.headers["location"] == "/pl/bfheroes/user/createHero?from=game"
-    # An address whose page the site does not have yet opens the game's front page.
-    assert funds.headers["location"] == "/pl/bfheroes"
+    # 1.46 names the Funds page's address by the currency's older name.
+    assert funds.headers["location"] == older.headers["location"]
+    assert funds.headers["location"] == "/pl/bfheroes/store/purchaseFunds?from=game"
+    # An address whose page the site does not have opens the game's front page.
+    assert redeem.headers["location"] == "/pl/bfheroes"
     assert english.headers["location"] == "/bfheroes/user/createHero?from=game"
     assert unknown.status_code == 404

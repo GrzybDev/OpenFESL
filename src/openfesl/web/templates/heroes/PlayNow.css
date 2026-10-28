@@ -16,16 +16,6 @@
     min-width: 0;
   }
 
-  .play-now-splash {
-    position: absolute;
-    bottom: -18px;
-    left: 4%;
-    z-index: -1;
-    width: 92%;
-    height: 30px;
-    fill: #1b100c;
-  }
-
   .play-now-how {
     flex: 0 1 380px;
     min-width: 0;

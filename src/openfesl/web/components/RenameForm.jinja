@@ -74,6 +74,7 @@
       <a href="{{ url('/' ~ game.id ~ '/heroes') }}"
          class="site-button site-button-ghost">{{ _("web.rename.cancel") }}</a>
     {% endif %}
+    {% if short %}<FundsLink class="site-link" />{% endif %}
   </div>
   <p id="rename-why-{{ id }}" data-why class="site-dialog-why">
     {% if short %}

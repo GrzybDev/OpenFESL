@@ -642,7 +642,7 @@ msgid "web.heroes.wallet.none"
 msgstr "jeszcze brak"
 
 msgid "web.heroes.wallet.note"
-msgstr "Funds pochodzą z przydziału startowego i nigdy nie są sprzedawane."
+msgstr "Funds nigdy nie są sprzedawane; ich źródła wymienia strona Funds."
 
 msgid "web.account.page.heroes"
 msgstr "Strona bohaterów"
@@ -6541,3 +6541,69 @@ msgstr "„Graj” uruchamia grę %(game)s z domyślnym bohaterem, %(hero)s, prz
 #, python-format
 msgid "web.play_now.box.none"
 msgstr "„Graj” wymaga bohatera. Gdy już powstanie, „Graj” uruchamia grę %(game)s z domyślnym bohaterem przez program uruchamiający OpenFESLHook."
+
+msgid "games.bfheroes.menu.store"
+msgstr "Sklep i Funds"
+
+msgid "web.site.page.funds"
+msgstr "Funds"
+
+msgid "games.bfheroes.funds.lead"
+msgstr "Za Funds kupuje się przedmioty ze sklepu, gorące oferty, losowe skrzynki, klucze do skrzyń, miejsca na bohaterów i zmiany nazw. Należą do konta i może z nich korzystać każdy bohater."
+
+msgid "web.funds.balances"
+msgstr "Salda"
+
+msgid "web.funds.shared"
+msgstr "Konto, wszyscy bohaterowie."
+
+msgid "web.funds.own"
+msgstr "Każdy bohater osobno."
+
+msgid "web.funds.never_sold"
+msgstr "Nigdy nie są sprzedawane; źródła są niżej."
+
+msgid "web.funds.signed_out"
+msgstr "Salda konta i punkty każdego bohatera pojawią się tu po zalogowaniu. Część poniżej jest taka sama dla wszystkich."
+
+msgid "web.funds.not_sold"
+msgstr "%(currency)s nie są sprzedawane"
+
+msgid "web.funds.no_payments"
+msgstr "OpenFESL nie przyjmuje płatności i nic w tym serwisie nie kupuje się za pieniądze."
+
+msgid "web.funds.source"
+msgstr "%(currency)s pochodzą wyłącznie ze źródła poniżej."
+
+msgid "web.funds.no_source"
+msgstr "Nic w tym serwisie nie daje %(currency)s."
+
+msgid "web.funds.earned"
+msgstr "Jak zdobywa się %(currency)s"
+
+msgid "web.funds.allowance"
+msgstr "Przydział startowy"
+
+msgid "web.funds.allowance.amount"
+msgstr "%(amount)s %(currency)s jednorazowo"
+
+msgid "web.funds.allowance.text"
+msgstr "Każde konto dostaje go na start, jeden raz."
+
+msgid "web.funds.allowance.given"
+msgstr "Konto %(account)s otrzymało go %(date)s."
+
+msgid "web.funds.arrival.signed_in"
+msgstr "Gra otwiera tę stronę swoimi przyciskami do zdobywania %(currency)s i dalej działa; zamknięcie tej strony prowadzi z powrotem do gry. Salda poniżej należą do konta %(account)s, zalogowanego na tej stronie. Jeśli gra loguje się na inne konto, jego %(currency)s są na tamtym koncie."
+
+msgid "web.funds.arrival.signed_out"
+msgstr "Gra otwiera tę stronę swoimi przyciskami do zdobywania %(currency)s i dalej działa. Po zalogowaniu na konto, którego używa gra, widać jego salda."
+
+msgid "web.funds.arrival.switch"
+msgstr "Wyloguj, aby zmienić konto"
+
+msgid "games.bfheroes.currency._DV.earned"
+msgstr "Valor Points zdobywa się w meczach."
+
+msgid "games.bfheroes.currency._DH.earned"
+msgstr "Każdy bohater zdobywa jeden co drugi poziom."

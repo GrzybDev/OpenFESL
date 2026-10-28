@@ -10,13 +10,7 @@
              aria-live="polite"
              {% if link %} data-start-link="{{ link.address }}" data-status="{{ url('/' ~ game.id ~ '/play-now/status') }}?{{ {'link': link.ticket}|urlencode }}"{% endif %}
              class="play-now-panel enter-panel">
-      <svg aria-hidden="true"
-           focusable="false"
-           viewBox="0 0 200 40"
-           preserveAspectRatio="none"
-           class="play-now-splash">
-        <use href="{{ static('icons.svg') }}#splash" />
-      </svg>
+      <Splash />
       <PlayNowPanel :state="state" :minutes="minutes" :link="link" />
     </section>
     <aside aria-labelledby="play-now-how"

@@ -1,5 +1,6 @@
 from collections.abc import Sequence
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Protocol
 
 from openfesl.core.games import Credits, Game, Scope
@@ -53,6 +54,13 @@ class WalletStore(Protocol):
 
         Args:
             wallets: The wallets.
+        """
+
+    async def opened(self, wallet: Wallet) -> datetime | None:
+        """Return when a wallet received its allowance, if its ledger records one.
+
+        Args:
+            wallet: The wallet.
         """
 
     async def credit_from_server(
@@ -164,3 +172,14 @@ class Wallets:
             for code in codes
         ]
         return await self._store.peek(wallets)
+
+    async def allowance_given(self, game: Game, account_id: int, code: str) -> datetime | None:
+        """Return when an account received the allowance of a currency, if it did.
+
+        Args:
+            game: The game.
+            account_id: The account.
+            code: The currency, one that the account's personas share.
+        """
+        allowance = game.currencies[code].allowance
+        return await self._store.opened(Wallet(game.id, code, account_id, None, allowance))

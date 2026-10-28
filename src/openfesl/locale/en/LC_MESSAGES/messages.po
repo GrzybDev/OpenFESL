@@ -579,7 +579,7 @@ msgid "web.heroes.wallet.none"
 msgstr "none yet"
 
 msgid "web.heroes.wallet.note"
-msgstr "Funds come from the starting allowance and are never sold."
+msgstr "Funds are never sold; the Funds page lists where they come from."
 
 msgid "web.account.page.heroes"
 msgstr "The heroes page"
@@ -6295,3 +6295,69 @@ msgstr "Play Now starts %(game)s as the default hero, %(hero)s, through OpenFESL
 #, python-format
 msgid "web.play_now.box.none"
 msgstr "Play Now needs a hero. Once one exists, Play Now starts %(game)s as the default hero through OpenFESLHook's launcher."
+
+msgid "games.bfheroes.menu.store"
+msgstr "Store & funds"
+
+msgid "web.site.page.funds"
+msgstr "Funds"
+
+msgid "games.bfheroes.funds.lead"
+msgstr "Funds buy store items, hot deals, random boxes, chest keys, hero slots and renames. They belong to the account and every hero can use them."
+
+msgid "web.funds.balances"
+msgstr "Balances"
+
+msgid "web.funds.shared"
+msgstr "Account, all heroes."
+
+msgid "web.funds.own"
+msgstr "Each hero its own."
+
+msgid "web.funds.never_sold"
+msgstr "Never sold; the sources are below."
+
+msgid "web.funds.signed_out"
+msgstr "The account's balances and each hero's points appear here after signing in. The section below reads the same for everyone."
+
+msgid "web.funds.not_sold"
+msgstr "%(currency)s are not sold"
+
+msgid "web.funds.no_payments"
+msgstr "OpenFESL takes no payments, and nothing on this service is bought with money."
+
+msgid "web.funds.source"
+msgstr "%(currency)s come only from the source below."
+
+msgid "web.funds.no_source"
+msgstr "Nothing on this service gives %(currency)s."
+
+msgid "web.funds.earned"
+msgstr "How %(currency)s are earned"
+
+msgid "web.funds.allowance"
+msgstr "Starting allowance"
+
+msgid "web.funds.allowance.amount"
+msgstr "%(amount)s %(currency)s once"
+
+msgid "web.funds.allowance.text"
+msgstr "Every account starts with it, once."
+
+msgid "web.funds.allowance.given"
+msgstr "%(account)s got it on %(date)s."
+
+msgid "web.funds.arrival.signed_in"
+msgstr "The game opens this page from its buttons for getting %(currency)s and keeps running; closing this page leads back to it. The balances below belong to %(account)s, the account signed in on this site. If the game logs in with another account, its %(currency)s are on that account."
+
+msgid "web.funds.arrival.signed_out"
+msgstr "The game opens this page from its buttons for getting %(currency)s and keeps running. Signing in with the account the game uses shows its balances."
+
+msgid "web.funds.arrival.switch"
+msgstr "Sign out to switch"
+
+msgid "games.bfheroes.currency._DV.earned"
+msgstr "Valor Points are earned in matches."
+
+msgid "games.bfheroes.currency._DH.earned"
+msgstr "Each hero earns one with every second level."

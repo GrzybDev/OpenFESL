@@ -83,4 +83,15 @@
   .info-box-note {
     margin-top: 12px;
   }
+
+  /* Links in a box take its text colour: black on the brown box, white on the dark orange one. */
+  .info-box-link {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 6px;
+    font: 800 15px/1.1 var(--site-heading);
+    color: inherit;
+    text-decoration-line: underline;
+  }
 }

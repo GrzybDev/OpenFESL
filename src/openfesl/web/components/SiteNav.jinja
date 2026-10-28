@@ -1,15 +1,22 @@
 {# The menus of a game's own site: a tab per menu that lists one of the game's pages, open without
    scripts as a disclosure, and a signed-in account's heroes; the tab of the current page's menu
    wears the menus' colour. #}
-{% set glyphs = {"play": "book", "leaderboard": "bars", "host": "server", "servers": "server", "activity": "bars"} %}
+{% set glyphs = {
+  "play": "book",
+  "leaderboard": "bars",
+  "host": "server",
+  "servers": "server",
+  "activity": "bars",
+  "funds": "coin"
+} %}
 <nav aria-label="{{ game.name }}" class="site-nav">
   <ul class="site-tabs">
     {% for menu in game.site.menus %}
       {% set entries = menu.pages|select("in", game.pages)|list %}
       {% if entries %}
-        {% set ns = namespace(current=False) %}
+        {% set ns = namespace(current=menu.section and path.startswith("/" ~ game.id ~ menu.section ~ "/")) %}
         {% for kind in entries %}
-          {% set base = "/" ~ game.id ~ "/" ~ kind %}
+          {% set base = "/" ~ game.id ~ game.site.path(kind) %}
           {% if path == base or path.startswith(base ~ "/") %}
             {% set ns.current = True %}
           {% endif %}
@@ -21,7 +28,7 @@
             </summary>
             <ul class="site-entries">
               {% for kind in entries %}
-                {% set base = "/" ~ game.id ~ "/" ~ kind %}
+                {% set base = "/" ~ game.id ~ game.site.path(kind) %}
                 <li>
                   <a href="{{ url(base) }}"
                      {% if path == base %} aria-current="page"{% endif %}
