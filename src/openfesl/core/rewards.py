@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 
@@ -7,6 +7,7 @@ from openfesl.core.calendar import day_start, today
 from openfesl.core.catalogues import Catalogues, Contents
 from openfesl.core.chests import key_tag
 from openfesl.core.drops import Drops
+from openfesl.core.entitlements import EntitlementStore
 from openfesl.core.games import Game
 from openfesl.core.hero_items import fits
 from openfesl.core.heroes import Hero, Heroes
@@ -14,9 +15,11 @@ from openfesl.core.inventory import Ownership
 from openfesl.core.overrides import overridden
 from openfesl.core.policies import SettingStore
 from openfesl.core.reward_claims import Grant, RewardStore
-from openfesl.core.reward_rules import Gift, Part, RewardRules
+from openfesl.core.reward_rules import Gift, Milestone, Part, RewardRules
+from openfesl.core.stats import PERSONA, Owner, StatStore, bucket_of, partition_of
 from openfesl.core.store import ProductStore
 from openfesl.core.wallets import Wallet
+from openfesl.protocol.rank import Period
 
 
 class RewardState(StrEnum):
@@ -25,7 +28,7 @@ class RewardState(StrEnum):
     CLAIMABLE = "claimable"
     CLAIMED = "claimed"
     LOCKED = "locked"
-    """It needs a hero the account lacks."""
+    """It needs a hero, or a goal reached, that the account lacks."""
 
 
 class RewardRefusal(StrEnum):
@@ -35,6 +38,8 @@ class RewardRefusal(StrEnum):
     UNKNOWN = "unknown"
     """No such reward runs now: it ended, or never was."""
     CLAIMED = "claimed"
+    LOCKED = "locked"
+    """The account lacks the hero or the goal that the reward needs."""
     UNFIT = "unfit"
     """The hero chosen is not one the reward may go to."""
 
@@ -57,16 +62,20 @@ class Reward:
     """A reward as an account sees it now.
 
     Attributes:
-        key: What the account claims it by, unique for each faction: the event, the year and
-            for a daily gift its day.
+        key: What the account claims it by, unique for each faction, such as an event, its
+            year and the day of a daily gift.
         faction: The faction whose heroes it is for; the account's own when none.
         name: The id of its name in the game's texts or the server's own.
         description: The id of the text about it, likewise.
         gift: What it gives.
         state: Whether the account may claim it now.
         heroes: The account's heroes that its items may go to, by persona.
-        ends: When it can no longer be claimed.
-        day: The day of its daily event, from 1; none for an event of one gift.
+        ends: When it can no longer be claimed; never when none.
+        day: The day of its daily event, from 1; none for anything else.
+        hero: The persona of the one hero it is for, such as a new hero's starter pack; none for
+            any.
+        progress: How far towards its goal the account or its hero is, for a goal.
+        goal: What it needs reached, for a goal.
     """
 
     key: str
@@ -75,9 +84,12 @@ class Reward:
     description: str | None
     gift: Gift
     state: RewardState
-    heroes: tuple[int, ...]
-    ends: datetime
-    day: int | None
+    heroes: tuple[int, ...] = ()
+    ends: datetime | None = None
+    day: int | None = None
+    hero: int | None = None
+    progress: int | None = None
+    goal: int | None = None
 
 
 class Rewards:
@@ -88,6 +100,8 @@ class Rewards:
         store: RewardStore,
         settings: SettingStore,
         heroes: Heroes,
+        stats: StatStore,
+        entitlements: EntitlementStore,
         catalogues: Catalogues,
         products: ProductStore,
         drops: Drops,
@@ -99,6 +113,8 @@ class Rewards:
             store: Where claims are recorded and their rewards given.
             settings: The instance's settings, which override the rewards' game data.
             heroes: The accounts' heroes, with their factions, classes and levels.
+            stats: Where the heroes' stats are kept, which goals count.
+            entitlements: Where the heroes' items are kept, their treasure chests among them.
             catalogues: The games' imported catalogues, which tell what fits a hero.
             products: Where the store's boxes are kept, whose drops rewards give.
             drops: Picks what a box gives a hero.
@@ -107,6 +123,8 @@ class Rewards:
         self._store = store
         self._settings = settings
         self._heroes = heroes
+        self._stats = stats
+        self._entitlements = entitlements
         self._catalogues = catalogues
         self._products = products
         self._drops = drops
@@ -135,34 +153,19 @@ class Rewards:
             return []
         now = self._clock()
         heroes = (await self._heroes.roster(game, account_id)).heroes
-        found = _running(rules, now)
-        claimed = await self._store.claimed(game.id, account_id, {key for key, *_ in found})
-        rewards = []
-        for key, part, ends, day in found:
-            gift = part.on(day)
-            fitting = tuple(
-                hero.persona.id for hero in heroes if self._fits(game, part, gift, hero)
-            )
-            if (key, part.faction) in claimed:
-                state = RewardState.CLAIMED
-            elif gift.for_hero and not fitting:
-                state = RewardState.LOCKED
-            else:
-                state = RewardState.CLAIMABLE
-            rewards.append(
-                Reward(
-                    key,
-                    part.faction,
-                    _dated(part.name, day),
-                    _dated(part.description, day) if part.description else None,
-                    gift,
-                    state,
-                    fitting,
-                    ends,
-                    day,
-                )
-            )
-        return rewards
+        found = [
+            *self._events(game, rules, heroes, now),
+            *self._starters(game, rules, heroes, now),
+            *await self._milestones(game, rules, heroes),
+            *await self._first_chest(game, rules, heroes),
+        ]
+        claimed = await self._store.claimed(game.id, account_id, {r.key for r in found})
+        return [
+            replace(reward, state=RewardState.CLAIMED)
+            if (reward.key, reward.faction) in claimed
+            else reward
+            for reward in found
+        ]
 
     async def claim(
         self, game: Game, account_id: int, key: str, faction: str | None, hero_id: int | None
@@ -193,8 +196,8 @@ class Rewards:
         reward = next((r for r in rewards if (r.key, r.faction) == (key, faction)), None)
         if rules is None or reward is None:
             raise RewardRefused(RewardRefusal.UNKNOWN)
-        if reward.state is RewardState.CLAIMED:
-            raise RewardRefused(RewardRefusal.CLAIMED)
+        if reward.state is not RewardState.CLAIMABLE:
+            raise RewardRefused(RewardRefusal(reward.state.value))
         gift = reward.gift
         if gift.for_hero != (hero_id is not None) or (hero_id and hero_id not in reward.heroes):
             raise RewardRefused(RewardRefusal.UNFIT)
@@ -209,11 +212,105 @@ class Rewards:
         )
         return await self._store.grant(grant)
 
-    def _fits(self, game: Game, part: Part, gift: Gift, hero: Hero) -> bool:
-        # A hero of the part's faction, whom its items fit or who gets a drop of its box.
+    def _events(
+        self, game: Game, rules: RewardRules, heroes: list[Hero], now: datetime
+    ) -> list[Reward]:
+        found = []
+        for key, part, ends, day in _running(rules, now):
+            gift = part.on(day)
+            fitting = tuple(h.persona.id for h in heroes if self._fits(game, part.faction, gift, h))
+            description = _dated(part.description, day) if part.description else None
+            found.append(
+                Reward(
+                    key,
+                    part.faction,
+                    _dated(part.name, day),
+                    description,
+                    gift,
+                    _state(not gift.for_hero or bool(fitting)),
+                    fitting,
+                    ends,
+                    day,
+                )
+            )
+        return found
+
+    def _starters(
+        self, game: Game, rules: RewardRules, heroes: list[Hero], now: datetime
+    ) -> list[Reward]:
+        packs = rules.starter
+        if packs is None or not packs.enabled:
+            return []
+        found = []
+        for hero in heroes:
+            gift = packs.packs.get(hero.faction or "", {}).get(hero.hero_class or "")
+            ends = hero.created + timedelta(days=packs.days)
+            if gift is None or now >= ends:
+                continue
+            fits_hero = self._fits(game, hero.faction, gift, hero)
+            found.append(
+                Reward(
+                    f"starter:{hero.persona.id}",
+                    hero.faction,
+                    packs.name,
+                    packs.description,
+                    gift,
+                    _state(fits_hero),
+                    (hero.persona.id,) if fits_hero else (),
+                    ends,
+                    hero=hero.persona.id,
+                )
+            )
+        return found
+
+    async def _milestones(self, game: Game, rules: RewardRules, heroes: list[Hero]) -> list[Reward]:
+        shown = {key: goal for key, goal in rules.milestones.items() if goal.enabled}
+        keys = sorted({stat for goal in shown.values() for stat in goal.stats})
+        owners = [Owner(PERSONA, hero.persona.id) for hero in heroes]
+        bucket = bucket_of(Period.ALL_TIME, 0)
+        values = await self._stats.values(partition_of(game), owners, keys, bucket)
+
+        def count(goal: Milestone, hero: Hero) -> int:
+            owner = Owner(PERSONA, hero.persona.id)
+            return sum(int(values[(owner, s)].value) for s in goal.stats if (owner, s) in values)
+
+        found = []
+        for key, goal in shown.items():
+            counted: list[tuple[Hero | None, int]] = [(h, count(goal, h)) for h in heroes]
+            if not goal.each:
+                total = sum(value for _, value in counted) if goal.stats else len(heroes)
+                counted = [(None, total)]
+            found += [
+                Reward(
+                    f"milestone:{key}" + (f":{hero.persona.id}" if hero else ""),
+                    None,
+                    goal.name,
+                    goal.description,
+                    goal.gift,
+                    _state(value >= goal.goal),
+                    hero=hero.persona.id if hero else None,
+                    progress=value,
+                    goal=goal.goal,
+                )
+                for hero, value in counted
+            ]
+        return found
+
+    async def _first_chest(
+        self, game: Game, rules: RewardRules, heroes: list[Hero]
+    ) -> list[Reward]:
+        reward, chests = rules.first_chest, game.chests
+        if reward is None or not reward.enabled or chests is None:
+            return []
+        arrived = [await self._entitlements.of_persona(h.persona.id, chests.tag) for h in heroes]
+        state = _state(any(arrived))
+        return [Reward("first-chest", None, reward.name, reward.description, reward.gift, state)]
+
+    def _fits(self, game: Game, faction: str | None, gift: Gift, hero: Hero) -> bool:
+        # A hero of the faction, whom the gift's items fit or who gets a drop of its box.
         contents = self._catalogues.contents(game)
         return not gift.for_hero or (
-            hero.faction == part.faction
+            hero.faction == faction
             and hero.hero_class is not None
             and (bool(gift.box) or _usable(contents, gift, hero))
         )
@@ -255,6 +352,10 @@ def _running(rules: RewardRules, now: datetime) -> list[tuple[str, Part, datetim
         ends = day_start(day + timedelta(1), rules.zone) if number else period.end
         found += [(key, part, ends, number) for part in event.parts.values() if part.enabled]
     return found
+
+
+def _state(may: bool) -> RewardState:
+    return RewardState.CLAIMABLE if may else RewardState.LOCKED
 
 
 def _dated(text: str, day: int | None) -> str:

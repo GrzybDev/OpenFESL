@@ -80,6 +80,75 @@ class Event(BaseModel):
     parts: dict[str, Part]
 
 
+class StarterPacks(BaseModel):
+    """What a new hero of each faction and class may claim once, for a while after its creation.
+
+    Attributes:
+        enabled: Whether they are given.
+        days: How many days after its creation a hero may claim its pack.
+        name: The id of their name in the game's texts or the server's own.
+        description: The id of the text about them, likewise.
+        packs: What each faction's heroes get, by class.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    enabled: bool = True
+    days: PositiveInt
+    name: str
+    description: str | None = None
+    packs: dict[str, dict[str, Gift]]
+
+
+class Milestone(BaseModel):
+    """What an account gets once its heroes reach a goal, or once for each hero that does.
+
+    Attributes:
+        enabled: Whether it is given.
+        name: The id of its name in the game's texts or the server's own.
+        description: The id of the text about it, likewise.
+        stats: The heroes' stats whose values it adds up; it counts the heroes when none.
+        each: Whether each hero counts on its own, so that it is given for each hero that
+            reaches the goal, rather than once for the account's heroes together.
+        goal: What the count reaches it at.
+        gift: What it gives, which goes to the account.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    enabled: bool = True
+    name: str
+    description: str | None = None
+    stats: tuple[str, ...] = ()
+    each: bool = False
+    goal: PositiveInt
+    gift: Gift
+
+    @model_validator(mode="after")
+    def _check_gift(self) -> Self:
+        if self.gift.for_hero:
+            raise ValueError(f"the milestone {self.name} gives the account alone")
+        return self
+
+
+class FirstChest(BaseModel):
+    """What an account gets once, after a dedicated server stacked a first chest on its heroes.
+
+    Attributes:
+        enabled: Whether it is given.
+        name: The id of its name in the game's texts or the server's own.
+        description: The id of the text about it, likewise.
+        gift: What it gives, which goes to the account.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    enabled: bool = True
+    name: str
+    description: str | None = None
+    gift: Gift
+
+
 class RewardRules(BaseModel):
     """How a game's site gives rewards that accounts claim, as its data sets them.
 
@@ -89,6 +158,9 @@ class RewardRules(BaseModel):
         currency: The currency of the Funds that rewards give.
         fallback: What a hero gets for an item of a gift that it owns for good already.
         events: The events of the yearly calendar, by key.
+        starter: The packs that new heroes may claim; none for a game without them.
+        milestones: The goals that bring the account a gift, by key.
+        first_chest: What the account gets after its first treasure chest; nothing when none.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -98,12 +170,20 @@ class RewardRules(BaseModel):
     currency: str
     fallback: DropEntry
     events: dict[str, Event] = {}
+    starter: StarterPacks | None = None
+    milestones: dict[str, Milestone] = {}
+    first_chest: FirstChest | None = None
 
     @property
     def gifts(self) -> list[Gift]:
-        """Every gift of the rewards: of each event and day."""
+        """Every gift of the rewards: of each event and day, pack, milestone and the first chest."""
         parts = [part for event in self.events.values() for part in event.parts.values()]
-        return [gift for part in parts for gift in (part.gift, *part.days.values())]
+        gifts = [gift for part in parts for gift in (part.gift, *part.days.values())]
+        packs = self.starter.packs if self.starter else {}
+        gifts += [gift for classes in packs.values() for gift in classes.values()]
+        gifts += [milestone.gift for milestone in self.milestones.values()]
+        gifts += [self.first_chest.gift] if self.first_chest else []
+        return gifts
 
     @property
     def given_items(self) -> set[int]:
@@ -120,6 +200,8 @@ class RewardRules(BaseModel):
                 # The day from 1 stands in a daily event's texts, and a year has at most 366.
                 named = [text.replace("{day}", str(day)) for text in named for day in range(1, 367)]
             texts.update(named)
+        others = [self.starter, *self.milestones.values(), self.first_chest]
+        texts.update(t for found in others if found for t in (found.name, found.description) if t)
         return texts
 
     @model_validator(mode="after")

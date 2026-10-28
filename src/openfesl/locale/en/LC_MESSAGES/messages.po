@@ -6137,3 +6137,29 @@ msgstr "Birthday keys"
 
 msgid "web.rewards.birthday.keys.description"
 msgstr "For the game's birthday: treasure chest keys for the account."
+
+msgid "web.rewards.starter.name"
+msgstr "Starter pack"
+
+msgid "web.rewards.starter.description"
+msgstr "Gear for a new hero, matched to its faction and class, to claim in its first days."
+
+msgid "web.rewards.milestone.first_hero.name"
+msgstr "First hero"
+
+msgid "web.rewards.milestone.first_hero.description"
+msgstr "Funds for the account, once, for creating its first hero."
+
+#, python-brace-format
+msgid "web.rewards.milestone.level.name"
+msgstr "Level {goal}"
+
+msgid "web.rewards.milestone.level.description"
+msgstr "Funds for the account, once for each hero that reaches this level."
+
+#, python-brace-format
+msgid "web.rewards.milestone.matches.name"
+msgstr "Ranked matches: {goal}"
+
+msgid "web.rewards.milestone.matches.description"
+msgstr "Funds for the account, once, when its heroes have finished this many ranked matches together."

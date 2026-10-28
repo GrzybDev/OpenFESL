@@ -1,13 +1,13 @@
 import asyncio
 from collections.abc import AsyncIterator
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from random import Random
 from typing import Any
 
 import anyio
 import pytest
-from accounts import select_value
+from accounts import execute, select_value
 from heroes import create_hero
 from living import NATIONAL, ROYAL, import_catalogue, setting, worn
 from pydantic import ValidationError
@@ -37,8 +37,8 @@ from openfesl.storage.store import SqlProductStore
 pytestmark = pytest.mark.anyio
 
 # An invented catalogue: the masks that Santa's and Nikolaus' Visits may give, the Royal
-# birthday pack and the tonics that the Visits and the rewards give instead of an item a hero
-# owns for good.
+# birthday pack, the tonics that the Visits and the rewards give instead of an item a hero owns
+# for good, and the Royal soldier's starter pack.
 INVENTED = {
     1081: worn("Invented Mask", ROYAL, "1"),
     1084: worn("Invented Visor", NATIONAL, "1"),
@@ -48,6 +48,9 @@ INVENTED = {
     5063: ("Invented Tricycle", "emote", {"faction": ROYAL}),
     2161: ("Invented Flare", "ability", {"faction": ROYAL, "consumable": "true"}),
     2153: ("Invented Tonic", "ability", {"consumable": "true"}),
+    3015: ("Invented Rifle", "weapon", {"faction": ROYAL, "kits": "2"}),
+    9000: ("Invented XP Boost", "convenience", {}),
+    9040: ("Invented Stamina Boost", "convenience", {}),
 }
 # The fifth day of Christmas, and the birthday a year apart.
 CHRISTMAS = datetime(2026, 12, 5, 12, tzinfo=UTC)
@@ -63,13 +66,16 @@ class Site:
         self.catalogues = Catalogues(SqlCatalogueStore(sessions), None, load_games())
         self.entitlements = SqlEntitlementStore(sessions)
         self.personas = SqlPersonaStore(sessions)
-        heroes = Heroes(SqlHeroStore(sessions), SqlStatStore(sessions))
+        stats = SqlStatStore(sessions)
+        heroes = Heroes(SqlHeroStore(sessions), stats)
         # The same drops on every run.
         drops = Drops(self.catalogues, self.entitlements, Random(20111201))
         self.rewards = Rewards(
             SqlRewardStore(sessions),
             SqlSettingStore(sessions),
             heroes,
+            stats,
+            self.entitlements,
             self.catalogues,
             SqlProductStore(sessions),
             drops,
@@ -187,7 +193,7 @@ async def test_each_day_of_christmas_gives_each_faction_one_roll_of_its_visit_fo
     national = await create_hero(base, "ann@example.test", "Mudlark")
     other = await create_hero(base, "bob@example.test", "Tinpot")
 
-    today = await site.available(royal)
+    today = [reward for reward in await site.available(royal) if reward.day]
     unfit = await site.claim(national, "christmas:2026:5", "royal")
     given = await site.claim(royal, "christmas:2026:5", "royal")
     again = await site.claim(royal, "christmas:2026:5", "royal")
@@ -196,7 +202,7 @@ async def test_each_day_of_christmas_gives_each_faction_one_roll_of_its_visit_fo
     )
     site.now = datetime(2026, 12, 6, tzinfo=UTC)
     missed = await site.claim(other, "christmas:2026:5", "national")
-    tomorrow = await site.available(royal)
+    tomorrow = [reward for reward in await site.available(royal) if reward.day]
     next_day = await site.claim(other, "christmas:2026:6", "national")
 
     # Santa's Gift for Royal heroes and Nikolaus' Gift for National ones, until midnight.
@@ -249,3 +255,77 @@ async def test_a_yearly_pack_goes_once_to_each_faction_and_an_item_owned_for_goo
         4,
     )
     assert paused is RewardRefusal.PAUSED
+
+
+async def test_a_new_hero_and_goals_bring_their_gifts_once_and_a_first_chest_brings_a_key(
+    site: Site, base: str, database_url: str
+) -> None:
+    hero = await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    site.now = datetime.now(UTC) + timedelta(days=1)
+    level, matches = f"milestone:level-10:{hero}", "milestone:matches"
+
+    before = await site.available(hero)
+    early = [await site.claim(hero, key, None) for key in (level, "first-chest")]
+    starter = await site.claim(hero, f"starter:{hero}", "royal")
+    first = [await site.claim(hero, "milestone:first-hero", None) for _ in range(2)]
+    # The hero reaches level 10 and finishes 100 ranked matches; a server stacks a chest on it.
+    await execute(
+        database_url,
+        "UPDATE stat SET value = 10 WHERE owner_id = :hero AND key = 'level'",
+        hero=hero,
+    )
+    for key, value in (("win", 60), ("los", 40)):
+        await execute(
+            database_url,
+            "INSERT INTO stat SELECT partition, owner_type, owner_id, period, period_start,"
+            " :key, :value, '' FROM stat WHERE owner_id = :hero AND key = 'level'",
+            hero=hero,
+            key=key,
+            value=value,
+        )
+    await execute(
+        database_url,
+        "INSERT INTO entitlement (account_id, persona_id, tag, use_count, status) SELECT"
+        " account_id, id, 'BFH_TREASURE_CHEST', 1, 'ACTIVE' FROM persona WHERE id = :hero",
+        hero=hero,
+    )
+    later = [
+        await site.claim(hero, key, None)
+        for key in (level, f"milestone:level-20:{hero}", matches, "first-chest")
+    ]
+    site.now += timedelta(days=30)
+    a_month_on = await site.available(hero)
+
+    assert always(before) == {
+        f"starter:{hero}": (RewardState.CLAIMABLE, None),
+        "milestone:first-hero": (RewardState.CLAIMABLE, 1),
+        level: (RewardState.LOCKED, 1),
+        f"milestone:level-20:{hero}": (RewardState.LOCKED, 1),
+        f"milestone:level-30:{hero}": (RewardState.LOCKED, 1),
+        matches: (RewardState.LOCKED, 0),
+        "first-chest": (RewardState.LOCKED, None),
+    }
+    assert early == [RewardRefusal.LOCKED, RewardRefusal.LOCKED]
+    # The soldier's rifle and both boosts for a week, and tonics.
+    assert starter == [2153, 3015, 9000, 9040]
+    assert first == [[], RewardRefusal.CLAIMED]
+    assert later == [[], RewardRefusal.LOCKED, [], []]
+    # 600 for the first hero, 500 for its level 10 and 1,000 for the matches; one key.
+    funds = "SELECT sum(delta) FROM wallet_entry WHERE reason = 'reward'"
+    keys = "SELECT use_count FROM entitlement WHERE tag = '7353-lmct' AND persona_id IS NULL"
+    assert (await select_value(database_url, funds), await select_value(database_url, keys)) == (
+        2100,
+        1,
+    )
+    # The starter pack is gone a month after the hero's creation.
+    assert f"starter:{hero}" not in always(a_month_on)
+    assert always(a_month_on)[level] == (RewardState.CLAIMED, 10)
+
+
+def always(rewards: list[Reward]) -> dict[str, tuple[RewardState, int | None]]:
+    """Return the rewards that no event brings, by key, with their state and progress."""
+    return {
+        r.key: (r.state, r.progress)
+        for r in rewards
+        if r.key.split(":")[0] in ("starter", "milestone", "first-chest")
+    }

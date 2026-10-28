@@ -136,3 +136,71 @@ gift = { box = "national-nikolaus-visit" }
 2 = { items = ["1320 1d", "1321 1d", "1322 1d", "1323 1d", "1324 1d"] }
 9 = { items = ["3213 1d"], box = "national-nikolaus-visit" }
 17 = { items = ["1529 1d"] }
+
+# Starter packs: a new hero may claim one within 30 days of its creation, with its class's Bad
+# Company 2 weapon, Sarge's Stamina Boost and the Basic XP Boost for a week and 25 Terrific
+# Health Tonics, as the Modern Kits and the 2010 bundles paired them. The game's starter pack
+# texts name the summer, so the server's own name the packs (REWARDS_*_SUMMER_STARTER_PACK_*
+# answered from 2011-09 to 2012-09, contents never archived).
+[rewards.starter]
+days = 30
+name = "web.rewards.starter.name"
+description = "web.rewards.starter.description"
+
+[rewards.starter.packs.royal]
+commando = { items = ["3025 7d", "9040 7d", "9000 7d", "2153 x25"] }
+soldier = { items = ["3015 7d", "9040 7d", "9000 7d", "2153 x25"] }
+gunner = { items = ["3038 7d", "9040 7d", "9000 7d", "2153 x25"] }
+
+[rewards.starter.packs.national]
+commando = { items = ["3042 7d", "9040 7d", "9000 7d", "2153 x25"] }
+soldier = { items = ["3041 7d", "9040 7d", "9000 7d", "2153 x25"] }
+gunner = { items = ["3043 7d", "9040 7d", "9000 7d", "2153 x25"] }
+
+# Funds milestones, this server's own: the original rewarded no player's milestones, so the
+# amounts follow its event gifts of 77 and 100 BattleFunds and 1,500 Funds, and a level-10 gift
+# stays below a hero slot's 1,749 Funds. Levels count for each hero, the first hero and 100
+# finished ranked matches (wins and losses of all its heroes) once for the account.
+[rewards.milestones.first-hero]
+name = "web.rewards.milestone.first_hero.name"
+description = "web.rewards.milestone.first_hero.description"
+goal = 1
+gift = { funds = 600 }
+
+[rewards.milestones.level-10]
+name = "web.rewards.milestone.level.name"
+description = "web.rewards.milestone.level.description"
+stats = ["level"]
+each = true
+goal = 10
+gift = { funds = 500 }
+
+[rewards.milestones.level-20]
+name = "web.rewards.milestone.level.name"
+description = "web.rewards.milestone.level.description"
+stats = ["level"]
+each = true
+goal = 20
+gift = { funds = 1500 }
+
+[rewards.milestones.level-30]
+name = "web.rewards.milestone.level.name"
+description = "web.rewards.milestone.level.description"
+stats = ["level"]
+each = true
+goal = 30
+gift = { funds = 3000 }
+
+[rewards.milestones.matches]
+name = "web.rewards.milestone.matches.name"
+description = "web.rewards.milestone.matches.description"
+stats = ["win", "los"]
+goal = 100
+gift = { funds = 1000 }
+
+# The treasure chest key: one, once, after a dedicated server stacked the account's first chest
+# on one of its heroes, as the game's text explains chests to someone who has taken one.
+[rewards.first_chest]
+name = "REWARDS_TREASURE_CHEST_REWARD_NAME"
+description = "REWARDS_TREASURE_CHEST_REWARD_DESCRIPTION"
+gift = { keys = 1 }

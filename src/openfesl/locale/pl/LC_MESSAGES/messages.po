@@ -6367,3 +6367,29 @@ msgstr "Urodzinowe klucze"
 
 msgid "web.rewards.birthday.keys.description"
 msgstr "Na urodziny gry: klucze do skrzyń skarbów dla konta."
+
+msgid "web.rewards.starter.name"
+msgstr "Pakiet startowy"
+
+msgid "web.rewards.starter.description"
+msgstr "Wyposażenie dla nowego bohatera, dobrane do jego frakcji i klasy, do odebrania w pierwszych dniach."
+
+msgid "web.rewards.milestone.first_hero.name"
+msgstr "Pierwszy bohater"
+
+msgid "web.rewards.milestone.first_hero.description"
+msgstr "Funds dla konta, jednorazowo, za utworzenie pierwszego bohatera."
+
+#, python-brace-format
+msgid "web.rewards.milestone.level.name"
+msgstr "Poziom {goal}"
+
+msgid "web.rewards.milestone.level.description"
+msgstr "Funds dla konta, raz za każdego bohatera, który osiągnie ten poziom."
+
+#, python-brace-format
+msgid "web.rewards.milestone.matches.name"
+msgstr "Mecze rankingowe: {goal}"
+
+msgid "web.rewards.milestone.matches.description"
+msgstr "Funds dla konta, jednorazowo, gdy jego bohaterowie rozegrają razem tyle meczów rankingowych."

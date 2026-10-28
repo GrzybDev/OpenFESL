@@ -457,17 +457,21 @@ class Game(BaseModel):
         currency = self.currencies.get(self.rewards.currency)
         if self.heroes is None or currency is None or currency.scope is not Scope.ACCOUNT:
             raise ValueError("rewards need heroes and Funds that the account holds")
-        parts = [part for event in self.rewards.events.values() for part in event.parts.values()]
-        gifts = self.rewards.gifts
-        if {part.faction for part in parts} - {None, *self.heroes.factions}:
-            raise ValueError("rewards name a faction the heroes lack")
+        rewards = self.rewards
+        parts = [part for event in rewards.events.values() for part in event.parts.values()]
+        packs = rewards.starter.packs if rewards.starter else {}
+        gifts = rewards.gifts
+        factions = {part.faction for part in parts} | set(packs)
+        classes = {name for found in packs.values() for name in found}
+        if factions - {None, *self.heroes.factions} or classes - set(self.heroes.classes):
+            raise ValueError("rewards name a faction or class the heroes lack")
         boxes = {box.key for box in self.store.boxes} if self.store else set()
         if unknown := {gift.box for gift in gifts if gift.box} - boxes:
             raise ValueError(f"rewards give boxes the store lacks: {sorted(unknown)}")
         if self.chests is None and any(gift.keys for gift in gifts):
             raise ValueError("rewards give keys of a game without treasure chests")
         withheld = self.catalogue.withheld if self.catalogue else frozenset()
-        if given := sorted(self.rewards.given_items & withheld):
+        if given := sorted(rewards.given_items & withheld):
             raise ValueError(f"rewards give withheld items: {given}")
         return self
 
