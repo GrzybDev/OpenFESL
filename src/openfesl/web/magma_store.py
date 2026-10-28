@@ -9,8 +9,8 @@ from openfesl.core.games import Game
 from openfesl.core.item_writes import ItemWrites
 from openfesl.core.magma import Magma
 from openfesl.core.purchases import Purchases
-from openfesl.core.store import Offer, Store
-from openfesl.protocol.magma import ProductEntry, products, success
+from openfesl.core.store import Deal, Offer, Store
+from openfesl.protocol.magma import BundleEntry, ProductEntry, hot_deals, products, success
 from openfesl.web.magma import XML, SessionId, UserId
 
 # The id of a product, as the game buys it, and of an item's entitlement, as it changes one.
@@ -76,10 +76,12 @@ def store_router(
         await writes.take_out(entitlement_id, status)
         return Response(success(), media_type=XML)
 
-    # No hot deals yet, while a game still needs the list to load a persona.
+    # The game asks in the language of its menus, such as en.
     @router.get("/{language}/game/hotDeals")
-    async def hot_deals() -> Response:
-        return Response(products(), media_type=XML)
+    async def deals(language: str) -> Response:
+        listed = await store.hot_deals(game, game.language_of(language))
+        entries = [_deal(deal) for deal in listed]
+        return Response(hot_deals(entries), media_type=XML)
 
     return router
 
@@ -90,6 +92,26 @@ async def _holder(
     # Who asks first, so that only an asker who may change items learns which exist.
     magma.session(session_id)
     await magma.persona(session_id, game, await writes.holder(entitlement_id))
+
+
+def _deal(deal: Deal) -> BundleEntry:
+    listed = deal.listed
+    bundle = listed.bundle
+    lead = listed.members[0] if listed.members else None
+    return BundleEntry(
+        id=deal.product_id,
+        name=deal.name,
+        description=deal.description,
+        tag=lead.ownership.tag(lead.item_id) if lead else "",
+        game_order=bundle.game_order,
+        published=bundle.starts or listed.created,
+        created=listed.created,
+        random=False,
+        currency=bundle.currency,
+        price=bundle.price,
+        original_price=bundle.original_price,
+        members=tuple(_entry(member) for member in deal.members),
+    )
 
 
 def _entry(offer: Offer) -> ProductEntry:

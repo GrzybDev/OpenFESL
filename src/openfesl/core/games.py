@@ -20,6 +20,7 @@ from openfesl.core.game_pages import Listing, PageKind, Site, Stats, Theme
 from openfesl.core.hero_rules import HeroRules
 from openfesl.core.policies import Policies
 from openfesl.core.store_rules import StoreRules
+from openfesl.core.texts import BASE_LANGUAGE
 
 
 class Partition(BaseModel):
@@ -98,6 +99,8 @@ class Http(BaseModel):
             alone.
         files: The editorial files by URL, as UTF-8 templates whose `${news_<language>}`
             placeholders take the news text in that language.
+        languages: The languages that the Magma addresses name otherwise than the game's
+            language table, by the addresses' name, such as br for pt-BR.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -105,6 +108,7 @@ class Http(BaseModel):
     locker: str | None = None
     magma: str | None = None
     files: dict[str, str] = {}
+    languages: dict[str, str] = {}
 
 
 class ListRule(BaseModel):
@@ -320,6 +324,19 @@ class Game(BaseModel):
             country: The country's ISO code, in either case.
         """
         return self.countries.get(country.upper(), Ages())
+
+    def language_of(self, segment: str) -> str:
+        """Return the language that a Magma address names, as the game's language table names it.
+
+        A language that the table lacks is English, so that only the game's own languages reach
+        the texts read for an address.
+
+        Args:
+            segment: The language that the address starts with, such as en or br.
+        """
+        language = self.http.languages.get(segment, segment)
+        known = self.catalogue.languages.values() if self.catalogue else ()
+        return language if language in known else BASE_LANGUAGE
 
     def owned_by_account(self, key: str) -> bool:
         """Tell whether a stat belongs to a player's account rather than to one of its personas.

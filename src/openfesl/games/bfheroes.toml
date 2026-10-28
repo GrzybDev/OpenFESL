@@ -38,6 +38,11 @@ servers_log_in_as_players = true
 [http]
 magma = "www.battlefieldheroes.com"
 
+# The game puts its lang setting at the start of the addresses of its hot deals and its in-game
+# pages, where Brazilian Portuguese is br, as the launcher and the original site named it.
+[http.languages]
+br = "pt-BR"
+
 # The currencies of the wallets the game loads with each hero, by code: Hero Points, Valor Points
 # and Funds. The game keeps a balance in each, and its ability refund fails without the Hero Points
 # one (BFHeroes.exe 1.89 0x007dc1ac). A hero earns Hero Points with its own levels, while Funds

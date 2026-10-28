@@ -43,10 +43,11 @@ class Purchase:
         game: The game's data-file name.
         persona: The hero.
         product_id: The id the game bought it by.
-        kind: What was bought: a product.
+        kind: What was bought: a product or a bundle.
         wallet: The wallet the price is paid from.
         price: The price.
-        items: The items the hero gains, by number, with how it owns each.
+        items: The items the hero gains, by number, with how it owns each; those it owns for
+            good are left out, and a purchase that gains it none is refused.
     """
 
     game: str
@@ -68,8 +69,9 @@ class PurchaseStore(Protocol):
             purchase: The purchase.
 
         Raises:
-            PurchaseRefused: When the hero owns an item for good or it was taken away, or the
-                wallet holds less than the price, also after another purchase at the same time.
+            PurchaseRefused: When the hero gains no item, as it owns them for good or they were
+                taken away, or the wallet holds less than the price, also after another
+                purchase at the same time.
         """
 
 
@@ -118,9 +120,6 @@ class Purchases:
         rules = game.store
         number = rules.number(product_id) if rules else None
         product = await self._products.product(game.id, number) if number is not None else None
-        if product is None:
-            raise PurchaseRefused(UNKNOWN_PRODUCT)
-        item = self._catalogues.contents(game).items.get(product.item_id)
         hero = next(
             (
                 hero
@@ -129,6 +128,31 @@ class Purchases:
             ),
             None,
         )
+        if product is None and number is not None:
+            listed = await self._products.bundle(game.id, number)
+            if listed is None:
+                raise PurchaseRefused(UNKNOWN_PRODUCT)
+            bundle = listed.bundle
+            if (
+                hero is None
+                or bundle.faction not in (None, hero.faction)
+                or bundle.hero_class not in (None, hero.hero_class)
+            ):
+                raise PurchaseRefused(NOT_FOR_HERO)
+            loadout = granted(game.heroes, hero.faction, hero.hero_class)
+            items = tuple(
+                (member.item_id, member.ownership)
+                for member in listed.members
+                if gains(member.item_id, member.ownership, loadout)
+            )
+            wallet = wallet_of(game, persona, bundle.currency)
+            await self._store.buy(
+                Purchase(game.id, persona, product_id, "bundle", wallet, bundle.price, items)
+            )
+            return
+        if product is None:
+            raise PurchaseRefused(UNKNOWN_PRODUCT)
+        item = self._catalogues.contents(game).items.get(product.item_id)
         if (
             item is None
             or hero is None

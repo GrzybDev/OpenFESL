@@ -67,13 +67,31 @@ NAMES = {
 }
 
 
+# A bundle's name and description in English and Polish.
+BUNDLE_TEXTS = {
+    "WEST_Custom_Bundle_Invented": ("Invented Set", "Wymyślony zestaw"),
+    "WEST_Custom_Bundle_Invented_HotDealsDesc": (
+        "A coat, a pet, bandages.",
+        "Płaszcz, zwierzak, bandaże.",
+    ),
+}
+# The Royal coat's and a bundle's names in Brazilian Portuguese.
+BRAZILIAN = {
+    "WEST_Custom_Item_3": "Casaco inventado",
+    "WEST_Custom_Bundle_Invented": "Conjunto inventado",
+}
+
+
 def catalogue_file(folder: Path, items: list[CatalogueItem] = ITEMS) -> Path:
     """Write the file of an invented catalogue as `openfesl catalogue extract` writes it."""
-    texts = {f"WEST_Custom_Item_{number}": name for number, name in NAMES.items()}
-    texts["AUTO_RULES_MISSION_6000"] = "Invented Mission"
+    english = {f"WEST_Custom_Item_{number}": name for number, name in NAMES.items()}
+    english["AUTO_RULES_MISSION_6000"] = "Invented Mission"
+    english |= {name: texts[0] for name, texts in BUNDLE_TEXTS.items()}
+    polish = {name: texts[1] for name, texts in BUNDLE_TEXTS.items()}
     document = CatalogueDocument(format=1, game="bfheroes", items=tuple(items))
     file = folder / "catalogue.zip"
-    file.write_bytes(CatalogueFile(document, {"en": texts}, {}).write())
+    texts = {"en": english, "pl": polish, "pt-BR": BRAZILIAN}
+    file.write_bytes(CatalogueFile(document, texts, {}).write())
     return file
 
 
@@ -90,6 +108,18 @@ async def items(server_url: str, cookie: dict[str, str], hero: int) -> list[str]
         f"{entry.findtext('entitlementTag')} {entry.findtext('useCount')}"
         for entry in ElementTree.fromstring(body)
     ]
+
+
+async def deals(server_url: str, language: str) -> list[ElementTree.Element]:
+    """Return the hot deals as the game loads them in a language."""
+    _, _, body = await fetch(server_url, f"/{language}/game/hotDeals", MAGMA)
+    return list(ElementTree.fromstring(body))
+
+
+def attribute(product: ElementTree.Element, name: str) -> str | None:
+    """Return a product's attribute as the game loads it; none where it lacks it."""
+    found = product.find(f"attributes/attribute[@name='{name}']")
+    return found.get("value") if found is not None else None
 
 
 async def stock(

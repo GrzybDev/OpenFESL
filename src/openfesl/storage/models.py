@@ -247,6 +247,38 @@ class StoreProductRow(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class StoreBundleRow(Base):
+    __tablename__ = "store_bundle"
+
+    id: Mapped[int] = mapped_column(BigInteger, STORE_ID, primary_key=True)
+    game: Mapped[str]
+    # The ids of texts of the game's language table, or the texts themselves.
+    name: Mapped[str]
+    description: Mapped[str | None]
+    currency: Mapped[str]
+    price: Mapped[int] = mapped_column(BigInteger)
+    original_price: Mapped[int | None] = mapped_column(BigInteger)
+    # The faction and class whose heroes may buy it; any where none.
+    faction: Mapped[str | None]
+    hero_class: Mapped[str | None]
+    game_order: Mapped[int] = mapped_column(server_default="0")
+    starts_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    published: Mapped[bool] = mapped_column(server_default="true")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class StoreBundleMemberRow(Base):
+    __tablename__ = "store_bundle_member"
+
+    bundle_id: Mapped[int] = mapped_column(
+        ForeignKey("store_bundle.id", ondelete="CASCADE"), primary_key=True
+    )
+    product_id: Mapped[int] = mapped_column(
+        ForeignKey("store_product.id", ondelete="CASCADE"), primary_key=True, index=True
+    )
+
+
 class PurchaseRow(Base):
     __tablename__ = "purchase"
 

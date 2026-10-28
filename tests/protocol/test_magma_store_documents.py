@@ -1,4 +1,6 @@
-from openfesl.protocol.magma import ProductEntry, products
+from datetime import UTC, datetime, timedelta, timezone
+
+from openfesl.protocol.magma import BundleEntry, ProductEntry, hot_deals, products
 
 
 def test_each_product_is_one_price_point_with_how_the_item_is_owned() -> None:
@@ -47,4 +49,50 @@ def test_each_product_is_one_price_point_with_how_the_item_is_owned() -> None:
         b'<attribute name="originalPrice" value="2600" /></attributes>'
         b'<pricePoints><pricePoint currency="_PF" price="1999" /></pricePoints></product>'
         b"</products>"
+    )
+
+
+def test_a_hot_deal_carries_its_one_price_and_its_members_with_their_own() -> None:
+    # The game reads a bundle's first price point only, and each member as an offer; it
+    # downloads no picture whose address is empty.
+    member = ProductEntry("OFB-DBFH:5", "Pet", "521-unlm", "appearance", 4, "_PF", 900)
+    document = hot_deals(
+        [
+            BundleEntry(
+                "OFB-DBFH:26",
+                "Invented Set",
+                "A coat & a pet.",
+                "521-unlm",
+                1,
+                datetime(2026, 10, 1, 8, 30, 15, tzinfo=UTC),
+                datetime(2026, 9, 30, 20, 0, tzinfo=timezone(timedelta(hours=2))),
+                False,
+                "_PF",
+                699,
+                original_price=900,
+                members=(member,),
+            )
+        ]
+    )
+
+    assert document == (
+        b'<products><product productId="OFB-DBFH:26"><status>published</status><attributes>'
+        b'<attribute name="entitlementTag" value="521-unlm" />'
+        b'<attribute name="gameOrder" value="1" />'
+        b'<attribute name="hotdealsDescription" value="A coat &amp; a pet." />'
+        b'<attribute name="gameSmallImage" value="" />'
+        b'<attribute name="gameBigImage" value="" />'
+        b'<attribute name="Product Name" value="Invented Set" />'
+        b'<attribute name="publishedDate" value="2026-10-01 08:30:15" />'
+        b'<attribute name="createdDate" value="2026-09-30 18:00:00" />'
+        b'<attribute name="randomContent" value="NO" />'
+        b'<attribute name="originalPrice" value="900" /></attributes>'
+        b'<PricePoints><pricePoint currency="_PF" price="699" /></PricePoints>'
+        b'<association><product productId="OFB-DBFH:5" productName="Pet">'
+        b"<status>published</status><attributes>"
+        b'<attribute name="entitlementTag" value="521-unlm" />'
+        b'<attribute name="groupName" value="appearance" />'
+        b'<attribute name="sortKey" value="4" /></attributes>'
+        b'<pricePoints><pricePoint currency="_PF" price="900" /></pricePoints></product>'
+        b"</association></product></products>"
     )

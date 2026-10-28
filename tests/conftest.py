@@ -22,6 +22,7 @@ from openfesl.core.games import Game, load_games
 from openfesl.server.cli import RelayServer, main, uvicorn_config
 from openfesl.storage.database import migrate
 from openfesl.storage.history import SqlHistoryStore
+from openfesl.storage.store import SqlProductStore
 
 
 @pytest.fixture
@@ -60,7 +61,7 @@ async def relay_server(
         )
         await connection.execute(text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE"))
         # The stores' products and bundles, numbered from 1 again.
-        await connection.execute(text("TRUNCATE store_product CASCADE"))
+        await connection.execute(text("TRUNCATE store_product, store_bundle CASCADE"))
         await connection.execute(text("ALTER SEQUENCE store_id RESTART"))
     await engine.dispose()
 
@@ -118,6 +119,14 @@ async def history_store(database_url: str) -> AsyncIterator[SqlHistoryStore]:
     yield SqlHistoryStore(async_sessionmaker(engine))
     async with engine.begin() as connection:
         await connection.execute(text("TRUNCATE activity_hour, activity_day"))
+    await engine.dispose()
+
+
+@pytest.fixture
+async def products(database_url: str) -> AsyncIterator[SqlProductStore]:
+    # Bundles are added through the store's service; no page adds them yet.
+    engine = create_async_engine(database_url)
+    yield SqlProductStore(async_sessionmaker(engine))
     await engine.dispose()
 
 

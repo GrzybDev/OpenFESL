@@ -150,6 +150,76 @@ def products(entries: Iterable[ProductEntry] = ()) -> bytes:
     return _document(root)
 
 
+@dataclass(frozen=True, slots=True)
+class BundleEntry:
+    """A bundle as the game reads it among its hot deals: products sold together at one price.
+
+    Attributes:
+        id: The id the game buys it by.
+        name: Its name, as the game shows it.
+        description: What the game shows about it.
+        tag: The tag of its leading item, if it has one.
+        game_order: Its place among the hot deals.
+        published: Since when it is sold.
+        created: When it was made.
+        random: Whether it gives one of its contents at random.
+        currency: The currency of its price.
+        price: Its price.
+        original_price: Its price before a sale, which marks it on sale.
+        members: The products it holds, each with its own price.
+        small_image: The address of its small picture, which the game downloads; empty for none.
+        big_image: The address of its big picture, likewise.
+    """
+
+    id: str
+    name: str
+    description: str
+    tag: str
+    game_order: int
+    published: datetime
+    created: datetime
+    random: bool
+    currency: str
+    price: int
+    original_price: int | None = None
+    members: tuple[ProductEntry, ...] = ()
+    small_image: str = ""
+    big_image: str = ""
+
+
+def hot_deals(entries: Iterable[BundleEntry]) -> bytes:
+    """Return the store's hot deals, as the game loads them.
+
+    Args:
+        entries: The bundles, in order.
+    """
+    root = Element("products")
+    for entry in entries:
+        bundle = SubElement(root, "product", productId=entry.id)
+        SubElement(bundle, "status").text = "published"
+        attributes = SubElement(bundle, "attributes")
+        named = [
+            ("entitlementTag", entry.tag),
+            ("gameOrder", str(entry.game_order)),
+            ("hotdealsDescription", entry.description),
+            ("gameSmallImage", entry.small_image),
+            ("gameBigImage", entry.big_image),
+            ("Product Name", entry.name),
+            ("publishedDate", _moment(entry.published)),
+            ("createdDate", _moment(entry.created)),
+            ("randomContent", "YES" if entry.random else "NO"),
+        ]
+        if entry.original_price is not None:
+            named.append(("originalPrice", str(entry.original_price)))
+        for name, value in named:
+            SubElement(attributes, "attribute", name=name, value=value)
+        # The game reads only the first price point of a bundle.
+        points = SubElement(bundle, "PricePoints")
+        SubElement(points, "pricePoint", currency=entry.currency, price=str(entry.price))
+        SubElement(bundle, "association").extend(_product(member) for member in entry.members)
+    return _document(root)
+
+
 def _product(entry: ProductEntry) -> Element:
     # Only a published product is read, and only its first price point.
     product = Element("product", productId=entry.id, productName=entry.name)
@@ -172,6 +242,11 @@ def _product(entry: ProductEntry) -> Element:
 def _date(moment: datetime) -> str:
     # Games read Magma's dates to the minute, in UTC.
     return moment.astimezone(UTC).strftime("%Y-%m-%dT%H:%MZ")
+
+
+def _moment(moment: datetime) -> str:
+    # The dates of a store's products and bundles, to the second in UTC.
+    return moment.astimezone(UTC).strftime("%Y-%m-%d %H:%M:%S")
 
 
 def _document(root: Element) -> bytes:

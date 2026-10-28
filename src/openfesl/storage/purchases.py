@@ -33,9 +33,13 @@ class SqlPurchaseStore:
         persona = purchase.persona
         async with self._sessions.begin() as session:
             # The items' rows are locked in one order, so that purchases at once wait in turn.
-            for item_id, gained in sorted(purchase.items, key=lambda item: item[0]):
-                if await add_item(session, persona.account_id, persona.id, item_id, gained) is None:
-                    raise PurchaseRefused(ALREADY_OWNED)
+            added = [
+                item_id
+                for item_id, gained in sorted(purchase.items, key=lambda item: item[0])
+                if await add_item(session, persona.account_id, persona.id, item_id, gained)
+            ]
+            if not added:
+                raise PurchaseRefused(ALREADY_OWNED)
             if await spend(session, purchase.wallet, purchase.price, PURCHASE) is None:
                 raise PurchaseRefused(INSUFFICIENT_FUNDS)
             session.add(
@@ -47,6 +51,6 @@ class SqlPurchaseStore:
                     kind=purchase.kind,
                     currency=purchase.wallet.currency,
                     price=purchase.price,
-                    outcome={"items": [item_id for item_id, _ in purchase.items]},
+                    outcome={"items": added},
                 )
             )
