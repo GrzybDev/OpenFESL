@@ -119,6 +119,8 @@ class CatalogueRules(BaseModel):
             name; English is needed, as every other language falls back to it.
         items: The files of item definitions in the archive of definitions.
         tables: Further files of the archive of definitions, kept whole.
+        withheld: The items that the store never sells nor drops and rewards never give, whose
+            icons only the admin panel shows.
         fields: The fields of the definitions that say who may use an item.
         factions: The factions by the bits that stand for them in a faction mask.
         teams: The factions by the ids of their teams.
@@ -136,6 +138,7 @@ class CatalogueRules(BaseModel):
     languages: dict[str, str]
     items: list[ItemFile]
     tables: list[str] = []
+    withheld: frozenset[int] = frozenset()
     fields: ItemFields
     factions: dict[str, int]
     teams: dict[str, int]

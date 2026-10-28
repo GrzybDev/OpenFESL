@@ -16,6 +16,7 @@ from openfesl.storage.records import SqlRecordStore
 from openfesl.storage.servers import SqlServerStore
 from openfesl.storage.settings import SqlSettingStore
 from openfesl.storage.stats import SqlStatStore
+from openfesl.storage.store import SqlProductStore
 from openfesl.storage.wallets import SqlWalletStore
 
 
@@ -45,3 +46,4 @@ class Stores:
         self.settings = SqlSettingStore(sessions)
         self.stats = SqlStatStore(sessions)
         self.wallets = SqlWalletStore(sessions)
+        self.products = SqlProductStore(sessions)

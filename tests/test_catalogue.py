@@ -29,7 +29,7 @@ async def test_a_copy_of_the_game_gives_a_file_of_its_items_texts_icons_and_tabl
 
     assert printed == (
         f"Wrote the catalogue of Battlefield Heroes to {out}: 12 items, texts in 2 languages "
-        "and 6 icons\n"
+        "and 5 icons\n"
     )
     assert fingerprint(copy) == before
     written = out.read_bytes()
@@ -37,14 +37,15 @@ async def test_a_copy_of_the_game_gives_a_file_of_its_items_texts_icons_and_tabl
     assert extracted.write() == written
     document = extracted.document
     assert document.game == "bfheroes"
-    # Each file's items in the file's order; each level of an ability is an item.
+    # Each file's items in the file's order; each level of an ability is an item. Only the items
+    # that the site may show have icons: the unnamed tonic is never sold, so its icon stays out.
     assert [(item.id, item.kind, item.levels, item.icon) for item in document.items] == [
         (1, "appearance", (), "item1"),
         (2, "appearance", (), None),
         (3000, "weapon", (), "weapon3000"),
         (2000, "ability", (2000, 2001), "ability2000"),
         (2001, "ability", (2000, 2001), "ability2000"),
-        (2010, "ability", (2010,), "citem2010"),
+        (2010, "ability", (2010,), None),
         (5000, "emote", (), "emote5000"),
         (9000, "convenience", (), None),
         (6000, "mission", (), "mission6000"),
@@ -62,7 +63,7 @@ async def test_a_copy_of_the_game_gives_a_file_of_its_items_texts_icons_and_tabl
         "default": "True",
     }
     assert rifle.fields == {"faction": "3", "kits": "4"}
-    assert tonic.fields == {"faction": "3", "kits": "7"}
+    assert tonic.fields == {"faction": "3", "kits": "7", "consumable": "true"}
     assert set(extracted.icons) == {item.icon for item in document.items if item.icon}
     assert all(icon[8:12] == b"WEBP" for icon in extracted.icons.values())
     assert document.tables["Colors.xml"].children[0].children[0].text == "30 20 15"

@@ -57,17 +57,17 @@ async def test_an_imported_catalogue_names_items_in_the_pages_language_with_its_
     printed = await cli(capsys, "catalogue", "import", str(file))
 
     assert printed == (
-        "Imported the catalogue of Battlefield Heroes: 12 items, texts in 2 languages and 6 icons\n"
+        "Imported the catalogue of Battlefield Heroes: 12 items, texts in 2 languages and 5 icons\n"
     )
     [kept] = (tmp_path / "files" / "catalogues" / "bfheroes").iterdir()
-    assert len(list(kept.iterdir())) == 6 and (kept / "item1.webp").read_bytes()[8:12] == b"WEBP"
+    assert len(list(kept.iterdir())) == 5 and (kept / "item1.webp").read_bytes()[8:12] == b"WEBP"
     engine = create_async_engine(database_url)
     catalogues = Catalogues(SqlCatalogueStore(async_sessionmaker(engine)), None, load_games())
     await catalogues.load()
     polish = await catalogues.of(bfheroes, "pl")
     await engine.dispose()
 
-    assert polish.imported and polish.contents.icons == 6
+    assert polish.imported and polish.contents.icons == 5
     hat, hair, rifle, wave = polish.item(1), polish.item(2), polish.item(3000), polish.item(5000)
     assert hat and hair and rifle and wave
     assert (hat.kind, hat.slot, hat.level) == ("appearance", "hat", 1)
@@ -105,7 +105,7 @@ async def test_an_imported_catalogue_names_items_in_the_pages_language_with_its_
     async with httpx2.AsyncClient() as client:
         log = (await sign_in(client, base, next="/admin/audit")).text
     assert "Imported catalogue" in log and "Battlefield Heroes" in log
-    assert "Items: 12 · languages: 2 · icons: 6" in log
+    assert "Items: 12 · languages: 2 · icons: 5" in log
 
 
 async def test_a_new_import_replaces_the_whole_catalogue_for_every_server_that_follows(

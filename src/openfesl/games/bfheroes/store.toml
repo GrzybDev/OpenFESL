@@ -1,0 +1,146 @@
+# The store's starting set: what the items of the imported catalogue sell for, which fills a store
+# that has no products; the admin changes the products from there. Prices are those of autumn 2012
+# where the archived hot deals and forum posts keep them, else derived from them. The game buys a
+# product by its id, which the original store wrote OFB-DBFH:<number> (the 2013-2015 site); the
+# game puts it in a path as it is.
+[store]
+ids = "OFB-DBFH:{id}"
+# A rental's share of the item's value in percent, by its days: 30 days were half the price of
+# owning an item for good (emotes 140 or 280 BattleFunds, 2010), the shorter ones are inferred.
+rentals = { 1 = 5, 3 = 10, 7 = 20, 30 = 50 }
+# A rental in Valor Points costs a multiple of 50, rounded down; no archive shows one. Funds
+# rentals stay exact, as a week of a Super weapon (672) would fall below the 629 of the class
+# supply drops that promise to be worth their price if it ended in 99.
+rounding = { _DV = { step = 50 } }
+
+# Never sold nor dropped: the hair, facial hair and heads a hero's look takes from its creation;
+# the weapons and class abilities of the loadouts, which the game grants every hero itself
+# (BFHeroes.exe 1.89 0x007bae0d); and the partner, celebration, retailer, test and mission-reward
+# items of 2012. The clothes the definitions mark default are never sold either, as every hero
+# they fit holds them.
+[store.excluded]
+slots = ["head", "hair", "facial_hair"]
+items = [
+    # The loadouts' weapons and level-1 class abilities.
+    3001, 3002, 3003, 3004, 3009, 3010, 3011, 3012, 3013, 3014, 3155, 3156, 2026, 2075, 2136, 2141,
+    # Partner items: Minecraft, Battlefield 3, N7, Battlefield Play4Free medals, beta medals.
+    1468, 1469, 1471, 1472, 1689, 1690, 1394, 1395, 450, 459, 928,
+    # The 10-million shirts, Need for Speed items and server shirts.
+    1556, 1557, 1558, 1559, 997, 1066, 1073, 1283, 1297, 1367, 1385, 1676, 1677, 1683, 1684, 1685,
+    1731, 1733, 1737, 1739,
+    # Retailer launchers.
+    3230, 3231, 3232, 3233, 3234, 3235, 3236, 3237, 3275, 3276, 3277, 3278, 3279, 3280, 3281, 3282,
+    # Unnamed and test items.
+    3018, 3188, 3189, 3216, 3222, 3223, 3243, 3244, 3344, 3345,
+    # Mission rewards.
+    1511, 1512, 3205, 3206, 3209, 3211,
+]
+
+# The first rule of a currency that covers an item prices it in that currency; an item no rule
+# covers, such as a mission, is not sold. Funds (_PF) are the account's, Valor Points (_DV) too,
+# and Hero Points (_DH) the hero's own.
+
+# Battlefield: Bad Company 2 class weapons: a set with its weapon cost 6,720 Funds more than the set
+# alone (22,980 against 16,260), as 1,120 BattleFunds did in 2010.
+[[store.prices]]
+kind = "weapon"
+items = [3015, 3025, 3038, 3041, 3042, 3043]
+currency = "_PF"
+value = 6720
+sold = ["perm"]
+
+# Tier 1 weapons, 1,200 BattleFunds in 2010.
+[[store.prices]]
+kind = "weapon"
+items = [3148, 3149, 3150, 3151, 3152, 3153]
+currency = "_PF"
+value = 7200
+sold = ["perm"]
+
+# Super and Uber weapons and their stolen and pilfered copies of the other faction, 560
+# BattleFunds each in 2010.
+[[store.prices]]
+kind = "weapon"
+items = [
+    3016, 3017, 3019, 3020, 3021, 3022, 3023, 3024, 3026, 3027, 3028, 3029, 3030, 3031, 3032, 3033,
+    3034, 3037, 3039, 3040, 3047, 3048, 3054, 3059, 3060, 3065, 3067, 3069, 3073, 3074, 3080, 3084,
+    3085, 3089, 3100, 3101, 3103, 3108, 3109, 3110, 3117, 3118, 3119, 3125, 3126, 3127, 3132, 3134,
+    3137, 3139, 3143, 3144, 3174, 3175, 3176, 3177, 3178, 3179, 3180, 3181, 3182, 3183, 3184, 3185,
+    3186, 3187,
+]
+currency = "_PF"
+value = 3360
+sold = ["perm"]
+
+# Every weapon also rents for Valor Points, from a value of 5,000, the permanent price that some
+# weapons got in February 2013; no Valor Point price of 2012 survives.
+[[store.prices]]
+kind = "weapon"
+currency = "_DV"
+value = 5000
+sold = ["1d", "3d", "7d", "30d"]
+
+# Pets, about 900 Funds (Drayseen the Dragon was refunded at 899 in June 2012).
+[[store.prices]]
+kind = "appearance"
+items = [362, 521, 973, 974, 1123, 1124, 1507, 1529, 1530, 1581, 1583]
+currency = "_PF"
+value = 900
+sold = ["perm"]
+
+# The rocket packs, at their archived price.
+[[store.prices]]
+kind = "appearance"
+items = [589, 597]
+currency = "_PF"
+value = 3600
+sold = ["perm"]
+
+# Clothing, about 2,600 Funds an item: the median of the item prices of the appearance sets of
+# July 2012.
+[[store.prices]]
+kind = "appearance"
+currency = "_PF"
+value = 2600
+sold = ["perm", "30d"]
+
+# Emotes, 280 BattleFunds for good in 2010.
+[[store.prices]]
+kind = "emote"
+currency = "_PF"
+value = 1680
+sold = ["perm", "30d"]
+
+# Boosts and the other convenience items, 6,299 Funds for 30 days (the XP and VP boost bundle of
+# 2012 cost 12,598).
+[[store.prices]]
+kind = "convenience"
+currency = "_PF"
+value = 12598
+sold = ["30d"]
+
+# Widgets and consumables in packs of uses, about 7 Funds a use: a Christmas class drop of 4,350
+# Funds gave 610 tonics and promised at least its price.
+[[store.prices]]
+kind = "ability"
+fields = { consumable = "true" }
+currency = "_PF"
+use_price = 7
+sold = ["x25", "x110"]
+
+# The widgets that last a while, such as the claw attacks, which only boxes drop; their value is
+# inferred.
+[[store.prices]]
+kind = "ability"
+fields = { widget = "true" }
+currency = "_PF"
+value = 3360
+
+# Each level of an ability that heroes learn costs one Hero Point, as every level's cost in
+# Abilities.xml says.
+[[store.prices]]
+kind = "ability"
+fields = { consumable = "", widget = "" }
+currency = "_DH"
+value = 1
+sold = ["perm"]

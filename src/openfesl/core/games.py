@@ -19,6 +19,7 @@ from openfesl.core.catalogue import CatalogueRules
 from openfesl.core.game_pages import Listing, PageKind, Site, Stats, Theme
 from openfesl.core.hero_rules import HeroRules
 from openfesl.core.policies import Policies
+from openfesl.core.store_rules import StoreRules
 
 
 class Partition(BaseModel):
@@ -231,6 +232,8 @@ class Game(BaseModel):
             players in their games, by tag.
         http: What the game fetches over HTTP.
         currencies: The currencies of the players' wallets, by the code the game knows each by.
+        store: How the game's store prices and sells the items of its catalogue; none for a
+            game without one.
         account_stats: The stats that belong to a player's account rather than to one of its
             personas, by patterns that their keys match whole.
         records: The records a persona may keep, by name, with the most entries each holds.
@@ -271,6 +274,7 @@ class Game(BaseModel):
     automatic_grants: list[Grant] = []
     http: Http = Http()
     currencies: dict[str, Currency] = {}
+    store: StoreRules | None = None
     account_stats: list[re.Pattern[str]] = []
     records: dict[str, int] = {}
     associations: dict[str, ListRule] = {}
@@ -383,6 +387,13 @@ class Game(BaseModel):
         return self
 
     @model_validator(mode="after")
+    def _check_store(self) -> Self:
+        rules = self.store.prices if self.store else []
+        if unknown := {rule.currency for rule in rules} - self.currencies.keys():
+            raise ValueError(f"the store prices items in unknown currencies: {sorted(unknown)}")
+        return self
+
+    @model_validator(mode="after")
     def _check_host_page(self) -> Self:
         if "host" in self.pages and self.server_files is None:
             raise ValueError("the host page needs the server_files that hosting involves")
@@ -465,6 +476,12 @@ def load_games(folder: Traversable | None = None) -> Games:
 
 def _load(entry: Traversable, folder: Traversable) -> Game:
     data = tomllib.loads(entry.read_text("utf-8"))
+    # A data file may keep parts of the game's data in files of their own, each part in one.
+    for name in data.pop("include", []):
+        part = tomllib.loads(folder.joinpath(*name.split("/")).read_text("utf-8"))
+        if twice := data.keys() & part.keys():
+            raise ValueError(f"{name} defines {sorted(twice)} again")
+        data |= part
     http = data.get("http", {})
     # The data file names each editorial file by its path in the folder.
     contents = {

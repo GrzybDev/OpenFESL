@@ -3,6 +3,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Cookie, FastAPI, Path, Query, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import Response
 
 from openfesl.core.games import Game
@@ -12,7 +13,6 @@ from openfesl.protocol.magma import (
     billing_accounts,
     entitlements,
     error,
-    products,
     success,
     token,
 )
@@ -43,6 +43,8 @@ def magma_app(game: Game, magma: Magma, routers: Sequence[APIRouter] = ()) -> Fa
         openapi_url=None,
         exception_handlers={MagmaError: _refused, RequestValidationError: _not_numeric},
     )
+    # The game asks for its store's long lists compressed, and reads a plain answer as well.
+    app.add_middleware(GZipMiddleware)
 
     @app.get("/nucleus/authToken")
     async def auth_token(session_id: SessionId = None) -> Response:
@@ -71,12 +73,6 @@ def magma_app(game: Game, magma: Magma, routers: Sequence[APIRouter] = ()) -> Fa
     @app.get("/nucleus/wallets/{userId}")
     async def wallets(persona_id: UserId, session_id: SessionId = None) -> Response:
         return _xml(billing_accounts(await magma.wallets(session_id, game, persona_id)))
-
-    # The store has no products, while a game still needs both lists to load a persona.
-    @app.get("/ofb/products")
-    @app.get("/{language}/game/hotDeals")
-    async def offers() -> Response:
-        return _xml(products())
 
     # Telemetry the game can do without, so it is not kept; any root but <success> is a denial
     # that the game logs.

@@ -1,5 +1,5 @@
 import re
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from pathlib import Path, PurePosixPath
 from zipfile import BadZipFile, ZipFile
 
@@ -12,6 +12,7 @@ from openfesl.core.catalogue import (
     Element,
     text_id,
 )
+from openfesl.core.catalogues import catalogue_items
 from openfesl.core.games import Game, Games
 from openfesl.core.texts import BASE_LANGUAGE
 from openfesl.formats.definitions import read_definitions, read_tree
@@ -52,7 +53,7 @@ def extract(game: Game, folder: Path) -> CatalogueFile:
     Returns:
         What the server uses of the catalogue, converted for browsers: the fields of the items
         that the game's rules read, the texts that the rules name in each language of the
-        language table, and the icons of the items.
+        language table, and the icons of the items that the site may show.
 
     Raises:
         ExtractionError: When the copy lacks a file of the catalogue or a file is not as the
@@ -62,7 +63,8 @@ def extract(game: Game, folder: Path) -> CatalogueFile:
     if rules is None:
         raise ExtractionError(f"{game.name} has no catalogue")
     items, tables = _definitions(rules, folder, _read_fields(game))
-    items, icons = _icons(rules, folder, items)
+    texts = _texts(rules, folder, _named(rules, items))
+    items, icons = _icons(rules, folder, items, _shown(game, items, texts[BASE_LANGUAGE]))
     daily_missions, experience = _executable(rules, folder / game.executable, items)
     document = CatalogueDocument(
         format=FORMAT,
@@ -72,13 +74,16 @@ def extract(game: Game, folder: Path) -> CatalogueFile:
         daily_missions=daily_missions,
         experience=experience,
     )
-    return CatalogueFile(document, _texts(rules, folder, _named(rules, items)), icons)
+    return CatalogueFile(document, texts, icons)
 
 
 def _read_fields(game: Game) -> set[str]:
-    # The fields of the definitions that the game's rules read: who may use an item.
+    # The fields of the definitions that the game's rules read: who may use an item, and the
+    # values that the store's prices match.
     rules = game.catalogue
-    return {name for name in rules.fields.model_dump().values() if name} if rules else set()
+    fields = {name for name in rules.fields.model_dump().values() if name} if rules else set()
+    prices = game.store.prices if game.store else []
+    return fields | {field for rule in prices for field in rule.fields}
 
 
 def _definitions(
@@ -111,15 +116,10 @@ def _definitions(
     return list(items.values()), tables
 
 
-def _named(rules: CatalogueRules, items: Sequence[CatalogueItem]) -> set[str]:
-    # The texts that the site and Magma show, by the ids that text_id gives: the names of the
-    # items, a level after the first named by the first one where it has no name of its own.
-    templates = {item_file.kind: item_file.name for item_file in rules.items}
-    return {
-        text_id(templates[item.kind].replace("{id}", str(number)))
-        for item in items
-        for number in (item.id, *item.levels[:1])
-    }
+def _named(rules: CatalogueRules, found: Sequence[CatalogueItem]) -> set[str]:
+    # The texts that the site and Magma show, by the ids that text_id gives: the items' names.
+    items = catalogue_items(rules, found)
+    return {name for item in items.values() for name in item.names}
 
 
 def _texts(rules: CatalogueRules, folder: Path, named: set[str]) -> dict[str, dict[str, str]]:
@@ -141,8 +141,36 @@ def _texts(rules: CatalogueRules, folder: Path, named: set[str]) -> dict[str, di
     return texts
 
 
+def _shown(game: Game, found: Sequence[CatalogueItem], english: Mapping[str, str]) -> set[int]:
+    # The items whose icons the site may show: what heroes start with or the game grants them,
+    # what the store sells, which is only what the game names, and the withheld items, whose
+    # icons the admin panel shows.
+    rules = game.catalogue
+    if rules is None:
+        return set()
+    items = catalogue_items(rules, found)
+    named = {text_id(name) for name in english}
+    shown = set(rules.withheld)
+    if heroes := game.heroes:
+        shown |= {item for faction in heroes.factions.values() for item in faction.base_items}
+        loadouts = [loadout for classes in heroes.loadouts.values() for loadout in classes.values()]
+        for loadout in loadouts:
+            shown |= {*loadout.appearance, *loadout.equipment, *loadout.emotes, *loadout.missions}
+        shown |= {int(tag.partition("-")[0]) for tag in heroes.starting_items}
+        shown |= {item.id for item in items.values() if item.kind in heroes.granted}
+    if store := game.store:
+        shown |= {
+            item.id
+            for item in items.values()
+            if store.sellable(item)
+            and any(rule.sold for rule in store.rules(item))
+            and not named.isdisjoint(item.names)
+        }
+    return shown
+
+
 def _icons(
-    rules: CatalogueRules, folder: Path, items: list[CatalogueItem]
+    rules: CatalogueRules, folder: Path, items: list[CatalogueItem], shown: set[int]
 ) -> tuple[list[CatalogueItem], dict[str, bytes]]:
     patterns = {item_file.kind: item_file.icons for item_file in rules.items}
     icons: dict[str, bytes] = {}
@@ -154,7 +182,7 @@ def _icons(
             first = item.levels[0] if item.levels else item.id
             paths = (
                 pattern.replace("{id}", str(item.id)).replace("{first}", str(first)).lower()
-                for pattern in patterns.get(item.kind, [])
+                for pattern in (patterns.get(item.kind, []) if item.id in shown else [])
             )
             source = next((path for path in paths if path in members), None)
             name = PurePosixPath(source).stem if source else ""

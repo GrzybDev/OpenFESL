@@ -108,9 +108,65 @@ def billing_accounts(balances: Mapping[str, int]) -> bytes:
     return _document(root)
 
 
-def products() -> bytes:
-    """Return an empty list of the store's products, as the game loads offers and hot deals."""
-    return _document(Element("products"))
+@dataclass(frozen=True, slots=True)
+class ProductEntry:
+    """A product among the store's offers, as the game reads it: one way to own an item at a price.
+
+    The game lists the products of one item as one offer, whose price points they are.
+
+    Attributes:
+        id: The id the game buys it by.
+        name: Its name, which the game's own names of its items take the place of.
+        tag: The item and how it is owned once bought, such as 3002-tlmd.
+        group: The group it is listed in.
+        sort: Its place in the list.
+        currency: The currency of its price.
+        price: Its price.
+        uses: The uses it brings, for an item limited by uses.
+        days: How long it lasts, for a rental.
+        original_price: Its price before a sale, which marks it on sale.
+    """
+
+    id: str
+    name: str
+    tag: str
+    group: str
+    sort: int
+    currency: str
+    price: int
+    uses: int | None = None
+    days: int | None = None
+    original_price: int | None = None
+
+
+def products(entries: Iterable[ProductEntry] = ()) -> bytes:
+    """Return the store's products, as the game loads them as offers.
+
+    Args:
+        entries: The products, in order.
+    """
+    root = Element("products")
+    root.extend(_product(entry) for entry in entries)
+    return _document(root)
+
+
+def _product(entry: ProductEntry) -> Element:
+    # Only a published product is read, and only its first price point.
+    product = Element("product", productId=entry.id, productName=entry.name)
+    SubElement(product, "status").text = "published"
+    attributes = SubElement(product, "attributes")
+    named = [("entitlementTag", entry.tag), ("groupName", entry.group), ("sortKey", entry.sort)]
+    if entry.uses is not None:
+        named.append(("useCount", entry.uses))
+    if entry.days is not None:
+        named += [("duration", entry.days), ("durationType", "DAY")]
+    if entry.original_price is not None:
+        named.append(("originalPrice", entry.original_price))
+    for name, value in named:
+        SubElement(attributes, "attribute", name=name, value=str(value))
+    points = SubElement(product, "pricePoints")
+    SubElement(points, "pricePoint", currency=entry.currency, price=str(entry.price))
+    return product
 
 
 def _date(moment: datetime) -> str:

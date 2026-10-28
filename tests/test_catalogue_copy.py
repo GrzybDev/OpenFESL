@@ -48,12 +48,17 @@ def test_the_copy_gives_every_kind_of_item_with_names_and_icons(
     assert (smg.fields["faction"], smg.fields["kits"]) == ("2", "2") and "class" not in smg.fields
     bandage = items[2005]
     assert bandage.kind == "ability" and bandage.levels == (2001, 2002, 2003, 2004, 2005)
+    assert bandage.fields["consumable"] == "true"
     assert all(item.id in item.levels for item in document.items if item.levels)
     # Only the texts that the site and Magma show, not the menus' own.
     assert catalogue.texts["en"]["WEST_Custom_Item_3169"]
     assert not [name for name in catalogue.texts["en"] if name.startswith("WEST_BACKEND_")]
+    # The icons of what the site may show: the withheld shirts keep theirs for the admin panel,
+    # while the partners' medals, which nothing gives, have none.
     with_icons = [item for item in document.items if item.icon]
-    assert len(with_icons) > 0.95 * len(document.items)
+    assert len(with_icons) > 0.8 * len(document.items)
+    assert all(items[number].icon for number in (257, 264, 284, 291))
+    assert items[450].icon is None and items[928].icon is None
     assert {item.icon for item in with_icons} == set(catalogue.icons)
     assert all(icon[8:12] == b"WEBP" for icon in catalogue.icons.values())
     assert set(document.tables) == {"DefaultCustomization.xml", "Colors.xml"}

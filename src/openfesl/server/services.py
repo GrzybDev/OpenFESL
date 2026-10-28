@@ -46,6 +46,7 @@ from openfesl.core.servers import Approval
 from openfesl.core.session import GameSession, Players
 from openfesl.core.sign_in import WebSignIn
 from openfesl.core.stats import StatsService
+from openfesl.core.store import Store
 from openfesl.core.telemetry import telemetry_routes
 from openfesl.core.texts import load_texts
 from openfesl.core.theater import Theater, TheaterRoute, theater_routes
@@ -102,6 +103,7 @@ class GameServices:
         self.feed = AdminFeed(stores.admin_log)
         icons = IconFolder(settings.files_path) if settings.files_path else None
         self.catalogues = Catalogues(stores.catalogues, icons, games)
+        self.store = Store(stores.products, self.catalogues, games)
         self.policies = GamePolicies(stores.settings)
         self.terms = Terms.load()
 
@@ -208,9 +210,11 @@ class GameServices:
         players.follow(feed)
         joining.follow(feed)
         self.catalogues.follow(feed)
+        self.store.follow(feed)
         await feed.start()
         await self.rich_presence.follow_icons(stores.game_icons, feed)
         await self.catalogues.load()
+        await self.store.stock()
         followers = [
             asyncio.create_task(trust.follow_approvals()),
             asyncio.create_task(feed.follow()),

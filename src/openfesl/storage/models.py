@@ -9,6 +9,7 @@ from sqlalchemy import (
     Identity,
     Index,
     LargeBinary,
+    Sequence,
     SmallInteger,
     UniqueConstraint,
     func,
@@ -208,6 +209,42 @@ class WalletEntryRow(Base):
     reason: Mapped[str]
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     transaction: Mapped[str | None]
+
+
+# Numbers the products and bundles of the stores together, so that an id names one thing to buy.
+STORE_ID = Sequence("store_id")
+
+
+class StoreProductRow(Base):
+    __tablename__ = "store_product"
+    # One product of each way an item is owned, priced in each currency.
+    __table_args__ = (
+        UniqueConstraint(
+            "game",
+            "item_id",
+            "type",
+            "days",
+            "uses",
+            "currency",
+            postgresql_nulls_not_distinct=True,
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, STORE_ID, primary_key=True)
+    game: Mapped[str]
+    item_id: Mapped[int]
+    type: Mapped[str]
+    days: Mapped[int | None]
+    uses: Mapped[int | None]
+    currency: Mapped[str]
+    price: Mapped[int] = mapped_column(BigInteger)
+    original_price: Mapped[int | None] = mapped_column(BigInteger)
+    # Owned by the account rather than one of its heroes.
+    account: Mapped[bool] = mapped_column(server_default="false")
+    # Unpublished products are never listed nor bought alone, only as parts of others.
+    published: Mapped[bool] = mapped_column(server_default="true")
+    sort: Mapped[int] = mapped_column(server_default="0")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
 class ProductKeyRow(Base):

@@ -59,6 +59,9 @@ async def relay_server(
             "activity_hour, activity_day, game_icon, catalogue"
         )
         await connection.execute(text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE"))
+        # The stores' products and bundles, numbered from 1 again.
+        await connection.execute(text("TRUNCATE store_product CASCADE"))
+        await connection.execute(text("ALTER SEQUENCE store_id RESTART"))
     await engine.dispose()
 
 

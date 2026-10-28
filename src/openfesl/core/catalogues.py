@@ -2,7 +2,7 @@ import asyncio
 import logging
 import secrets
 from collections import ChainMap
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from contextlib import AbstractAsyncContextManager
 from dataclasses import dataclass, field
 from datetime import date
@@ -10,7 +10,13 @@ from typing import Protocol
 
 from openfesl.core.admin import AdminAction, AdminFeed, LoggedAction
 from openfesl.core.admins import Admin
-from openfesl.core.catalogue import CatalogueDocument, CatalogueFile, CatalogueRules, text_id
+from openfesl.core.catalogue import (
+    CatalogueDocument,
+    CatalogueFile,
+    CatalogueItem,
+    CatalogueRules,
+    text_id,
+)
 from openfesl.core.games import Game, Games
 from openfesl.core.stats import partition_of
 from openfesl.core.texts import BASE_LANGUAGE
@@ -128,6 +134,8 @@ class Item:
         base: Whether every hero it fits holds it without being granted it.
         prerequisite: The mission a hero completes before it may take this one, if any.
         repeatable: Whether a hero may complete it again, for a mission.
+        withheld: Whether the store never sells nor drops it, rewards never give it and only
+            the admin panel shows its icon.
     """
 
     id: int
@@ -143,6 +151,7 @@ class Item:
     base: bool
     prerequisite: int | None
     repeatable: bool
+    withheld: bool
 
 
 @dataclass(frozen=True, slots=True)
@@ -383,11 +392,17 @@ class Catalogues:
         return texts
 
 
-def _contents(rules: CatalogueRules, stored: StoredCatalogue) -> Contents:
+def catalogue_items(rules: CatalogueRules, items: Iterable[CatalogueItem]) -> dict[int, Item]:
+    """Return the items of a game's catalogue with what their definitions mean, by number.
+
+    Args:
+        rules: The rules of the game's catalogue, which say what the definitions mean.
+        items: The items as the catalogue holds them.
+    """
     names = {item_file.kind: item_file.name for item_file in rules.items}
     slots = {number: name for name, number in rules.slots.items()}
     found = {}
-    for item in stored.document.items:
+    for item in items:
         values = item.fields
         slot = _number(values.get(rules.fields.slot))
         template = names.get(item.kind, "")
@@ -408,8 +423,14 @@ def _contents(rules: CatalogueRules, stored: StoredCatalogue) -> Contents:
             base=_flag(values, rules.fields.base, missing=False),
             prerequisite=(_number(values.get(prerequisite)) or None) if prerequisite else None,
             repeatable=_flag(values, rules.fields.repeatable, missing=True),
+            withheld=item.id in rules.withheld,
         )
+    return found
+
+
+def _contents(rules: CatalogueRules, stored: StoredCatalogue) -> Contents:
     document = stored.document
+    found = catalogue_items(rules, document.items)
     return Contents(
         stored.revision, stored.icons, found, document.daily_missions, document.experience
     )

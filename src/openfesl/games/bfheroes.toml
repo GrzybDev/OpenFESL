@@ -16,6 +16,8 @@ pages = ["play"]
 # owner, yet it names a hero and an account by the same owner type, telling them apart by the id
 # alone (BFHeroes.exe 1.89 0x006aa1fb).
 account_stats = ["c_tut", "c_ltm", "c_slm", "cdm", "edm", "dmc", "pi[0-9]+"]
+# The parts of the game's data kept in files of their own: the store's starting set.
+include = ["bfheroes/store.toml"]
 
 # The one client string of versions 1.46 and 1.89, which their dedicated servers greet FESL with
 # too. The game takes its Theater address from the Hello answer; the port is the one that its
@@ -70,6 +72,9 @@ icons = "mods/bfheroes/Menu_client.zip"
 # The look, equipment, emotes and missions that a new hero of each team and kit starts with, and
 # the colours of skin and hair (0x006615e6).
 tables = ["DefaultCustomization.xml", "Colors.xml"]
+# The 1.89 shirts with the logos of DICE and of the game, Royal and National, which only the
+# admin panel shows and admins alone grant.
+withheld = [257, 264, 284, 291]
 
 # The columns of the language table; 1.46 has some others, a few of them empty.
 [catalogue.languages]
