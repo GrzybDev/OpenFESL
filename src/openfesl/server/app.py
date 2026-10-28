@@ -20,6 +20,7 @@ from openfesl.web.account.session import PlayerSessionMiddleware
 from openfesl.web.game_http import GameHttpMiddleware
 from openfesl.web.languages import LanguageMiddleware
 from openfesl.web.magma import magma_app
+from openfesl.web.magma_heroes import hero_router
 from openfesl.web.magma_servers import servers_router
 from openfesl.web.magma_social import social_router
 from openfesl.web.magma_store import store_router
@@ -106,6 +107,7 @@ def _add_middleware(
             [
                 servers_router(game, services.magma),
                 social_router(game, services.magma, services.relationships),
+                hero_router(game, services.magma),
                 store_router(
                     game,
                     services.magma,
