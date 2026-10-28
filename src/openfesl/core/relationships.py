@@ -30,6 +30,7 @@ class Refusal(StrEnum):
     UNKNOWN_RELATIONSHIP = "RELATIONSHIP_NOT_FOUND"
     STATUS_TOO_LONG = "STATUS_TOO_LONG"
     STATUS_NOT_TEXT = "STATUS_NOT_TEXT"
+    SEARCH_TOO_SHORT = "SEARCH_TOO_SHORT"
 
 
 class RelationshipRefused(Exception):
@@ -86,6 +87,21 @@ class Presence:
 
     account_id: int
     text: str
+
+
+@dataclass(frozen=True, slots=True)
+class Found:
+    """A player that a search found by one of its names.
+
+    Attributes:
+        account_id: The player's account.
+        name: The name that matched.
+        hero: Whether the name is one of its heroes' rather than its account's display name.
+    """
+
+    account_id: int
+    name: str
+    hero: bool
 
 
 class RelationshipStore(Protocol):
@@ -146,6 +162,16 @@ class RelationshipStore(Protocol):
 
         Returns:
             Whether the account has such a relationship.
+        """
+
+    async def search(self, namespace: str, pattern: str, limit: int) -> list[Found]:
+        """Return the accounts that may be asked, by display name, and their heroes by name.
+
+        Args:
+            namespace: The namespace of the game's heroes.
+            pattern: The start of the names, where * stands for any run of characters; capitals
+                do not matter.
+            limit: The most names to return, by name.
         """
 
 
@@ -230,6 +256,24 @@ class Relationships:
         """
         if not await self._store.acknowledge(game.id, account_id, relationship_id):
             raise RelationshipRefused(Refusal.UNKNOWN_RELATIONSHIP)
+
+    async def search(self, game: Game, pattern: str) -> list[Found]:
+        """Return the players whose display names or heroes' names start as a search says.
+
+        Only players that may be asked for a relationship are found.
+
+        Args:
+            game: The game, whose heroes are searched.
+            pattern: The start of the names, where * stands for any run of characters; capitals
+                do not matter.
+
+        Raises:
+            RelationshipRefused: When the search names too few characters besides wildcards.
+        """
+        rules = _rules(game)
+        if len(pattern.replace("*", "")) < rules.search_minimum:
+            raise RelationshipRefused(Refusal.SEARCH_TOO_SHORT)
+        return await self._store.search(game.namespace, pattern, rules.search_limit)
 
     def report(self, account_id: int, text: str) -> None:
         """Keep the status line that an account's game reports while that game is logged in.

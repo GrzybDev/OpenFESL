@@ -3,8 +3,10 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.accounts import AccountState
-from openfesl.core.relationships import Refusal, Relationship, RelationshipRefused
-from openfesl.storage.models import AccountRow, RelationshipRow
+from openfesl.core.personas import PersonaState
+from openfesl.core.relationships import Found, Refusal, Relationship, RelationshipRefused
+from openfesl.storage.models import AccountRow, PersonaRow, RelationshipRow
+from openfesl.storage.personas import like
 
 _SIDE = ("game", "tag", "owner_id", "member_id")
 
@@ -134,6 +136,40 @@ class SqlRelationshipStore:
                 .returning(RelationshipRow.id)
             )
             return seen is not None
+
+    async def search(self, namespace: str, pattern: str, limit: int) -> list[Found]:
+        """Return the accounts that may be asked, by display name, and their heroes by name.
+
+        Args:
+            namespace: The namespace of the game's heroes.
+            pattern: The start of the names, where * stands for any run of characters; capitals
+                do not matter.
+            limit: The most names to return, by name.
+        """
+        start = like(f"{pattern}*")
+        async with self._sessions() as session:
+            accounts = await session.execute(
+                select(AccountRow.id, AccountRow.display_name)
+                .where(AccountRow.display_name.ilike(start, escape="\\"), *_askable())
+                .order_by(func.lower(AccountRow.display_name))
+                .limit(limit)
+            )
+            heroes = await session.execute(
+                select(PersonaRow.account_id, PersonaRow.name)
+                .join(AccountRow, AccountRow.id == PersonaRow.account_id)
+                .where(
+                    PersonaRow.namespace == namespace,
+                    PersonaRow.name.ilike(start, escape="\\"),
+                    PersonaRow.disabled_at.is_(None),
+                    PersonaRow.state == PersonaState.ACTIVE,
+                    *_askable(),
+                )
+                .order_by(func.lower(PersonaRow.name))
+                .limit(limit)
+            )
+            found = [Found(account_id, name or "", False) for account_id, name in accounts]
+            found += [Found(account_id, name, True) for account_id, name in heroes]
+        return sorted(found, key=lambda each: each.name.casefold())[:limit]
 
 
 async def _lock(session: AsyncSession, *account_ids: int) -> set[int]:

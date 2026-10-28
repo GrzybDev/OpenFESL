@@ -381,7 +381,12 @@ max_games = 10000
 
 # Friends, whom the game keeps between accounts rather than heroes: its Magma relationship paths
 # name the account it logged in with (BFHeroes.exe 1.89 0x00691bd4), and its friends list shows
-# at most 100 of them (mainMenu_west.swf, MenuFriends.updateFriendsList).
+# at most 100 of them (mainMenu_west.swf, MenuFriends.updateFriendsList). Its player search finds
+# accounts by display name, in the website's namespace, and heroes by name, and sends searches of
+# at least 2 characters besides its wildcard * (0x0069f6d4, 0x006a0eb0); 50 names are answered.
 [relationships]
 friends = "friends"
 most = 100
+web_namespace = "bfheroes_web"
+search_minimum = 2
+search_limit = 50

@@ -144,6 +144,40 @@ def relationship(entry: RelationshipEntry) -> bytes:
     return success(_relationship(entry))
 
 
+@dataclass(frozen=True, slots=True)
+class PersonaEntry:
+    """A player that a persona search found, as the game reads it.
+
+    Attributes:
+        user_id: The player's account number, which the game asks to befriend.
+        display_name: The name that matched.
+        namespace: Where the name is from: the website's namespace for the account's display
+            name, the game's own for a hero.
+    """
+
+    user_id: int
+    display_name: str
+    namespace: str
+
+
+def personas(entries: Iterable[PersonaEntry]) -> bytes:
+    """Return the answer to a persona search: each player found, by the name that matched.
+
+    Args:
+        entries: The players, in order.
+    """
+    root = Element("personas")
+    for entry in entries:
+        persona = SubElement(root, "persona")
+        for name, text in (
+            ("userId", str(entry.user_id)),
+            ("displayName", entry.display_name),
+            ("namespaceName", entry.namespace),
+        ):
+            SubElement(persona, name).text = text
+    return _document(root)
+
+
 def status_update(body: bytes) -> str | None:
     """Return the status line of a relationship status update, or none when it holds none.
 

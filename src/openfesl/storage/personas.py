@@ -117,14 +117,13 @@ class SqlPersonaStore:
             pattern: The name, where * stands for any run of characters.
             limit: The most personas to return, by name.
         """
-        like = _LIKE_SPECIAL.sub(lambda match: "\\" + match[0], pattern).replace("*", "%")
         async with self._sessions() as session:
             rows = await session.scalars(
                 select(PersonaRow)
                 .join(AccountRow, AccountRow.id == PersonaRow.account_id)
                 .where(
                     PersonaRow.namespace == namespace,
-                    PersonaRow.name.ilike(like, escape="\\"),
+                    PersonaRow.name.ilike(like(pattern), escape="\\"),
                     PersonaRow.disabled_at.is_(None),
                     AccountRow.server.is_(False),
                 )
@@ -219,3 +218,13 @@ def persona_of(row: PersonaRow) -> Persona:
         row: The row.
     """
     return Persona(id=row.id, account_id=row.account_id, namespace=row.namespace, name=row.name)
+
+
+def like(pattern: str) -> str:
+    """Return the LIKE pattern, escaped with a backslash, of a name pattern.
+
+    Args:
+        pattern: The name, where * stands for any run of characters and every other character
+            for itself.
+    """
+    return _LIKE_SPECIAL.sub(lambda match: "\\" + match[0], pattern).replace("*", "%")

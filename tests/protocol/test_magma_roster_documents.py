@@ -1,6 +1,13 @@
 from datetime import UTC, datetime, timedelta, timezone
 
-from openfesl.protocol.magma import RelationshipEntry, relationship, roster, status_update
+from openfesl.protocol.magma import (
+    PersonaEntry,
+    RelationshipEntry,
+    personas,
+    relationship,
+    roster,
+    status_update,
+)
 
 
 def test_a_roster_gives_each_relationship_every_child_the_game_requires() -> None:
@@ -31,6 +38,19 @@ def test_a_roster_gives_each_relationship_every_child_the_game_requires() -> Non
         b"<realid>12</realid><type>nucleus</type><status /><name>Invented_Ann</name>"
         b"<modified>2026-10-27 12:05:09</modified>"
         b"<entityModified>2026-10-27 12:05:09</entityModified></relationship></success>"
+    )
+
+
+def test_a_persona_search_names_each_player_with_its_namespace() -> None:
+    # The game tells an account's display name from a hero by the namespace.
+    found = [PersonaEntry(12, "Invented_Ann", "bfheroes_web"), PersonaEntry(12, "a&b", "bfwest")]
+
+    assert personas([]) == b"<personas />"
+    assert personas(found) == (
+        b"<personas><persona><userId>12</userId><displayName>Invented_Ann</displayName>"
+        b"<namespaceName>bfheroes_web</namespaceName></persona>"
+        b"<persona><userId>12</userId><displayName>a&amp;b</displayName>"
+        b"<namespaceName>bfwest</namespaceName></persona></personas>"
     )
 
 

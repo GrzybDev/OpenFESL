@@ -16,7 +16,9 @@ from openfesl.core.relationships import (
     Relationships,
 )
 from openfesl.protocol.magma import (
+    PersonaEntry,
     RelationshipEntry,
+    personas,
     relationship,
     roster,
     status_update,
@@ -50,7 +52,8 @@ def social_router(game: Game, magma: Magma, relationships: Relationships) -> API
         relationships: Keeps the relationships and the status lines of the games.
     """
     router = APIRouter()
-    if game.relationships is None:
+    rules = game.relationships
+    if rules is None:
         return router
 
     def own(session_id: str | None, account_id: int) -> int:
@@ -121,6 +124,23 @@ def social_router(game: Game, magma: Magma, relationships: Relationships) -> API
         with _refusals():
             relationships.report(reporting, text)
         return _xml(success())
+
+    # A name the player types may hold anything, a slash too.
+    @router.get("/nucleus/personas/{search:path}")
+    async def search(search: str, session_id: SessionId = None) -> Response:
+        magma.session(session_id)
+        with _refusals():
+            found = await relationships.search(game, search)
+        return _xml(
+            personas(
+                PersonaEntry(
+                    each.account_id,
+                    each.name,
+                    game.namespace if each.hero else rules.web_namespace,
+                )
+                for each in found
+            )
+        )
 
     return router
 
