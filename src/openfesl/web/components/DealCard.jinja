@@ -1,0 +1,96 @@
+{#def card, shelf: str #}
+{# A hot deal's card (the 2012 card): the shelf's ribbon, its name with a discount sticker, its
+   items' icons or OpenFESL's tiles, or the tile of a random box, its price with the usual one
+   struck through, what it holds or may give, which heroes may have it, the time it has left and
+   the way to its page. With scripts the time counts down; once it runs out the card says
+   expired and leaves at the next page load. #}
+{% set texts_key = "games." ~ game.id ~ ".deals." %}
+{% set word = "leaves" if card.leaves else "ends" %}
+<article aria-labelledby="deal-{{ card.number }}" data-deal class="deal-card">
+  <p class="deal-ribbon">
+    <span data-live>{{ _(texts_key ~ "ribbon." ~ shelf) }}</span><span data-gone
+      hidden>{{ _("web.deals.card.expired") }}</span>
+  </p>
+  <div class="deal-head">
+    <h3 id="deal-{{ card.number }}" class="deal-name">{{ card.name }}</h3>
+    {% if card.off %}
+      <p data-live class="deal-sticker">
+        <svg aria-hidden="true" viewBox="0 0 100 100" class="store-sticker-burst">
+          <use href="{{ static('icons.svg') }}#sticker" />
+        </svg>
+        <span aria-hidden="true">{{ _("web.store.sticker", off=card.off) }}</span><span class="sr-only">{{ _("web.store.sticker.label", off=card.off) }}</span>
+      </p>
+    {% endif %}
+  </div>
+  <div aria-hidden="true" class="deal-art">
+    {% if card.box %}
+      <span class="deal-icon deal-icon-drawn"><Icon name="box" :size="26" stroke="currentColor" /></span>
+    {% else %}
+      {% for icon in card.icons %}
+        {% if icon.src %}
+          <img src="{{ icon.src }}"
+               width="58"
+               height="58"
+               alt=""
+               loading="lazy"
+               class="deal-icon">
+        {% else %}
+          <span class="deal-icon deal-icon-drawn"><Icon :name="icon.glyph" :size="26" stroke="currentColor" /></span>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <div class="deal-body">
+    <p class="deal-price">
+      <span aria-hidden="true"
+            data-wallet="{{ card.currency }}"
+            class="store-coin"><Icon name="coin" :size="12" stroke="currentColor" /></span>
+      {% if card.original %}
+        <s data-live><span class="sr-only">{{ _("web.store.was") }}</span>{{ card.original }}</s>
+      {% endif %}
+      <strong>{{ card.price }}</strong> {{ _("games." ~ game.id ~ ".currency." ~ card.currency) }}
+    </p>
+    <ul role="list" class="deal-lines">
+      {% for line in card.lines %}<li>{{ line }}</li>{% endfor %}
+    </ul>
+    <dl class="deal-facts">
+      <dt>{{ _("web.store.requires") }}</dt>
+      <dd>
+        {{ card.requires }}
+      </dd>
+      {% if card.heroes is not none %}
+        <dt class="phone-sr-only">{{ _("web.deals.card.heroes") }}</dt>
+        <dd class="deal-heroes{% if not card.heroes %} deal-heroes-none{% endif %}">
+          {% if card.heroes %}
+            {{ _("web.deals.card.for", heroes=listed(card.heroes)) }}
+          {% else %}
+            {{ _("web.deals.card.nobody") }}
+          {% endif %}
+        </dd>
+      {% endif %}
+    </dl>
+    {% if card.ends %}
+      <p class="deal-timer{% if card.soon %} deal-timer-soon{% endif %}">
+        <Icon name="clock" :size="20" stroke="currentColor" />
+        <span>
+          <span data-live class="js-only">{{ _("web.deals.card." ~ word ~ "_in") }}
+            <strong role="timer"
+                    data-left="{{ seconds_left(card.ends) }}"
+                    data-format="{{ _('web.store.countdown') }}">{{ card.left }}</strong></span>
+          <span data-gone hidden>{{ _("web.deals.card.expired_at") }}</span>
+          <span class="no-js-only">{{ _("web.deals.card." ~ word ~ "_at") }}</span>
+          <span class="deal-timer-end">{{ card.until }}</span>
+        </span>
+      </p>
+      <p data-gone hidden class="deal-gone">{{ _("web.deals.card.expired.leaves") }}</p>
+    {% else %}
+      <p class="deal-no-end">
+        <Icon name="clock" :size="18" stroke="currentColor" />{{ _("web.deals.card.no_end") }}
+      </p>
+    {% endif %}
+    <a data-live href="{{ card.href }}" class="site-button deal-buy">
+      <Icon :name="'box' if card.box else 'bag'" :size="16" stroke="#FEDE01" />
+      {{ _("web.deals.card.contents" if card.box else "web.deals.card.choose") }}
+    </a>
+  </div>
+</article>

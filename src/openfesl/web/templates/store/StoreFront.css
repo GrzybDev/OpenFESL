@@ -2,6 +2,10 @@
    (heroes, categories in seven columns or two on phones), the Owned by pill and the search, then
    the outlined title over the items' tiles and the pager. Chosen tiles take the yellow fill. */
 @layer pages {
+  .store-front-deals {
+    flex: 0 1 400px;
+  }
+
   .store-front-line {
     display: flex;
     flex-wrap: wrap;

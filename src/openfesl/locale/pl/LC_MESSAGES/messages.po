@@ -8502,3 +8502,188 @@ msgstr "Udogodnienie"
 msgid "games.bfheroes.item_kind.emote.item"
 msgstr "Gest"
 
+msgid "web.site.page.hot-deals"
+msgstr "Okazje"
+
+msgid "web.store.front.hot_deals"
+msgstr ""
+"Okazja dnia, nowe zestawy, wyprzedaże i losowe skrzynki, taniej przez "
+"ograniczony czas."
+
+msgid "web.deals.lead"
+msgstr ""
+"Okazja dnia, nowe zestawy, wyprzedaże i losowe skrzynki zmieniają się "
+"według harmonogramu, a administracja tego serwisu może dodawać własne "
+"oferty. Każdą okazję kupuje się dla jednego bohatera, który spełnia jej "
+"wymagania; ceny są w Funds."
+
+msgid "web.deals.lead.admin_only"
+msgstr ""
+"Oferty przygotowane przez administrację tego serwisu. Każdą okazję kupuje "
+"się dla jednego bohatera, który spełnia jej wymagania; ceny są w Funds."
+
+msgid "web.deals.rules"
+msgstr "Jak działają okazje"
+
+msgid "web.deals.rules.ends"
+msgstr "Okazja kończy się o czasie podanym na jej karcie."
+
+msgid "web.deals.rules.box"
+msgstr ""
+"Losowa skrzynka otwiera się od razu i daje jeden z wymienionych "
+"przedmiotów, wart co najmniej tyle, ile kosztuje skrzynka."
+
+msgid "web.deals.midnight"
+msgstr "00:00 %(zone)s"
+
+msgid "games.bfheroes.deals.schedule"
+msgstr ""
+"Okazja dnia zmienia się o %(time)s, nowe zestawy pojawiają się w każdy "
+"poniedziałek, a wyprzedaże trwają 72 godziny."
+
+msgid "games.bfheroes.deals.section.daily"
+msgstr "Okazja dnia"
+
+msgid "games.bfheroes.deals.section.daily.lead"
+msgstr ""
+"Trzy części dla każdej frakcji, %(percent)s%% taniej, do %(time)s. Nowa "
+"para codziennie."
+
+msgid "games.bfheroes.deals.section.new"
+msgstr "Nowe w tym tygodniu"
+
+msgid "games.bfheroes.deals.section.new.lead"
+msgstr ""
+"Zestawy nowe od poniedziałku, za połowę ceny ich części. Zostają na 7 dni "
+"i wracają nie wcześniej niż po 6 tygodniach."
+
+msgid "games.bfheroes.deals.section.sale"
+msgstr "Wyprzedaż"
+
+msgid "games.bfheroes.deals.section.sale.lead"
+msgstr ""
+"Wyprzedaże trwają 72 godziny i zaczynają się w poniedziałki i czwartki."
+
+msgid "games.bfheroes.deals.section.boxes"
+msgstr "Losowe skrzynki"
+
+msgid "games.bfheroes.deals.section.boxes.lead"
+msgstr ""
+"Skrzynka otwiera się od razu i daje jeden z wymienionych przedmiotów. Pary "
+"tematyczne zmieniają się co 14 dni; skrzynki z wydarzeń są tu, dopóki trwa "
+"wydarzenie."
+
+msgid "games.bfheroes.deals.section.popular"
+msgstr "Popularne"
+
+msgid "games.bfheroes.deals.section.popular.lead"
+msgstr "Zawsze dostępne, w zwykłej cenie lub ze stałym rabatem."
+
+msgid "games.bfheroes.deals.section.offers"
+msgstr "Inne oferty"
+
+msgid "games.bfheroes.deals.section.offers.lead"
+msgstr "Oferty przygotowane przez administrację tego serwisu."
+
+msgid "games.bfheroes.deals.ribbon.daily"
+msgstr "Okazja dnia"
+
+msgid "games.bfheroes.deals.ribbon.new"
+msgstr "Nowość"
+
+msgid "games.bfheroes.deals.ribbon.sale"
+msgstr "Wyprzedaż"
+
+msgid "games.bfheroes.deals.ribbon.boxes"
+msgstr "Losowa"
+
+msgid "games.bfheroes.deals.ribbon.popular"
+msgstr "Popularne"
+
+msgid "games.bfheroes.deals.ribbon.offers"
+msgstr "Oferta"
+
+msgid "web.deals.card.expired"
+msgstr "Wygasła"
+
+msgid "web.deals.card.expired_at"
+msgstr "Wygasła"
+
+msgid "web.deals.card.expired.leaves"
+msgstr "Zniknie z listy przy następnym wczytaniu strony."
+
+msgid "web.deals.card.ends_in"
+msgstr "Koniec za"
+
+msgid "web.deals.card.leaves_in"
+msgstr "Zniknie za"
+
+msgid "web.deals.card.ends_at"
+msgstr "Koniec"
+
+msgid "web.deals.card.leaves_at"
+msgstr "Zniknie"
+
+msgid "web.deals.card.no_end"
+msgstr "Bez daty końca"
+
+msgid "web.deals.card.item"
+msgstr "%(item)s · %(ownership)s"
+
+msgid "web.deals.card.box.one"
+msgstr "%(count)s przedmiot"
+
+msgid "web.deals.card.box.few"
+msgstr "Jeden z %(count)s przedmiotów"
+
+msgid "web.deals.card.box.many"
+msgstr "Jeden z %(count)s przedmiotów"
+
+msgid "web.deals.card.box.other"
+msgstr "Jeden z %(count)s przedmiotów"
+
+msgid "web.deals.card.box.worth.one"
+msgstr "%(count)s przedmiot, wart co najmniej %(worth)s"
+
+msgid "web.deals.card.box.worth.few"
+msgstr "Jeden z %(count)s przedmiotów, każdy wart co najmniej %(worth)s"
+
+msgid "web.deals.card.box.worth.many"
+msgstr "Jeden z %(count)s przedmiotów, każdy wart co najmniej %(worth)s"
+
+msgid "web.deals.card.box.worth.other"
+msgstr "Jeden z %(count)s przedmiotów, każdy wart co najmniej %(worth)s"
+
+msgid "web.deals.card.heroes"
+msgstr "Bohaterowie"
+
+msgid "web.deals.card.for"
+msgstr "Dla: %(heroes)s"
+
+msgid "web.deals.card.nobody"
+msgstr "Żaden z bohaterów konta"
+
+msgid "web.deals.card.requires.faction"
+msgstr "Bohaterowie frakcji %(faction)s"
+
+msgid "web.deals.card.requires.class"
+msgstr "Bohaterowie klasy %(hero_class)s"
+
+msgid "web.deals.card.requires.both"
+msgstr "Bohaterowie frakcji %(faction)s, klasa %(hero_class)s"
+
+msgid "web.deals.card.contents"
+msgstr "Zobacz zawartość"
+
+msgid "web.deals.card.choose"
+msgstr "Wybierz bohatera"
+
+msgid "web.deals.empty"
+msgstr "Teraz nie ma okazji"
+
+msgid "web.deals.empty.text"
+msgstr "Wszystkie przedmioty są w sklepie w zwykłej cenie."
+
+msgid "web.deals.card.more"
+msgstr "%(names)s i jeszcze %(count)s"
+

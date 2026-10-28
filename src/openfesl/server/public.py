@@ -24,6 +24,7 @@ from openfesl.web.funds import FundsPages
 from openfesl.web.game_icons import game_icon_routes
 from openfesl.web.heroes import HeroesPages
 from openfesl.web.host import host_routes
+from openfesl.web.hot_deals import HotDealsPages
 from openfesl.web.launcher import launcher_routes
 from openfesl.web.leaderboard import leaderboard_routes
 from openfesl.web.menu import menu_routes
@@ -145,6 +146,9 @@ def include_public_routes(
     )
     app.include_router(
         StoreFrontPages(pages, games, services.store_front, services.catalogues).routes()
+    )
+    app.include_router(
+        HotDealsPages(pages, games, services.deals, services.catalogues, stores.products).routes()
     )
     app.include_router(FundsPages(pages, games, services.wallets).routes())
     app.include_router(launcher_routes(lambda: app.state.launcher))

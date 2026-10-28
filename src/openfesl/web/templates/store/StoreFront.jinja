@@ -12,6 +12,18 @@
       <Plaque id="store-front-title">{{ title }}</Plaque>
       <p class="site-lead">{{ _("web.store.front.lead") }}</p>
     </div>
+    {% if "hot-deals" in game.pages %}
+      <section aria-labelledby="store-deals-title"
+               class="info-box info-box-darkorange store-front-deals">
+        <h2 id="store-deals-title" class="info-box-title">{{ _("web.site.page.hot-deals") }}</h2>
+        <span aria-hidden="true" class="info-box-disc"><Icon name="deal" :size="22" stroke="#0A0A0A" /></span>
+        <p class="info-box-note">{{ _("web.store.front.hot_deals") }}</p>
+        <p class="info-box-note">
+          <a href="{{ url('/' ~ game.id ~ game.site.path('hot-deals')) }}"
+             class="site-button"><Icon name="deal" :size="16" stroke="#FEDE01" />{{ _("web.site.page.hot-deals") }}</a>
+        </p>
+      </section>
+    {% endif %}
   </section>
   {% if not player %}
     <p class="store-front-line">

@@ -2,7 +2,14 @@ from fastapi import APIRouter, Request
 from fastapi.responses import FileResponse, Response
 from starlette.exceptions import HTTPException
 
-from openfesl.core.catalogues import KEPT_FILE, REVISION, CatalogueFiles, Catalogues, file_path
+from openfesl.core.catalogues import (
+    KEPT_FILE,
+    REVISION,
+    Catalogue,
+    CatalogueFiles,
+    Catalogues,
+    file_path,
+)
 from openfesl.core.game_art import GameArt
 from openfesl.core.games import Games
 from openfesl.core.magma import Magma
@@ -22,6 +29,26 @@ def catalogue_file_url(game: str, revision: str, path: str) -> str:
         path: The file's path in the import's folder.
     """
     return f"/catalogues/{game}/{revision}/{path}"
+
+
+def icon_url(game: str, catalogue: Catalogue, item_id: int, shown: bool) -> str | None:
+    """Return the address of an item's imported icon, for a page that shows the game's art.
+
+    Args:
+        game: The game's data-file name.
+        catalogue: The game's imported catalogue.
+        item_id: The item's number.
+        shown: Whether the page shows the game's art to its viewer.
+
+    Returns:
+        None where the art is hidden, the import keeps no icons, or the item has none or is
+        withheld.
+    """
+    contents, item = catalogue.contents, catalogue.item(item_id)
+    revision = contents.revision if shown and contents.icons else None
+    if revision is None or item is None or not item.icon or item.withheld:
+        return None
+    return catalogue_file_url(game, revision, file_path("icons", item.icon))
 
 
 def catalogue_file_routes(

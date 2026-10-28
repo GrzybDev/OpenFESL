@@ -58,6 +58,8 @@ class ItemSection(BaseModel):
         slots: The slots its items are worn in.
         discount: The discount on the items' prices, in percent.
         name: The id of the text that names a deal, with {faction} for the faction's name.
+        shelf: The section of the hot deals page that lists its deals; its own name when none.
+        leaves: Whether its deals leave the hot deals for a while rather than end.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -70,6 +72,8 @@ class ItemSection(BaseModel):
     slots: frozenset[str]
     discount: Percent
     name: str
+    shelf: str | None = None
+    leaves: bool = False
 
 
 class OfferSection(BaseModel):
@@ -86,6 +90,8 @@ class OfferSection(BaseModel):
         gap: The days after an offer left the section before it may come back.
         sets: Whether the game's sets are among its offers.
         offers: Its own offers.
+        shelf: The section of the hot deals page that lists its deals; its own name when none.
+        leaves: Whether its deals leave the hot deals for a while rather than end.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -98,6 +104,8 @@ class OfferSection(BaseModel):
     gap: NonNegativeInt = 0
     sets: bool = False
     offers: tuple[Offer, ...] = ()
+    shelf: str | None = None
+    leaves: bool = False
 
     @model_validator(mode="after")
     def _check_discount(self) -> Self:

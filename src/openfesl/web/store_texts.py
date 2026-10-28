@@ -96,13 +96,15 @@ class StoreTexts:
     def countdown(self, ends: datetime) -> str:
         """Return the time left until a moment, as days and a clock, such as 1 d 23:22:40.
 
+        Under a day the clock alone is left.
+
         Args:
             ends: The moment.
         """
         left = max(int((ends - self._now).total_seconds()), 0)
         days, rest = divmod(left, 86400)
         clock = f"{rest // 3600:02}:{rest % 3600 // 60:02}:{rest % 60:02}"
-        return self.text("web.store.countdown", days=days, time=clock)
+        return self.text("web.store.countdown", days=days, time=clock) if days else clock
 
     def percent(self, share: float) -> str:
         """Return a share as a percentage with at most one decimal, as the language writes it.

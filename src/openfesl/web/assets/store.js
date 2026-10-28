@@ -9,8 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
   if (form) {
     buyPanel(form);
   }
-  for (const timer of document.querySelectorAll("[role=timer][data-left]")) {
-    countDown(timer);
+  for (const timer of document.querySelectorAll("[role=timer][data-left]:not([data-deal] *)")) {
+    countDown(timer, endDeal);
   }
   const reveal = document.querySelector("dialog[data-reveal]");
   if (reveal) {
@@ -116,12 +116,13 @@ function closes(dialog, opener) {
 }
 
 /**
- * Counts a hot deal's time left down each second while the page is shown, and marks the deal
- * ended when it runs out.
+ * Counts a hot deal's time left down each second while the page is shown, under a day as a clock
+ * alone, and says so once it runs out.
  *
  * @param {HTMLElement} timer - The time left, with the server's seconds to its end and its wording.
+ * @param {() => void} ended - Shows that the deal has ended.
  */
-function countDown(timer) {
+export function countDown(timer, ended) {
   const ends = Date.now() + Number(timer.dataset.left) * 1000;
   const tick = () => {
     if (document.hidden) {
@@ -131,11 +132,12 @@ function countDown(timer) {
     const clock = [Math.floor((left % 86400) / 3600), Math.floor((left % 3600) / 60), left % 60]
       .map((part) => String(part).padStart(2, "0"))
       .join(":");
-    timer.textContent = fill(timer.dataset.format, { days: Math.floor(left / 86400), time: clock });
+    const days = Math.floor(left / 86400);
+    timer.textContent = days ? fill(timer.dataset.format, { days, time: clock }) : clock;
     if (!left) {
       clearInterval(interval);
       timer.dataset.ended = "true";
-      endDeal();
+      ended();
     }
   };
   const interval = setInterval(tick, 1000);

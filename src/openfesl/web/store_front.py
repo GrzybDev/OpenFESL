@@ -9,14 +9,14 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, Response
 from starlette.datastructures import QueryParams
 
-from openfesl.core.catalogues import Catalogue, Catalogues, Item, file_path
+from openfesl.core.catalogues import Catalogue, Catalogues, Item
 from openfesl.core.games import Game, Games
 from openfesl.core.heroes import Hero
 from openfesl.core.store_front import FrontItem, Owned, StoreFront
 from openfesl.core.store_items import Requirement, Unfit, requirement
 from openfesl.core.store_window import DAYS, HOURS, USES
 from openfesl.core.texts import localize
-from openfesl.web.catalogue_files import catalogue_file_url
+from openfesl.web.catalogue_files import icon_url
 from openfesl.web.pages import Pages
 from openfesl.web.site import site_bar
 from openfesl.web.store import ITEM
@@ -190,10 +190,19 @@ class StoreFrontPages:
             pages = max(math.ceil(len(pool) / PAGE_SIZE), 1)
             choice = choice.changed(page=min(choice.page, pages))
             shown = pool[(choice.page - 1) * PAGE_SIZE : choice.page * PAGE_SIZE]
-            icon = self._icons(request, game, catalogue)
+            art = self._pages.shows_art(request, game)
             buy = localize(f"/{game.id}{ITEM.format(number='')}", language)
             tiles = [
-                _tile(texts, catalogue, found, item, hero, held.get(item.id), buy, icon(item.id))
+                _tile(
+                    texts,
+                    catalogue,
+                    found,
+                    item,
+                    hero,
+                    held.get(item.id),
+                    buy,
+                    icon_url(game.id, catalogue, item.id, art),
+                )
                 for found, item in shown
             ]
             return self._pages.render(
@@ -203,7 +212,7 @@ class StoreFrontPages:
                 heroes=heroes,
                 choice=choice,
                 kinds=[("", len(fitting))] + [(kind, counts[kind]) for kind in kinds],
-                glyphs=_glyphs(game),
+                glyphs=kind_glyphs(game),
                 tiles=tiles,
                 total=len(pool),
                 pages=pages,
@@ -220,23 +229,6 @@ class StoreFrontPages:
             )
 
         return show_store
-
-    def _icons(
-        self, request: Request, game: Game, catalogue: Catalogue
-    ) -> Callable[[int], str | None]:
-        # The address of an item's imported icon, where the deployment keeps the import's files
-        # and the page shows the game's art to its viewer.
-        contents = catalogue.contents
-        shown = self._pages.shows_art(request, game) and contents.icons and contents.revision
-
-        def icon(item_id: int) -> str | None:
-            item = catalogue.item(item_id)
-            if not shown or item is None or not item.icon or item.withheld:
-                return None
-            assert contents.revision is not None
-            return catalogue_file_url(game.id, contents.revision, file_path("icons", item.icon))
-
-        return icon
 
     async def _empty(
         self,
@@ -301,7 +293,7 @@ class StoreFrontPages:
                 label = texts.text("web.store.front.none.show_for", hero=other.persona.name)
                 links.insert(0, (label, choice.changed(hero=other).query()))
                 break
-        return Empty(title, why, _glyphs(game).get(choice.kind, "bag"), links)
+        return Empty(title, why, kind_glyphs(game).get(choice.kind, "bag"), links)
 
 
 def _choice(query: QueryParams, heroes: list[Hero], default: int | None) -> Choice:
@@ -326,8 +318,12 @@ def _kinds(game: Game, items: list[FrontItem]) -> list[str]:
     return [kind for kind in dict.fromkeys(order) if kind in present] + sorted(present - set(order))
 
 
-def _glyphs(game: Game) -> dict[str, str]:
-    # The glyph of each kind, as the in-game store's category of the kind wears it.
+def kind_glyphs(game: Game) -> dict[str, str]:
+    """Return the glyph of each kind of item, as the in-game store's category of the kind wears it.
+
+    Args:
+        game: The game.
+    """
     store = game.store.in_game if game.store else None
     categories = store.categories if store else []
     return {kind: category.glyph for category in categories for kind in category.kinds}

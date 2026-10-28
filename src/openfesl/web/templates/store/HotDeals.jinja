@@ -1,0 +1,67 @@
+{#def shelves: list, rotation: bool, midnight: str #}
+{# The hot deals: how they change beside the title, then each shelf under its plaque in the
+   rotation's order, its deals as the 2012 cards; a shelf with nothing in it is left out, and a
+   page without any says that the store's items stay at their usual prices. Without the rotation
+   the shelves hold the admins' offers alone and say so. #}
+{% set title = _("web.site.page.hot-deals") %}
+{% set texts_key = "games." ~ game.id ~ ".deals." %}
+<Layout :title="title">
+  <section aria-labelledby="deals-title" class="creator-head">
+    <div class="creator-intro">
+      <Plaque id="deals-title">{{ title }}</Plaque>
+      <p class="site-lead">{{ _("web.deals.lead" if rotation else "web.deals.lead.admin_only") }}</p>
+    </div>
+    <section aria-labelledby="deals-rules"
+             class="site-box site-box-pale deals-rules">
+      <h2 id="deals-rules" class="site-box-title">{{ _("web.deals.rules") }}</h2>
+      <ul class="deals-rules-list">
+        {% if rotation %}<li>{{ _(texts_key ~ "schedule", time=midnight) }}</li>{% endif %}
+        <li>{{ _("web.deals.rules.ends") }}</li>
+        <li>{{ _("web.deals.rules.box") }}</li>
+        {% if game.heroes %}
+          <li>
+            {{ _("games." ~ game.id ~ ".currency." ~ game.heroes.currency ~ ".earned") }}
+            <FundsLink class="deals-rules-link" />
+          </li>
+        {% endif %}
+      </ul>
+    </section>
+  </section>
+  {% for shelf in shelves %}
+    <section aria-labelledby="shelf-{{ shelf.key }}" class="deals-shelf">
+      <div class="deals-shelf-head">
+        <div class="deals-shelf-plaque{% if loop.index is even %} deals-shelf-plaque-right{% endif %}">
+          <Plaque :id="'shelf-' ~ shelf.key">{{ _(texts_key ~ "section." ~ shelf.key) }}</Plaque>
+        </div>
+        <p class="deals-shelf-lead">
+          {% if rotation %}
+            {{ _(texts_key ~ "section." ~ shelf.key ~ ".lead", percent=number(shelf.discount or 0), time=midnight) }}
+          {% else %}
+            {{ _(texts_key ~ "section.offers.lead") }}
+          {% endif %}
+        </p>
+      </div>
+      <ul role="list" class="deal-cards enter-rows">
+        {% for card in shelf.cards %}
+          <li>
+            <DealCard :card="card" :shelf="shelf.key" />
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% else %}
+    <section aria-labelledby="deals-none" class="store-front-none deals-none">
+      <span aria-hidden="true" class="store-none-disc"><Icon name="deal" :size="26" stroke="currentColor" /></span>
+      <div>
+        <h2 id="deals-none">
+          <strong>{{ _("web.deals.empty") }}</strong>
+        </h2>
+        <p>{{ _("web.deals.empty.text") }}</p>
+        <p class="store-front-links">
+          <a href="{{ url('/' ~ game.id ~ game.site.path('store')) }}"
+             class="store-front-link">{{ _("web.site.page.store") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+        </p>
+      </div>
+    </section>
+  {% endfor %}
+</Layout>

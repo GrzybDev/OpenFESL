@@ -513,8 +513,11 @@ class Game(BaseModel):
 
     @model_validator(mode="after")
     def _check_store_page(self) -> Self:
-        if "store" in self.pages and not (self.store and self.heroes and self.site):
-            raise ValueError("the store page needs a store, heroes and a site")
+        listed = {"store", "hot-deals"} & set(self.pages)
+        if listed and not (self.store and self.heroes and self.site):
+            raise ValueError(
+                f"the {' and '.join(sorted(listed))} pages need a store, heroes and a site"
+            )
         return self
 
     @model_validator(mode="after")

@@ -1,0 +1,286 @@
+/* A hot deal's card: a ribbon tab over its dark head with the name and a red discount burst, a
+   dark band of item icons or a box's tile, then the pale body with the price, its lines, dashed
+   facts, the time left in an outlined box and a black button. The card lifts and tilts under the
+   pointer; an expired one turns grey and keeps only its end. */
+@layer components {
+  .deal-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: 34px 22px;
+    margin-top: 18px;
+
+    > li {
+      display: flex;
+      padding-top: 14px;
+    }
+  }
+
+  .deal-card {
+    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #f1e9de;
+    box-shadow:
+      inset 0 0 0 2px #f8f4ef,
+      0 4px 0 rgb(0 0 0 / 0.3);
+    color: #1f1712;
+    transition:
+      translate 200ms var(--ease-menu),
+      rotate 200ms var(--ease-menu);
+
+    &:hover:not(.deal-expired) {
+      translate: 0 -3px;
+      rotate: -0.5deg;
+    }
+  }
+
+  .deal-ribbon {
+    position: absolute;
+    top: -16px;
+    left: 14px;
+    z-index: 2;
+    padding: 4px 10px 5px;
+    border: 2px solid #000;
+    border-radius: 4px 4px 0 0;
+    background: #521f1c;
+    color: #fff;
+    font: 800 13px/1.1 var(--site-heading);
+    text-transform: lowercase;
+  }
+
+  .deal-head {
+    display: flex;
+    min-height: 62px;
+    align-items: center;
+    padding: 14px 70px 12px 16px;
+    border-bottom: 3px solid #000;
+    border-radius: 5px 5px 0 0;
+    background: #2a1f19;
+  }
+
+  .deal-name {
+    font: 800 22px/1.15 var(--site-heading);
+    color: #fff;
+    overflow-wrap: anywhere;
+    text-shadow: var(--site-outline-thin);
+  }
+
+  .deal-sticker {
+    position: absolute;
+    top: -14px;
+    right: -14px;
+    z-index: 3;
+    display: grid;
+    width: 78px;
+    height: 78px;
+    place-items: center;
+    rotate: 9deg;
+    font: 800 19px/1 var(--site-heading);
+    color: #fff;
+
+    > * {
+      grid-area: 1 / 1;
+    }
+  }
+
+  .deal-art {
+    display: flex;
+    min-height: 122px;
+    flex-wrap: wrap;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px;
+    border-bottom: 3px solid #000;
+    background: #3b2d23;
+  }
+
+  .deal-icon {
+    display: grid;
+    width: 58px;
+    height: 58px;
+    place-items: center;
+    border: 2px solid #000;
+    background: #cdbfa6;
+    object-fit: contain;
+  }
+
+  .deal-icon-drawn {
+    color: #5c4a3c;
+  }
+
+  .deal-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 16px 16px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .deal-price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #a8977f;
+    font: 700 15px/1.2 var(--site-heading);
+
+    .store-coin {
+      align-self: center;
+    }
+
+    s {
+      color: #5c4a3c;
+      font-weight: 600;
+    }
+
+    strong {
+      font-size: 23px;
+      font-weight: 800;
+    }
+  }
+
+  .deal-lines > li {
+    padding-block: 5px;
+    border-bottom: 1px dashed #a8977f;
+  }
+
+  .deal-facts {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 4px 12px;
+
+    dt {
+      font: 800 11px/1.8 var(--site-heading);
+      letter-spacing: 0.08em;
+      color: #5c4a3c;
+      text-transform: uppercase;
+    }
+  }
+
+  .deal-heroes {
+    font-weight: 700;
+  }
+
+  .deal-heroes-none {
+    font-weight: 400;
+    color: #5c4a3c;
+  }
+
+  .deal-timer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 2px solid #1f1712;
+    border-radius: 6px;
+    background: #f8f4ef;
+
+    > svg {
+      flex: none;
+    }
+
+    > span {
+      display: grid;
+    }
+
+    strong {
+      font-weight: 800;
+    }
+  }
+
+  .deal-timer-soon {
+    > svg,
+    strong {
+      color: #8c1e18;
+    }
+  }
+
+  .deal-timer-end {
+    font-size: 13px;
+    color: #5c4a3c;
+  }
+
+  .deal-no-end {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #5c4a3c;
+  }
+
+  .deal-gone {
+    color: #8c1e18;
+    font-weight: 700;
+  }
+
+  .deal-buy {
+    align-self: flex-start;
+    margin-top: auto;
+  }
+
+  .deal-expired {
+    background: #e4dccf;
+    box-shadow:
+      inset 0 0 0 2px #e4dccf,
+      0 4px 0 rgb(0 0 0 / 0.3);
+
+    .deal-timer {
+      border-color: #8c1e18;
+      color: #8c1e18;
+    }
+  }
+
+  /* On phones a card leaves its item lines to the deal's page, puts its facts in one line, where
+     the heroes need no label, and keeps the moment a deal ends for when no countdown says it. */
+  @media (width < 40rem) {
+    .deal-lines,
+    .deal-price .store-coin,
+    .js .deal-card:not(.deal-expired) .deal-timer-end {
+      display: none;
+    }
+
+    .deal-price {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .deal-facts {
+      display: block;
+
+      :is(dt, dd) {
+        display: inline;
+      }
+
+      dt {
+        font: inherit;
+        font-weight: 700;
+        letter-spacing: 0;
+        color: inherit;
+        text-transform: none;
+      }
+
+      dt + dd ~ dd::before {
+        content: "· ";
+        font-weight: 400;
+      }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .deal-card {
+      transition: none;
+
+      &:hover:not(.deal-expired) {
+        translate: none;
+        rotate: none;
+      }
+    }
+  }
+}

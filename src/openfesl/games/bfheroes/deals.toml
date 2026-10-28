@@ -1,10 +1,12 @@
 # The hot deals' rotation: what the store's hot deals sell besides the admin's own offers, in
 # the sections of the autumn 2012 window, which the first look after a section's change makes
-# and the store keeps. Each switch, size and schedule below is a default that the setting
-# bfheroes.deals.<path> overrides, such as bfheroes.deals.sections.sale.enabled = off. Times are
-# the zone's midnights, a period's days counted from Mondays. Set names and descriptions are
-# the game's own bundle texts; prices worked out from items end in 99, as the store's did in
-# 2012 (archived hot deals, HD yyyymmdd; product ids in parentheses).
+# and the store keeps. The hot deals page lists them in five shelves, a section's own unless it
+# names another, and new sets and themed boxes leave the page rather than end. Each switch, size
+# and schedule below is a default that the setting bfheroes.deals.<path> overrides, such as
+# bfheroes.deals.sections.sale.enabled = off. Times are the zone's midnights, a period's days
+# counted from Mondays. Set names and descriptions are the game's own bundle texts; prices worked
+# out from items end in 99, as the store's did in 2012 (archived hot deals, HD yyyymmdd; product
+# ids in parentheses).
 [deals]
 enabled = true
 zone = "UTC"
@@ -30,6 +32,7 @@ size = 6
 discount = [50, 50]
 gap = 42
 sets = true
+leaves = true
 
 # On sale: two sets or emote pairs of each faction for 72 hours from Mondays and Thursdays, 25
 # to 50% off (79 hours left on the half-price emote bundles in October 2011).
@@ -55,6 +58,8 @@ members = [5043, 5046]
 [deals.sections.seasonal]
 kind = "offers"
 discount = [50, 50]
+shelf = "new"
+leaves = true
 
 # Cliffhanger's Bundle (34140, HD 20120106), for January
 [[deals.sections.seasonal.offers]]
@@ -206,6 +211,8 @@ kind = "offers"
 schedule = { every = 14, lasts = 42 }
 size = 1
 gap = 42
+shelf = "boxes"
+leaves = true
 
 [[deals.sections.themed.offers]]
 name = "WEST_Custom_Bundle_RoyalMechanicalDrop"
@@ -300,6 +307,7 @@ pool = "lost-treasure"
 # and Santa's and Nikolaus' Visits of Christmas, as their texts date them.
 [deals.sections.events]
 kind = "offers"
+shelf = "boxes"
 
 [[deals.sections.events.offers]]
 name = "WEST_Custom_Bundle_RoyalTrickorTreat"

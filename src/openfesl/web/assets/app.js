@@ -23,6 +23,7 @@ import "./chests.js";
 import "./catalogue.js";
 import "./settings.js";
 import "./store-front.js";
+import "./hot-deals.js";
 import "htmx.org";
 
 // A chevron block whose page takes longer than 300 ms to arrive shows that it is loading, and

@@ -8,6 +8,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.exceptions import HTTPException
 
 from openfesl.core.catalogues import Catalogues
+from openfesl.core.game_pages import PageKind
 from openfesl.core.games import Game, Games, Scope
 from openfesl.core.heroes import Roster
 from openfesl.core.purchases import (
@@ -308,12 +309,14 @@ class StorePages:
 def _back(
     game: Game, sold: StoreItem, chosen: HeroChoice | None, language: str
 ) -> tuple[str, str] | None:
-    # The list an item is found in, with the hero it was chosen for, and its name.
-    if sold.kind is not Kind.ITEM or game.site is None or "store" not in game.pages:
+    # The list a page is found in and its name: the store front, with the hero an item was
+    # chosen for, or the hot deals.
+    kind: PageKind = "store" if sold.kind is Kind.ITEM else "hot-deals"
+    if game.site is None or kind not in game.pages:
         return None
-    page = localize(f"/{game.id}{game.site.path('store')}", language)
-    hero = f"?hero={chosen.hero.persona.id}" if chosen else ""
-    return page + hero, translate("web.site.page.store", language)
+    page = localize(f"/{game.id}{game.site.path(kind)}", language)
+    hero = f"?hero={chosen.hero.persona.id}" if chosen and kind == "store" else ""
+    return page + hero, translate(f"web.site.page.{kind}", language)
 
 
 def _number(text: str) -> int:

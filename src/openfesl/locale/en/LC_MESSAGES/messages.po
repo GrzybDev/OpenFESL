@@ -8026,3 +8026,174 @@ msgstr "Convenience"
 msgid "games.bfheroes.item_kind.emote.item"
 msgstr "Emote"
 
+msgid "web.site.page.hot-deals"
+msgstr "Hot deals"
+
+msgid "web.store.front.hot_deals"
+msgstr ""
+"Deal of the Day, new sets, sales and random boxes, at a lower price for a "
+"limited time."
+
+msgid "web.deals.lead"
+msgstr ""
+"Deal of the Day, new sets, sales and random boxes change on a schedule, "
+"and the administrators of this service can add offers of their own. Every "
+"deal is bought for one hero who meets its requirements; prices are in "
+"Funds."
+
+msgid "web.deals.lead.admin_only"
+msgstr ""
+"Offers set up by the administrators of this service. Every deal is bought "
+"for one hero who meets its requirements; prices are in Funds."
+
+msgid "web.deals.rules"
+msgstr "How deals work"
+
+msgid "web.deals.rules.ends"
+msgstr "A deal ends at the time on its card."
+
+msgid "web.deals.rules.box"
+msgstr ""
+"A random box opens at once and gives one of its listed items, worth at "
+"least the box's price."
+
+msgid "web.deals.midnight"
+msgstr "00:00 %(zone)s"
+
+msgid "games.bfheroes.deals.schedule"
+msgstr ""
+"Deal of the Day changes at %(time)s, new sets come every Monday, and sales "
+"run 72 hours."
+
+msgid "games.bfheroes.deals.section.daily"
+msgstr "Deal of the Day"
+
+msgid "games.bfheroes.deals.section.daily.lead"
+msgstr ""
+"Three pieces for each faction, %(percent)s%% off, until %(time)s. A new "
+"pair comes every day."
+
+msgid "games.bfheroes.deals.section.new"
+msgstr "New this week"
+
+msgid "games.bfheroes.deals.section.new.lead"
+msgstr ""
+"Sets new on Monday, at half their pieces' price. They stay for 7 days and "
+"come back no sooner than 6 weeks later."
+
+msgid "games.bfheroes.deals.section.sale"
+msgstr "On sale"
+
+msgid "games.bfheroes.deals.section.sale.lead"
+msgstr "Sales run 72 hours and start on Mondays and Thursdays."
+
+msgid "games.bfheroes.deals.section.boxes"
+msgstr "Random boxes"
+
+msgid "games.bfheroes.deals.section.boxes.lead"
+msgstr ""
+"A box opens at once and gives one of its listed items. Themed pairs change "
+"every 14 days; event boxes are here while their event runs."
+
+msgid "games.bfheroes.deals.section.popular"
+msgstr "Popular"
+
+msgid "games.bfheroes.deals.section.popular.lead"
+msgstr "Always here, at their usual price or a standing discount."
+
+msgid "games.bfheroes.deals.section.offers"
+msgstr "More offers"
+
+msgid "games.bfheroes.deals.section.offers.lead"
+msgstr "Offers set up by the administrators of this service."
+
+msgid "games.bfheroes.deals.ribbon.daily"
+msgstr "Deal of the day"
+
+msgid "games.bfheroes.deals.ribbon.new"
+msgstr "New"
+
+msgid "games.bfheroes.deals.ribbon.sale"
+msgstr "On sale"
+
+msgid "games.bfheroes.deals.ribbon.boxes"
+msgstr "Random"
+
+msgid "games.bfheroes.deals.ribbon.popular"
+msgstr "Popular"
+
+msgid "games.bfheroes.deals.ribbon.offers"
+msgstr "Offer"
+
+msgid "web.deals.card.expired"
+msgstr "Expired"
+
+msgid "web.deals.card.expired_at"
+msgstr "Expired at"
+
+msgid "web.deals.card.expired.leaves"
+msgstr "It leaves the list at the next page load."
+
+msgid "web.deals.card.ends_in"
+msgstr "Ends in"
+
+msgid "web.deals.card.leaves_in"
+msgstr "Leaves in"
+
+msgid "web.deals.card.ends_at"
+msgstr "Ends at"
+
+msgid "web.deals.card.leaves_at"
+msgstr "Leaves at"
+
+msgid "web.deals.card.no_end"
+msgstr "No end date"
+
+msgid "web.deals.card.item"
+msgstr "%(item)s · %(ownership)s"
+
+msgid "web.deals.card.box.one"
+msgstr "%(count)s item"
+
+msgid "web.deals.card.box.other"
+msgstr "One of %(count)s items"
+
+msgid "web.deals.card.box.worth.one"
+msgstr "%(count)s item, worth at least %(worth)s"
+
+msgid "web.deals.card.box.worth.other"
+msgstr "One of %(count)s items, each worth at least %(worth)s"
+
+msgid "web.deals.card.heroes"
+msgstr "Heroes"
+
+msgid "web.deals.card.for"
+msgstr "For %(heroes)s"
+
+msgid "web.deals.card.nobody"
+msgstr "None of the account's heroes"
+
+msgid "web.deals.card.requires.faction"
+msgstr "%(faction)s heroes"
+
+msgid "web.deals.card.requires.class"
+msgstr "%(hero_class)s heroes"
+
+msgid "web.deals.card.requires.both"
+msgstr "%(faction)s %(hero_class)s heroes"
+
+msgid "web.deals.card.contents"
+msgstr "See the contents"
+
+msgid "web.deals.card.choose"
+msgstr "Choose a hero"
+
+msgid "web.deals.empty"
+msgstr "No hot deals right now"
+
+msgid "web.deals.empty.text"
+msgstr "Every item stays in the store at its usual price."
+
+msgid "web.deals.card.more"
+msgstr "%(names)s and %(count)s more"
+
