@@ -48,7 +48,7 @@ MAXIMUM_PASSWORD = 31
 MAXIMUM_NAME = 63
 
 # Enough to tell an address that mail can be sent to from a name that is none.
-_ADDRESS = re.compile(r"[^@\s]+@[^@\s]+\.[^@\s]+")
+ADDRESS = re.compile(r"[^@\s]+@[^@\s]+\.[^@\s]+")
 
 # No account here belongs to a console identity, and the service hands out no tokens for other
 # services; the SDK passes these errors on to the game.
@@ -184,8 +184,9 @@ class AccountStore(Protocol):
         server: bool = False,
         verification: Link | None = None,
         made_in: str | None = None,
+        display_name: str | None = None,
     ) -> Account | None:
-        """Create an account, or return None when the name is taken.
+        """Create an account, or return None when its name or display name is taken.
 
         Args:
             nuid: The login name.
@@ -195,6 +196,14 @@ class AccountStore(Protocol):
             server: Whether the account belongs to a game's dedicated servers.
             verification: The link that must confirm its e-mail address before it logs in.
             made_in: The id of the game whose client registers it; None for the site.
+            display_name: Its public display name, which the site's registration gives it.
+        """
+
+    async def display_name_taken(self, name: str) -> bool:
+        """Return whether an account uses a display name, compared regardless of case.
+
+        Args:
+            name: The display name.
         """
 
     async def accept_terms(self, account_id: int, version: str) -> None:
@@ -265,6 +274,7 @@ class AccountService:
         terms: Terms,
         policies: GamePolicies,
         verification: EmailVerification,
+        games: Games,
     ) -> None:
         """Serve accounts from a store.
 
@@ -274,8 +284,9 @@ class AccountService:
             entitlements: Where the entitlements that let players in are kept.
             keys: Where the product keys that grant them are kept.
             terms: The service's terms.
-            policies: Each game's policies.
+            policies: The site's and each game's policies.
             verification: Confirms the e-mail addresses of new accounts.
+            games: The games, which the accounts they registered name.
         """
         self._store = store
         self._logins = logins
@@ -284,6 +295,7 @@ class AccountService:
         self._terms = terms
         self._policies = policies
         self._verification = verification
+        self._games = games
 
     async def prepare(self, games: Games) -> list[tuple[Game, Account]]:
         """Create the accounts that the games' dedicated servers log in with.
@@ -372,7 +384,7 @@ class AccountService:
         if (
             not 3 <= len(request.nuid) <= MAXIMUM_NAME
             or not request.nuid.isprintable()
-            or (verify and not _ADDRESS.fullmatch(request.nuid))
+            or (verify and not ADDRESS.fullmatch(request.nuid))
         ):
             errors.append(FieldError(field_name="email", field_error=INVALID_VALUE))
         if error := password_error("password", request.password):
@@ -483,8 +495,9 @@ class AccountService:
             request.nuid, request.password, request.encrypted_info
         )
         account = credentials.account
-        # Only while the policy is on, so turning it off lets waiting accounts in.
-        if policies.accounts.email_verification:
+        # The policy the account was registered under decides, in whichever game it logs in.
+        made_in = self._games.by_id(account.made_in or "")
+        if account.verification_expires_at and await self._policies.confirms(made_in):
             await self._verification.require(account, language_of(connection.hello.locale))
         # Before a token is remembered: an account keeps only its newest tokens, so those of
         # refused logins would push out the one of the session it is logged in on.

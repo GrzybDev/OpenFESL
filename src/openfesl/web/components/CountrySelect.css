@@ -1,0 +1,20 @@
+/* A native list as tall as the birth date beside it, with a caret of its own. */
+@layer components {
+  .country-select {
+    position: relative;
+
+    select {
+      height: 68px;
+      appearance: none;
+      padding-right: 44px;
+      cursor: pointer;
+    }
+
+    svg {
+      position: absolute;
+      top: 26px;
+      right: 14px;
+      pointer-events: none;
+    }
+  }
+}

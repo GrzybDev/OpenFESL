@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from typing import Protocol
 
@@ -42,10 +43,21 @@ class Outbox:
         self._public_url = public_url
         self._deliveries: set[asyncio.Task[None]] = set()
 
+    @property
+    def sends(self) -> bool:
+        """Whether the deployment set up the mail server and the address the links lead to."""
+        return self._mailer is not None and self._public_url is not None
+
     def send(
-        self, to: str, texts: str, path: str, expires: datetime, language: str, **values: str
+        self,
+        to: str,
+        texts: str,
+        language: str,
+        links: Mapping[str, str],
+        times: Mapping[str, datetime] | None = None,
+        **values: str,
     ) -> None:
-        """Start sending a mail whose link leads to a page and stops working at a moment.
+        """Start sending a mail whose links lead to the server's pages.
 
         Nothing waits for the mail: a game gives up on its request after 20 s, which a slow mail
         server can take. A mail that does not reach the mail server is only logged.
@@ -53,25 +65,27 @@ class Outbox:
         Args:
             to: The recipient's address.
             texts: The catalogues' key of the mail, whose subject and body are its .subject and
-                .body, with the placeholders link and expires.
-            path: The page the link leads to, without a language.
-            expires: When the link stops working.
+                .body.
             language: The language code of the game or page it was asked from; English where
                 the catalogues hold no texts in it.
+            links: The pages its links lead to, without a language, by the body's placeholder.
+            times: The moments the body names, such as when its link expires, by placeholder.
             values: The body's other placeholders.
         """
         if self._mailer is None or self._public_url is None:
             logger.error("Cannot send %s: no mail server or public URL is set", texts)
             return
-        # The date and the mail's language follow the texts, which would otherwise be English
+        # The dates and the mail's language follow the texts, which would otherwise be English
         # around a date in the game's language, and Babel refuses locales it does not know.
         if language not in languages():
             language = BASE_LANGUAGE
-        # The link opens the page in the language of the mail.
-        url = self._public_url.rstrip("/") + localize(path, language)
-        until = format_datetime(expires, "long", tzinfo=UTC, locale=language)
+        # The links open the pages in the language of the mail.
+        base = self._public_url.rstrip("/")
+        filled = {name: base + localize(path, language) for name, path in links.items()}
+        for name, moment in (times or {}).items():
+            filled[name] = format_datetime(moment, "long", tzinfo=UTC, locale=language)
         subject = translate(f"{texts}.subject", language)
-        body = translate(f"{texts}.body", language).format(link=url, expires=until, **values)
+        body = translate(f"{texts}.body", language).format(**filled, **values)
         delivery = asyncio.create_task(_deliver(self._mailer, to, subject, body, language, texts))
         # The loop keeps only weak references to its tasks.
         self._deliveries.add(delivery)

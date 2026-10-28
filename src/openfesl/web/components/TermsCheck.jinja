@@ -1,0 +1,26 @@
+{#def id: str, checked: bool = False, error: str = "" #}
+{# The acceptance of the terms as a check row that the whole row toggles, with a row under it that
+   links the terms or says the error. #}
+<label for="{{ id }}"
+       class="terms-check{% if error %} field-invalid{% endif %}">
+  <span class="terms-glyph"><Badge name="doc" /></span>
+  <span class="terms-label">{{ _("web.account.terms") }}</span>
+  <span class="terms-place">
+    <input id="{{ id }}"
+           name="terms"
+           type="checkbox"
+           value="1"
+           required
+           aria-describedby="{{ id }}-note"
+           {% if checked %} checked{% endif %}
+           {% if error %} aria-invalid="true"{% endif %}>
+  </span>
+</label>
+{% if error %}
+  <FieldError :id="id ~ '-note'">{{ error }}</FieldError>
+{% else %}
+  <div class="field-note terms-note">
+    <p id="{{ id }}-note">{{ _("web.account.terms.note") }}</p>
+    <a href="{{ url('/terms') }}">{{ _("web.account.terms.read") }}</a>
+  </div>
+{% endif %}

@@ -1,5 +1,6 @@
 """Helpers of the tests of the site's accounts: accounts made in a game and the ways to sign in."""
 
+import re
 from urllib.parse import urlsplit
 
 import httpx2
@@ -47,6 +48,35 @@ async def returned(
     assert started.status_code == 302, started.text
     back = urlsplit((await client.get(started.headers["location"])).headers["location"])
     return await client.get(f"{base}{back.path}?{back.query}")
+
+
+async def post_registration(
+    client: httpx2.AsyncClient, base: str, path: str = "/register", **fields: str
+) -> httpx2.Response:
+    """Send a registration form of the site, filled in as a valid one unless a field says else."""
+    page = await client.get(f"{base}{path}")
+    # Where the page's form sends it, so the form is the one a browser sends.
+    action = re.search(r'<form[^>]*action="(/register[^"]*)"', page.text)
+    assert action, "the page has no registration form"
+    form = {
+        "csrf": form_token(page.text),
+        "email": "cat@example.test",
+        "password": PASSWORD,
+        "display_name": "Invented_Cat",
+        "country": "PL",
+        "birth_day": "28",
+        "birth_month": "5",
+        "birth_year": "1990",
+        "terms": "1",
+        **fields,
+    }
+    return await client.post(f"{base}{action[1]}", data=form)
+
+
+async def confirm_address(client: httpx2.AsyncClient, base: str, link: str) -> httpx2.Response:
+    """Open a mailed confirmation link and press the button of the page it opens."""
+    page = await client.get(f"{base}{link}")
+    return await client.post(f"{base}{link}", data={"csrf": form_token(page.text)})
 
 
 async def sign_out(client: httpx2.AsyncClient, base: str) -> httpx2.Response:

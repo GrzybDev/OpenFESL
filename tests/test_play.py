@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
-from support import fetch
+from support import fetch, links, markup
 
 pytestmark = pytest.mark.anyio
 
@@ -43,6 +43,9 @@ async def test_a_game_its_launcher_signs_in_is_set_up_without_making_an_account_
     _, _, front = await fetch(server_url, "/bfheroes")
 
     assert ">4</span>Sign in" in guide.decode()
+    assert "registered on this site or made in another game" in guide.decode()
+    step = markup(guide).partition(">4</span>Sign in")[2]
+    assert ("/register", "Create an account") in links(step)
     for page in (guide.decode(), front.decode()):
         assert "BFHeroes.exe" in page and "sign-in window" in page
         assert "create an account" not in page

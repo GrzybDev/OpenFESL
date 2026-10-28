@@ -1,0 +1,6 @@
+{#def id: str #}
+{# The error under a form's field, which says the rule and what was sent; the field names it as its
+   description and wears the ink outline. #}
+<p id="{{ id }}" class="field-note field-error">
+  <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span><span>{{ content }}</span>
+</p>

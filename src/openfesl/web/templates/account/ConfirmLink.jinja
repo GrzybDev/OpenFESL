@@ -1,0 +1,14 @@
+{#def action: str, account: str, notice: str = "" #}
+{# What a working confirmation link opens. It asks first, as mail scanners open links too, and its
+   button confirms the address. #}
+<Layout :title="_('web.account.confirm')" page="sign_in">
+  <Notice :title="_('web.account.confirm')"
+          :text="_('web.account.confirm.text', account=account)"
+          :rows="[_('web.account.notice.form')] if notice else []"
+          narrow>
+    <form method="post" action="{{ action }}">
+      <CsrfField />
+      <ActionButton :label="_('web.account.confirm')" :busy="_('web.account.confirm.busy')" />
+    </form>
+  </Notice>
+</Layout>

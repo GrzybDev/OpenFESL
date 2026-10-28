@@ -1,0 +1,19 @@
+{#def id: str, countries: list, value: str = "", error: str = "", describedby: str = "" #}
+{# The country of an account as a native list on the light row with an ink caret, the countries
+   named in the page's language; its first entry asks for a choice. #}
+<label for="{{ id }}" class="field-label">{{ _("web.account.country") }}</label>
+<div class="country-select">
+  <select id="{{ id }}"
+          name="country"
+          required
+          autocomplete="country"
+          {% if describedby %} aria-describedby="{{ describedby }}"{% endif %}
+          {% if error %} aria-invalid="true"{% endif %}
+          class="field-input{% if error %} field-invalid{% endif %}">
+    <option value="">{{ _("web.account.country.choose") }}</option>
+    {% for code, name in countries %}
+      <option value="{{ code }}" {% if code == value %}selected{% endif %}>{{ name }}</option>
+    {% endfor %}
+  </select>
+  <Icon name="caret" :size="16" stroke="#0A0A0A" />
+</div>

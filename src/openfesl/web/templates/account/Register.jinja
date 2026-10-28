@@ -1,0 +1,93 @@
+{#def next: str, values: dict, errors: dict, notice: str, countries: list, order: list, reported: bool, check: str, confirm: bool, mail: bool, password_games: list #}
+{# Registration with an e-mail address: the address and game password, then the display name, the
+   country and age, and the terms; beside it what happens next. The game password never comes
+   back with the form. #}
+{% set games = listed(password_games) %}
+{% set title = _("web.account.register") %}
+{# The fields in the form's order, which the error summary follows, with the ids it links to. #}
+{% set named = {"email": ("register-email", _("web.account.address")), "password": ("register-password", _("web.account.password")), "display_name": ("register-name", _("web.account.display_name")), "country": ("register-country", _("web.account.country")), "birth": ("register-birth-" ~ order[0], _("web.account.birth")), "terms": ("register-terms", _("web.account.terms.short"))} %}
+{% set wrong = ["email", "password", "display_name", "country", "birth", "terms"]|select("in", errors)|list %}
+{% set age_note %}{% if reported %}{{ _("web.account.register.country.reported") }} {% endif %}{{ _("web.account.register.age") }}{% endset %}
+<AccountPage :title="title"
+             :subtitle="_('web.account.sign_in.subtitle')"
+             :turnstile="check != ''">
+  <div class="account-page-main register-main">
+    <Panel tag="form"
+           method="post"
+           :action="url('/register')"
+           aria-labelledby="account-title"
+           class="enter-panel account-page-panel register-form">
+      <CsrfField />
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+      {% if wrong %}
+        <ErrorSummary :label="_('web.account.register.not_registered')" :count="wrong|length">
+        {% for field in wrong %}
+          <li>
+            <a href="#{{ named[field][0] }}">{{ named[field][1] }}</a>
+          </li>
+        {% endfor %}
+        </ErrorSummary>
+      {% elif notice == "check" %}
+        <Alert :label="_('web.account.register.not_registered')" :title="_('web.account.notice.check')" glyph="warn" alert>{{ _("web.account.register.kept") }}</Alert>
+      {% elif notice == "paused" %}
+        <Alert :label="_('web.account.notice.paused')" :title="_('web.account.register.paused')" glyph="clock" alert>{{ _("web.account.register.paused.text") }}</Alert>
+      {% elif notice == "form" %}
+        <Alert :label="_('web.account.register.not_registered')" :title="_('web.account.notice.form')" glyph="warn" alert>{{ _("web.account.notice.form.text") }}</Alert>
+      {% endif %}
+      <div class="account-page-form">
+        <Bar large>{{ _("web.account.register.signs_in") }}</Bar>
+        {% set address_note %}{{ _("web.account.register.email", games=games) }}{% if mail %} {{ _("web.account.register.email.link") }}{% endif %}{% endset %}
+        <TextField id="register-email" name="email" type="email" autocomplete="email" :maxlength="63" :label="_('web.account.address')" :value="values.email" :note="address_note" :error="errors.get('email', '')" />
+        <PasswordField id="register-password"
+                       :label="_('web.account.password')"
+                       note="register-password-note"
+                       :error="errors.get('password', '')"
+                       new>
+          <p id="register-password-note" class="field-note">{{ _("web.account.register.password", games=games) }}</p>
+        </PasswordField>
+      </div>
+      <div class="account-page-form">
+        <Bar large>{{ _("web.account.register.public") }}</Bar>
+        <TextField id="register-name" name="display_name" autocomplete="nickname" pattern="[A-Za-z0-9_\\-]{4,16}" :minlength="4" :maxlength="16" :label="_('web.account.display_name')" :tag="_('web.account.public')" :value="values.display_name" :note="_('web.account.display_name.rule')" :error="errors.get('display_name', '')" />
+        <div class="register-pair">
+          <div>
+            <CountrySelect id="register-country" :countries="countries" :value="values.country" :error="errors.get('country', '')" :describedby="('register-country-error ' if errors.get('country') else '') ~ 'register-age'" />
+          </div>
+          <BirthDate id="register-birth" :values="values" :order="order" :error="errors.get('birth', '')" :describedby="('register-birth-error ' if errors.get('birth') else '') ~ 'register-age'" />
+        </div>
+        {% if errors.get("country") %}<FieldError id="register-country-error">{{ errors.country }}</FieldError>{% endif %}
+        {% if errors.get("birth") %}<FieldError id="register-birth-error">{{ errors.birth }}</FieldError>{% endif %}
+        <p id="register-age" class="field-note">{{ age_note }}</p>
+      </div>
+      <div class="account-page-form">
+        <TermsCheck id="register-terms" :checked="values.terms" :error="errors.get('terms', '')" />
+        {% if check %}<TurnstileCheck :key="check" />{% endif %}
+        <ActionButton :label="_('web.account.register.action')" :busy="_('web.account.register.busy')" />
+      </div>
+    </Panel>
+  </div>
+  <div class="account-page-side">
+    <section aria-labelledby="register-after">
+      <Bar id="register-after" large>{{ _("web.account.register.after") }}</Bar>
+      <ol class="register-steps">
+        <li>
+          <StepNumber :number="1" />
+          <span>{% if confirm %}{{ _("web.account.register.after.link") }}{% else %}{{ _("web.account.register.after.at_once") }}{% if mail %} {{ _("web.account.register.after.confirm") }}{% endif %}{% endif %}</span>
+        </li>
+        <li>
+          <StepNumber :number="2" />
+          <span>{{ _("web.account.register.after.games", games=games) }}</span>
+        </li>
+        <li>
+          <StepNumber :number="3" />
+          <span>{{ _("web.account.register.after.account") }}</span>
+        </li>
+      </ol>
+    </section>
+    <section aria-labelledby="register-made">
+      <Bar id="register-made" large>{{ _("web.account.register.made") }}</Bar>
+      <p class="bar-text body-text">{{ _("web.account.register.made.text", games=games) }}</p>
+      <SmallAction :href="url('/sign-in') ~ ('?next=' ~ next|urlencode if next else '')" :label="_('web.account.sign_in')" />
+    </section>
+  </div>
+</AccountPage>

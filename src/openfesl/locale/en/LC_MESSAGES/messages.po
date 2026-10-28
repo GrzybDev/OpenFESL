@@ -14,14 +14,11 @@ msgstr "Confirm the e-mail address of an OpenFESL account"
 #, python-brace-format
 msgid "verification.mail.body"
 msgstr ""
-"An OpenFESL account was registered with this e-mail address. It can log in "
-"once the address is confirmed with this link:\n"
+"An OpenFESL account was registered with this e-mail address. It can sign in and log in from games once the address is confirmed. This link opens a page whose button confirms it:\n"
 "\n"
 "{link}\n"
 "\n"
-"The link is valid until {expires}. After that, the next login from the game "
-"sends a new link. An account whose address is not confirmed cannot log in; "
-"nothing else needs to be done.\n"
+"The link is valid until {expires}. After that, signing in on the site offers a new link, and the next login from a game sends one.\n"
 
 msgid "account.mail.proof.subject"
 msgstr "Link a sign-in service to an OpenFESL account"
@@ -35,27 +32,31 @@ msgstr ""
 "\n"
 "The link is valid until {expires} and works once. Without it, nothing changes.\n"
 
-msgid "verification.page.confirmed.heading"
-msgstr "E-mail address confirmed"
+msgid "account.mail.address.subject"
+msgstr "Confirm the e-mail address of an OpenFESL account"
 
-msgid "verification.page.confirmed.text"
-msgstr "The account can now log in from the game."
-
-msgid "verification.page.expired.heading"
-msgstr "Link expired"
-
-msgid "verification.page.expired.text"
+#, python-brace-format
+msgid "account.mail.address.body"
 msgstr ""
-"The next login from the game sends a new link to the account's e-mail "
-"address."
+"An OpenFESL account was registered with this e-mail address and can already sign in. This link opens a page whose button confirms the address:\n"
+"\n"
+"{link}\n"
+"\n"
+"The link is valid until {expires}.\n"
 
-msgid "verification.page.unknown.heading"
-msgstr "Link not valid"
+msgid "account.mail.in_use.subject"
+msgstr "Registration with the address of an OpenFESL account"
 
-msgid "verification.page.unknown.text"
+#, python-brace-format
+msgid "account.mail.in_use.body"
 msgstr ""
-"The link is not valid or has been used already. A confirmed address needs "
-"nothing more."
+"A registration with this e-mail address was sent on {sent}, but the address already has an OpenFESL account. Nothing was changed and no service was linked. The account signs in at:\n"
+"\n"
+"{link}\n"
+"\n"
+"Its account page links services. A forgotten game password is reset at:\n"
+"\n"
+"{reset}\n"
 
 msgid "web.language.name"
 msgstr "English"
@@ -354,7 +355,7 @@ msgid "web.front.setup.account.plain"
 msgstr "Start the game and create an account."
 
 msgid "web.front.setup.launcher"
-msgstr "Start the game; a sign-in window opens first. Sign in with an account made in another game on this service, since this game creates none."
+msgstr "Start the game; a sign-in window opens first. Sign in with an account of this service, registered on this site or made in another game, since this game creates none."
 
 msgid "web.front.setup.copy"
 msgstr "Copy key"
@@ -1640,7 +1641,7 @@ msgid "web.play.launcher.where"
 msgstr "In the sign-in window"
 
 msgid "web.play.launcher.text"
-msgstr "Start the game: OpenFESLHook first opens a sign-in window, then starts the game. The game creates no accounts, so sign in with one made in another game on this service."
+msgstr "Start the game: OpenFESLHook first opens a sign-in window, then starts the game. The game creates no accounts, so sign in with an account of this service, registered on this site or made in another game."
 
 msgid "web.play.server_list"
 msgstr "Server list"
@@ -2254,8 +2255,6 @@ msgstr "Servers"
 msgid "web.admin.waiting"
 msgstr "Waiting for approval"
 
-
-
 msgid "web.admin.waiting.count"
 msgstr "Servers waiting: %(count)s"
 
@@ -2358,6 +2357,8 @@ msgstr "%(service)s linked as %(name)s. Signed in as %(account)s."
 msgid "web.account.toast.signed_in"
 msgstr "Signed in as %(account)s."
 
+msgid "web.account.toast.created"
+msgstr "Account created."
 
 msgid "web.admin.toast.failed"
 msgstr "The change was not saved. Try again."
@@ -3878,10 +3879,10 @@ msgid "web.admin.policy.accounts.email_verification"
 msgstr "Confirm e-mail addresses"
 
 msgid "web.admin.policy.accounts.email_verification.text"
-msgstr "A new account logs in only once the link sent to its address was opened, or an admin confirmed it."
+msgstr "A new account logs in only once its address is confirmed through the link sent to it, or by an admin."
 
 msgid "web.admin.policy.site.email_verification.text"
-msgstr "An account registered on this site signs in only once the link sent to its address was opened, or an admin confirmed it. While this is on, the site offers registration only with the server's mail."
+msgstr "An account registered on this site signs in only once its address is confirmed through the link sent to it, or by an admin. While this is on, the site offers registration only with the server's mail."
 
 msgid "web.admin.policy.accounts.concurrent_login"
 msgstr "A login while the account plays elsewhere"
@@ -4386,7 +4387,7 @@ msgid "web.account.notice.unconfirmed.title"
 msgstr "The e-mail address of this account is not confirmed yet."
 
 msgid "web.account.notice.unconfirmed.text"
-msgstr "The link sent to %(address)s on %(date)s confirms it; signing in and game logins work once it is opened. A new link replaces the previous one."
+msgstr "The link sent to %(address)s on %(date)s confirms it; signing in and game logins work from then on. A new link replaces the previous one."
 
 msgid "web.account.notice.unconfirmed.text.service"
 msgstr "The link sent to %(address)s on %(date)s confirms it and completes the account, with %(service)s as a way in. A new link replaces the previous one."
@@ -4407,7 +4408,7 @@ msgid "web.account.notice.link_sent.title"
 msgstr "A new link was sent to %(address)s."
 
 msgid "web.account.notice.link_sent.text"
-msgstr "It is valid until %(expires)s. Opening it confirms the address; signing in then works with the same game password or service."
+msgstr "It is valid until %(expires)s. A button on the page it opens confirms the address; signing in then works with the same game password or service."
 
 msgid "web.account.notice.link_wait"
 msgstr "A link was sent at %(time)s."
@@ -4600,3 +4601,246 @@ msgstr "The link is not valid or has been used already."
 
 msgid "web.account.proof.link.open.text"
 msgstr "Linking adds the %(service)s account %(name)s as a way in to the OpenFESL account %(account)s and signs in. Without it, nothing changes."
+
+msgid "web.account.display_name"
+msgstr "Display name"
+
+msgid "web.account.display_name.rule"
+msgstr "4 to 16 characters: A-Z, a-z, 0-9, _ and -. No other account may use it, ignoring case. Profiles, leaderboards and friends lists show it."
+
+msgid "web.account.public"
+msgstr "Public"
+
+msgid "web.account.country"
+msgstr "Country"
+
+msgid "web.account.country.choose"
+msgstr "Choose a country"
+
+msgid "web.account.birth"
+msgstr "Birth date"
+
+msgid "web.account.birth.day"
+msgstr "Day"
+
+msgid "web.account.birth.month"
+msgstr "Month"
+
+msgid "web.account.birth.year"
+msgstr "Year"
+
+msgid "web.account.terms"
+msgstr "Accept the OpenFESL terms"
+
+msgid "web.account.terms.short"
+msgstr "Terms"
+
+msgid "web.account.terms.note"
+msgstr "One text for every game on this site, accepted once for the account."
+
+msgid "web.account.terms.read"
+msgstr "Read the terms"
+
+msgid "web.account.error.count.one"
+msgstr "%(count)s field needs a change."
+
+msgid "web.account.error.count.other"
+msgstr "%(count)s fields need a change."
+
+msgid "web.account.error.email.long"
+msgstr "An e-mail address has at most 63 characters; this one has %(detail)s."
+
+msgid "web.account.error.email.form"
+msgstr "An e-mail address has the form name@example.net; this one does not."
+
+msgid "web.account.error.email.taken"
+msgstr "Another account uses this e-mail address."
+
+msgid "web.account.error.password.short"
+msgstr "A game password has 8 to 31 characters; the one sent had %(detail)s."
+
+msgid "web.account.error.password.long"
+msgstr "Games keep at most 31 bytes of a game password, and letters such as ą take two; the one sent had %(detail)s."
+
+msgid "web.account.error.display_name.characters"
+msgstr "A display name uses only A-Z, a-z, 0-9, _ and -; this one has %(characters)s."
+
+msgid "web.account.error.display_name.length"
+msgstr "A display name has 4 to 16 characters; this one has %(detail)s."
+
+msgid "web.account.error.display_name.taken"
+msgstr "Another account uses %(detail)s, ignoring case."
+
+msgid "web.account.error.space"
+msgstr "a space"
+
+msgid "web.account.error.country.missing"
+msgstr "Registration needs a country from the list."
+
+msgid "web.account.error.birth.form"
+msgstr "A birth date has a day, a month and a four-digit year in numbers."
+
+msgid "web.account.error.birth.day"
+msgstr "%(day)s %(month)s does not exist."
+
+msgid "web.account.error.birth.future"
+msgstr "The birth date sent lies in the future."
+
+msgid "web.account.error.terms.missing"
+msgstr "Registration needs the terms accepted."
+
+msgid "web.account.register"
+msgstr "Create an account"
+
+msgid "web.account.register.not_registered"
+msgstr "Not registered"
+
+msgid "web.account.register.kept"
+msgstr "The form keeps its values; the game password field is empty again."
+
+msgid "web.account.register.paused"
+msgstr "Registration with this address is paused for a few minutes."
+
+msgid "web.account.register.paused.text"
+msgstr "Requests with it came in recently. Links already sent to it stay valid; the form keeps its values."
+
+msgid "web.account.register.signs_in"
+msgstr "E-mail address and game password"
+
+msgid "web.account.register.email"
+msgstr "The login name in games that ask for one, such as %(games)s. Public pages never show it."
+
+msgid "web.account.register.email.link"
+msgstr "A link sent to it confirms it."
+
+msgid "web.account.register.password"
+msgstr "8 to 31 characters. Games such as %(games)s ask for it with the e-mail address; it is not the password of any service."
+
+msgid "web.account.register.public"
+msgstr "Display name, country and age"
+
+msgid "web.account.register.country.reported"
+msgstr "The country is suggested from the one Cloudflare reports for this connection and can be changed."
+
+msgid "web.account.register.age"
+msgstr "The birth date is checked against the chosen country's age limit and not stored. Games receive the country with the account's details."
+
+msgid "web.account.register.action"
+msgstr "Create account"
+
+msgid "web.account.register.busy"
+msgstr "Creating"
+
+msgid "web.account.register.after"
+msgstr "After registration"
+
+msgid "web.account.register.after.link"
+msgstr "A link goes to the e-mail address. Signing in and game logins work once the address is confirmed on the page it opens."
+
+msgid "web.account.register.after.at_once"
+msgstr "The account signs in at once."
+
+msgid "web.account.register.after.confirm"
+msgstr "A link sent to the e-mail address confirms the address."
+
+msgid "web.account.register.after.games"
+msgstr "Games such as %(games)s log in with the e-mail address and the game password."
+
+msgid "web.account.register.after.account"
+msgstr "The account page links services and changes the display name, the country and the game password."
+
+msgid "web.account.register.made"
+msgstr "Account made in a game"
+
+msgid "web.account.register.made.text"
+msgstr "An account registered in a game such as %(games)s already exists: it signs in with its e-mail address and game password, and its account page links services."
+
+msgid "web.account.register.young"
+msgstr "Registration not possible"
+
+msgid "web.account.register.young.subtitle"
+msgstr "Age limit"
+
+msgid "web.account.register.young.text"
+msgstr "Accounts in %(country)s can be registered from the age of %(age)s. The birth date was checked against this limit and not stored."
+
+msgid "web.account.register.young.consent"
+msgstr "Registration not possible"
+
+msgid "web.account.register.young.consent.subtitle"
+msgstr "Age limit"
+
+msgid "web.account.register.young.consent.text"
+msgstr "Accounts in %(country)s can be registered without a parent's consent from the age of %(age)s. The birth date was checked against this limit and not stored."
+
+msgid "web.account.register.sent"
+msgstr "Link sent"
+
+msgid "web.account.register.sent.subtitle"
+msgstr "Registration"
+
+msgid "web.account.register.sent.text"
+msgstr "A mail went to %(address)s. Its link confirms the address and completes the account; signing in and game logins work from then on."
+
+msgid "web.account.register.sent.in_use"
+msgstr "An address that already has an account receives a mail that says so, with links to sign in and to reset the game password."
+
+msgid "web.account.register.sent.none"
+msgstr "No mail after a few minutes: a spam folder may hold it, and signing in with the address and game password, or through the service used for registration, offers a new link."
+
+msgid "web.account.register.unavailable"
+msgstr "Registration not available"
+
+msgid "web.account.register.unavailable.subtitle"
+msgstr "Mail not set up"
+
+msgid "web.account.register.unavailable.text"
+msgstr "Registration needs the server's mail, which is not set up. Existing accounts sign in as usual."
+
+msgid "web.account.confirm"
+msgstr "Confirm the e-mail address"
+
+msgid "web.account.confirm.text"
+msgstr "The button confirms the e-mail address of the OpenFESL account %(account)s. Without it, nothing changes."
+
+msgid "web.account.confirm.busy"
+msgstr "Confirming"
+
+msgid "web.account.confirm.done"
+msgstr "E-mail address confirmed"
+
+msgid "web.account.confirm.done.subtitle"
+msgstr "OpenFESL account"
+
+msgid "web.account.confirm.done.text"
+msgstr "The account can now sign in here and log in from games."
+
+msgid "web.account.confirm.done.already"
+msgstr "E-mail address confirmed"
+
+msgid "web.account.confirm.done.already.subtitle"
+msgstr "OpenFESL account"
+
+msgid "web.account.confirm.done.already.text"
+msgstr "The e-mail address of this account is confirmed."
+
+msgid "web.account.confirm.open"
+msgstr "Open the account"
+
+msgid "web.account.confirm.expired"
+msgstr "Link expired"
+
+msgid "web.account.confirm.expired.subtitle"
+msgstr "OpenFESL account"
+
+msgid "web.account.confirm.expired.text"
+msgstr "Signing in with the address and game password, or through the service used for registration, offers a new link. The next login from a game sends one too."
+
+msgid "web.account.confirm.unknown"
+msgstr "Link not valid"
+
+msgid "web.account.confirm.unknown.subtitle"
+msgstr "OpenFESL account"
+
+msgid "web.account.confirm.unknown.text"
+msgstr "The link is not valid or has been used already. A confirmed address needs nothing more."

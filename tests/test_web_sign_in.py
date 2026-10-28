@@ -4,7 +4,7 @@ from collections.abc import AsyncIterator
 import httpx2
 import pytest
 import uvicorn
-from accounts import PASSWORD, execute, post_sign_in, register, sign_out
+from accounts import PASSWORD, confirm_address, execute, post_sign_in, register, sign_out
 from identity import form_token
 from starlette.applications import Starlette
 from starlette.requests import Request
@@ -244,6 +244,6 @@ async def test_a_waiting_account_gets_a_new_link_at_most_once_per_interval(
 
         # The new link replaces the one sent on registration.
         assert (await client.get(f"{base}{first}")).status_code == 404
-        assert (await client.get(f"{base}{second}")).status_code == 200
+        assert (await confirm_address(client, base, second)).status_code == 200
         assert (await post_sign_in(client, base, "kim@example.test", PASSWORD)).status_code == 303
     assert not mailbox.messages

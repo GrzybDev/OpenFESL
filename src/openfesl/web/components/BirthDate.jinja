@@ -1,0 +1,24 @@
+{#def id: str, values: dict, order: list, error: str = "", describedby: str = "" #}
+{# A birth date as a day, a month and a year in the order the page's language writes dates, each a
+   numeric field under its own small label. #}
+<fieldset class="birth-date"
+          {% if describedby %} aria-describedby="{{ describedby }}"{% endif %}>
+  <legend class="field-label">{{ _("web.account.birth") }}</legend>
+  <div class="birth-parts">
+    {% for part in order %}
+      <div>
+        <label for="{{ id }}-{{ part }}">{{ _("web.account.birth." ~ part) }}</label>
+        <input id="{{ id }}-{{ part }}"
+               name="birth_{{ part }}"
+               type="text"
+               inputmode="numeric"
+               required
+               maxlength="{{ 4 if part == 'year' else 2 }}"
+               autocomplete="bday-{{ part }}"
+               value="{{ values['birth_' ~ part] }}"
+               {% if error %} aria-invalid="true"{% endif %}
+               class="field-input{% if error %} field-invalid{% endif %}">
+      </div>
+    {% endfor %}
+  </div>
+</fieldset>

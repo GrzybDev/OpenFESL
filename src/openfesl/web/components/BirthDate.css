@@ -1,0 +1,35 @@
+/* The birth date's three fields side by side on the light row, each under its small label. */
+@layer components {
+  .birth-date {
+    min-width: 0;
+
+    legend {
+      float: left;
+      width: 100%;
+    }
+  }
+
+  .birth-parts {
+    display: grid;
+    clear: both;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px;
+    color: var(--ink);
+
+    > div {
+      background: var(--row-light);
+    }
+
+    label {
+      display: block;
+      padding: 5px 12px 0;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .field-input {
+      padding-inline: 12px;
+    }
+  }
+}

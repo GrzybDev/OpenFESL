@@ -8,6 +8,26 @@
     max-width: 440px;
   }
 
+  .notice-rows {
+    display: grid;
+    max-width: 640px;
+    gap: 2px;
+  }
+
+  .notice-row {
+    background: var(--row);
+    padding: 10px 14px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.45;
+    font-weight: 500;
+    color: var(--ink);
+
+    &:nth-child(odd) {
+      background: var(--row-alt);
+    }
+  }
+
   /* A row of action blocks under a text. */
   .actions {
     display: flex;

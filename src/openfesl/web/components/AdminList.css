@@ -196,7 +196,7 @@
   }
 
   .field-invalid {
-    outline: 2px solid var(--bright);
+    outline: 2px solid var(--ink);
     outline-offset: -2px;
   }
 

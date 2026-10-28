@@ -214,8 +214,9 @@ class SqlAccountStore:
         server: bool = False,
         verification: Link | None = None,
         made_in: str | None = None,
+        display_name: str | None = None,
     ) -> Account | None:
-        """Create an account, or return None when the name is taken.
+        """Create an account, or return None when its name or display name is taken.
 
         Args:
             nuid: The login name.
@@ -225,6 +226,7 @@ class SqlAccountStore:
             server: Whether the account belongs to a game's dedicated servers.
             verification: The link that must confirm its e-mail address before it logs in.
             made_in: The id of the game whose client registers it; None for the site.
+            display_name: Its public display name, which the site's registration gives it.
         """
         async with self._sessions.begin() as session:
             row = await session.scalar(
@@ -238,11 +240,24 @@ class SqlAccountStore:
                     verification_hash=verification.token_hash if verification else None,
                     verification_expires_at=verification.expires_at if verification else None,
                     made_in=made_in,
+                    display_name=display_name,
                 )
                 .on_conflict_do_nothing()
                 .returning(AccountRow)
             )
             return _account(row) if row else None
+
+    async def display_name_taken(self, name: str) -> bool:
+        """Return whether an account uses a display name, compared regardless of case.
+
+        Args:
+            name: The display name.
+        """
+        async with self._sessions() as session:
+            taken = await session.scalar(
+                select(exists().where(func.lower(AccountRow.display_name) == func.lower(name)))
+            )
+        return bool(taken)
 
     async def accept_terms(self, account_id: int, version: str) -> None:
         """Record that an account accepted a version of the terms.
@@ -389,28 +404,36 @@ class SqlAccountStore:
             )
         return replaced is not None
 
-    async def confirm(self, token_hash: bytes) -> Confirmation:
+    async def waiting(self, token_hash: bytes) -> int | Confirmation:
+        """Return the account that waits for a link, without confirming its address.
+
+        Args:
+            token_hash: The SHA-256 digest of the token the link carries.
+
+        Returns:
+            The account's number, or why the link confirms nothing.
+        """
+        async with self._sessions() as session:
+            return await _waiting(session, token_hash, lock=False)
+
+    async def confirm(self, token_hash: bytes) -> int | Confirmation:
         """Confirm the address of the account that waits for a link.
 
         Args:
             token_hash: The SHA-256 digest of the token the link carries.
+
+        Returns:
+            The account's number, or why nothing was confirmed.
         """
         async with self._sessions.begin() as session:
-            expires_at = await session.scalar(
-                select(AccountRow.verification_expires_at)
-                .where(AccountRow.verification_hash == token_hash)
-                .with_for_update()
-            )
-            if expires_at is None:
-                return Confirmation.UNKNOWN
-            if expires_at <= datetime.now(UTC):
-                return Confirmation.EXPIRED
-            await session.execute(
-                update(AccountRow)
-                .where(AccountRow.verification_hash == token_hash)
-                .values(verification_hash=None, verification_expires_at=None)
-            )
-        return Confirmation.CONFIRMED
+            found = await _waiting(session, token_hash, lock=True)
+            if isinstance(found, int):
+                await session.execute(
+                    update(AccountRow)
+                    .where(AccountRow.id == found)
+                    .values(verification_hash=None, verification_expires_at=None)
+                )
+        return found
 
     async def confirm_account(self, account_id: int, admin: Admin | None) -> None:
         """Confirm an account's address by hand and record it among the admin's actions.
@@ -434,6 +457,19 @@ def _is_hex(text: str) -> bool:
     except ValueError:
         return False
     return True
+
+
+async def _waiting(session: AsyncSession, token_hash: bytes, lock: bool) -> int | Confirmation:
+    statement = select(AccountRow.id, AccountRow.verification_expires_at).where(
+        AccountRow.verification_hash == token_hash
+    )
+    row = (await session.execute(statement.with_for_update() if lock else statement)).one_or_none()
+    account_id, expires_at = row or (0, None)
+    if expires_at is None:
+        return Confirmation.UNKNOWN
+    if expires_at <= datetime.now(UTC):
+        return Confirmation.EXPIRED
+    return account_id
 
 
 def _record(row: AccountRow) -> AccountRecord:

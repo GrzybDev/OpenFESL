@@ -1,0 +1,18 @@
+/* The links of an error summary, each a row high enough to tap. */
+@layer components {
+  .error-summary {
+    ul {
+      margin-top: 6px;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    a {
+      display: flex;
+      min-height: 44px;
+      align-items: center;
+      text-decoration-line: underline;
+    }
+  }
+}

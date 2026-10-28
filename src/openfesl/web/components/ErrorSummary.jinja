@@ -1,0 +1,12 @@
+{#def label: str, count: int #}
+{# The notice at the top of a form that left fields to change: how many, and as the content the
+   list items that link to each. It takes the focus when the page arrives. #}
+<div role="alert" tabindex="-1" autofocus class="alert error-summary">
+  <p class="alert-label">
+    <span aria-hidden="true" class="alert-glyph"><Icon name="warn" fill="#0A0A0A" /></span>{{ label }}
+  </p>
+  <p class="alert-title">{{ _n("web.account.error.count", count) }}</p>
+  <ul>
+    {{ content }}
+  </ul>
+</div>

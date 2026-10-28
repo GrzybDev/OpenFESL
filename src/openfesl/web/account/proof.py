@@ -10,6 +10,7 @@ from openfesl.core.limits import Wait
 from openfesl.core.proofs import PATH, ProofFound, ProofGone, ProofMail
 from openfesl.core.sign_in import ProofTarget, Refusal, SignInRefused, WebSignIn
 from openfesl.core.texts import localize, translate
+from openfesl.web.account.message import SECRET
 from openfesl.web.account.services import PROOF, SignInServices
 from openfesl.web.account.session import (
     PENDING,
@@ -26,8 +27,6 @@ from openfesl.web.sessions import form_matches, form_token, take_notice
 from openfesl.web.turnstile import Turnstile
 
 _STATUS = {Refusal.WRONG: 400, Refusal.PAUSED: 429, Refusal.DEACTIVATED: 403}
-# The link's token is a secret, so neither caches nor other sites may keep the page's address.
-HEADERS = {"Cache-Control": "no-store", "Referrer-Policy": "no-referrer"}
 
 
 class ProofPages:
@@ -178,7 +177,7 @@ class ProofPages:
             status,
             steel=True,
             switch=False,
-            headers=HEADERS,
+            headers=SECRET,
             csrf=form_token(request),
             action=localize(PATH.format(token=token), language),
             service=service,

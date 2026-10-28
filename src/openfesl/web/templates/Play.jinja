@@ -72,6 +72,9 @@
                      :where="_(account ~ '.where')">
             {% set key %}{% if play_key %}<FileName :text="play_key.key.code" />{% endif %}{% endset %}
             <p class="body-text guide-fill">{% if game.launched %}{{ _("web.play.launcher.text") }}{% elif play_key %}{{ _("web.play.account.text", key=key) }}{% else %}{{ _("web.play.account.plain") }}{% endif %}</p>
+            {% if game.launched and not player %}
+              <Action :href="url('/register')" :label="_('web.account.sign_in.create')" />
+            {% endif %}
             {% if play_key %}
               <div class="play-key">
                 <span>{{ play_key.key.code }}</span>

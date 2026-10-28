@@ -436,6 +436,16 @@ def markup(body: bytes) -> str:
     return re.sub(r"\s*([<>])\s*", r"\1", text, flags=re.ASCII)
 
 
+def links(page: str) -> list[tuple[str, str]]:
+    """Return the links of a page, each with the text it shows, in the page's order.
+
+    Args:
+        page: The page's markup.
+    """
+    found = re.findall(r'<a href="([^"]*)"[^>]*>(.*?)</a>', page, flags=re.DOTALL)
+    return [(href, re.sub(r"<[^>]*>", "", text).strip()) for href, text in found]
+
+
 def block(owner: int, member: int) -> Fields:
     """Return the AddAssociations that puts a member on its owner's block list."""
     return [

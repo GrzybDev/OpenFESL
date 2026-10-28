@@ -15,14 +15,11 @@ msgstr "Potwierdzenie adresu e-mail konta OpenFESL"
 #, python-brace-format
 msgid "verification.mail.body"
 msgstr ""
-"Na ten adres e-mail zarejestrowano konto OpenFESL. Logowanie na nie będzie "
-"możliwe po potwierdzeniu adresu za pomocą tego linku:\n"
+"Na ten adres e-mail zarejestrowano konto OpenFESL. Logowanie na stronie i w grach będzie możliwe po potwierdzeniu adresu. Ten link otwiera stronę, na której przycisk go potwierdza:\n"
 "\n"
 "{link}\n"
 "\n"
-"Link jest ważny do {expires}. Po tym czasie następne logowanie w grze wyśle "
-"nowy link. Konto z niepotwierdzonym adresem nie może się logować; nie trzeba "
-"podejmować żadnych innych działań.\n"
+"Link jest ważny do {expires}. Po tym czasie logowanie na stronie pozwala wysłać nowy link, a następne logowanie w grze wysyła go samo.\n"
 
 msgid "account.mail.proof.subject"
 msgstr "Połączenie usługi logowania z kontem OpenFESL"
@@ -36,25 +33,31 @@ msgstr ""
 "\n"
 "Link jest ważny do {expires} i działa jeden raz. Bez niego nic się nie zmienia.\n"
 
-msgid "verification.page.confirmed.heading"
-msgstr "Adres e-mail potwierdzony"
+msgid "account.mail.address.subject"
+msgstr "Potwierdzenie adresu e-mail konta OpenFESL"
 
-msgid "verification.page.confirmed.text"
-msgstr "Na to konto można już zalogować się w grze."
-
-msgid "verification.page.expired.heading"
-msgstr "Link wygasł"
-
-msgid "verification.page.expired.text"
-msgstr "Następne logowanie w grze wyśle nowy link na adres e-mail konta."
-
-msgid "verification.page.unknown.heading"
-msgstr "Nieprawidłowy link"
-
-msgid "verification.page.unknown.text"
+#, python-brace-format
+msgid "account.mail.address.body"
 msgstr ""
-"Ten link jest nieprawidłowy albo został już użyty. Potwierdzony adres nie "
-"wymaga dalszych działań."
+"Na ten adres e-mail zarejestrowano konto OpenFESL, które może już się logować. Ten link otwiera stronę, na której przycisk potwierdza adres:\n"
+"\n"
+"{link}\n"
+"\n"
+"Link jest ważny do {expires}.\n"
+
+msgid "account.mail.in_use.subject"
+msgstr "Rejestracja z adresem konta OpenFESL"
+
+#, python-brace-format
+msgid "account.mail.in_use.body"
+msgstr ""
+"Dnia {sent} wysłano rejestrację z tym adresem e-mail, ale ten adres ma już konto OpenFESL. Nic nie zostało zmienione ani połączone. Konto loguje się tutaj:\n"
+"\n"
+"{link}\n"
+"\n"
+"Usługi łączy się na stronie konta. Zapomniane hasło do gier można zastąpić nowym tutaj:\n"
+"\n"
+"{reset}\n"
 
 msgid "web.language.name"
 msgstr "Polski"
@@ -366,7 +369,7 @@ msgid "web.front.setup.account.plain"
 msgstr "Uruchom grę i utwórz konto."
 
 msgid "web.front.setup.launcher"
-msgstr "Uruchom grę; najpierw otworzy się okno logowania. Zaloguj się kontem tego serwisu założonym w innej grze, bo ta gra nie zakłada kont."
+msgstr "Uruchom grę; najpierw otworzy się okno logowania. Zaloguj się kontem tego serwisu, zarejestrowanym na tej stronie lub założonym w innej grze, bo ta gra nie zakłada kont."
 
 msgid "web.front.setup.copy"
 msgstr "Kopiuj klucz"
@@ -1654,7 +1657,7 @@ msgid "web.play.launcher.where"
 msgstr "W oknie logowania"
 
 msgid "web.play.launcher.text"
-msgstr "Uruchom grę: OpenFESLHook najpierw otwiera okno logowania, a potem uruchamia grę. Gra nie zakłada kont, więc zaloguj się kontem tego serwisu założonym w innej grze."
+msgstr "Uruchom grę: OpenFESLHook najpierw otwiera okno logowania, a potem uruchamia grę. Gra nie zakłada kont, więc zaloguj się kontem tego serwisu, zarejestrowanym na tej stronie lub założonym w innej grze."
 
 msgid "web.play.server_list"
 msgstr "Lista serwerów"
@@ -2294,8 +2297,6 @@ msgstr "Serwery"
 msgid "web.admin.waiting"
 msgstr "Czekają na zatwierdzenie"
 
-
-
 msgid "web.admin.waiting.count"
 msgstr "Czekające serwery: %(count)s"
 
@@ -2404,6 +2405,8 @@ msgstr "Połączono usługę %(service)s jako %(name)s. Zalogowano jako %(accoun
 msgid "web.account.toast.signed_in"
 msgstr "Zalogowano jako %(account)s."
 
+msgid "web.account.toast.created"
+msgstr "Konto zostało utworzone."
 
 msgid "web.admin.toast.failed"
 msgstr "Zmiana nie została zapisana. Spróbuj ponownie."
@@ -4002,10 +4005,10 @@ msgid "web.admin.policy.accounts.email_verification"
 msgstr "Potwierdzanie adresów e-mail"
 
 msgid "web.admin.policy.accounts.email_verification.text"
-msgstr "Nowe konto może się zalogować dopiero po otwarciu linku wysłanego na jego adres albo po ręcznym potwierdzeniu w panelu."
+msgstr "Nowe konto może się zalogować dopiero po potwierdzeniu jego adresu przez wysłany link albo ręcznie w panelu."
 
 msgid "web.admin.policy.site.email_verification.text"
-msgstr "Konto zarejestrowane na tej stronie loguje się dopiero po otwarciu linku wysłanego na jego adres albo po potwierdzeniu przez administratora. Gdy to jest włączone, strona oferuje rejestrację tylko z pocztą serwera."
+msgstr "Konto zarejestrowane na tej stronie loguje się dopiero po potwierdzeniu jego adresu przez wysłany link albo przez administratora. Gdy to jest włączone, strona oferuje rejestrację tylko z pocztą serwera."
 
 msgid "web.admin.policy.accounts.concurrent_login"
 msgstr "Logowanie, gdy konto gra gdzie indziej"
@@ -4510,10 +4513,10 @@ msgid "web.account.notice.unconfirmed.title"
 msgstr "Adres e-mail tego konta nie jest jeszcze potwierdzony."
 
 msgid "web.account.notice.unconfirmed.text"
-msgstr "Potwierdza go link wysłany na adres %(address)s dnia %(date)s; logowanie na stronie i w grach działa po jego otwarciu. Nowy link zastępuje poprzedni."
+msgstr "Potwierdza go link wysłany na adres %(address)s dnia %(date)s; po potwierdzeniu działa logowanie na stronie i w grach. Nowy link zastępuje poprzedni."
 
 msgid "web.account.notice.unconfirmed.text.service"
-msgstr "Potwierdza go link wysłany na adres %(address)s dnia %(date)s; jego otwarcie kończy zakładanie konta z usługą %(service)s jako sposobem logowania. Nowy link zastępuje poprzedni."
+msgstr "Potwierdza go link wysłany na adres %(address)s dnia %(date)s, co kończy zakładanie konta z usługą %(service)s jako sposobem logowania. Nowy link zastępuje poprzedni."
 
 msgid "web.account.notice.unconfirmed.send"
 msgstr "Wyślij nowy link"
@@ -4531,7 +4534,7 @@ msgid "web.account.notice.link_sent.title"
 msgstr "Nowy link został wysłany na adres %(address)s."
 
 msgid "web.account.notice.link_sent.text"
-msgstr "Jest ważny do %(expires)s. Jego otwarcie potwierdza adres; potem logowanie działa tym samym hasłem do gier lub przez tę samą usługę."
+msgstr "Jest ważny do %(expires)s. Przycisk na stronie, którą otwiera, potwierdza adres; potem logowanie działa tym samym hasłem do gier lub przez tę samą usługę."
 
 msgid "web.account.notice.link_wait"
 msgstr "Link został wysłany o %(time)s."
@@ -4724,3 +4727,252 @@ msgstr "Link jest nieprawidłowy lub został już użyty."
 
 msgid "web.account.proof.link.open.text"
 msgstr "Połączenie dodaje konto %(name)s w usłudze %(service)s jako sposób logowania do konta OpenFESL %(account)s i loguje do niego. Bez tego nic się nie zmienia."
+
+msgid "web.account.display_name"
+msgstr "Nazwa wyświetlana"
+
+msgid "web.account.display_name.rule"
+msgstr "Od 4 do 16 znaków: A-Z, a-z, 0-9, _ i -. Żadne inne konto nie może jej używać, bez względu na wielkość liter. Pokazują ją profile, rankingi i listy znajomych."
+
+msgid "web.account.public"
+msgstr "Publiczna"
+
+msgid "web.account.country"
+msgstr "Kraj"
+
+msgid "web.account.country.choose"
+msgstr "Wybierz kraj"
+
+msgid "web.account.birth"
+msgstr "Data urodzenia"
+
+msgid "web.account.birth.day"
+msgstr "Dzień"
+
+msgid "web.account.birth.month"
+msgstr "Miesiąc"
+
+msgid "web.account.birth.year"
+msgstr "Rok"
+
+msgid "web.account.terms"
+msgstr "Akceptacja warunków OpenFESL"
+
+msgid "web.account.terms.short"
+msgstr "Warunki"
+
+msgid "web.account.terms.note"
+msgstr "Jeden tekst dla wszystkich gier na tej stronie, akceptowany raz dla konta."
+
+msgid "web.account.terms.read"
+msgstr "Przeczytaj warunki"
+
+msgid "web.account.error.count.one"
+msgstr "%(count)s pole wymaga zmiany."
+
+msgid "web.account.error.count.few"
+msgstr "%(count)s pola wymagają zmiany."
+
+msgid "web.account.error.count.many"
+msgstr "%(count)s pól wymaga zmiany."
+
+msgid "web.account.error.count.other"
+msgstr "%(count)s pola wymaga zmiany."
+
+msgid "web.account.error.email.long"
+msgstr "Adres e-mail ma najwyżej 63 znaki; podany ma %(detail)s."
+
+msgid "web.account.error.email.form"
+msgstr "Adres e-mail ma postać nazwa@example.net; podany jej nie ma."
+
+msgid "web.account.error.email.taken"
+msgstr "Inne konto używa tego adresu e-mail."
+
+msgid "web.account.error.password.short"
+msgstr "Hasło do gier ma od 8 do 31 znaków; podane miało %(detail)s."
+
+msgid "web.account.error.password.long"
+msgstr "Gry przechowują najwyżej 31 bajtów hasła do gier, a litery takie jak ą zajmują dwa; podane miało %(detail)s."
+
+msgid "web.account.error.display_name.characters"
+msgstr "Nazwa wyświetlana może zawierać tylko A-Z, a-z, 0-9, _ i -; podana zawiera %(characters)s."
+
+msgid "web.account.error.display_name.length"
+msgstr "Nazwa wyświetlana ma od 4 do 16 znaków; podana ma %(detail)s."
+
+msgid "web.account.error.display_name.taken"
+msgstr "Inne konto używa nazwy %(detail)s, bez względu na wielkość liter."
+
+msgid "web.account.error.space"
+msgstr "spację"
+
+msgid "web.account.error.country.missing"
+msgstr "Rejestracja wymaga wybrania kraju z listy."
+
+msgid "web.account.error.birth.form"
+msgstr "Data urodzenia składa się z dnia, miesiąca i czterocyfrowego roku zapisanych cyframi."
+
+msgid "web.account.error.birth.day"
+msgstr "%(day)s %(month)s nie istnieje."
+
+msgid "web.account.error.birth.future"
+msgstr "Podana data urodzenia jest w przyszłości."
+
+msgid "web.account.error.terms.missing"
+msgstr "Rejestracja wymaga akceptacji warunków."
+
+msgid "web.account.register"
+msgstr "Rejestracja"
+
+msgid "web.account.register.not_registered"
+msgstr "Nie zarejestrowano"
+
+msgid "web.account.register.kept"
+msgstr "Formularz zachowuje wpisane wartości; pole hasła do gier jest znowu puste."
+
+msgid "web.account.register.paused"
+msgstr "Rejestracja tym adresem jest wstrzymana na kilka minut."
+
+msgid "web.account.register.paused.text"
+msgstr "Niedawno wpłynęły z nim inne żądania. Wysłane już linki pozostają ważne; formularz zachowuje wpisane wartości."
+
+msgid "web.account.register.signs_in"
+msgstr "Adres e-mail i hasło do gier"
+
+msgid "web.account.register.email"
+msgstr "Nazwa logowania w grach, które o nią proszą, takich jak %(games)s. Strony publiczne nigdy nie pokazują adresu."
+
+msgid "web.account.register.email.link"
+msgstr "Potwierdza go link wysłany na ten adres."
+
+msgid "web.account.register.password"
+msgstr "Od 8 do 31 znaków. Gry takie jak %(games)s proszą o nie razem z adresem e-mail; to nie jest hasło żadnej usługi."
+
+msgid "web.account.register.public"
+msgstr "Nazwa wyświetlana, kraj i wiek"
+
+msgid "web.account.register.country.reported"
+msgstr "Kraj jest podpowiedziany na podstawie tego, który Cloudflare zgłasza dla tego połączenia, i można go zmienić."
+
+msgid "web.account.register.age"
+msgstr "Data urodzenia jest sprawdzana z limitem wieku wybranego kraju i nie jest zapisywana. Gry otrzymują kraj razem z danymi konta."
+
+msgid "web.account.register.action"
+msgstr "Utwórz konto"
+
+msgid "web.account.register.busy"
+msgstr "Tworzenie"
+
+msgid "web.account.register.after"
+msgstr "Po rejestracji"
+
+msgid "web.account.register.after.link"
+msgstr "Na adres e-mail trafia link. Logowanie na stronie i w grach działa po potwierdzeniu adresu na stronie, którą otwiera."
+
+msgid "web.account.register.after.at_once"
+msgstr "Konto od razu jest zalogowane."
+
+msgid "web.account.register.after.confirm"
+msgstr "Link wysłany na adres e-mail potwierdza ten adres."
+
+msgid "web.account.register.after.games"
+msgstr "Gry takie jak %(games)s logują się adresem e-mail i hasłem do gier."
+
+msgid "web.account.register.after.account"
+msgstr "Na stronie konta można łączyć usługi oraz zmieniać nazwę wyświetlaną, kraj i hasło do gier."
+
+msgid "web.account.register.made"
+msgstr "Konto utworzone w grze"
+
+msgid "web.account.register.made.text"
+msgstr "Konto zarejestrowane w grze takiej jak %(games)s już istnieje: loguje się swoim adresem e-mail i hasłem do gier, a usługi łączy na stronie konta."
+
+msgid "web.account.register.young"
+msgstr "Rejestracja niemożliwa"
+
+msgid "web.account.register.young.subtitle"
+msgstr "Limit wieku"
+
+msgid "web.account.register.young.text"
+msgstr "Dla kraju %(country)s konta można rejestrować od ukończenia %(age)s lat. Data urodzenia została sprawdzona z tym limitem i nie została zapisana."
+
+msgid "web.account.register.young.consent"
+msgstr "Rejestracja niemożliwa"
+
+msgid "web.account.register.young.consent.subtitle"
+msgstr "Limit wieku"
+
+msgid "web.account.register.young.consent.text"
+msgstr "Dla kraju %(country)s konta bez zgody rodzica można rejestrować od ukończenia %(age)s lat. Data urodzenia została sprawdzona z tym limitem i nie została zapisana."
+
+msgid "web.account.register.sent"
+msgstr "Link wysłany"
+
+msgid "web.account.register.sent.subtitle"
+msgstr "Rejestracja"
+
+msgid "web.account.register.sent.text"
+msgstr "Na adres %(address)s wysłano wiadomość. Jej link potwierdza adres i kończy zakładanie konta; od tej chwili działa logowanie na stronie i w grach."
+
+msgid "web.account.register.sent.in_use"
+msgstr "Adres, który ma już konto, otrzymuje wiadomość z tą informacją oraz linkami do logowania i ustawienia nowego hasła do gier."
+
+msgid "web.account.register.sent.none"
+msgstr "Jeśli wiadomość nie dotrze w ciągu kilku minut, może być w folderze spamu, a logowanie adresem i hasłem do gier albo przez usługę użytą do rejestracji pozwala wysłać nowy link."
+
+msgid "web.account.register.unavailable"
+msgstr "Rejestracja niedostępna"
+
+msgid "web.account.register.unavailable.subtitle"
+msgstr "Poczta nieskonfigurowana"
+
+msgid "web.account.register.unavailable.text"
+msgstr "Rejestracja wymaga poczty serwera, która nie jest skonfigurowana. Istniejące konta logują się jak zwykle."
+
+msgid "web.account.confirm"
+msgstr "Potwierdź adres e-mail"
+
+msgid "web.account.confirm.text"
+msgstr "Przycisk potwierdza adres e-mail konta OpenFESL %(account)s. Bez tego nic się nie zmienia."
+
+msgid "web.account.confirm.busy"
+msgstr "Potwierdzanie"
+
+msgid "web.account.confirm.done"
+msgstr "Adres e-mail potwierdzony"
+
+msgid "web.account.confirm.done.subtitle"
+msgstr "Konto OpenFESL"
+
+msgid "web.account.confirm.done.text"
+msgstr "Konto może już logować się na tej stronie i w grach."
+
+msgid "web.account.confirm.done.already"
+msgstr "Adres e-mail potwierdzony"
+
+msgid "web.account.confirm.done.already.subtitle"
+msgstr "Konto OpenFESL"
+
+msgid "web.account.confirm.done.already.text"
+msgstr "Adres e-mail tego konta jest potwierdzony."
+
+msgid "web.account.confirm.open"
+msgstr "Otwórz konto"
+
+msgid "web.account.confirm.expired"
+msgstr "Link wygasł"
+
+msgid "web.account.confirm.expired.subtitle"
+msgstr "Konto OpenFESL"
+
+msgid "web.account.confirm.expired.text"
+msgstr "Logowanie adresem i hasłem do gier albo przez usługę użytą do rejestracji pozwala wysłać nowy link. Następne logowanie w grze też go wysyła."
+
+msgid "web.account.confirm.unknown"
+msgstr "Nieprawidłowy link"
+
+msgid "web.account.confirm.unknown.subtitle"
+msgstr "Konto OpenFESL"
+
+msgid "web.account.confirm.unknown.text"
+msgstr "Link jest nieprawidłowy lub został już użyty. Potwierdzony adres nie wymaga dalszych działań."

@@ -209,7 +209,8 @@ class WebSignIn:
         """
         if account.login_error() == STATE_ERRORS[AccountState.DEACTIVATED]:
             raise SignInRefused(Refusal.DEACTIVATED, account)
-        if account.verification_expires_at is not None and await self._confirms(account):
+        made_in = self._games.by_id(account.made_in or "")
+        if account.verification_expires_at and await self._policies.confirms(made_in):
             raise SignInRefused(Refusal.UNCONFIRMED, account)
 
     async def waiting(self, account_id: int) -> Account | None:
@@ -241,10 +242,3 @@ class WebSignIn:
         if expires is None:
             return None
         return LinkSent(account.nuid, expires)
-
-    async def _confirms(self, account: Account) -> bool:
-        # Only while the policy is on, so turning it off lets waiting accounts in, as games do.
-        game = self._games.by_id(account.made_in) if account.made_in else None
-        if game is None:
-            return await self._policies.site_confirmation()
-        return (await self._policies.of(game)).accounts.email_verification

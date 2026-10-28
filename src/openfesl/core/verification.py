@@ -37,9 +37,8 @@ class Link:
 
 
 class Confirmation(Enum):
-    """What opening a link did."""
+    """Why a link confirms nothing."""
 
-    CONFIRMED = auto()
     EXPIRED = auto()
     UNKNOWN = auto()
     """No account waits for the link, as when it was used already."""
@@ -71,11 +70,24 @@ class VerificationStore(Protocol):
             Whether the link was replaced, which it is not once the address is confirmed.
         """
 
-    async def confirm(self, token_hash: bytes) -> Confirmation:
+    async def waiting(self, token_hash: bytes) -> int | Confirmation:
+        """Return the account that waits for a link, without confirming its address.
+
+        Args:
+            token_hash: The SHA-256 digest of the token the link carries.
+
+        Returns:
+            The account's number, or why the link confirms nothing.
+        """
+
+    async def confirm(self, token_hash: bytes) -> int | Confirmation:
         """Confirm the address of the account that waits for a link.
 
         Args:
             token_hash: The SHA-256 digest of the token the link carries.
+
+        Returns:
+            The account's number, or why nothing was confirmed.
         """
 
     async def confirm_account(self, account_id: int, admin: Admin | None) -> None:
@@ -120,7 +132,9 @@ class EmailVerification:
         self._store = store
         self._outbox = outbox
 
-    def send(self, to: str, token: str, link: Link, language: str) -> None:
+    def send(
+        self, to: str, token: str, link: Link, language: str, texts: str = "verification.mail"
+    ) -> None:
         """Start sending an account's address the link that confirms it.
 
         The game's answer does not wait for the mail: the game gives up on NuAddAccount and
@@ -134,10 +148,11 @@ class EmailVerification:
             link: The link as the store keeps it.
             language: The language code of the game it registers or logs in from; English
                 where the catalogues hold no texts in it.
+            texts: The catalogues' key of the mail, which tells whether the account waits for
+                the link.
         """
-        self._outbox.send(
-            to, "verification.mail", PATH.format(token=token), link.expires_at, language
-        )
+        path = PATH.format(token=token)
+        self._outbox.send(to, texts, language, {"link": path}, {"expires": link.expires_at})
 
     async def require(self, account: Account, language: str) -> None:
         """Refuse the login of an account whose address waits to be confirmed.
@@ -175,12 +190,27 @@ class EmailVerification:
         self.send(account.nuid, token, link, language)
         return link.expires_at
 
-    async def confirm(self, token: str) -> Confirmation:
+    async def find(self, token: str) -> int | Confirmation:
+        """Return the account whose address a link confirms, without confirming it.
+
+        Args:
+            token: The token the link carries.
+
+        Returns:
+            The account's number, or why the link confirms nothing.
+        """
+        return await self._store.waiting(digest(token))
+
+    async def confirm(self, token: str) -> int | Confirmation:
         """Confirm the address of the account a link was sent to.
 
         Args:
             token: The token the link carries.
+
+        Returns:
+            The account's number, or why nothing was confirmed.
         """
-        confirmation = await self._store.confirm(digest(token))
-        logger.info("A verification link was opened: %s", confirmation.name.lower())
-        return confirmation
+        confirmed = await self._store.confirm(digest(token))
+        outcome = "confirmed" if isinstance(confirmed, int) else confirmed.name.lower()
+        logger.info("A verification link was used: %s", outcome)
+        return confirmed

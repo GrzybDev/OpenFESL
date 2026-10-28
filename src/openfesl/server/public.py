@@ -1,11 +1,11 @@
 from fastapi import FastAPI, Request
 
 from openfesl.core.games import Games
-from openfesl.core.verification import Confirmation, EmailVerification
 from openfesl.server.services import GameServices
 from openfesl.server.settings import Settings
 from openfesl.server.stores import Stores
 from openfesl.web.account.proof import ProofPages
+from openfesl.web.account.register import RegisterPages
 from openfesl.web.account.services import SignInServices
 from openfesl.web.account.sign_in import SignInPages
 from openfesl.web.activity import activity_routes
@@ -20,7 +20,6 @@ from openfesl.web.play import play_routes, relay_address
 from openfesl.web.players import player_routes
 from openfesl.web.servers import server_routes
 from openfesl.web.shell import shell_routes
-from openfesl.web.verification import verification_routes
 
 
 def include_public_routes(
@@ -31,7 +30,7 @@ def include_public_routes(
     services: GameServices,
     stores: Stores,
 ) -> None:
-    """Add the public pages, the e-mail confirmation and the launcher's and the site's sign-in.
+    """Add the public pages, the launcher's sign-in and the site's sign-in and registration.
 
     Args:
         app: The application, whose state holds the services that the lifespan starts.
@@ -71,11 +70,6 @@ def include_public_routes(
         )
     )
 
-    async def confirm(token: str) -> Confirmation:
-        verification: EmailVerification = app.state.verification
-        return await verification.confirm(token)
-
-    app.include_router(verification_routes(confirm, pages))
     app.include_router(launcher_routes(lambda: app.state.launcher))
     turnstile = settings.turnstile
     sign_in_services = SignInServices(
@@ -99,6 +93,15 @@ def include_public_routes(
         settings.sends_mail,
         turnstile,
     )
+    register = RegisterPages(
+        pages,
+        games,
+        services.policies,
+        lambda: app.state.registration,
+        settings.sends_mail,
+        turnstile,
+    )
     app.include_router(sign_in.routes())
     app.include_router(sign_in_services.routes())
     app.include_router(proof.routes())
+    app.include_router(register.routes())

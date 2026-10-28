@@ -1,0 +1,8 @@
+/* A field's label with a word at its end, such as Public or Optional. */
+@layer components {
+  .field-label-tagged {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+}

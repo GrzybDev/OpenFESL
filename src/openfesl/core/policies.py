@@ -226,6 +226,19 @@ class GamePolicies:
         values = await self._store.settings(SITE_CONFIRMATION)
         return values.get(SITE_CONFIRMATION) != "off"
 
+    async def confirms(self, made_in: Game | None) -> bool:
+        """Return whether an account waits for the link that confirms its address, while it does.
+
+        Only while the policy it was registered under is on, so turning that off lets waiting
+        accounts in, in games and on the site alike.
+
+        Args:
+            made_in: The game whose client registered the account; None for the site.
+        """
+        if made_in is None:
+            return await self.site_confirmation()
+        return (await self.of(made_in)).accounts.email_verification
+
     async def set_site_confirmation(self, on: bool, admin: Admin | None) -> None:
         """Turn the site's confirmation of new accounts' addresses on or off.
 

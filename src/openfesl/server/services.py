@@ -45,6 +45,7 @@ from openfesl.core.theater import Theater, TheaterRoute, theater_routes
 from openfesl.core.trust import ServerTrust
 from openfesl.core.verification import EmailVerification
 from openfesl.core.wallets import Wallets
+from openfesl.core.web_registration import WebRegistration
 from openfesl.server.mail import SmtpMailer
 from openfesl.server.settings import Settings
 from openfesl.server.stores import Stores
@@ -95,8 +96,8 @@ class GameServices:
         """Start the services and their followers once the database is ready, and stop them after.
 
         Args:
-            app: The application, whose state hands the pages the e-mail verification, the
-                launcher sign-in, the site's sign-in and its e-mailed proofs.
+            app: The application, whose state hands the pages the launcher sign-in, the site's
+                sign-in with its e-mailed proofs, and its registration.
         """
         settings, games, stores = self._settings, self._games, self._stores
         routes, commands = self._routes, self._commands
@@ -108,7 +109,6 @@ class GameServices:
             mailer = SmtpMailer(settings, settings.smtp_host, settings.smtp_sender)
         outbox = Outbox(mailer, settings.public_url)
         verification = EmailVerification(stores.accounts, outbox)
-        app.state.verification = verification
         accounts = AccountService(
             stores.accounts,
             logins,
@@ -117,6 +117,7 @@ class GameServices:
             self.terms,
             policies,
             verification,
+            games,
         )
         personas = PersonaService(stores.personas)
         await personas.prepare(await accounts.prepare(games))
@@ -135,6 +136,16 @@ class GameServices:
         app.state.sign_in = sign_in
         app.state.proof_mail = ProofMail(
             stores.identities, stores.accounts, sign_in, outbox, mailings
+        )
+        app.state.registration = WebRegistration(
+            stores.accounts,
+            logins,
+            policies,
+            games,
+            verification,
+            outbox,
+            mailings,
+            self.terms,
         )
         routes.update(connect_routes(games, policies))
         routes.update(telemetry_routes())

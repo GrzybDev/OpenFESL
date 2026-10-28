@@ -1,8 +1,10 @@
 from datetime import timedelta
 
 import anyio
+import httpx2
 import pytest
-from support import Game, Mailbox, cli, fetch, game, login, registration
+from accounts import confirm_address
+from support import Game, Mailbox, cli, game, login, registration
 
 from openfesl.core import verification
 from openfesl.protocol.relay import Channel, ConnectionKey
@@ -28,7 +30,8 @@ async def test_a_new_account_logs_in_once_the_link_sent_to_its_address_confirmed
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     await cli(capsys, "settings", "set", "bfbc2.accounts.email_verification", "on")
-    async with game(server_url) as player:
+    base = server_url.replace("ws://", "http://").rstrip("/")
+    async with game(server_url) as player, httpx2.AsyncClient() as browser:
         await player.hello(FESL, "bfbc2-pc", locale="pl_PL")
         refused = await register(player, "not-an-address")
         assert refused["errorContainer.0.fieldName"] == "email"
@@ -44,10 +47,13 @@ async def test_a_new_account_logs_in_once_the_link_sent_to_its_address_confirmed
         assert link.startswith("/pl/")
         # The game shows that the account waits for authorization.
         assert await log_in(player, "ann@example.test") == "105"
-        assert (await fetch(server_url, link))[0] == 200
+        # Opening the link only asks; the button of the page it opens confirms the address.
+        assert (await browser.get(f"{base}{link}")).status_code == 200
+        assert await log_in(player, "ann@example.test") == "105"
+        assert (await confirm_address(browser, base, link)).status_code == 200
         # On to the game's key prompt, as for any new account.
         assert await log_in(player, "ann@example.test") == "120"
-        assert (await fetch(server_url, link))[0] == 404
+        assert (await browser.get(f"{base}{link}")).status_code == 404
         # A game in a language the texts lack gets the whole mail in English.
         async with game(server_url) as other:
             await other.hello(FESL, "bfbc2-pc", locale="de_DE")
@@ -65,11 +71,11 @@ async def test_a_new_account_logs_in_once_the_link_sent_to_its_address_confirmed
         await register(player, "eve@example.test")
         _, expired = await mailbox.receive("eve@example.test")
         monkeypatch.setattr(verification, "VALID_FOR", timedelta(days=1))
-        assert (await fetch(server_url, expired))[0] == 410
+        assert (await browser.get(f"{base}{expired}")).status_code == 410
         assert await log_in(player, "eve@example.test") == "105"
         _, renewed = await mailbox.receive("eve@example.test")
         assert await log_in(player, "eve@example.test") == "105"
-        assert (await fetch(server_url, renewed))[0] == 200
+        assert (await confirm_address(browser, base, renewed)).status_code == 200
         assert await log_in(player, "eve@example.test") == "120"
 
         # Without the policy no mail goes out, and accounts still waiting may log in.

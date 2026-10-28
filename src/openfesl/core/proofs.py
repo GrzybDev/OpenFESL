@@ -142,11 +142,10 @@ class ProofMail:
         token, link = new_link(VALID_FOR)
         await self._store.keep_proof(account.id, identity, link)
         name = account.display_name or account.nuid
-        path = PATH.format(token=token)
+        links = {"link": PATH.format(token=token)}
+        times = {"expires": link.expires_at}
         values = {"service": service, "account": name}
-        self._outbox.send(
-            account.nuid, "account.mail.proof", path, link.expires_at, language, **values
-        )
+        self._outbox.send(account.nuid, "account.mail.proof", language, links, times, **values)
         return LinkSent(account.nuid, link.expires_at)
 
     async def find(self, token: str) -> ProofFound | ProofGone:

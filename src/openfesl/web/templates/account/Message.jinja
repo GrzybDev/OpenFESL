@@ -1,0 +1,8 @@
+{#def title: str, subtitle: str, text: str, rows: list, href: str, action: str #}
+{# A notice page of the site's accounts, such as the one after registration: the title block, the
+   text with the rows that explain it, and the page's one action. #}
+<Layout :title="title" page="sign_in">
+  <Notice :title="title" :subtitle="subtitle" :text="text" :rows="rows">
+    <SmallAction :href="url(href)" :label="action" />
+  </Notice>
+</Layout>
