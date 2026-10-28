@@ -14,6 +14,7 @@ from openfesl.core.texts import localize
 from openfesl.web.admin.accounts import AccountView, AccountViews
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.keys import KeySource, KeyView, key_views
+from openfesl.web.sessions import check_form, toast
 
 SECTION = "accounts"
 # The grant form's choice of one tag typed by hand instead of a product key's.
@@ -146,7 +147,7 @@ def entitlement_routes(
     async def grant(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         form = await request.form()
-        sessions.check(request, form)
+        check_form(request, form)
         view = await account(account_id)
         chosen = str(form.get("key", ""))
         fields = {name: str(form.get(name, "")).strip() for name in ("tag", "group", "product")}
@@ -164,9 +165,9 @@ def entitlement_routes(
         added = await store.give(view.record.account.id, grants, code, admin)
         name = view.record.account.nuid
         if added:
-            sessions.toast(request, "web.admin.toast.granted", name=name, tags=", ".join(added))
+            toast(request, "web.admin.toast.granted", name=name, tags=", ".join(added))
         else:
-            sessions.toast(request, "web.admin.toast.granted_none", error=True, name=name)
+            toast(request, "web.admin.toast.granted_none", error=True, name=name)
         return RedirectResponse(page_of(request, view), 303)
 
     @router.get("/admin/accounts/{account_id}/entitlements/revoke", response_class=HTMLResponse)
@@ -205,7 +206,7 @@ def _decide(
     async def decide(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         form = await request.form()
-        sessions.check(request, form)
+        check_form(request, form)
         view = await account(account_id)
         tag = str(form.get("tag", ""))
         path = f"/admin/accounts/{view.record.account.id}"
@@ -214,9 +215,9 @@ def _decide(
             target = localize(f"{path}/entitlements/revoke", request.state.language)
             return RedirectResponse(f"{target}?{urlencode({'tag': tag, 'back': back})}", 303)
         if await store.set_status(view.record.account.id, tag, decision == "restore", admin):
-            sessions.toast(request, f"web.admin.toast.{decision}d", tag=tag)
+            toast(request, f"web.admin.toast.{decision}d", tag=tag)
         else:
-            sessions.toast(request, "web.admin.toast.entitlement_unchanged", error=True, tag=tag)
+            toast(request, "web.admin.toast.entitlement_unchanged", error=True, tag=tag)
         return RedirectResponse(back, 303)
 
     return decide

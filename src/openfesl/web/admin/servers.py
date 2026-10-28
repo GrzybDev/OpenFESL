@@ -23,6 +23,7 @@ from openfesl.core.servers import (
 from openfesl.core.texts import localize
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.servers import label_name
+from openfesl.web.sessions import check_form, toast
 
 # The tabs of the servers page with their sortable columns, the first the default order.
 TABS = {
@@ -356,22 +357,22 @@ def _decide(
     async def decide(request: Request, ugid: str) -> Response:
         admin = sessions.admin(request)
         form = await request.form()
-        sessions.check(request, form)
+        check_form(request, form)
         view = await views.find(ugid)
         back = back_to(request, str(form.get("back", "")))
         name = view.server.name
         provider = view.server.provider
         if view.tab not in tabs or (provider is not None and provider.revoked):
             # Another admin decided first, or the provider's revocation keeps it refused.
-            sessions.toast(request, "web.admin.toast.unchanged", error=True, name=name)
+            toast(request, "web.admin.toast.unchanged", error=True, name=name)
         elif asks_first(decision, view) and form.get("confirmed") != "1":
             target = localize(f"/admin/servers/{ugid}/{decision}", request.state.language)
             return RedirectResponse(f"{target}?{urlencode({'back': back})}", 303)
         elif await views.store.set_state(ugid, state, admin):
             await apply()
-            sessions.toast(request, f"web.admin.toast.{decision}", name=name)
+            toast(request, f"web.admin.toast.{decision}", name=name)
         else:
-            sessions.toast(request, "web.admin.toast.failed", error=True)
+            toast(request, "web.admin.toast.failed", error=True)
         return RedirectResponse(back, 303)
 
     return decide

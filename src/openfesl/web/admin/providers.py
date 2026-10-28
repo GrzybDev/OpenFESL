@@ -22,6 +22,7 @@ from openfesl.core.servers import (
 from openfesl.core.texts import localize
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.admin.servers import ServerView, ServerViews
+from openfesl.web.sessions import check_form, toast
 
 # The tabs of the providers page with their sortable columns, the first the default order.
 TABS = {
@@ -228,7 +229,7 @@ def provider_routes(
     async def add(request: Request) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         form = await request.form()
-        sessions.check(request, form)
+        check_form(request, form)
         name = str(form.get("name", "")).strip()
         try:
             provider = new_provider(name)
@@ -280,20 +281,20 @@ def provider_routes(
     async def revoke(request: Request, provider: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         form = await request.form()
-        sessions.check(request, form)
+        check_form(request, form)
         view = await find(provider)
         back = back_to(request, str(form.get("back", "")), "/admin/providers")
         name = view.provider.name
         if view.provider.revoked:
-            sessions.toast(request, "web.admin.toast.provider_unchanged", error=True, name=name)
+            toast(request, "web.admin.toast.provider_unchanged", error=True, name=name)
         elif form.get("confirmed") != "1":
             target = localize(f"/admin/providers/{provider}/revoke", request.state.language)
             return RedirectResponse(f"{target}?{urlencode({'back': back})}", 303)
         elif await servers.store.revoke_provider(view.provider.id, admin):
             await apply()
-            sessions.toast(request, "web.admin.toast.provider_revoke", name=name)
+            toast(request, "web.admin.toast.provider_revoke", name=name)
         else:
-            sessions.toast(request, "web.admin.toast.failed", error=True)
+            toast(request, "web.admin.toast.failed", error=True)
         return RedirectResponse(back, 303)
 
     return router

@@ -1,26 +1,33 @@
 import logging
-import secrets
 from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
-from urllib.parse import urlencode, urlsplit
+from urllib.parse import urlencode
 
-import httpx2
-from authlib.integrations.starlette_client import OAuth, OAuthError
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
-from joserfc.errors import JoseError
 
 from openfesl.core.admins import Admin, GroupRoles, Role
 from openfesl.core.texts import localize
-from openfesl.web.pages import Pages, Toast, Viewer
-from openfesl.web.security import HEADERS
+from openfesl.web.oidc import OidcClient, SignInFailed
+from openfesl.web.pages import Pages, Viewer
+from openfesl.web.sessions import (
+    check_form,
+    form_token,
+    inside,
+    notify,
+    renew_form_token,
+    take_notice,
+    take_toast,
+)
 
 logger = logging.getLogger(__name__)
 
 # A signed-in admin signs in again after this long, as a stolen cookie should not last.
 SESSION_LIFETIME = timedelta(hours=12)
+# The panel's pages in each language, the only ones that a sign-in or a form returns to.
+PANEL = ("/admin/", "/pl/admin/")
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,10 +59,6 @@ class SignInNeeded(Exception):
             path: The page's address.
         """
         self.path = path
-
-
-class FormExpired(Exception):
-    """Raised for an admin form whose token does not match the session's; nothing changes."""
 
 
 class NeedsRole(Exception):
@@ -95,23 +98,19 @@ class AdminSessions:
         self._pages = pages
         self._menu_counts = menu_counts
         self.provider = provider
-        self._public_url = public_url.rstrip("/") if public_url else None
-        self._sign_in_policy = HEADERS["Content-Security-Policy"]
-        self._client: Any = None
-        if provider is not None:
-            # The sign-in form leads to the provider, which the policy must let a form go to.
-            parts = urlsplit(provider.issuer)
-            self._sign_in_policy = self._sign_in_policy.replace(
-                "form-action 'self'", f"form-action 'self' {parts.scheme}://{parts.netloc}"
-            )
-            issuer = provider.issuer.rstrip("/")
-            self._client = OAuth().register(
+        self._client = (
+            OidcClient(
                 "admin",
-                client_id=provider.client_id,
-                client_secret=provider.client_secret,
-                client_kwargs={"code_challenge_method": "S256", "scope": "openid profile"},
-                server_metadata_url=f"{issuer}/.well-known/openid-configuration",
+                provider.issuer,
+                provider.client_id,
+                provider.client_secret,
+                scope="openid profile",
+                callback="/admin/sign-in/callback",
+                public_url=public_url,
             )
+            if provider
+            else None
+        )
 
     def admin(self, request: Request, role: Role | None = None, section: str = "") -> Admin:
         """Return the signed-in admin of a request to an admin page.
@@ -131,27 +130,12 @@ class AdminSessions:
             raise SignInNeeded(here)
         if datetime.now(UTC) - datetime.fromisoformat(signed_in["since"]) > SESSION_LIFETIME:
             request.session.pop("admin")
-            request.session["notice"] = {"kind": "expired"}
+            notify(request, "expired")
             raise SignInNeeded(here)
         admin = _admin(signed_in)
         if role is Role.ADMIN and admin.role is not Role.ADMIN:
             raise NeedsRole(admin, section)
         return admin
-
-    def check(self, request: Request, form: Mapping[str, Any]) -> None:
-        """Check that a form came from a page of this session.
-
-        Args:
-            request: The form's request.
-            form: The form's fields.
-
-        Raises:
-            FormExpired: When its token is not the session's.
-        """
-        token = request.session.get("csrf")
-        sent = form.get("csrf")
-        if not token or not isinstance(sent, str) or not secrets.compare_digest(token, sent):
-            raise FormExpired
 
     async def render(
         self,
@@ -170,27 +154,14 @@ class AdminSessions:
             admin: The signed-in admin; None on the sign-in pages.
             context: The page's own values.
         """
-        token = request.session.setdefault("csrf", secrets.token_urlsafe(32))
+        token = form_token(request)
         viewer = None
         if admin is not None:
-            shown = request.session.pop("toast", None)
-            toast = Toast(shown["key"], shown["values"], shown["error"]) if shown else None
             through = self.provider.name if self.provider else ""
-            viewer = Viewer(admin, through, toast, await self._menu_counts())
+            viewer = Viewer(admin, through, take_toast(request), await self._menu_counts())
         return self._pages.render(
             request, template, status, steel=True, viewer=viewer, csrf=token, **context
         )
-
-    def toast(self, request: Request, key: str, error: bool = False, **values: str) -> None:
-        """Have the next admin page say what came of a change.
-
-        Args:
-            request: The change's request.
-            key: The text in the catalogues.
-            error: Whether the change failed.
-            values: The text's placeholders.
-        """
-        request.session["toast"] = {"key": key, "values": values, "error": error}
 
     def routes(self) -> APIRouter:
         """Return the sign-in and sign-out pages."""
@@ -198,53 +169,50 @@ class AdminSessions:
 
         @router.get("/admin/sign-in", response_class=HTMLResponse)
         async def sign_in_page(request: Request, next: str = "") -> HTMLResponse:
-            notice = request.session.pop("notice", None)
             page = await self.render(
-                request, "admin.SignIn", next=_inside(next), notice=notice, provider=self.provider
+                request,
+                "admin.SignIn",
+                next=inside(next, PANEL),
+                notice=take_notice(request),
+                provider=self.provider,
             )
-            page.headers["Content-Security-Policy"] = self._sign_in_policy
+            if self._client is not None:
+                self._client.allow_forms(page)
             return page
 
         @router.post("/admin/sign-in")
         async def start(request: Request) -> Response:
             form = await request.form()
-            self.check(request, form)
+            check_form(request, form)
             if self._client is None:
                 return RedirectResponse(localize("/admin/sign-in", request.state.language), 303)
             request.session["after"] = {
-                "next": _inside(str(form.get("next", ""))),
+                "next": inside(str(form.get("next", "")), PANEL),
                 "language": request.state.language,
             }
-            callback = (
-                f"{self._public_url}/admin/sign-in/callback"
-                if self._public_url
-                else str(request.url_for("sign_in_callback"))
-            )
             try:
-                redirect: Response = await self._client.authorize_redirect(request, callback)
-            except (OAuthError, httpx2.HTTPError, ValueError) as error:
+                return await self._client.start(request)
+            except SignInFailed as error:
                 logger.warning("The admin sign-in provider's discovery failed: %s", error)
-                request.session["notice"] = {"kind": "unreachable"}
+                notify(request, "unreachable")
                 return RedirectResponse(localize("/admin/sign-in", request.state.language), 303)
-            return redirect
 
-        @router.get("/admin/sign-in/callback", name="sign_in_callback")
+        @router.get("/admin/sign-in/callback")
         async def callback(request: Request) -> Response:
             after = request.session.pop("after", None) or {"next": "", "language": "en"}
             failed = RedirectResponse(localize("/admin/sign-in", after["language"]), 303)
-            if self.provider is None:
+            if self.provider is None or self._client is None:
                 return failed
             try:
-                token = await self._client.authorize_access_token(request)
-                subject, name, groups = _identity(token)
-            except (OAuthError, JoseError, httpx2.HTTPError, KeyError, ValueError) as error:
-                # Such as a cancelled sign-in, or a token the provider's keys did not sign.
+                claims = await self._client.finish(request)
+            except SignInFailed as error:
                 logger.warning("An admin sign-in did not complete: %r", error)
-                request.session["notice"] = {"kind": "failed"}
+                notify(request, "failed")
                 return failed
+            subject, name, groups = _identity(claims)
             role = self.provider.roles.role(groups)
             if role is None:
-                request.session["notice"] = {"kind": "refused", "name": name}
+                notify(request, "refused", name=name)
                 return failed
             request.session["admin"] = {
                 "subject": subject,
@@ -252,16 +220,15 @@ class AdminSessions:
                 "role": role.value,
                 "since": datetime.now(UTC).isoformat(),
             }
-            # A new session gets a new token, so that a token seen before signing in is no use.
-            request.session["csrf"] = secrets.token_urlsafe(32)
+            renew_form_token(request)
             return RedirectResponse(after["next"] or localize("/admin/", after["language"]), 303)
 
         @router.post("/admin/sign-out")
         async def sign_out(request: Request) -> Response:
-            self.check(request, await request.form())
+            check_form(request, await request.form())
             request.session.pop("admin", None)
-            request.session["notice"] = {"kind": "signed_out"}
-            request.session["csrf"] = secrets.token_urlsafe(32)
+            notify(request, "signed_out")
+            renew_form_token(request)
             return RedirectResponse(localize("/admin/sign-in", request.state.language), 303)
 
         return router
@@ -313,18 +280,10 @@ def back_to(request: Request, back: str, default: str = "/admin/") -> str:
         back: The page the form names; another site's is never used.
         default: The page otherwise, such as the panel's home.
     """
-    return _inside(back) or localize(default, request.state.language)
+    return inside(back, PANEL) or localize(default, request.state.language)
 
 
-def _inside(path: str) -> str:
-    # Only the panel's own pages open after signing in, never another site.
-    if path.startswith(("/admin/", "/pl/admin/")) and "//" not in path and "\\" not in path:
-        return path
-    return ""
-
-
-def _identity(token: Mapping[str, Any]) -> tuple[str, str, list[str]]:
-    claims = token["userinfo"]
+def _identity(claims: Mapping[str, Any]) -> tuple[str, str, list[str]]:
     name = claims.get("preferred_username") or claims.get("name") or claims["sub"]
     groups = claims.get("groups") or []
     return str(claims["sub"]), str(name), [str(group) for group in groups]

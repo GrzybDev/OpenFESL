@@ -14,6 +14,7 @@ from openfesl.core.texts import languages, localize
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.keys import SECTION, KeyList
 from openfesl.web.keys import KeyView, key_views
+from openfesl.web.sessions import check_form, toast
 
 MAXIMUM_LABEL = 80
 
@@ -199,7 +200,7 @@ def key_edit_routes(sessions: AdminSessions, games: Games, store: KeyEditor) -> 
     async def save(request: Request, code: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         sent = await request.form()
-        sessions.check(request, sent)
+        check_form(request, sent)
         view = await find(code)
         form = KeyForm.read(sent)
         if form.error:
@@ -213,7 +214,7 @@ def key_edit_routes(sessions: AdminSessions, games: Games, store: KeyEditor) -> 
             if label and label != view.fallback(language)
         }
         await store.edit_key(key.code, form.grants(), labels, limits, admin)
-        sessions.toast(request, "web.admin.toast.key_saved", code=key.code)
+        toast(request, "web.admin.toast.key_saved", code=key.code)
         target = localize("/admin/keys", request.state.language)
         return RedirectResponse(f"{target}{KeyList().link(open=key.code)}#key-{key.code}", 303)
 

@@ -14,6 +14,7 @@ from openfesl.core.personas import PersonaState
 from openfesl.core.texts import localize
 from openfesl.web.admin.accounts import AccountView, AccountViews, PersonaView
 from openfesl.web.admin.auth import AdminSessions, back_to
+from openfesl.web.sessions import check_form, toast
 
 # The decisions about an account or one of its names that ask for confirmation first.
 CONFIRMED = ("end", "kick", "disable")
@@ -144,7 +145,7 @@ def account_decision_routes(
     async def set_state(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request)
         form = await request.form()
-        sessions.check(request, form)
+        check_form(request, form)
         view = await account(request, account_id)
         chosen = str(form.get("state", ""))
         written = str(form.get("until", "")).strip()
@@ -164,48 +165,48 @@ def account_decision_routes(
         await accounts.set_state(view.record.account.id, state, until, admin)
         await apply()
         name = view.record.account.nuid
-        sessions.toast(request, f"web.admin.toast.account.{state}", name=name)
+        toast(request, f"web.admin.toast.account.{state}", name=name)
         return RedirectResponse(page_of(request, view), 303)
 
     @router.post("/admin/accounts/{account_id}/verify")
     async def verify(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request)
         form = await request.form()
-        sessions.check(request, form)
+        check_form(request, form)
         view = await account(request, account_id)
         name = view.record.account.nuid
         if view.record.account.verification_expires_at is None:
-            sessions.toast(request, "web.admin.toast.verified_already", error=True, name=name)
+            toast(request, "web.admin.toast.verified_already", error=True, name=name)
         else:
             await accounts.confirm_account(view.record.account.id, admin)
-            sessions.toast(request, "web.admin.toast.verified", name=name)
+            toast(request, "web.admin.toast.verified", name=name)
         return RedirectResponse(page_of(request, view), 303)
 
     @router.post("/admin/accounts/{account_id}/remembered/remove")
     async def forget(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request)
         form = await request.form()
-        sessions.check(request, form)
+        check_form(request, form)
         view = await account(request, account_id)
         login = form.get("login")
         chosen = [str(login)] if login else None
         removed = await accounts.forget(view.record.account.id, chosen, admin)
         name = view.record.account.nuid
         if removed:
-            sessions.toast(request, "web.admin.toast.forgotten", name=name, count=str(removed))
+            toast(request, "web.admin.toast.forgotten", name=name, count=str(removed))
         else:
-            sessions.toast(request, "web.admin.toast.forgotten_none", error=True, name=name)
+            toast(request, "web.admin.toast.forgotten_none", error=True, name=name)
         return RedirectResponse(page_of(request, view), 303)
 
     @router.post("/admin/accounts/{account_id}/names/{persona_id}/enable")
     async def enable(request: Request, account_id: str, persona_id: str) -> Response:
         admin = sessions.admin(request)
         form = await request.form()
-        sessions.check(request, form)
+        check_form(request, form)
         view = await account(request, account_id)
         persona = persona_of(view, persona_id)
         await personas.set_state(persona.record.persona.id, PersonaState.ACTIVE, admin)
-        sessions.toast(request, "web.admin.toast.enabled", name=persona.record.persona.name)
+        toast(request, "web.admin.toast.enabled", name=persona.record.persona.name)
         return RedirectResponse(page_of(request, view), 303)
 
     for decision in CONFIRMED:
@@ -220,18 +221,18 @@ def account_decision_routes(
     async def end(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request)
         form = await request.form()
-        sessions.check(request, form)
+        check_form(request, form)
         view = await account(request, account_id)
         back = back_to(request, str(form.get("back", "")), _path(view))
         name = view.record.account.nuid
         if form.get("confirmed") != "1":
             return _ask(request, f"/admin/accounts/{account_id}/session/end", back)
         if view.session is None:
-            sessions.toast(request, "web.admin.toast.ended_already", error=True, name=name)
+            toast(request, "web.admin.toast.ended_already", error=True, name=name)
         else:
             await log.record(AdminAction.SESSION_END, str(view.record.account.id), admin)
             await apply()
-            sessions.toast(request, "web.admin.toast.ended", name=name)
+            toast(request, "web.admin.toast.ended", name=name)
         return RedirectResponse(back, 303)
 
     @router.post("/admin/accounts/{account_id}/names/{persona_id}/{decision}")
@@ -240,7 +241,7 @@ def account_decision_routes(
             raise HTTPException(404)
         admin = sessions.admin(request)
         form = await request.form()
-        sessions.check(request, form)
+        check_form(request, form)
         view = await account(request, account_id)
         persona = persona_of(view, persona_id)
         back = back_to(request, str(form.get("back", "")), _path(view))
@@ -254,7 +255,7 @@ def account_decision_routes(
         else:
             await personas.set_state(target, PersonaState.DISABLED, admin)
         await apply()
-        sessions.toast(request, f"web.admin.toast.{decision}", name=name)
+        toast(request, f"web.admin.toast.{decision}", name=name)
         return RedirectResponse(back, 303)
 
     return router

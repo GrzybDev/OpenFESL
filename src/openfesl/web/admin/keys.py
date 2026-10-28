@@ -15,6 +15,7 @@ from openfesl.core.keys import KeyHistory, StoredKey
 from openfesl.core.texts import languages, localize
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.keys import KeyView, key_views
+from openfesl.web.sessions import check_form, toast
 
 SECTION = "keys"
 TABS = ("all", "enabled", "disabled")
@@ -157,13 +158,13 @@ def key_routes(sessions: AdminSessions, games: Games, store: KeyAdmin) -> APIRou
     async def add(request: Request) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         form = await request.form()
-        sessions.check(request, form)
+        check_form(request, form)
         if form.get("starting"):
             added = await store.import_keys(games.keys, admin)
             if added:
-                sessions.toast(request, "web.admin.toast.keys_imported", count=str(added))
+                toast(request, "web.admin.toast.keys_imported", count=str(added))
             else:
-                sessions.toast(request, "web.admin.toast.keys_imported_none")
+                toast(request, "web.admin.toast.keys_imported_none")
             return RedirectResponse(_listed(request), 303)
         code = str(form.get("code", "")).strip()
         chosen = str(form.get("game", ""))
@@ -175,7 +176,7 @@ def key_routes(sessions: AdminSessions, games: Games, store: KeyAdmin) -> APIRou
             return await page(request, admin, 400, code=code, error="game")
         if not await store.add_key(code, game.id, admin):
             return await page(request, admin, 400, code=code, game=chosen, error="taken")
-        sessions.toast(request, "web.admin.toast.key_added", code=code)
+        toast(request, "web.admin.toast.key_added", code=code)
         target = localize(f"/admin/keys/{quote(code)}", request.state.language)
         return RedirectResponse(target, 303)
 
@@ -210,21 +211,21 @@ def _decide(
     find: Callable[[str], Awaitable[KeyView]],
     enabled: bool,
 ) -> Callable[[Request, str], Awaitable[Response]]:
-    toast = "web.admin.toast.key_enabled" if enabled else "web.admin.toast.key_disabled"
+    done = "web.admin.toast.key_enabled" if enabled else "web.admin.toast.key_disabled"
 
     async def decide(request: Request, code: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         form = await request.form()
-        sessions.check(request, form)
+        check_form(request, form)
         view = await find(code)
         back = back_to(request, str(form.get("back", "")), "/admin/keys")
         if not enabled and form.get("confirmed") != "1":
             target = localize(f"/admin/keys/{code}/disable", request.state.language)
             return RedirectResponse(f"{target}?{urlencode({'back': back})}", 303)
         if await store.enable(view.key.code, enabled, admin):
-            sessions.toast(request, toast, code=code)
+            toast(request, done, code=code)
         else:
-            sessions.toast(request, "web.admin.toast.key_unchanged", error=True, code=code)
+            toast(request, "web.admin.toast.key_unchanged", error=True, code=code)
         return RedirectResponse(back, 303)
 
     return decide
