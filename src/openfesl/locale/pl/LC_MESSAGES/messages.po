@@ -5230,6 +5230,18 @@ msgstr ""
 msgid "web.account.index"
 msgstr "Sekcje konta"
 
+msgid "web.account.index.games.one"
+msgstr "gra"
+
+msgid "web.account.index.games.few"
+msgstr "gry"
+
+msgid "web.account.index.games.many"
+msgstr "gier"
+
+msgid "web.account.index.games.other"
+msgstr "gry"
+
 msgid "web.account.profile"
 msgstr "Profil"
 
@@ -5286,3 +5298,49 @@ msgstr "Jest ważny do %(expires)s. Przycisk na stronie, którą otwiera, potwie
 
 msgid "web.account.toast.country"
 msgstr "Zapisano kraj: %(country)s."
+
+msgid "web.account.games"
+msgstr "Gry"
+
+msgid "web.account.games.score"
+msgstr "wynik %(score)s"
+
+msgid "web.account.games.player"
+msgstr "Strona gracza %(name)s"
+
+msgid "games.bfbc2.personas.count.one"
+msgstr "%(count)s żołnierz"
+
+msgid "games.bfbc2.personas.count.few"
+msgstr "%(count)s żołnierzy"
+
+msgid "games.bfbc2.personas.count.many"
+msgstr "%(count)s żołnierzy"
+
+msgid "games.bfbc2.personas.count.other"
+msgstr "%(count)s żołnierza"
+
+msgid "games.bfheroes.personas.count.one"
+msgstr "%(count)s bohater"
+
+msgid "games.bfheroes.personas.count.few"
+msgstr "%(count)s bohaterów"
+
+msgid "games.bfheroes.personas.count.many"
+msgstr "%(count)s bohaterów"
+
+msgid "games.bfheroes.personas.count.other"
+msgstr "%(count)s bohatera"
+
+msgid "games.bfbc2.personas.none"
+msgstr "Brak żołnierzy"
+
+msgid "games.bfheroes.personas.none"
+msgstr "Brak bohaterów"
+
+msgid "games.bfbc2.personas.made"
+msgstr ""
+"Żołnierze powstają w Bad Company 2, które loguje się adresem e-mail i hasłem do gier tego konta."
+
+msgid "games.bfheroes.personas.made"
+msgstr "Przed uruchomieniem Battlefield Heroes otwiera się okno logowania, w którym loguje się adresem e-mail i hasłem do gier tego konta."

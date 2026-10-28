@@ -125,6 +125,7 @@ def include_public_routes(
         lambda: app.state.account_management,
         lambda: app.state.sign_in,
         services.policies,
+        stores.stats,
         services.terms,
         settings.sends_mail,
         turnstile,

@@ -1,0 +1,43 @@
+{#def games: list #}
+{# The account page's games: every game on this site with the names the account plays under there,
+   each with its rank and score and a link to its player page where the game has a leaderboard,
+   and where the game makes them. #}
+{% set played = namespace(counts=[]) %}
+{% for game, lines in games if lines %}
+  {% set played.counts = played.counts + [_n("games." ~ game.id ~ ".personas.count", lines|length)] %}
+{% endfor %}
+<AccountPart id="games" :title="_('web.account.games')" :extra="listed(played.counts)">
+<div class="account-sides">
+  {% for game, lines in games %}
+    <section aria-labelledby="games-{{ game.id }}"
+             class="account-side account-game">
+      <h3 id="games-{{ game.id }}" class="bar bar-wrap">
+        <GameChip :of="game" full />
+        <span class="bar-extra">{{ _n("games." ~ game.id ~ ".personas.count", lines|length) if lines else _("games." ~ game.id ~ ".personas.none") }}</span>
+      </h3>
+      {% if lines %}
+        <ul class="account-personas">
+          {% for line in lines %}
+            {% set name = line.persona.name %}
+            <li>
+              {% if line.rank is not none %}
+                <Shield :rank="line.rank" />
+              {% else %}
+                <span aria-hidden="true" class="badge"><Icon name="user" stroke="#0A0A0A" /></span>
+              {% endif %}
+              <span class="account-persona">
+                <span class="account-persona-name">{{ name }}</span>
+                {% if line.rank is not none %}<span class="account-persona-score">{{ _("web.account.games.score", score=number(line.score)) }}</span>{% endif %}
+              </span>
+              {% if "leaderboard" in game.pages %}
+                <EndSquare :href="url('/' ~ game.id ~ '/players/' ~ name|urlencode)" :label="_('web.account.games.player', name=name)" />
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      <p class="body-text side-note">{{ _("games." ~ game.id ~ ".personas.made") }}</p>
+    </section>
+  {% endfor %}
+</div>
+</AccountPart>

@@ -1,0 +1,56 @@
+/* The account page's games: each game's names on alternating rows, the rank's shield at their start
+   and the player page's square at their end. */
+@layer components {
+  .account-game .bar {
+    align-items: center;
+    padding-block: 9px;
+  }
+
+  .account-personas {
+    display: grid;
+    gap: 2px;
+    margin-top: 2px;
+    color: var(--ink);
+
+    li {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr) 44px;
+      min-height: 60px;
+      align-items: center;
+      gap: 0 10px;
+      background: var(--row);
+      padding: 4px 0 4px 6px;
+
+      &:nth-child(even) {
+        background: var(--row-alt);
+      }
+
+      > :first-child {
+        justify-self: center;
+      }
+    }
+  }
+
+  .account-persona {
+    display: grid;
+    min-width: 0;
+    gap: 3px;
+  }
+
+  .account-persona-name {
+    overflow-wrap: anywhere;
+    font-family: var(--font-sans);
+    font-size: 17px;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+
+  .account-persona-score {
+    font-size: 13px;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+  }
+}

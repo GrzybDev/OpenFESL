@@ -5098,6 +5098,12 @@ msgstr ""
 msgid "web.account.index"
 msgstr "Account sections"
 
+msgid "web.account.index.games.one"
+msgstr "game"
+
+msgid "web.account.index.games.other"
+msgstr "games"
+
 msgid "web.account.profile"
 msgstr "Profile"
 
@@ -5153,3 +5159,37 @@ msgstr "It is valid until %(expires)s. A button on the page it opens confirms th
 
 msgid "web.account.toast.country"
 msgstr "Country saved: %(country)s."
+
+msgid "web.account.games"
+msgstr "Games"
+
+msgid "web.account.games.score"
+msgstr "%(score)s score"
+
+msgid "web.account.games.player"
+msgstr "Player page of %(name)s"
+
+msgid "games.bfbc2.personas.count.one"
+msgstr "%(count)s soldier"
+
+msgid "games.bfbc2.personas.count.other"
+msgstr "%(count)s soldiers"
+
+msgid "games.bfheroes.personas.count.one"
+msgstr "%(count)s hero"
+
+msgid "games.bfheroes.personas.count.other"
+msgstr "%(count)s heroes"
+
+msgid "games.bfbc2.personas.none"
+msgstr "No soldiers"
+
+msgid "games.bfheroes.personas.none"
+msgstr "No heroes"
+
+msgid "games.bfbc2.personas.made"
+msgstr ""
+"Soldiers are created in Bad Company 2, which logs in with this account's e-mail address and game password."
+
+msgid "games.bfheroes.personas.made"
+msgstr "Battlefield Heroes starts with a sign-in window, which signs in with this account's e-mail address and game password."

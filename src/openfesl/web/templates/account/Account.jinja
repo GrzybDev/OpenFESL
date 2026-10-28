@@ -1,4 +1,4 @@
-{#def overview, made_in, said: dict, errors: dict, countries: list, sent, waits: bool, mail: bool, check: str, accepted: bool, password_games: list, personas: list, failed #}
+{#def overview, made_in, said: dict, errors: dict, countries: list, games: list, sent, waits: bool, mail: bool, check: str, accepted: bool, password_games: list, personas: list, failed #}
 {# The account page: the title block with the display name, the index of its parts that stays at
    the top while the page scrolls, and the parts. Each part's forms come back to it; where scripts
    run, only that part is swapped. #}
@@ -6,6 +6,7 @@
 {% set title = _("web.account.page") %}
 {% set parts = [
   {"id": "profile", "label": _("web.account.profile")},
+  {"id": "games", "label": _("web.account.games"), "count": games|length, "noun": _n("web.account.index.games", games|length)},
 ] %}
 <Layout :title="title" page="account" :turnstile="check != ''">
   <PageHead labelledby="account-title" class="account-head">
@@ -17,6 +18,7 @@
   <AccountIndex :parts="parts" />
   <div class="enter-panel account-parts">
     <AccountProfile :overview="overview" :made_in="made_in" :said="said if said.get('part') == 'profile' else {}" :errors="errors" :countries="countries" :sent="sent" :waits="waits" :mail="mail" :check="check" :accepted="accepted" :password_games="password_games" :personas="personas" />
+    <AccountGames :games="games" />
   </div>
   <template id="toast-failed">
     <Toast :shown="failed" />

@@ -1,4 +1,5 @@
 from collections.abc import Awaitable, Callable, Sequence
+from dataclasses import dataclass
 from typing import Any
 
 from fastapi import APIRouter, Request
@@ -6,14 +7,18 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 
 from openfesl.core.account_management import AccountManagement, AccountOverview
 from openfesl.core.accounts import Account
-from openfesl.core.games import Games
+from openfesl.core.games import Game, Games
 from openfesl.core.limits import Wait
+from openfesl.core.personas import Persona
 from openfesl.core.policies import GamePolicies
 from openfesl.core.problems import Problem
+from openfesl.core.rankings import RankingStore
 from openfesl.core.registration import Terms, countries
 from openfesl.core.sign_in import LinkSent, WebSignIn
+from openfesl.core.stats import bucket_of, partition_of
 from openfesl.core.texts import localize, translate
 from openfesl.core.verification import VALID_FOR
+from openfesl.protocol.rank import Period
 from openfesl.web.account.fields import field_errors
 from openfesl.web.account.session import DISPLAY_NAME, open_page, shown, signed_in
 from openfesl.web.account.sign_in import password_games
@@ -24,6 +29,21 @@ from openfesl.web.turnstile import Turnstile
 ACCOUNT = "/account"
 # What the account page's last form left for one of its parts to say, until the page shows it.
 FORM = "account_form"
+
+
+@dataclass(frozen=True, slots=True)
+class PersonaLine:
+    """A persona as the account page lists it under its game.
+
+    Attributes:
+        persona: The persona.
+        rank: Its rank, in a game whose leaderboard ranks its players.
+        score: Its total score there.
+    """
+
+    persona: Persona
+    rank: int | None = None
+    score: int = 0
 
 
 def answered(
@@ -79,6 +99,7 @@ class AccountPages:
         management: Callable[[], AccountManagement],
         sign_in: Callable[[], WebSignIn],
         policies: GamePolicies,
+        rankings: RankingStore,
         terms: Terms,
         mail: bool,
         turnstile: Turnstile | None,
@@ -87,13 +108,13 @@ class AccountPages:
 
         Args:
             pages: Renders the page.
-            games: The games, which the page names where the account was made and which games
-                ask for its address.
+            games: The games, each of which the page lists with the account's personas.
             accounts: Returns an account by its number.
             management: Returns the account management, once the application has started.
             sign_in: Returns the site's sign-in, which sends new confirmation links.
             policies: The site's and each game's policies, which say whether an account waits
                 for its confirmation link.
+            rankings: The players' stats, whose ranks and scores the page shows.
             terms: The terms, whose current version the page says the account accepted or not.
             mail: Whether the server sends mail, which a new confirmation link needs.
             turnstile: Cloudflare's check of the form that sends a new link; None when the
@@ -105,6 +126,7 @@ class AccountPages:
         self._management = management
         self._sign_in = sign_in
         self._policies = policies
+        self._rankings = rankings
         self._terms = terms
         self._mail = mail
         self._turnstile = turnstile
@@ -190,6 +212,10 @@ class AccountPages:
             said=said,
             errors=field_errors(problems, language),
             countries=countries(language),
+            games=[
+                (entry.game, await self._lines(entry.game, entry.personas))
+                for entry in overview.games
+            ],
             sent=waiting - VALID_FOR if waiting else None,
             waits=bool(waiting) and await self._policies.confirms(made_in),
             mail=self._mail,
@@ -202,3 +228,22 @@ class AccountPages:
         if self._turnstile:
             self._turnstile.allow(page)
         return page
+
+    async def _lines(self, game: Game, personas: list[Persona]) -> list[PersonaLine]:
+        # The ranks and scores of the personas in a game whose leaderboard ranks its players.
+        if "leaderboard" not in game.pages or not personas:
+            return [PersonaLine(persona) for persona in personas]
+        found = await self._rankings.lines(
+            partition_of(game),
+            {"score": game.stats.score},
+            "score",
+            bucket_of(Period.ALL_TIME, 0),
+            [persona.id for persona in personas],
+            slice(0, len(personas)),
+        )
+        scores = {line.persona_id: int(line.values["score"]) for line in found}
+        lines = []
+        for persona in personas:
+            score = scores.get(persona.id, 0)
+            lines.append(PersonaLine(persona, game.stats.rank(score), score))
+        return lines

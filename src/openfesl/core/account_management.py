@@ -2,8 +2,23 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from openfesl.core.accounts import Account, AccountStore
+from openfesl.core.games import Game, Games
+from openfesl.core.personas import Persona, PersonaStore
 from openfesl.core.problems import Problem
 from openfesl.core.registration import is_country
+
+
+@dataclass(frozen=True, slots=True)
+class GamePersonas:
+    """The personas an account plays under in one game.
+
+    Attributes:
+        game: The game.
+        personas: The personas, the oldest first; none for a game the account has not played.
+    """
+
+    game: Game
+    personas: list[Persona]
 
 
 @dataclass(frozen=True, slots=True)
@@ -13,22 +28,28 @@ class AccountOverview:
     Attributes:
         account: The account.
         created: When it was made.
+        games: Every game with the account's personas in it, the game it was made in first.
     """
 
     account: Account
     created: datetime
+    games: list[GamePersonas]
 
 
 class AccountManagement:
     """What a signed-in player sees of their account on the site and changes about it."""
 
-    def __init__(self, accounts: AccountStore) -> None:
-        """Manage the accounts in a store.
+    def __init__(self, accounts: AccountStore, personas: PersonaStore, games: Games) -> None:
+        """Manage the accounts in the stores.
 
         Args:
             accounts: Where the accounts are kept.
+            personas: Where their personas are kept.
+            games: The games, each of which the overview names with the account's personas.
         """
         self._accounts = accounts
+        self._personas = personas
+        self._games = games
 
     async def overview(self, account_id: int) -> AccountOverview | None:
         """Return what the player of an account sees of it; None for an unknown account.
@@ -37,7 +58,18 @@ class AccountManagement:
             account_id: The account.
         """
         record = await self._accounts.record(account_id)
-        return AccountOverview(record.account, record.created) if record else None
+        if record is None:
+            return None
+        account = record.account
+        games = sorted(self._games, key=lambda game: game.id != account.made_in)
+        return AccountOverview(
+            account,
+            record.created,
+            [
+                GamePersonas(game, await self._personas.of_account(account.id, game.namespace))
+                for game in games
+            ],
+        )
 
     async def change_country(self, account: Account, country: str) -> Problem | None:
         """Change the country of an account, which games receive with its details.
