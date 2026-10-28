@@ -301,6 +301,7 @@ class Pages:
                 {
                     "name": entry.name,
                     "href": localize(f"/{entry.id}", language),
+                    "pages": entry.pages,
                     "current": entry is game,
                     "online": self._census.activity(entry).online,
                 }

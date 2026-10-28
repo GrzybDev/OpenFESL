@@ -6,7 +6,7 @@ from typing import Self
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
-from openfesl.core.game_pages import Listing, Stats, Theme
+from openfesl.core.game_pages import Listing, PageKind, Stats, Theme
 from openfesl.core.policies import Policies
 
 
@@ -184,6 +184,8 @@ class Game(BaseModel):
             one behaviour.
         countries: The age limits of the countries whose limits differ from the defaults, by
             ISO code.
+        pages: The kinds of web pages that the game's menu shows, in its order, and the site
+            serves besides the game's front page.
         theme: How the game's web pages look.
         listing: How the web pages read the games its servers host.
         stats: The stats of the game's players that the web pages show.
@@ -210,6 +212,7 @@ class Game(BaseModel):
     provider_attribute: str | None = None
     policies: Policies
     countries: dict[str, Ages] = {}
+    pages: list[PageKind]
     theme: Theme
     listing: Listing = Listing()
     stats: Stats = Stats()
@@ -266,6 +269,12 @@ class Game(BaseModel):
                 )
         return self
 
+    @model_validator(mode="after")
+    def _check_host_page(self) -> Self:
+        if "host" in self.pages and self.server_files is None:
+            raise ValueError("the host page needs the server_files that hosting involves")
+        return self
+
 
 class Games:
     """The games the server serves, found by the client string of a FESL Hello."""
@@ -311,6 +320,14 @@ class Games:
             game_id: The data file's name without its extension.
         """
         return next((game for game in self._games if game.id == game_id), None)
+
+    def with_page(self, kind: PageKind) -> list[Game]:
+        """Return the games that list a kind of web page, which the site serves for them only.
+
+        Args:
+            kind: The kind of page.
+        """
+        return [game for game in self._games if kind in game.pages]
 
     def find(self, client_string: str) -> tuple[Game, Client] | None:
         """Return the game and client that a client string names, if the server serves it.

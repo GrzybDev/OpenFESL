@@ -11,6 +11,10 @@ automatic_grants = [
     { tag = "BFBC2:PC:ADDSVETRANK", group = "AddsVetRank" },
     { tag = "BFBC2NAM:PC:NOVETRANK", group = "NoVetRank" },
 ]
+# The web pages the game's menu shows, in its order, beside its front page: the server list with
+# the servers' pages, the leaderboard with the players' pages, the activity, the guide to playing
+# and the guide to hosting, which needs the server files below.
+pages = ["servers", "leaderboard", "activity", "play", "host"]
 
 # The files of the R34 dedicated server release that hosting involves: the hook goes next to its
 # executable, the provider file next to its configuration, and the server keeps its identity in

@@ -286,10 +286,12 @@
             {% endfor %}
           </dl>
         </section>
-        <div>
-          <Action :href="url('/' ~ game.id ~ '/play')" :label="_('web.front.play')" :size="32" />
-          <p class="body-text side-note">{{ _("web.servers.joining") }}</p>
-        </div>
+        {% if "play" in game.pages %}
+          <div>
+            <Action :href="url('/' ~ game.id ~ '/play')" :label="_('web.front.play')" :size="32" />
+            <p class="body-text side-note">{{ _("web.servers.joining") }}</p>
+          </div>
+        {% endif %}
       </div>
     </div>
   </Panel>

@@ -1,10 +1,12 @@
 from html.parser import HTMLParser
 
 import pytest
-from support import fetch
+from support import enter_as_player, fetch, game, host_game, let_in
 
+from openfesl.core.games import Games, load_games
 from openfesl.core.registration import Terms
 from openfesl.core.texts import load_texts
+from openfesl.server import app
 
 pytestmark = pytest.mark.anyio
 
@@ -109,3 +111,50 @@ async def test_a_page_that_fails_answers_a_short_error_page_without_details(
     assert "frame-ancestors 'none'" in headers["Content-Security-Policy"]
     # The ways out: the same page again, or the front page.
     assert {"/pl/terms?again=1", "/pl"} <= {link["href"] for link in page.links}
+
+
+@pytest.fixture
+def without_server_list(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Bad Company 2 without the server list and its servers' pages; the server starts with it.
+    def load() -> Games:
+        bfbc2 = load_games().by_id("bfbc2")
+        assert bfbc2 is not None
+        pages = [kind for kind in bfbc2.pages if kind != "servers"]
+        return Games([bfbc2.model_copy(update={"pages": pages})])
+
+    monkeypatch.setattr(app, "load_games", load)
+
+
+@pytest.mark.usefixtures("without_server_list", "open_hosting")
+async def test_a_game_neither_shows_nor_serves_a_page_its_data_leaves_out(server_url: str) -> None:
+    async with game(server_url) as server, game(server_url) as player:
+        created = await host_game(server, {"NAME": "Invented Quarry Rush"})
+        await enter_as_player(player, "quarry@example.invalid", "QuarryRunner")
+        await let_in(server, player, created)
+
+        # The game's menu leads to the pages it lists; the server and its player still show,
+        # but nothing leads to the server list or a server's page.
+        status, _, body = await fetch(server_url, "/bfbc2")
+        hrefs = {link["href"] for link in Page(body).links}
+        assert status == 200 and "Invented Quarry Rush" in body.decode()
+        assert {"/bfbc2/leaderboard", "/bfbc2/activity", "/bfbc2/play", "/bfbc2/host"} <= hrefs
+        for path, expected in (
+            ("/", 200),
+            ("/bfbc2", 200),
+            ("/bfbc2/leaderboard", 200),
+            ("/bfbc2/players/QuarryRunner", 200),
+            ("/bfbc2/activity", 200),
+            ("/bfbc2/play", 200),
+            ("/bfbc2/host", 200),
+            ("/missing", 404),
+        ):
+            status, _, body = await fetch(server_url, path)
+            leading = {link["href"] for link in Page(body).links if "/servers" in str(link["href"])}
+            assert (path, status, leading) == (path, expected, set())
+
+        # Its servers' addresses answer as those of a game the server does not serve.
+        _, _, body = await fetch(server_url, "/invented/servers")
+        unknown = Page(body).heading
+        for path in ("/bfbc2/servers", "/bfbc2/servers/invented-quarry-rush"):
+            status, _, body = await fetch(server_url, path)
+            assert (status, Page(body).heading) == (404, unknown)

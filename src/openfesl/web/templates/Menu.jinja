@@ -111,7 +111,9 @@
                     <Count :value="tile.activity.online" class="count-ink count-sm live-value" />
                   </div>
                   <div role="cell" class="cell-end">
-                    <EndSquare :href="url('/' ~ tile.game.id ~ '/servers')" :label="_('web.menu.servers.of', game=tile.game.name)" />
+                    {% if "servers" in tile.game.pages %}
+                      <EndSquare :href="url('/' ~ tile.game.id ~ '/servers')" :label="_('web.menu.servers.of', game=tile.game.name)" />
+                    {% endif %}
                   </div>
                 </div>
               {% endfor %}

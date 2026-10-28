@@ -68,14 +68,14 @@ def play_routes(
 
     Args:
         pages: Renders the pages.
-        games: The games, each with its guide under its id.
+        games: The games, of which those that list the guide get it under their id.
         census: Counts the players and servers.
         keys: Lists the product keys, of which the game's enabled ones are shown.
         relay: Returns this server's relay address for a request.
         hook_default: The relay address OpenFESLHook connects to without an OpenFESLHook.ini.
     """
     router = APIRouter()
-    for game in games:
+    for game in games.with_page("play"):
         router.add_api_route(
             f"/{game.id}/play",
             _guide(pages, games, census, keys, relay, hook_default, game),

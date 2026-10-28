@@ -177,7 +177,7 @@
     flex-wrap: wrap;
     gap: 4px;
 
-    a {
+    :is(a, span) {
       display: flex;
       min-height: 44px;
       align-items: center;

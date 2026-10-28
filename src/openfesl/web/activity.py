@@ -64,12 +64,12 @@ def activity_routes(
 
     Args:
         pages: Renders the pages.
-        games: The games, each with an activity page.
+        games: The games, of which those that list the activity page get it.
         census: Counts each game's players now.
         history: Holds the peaks of each game's players online.
     """
     router = APIRouter()
-    for game in games:
+    for game in games.with_page("activity"):
         router.add_api_route(
             f"/{game.id}/activity",
             _activity(pages, census, history, game),

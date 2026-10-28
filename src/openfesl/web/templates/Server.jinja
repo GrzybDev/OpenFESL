@@ -115,8 +115,7 @@
           </section>
           <div class="server-copy">
             <CopyBlock :value="server.name" :label="_('web.server.copy')" :note="_('web.server.copied')" :field_label="_('web.servers.name')" :hint="_('web.server.select')" />
-            <p class="body-text js-only">{{ _("web.server.joining") }} <a href="{{ url('/' ~ game.id ~ '/play') }}"
-    class="reload">{{ _("web.front.play") }}</a></p>
+            <p class="body-text js-only">{{ _("web.server.joining") }}{% if "play" in game.pages %} <a href="{{ url('/' ~ game.id ~ '/play') }}" class="reload">{{ _("web.front.play") }}</a>{% endif %}</p>
           </div>
         </div>
 
@@ -157,7 +156,9 @@
                        {% if seat.name == highlighted %} aria-current="true"{% endif %}
                        class="score-columns-{{ numbers|length }} seat">
                     <div role="cell">{{ number(loop.index) }}</div>
-                    <div role="cell"><a href="{{ url('/' ~ game.id ~ '/players/' ~ seat.name|urlencode) }}">{{ seat.name }}</a></div>
+                    <div role="cell">
+                      <PlayerName :name="seat.name" />
+                    </div>
                     {% for meaning in numbers %}
                       <div role="cell">
                         {% if meaning in seat.numbers %}<Count :value="seat.numbers[meaning]" class="count-ink count-sm" />{% endif %}
@@ -179,9 +180,11 @@
             <p class="body-text">{{ _("web.server.menus", game=game.name) }}</p>
             <ul class="name-chips server-menus">
               {% for name in menus[:12] %}
-                <li><a href="{{ url('/' ~ game.id ~ '/players/' ~ name|urlencode) }}">{{ name }}</a></li>
+                <li>
+                  <PlayerName :name="name" />
+                </li>
               {% endfor %}
-              {% if menus|length > 12 %}<li><a href="{{ url('/' ~ game.id ~ '/leaderboard') }}?show=online"
+              {% if menus|length > 12 and "leaderboard" in game.pages %}<li><a href="{{ url('/' ~ game.id ~ '/leaderboard') }}?show=online"
    class="more-names">{{ _("web.servers.more", count=number(menus|length - 12)) }}<Icon name="go" :size="14" stroke="currentColor" /></a></li>{% endif %}
             </ul>
           </div>

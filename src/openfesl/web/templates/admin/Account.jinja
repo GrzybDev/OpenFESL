@@ -89,7 +89,7 @@
                 {% set entry = persona.record %}
                 <li>
                   {{ badge("tick" if persona.usable else "x") }}
-                  {% if persona.usable and persona.game %}
+                  {% if persona.usable and persona.game and "leaderboard" in persona.game.pages %}
                     <a href="{{ url('/' ~ persona.game.id ~ '/players/' ~ entry.persona.name|urlencode) }}"
                        class="account-name-link">{{ entry.persona.name }}</a>
                   {% else %}

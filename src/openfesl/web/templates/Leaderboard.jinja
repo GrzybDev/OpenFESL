@@ -133,7 +133,8 @@
                            data-label="{{ _('web.leaderboard.column.now') }}"
                            class="line-now line-cell">
                       {%- if line.persona_id not in places %}<span class="line-away">{{ _("web.leaderboard.offline_now") }}</span>
-                  {%- elif places[line.persona_id] %}<a href="{{ url('/' ~ game.id ~ '/servers/' ~ places[line.persona_id].slug) }}">{{ places[line.persona_id].name }}</a>
+                  {%- elif places[line.persona_id] and "servers" in game.pages %}<a href="{{ url('/' ~ game.id ~ '/servers/' ~ places[line.persona_id].slug) }}">{{ places[line.persona_id].name }}</a>
+                  {%- elif places[line.persona_id] %}{{ places[line.persona_id].name }}
       {%- else %}<span class="line-menus">{{ _("web.activity.in_menus") }}</span>{% endif -%}
         </div>
         <div role="cell" class="cell-end">
@@ -158,10 +159,12 @@
     <p class="body-text">{{ _("web.leaderboard.empty.text") }}</p>
     <p><span class="list-count">{{ _("web.leaderboard.listed", count=number(0)) }}</span></p>
   </section>
-  <div>
-    <Action :href="url('/' ~ game.id ~ '/play')" :label="_('web.front.play')" :size="32" />
-    <p class="body-text">{{ _("web.leaderboard.setup") }}</p>
-  </div>
+  {% if "play" in game.pages %}
+    <div>
+      <Action :href="url('/' ~ game.id ~ '/play')" :label="_('web.front.play')" :size="32" />
+      <p class="body-text">{{ _("web.leaderboard.setup") }}</p>
+    </div>
+  {% endif %}
 </div>
 {% endif %}
 </Panel>

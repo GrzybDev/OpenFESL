@@ -22,7 +22,7 @@ def host_routes(
 
     Args:
         pages: Renders the pages.
-        games: The games whose players may host, each with its guide under its id.
+        games: The games, of which those that list the guide get it under their id.
         census: Counts the players and servers.
         approval: Knows whether new servers wait for the administrators' approval.
         contact: The address at which operators reach the administrators, if the deployment
@@ -31,13 +31,12 @@ def host_routes(
         hook_default: The relay address OpenFESLHook connects to without an OpenFESLHook.ini.
     """
     router = APIRouter()
-    for game in games:
-        if game.server_files:
-            router.add_api_route(
-                f"/{game.id}/host",
-                _guide(pages, census, approval, contact, relay, hook_default, game),
-                response_class=HTMLResponse,
-            )
+    for game in games.with_page("host"):
+        router.add_api_route(
+            f"/{game.id}/host",
+            _guide(pages, census, approval, contact, relay, hook_default, game),
+            response_class=HTMLResponse,
+        )
     return router
 
 

@@ -7,7 +7,7 @@
           :narrow="code == 404">
     {% if code == 404 %}
       <Action :href="url('/')" :label="_('web.home')" />
-      {% for entry in games %}
+      {% for entry in games if "servers" in entry.pages %}
         <SmallAction :href="entry.href ~ '/servers'" :label="_('web.error.404.servers', game=entry.name)" />
       {% endfor %}
     {% else %}

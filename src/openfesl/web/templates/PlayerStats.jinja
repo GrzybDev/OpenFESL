@@ -72,19 +72,19 @@
           {% set now_state %}{% if server %}{{ _("web.player.now.match") }}{% elif online %}{{ _("web.activity.in_menus") }}{% else %}{{ _("web.leaderboard.offline_now") }}{% endif %}{% endset %}
           <Bar id="player-now" :extra="now_state">{{ _("web.leaderboard.column.now") }}</Bar>
           {% if server %}
-            {% set href = url("/" ~ game.id ~ "/servers/" ~ server.slug) %}
+            {% set href = url("/" ~ game.id ~ "/servers/" ~ server.slug) if "servers" in game.pages else "" %}
             <div class="table-scroll player-server-scroll">
               <div class="player-server">
                 <div class="player-server-badges">
                   <Badges :server="server" />
                 </div>
-                <div class="player-server-name"><a href="{{ href }}" class="server-name">{{ server.name }}</a></div>
+                <div class="player-server-name">{% if href %}<a href="{{ href }}" class="server-name">{{ server.name }}</a>{% else %}<span class="server-name">{{ server.name }}</span>{% endif %}</div>
                 <div class="player-server-players">
                   <span class="cell-taken">{{ number(server.players) }}&nbsp;/&nbsp;{{ number(server.max_players) }}<span class="cell-free"><Free :server="server" /></span></span>
                   <Seats :taken="server.players" :slots="server.max_players" />
                 </div>
                 <div class="cell-end">
-                  <EndSquare :href="href" :label="_('web.server.page.of', name=server.name)" />
+                  {% if href %}<EndSquare :href="href" :label="_('web.server.page.of', name=server.name)" />{% endif %}
                 </div>
               </div>
             </div>
@@ -95,7 +95,9 @@
                   <p class="row-text">{{ _("web.player.round", score=number(seat.numbers.score), kills=number(seat.numbers.kills), deaths=number(seat.numbers.deaths)) }}</p>
                 {% endfor %}
               </div>
-              <SmallAction :href="href ~ '?player=' ~ persona.name|urlencode" :label="_('web.server.scoreboard')" />
+              {% if href %}
+                <SmallAction :href="href ~ '?player=' ~ persona.name|urlencode" :label="_('web.server.scoreboard')" />
+              {% endif %}
             </div>
           {% else %}
             <p class="body-text player-quiet">{{ _("web.player.now.menus") if online else _("web.player.now.offline") }}</p>

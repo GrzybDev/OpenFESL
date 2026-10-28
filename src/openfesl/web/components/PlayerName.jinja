@@ -1,0 +1,3 @@
+{#def name: str #}
+{# A player's name, leading to the player's page where the game has the players' pages. #}
+{% if "leaderboard" in game.pages %}<a href="{{ url('/' ~ game.id ~ '/players/' ~ name|urlencode) }}">{{ name }}</a>{% else %}<span>{{ name }}</span>{% endif %}

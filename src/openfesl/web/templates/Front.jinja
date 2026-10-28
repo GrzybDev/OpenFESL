@@ -28,13 +28,16 @@
         <Stat :label="_('web.activity.in_menus')">
           <Count :value="activity.in_menus" class="live-value" />
         </Stat>
-        <Stat :label="_('web.activity.servers')" kind="link">
+        <Stat :label="_('web.activity.servers')"
+              :kind="'link' if 'servers' in game.pages else 'center'">
           <Count :value="activity.servers" class="live-value" />
-          <a href="{{ url('/' ~ game.id ~ '/servers') }}" class="front-all"><span class="phone-sr-only">{{ _("web.front.all_servers") }}</span><span aria-hidden="true"><Icon name="go" stroke="currentColor" /></span></a>
+          {% if "servers" in game.pages %}
+            <a href="{{ url('/' ~ game.id ~ '/servers') }}" class="front-all"><span class="phone-sr-only">{{ _("web.front.all_servers") }}</span><span aria-hidden="true"><Icon name="go" stroke="currentColor" /></span></a>
+          {% endif %}
         </Stat>
       </dl>
       <div class="front-lines">
-        {% if overview.record %}
+        {% if overview.record and "activity" in game.pages %}
           <a href="{{ url('/' ~ game.id ~ '/activity') }}"
              class="peak-line"><PeakLine :overview="overview" /><Icon name="go" :size="14" stroke="currentColor" /></a>
         {% endif %}
@@ -48,7 +51,7 @@
         {% set free %}{% if busiest %}<Free :server="busiest" />{% endif %}{% endset %}
         <Bar id="front-busiest" :extra="free" wrap>{{ _("web.front.busiest") }}</Bar>
         {% if busiest %}
-          {% set href = url('/' ~ game.id ~ '/servers/' ~ busiest.slug) %}
+          {% set href = url('/' ~ game.id ~ '/servers/' ~ busiest.slug) if "servers" in game.pages else "" %}
           <div class="table-scroll">
             <div role="table"
                  aria-labelledby="front-busiest"
@@ -76,7 +79,7 @@
                       <p class="row-text">{{ _("web.server.joining") }}</p>
                     </div>
                     <div class="row-actions">
-                      <SmallAction :href="href" :label="_('web.server.page')" />
+                      {% if href %}<SmallAction :href="href" :label="_('web.server.page')" />{% endif %}
                       <CopyButton :value="busiest.name" :label="_('web.server.copy')" :note="_('web.server.copied')" />
                     </div>
                   </div>
@@ -87,9 +90,9 @@
         {% else %}
           <div class="row-details front-none">
             <p>{{ _("web.activity.no_room") if activity.servers else _("web.activity.no_servers") }}</p>
-            {% if activity.servers %}
+            {% if activity.servers and "servers" in game.pages %}
               <SmallAction :href="url('/' ~ game.id ~ '/servers')" :label="_('web.front.all_servers')" />
-            {% else %}
+            {% elif not activity.servers and "host" in game.pages %}
               <SmallAction :href="url('/' ~ game.id ~ '/host')" :label="_('web.game.menu.host')" />
             {% endif %}
           </div>
@@ -122,10 +125,12 @@
             </li>
           </ol>
         </section>
-        <div class="front-guide">
-          <p class="body-text">{{ _("web.front.guide") }}</p>
-          <Action :href="url('/' ~ game.id ~ '/play')" :label="_('web.front.play')" :size="32" />
-        </div>
+        {% if "play" in game.pages %}
+          <div class="front-guide">
+            <p class="body-text">{{ _("web.front.guide") }}</p>
+            <Action :href="url('/' ~ game.id ~ '/play')" :label="_('web.front.play')" :size="32" />
+          </div>
+        {% endif %}
       </div>
     </Panel>
   </section>

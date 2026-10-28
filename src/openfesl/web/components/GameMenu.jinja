@@ -3,7 +3,7 @@
    item on the way there. #}
 <nav aria-label="{{ game.name }}" class="game-menu">
   <ul>
-    {% for item in ["servers", "leaderboard", "activity", "play", "host"] %}
+    {% for item in game.pages %}
       <li>
         <a href="{{ url('/' ~ game.id ~ '/' ~ item) }}"
            {% if item == current %} aria-current="{{ 'page' if exact else 'true' }}"{% endif %}

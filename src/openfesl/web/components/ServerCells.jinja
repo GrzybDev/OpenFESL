@@ -1,13 +1,12 @@
-{#def server, href: str, listed: bool = False #}
-{# The cells of a server's row, as the game's server browser lays them out. A listed row reacts to
-   the pointer and opens its details, whose button the content gives. #}
+{#def server, href: str = "", listed: bool = False #}
+{# The cells of a server's row, as the game's server browser lays them out, leading to the server's
+   page where the game has one. A listed row reacts to the pointer and opens its details, whose
+   button the content gives. #}
 {% set cell = "server-cell row-cell" if listed else "server-cell" %}
 <div role="cell" class="cell-badges {{ cell }}">
   <Badges :server="server" />
 </div>
-<div role="cell"
-     class="cell-name {{ cell }}"><a href="{{ href }}"
-   class="server-name">{{ server.name }}</a>{{ content }}</div>
+<div role="cell" class="cell-name {{ cell }}">{% if href %}<a href="{{ href }}" class="server-name">{{ server.name }}</a>{% else %}<span class="server-name">{{ server.name }}</span>{% endif %}{{ content }}</div>
 <div role="cell" class="cell-map {{ cell }}">
   <Published kind="map" :label="server.map" />
 </div>
@@ -20,5 +19,5 @@
   <Published kind="region" :label="server.region" />
 </div>
 <div role="cell" class="cell-end">
-  <EndSquare :href="href" :label="_('web.server.page.of', name=server.name)" />
+  {% if href %}<EndSquare :href="href" :label="_('web.server.page.of', name=server.name)" />{% endif %}
 </div>

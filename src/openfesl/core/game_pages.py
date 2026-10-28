@@ -5,6 +5,9 @@ from pydantic import BaseModel, ConfigDict, PositiveInt, StringConstraints
 
 # CSS colours only, so that a data file puts nothing else into the themes' stylesheet.
 type Colour = Annotated[str, StringConstraints(pattern=r"^(#[0-9A-Fa-f]{6}|rgba\([0-9., ]+\))$")]
+# The kinds of web pages a game may list; the server list brings the servers' pages with it and
+# the leaderboard the players' pages.
+type PageKind = Literal["servers", "leaderboard", "activity", "play", "host"]
 
 
 class Theme(BaseModel):

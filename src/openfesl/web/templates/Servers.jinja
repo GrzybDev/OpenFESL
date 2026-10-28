@@ -17,10 +17,12 @@
    class="filter-chip{% if plain %} filter-chip-plain{% endif %}"><span aria-hidden="true" class="form-glyph"><Icon name="x" :size="14" stroke="#F4F4EE" /></span>{{ label }}</a></li>
 {%- endmacro %}
 {% macro guide(where) %}
-  <div class="list-guide {{ where }}">
-    <Action :href="url('/' ~ game.id ~ '/play')" :label="_('web.front.play')" :size="32" />
-    <p class="body-text">{{ _("web.servers.joining") }}</p>
-  </div>
+  {% if "play" in game.pages %}
+    <div class="list-guide {{ where }}">
+      <Action :href="url('/' ~ game.id ~ '/play')" :label="_('web.front.play')" :size="32" />
+      <p class="body-text">{{ _("web.servers.joining") }}</p>
+    </div>
+  {% endif %}
 {%- endmacro %}
 <Layout :title="title">
   <div id="live"
@@ -190,7 +192,9 @@
                               <ul aria-label="{{ _('web.servers.roster') }}"
                                   class="name-chips server-roster">
                                 {% for player in server.roster[:4] %}
-                                  <li><a href="{{ url('/' ~ game.id ~ '/players/' ~ player.name|urlencode) }}">{{ player.name }}</a></li>
+                                  <li>
+                                    <PlayerName :name="player.name" />
+                                  </li>
                                 {% endfor %}
                                 {% if server.roster|length > 4 %}<li><a href="{{ href }}">{{ _("web.servers.more", count=number(server.roster|length - 4)) }}</a></li>{% endif %}
                               </ul>
@@ -233,8 +237,12 @@
                           <p class="body-text">{{ _("web.servers.none.text") }}</p>
                         </div>
                         <div class="row-actions">
-                          <SmallAction :href="url('/' ~ game.id ~ '/host')" :label="_('web.game.menu.host')" />
-                          <SmallAction :href="url('/' ~ game.id ~ '/play')" :label="_('web.front.play')" />
+                          {% if "host" in game.pages %}
+                            <SmallAction :href="url('/' ~ game.id ~ '/host')" :label="_('web.game.menu.host')" />
+                          {% endif %}
+                          {% if "play" in game.pages %}
+                            <SmallAction :href="url('/' ~ game.id ~ '/play')" :label="_('web.front.play')" />
+                          {% endif %}
                         </div>
                       {% endif %}
                     </div>

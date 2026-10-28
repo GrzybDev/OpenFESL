@@ -84,12 +84,12 @@ def leaderboard_routes(
 
     Args:
         pages: Renders the pages.
-        games: The games, each with its leaderboard under its id.
+        games: The games, of which those that list the leaderboard get it under their id.
         census: Knows who is online and on which server.
         store: Sums up and orders the players' stats.
     """
     router = APIRouter()
-    for game in games:
+    for game in games.with_page("leaderboard"):
         router.add_api_route(
             f"/{game.id}/leaderboard",
             _board(pages, census, store, game),

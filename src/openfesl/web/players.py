@@ -56,14 +56,15 @@ def player_routes(
 
     Args:
         pages: Renders the pages.
-        games: The games, each with its players' pages under its id.
+        games: The games, of which those that list the leaderboard get their players' pages
+            under their id.
         census: Knows who is online and on which server.
         stats: Holds the players' stats.
         personas: Finds players by name.
         records: Holds the records of players' games, such as their dog tags.
     """
     router = APIRouter()
-    for game in games:
+    for game in games.with_page("leaderboard"):
         for tab in TABS:
             suffix = "" if tab == "stats" else f"/{tab}"
             router.add_api_route(

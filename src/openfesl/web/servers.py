@@ -146,11 +146,12 @@ def server_routes(pages: Pages, games: Games, census: Census) -> APIRouter:
 
     Args:
         pages: Renders the pages.
-        games: The games, each with its list under its id.
+        games: The games, of which those that list the server list get it and their servers'
+            pages under their id.
         census: Knows the servers each game's hosts list.
     """
     router = APIRouter()
-    for game in games:
+    for game in games.with_page("servers"):
         router.add_api_route(
             f"/{game.id}/servers", _list(pages, census, game), response_class=HTMLResponse
         )

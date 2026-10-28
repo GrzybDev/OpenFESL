@@ -21,8 +21,10 @@
       <div class="enter-title page-title page-title-wider">
         <TitleBlock :title="title" id="host-title">{{ _("web.host.subtitle", game=game.name) }}</TitleBlock>
       </div>
-      <Tab :href="servers" class="tab-link">{{ _("web.game.menu.servers") }}<span class="tab-count"><Count :value="activity.servers" class="count-sm live-value" /></span>
-      <Icon name="go" :size="14" stroke="currentColor" class="go" /></Tab>
+      {% if "servers" in game.pages %}
+        <Tab :href="servers" class="tab-link">{{ _("web.game.menu.servers") }}<span class="tab-count"><Count :value="activity.servers" class="count-sm live-value" /></span>
+        <Icon name="go" :size="14" stroke="currentColor" class="go" /></Tab>
+      {% endif %}
     </PageHead>
 
     <Panel class="enter-panel">
@@ -74,14 +76,18 @@
                 {% endfor %}
               </dl>
               <p class="guide-aside">{{ _("web.host.identity", file=inline(files.identity)) }}</p>
-              <Outside :href="servers" :label="_('web.play.server_list')" :note="_n('web.play.servers', activity.servers)" />
+              {% if "servers" in game.pages %}
+                <Outside :href="servers" :label="_('web.play.server_list')" :note="_n('web.play.servers', activity.servers)" />
+              {% endif %}
             </GuideStep>
           {% else %}
             <GuideStep :number="2"
                        :heading="_('web.host.start')"
                        :where="_('web.host.start.listed')">
               <p class="body-text guide-fill">{{ _("web.host.start.open") }}</p>
-              <Outside :href="servers" :label="_('web.play.server_list')" :note="_n('web.play.servers', activity.servers)" />
+              {% if "servers" in game.pages %}
+                <Outside :href="servers" :label="_('web.play.server_list')" :note="_n('web.play.servers', activity.servers)" />
+              {% endif %}
             </GuideStep>
           {% endif %}
         </ol>

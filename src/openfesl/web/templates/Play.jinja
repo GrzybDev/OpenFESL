@@ -16,8 +16,10 @@
       <div class="enter-title page-title page-title-wide">
         <TitleBlock :title="title" id="play-title">{{ _("web.play.subtitle", game=game.name) }}</TitleBlock>
       </div>
-      <Tab :href="servers" class="tab-link">{{ _("web.game.menu.servers") }}<span class="tab-count"><Count :value="activity.servers" class="count-sm live-value" /></span>
-      <Icon name="go" :size="14" stroke="currentColor" class="go" /></Tab>
+      {% if "servers" in game.pages %}
+        <Tab :href="servers" class="tab-link">{{ _("web.game.menu.servers") }}<span class="tab-count"><Count :value="activity.servers" class="count-sm live-value" /></span>
+        <Icon name="go" :size="14" stroke="currentColor" class="go" /></Tab>
+      {% endif %}
     </PageHead>
 
     <Panel class="enter-panel">
@@ -75,7 +77,9 @@
                 <CopyButton :value="play_key.key.code" :label="_('web.front.setup.copy')" :note="_('web.front.setup.copied')" size="tall" />
               </div>
             {% endif %}
-            <Outside :href="servers" :label="_('web.play.server_list')" :note="_n('web.play.servers', activity.servers)" />
+            {% if "servers" in game.pages %}
+              <Outside :href="servers" :label="_('web.play.server_list')" :note="_n('web.play.servers', activity.servers)" />
+            {% endif %}
           </GuideStep>
         </ol>
         <p class="body-text side-note">{{ _("web.play.joining") }}</p>
