@@ -23,6 +23,7 @@ from openfesl.core.fesl import Route
 from openfesl.core.figures import Figures
 from openfesl.core.game_art import GameArt
 from openfesl.core.game_http import GameHttp
+from openfesl.core.game_marks import GameMarks
 from openfesl.core.games import Games
 from openfesl.core.hero_items import OwnWrites
 from openfesl.core.heroes import Heroes
@@ -95,7 +96,8 @@ class GameServices:
         self.start_links = StartLinks()
         self.game_http = GameHttp(games, self.players, load_texts("news"))
         self.approval = Approval(stores.servers)
-        self.hosting = Hosting(self.approval)
+        self.game_marks = GameMarks(stores.game_marks)
+        self.hosting = Hosting(self.approval, self.game_marks)
         self.trust = ServerTrust(self.hosting, self.approval)
         self.wallets = Wallets(stores.wallets)
         self.heroes = Heroes(stores.heroes, stores.stats)
@@ -249,11 +251,13 @@ class GameServices:
         joining.follow(feed)
         self.catalogues.follow(feed)
         self.game_art.follow(feed)
+        self.game_marks.follow(feed)
         self.store.follow(feed)
         await feed.start()
         await self.rich_presence.follow_icons(stores.game_icons, feed)
         await self.catalogues.load()
         await self.game_art.load()
+        await self.game_marks.load()
         await self.store.stock()
         followers = [
             asyncio.create_task(trust.follow_approvals()),

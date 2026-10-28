@@ -11,6 +11,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.datastructures import FormData, UploadFile
 from starlette.exceptions import HTTPException
 
+from openfesl.core.admin import ActionHistory, AdminAction, AuditEntry
 from openfesl.core.admins import Admin, Role
 from openfesl.core.game_icons import (
     MAX_ICON_SIZE,
@@ -20,13 +21,15 @@ from openfesl.core.game_icons import (
     icon_png,
     png_size,
 )
+from openfesl.core.game_marks import GameMarks
 from openfesl.core.games import Game, Games
 from openfesl.core.policies import GamePolicies, Policies, SettingStore, setting_key
 from openfesl.core.servers import HostingMode
-from openfesl.core.texts import localize
+from openfesl.core.texts import localize, translate
 from openfesl.web.admin.auth import AdminSessions, SignInProvider
 from openfesl.web.admin.servers import ServerViews
 from openfesl.web.game_icons import ICON_PATH, icon_version, reaches_discord
+from openfesl.web.pages import Toast
 from openfesl.web.sessions import check_form, toast
 
 SECTION = "settings"
@@ -116,6 +119,19 @@ class IconRefusal:
 
 
 @dataclass(frozen=True, slots=True)
+class MarkView:
+    """Whether a game shows its own server mark, as its block on the settings page shows it.
+
+    Attributes:
+        shown: Whether the game's official servers publish the mark.
+        changed: The latest change as the admin's log records it; none while the default holds.
+    """
+
+    shown: bool
+    changed: AuditEntry | None
+
+
+@dataclass(frozen=True, slots=True)
 class PolicyView:
     """One of a game's policies as the settings page shows it.
 
@@ -174,12 +190,15 @@ def settings_routes(
     icons: IconStore,
     public_url: str | None,
     apply_actions: Callable[[], Awaitable[None]],
+    marks: GameMarks,
+    log: ActionHistory,
 ) -> APIRouter:
-    """Return the settings page: hosting, sign-in, the site's policy, each game's icon and rules.
+    """Return the settings page: hosting, sign-in, the site's policy and each game's settings.
 
-    Moderators see the settings; changing them needs the admin role. A change of the hosting
-    mode asks first and applies to the games hosted now too; policies apply from their next
-    use, and an icon from presence's next update.
+    Each game has its icon, its own server mark at official servers and its rules. Moderators
+    see the settings; changing them needs the admin role. A change of the hosting mode asks
+    first and applies to the games hosted now too, as does a game's own server mark without
+    asking; policies apply from their next use, and an icon from presence's next update.
 
     Args:
         sessions: Signs admins in and renders the panel's pages.
@@ -195,6 +214,9 @@ def settings_routes(
             fetches the icons; the request's own when None.
         apply_actions: Hands the admin's recorded actions to the running server, such as a
             changed icon to presence.
+        marks: Says whether each game shows its own server mark at official servers, which the
+            page changes.
+        log: Says who last changed each game's own server mark and when.
     """
     router = APIRouter()
 
@@ -211,6 +233,11 @@ def settings_routes(
         base = (public_url or str(request.base_url)).rstrip("/")
         stored = await icons.stored()
         site = await policies.site_confirmation()
+        shown_marks = {
+            game.id: MarkView(marks.shown(game), await log.latest(AdminAction.GAME_MARK, game.id))
+            for game in games
+            if game.official_attribute is not None
+        }
         return await sessions.render(
             request,
             "admin.Settings",
@@ -230,6 +257,8 @@ def settings_routes(
             replacing=request.query_params.get("icon", ""),
             refused=refused,
             largest=MAX_ICON_SIZE // (1024 * 1024),
+            marks=shown_marks,
+            failed=Toast("web.toast.failed", {}, error=True),
         )
 
     @router.get("/admin/settings", response_class=HTMLResponse)
@@ -308,6 +337,30 @@ def settings_routes(
             toast(request, "web.admin.toast.policies_unchanged", game=game.name)
         target = localize("/admin/settings", request.state.language)
         return RedirectResponse(f"{target}#game-{game.id}", 303)
+
+    @router.post("/admin/settings/games/{game_id}/mark")
+    async def change_mark(request: Request, game_id: str) -> Response:
+        admin = sessions.admin(request, Role.ADMIN, SECTION)
+        form = await request.form()
+        check_form(request, form)
+        game = games.by_id(game_id)
+        if game is None or game.official_attribute is None:
+            raise HTTPException(404)
+        shown = form.get("shown") == "on"
+        state = "on" if shown else "off"
+        name = translate(f"games.{game.id}.short", request.state.language)
+        if shown == marks.shown(game):
+            toast(request, f"web.admin.toast.game_mark.unchanged.{state}", game=name)
+        else:
+            views = await servers.all()
+            official = sum(
+                view.server.official and view.hosting is not None and view.game is game
+                for view in views
+            )
+            await marks.show(game, shown, official, admin)
+            toast(request, f"web.admin.toast.game_mark.{state}", game=name)
+        target = localize("/admin/settings", request.state.language)
+        return RedirectResponse(f"{target}#mark-{game.id}", 303)
 
     @router.post("/admin/settings/games/{game_id}/icon")
     async def store_icon(request: Request, game_id: str) -> Response:

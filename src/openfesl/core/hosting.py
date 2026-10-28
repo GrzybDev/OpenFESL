@@ -5,6 +5,7 @@ from collections.abc import Callable, Iterator, Mapping
 from ipaddress import IPv4Address
 from typing import Any
 
+from openfesl.core.game_marks import GameMarks
 from openfesl.core.games import Game, Lobby
 from openfesl.core.hosted_games import HostedGame, Player
 from openfesl.core.personas import Persona
@@ -48,13 +49,17 @@ MAXIMUM_ATTRIBUTES_SIZE = 6144
 class Hosting:
     """The games hosts list in the lobbies of every game; one process holds them all."""
 
-    def __init__(self, approval: Approval) -> None:
+    def __init__(self, approval: Approval, marks: GameMarks) -> None:
         """Start with empty lobbies.
 
         Args:
             approval: Issues dedicated servers their identities and decides who sees their games.
+            marks: Says whether each game shows its own mark at official servers, which the games
+                hosted now follow at once when it changes.
         """
         self._approval = approval
+        self._marks = marks
+        marks.on_change(self._relabel)
         self._lobbies: dict[tuple[str, int], dict[int, HostedGame]] = {}
         self._ids = itertools.count(1)
         self._changed: list[Callable[[HostedGame], object]] = []
@@ -218,7 +223,7 @@ class Hosting:
             basic={},
         )
         _merge(hosted.basic, request.attributes)
-        _label(connection.game, hosted)
+        self._label(connection.game, hosted)
         self._lobbies.setdefault((connection.game.name, lobby.id), {})[hosted.id] = hosted
         connection.on_close(lambda: self._remove(hosted))
         logger.info(
@@ -270,7 +275,7 @@ class Hosting:
         if request.num_observers is not None:
             hosted.observers = request.num_observers
         _merge(hosted.basic, request.attributes)
-        _label(connection.game, hosted)
+        self._label(connection.game, hosted)
         if (hosted.max_players, hosted.join) != room:
             for listener in self._changed:
                 listener(hosted)
@@ -381,7 +386,7 @@ class Hosting:
             server: The server, as stored now.
         """
         hosted.server = server
-        _label(hosted.host.game, hosted)
+        self._label(hosted.host.game, hosted)
 
     def end(self, hosted: HostedGame) -> None:
         """Remove a dedicated server's game whose server or provider the admin revoked.
@@ -397,6 +402,23 @@ class Hosting:
         )
         if self._remove(hosted):
             hosted.host.send("GREM", GameRequest(lid=hosted.lobby.id, gid=hosted.id))
+
+    def _label(self, game: Game, hosted: HostedGame) -> None:
+        # Only the master server says who provides a game and whether the game's own mark shows,
+        # whatever the host sends and however it spells the keys: the name of the provider its
+        # server reports, once the admin knows it, and 1 only for an official server while the
+        # game shows its mark.
+        server = hosted.server
+        provider = server.provider if server else None
+        marked = server is not None and server.official and self._marks.shown(game)
+        _set(hosted.basic, game.provider_attribute, provider.name if provider else None)
+        _set(hosted.basic, game.official_attribute, "1" if marked else "0")
+
+    def _relabel(self, game_id: str) -> None:
+        # Players see the change at their next look at the game, as after any host's update.
+        for hosted in self.every():
+            if hosted.host.game.id == game_id:
+                self._label(hosted.host.game, hosted)
 
     def _remove(self, hosted: HostedGame) -> bool:
         listed = self._lobbies.get((hosted.host.game.name, hosted.lobby.id), {})
@@ -418,16 +440,6 @@ def _same_host(host: TheaterConnection, connection: TheaterConnection) -> bool:
     if host.server or connection.server:
         return host.session is connection.session
     return host.persona == connection.persona
-
-
-def _label(game: Game, hosted: HostedGame) -> None:
-    # Only the master server says who provides a game and whether the game's own mark shows,
-    # whatever the host sends and however it spells the keys: the name of the provider its server
-    # reports, once the admin knows it, and 1 only for an official server.
-    server = hosted.server
-    provider = server.provider if server else None
-    _set(hosted.basic, game.provider_attribute, provider.name if provider else None)
-    _set(hosted.basic, game.official_attribute, "1" if server and server.official else "0")
 
 
 def _set(attributes: dict[str, str], name: str | None, value: str | None) -> None:

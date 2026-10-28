@@ -73,6 +73,9 @@ class AdminAction(StrEnum):
     CATALOGUE_ART = "catalogue_art"
     """Chose who sees the art of the game named as the target; the details hold the viewers and
     how many icons, hero models, textures and portraits the choice covers."""
+    GAME_MARK = "game_mark"
+    """Turned the own server mark of the game whose id is the target on or off at its official
+    servers; the details say which and how many official servers it had then."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -147,6 +150,18 @@ class Auditor:
     name: str | None
     role: Role | None
     count: int
+
+
+class ActionHistory(Protocol):
+    """Where pages read who last did something to a target and when."""
+
+    async def latest(self, action: AdminAction, target: str) -> AuditEntry | None:
+        """Return the latest action of a kind done to a target, if any was.
+
+        Args:
+            action: The kind.
+            target: What it was done to.
+        """
 
 
 class AdminLog(Protocol):

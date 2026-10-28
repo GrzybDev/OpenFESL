@@ -20,6 +20,7 @@ import "./play-now.js";
 import "./store.js";
 import "./chests.js";
 import "./catalogue.js";
+import "./settings.js";
 import "htmx.org";
 
 // A chevron block whose page takes longer than 300 ms to arrive shows that it is loading, and

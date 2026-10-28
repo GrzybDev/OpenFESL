@@ -5,10 +5,13 @@ import uuid
 from pathlib import Path
 
 import anyio
+import httpx2
 import pytest
+from identity import IdentityProvider, form_token, sign_in
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async_engine
 from support import (
+    THEATER,
     Game,
     TheaterAnswer,
     cli,
@@ -30,7 +33,8 @@ from openfesl.storage.servers import SqlServerStore
 pytestmark = pytest.mark.anyio
 
 FESL = ConnectionKey(Channel.FESL, 1)
-THEATER = ConnectionKey(Channel.THEATER, 1)
+KEEPER = {"sub": "keeper-9", "preferred_username": "invented-keeper", "groups": ["fesl-admins"]}
+WARDEN = {"sub": "warden-9", "preferred_username": "invented-warden", "groups": ["fesl-moderators"]}
 
 
 async def shown(looker: Game, created: TheaterAnswer, attribute: str) -> list[str] | None:
@@ -338,3 +342,80 @@ async def test_official_servers_show_their_mark_in_game_and_on_the_pages_until_u
             await cli(capsys, "servers", "official", waiting)
     with pytest.raises(SystemExit, match="No server has the id"):
         await cli(capsys, "servers", "official", str(uuid.uuid4()))
+
+
+async def test_admins_turn_the_games_own_server_mark_off_and_on_for_all_its_servers_at_once(
+    prompt_decisions: None,
+    admin_provider: IdentityProvider,
+    server_url: str,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    base = server_url.replace("ws://", "http://").rstrip("/")
+    switch = f"{base}/admin/settings/games/bfbc2/mark"
+    async with (
+        httpx2.AsyncClient() as client,
+        httpx2.AsyncClient() as warden,
+        game(server_url) as kept,
+    ):
+        await connect_server(kept)
+        listed = await create(kept, name="Invented Kestrel Rush")
+        ugid, secret = listed.fields["UGID"], listed.fields["SECRET"]
+        await cli(capsys, "servers", "approve", ugid)
+        await cli(capsys, "servers", "official", ugid)
+        await until_marked(kept, listed, "1")
+
+        # On by default; turning it off takes the mark from the game hosted now at once, without
+        # asking, and no host sets it back.
+        admin_provider.user = KEEPER
+        page = (await sign_in(client, base, next="/admin/settings")).text
+        token = form_token(page)
+        assert "On by default." in page and 'id="mark-bfheroes"' not in page
+        turned = await client.post(switch, data={"csrf": token})
+        assert turned.headers["location"] == "/admin/settings#mark-bfbc2"
+        assert await shown(kept, listed, "b-u-ea") == ["0"]
+        said = visible((await client.get(f"{base}/admin/settings")).content)
+        assert "Bad Company 2 no longer shows its own server mark at any server." in said
+        assert "Turned off" in said and "invented-keeper" in said
+        await report(kept, listed, ("B-U-EA", "1"))
+        assert await shown(kept, listed, "b-u-ea") == ["0"]
+
+        # A game listed while it is off gets 0 too; the server keeps its own official mark, and
+        # its drawer says the game does not show it now, with the way to the switch.
+        ids = [("LID", listed.fields["LID"]), ("GID", listed.fields["GID"])]
+        assert (await kept.theater(THEATER, "RGAM", ids)).error is None
+        again = await create(kept, ugid, secret, name="Invented Kestrel Rush")
+        assert await shown(kept, again, "b-u-ea") == ["0"]
+        assert await marked_on_pages(server_url) == ["Invented Kestrel Rush"]
+        drawer = await client.get(
+            f"{base}/admin/servers", params={"state": "approved", "open": ugid}
+        )
+        assert (
+            "Bad Company 2 does not show its own server mark now. Turned off in Settings"
+            in visible(drawer.content)
+        )
+        assert 'href="/admin/settings#mark-bfbc2"' in drawer.text
+
+        # Moderators see the state and are refused the change.
+        admin_provider.user = WARDEN
+        seen = (await sign_in(warden, base, next="/admin/settings")).text
+        assert "Changing the game&#39;s own server mark needs the admin role." in seen
+        assert 'name="shown"' not in seen
+        refused = await warden.post(switch, data={"csrf": form_token(seen), "shown": "on"})
+        assert refused.status_code == 403
+        assert await shown(kept, again, "b-u-ea") == ["0"]
+
+        # The same state again changes nothing and says so; on, the official servers get the
+        # mark back at once.
+        await client.post(switch, data={"csrf": token})
+        said = visible((await client.get(f"{base}/admin/settings")).content)
+        assert "Nothing changed: Bad Company 2 already had its own server mark turned off." in said
+        await client.post(switch, data={"csrf": token, "shown": "on"})
+        assert await shown(kept, again, "b-u-ea") == ["1"]
+        log = visible((await client.get(f"{base}/admin/audit")).content)
+        entry = (
+            "the game's own server mark Battlefield: Bad Company 2 Details "
+            "Official servers hosting it: 1"
+        )
+        assert log.index(f"Turned on {entry}") < log.index(f"Turned off {entry}")
+        polish = visible((await client.get(f"{base}/pl/admin/settings")).content)
+        assert "Własny znak serwera w grze" in polish and "Włączono" in polish

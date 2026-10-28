@@ -8220,3 +8220,78 @@ msgstr ""
 "Ikony: %(icons)s · modele bohaterów: %(models)s · tekstury: %(textures)s "
 "· portrety: %(portraits)s"
 
+msgid "web.admin.game_mark"
+msgstr "Własny znak serwera w grze"
+
+msgid "web.admin.game_mark.state.on"
+msgstr "Włączony"
+
+msgid "web.admin.game_mark.state.off"
+msgstr "Wyłączony"
+
+msgid "web.admin.game_mark.state.saving"
+msgstr "Zapisywanie…"
+
+msgid "web.admin.game_mark.switch"
+msgstr "Pokazuj własny znak gry przy oficjalnych serwerach"
+
+msgid "web.admin.game_mark.switch.text"
+msgstr ""
+"W przeglądarce serwerów %(game)s wyróżnia własnym znakiem i filtrem "
+"serwery oznaczone tutaj jako oficjalne. Po wyłączeniu nie wyróżnia "
+"żadnego; oznaczenie „Oficjalny” na stronach WWW zostaje."
+
+msgid "web.admin.game_mark.default"
+msgstr "Domyślnie włączony."
+
+msgid "web.admin.game_mark.changed.on"
+msgstr "Włączono %(time)s · %(who)s."
+
+msgid "web.admin.game_mark.changed.off"
+msgstr "Wyłączono %(time)s · %(who)s."
+
+msgid "web.admin.game_mark.audit"
+msgstr "Każda zmiana jest zapisywana w dzienniku zmian."
+
+msgid "web.admin.game_mark.when"
+msgstr ""
+"Prowadzone teraz gry zmieniają się od razu; gracze widzą zmianę przy "
+"następnym odświeżeniu listy serwerów."
+
+msgid "web.admin.game_mark.managed"
+msgstr "Zmiana własnego znaku serwera w grze wymaga roli administratora."
+
+msgid "web.admin.game_mark.save"
+msgstr "Zapisz"
+
+msgid "web.admin.toast.game_mark.on"
+msgstr "%(game)s znów pokazuje własny znak przy oficjalnych serwerach."
+
+msgid "web.admin.toast.game_mark.off"
+msgstr "%(game)s nie pokazuje już własnego znaku przy żadnym serwerze."
+
+msgid "web.admin.toast.game_mark.unchanged.on"
+msgstr ""
+"Nic się nie zmieniło: własny znak serwera w grze %(game)s był już "
+"włączony."
+
+msgid "web.admin.toast.game_mark.unchanged.off"
+msgstr ""
+"Nic się nie zmieniło: własny znak serwera w grze %(game)s był już "
+"wyłączony."
+
+msgid "web.admin.official.game.off"
+msgstr "%(game)s nie pokazuje teraz własnego znaku serwera."
+
+msgid "web.admin.official.game.off.link"
+msgstr "Wyłączono w Ustawieniach"
+
+msgid "web.admin.audit.action.game_mark.on"
+msgstr "Włączono własny znak serwera w grze"
+
+msgid "web.admin.audit.action.game_mark.off"
+msgstr "Wyłączono własny znak serwera w grze"
+
+msgid "web.admin.audit.game_mark"
+msgstr "Oficjalne serwery prowadzące grę: %(count)s"
+

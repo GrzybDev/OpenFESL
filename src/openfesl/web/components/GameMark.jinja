@@ -1,0 +1,71 @@
+{#def game, mark, manages: bool #}
+{# Whether a game shows its own server mark at official servers, in its section of the settings
+   after Discord presence: the switch with what it does, the last change, and when the game shows
+   it. Where scripts run the box saves once it changes and a toast reports it; without them Save
+   sends it. Moderators see the state as a word with its mark and the role note. #}
+{% set key = "mark-" ~ game.id %}
+{% set state = "on" if mark.shown else "off" %}
+{% set short = _("games." ~ game.id ~ ".short") %}
+<section aria-labelledby="{{ key }}-title"
+         id="{{ key }}"
+         data-mark-section
+         class="game-mark">
+  <h3 id="{{ key }}-title" class="bar bar-wrap">
+    <span>{{ _("web.admin.game_mark") }}</span><span data-mark-word
+      data-saving="{{ _('web.admin.game_mark.state.saving') }}"
+      class="bar-extra{% if not mark.shown %} game-mark-off{% endif %}">{{ _("web.admin.game_mark.state." ~ state) }}</span>
+  </h3>
+  <form method="post"
+        action="{{ url('/admin/settings/games/' ~ game.id ~ '/mark') }}"
+        data-mark>
+    <CsrfField />
+    <div class="settings-policy settings-switch">
+      {% if manages %}
+        <label class="settings-switch-row">
+          <span class="settings-switch-text">
+            <span class="settings-policy-name">{{ _("web.admin.game_mark.switch") }}</span>
+            <span class="settings-policy-text">{{ _("web.admin.game_mark.switch.text", game=short) }}</span>
+          </span>
+          <span class="check-place">
+            <input type="checkbox"
+                   name="shown"
+                   value="on"
+                   {% if mark.shown %} checked{% endif %}
+                   class="check">
+            <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span>
+          </span>
+        </label>
+      {% else %}
+        <div class="settings-switch-row">
+          <span class="settings-switch-text">
+            <span class="settings-policy-name">{{ _("web.admin.game_mark.switch") }}</span>
+            <span class="settings-policy-text">{{ _("web.admin.game_mark.switch.text", game=short) }}</span>
+          </span>
+          <span class="game-mark-state">
+            <span aria-hidden="true" class="badge"><Icon :name="'tick' if mark.shown else 'x'" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.game_mark.state." ~ state) }}
+          </span>
+        </div>
+      {% endif %}
+    </div>
+    {% if manages %}
+      <div class="settings-save no-js-only">
+        <SmallAction :label="_('web.admin.game_mark.save')" />
+      </div>
+    {% endif %}
+  </form>
+  <p class="game-mark-line">
+    {% if mark.changed %}
+      {{ _("web.admin.game_mark.changed." ~ state, time=_("web.server.time", time=moment(mark.changed.at)), who=mark.changed.name or _("web.admin.command_line")) }}
+    {% else %}
+      {{ _("web.admin.game_mark.default") }}
+    {% endif %}
+    <a href="{{ url('/admin/audit') }}">{{ _("web.admin.game_mark.audit") }}</a>
+  </p>
+  <p class="game-mark-line">{{ _("web.admin.game_mark.when") }}</p>
+  {% if not manages %}
+    <p class="role-note">
+      <span aria-hidden="true"
+            class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.game_mark.managed") }}
+    </p>
+  {% endif %}
+</section>

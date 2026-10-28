@@ -350,6 +350,14 @@ async def _rows(
                 models=details.get("models", 0),
                 textures=details.get("textures", 0),
             )
+        elif action is AdminAction.GAME_MARK:
+            game = games.by_id(target)
+            shown = game.name if game else target
+            href = page(f"/admin/settings#mark-{target}")
+            kind = f"game_mark.{'on' if details.get('shown') else 'off'}"
+            said = say(
+                "web.admin.audit.game_mark", count=grouped(details.get("official", 0), language)
+            )
         elif action is AdminAction.CATALOGUE_ART:
             game = games.by_id(target)
             shown = game.name if game else target
@@ -383,6 +391,8 @@ def _glyph(action: AdminAction, kind: str, details: dict[str, Any]) -> str:
         return ART_GLYPHS.get(details.get("viewers", ""), "edit")
     if action is AdminAction.SERVER_OFFICIAL:
         return "star" if details.get("official") else "star-off"
+    if action is AdminAction.GAME_MARK:
+        return "star" if details.get("shown") else "star-off"
     state = kind.rpartition(".")[2]
     if action in (AdminAction.SETTING, AdminAction.KEY_GRANTS, AdminAction.KEY_LIMITS):
         return "edit"

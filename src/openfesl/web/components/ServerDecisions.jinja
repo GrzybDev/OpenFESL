@@ -44,7 +44,11 @@
       {% set game = _("games." ~ view.game.id ~ ".short") %}
       <p class="row-text admin-in-game">
         <span data-game="{{ view.game.id }}" class="game-chip">{{ _("web.admin.official.game.label") }}</span>
-        <span>{{ _("web.admin.official.game", game=game) if official else _("web.admin.official.game.mark", game=game) }}</span>
+        {% if view.game_mark %}
+          <span>{{ _("web.admin.official.game", game=game) if official else _("web.admin.official.game.mark", game=game) }}</span>
+        {% else %}
+          <span>{{ _("web.admin.official.game.off", game=game) }} <a href="{{ url('/admin/settings') }}#mark-{{ view.game.id }}">{{ _("web.admin.official.game.off.link") }}</a></span>
+        {% endif %}
       </p>
     {% endif %}
     <FormButton icon="x" :href="base ~ '/revoke' ~ back" dialog>{{ _("web.admin.revoke") }}</FormButton>

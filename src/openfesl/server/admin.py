@@ -45,7 +45,9 @@ def include_admin_routes(
         stores: The database's stores.
     """
     census, players, apply = services.census, services.players, services.trust.apply_decisions
-    server_views = ServerViews(games, census, services.approval, stores.servers)
+    server_views = ServerViews(
+        games, census, services.approval, stores.servers, services.game_marks
+    )
     sections = frozenset({"catalogues"} if any(game.catalogue for game in games) else ())
     sign_in = AdminSessions(
         pages,
@@ -99,6 +101,8 @@ def include_admin_routes(
             stores.game_icons,
             settings.public_url,
             services.feed.apply,
+            services.game_marks,
+            stores.admin_log,
         )
     )
     app.include_router(

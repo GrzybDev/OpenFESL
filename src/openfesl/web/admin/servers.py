@@ -11,6 +11,7 @@ from starlette.exceptions import HTTPException
 
 from openfesl.core.admins import Role
 from openfesl.core.census import Census, Server
+from openfesl.core.game_marks import GameMarks
 from openfesl.core.games import Game, Games
 from openfesl.core.servers import (
     Approval,
@@ -55,6 +56,7 @@ class ServerView:
         hosting: The game it hosts now, also while players do not see it.
         attempts: How often it tried to host lately while players did not see it.
         decision: The admin's latest decision about it, if any.
+        game_mark: Whether its game shows its own server mark at official servers now.
     """
 
     server: GameServer
@@ -62,6 +64,7 @@ class ServerView:
     hosting: Server | None
     attempts: Attempts
     decision: Decision | None
+    game_mark: bool = True
 
     @property
     def tab(self) -> str:
@@ -90,7 +93,12 @@ class ServerViews:
     """Puts together what the admin panel shows about the dedicated servers."""
 
     def __init__(
-        self, games: Games, census: Census, approval: Approval, store: ServerStore
+        self,
+        games: Games,
+        census: Census,
+        approval: Approval,
+        store: ServerStore,
+        marks: GameMarks,
     ) -> None:
         """Gather from the live games, the approval and the stored servers.
 
@@ -99,11 +107,13 @@ class ServerViews:
             census: Knows the games the servers host now.
             approval: Knows how often servers tried to host.
             store: Where the servers and the admin's decisions are kept.
+            marks: Says whether each game shows its own server mark at official servers.
         """
         self._games = list(games)
         self._census = census
         self._approval = approval
         self.store = store
+        self._marks = marks
 
     async def all(self) -> list[ServerView]:
         """Return every server that ever hosted, newest first."""
@@ -161,7 +171,9 @@ class ServerViews:
                 if (found := self._census.hosted_by(candidate, server.ugid)) is not None:
                     hosting, game = found, candidate
             attempts = self._approval.attempts(server.ugid)
-            views.append(ServerView(server, game, hosting, attempts, decisions.get(server.ugid)))
+            decision = decisions.get(server.ugid)
+            marked = game is None or self._marks.shown(game)
+            views.append(ServerView(server, game, hosting, attempts, decision, marked))
         return views
 
 

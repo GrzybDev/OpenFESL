@@ -1,7 +1,7 @@
 from collections import Counter
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Any
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -9,7 +9,7 @@ from starlette.datastructures import UploadFile
 from starlette.exceptions import HTTPException
 from starlette.requests import ClientDisconnect
 
-from openfesl.core.admin import AdminAction, AuditEntry
+from openfesl.core.admin import ActionHistory, AdminAction, AuditEntry
 from openfesl.core.admins import Admin, Role
 from openfesl.core.catalogue import FORMAT, CatalogueProblem, CatalogueRefused
 from openfesl.core.catalogues import Catalogues, Contents
@@ -27,18 +27,6 @@ SECTION = "catalogues"
 RESULT = "catalogue_result"
 # The form's other fields and boundaries, which a body holds beside the file.
 FORM_SLACK = 64 * 1024
-
-
-class ImportLog(Protocol):
-    """Where the page reads who imported each game's catalogue and when."""
-
-    async def latest(self, action: AdminAction, target: str) -> AuditEntry | None:
-        """Return the latest action of a kind done to a target, if any was.
-
-        Args:
-            action: The kind.
-            target: What it was done to.
-        """
 
 
 @dataclass(frozen=True, slots=True)
@@ -84,7 +72,7 @@ def catalogue_routes(
     sessions: AdminSessions,
     games: Games,
     catalogues: Catalogues,
-    log: ImportLog,
+    log: ActionHistory,
     keeps_files: bool,
     apply_actions: Callable[[], Awaitable[None]],
     art: GameArt,

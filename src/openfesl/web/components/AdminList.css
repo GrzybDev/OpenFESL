@@ -2,6 +2,26 @@
    cells that open their details in place with the actions that apply. Where a list's table does
    not fit, each row is a block of its own and the column names are left to screen readers. */
 @layer components {
+  /* What only the admin role changes, on a light row of a panel's block. */
+  .role-note {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--row-light);
+    padding: 12px 14px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.35;
+    font-weight: 600;
+    color: var(--ink);
+
+    .badge {
+      width: 26px;
+      height: 26px;
+      flex: none;
+    }
+  }
+
   /* The list comes first, also on phones, where the search and the mode follow it. */
   .list-layout.admin-layout {
     flex-direction: row;
@@ -172,6 +192,10 @@
 
     .admin-in-game .game-chip {
       margin-top: 2px;
+    }
+
+    .admin-in-game a {
+      text-decoration-line: underline;
     }
   }
 

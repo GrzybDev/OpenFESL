@@ -1,0 +1,59 @@
+/* A game's own server mark on the settings page: the switch's row, its state in the bar's accent
+   while on and dimmed while off, the grey lines under it, and the box spinning while it saves. */
+@layer components {
+  .game-mark {
+    display: grid;
+    gap: 2px;
+    margin-block: 10px 14px;
+    scroll-margin-top: 16px;
+  }
+
+  .game-mark-off {
+    color: var(--soft);
+  }
+
+  .game-mark-state {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+    padding-right: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .game-mark-line {
+    background: var(--row);
+    padding: 10px 14px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 600;
+    color: var(--ink);
+
+    a {
+      text-decoration-line: underline;
+    }
+  }
+
+  .game-mark .check:disabled {
+    cursor: progress;
+  }
+
+  .game-mark .check-box svg.spinning {
+    opacity: 1;
+    animation: spin 900ms linear infinite;
+  }
+
+  .game-mark[aria-busy="true"] .check-box {
+    background-color: var(--ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .game-mark .check-box svg.spinning {
+      animation: none;
+    }
+  }
+}

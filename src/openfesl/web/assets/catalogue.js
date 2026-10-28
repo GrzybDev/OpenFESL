@@ -4,6 +4,7 @@
 // page's new blocks in place, whose numbers count to their new values; a refusal or a stopped
 // upload says so above the steps, and the file stays chosen. Without scripts the form is sent as
 // it is.
+import { post, swap, toastFailed } from "./saving.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.querySelector("[data-catalogue-upload]");
@@ -271,28 +272,20 @@ async function saveArt(form) {
   form.dataset.saving = chosen;
   const section = form.closest("[data-art-section]");
   const timer = setTimeout(() => spin(section, chosen), 300);
-  let page = null;
-  try {
-    const answer = await fetch(form.action, { method: "POST", body: new FormData(form) });
-    page = answer.ok ? new DOMParser().parseFromString(await answer.text(), "text/html") : null;
-  } catch {
-    page = null;
-  }
+  const page = await post(form);
   clearTimeout(timer);
-  const fresh = page?.getElementById(section.id);
-  if (!fresh) {
+  if (!page?.getElementById(section.id)) {
     delete form.dataset.saving;
     unspin(section);
     form.querySelector(`input[value="${form.dataset.saved}"]`).checked = true;
-    toast(document.querySelector("[data-art-failed]").content.cloneNode(true));
+    toastFailed();
     return;
   }
   // A choice made while this one was saved is kept, and saved next.
   const latest = form.querySelector("input:checked")?.value;
   const before = [...section.querySelectorAll("[data-strip] td")].map((cell) => cell.dataset.shown);
   const focused = section.contains(document.activeElement) ? document.activeElement.value : null;
-  const placed = document.importNode(fresh, true);
-  section.replaceWith(placed);
+  const placed = swap(section, page);
   // The keyboard stays on the tile it was on.
   if (focused) {
     placed.querySelector(`input[value="${focused}"]`)?.focus();
@@ -302,10 +295,6 @@ async function saveArt(form) {
       cell.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, easing: "linear" });
     }
   });
-  const said = page.querySelector(".toast");
-  if (said) {
-    toast(document.importNode(said, true));
-  }
   const next = placed.querySelector("form[data-art]");
   if (latest && latest !== next.dataset.saved) {
     next.querySelector(`input[value="${latest}"]`).checked = true;
@@ -348,20 +337,4 @@ function unspin(section) {
     "catalogue-art-off",
     section.querySelector("form[data-art]").dataset.saved === "nobody",
   );
-}
-
-/**
- * Shows a toast at the bottom right of the window.
- *
- * @param {Node} shown - The toast.
- */
-function toast(shown) {
-  let place = document.querySelector(".toasts");
-  if (!place) {
-    place = document.createElement("div");
-    place.className = "toasts";
-    document.getElementById("area").append(place);
-  }
-  place.replaceChildren(shown);
-  place.dispatchEvent(new Event("swapped", { bubbles: true }));
 }
