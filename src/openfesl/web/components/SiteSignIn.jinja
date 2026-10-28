@@ -1,0 +1,40 @@
+{# The bar of a game's own site for a visitor who is not signed in: the sign-in with an e-mail
+   address and game password, which returns to this page, and the ways to sign in otherwise or
+   to register. Where the sign-in asks for Cloudflare's check, whose script only the sign-in page
+   loads, it links to the sign-in page instead of the fields. #}
+{% set sign_in = url("/sign-in") ~ "?" ~ {"next": here}|urlencode %}
+{% if sign_in_check %}
+  <div class="site-strip">
+    <a href="{{ sign_in }}" class="strip-sign-in">
+      <Icon name="sign-in" :size="18" stroke="currentColor" />
+      {{ _("web.account.sign_in.action") }}
+    </a>
+    <span class="strip-links">
+      <a href="{{ url('/register') }}">{{ _("web.account.sign_in.create") }}</a>
+    </span>
+  </div>
+{% else %}
+  <form method="post" action="{{ url('/sign-in') }}" class="site-strip">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <input type="hidden" name="next" value="{{ here }}">
+    <label class="strip-field strip-address">
+      <span>{{ _("web.account.address") }}</span>
+      <input type="email" name="email" autocomplete="email" required>
+    </label>
+    <label class="strip-field strip-password">
+      <span>{{ _("web.account.password") }}</span>
+      <input type="password"
+             name="password"
+             autocomplete="current-password"
+             required>
+    </label>
+    <button type="submit" class="strip-sign-in">
+      <Icon name="sign-in" :size="18" stroke="currentColor" />
+      {{ _("web.account.sign_in.action") }}
+    </button>
+    <span class="strip-links">
+      <a href="{{ sign_in }}">{{ _("web.site.strip.services") }}</a>
+      <a href="{{ url('/register') }}">{{ _("web.account.sign_in.create") }}</a>
+    </span>
+  </form>
+{% endif %}

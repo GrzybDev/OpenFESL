@@ -1,0 +1,176 @@
+/* The site's menus: tabs on the header's foot whose menus drop under them, the 2012 red-brown
+   with its edges; on phones the tabs are a grid of outlined buttons and an open menu a sheet
+   under them. */
+@layer components {
+  .site-nav {
+    grid-area: nav;
+    position: relative;
+    align-self: end;
+    min-width: 0;
+  }
+
+  .site-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 2px 0 12px;
+  }
+
+  .site-tab {
+    display: flex;
+    width: 100%;
+    min-height: 48px;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding-inline: 16px;
+    border: 2px solid #3a2a24;
+    border-radius: 7px;
+    font: 800 19px/1 var(--site-heading);
+    color: #fff;
+    text-transform: lowercase;
+    text-shadow: var(--site-outline-thin);
+    cursor: pointer;
+    list-style: none;
+    transition:
+      background-color 150ms var(--ease-menu),
+      border-color 150ms var(--ease-menu);
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .site-menu[open] > .site-tab,
+  .site-tab-current {
+    border-color: #b9453e #000 #000 #59211e;
+    background: #521f1c;
+  }
+
+  .site-turn {
+    transition: rotate 160ms var(--ease-menu);
+
+    .site-menu[open] > summary & {
+      rotate: 180deg;
+    }
+  }
+
+  .site-entries {
+    position: absolute;
+    z-index: 40;
+    top: 100%;
+    left: 0;
+    right: 0;
+    padding: 2px 0 6px;
+    border: 1px solid #59211e;
+    border-top: 0;
+    border-radius: 0 0 7px 7px;
+    background: #521f1c;
+    box-shadow:
+      0 1px 0 1px #000,
+      0 2px 0 2px rgb(0 0 0 / 0.5);
+  }
+
+  .site-menu[open] .site-entries {
+    animation: site-menu-in 140ms var(--ease-menu);
+  }
+
+  .site-menu.closing .site-entries {
+    opacity: 0;
+    translate: 0 -6px;
+    transition:
+      opacity 140ms var(--ease-menu),
+      translate 140ms var(--ease-menu);
+  }
+
+  .site-entries li {
+    margin-inline: -1px;
+    border: 1px solid transparent;
+
+    &:hover {
+      border-color: #b9453e;
+    }
+  }
+
+  .site-entry {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 10px;
+    padding: 0 16px 0 12px;
+    border-left: 4px solid transparent;
+    font: 800 16px/1.1 var(--site-heading);
+    color: #fff;
+    text-transform: lowercase;
+    white-space: nowrap;
+
+    li:hover > & {
+      background: #8b342f;
+    }
+
+    &[aria-current="page"] {
+      border-left-color: #f2c12e;
+    }
+  }
+
+  @keyframes site-menu-in {
+    from {
+      opacity: 0;
+      translate: 0 -6px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-menu[open] .site-entries {
+      animation: site-fade-in 100ms linear;
+    }
+
+    .site-menu.closing .site-entries {
+      translate: none;
+      transition: opacity 100ms linear;
+    }
+
+    .site-turn {
+      transition: none;
+    }
+  }
+
+  @keyframes site-fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @media (width >= 40rem) {
+    .site-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px;
+      padding: 0;
+    }
+
+    .site-tabs > li {
+      position: relative;
+    }
+
+    .site-tab {
+      border-width: 2px 2px 0;
+      border-color: transparent;
+      border-radius: 7px 7px 0 0;
+    }
+
+    .site-menu[open] > .site-tab,
+    .site-tab-current {
+      border-color: #b9453e #000 transparent #59211e;
+    }
+
+    .site-entries {
+      right: auto;
+      min-width: 100%;
+    }
+  }
+}

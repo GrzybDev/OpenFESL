@@ -91,3 +91,12 @@ async def execute(database_url: str, statement: str, **values: object) -> None:
     async with engine.begin() as connection:
         await connection.execute(text(statement), values)
     await engine.dispose()
+
+
+async def select_value(database_url: str, statement: str, **values: object) -> object:
+    """Read one value from the database directly, for a state that no page shows."""
+    engine = create_async_engine(database_url)
+    async with engine.connect() as connection:
+        found = await connection.scalar(text(statement), values)
+    await engine.dispose()
+    return found

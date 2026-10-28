@@ -1,0 +1,67 @@
+{#def page: str = "" #}
+{# A game's own website around a page: the painted sky, and the site's container with its header
+   and menus, the bar with the account's wallets or a sign-in form, the page on parchment under
+   the message of the last change, and the footer. #}
+<div aria-hidden="true" class="site-sky">
+  <svg focusable="false">
+    <filter id="site-clouds" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency=".0035 .009" numOctaves="5" seed="7" />
+    <feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 2.4 -1.05" />
+    <feGaussianBlur stdDeviation="2" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#site-clouds)" />
+  </svg>
+</div>
+<svg aria-hidden="true"
+     focusable="false"
+     viewBox="0 0 200 200"
+     class="site-splatter site-splatter-left">
+  <use href="{{ static('icons.svg') }}#splatter" />
+</svg>
+<svg aria-hidden="true"
+     focusable="false"
+     viewBox="0 0 200 200"
+     class="site-splatter site-splatter-right">
+  <use href="{{ static('icons.svg') }}#splatter" />
+</svg>
+<div class="site">
+  <svg aria-hidden="true" focusable="false" class="site-filters">
+    <filter id="site-dark" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency=".006 .011" numOctaves="4" seed="7" />
+    <feColorMatrix values="0 0 0 0 .34 0 0 0 0 .17 0 0 0 0 .1 0 0 0 .55 -.2" />
+    </filter>
+    <filter id="site-parchment" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency=".01 .018" numOctaves="4" seed="3" />
+    <feColorMatrix values="0 0 0 0 .55 0 0 0 0 .4 0 0 0 0 .24 0 0 0 .5 -.16" />
+    </filter>
+    <filter id="site-grain" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch" />
+    <feColorMatrix values="0 0 0 0 .25 0 0 0 0 .17 0 0 0 0 .1 0 0 0 .2 -.04" />
+    </filter>
+  </svg>
+  <header class="site-header">
+    <svg aria-hidden="true" focusable="false" class="site-texture">
+      <rect width="100%" height="100%" filter="url(#site-dark)" />
+    </svg>
+    <a href="{{ url('/' ~ game.id) }}"
+       {% if path == '/' ~ game.id %} aria-current="page"{% endif %}
+       class="site-name"><span class="site-title">{{ game.name }}</span><span class="site-on">{{ _("web.site.on") }}</span></a>
+    <SiteNav />
+  </header>
+  {% if player %}
+    <SiteBar />
+  {% else %}
+    <SiteSignIn />
+  {% endif %}
+  <div class="site-main">
+    <svg aria-hidden="true" focusable="false" class="site-texture">
+      <rect width="100%" height="100%" filter="url(#site-parchment)" />
+      <rect width="100%" height="100%" filter="url(#site-grain)" />
+    </svg>
+    {% if toast %}<SiteMessage :shown="toast" />{% endif %}
+    {{ content }}
+  </div>
+  <footer class="site-footer">
+    <FooterLinks :page="page" />
+  </footer>
+</div>

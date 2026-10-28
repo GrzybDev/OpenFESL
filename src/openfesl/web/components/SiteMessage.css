@@ -1,0 +1,76 @@
+/* What came of the last change, at the top of the parchment: green with a yellow tick, or red
+   with a warning when the server refused (M: slides down 8 px and fades in). */
+@layer components {
+  .site-message {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+    padding: 8px 6px 8px 12px;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #4f5627;
+    box-shadow:
+      inset 0 0 0 2px #77813b,
+      0 4px 0 rgb(0 0 0 / 0.3);
+    color: #fff;
+    animation: site-message-in 200ms var(--ease-menu);
+
+    > p {
+      flex: 1;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    &.leaving {
+      opacity: 0;
+      transition: opacity 120ms linear;
+    }
+  }
+
+  .site-message-refused {
+    background: #893531;
+    box-shadow:
+      inset 0 0 0 2px #c54d47,
+      0 4px 0 rgb(0 0 0 / 0.3);
+  }
+
+  .site-message-disc {
+    display: grid;
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    border: 2px solid #000;
+    border-radius: 50%;
+    background: #f2c12e;
+  }
+
+  .site-message-close {
+    display: grid;
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    cursor: pointer;
+  }
+
+  @keyframes site-message-in {
+    from {
+      opacity: 0;
+      translate: 0 -8px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-message {
+      animation: site-fade-in 100ms linear;
+
+      &.leaving {
+        transition-duration: 100ms;
+      }
+    }
+  }
+}

@@ -30,6 +30,7 @@ from openfesl.core.games import Game
 from openfesl.core.texts import languages, localize, translate, translate_count
 from openfesl.web.languages import split_language
 from openfesl.web.security import HEADERS
+from openfesl.web.sessions import form_token
 
 STATIC = Path(__file__).with_name("static")
 # Vite writes the built scripts, stylesheet and fonts here, named after their content.
@@ -264,16 +265,20 @@ _catalog.add_folder(Path(__file__).with_name("templates"), prefix="page")
 class Pages:
     """Renders the web pages in the OpenFESL shell, in the language their address names."""
 
-    def __init__(self, games: Iterable[Game], census: Census) -> None:
+    def __init__(self, games: Iterable[Game], census: Census, sign_in_check: bool) -> None:
         """Prepare the shell for the games the server serves.
 
         Args:
             games: Every game, listed in the shell with its players online and dressed in its
                 theme.
             census: Counts the players of each game.
+            sign_in_check: Whether the sign-in with an e-mail address asks for Cloudflare
+                Turnstile's check, which only the sign-in pages load, so that the pages of a
+                game's own site link to them instead of taking the password.
         """
         self._games = list(games)
         self._census = census
+        self._sign_in_check = sign_in_check
         self.themes = "".join(_theme_rule(game) for game in self._games)
         self._themes_url = f"/themes.css?v={_digest(self.themes.encode())}"
 
@@ -308,12 +313,21 @@ class Pages:
         """
         language, path = _address(request)
         session = request.scope.get("session") or {}
-        player: Player | None = request.scope.get("state", {}).get("player")
+        state = request.scope.get("state", {})
+        player: Player | None = state.get("player")
+        # A game's own site offers its sign-in form on every page to a visitor not signed in,
+        # unless the sign-in asks for the check.
+        if game and game.site and not player and not csrf and not self._sign_in_check:
+            csrf = form_token(request)
         query = f"?{request.url.query}" if request.url.query else ""
         shared = dict(
             language=language,
             url=lambda target: localize(target, language),
             here=localize(path, language) + query,
+            # The page's own address, without its language and query.
+            path=path,
+            bar=state.get("site_bar"),
+            sign_in_check=self._sign_in_check,
             assets=built_assets(),
             themes=self._themes_url,
             game=game,
@@ -420,6 +434,10 @@ def _theme_rule(game: Game) -> str:
     rules += [
         f'{scope} [data-tier="{tier}"]{{--mark:{fill};--mark-ink:{ink}}}'
         for tier, (fill, ink) in enumerate(tiers, 1)
+    ]
+    rules += [
+        f'{scope} [data-wallet="{wallet.currency}"]{{--coin:{wallet.fill};--coin-ink:{wallet.ink}}}'
+        for wallet in (game.site.wallets if game.site else [])
     ]
     return "".join(f"{rule}\n" for rule in rules)
 

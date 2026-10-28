@@ -11,6 +11,8 @@
     "@fontsource/barlow": "5.3.0",
     "@fontsource/barlow-semi-condensed": "5.3.0",
     "@fontsource/ibm-plex-mono": "5.3.0",
+    "@fontsource/shantell-sans": "5.3.0",
+    "@fontsource/urbanist": "5.3.0",
     "htmx.org": "4.0.0"
   },
   "devDependencies": {

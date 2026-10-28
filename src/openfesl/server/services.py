@@ -80,13 +80,14 @@ class GameServices:
         self.approval = Approval(stores.servers)
         self.hosting = Hosting(self.approval)
         self.trust = ServerTrust(self.hosting, self.approval)
+        self.wallets = Wallets(stores.wallets)
         self.magma = Magma(
             self._launcher_sessions,
             self.players,
             self.trust,
             stores.personas,
             stores.entitlements,
-            Wallets(stores.wallets),
+            self.wallets,
         )
         self.census = Census(self.hosting, self.players)
         art = presence_art(settings.public_url)

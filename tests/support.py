@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import html
 import re
 import struct
 import urllib.error
@@ -444,6 +445,17 @@ def links(page: str) -> list[tuple[str, str]]:
     """
     found = re.findall(r'<a href="([^"]*)"[^>]*>(.*?)</a>', page, flags=re.DOTALL)
     return [(href, re.sub(r"<[^>]*>", "", text).strip()) for href, text in found]
+
+
+def visible(body: bytes) -> str:
+    """Return the text a page shows, without its markup, scripts and styles, on one line.
+
+    Args:
+        body: The page.
+    """
+    text = re.sub(r"<(script|style)\b.*?</\1>", " ", body.decode(), flags=re.DOTALL)
+    text = html.unescape(re.sub(r"<[^>]*>", " ", text))
+    return re.sub(r"\s+", " ", text, flags=re.ASCII).strip()
 
 
 def block(owner: int, member: int) -> Fields:

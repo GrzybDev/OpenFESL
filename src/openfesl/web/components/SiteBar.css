@@ -1,0 +1,76 @@
+/* The site's bar for a signed-in account: its balances as coins on dark chips, at the right on
+   wide screens and splitting the row in halves on phones. */
+@layer components {
+  .site-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    min-height: 62px;
+    padding: 8px clamp(16px, 2vw, 26px);
+    border-bottom: 2px solid #000;
+    background: #120e0c;
+  }
+
+  .site-wallets {
+    display: grid;
+    flex: 1 1 100%;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .site-wallet {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 14px 0 5px;
+    border: 2px solid #000;
+    border-radius: 24px;
+    background: #2e2420;
+    font-family: var(--site-heading);
+  }
+
+  .wallet-coin {
+    display: grid;
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    border: 2px solid #000;
+    border-radius: 50%;
+    background: var(--coin);
+    color: var(--coin-ink);
+  }
+
+  .wallet-amount {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 8px;
+    min-width: 0;
+    line-height: 1.1;
+  }
+
+  .wallet-number {
+    font-size: 17px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+  }
+
+  .wallet-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #d9cfc4;
+  }
+
+  @media (width >= 40rem) {
+    .site-wallets {
+      display: flex;
+      flex: 0 1 auto;
+      flex-wrap: wrap;
+      margin-left: auto;
+    }
+  }
+}

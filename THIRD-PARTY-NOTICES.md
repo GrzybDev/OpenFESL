@@ -39,15 +39,35 @@ refer to, which does not mean that their owners endorse OpenFESL.
 - Copyright: Copyright 2017 IBM Corp.
 - Use: the web pages' typeface for file names and codes, served as separate font files.
 
+### Shantell Sans
+
+- Website: https://github.com/arrowtype/shantell-sans
+- Version or package: @fontsource/shantell-sans 5.3.0 (italic, weight 800, in every subset the package has)
+- Licence: OFL-1.1 (see "SIL Open Font License 1.1")
+- Copyright: Copyright 2022 The Shantell Sans Project Authors (https://github.com/arrowtype/shantell-sans)
+- Use: the Battlefield Heroes pages' typeface for their plaques, badge and the hero's speech bubble, served as separate
+  font files.
+
+### Urbanist
+
+- Website: https://github.com/coreyhu/Urbanist
+- Version or package: @fontsource/urbanist 5.3.0 (weights 700 and 800, in every subset the package has)
+- Licence: OFL-1.1 (see "SIL Open Font License 1.1")
+- Copyright: Copyright 2021 The Urbanist Project Authors (https://github.com/coreyhu/Urbanist)
+- Use: the Battlefield Heroes pages' typeface for their headings, menus, buttons and numbers, served as separate font
+  files.
+
 ## Licence texts
 
 ### SIL Open Font License 1.1
 
-Applies to Barlow and Barlow Semi Condensed, and to IBM Plex Mono.
+Applies to Barlow and Barlow Semi Condensed, to IBM Plex Mono, to Shantell Sans and to Urbanist.
 
 ```text
 Copyright 2017 The Barlow Project Authors (https://github.com/jpt/barlow)
 Copyright 2017 IBM Corp. (IBM Plex Mono)
+Copyright 2022 The Shantell Sans Project Authors (https://github.com/arrowtype/shantell-sans)
+Copyright 2021 The Urbanist Project Authors (https://github.com/coreyhu/Urbanist)
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

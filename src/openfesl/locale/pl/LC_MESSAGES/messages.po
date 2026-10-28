@@ -110,6 +110,33 @@ msgstr ""
 "OpenFESL nie jest powiązany z firmą Electronic Arts ani przez nią "
 "wspierany."
 
+msgid "web.site.on"
+msgstr "w OpenFESL"
+
+msgid "web.site.page.play"
+msgstr "Jak zagrać"
+
+msgid "web.site.page.leaderboard"
+msgstr "Rankingi"
+
+msgid "web.site.page.host"
+msgstr "Postaw serwer"
+
+msgid "web.site.strip.services"
+msgstr "Zaloguj się przez usługę"
+
+msgid "web.site.wallets"
+msgstr "Portfele"
+
+msgid "games.bfheroes.menu.game"
+msgstr "Gra"
+
+msgid "games.bfheroes.currency._PF"
+msgstr "Funds"
+
+msgid "games.bfheroes.currency._DV"
+msgstr "Valor Points"
+
 msgid "web.home"
 msgstr "Strona główna OpenFESL"
 

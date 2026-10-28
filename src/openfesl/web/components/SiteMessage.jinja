@@ -1,0 +1,17 @@
+{#def shown #}
+{# What came of the last change, at the top of a game's own site's page: done, or refused with
+   what the server kept unchanged. It stays until closed or the next page. #}
+<div role="{{ 'alert' if shown.error else 'status' }}"
+     data-site-message
+     class="site-message{% if shown.error %} site-message-refused{% endif %}">
+  <span aria-hidden="true" class="site-message-disc">
+    <Icon :name="'warn' if shown.error else 'tick'" :size="22" stroke="#0A0A0A" />
+  </span>
+  <p>{{ _(shown.key, **shown.values) }}</p>
+  <button type="button"
+          data-site-dismiss
+          class="site-message-close js-only"
+          aria-label="{{ _('web.toast.dismiss') }}">
+    <Icon name="x" :size="16" stroke="currentColor" />
+  </button>
+</div>

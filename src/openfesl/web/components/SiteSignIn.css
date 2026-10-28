@@ -1,0 +1,104 @@
+/* The site's bar for a visitor who is not signed in: the sign-in with labels above the white
+   inputs, the green sign-in button and the other ways in, stacked on phones. */
+@layer components {
+  .site-strip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 8px 12px;
+    padding: 8px clamp(16px, 2vw, 26px) 10px;
+    border-bottom: 2px solid #000;
+    background: #120e0c;
+  }
+
+  .strip-field {
+    display: grid;
+    flex: 1 1 100%;
+    gap: 4px;
+
+    > span {
+      font: 800 11px/1.1 var(--site-heading);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #c9bfb3;
+    }
+
+    > input {
+      min-height: 44px;
+      padding-inline: 10px;
+      border-radius: 3px;
+      background: #fff;
+      box-shadow:
+        0 0 0 2px #000,
+        0 0 0 3px #1e1e1e;
+      color: #1f1712;
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 700;
+    }
+  }
+
+  .strip-sign-in {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 18px 0 12px;
+    border: 2px solid #000;
+    border-radius: 22px;
+    background: #3d6b1f;
+    box-shadow: inset 0 2px 0 #6e9b3f;
+    color: #fff;
+    font: 800 17px/1 var(--site-heading);
+    text-decoration: none;
+    text-transform: lowercase;
+    text-shadow:
+      1px 1px 0 #000,
+      -1px 1px 0 #000,
+      1px -1px 0 #000,
+      -1px -1px 0 #000;
+    cursor: pointer;
+    transition: scale 100ms var(--ease-menu);
+
+    &:active {
+      scale: 0.96;
+    }
+  }
+
+  .strip-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 18px;
+
+    a {
+      display: inline-flex;
+      min-height: 44px;
+      align-items: center;
+      font: 800 15px/1.1 var(--site-heading);
+      color: #fede01;
+      text-decoration-line: underline;
+    }
+  }
+
+  @media (width >= 40rem) {
+    .strip-address {
+      flex: 1 1 200px;
+      max-width: 270px;
+    }
+
+    .strip-password {
+      flex: 1 1 180px;
+      max-width: 230px;
+    }
+
+    .strip-links {
+      margin-left: auto;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .strip-sign-in {
+      transition: none;
+    }
+  }
+}

@@ -227,6 +227,19 @@ subtitle = "#141414"
 bright = "#F8F4EF"
 soft = "#DDDDDD"
 
+# The game's website of autumn 2012, whose site container, header and menus the pages wear over
+# a painted sky. Its menus list the game's pages under the headings the site gave them, and its
+# header bar shows the account's Funds and Valor Points, which every hero of the account shares.
+[site]
+wallets = [
+    { currency = "_PF", glyph = "coin", fill = "#F2C12E", ink = "#0A0A0A" },
+    { currency = "_DV", glyph = "valor", fill = "#B9453E", ink = "#FFFFFF" },
+]
+
+[[site.menus]]
+name = "game"
+pages = ["play", "leaderboard", "host"]
+
 # The Theater lobby the dedicated servers list their games in. Lobbies are kept on EA's servers,
 # not in the client, and a dedicated server asks for any (LID -1); this is the one the game was
 # played with live on OpenFESL.

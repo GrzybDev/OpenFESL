@@ -10,7 +10,7 @@ from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
-from support import FESL, Mailbox, cli, game, markup
+from support import FESL, Mailbox, cli, game, links, markup
 
 from openfesl.core.limits import FAILURES, Attempts
 from openfesl.web import turnstile as turnstile_module
@@ -184,7 +184,11 @@ async def test_the_cloudflare_check_guards_the_password_form_before_anything_is_
     turnstile: list[dict[str, str]], base: str
 ) -> None:
     async with httpx2.AsyncClient() as client:
-        page = await client.get(f"{base}/sign-in")
+        # A game's own site shows no check on its pages, so they lead to the sign-in page.
+        strip = await client.get(f"{base}/bfheroes/play")
+        assert 'name="password"' not in strip.text and "openfesl_session" not in strip.cookies
+        assert ("/sign-in?next=%2Fbfheroes%2Fplay", "Sign in") in links(markup(strip.content))
+        page = await client.get(f"{base}/sign-in", params={"next": "/bfheroes/play"})
         assert 'data-sitekey="invented-site-key"' in page.text
         assert "Cloudflare Turnstile to tell people from automated requests" in page.text
         policy = page.headers["content-security-policy"]
@@ -202,9 +206,15 @@ async def test_the_cloudflare_check_guards_the_password_form_before_anything_is_
             assert refused.status_code == 400
             assert "The check did not pass. Try again." in refused.text
         passed = await post_sign_in(
-            client, base, "ann@example.test", PASSWORD, **{"cf-turnstile-response": "passed"}
+            client,
+            base,
+            "ann@example.test",
+            PASSWORD,
+            next="/bfheroes/play",
+            **{"cf-turnstile-response": "passed"},
         )
-        assert passed.status_code == 303
+        # The account made in a game names itself first, then returns to the game's page.
+        assert passed.headers["location"] == "/account/display-name?next=%2Fbfheroes%2Fplay"
     # Cloudflare compares the token with the address of the client that passed the check.
     assert turnstile[-1] == {
         "secret": "invented-secret-key",

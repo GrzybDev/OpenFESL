@@ -175,6 +175,12 @@ importers:
       '@fontsource/ibm-plex-mono':
         specifier: 5.3.0
         version: 5.3.0
+      '@fontsource/shantell-sans':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource/urbanist':
+        specifier: 5.3.0
+        version: 5.3.0
       htmx.org:
         specifier: 4.0.0
         version: 4.0.0
@@ -196,6 +202,12 @@ packages:
 
   '@fontsource/ibm-plex-mono@5.3.0':
     resolution: {integrity: sha512-eTgnZjZEGk1QtD3ZstF+Vclo2HLAni8YMy34/DxllwZvyz1lR/1RF/xTiAquOBO7MvqBx8D2Ig2WCPMVfdZu7Q==}
+
+  '@fontsource/shantell-sans@5.3.0':
+    resolution: {integrity: sha512-hVKmS5EO/xGOtKx+rHuyqIsswjWp5bb91DlszxSkO4jEqOSaRIjYH/iu5gJ7QVszDlofoezZeWM5OdKgyE2jtg==}
+
+  '@fontsource/urbanist@5.3.0':
+    resolution: {integrity: sha512-588s006ey+ygDqZtnJ1qehGNzIfNDl49ibAKifeYmU3juExX39LfMuCSkvT4nMktbvc07hg/8zc3qABh8zoxeA==}
 
   '@oxc-project/types@0.155.0':
     resolution: {integrity: sha512-SeE8JPwW1xs1tHeNycjUtUBdhorRa8o4jlvjwk49R7/Z291i+4DQa7JJIgOm/TaYQZx+QrPQbVJ/9c8dMIZN8Q==}
@@ -479,6 +491,10 @@ snapshots:
   '@fontsource/barlow@5.3.0': {}
 
   '@fontsource/ibm-plex-mono@5.3.0': {}
+
+  '@fontsource/shantell-sans@5.3.0': {}
+
+  '@fontsource/urbanist@5.3.0': {}
 
   '@oxc-project/types@0.155.0': {}
 

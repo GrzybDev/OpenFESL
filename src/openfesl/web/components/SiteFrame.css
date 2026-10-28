@@ -1,0 +1,211 @@
+/* A game's own website around its pages: the painted sky with soft clouds fading into the field,
+   and the site's container with its dark header, the parchment the page sits on and the footer
+   in its rounded foot. */
+@layer components {
+  .area-site {
+    --site-field: #23251a;
+    --site-heading: "Urbanist", "Barlow", system-ui, sans-serif;
+    --site-comic: "Shantell Sans", "Urbanist", system-ui, sans-serif;
+    --site-outline:
+      2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 1.5px 1.5px 0 #000,
+      -1.5px 1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px -1.5px 0 #000, 0 4px 0 #000;
+    --site-outline-thin:
+      1.5px 0 0 #000, -1.5px 0 0 #000, 0 1.5px 0 #000, 0 -1.5px 0 #000, 1px 1px 0 #000,
+      -1px 1px 0 #000, 1px -1px 0 #000, -1px -1px 0 #000, 0 3px 0 #000;
+    padding: clamp(10px, 1.8vw, 26px) clamp(0px, 2.2vw, 32px) 56px;
+    background: var(--site-field);
+  }
+
+  .site-sky {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: -2;
+    height: 520px;
+    overflow: hidden;
+    background: linear-gradient(180deg, #5e93c4 0%, #7faed6 45%, #afcfea 100%);
+
+    > svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 140px;
+      background: linear-gradient(180deg, rgb(35 37 26 / 0) 0%, var(--site-field) 100%);
+    }
+  }
+
+  .site-splatter {
+    position: absolute;
+    z-index: -1;
+    fill: #0e0d08;
+  }
+
+  .site-splatter-left {
+    top: 760px;
+    left: -70px;
+    width: 340px;
+    height: 340px;
+    rotate: 18deg;
+  }
+
+  .site-splatter-right {
+    top: 1300px;
+    right: -90px;
+    width: 380px;
+    height: 380px;
+    rotate: -30deg;
+  }
+
+  .site {
+    position: relative;
+    max-width: 1240px;
+    margin-inline: auto;
+    border: 1px solid #393939;
+    border-radius: 0 0 7px 7px;
+    background: #262626;
+    box-shadow: 0 0 0 2px #000;
+  }
+
+  .site-filters {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+
+  .site-texture {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+  }
+
+  .site-header {
+    position: relative;
+    isolation: isolate;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "name" "nav";
+    align-items: center;
+    gap: 6px 24px;
+    padding: 12px clamp(16px, 2vw, 26px) 0;
+    border-bottom: 2px solid #000;
+    background: #1e1815;
+  }
+
+  .site-name {
+    grid-area: name;
+    display: flex;
+    min-height: 44px;
+    flex-direction: column;
+    justify-content: center;
+    font-family: var(--site-heading);
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  .site-title {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1;
+    color: #fff;
+    text-shadow: var(--site-outline);
+  }
+
+  .site-on {
+    margin-top: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #c9bfb3;
+  }
+
+  /* The parchment the page sits on, which holds what the page's titles reach out to. */
+  .site-main {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+    padding: clamp(20px, 2.2vw, 28px) clamp(16px, 2vw, 26px) 40px;
+    background: #d7c8af;
+    color: #1f1712;
+    font-family: Arial, Helvetica, sans-serif;
+
+    /* The line under the game's state, which the game's other pages put on their backdrop, sits
+       on the parchment here. */
+    .game-status-menus {
+      color: #5c4a3c;
+    }
+  }
+
+  .site-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 24px;
+    padding: 12px clamp(16px, 2vw, 26px) 18px;
+    border-top: 2px solid #000;
+    border-radius: 0 0 7px 7px;
+    background: #141414;
+    color: #c9c9c9;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+
+    a {
+      display: flex;
+      min-height: 44px;
+      min-width: 44px;
+      align-items: center;
+      text-decoration-line: underline;
+
+      &[aria-current="page"] {
+        color: #eee;
+      }
+    }
+
+    .footer-name {
+      color: #eee;
+    }
+
+    p {
+      flex-basis: 100%;
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+  }
+
+  @media (width >= 40rem) {
+    .site-sky {
+      height: 720px;
+
+      &::after {
+        height: 200px;
+      }
+    }
+
+    .site-header {
+      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-areas: "name nav";
+    }
+
+    .site-name {
+      padding-bottom: 12px;
+    }
+
+    .site-title {
+      font-size: 26px;
+    }
+  }
+}

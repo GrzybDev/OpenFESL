@@ -8,8 +8,12 @@ import "@fontsource/barlow-semi-condensed/600.css";
 import "@fontsource/barlow-semi-condensed/700.css";
 import "@fontsource/barlow-semi-condensed/800.css";
 import "@fontsource/ibm-plex-mono/500.css";
+import "@fontsource/shantell-sans/800-italic.css";
+import "@fontsource/urbanist/700.css";
+import "@fontsource/urbanist/800.css";
 import "./base.css";
 import "./styles.js";
+import { closeMenu } from "./site.js";
 import "htmx.org";
 
 // A chevron block whose page takes longer than 300 ms to arrive shows that it is loading, and
@@ -465,35 +469,19 @@ document.addEventListener("click", (event) => {
   const summary = event.target.closest("summary");
   if (summary?.parentElement === menu) {
     event.preventDefault();
-    closeMenu(menu);
+    closeMenu(menu, 100, 0);
   } else if (!menu.contains(event.target)) {
-    closeMenu(menu);
+    closeMenu(menu, 100, 0);
   }
 });
 
 document.addEventListener("keydown", (event) => {
   const menu = document.querySelector("[data-account-menu][open]");
   if (menu && event.key === "Escape") {
-    closeMenu(menu);
+    closeMenu(menu, 100, 0);
     menu.querySelector("summary").focus();
   }
 });
-
-/**
- * Plays the account menu's closing and closes it.
- *
- * @param {HTMLDetailsElement} menu - The open account menu.
- */
-function closeMenu(menu) {
-  menu.classList.add("closing");
-  setTimeout(
-    () => {
-      menu.open = false;
-      menu.classList.remove("closing");
-    },
-    reducedMotion.matches ? 0 : 100,
-  );
-}
 
 // The account page's forms swap only their part: it cross-fades in with the toast of the change,
 // and Cloudflare's check in it is drawn anew. A change the server did not answer says so in an

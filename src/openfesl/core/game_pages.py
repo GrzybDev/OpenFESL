@@ -159,6 +159,55 @@ class Listing(BaseModel):
 type Glyph = Annotated[str, StringConstraints(pattern=r"^[a-z][a-z-]*$")]
 
 
+class Menu(BaseModel):
+    """A menu in the header of a game's own site, listing some of the game's pages.
+
+    Attributes:
+        name: The end of the key of its name in the catalogues, after games.<game>.menu.
+        pages: The kinds of pages it lists, in order; those the game does not have are left out.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    name: str
+    pages: list[PageKind]
+
+
+class SiteWallet(BaseModel):
+    """A balance that the bar of a game's own site shows, drawn as a coin.
+
+    Attributes:
+        currency: The currency's code.
+        glyph: The glyph on the coin.
+        fill: The coin's colour.
+        ink: The glyph's colour.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    currency: str
+    glyph: Glyph
+    fill: Colour
+    ink: Colour
+
+
+class Site(BaseModel):
+    """The look of a game's own website, which the game's pages wear over the whole area.
+
+    The pages sit in the site's container over a painted sky: its header with the game's name
+    and menus, a bar with the signed-in account's wallets or a sign-in form, and a footer.
+
+    Attributes:
+        menus: The header's menus, in order; a menu without one of the game's pages is left out.
+        wallets: The currencies whose balances the bar shows a signed-in account, in order.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    menus: list[Menu]
+    wallets: list[SiteWallet] = []
+
+
 class Insignia(BaseModel):
     """How a player's page draws an insignia.
 

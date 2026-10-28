@@ -1,0 +1,15 @@
+{# The bar of a game's own site for a signed-in account: the balances it has to spend. #}
+<div class="site-bar">
+  {% if bar and bar.wallets %}
+    <ul aria-label="{{ _('web.site.wallets') }}" class="site-wallets">
+      {% for wallet, balance in bar.wallets %}
+        <li data-wallet="{{ wallet.currency }}" class="site-wallet">
+          <span aria-hidden="true"
+                class="wallet-coin"><Icon :name="wallet.glyph" :size="18" stroke="currentColor" /></span>
+          <span class="wallet-amount"><span class="wallet-number">{{ number(balance) }}</span>
+            <span class="wallet-name">{{ _("games." ~ game.id ~ ".currency." ~ wallet.currency) }}</span></span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</div>

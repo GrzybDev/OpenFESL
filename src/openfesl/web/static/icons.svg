@@ -295,4 +295,32 @@
   <symbol id="globe" viewBox="0 0 20 20">
     <path d="M10 2.6a7.4 7.4 0 1 0 0 14.8a7.4 7.4 0 1 0 0-14.8zM2.6 10h14.8M10 2.6c2 2.1 3 4.6 3 7.4s-1 5.3-3 7.4c-2-2.1-3-4.6-3-7.4s1-5.3 3-7.4z" fill="none" stroke-width="1.8"/>
   </symbol>
+  <symbol id="sign-in" viewBox="0 0 24 24">
+    <path d="M10 4.5h8.5v15H10M4 12h10.5M11 8.5l3.5 3.5-3.5 3.5" fill="none" stroke-width="2.4" stroke-linecap="square"/>
+  </symbol>
+  <symbol id="coin" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="8.5" fill="none" stroke-width="2.2"/>
+    <path d="M10 7.8v8.4M10 7.8h5M10 12h4" fill="none" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="valor" viewBox="0 0 24 24">
+    <path d="M7.5 2.5l4.5 6.5 4.5-6.5" fill="none" stroke-width="2.2" stroke-linejoin="round"/>
+    <circle cx="12" cy="15.5" r="5.5" fill="none" stroke-width="2.2"/>
+    <path d="M12 13v5" fill="none" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="book" viewBox="0 0 24 24">
+    <path d="M3.5 5.5c3-1.4 5.8-1.2 8.5.8 2.7-2 5.5-2.2 8.5-.8v13c-3-1.4-5.8-1.2-8.5.8-2.7-2-5.5-2.2-8.5-.8zM12 6.3v13" fill="none" stroke-width="2.2" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="bars" viewBox="0 0 24 24">
+    <path d="M5.5 20v-7M12 20V5.5M18.5 20v-10M3 20.5h18" fill="none" stroke-width="2.6" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="server" viewBox="0 0 24 24">
+    <path d="M4 4.5h16v6H4zM4 13.5h16v6H4zM7.5 7.5h.1M7.5 16.5h.1" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="splatter" viewBox="0 0 200 200">
+    <path d="M100 30c10 0 12 18 22 20s22-14 30-6-6 22 0 30 26 4 26 16-20 10-22 20 14 22 6 30-22-6-30 0-4 26-16 26-10-20-20-22-22 14-30 6 6-22 0-30-26-4-26-16 20-10 22-20-14-22-6-30 22 6 30 0 4-26 14-24z"/>
+    <circle cx="30" cy="40" r="6"/>
+    <circle cx="172" cy="160" r="8"/>
+    <circle cx="160" cy="30" r="4"/>
+    <circle cx="40" cy="170" r="5"/>
+  </symbol>
 </svg>

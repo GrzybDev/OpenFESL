@@ -57,32 +57,46 @@ class SqlWalletStore:
             ]
             if entries:
                 await session.execute(insert(WalletEntryRow).values(entries))
-            held = await session.execute(
-                select(
-                    WalletRow.game,
-                    WalletRow.currency,
-                    WalletRow.account_id,
-                    WalletRow.persona_id,
-                    WalletRow.balance,
-                ).where(
-                    or_(
-                        *(
-                            and_(
-                                WalletRow.game == wallet.game,
-                                WalletRow.currency == wallet.currency,
-                                WalletRow.account_id == wallet.account_id,
-                                WalletRow.persona_id.is_not_distinct_from(wallet.persona_id),
-                            )
-                            for wallet in wallets
-                        )
+            return await _held(session, wallets)
+
+    async def peek(self, wallets: Sequence[Wallet]) -> list[int]:
+        """Return the balances of wallets without opening any; a new one shows its allowance.
+
+        Args:
+            wallets: The wallets.
+        """
+        if not wallets:
+            return []
+        async with self._sessions() as session:
+            return await _held(session, wallets)
+
+
+async def _held(session: AsyncSession, wallets: Sequence[Wallet]) -> list[int]:
+    held = await session.execute(
+        select(
+            WalletRow.game,
+            WalletRow.currency,
+            WalletRow.account_id,
+            WalletRow.persona_id,
+            WalletRow.balance,
+        ).where(
+            or_(
+                *(
+                    and_(
+                        WalletRow.game == wallet.game,
+                        WalletRow.currency == wallet.currency,
+                        WalletRow.account_id == wallet.account_id,
+                        WalletRow.persona_id.is_not_distinct_from(wallet.persona_id),
                     )
+                    for wallet in wallets
                 )
             )
-            found = {
-                (row.game, row.currency, row.account_id, row.persona_id): row.balance
-                for row in held
-            }
-            return [
-                found[(wallet.game, wallet.currency, wallet.account_id, wallet.persona_id)]
-                for wallet in wallets
-            ]
+        )
+    )
+    found = {(row.game, row.currency, row.account_id, row.persona_id): row.balance for row in held}
+    return [
+        found.get(
+            (wallet.game, wallet.currency, wallet.account_id, wallet.persona_id), wallet.allowance
+        )
+        for wallet in wallets
+    ]

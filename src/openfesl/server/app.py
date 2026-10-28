@@ -22,6 +22,7 @@ from openfesl.web.languages import LanguageMiddleware
 from openfesl.web.magma import magma_app
 from openfesl.web.pages import STATIC, Pages, StaticAssets
 from openfesl.web.security import SecurityHeadersMiddleware
+from openfesl.web.site import SiteBarMiddleware
 
 # The session cookie outlives a session, so that an expired one can say so.
 SESSION_COOKIE_AGE = 14 * 24 * 3600
@@ -52,7 +53,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             yield
         await engine.dispose()
 
-    pages = Pages(games, services.census)
+    pages = Pages(games, services.census, settings.turnstile is not None)
     app = FastAPI(
         title="OpenFESL",
         lifespan=lifespan,
@@ -80,6 +81,7 @@ def _add_middleware(
     # The last one added sees a request first: the game's HTTP keeps its own answers. Only the
     # sign-ins and their forms store anything in the session, so other pages set no cookie.
     secret = settings.session_secret.get_secret_value() if settings.session_secret else None
+    app.add_middleware(SiteBarMiddleware, games=games, wallets=services.wallets)
     app.add_middleware(PlayerSessionMiddleware, accounts=stores.accounts.account)
     app.add_middleware(
         SessionMiddleware,

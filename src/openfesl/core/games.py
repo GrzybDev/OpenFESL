@@ -9,7 +9,7 @@ from typing import Self
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from openfesl.core.catalogue import CatalogueRules
-from openfesl.core.game_pages import Listing, PageKind, Stats, Theme
+from openfesl.core.game_pages import Listing, PageKind, Site, Stats, Theme
 from openfesl.core.policies import Policies
 
 
@@ -219,6 +219,8 @@ class Game(BaseModel):
         pages: The kinds of web pages that the game's menu shows, in its order, and the site
             serves besides the game's front page.
         theme: How the game's web pages look.
+        site: The look of the game's own website, which its pages wear instead of the game's
+            menus; none for a game whose pages look like its menus.
         listing: How the web pages read the games its servers host.
         stats: The stats of the game's players that the web pages show.
         product_names: The names the game's data gives the products of some entitlements, by
@@ -250,6 +252,7 @@ class Game(BaseModel):
     countries: dict[str, Ages] = {}
     pages: list[PageKind]
     theme: Theme
+    site: Site | None = None
     listing: Listing = Listing()
     stats: Stats = Stats()
     product_names: dict[str, str] = {}
@@ -321,6 +324,19 @@ class Game(BaseModel):
                     f"client {name} names {client.server_client} for its dedicated servers, "
                     "which is no client with a server account"
                 )
+        return self
+
+    @model_validator(mode="after")
+    def _check_site(self) -> Self:
+        # The bar shows an account's balances, which only currencies its personas share hold.
+        shared = {
+            code for code, currency in self.currencies.items() if currency.scope is Scope.ACCOUNT
+        }
+        shown = {wallet.currency for wallet in self.site.wallets} if self.site else set()
+        if unknown := shown - shared:
+            raise ValueError(
+                f"the site shows wallets that are not the account's: {sorted(unknown)}"
+            )
         return self
 
     @model_validator(mode="after")

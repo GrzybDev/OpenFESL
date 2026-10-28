@@ -36,6 +36,13 @@ class WalletStore(Protocol):
             wallets: The wallets.
         """
 
+    async def peek(self, wallets: Sequence[Wallet]) -> list[int]:
+        """Return the balances of wallets without opening any; a new one shows its allowance.
+
+        Args:
+            wallets: The wallets.
+        """
+
 
 class Wallets:
     """The balances that players spend in the currencies of their games."""
@@ -71,3 +78,19 @@ class Wallets:
             for code, currency in game.currencies.items()
         ]
         return dict(zip(game.currencies, await self._store.balances(wallets), strict=True))
+
+    async def of_account(self, game: Game, account_id: int, codes: Sequence[str]) -> list[int]:
+        """Return what an account has to spend in currencies its personas share, opening nothing.
+
+        A wallet not opened yet shows the allowance it opens with, which it then holds.
+
+        Args:
+            game: The game.
+            account_id: The account.
+            codes: The currencies, each one that the account's personas share.
+        """
+        wallets = [
+            Wallet(game.id, code, account_id, None, game.currencies[code].allowance)
+            for code in codes
+        ]
+        return await self._store.peek(wallets)
