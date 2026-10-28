@@ -48,6 +48,16 @@ refer to, which does not mean that their owners endorse OpenFESL.
 - Use: the Battlefield Heroes pages' typeface for their plaques, badge and the hero's speech bubble, served as separate
   font files.
 
+### three.js
+
+- Website: https://threejs.org (https://github.com/mrdoob/three.js)
+- Version or package: three 0.186.1, the parts that the pages use of its `build/three.module.js`, of
+  `examples/jsm/loaders/GLTFLoader.js` and of the `examples/jsm/utils` modules that the loader imports
+- Licence: MIT (see "MIT License")
+- Copyright: Copyright © 2010-2026 three.js authors
+- Use: draws the game's models of heroes on the Battlefield Heroes pages of deployments that import them, bundled into
+  a separate script that only those pages load.
+
 ### Urbanist
 
 - Website: https://github.com/coreyhu/Urbanist
@@ -58,6 +68,34 @@ refer to, which does not mean that their owners endorse OpenFESL.
   files.
 
 ## Licence texts
+
+### MIT License
+
+Applies to three.js.
+
+```text
+The MIT License
+
+Copyright © 2010-2026 three.js authors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+```
 
 ### SIL Open Font License 1.1
 

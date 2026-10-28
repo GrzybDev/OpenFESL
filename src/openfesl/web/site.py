@@ -14,6 +14,8 @@ from openfesl.web.pages import Player
 NAME_CHECK = "/heroes/name"
 # The state of a start link, which the Play Now page asks for while it waits; it shows no page.
 LINK_STATUS = "/play-now/status"
+# The game's model of a hero with a look, which the creator's stage asks for; it shows no page.
+FIGURE = "/heroes/figure"
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,7 +82,9 @@ class SiteBarMiddleware:
             game = self._games.get(scope["path"].split("/")[1])
             if player and game:
                 state["read_site_bar"] = partial(self._bar, game, player)
-                checked = scope["path"] in (f"/{game.id}{NAME_CHECK}", f"/{game.id}{LINK_STATUS}")
+                checked = scope["path"] in (
+                    f"/{game.id}{path}" for path in (NAME_CHECK, LINK_STATUS, FIGURE)
+                )
                 if scope["method"] == "GET" and not checked:
                     state["site_bar"] = await self._bar(game, player)
         await self._app(scope, receive, send)

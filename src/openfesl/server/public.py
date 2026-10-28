@@ -93,7 +93,9 @@ def include_public_routes(
     )
 
     app.include_router(mugshot_routes(games, services.mugshots))
-    app.include_router(CreatorPages(pages, games, services.heroes, services.catalogues).routes())
+    app.include_router(
+        CreatorPages(pages, games, services.heroes, services.catalogues, services.figures).routes()
+    )
     app.include_router(
         HeroesPages(
             pages,

@@ -1,8 +1,19 @@
-{#def look, who: str, hair: int, beard: int #}
+{#def look, who: str, hair: int, beard: int, figure: dict | None = None #}
 {# The creator's stage: on the ground under the sky, the hero's class glyph on its faction's
    colour over its look in words, with its speech bubble, and the note that the game shows the
-   hero with its own models. #}
-<figure class="creator-stage">
+   hero with its own models. Where the deployment keeps the game's models of heroes, the stage's
+   script shows the game's model of the hero in the glyph's place, with its own caption and
+   label. #}
+{% set chosen = {
+  "who": who,
+  "skin": look.skin_tone,
+  "hair_colour": look.hair_colour,
+  "hair": _("web.creator.figure.hair", style=hair) if hair else _("web.creator.figure.no_hair"),
+  "beard": _("web.creator.figure.beard", style=beard) if beard else _("web.creator.figure.no_beard"),
+} %}
+<figure data-stage
+        {% if figure %} data-figures="{{ url('/' ~ game.id ~ '/heroes/figure') }}" data-model-caption="{{ _('web.creator.model.caption') }}" data-model-label="{{ _('web.creator.model', **chosen) }}" {% endif %}
+        class="creator-stage">
   <div aria-hidden="true" class="stage-sky">
     <svg class="stage-clouds">
       <rect width="100%" height="100%" filter="url(#site-clouds)" />
@@ -14,13 +25,11 @@
     </svg>
   </div>
   <div data-hop class="stage-hero">
-    {% set hair_text = _("web.creator.figure.hair", style=hair) if hair else _("web.creator.figure.no_hair") %}
-    {% set beard_text = _("web.creator.figure.beard", style=beard) if beard else _("web.creator.figure.no_beard") %}
-    <div class="stage-stand-in">
+    <div data-stand-in class="stage-stand-in">
       <span aria-hidden="true"
             data-class-glyph
             class="stage-glyph"><Icon :name="game.heroes.classes[look.hero_class].glyph" :size="72" stroke="currentColor" /></span>
-      <p data-look-text class="stage-look">{{ _("web.creator.figure", skin=look.skin_tone, hair_colour=look.hair_colour, hair=hair_text, beard=beard_text) }}</p>
+      <p data-look-text class="stage-look">{{ _("web.creator.figure", **chosen) }}</p>
     </div>
     <div data-bubble class="stage-bubble">
       <svg aria-hidden="true" viewBox="0 0 30 24" class="bubble-tail">
@@ -34,5 +43,6 @@
       </p>
     </div>
   </div>
-  <figcaption class="stage-caption">{{ _("web.creator.figure.caption") }}</figcaption>
+  {% if figure %}<script type="application/json" data-model>{{ figure|tojson }}</script>{% endif %}
+  <figcaption data-caption class="stage-caption">{{ _("web.creator.figure.caption") }}</figcaption>
 </figure>

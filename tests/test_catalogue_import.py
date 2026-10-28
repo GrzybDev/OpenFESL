@@ -30,14 +30,6 @@ async def extracted(folder: Path, capsys: pytest.CaptureFixture[str]) -> Path:
     return out
 
 
-@pytest.fixture
-def files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """Name the folder of the deployment's files, before a server starts with it."""
-    folder = tmp_path / "files"
-    monkeypatch.setenv("FILES_PATH", str(folder))
-    return folder
-
-
 def kept_files(folder: Path) -> list[str]:
     return sorted(str(path.relative_to(folder).as_posix()) for path in folder.rglob("*.*"))
 

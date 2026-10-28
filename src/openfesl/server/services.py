@@ -20,6 +20,7 @@ from openfesl.core.display_names import DisplayNames
 from openfesl.core.drops import Drops
 from openfesl.core.entitlements import EntitlementService
 from openfesl.core.fesl import Route
+from openfesl.core.figures import Figures
 from openfesl.core.game_http import GameHttp
 from openfesl.core.games import Games
 from openfesl.core.hero_items import OwnWrites
@@ -118,6 +119,7 @@ class GameServices:
         self.feed = AdminFeed(stores.admin_log)
         self.catalogue_files = CatalogueFolder(settings.files_path) if settings.files_path else None
         self.catalogues = Catalogues(stores.catalogues, self.catalogue_files, games)
+        self.figures = Figures(self.catalogues)
         self.store = Store(stores.products, self.catalogues, games)
         drops = Drops(self.catalogues, stores.entitlements)
         self.deals = HotDeals(stores.products, stores.deals, stores.settings, self.catalogues)

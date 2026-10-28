@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 from collections.abc import AsyncIterator, Iterator
+from pathlib import Path
 
 import anyio
 import pytest
@@ -14,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 # Docker Desktop on Windows publishes container ports on 127.0.0.1, not on the name localhost.
 os.environ.setdefault("TESTCONTAINERS_HOST_OVERRIDE", "127.0.0.1")
 
+from playwright.async_api import Browser, Error, async_playwright
 from support import FESL, PUBLIC_URL, Mailbox, game
 from testcontainers.community.postgres import PostgresContainer
 
@@ -99,6 +101,29 @@ async def admin_provider(monkeypatch: pytest.MonkeyPatch) -> AsyncIterator[Ident
         }.items():
             monkeypatch.setenv(key, value)
         yield running
+
+
+@pytest.fixture
+def files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Name the folder of the deployment's files, before a server starts with it."""
+    folder = tmp_path / "files"
+    monkeypatch.setenv("FILES_PATH", str(folder))
+    return folder
+
+
+@pytest.fixture
+async def edge() -> AsyncIterator[Browser]:
+    """Start Microsoft Edge without a window, which runs the pages' scripts."""
+    async with async_playwright() as playwright:
+        try:
+            # WebGL drawn in software, as on machines without a graphics card.
+            browser = await playwright.chromium.launch(
+                channel="msedge", args=["--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
+            )
+        except Error:
+            pytest.skip("Microsoft Edge, which runs the pages' scripts, is not installed")
+        yield browser
+        await browser.close()
 
 
 @pytest.fixture

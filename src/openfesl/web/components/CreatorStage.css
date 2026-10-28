@@ -68,15 +68,25 @@
     &.hop {
       animation: creator-hop 170ms var(--ease-menu);
     }
+
+    /* The game's model answers a change with its own motion, while the bubble still grows. */
+    [data-shown="model"] &.hop {
+      animation: none;
+    }
   }
 
-  /* The class glyph on the faction's colour over the look in words, which the bubble comes
-     from. */
+  /* The class glyph on the faction's colour over the look in words, which the bubble comes from
+     until the model is shown. */
   .stage-stand-in {
     display: grid;
     width: 60%;
     justify-items: center;
     gap: 8px;
+    transition: opacity 200ms var(--ease-menu);
+
+    [data-shown="model"] & {
+      opacity: 0;
+    }
   }
 
   .stage-glyph {
@@ -113,6 +123,21 @@
     text-align: center;
   }
 
+  /* The game's model in the hero's box, faded in over the glyph once it is drawn. */
+  .stage-model {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    aspect-ratio: 300 / 420;
+    opacity: 0;
+    transition: opacity 200ms var(--ease-menu);
+
+    [data-shown="model"] & {
+      opacity: 1;
+    }
+  }
+
   .stage-bubble {
     position: absolute;
     left: 70%;
@@ -125,9 +150,15 @@
     color: #1f1712;
     text-align: center;
     transform-origin: 0 30px;
+    transition: top 200ms var(--ease-menu);
 
     .hop > & {
       animation: creator-pop 170ms var(--ease-menu);
+    }
+
+    /* Beside the model's head. */
+    [data-shown="model"] & {
+      top: 0;
     }
   }
 
@@ -194,7 +225,10 @@
       animation: none;
     }
 
-    .stage-glyph {
+    .stage-stand-in,
+    .stage-glyph,
+    .stage-model,
+    .stage-bubble {
       transition: none;
     }
   }
@@ -238,6 +272,10 @@
       top: 33%;
       width: 210px;
       padding: 10px 12px 12px;
+
+      [data-shown="model"] & {
+        top: 5%;
+      }
     }
 
     .bubble-tail {

@@ -12,6 +12,17 @@ FILE_CACHE = "public, max-age=31536000, immutable"
 _TYPES = {".webp": "image/webp", ".glb": "model/gltf-binary"}
 
 
+def catalogue_file_url(game: str, revision: str, path: str) -> str:
+    """Return the address of a file that an import keeps.
+
+    Args:
+        game: The game's data-file name.
+        revision: The import.
+        path: The file's path in the import's folder.
+    """
+    return f"/catalogues/{game}/{revision}/{path}"
+
+
 def catalogue_file_routes(games: Games, catalogues: Catalogues, files: CatalogueFiles) -> APIRouter:
     """Return the icons, hero models and textures that the games' imported catalogues keep.
 

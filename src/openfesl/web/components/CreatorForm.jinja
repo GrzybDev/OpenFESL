@@ -1,4 +1,4 @@
-{#def rules, look, roster, name: str, refused: str, from_game: bool, kits: dict, slot: int #}
+{#def rules, look, roster, name: str, refused: str, from_game: bool, kits: dict, slot: int, figure: dict | None #}
 {# The one-screen creator: the hero on the stage at the left, the faction, class and look on the
    wooden panel at the right, and the naming step. Without scripts every list shows, the naming
    is the form's last part, and the name is checked when the form is sent. #}
@@ -27,6 +27,7 @@
   "who": who,
   "bubble_who": _("web.creator.bubble.who", who="%(who)s"),
   "look": _("web.creator.figure", skin="%(skin)s", hair_colour="%(hair_colour)s", hair="%(hair)s", beard="%(beard)s"),
+  "model_label": _("web.creator.model", who="%(who)s", skin="%(skin)s", hair_colour="%(hair_colour)s", hair="%(hair)s", beard="%(beard)s"),
   "hair": _("web.creator.figure.hair", style="%(style)s"),
   "no_hair": _("web.creator.figure.no_hair"),
   "beard": _("web.creator.figure.beard", style="%(style)s"),
@@ -57,7 +58,7 @@
   <input type="hidden" name="csrf" value="{{ csrf }}">
   {% if from_game %}<input type="hidden" name="from" value="game">{% endif %}
   <div class="creator-box">
-    <CreatorStage :look="look" :who="who[current]" :hair="hair" :beard="beard" />
+    <CreatorStage :look="look" :who="who[current]" :hair="hair" :beard="beard" :figure="figure" />
     <div class="creator-panel">
       <svg aria-hidden="true"
            focusable="false"

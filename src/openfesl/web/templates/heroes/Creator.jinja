@@ -1,4 +1,4 @@
-{#def rules, roster, look, name: str, refused: str, notice: str, from_game: bool, kits: dict, next: str #}
+{#def rules, roster, look, name: str, refused: str, notice: str, from_game: bool, kits: dict, next: str, figure: dict | None #}
 {# The hero creator: why the game opened it, the slots, and the one-screen creator, or why no hero
    can be created now. #}
 {% set title = _("web.creator.title") %}
@@ -89,6 +89,6 @@
       </div>
     </section>
   {% else %}
-    <CreatorForm :rules="rules" :look="look" :roster="roster" :name="name" :refused="refused" :from_game="from_game" :kits="kits" :slot="slot" />
+    <CreatorForm :rules="rules" :look="look" :roster="roster" :name="name" :refused="refused" :from_game="from_game" :kits="kits" :slot="slot" :figure="figure" />
   {% endif %}
 </Layout>

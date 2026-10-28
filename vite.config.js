@@ -10,11 +10,17 @@ export default defineConfig({
     emptyOutDir: true,
     manifest: "manifest.json",
     modulePreload: false,
+    // The script of the game's models of heroes, three.js mostly, which only a stage that shows
+    // them loads.
+    chunkSizeWarningLimit: 700,
     rolldownOptions: {
       input: {
         head: "src/openfesl/web/assets/head.js",
         app: "src/openfesl/web/assets/app.js",
       },
+      // Minifying drops comments, and with them the licence notices that bundled packages
+      // require to travel with their code.
+      output: { comments: { legal: true } },
     },
   },
 });

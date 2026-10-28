@@ -2,6 +2,10 @@
 // work, and I'm done opens the naming dialog, whose name is checked as it is typed. Without
 // scripts the same form shows every list and its naming part, and the server checks the name.
 import { checkName, closeDialog, decode, fill, flash, reducedMotion } from "./naming.js";
+import { heroStage } from "./stage.js";
+
+// The fields of the look that the hero's model is drawn in.
+const LOOK = ["faction", "class", "skin_tone", "hair_colour", "hair_style", "facial_hair"];
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.querySelector("[data-creator]");
@@ -20,6 +24,7 @@ function creator(form) {
   const naming = form.querySelector("[data-naming]");
   const input = naming.querySelector("[name=name]");
   const done = form.querySelector("[data-done]");
+  const stage = heroStage(form.querySelector("[data-stage]"));
   let check = naming.querySelector("[data-check]")?.dataset.check ?? "";
 
   form.addEventListener("change", (event) => {
@@ -86,12 +91,16 @@ function creator(form) {
     const hair = place("hair_style");
     const beard = place("facial_hair");
     form.querySelector("[data-class-glyph] use").setAttribute("href", texts.classes[heroClass]);
-    form.querySelector("[data-look-text]").textContent = fill(texts.look, {
+    const chosen = {
+      who: decode(who),
       skin: form.dataset.skin,
       hair_colour: form.dataset.hairColour,
       hair: hair ? fill(texts.hair, { style: hair }) : decode(texts.no_hair),
       beard: beard ? fill(texts.beard, { style: beard }) : decode(texts.no_beard),
-    });
+    };
+    form.querySelector("[data-look-text]").textContent = fill(texts.look, chosen);
+    const look = new URLSearchParams(LOOK.map((name) => [name, form.elements[name].value]));
+    stage.show(look, fill(texts.model_label, chosen));
     const note = form.querySelector("[data-look-note]");
     if (note) {
       note.textContent = fill(texts.note, { faction: decode(texts.factions[faction]) });

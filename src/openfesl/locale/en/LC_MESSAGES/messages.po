@@ -272,6 +272,12 @@ msgstr "no facial hair"
 msgid "web.creator.figure.caption"
 msgstr "The game shows the hero with its own models."
 
+msgid "web.creator.model"
+msgstr "The game's model of the hero: %(who)s, skin tone %(skin)s, hair colour %(hair_colour)s, %(hair)s, %(beard)s."
+
+msgid "web.creator.model.caption"
+msgstr "The game's model of the hero, imported by the administrators of this service from their copy of the game."
+
 msgid "web.creator.faction"
 msgstr "Faction"
 

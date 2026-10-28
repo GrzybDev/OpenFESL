@@ -2,10 +2,11 @@ from collections.abc import Awaitable, Callable, Mapping
 from typing import Any
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from starlette.exceptions import HTTPException
 
-from openfesl.core.catalogues import Catalogues
+from openfesl.core.catalogues import Catalogues, file_path
+from openfesl.core.figures import Figure, Figures
 from openfesl.core.games import Game, Games
 from openfesl.core.hero_rules import HeroRules
 from openfesl.core.heroes import (
@@ -18,17 +19,28 @@ from openfesl.core.heroes import (
 )
 from openfesl.core.texts import localize, translate_count
 from openfesl.web.account.session import signed_in
+from openfesl.web.catalogue_files import catalogue_file_url
 from openfesl.web.pages import Pages, listed
 from openfesl.web.sessions import form_matches, form_token
-from openfesl.web.site import NAME_CHECK, site_bar
+from openfesl.web.site import FIGURE, NAME_CHECK, site_bar
 
 CREATOR = "/user/createHero"
 
 
 class CreatorPages:
-    """The site's hero creator, the page of a hero just created and the check of a wanted name."""
+    """The site's hero creator and the page of a hero just created, with what their scripts ask.
 
-    def __init__(self, pages: Pages, games: Games, heroes: Heroes, catalogues: Catalogues) -> None:
+    The scripts check a wanted name and load the game's model of a hero with a look.
+    """
+
+    def __init__(
+        self,
+        pages: Pages,
+        games: Games,
+        heroes: Heroes,
+        catalogues: Catalogues,
+        figures: Figures,
+    ) -> None:
         """Prepare the creator of each game whose heroes are made on its site.
 
         Args:
@@ -36,11 +48,13 @@ class CreatorPages:
             games: The games, of which those with hero rules get a creator.
             heroes: Creates and lists the heroes.
             catalogues: Name the items of a new hero's starting kit, once imported.
+            figures: Assemble the game's models of heroes, where an import keeps them.
         """
         self._pages = pages
         self._games = games
         self._heroes = heroes
         self._catalogues = catalogues
+        self._figures = figures
 
     def routes(self) -> APIRouter:
         """Return each game's creator, its page of a created hero and its check of names."""
@@ -53,6 +67,7 @@ class CreatorPages:
                 )
                 router.add_api_route(base + CREATOR, self._create(game), methods=["POST"])
                 router.add_api_route(base + NAME_CHECK, self._check(game))
+                router.add_api_route(base + FIGURE, self._figure(game))
                 router.add_api_route(
                     base + "/heroes/{hero_id}/created",
                     self._created(game),
@@ -100,6 +115,16 @@ class CreatorPages:
             )
 
         return check_name
+
+    def _figure(self, game: Game) -> Callable[[Request], Awaitable[Response]]:
+        async def show_figure(request: Request) -> Response:
+            look = read_look(_rules(game), request.query_params)
+            figure = self._figures.figure(game, look) if look else None
+            if figure is None:
+                raise HTTPException(404)
+            return JSONResponse(figure_document(game, figure))
+
+        return show_figure
 
     def _created(self, game: Game) -> Callable[[Request, int], Awaitable[Response]]:
         async def show_created(request: Request, hero_id: int) -> Response:
@@ -159,9 +184,14 @@ class CreatorPages:
             },
             next=localize(f"/{game.id}{CREATOR}", request.state.language)
             + ("?from=game" if from_game else ""),
+            figure=self._document(game, look),
             csrf=form_token(request),
         )
         return self._pages.render(request, "heroes.Creator", status, **context)
+
+    def _document(self, game: Game, look: Look) -> dict[str, Any] | None:
+        figure = self._figures.figure(game, look)
+        return figure_document(game, figure) if figure else None
 
     async def _kits(self, game: Game, language: str) -> dict[tuple[str, str], str]:
         # What each faction's classes start with, named from the catalogue once it is imported.
@@ -181,6 +211,36 @@ class CreatorPages:
                     items = [_count("web.creator.kit.items", len(loadout.equipment), language)]
                 kits[(faction, hero_class)] = listed([*items, emotes], language)
         return kits
+
+
+def figure_document(game: Game, figure: Figure) -> dict[str, Any]:
+    """Return a hero as the game's menu draws it, as the stage's script reads it.
+
+    Files are named by their addresses; the pose names its clip.
+
+    Args:
+        game: The hero's game.
+        figure: The hero, assembled from the game's models.
+    """
+
+    def address(group: str, name: str) -> str:
+        return catalogue_file_url(game.id, figure.revision, file_path(group, name))
+
+    rig = figure.rig
+    role, time = figure.pose
+    return {
+        "skeleton": address("models", rig.model),
+        "pose": [next(iter(rig.roles.get(role, ())), role), time],
+        "parts": [address("models", name) for name in figure.parts],
+        "layers": [
+            {"texture": address("textures", layer.texture), "at": layer.at, "tint": layer.tint}
+            for layer in figure.layers
+        ],
+        "atlas": figure.atlas,
+        "warp": address("textures", figure.warp),
+        "light": figure.light,
+        "camera": figure.camera.model_dump(),
+    }
 
 
 def _named(name: str, uses: int | None, language: str) -> str:

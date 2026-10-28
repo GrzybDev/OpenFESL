@@ -184,6 +184,9 @@ importers:
       htmx.org:
         specifier: 4.0.0
         version: 4.0.0
+      three:
+        specifier: 0.186.1
+        version: 0.186.1
     devDependencies:
       prettier:
         specifier: 3.9.10
@@ -437,6 +440,9 @@ packages:
     resolution: {integrity: sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw==}
     engines: {node: '>=0.10.0'}
 
+  three@0.186.1:
+    resolution: {integrity: sha512-blFeqb49wRCSGUGj7gtpfnSGHy2lwDk94RhUmS1c/hTby70kvChbWpkJ4Pm1390LqzzvTmzgXKHPEafJwCb8jA==}
+
   tinyglobby@0.2.17:
     resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
     engines: {node: '>=12.0.0'}
@@ -641,6 +647,8 @@ snapshots:
       '@rolldown/binding-win32-x64-msvc': 1.2.15
 
   source-map-js@1.2.2: {}
+
+  three@0.186.1: {}
 
   tinyglobby@0.2.17:
     dependencies:

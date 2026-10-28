@@ -1,12 +1,11 @@
 import re
-from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import Any
 
 import anyio
 import pytest
 from heroes import MAGMA
-from playwright.async_api import Browser, BrowserContext, Error, async_playwright
+from playwright.async_api import Browser, BrowserContext
 from store import ROYAL_SOLDIER, grant, shopper, stock
 
 pytestmark = pytest.mark.anyio
@@ -26,17 +25,6 @@ window.game = {
   notifyPurchase: function () { record(["notifyPurchase"].concat([].slice.call(arguments))); },
 };
 """
-
-
-@pytest.fixture
-async def edge() -> AsyncIterator[Browser]:
-    async with async_playwright() as playwright:
-        try:
-            browser = await playwright.chromium.launch(channel="msedge")
-        except Error:
-            pytest.skip("Microsoft Edge, which runs the pages' scripts, is not installed")
-        yield browser
-        await browser.close()
 
 
 async def game_window(

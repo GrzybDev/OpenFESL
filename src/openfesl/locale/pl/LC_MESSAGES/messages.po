@@ -299,6 +299,12 @@ msgstr "bez zarostu"
 msgid "web.creator.figure.caption"
 msgstr "Gra pokazuje bohatera za pomocą własnych modeli."
 
+msgid "web.creator.model"
+msgstr "Model bohatera z gry: %(who)s, odcień skóry %(skin)s, kolor włosów %(hair_colour)s, %(hair)s, %(beard)s."
+
+msgid "web.creator.model.caption"
+msgstr "Model bohatera z gry, zaimportowany przez administratorów tego serwisu z ich kopii gry."
+
 msgid "web.creator.faction"
 msgstr "Frakcja"
 
