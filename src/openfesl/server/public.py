@@ -5,6 +5,7 @@ from openfesl.core.verification import Confirmation, EmailVerification
 from openfesl.server.services import GameServices
 from openfesl.server.settings import Settings
 from openfesl.server.stores import Stores
+from openfesl.web.account.proof import ProofPages
 from openfesl.web.account.services import SignInServices
 from openfesl.web.account.sign_in import SignInPages
 from openfesl.web.activity import activity_routes
@@ -76,6 +77,7 @@ def include_public_routes(
 
     app.include_router(verification_routes(confirm, pages))
     app.include_router(launcher_routes(lambda: app.state.launcher))
+    turnstile = settings.turnstile
     sign_in_services = SignInServices(
         settings.sign_in_services, settings.public_url, lambda: app.state.sign_in
     )
@@ -85,8 +87,10 @@ def include_public_routes(
         services.policies,
         lambda: app.state.sign_in,
         settings.sends_mail,
-        settings.turnstile,
+        turnstile,
         sign_in_services,
     )
+    proof = ProofPages(pages, games, sign_in_services, lambda: app.state.sign_in, turnstile)
     app.include_router(sign_in.routes())
     app.include_router(sign_in_services.routes())
+    app.include_router(proof.routes())

@@ -2230,6 +2230,12 @@ msgstr "soldiers in Bad Company 2"
 msgid "games.bfheroes.personas.kept"
 msgstr "heroes in Battlefield Heroes"
 
+msgid "games.bfbc2.personas"
+msgstr "soldiers"
+
+msgid "games.bfheroes.personas"
+msgstr "heroes"
+
 msgid "web.admin.servers"
 msgstr "Servers"
 
@@ -2325,14 +2331,20 @@ msgstr "Nothing needs attention."
 msgid "web.admin.calm.text"
 msgstr "A new server appears here when it first tries to host. Warnings appear here too, such as a revoked server that keeps trying."
 
-msgid "web.admin.toast.saved"
+msgid "web.toast.saved"
 msgstr "Saved"
 
-msgid "web.admin.toast.error"
+msgid "web.toast.error"
 msgstr "Error"
 
-msgid "web.admin.toast.dismiss"
+msgid "web.toast.dismiss"
 msgstr "Dismiss"
+
+msgid "web.account.toast.linked"
+msgstr "%(service)s linked as %(name)s. Signed in as %(account)s."
+
+msgid "web.account.toast.signed_in"
+msgstr "Signed in as %(account)s."
 
 
 msgid "web.admin.toast.failed"
@@ -4429,3 +4441,93 @@ msgstr "Existing accounts sign in as usual with the e-mail address and game pass
 
 msgid "web.account.notice.no_registration.text.services"
 msgstr "Existing accounts sign in as usual, through a linked service or with the e-mail address and game password."
+
+msgid "web.account.proof"
+msgstr "Link %(service)s"
+
+msgid "web.account.proof.subtitle"
+msgstr "Proof of the account needed"
+
+msgid "web.account.proof.belongs"
+msgstr "%(address)s belongs to the OpenFESL account %(account)s."
+
+msgid "web.account.proof.belongs.text"
+msgstr "%(service)s marks this address as verified for the %(service)s account %(name)s. Linking it to %(account)s needs one of the proofs below; %(service)s is then linked and the account signed in."
+
+msgid "web.account.proof.password"
+msgstr "With the game password"
+
+msgid "web.account.proof.password.note"
+msgstr "The password %(account)s uses in %(games)s, never %(service)s's."
+
+msgid "web.account.proof.busy"
+msgstr "Linking"
+
+msgid "web.account.proof.services"
+msgstr "Or through a linked service"
+
+msgid "web.account.proof.services.first"
+msgstr "Through a linked service"
+
+msgid "web.account.proof.through"
+msgstr "Sign in with %(linked)s to link %(service)s"
+
+msgid "web.account.proof.cancel"
+msgstr "Cancel"
+
+msgid "web.account.proof.cancel.text"
+msgstr "Forgets %(service)s's answer and returns to sign-in; nothing is linked."
+
+msgid "web.account.proof.changes"
+msgstr "What linking changes"
+
+msgid "web.account.proof.changes.way"
+msgstr "One more way in"
+
+msgid "web.account.proof.changes.way.text"
+msgstr "%(service)s signs in to %(account)s from then on, beside %(ways)s."
+
+msgid "web.account.proof.ways.password"
+msgstr "its game password"
+
+msgid "web.account.proof.changes.rest"
+msgstr "Nothing else changes"
+
+msgid "web.account.proof.changes.rest.text"
+msgstr "The display name, country and %(personas)s stay as they are; no second account is made."
+
+msgid "web.account.proof.changes.why"
+msgstr "Why a proof"
+
+msgid "web.account.proof.changes.why.text"
+msgstr "A service only joins an account through one of the account's own ways in or its mailbox."
+
+msgid "web.account.proof.changes.check.text"
+msgstr "The game password and e-mail forms use Cloudflare Turnstile to tell people from automated requests."
+
+msgid "web.account.proof.not_linked"
+msgstr "Not linked"
+
+msgid "web.account.proof.wrong"
+msgstr "This is not the game password of %(account)s."
+
+msgid "web.account.proof.wrong.text"
+msgstr "%(service)s is not linked yet. The other proofs work as well."
+
+msgid "web.account.proof.check.text"
+msgstr "The game password field is empty again; %(service)s is not linked yet."
+
+msgid "web.account.proof.paused"
+msgstr "Proof with the game password is paused for a few minutes."
+
+msgid "web.account.proof.paused.text"
+msgstr "Several attempts for this address did not match. The other proofs are not paused."
+
+msgid "web.account.proof.another"
+msgstr "%(linked)s answered with an account that is not linked to %(account)s."
+
+msgid "web.account.proof.another.text"
+msgstr "%(service)s is not linked yet. The %(linked)s account linked to %(account)s proves it, as do the other proofs."
+
+msgid "web.account.proof.deactivated.text"
+msgstr "A deletion request deactivated it on %(date)s. %(service)s was not linked; an admin completes the deletion."

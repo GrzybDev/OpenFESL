@@ -5,5 +5,5 @@
   {% if viewer %}<AdminStatus />{% endif %}
   <AdminMenu :current="current" />
   {{ content }}
-  {% if viewer and viewer.toast %}<Toast />{% endif %}
+  {% if toast %}<Toast />{% endif %}
 </Layout>

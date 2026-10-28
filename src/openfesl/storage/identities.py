@@ -1,6 +1,8 @@
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from openfesl.core.identities import Identity, LinkedIdentity
 from openfesl.storage.models import SignInIdentityRow
 
 
@@ -29,3 +31,44 @@ class SqlIdentityStore:
                 )
             )
         return account_id
+
+    async def linked(self, account_id: int) -> list[LinkedIdentity]:
+        """Return the identities linked to an account, the oldest first.
+
+        Args:
+            account_id: The account.
+        """
+        async with self._sessions() as session:
+            rows = await session.scalars(
+                select(SignInIdentityRow)
+                .where(SignInIdentityRow.account_id == account_id)
+                .order_by(SignInIdentityRow.linked_at)
+            )
+            return [
+                LinkedIdentity(row.service, row.subject, row.name, row.linked_at) for row in rows
+            ]
+
+    async def link(self, account_id: int, identity: Identity) -> bool:
+        """Link an identity to an account, which it signs in from then on.
+
+        Args:
+            account_id: The account.
+            identity: The identity.
+
+        Returns:
+            Whether it was linked, which it is not when it opens another account or the account
+            has an identity of that service already.
+        """
+        async with self._sessions.begin() as session:
+            linked = await session.scalar(
+                insert(SignInIdentityRow)
+                .values(
+                    service=identity.service,
+                    subject=identity.subject,
+                    account_id=account_id,
+                    name=identity.name,
+                )
+                .on_conflict_do_nothing()
+                .returning(SignInIdentityRow.account_id)
+            )
+        return linked is not None

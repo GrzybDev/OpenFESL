@@ -4,8 +4,6 @@ from typing import Any
 
 from fastapi import Request
 
-from openfesl.web.pages import Toast
-
 
 class FormExpired(Exception):
     """Raised for a form whose token does not match the session's; nothing changes."""
@@ -69,16 +67,6 @@ def toast(request: Request, key: str, error: bool = False, **values: str) -> Non
         values: The text's placeholders.
     """
     request.session["toast"] = {"key": key, "values": values, "error": error}
-
-
-def take_toast(request: Request) -> Toast | None:
-    """Return what came of the last change, if it is still to be shown, and forget it.
-
-    Args:
-        request: The request of the page that shows it.
-    """
-    shown = request.session.pop("toast", None)
-    return Toast(shown["key"], shown["values"], shown["error"]) if shown else None
 
 
 def notify(request: Request, kind: str, **values: str) -> None:

@@ -20,7 +20,6 @@ from openfesl.web.sessions import (
     notify,
     renew_form_token,
     take_notice,
-    take_toast,
 )
 
 logger = logging.getLogger(__name__)
@@ -163,7 +162,7 @@ class AdminSessions:
         viewer = None
         if admin is not None:
             through = self.provider.name if self.provider else ""
-            viewer = Viewer(admin, through, take_toast(request), await self._menu_counts())
+            viewer = Viewer(admin, through, await self._menu_counts())
         return self._pages.render(
             request, template, status, steel=True, viewer=viewer, csrf=token, **context
         )

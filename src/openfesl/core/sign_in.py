@@ -5,7 +5,7 @@ from enum import Enum, auto
 from openfesl.core.accounts import STATE_ERRORS, Account, AccountState, AccountStore
 from openfesl.core.fesl import TransactionError
 from openfesl.core.games import Games
-from openfesl.core.identities import Identity, IdentityStore
+from openfesl.core.identities import Identity, IdentityStore, LinkedIdentity
 from openfesl.core.limits import Attempts, Mailings, Wait
 from openfesl.core.logins import Logins
 from openfesl.core.policies import GamePolicies
@@ -53,6 +53,34 @@ class LinkSent:
 
     address: str
     expires: datetime
+
+
+@dataclass(frozen=True, slots=True)
+class ProofNeeded:
+    """A new identity whose address, verified by its service, belongs to an account.
+
+    A proof that the account is the visitor's links the identity to it.
+
+    Attributes:
+        account: The account.
+    """
+
+    account: Account
+
+
+@dataclass(frozen=True, slots=True)
+class ProofTarget:
+    """An account that a new identity is to be linked to, with the ways it can be proved.
+
+    Attributes:
+        account: The account.
+        password: Whether it has a game password.
+        linked: The identities linked to it, through whose services it can be proved.
+    """
+
+    account: Account
+    password: bool
+    linked: list[LinkedIdentity]
 
 
 class WebSignIn:
@@ -113,26 +141,61 @@ class WebSignIn:
         await self.admit(credentials.account)
         return credentials.account
 
-    async def with_service(self, identity: Identity) -> Account | None:
+    async def with_service(self, identity: Identity) -> Account | ProofNeeded | None:
         """Return the account that an identity at a sign-in service is linked to.
 
-        Sign-ins through services are never paused, as the service checked who signs in.
+        Sign-ins through services are never paused, as the service checked who signs in. A
+        service's verified address only finds the account that a proof may link the identity to;
+        it never signs in on its own.
 
         Args:
             identity: Who signed in through the service.
 
         Returns:
-            The account; None for an identity that no account uses yet.
+            The account; the account that a proof may link the identity to, when the service
+            verified its address and the account has no identity of the service yet; None for
+            any other identity that no account uses yet.
 
         Raises:
             SignInRefused: When the account may not sign in.
         """
         account_id = await self._identities.account_of(identity.service, identity.subject)
         account = await self._accounts.account(account_id) if account_id is not None else None
-        if account is None:
+        if account is not None:
+            await self.admit(account)
+            return account
+        found = await self._accounts.find(identity.address) if identity.address else None
+        if found is None or found.account.server:
             return None
-        await self.admit(account)
-        return account
+        linked = await self._identities.linked(found.account.id)
+        if any(other.service == identity.service for other in linked):
+            return None
+        return ProofNeeded(found.account)
+
+    async def proof_target(self, account_id: int) -> ProofTarget | None:
+        """Return an account that a new identity is to be linked to, with its ways in.
+
+        Args:
+            account_id: The account.
+        """
+        account = await self._accounts.account(account_id)
+        found = await self._accounts.find(account.nuid) if account else None
+        if found is None:
+            return None
+        linked = await self._identities.linked(found.account.id)
+        return ProofTarget(found.account, found.password_hash is not None, linked)
+
+    async def link(self, account: Account, identity: Identity) -> bool:
+        """Link an identity to an account that proved to be the visitor's.
+
+        Args:
+            account: The account, which a proof showed to be the visitor's.
+            identity: The identity.
+
+        Returns:
+            Whether it was linked, which it is not when it was linked elsewhere meanwhile.
+        """
+        return await self._identities.link(account.id, identity)
 
     async def admit(self, account: Account) -> None:
         """Check that an account that proved to be the visitor's may sign in.

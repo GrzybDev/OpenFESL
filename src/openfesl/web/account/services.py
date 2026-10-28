@@ -5,20 +5,31 @@ from dataclasses import dataclass
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse, Response
 
+from openfesl.core.accounts import Account
 from openfesl.core.identities import Identity
-from openfesl.core.sign_in import SignInRefused, WebSignIn
+from openfesl.core.sign_in import ProofNeeded, Refusal, SignInRefused, WebSignIn
 from openfesl.core.texts import localize, translate
-from openfesl.web.account.session import SITE, WAITING, refused_notice, start, to_sign_in
+from openfesl.web.account.session import (
+    PENDING,
+    SITE,
+    WAITING,
+    open_page,
+    pending_identity,
+    proved,
+    refused_notice,
+    start,
+    to_sign_in,
+)
 from openfesl.web.oidc import ServiceAnswer, ServiceClient, SignInFailed, SignInService
-from openfesl.web.sessions import form_matches, inside
+from openfesl.web.sessions import form_matches, inside, notify
 
 logger = logging.getLogger(__name__)
 
 # The one address that every service sends the browser back to; the session names the service.
 CALLBACK = "/sign-in/callback"
-# The sign-in under way at a service, and the answer of a service whose identity no account uses.
+# The sign-in under way at a service: to sign in, or to prove an account for a pending identity.
 FLOW = "service"
-PENDING = "pending"
+PROOF = "/sign-in/proof"
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,6 +91,41 @@ class SignInServices:
             for service in (client.service for client in self._clients.values())
         ]
 
+    def view(self, service_id: str, language: str) -> ServiceView | None:
+        """Return a configured service as the pages show it.
+
+        Args:
+            service_id: The service's id.
+            language: The page's language code.
+        """
+        return next((view for view in self.views(language) if view.id == service_id), None)
+
+    async def start(
+        self, request: Request, service_id: str, back: str, proof: bool = False
+    ) -> Response:
+        """Send the browser to a service to sign in.
+
+        Args:
+            request: The request of the form that starts it.
+            service_id: The service's id.
+            back: The page to open after signing in, if any.
+            proof: Whether the sign-in proves the account of a pending identity rather than
+                signing in.
+        """
+        client = self._clients[service_id]
+        request.session[FLOW] = {
+            "service": service_id,
+            "next": back,
+            "language": request.state.language,
+            "proof": proof,
+        }
+        try:
+            return await client.start(request)
+        except SignInFailed as error:
+            logger.warning("The sign-in service %s cannot be reached: %s", service_id, error)
+            notify(request, "unreachable", service=client.service.name)
+            return open_page(request, PROOF if proof else "/sign-in", back)
+
     def allow_forms(self, response: Response) -> None:
         """Widen a page's policy so that its service tiles may lead to every service.
 
@@ -97,21 +143,10 @@ class SignInServices:
         async def begin(request: Request) -> Response:
             form = await request.form()
             back = inside(str(form.get("next", "")), SITE)
-            client = self._clients.get(str(form.get("service", "")))
-            if not form_matches(request, form) or client is None:
+            service_id = str(form.get("service", ""))
+            if not form_matches(request, form) or service_id not in self._clients:
                 return to_sign_in(request, back, "form")
-            request.session[FLOW] = {
-                "service": client.service.id,
-                "next": back,
-                "language": request.state.language,
-            }
-            try:
-                return await client.start(request)
-            except SignInFailed as error:
-                logger.warning(
-                    "The sign-in service %s cannot be reached: %s", client.service.id, error
-                )
-                return to_sign_in(request, back, "unreachable", service=client.service.name)
+            return await self.start(request, service_id, back)
 
         @router.get(CALLBACK)
         async def finish(request: Request) -> Response:
@@ -125,7 +160,10 @@ class SignInServices:
                 answer = await client.finish(request)
             except SignInFailed as error:
                 logger.info("A sign-in through %s did not complete: %r", service.id, error)
-                return to_sign_in(request, flow["next"], "failed", service=service.name)
+                notify(request, "failed", service=service.name)
+                return open_page(request, PROOF if flow["proof"] else "/sign-in", flow["next"])
+            if flow["proof"]:
+                return await self._proved(request, service, answer)
             return await self._signed_in(request, service, answer, flow["next"])
 
         return router
@@ -139,18 +177,48 @@ class SignInServices:
         except SignInRefused as refused:
             return to_sign_in(request, back, **refused_notice(request, refused, service.name))
         language = request.state.language
-        if account is None:
+        if not isinstance(account, Account):
             request.session[PENDING] = {
                 "service": service.id,
                 "subject": identity.subject,
                 "name": identity.name,
                 "address": identity.address,
                 "next": back,
+                "account": account.account.id if isinstance(account, ProofNeeded) else None,
             }
-            return RedirectResponse(localize("/register/service", language), 303)
+            target = PROOF if isinstance(account, ProofNeeded) else "/register/service"
+            return RedirectResponse(localize(target, language), 303)
         request.session.pop(WAITING, None)
         start(request, account, way=service.name)
         return RedirectResponse(back or localize("/account", language), 303)
+
+    async def _proved(
+        self, request: Request, service: SignInService, answer: ServiceAnswer
+    ) -> Response:
+        # The account of a linked service proves the pending identity's account.
+        pending = pending_identity(request)
+        if pending is None:
+            return RedirectResponse(localize("/sign-in", request.state.language), 303)
+        identity, account_id = pending
+        sign_in = self._sign_in()
+        try:
+            found = await sign_in.with_service(
+                Identity(service.id, answer.subject, answer.name, answer.address)
+            )
+        except SignInRefused as refused:
+            if refused.refusal is Refusal.UNCONFIRMED or refused.account is None:
+                request.session.pop(PENDING, None)
+                return to_sign_in(request, "", **refused_notice(request, refused))
+            since = refused.account.state_changed
+            notify(request, "deactivated", since=since.isoformat() if since else "")
+            return open_page(request, PROOF, "")
+        if not isinstance(found, Account) or found.id != account_id:
+            notify(request, "other", service=service.name)
+            return open_page(request, PROOF, "")
+        linked = await sign_in.link(found, identity)
+        pending_client = self._clients.get(identity.service)
+        name = pending_client.service.name if pending_client else identity.service
+        return proved(request, found, identity, name, linked)
 
 
 def _scope(scope: str, language: str) -> str:

@@ -3,7 +3,7 @@ from collections.abc import AsyncIterator
 
 import httpx2
 import pytest
-from accounts import execute, sign_in_through, sign_out
+from accounts import PASSWORD, execute, sign_in_through, sign_out
 from identity import IdentityProvider, form_token, identity_provider
 from support import cli, markup
 
@@ -117,3 +117,105 @@ async def test_an_unreachable_service_leaves_the_other_ways_in(
         assert started.status_code == 303
         page = await client.get(f"{base}{started.headers['location']}")
         assert "Invented Gone could not be reached." in page.text
+
+
+async def follow(
+    client: httpx2.AsyncClient, base: str, started: httpx2.Response
+) -> httpx2.Response:
+    """Follow a sign-in from the service's redirect to the page the site then opens."""
+    assert started.status_code == 302, started.text
+    back = await client.get(started.headers["location"])
+    done = await client.get(back.headers["location"])
+    assert done.status_code == 303, done.text
+    return await client.get(f"{base}{done.headers['location']}")
+
+
+async def test_a_verified_address_of_an_account_links_its_service_only_after_a_proof(
+    services: tuple[IdentityProvider, IdentityProvider],
+    base: str,
+    database_url: str,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    connect, plain = services
+    async with httpx2.AsyncClient() as client:
+        # A service's address finds an account only when the service marks it verified.
+        connect.user = {"sub": "c-bob", "email": "bob@example.test", "email_verified": False}
+        unverified = await sign_in_through(client, base, "connect")
+        assert unverified.headers["location"] == "/register/service"
+
+        connect.user = {
+            "sub": "c-ann",
+            "preferred_username": "ann-connect",
+            "email": "ann@example.test",
+            "email_verified": True,
+        }
+        asked = await sign_in_through(client, base, "connect", next="/terms")
+        assert asked.headers["location"] == "/sign-in/proof"
+        page = await client.get(f"{base}/sign-in/proof")
+        assert "ann@example.test belongs to the OpenFESL account ann@example.test." in page.text
+        wrong = await client.post(
+            f"{base}/sign-in/proof", data={"csrf": form_token(page.text), "password": "x"}
+        )
+        assert wrong.status_code == 400
+        assert "This is not the game password of ann@example.test." in wrong.text
+        linked = await client.post(
+            f"{base}/sign-in/proof", data={"csrf": form_token(page.text), "password": PASSWORD}
+        )
+        assert linked.headers["location"] == "/terms"
+        shown = (await client.get(f"{base}/terms")).text
+        assert "Invented Connect linked as ann-connect. Signed in as ann@example.test." in shown
+        await sign_out(client, base)
+        assert (await sign_in_through(client, base, "connect")).headers["location"] == "/account"
+        await sign_out(client, base)
+
+        # A linked service proves the account too, but only with the identity linked to it; the
+        # address comes from the service's list, which marks only one of them verified.
+        plain.user = {"id": 77, "login": "ann-plain"}
+        plain.emails = [
+            {"email": "elsewhere@example.test", "primary": True, "verified": False},
+            {"email": "ann@example.test", "primary": False, "verified": True},
+        ]
+        assert (await sign_in_through(client, base, "plain")).headers["location"] == (
+            "/sign-in/proof"
+        )
+        page = await client.get(f"{base}/sign-in/proof")
+        assert "Sign in with Invented Connect to link Invented Plain" in page.text
+        prove = {"csrf": form_token(page.text), "service": "connect"}
+        # An identity of a service that is no longer configured proves nothing.
+        await execute(
+            database_url,
+            "INSERT INTO sign_in_identity (service, subject, account_id, name)"
+            " SELECT 'retired', 'r-ann', id, 'ann-retired' FROM account"
+            " WHERE nuid = 'ann@example.test'",
+        )
+        retired = {**prove, "service": "retired"}
+        assert (await client.post(f"{base}/sign-in/proof/service", data=retired)).headers[
+            "location"
+        ] == "/sign-in"
+        connect.user = {"sub": "c-someone-else"}
+        other = await follow(
+            client, base, await client.post(f"{base}/sign-in/proof/service", data=prove)
+        )
+        assert "Invented Connect answered with an account that is not linked to" in other.text
+        connect.user = {"sub": "c-ann"}
+        done = await follow(
+            client, base, await client.post(f"{base}/sign-in/proof/service", data=prove)
+        )
+        assert "Invented Plain linked as ann-plain." in done.text
+        await sign_out(client, base)
+
+        # A deactivated account says so only after a right proof, and nothing is linked.
+        await cli(capsys, "accounts", "state", "bob@example.test", "deactivated")
+        connect.user = {"sub": "c-bob", "email": "bob@example.test", "email_verified": True}
+        await sign_in_through(client, base, "connect")
+        page = await client.get(f"{base}/sign-in/proof")
+        refused = await client.post(
+            f"{base}/sign-in/proof", data={"csrf": form_token(page.text), "password": PASSWORD}
+        )
+        assert refused.status_code == 403
+        assert "Invented Connect was not linked" in refused.text
+        cancelled = await client.post(
+            f"{base}/sign-in/proof/cancel", data={"csrf": form_token(page.text)}
+        )
+        assert cancelled.headers["location"] == "/sign-in"
+        assert (await client.get(f"{base}/sign-in/proof")).headers["location"] == "/sign-in"

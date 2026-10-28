@@ -2270,6 +2270,12 @@ msgstr "żołnierzy w Bad Company 2"
 msgid "games.bfheroes.personas.kept"
 msgstr "bohaterów w Battlefield Heroes"
 
+msgid "games.bfbc2.personas"
+msgstr "żołnierze"
+
+msgid "games.bfheroes.personas"
+msgstr "bohaterowie"
+
 msgid "web.admin.servers"
 msgstr "Serwery"
 
@@ -2371,14 +2377,20 @@ msgstr "Nic nie wymaga uwagi."
 msgid "web.admin.calm.text"
 msgstr "Nowy serwer pojawia się tutaj przy pierwszej próbie uruchomienia gry. Tutaj są też ostrzeżenia, na przykład o serwerze z cofniętym zatwierdzeniem, który nadal próbuje."
 
-msgid "web.admin.toast.saved"
+msgid "web.toast.saved"
 msgstr "Zapisano"
 
-msgid "web.admin.toast.error"
+msgid "web.toast.error"
 msgstr "Błąd"
 
-msgid "web.admin.toast.dismiss"
+msgid "web.toast.dismiss"
 msgstr "Zamknij"
+
+msgid "web.account.toast.linked"
+msgstr "Połączono usługę %(service)s jako %(name)s. Zalogowano jako %(account)s."
+
+msgid "web.account.toast.signed_in"
+msgstr "Zalogowano jako %(account)s."
 
 
 msgid "web.admin.toast.failed"
@@ -4553,3 +4565,93 @@ msgstr "Istniejące konta logują się jak zwykle adresem e-mail i hasłem do gi
 
 msgid "web.account.notice.no_registration.text.services"
 msgstr "Istniejące konta logują się jak zwykle: przez połączoną usługę albo adresem e-mail i hasłem do gier."
+
+msgid "web.account.proof"
+msgstr "Połącz %(service)s"
+
+msgid "web.account.proof.subtitle"
+msgstr "Potrzebny dowód, że konto jest właściwe"
+
+msgid "web.account.proof.belongs"
+msgstr "Adres %(address)s należy do konta OpenFESL %(account)s."
+
+msgid "web.account.proof.belongs.text"
+msgstr "Usługa %(service)s oznacza ten adres jako zweryfikowany dla konta %(name)s w tej usłudze. Połączenie go z kontem %(account)s wymaga jednego z poniższych dowodów; wtedy usługa %(service)s zostaje połączona, a konto zalogowane."
+
+msgid "web.account.proof.password"
+msgstr "Hasłem do gier"
+
+msgid "web.account.proof.password.note"
+msgstr "Hasło, którego %(account)s używa w %(games)s – nigdy hasło usługi %(service)s."
+
+msgid "web.account.proof.busy"
+msgstr "Łączenie"
+
+msgid "web.account.proof.services"
+msgstr "Lub przez połączoną usługę"
+
+msgid "web.account.proof.services.first"
+msgstr "Przez połączoną usługę"
+
+msgid "web.account.proof.through"
+msgstr "Zaloguj się przez %(linked)s, aby połączyć %(service)s"
+
+msgid "web.account.proof.cancel"
+msgstr "Anuluj"
+
+msgid "web.account.proof.cancel.text"
+msgstr "Odrzuca odpowiedź usługi %(service)s i wraca do logowania; nic nie zostaje połączone."
+
+msgid "web.account.proof.changes"
+msgstr "Co zmienia połączenie"
+
+msgid "web.account.proof.changes.way"
+msgstr "Jeszcze jeden sposób logowania"
+
+msgid "web.account.proof.changes.way.text"
+msgstr "Od tej chwili %(service)s loguje do konta %(account)s, obok: %(ways)s."
+
+msgid "web.account.proof.ways.password"
+msgstr "hasło do gier"
+
+msgid "web.account.proof.changes.rest"
+msgstr "Nic więcej się nie zmienia"
+
+msgid "web.account.proof.changes.rest.text"
+msgstr "Nazwa wyświetlana, kraj, %(personas)s pozostają bez zmian; nie powstaje drugie konto."
+
+msgid "web.account.proof.changes.why"
+msgstr "Dlaczego dowód"
+
+msgid "web.account.proof.changes.why.text"
+msgstr "Usługa dołącza do konta tylko przez jeden z jego własnych sposobów logowania albo przez jego skrzynkę pocztową."
+
+msgid "web.account.proof.changes.check.text"
+msgstr "Formularze hasła do gier i e-mail używają Cloudflare Turnstile, aby odróżnić ludzi od zautomatyzowanych żądań."
+
+msgid "web.account.proof.not_linked"
+msgstr "Nie połączono"
+
+msgid "web.account.proof.wrong"
+msgstr "To nie jest hasło do gier konta %(account)s."
+
+msgid "web.account.proof.wrong.text"
+msgstr "Usługa %(service)s nie jest jeszcze połączona. Pozostałe dowody też działają."
+
+msgid "web.account.proof.check.text"
+msgstr "Pole hasła do gier jest znowu puste; usługa %(service)s nie jest jeszcze połączona."
+
+msgid "web.account.proof.paused"
+msgstr "Dowód hasłem do gier jest wstrzymany na kilka minut."
+
+msgid "web.account.proof.paused.text"
+msgstr "Kilka prób dla tego adresu było nieudanych. Pozostałe dowody nie są wstrzymane."
+
+msgid "web.account.proof.another"
+msgstr "Usługa %(linked)s zwróciła konto, które nie jest połączone z %(account)s."
+
+msgid "web.account.proof.another.text"
+msgstr "Usługa %(service)s nie jest jeszcze połączona. Dowodem jest konto w usłudze %(linked)s połączone z %(account)s, podobnie jak pozostałe dowody."
+
+msgid "web.account.proof.deactivated.text"
+msgstr "Prośba o usunięcie dezaktywowała je dnia %(date)s. Usługa %(service)s nie została połączona; usunięcie kończy administrator."

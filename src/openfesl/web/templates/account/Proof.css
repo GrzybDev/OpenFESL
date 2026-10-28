@@ -1,0 +1,111 @@
+/* The proof's page: the account's address as a fact over the game password, one black row per
+   linked service, and the way back under the panel. */
+@layer pages {
+  .proof-fact {
+    display: flex;
+    min-height: 44px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px 12px;
+    margin-top: 2px;
+    background: var(--row);
+    padding: 6px 14px;
+    color: var(--ink);
+  }
+
+  .proof-fact-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .proof-fact-value {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .proof-service {
+    display: flex;
+    width: 100%;
+    min-height: 68px;
+    align-items: center;
+    gap: 14px;
+    margin-top: 2px;
+    background: var(--ink);
+    padding: 8px 14px 8px 8px;
+    color: var(--bright);
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 150ms var(--ease-menu);
+
+    &:hover {
+      background: var(--menu-hover);
+    }
+
+    /* The glyph stays in place, unlike an action block's chevron. */
+    &:hover .go,
+    &:focus-visible .go {
+      transform: none;
+    }
+  }
+
+  .proof-service-square {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    place-items: center;
+    background: var(--bar-dark);
+    transition: background-color 150ms var(--ease-menu);
+
+    .proof-service:is(:hover, :focus-visible, [aria-busy="true"]) & {
+      background: var(--accent);
+      color: var(--ink);
+    }
+  }
+
+  .proof-service-text {
+    display: grid;
+    gap: 4px;
+  }
+
+  .proof-service-name {
+    font-size: 15px;
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .proof-service-host {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.25;
+    font-weight: 600;
+    color: var(--soft);
+  }
+
+  .proof-cancel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+    margin-top: 10px;
+
+    p {
+      flex: 1 1 260px;
+      color: var(--soft);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .proof-service,
+    .proof-service-square {
+      transition: none;
+    }
+  }
+}

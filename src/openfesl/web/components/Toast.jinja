@@ -1,6 +1,6 @@
-{# What came of the admin's last change, at the bottom right: a success leaves on its own,
-   an error stays until dismissed. #}
-{% set shown = viewer.toast %}
+{# What came of the last change, at the bottom right: a success leaves on its own, an error
+   stays until dismissed. #}
+{% set shown = toast %}
 <div class="toasts">
   <div role="{{ 'alert' if shown.error else 'status' }}"
        {% if not shown.error %} data-leaves{% endif %}
@@ -13,13 +13,13 @@
       {% endif %}
     </span>
     <p class="toast-body">
-      <span class="toast-label">{{ _("web.admin.toast.error") if shown.error else _("web.admin.toast.saved") }}</span>
+      <span class="toast-label">{{ _("web.toast.error") if shown.error else _("web.toast.saved") }}</span>
       <span class="toast-text">{{ _(shown.key, **shown.values) }}</span>
     </p>
     <button type="button"
             data-dismiss
             class="toast-dismiss js-only"
-            aria-label="{{ _('web.admin.toast.dismiss') }}">
+            aria-label="{{ _('web.toast.dismiss') }}">
       <span><Icon name="x" :size="14" stroke="currentColor" /></span>
     </button>
   </div>

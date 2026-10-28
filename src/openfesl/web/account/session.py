@@ -1,5 +1,6 @@
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Mapping
 from datetime import UTC, datetime, timedelta
+from typing import Any
 from urllib.parse import urlencode
 
 from fastapi import Request
@@ -7,11 +8,12 @@ from fastapi.responses import RedirectResponse
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from openfesl.core.accounts import Account
+from openfesl.core.identities import Identity
 from openfesl.core.sign_in import Refusal, SignInRefused
 from openfesl.core.texts import localize
 from openfesl.core.verification import VALID_FOR
 from openfesl.web.pages import Player
-from openfesl.web.sessions import notify, renew_form_token
+from openfesl.web.sessions import notify, renew_form_token, toast
 
 # A player signs in again after this long, so a browser left signed in does not stay so for good.
 LIFETIME = timedelta(days=14)
@@ -20,6 +22,11 @@ PLAYER = "player"
 SITE = ("/",)
 # The account that proved to be the visitor's while it waits for its address to be confirmed.
 WAITING = "waiting"
+# The answer of a service whose identity no account uses yet: the account to link it to after a
+# proof, or none for the step that creates one.
+PENDING = "pending"
+# The notices' times, which the session keeps as ISO text.
+_TIMES = ("sent", "since", "expires", "last", "until")
 
 
 def start(request: Request, account: Account, way: str) -> None:
@@ -88,6 +95,58 @@ def refused_notice(request: Request, refused: SignInRefused, service: str = "") 
     return {"kind": "wrong"}
 
 
+def pending_identity(request: Request) -> tuple[Identity, int] | None:
+    """Return the service's answer that waits for a proof, with the account it is to be linked to.
+
+    Args:
+        request: The request of the proof.
+    """
+    pending = request.session.get(PENDING)
+    if not pending or pending.get("account") is None:
+        return None
+    identity = Identity(pending["service"], pending["subject"], pending["name"], pending["address"])
+    return identity, pending["account"]
+
+
+def proved(
+    request: Request, account: Account, identity: Identity, service: str, linked: bool
+) -> RedirectResponse:
+    """Sign in an account that a proof showed to be the visitor's, saying what was linked.
+
+    Args:
+        request: The request that ends the proof.
+        account: The account.
+        identity: The identity the proof was for.
+        service: The name of its service.
+        linked: Whether the identity was linked to the account.
+    """
+    back = (request.session.pop(PENDING, None) or {}).get("next", "")
+    request.session.pop(WAITING, None)
+    start(request, account, way=service)
+    name = account.display_name or account.nuid
+    if linked:
+        toast(
+            request, "web.account.toast.linked", service=service, name=identity.name, account=name
+        )
+    else:
+        toast(request, "web.account.toast.signed_in", account=name)
+    return RedirectResponse(back or localize("/account", request.state.language), 303)
+
+
+def shown(notice: Mapping[str, Any] | None) -> dict[str, Any] | None:
+    """Return a page's notice with its times as moments, as the page shows them.
+
+    Args:
+        notice: The notice, whose times may be ISO text, as from the session.
+    """
+    if not notice:
+        return None
+    return {
+        key: datetime.fromisoformat(value) if key in _TIMES and isinstance(value, str) else value
+        for key, value in notice.items()
+    }
+
+
 def to_sign_in(request: Request, back: str, kind: str, **values: str) -> RedirectResponse:
     """Return to the sign-in page, which says what happened.
 
@@ -98,7 +157,18 @@ def to_sign_in(request: Request, back: str, kind: str, **values: str) -> Redirec
         values: The details the page names, such as the service.
     """
     notify(request, kind, **values)
-    target = localize("/sign-in", request.state.language)
+    return open_page(request, "/sign-in", back)
+
+
+def open_page(request: Request, path: str, back: str = "") -> RedirectResponse:
+    """Send the browser to one of the sign-in's pages in the request's language.
+
+    Args:
+        request: The request.
+        path: The page's path without a language, such as /sign-in.
+        back: The page to open after signing in, which the page carries on; none when empty.
+    """
+    target = localize(path, request.state.language)
     return RedirectResponse(f"{target}?{urlencode({'next': back})}" if back else target, 303)
 
 

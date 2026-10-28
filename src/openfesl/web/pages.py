@@ -56,7 +56,7 @@ class Assets:
 
 @dataclass(frozen=True, slots=True)
 class Toast:
-    """What came of the admin's last change, shown once on the next page.
+    """What came of the last change, shown once on the next page.
 
     Attributes:
         key: The text in the catalogues.
@@ -76,13 +76,11 @@ class Viewer:
     Attributes:
         admin: The admin.
         through: The name of the provider they signed in through.
-        toast: What came of their last change, if it is still to be shown.
         counts: The numbers the menu shows by its items, such as the servers waiting.
     """
 
     admin: Admin
     through: str
-    toast: Toast | None = None
     counts: Mapping[str, int] = field(default_factory=dict)
 
 
@@ -314,6 +312,7 @@ class Pages:
             viewer=viewer,
             player=player,
             csrf=csrf or session.get("csrf", ""),
+            toast=_take_toast(session) if player or viewer else None,
             # The time the page's values are from.
             now=datetime.now(UTC),
             games=[
@@ -386,6 +385,11 @@ class StaticAssets(StaticFiles):
         if built or "v" in QueryParams(scope["query_string"]):
             response.headers["Cache-Control"] = KEEP
         return response
+
+
+def _take_toast(session: dict[str, Any]) -> Toast | None:
+    shown = session.pop("toast", None)
+    return Toast(shown["key"], shown["values"], shown["error"]) if shown else None
 
 
 def _address(request: Request) -> tuple[str, str]:

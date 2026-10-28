@@ -1,5 +1,4 @@
 from collections.abc import Callable, Mapping
-from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, Request
@@ -15,7 +14,9 @@ from openfesl.web.account.session import (
     SITE,
     WAITING,
     end,
+    open_page,
     refused_notice,
+    shown,
     signed_in,
     start,
     to_sign_in,
@@ -23,9 +24,6 @@ from openfesl.web.account.session import (
 from openfesl.web.pages import Pages
 from openfesl.web.sessions import form_matches, form_token, inside, take_notice
 from openfesl.web.turnstile import Turnstile
-
-# The notices' times, which the session keeps as ISO text.
-_TIMES = ("sent", "since", "expires", "last", "until")
 
 _STATUS = {
     Refusal.WRONG: 400,
@@ -123,7 +121,7 @@ class SignInPages:
                     wait = {"kind": "link_wait", "last": last, "until": until}
                     return await self._render(request, back, wait, status=429)
             request.session.pop(WAITING, None)
-            return RedirectResponse(localize("/sign-in", request.state.language), 303)
+            return open_page(request, "/sign-in")
 
         @router.post("/sign-out")
         async def sign_out(request: Request) -> Response:
@@ -143,8 +141,6 @@ class SignInPages:
         status: int = 200,
     ) -> HTMLResponse:
         language = request.state.language
-        if notice:
-            notice = {key: _restored(key, value) for key, value in notice.items()}
         registration = self._mail or not await self._policies.site_confirmation()
         page = self._pages.render(
             request,
@@ -153,17 +149,13 @@ class SignInPages:
             steel=True,
             csrf=form_token(request),
             next=back,
-            notice=notice,
+            notice=shown(notice),
             address=address,
             check=self._turnstile.site_key if self._turnstile else "",
             services=self._services.views(language),
             mail=self._mail,
             registration=registration,
-            password_games=[
-                translate(f"games.{game.id}.short", language)
-                for game in self._games
-                if not game.launched
-            ],
+            password_games=password_games(self._games, language),
             personas=[
                 translate(f"games.{game.id}.personas.kept", language) for game in self._games
             ],
@@ -174,8 +166,14 @@ class SignInPages:
         return page
 
 
-def _restored(key: str, value: Any) -> Any:
-    return datetime.fromisoformat(value) if key in _TIMES and isinstance(value, str) else value
+def password_games(games: Games, language: str) -> list[str]:
+    """Return the short names of the games that ask for the game password on their own screen.
+
+    Args:
+        games: The games.
+        language: The page's language code.
+    """
+    return [translate(f"games.{game.id}.short", language) for game in games if not game.launched]
 
 
 def _account(request: Request) -> str:
