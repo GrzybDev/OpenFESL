@@ -17,6 +17,7 @@ from openfesl.server.settings import Settings
 from openfesl.server.stores import Stores
 from openfesl.storage.database import migrate
 from openfesl.web.account.session import PlayerSessionMiddleware
+from openfesl.web.deal_art import DealArt, deal_art_router
 from openfesl.web.game_http import GameHttpMiddleware
 from openfesl.web.languages import LanguageMiddleware
 from openfesl.web.magma import magma_app
@@ -102,6 +103,11 @@ def _add_middleware(
     )
     app.add_middleware(LanguageMiddleware)
     app.add_middleware(SecurityHeadersMiddleware)
+    deal_art = DealArt(
+        stores.products,
+        services.catalogues,
+        services.catalogue_files,
+    )
     magma = {
         game.http.magma: magma_app(
             game,
@@ -119,6 +125,7 @@ def _add_middleware(
                     services.item_writes,
                 ),
                 window_router(game, services.magma, services.windows, services.purchases),
+                deal_art_router(game, services.magma, deal_art, services.game_art),
                 notices_router(game, settings.public_url),
             ],
         )

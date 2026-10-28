@@ -87,7 +87,9 @@ BRAZILIAN = {
 }
 
 
-def catalogue_file(folder: Path, items: list[CatalogueItem] = ITEMS) -> Path:
+def catalogue_file(
+    folder: Path, items: list[CatalogueItem] = ITEMS, icons: dict[str, bytes] | None = None
+) -> Path:
     """Write the file of an invented catalogue as `openfesl catalogue extract` writes it."""
     english = {f"WEST_Custom_Item_{number}": name for number, name in NAMES.items()}
     english["AUTO_RULES_MISSION_6000"] = "Invented Mission"
@@ -96,7 +98,7 @@ def catalogue_file(folder: Path, items: list[CatalogueItem] = ITEMS) -> Path:
     document = CatalogueDocument(format=1, game="bfheroes", items=tuple(items))
     file = folder / "catalogue.zip"
     texts = {"en": english, "pl": polish, "pt-BR": BRAZILIAN}
-    file.write_bytes(CatalogueFile(document, texts, {}).write())
+    file.write_bytes(CatalogueFile(document, texts, icons or {}).write())
     return file
 
 
@@ -132,9 +134,10 @@ async def stock(
     folder: Path,
     capsys: pytest.CaptureFixture[str],
     items: list[CatalogueItem] = ITEMS,
+    icons: dict[str, bytes] | None = None,
 ) -> None:
     """Import the invented catalogue as the admin does, and wait for the store to fill from it."""
-    await cli(capsys, "catalogue", "import", str(catalogue_file(folder, items)))
+    await cli(capsys, "catalogue", "import", str(catalogue_file(folder, items, icons)))
     with anyio.fail_after(30):
         while not await offers(server_url):
             await anyio.sleep(0.05)

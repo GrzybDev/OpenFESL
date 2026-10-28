@@ -20,6 +20,7 @@ from openfesl.protocol.magma import (
     refunded,
     success,
 )
+from openfesl.web.deal_art import deal_art_url
 from openfesl.web.magma import XML, SessionId, UserId
 
 # The id of a product, as the game buys it, and of an item's entitlement, as it changes one.
@@ -104,7 +105,7 @@ def store_router(
     @router.get("/{language}/game/hotDeals")
     async def hot(language: str) -> Response:
         listed = await deals.hot_deals(game, game.language_of(language))
-        entries = [_deal(deal) for deal in listed]
+        entries = [_deal(game, deal) for deal in listed]
         return Response(hot_deals(entries), media_type=XML)
 
     return router
@@ -118,7 +119,7 @@ async def _holder(
     await magma.persona(session_id, game, await writes.holder(entitlement_id))
 
 
-def _deal(deal: Deal) -> BundleEntry:
+def _deal(game: Game, deal: Deal) -> BundleEntry:
     listed = deal.listed
     bundle = listed.bundle
     lead = listed.members[0] if listed.members else None
@@ -135,6 +136,8 @@ def _deal(deal: Deal) -> BundleEntry:
         price=bundle.price,
         original_price=bundle.original_price,
         members=tuple(_entry(member) for member in deal.members),
+        small_image=deal_art_url(game, listed.id, big=False),
+        big_image=deal_art_url(game, listed.id, big=True),
     )
 
 
