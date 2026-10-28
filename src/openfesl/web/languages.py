@@ -90,12 +90,12 @@ class LanguageMiddleware:
 def _arriving_language(scope: Scope, path: str) -> str | None:
     # Browsers name a page opened by hand or from another site in Sec-Fetch-Site; without the
     # header, as from the game, the dedicated servers or scripts, nothing is redirected. The
-    # admin panel carries its own language through a sign-in, whose return from the provider
-    # arrives from another site.
+    # admin panel and the site's sign-in carry their own language through a sign-in, whose
+    # return from the service arrives from another site.
     headers = Headers(scope=scope)
     arriving = (
         scope["method"] == "GET"
-        and path != "/admin"
+        and path not in ("/admin", "/sign-in/callback")
         and not path.startswith("/admin/")
         and headers.get("sec-fetch-dest") == "document"
         and headers.get("sec-fetch-site") in ("none", "cross-site")

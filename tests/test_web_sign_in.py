@@ -4,49 +4,18 @@ from collections.abc import AsyncIterator
 import httpx2
 import pytest
 import uvicorn
+from accounts import PASSWORD, execute, post_sign_in, register, sign_out
 from identity import form_token
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import create_async_engine
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
-from support import FESL, Game, Mailbox, cli, game, markup, registration
+from support import FESL, Mailbox, cli, game, markup
 
 from openfesl.core.limits import FAILURES, Attempts
 from openfesl.web import turnstile as turnstile_module
 
 pytestmark = pytest.mark.anyio
-
-PASSWORD = "secret-pass"
-
-
-async def register(player: Game, address: str) -> None:
-    terms = (await player.request(FESL, "acct", [("TXN", "NuGetTos")]))["version"]
-    answer = await player.request(FESL, "acct", registration(address, PASSWORD, terms))
-    assert "errorCode" not in answer
-
-
-async def post_sign_in(
-    client: httpx2.AsyncClient, base: str, address: str, password: str, **fields: str
-) -> httpx2.Response:
-    page = await client.get(f"{base}/sign-in")
-    form = {"csrf": form_token(page.text), "email": address, "password": password, **fields}
-    return await client.post(f"{base}/sign-in", data=form)
-
-
-async def sign_out(client: httpx2.AsyncClient, base: str) -> httpx2.Response:
-    page = await client.get(f"{base}/terms")
-    return await client.post(f"{base}/sign-out", data={"csrf": form_token(page.text)})
-
-
-@pytest.fixture
-async def base(server_url: str) -> AsyncIterator[str]:
-    async with game(server_url) as player:
-        await player.hello(FESL, "bfbc2-pc")
-        for address in ("ann@example.test", "bob@example.test"):
-            await register(player, address)
-    yield server_url.replace("ws://", "http://").rstrip("/")
 
 
 async def test_an_account_made_in_a_game_signs_in_with_its_address_and_game_password(
@@ -78,13 +47,10 @@ async def test_an_account_made_in_a_game_signs_in_with_its_address_and_game_pass
         assert 'href="/pl/account/display-name"' in menu and 'href="/pl/account"' not in menu
         assert (await client.get(f"{base}/sign-in")).headers["location"] == "/account"
 
-        engine = create_async_engine(database_url)
-        async with engine.begin() as connection:
-            await connection.execute(
-                text("UPDATE account SET display_name = 'Invented_Ann' WHERE nuid = :nuid"),
-                {"nuid": "ann@example.test"},
-            )
-        await engine.dispose()
+        await execute(
+            database_url,
+            "UPDATE account SET display_name = 'Invented_Ann' WHERE nuid = 'ann@example.test'",
+        )
         menu = markup((await client.get(f"{base}/terms")).content)
         assert "Invented_Ann" in menu and "with the e-mail address" in menu
         assert "ann@example.test" not in menu
@@ -132,12 +98,9 @@ async def test_waiting_and_deactivated_accounts_are_named_only_after_the_right_p
         # The policy the account was registered under decides, as games' policies do for games.
         await cli(capsys, "settings", "reset", "bfbc2.accounts.email_verification")
         assert (await post_sign_in(client, base, "kim@example.test", PASSWORD)).status_code == 303
-        engine = create_async_engine(database_url)
-        async with engine.begin() as connection:
-            await connection.execute(
-                text("UPDATE account SET made_in = NULL WHERE nuid = 'kim@example.test'")
-            )
-        await engine.dispose()
+        await execute(
+            database_url, "UPDATE account SET made_in = NULL WHERE nuid = 'kim@example.test'"
+        )
         await sign_out(client, base)
         refused = await post_sign_in(client, base, "kim@example.test", PASSWORD)
         assert refused.status_code == 403

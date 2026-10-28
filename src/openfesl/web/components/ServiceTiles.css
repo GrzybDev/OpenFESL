@@ -1,0 +1,107 @@
+/* The sign-in services as tiles on black: under the pointer the tile darkens and its square takes
+   the accent (150 ms); a tile whose page is on its way wears the accent and the others wait. Under
+   460 px of width an odd last tile spans the row. */
+@layer components {
+  .service-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 2px;
+    margin-top: 2px;
+    container-type: inline-size;
+
+    &:has([aria-busy="true"]) .service-tile:not([aria-busy="true"]) {
+      pointer-events: none;
+    }
+  }
+
+  .service-tile {
+    display: flex;
+    min-height: 116px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--ink);
+    padding: 14px 8px 12px;
+    color: var(--bright);
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 150ms var(--ease-menu);
+
+    &:hover {
+      background: var(--menu-hover);
+    }
+
+    /* The glyph stays in place, unlike an action block's chevron. */
+    &:hover .go,
+    &:focus-visible .go {
+      transform: none;
+    }
+
+    &[aria-busy="true"] {
+      background: var(--accent);
+      color: var(--ink);
+    }
+  }
+
+  .service-square {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    background: var(--bar-dark);
+    transition:
+      background-color 150ms var(--ease-menu),
+      color 150ms var(--ease-menu);
+
+    .service-tile:is(:hover, :focus-visible) & {
+      background: var(--accent);
+      color: var(--ink);
+    }
+
+    .service-tile[aria-busy="true"] & {
+      background: var(--ink);
+      color: var(--accent);
+    }
+  }
+
+  .service-name {
+    font-size: 14px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .service-host {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.25;
+    font-weight: 600;
+    color: var(--soft);
+    overflow-wrap: anywhere;
+
+    [aria-busy="true"] > & {
+      color: var(--ink);
+    }
+  }
+
+  @container (width < 460px) {
+    .service-tile:last-child:nth-child(odd of .service-tile) {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (width >= 40rem) {
+    .service-tile {
+      min-height: 124px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .service-tile,
+    .service-square {
+      transition: none;
+    }
+  }
+}

@@ -4190,8 +4190,41 @@ msgstr "One OpenFESL account for every game"
 msgid "web.account.sign_in.email.only"
 msgstr "Sign in with an e-mail address"
 
+msgid "web.account.sign_in.through"
+msgstr "Sign in through"
+
+msgid "web.account.sign_in.email"
+msgstr "Or with an e-mail address"
+
+msgid "web.account.service.host"
+msgstr "Continues on %(host)s"
+
+msgid "web.account.service.busy"
+msgstr "Continuing on %(host)s"
+
+msgid "web.account.scope.identify"
+msgstr "identify"
+
+msgid "web.account.scope.email"
+msgstr "e-mail"
+
+msgid "web.account.scope.read:user"
+msgstr "profile"
+
+msgid "web.account.scope.user:email"
+msgstr "e-mail addresses"
+
+msgid "web.account.scope.openid"
+msgstr "sign-in"
+
+msgid "web.account.scope.profile"
+msgstr "profile"
+
 msgid "web.account.sign_in.password.note"
 msgstr "The password games such as %(games)s ask for."
+
+msgid "web.account.sign_in.password.note.services"
+msgstr "The password that games such as %(games)s ask for with this address, never a service's password."
 
 msgid "web.account.sign_in.forgotten"
 msgstr "Forgotten game password"
@@ -4205,6 +4238,9 @@ msgstr "Signing in"
 msgid "web.account.sign_in.side"
 msgstr "Accounts made in a game sign in here with the same e-mail address and game password."
 
+msgid "web.account.sign_in.side.services"
+msgstr "Accounts made in a game sign in here with the same e-mail address and game password, and link services on their account page."
+
 msgid "web.account.sign_in.pauses"
 msgstr "After several failed attempts for one address, sign-in with it pauses for a few minutes."
 
@@ -4216,6 +4252,9 @@ msgstr "Create an account"
 
 msgid "web.account.sign_in.create.text"
 msgstr "Registration asks for an e-mail address, a game password, a birth date, the country and a public display name."
+
+msgid "web.account.sign_in.create.services"
+msgstr "Signing in through a service that no account uses yet leads to a shorter step, where the game password is optional."
 
 msgid "web.account.how"
 msgstr "How the account works"
@@ -4232,6 +4271,9 @@ msgstr "Ways in"
 msgid "web.account.how.ways.text"
 msgstr "The e-mail address with the game password, which games such as %(games)s log in with too."
 
+msgid "web.account.how.ways.text.services"
+msgstr "Linked services, and the e-mail address with the game password. Games such as %(games)s log in with the address and game password."
+
 msgid "web.account.how.personas"
 msgstr "Personas"
 
@@ -4243,6 +4285,15 @@ msgstr "Public"
 
 msgid "web.account.how.public.text"
 msgstr "Profiles, leaderboards and friends lists show only the display name. The e-mail address and the ways in stay private."
+
+msgid "web.account.how.services"
+msgstr "What a service shares"
+
+msgid "web.account.how.services.one"
+msgstr "%(service)s: %(scopes)s."
+
+msgid "web.account.how.services.end"
+msgstr "Nothing more is asked."
 
 msgid "web.account.how.check"
 msgstr "Cloudflare check"
@@ -4277,6 +4328,9 @@ msgstr "Sign-in with this address is paused for a few minutes."
 msgid "web.account.notice.paused.text"
 msgstr "Several attempts with it did not match."
 
+msgid "web.account.notice.paused.services"
+msgstr "Signing in through a linked service is not paused."
+
 msgid "web.account.notice.paused.reset"
 msgstr "A new game password set through an e-mailed link ends the pause."
 
@@ -4288,6 +4342,9 @@ msgstr "The e-mail address of this account is not confirmed yet."
 
 msgid "web.account.notice.unconfirmed.text"
 msgstr "The link sent to %(address)s on %(date)s confirms it; signing in and game logins work once it is opened. A new link replaces the previous one."
+
+msgid "web.account.notice.unconfirmed.text.service"
+msgstr "The link sent to %(address)s on %(date)s confirms it and completes the account, with %(service)s as a way in. A new link replaces the previous one."
 
 msgid "web.account.notice.unconfirmed.send"
 msgstr "Send a new link"
@@ -4331,6 +4388,9 @@ msgstr "Signed out."
 msgid "web.account.notice.signed_out.text"
 msgstr "This site's session has ended."
 
+msgid "web.account.notice.signed_out.services"
+msgstr "A service keeps its own session, so the next sign-in through it may not ask for its password."
+
 msgid "web.account.notice.expired"
 msgstr "Session expired"
 
@@ -4346,6 +4406,18 @@ msgstr "The form expired. Try again."
 msgid "web.account.notice.form.text"
 msgstr "Nothing was changed."
 
+msgid "web.account.notice.failed.title"
+msgstr "Sign-in through %(service)s did not complete."
+
+msgid "web.account.notice.failed.text"
+msgstr "%(service)s returned without a signed-in account. The account and its ways in are as they were."
+
+msgid "web.account.notice.unreachable.title"
+msgstr "%(service)s could not be reached."
+
+msgid "web.account.notice.unreachable.text"
+msgstr "The other services and the e-mail address with the game password work as usual."
+
 msgid "web.account.notice.no_registration"
 msgstr "Registration not available"
 
@@ -4354,3 +4426,6 @@ msgstr "Registration needs the server's mail, which is not set up."
 
 msgid "web.account.notice.no_registration.text"
 msgstr "Existing accounts sign in as usual with the e-mail address and game password."
+
+msgid "web.account.notice.no_registration.text.services"
+msgstr "Existing accounts sign in as usual, through a linked service or with the e-mail address and game password."

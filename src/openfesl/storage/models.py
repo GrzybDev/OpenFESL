@@ -59,6 +59,18 @@ class LoginTokenRow(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class SignInIdentityRow(Base):
+    __tablename__ = "sign_in_identity"
+    # One identity of each service per account, and each identity opens one account.
+    __table_args__ = (UniqueConstraint("account_id", "service"),)
+
+    service: Mapped[str] = mapped_column(primary_key=True)
+    subject: Mapped[str] = mapped_column(primary_key=True)
+    account_id: Mapped[int] = mapped_column(ForeignKey("account.id", ondelete="CASCADE"))
+    name: Mapped[str]
+    linked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class PersonaRow(Base):
     __tablename__ = "persona"
 

@@ -4,6 +4,7 @@ from collections.abc import AsyncIterator, Iterator
 
 import anyio
 import pytest
+from accounts import register
 from aiosmtpd.smtp import SMTP
 from identity import IdentityProvider, identity_provider
 from sqlalchemy import text
@@ -12,7 +13,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 # Docker Desktop on Windows publishes container ports on 127.0.0.1, not on the name localhost.
 os.environ.setdefault("TESTCONTAINERS_HOST_OVERRIDE", "127.0.0.1")
 
-from support import PUBLIC_URL, Mailbox
+from support import FESL, PUBLIC_URL, Mailbox, game
 from testcontainers.community.postgres import PostgresContainer
 
 from openfesl.core import admin, history, trust
@@ -134,3 +135,13 @@ async def mailbox(monkeypatch: pytest.MonkeyPatch) -> AsyncIterator[Mailbox]:
     yield box
     server.close()
     await server.wait_closed()
+
+
+@pytest.fixture
+async def base(server_url: str) -> AsyncIterator[str]:
+    """Return the server's web address once Bad Company 2 registered ann and bob."""
+    async with game(server_url) as player:
+        await player.hello(FESL, "bfbc2-pc")
+        for address in ("ann@example.test", "bob@example.test"):
+            await register(player, address)
+    yield server_url.replace("ws://", "http://").rstrip("/")

@@ -1,6 +1,6 @@
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
+from datetime import datetime
 from typing import Any
-from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -10,16 +10,22 @@ from openfesl.core.limits import Wait
 from openfesl.core.policies import GamePolicies
 from openfesl.core.sign_in import LinkSent, Refusal, SignInRefused, WebSignIn
 from openfesl.core.texts import localize, translate
-from openfesl.core.verification import VALID_FOR
-from openfesl.web.account.session import end, signed_in, start
+from openfesl.web.account.services import SignInServices
+from openfesl.web.account.session import (
+    SITE,
+    WAITING,
+    end,
+    refused_notice,
+    signed_in,
+    start,
+    to_sign_in,
+)
 from openfesl.web.pages import Pages
-from openfesl.web.sessions import form_matches, form_token, inside, notify, take_notice
+from openfesl.web.sessions import form_matches, form_token, inside, take_notice
 from openfesl.web.turnstile import Turnstile
 
-# Every page of the site, in any language, which a sign-in may return to.
-SITE = ("/",)
-# The account that proved to be the visitor's while it waits for its address to be confirmed.
-WAITING = "waiting"
+# The notices' times, which the session keeps as ISO text.
+_TIMES = ("sent", "since", "expires", "last", "until")
 
 _STATUS = {
     Refusal.WRONG: 400,
@@ -40,6 +46,7 @@ class SignInPages:
         sign_in: Callable[[], WebSignIn],
         mail: bool,
         turnstile: Turnstile | None,
+        services: SignInServices,
     ) -> None:
         """Prepare the sign-in pages.
 
@@ -51,6 +58,7 @@ class SignInPages:
             mail: Whether the server sends mail, which registration and resets need.
             turnstile: Cloudflare's check of the forms that take an address; None when the
                 deployment sets none up.
+            services: The sign-in services, whose tiles lead the page.
         """
         self._pages = pages
         self._games = games
@@ -58,6 +66,7 @@ class SignInPages:
         self._sign_in = sign_in
         self._mail = mail
         self._turnstile = turnstile
+        self._services = services
 
     def routes(self) -> APIRouter:
         """Return the sign-in page and the forms that sign in and out."""
@@ -75,7 +84,7 @@ class SignInPages:
             form = await request.form()
             back = inside(str(form.get("next", "")), SITE)
             if not form_matches(request, form):
-                return _again(request, back, "form")
+                return to_sign_in(request, back, "form")
             address = str(form.get("email", "")).strip()
             if self._turnstile and not await self._turnstile.passed(request, form):
                 return await self._render(request, back, {"kind": "check"}, address, 400)
@@ -84,9 +93,7 @@ class SignInPages:
                     address, str(form.get("password", ""))
                 )
             except SignInRefused as refused:
-                if refused.refusal is Refusal.UNCONFIRMED and refused.account:
-                    request.session[WAITING] = refused.account.id
-                notice = _refusal_notice(refused)
+                notice = refused_notice(request, refused)
                 status = _STATUS[refused.refusal]
                 return await self._render(request, back, notice, address, status)
             request.session.pop(WAITING, None)
@@ -99,32 +106,31 @@ class SignInPages:
             back = inside(str(form.get("next", "")), SITE)
             account_id = request.session.get(WAITING)
             if not form_matches(request, form) or account_id is None:
-                return _again(request, back, "form")
+                return to_sign_in(request, back, "form")
             sign_in = self._sign_in()
             if self._turnstile and not await self._turnstile.passed(request, form):
                 account = await sign_in.waiting(account_id)
                 if account is None:
-                    return _again(request, back, "form")
+                    return to_sign_in(request, back, "form")
                 refused = SignInRefused(Refusal.UNCONFIRMED, account)
-                notice = {**_refusal_notice(refused), "check": True}
+                notice = {**refused_notice(request, refused), "check": "1"}
                 return await self._render(request, back, notice, status=400)
             match await sign_in.send_confirmation(account_id, request.state.language):
                 case LinkSent(address, expires):
-                    notice = {"kind": "link_sent", "address": address, "expires": expires}
-                    return await self._render(request, back, notice)
+                    sent = {"kind": "link_sent", "address": address, "expires": expires}
+                    return await self._render(request, back, sent)
                 case Wait(last, until):
-                    notice = {"kind": "link_wait", "last": last, "until": until}
-                    return await self._render(request, back, notice, status=429)
+                    wait = {"kind": "link_wait", "last": last, "until": until}
+                    return await self._render(request, back, wait, status=429)
             request.session.pop(WAITING, None)
             return RedirectResponse(localize("/sign-in", request.state.language), 303)
 
         @router.post("/sign-out")
         async def sign_out(request: Request) -> Response:
             if not form_matches(request, await request.form()):
-                return _again(request, "", "form")
+                return to_sign_in(request, "", "form")
             end(request)
-            notify(request, "signed_out")
-            return RedirectResponse(localize("/sign-in", request.state.language), 303)
+            return to_sign_in(request, "", "signed_out")
 
         return router
 
@@ -132,11 +138,13 @@ class SignInPages:
         self,
         request: Request,
         back: str,
-        notice: dict[str, Any] | None,
+        notice: Mapping[str, Any] | None,
         address: str = "",
         status: int = 200,
     ) -> HTMLResponse:
         language = request.state.language
+        if notice:
+            notice = {key: _restored(key, value) for key, value in notice.items()}
         registration = self._mail or not await self._policies.site_confirmation()
         page = self._pages.render(
             request,
@@ -148,6 +156,7 @@ class SignInPages:
             notice=notice,
             address=address,
             check=self._turnstile.site_key if self._turnstile else "",
+            services=self._services.views(language),
             mail=self._mail,
             registration=registration,
             password_games=[
@@ -161,26 +170,12 @@ class SignInPages:
         )
         if self._turnstile:
             self._turnstile.allow(page)
+        self._services.allow_forms(page)
         return page
 
 
-def _refusal_notice(refused: SignInRefused) -> dict[str, Any]:
-    account = refused.account
-    match refused.refusal:
-        case Refusal.UNCONFIRMED if account and account.verification_expires_at:
-            sent = account.verification_expires_at - VALID_FOR
-            return {"kind": "unconfirmed", "address": account.nuid, "sent": sent}
-        case Refusal.DEACTIVATED if account:
-            return {"kind": "deactivated", "since": account.state_changed}
-        case Refusal.PAUSED:
-            return {"kind": "paused"}
-    return {"kind": "wrong"}
-
-
-def _again(request: Request, back: str, kind: str) -> Response:
-    notify(request, kind)
-    target = localize("/sign-in", request.state.language)
-    return RedirectResponse(f"{target}?{urlencode({'next': back})}" if back else target, 303)
+def _restored(key: str, value: Any) -> Any:
+    return datetime.fromisoformat(value) if key in _TIMES and isinstance(value, str) else value
 
 
 def _account(request: Request) -> str:

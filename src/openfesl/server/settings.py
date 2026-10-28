@@ -8,6 +8,7 @@ from pydantic_settings import BaseSettings
 from sqlalchemy.engine import make_url
 
 from openfesl.core.connection import Address
+from openfesl.web.oidc import SignInService
 from openfesl.web.turnstile import Turnstile
 
 # A Discord application's id, a snowflake of up to 20 digits.
@@ -69,6 +70,10 @@ class Settings(BaseSettings):
             that take an e-mail address or send mail; without it and the secret key no form is
             checked.
         turnstile_secret_key: The secret key of Cloudflare Turnstile.
+        sign_in_services: The services that players sign in to the site through, as a JSON
+            list of their settings, such as {"id": "discord", "name": "Discord", "kind":
+            "oauth2", ...}; their tiles show in this order. Their pages send the browser back
+            to /sign-in/callback.
     """
 
     database_url: str
@@ -94,6 +99,7 @@ class Settings(BaseSettings):
     discord_application_id: ApplicationId | None = None
     turnstile_site_key: str | None = None
     turnstile_secret_key: SecretStr | None = None
+    sign_in_services: list[SignInService] = []
 
     @field_validator("database_url")
     @classmethod

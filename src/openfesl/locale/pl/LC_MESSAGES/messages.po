@@ -4314,8 +4314,41 @@ msgstr "Jedno konto OpenFESL do każdej gry"
 msgid "web.account.sign_in.email.only"
 msgstr "Logowanie adresem e-mail"
 
+msgid "web.account.sign_in.through"
+msgstr "Zaloguj się przez"
+
+msgid "web.account.sign_in.email"
+msgstr "Lub adresem e-mail"
+
+msgid "web.account.service.host"
+msgstr "Dalej w serwisie %(host)s"
+
+msgid "web.account.service.busy"
+msgstr "Przechodzenie do %(host)s"
+
+msgid "web.account.scope.identify"
+msgstr "identyfikacja"
+
+msgid "web.account.scope.email"
+msgstr "e-mail"
+
+msgid "web.account.scope.read:user"
+msgstr "profil"
+
+msgid "web.account.scope.user:email"
+msgstr "adresy e-mail"
+
+msgid "web.account.scope.openid"
+msgstr "logowanie"
+
+msgid "web.account.scope.profile"
+msgstr "profil"
+
 msgid "web.account.sign_in.password.note"
 msgstr "Hasło, którego używają gry takie jak %(games)s."
+
+msgid "web.account.sign_in.password.note.services"
+msgstr "Hasło, którego z tym adresem używają gry takie jak %(games)s – nigdy hasło do usługi."
 
 msgid "web.account.sign_in.forgotten"
 msgstr "Zapomniane hasło do gier"
@@ -4329,6 +4362,9 @@ msgstr "Logowanie"
 msgid "web.account.sign_in.side"
 msgstr "Konta utworzone w grze logują się tutaj tym samym adresem e-mail i hasłem do gier."
 
+msgid "web.account.sign_in.side.services"
+msgstr "Konta utworzone w grze logują się tutaj tym samym adresem e-mail i hasłem do gier, a usługi łączą na stronie konta."
+
 msgid "web.account.sign_in.pauses"
 msgstr "Po kilku nieudanych próbach z jednym adresem logowanie nim zostaje wstrzymane na kilka minut."
 
@@ -4340,6 +4376,9 @@ msgstr "Utwórz konto"
 
 msgid "web.account.sign_in.create.text"
 msgstr "Rejestracja wymaga adresu e-mail, hasła do gier, daty urodzenia, kraju i publicznej nazwy wyświetlanej."
+
+msgid "web.account.sign_in.create.services"
+msgstr "Logowanie przez usługę, której nie używa jeszcze żadne konto, prowadzi do krótszego kroku, w którym hasło do gier jest opcjonalne."
 
 msgid "web.account.how"
 msgstr "Jak działa konto"
@@ -4356,6 +4395,9 @@ msgstr "Sposoby logowania"
 msgid "web.account.how.ways.text"
 msgstr "Adres e-mail z hasłem do gier, którymi logują się też gry takie jak %(games)s."
 
+msgid "web.account.how.ways.text.services"
+msgstr "Połączone usługi oraz adres e-mail z hasłem do gier. Gry takie jak %(games)s logują się adresem i hasłem do gier."
+
 msgid "web.account.how.personas"
 msgstr "Postacie"
 
@@ -4367,6 +4409,15 @@ msgstr "Publiczne"
 
 msgid "web.account.how.public.text"
 msgstr "Profile, rankingi i listy znajomych pokazują tylko nazwę wyświetlaną. Adres e-mail i sposoby logowania pozostają prywatne."
+
+msgid "web.account.how.services"
+msgstr "Co udostępnia usługa"
+
+msgid "web.account.how.services.one"
+msgstr "%(service)s: %(scopes)s."
+
+msgid "web.account.how.services.end"
+msgstr "Nic więcej nie jest wymagane."
 
 msgid "web.account.how.check"
 msgstr "Kontrola Cloudflare"
@@ -4401,6 +4452,9 @@ msgstr "Logowanie tym adresem jest wstrzymane na kilka minut."
 msgid "web.account.notice.paused.text"
 msgstr "Kilka prób z tym adresem było nieudanych."
 
+msgid "web.account.notice.paused.services"
+msgstr "Logowanie przez połączoną usługę nie jest wstrzymane."
+
 msgid "web.account.notice.paused.reset"
 msgstr "Nowe hasło do gier ustawione przez link z wiadomości e-mail kończy wstrzymanie."
 
@@ -4412,6 +4466,9 @@ msgstr "Adres e-mail tego konta nie jest jeszcze potwierdzony."
 
 msgid "web.account.notice.unconfirmed.text"
 msgstr "Potwierdza go link wysłany na adres %(address)s dnia %(date)s; logowanie na stronie i w grach działa po jego otwarciu. Nowy link zastępuje poprzedni."
+
+msgid "web.account.notice.unconfirmed.text.service"
+msgstr "Potwierdza go link wysłany na adres %(address)s dnia %(date)s; jego otwarcie kończy zakładanie konta z usługą %(service)s jako sposobem logowania. Nowy link zastępuje poprzedni."
 
 msgid "web.account.notice.unconfirmed.send"
 msgstr "Wyślij nowy link"
@@ -4455,6 +4512,9 @@ msgstr "Wylogowano."
 msgid "web.account.notice.signed_out.text"
 msgstr "Sesja tej strony zakończyła się."
 
+msgid "web.account.notice.signed_out.services"
+msgstr "Usługa ma własną sesję, więc przy następnym logowaniu przez nią hasło może nie być potrzebne."
+
 msgid "web.account.notice.expired"
 msgstr "Sesja wygasła"
 
@@ -4470,6 +4530,18 @@ msgstr "Formularz wygasł. Spróbuj ponownie."
 msgid "web.account.notice.form.text"
 msgstr "Nic nie zostało zmienione."
 
+msgid "web.account.notice.failed.title"
+msgstr "Logowanie przez usługę %(service)s nie zostało ukończone."
+
+msgid "web.account.notice.failed.text"
+msgstr "Usługa %(service)s nie zwróciła zalogowanego konta. Konto i jego sposoby logowania pozostały bez zmian."
+
+msgid "web.account.notice.unreachable.title"
+msgstr "Nie udało się połączyć z usługą %(service)s."
+
+msgid "web.account.notice.unreachable.text"
+msgstr "Pozostałe usługi oraz adres e-mail z hasłem do gier działają jak zwykle."
+
 msgid "web.account.notice.no_registration"
 msgstr "Rejestracja niedostępna"
 
@@ -4478,3 +4550,6 @@ msgstr "Rejestracja wymaga poczty serwera, która nie jest skonfigurowana."
 
 msgid "web.account.notice.no_registration.text"
 msgstr "Istniejące konta logują się jak zwykle adresem e-mail i hasłem do gier."
+
+msgid "web.account.notice.no_registration.text.services"
+msgstr "Istniejące konta logują się jak zwykle: przez połączoną usługę albo adresem e-mail i hasłem do gier."

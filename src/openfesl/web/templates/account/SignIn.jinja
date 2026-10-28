@@ -1,7 +1,9 @@
-{#def next: str, notice, address: str, check: str, mail: bool, registration: bool, password_games: list, personas: list #}
-{# The site's sign-in: the e-mail address and game password under what happened at the last
-   attempt, and beside them the way to a new account and how accounts work. #}
+{#def next: str, notice, address: str, check: str, services: list, mail: bool, registration: bool, password_games: list, personas: list #}
+{# The site's sign-in: the services' tiles and the e-mail address with the game password under
+   what happened at the last attempt, and beside them the way to a new account and how accounts
+   work. Texts that name the services have a variant without them. #}
 {% set title = _("web.account.sign_in") %}
+{% set via = ".services" if services else "" %}
 {% set games = listed(password_games) %}
 {% set query = "?next=" ~ next|urlencode if next else "" %}
 <AccountPage :title="title"
@@ -9,7 +11,7 @@
              :turnstile="check != ''">
   <div class="account-page-main">
     <Panel tag="section"
-           aria-labelledby="sign-in-email"
+           :aria-labelledby="'sign-in-through' if services else 'sign-in-email'"
            class="enter-panel account-page-panel">
       {% if notice %}
         {% set kind = notice.kind %}
@@ -19,12 +21,14 @@
         {% elif kind == "check" %}
           <Alert :label="_('web.account.notice.not_signed_in')" :title="_('web.account.notice.check')" glyph="warn" alert>{{ _("web.account.notice.wrong.text") }}</Alert>
         {% elif kind == "paused" %}
-          <Alert :label="_('web.account.notice.paused')" :title="_('web.account.notice.paused.title')" glyph="clock" alert>{{ _("web.account.notice.paused.text") }}{% if mail %} {{ _("web.account.notice.paused.reset") }}{% endif %}</Alert>
+          <Alert :label="_('web.account.notice.paused')" :title="_('web.account.notice.paused.title')" glyph="clock" alert>{{ _("web.account.notice.paused.text") }}{% if services %} {{ _("web.account.notice.paused.services") }}{% endif %}{% if mail %} {{ _("web.account.notice.paused.reset") }}{% endif %}</Alert>
+        {% elif kind in ("failed", "unreachable") %}
+          <Alert :label="_('web.account.notice.not_signed_in')" :title="_('web.account.notice.' ~ kind ~ '.title', service=notice.service)" glyph="warn" alert>{{ _("web.account.notice." ~ kind ~ ".text", service=notice.service) }}</Alert>
         {% elif kind == "unconfirmed" %}
           {% if notice.get("check") %}
             <Alert :label="_('web.account.notice.not_sent')" :title="_('web.account.notice.check')" glyph="warn" alert />
           {% endif %}
-          <Alert :label="_('web.account.notice.unconfirmed')" :title="_('web.account.notice.unconfirmed.title')" glyph="mail">{{ _("web.account.notice.unconfirmed.text", address=notice.address, date=when(notice.sent, "yMMMd")) }}</Alert>
+          <Alert :label="_('web.account.notice.unconfirmed')" :title="_('web.account.notice.unconfirmed.title')" glyph="mail">{% if notice.service %}{{ _("web.account.notice.unconfirmed.text.service", address=notice.address, date=when(notice.sent, "yMMMd"), service=notice.service) }}{% else %}{{ _("web.account.notice.unconfirmed.text", address=notice.address, date=when(notice.sent, "yMMMd")) }}{% endif %}</Alert>
           {% if mail %}
             <form method="post"
                   action="{{ url('/sign-in/confirmation') }}"
@@ -42,19 +46,25 @@
         {% elif kind == "deactivated" %}
           <Alert :label="_('web.account.notice.deactivated')" :title="_('web.account.notice.deactivated.title')" glyph="lock" alert>{{ _("web.account.notice.deactivated.text", date=when(notice.since, "yMMMd")) }}</Alert>
         {% elif kind == "signed_out" %}
-          <Alert :label="_('web.account.notice.signed_out')" :title="_('web.account.notice.signed_out.title')" glyph="tick">{{ _("web.account.notice.signed_out.text") }}</Alert>
+          <Alert :label="_('web.account.notice.signed_out')" :title="_('web.account.notice.signed_out.title')" glyph="tick">{{ _("web.account.notice.signed_out.text") }}{% if services %} {{ _("web.account.notice.signed_out.services") }}{% endif %}</Alert>
         {% elif kind == "expired" %}
           <Alert :label="_('web.account.notice.expired')" :title="_('web.account.notice.expired.title')" glyph="clock">{% if next %}{{ _("web.account.notice.next") }}{% endif %}</Alert>
         {% else %}
           <Alert :label="_('web.account.notice.not_signed_in')" :title="_('web.account.notice.form')" glyph="warn" alert>{{ _("web.account.notice.form.text") }}</Alert>
         {% endif %}
       {% endif %}
+      {% if services %}
+        <div>
+          <Bar id="sign-in-through" large>{{ _("web.account.sign_in.through") }}</Bar>
+          <ServiceTiles :services="services" :next="next" labelledby="sign-in-through" />
+        </div>
+      {% endif %}
       <form method="post"
             action="{{ url('/sign-in') }}"
             class="account-page-form">
         <CsrfField />
         {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
-        <Bar id="sign-in-email" large>{{ _("web.account.sign_in.email.only") }}</Bar>
+        <Bar id="sign-in-email" large>{{ _("web.account.sign_in.email" if services else "web.account.sign_in.email.only") }}</Bar>
         <label for="sign-in-address" class="field-label field-label-joined">{{ _("web.account.address") }}</label>
         <input id="sign-in-address"
                name="email"
@@ -69,7 +79,7 @@
                        note="sign-in-password-note"
                        :focus="notice is not none and notice.kind == 'wrong'">
           <div class="field-note password-note">
-            <p id="sign-in-password-note">{{ _("web.account.sign_in.password.note", games=games) }}</p>
+            <p id="sign-in-password-note">{{ _("web.account.sign_in.password.note" ~ via, games=games) }}</p>
             {% if mail %}<a href="{{ url('/password-reset') }}">{{ _("web.account.sign_in.forgotten") }}</a>{% endif %}
           </div>
         </PasswordField>
@@ -77,17 +87,17 @@
         <ActionButton :label="_('web.account.sign_in.action')" :busy="_('web.account.sign_in.busy')" />
       </form>
     </Panel>
-    <p class="body-text side-note">{{ _("web.account.sign_in.side") }} {{ _("web.account.sign_in.pauses") }}</p>
+    <p class="body-text side-note">{{ _("web.account.sign_in.side" ~ via) }} {{ _("web.account.sign_in.pauses") }}</p>
   </div>
   <div class="account-page-side">
     <section aria-labelledby="sign-in-new">
       <Bar id="sign-in-new" large>{{ _("web.account.sign_in.new") }}</Bar>
       {% if registration %}
         <Action :href="url('/register') ~ query" :label="_('web.account.sign_in.create')" />
-        <p class="body-text side-note">{{ _("web.account.sign_in.create.text") }}</p>
+        <p class="body-text side-note">{{ _("web.account.sign_in.create.text") }}{% if services %} {{ _("web.account.sign_in.create.services") }}{% endif %}</p>
       {% else %}
         <div class="account-page-joined">
-          <Alert :label="_('web.account.notice.no_registration')" :title="_('web.account.notice.no_registration.title')" glyph="mail">{{ _("web.account.notice.no_registration.text") }}</Alert>
+          <Alert :label="_('web.account.notice.no_registration')" :title="_('web.account.notice.no_registration.title')" glyph="mail">{{ _("web.account.notice.no_registration.text" ~ via) }}</Alert>
         </div>
       {% endif %}
     </section>
@@ -95,9 +105,13 @@
       <Bar id="sign-in-how">{{ _("web.account.how") }}</Bar>
       <ul class="info-rows">
         <InfoRow glyph="user" :label="_('web.account.how.account')">{{ _("web.account.how.account.text") }}</InfoRow>
-        <InfoRow glyph="key" :label="_('web.account.how.ways')">{{ _("web.account.how.ways.text", games=games) }}</InfoRow>
+        <InfoRow glyph="key" :label="_('web.account.how.ways')">{{ _("web.account.how.ways.text" ~ via, games=games) }}</InfoRow>
         <InfoRow glyph="people" :label="_('web.account.how.personas')">{{ _("web.account.how.personas.text", personas=listed(personas)) }}</InfoRow>
         <InfoRow glyph="show" :label="_('web.account.how.public')">{{ _("web.account.how.public.text") }}</InfoRow>
+        {% if services %}
+          {% set shared %}{% for service in services %}{{ _("web.account.how.services.one", service=service.name, scopes=listed(service.scopes)) }} {% endfor %}{{ _("web.account.how.services.end") }}{% endset %}
+          <InfoRow glyph="chat" :label="_('web.account.how.services')">{{ shared }}</InfoRow>
+        {% endif %}
         {% if check %}
           <InfoRow glyph="shield-check" :label="_('web.account.how.check')">{{ _("web.account.how.check.text") }}</InfoRow>
         {% endif %}

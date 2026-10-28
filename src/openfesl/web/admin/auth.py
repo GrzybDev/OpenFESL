@@ -7,10 +7,11 @@ from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from pydantic import SecretStr
 
 from openfesl.core.admins import Admin, GroupRoles, Role
 from openfesl.core.texts import localize
-from openfesl.web.oidc import OidcClient, SignInFailed
+from openfesl.web.oidc import ServiceClient, SignInFailed, SignInService
 from openfesl.web.pages import Pages, Viewer
 from openfesl.web.sessions import (
     check_form,
@@ -99,12 +100,16 @@ class AdminSessions:
         self._menu_counts = menu_counts
         self.provider = provider
         self._client = (
-            OidcClient(
+            ServiceClient(
+                SignInService(
+                    id="admin",
+                    name=provider.name,
+                    issuer=provider.issuer,
+                    client_id=provider.client_id,
+                    client_secret=SecretStr(provider.client_secret),
+                    scope="openid profile",
+                ),
                 "admin",
-                provider.issuer,
-                provider.client_id,
-                provider.client_secret,
-                scope="openid profile",
                 callback="/admin/sign-in/callback",
                 public_url=public_url,
             )
@@ -204,13 +209,15 @@ class AdminSessions:
             if self.provider is None or self._client is None:
                 return failed
             try:
-                claims = await self._client.finish(request)
+                answer = await self._client.finish(request)
             except SignInFailed as error:
                 logger.warning("An admin sign-in did not complete: %r", error)
                 notify(request, "failed")
                 return failed
-            subject, name, groups = _identity(claims)
-            role = self.provider.roles.role(groups)
+            subject, name = answer.subject, answer.name
+            role = self.provider.roles.role(
+                [str(group) for group in answer.claims.get("groups", [])]
+            )
             if role is None:
                 notify(request, "refused", name=name)
                 return failed
@@ -281,9 +288,3 @@ def back_to(request: Request, back: str, default: str = "/admin/") -> str:
         default: The page otherwise, such as the panel's home.
     """
     return inside(back, PANEL) or localize(default, request.state.language)
-
-
-def _identity(claims: Mapping[str, Any]) -> tuple[str, str, list[str]]:
-    name = claims.get("preferred_username") or claims.get("name") or claims["sub"]
-    groups = claims.get("groups") or []
-    return str(claims["sub"]), str(name), [str(group) for group in groups]

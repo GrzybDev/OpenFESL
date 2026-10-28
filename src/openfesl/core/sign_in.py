@@ -5,6 +5,7 @@ from enum import Enum, auto
 from openfesl.core.accounts import STATE_ERRORS, Account, AccountState, AccountStore
 from openfesl.core.fesl import TransactionError
 from openfesl.core.games import Games
+from openfesl.core.identities import Identity, IdentityStore
 from openfesl.core.limits import Attempts, Mailings, Wait
 from openfesl.core.logins import Logins
 from openfesl.core.policies import GamePolicies
@@ -60,6 +61,7 @@ class WebSignIn:
     def __init__(
         self,
         accounts: AccountStore,
+        identities: IdentityStore,
         logins: Logins,
         policies: GamePolicies,
         games: Games,
@@ -71,6 +73,7 @@ class WebSignIn:
 
         Args:
             accounts: Where the accounts are kept.
+            identities: Where the identities at sign-in services linked to them are kept.
             logins: Checks game passwords.
             policies: The site's and each game's policies, which say whether an account waits
                 for its address to be confirmed.
@@ -80,6 +83,7 @@ class WebSignIn:
             mailings: Limits the mail to each address.
         """
         self._accounts = accounts
+        self._identities = identities
         self._logins = logins
         self._policies = policies
         self._games = games
@@ -108,6 +112,27 @@ class WebSignIn:
         self._attempts.clear(address)
         await self.admit(credentials.account)
         return credentials.account
+
+    async def with_service(self, identity: Identity) -> Account | None:
+        """Return the account that an identity at a sign-in service is linked to.
+
+        Sign-ins through services are never paused, as the service checked who signs in.
+
+        Args:
+            identity: Who signed in through the service.
+
+        Returns:
+            The account; None for an identity that no account uses yet.
+
+        Raises:
+            SignInRefused: When the account may not sign in.
+        """
+        account_id = await self._identities.account_of(identity.service, identity.subject)
+        account = await self._accounts.account(account_id) if account_id is not None else None
+        if account is None:
+            return None
+        await self.admit(account)
+        return account
 
     async def admit(self, account: Account) -> None:
         """Check that an account that proved to be the visitor's may sign in.

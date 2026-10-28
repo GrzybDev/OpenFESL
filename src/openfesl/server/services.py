@@ -119,7 +119,14 @@ class GameServices:
         await personas.prepare(await accounts.prepare(games))
         app.state.launcher = LauncherService(logins, games, personas, self._launcher_sessions)
         app.state.sign_in = WebSignIn(
-            stores.accounts, logins, policies, games, verification, Attempts(), Mailings()
+            stores.accounts,
+            stores.identities,
+            logins,
+            policies,
+            games,
+            verification,
+            Attempts(),
+            Mailings(),
         )
         routes.update(connect_routes(games, policies))
         routes.update(telemetry_routes())

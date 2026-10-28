@@ -1,0 +1,25 @@
+{#def services: list, next: str = "", labelledby: str = "" #}
+{# The sign-in services as centred tiles, each a button that continues on the service's own page,
+   which the tile names: its neutral glyph, its name and the host. While the page leaves, the
+   pressed tile wears the accent and its glyph turns into the spinning segment. #}
+<form method="post"
+      action="{{ url('/sign-in/service') }}"
+      {% if labelledby %} aria-labelledby="{{ labelledby }}"{% endif %}
+      class="service-tiles">
+  <CsrfField />
+  {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+  {% for service in services %}
+    <button type="submit"
+            name="service"
+            value="{{ service.id }}"
+            data-busy="{{ _('web.account.service.busy', host=service.host) }}"
+            class="service-tile chevron">
+      <span aria-hidden="true" class="service-square">
+        <Icon :name="service.glyph" :size="20" stroke="currentColor" class="go" />
+        <Icon name="busy" :size="20" stroke="currentColor" class="busy" />
+      </span>
+      <span class="service-name">{{ service.name }}</span>
+      <span data-label class="service-host">{{ _("web.account.service.host", host=service.host) }}</span>
+    </button>
+  {% endfor %}
+</form>

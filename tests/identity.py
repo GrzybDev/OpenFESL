@@ -1,4 +1,5 @@
-"""An OpenID Connect provider for the admin panel's tests, which signs in whom a test names."""
+"""A sign-in service for the tests, which signs in whom a test names: an OpenID Connect provider,
+and a plain OAuth2 one at /oauth with a userinfo URL and a list of e-mail addresses."""
 
 import asyncio
 import base64
@@ -32,7 +33,10 @@ class IdentityProvider:
     cancel: bool = False
     # A forged sign-in returns a token signed with a key the provider does not publish.
     forge: bool = False
+    # What the plain OAuth2 service's list of the account's e-mail addresses holds.
+    emails: list[dict[str, Any]] = field(default_factory=list)
     _codes: dict[str, dict[str, Any]] = field(default_factory=dict)
+    _tokens: dict[str, dict[str, Any]] = field(default_factory=dict)
 
 
 @asynccontextmanager
@@ -71,12 +75,16 @@ async def identity_provider() -> AsyncIterator[IdentityProvider]:
         }
         return RedirectResponse(f"{back}?{urlencode({'code': code, 'state': query['state']})}")
 
-    async def token(request: Request) -> Response:
+    async def granted(request: Request) -> dict[str, Any] | None:
         form = await request.form()
         grant = provider._codes.pop(str(form["code"]))
         verifier = str(form["code_verifier"]).encode()
         challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier).digest()).rstrip(b"=")
-        if challenge.decode() != grant["challenge"]:
+        return grant if challenge.decode() == grant["challenge"] else None
+
+    async def token(request: Request) -> Response:
+        grant = await granted(request)
+        if grant is None:
             return JSONResponse({"error": "invalid_grant"}, 400)
         now = int(time.time())
         claims = {"iss": provider.url, "aud": grant["client"], "iat": now, "exp": now + 300}
@@ -90,12 +98,32 @@ async def identity_provider() -> AsyncIterator[IdentityProvider]:
     async def jwks(request: Request) -> Response:
         return JSONResponse({"keys": [key.as_dict(private=False)]})
 
+    async def oauth_token(request: Request) -> Response:
+        grant = await granted(request)
+        if grant is None:
+            return JSONResponse({"error": "invalid_grant"}, 400)
+        access = secrets.token_urlsafe(16)
+        provider._tokens[access] = {"user": grant["user"], "emails": list(provider.emails)}
+        return JSONResponse({"access_token": access, "token_type": "Bearer"})
+
+    async def user(request: Request) -> Response:
+        signed_in = provider._tokens[request.headers["authorization"].removeprefix("Bearer ")]
+        return JSONResponse(signed_in["user"])
+
+    async def emails(request: Request) -> Response:
+        signed_in = provider._tokens[request.headers["authorization"].removeprefix("Bearer ")]
+        return JSONResponse(signed_in["emails"])
+
     app = Starlette(
         routes=[
             Route("/.well-known/openid-configuration", discovery),
             Route("/authorize", authorize),
             Route("/token", token, methods=["POST"]),
             Route("/jwks", jwks),
+            Route("/oauth/authorize", authorize),
+            Route("/oauth/token", oauth_token, methods=["POST"]),
+            Route("/api/user", user),
+            Route("/api/emails", emails),
         ]
     )
     server = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=0, log_level="warning"))
