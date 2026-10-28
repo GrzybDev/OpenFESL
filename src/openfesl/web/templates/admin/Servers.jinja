@@ -1,4 +1,4 @@
-{#def listing, servers: list, counts, total: int, mode: str, fellows #}
+{#def listing, servers: list, counts, total: int, mode: str, fellows, manages: bool #}
 {# The dedicated servers by the admin's decision about them, in tabs: their rows, whose details
    open in place with the decisions that apply, the search over every tab and the hosting mode. #}
 {% set title = _("web.admin.servers") %}
@@ -134,7 +134,8 @@
                       </div>
                       <div role="cell" class="admin-cell row-cell admin-name-cell">
                         <span class="admin-server-name"><a href="{{ href }}" class="server-name">{{ server.name }}</a>
-                          {%- if view.game %}<GameChip :of="view.game" />{% endif %}
+                          {%- if view.game %}<GameChip :of="view.game" /> {% endif %}
+                          {%- if server.official %}<OfficialChip />{% endif %}
                         </span>
                         <a href="{{ list ~ listing.changed(open=None if open else server.ugid).link() }}#row-{{ server.ugid }}"
                            role="button"
@@ -187,6 +188,9 @@
                                 <Fact :label="_('web.admin.attempts')">
                                   <span class="fact-number">{{ number(view.attempts.last_hour) }}</span>
                                 </Fact>
+                                <Fact :label="_('web.server.official')" wide>
+                                  {{ _("web.admin.official.no") }}
+                                </Fact>
                               {% elif tab == "approved" %}
                                 <Fact :label="_('web.admin.column.hosting')">
                                   {% if view.hosting %}<Published kind="map" :label="view.hosting.map" :of="view.game" /> · <Published kind="mode" :label="view.hosting.mode" :of="view.game" />{% else %}{{ _("web.admin.not_hosting") }}{% endif %}
@@ -196,6 +200,13 @@
                                     <span class="fact-number">{{ number(view.hosting.players) }} / {{ number(view.hosting.max_players) }}</span>
                                   </Fact>
                                 {% endif %}
+                                <Fact :label="_('web.server.official')" wide>
+                                  {% if server.official %}
+                                    <span aria-hidden="true" class="badge"><Icon name="star" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.official.yes") }}
+                                  {% else %}
+                                    {{ _("web.admin.official.no") }}
+                                  {% endif %}
+                                </Fact>
                               {% else %}
                                 <Fact :label="_('web.admin.column.last')">
                                   {{ _("web.server.time", time=when(view.attempts.last, "Hm")) if view.attempts.last else _("web.admin.not_tried") }}
@@ -211,33 +222,12 @@
                             </dl>
                             {% set note = provider_note(view)|trim %}
                             {% if note %}<p class="row-text">{{ note }}</p>{% endif %}
+                            {% if tab == "waiting" %}
+                              <p class="row-text">{{ _("web.admin.official.waiting.open", mode=_("web.host.mode.open")) if mode == "open" else _("web.admin.official.waiting") }}</p>
+                            {% endif %}
                           </div>
-                          {% set revoked_provider = server.provider and server.provider.revoked %}
-                          {% if not revoked_provider %}
-                            <div class="admin-decide">
-                              {% if tab == "waiting" %}
-                                {% if not view.provider_unknown %}
-                                  <form method="post"
-                                        action="{{ url('/admin/servers/' ~ server.ugid ~ '/approve') }}">
-                                    <CsrfField />
-                                    <input type="hidden" name="back" value="{{ here }}">
-                                    <ActionButton :label="_('web.admin.approve')" :name="_('web.admin.approve.of', name=server.name)" :busy="_('web.admin.approve.busy')" />
-                                  </form>
-                                {% else %}
-                                  <Action :href="url('/admin/servers/' ~ server.ugid ~ '/approve') ~ '?back=' ~ here|urlencode" :label="_('web.admin.approve')" :size="32" dialog />
-                                {% endif %}
-                                <FormButton icon="x" :href="url('/admin/servers/' ~ server.ugid ~ '/reject') ~ '?back=' ~ here|urlencode" dialog>{{ _("web.admin.reject") }}</FormButton>
-                                <p class="row-text">
-                                  {{ _("web.admin.how.approve." ~ ("unknown" if view.provider_unknown else "known")) }} {{ _("web.admin.how.reject") }}
-                                </p>
-                              {% elif tab == "approved" %}
-                                <FormButton icon="x" :href="url('/admin/servers/' ~ server.ugid ~ '/revoke') ~ '?back=' ~ here|urlencode" dialog>{{ _("web.admin.revoke") }}</FormButton>
-                                <p class="row-text">{{ _("web.admin.how.revoke") }}</p>
-                              {% else %}
-                                <Action :href="url('/admin/servers/' ~ server.ugid ~ '/approve') ~ '?back=' ~ here|urlencode" :label="_('web.admin.again')" dialog />
-                                <p class="row-text">{{ _("web.admin.how.again") }}</p>
-                              {% endif %}
-                            </div>
+                          {% if not (server.provider and server.provider.revoked) %}
+                            <ServerDecisions :view="view" :mode="mode" :manages="manages" />
                           {% endif %}
                         </div>
                       </div>

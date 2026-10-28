@@ -1,0 +1,58 @@
+{#def view, mode: str, manages: bool #}
+{# The decisions about a dedicated server in its details on the admin panel, each with a line on
+   what it does: approving or rejecting it while it waits; its official mark, which only the admin
+   role changes, and revoking it once approved; approving it again once revoked. #}
+{% set server = view.server %}
+{% set base = url("/admin/servers/" ~ server.ugid) %}
+{% set back = "?back=" ~ here|urlencode %}
+<div class="admin-decide">
+  {% if view.tab == "waiting" %}
+    {% if not view.provider_unknown %}
+      <form method="post" action="{{ base }}/approve">
+        <CsrfField />
+        <input type="hidden" name="back" value="{{ here }}">
+        <ActionButton :label="_('web.admin.approve')" :name="_('web.admin.approve.of', name=server.name)" :busy="_('web.admin.approve.busy')" />
+      </form>
+    {% else %}
+      <Action :href="base ~ '/approve' ~ back" :label="_('web.admin.approve')" :size="32" dialog />
+    {% endif %}
+    <FormButton icon="x" :href="base ~ '/reject' ~ back" dialog>{{ _("web.admin.reject") }}</FormButton>
+    <p class="row-text">
+      {{ _("web.admin.how.approve." ~ ("unknown" if view.provider_unknown else "open" if mode == "open" else "known")) }} {{ _("web.admin.how.reject") }}
+    </p>
+  {% elif view.tab == "approved" %}
+    {% set official = server.official %}
+    {% if manages %}
+      <form method="post"
+            action="{{ base }}/{{ 'unofficial' if official else 'official' }}">
+        <CsrfField />
+        <input type="hidden" name="back" value="{{ here }}">
+        {% if official %}
+          <FormButton icon="star-off" :busy="_('web.admin.official.unmark.busy')" :aria-label="_('web.admin.official.unmark.of', name=server.name)">{{ _("web.admin.official.unmark") }}</FormButton>
+        {% else %}
+          <FormButton icon="star" filled :busy="_('web.admin.official.mark.busy')" :aria-label="_('web.admin.official.mark.of', name=server.name)">{{ _("web.admin.official.mark") }}</FormButton>
+        {% endif %}
+      </form>
+      <p class="row-text">{{ _("web.admin.how.official." ~ ("unmark" if official else "mark.menu" if view.game and view.game.site else "mark")) }}</p>
+    {% else %}
+      <p class="row-text admin-role-note">
+        <span aria-hidden="true"
+              class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.refused.role.servers") }}
+      </p>
+    {% endif %}
+    {% if view.marked_in_game %}
+      {% set game = _("games." ~ view.game.id ~ ".short") %}
+      <p class="row-text admin-in-game">
+        <span data-game="{{ view.game.id }}" class="game-chip">{{ _("web.admin.official.game.label") }}</span>
+        <span>{{ _("web.admin.official.game", game=game) if official else _("web.admin.official.game.mark", game=game) }}</span>
+      </p>
+    {% endif %}
+    <FormButton icon="x" :href="base ~ '/revoke' ~ back" dialog>{{ _("web.admin.revoke") }}</FormButton>
+    <p class="row-text">
+      {{ _("web.admin.how.revoke") }}{% if official %} {{ _("web.admin.how.revoke.official") }}{% endif %}
+    </p>
+  {% else %}
+    <Action :href="base ~ '/approve' ~ back" :label="_('web.admin.again')" dialog />
+    <p class="row-text">{{ _("web.admin.how.again") }}</p>
+  {% endif %}
+</div>

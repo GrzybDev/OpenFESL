@@ -1,0 +1,20 @@
+@layer components {
+  .confirm-mark {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 10px;
+    background: var(--row);
+    padding: 10px 12px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.45;
+    font-weight: 600;
+    color: var(--ink);
+
+    .badge {
+      width: 22px;
+      height: 22px;
+    }
+  }
+}

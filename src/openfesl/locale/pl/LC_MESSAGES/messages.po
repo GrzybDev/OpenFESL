@@ -976,6 +976,9 @@ msgstr "Pusty"
 msgid "web.server.hardcore"
 msgstr "Hardcore"
 
+msgid "web.server.official"
+msgstr "Oficjalny"
+
 msgid "web.server.unpublished"
 msgstr "Brak danych"
 
@@ -3205,6 +3208,9 @@ msgstr "Dostawca %(provider)s ma cofnięte zatwierdzenie, a z nim wszystkie jego
 msgid "web.admin.how.approve.known"
 msgstr "Zatwierdzenie wystawia jego grę na liście serwerów."
 
+msgid "web.admin.how.approve.open"
+msgstr "Zatwierdzenie zostawia jego grę na liście i pozwala go oznaczyć."
+
 msgid "web.admin.how.approve.unknown"
 msgstr "Zatwierdzenie wymaga najpierw potwierdzenia, bo dostawca jest nieznany."
 
@@ -3213,6 +3219,57 @@ msgstr "Odrzucenie wymaga potwierdzenia, a potem przenosi serwer do cofniętych.
 
 msgid "web.admin.how.revoke"
 msgstr "Cofnięcie wymaga potwierdzenia; potem jego gra znika z listy serwerów, a kolejne próby uruchomienia gry są odrzucane."
+
+msgid "web.admin.how.revoke.official"
+msgstr "Znika też jego oznaczenie oficjalnego serwera."
+
+msgid "web.admin.how.official.mark"
+msgstr "Oznaczenie od razu pojawia się przy jego nazwie na liście serwerów, na jego stronie i na stronach graczy, bez potwierdzania."
+
+msgid "web.admin.how.official.mark.menu"
+msgstr "Oznaczenie od razu pojawia się przy jego nazwie w menu, gdy jest tam podany jako najbardziej oblegany serwer gry, bez potwierdzania."
+
+msgid "web.admin.how.official.unmark"
+msgstr "Oznaczenie od razu znika ze stron publicznych, bez potwierdzania."
+
+msgid "web.admin.official.yes"
+msgstr "Tak"
+
+msgid "web.admin.official.no"
+msgstr "Nie"
+
+msgid "web.admin.official.mark"
+msgstr "Oznacz jako oficjalny"
+
+msgid "web.admin.official.mark.of"
+msgstr "Oznacz jako oficjalny: %(name)s"
+
+msgid "web.admin.official.mark.busy"
+msgstr "Oznaczanie…"
+
+msgid "web.admin.official.unmark"
+msgstr "Usuń oznaczenie oficjalnego serwera"
+
+msgid "web.admin.official.unmark.of"
+msgstr "Usuń oznaczenie oficjalnego serwera %(name)s"
+
+msgid "web.admin.official.unmark.busy"
+msgstr "Usuwanie…"
+
+msgid "web.admin.official.game.label"
+msgstr "W grze"
+
+msgid "web.admin.official.game"
+msgstr "Również %(game)s wyróżnia ten serwer własnym znakiem i filtrem w przeglądarce serwerów."
+
+msgid "web.admin.official.game.mark"
+msgstr "Po oznaczeniu również %(game)s wyróżni go własnym znakiem i filtrem w przeglądarce serwerów."
+
+msgid "web.admin.official.waiting"
+msgstr "Oznaczyć można tylko zatwierdzony serwer."
+
+msgid "web.admin.official.waiting.open"
+msgstr "Oznaczyć można tylko zatwierdzony serwer. W trybie „%(mode)s” jest już na liście; po zatwierdzeniu można go oznaczyć."
 
 msgid "web.admin.how.again"
 msgstr "Ponowne zatwierdzenie wymaga potwierdzenia; jego gra pojawi się na liście, gdy znów zacznie prowadzić grę."
@@ -3244,6 +3301,9 @@ msgstr "Cofnąć zatwierdzenie tego serwera?"
 msgid "web.admin.confirm.revoke.text"
 msgstr "Jego gra od razu znika z listy serwerów, kolejne próby uruchomienia gry są odrzucane, a przesyłane przez niego statystyki przestają być zapisywane. Cofnięcie dotyczy tylko tego serwera; cofnięcie zatwierdzenia dostawcy obejmuje wszystkie jego serwery. Serwer można ponownie zatwierdzić na karcie cofniętych."
 
+msgid "web.admin.confirm.revoke.official"
+msgstr "Oznaczenie oficjalnego serwera też zostaje usunięte i nie wraca po ponownym zatwierdzeniu."
+
 msgid "web.admin.confirm.approve.again"
 msgstr "Ponowne zatwierdzenie wystawia grę serwera na liście serwerów, gdy tylko zacznie prowadzić grę, a przesyłane przez niego statystyki są od tej chwili zapisywane. Zatwierdzenie można później cofnąć."
 
@@ -3261,6 +3321,12 @@ msgstr "Odrzucono %(name)s."
 
 msgid "web.admin.toast.revoke"
 msgstr "Cofnięto zatwierdzenie %(name)s."
+
+msgid "web.admin.toast.official.on"
+msgstr "Oznaczono serwer %(name)s jako oficjalny."
+
+msgid "web.admin.toast.official.off"
+msgstr "Serwer %(name)s nie jest już oznaczony jako oficjalny."
 
 msgid "web.admin.toast.unchanged"
 msgstr "%(name)s pozostaje bez zmian: jego stan zmienił się w międzyczasie."
@@ -3592,8 +3658,23 @@ msgstr "Dostawca %(name)s był już cofnięty."
 msgid "web.admin.refused.role.providers"
 msgstr "Dostawcami i ich plikami zarządza rola administratora."
 
+msgid "web.admin.refused.role.servers"
+msgstr "Zmiana oznaczenia oficjalnego serwera wymaga roli administratora."
+
 msgid "web.admin.confirm.provider.text.single"
 msgstr "Jego jedyny serwer zostaje cofnięty: jego gra od razu znika z listy serwerów, kolejne próby uruchomienia gry są odrzucane, a przesyłane statystyki przestają być zapisywane. Serwery uruchomione później z jego plikiem %(file)s też są odrzucane. Cofniętego dostawcy nie można przywrócić; jego operator potrzebowałby nowego dostawcy i pliku."
+
+msgid "web.admin.confirm.provider.official.one"
+msgstr "Oznaczenie oficjalnego serwera %(names)s też zostaje usunięte i nie wraca."
+
+msgid "web.admin.confirm.provider.official.few"
+msgstr "Oznaczenia oficjalnych serwerów %(names)s też zostają usunięte i nie wracają."
+
+msgid "web.admin.confirm.provider.official.many"
+msgstr "Oznaczenia oficjalnych serwerów %(names)s też zostają usunięte i nie wracają."
+
+msgid "web.admin.confirm.provider.official.other"
+msgstr "Oznaczenia oficjalnych serwerów %(names)s też zostają usunięte i nie wracają."
 
 msgid "web.admin.provider.how.single"
 msgstr "Cofnięcie wymaga potwierdzenia, a potem obejmuje jego jedyny serwer."
@@ -4819,6 +4900,9 @@ msgstr "Przedmioty: %(items)s · języki: %(languages)s · ikony: %(icons)s"
 msgid "web.admin.audit.from_key"
 msgstr "%(tags)s · z klucza %(key)s"
 
+msgid "web.admin.audit.provider"
+msgstr "Dostawca %(name)s"
+
 msgid "web.admin.audit.provider_id"
 msgstr "Identyfikator dostawcy %(id)s…"
 
@@ -4896,6 +4980,12 @@ msgstr "Cofnięto zatwierdzenie serwera"
 
 msgid "web.admin.audit.action.server_state.pending"
 msgstr "Serwer czeka na decyzję"
+
+msgid "web.admin.audit.action.server_official.on"
+msgstr "Oznaczono serwer jako oficjalny"
+
+msgid "web.admin.audit.action.server_official.off"
+msgstr "Usunięto oznaczenie oficjalnego serwera"
 
 msgid "web.admin.audit.action.key_add"
 msgstr "Dodano klucz"

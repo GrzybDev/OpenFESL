@@ -9,6 +9,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.datastructures import QueryParams
 from starlette.exceptions import HTTPException
 
+from openfesl.core.admins import Role
 from openfesl.core.census import Census, Server
 from openfesl.core.games import Game, Games
 from openfesl.core.servers import (
@@ -40,6 +41,8 @@ DECISIONS = {
     "revoke": ({"approved"}, ServerState.REVOKED),
 }
 _EARLIEST = datetime.min.replace(tzinfo=UTC)
+# The panel's section that the official mark belongs to, which the page refusing a role names.
+SECTION = "servers"
 
 
 @dataclass(frozen=True, slots=True)
@@ -76,6 +79,11 @@ class ServerView:
     def provider_unknown(self) -> bool:
         """Whether its game reports a provider that the admin has not created."""
         return self.reports_provider and self.server.provider is None
+
+    @property
+    def marked_in_game(self) -> bool:
+        """Whether its game shows the official mark in its own server browser too."""
+        return self.game is not None and self.game.official_attribute is not None
 
 
 class ServerViews:
@@ -291,6 +299,7 @@ def server_list_routes(sessions: AdminSessions, views: ServerViews) -> APIRouter
             total=len(every),
             mode=(await views.store.hosting_mode()).value,
             fellows=fellows,
+            manages=admin.role is Role.ADMIN,
         )
 
     @router.get("/admin/servers/{ugid}")
@@ -325,6 +334,28 @@ def decision_routes(
             path, _confirmation(sessions, views, decision), response_class=HTMLResponse
         )
         router.add_api_route(path, _decide(sessions, views, decision, apply), methods=["POST"])
+    return router
+
+
+def official_routes(
+    sessions: AdminSessions, views: ServerViews, apply: Callable[[], Awaitable[None]]
+) -> APIRouter:
+    """Return the admin role's marking of approved servers as official and its removal.
+
+    Neither asks for confirmation: the mark changes how the server's games are shown, nothing else.
+
+    Args:
+        sessions: Signs admins in and renders the panel's pages.
+        views: Puts together what the panel shows about the servers.
+        apply: Shows the servers' games as the admin decided.
+    """
+    router = APIRouter()
+    for path, official in (("official", True), ("unofficial", False)):
+        router.add_api_route(
+            f"/admin/servers/{{ugid}}/{path}",
+            _mark(sessions, views, official, apply),
+            methods=["POST"],
+        )
     return router
 
 
@@ -386,6 +417,33 @@ def _decide(
         return RedirectResponse(back, 303)
 
     return decide
+
+
+def _mark(
+    sessions: AdminSessions,
+    views: ServerViews,
+    official: bool,
+    apply: Callable[[], Awaitable[None]],
+) -> Callable[[Request, str], Awaitable[Response]]:
+    async def mark(request: Request, ugid: str) -> Response:
+        admin = sessions.admin(request, Role.ADMIN, SECTION)
+        form = await request.form()
+        check_form(request, form)
+        view = await views.find(ugid)
+        back = back_to(request, str(form.get("back", "")))
+        # Another admin may have revoked the server or changed its mark first.
+        if await views.store.set_official(ugid, official, admin):
+            await apply()
+            toast(
+                request,
+                f"web.admin.toast.official.{'on' if official else 'off'}",
+                name=view.server.name,
+            )
+        else:
+            toast(request, "web.admin.toast.unchanged", error=True, name=view.server.name)
+        return RedirectResponse(back, 303)
+
+    return mark
 
 
 def _tab_address(request: Request, view: ServerView) -> str:

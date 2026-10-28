@@ -247,7 +247,7 @@ async def _rows(
         numbers | {persona.account_id for persona in persona_list.values()}
     )
     providers = {provider.id.hex(): provider.name for provider in await servers.providers()}
-    hosted = {server.ugid: server.name for server in await servers.all()}
+    hosted = {server.ugid: server for server in await servers.all()}
     rows = []
     for entry in entries:
         action, target, details = entry.action, entry.target, entry.details
@@ -292,10 +292,18 @@ async def _rows(
             shown = providers.get(target, str(details.get("name", target)))
             href = page(f"/admin/providers/{target}")
             said = say("web.admin.audit.provider_id", id=target[:8].upper())
-        elif action is AdminAction.SERVER_STATE:
-            shown = hosted.get(target, target)
+        elif action in (AdminAction.SERVER_STATE, AdminAction.SERVER_OFFICIAL):
+            server = hosted.get(target)
+            shown = server.name if server else target
             href = page(f"/admin/servers/{target}")
-            kind = f"server_state.{details.get('state')}"
+            if server and server.provider:
+                said = say("web.admin.audit.provider", name=server.provider.name)
+            elif server and server.provider_id:
+                said = say("web.admin.unknown_provider")
+            if action is AdminAction.SERVER_STATE:
+                kind = f"server_state.{details.get('state')}"
+            else:
+                kind = f"server_official.{'on' if details.get('official') else 'off'}"
         elif action in (
             AdminAction.KEY_ADD,
             AdminAction.KEY_STATE,
@@ -353,6 +361,8 @@ async def _rows(
 def _glyph(action: AdminAction, kind: str, details: dict[str, Any]) -> str:
     if action in GLYPHS:
         return GLYPHS[action]
+    if action is AdminAction.SERVER_OFFICIAL:
+        return "star" if details.get("official") else "star-off"
     state = kind.rpartition(".")[2]
     if action in (AdminAction.SETTING, AdminAction.KEY_GRANTS, AdminAction.KEY_LIMITS):
         return "edit"

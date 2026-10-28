@@ -23,6 +23,23 @@
     background: var(--bar-dark);
   }
 
+  .form-icon {
+    grid-area: 1 / 1;
+  }
+
+  /* A button whose request runs turns its square to the accent, where the glyph spins. */
+  .form-button[aria-busy="true"] {
+    cursor: progress;
+
+    .form-glyph {
+      background: var(--accent);
+    }
+
+    .form-icon {
+      opacity: 0;
+    }
+  }
+
   /* A form's reset and search buttons side by side. */
   .form-buttons {
     display: grid;

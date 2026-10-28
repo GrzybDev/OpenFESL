@@ -24,7 +24,7 @@
                   :busy="_('web.admin.' ~ decision ~ '.busy')"
                   :back="back"
                   :glyph="'go' if decision == 'approve' else 'x'">
-      <ServerTitle :name="server.name" :game="view.game" />
+      <ServerTitle :name="server.name" :game="view.game" :official="server.official" />
       <dl class="facts">
         {% if tab == "approved" %}
           <Fact :label="_('web.admin.state')">
@@ -59,6 +59,12 @@
             <ProviderId :id="server.provider_id" />
           </Fact>
         {% endif %}
+        {% if server.official %}
+          <Fact :label="_('web.server.official')">
+            <span aria-hidden="true"
+                  class="badge"><Icon name="star" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.official.yes") }}
+          </Fact>
+        {% endif %}
         {% if tab == "waiting" %}
           {% if view.hosting %}
             <Fact :label="_('web.admin.tried')">
@@ -75,6 +81,9 @@
         {% endif %}
       </dl>
       <p id="confirm-text" class="body-text">{{ _(text) }}</p>
+      {% if server.official and decision == "revoke" %}
+        <ConfirmMark>{{ _("web.admin.confirm.revoke.official") }}</ConfirmMark>
+      {% endif %}
     </Confirmation>
   </Panel>
 </AdminPage>

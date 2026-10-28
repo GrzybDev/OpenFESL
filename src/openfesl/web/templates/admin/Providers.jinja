@@ -157,6 +157,7 @@
                                     <StateBadges :view="server" />
                                     <a href="{{ url('/admin/servers/' ~ server.server.ugid) }}">{{ server.server.name }}</a>
                                     {% if server.game %}<GameChip :of="server.game" />{% endif %}
+                                    {% if server.server.official %}<OfficialChip />{% endif %}
                                     <span class="provider-server-line">{{ server_line(server) }}</span>
                                   </li>
                                 {% endfor %}

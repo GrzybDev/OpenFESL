@@ -1,13 +1,18 @@
-{#def icon: str, href: str = "", dialog: bool = False #}
+{#def icon: str, href: str = "", dialog: bool = False, busy: str = "", filled: bool = False #}
 {# A filter panel's black button with its glyph on a grey square: a link where it leads somewhere,
    otherwise the button that sends the form. A link to a confirmation opens it as a dialog where
-   scripts run. Other attributes go on the link or button, such as those of a details button. #}
-{% set glyph %}<span aria-hidden="true"
-      class="form-glyph"><Icon :name="icon" :size="14" stroke="#F4F4EE" /></span>{% endset %}
+   scripts run. A filled glyph is a shape rather than lines; a busy label replaces the button's
+   text while its form's request runs, as its glyph turns into a spinning segment. Other
+   attributes go on the link or button, such as those of a details button. #}
+{% set glyph %}<span aria-hidden="true" class="form-glyph"><Icon :name="icon" :size="14" :stroke="'' if filled else '#F4F4EE'" :fill="'#F4F4EE' if filled else ''" class="form-icon" />{% if busy %}<Icon name="busy" :size="14" stroke="#0A0A0A" class="busy" />{% endif %}</span>{% endset %}
 {% if href %}
   <a href="{{ href }}"
      {% if dialog %} data-dialog aria-haspopup="dialog"{% endif %}
      {{ attrs.render(class="form-button") }}>{{ glyph }}{{ content }}</a>
+{% elif busy %}
+  <button type="submit"
+          data-busy="{{ busy }}"
+          {{ attrs.render(class="form-button chevron") }}>{{ glyph }}<span data-label>{{ content }}</span></button>
 {% else %}
   <button type="submit" {{ attrs.render(class="form-button") }}>{{ glyph }}{{ content }}</button>
 {% endif %}

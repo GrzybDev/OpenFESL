@@ -1,0 +1,13 @@
+@layer components {
+  .official-chip {
+    background: var(--ink);
+    padding: 2px 5px;
+    font-size: 11px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--bright);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+}

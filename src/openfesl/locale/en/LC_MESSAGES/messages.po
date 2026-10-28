@@ -900,6 +900,9 @@ msgstr "Empty"
 msgid "web.server.hardcore"
 msgstr "Hardcore"
 
+msgid "web.server.official"
+msgstr "Official"
+
 msgid "web.server.unpublished"
 msgstr "Not published"
 
@@ -3085,6 +3088,9 @@ msgstr "Its provider %(provider)s is revoked, which revokes all of its servers; 
 msgid "web.admin.how.approve.known"
 msgstr "Approve lists its game in the server list."
 
+msgid "web.admin.how.approve.open"
+msgstr "Approve keeps its game listed and allows the mark."
+
 msgid "web.admin.how.approve.unknown"
 msgstr "Approve asks for confirmation first, because the provider is unknown."
 
@@ -3093,6 +3099,57 @@ msgstr "Reject asks for confirmation, then moves the server to Revoked."
 
 msgid "web.admin.how.revoke"
 msgstr "Revoke asks for confirmation; its game then leaves the server list and its later attempts to host are refused."
+
+msgid "web.admin.how.revoke.official"
+msgstr "Its official mark goes with it."
+
+msgid "web.admin.how.official.mark"
+msgstr "Shows the mark beside its name on the server list, its page and its players' pages at once, without a confirmation."
+
+msgid "web.admin.how.official.mark.menu"
+msgstr "Shows the mark beside its name in the menu at once, without a confirmation, while the menu names it as the game's busiest server."
+
+msgid "web.admin.how.official.unmark"
+msgstr "Takes the mark off the public pages at once, without a confirmation."
+
+msgid "web.admin.official.yes"
+msgstr "Yes"
+
+msgid "web.admin.official.no"
+msgstr "No"
+
+msgid "web.admin.official.mark"
+msgstr "Mark as official"
+
+msgid "web.admin.official.mark.of"
+msgstr "Mark as official: %(name)s"
+
+msgid "web.admin.official.mark.busy"
+msgstr "Marking…"
+
+msgid "web.admin.official.unmark"
+msgstr "Remove the official mark"
+
+msgid "web.admin.official.unmark.of"
+msgstr "Remove the official mark of %(name)s"
+
+msgid "web.admin.official.unmark.busy"
+msgstr "Removing…"
+
+msgid "web.admin.official.game.label"
+msgstr "In game"
+
+msgid "web.admin.official.game"
+msgstr "%(game)s also shows its own server mark and filter for this server."
+
+msgid "web.admin.official.game.mark"
+msgstr "Marking it also makes %(game)s show its own server mark and filter for it."
+
+msgid "web.admin.official.waiting"
+msgstr "Only approved servers can be marked."
+
+msgid "web.admin.official.waiting.open"
+msgstr "Only approved servers can be marked. With the hosting mode %(mode)s it is listed already; approving it allows the mark."
 
 msgid "web.admin.how.again"
 msgstr "Approve again asks for confirmation; its game lists as soon as it hosts again."
@@ -3124,6 +3181,9 @@ msgstr "Revoke this server?"
 msgid "web.admin.confirm.revoke.text"
 msgstr "Its game leaves the server list at once, its later attempts to host are refused, and the statistics it sends are no longer recorded. Only this server is revoked; revoking a provider revokes all of its servers. It can be approved again from the Revoked tab."
 
+msgid "web.admin.confirm.revoke.official"
+msgstr "The official mark is removed too and does not return when the server is approved again."
+
 msgid "web.admin.confirm.approve.again"
 msgstr "Approving it again lists its game in the server list as soon as it hosts, and the statistics it sends are recorded from then on. The approval can be revoked later."
 
@@ -3141,6 +3201,12 @@ msgstr "Rejected %(name)s."
 
 msgid "web.admin.toast.revoke"
 msgstr "Revoked %(name)s."
+
+msgid "web.admin.toast.official.on"
+msgstr "Marked %(name)s as official."
+
+msgid "web.admin.toast.official.off"
+msgstr "%(name)s is no longer marked as official."
 
 msgid "web.admin.toast.unchanged"
 msgstr "%(name)s was not changed: its state changed in the meantime."
@@ -3448,8 +3514,17 @@ msgstr "%(name)s was revoked already."
 msgid "web.admin.refused.role.providers"
 msgstr "Providers and their files are managed by the admin role."
 
+msgid "web.admin.refused.role.servers"
+msgstr "The official mark is changed by the admin role."
+
 msgid "web.admin.confirm.provider.text.single"
 msgstr "Its only server is revoked: its game leaves the server list at once, its later attempts to host are refused, and the statistics it sends are no longer recorded. Servers started later with its %(file)s are refused too. A revoked provider cannot be restored; its operator would need a new provider and file."
+
+msgid "web.admin.confirm.provider.official.one"
+msgstr "The official mark of %(names)s is removed too and does not return."
+
+msgid "web.admin.confirm.provider.official.other"
+msgstr "The official marks of %(names)s are removed too and do not return."
 
 msgid "web.admin.provider.how.single"
 msgstr "Revoke asks for confirmation, then revokes its only server."
@@ -4633,6 +4708,9 @@ msgstr "Items: %(items)s · languages: %(languages)s · icons: %(icons)s"
 msgid "web.admin.audit.from_key"
 msgstr "%(tags)s · from %(key)s"
 
+msgid "web.admin.audit.provider"
+msgstr "Provider %(name)s"
+
 msgid "web.admin.audit.provider_id"
 msgstr "Provider id %(id)s…"
 
@@ -4710,6 +4788,12 @@ msgstr "Revoked server"
 
 msgid "web.admin.audit.action.server_state.pending"
 msgstr "Set server waiting"
+
+msgid "web.admin.audit.action.server_official.on"
+msgstr "Marked server as official"
+
+msgid "web.admin.audit.action.server_official.off"
+msgstr "Removed the official mark"
 
 msgid "web.admin.audit.action.key_add"
 msgstr "Added key"

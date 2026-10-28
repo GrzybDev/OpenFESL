@@ -5,7 +5,8 @@
   .admin-server-columns {
     --cell: var(--row);
     display: grid;
-    grid-template-columns: 64px minmax(200px, 1fr) 210px 170px 130px 104px 44px;
+    /* The state column fits three badges: the state, an unknown provider and the official mark. */
+    grid-template-columns: 98px minmax(166px, 1fr) 210px 170px 130px 104px 44px;
     gap: 2px;
   }
 
@@ -15,7 +16,7 @@
 
   @container (width < 940px) {
     .server-row.admin-server-columns {
-      grid-template-columns: 64px repeat(2, minmax(0, 1fr)) 44px;
+      grid-template-columns: 98px repeat(2, minmax(0, 1fr)) 44px;
       grid-template-areas:
         "badges name name end"
         "provider provider first first"

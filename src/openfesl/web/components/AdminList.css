@@ -47,8 +47,9 @@
     align-items: center;
     column-gap: 10px;
 
+    /* The chips wrap under the name first; a name longer than its cell wraps itself. */
     .server-name {
-      flex: none;
+      flex: 0 1 auto;
     }
   }
 
@@ -152,6 +153,25 @@
 
     .row-text {
       margin-top: 4px;
+    }
+
+    /* A note that leads with its badge or chip: what only the admin role changes, or what the
+       game itself shows. */
+    .admin-role-note,
+    .admin-in-game {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-weight: 600;
+    }
+
+    .admin-role-note .badge {
+      width: 22px;
+      height: 22px;
+    }
+
+    .admin-in-game .game-chip {
+      margin-top: 2px;
     }
   }
 

@@ -65,6 +65,8 @@ async def test_an_admin_adds_a_provider_hands_out_its_file_and_revokes_it(
 
         revoked = await client.get(f"{base}/admin/providers", params={"state": "revoked"})
         assert "Invented Hosting" in revoked.text and "by invented-keeper" in revoked.text
+        # The log names the provider of each server it records a decision about.
+        assert "Provider Invented Hosting" in (await client.get(f"{base}/admin/audit")).text
         assert (await client.get(f"{base}{found.group(0)}")).status_code == 404
 
 

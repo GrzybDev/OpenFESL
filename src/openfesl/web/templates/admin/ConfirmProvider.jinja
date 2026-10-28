@@ -6,6 +6,7 @@
 {% set approved = view.servers|selectattr("tab", "equalto", "approved")|list %}
 {% set waiting = view.servers|selectattr("tab", "equalto", "waiting")|map(attribute="server.name")|list %}
 {% set total = view.servers|length %}
+{% set official = view.servers|selectattr("server.official")|map(attribute="server.name")|list %}
 <AdminPage :title="title" current="providers">
   <PageHead labelledby="confirm-title">
     <div class="enter-title page-title">
@@ -35,10 +36,19 @@
         <Fact :label="_('web.admin.players_on')">
           <span class="confirm-number">{{ number(view.players) }}</span>
         </Fact>
+        {% if official %}
+          <Fact :label="_('web.server.official')">
+            <span aria-hidden="true"
+                  class="badge"><Icon name="star" :size="14" fill="#0A0A0A" /></span>{{ listed(official) }}
+          </Fact>
+        {% endif %}
       </dl>
       <p id="confirm-text" class="body-text">
         {{ _n("web.admin.confirm.provider.text", total, file=file_name) if total > 1 else _("web.admin.confirm.provider.text." ~ ("single" if total else "none"), file=file_name) }}
       </p>
+      {% if official %}
+        <ConfirmMark>{{ _n("web.admin.confirm.provider.official", official|length, names=listed(official)) }}</ConfirmMark>
+      {% endif %}
     </Confirmation>
   </Panel>
 </AdminPage>

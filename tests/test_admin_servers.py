@@ -9,6 +9,7 @@ from test_player_servers import SERVER_GAME, register
 
 pytestmark = pytest.mark.anyio
 KEEPER = {"sub": "keeper-3", "preferred_username": "invented-keeper", "groups": ["fesl-admins"]}
+WARDEN = {"sub": "warden-3", "preferred_username": "invented-warden", "groups": ["fesl-moderators"]}
 
 
 async def test_servers_move_between_tabs_through_the_admins_decisions(
@@ -128,5 +129,85 @@ async def test_a_server_of_a_game_without_providers_is_approved_in_one_step(
             data={"csrf": form_token(page), "back": "/admin/servers"},
         )
         assert approved.headers["location"] == "/admin/servers"
-        listed = await client.get(f"{base}/admin/servers", params={"state": "approved"})
+        listed = await client.get(
+            f"{base}/admin/servers", params={"state": "approved", "open": ugid}
+        )
         assert "Approved Invented Heroes Server." in listed.text
+        # The game shows the official mark in the menu only, which is all its drawer promises.
+        assert "Shows the mark beside its name in the menu at once" in listed.text
+        assert "on the server list" not in listed.text
+        log = (await client.get(f"{base}/admin/audit")).text
+        assert "Approved server" in log and "nknown provider" not in log
+
+
+async def test_admins_mark_approved_servers_as_official_and_moderators_see_the_mark(
+    admin_provider: IdentityProvider, server_url: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    admin_provider.user = KEEPER
+    base = server_url.replace("ws://", "http://").rstrip("/")
+    async with (
+        httpx2.AsyncClient() as client,
+        httpx2.AsyncClient() as warden,
+        game(server_url) as hosted,
+        game(server_url) as stranger,
+    ):
+        await connect_server(hosted)
+        ugid = (await create(hosted, name="Invented Night Rush")).fields["UGID"]
+        await connect_server(stranger)
+        waiting = (await create(stranger, name="Invented Stranger")).fields["UGID"]
+        await cli(capsys, "servers", "approve", ugid)
+        row = f"/admin/servers?state=approved&open={ugid}"
+
+        page = (await sign_in(client, base, next=row)).text
+        assert "Mark as official" in page
+        assert (
+            "Marking it also makes Bad Company 2 show its own server mark and filter for it."
+            in page
+        )
+        others = (await client.get(f"{base}/admin/servers", params={"open": waiting})).text
+        assert "Only approved servers can be marked." in others
+        assert "Mark as official" not in others
+        assert (
+            await client.post(
+                f"{base}/admin/servers/{waiting}/official",
+                data={"csrf": form_token(page), "back": "/admin/servers"},
+            )
+        ).headers["location"] == "/admin/servers"
+        assert (
+            "Invented Stranger was not changed" in (await client.get(f"{base}/admin/servers")).text
+        )
+
+        # Marking needs no confirmation, and the row keeps its details open.
+        marked = await client.post(
+            f"{base}/admin/servers/{ugid}/official", data={"csrf": form_token(page), "back": row}
+        )
+        assert marked.headers["location"] == row
+        page = (await client.get(base + row)).text
+        assert "Marked Invented Night Rush as official." in page
+        assert "Remove the official mark" in page and "Its official mark goes with it." in page
+        assert "Bad Company 2 also shows its own server mark and filter for this server." in page
+        question = (await client.get(f"{base}/admin/servers/{ugid}/revoke")).text
+        assert "does not return when the server is approved again" in question
+
+        # Moderators see the mark, and only the admin role changes it.
+        admin_provider.user = WARDEN
+        seen = (await sign_in(warden, base, next=row)).text
+        assert "The official mark is changed by the admin role." in seen
+        assert "Remove the official mark" not in seen
+        refused = await warden.post(
+            f"{base}/admin/servers/{ugid}/unofficial", data={"csrf": form_token(seen)}
+        )
+        assert refused.status_code == 403
+        assert "The official mark is changed by the admin role." in refused.text
+
+        removed = await client.post(
+            f"{base}/admin/servers/{ugid}/unofficial", data={"csrf": form_token(page), "back": row}
+        )
+        page = (await client.get(base + removed.headers["location"])).text
+        assert "Invented Night Rush is no longer marked as official." in page
+        assert "Mark as official" in page
+        log = (await client.get(f"{base}/admin/audit")).text
+        assert log.index("Removed the official mark") < log.index("Marked server as official")
+        assert "invented-keeper" in log
+        polish = (await client.get(f"{base}/pl/admin/audit")).text
+        assert "Usunięto oznaczenie oficjalnego serwera" in polish

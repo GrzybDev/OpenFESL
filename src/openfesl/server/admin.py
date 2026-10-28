@@ -14,7 +14,12 @@ from openfesl.web.admin.home import home_routes
 from openfesl.web.admin.key_edit import key_edit_routes
 from openfesl.web.admin.keys import key_routes
 from openfesl.web.admin.providers import provider_routes
-from openfesl.web.admin.servers import ServerViews, decision_routes, server_list_routes
+from openfesl.web.admin.servers import (
+    ServerViews,
+    decision_routes,
+    official_routes,
+    server_list_routes,
+)
 from openfesl.web.admin.settings import settings_routes
 from openfesl.web.pages import Pages
 from openfesl.web.sessions import FormExpired
@@ -47,6 +52,7 @@ def include_admin_routes(
     app.include_router(home_routes(sign_in, games, census, players, stores.accounts, server_views))
     app.include_router(server_list_routes(sign_in, server_views))
     app.include_router(decision_routes(sign_in, server_views, apply))
+    app.include_router(official_routes(sign_in, server_views, apply))
     app.include_router(provider_routes(sign_in, games, server_views, apply))
     account_views = AccountViews(games, census, players, stores.accounts, stores.personas)
     app.include_router(
