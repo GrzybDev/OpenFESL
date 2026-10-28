@@ -1,0 +1,103 @@
+/* What a store page sells, in the 2012 green box: the item's tile, its row on a dark stripe and
+   the facts. */
+@layer components {
+  .store-contents {
+    position: relative;
+    isolation: isolate;
+    flex: 1 1 360px;
+    min-width: 0;
+
+    .store-box {
+      padding: 0 16px 16px;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .store-tab {
+      margin-left: -16px;
+      padding-left: 16px;
+    }
+  }
+
+  .store-art {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 14px;
+    border: 2px solid #000;
+    border-radius: 6px;
+    background: #2f3317;
+  }
+
+  /* Where the game's own icon of an item would show, which this server does not serve. */
+  .store-icon {
+    display: grid;
+    width: 110px;
+    height: 110px;
+    place-items: center;
+    border: 2px solid #000;
+    background: #cdbfa6;
+    color: #3b2d23;
+  }
+
+  .store-rows {
+    margin-top: 14px;
+    overflow: hidden;
+    border: 2px solid #000;
+    border-radius: 6px;
+
+    > li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 10px 6px 6px;
+
+      &:nth-child(even) {
+        background: rgb(0 0 0 / 0.22);
+      }
+    }
+  }
+
+  .store-row-icon {
+    display: grid;
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border: 2px solid #000;
+    background: #cdbfa6;
+    color: #3b2d23;
+  }
+
+  .store-row-text {
+    flex: 1;
+    min-width: 0;
+    line-height: 1.35;
+
+    > span {
+      display: block;
+      color: #e4ddb8;
+    }
+  }
+
+  .store-facts {
+    margin-top: 14px;
+
+    dt {
+      font: 800 12px/1.3 var(--site-heading);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #e4ddb8;
+    }
+
+    dd + dt {
+      margin-top: 10px;
+    }
+
+    dd {
+      margin-top: 2px;
+    }
+  }
+}

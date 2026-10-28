@@ -1,5 +1,6 @@
-/* The boxes of the store's pages, as the 2012 site drew them: pale, with a 3 px black edge, an
-   inner highlight, a yellow disc on the corner and the red title tab of dialogs. */
+/* The boxes of the store's pages, as the 2012 site drew them: pale, red or green, with a 3 px
+   black edge, an inner highlight, a yellow disc on the corner and a title tab, the red one of
+   dialogs or a dark one on coloured boxes. */
 @layer components {
   .store-box {
     position: relative;
@@ -20,7 +21,17 @@
     --box-inset: 3px;
   }
 
-  /* The yellow disc on a box's corner. */
+  .store-box-red {
+    --box: #893531;
+    --box-edge: #c54d47;
+  }
+
+  .store-box-green {
+    --box: #4f5627;
+    --box-edge: #77813b;
+  }
+
+  /* The yellow disc on a box's corner and its dark title tab. */
   .store-disc {
     position: absolute;
     top: -14px;
@@ -34,11 +45,24 @@
     background: #f2c12e;
   }
 
+  .store-tab {
+    display: inline-block;
+    margin-left: -18px;
+    padding: 10px 28px 9px 18px;
+    border-radius: 5px 0 0;
+    background: rgb(0 0 0 / 0.32);
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 100%, 0 100%);
+    font: 800 18px/1.2 var(--site-heading);
+    color: #fff;
+    text-shadow: var(--site-outline-thin);
+  }
+
   @media (width < 40rem) {
     .store-box {
       padding: 0 14px 14px;
     }
 
+    .store-tab,
     .store-box .site-dialog-title {
       margin-left: -14px;
       padding-left: 14px;

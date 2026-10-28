@@ -1,0 +1,26 @@
+{#def sold, texts #}
+{# The item a store page sells, in the green box beside the buy panel: its row and which heroes
+   may have it. #}
+<section aria-labelledby="contents-title" class="store-contents">
+  <Splash />
+  <div class="store-box store-box-green">
+    <span aria-hidden="true" class="store-disc"><Icon name="bag" :size="22" stroke="#0A0A0A" /></span>
+    <h2 id="contents-title" class="store-tab">{{ _("web.store.contents.item") }}</h2>
+    <div aria-hidden="true" class="store-art">
+      <span class="store-icon"><Icon name="bag" :size="28" stroke="currentColor" /></span>
+    </div>
+    <ul role="list" class="store-rows">
+      <li>
+        <span aria-hidden="true" class="store-row-icon"><Icon name="bag" :size="18" stroke="currentColor" /></span>
+        <span class="store-row-text"><strong>{{ sold.name }}</strong>
+          <span>{{ texts.chosen(sold) }}</span></span>
+      </li>
+    </ul>
+    <dl class="store-facts">
+      <dt>{{ _("web.store.requires") }}</dt>
+      <dd>
+        {{ texts.requires(sold.requirement) }}
+      </dd>
+    </dl>
+  </div>
+</section>

@@ -1,0 +1,109 @@
+{#def sold, roster, choices: list, offered, texts #}
+{# A page of the game's store: what it sells and for whom on the right, and on the left the hero
+   it is bought for and its price, or why no hero can buy it. #}
+{% set rules = game.heroes %}
+{% set able = choices|rejectattr("unfit")|rejectattr("owned")|list %}
+{# Heroes that lack an ability's level before it still choose; the others can never have it now. #}
+{% set barred = choices|selectattr("unfit", "in", ["faction", "class", "level"])|list %}
+<Layout :title="sold.name">
+  <section aria-labelledby="store-title" class="store-head">
+    <Plaque id="store-title">{{ sold.name }}</Plaque>
+    <p class="site-lead">{{ texts.lead(sold) }}</p>
+  </section>
+  <div class="store-columns enter-rows">
+    {% if not player %}
+      <section aria-labelledby="buy-title" class="store-buy">
+        <Splash />
+        <div class="store-box store-box-red">
+          <span aria-hidden="true" class="store-disc"><Icon name="key" :size="22" stroke="#0A0A0A" /></span>
+          <h2 id="buy-title" class="store-tab">{{ _("web.store.signed_out") }}</h2>
+          <p class="store-signed-out">{{ _("web.store.signed_out.text") }}</p>
+          <p class="site-actions">
+            <a href="{{ url('/sign-in') }}?{{ {'next': here}|urlencode }}"
+               class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+            <a href="{{ url('/register') }}" class="store-link-yellow">{{ _("web.account.sign_in.create") }}</a>
+          </p>
+        </div>
+      </section>
+    {% else %}
+      <section aria-labelledby="buy-title" class="store-buy">
+        <Splash />
+        <div class="store-box store-box-pale">
+          <h2 id="buy-title" class="site-dialog-title">{{ _("web.store.buy.title") }}</h2>
+          {% if not roster.heroes %}
+            <div class="store-none">
+              <span aria-hidden="true"
+                    class="store-none-disc"><Icon name="plus" :size="26" stroke="currentColor" /></span>
+              <p>{{ _n("web.store.no_hero", roster.free) }}</p>
+            </div>
+            <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
+               class="site-button site-button-go site-button-large"><Icon name="plus" :size="18" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+          {% elif barred|length == choices|length %}
+            <p class="store-note">
+              <Icon name="warn" :size="20" stroke="#5C4A3C" />
+              <span>{{ _("web.store.nobody", item=sold.name) }} {{ _("web.store.nobody.requires", requires=texts.requires(sold.requirement)) }}
+                {% if roster.free and sold.requirement.level <= 1 %}{{ _("web.store.nobody.create") }}{% endif %}
+              </span>
+            </p>
+            {% if roster.free and sold.requirement.level <= 1 %}
+              <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
+                 class="site-button site-button-go site-button-large"><Icon name="plus" :size="18" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+            {% endif %}
+          {% else %}
+            <form data-buy class="store-form">
+              <fieldset class="store-field">
+                <legend class="store-legend">{{ _("web.store.hero") }}</legend>
+                <p class="store-hint">{{ _("web.store.hero.hint") }}</p>
+                <div class="store-heroes">
+                  {% for choice in choices %}
+                    {% set hero = choice.hero %}
+                    <label {% if hero.faction %}data-faction="{{ hero.faction }}"{% endif %}
+                           class="store-hero{% if choice.unfit %} store-hero-off{% endif %}">
+                      <input type="radio"
+                             name="hero"
+                             value="{{ hero.persona.id }}"
+                             aria-describedby="hero-{{ hero.persona.id }}"
+                             {% if choice.unfit %}aria-disabled="true"{% endif %}
+                             {% if offered and choice == offered.choice %}checked{% endif %}
+                             class="sr-only">
+                      <span class="store-hero-card">
+                        <span class="store-hero-tab">
+                          {% if hero.faction %}
+                            <Icon :name="rules.factions[hero.faction].glyph" :size="16" stroke="currentColor" />
+                            {{ _("games." ~ game.id ~ ".faction." ~ hero.faction) }}
+                          {% endif %}
+                        </span>
+                        <span aria-hidden="true" class="store-hero-disc">
+                          {% if hero.hero_class %}
+                            <Icon :name="rules.classes[hero.hero_class].glyph" :size="24" stroke="currentColor" />
+                          {% endif %}
+                        </span>
+                        <span class="store-hero-name">{{ hero.persona.name }}</span>
+                        <span class="store-hero-kind">
+                          {% if hero.hero_class %}
+                            {{ _("web.heroes.kind", hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class), level=hero.level) }}
+                          {% else %}
+                            {{ _("web.heroes.level", level=hero.level) }}
+                          {% endif %}
+                        </span>
+                        <span id="hero-{{ hero.persona.id }}"
+                              class="store-hero-status{% if choice.held and not choice.unfit %} store-hero-holds{% endif %}">{{ texts.tile(sold, choice) }}</span>
+                      </span>
+                    </label>
+                  {% endfor %}
+                </div>
+              </fieldset>
+              <div id="buy-panel"
+                   data-buy-panel
+                   data-hero="{{ offered.choice.hero.persona.id }}"
+                   data-price="{{ offered.price.number }}">
+                <StorePanel :offered="offered" :texts="texts" :others="able|length > (1 if offered.open else 0)" />
+              </div>
+            </form>
+          {% endif %}
+        </div>
+      </section>
+    {% endif %}
+    <StoreContents :sold="sold" :texts="texts" />
+  </div>
+</Layout>

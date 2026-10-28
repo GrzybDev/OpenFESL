@@ -1,0 +1,161 @@
+/* The lower part of the buy panel: the note about the chosen hero, the price tiles with their
+   coins and the amount a balance lacks, and the purchase summary over a dashed rule. */
+@layer components {
+  .store-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 10px 12px;
+    border: 2px solid #a8977f;
+    border-radius: 6px;
+    background: #f8f4ef;
+    font-size: 14px;
+    line-height: 1.45;
+    color: #1f1712;
+
+    > svg {
+      flex: 0 0 auto;
+      margin-top: 1px;
+    }
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  .store-prices {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 132px), 1fr));
+    gap: 10px;
+  }
+
+  .store-price {
+    display: flex;
+    min-width: 0;
+    cursor: pointer;
+  }
+
+  .store-price-card {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    padding: 12px 8px 10px;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #f1e9de;
+    box-shadow:
+      inset 0 0 0 2px #f8f4ef,
+      0 3px 0 rgb(0 0 0 / 0.3);
+    text-align: center;
+    transition: background-color 150ms var(--ease-menu);
+
+    :checked + & {
+      background: #f2c12e;
+      box-shadow:
+        inset 0 0 0 2px #ffe27a,
+        0 3px 0 rgb(0 0 0 / 0.3);
+    }
+
+    :focus-visible + & {
+      outline: 3px solid #fff;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 6px #0a0a0a;
+    }
+  }
+
+  .store-price-disc {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border: 2px solid #000;
+    border-radius: 50%;
+    background: #1a1412;
+  }
+
+  .store-price-title {
+    font: 800 19px/1.15 var(--site-heading);
+  }
+
+  .store-price-amount {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 2px 6px;
+    font-size: 14px;
+    line-height: 1.3;
+
+    s {
+      color: #5c4a3c;
+    }
+
+    strong {
+      font: 800 16px/1.2 var(--site-heading);
+    }
+  }
+
+  .store-coin {
+    display: grid;
+    width: 20px;
+    height: 20px;
+    place-items: center;
+    border: 2px solid #000;
+    border-radius: 50%;
+    background: var(--coin, #1a1412);
+    color: var(--coin-ink, #fede01);
+  }
+
+  .store-price-short {
+    min-height: 18px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #8c1e18;
+  }
+
+  .store-sum {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px dashed #a8977f;
+  }
+
+  .store-sum-line {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .store-amounts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 18px;
+    margin-top: 6px;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #5c4a3c;
+
+    strong {
+      color: #1f1712;
+    }
+
+    .site-short {
+      color: #8c1e18;
+    }
+  }
+
+  @media (width < 40rem) {
+    .store-prices {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .store-price-card {
+      transition: none;
+    }
+  }
+}

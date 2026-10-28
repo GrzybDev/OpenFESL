@@ -218,6 +218,26 @@ class SqlProductStore:
         """
         return await self._box(StoreBoxRow.game == game, StoreBoxRow.key == key)
 
+    async def of_item(self, game: str, item_id: int) -> list[Product]:
+        """Return the products by which a game's store sells an item alone to heroes, in order.
+
+        Args:
+            game: The game's data-file name.
+            item_id: The item's number.
+        """
+        async with self._sessions() as session:
+            rows = await session.scalars(
+                select(StoreProductRow)
+                .where(
+                    StoreProductRow.game == game,
+                    StoreProductRow.item_id == item_id,
+                    StoreProductRow.published,
+                    StoreProductRow.account.is_(False),
+                )
+                .order_by(StoreProductRow.sort, StoreProductRow.id)
+            )
+            return [product_of(row) for row in rows]
+
     async def _box(self, *chosen: ColumnElement[bool]) -> Box | None:
         async with self._sessions() as session:
             row = await session.scalar(select(StoreBoxRow).where(*chosen))

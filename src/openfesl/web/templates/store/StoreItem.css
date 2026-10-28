@@ -1,0 +1,213 @@
+/* A page of the store: the title and how it is sold, then the buy panel beside the green box of
+   what it sells, which wraps under it on narrow screens. The hero tiles take the yellow fill when
+   chosen and lift under the pointer; unavailable heroes stay choosable behind a dashed edge. */
+@layer pages {
+  .store-columns {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 44px 26px;
+    margin-top: 30px;
+  }
+
+  .store-buy {
+    position: relative;
+    isolation: isolate;
+    flex: 999 1 560px;
+    min-width: 0;
+  }
+
+  .store-signed-out {
+    margin-top: 14px;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .store-link-yellow {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    font: 800 15px/1.1 var(--site-heading);
+    color: #fede01;
+    text-decoration-line: underline;
+  }
+
+  /* The account without a hero: a dashed panel before the way to create one. */
+  .store-none {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 14px 0 16px;
+    padding: 14px;
+    border: 3px dashed #3b2d23;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .store-none-disc {
+    display: grid;
+    flex: 0 0 auto;
+    width: 56px;
+    height: 56px;
+    place-items: center;
+    border: 3px dashed #3b2d23;
+    border-radius: 50%;
+    color: #3b2d23;
+  }
+
+  .store-buy .store-note + .site-button {
+    margin-top: 16px;
+  }
+
+  .store-field {
+    margin-top: 16px;
+  }
+
+  .store-legend {
+    font: 800 13px/1.2 var(--site-heading);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #5c4a3c;
+  }
+
+  .store-hint {
+    margin: 4px 0 10px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #5c4a3c;
+  }
+
+  .store-login {
+    margin: 16px 0 0;
+  }
+
+  .store-heroes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+    gap: 10px;
+  }
+
+  .store-hero {
+    display: flex;
+    min-width: 0;
+    cursor: pointer;
+    transition: translate 160ms var(--ease-menu);
+
+    &:hover {
+      translate: 0 -2px;
+    }
+  }
+
+  .store-hero-card {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    padding: 0 10px 12px;
+    overflow: hidden;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #f1e9de;
+    box-shadow:
+      inset 0 0 0 2px #f8f4ef,
+      0 3px 0 rgb(0 0 0 / 0.3);
+    text-align: center;
+    transition:
+      background-color 150ms var(--ease-menu),
+      box-shadow 150ms var(--ease-menu);
+
+    .store-hero-off & {
+      border-style: dashed;
+      background: #e4dccf;
+      box-shadow:
+        inset 0 0 0 2px #e4dccf,
+        0 3px 0 rgb(0 0 0 / 0.3);
+    }
+
+    :checked + & {
+      background: #f2c12e;
+      box-shadow:
+        inset 0 0 0 2px #ffe27a,
+        0 3px 0 rgb(0 0 0 / 0.3);
+    }
+
+    :focus-visible + & {
+      outline: 3px solid #fff;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 6px #0a0a0a;
+    }
+  }
+
+  .store-hero-tab {
+    display: flex;
+    min-height: 28px;
+    align-items: center;
+    align-self: stretch;
+    justify-content: center;
+    gap: 6px;
+    margin: 0 -10px;
+    background: var(--faction, #3b2d23);
+    color: var(--faction-ink, #fff);
+    font: 800 12px/1 var(--site-heading);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .store-hero-disc {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    margin-top: 4px;
+    border: 2px solid #000;
+    border-radius: 50%;
+    background: var(--faction, #cdbfa6);
+    color: var(--faction-ink, #3b2d23);
+  }
+
+  .store-hero-name {
+    font: 800 17px/1.15 var(--site-heading);
+    overflow-wrap: anywhere;
+  }
+
+  .store-hero-kind {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+
+  .store-hero-status {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #5c4a3c;
+  }
+
+  .store-hero-holds {
+    color: #1f1712;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .store-hero {
+      transition: none;
+
+      &:hover {
+        translate: none;
+      }
+    }
+
+    .store-hero-card {
+      transition: none;
+    }
+  }
+
+  @media (width < 40rem) {
+    .store-heroes {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+    }
+  }
+}

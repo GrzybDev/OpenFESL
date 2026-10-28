@@ -6361,3 +6361,183 @@ msgstr "Valor Points are earned in matches."
 
 msgid "games.bfheroes.currency._DH.earned"
 msgstr "Each hero earns one with every second level."
+
+msgid "web.store.utc"
+msgstr "%(time)s UTC"
+
+msgid "web.store.price.days.one"
+msgstr "%(count)s day"
+
+msgid "web.store.price.days.other"
+msgstr "%(count)s days"
+
+msgid "web.store.price.uses.one"
+msgstr "%(count)s use"
+
+msgid "web.store.price.uses.other"
+msgstr "%(count)s uses"
+
+msgid "web.store.price.permanent"
+msgstr "Permanent"
+
+msgid "web.store.requires.any_faction"
+msgstr "Any faction"
+
+msgid "web.store.requires.any_class"
+msgstr "any class"
+
+msgid "web.store.requires.level"
+msgstr "level %(level)s or higher"
+
+msgid "web.store.requires.any_level"
+msgstr "any level"
+
+msgid "web.store.lead.uses"
+msgstr "Bought as a number of uses, which add to the uses a hero has left."
+
+msgid "web.store.lead.rental"
+msgstr "Rented for a number of days or bought to keep."
+
+msgid "web.store.lead.rented"
+msgstr "Rented for a number of days."
+
+msgid "web.store.lead.permanent"
+msgstr "Bought to keep."
+
+msgid "web.store.hint.uses"
+msgstr "Each price is a number of uses, in %(currencies)s."
+
+msgid "web.store.hint.rental"
+msgstr "Each price is a rental time or Permanent, in %(currencies)s."
+
+msgid "web.store.hint.rented"
+msgstr "Each price is a rental time, in %(currencies)s."
+
+msgid "web.store.hint.permanent"
+msgstr "Each price buys it permanently, in %(currencies)s."
+
+msgid "web.store.tile.faction"
+msgstr "%(factions)s only"
+
+msgid "web.store.tile.class"
+msgstr "%(classes)s only"
+
+msgid "web.store.tile.level"
+msgstr "Needs level %(level)s"
+
+msgid "web.store.tile.order"
+msgstr "Needs the level before"
+
+msgid "web.store.tile.not_owned"
+msgstr "Not owned"
+
+msgid "web.store.tile.permanent"
+msgstr "Owns it permanently"
+
+msgid "web.store.tile.days.one"
+msgstr "Owns it · %(count)s day left"
+
+msgid "web.store.tile.days.other"
+msgstr "Owns it · %(count)s days left"
+
+msgid "web.store.tile.uses.one"
+msgstr "%(count)s use left"
+
+msgid "web.store.tile.uses.other"
+msgstr "%(count)s uses left"
+
+msgid "web.store.note.others"
+msgstr "Another hero of the account can get it."
+
+msgid "web.store.note.faction"
+msgstr "%(item)s is for the %(factions)s only, and %(hero)s is in the %(faction)s."
+
+msgid "web.store.note.class"
+msgstr "%(item)s is for the %(classes)s class only, and %(hero)s is a %(hero_class)s."
+
+msgid "web.store.note.level"
+msgstr "%(hero)s is level %(level)s; %(item)s needs level %(needed)s."
+
+msgid "web.store.note.order"
+msgstr "%(item)s is a further level of an ability; %(hero)s needs the level before it first."
+
+msgid "web.store.note.permanent"
+msgstr "%(hero)s owns %(item)s permanently. There is nothing more to buy for this hero."
+
+msgid "web.store.days_left.one"
+msgstr "%(count)s day left"
+
+msgid "web.store.days_left.other"
+msgstr "%(count)s days left"
+
+msgid "web.store.note.rental"
+msgstr "%(hero)s has %(item)s until %(until)s (%(left)s). A new rental adds its time to that date."
+
+msgid "web.store.note.replaces"
+msgstr "Permanent replaces the rental."
+
+msgid "web.store.note.uses"
+msgstr "%(hero)s has %(uses)s of %(item)s left. Bought uses are added to them."
+
+msgid "web.store.sum.longer"
+msgstr "%(hero)s's %(item)s lasts %(time)s longer, until %(until)s."
+
+msgid "web.store.sum.rental"
+msgstr "%(hero)s gets %(item)s for %(time)s, until %(until)s."
+
+msgid "web.store.sum.uses_added"
+msgstr "%(hero)s gets %(uses)s of %(item)s: %(left)s + %(added)s = %(total)s."
+
+msgid "web.store.sum.uses"
+msgstr "%(hero)s gets %(uses)s of %(item)s."
+
+msgid "web.store.sum.keeps"
+msgstr "%(hero)s keeps %(item)s permanently."
+
+msgid "web.store.sum.permanent"
+msgstr "%(hero)s gets %(item)s permanently."
+
+msgid "web.store.signed_out"
+msgstr "Sign in to buy"
+
+msgid "web.store.signed_out.text"
+msgstr "Store items are bought for a hero of a signed-in account. After signing in, this page opens again."
+
+msgid "web.store.buy.title"
+msgstr "Buy for one hero"
+
+msgid "web.store.no_hero.one"
+msgstr "Items are bought for a hero, and the account has no hero yet. A hero takes a faction, a class, a look and a name; %(count)s slot is free."
+
+msgid "web.store.no_hero.other"
+msgstr "Items are bought for a hero, and the account has no hero yet. A hero takes a faction, a class, a look and a name; %(count)s slots are free."
+
+msgid "web.store.nobody"
+msgstr "None of the account's heroes can use %(item)s."
+
+msgid "web.store.nobody.requires"
+msgstr "Requires: %(requires)s."
+
+msgid "web.store.nobody.create"
+msgstr "A hero that fits can be created in a free slot."
+
+msgid "web.store.hero"
+msgstr "Hero"
+
+msgid "web.store.hero.hint"
+msgstr "Items stay with the hero they are bought for."
+
+msgid "web.store.after"
+msgstr "After"
+
+msgid "web.store.contents.item"
+msgstr "Item"
+
+msgid "web.store.chosen.time"
+msgstr "Time as chosen"
+
+msgid "web.store.chosen.uses"
+msgstr "Uses as chosen"
+
+msgid "web.store.requires"
+msgstr "Requires"

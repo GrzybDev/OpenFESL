@@ -1,0 +1,60 @@
+{#def offered, texts, others: bool #}
+{# The lower part of a store page's buy panel for the chosen hero: what the hero holds or why it
+   cannot have it, the price tiles, what it gets for the chosen price with the balance before and
+   after. Scripts swap it when another hero or price is chosen. #}
+{% set sold = offered.sold %}
+{% set note = texts.note(offered, others) %}
+{% if note %}
+  <p role="status" class="store-note">
+    <Icon :name="note[0]" :size="20" stroke="#5C4A3C" />
+    <span>{{ note[1] }}</span>
+  </p>
+{% endif %}
+{% if offered.choice.unfit is none and not offered.choice.owned %}
+  <fieldset class="store-field">
+    <legend class="store-legend">{{ _("web.rename.price") }}</legend>
+    <p class="store-hint">{{ texts.hint(sold) }}</p>
+    <div class="store-prices">
+      {% for price in sold.prices %}
+        {% set short = price.price - offered.choice.balances.get(price.currency, 0) %}
+        <label data-wallet="{{ price.currency }}" class="store-price">
+          <input type="radio"
+                 name="price"
+                 value="{{ price.number }}"
+                 aria-describedby="price-{{ price.number }}"
+                 {% if price == offered.price %}checked{% endif %}
+                 class="sr-only">
+          <span class="store-price-card">
+            <span aria-hidden="true" class="store-price-disc">
+              <Icon :name="texts.glyph(price)" :size="22" stroke="#FEDE01" />
+            </span>
+            <span class="store-price-title">{{ texts.ownership(price.ownership) }}</span>
+            <span class="store-price-amount">
+              <span aria-hidden="true"
+                    class="store-coin"><Icon :name="texts.coin(price.currency)" :size="12" stroke="currentColor" /></span>
+              <strong>{{ number(price.price) }}</strong> {{ texts.currency(price.currency) }}
+            </span>
+            <span id="price-{{ price.number }}" class="store-price-short">
+              {% if short > 0 %}{{ _("web.rename.short", amount=number(short)) }}{% endif %}
+            </span>
+          </span>
+        </label>
+      {% endfor %}
+    </div>
+  </fieldset>
+  <div class="store-sum">
+    <p class="store-sum-line">{{ texts.summary(offered) }}</p>
+    {% set currency = texts.currency(offered.price.currency) %}
+    <p class="store-amounts">
+      <span>{{ _("web.rename.price") }} <strong>{{ texts.priced(offered.price.price, offered.price.currency) }}</strong></span>
+      <span>{{ _("web.rename.funds_now", currency=currency) }} <strong>{{ number(offered.balance) }}</strong></span>
+      <span>{{ _("web.store.after") }}
+        {% if offered.short %}
+          <strong class="site-short">{{ _("web.rename.short", amount=number(offered.short)) }}</strong>
+        {% else %}
+          <strong>{{ number(offered.balance - offered.price.price) }}</strong>
+        {% endif %}
+      </span>
+    </p>
+  </div>
+{% endif %}

@@ -8,7 +8,7 @@ from openfesl.core.admin import AdminAction, AdminFeed, LoggedAction
 from openfesl.core.catalogues import Catalogue, Catalogues
 from openfesl.core.drops import Box
 from openfesl.core.games import Game, Games
-from openfesl.core.inventory import COUNTED, Ownership
+from openfesl.core.inventory import COUNTED, PERMANENT, Ownership
 from openfesl.core.store_rules import BoxRule
 from openfesl.core.texts import BASE_LANGUAGE
 
@@ -235,6 +235,14 @@ class ProductStore(Protocol):
             key: The key the game's data knows the box by.
         """
 
+    async def of_item(self, game: str, item_id: int) -> list[Product]:
+        """Return the products by which a game's store sells an item alone to heroes, in order.
+
+        Args:
+            game: The game's data-file name.
+            item_id: The item's number.
+        """
+
 
 class Store:
     """The games' stores, whose products their data seeds from the imported catalogues."""
@@ -381,4 +389,23 @@ def offer(game: Game, catalogue: Catalogue, product: Product) -> Offer:
         game.store.product_id(product.id) if game.store else str(product.id),
         catalogue.name(product.item_id) or str(product.item_id),
         item.kind if item else "",
+    )
+
+
+def price_order(currencies: Sequence[str], product: Product) -> tuple[int, bool, int, int]:
+    """Return a product's place among its item's prices, as the game's store lists them.
+
+    By currency, then rentals and uses from the shortest, then owning for good, then by price.
+
+    Args:
+        currencies: The currencies in the order their prices are listed in, the product's among
+            them.
+        product: The product.
+    """
+    ownership = product.ownership
+    return (
+        currencies.index(product.currency),
+        ownership.type == PERMANENT,
+        ownership.days or ownership.uses or 0,
+        product.price,
     )

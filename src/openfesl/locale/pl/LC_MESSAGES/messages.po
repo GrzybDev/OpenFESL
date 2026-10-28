@@ -6607,3 +6607,219 @@ msgstr "Valor Points zdobywa się w meczach."
 
 msgid "games.bfheroes.currency._DH.earned"
 msgstr "Każdy bohater zdobywa jeden co drugi poziom."
+
+msgid "web.store.utc"
+msgstr "%(time)s UTC"
+
+msgid "web.store.price.days.one"
+msgstr "%(count)s dzień"
+
+msgid "web.store.price.days.few"
+msgstr "%(count)s dni"
+
+msgid "web.store.price.days.many"
+msgstr "%(count)s dni"
+
+msgid "web.store.price.days.other"
+msgstr "%(count)s dnia"
+
+msgid "web.store.price.uses.one"
+msgstr "%(count)s użycie"
+
+msgid "web.store.price.uses.few"
+msgstr "%(count)s użycia"
+
+msgid "web.store.price.uses.many"
+msgstr "%(count)s użyć"
+
+msgid "web.store.price.uses.other"
+msgstr "%(count)s użycia"
+
+msgid "web.store.price.permanent"
+msgstr "Na stałe"
+
+msgid "web.store.requires.any_faction"
+msgstr "Dowolna frakcja"
+
+msgid "web.store.requires.any_class"
+msgstr "dowolna klasa"
+
+msgid "web.store.requires.level"
+msgstr "poziom %(level)s lub wyższy"
+
+msgid "web.store.requires.any_level"
+msgstr "dowolny poziom"
+
+msgid "web.store.lead.uses"
+msgstr "Kupowany jako liczba użyć, które dodają się do użyć pozostałych bohaterowi."
+
+msgid "web.store.lead.rental"
+msgstr "Wynajmowany na określoną liczbę dni albo kupowany na stałe."
+
+msgid "web.store.lead.rented"
+msgstr "Wynajmowany na określoną liczbę dni."
+
+msgid "web.store.lead.permanent"
+msgstr "Kupowany na stałe."
+
+msgid "web.store.hint.uses"
+msgstr "Każda cena to liczba użyć, płatna w %(currencies)s."
+
+msgid "web.store.hint.rental"
+msgstr "Każda cena to czas wynajmu albo zakup na stałe, płatna w %(currencies)s."
+
+msgid "web.store.hint.rented"
+msgstr "Każda cena to czas wynajmu, płatna w %(currencies)s."
+
+msgid "web.store.hint.permanent"
+msgstr "Każda cena to zakup na stałe, płatna w %(currencies)s."
+
+msgid "web.store.tile.faction"
+msgstr "Tylko %(factions)s"
+
+msgid "web.store.tile.class"
+msgstr "Tylko %(classes)s"
+
+msgid "web.store.tile.level"
+msgstr "Wymaga poziomu %(level)s"
+
+msgid "web.store.tile.order"
+msgstr "Wymaga poprzedniego poziomu"
+
+msgid "web.store.tile.not_owned"
+msgstr "Nie posiada"
+
+msgid "web.store.tile.permanent"
+msgstr "Posiada na stałe"
+
+msgid "web.store.tile.days.one"
+msgstr "Posiada · został %(count)s dzień"
+
+msgid "web.store.tile.days.few"
+msgstr "Posiada · zostały %(count)s dni"
+
+msgid "web.store.tile.days.many"
+msgstr "Posiada · zostało %(count)s dni"
+
+msgid "web.store.tile.days.other"
+msgstr "Posiada · zostało %(count)s dnia"
+
+msgid "web.store.tile.uses.one"
+msgstr "Zostało %(count)s użycie"
+
+msgid "web.store.tile.uses.few"
+msgstr "Zostały %(count)s użycia"
+
+msgid "web.store.tile.uses.many"
+msgstr "Zostało %(count)s użyć"
+
+msgid "web.store.tile.uses.other"
+msgstr "Zostało %(count)s użycia"
+
+msgid "web.store.note.others"
+msgstr "Inny bohater tego konta może to dostać."
+
+msgid "web.store.note.faction"
+msgstr "%(item)s jest tylko dla frakcji %(factions)s, a %(hero)s należy do frakcji %(faction)s."
+
+msgid "web.store.note.class"
+msgstr "%(item)s jest tylko dla klasy %(classes)s, a %(hero)s to %(hero_class)s."
+
+msgid "web.store.note.level"
+msgstr "%(hero)s ma poziom %(level)s; %(item)s wymaga poziomu %(needed)s."
+
+msgid "web.store.note.order"
+msgstr "%(item)s to kolejny poziom umiejętności; %(hero)s potrzebuje najpierw poprzedniego."
+
+msgid "web.store.note.permanent"
+msgstr "%(hero)s posiada %(item)s na stałe. Dla tego bohatera nie ma tu nic więcej do kupienia."
+
+msgid "web.store.days_left.one"
+msgstr "został %(count)s dzień"
+
+msgid "web.store.days_left.few"
+msgstr "zostały %(count)s dni"
+
+msgid "web.store.days_left.many"
+msgstr "zostało %(count)s dni"
+
+msgid "web.store.days_left.other"
+msgstr "zostało %(count)s dnia"
+
+msgid "web.store.note.rental"
+msgstr "%(hero)s ma %(item)s do %(until)s (%(left)s). Nowy wynajem dodaje swój czas do tej daty."
+
+msgid "web.store.note.replaces"
+msgstr "Zakup na stałe zastępuje wynajem."
+
+msgid "web.store.note.uses"
+msgstr "%(hero)s ma jeszcze %(item)s: %(uses)s. Kupione użycia dodają się do nich."
+
+msgid "web.store.sum.longer"
+msgstr "Wynajem %(item)s dla %(hero)s wydłuży się o %(time)s, do %(until)s."
+
+msgid "web.store.sum.rental"
+msgstr "%(hero)s dostanie %(item)s na %(time)s, do %(until)s."
+
+msgid "web.store.sum.uses_added"
+msgstr "%(hero)s dostanie %(item)s: %(uses)s, razem %(left)s + %(added)s = %(total)s."
+
+msgid "web.store.sum.uses"
+msgstr "%(hero)s dostanie %(item)s: %(uses)s."
+
+msgid "web.store.sum.keeps"
+msgstr "%(hero)s zachowa %(item)s na stałe."
+
+msgid "web.store.sum.permanent"
+msgstr "%(hero)s dostanie %(item)s na stałe."
+
+msgid "web.store.signed_out"
+msgstr "Zaloguj się, aby kupić"
+
+msgid "web.store.signed_out.text"
+msgstr "Przedmioty ze sklepu kupuje się dla bohatera zalogowanego konta. Po zalogowaniu ta strona otworzy się ponownie."
+
+msgid "web.store.buy.title"
+msgstr "Kup dla jednego bohatera"
+
+msgid "web.store.no_hero.one"
+msgstr "Przedmioty kupuje się dla bohatera, a to konto nie ma jeszcze bohatera. Bohater dostaje frakcję, klasę, wygląd i nazwę; wolne jest %(count)s miejsce."
+
+msgid "web.store.no_hero.few"
+msgstr "Przedmioty kupuje się dla bohatera, a to konto nie ma jeszcze bohatera. Bohater dostaje frakcję, klasę, wygląd i nazwę; wolne są %(count)s miejsca."
+
+msgid "web.store.no_hero.many"
+msgstr "Przedmioty kupuje się dla bohatera, a to konto nie ma jeszcze bohatera. Bohater dostaje frakcję, klasę, wygląd i nazwę; wolnych jest %(count)s miejsc."
+
+msgid "web.store.no_hero.other"
+msgstr "Przedmioty kupuje się dla bohatera, a to konto nie ma jeszcze bohatera. Bohater dostaje frakcję, klasę, wygląd i nazwę; wolne jest %(count)s miejsca."
+
+msgid "web.store.nobody"
+msgstr "Żaden bohater tego konta nie może używać: %(item)s."
+
+msgid "web.store.nobody.requires"
+msgstr "Wymagania: %(requires)s."
+
+msgid "web.store.nobody.create"
+msgstr "Pasującego bohatera można utworzyć w wolnym miejscu."
+
+msgid "web.store.hero"
+msgstr "Bohater"
+
+msgid "web.store.hero.hint"
+msgstr "Przedmioty zostają przy bohaterze, dla którego zostały kupione."
+
+msgid "web.store.after"
+msgstr "Po zakupie"
+
+msgid "web.store.contents.item"
+msgstr "Przedmiot"
+
+msgid "web.store.chosen.time"
+msgstr "Czas według wyboru"
+
+msgid "web.store.chosen.uses"
+msgstr "Użycia według wyboru"
+
+msgid "web.store.requires"
+msgstr "Wymagania"
