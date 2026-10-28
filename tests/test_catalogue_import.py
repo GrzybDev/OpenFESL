@@ -1,5 +1,4 @@
 import asyncio
-from collections.abc import AsyncIterator
 from datetime import date
 from pathlib import Path
 
@@ -8,7 +7,6 @@ import httpx2
 import pytest
 from game_files import invented_copy
 from identity import IdentityProvider, sign_in
-from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from support import cli
 
@@ -19,7 +17,6 @@ from openfesl.core.games import Game, load_games
 from openfesl.core.stats import partition_of
 from openfesl.storage.admin import SqlAdminLog
 from openfesl.storage.catalogues import CatalogueFolder, SqlCatalogueStore
-from openfesl.storage.database import migrate
 
 pytestmark = pytest.mark.anyio
 KEEPER = {"sub": "keeper-8", "preferred_username": "invented-keeper", "groups": ["fesl-admins"]}
@@ -43,16 +40,6 @@ def files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 def kept_files(folder: Path) -> list[str]:
     return sorted(str(path.relative_to(folder).as_posix()) for path in folder.rglob("*.*"))
-
-
-@pytest.fixture
-async def sessions(database_url: str) -> AsyncIterator[async_sessionmaker[AsyncSession]]:
-    engine = create_async_engine(database_url)
-    await migrate(engine)
-    yield async_sessionmaker(engine)
-    async with engine.begin() as connection:
-        await connection.execute(text("TRUNCATE catalogue, admin_action CASCADE"))
-    await engine.dispose()
 
 
 async def test_an_imported_catalogue_names_items_in_the_pages_language_and_serves_its_files(
@@ -141,7 +128,7 @@ async def test_an_imported_catalogue_names_items_in_the_pages_language_and_serve
 
 
 async def test_a_new_import_replaces_the_whole_catalogue_for_every_server_that_follows(
-    sessions: async_sessionmaker[AsyncSession],
+    catalogue_sessions: async_sessionmaker[AsyncSession],
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
     monkeypatch: pytest.MonkeyPatch,
@@ -155,9 +142,11 @@ async def test_a_new_import_replaces_the_whole_catalogue_for_every_server_that_f
         {"item1": old.icons["item1"]},
     ).write()
     files = tmp_path / "files"
-    importing = Catalogues(SqlCatalogueStore(sessions), CatalogueFolder(files), load_games())
-    following = Catalogues(SqlCatalogueStore(sessions), None, load_games())
-    feed = AdminFeed(SqlAdminLog(sessions))
+    importing = Catalogues(
+        SqlCatalogueStore(catalogue_sessions), CatalogueFolder(files), load_games()
+    )
+    following = Catalogues(SqlCatalogueStore(catalogue_sessions), None, load_games())
+    feed = AdminFeed(SqlAdminLog(catalogue_sessions))
     following.follow(feed)
     await feed.start()
     await following.load()
@@ -205,7 +194,7 @@ async def test_a_new_import_replaces_the_whole_catalogue_for_every_server_that_f
 
 
 async def test_imports_at_once_on_two_servers_leave_the_files_of_the_one_kept(
-    sessions: async_sessionmaker[AsyncSession],
+    catalogue_sessions: async_sessionmaker[AsyncSession],
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
     bfheroes: Game,
@@ -213,12 +202,13 @@ async def test_imports_at_once_on_two_servers_leave_the_files_of_the_one_kept(
     data = (await extracted(tmp_path, capsys)).read_bytes()
     files = tmp_path / "files"
     first, second = (
-        Catalogues(SqlCatalogueStore(sessions), CatalogueFolder(files), load_games()) for _ in "ab"
+        Catalogues(SqlCatalogueStore(catalogue_sessions), CatalogueFolder(files), load_games())
+        for _ in "ab"
     )
 
     await asyncio.gather(first.import_file(data, None), second.import_file(data, None))
 
-    kept = await SqlCatalogueStore(sessions).current(partition_of(bfheroes))
+    kept = await SqlCatalogueStore(catalogue_sessions).current(partition_of(bfheroes))
     assert kept is not None
     folders = [folder.name for folder in (files / "catalogues" / "bfheroes").iterdir()]
     assert folders == [kept.revision]

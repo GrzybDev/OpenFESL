@@ -5,9 +5,36 @@ from pydantic import BaseModel, ConfigDict, PositiveFloat, PositiveInt
 
 from openfesl.formats.refractor_scripts import MeshRule
 
+type Colour = tuple[int, int, int]
+type Vector = tuple[float, float, float]
+
+
+class Camera(BaseModel):
+    """A camera that circles a hero standing at the origin and facing +Z, in glTF's space.
+
+    Attributes:
+        look_at: The point it looks at, in metres.
+        distance: How far it stands from that point, in metres.
+        azimuth: How far around the hero it stands, in degrees; 180 faces the hero.
+        zenith: How far from straight above the point it stands, in degrees; 90 is level.
+        fov: Its vertical field of view, in radians.
+        near: The nearest distance it draws, in metres.
+        far: The farthest distance it draws, in metres.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    look_at: Vector
+    distance: PositiveFloat
+    azimuth: float
+    zenith: float
+    fov: PositiveFloat
+    near: PositiveFloat
+    far: PositiveFloat
+
 
 class FigureRules(BaseModel):
-    """Where a copy of a game keeps the skeleton of a faction's heroes and their animations.
+    """Where a copy of a game keeps the skeleton of a faction's heroes, and how its menu shows them.
 
     Paths are in the archive of animations.
 
@@ -17,6 +44,8 @@ class FigureRules(BaseModel):
             order.
         relocated: Where the copy keeps animations that the systems name where it lacks them,
             by the paths that the systems name, both lower-cased.
+        camera: The camera of the hero's portrait.
+        pose: The clip and the time in seconds into it of the hero's still pose.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -24,10 +53,46 @@ class FigureRules(BaseModel):
     skeleton: str
     systems: list[str]
     relocated: dict[str, str] = {}
+    camera: Camera
+    pose: tuple[str, float]
+
+
+class Tint(BaseModel):
+    """The colour of a hero's that tints its textures of some types before they are painted.
+
+    Attributes:
+        group: The group of the colours in the table of colours, whose numbers a hero names.
+        types: The item types of the textures it tints, lower-cased.
+        highest_layer: The highest layer of a texture it tints, if it tints only the lower ones.
+        default: The colour of a number that the table lacks.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    group: str
+    types: frozenset[str]
+    highest_layer: int | None = None
+    default: Colour
+
+
+class Tints(BaseModel):
+    """The colours of a hero that tint its textures, from a table of the catalogue.
+
+    Attributes:
+        table: The catalogue's table of the colours.
+        skin: The skin tone's tint.
+        hair: The hair colour's tint, which a texture takes when the skin tone's does not.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    table: str
+    skin: Tint
+    hair: Tint
 
 
 class ModelRules(BaseModel):
-    """Where a copy of a game keeps the models that its menu draws heroes with.
+    """Where a copy of a game keeps the models that its menu draws heroes with, and how it does.
 
     The templates of the parts that heroes wear are scripts in the archive of definitions,
     beside the item definitions. Paths of archives are relative to the folder of the game's
@@ -56,6 +121,8 @@ class ModelRules(BaseModel):
         clips: The bundles that the site plays in each role, by role; a trigger stands for
             every bundle it starts.
         figures: The skeleton and animations of each faction's heroes, by faction.
+        light: The direction from which the menu's light shades the models, in glTF's space.
+        tints: The colours of a hero that tint its textures.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -77,6 +144,8 @@ class ModelRules(BaseModel):
     warp: tuple[str, str]
     clips: dict[str, list[str]]
     figures: dict[str, FigureRules]
+    light: Vector
+    tints: Tints
 
 
 class Template(BaseModel):
@@ -96,7 +165,7 @@ class Template(BaseModel):
     type: str
     kind: Literal["mesh", "texture"]
     offset: tuple[int, int] = (0, 0)
-    colour: tuple[int, int, int] | None = None
+    colour: Colour | None = None
 
 
 class Rig(BaseModel):

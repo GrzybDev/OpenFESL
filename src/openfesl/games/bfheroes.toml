@@ -244,6 +244,18 @@ frame_rate = 30
 # The ramp that the menu's shader (RaShaderPortrait.fx) shades its models with: the default one,
 # as the menu loads no level with its own.
 warp = ["mods/bfheroes/Common_client.zip", "Textures/defaultLightWarpSkinned.dds"]
+# The menu's light (SwiffPlayer.dll 1.89 0x1003ef47 sets -0.5, 0.2, 0 in the engine's space),
+# with X mirrored as in the models.
+light = [0.5, 0.2, 0.0]
+
+# The colours that tint a hero's textures by overlay before they are painted (BFHeroes.exe 1.89
+# 0x0047b4f8): its skin tone those of its skin up to layer 0, and its hair colour those of its
+# hair, each by number from Colors.xml, or the colour that the game's customization starts with
+# where the table lacks the number. The other textures keep the colour of their script.
+[catalogue.models.tints]
+table = "Colors.xml"
+skin = { group = "skin", types = ["cit_body", "cit_legs", "cit_head", "cit_feet", "cit_hands", "cit_faceobj", "cit_neck"], highest_layer = 0, default = [155, 120, 85] }
+hair = { group = "hair", types = ["cit_hair", "cit_headhair", "cit_facehair"], default = [100, 75, 55] }
 
 # The menu's idle, the random idles of the face in rounds, the poses of item icons, and the
 # emotes with which the creator's hero answers a choice: a nod to a faction, a flex to a class, a
@@ -257,6 +269,11 @@ flex = ["flex"]
 wave = ["wave"]
 cheer = ["cheer"]
 
+# The camera and still pose of the portrait that the menu renders of its hero, fitted to the
+# one the game uploads of a National hero (mugshot.png), as the values that the menu sets
+# (SwiffPlayer.dll 1.89 0x1003f8ea) draw the hero larger and higher than it; the Royal camera looks
+# 0.05 m higher, as the menu's does. The pose is the idle at the time that the menu sets
+# (0x1003f21a), for National heroes the frame that fits the portrait best.
 [catalogue.models.figures.royal]
 skeleton = "british_male_soldier/british_male_soldier.ske"
 systems = [
@@ -264,6 +281,8 @@ systems = [
     "british_male_soldier/AnimationSystemIcons.inc",
     "british_male_soldier/AnimationSystem3p.inc",
 ]
+pose = ["idle", 5.6]
+camera = { look_at = [0.0, 1.024, 0.0], distance = 2.6, azimuth = 180.0, zenith = 89.9, fov = 0.882, near = 0.01, far = 20.0 }
 
 # The National icons' system names its poses in the Royal folder, which lacks them.
 [catalogue.models.figures.national]
@@ -274,6 +293,8 @@ systems = [
     "german_male_soldier/AnimationSystem3p.inc",
 ]
 relocated = { "british_male_soldier/animations/common/gms_uipose_default.baf" = "german_male_soldier/animations/common/gms_uipose_default.baf", "british_male_soldier/animations/common/gms_uipose_hands.baf" = "german_male_soldier/animations/common/gms_uipose_hands.baf" }
+pose = ["idle", 2.3333333]
+camera = { look_at = [0.0, 0.974, 0.0], distance = 2.6, azimuth = 180.5, zenith = 89.9, fov = 0.882, near = 0.01, far = 20.0 }
 
 # How the services behave where the game handles more than one behaviour; the instance's
 # settings override each.

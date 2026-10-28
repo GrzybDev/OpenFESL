@@ -18,9 +18,11 @@ from openfesl.core.catalogue import (
     CatalogueFile,
     CatalogueItem,
     CatalogueRules,
+    Element,
     text_id,
 )
 from openfesl.core.games import Game, Games
+from openfesl.core.hero_models import HeroModels
 from openfesl.core.stats import partition_of
 from openfesl.core.texts import BASE_LANGUAGE
 
@@ -192,6 +194,8 @@ class Contents:
         items: The items by number.
         daily_missions: The number of each day's daily mission, by the day of the year.
         experience: The XP from each level to the next, by level.
+        tables: The further files of the game's definitions, by file name.
+        hero_models: What the game draws its heroes with, where the server keeps the models.
     """
 
     revision: str | None = None
@@ -201,6 +205,8 @@ class Contents:
     items: Mapping[int, Item] = field(default_factory=dict)
     daily_missions: tuple[int, ...] = ()
     experience: tuple[int, ...] = ()
+    tables: Mapping[str, Element] = field(default_factory=dict)
+    hero_models: HeroModels | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -517,6 +523,8 @@ def _contents(rules: CatalogueRules, stored: StoredCatalogue) -> Contents:
         found,
         document.daily_missions,
         document.experience,
+        document.tables,
+        document.models if stored.models else None,
     )
 
 

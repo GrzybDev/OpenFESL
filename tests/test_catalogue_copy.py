@@ -4,17 +4,17 @@ from zipfile import ZipFile
 
 import pytest
 from game_files import COPY, NEEDS_COPY
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.catalogue import CatalogueFile
 from openfesl.core.catalogues import Catalogues
+from openfesl.core.figures import Figures
 from openfesl.core.games import Game, load_games
 from openfesl.core.hero_items import fits
+from openfesl.core.heroes import Look
 from openfesl.extraction.catalogue import extract, find_game
 from openfesl.formats.definitions import read_definitions
 from openfesl.storage.catalogues import CatalogueFolder, SqlCatalogueStore
-from openfesl.storage.database import migrate
 
 pytestmark = NEEDS_COPY
 
@@ -114,20 +114,20 @@ def test_the_copy_gives_the_daily_missions_and_the_xp_of_each_level(
 
 @pytest.mark.anyio
 async def test_the_server_reads_the_copys_catalogue_as_the_game_does(
-    written: Path, database_url: str, tmp_path: Path, bfheroes: Game
+    written: Path,
+    catalogue_sessions: async_sessionmaker[AsyncSession],
+    tmp_path: Path,
+    bfheroes: Game,
 ) -> None:
-    engine = create_async_engine(database_url)
-    await migrate(engine)
     catalogues = Catalogues(
-        SqlCatalogueStore(async_sessionmaker(engine)), CatalogueFolder(tmp_path), load_games()
+        SqlCatalogueStore(catalogue_sessions), CatalogueFolder(tmp_path), load_games()
     )
-    try:
-        await catalogues.import_file(written.read_bytes(), admin=None)
-        english = await catalogues.of(bfheroes, "en")
-    finally:
-        async with engine.begin() as connection:
-            await connection.execute(text("TRUNCATE catalogue, admin_action CASCADE"))
-        await engine.dispose()
+    await catalogues.import_file(written.read_bytes(), admin=None)
+    english = await catalogues.of(bfheroes, "en")
+    # The hero of the portrait that the game uploads (mugshot.png): a National commando in its
+    # starting outfit with the seventh skin tone, which the models drew alike in the render
+    # trial.
+    portrait = Figures(catalogues).figure(bfheroes, Look("national", "commando", 7, 1, 0, 0))
 
     smg, head = english.item(3169), english.item(1)
     assert smg and head
@@ -174,3 +174,24 @@ async def test_the_server_reads_the_copys_catalogue_as_the_game_does(
                 ), (faction, hero_class, key)
             missions = [english.item(number) for number in loadout.missions]
             assert missions and all(item and item.prerequisite is None for item in missions)
+    assert portrait and portrait.parts == (
+        "ger_m_hands001",
+        "ger_m_head003",
+        "ger_m_feet002",
+        "ger_m_legs006",
+        "ger_m_body002",
+    )
+    assert [layer.texture for layer in portrait.layers] == [
+        "ger_m_hands001_hands001",
+        "ger_m_body001_body001",
+        "ger_m_legs001_legs001",
+        "ger_m_feet001_feet001",
+        "ger_m_head001_head001",
+        "ger_m_head_wrincle005",
+        "ger_m_head_moutheye001",
+        "ger_m_legs001_underwear001",
+        "ger_m_feet002_boots001",
+        "ger_m_legs006_trousers012",
+        "ger_m_body002_jacket009",
+    ]
+    assert [layer.tint for layer in portrait.layers[5:7]] == [(153, 119, 86), None]

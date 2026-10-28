@@ -9,7 +9,7 @@ from accounts import register
 from aiosmtpd.smtp import SMTP
 from identity import IdentityProvider, identity_provider
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 # Docker Desktop on Windows publishes container ports on 127.0.0.1, not on the name localhost.
 os.environ.setdefault("TESTCONTAINERS_HOST_OVERRIDE", "127.0.0.1")
@@ -71,6 +71,17 @@ async def relay_server(
 @pytest.fixture
 def server_url(relay_server: tuple[str, RelayServer]) -> str:
     return relay_server[0]
+
+
+@pytest.fixture
+async def catalogue_sessions(database_url: str) -> AsyncIterator[async_sessionmaker[AsyncSession]]:
+    """Open sessions of the database, whose imported catalogues go once the test ends."""
+    engine = create_async_engine(database_url)
+    await migrate(engine)
+    yield async_sessionmaker(engine)
+    async with engine.begin() as connection:
+        await connection.execute(text("TRUNCATE catalogue, admin_action CASCADE"))
+    await engine.dispose()
 
 
 @pytest.fixture
