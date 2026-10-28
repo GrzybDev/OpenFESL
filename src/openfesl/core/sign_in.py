@@ -1,11 +1,14 @@
+from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum, auto
 
-from openfesl.core.accounts import STATE_ERRORS, Account, AccountState
+from openfesl.core.accounts import STATE_ERRORS, Account, AccountState, AccountStore
 from openfesl.core.fesl import TransactionError
 from openfesl.core.games import Games
-from openfesl.core.limits import Attempts
+from openfesl.core.limits import Attempts, Mailings, Wait
 from openfesl.core.logins import Logins
 from openfesl.core.policies import GamePolicies
+from openfesl.core.verification import EmailVerification
 
 
 class Refusal(Enum):
@@ -38,25 +41,51 @@ class SignInRefused(Exception):
         self.account = account
 
 
+@dataclass(frozen=True, slots=True)
+class LinkSent:
+    """A link that went to an account's address.
+
+    Attributes:
+        address: The address it went to.
+        expires: When it stops working.
+    """
+
+    address: str
+    expires: datetime
+
+
 class WebSignIn:
     """Decides whether an account signs in on the site's pages."""
 
     def __init__(
-        self, logins: Logins, policies: GamePolicies, games: Games, attempts: Attempts
+        self,
+        accounts: AccountStore,
+        logins: Logins,
+        policies: GamePolicies,
+        games: Games,
+        verification: EmailVerification,
+        attempts: Attempts,
+        mailings: Mailings,
     ) -> None:
         """Check sign-ins against the accounts and the instance's policies.
 
         Args:
+            accounts: Where the accounts are kept.
             logins: Checks game passwords.
             policies: The site's and each game's policies, which say whether an account waits
                 for its address to be confirmed.
             games: The games, which the accounts they registered name.
+            verification: Sends the links that confirm addresses.
             attempts: Counts the failed attempts with each address.
+            mailings: Limits the mail to each address.
         """
+        self._accounts = accounts
         self._logins = logins
         self._policies = policies
         self._games = games
+        self._verification = verification
         self._attempts = attempts
+        self._mailings = mailings
 
     async def with_password(self, address: str, password: str) -> Account:
         """Return the account that an e-mail address and its game password sign in.
@@ -94,6 +123,36 @@ class WebSignIn:
             raise SignInRefused(Refusal.DEACTIVATED, account)
         if account.verification_expires_at is not None and await self._confirms(account):
             raise SignInRefused(Refusal.UNCONFIRMED, account)
+
+    async def waiting(self, account_id: int) -> Account | None:
+        """Return an account while it waits for its address to be confirmed.
+
+        Args:
+            account_id: The account, which proved to be the visitor's.
+        """
+        account = await self._accounts.account(account_id)
+        return account if account and account.verification_expires_at else None
+
+    async def send_confirmation(self, account_id: int, language: str) -> LinkSent | Wait | None:
+        """Send an account that waits for its address to be confirmed a new link.
+
+        Args:
+            account_id: The account, which proved to be the visitor's.
+            language: The language code of the page it was asked from.
+
+        Returns:
+            The link that went out, the wait while the last mail to the address is recent, or
+            None once the account no longer waits.
+        """
+        account = await self.waiting(account_id)
+        if account is None:
+            return None
+        if wait := self._mailings.reserve(account.nuid):
+            return wait
+        expires = await self._verification.resend(account, language)
+        if expires is None:
+            return None
+        return LinkSent(account.nuid, expires)
 
     async def _confirms(self, account: Account) -> bool:
         # Only while the policy is on, so turning it off lets waiting accounts in, as games do.

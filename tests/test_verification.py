@@ -1,14 +1,8 @@
-import asyncio
-import re
-from collections.abc import AsyncIterator
 from datetime import timedelta
-from email import message_from_bytes, policy
-from email.message import EmailMessage
 
 import anyio
 import pytest
-from aiosmtpd.smtp import SMTP, Envelope, Session
-from support import Game, cli, fetch, game, login, registration
+from support import Game, Mailbox, cli, fetch, game, login, registration
 
 from openfesl.core import verification
 from openfesl.protocol.relay import Channel, ConnectionKey
@@ -16,57 +10,6 @@ from openfesl.protocol.relay import Channel, ConnectionKey
 pytestmark = pytest.mark.anyio
 
 FESL = ConnectionKey(Channel.FESL, 1)
-PUBLIC_URL = "https://openfesl.example.test"
-
-
-class Mailbox:
-    """A mail server that keeps what it is sent."""
-
-    def __init__(self) -> None:
-        self.messages: list[EmailMessage] = []
-        # Cleared, the mail server holds what it is sent, as a slow one does.
-        self.answering = asyncio.Event()
-        self.answering.set()
-
-    async def handle_DATA(self, server: SMTP, session: Session, envelope: Envelope) -> str:
-        await self.answering.wait()
-        assert isinstance(envelope.content, bytes)
-        message = message_from_bytes(envelope.content, policy=policy.default)
-        assert isinstance(message, EmailMessage)
-        self.messages.append(message)
-        return "250 OK"
-
-    async def receive(self, to: str) -> tuple[EmailMessage, str]:
-        """Wait for the next message to an address and return it with the path of its link."""
-        with anyio.fail_after(5):
-            while not self.messages:
-                await anyio.sleep(0.02)
-        message = self.messages.pop(0)
-        assert message["To"] == to
-        found = re.search(re.escape(PUBLIC_URL) + r"(/(?:pl/)?verify/\S+)", message.get_content())
-        assert found is not None
-        return message, found[1]
-
-
-@pytest.fixture
-async def mailbox(monkeypatch: pytest.MonkeyPatch) -> AsyncIterator[Mailbox]:
-    # Before the server starts, which reads its mail server from the environment.
-    box = Mailbox()
-    loop = asyncio.get_running_loop()
-    server = await loop.create_server(lambda: SMTP(box), "127.0.0.1", 0)
-    port = server.sockets[0].getsockname()[1]
-    environment = {
-        "SMTP_HOST": "127.0.0.1",
-        "SMTP_PORT": str(port),
-        "SMTP_SECURITY": "none",
-        "SMTP_SENDER": "openfesl@example.test",
-        "PUBLIC_URL": PUBLIC_URL,
-    }
-    for name, value in environment.items():
-        monkeypatch.setenv(name, value)
-    yield box
-    server.close()
-    await server.wait_closed()
 
 
 async def register(player: Game, nuid: str) -> dict[str, str]:

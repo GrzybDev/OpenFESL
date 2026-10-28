@@ -21,7 +21,24 @@
         {% elif kind == "paused" %}
           <Alert :label="_('web.account.notice.paused')" :title="_('web.account.notice.paused.title')" glyph="clock" alert>{{ _("web.account.notice.paused.text") }}{% if mail %} {{ _("web.account.notice.paused.reset") }}{% endif %}</Alert>
         {% elif kind == "unconfirmed" %}
+          {% if notice.get("check") %}
+            <Alert :label="_('web.account.notice.not_sent')" :title="_('web.account.notice.check')" glyph="warn" alert />
+          {% endif %}
           <Alert :label="_('web.account.notice.unconfirmed')" :title="_('web.account.notice.unconfirmed.title')" glyph="mail">{{ _("web.account.notice.unconfirmed.text", address=notice.address, date=when(notice.sent, "yMMMd")) }}</Alert>
+          {% if mail %}
+            <form method="post"
+                  action="{{ url('/sign-in/confirmation') }}"
+                  class="alert-form">
+              <CsrfField />
+              {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+              {% if check %}<TurnstileCheck :key="check" />{% endif %}
+              <SmallAction :label="_('web.account.notice.unconfirmed.send')" :busy="_('web.account.notice.sending')" />
+            </form>
+          {% endif %}
+        {% elif kind == "link_sent" %}
+          <Alert :label="_('web.account.notice.link_sent')" :title="_('web.account.notice.link_sent.title', address=notice.address)" glyph="tick">{{ _("web.account.notice.link_sent.text", expires=moment(notice.expires)) }}</Alert>
+        {% elif kind == "link_wait" %}
+          <Alert :label="_('web.account.notice.link_sent')" :title="_('web.account.notice.link_wait', time=when(notice.last, 'Hm'))" glyph="tick">{{ _("web.account.notice.link_wait.text", time=when(notice.until, 'Hm')) }}</Alert>
         {% elif kind == "deactivated" %}
           <Alert :label="_('web.account.notice.deactivated')" :title="_('web.account.notice.deactivated.title')" glyph="lock" alert>{{ _("web.account.notice.deactivated.text", date=when(notice.since, "yMMMd")) }}</Alert>
         {% elif kind == "signed_out" %}

@@ -1,11 +1,15 @@
 import time
 from collections import deque
 from collections.abc import Callable
+from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
 
 # Sign-in with an address pauses after this many failed attempts within the window, and resumes
 # once the oldest of them is older than the window.
 FAILURES = 5
 WINDOW = 600.0
+# The mail that visitors can have sent goes to each address at most once in this long.
+MAIL_INTERVAL = timedelta(minutes=10)
 
 
 class Attempts:
@@ -77,3 +81,67 @@ class Attempts:
 
 def _key(address: str) -> str:
     return address.strip().casefold()
+
+
+@dataclass(frozen=True, slots=True)
+class Wait:
+    """The wait before another mail may go to an address.
+
+    Attributes:
+        last: When the last mail went to it.
+        until: From when the next one may go.
+    """
+
+    last: datetime
+    until: datetime
+
+
+class Mailings:
+    """Lets one mail go to each e-mail address per interval, in memory.
+
+    Every mail that a visitor can have sent to an address counts, so such forms cannot flood a
+    mailbox, whoever asks.
+    """
+
+    def __init__(
+        self,
+        interval: timedelta = MAIL_INTERVAL,
+        clock: Callable[[], datetime] = lambda: datetime.now(UTC),
+    ) -> None:
+        """Limit the mail to each address.
+
+        Args:
+            interval: How long after a mail the next one to the address may go.
+            clock: Reads the current time.
+        """
+        self._interval = interval
+        self._clock = clock
+        self._sent: dict[str, datetime] = {}
+
+    def reserve(self, address: str) -> Wait | None:
+        """Count a mail to an address now, unless one went there lately.
+
+        The check and the count are one step, so requests that run together send one mail.
+
+        Args:
+            address: The e-mail address, in any case.
+
+        Returns:
+            The wait before another mail may go to the address; None once this one is counted.
+        """
+        last = self._sent.get(_key(address))
+        if last is not None and self._clock() - last < self._interval:
+            return Wait(last, last + self._interval)
+        self.sent(address)
+        return None
+
+    def sent(self, address: str) -> None:
+        """Count a mail that went to an address now.
+
+        Args:
+            address: The e-mail address, in any case.
+        """
+        now = self._clock()
+        for key in [key for key, last in self._sent.items() if now - last >= self._interval]:
+            del self._sent[key]
+        self._sent[_key(address)] = now

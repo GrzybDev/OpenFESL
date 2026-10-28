@@ -11,7 +11,7 @@ from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
-from support import FESL, Game, cli, game, markup, registration
+from support import FESL, Game, Mailbox, cli, game, markup, registration
 
 from openfesl.core.limits import FAILURES, Attempts
 from openfesl.web import turnstile as turnstile_module
@@ -241,3 +241,46 @@ async def test_the_cloudflare_check_guards_the_password_form_before_anything_is_
         "response": "passed",
         "remoteip": "127.0.0.1",
     }
+
+
+async def test_a_waiting_account_gets_a_new_link_at_most_once_per_interval(
+    mailbox: Mailbox, server_url: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    await cli(capsys, "settings", "set", "bfbc2.accounts.email_verification", "on")
+    async with game(server_url) as player:
+        await player.hello(FESL, "bfbc2-pc")
+        await register(player, "kim@example.test")
+    _, first = await mailbox.receive("kim@example.test")
+    base = server_url.replace("ws://", "http://").rstrip("/")
+    async with httpx2.AsyncClient() as client:
+        # Only an account that proved to be the visitor's asks for a link.
+        page = await client.get(f"{base}/sign-in")
+        asked = await client.post(
+            f"{base}/sign-in/confirmation", data={"csrf": form_token(page.text)}
+        )
+        assert asked.status_code == 303
+
+        waiting = await post_sign_in(client, base, "kim@example.test", PASSWORD)
+        assert 'action="/sign-in/confirmation"' in waiting.text
+        # Requests sent together send one mail.
+        sent, again = sorted(
+            await asyncio.gather(
+                *(
+                    client.post(
+                        f"{base}/sign-in/confirmation", data={"csrf": form_token(waiting.text)}
+                    )
+                    for _ in range(2)
+                )
+            ),
+            key=lambda answer: answer.status_code,
+        )
+        assert "A new link was sent to kim@example.test." in sent.text
+        _, second = await mailbox.receive("kim@example.test")
+        assert again.status_code == 429
+        assert "Another one can be sent from " in again.text
+
+        # The new link replaces the one sent on registration.
+        assert (await client.get(f"{base}{first}")).status_code == 404
+        assert (await client.get(f"{base}{second}")).status_code == 200
+        assert (await post_sign_in(client, base, "kim@example.test", PASSWORD)).status_code == 303
+    assert not mailbox.messages

@@ -8,11 +8,13 @@ import zlib
 from collections.abc import AsyncIterator, Mapping, Sequence
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from email.message import Message
+from email import message_from_bytes, policy
+from email.message import EmailMessage, Message
 
 import anyio
 import httpx2
 import pytest
+from aiosmtpd.smtp import SMTP, Envelope, Session
 from websockets.asyncio.client import ClientConnection, connect
 from websockets.typing import Subprotocol
 
@@ -35,6 +37,9 @@ type Update = tuple[int, str, str, str, str]
 
 FESL = ConnectionKey(Channel.FESL, 1)
 THEATER = ConnectionKey(Channel.THEATER, 1)
+# The address that the server's mail links lead to in tests that send mail; plain HTTP, as a
+# session cookie for HTTPS would not come back from the tests' client.
+PUBLIC_URL = "http://openfesl.example.test"
 
 # The Theater port and product of each client, as the games and the R34 dedicated server send
 # them; the server names the game's product on its own host.
@@ -510,3 +515,32 @@ def png_image(width: int, height: int) -> bytes:
         + chunk(b"IDAT", zlib.compress(rows))
         + chunk(b"IEND", b"")
     )
+
+
+class Mailbox:
+    """A mail server that keeps what it is sent."""
+
+    def __init__(self) -> None:
+        self.messages: list[EmailMessage] = []
+        # Cleared, the mail server holds what it is sent, as a slow one does.
+        self.answering = asyncio.Event()
+        self.answering.set()
+
+    async def handle_DATA(self, server: SMTP, session: Session, envelope: Envelope) -> str:
+        await self.answering.wait()
+        assert isinstance(envelope.content, bytes)
+        message = message_from_bytes(envelope.content, policy=policy.default)
+        assert isinstance(message, EmailMessage)
+        self.messages.append(message)
+        return "250 OK"
+
+    async def receive(self, to: str) -> tuple[EmailMessage, str]:
+        """Wait for the next message to an address and return it with the path of its link."""
+        with anyio.fail_after(5):
+            while not self.messages:
+                await anyio.sleep(0.02)
+        message = self.messages.pop(0)
+        assert message["To"] == to
+        found = re.search(re.escape(PUBLIC_URL) + r"(/\S+)", message.get_content())
+        assert found is not None
+        return message, found[1]

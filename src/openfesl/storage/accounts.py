@@ -370,6 +370,25 @@ class SqlAccountStore:
             )
         return renewed is not None
 
+    async def replace(self, account_id: int, link: Link) -> bool:
+        """Replace the link of an account that waits for its address to be confirmed.
+
+        Args:
+            account_id: The account.
+            link: The new link.
+
+        Returns:
+            Whether the link was replaced, which it is not once the address is confirmed.
+        """
+        async with self._sessions.begin() as session:
+            replaced = await session.scalar(
+                update(AccountRow)
+                .where(AccountRow.id == account_id, AccountRow.verification_expires_at.is_not(None))
+                .values(verification_hash=link.token_hash, verification_expires_at=link.expires_at)
+                .returning(AccountRow.id)
+            )
+        return replaced is not None
+
     async def confirm(self, token_hash: bytes) -> Confirmation:
         """Confirm the address of the account that waits for a link.
 

@@ -29,6 +29,29 @@
     margin-top: 14px;
   }
 
+  /* A form that belongs to the notice above it, such as the one that sends a new link, on the
+     notice's light block. */
+  .account-page-panel > .alert:has(+ .alert-form) {
+    padding-bottom: 0;
+  }
+
+  .alert-form {
+    display: grid;
+    justify-items: start;
+    gap: 10px;
+    background: var(--row-light);
+    padding: 12px 14px 14px;
+
+    .account-page-panel > & {
+      margin-top: 0;
+    }
+
+    .turnstile {
+      margin-top: 0;
+      background: #ffffff;
+    }
+  }
+
   /* A block joined to the bar above it. */
   .account-page-joined {
     margin-top: 2px;

@@ -63,6 +63,17 @@ class VerificationStore(Protocol):
             the address is confirmed.
         """
 
+    async def replace(self, account_id: int, link: Link) -> bool:
+        """Replace the link of an account that waits for its address to be confirmed.
+
+        Args:
+            account_id: The account.
+            link: The new link.
+
+        Returns:
+            Whether the link was replaced, which it is not once the address is confirmed.
+        """
+
     async def confirm(self, token_hash: bytes) -> Confirmation:
         """Confirm the address of the account that waits for a link.
 
@@ -172,6 +183,22 @@ class EmailVerification:
             if await self._store.renew(account.id, link):
                 self.send(account.nuid, token, link, language)
         raise TransactionError(PENDING_AUTHORIZATION)
+
+    async def resend(self, account: Account, language: str) -> datetime | None:
+        """Send an account that waits for its address to be confirmed a link that replaces its last.
+
+        Args:
+            account: The account.
+            language: The language code of the page it was asked from.
+
+        Returns:
+            When the new link expires; None once the address is confirmed and nothing went out.
+        """
+        token, link = new_link()
+        if not await self._store.replace(account.id, link):
+            return None
+        self.send(account.nuid, token, link, language)
+        return link.expires_at
 
     async def confirm(self, token: str) -> Confirmation:
         """Confirm the address of the account a link was sent to.

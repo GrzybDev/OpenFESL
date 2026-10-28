@@ -4413,6 +4413,30 @@ msgstr "Adres e-mail tego konta nie jest jeszcze potwierdzony."
 msgid "web.account.notice.unconfirmed.text"
 msgstr "Potwierdza go link wysłany na adres %(address)s dnia %(date)s; logowanie na stronie i w grach działa po jego otwarciu. Nowy link zastępuje poprzedni."
 
+msgid "web.account.notice.unconfirmed.send"
+msgstr "Wyślij nowy link"
+
+msgid "web.account.notice.sending"
+msgstr "Wysyłanie"
+
+msgid "web.account.notice.not_sent"
+msgstr "Nie wysłano"
+
+msgid "web.account.notice.link_sent"
+msgstr "Link wysłany"
+
+msgid "web.account.notice.link_sent.title"
+msgstr "Nowy link został wysłany na adres %(address)s."
+
+msgid "web.account.notice.link_sent.text"
+msgstr "Jest ważny do %(expires)s. Jego otwarcie potwierdza adres; potem logowanie działa tym samym hasłem do gier lub przez tę samą usługę."
+
+msgid "web.account.notice.link_wait"
+msgstr "Link został wysłany o %(time)s."
+
+msgid "web.account.notice.link_wait.text"
+msgstr "Kolejny można wysłać od %(time)s."
+
 msgid "web.account.notice.deactivated"
 msgstr "Dezaktywowane"
 

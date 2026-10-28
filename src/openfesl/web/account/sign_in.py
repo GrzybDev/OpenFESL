@@ -6,8 +6,9 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 
 from openfesl.core.games import Games
+from openfesl.core.limits import Wait
 from openfesl.core.policies import GamePolicies
-from openfesl.core.sign_in import Refusal, SignInRefused, WebSignIn
+from openfesl.core.sign_in import LinkSent, Refusal, SignInRefused, WebSignIn
 from openfesl.core.texts import localize, translate
 from openfesl.core.verification import VALID_FOR
 from openfesl.web.account.session import end, signed_in, start
@@ -17,6 +18,8 @@ from openfesl.web.turnstile import Turnstile
 
 # Every page of the site, in any language, which a sign-in may return to.
 SITE = ("/",)
+# The account that proved to be the visitor's while it waits for its address to be confirmed.
+WAITING = "waiting"
 
 _STATUS = {
     Refusal.WRONG: 400,
@@ -81,11 +84,39 @@ class SignInPages:
                     address, str(form.get("password", ""))
                 )
             except SignInRefused as refused:
+                if refused.refusal is Refusal.UNCONFIRMED and refused.account:
+                    request.session[WAITING] = refused.account.id
                 notice = _refusal_notice(refused)
                 status = _STATUS[refused.refusal]
                 return await self._render(request, back, notice, address, status)
+            request.session.pop(WAITING, None)
             start(request, account, way="")
             return RedirectResponse(back or _account(request), 303)
+
+        @router.post("/sign-in/confirmation")
+        async def confirmation(request: Request) -> Response:
+            form = await request.form()
+            back = inside(str(form.get("next", "")), SITE)
+            account_id = request.session.get(WAITING)
+            if not form_matches(request, form) or account_id is None:
+                return _again(request, back, "form")
+            sign_in = self._sign_in()
+            if self._turnstile and not await self._turnstile.passed(request, form):
+                account = await sign_in.waiting(account_id)
+                if account is None:
+                    return _again(request, back, "form")
+                refused = SignInRefused(Refusal.UNCONFIRMED, account)
+                notice = {**_refusal_notice(refused), "check": True}
+                return await self._render(request, back, notice, status=400)
+            match await sign_in.send_confirmation(account_id, request.state.language):
+                case LinkSent(address, expires):
+                    notice = {"kind": "link_sent", "address": address, "expires": expires}
+                    return await self._render(request, back, notice)
+                case Wait(last, until):
+                    notice = {"kind": "link_wait", "last": last, "until": until}
+                    return await self._render(request, back, notice, status=429)
+            request.session.pop(WAITING, None)
+            return RedirectResponse(localize("/sign-in", request.state.language), 303)
 
         @router.post("/sign-out")
         async def sign_out(request: Request) -> Response:

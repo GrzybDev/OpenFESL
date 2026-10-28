@@ -4,6 +4,7 @@ from collections.abc import AsyncIterator, Iterator
 
 import anyio
 import pytest
+from aiosmtpd.smtp import SMTP
 from identity import IdentityProvider, identity_provider
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
@@ -11,6 +12,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 # Docker Desktop on Windows publishes container ports on 127.0.0.1, not on the name localhost.
 os.environ.setdefault("TESTCONTAINERS_HOST_OVERRIDE", "127.0.0.1")
 
+from support import PUBLIC_URL, Mailbox
 from testcontainers.community.postgres import PostgresContainer
 
 from openfesl.core import admin, history, trust
@@ -111,3 +113,24 @@ async def history_store(database_url: str) -> AsyncIterator[SqlHistoryStore]:
     async with engine.begin() as connection:
         await connection.execute(text("TRUNCATE activity_hour, activity_day"))
     await engine.dispose()
+
+
+@pytest.fixture
+async def mailbox(monkeypatch: pytest.MonkeyPatch) -> AsyncIterator[Mailbox]:
+    # Before the server starts, which reads its mail server from the environment.
+    box = Mailbox()
+    loop = asyncio.get_running_loop()
+    server = await loop.create_server(lambda: SMTP(box), "127.0.0.1", 0)
+    port = server.sockets[0].getsockname()[1]
+    environment = {
+        "SMTP_HOST": "127.0.0.1",
+        "SMTP_PORT": str(port),
+        "SMTP_SECURITY": "none",
+        "SMTP_SENDER": "openfesl@example.test",
+        "PUBLIC_URL": PUBLIC_URL,
+    }
+    for name, value in environment.items():
+        monkeypatch.setenv(name, value)
+    yield box
+    server.close()
+    await server.wait_closed()

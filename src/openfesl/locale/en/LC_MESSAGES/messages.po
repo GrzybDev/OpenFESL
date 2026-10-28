@@ -4289,6 +4289,30 @@ msgstr "The e-mail address of this account is not confirmed yet."
 msgid "web.account.notice.unconfirmed.text"
 msgstr "The link sent to %(address)s on %(date)s confirms it; signing in and game logins work once it is opened. A new link replaces the previous one."
 
+msgid "web.account.notice.unconfirmed.send"
+msgstr "Send a new link"
+
+msgid "web.account.notice.sending"
+msgstr "Sending"
+
+msgid "web.account.notice.not_sent"
+msgstr "Not sent"
+
+msgid "web.account.notice.link_sent"
+msgstr "Link sent"
+
+msgid "web.account.notice.link_sent.title"
+msgstr "A new link was sent to %(address)s."
+
+msgid "web.account.notice.link_sent.text"
+msgstr "It is valid until %(expires)s. Opening it confirms the address; signing in then works with the same game password or service."
+
+msgid "web.account.notice.link_wait"
+msgstr "A link was sent at %(time)s."
+
+msgid "web.account.notice.link_wait.text"
+msgstr "Another one can be sent from %(time)s."
+
 msgid "web.account.notice.deactivated"
 msgstr "Deactivated"
 

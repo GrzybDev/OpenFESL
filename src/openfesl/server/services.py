@@ -22,7 +22,7 @@ from openfesl.core.joining import Joining
 from openfesl.core.keys import KeyService
 from openfesl.core.launcher import LauncherService, LauncherSessions
 from openfesl.core.leaderboards import LeaderboardService
-from openfesl.core.limits import Attempts
+from openfesl.core.limits import Attempts, Mailings
 from openfesl.core.logins import Logins
 from openfesl.core.magma import Magma
 from openfesl.core.messages import MessageService
@@ -118,7 +118,9 @@ class GameServices:
         personas = PersonaService(stores.personas)
         await personas.prepare(await accounts.prepare(games))
         app.state.launcher = LauncherService(logins, games, personas, self._launcher_sessions)
-        app.state.sign_in = WebSignIn(logins, policies, games, Attempts())
+        app.state.sign_in = WebSignIn(
+            stores.accounts, logins, policies, games, verification, Attempts(), Mailings()
+        )
         routes.update(connect_routes(games, policies))
         routes.update(telemetry_routes())
         routes.update(accounts.routes())
