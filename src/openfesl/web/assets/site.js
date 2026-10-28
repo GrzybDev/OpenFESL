@@ -1,7 +1,7 @@
 // The motion and keyboard of a game's own site: one menu open at a time, closed by Escape, a
 // click outside or another menu, playing its closing first; and the message of the last change,
 // which its button closes. Without scripts the menus open and close as disclosures.
-const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+import { closeDialog, flash, reducedMotion } from "./naming.js";
 
 document.addEventListener("click", (event) => {
   if (!(event.target instanceof Element)) {
@@ -31,6 +31,10 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
+  // An open dialog takes Escape alone, closing and returning the focus to what opened it.
+  if (document.querySelector("dialog:modal")) {
+    return;
+  }
   const menu = document.querySelector("[data-site-menu][open]");
   if (menu && event.key === "Escape") {
     closeMenu(menu, 140, 100);
@@ -60,6 +64,47 @@ for (const toggle of document.querySelectorAll("[data-selector-toggle]")) {
     }
   });
 }
+
+// The site's dialogs open from the links that name them, which without scripts lead to pages that
+// hold the same forms; a form whose button is unavailable says why instead of being sent.
+for (const opener of document.querySelectorAll("[data-opens]")) {
+  const dialog = document.getElementById(opener.dataset.opens);
+  opener.addEventListener("click", (event) => {
+    event.preventDefault();
+    dialog.opener = opener;
+    dialog.showModal();
+    dialog.querySelector("input:not([type=hidden])")?.focus();
+  });
+}
+
+for (const dialog of document.querySelectorAll("dialog[data-modal]")) {
+  for (const button of dialog.querySelectorAll("[data-close]")) {
+    button.addEventListener("click", () => closeDialog(dialog, dialog.opener));
+  }
+  dialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeDialog(dialog, dialog.opener);
+  });
+  dialog.addEventListener("submit", (event) => {
+    if (event.submitter?.getAttribute("aria-disabled") === "true") {
+      event.preventDefault();
+      flash(dialog.querySelector("[data-why]"));
+    }
+  });
+}
+
+// A link that is unavailable flashes the line beside it that says why instead of leading on;
+// without scripts it opens its page, which says the same.
+document.addEventListener("click", (event) => {
+  const link =
+    event.target instanceof Element
+      ? event.target.closest("a[aria-disabled=true][aria-describedby]")
+      : null;
+  if (link) {
+    event.preventDefault();
+    flash(document.getElementById(link.getAttribute("aria-describedby")));
+  }
+});
 
 /**
  * Opens or closes the hero selector, playing its motion.

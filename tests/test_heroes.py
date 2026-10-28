@@ -6,7 +6,7 @@ import pytest
 from accounts import PASSWORD, execute, post_sign_in, select_value
 from heroes import CREATOR, create, create_hero
 from identity import form_token
-from support import FESL, fetch, game, launcher_sign_in, markup, visible
+from support import FESL, fetch, game, launcher_sign_in, markup, once_token, visible
 
 pytestmark = pytest.mark.anyio
 
@@ -289,3 +289,67 @@ async def test_a_new_name_costs_funds_only_when_it_is_given(
     assert ledger == "allowance:2500 rename:-1499 rename:-1499"
     session = (await launcher_sign_in(server_url, "ann@example.test", PASSWORD)).json()
     assert session["personaName"] in ("Kettle_Two", "Kettle_Three")
+
+
+async def test_a_further_hero_slot_is_bought_once_with_the_funds_for_one(
+    base: str, database_url: str
+) -> None:
+    for name in ("Brassbuckle", "Tin_Tankard", "Pip-Lantern", "Mossgrove"):
+        await create_hero(base, "ann@example.test", name)
+    slots = f"{base}/bfheroes/user/buyCharacterSlots"
+    async with httpx2.AsyncClient() as client, httpx2.AsyncClient() as twin:
+        for session in (client, twin):
+            await post_sign_in(session, base, "ann@example.test", PASSWORD)
+        full = await client.get(f"{base}{CREATOR}")
+        shown = visible(full.content)
+        assert "All 4 hero slots are in use" in shown
+        assert "Price 1,749 Funds · Funds now 2,500" in shown
+        assert 'href="/bfheroes/user/buyCharacterSlots?next=%2Fbfheroes%2Fuser%2FcreateHero"' in (
+            full.text
+        )
+        page = await client.get(f"{slots}?next={CREATOR}")
+        assert "4 → 5" in visible(page.content) and "Funds after 751" in visible(page.content)
+
+        # A form from another site, or one without its one-time token, buys nothing.
+        for sent in ({"csrf": "forged"}, {"csrf": form_token(page.text), "price": "1749"}):
+            await client.post(slots, data={**sent, "next": CREATOR})
+            refused = visible((await client.get(f"{base}{CREATOR}")).content)
+            assert "No hero slot was added: the form had expired. Nothing was spent." in refused
+        # Two purchases at once with the Funds for one: one slot is added, nothing goes below 0.
+        form = {"csrf": form_token(page.text), "next": CREATOR, "once": once_token(page.text)}
+        other = (await twin.get(slots)).text
+        raced = await asyncio.gather(
+            client.post(slots, data=form),
+            twin.post(slots, data={**form, "csrf": form_token(other), "once": once_token(other)}),
+        )
+        assert [answer.headers["location"] for answer in raced] == [CREATOR, CREATOR]
+        creator = await client.get(f"{base}{CREATOR}")
+        opened = visible(creator.content)
+        refused = visible((await twin.get(f"{base}{CREATOR}")).content)
+
+        # With every slot used again, the purchase stays in view, unavailable, saying why.
+        await create(client, base, "Mudlark")
+        short = await client.get(f"{base}{CREATOR}")
+        assert 'aria-disabled="true" aria-describedby="creator-why"' in short.text
+        assert "Funds now 751 · 998 short" in visible(short.content)
+        assert "The account has 751 Funds; a slot costs 1,749." in visible(short.content)
+
+        # One form sent twice at once, as a double click without scripts sends it, and later
+        # again, as Back and sending it do, adds one slot.
+        await execute(database_url, "UPDATE wallet SET balance = 4000")
+        page = await client.get(slots)
+        form = {"csrf": form_token(page.text), "next": CREATOR, "once": once_token(page.text)}
+        await asyncio.gather(*(client.post(slots, data=form) for _ in range(2)))
+        await client.get(f"{base}{CREATOR}")
+        await client.post(slots, data=form)
+        again = visible((await client.get(f"{base}{CREATOR}")).content)
+    messages = opened + refused
+    assert "Hero slot 5 added. 1,749 Funds spent." in messages
+    assert "No hero slot was added: the account has 751 Funds; a slot costs 1,749." in messages
+    assert "4 of 5 used" in opened and 'name="faction"' in creator.text
+    assert "This hero slot purchase was made already; sending it again added no further" in again
+    assert await select_value(database_url, "SELECT balance FROM wallet") == 2251
+    ledger = await select_value(
+        database_url, "SELECT string_agg(reason || ':' || delta, ' ' ORDER BY id) FROM wallet_entry"
+    )
+    assert ledger == "allowance:2500 hero-slot:-1749 hero-slot:-1749"

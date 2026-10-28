@@ -55,6 +55,15 @@
           </article>
         </li>
       {% endfor %}
+      {% if not roster.free %}
+        <li class="selector-hanger">
+          <div class="selector-free">
+            <span aria-hidden="true" class="selector-plus"><Icon name="coin" :size="26" stroke="currentColor" /></span>
+            <p>{{ _n("web.slots.all_used", roster.slots) }}</p>
+            <BuySlotButton />
+          </div>
+        </li>
+      {% endif %}
       {% for number in range(roster.heroes|length + 1, roster.slots + 1) %}
         <li class="selector-hanger">
           <div class="selector-free">

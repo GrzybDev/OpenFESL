@@ -28,6 +28,7 @@ from openfesl.web.pages import Pages
 from openfesl.web.play import play_routes, relay_address
 from openfesl.web.players import player_routes
 from openfesl.web.servers import server_routes
+from openfesl.web.sessions import SentForms
 from openfesl.web.shell import shell_routes
 
 
@@ -50,6 +51,7 @@ def include_public_routes(
         stores: The database's stores.
     """
     census, history = services.census, services.history
+    sent = SentForms()
     app.include_router(game_icon_routes(games, stores.game_icons))
     app.include_router(shell_routes(pages, services.terms))
     app.include_router(menu_routes(pages, games, census))
@@ -85,6 +87,7 @@ def include_public_routes(
             pages,
             games,
             services.heroes,
+            sent,
             services.wallets,
             stores.entitlements,
             services.catalogues,

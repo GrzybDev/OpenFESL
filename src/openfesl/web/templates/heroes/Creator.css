@@ -17,10 +17,6 @@
 
   .creator-closed {
     margin-top: 30px;
-
-    > p {
-      max-width: 70ch;
-    }
   }
 
   .creator-unavailable {
@@ -52,6 +48,10 @@
       0 4px 0 #000;
   }
 
+  .creator-unavailable-coin {
+    background: #f2c12e;
+  }
+
   .creator-unavailable-text {
     flex: 1 1 300px;
     min-width: 0;
@@ -63,6 +63,32 @@
 
     > .site-actions {
       margin-top: 14px;
+    }
+  }
+
+  /* The price beside what the account has, in red with the amount missing when it is short. */
+  .creator-amounts {
+    > span {
+      color: #5c4a3c;
+    }
+  }
+
+  .creator-why {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 12px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: #8c1e18;
+
+    > svg {
+      flex: 0 0 auto;
+      margin-top: 1px;
+    }
+
+    &.flash {
+      animation: site-flash 600ms linear;
     }
   }
 

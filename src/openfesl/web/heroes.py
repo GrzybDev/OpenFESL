@@ -13,9 +13,19 @@ from openfesl.core.texts import localize, translate
 from openfesl.core.wallets import Wallets
 from openfesl.web.account.session import open_page, signed_in
 from openfesl.web.pages import Pages, number
-from openfesl.web.sessions import form_matches, form_token, inside, notify, toast
+from openfesl.web.sessions import (
+    SentForms,
+    form_matches,
+    form_token,
+    inside,
+    notify,
+    purchase_matches,
+    toast,
+)
+from openfesl.web.site import site_bar
 
 HEROES = "/heroes"
+SLOTS = "/user/buyCharacterSlots"
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,6 +61,7 @@ class HeroesPages:
         pages: Pages,
         games: Games,
         heroes: Heroes,
+        sent: SentForms,
         wallets: Wallets,
         entitlements: EntitlementStore,
         catalogues: Catalogues,
@@ -61,6 +72,7 @@ class HeroesPages:
             pages: Renders the pages.
             games: The games, of which those with hero rules get the page.
             heroes: Lists the heroes and keeps the default one.
+            sent: Lets each form that buys a hero slot buy once.
             wallets: Reads the heroes' Hero Points without opening their wallets.
             entitlements: Lists the items kept for each hero.
             catalogues: Give the XP each level needs, once imported.
@@ -68,12 +80,13 @@ class HeroesPages:
         self._pages = pages
         self._games = games
         self._heroes = heroes
+        self._sent = sent
         self._wallets = wallets
         self._entitlements = entitlements
         self._catalogues = catalogues
 
     def routes(self) -> APIRouter:
-        """Return each game's heroes page and its forms of the default hero and of new names."""
+        """Return each game's heroes page and its forms of the default hero, new names and slots."""
         router = APIRouter()
         for game in self._games:
             if game.heroes:
@@ -90,23 +103,25 @@ class HeroesPages:
                 router.add_api_route(
                     base + "/{hero_id}/rename", self._rename(game), methods=["POST"]
                 )
+                slots = f"/{game.id}{SLOTS}"
+                router.add_api_route(slots, self._slots_page(game), response_class=HTMLResponse)
+                router.add_api_route(slots, self._buy_slot(game), methods=["POST"])
         return router
 
     def _page(self, game: Game) -> Callable[[Request], Awaitable[Response]]:
         async def show_heroes(request: Request) -> Response:
-            player = signed_in(request)
-            if player is None:
+            bar = await site_bar(request)
+            if bar is None or bar.roster is None:
                 notify(request, "needed", page="heroes")
                 back = localize(f"/{game.id}{HEROES}", request.state.language)
                 return open_page(request, "/sign-in", back)
-            roster = await self._heroes.roster(game, player.account_id)
             return self._pages.render(
                 request,
                 "heroes.Heroes",
                 game=game,
-                roster=roster,
-                cards=await self._cards(game, roster, request.state.language),
-                funds=await self._funds(game, player.account_id),
+                roster=bar.roster,
+                cards=await self._cards(game, bar.roster, request.state.language),
+                funds=bar.funds,
                 csrf=form_token(request),
             )
 
@@ -148,6 +163,8 @@ class HeroesPages:
                 return found
             name = str(form.get("name", "")).strip()
             old = found.persona.name
+            assert game.heroes is not None
+            price = game.heroes.rename_price
             heroes = localize(f"/{game.id}{HEROES}", request.state.language)
             if not form_matches(request, form):
                 toast(request, "web.rename.refused.form", error=True, hero=old)
@@ -158,10 +175,10 @@ class HeroesPages:
                 if refused.refusal is not Refusal.FUNDS:
                     return await self._render_rename(request, game, found, name, refused.refusal)
                 funds = await self._funds(game, found.persona.account_id)
-                values = self._prices(game, funds, request.state.language)
+                values = self._prices(game, funds, request.state.language, price)
                 toast(request, "web.rename.refused.funds", error=True, hero=old, **values)
                 return RedirectResponse(heroes, 303)
-            prices = self._prices(game, 0, request.state.language)
+            prices = self._prices(game, 0, request.state.language, price)
             toast(
                 request, "web.rename.done", error=False, old=old, new=name, game=game.name, **prices
             )
@@ -169,15 +186,58 @@ class HeroesPages:
 
         return rename
 
+    def _slots_page(self, game: Game) -> Callable[[Request, str], Awaitable[Response]]:
+        async def show_slots(request: Request, next: str = "") -> Response:
+            if signed_in(request) is None:
+                notify(request, "needed", page="heroes")
+                back = localize(f"/{game.id}{SLOTS}", request.state.language)
+                return open_page(request, "/sign-in", back)
+            return self._pages.render(
+                request,
+                "heroes.BuySlots",
+                game=game,
+                next=inside(next, ("/",)),
+                csrf=form_token(request),
+            )
+
+        return show_slots
+
+    def _buy_slot(self, game: Game) -> Callable[[Request], Awaitable[Response]]:
+        async def buy_slot(request: Request) -> Response:
+            form = await request.form()
+            heroes = localize(f"/{game.id}{HEROES}", request.state.language)
+            back = inside(str(form.get("next", "")), ("/",)) or heroes
+            player = signed_in(request)
+            if player is None or not purchase_matches(request, form):
+                toast(request, "web.slots.refused.form", error=True)
+                return RedirectResponse(back, 303)
+            assert game.heroes is not None
+            price, language = game.heroes.slot_price, request.state.language
+            try:
+                async with self._sent.once(form) as bought:
+                    if bought:
+                        toast(request, "web.slots.done.again", error=False)
+                        return RedirectResponse(back, 303)
+                    slot = await self._heroes.buy_slot(game, player.account_id)
+            except HeroRefused:
+                funds = await self._funds(game, player.account_id)
+                values = self._prices(game, funds, language, price)
+                toast(request, "web.slots.refused.funds", error=True, **values)
+                return RedirectResponse(back, 303)
+            values = self._prices(game, 0, language, price)
+            toast(request, "web.slots.done", error=False, slot=number(slot, language), **values)
+            return RedirectResponse(back, 303)
+
+        return buy_slot
+
     async def _own(self, request: Request, game: Game, hero_id: int) -> Hero | Response:
         # The signed-in account's hero, or the sign-in page, or no page for another's hero.
-        player = signed_in(request)
-        if player is None:
+        bar = await site_bar(request)
+        if bar is None or bar.roster is None:
             notify(request, "needed", page="heroes")
             back = localize(f"/{game.id}{HEROES}", request.state.language)
             return open_page(request, "/sign-in", back)
-        roster = await self._heroes.roster(game, player.account_id)
-        hero = next((hero for hero in roster.heroes if hero.persona.id == hero_id), None)
+        hero = next((hero for hero in bar.roster.heroes if hero.persona.id == hero_id), None)
         if hero is None:
             raise HTTPException(404)
         return hero
@@ -185,13 +245,16 @@ class HeroesPages:
     async def _render_rename(
         self, request: Request, game: Game, hero: Hero, name: str = "", refused: str = ""
     ) -> Response:
+        # The hero was found among the bar's, which was read for this request.
+        bar = await site_bar(request)
+        assert bar is not None
         return self._pages.render(
             request,
             "heroes.Rename",
             409 if refused == Refusal.TAKEN else 400 if refused else 200,
             game=game,
             hero=hero,
-            funds=await self._funds(game, hero.persona.account_id),
+            funds=bar.funds,
             name=name,
             check=refused,
             csrf=form_token(request),
@@ -203,12 +266,12 @@ class HeroesPages:
         [funds] = await self._wallets.of_account(game, account_id, [game.heroes.currency])
         return funds
 
-    def _prices(self, game: Game, funds: int, language: str) -> dict[str, str]:
+    def _prices(self, game: Game, funds: int, language: str, price: int) -> dict[str, str]:
         # The amounts a message names, written as the page's language writes them.
         assert game.heroes is not None
         currency = translate(f"games.{game.id}.currency.{game.heroes.currency}", language)
         return {
-            "price": number(game.heroes.rename_price, language),
+            "price": number(price, language),
             "funds": number(funds, language),
             "currency": currency,
         }

@@ -458,6 +458,16 @@ def visible(body: bytes) -> str:
     return re.sub(r"\s+", " ", text, flags=re.ASCII).strip()
 
 
+def once_token(page: str) -> str:
+    """Return the one-time token of a page's last purchase form, which its content holds.
+
+    Args:
+        page: The page's markup.
+    """
+    tokens: list[str] = re.findall(r'name="once" value="([^"]+)"', page)
+    return tokens[-1]
+
+
 def block(owner: int, member: int) -> Fields:
     """Return the AddAssociations that puts a member on its owner's block list."""
     return [

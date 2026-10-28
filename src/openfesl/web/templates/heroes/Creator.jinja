@@ -33,6 +33,7 @@
         {{ _("web.slots.taking", slot=slot) }}
       {% else %}
         {{ _n("web.slots.free", rules.slots) }}
+        {{ _("web.slots.further", price=number(rules.slot_price), currency=_("games." ~ game.id ~ ".currency." ~ rules.currency)) }}
       {% endif %}
       </SlotPanel>
     {% endif %}
@@ -56,10 +57,33 @@
       </div>
     </section>
   {% elif not roster.free %}
+    {% set price = rules.slot_price %}
+    {% set short = bar.funds < price %}
+    {% set currency = _("games." ~ game.id ~ ".currency." ~ rules.currency) %}
     <section aria-labelledby="creator-closed"
-             class="site-box site-box-pale creator-closed">
-      <h2 id="creator-closed" class="site-box-title">{{ _n("web.creator.full", roster.slots) }}</h2>
-      <p>{{ _("web.creator.full.text") }}</p>
+             class="creator-closed creator-unavailable">
+      <span aria-hidden="true"
+            class="creator-unavailable-disc creator-unavailable-coin"><Icon name="coin" :size="34" stroke="#0A0A0A" /></span>
+      <div class="creator-unavailable-text">
+        <h2 id="creator-closed" class="site-box-title">{{ _n("web.creator.full", roster.slots) }}</h2>
+        <p>{{ _("web.creator.full.text", price=number(price), currency=currency) }}</p>
+        <p class="creator-amounts">
+          <span>{{ _("web.rename.price") }}</span> <strong>{{ number(price) }} {{ currency }}</strong> ·
+          <span>{{ _("web.rename.funds_now", currency=currency) }}</span>
+          <strong{% if short %} class="site-short"{% endif %}>{{ number(bar.funds) }}{% if short %} · {{ _("web.rename.short", amount=number(price - bar.funds)) }}{% endif %}</strong>
+        </p>
+        <p class="site-actions">
+          <BuySlotButton :why="'creator-why' if short else ''" plus />
+          <a href="{{ url('/' ~ game.id ~ '/heroes') }}"
+             class="site-link"><Icon name="back" :size="13" stroke="currentColor" />{{ _("web.heroes.back") }}</a>
+        </p>
+        {% if short %}
+          <p id="creator-why" class="creator-why">
+            <Icon name="warn" :size="18" stroke="currentColor" />
+            {{ _("web.slots.why.funds", funds=number(bar.funds), price=number(price), currency=currency) }}
+          </p>
+        {% endif %}
+      </div>
     </section>
   {% else %}
     <CreatorForm :rules="rules" :look="look" :roster="roster" :name="name" :refused="refused" :from_game="from_game" :kits="kits" :slot="slot" />

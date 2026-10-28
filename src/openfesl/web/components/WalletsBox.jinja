@@ -5,13 +5,14 @@
     <h2 id="wallets-title" class="info-box-title">{{ _("web.site.wallets") }}</h2>
     <span aria-hidden="true" class="info-box-disc"><Icon name="coin" :size="22" stroke="#0A0A0A" /></span>
     <dl class="wallet-rows">
+      {% set spent = game.heroes.slot_price if toast and toast.key == "web.slots.done" else 0 %}
       {% for wallet, balance in bar.wallets %}
         <div>
           <dt>
             <strong>{{ _("games." ~ game.id ~ ".currency." ~ wallet.currency) }}</strong> · {{ _("web.heroes.wallet.shared") }}
           </dt>
           <dd>
-            {{ number(balance) }}
+            <Count :value="balance" :was="balance + spent if spent and wallet.currency == game.heroes.currency else none" />
           </dd>
         </div>
       {% endfor %}

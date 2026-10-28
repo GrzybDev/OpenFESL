@@ -126,6 +126,8 @@ class HeroAccountRow(Base):
     default_persona_id: Mapped[int | None] = mapped_column(
         ForeignKey("persona.id", ondelete="SET NULL")
     )
+    # The slots bought on top of the game's free ones, which stay with the account.
+    bought_slots: Mapped[int] = mapped_column(server_default="0")
 
 
 class EntitlementRow(Base):

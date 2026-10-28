@@ -1,0 +1,16 @@
+{#def why: str = "", plus: bool = False #}
+{# The black pill that buys a further hero slot: a dialog with scripts, its page without. With the
+   id of the line that says why the account cannot pay, it stays visible, grey and unavailable. #}
+{% set rules = game.heroes %}
+{% set price = number(rules.slot_price) ~ " " ~ _("games." ~ game.id ~ ".currency." ~ rules.currency) %}
+<a href="{{ url('/' ~ game.id ~ '/user/buyCharacterSlots') }}?{{ {'next': here}|urlencode }}"
+   {% if why %}aria-disabled="true" aria-describedby="{{ why }}"{% else %}data-opens="buy-slot"{% endif %}
+   class="site-button slot-buy">
+  {% if plus %}<Icon name="plus" :size="17" :stroke="'currentColor' if why else '#FEDE01'" />{% endif %}
+  {{ _("web.slots.buy") }}
+  {% if why %}
+    <span>· {{ price }}</span>
+  {% else %}
+    <span class="slot-price"><Icon name="coin" :size="15" stroke="currentColor" />{{ price }}</span>
+  {% endif %}
+</a>

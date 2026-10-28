@@ -167,6 +167,60 @@ msgstr "Każde konto ma %(count)s bezpłatnych miejsc na bohaterów."
 msgid "web.slots.free.other"
 msgstr "Każde konto ma %(count)s bezpłatnego miejsca na bohaterów."
 
+msgid "web.slots.buy"
+msgstr "Kup miejsce na bohatera"
+
+msgid "web.slots.further"
+msgstr "Każde kolejne miejsce kosztuje %(price)s %(currency)s."
+
+msgid "web.slots.kept"
+msgstr "Miejsce zostaje przy koncie. Bohaterów nie można usuwać, więc każdy bohater zachowuje swoje miejsce."
+
+msgid "web.slots.submit"
+msgstr "Kup za %(price)s %(currency)s"
+
+msgid "web.slots.why.funds"
+msgstr "Konto ma %(funds)s %(currency)s; miejsce kosztuje %(price)s."
+
+msgid "web.slots.all_used.one"
+msgstr "%(count)s miejsce zajęte"
+
+msgid "web.slots.all_used.few"
+msgstr "Wszystkie %(count)s miejsca zajęte"
+
+msgid "web.slots.all_used.many"
+msgstr "Wszystkie %(count)s miejsc zajętych"
+
+msgid "web.slots.all_used.other"
+msgstr "Wszystkie %(count)s miejsca zajęte"
+
+msgid "web.slots.another"
+msgstr "Kolejne miejsce"
+
+msgid "web.slots.another.text.one"
+msgstr "%(count)s miejsce jest zajęte. Kolejne kosztuje %(price)s %(currency)s i zostaje przy koncie."
+
+msgid "web.slots.another.text.few"
+msgstr "Wszystkie %(count)s miejsca są zajęte. Kolejne kosztuje %(price)s %(currency)s i zostaje przy koncie."
+
+msgid "web.slots.another.text.many"
+msgstr "Wszystkie %(count)s miejsc jest zajętych. Kolejne kosztuje %(price)s %(currency)s i zostaje przy koncie."
+
+msgid "web.slots.another.text.other"
+msgstr "Wszystkie %(count)s miejsca są zajęte. Kolejne kosztuje %(price)s %(currency)s i zostaje przy koncie."
+
+msgid "web.slots.done"
+msgstr "Dodano miejsce %(slot)s. Wydano %(price)s %(currency)s."
+
+msgid "web.slots.done.again"
+msgstr "Ten zakup miejsca został już dokonany; ponowne wysłanie nie dodało kolejnego miejsca. Nic więcej nie zostało wydane."
+
+msgid "web.slots.refused.funds"
+msgstr "Miejsce nie zostało dodane: konto ma %(funds)s %(currency)s, a miejsce kosztuje %(price)s. Nic nie zostało wydane."
+
+msgid "web.slots.refused.form"
+msgstr "Miejsce nie zostało dodane: formularz wygasł. Nic nie zostało wydane."
+
 msgid "web.creator.title"
 msgstr "Utwórz bohatera"
 
@@ -204,7 +258,7 @@ msgid "web.creator.full.other"
 msgstr "Wszystkie %(count)s miejsca na bohaterów są zajęte"
 
 msgid "web.creator.full.text"
-msgstr "Bohaterów nie można usuwać, więc nowy bohater potrzebuje kolejnego miejsca."
+msgstr "Bohaterów nie można usuwać, więc nowy bohater potrzebuje kolejnego miejsca. Miejsce kosztuje %(price)s %(currency)s i zostaje przy koncie; po jego dodaniu kreator otworzy się tutaj."
 
 msgid "web.creator.refused.taken"
 msgstr "Bohater %(name)s nie powstał: nazwa została zajęta przed chwilą. Żadne miejsce nie zostało użyte, a pozostałe wybory są zachowane poniżej."

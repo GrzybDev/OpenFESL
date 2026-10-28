@@ -158,6 +158,48 @@ msgstr "Every account has %(count)s free hero slot."
 msgid "web.slots.free.other"
 msgstr "Every account has %(count)s free hero slots."
 
+msgid "web.slots.buy"
+msgstr "Buy a hero slot"
+
+msgid "web.slots.further"
+msgstr "Each further slot costs %(price)s %(currency)s."
+
+msgid "web.slots.kept"
+msgstr "The slot stays with the account. Heroes cannot be deleted, so each hero keeps its slot."
+
+msgid "web.slots.submit"
+msgstr "Buy for %(price)s %(currency)s"
+
+msgid "web.slots.why.funds"
+msgstr "The account has %(funds)s %(currency)s; a slot costs %(price)s."
+
+msgid "web.slots.all_used.one"
+msgstr "The %(count)s slot is in use"
+
+msgid "web.slots.all_used.other"
+msgstr "All %(count)s slots in use"
+
+msgid "web.slots.another"
+msgstr "Another hero slot"
+
+msgid "web.slots.another.text.one"
+msgstr "The %(count)s slot is in use. Another slot costs %(price)s %(currency)s and stays with the account."
+
+msgid "web.slots.another.text.other"
+msgstr "All %(count)s slots are in use. Another slot costs %(price)s %(currency)s and stays with the account."
+
+msgid "web.slots.done"
+msgstr "Hero slot %(slot)s added. %(price)s %(currency)s spent."
+
+msgid "web.slots.done.again"
+msgstr "This hero slot purchase was made already; sending it again added no further slot. Nothing more was spent."
+
+msgid "web.slots.refused.funds"
+msgstr "No hero slot was added: the account has %(funds)s %(currency)s; a slot costs %(price)s. Nothing was spent."
+
+msgid "web.slots.refused.form"
+msgstr "No hero slot was added: the form had expired. Nothing was spent."
+
 msgid "web.creator.title"
 msgstr "Create a hero"
 
@@ -189,7 +231,7 @@ msgid "web.creator.full.other"
 msgstr "All %(count)s hero slots are in use"
 
 msgid "web.creator.full.text"
-msgstr "Heroes cannot be deleted, so a new hero needs another slot."
+msgstr "Heroes cannot be deleted, so a new hero needs another slot. A slot costs %(price)s %(currency)s and stays with the account; the creator opens here once it is added."
 
 msgid "web.creator.refused.taken"
 msgstr "%(name)s was not created: the name was taken a moment earlier. No hero slot was used, and the other choices are kept below."

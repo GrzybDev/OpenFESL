@@ -1,4 +1,6 @@
-{#def value: int #}
-{# A number that a refresh may change; it then counts to its new value over an underline. #}
+{#def value: int, was: int | None = None #}
+{# A number that a refresh may change; it then counts to its new value over an underline.
+   Given its value before a change on the previous page, such as a purchase, it counts from it. #}
 <span class="count{% if attrs.classes %} {{ attrs.classes }}{% endif %}"
-      data-count="{{ value }}">{{ number(value) }}</span>
+      data-count="{{ value }}"
+      {% if was is not none %}data-count-from="{{ was }}"{% endif %}>{{ number(value) }}</span>

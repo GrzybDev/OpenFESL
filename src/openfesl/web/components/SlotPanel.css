@@ -61,4 +61,38 @@
     font-size: 14px;
     line-height: 1.4;
   }
+
+  .slot-buy {
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .slot-price {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #f2c12e;
+  }
+
+  .slot-kept {
+    margin-top: 10px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  /* A slot just bought joins the pips. */
+  .slot-pip-new {
+    animation: slot-pip-in 200ms var(--ease-menu) both;
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: fade-in 100ms linear both;
+    }
+  }
+
+  @keyframes slot-pip-in {
+    from {
+      opacity: 0;
+      scale: 0.6;
+    }
+  }
 }

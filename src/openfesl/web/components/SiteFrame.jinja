@@ -50,7 +50,15 @@
   </header>
   {% if player %}
     <SiteBar />
-    {% if bar and bar.roster and bar.roster.heroes %}<HeroSelector />{% endif %}
+    {% if bar and bar.roster %}
+      {% if bar.roster.heroes %}<HeroSelector />{% endif %}
+      <dialog id="buy-slot"
+              aria-labelledby="buy-slot-title"
+              data-modal
+              class="site-dialog">
+        <BuySlotForm :roster="bar.roster" :funds="bar.funds" :next="here" dialog />
+      </dialog>
+    {% endif %}
   {% else %}
     <SiteSignIn />
   {% endif %}

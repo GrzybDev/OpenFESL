@@ -3,6 +3,7 @@
    after them, or the way to the first hero, and the account's wallets. #}
 {% set title = _("web.heroes.title") %}
 {% set rules = game.heroes %}
+{% set bought = toast and toast.key == "web.slots.done" %}
 <Layout :title="title">
   <section aria-labelledby="heroes-title" class="creator-head">
     <div class="creator-intro">
@@ -14,7 +15,10 @@
         <p class="site-lead">{{ _("web.heroes.lead.none", game=game.name) }}</p>
       {% endif %}
     </div>
-    <SlotPanel :roster="roster">{{ _n("web.slots.free", rules.slots) }}</SlotPanel>
+    <SlotPanel :roster="roster" :buy="roster.heroes|length > 0">
+    {{ _n("web.slots.free", rules.slots) }}
+    {{ _("web.slots.further", price=number(rules.slot_price), currency=_("games." ~ game.id ~ ".currency." ~ rules.currency)) }}
+    </SlotPanel>
   </section>
   {% if cards %}
     <section aria-labelledby="heroes-list" class="hero-rack">
@@ -29,7 +33,8 @@
             <div class="hero-folder">
               <span aria-hidden="true" class="hero-string hero-string-left"></span>
               <span aria-hidden="true" class="hero-string hero-string-right"></span>
-              <article aria-labelledby="slot-{{ number }}" class="free-slot">
+              <article aria-labelledby="slot-{{ number }}"
+                       class="free-slot{% if bought and number == roster.slots %} free-slot-new{% endif %}">
                 <p class="free-slot-tab">{{ _("web.heroes.slot", slot=number) }}</p>
                 <span aria-hidden="true"
                       class="free-slot-disc"><Icon name="plus" :size="32" stroke="currentColor" /></span>
@@ -41,6 +46,23 @@
             </div>
           </li>
         {% endfor %}
+        {% if not roster.free %}
+          <li class="hero-hanger">
+            <span aria-hidden="true" class="hero-beam"></span>
+            <div class="hero-folder">
+              <span aria-hidden="true" class="hero-string hero-string-left"></span>
+              <span aria-hidden="true" class="hero-string hero-string-right"></span>
+              <article aria-labelledby="slot-buy" class="free-slot">
+                <p class="free-slot-tab">{{ _("web.heroes.slot", slot=roster.slots + 1) }}</p>
+                <span aria-hidden="true"
+                      class="free-slot-disc"><Icon name="coin" :size="32" stroke="currentColor" /></span>
+                <h3 id="slot-buy" class="free-slot-title">{{ _("web.slots.another") }}</h3>
+                <p>{{ _n("web.slots.another.text", roster.slots, price=number(rules.slot_price), currency=_("games." ~ game.id ~ ".currency." ~ rules.currency)) }}</p>
+                <BuySlotButton />
+              </article>
+            </div>
+          </li>
+        {% endif %}
       </ul>
     </section>
   {% else %}

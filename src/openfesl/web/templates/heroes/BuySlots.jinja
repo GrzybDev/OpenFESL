@@ -1,0 +1,8 @@
+{#def next: str #}
+{# The page that buys a further hero slot, where a page has no scripts to open its dialog. #}
+{% set title = _("web.slots.buy") %}
+<Layout :title="title">
+  <div class="rename-page">
+    <BuySlotForm :roster="bar.roster" :funds="bar.funds" :next="next" />
+  </div>
+</Layout>

@@ -31,7 +31,7 @@ from openfesl.core.hero_rules import HeroRules
 from openfesl.core.texts import languages, localize, translate, translate_count
 from openfesl.web.languages import split_language
 from openfesl.web.security import HEADERS
-from openfesl.web.sessions import form_token
+from openfesl.web.sessions import form_token, once_token
 
 STATIC = Path(__file__).with_name("static")
 # Vite writes the built scripts, stylesheet and fonts here, named after their content.
@@ -256,6 +256,7 @@ _catalog = Catalog(
         "_": _text,
         "_n": _count_text,
         "number": _number,
+        "once_token": once_token,
         "static": static_url,
         "page_links": page_links,
         "moment": _moment,

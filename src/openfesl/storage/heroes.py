@@ -12,8 +12,9 @@ from openfesl.storage.models import EntitlementRow, HeroAccountRow, PersonaRow, 
 from openfesl.storage.personas import persona_of
 from openfesl.storage.wallets import spend
 
-# The ledger's reason for a hero's new name.
+# The ledger's reasons for a hero's new name and for a further hero slot.
 RENAME = "rename"
+SLOT = "hero-slot"
 
 
 class SqlHeroStore:
@@ -46,12 +47,15 @@ class SqlHeroStore:
                 .order_by(PersonaRow.id)
             )
             personas = [(persona_of(row), row.created_at) for row in rows]
-            default_id = await session.scalar(
-                select(HeroAccountRow.default_persona_id).where(
-                    HeroAccountRow.account_id == account_id, HeroAccountRow.game == game
+            kept = (
+                await session.execute(
+                    select(HeroAccountRow.default_persona_id, HeroAccountRow.bought_slots).where(
+                        HeroAccountRow.account_id == account_id, HeroAccountRow.game == game
+                    )
                 )
-            )
-        return HeroRecords(personas, default_id)
+            ).first()
+        default_id, bought = kept if kept else (None, 0)
+        return HeroRecords(personas, default_id, bought)
 
     async def taken(self, namespace: str, name: str) -> bool:
         """Tell whether a persona has a name, ignoring capitals, those taken out of use too.
@@ -68,6 +72,36 @@ class SqlHeroStore:
                 )
             )
         return found is not None
+
+    async def buy_slot(self, account_id: int, game: str, price: Wallet, amount: int) -> int:
+        """Add a hero slot to an account and take its price from a wallet, both or neither.
+
+        Args:
+            account_id: The account.
+            game: The game's data-file name.
+            price: The wallet the price is taken from.
+            amount: The price.
+
+        Returns:
+            The slots the account bought in all.
+
+        Raises:
+            HeroRefused: When the wallet holds less than the price, also after a spending at
+                the same time.
+        """
+        async with self._sessions.begin() as session:
+            if await spend(session, price, amount, SLOT) is None:
+                raise HeroRefused(Refusal.FUNDS)
+            statement = insert(HeroAccountRow).values(
+                account_id=account_id, game=game, bought_slots=1
+            )
+            bought = await session.scalars(
+                statement.on_conflict_do_update(
+                    index_elements=[HeroAccountRow.account_id, HeroAccountRow.game],
+                    set_={"bought_slots": HeroAccountRow.bought_slots + 1},
+                ).returning(HeroAccountRow.bought_slots)
+            )
+            return bought.one()
 
     async def rename(self, persona: Persona, name: str, price: Wallet, amount: int) -> None:
         """Give a hero a new name and take its price from a wallet, both or neither.
@@ -164,7 +198,7 @@ class SqlHeroStore:
                     PersonaRow.disabled_at.is_(None),
                 )
             )
-            if (heroes or 0) >= hero.free_slots:
+            if (heroes or 0) >= hero.free_slots + account.bought_slots:
                 raise HeroRefused(Refusal.NO_SLOT)
             # The unique name index decides between two requests for one name.
             row = await session.scalar(

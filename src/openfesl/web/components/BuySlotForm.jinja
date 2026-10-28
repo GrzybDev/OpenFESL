@@ -1,0 +1,73 @@
+{#def roster, funds: int, next: str, dialog: bool = False #}
+{# The form that buys a further hero slot for Funds: the price, the Funds before and after, the
+   slots before and after, and why it cannot be sent when the account has too few. Pages open it
+   as a dialog; without scripts it is a page of its own. #}
+{% set rules = game.heroes %}
+{% set price = rules.slot_price %}
+{% set short = funds < price %}
+{% set currency = _("games." ~ game.id ~ ".currency." ~ rules.currency) %}
+<form method="post"
+      action="{{ url('/' ~ game.id ~ '/user/buyCharacterSlots') }}"
+      data-once
+      class="site-dialog-box">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <input type="hidden" name="next" value="{{ next }}">
+  <input type="hidden" name="once" value="{{ once_token() }}">
+  {% if dialog %}
+    <button type="button"
+            data-close
+            class="site-dialog-close"
+            aria-label="{{ _('web.dialog.close') }}">
+      <Icon name="x" :size="18" stroke="currentColor" />
+    </button>
+  {% endif %}
+  {% if dialog %}
+    <h2 id="buy-slot-title" class="site-dialog-title">{{ _("web.slots.buy") }}</h2>
+  {% else %}
+    <h1 id="buy-slot-title-page" class="site-dialog-title">{{ _("web.slots.buy") }}</h1>
+  {% endif %}
+  <dl class="site-facts">
+    <dt>{{ _("web.rename.price") }}</dt>
+    <dd>
+      {{ number(price) }} {{ currency }}
+    </dd>
+    <dt>{{ _("web.rename.funds_now", currency=currency) }}</dt>
+    <dd>
+      {{ number(funds) }}
+      {% if short %}<span class="site-short">· {{ _("web.rename.short", amount=number(price - funds)) }}</span>{% endif %}
+    </dd>
+    {% if not short %}
+      <dt>{{ _("web.rename.funds_after", currency=currency) }}</dt>
+      <dd>
+        {{ number(funds - price) }}
+      </dd>
+    {% endif %}
+    <dt>{{ _("web.slots.title") }}</dt>
+    <dd>
+      {{ roster.slots }} → {{ roster.slots + 1 }}
+    </dd>
+  </dl>
+  <p class="slot-kept">{{ _("web.slots.kept") }}</p>
+  <div class="site-dialog-actions">
+    <button type="submit"
+            aria-describedby="buy-slot-why{{ '' if dialog else '-page' }}"
+            {% if short %} aria-disabled="true"{% endif %}
+            class="site-button site-button-go site-button-large">
+      <Icon name="coin" :size="18" stroke="currentColor" />
+      {{ _("web.slots.submit", price=number(price), currency=currency) }}
+    </button>
+    {% if dialog %}
+      <button type="button" data-close class="site-button site-button-ghost">{{ _("web.rename.cancel") }}</button>
+    {% else %}
+      <a href="{{ next or url('/' ~ game.id ~ '/heroes') }}"
+         class="site-button site-button-ghost">{{ _("web.rename.cancel") }}</a>
+    {% endif %}
+  </div>
+  <p id="buy-slot-why{{ '' if dialog else '-page' }}"
+     data-why
+     class="site-dialog-why">
+    {% if short %}
+      {{ _("web.slots.why.funds", funds=number(funds), price=number(price), currency=currency) }}
+    {% endif %}
+  </p>
+</form>

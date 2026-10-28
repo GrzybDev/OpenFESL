@@ -1,7 +1,6 @@
-// The heroes page's dialogs that give a hero a new name: Rename opens its hero's dialog instead of
-// the page that holds the same form, the name is checked as it is typed, and the button stays
-// unavailable, saying why, until the name is free and the account has the price.
-import { checkName, closeDialog, decode, flash } from "./naming.js";
+// The heroes page's dialogs that give a hero a new name: the name is checked as it is typed, and
+// the button stays unavailable, saying why, until the name is free and the account has the price.
+import { checkName, decode } from "./naming.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   for (const dialog of document.querySelectorAll("[data-rename]")) {
@@ -15,7 +14,6 @@ document.addEventListener("DOMContentLoaded", () => {
  * @param {HTMLDialogElement} dialog - The dialog.
  */
 function rename(dialog) {
-  const opener = document.querySelector(`[data-opens="${dialog.id}"]`);
   const form = dialog.querySelector("form");
   const input = form.querySelector("[name=name]");
   const submit = form.querySelector("[data-submit]");
@@ -25,18 +23,6 @@ function rename(dialog) {
   const short = submit.getAttribute("aria-disabled") === "true";
   let check = "";
 
-  opener.addEventListener("click", (event) => {
-    event.preventDefault();
-    dialog.showModal();
-    input.focus();
-  });
-  for (const button of dialog.querySelectorAll("[data-close]")) {
-    button.addEventListener("click", () => closeDialog(dialog, opener));
-  }
-  dialog.addEventListener("cancel", (event) => {
-    event.preventDefault();
-    closeDialog(dialog, opener);
-  });
   checkName(dialog, input, texts.checkAddress, texts.checking, (found) => {
     check = found;
     ready();
@@ -51,12 +37,4 @@ function rename(dialog) {
     why.textContent = check === "free" ? "" : decode(texts.needsFree);
   }
   ready();
-
-  form.addEventListener("submit", (event) => {
-    if (submit.getAttribute("aria-disabled") === "true") {
-      event.preventDefault();
-      flash(why);
-      input.focus();
-    }
-  });
 }

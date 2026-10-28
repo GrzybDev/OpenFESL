@@ -120,6 +120,7 @@
   <dialog id="rename-{{ id }}"
           aria-labelledby="rename-title-{{ id }}"
           data-rename
+          data-modal
           data-check-address="{{ url('/' ~ game.id ~ '/heroes/name') }}?{{ {'current': hero.persona.name}|urlencode }}"
           data-checking="{{ _('web.creator.name.checking', name='%(name)s') }}"
           data-needs-free="{{ _('web.rename.needs.free') }}"

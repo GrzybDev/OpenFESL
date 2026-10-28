@@ -30,12 +30,14 @@
     {% endif %}
   {% endif %}
   {% if bar and bar.wallets %}
+    {# A slot just bought counts the Funds down from what they were before it. #}
+    {% set spent = game.heroes.slot_price if game.heroes and toast and toast.key == "web.slots.done" else 0 %}
     <ul aria-label="{{ _('web.site.wallets') }}" class="site-wallets">
       {% for wallet, balance in bar.wallets %}
         <li data-wallet="{{ wallet.currency }}" class="site-wallet">
           <span aria-hidden="true"
                 class="wallet-coin"><Icon :name="wallet.glyph" :size="18" stroke="currentColor" /></span>
-          <span class="wallet-amount"><span class="wallet-number">{{ number(balance) }}</span>
+          <span class="wallet-amount"><Count :value="balance" :was="balance + spent if spent and wallet.currency == game.heroes.currency else none" class="wallet-number" />
             <span class="wallet-name">{{ _("games." ~ game.id ~ ".currency." ~ wallet.currency) }}</span></span>
         </li>
       {% endfor %}

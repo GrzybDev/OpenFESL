@@ -23,7 +23,7 @@ class NameCheck(StrEnum):
 
 
 class Refusal(StrEnum):
-    """Why a hero was not created or renamed."""
+    """Why a hero was not created or renamed, or a hero slot not bought."""
 
     FORMAT = "format"
     TAKEN = "taken"
@@ -33,10 +33,10 @@ class Refusal(StrEnum):
 
 
 class HeroRefused(Exception):
-    """Raised for a hero that was not created or renamed; nothing was stored or spent."""
+    """Raised for a refused hero creation, rename or slot purchase; nothing was stored or spent."""
 
     def __init__(self, refusal: Refusal) -> None:
-        """Say why the hero was not created.
+        """Say why the request was refused.
 
         Args:
             refusal: Why.
@@ -124,10 +124,12 @@ class HeroRecords:
     Attributes:
         personas: The heroes' personas, oldest first, with when each was created.
         default_id: The persona of the default hero, once there is one.
+        bought: The slots the account bought on top of the game's free ones.
     """
 
     personas: list[tuple[Persona, datetime]]
     default_id: int | None
+    bought: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -139,7 +141,7 @@ class NewHero:
         game: The game's data-file name.
         namespace: The namespace its name is unique in.
         name: Its name.
-        free_slots: The slots every account has in the game, besides those it bought.
+        free_slots: The slots every account has in the game, to which those it bought add.
         partition: Where the game's stats are kept.
         stats: The stats it starts with, by key: a number and a text.
         items: The items it is granted, by Magma tag, with their uses.
@@ -186,6 +188,23 @@ class HeroStore(Protocol):
         Raises:
             HeroRefused: When the account has no free slot or the name is taken, also by a
                 request at the same time.
+        """
+
+    async def buy_slot(self, account_id: int, game: str, price: Wallet, amount: int) -> int:
+        """Add a hero slot to an account and take its price from a wallet, both or neither.
+
+        Args:
+            account_id: The account.
+            game: The game's data-file name.
+            price: The wallet the price is taken from.
+            amount: The price.
+
+        Returns:
+            The slots the account bought in all.
+
+        Raises:
+            HeroRefused: When the wallet holds less than the price, also after a spending at
+                the same time.
         """
 
     async def rename(self, persona: Persona, name: str, price: Wallet, amount: int) -> None:
@@ -263,7 +282,7 @@ class Heroes:
                     xp=stat(owner, rules.stats.xp) or 0,
                 )
             )
-        return Roster(heroes, rules.slots, records.default_id)
+        return Roster(heroes, rules.slots + records.bought, records.default_id)
 
     async def check(self, game: Game, name: str) -> NameCheck:
         """Tell whether a name may be given to a new hero.
@@ -294,6 +313,25 @@ class Heroes:
             return False
         return await self._store.set_default(account_id, game.id, game.namespace, persona_id)
 
+    async def buy_slot(self, game: Game, account_id: int) -> int:
+        """Add a hero slot to an account for the price the game's data sets.
+
+        Args:
+            game: The game, which has hero rules.
+            account_id: The account.
+
+        Returns:
+            The number of the new slot.
+
+        Raises:
+            HeroRefused: When the account has too little to pay.
+        """
+        rules = _rules(game)
+        bought = await self._store.buy_slot(
+            account_id, game.id, self._price(game, account_id), rules.slot_price
+        )
+        return rules.slots + bought
+
     async def rename(self, game: Game, persona: Persona, name: str) -> None:
         """Give one of an account's heroes a new name for the price the game's data sets.
 
@@ -313,14 +351,14 @@ class Heroes:
             raise HeroRefused(Refusal.FORMAT)
         if name.casefold() == persona.name.casefold():
             raise HeroRefused(Refusal.SAME)
-        wallet = Wallet(
-            game.id,
-            rules.currency,
-            persona.account_id,
-            None,
-            game.currencies[rules.currency].allowance,
-        )
-        await self._store.rename(persona, name, wallet, rules.rename_price)
+        price = self._price(game, persona.account_id)
+        await self._store.rename(persona, name, price, rules.rename_price)
+
+    def _price(self, game: Game, account_id: int) -> Wallet:
+        # The account's wallet that the game's prices are paid from.
+        currency = _rules(game).currency
+        allowance = game.currencies[currency].allowance
+        return Wallet(game.id, currency, account_id, None, allowance)
 
     async def create(self, game: Game, account_id: int, look: Look, name: str) -> Persona:
         """Create a hero with its starting stats and items.

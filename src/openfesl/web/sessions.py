@@ -1,6 +1,9 @@
+import asyncio
 import secrets
-from collections.abc import Mapping
+from collections.abc import AsyncIterator, Mapping
+from contextlib import asynccontextmanager
 from typing import Any
+from weakref import WeakValueDictionary
 
 from fastapi import Request
 
@@ -55,6 +58,62 @@ def form_matches(request: Request, form: Mapping[str, Any]) -> bool:
         return False
     # As bytes, since compare_digest refuses text that is not ASCII.
     return secrets.compare_digest(token.encode(), sent.encode())
+
+
+# How many purchase forms that bought the server remembers, forgetting the oldest first: a copy
+# that a double click or Back sends again comes well within that many purchases.
+SENT_KEPT = 10_000
+
+
+def once_token() -> str:
+    """Return a new token for a purchase form, by which SentForms lets the form buy once."""
+    return secrets.token_urlsafe(16)
+
+
+def purchase_matches(request: Request, form: Mapping[str, Any]) -> bool:
+    """Return whether a purchase form came from a page of this session with its one-time token.
+
+    A form without the token counts as expired, so that such forms never share one token.
+
+    Args:
+        request: The form's request.
+        form: The form's fields.
+    """
+    return form_matches(request, form) and bool(form.get("once"))
+
+
+class SentForms:
+    """The purchase forms that bought, so that a form sent again buys nothing more.
+
+    The server keeps them rather than the session: a double click sends its second copy with the
+    first one's session cookie, before the first one's answer arrives.
+    """
+
+    def __init__(self) -> None:
+        """Remember no form yet."""
+        self._bought: dict[str, None] = {}
+        self._sending: WeakValueDictionary[str, asyncio.Lock] = WeakValueDictionary()
+
+    @asynccontextmanager
+    async def once(self, form: Mapping[str, Any]) -> AsyncIterator[bool]:
+        """Hold a form's purchase until it ends, after any copy of the form sent earlier.
+
+        A purchase that leaves the block without an exception counts as made.
+
+        Args:
+            form: The form's fields, with the token that once_token gave it.
+
+        Yields:
+            Whether a copy of the form bought already, so that nothing is to be bought.
+        """
+        token = str(form.get("once", ""))
+        # Copies of one form wait for each other; the lock goes once no copy holds it.
+        lock = self._sending.setdefault(token, asyncio.Lock())
+        async with lock:
+            yield token in self._bought
+            self._bought[token] = None
+            if len(self._bought) > SENT_KEPT:
+                del self._bought[next(iter(self._bought))]
 
 
 def toast(request: Request, key: str, error: bool = False, **values: str) -> None:

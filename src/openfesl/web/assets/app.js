@@ -42,6 +42,29 @@ document.addEventListener("submit", (event) => {
   }
 });
 
+// A purchase's form is sent once: pressing its button again while the answer loads, as a double
+// click does, sends nothing more.
+document.addEventListener("submit", (event) => {
+  const form = event.target;
+  if (
+    event.defaultPrevented ||
+    !(form instanceof HTMLFormElement) ||
+    !form.matches("[data-once]")
+  ) {
+    return;
+  }
+  if (form.dataset.sent) {
+    event.preventDefault();
+    return;
+  }
+  form.dataset.sent = "true";
+  if (event.submitter) {
+    showBusy(event.submitter);
+  }
+  // A page restored from the back-forward cache may send it again.
+  addEventListener("pagehide", () => delete form.dataset.sent, { once: true });
+});
+
 /**
  * Marks a chevron block as loading once its page takes longer than 300 ms to arrive.
  *
@@ -183,11 +206,19 @@ for (const failure of ["htmx:error", "htmx:response:error"]) {
   });
 }
 
+// After a change on the previous page, such as a purchase: a number that names its value from
+// before the change counts to its new one.
+document.addEventListener("DOMContentLoaded", () => {
+  for (const element of document.querySelectorAll("[data-count-from]")) {
+    countTo(element, Number(element.dataset.countFrom));
+  }
+});
+
 /**
- * Counts a number that a refresh changed from its old value to its new one.
+ * Counts a number that a refresh or a change changed from its old value to its new one.
  *
  * @param {HTMLElement} element - The number, whose data-count holds its new value.
- * @param {number} from - Its value before the refresh.
+ * @param {number} from - Its value before the refresh or the change.
  */
 function countTo(element, from) {
   const to = Number(element.dataset.count);

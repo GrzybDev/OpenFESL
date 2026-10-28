@@ -21,10 +21,12 @@ class SiteBar:
     Attributes:
         wallets: The balances the account has to spend, each with how the bar draws it.
         roster: The account's heroes, in a game whose heroes are made on its site.
+        funds: What the account has to pay the game's prices with, in such a game.
     """
 
     wallets: list[tuple[SiteWallet, int]]
     roster: Roster | None
+    funds: int
 
 
 async def site_bar(request: Request) -> SiteBar | None:
@@ -87,5 +89,8 @@ class SiteBarMiddleware:
         balances = await self._wallets.of_account(
             game, player.account_id, [wallet.currency for wallet in shown]
         )
-        roster = await self._heroes.roster(game, player.account_id) if game.heroes else None
-        return SiteBar(list(zip(shown, balances, strict=True)), roster)
+        if not game.heroes:
+            return SiteBar(list(zip(shown, balances, strict=True)), None, 0)
+        roster = await self._heroes.roster(game, player.account_id)
+        [funds] = await self._wallets.of_account(game, player.account_id, [game.heroes.currency])
+        return SiteBar(list(zip(shown, balances, strict=True)), roster, funds)
