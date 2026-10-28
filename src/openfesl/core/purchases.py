@@ -1,15 +1,17 @@
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Protocol, TypeGuard
 
-from openfesl.core.catalogues import Catalogues
+from openfesl.core.catalogues import Catalogues, Item
+from openfesl.core.drops import Drops
 from openfesl.core.entitlements import EntitlementStore
 from openfesl.core.games import Game
 from openfesl.core.hero_items import fits, granted, held
-from openfesl.core.heroes import Heroes
+from openfesl.core.heroes import Hero, Heroes
 from openfesl.core.inventory import Ownership, gains
 from openfesl.core.magma import MagmaError
 from openfesl.core.personas import Persona
-from openfesl.core.store import ProductStore
+from openfesl.core.store import Bundle, Offer, ProductStore, offer
+from openfesl.core.texts import BASE_LANGUAGE
 from openfesl.core.wallets import Wallet, wallet_of
 
 # The code of a refused purchase and its causes, which the game only logs: a product it does
@@ -43,7 +45,7 @@ class Purchase:
         game: The game's data-file name.
         persona: The hero.
         product_id: The id the game bought it by.
-        kind: What was bought: a product or a bundle.
+        kind: What was bought: a product, a bundle or a box.
         wallet: The wallet the price is paid from.
         price: The price.
         items: The items the hero gains, by number, with how it owns each; those it owns for
@@ -85,6 +87,7 @@ class Purchases:
         catalogues: Catalogues,
         heroes: Heroes,
         entitlements: EntitlementStore,
+        drops: Drops,
     ) -> None:
         """Sell the products a store keeps, paid and given in another.
 
@@ -94,15 +97,17 @@ class Purchases:
             catalogues: The games' imported catalogues, which tell what fits a hero.
             heroes: The heroes who buy, with their factions, classes and levels.
             entitlements: Where the items the heroes hold are kept.
+            drops: Opens the boxes the heroes buy.
         """
         self._products = products
         self._store = store
         self._catalogues = catalogues
         self._heroes = heroes
         self._entitlements = entitlements
+        self._drops = drops
 
-    async def purchase(self, game: Game, persona: Persona, product_id: str) -> None:
-        """Sell a hero a product of its game's store, for the product's price.
+    async def purchase(self, game: Game, persona: Persona, product_id: str) -> Offer | None:
+        """Sell a hero a product, a bundle or a box of its game's store, for its price.
 
         The checks the game makes before it asks are made again, as a request may come from
         elsewhere, and more: the item must fit the hero's faction, class and level, an
@@ -113,6 +118,9 @@ class Purchases:
             persona: The hero, which the asking account owns.
             product_id: The id the game buys the product by.
 
+        Returns:
+            The product a box gave the hero; none for a product or a bundle.
+
         Raises:
             PurchaseRefused: When the store does not sell the product, the hero may not have
                 the item or owns it for good, or the price is more than the wallet holds.
@@ -120,25 +128,16 @@ class Purchases:
         rules = game.store
         number = rules.number(product_id) if rules else None
         product = await self._products.product(game.id, number) if number is not None else None
-        hero = next(
-            (
-                hero
-                for hero in (await self._heroes.roster(game, persona.account_id)).heroes
-                if hero.persona.id == persona.id
-            ),
-            None,
-        )
+        hero = await self._hero(game, persona)
         if product is None and number is not None:
             listed = await self._products.bundle(game.id, number)
             if listed is None:
                 raise PurchaseRefused(UNKNOWN_PRODUCT)
             bundle = listed.bundle
-            if (
-                hero is None
-                or bundle.faction not in (None, hero.faction)
-                or bundle.hero_class not in (None, hero.hero_class)
-            ):
+            if not _for(hero, bundle.faction, bundle.hero_class):
                 raise PurchaseRefused(NOT_FOR_HERO)
+            if bundle.box is not None:
+                return await self._open_box(game, persona, product_id, bundle, hero)
             loadout = granted(game.heroes, hero.faction, hero.hero_class)
             items = tuple(
                 (member.item_id, member.ownership)
@@ -149,16 +148,13 @@ class Purchases:
             await self._store.buy(
                 Purchase(game.id, persona, product_id, "bundle", wallet, bundle.price, items)
             )
-            return
+            return None
         if product is None:
             raise PurchaseRefused(UNKNOWN_PRODUCT)
         item = self._catalogues.contents(game).items.get(product.item_id)
-        if (
-            item is None
-            or hero is None
-            or not fits(item, {item.kind}, hero.faction, hero.hero_class, hero.level)
-        ):
+        if hero is None or not _fitting(item, hero):
             raise PurchaseRefused(NOT_FOR_HERO)
+        assert item is not None
         level = item.levels.index(item.id) if item.id in item.levels else 0
         if level and game.heroes:
             kept = await self._entitlements.of_persona(persona.id)
@@ -172,3 +168,37 @@ class Purchases:
         await self._store.buy(
             Purchase(game.id, persona, product_id, "product", wallet, product.price, bought)
         )
+        return None
+
+    async def _open_box(
+        self, game: Game, persona: Persona, product_id: str, bundle: Bundle, hero: Hero | None
+    ) -> Offer:
+        box = await self._products.box(game.id, bundle.box) if bundle.box is not None else None
+        if box is None or hero is None or not _for(hero, box.faction, box.hero_class):
+            raise PurchaseRefused(NOT_FOR_HERO)
+        won = await self._drops.roll(game, box, persona, hero)
+        if won is None:
+            raise PurchaseRefused(ALREADY_OWNED)
+        wallet = wallet_of(game, persona, bundle.currency)
+        items = ((won.item_id, won.ownership),)
+        await self._store.buy(
+            Purchase(game.id, persona, product_id, "box", wallet, bundle.price, items)
+        )
+        return offer(game, await self._catalogues.of(game, BASE_LANGUAGE), won)
+
+    async def _hero(self, game: Game, persona: Persona) -> Hero | None:
+        roster = await self._heroes.roster(game, persona.account_id)
+        return next((hero for hero in roster.heroes if hero.persona.id == persona.id), None)
+
+
+def _for(hero: Hero | None, faction: str | None, hero_class: str | None) -> TypeGuard[Hero]:
+    # A hero fits what names no faction or class, or names its own.
+    return (
+        hero is not None
+        and faction in (None, hero.faction)
+        and hero_class in (None, hero.hero_class)
+    )
+
+
+def _fitting(item: Item | None, hero: Hero) -> bool:
+    return item is not None and fits(item, {item.kind}, hero.faction, hero.hero_class, hero.level)

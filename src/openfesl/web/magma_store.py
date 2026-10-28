@@ -49,15 +49,15 @@ def store_router(
             return Response(packed, media_type=XML, headers={"Content-Encoding": "gzip"})
         return Response(plain, media_type=XML)
 
-    # The game adds what it bought itself once the answer is a success (BFHeroes.exe 1.89
-    # 0x007bafb7).
+    # The game adds what it bought itself once the answer is a success, or for a box the one
+    # product the answer lists (BFHeroes.exe 1.89 0x007bafb7, 0x006a0335).
     @router.post("/ofb/purchase/{userId}/{productId}")
     async def purchase(
         persona_id: UserId, product_id: ProductId, session_id: SessionId = None
     ) -> Response:
         persona = await magma.persona(session_id, game, persona_id, own=True)
-        await purchases.purchase(game, persona, product_id)
-        return Response(success(), media_type=XML)
+        won = await purchases.purchase(game, persona, product_id)
+        return Response(products([_entry(won)]) if won else success(), media_type=XML)
 
     # A player's game and the dedicated server keeping the player change the items it uses.
     @router.post("/nucleus/entitlement/{entitlementId}/useCount/{uses}")
@@ -106,7 +106,7 @@ def _deal(deal: Deal) -> BundleEntry:
         game_order=bundle.game_order,
         published=bundle.starts or listed.created,
         created=listed.created,
-        random=False,
+        random=bundle.box is not None,
         currency=bundle.currency,
         price=bundle.price,
         original_price=bundle.original_price,

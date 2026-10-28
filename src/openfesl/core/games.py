@@ -406,8 +406,15 @@ class Game(BaseModel):
     @model_validator(mode="after")
     def _check_store(self) -> Self:
         rules = self.store.prices if self.store else []
-        if unknown := {rule.currency for rule in rules} - self.currencies.keys():
+        boxes = self.store.boxes if self.store else []
+        used = {rule.currency for rule in rules} | {box.currency for box in boxes}
+        if unknown := used - self.currencies.keys():
             raise ValueError(f"the store prices items in unknown currencies: {sorted(unknown)}")
+        factions = set(self.heroes.factions) if self.heroes else set()
+        classes = set(self.heroes.classes) if self.heroes else set()
+        for box in boxes:
+            if box.faction not in {None, *factions} or box.hero_class not in {None, *classes}:
+                raise ValueError(f"the box {box.key} names a faction or class the heroes lack")
         return self
 
     @model_validator(mode="after")

@@ -266,6 +266,10 @@ class StoreBundleRow(Base):
     ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     published: Mapped[bool] = mapped_column(server_default="true")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    # The box of which it gives one product at random, for a box sold as a hot deal.
+    box_id: Mapped[int | None] = mapped_column(
+        ForeignKey("store_box.id", ondelete="CASCADE"), index=True
+    )
 
 
 class StoreBundleMemberRow(Base):
@@ -277,6 +281,42 @@ class StoreBundleMemberRow(Base):
     product_id: Mapped[int] = mapped_column(
         ForeignKey("store_product.id", ondelete="CASCADE"), primary_key=True, index=True
     )
+
+
+class StoreBoxRow(Base):
+    __tablename__ = "store_box"
+    __table_args__ = (UniqueConstraint("game", "key"),)
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    game: Mapped[str]
+    # The name the game's data knows it by.
+    key: Mapped[str]
+    kind: Mapped[str]
+    # What every product it gives is worth at least, in its currency, while it promises so.
+    currency: Mapped[str]
+    value: Mapped[int] = mapped_column(BigInteger)
+    worth_rule: Mapped[bool] = mapped_column(server_default="true")
+    # The faction and class whose heroes may open it; any where none.
+    faction: Mapped[str | None]
+    hero_class: Mapped[str | None]
+    # What it gives a hero who may get none of its drops.
+    fallback_id: Mapped[int | None] = mapped_column(
+        ForeignKey("store_product.id", ondelete="SET NULL")
+    )
+
+
+class StoreDropRow(Base):
+    __tablename__ = "store_drop"
+
+    box_id: Mapped[int] = mapped_column(
+        ForeignKey("store_box.id", ondelete="CASCADE"), primary_key=True
+    )
+    product_id: Mapped[int] = mapped_column(
+        ForeignKey("store_product.id", ondelete="CASCADE"), primary_key=True, index=True
+    )
+    # A tier's drops are equally likely, the tiers as likely as their weights.
+    tier: Mapped[int]
+    weight: Mapped[int]
 
 
 class PurchaseRow(Base):

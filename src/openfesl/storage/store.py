@@ -3,16 +3,20 @@ from collections.abc import Collection, Sequence
 from sqlalchemy import ColumnElement, delete, exists, func, insert, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from openfesl.core.drops import Box, Drop
 from openfesl.core.inventory import Ownership
 from openfesl.core.store import (
     Bundle,
     ListedBundle,
+    NewBox,
     NewProduct,
     Product,
 )
 from openfesl.storage.models import (
+    StoreBoxRow,
     StoreBundleMemberRow,
     StoreBundleRow,
+    StoreDropRow,
     StoreProductRow,
 )
 
@@ -28,14 +32,17 @@ class SqlProductStore:
         """
         self._sessions = sessions
 
-    async def stock(self, game: str, products: Sequence[NewProduct]) -> bool:
-        """Store a game's starting products, unless the game has products already.
+    async def stock(
+        self, game: str, products: Sequence[NewProduct], boxes: Sequence[NewBox]
+    ) -> bool:
+        """Store a game's starting products and boxes, unless the game has products already.
 
         Stores on other servers take turns, so a game is stocked once.
 
         Args:
             game: The game's data-file name.
             products: The products, in the order they are listed.
+            boxes: The boxes, whose drops are among the products.
 
         Returns:
             Whether they were stored.
@@ -55,11 +62,14 @@ class SqlProductStore:
                         "uses": product.ownership.uses,
                         "currency": product.currency,
                         "price": product.price,
+                        "published": product.published,
                         "sort": sort,
                     }
                     for sort, product in enumerate(products)
                 ],
             )
+            if boxes:
+                await _stock_boxes(session, game, boxes)
             return True
 
     async def withdraw(self, game: str, items: Collection[int]) -> int:
@@ -141,6 +151,7 @@ class SqlProductStore:
                     game_order=bundle.game_order,
                     starts_at=bundle.starts,
                     ends_at=bundle.ends,
+                    box_id=bundle.box,
                 )
                 .returning(StoreBundleRow.id)
             )
@@ -210,11 +221,102 @@ class SqlProductStore:
                     starts=row.starts_at,
                     ends=row.ends_at,
                     members=tuple(product.id for product in held.get(row.id, [])),
+                    box=row.box_id,
                 ),
                 held.get(row.id, []),
             )
             for row in rows
         ]
+
+    async def box(self, game: str, number: int) -> Box | None:
+        """Return a box of a game's store with its drops, if it has one by a number.
+
+        Args:
+            game: The game's data-file name.
+            number: The box's number.
+        """
+        async with self._sessions() as session:
+            row = await session.scalar(
+                select(StoreBoxRow).where(StoreBoxRow.game == game, StoreBoxRow.id == number)
+            )
+            if row is None:
+                return None
+            drops = await session.execute(
+                select(StoreDropRow.tier, StoreDropRow.weight, StoreProductRow)
+                .join(StoreProductRow, StoreProductRow.id == StoreDropRow.product_id)
+                .where(StoreDropRow.box_id == row.id)
+                .order_by(StoreDropRow.tier, StoreProductRow.sort, StoreProductRow.id)
+            )
+            fallback = (
+                await session.get(StoreProductRow, row.fallback_id) if row.fallback_id else None
+            )
+            return Box(
+                id=row.id,
+                key=row.key,
+                kind=row.kind,
+                value=row.value,
+                worth_rule=row.worth_rule,
+                faction=row.faction,
+                hero_class=row.hero_class,
+                currency=row.currency,
+                drops=tuple(
+                    Drop(tier, weight, _product(product)) for tier, weight, product in drops
+                ),
+                fallback=_product(fallback) if fallback else None,
+            )
+
+
+async def _stock_boxes(session: AsyncSession, game: str, boxes: Sequence[NewBox]) -> None:
+    stored = await session.execute(
+        select(
+            StoreProductRow.id,
+            StoreProductRow.item_id,
+            StoreProductRow.type,
+            StoreProductRow.days,
+            StoreProductRow.uses,
+            StoreProductRow.currency,
+        ).where(StoreProductRow.game == game)
+    )
+    numbers = {
+        (item_id, Ownership(type, days, uses), currency): number
+        for number, item_id, type, days, uses, currency in stored
+    }
+
+    def number(product: NewProduct) -> int:
+        return numbers[(product.item_id, product.ownership, product.currency)]
+
+    for box in boxes:
+        rule = box.rule
+        box_id = await session.scalar(
+            insert(StoreBoxRow)
+            .values(
+                game=game,
+                key=rule.key,
+                kind=rule.kind,
+                currency=rule.currency,
+                value=rule.value,
+                worth_rule=rule.worth_rule,
+                faction=rule.faction,
+                hero_class=rule.hero_class,
+                fallback_id=number(box.fallback) if box.fallback else None,
+            )
+            .returning(StoreBoxRow.id)
+        )
+        # A product that two tiers of a box name is dropped from the first.
+        drops = {number(product): tier for tier, product in reversed(box.drops)}
+        if drops:
+            await session.execute(
+                insert(StoreDropRow),
+                [
+                    {
+                        "box_id": box_id,
+                        "product_id": product_id,
+                        "tier": tier,
+                        "weight": rule.tiers[tier].weight,
+                    }
+                    for product_id, tier in drops.items()
+                ],
+            )
 
 
 async def _lock(session: AsyncSession, game: str) -> None:

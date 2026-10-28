@@ -143,8 +143,8 @@ def _texts(rules: CatalogueRules, folder: Path, named: set[str]) -> dict[str, di
 
 def _shown(game: Game, found: Sequence[CatalogueItem], english: Mapping[str, str]) -> set[int]:
     # The items whose icons the site may show: what heroes start with or the game grants them,
-    # what the store sells, which is only what the game names, and the withheld items, whose
-    # icons the admin panel shows.
+    # what the store sells, which is only what the game names, or its boxes drop, and the
+    # withheld items, whose icons the admin panel shows.
     rules = game.catalogue
     if rules is None:
         return set()
@@ -166,6 +166,9 @@ def _shown(game: Game, found: Sequence[CatalogueItem], english: Mapping[str, str
             and any(rule.sold for rule in store.rules(item))
             and not named.isdisjoint(item.names)
         }
+        dropped = {item for box in store.boxes for tier in box.tiers for item, _ in tier.drops}
+        dropped |= {box.fallback[0] for box in store.boxes if box.fallback}
+        shown |= {item for item in dropped if item in items and store.sellable(items[item])}
     return shown
 
 

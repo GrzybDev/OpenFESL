@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Annotated, Self
+from typing import TYPE_CHECKING, Annotated, Literal, Self
 
 from pydantic import (
     BaseModel,
@@ -17,6 +17,19 @@ if TYPE_CHECKING:
     from openfesl.core.catalogues import Item
 
 type Written = Annotated[Ownership, BeforeValidator(Ownership.read)]
+
+
+def _read_drop(text: object) -> object:
+    # A drop as game data writes it: an item's number and its ownership, such as 2153 x75.
+    if not isinstance(text, str):
+        return text
+    item, _, written = text.partition(" ")
+    if not (item.isascii() and item.isdecimal()):
+        raise ValueError(f"{text!r} is no drop such as 2153 x75")
+    return int(item), Ownership.read(written)
+
+
+type DropEntry = Annotated[tuple[int, Ownership], BeforeValidator(_read_drop)]
 
 
 class PriceRule(BaseModel):
@@ -75,6 +88,48 @@ class Exclusions(BaseModel):
     slots: frozenset[str] = frozenset()
 
 
+class Tier(BaseModel):
+    """A tier of a box's drops, whose drops are equally likely.
+
+    Attributes:
+        weight: How likely the tier is against the box's others.
+        drops: The items it gives, each with its ownership, written such as 3025 7d.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    weight: PositiveInt
+    drops: tuple[DropEntry, ...]
+
+
+class BoxRule(BaseModel):
+    """What a box of a game's store may give, as its data seeds it.
+
+    Attributes:
+        key: The name the box is known by.
+        kind: box, which hot deals sell, or chest, which a key opens.
+        currency: The currency of its value and of the prices its drops are worth.
+        value: What each of its drops is worth at least, which is its price.
+        worth_rule: Whether it promises that worth; a box that does not may give less.
+        faction: The faction whose heroes may open it; any when none.
+        hero_class: The class whose heroes may open it; any when none.
+        tiers: Its drops, in tiers.
+        fallback: What it gives when a hero may get none of its drops.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    key: str
+    kind: Literal["box", "chest"] = "box"
+    currency: str
+    value: PositiveInt
+    worth_rule: bool = True
+    faction: str | None = None
+    hero_class: str | None = None
+    tiers: tuple[Tier, ...]
+    fallback: DropEntry | None = None
+
+
 class Rounding(BaseModel):
     """How the prices of a currency are rounded down, such as to end in 99.
 
@@ -111,6 +166,7 @@ class StoreRules(BaseModel):
         prices: The price rules; the first rule of each currency that covers an item prices it
             in that currency.
         excluded: The items never sold nor dropped.
+        boxes: The boxes and their drops.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -120,6 +176,7 @@ class StoreRules(BaseModel):
     rounding: dict[str, Rounding] = {}
     prices: list[PriceRule]
     excluded: Exclusions = Exclusions()
+    boxes: list[BoxRule] = []
 
     def product_id(self, number: int) -> str:
         """Return the id that the game buys a product by.
@@ -186,6 +243,24 @@ class StoreRules(BaseModel):
         if ownership.type == COUNTED and rule.use_price and uses:
             return rule.use_price * uses
         return None
+
+    def price_of(self, item: Item, ownership: Ownership, currency: str) -> int | None:
+        """Return what owning an item in a way costs in a currency, if a rule prices it so.
+
+        Args:
+            item: The item, from the game's catalogue.
+            ownership: How it is owned.
+            currency: The currency.
+        """
+        rule = next((rule for rule in self.rules(item) if rule.currency == currency), None)
+        return self.price(rule, ownership) if rule else None
+
+    @model_validator(mode="after")
+    def _check_boxes(self) -> Self:
+        keys = [box.key for box in self.boxes]
+        if len(keys) != len(set(keys)):
+            raise ValueError("two boxes have one key")
+        return self
 
     @model_validator(mode="after")
     def _check_sold(self) -> Self:

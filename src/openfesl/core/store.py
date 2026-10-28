@@ -6,8 +6,10 @@ from typing import Protocol
 
 from openfesl.core.admin import AdminAction, AdminFeed, LoggedAction
 from openfesl.core.catalogues import Catalogue, Catalogues
+from openfesl.core.drops import Box
 from openfesl.core.games import Game, Games
 from openfesl.core.inventory import Ownership
+from openfesl.core.store_rules import BoxRule
 from openfesl.core.texts import BASE_LANGUAGE
 
 logger = logging.getLogger(__name__)
@@ -22,12 +24,29 @@ class NewProduct:
         ownership: How a hero owns the item once bought.
         currency: The currency of the price.
         price: The price.
+        published: Whether it is sold alone, rather than only as a box's drop.
     """
 
     item_id: int
     ownership: Ownership
     currency: str
     price: int
+    published: bool = True
+
+
+@dataclass(frozen=True, slots=True)
+class NewBox:
+    """A box that a game's starting set holds, with its drops among the starting products.
+
+    Attributes:
+        rule: What the game's data says of the box.
+        drops: Its drops, each with the number of its tier, from 0.
+        fallback: What it gives when a hero may get none of its drops.
+    """
+
+    rule: BoxRule
+    drops: tuple[tuple[int, NewProduct], ...]
+    fallback: NewProduct | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -69,6 +88,7 @@ class Bundle:
         starts: Since when it is sold; from its making when none.
         ends: Until when it is sold; for good when none.
         members: The numbers of the products it holds, which need not be sold alone.
+        box: The number of the box of which it gives one product at random, if it is one.
     """
 
     name: str
@@ -82,6 +102,7 @@ class Bundle:
     starts: datetime | None = None
     ends: datetime | None = None
     members: tuple[int, ...] = ()
+    box: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -140,14 +161,17 @@ class Offer:
 class ProductStore(Protocol):
     """Where the products of the games' stores are kept."""
 
-    async def stock(self, game: str, products: Sequence[NewProduct]) -> bool:
-        """Store a game's starting products, unless the game has products already.
+    async def stock(
+        self, game: str, products: Sequence[NewProduct], boxes: Sequence[NewBox]
+    ) -> bool:
+        """Store a game's starting products and boxes, unless the game has products already.
 
         Stores on other servers take turns, so a game is stocked once.
 
         Args:
             game: The game's data-file name.
             products: The products, in the order they are listed.
+            boxes: The boxes, whose drops are among the products.
 
         Returns:
             Whether they were stored.
@@ -203,6 +227,14 @@ class ProductStore(Protocol):
         Args:
             game: The game's data-file name.
             number: The bundle's number.
+        """
+
+    async def box(self, game: str, number: int) -> Box | None:
+        """Return a box of a game's store with its drops, if it has one by a number.
+
+        Args:
+            game: The game's data-file name.
+            number: The box's number.
         """
 
 
@@ -326,7 +358,35 @@ class Store:
             for ownership in rule.sold
             if (price := rules.price(rule, ownership))
         ]
-        if products and await self._store.stock(game.id, products):
+        sold = {(product.item_id, product.ownership, product.currency) for product in products}
+
+        def drop(item_id: int, ownership: Ownership, currency: str) -> NewProduct | None:
+            item = catalogue.item(item_id)
+            price = rules.price_of(item, ownership, currency) if item else None
+            if item is None or price is None or not rules.sellable(item):
+                return None
+            # A drop that is not sold alone is only given by boxes.
+            published = (item_id, ownership, currency) in sold
+            return NewProduct(item_id, ownership, currency, price, published)
+
+        boxes = []
+        for box in rules.boxes:
+            drops = tuple(
+                (tier, found)
+                for tier, rule in enumerate(box.tiers)
+                for item_id, ownership in rule.drops
+                if (found := drop(item_id, ownership, box.currency))
+            )
+            fallback = drop(*box.fallback, box.currency) if box.fallback else None
+            if drops or fallback:
+                boxes.append(NewBox(box, drops, fallback))
+        given = {found for new in boxes for _, found in new.drops} | {
+            new.fallback for new in boxes if new.fallback
+        }
+        products += sorted(
+            (found for found in given if not found.published), key=lambda found: found.item_id
+        )
+        if products and await self._store.stock(game.id, products, boxes):
             logger.info("Stocked the store of %s with %d products", game.name, len(products))
 
 

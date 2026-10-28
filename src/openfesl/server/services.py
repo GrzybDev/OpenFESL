@@ -15,6 +15,7 @@ from openfesl.core.catalogues import Catalogues
 from openfesl.core.census import Census
 from openfesl.core.connect import connect_routes
 from openfesl.core.display_names import DisplayNames
+from openfesl.core.drops import Drops
 from openfesl.core.entitlements import EntitlementService
 from openfesl.core.fesl import Route
 from openfesl.core.game_http import GameHttp
@@ -106,8 +107,14 @@ class GameServices:
         icons = IconFolder(settings.files_path) if settings.files_path else None
         self.catalogues = Catalogues(stores.catalogues, icons, games)
         self.store = Store(stores.products, self.catalogues, games)
+        drops = Drops(self.catalogues, stores.entitlements)
         self.purchases = Purchases(
-            stores.products, stores.purchases, self.catalogues, self.heroes, stores.entitlements
+            stores.products,
+            stores.purchases,
+            self.catalogues,
+            self.heroes,
+            stores.entitlements,
+            drops,
         )
         self.item_writes = ItemWrites(stores.entitlements)
         self.policies = GamePolicies(stores.settings)
