@@ -10,7 +10,7 @@ import httpx2
 import pytest
 from accounts import PASSWORD, post_sign_in
 from game_files import COPY, NEEDS_COPY
-from heroes import CREATOR
+from heroes import CREATOR, create
 from PIL import Image, ImageChops, ImageStat
 from playwright.async_api import Browser, Page
 from support import cli, visible
@@ -76,6 +76,8 @@ async def test_the_creator_offers_the_games_model_only_with_an_import(
         offered = (await client.get(f"{base}{CREATOR}")).text
         answer = await client.get(f"{base}{FIGURE}", params=ROYAL)
         refused = await client.get(f"{base}{FIGURE}", params={**ROYAL, "skin_tone": "10"})
+        created = await create(client, base, "Brassbuckle", **ROYAL)
+        arrived = (await client.get(base + created.headers["location"])).text
 
     # Without the models the stage shows the hero's look in words, and its script has nothing
     # to load.
@@ -92,6 +94,8 @@ async def test_the_creator_offers_the_games_model_only_with_an_import(
     # The hero wears its faction's default hat on its faction's skeleton, posed as the menu's
     # portrait from the game data; the copy has no texture that the hero wears.
     figure = answer.json()
+    # The new hero's page keeps the stage, where the hero's own model greets.
+    assert model_data(arrived) == figure
     assert figure.pop("camera")["look_at"] == [0.0, 1.024, 0.0]
     assert figure == {
         "skeleton": f"{folder}/models/british_male_soldier.glb",

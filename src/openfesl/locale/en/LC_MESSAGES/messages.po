@@ -248,6 +248,9 @@ msgstr "Reporting for duty!"
 msgid "web.creator.bubble.who"
 msgstr "%(who)s."
 
+msgid "web.creator.bubble.created"
+msgstr "%(name)s, %(who)s."
+
 msgid "web.creator.bubble.right"
 msgstr "Faction and class change on the right."
 

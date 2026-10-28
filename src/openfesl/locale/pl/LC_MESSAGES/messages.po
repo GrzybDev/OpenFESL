@@ -275,6 +275,9 @@ msgstr "Melduję się na służbę!"
 msgid "web.creator.bubble.who"
 msgstr "%(who)s."
 
+msgid "web.creator.bubble.created"
+msgstr "%(name)s, %(who)s."
+
 msgid "web.creator.bubble.right"
 msgstr "Frakcję i klasę zmienia się po prawej."
 

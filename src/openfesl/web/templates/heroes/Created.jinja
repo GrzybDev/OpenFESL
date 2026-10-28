@@ -1,9 +1,10 @@
-{#def roster, hero, slot: int, kit: str, from_game: bool #}
-{# The page a new hero arrives on: what was created, where it stands and what follows, beside the
-   new hero's card. #}
+{#def roster, hero, slot: int, kit: str, from_game: bool, figure: dict | None #}
+{# The page a new hero arrives on: the hero on the creator's stage, and beside it what was
+   created, where it stands and what follows, over the new hero's card. #}
 {% set title = _("web.created.title") %}
 {% set name = hero.persona.name %}
 {% set default = roster.default %}
+{% set look = hero.look %}
 <Layout :title="title">
   <section aria-labelledby="created-title" class="creator-head">
     <div class="creator-intro">
@@ -12,42 +13,51 @@
     <SlotPanel :roster="roster">{{ _("web.created.slot", hero=name, slot=slot) }}</SlotPanel>
   </section>
   <div class="created">
-    <section aria-labelledby="created-what"
-             class="site-box site-box-green created-box enter-panel">
-      <span aria-hidden="true" class="created-disc"><Icon name="tick" :size="48" stroke="#0A0A0A" /></span>
-      <div class="created-text">
-        <h2 id="created-what" class="site-box-title">{{ _("web.created.what", hero=name) }}</h2>
-        {% if default and default.persona.id == hero.persona.id %}
-          <p>{{ _("web.created.default", hero=name, slot=slot, slots=roster.slots) }}</p>
-          {% if from_game %}<p>{{ _("web.created.from_game", game=game.name, hero=name) }}</p>{% endif %}
-        {% else %}
-          <p>{{ _("web.created.further", slot=slot, slots=roster.slots, game=game.name) }}</p>
-          {% if default %}<p>{{ _("web.created.stays", hero=default.persona.name, game=game.name) }}</p>{% endif %}
-        {% endif %}
-        {% if kit %}<p class="created-kit">{{ _("web.created.kit", kit=kit) }}</p>{% endif %}
-        <div class="site-actions">
-          {% if hero.playable and not (default and default.persona.id == hero.persona.id) %}
-            <form method="post"
-                  action="{{ url('/' ~ game.id ~ '/heroes/' ~ hero.persona.id ~ '/default') }}">
-              <input type="hidden" name="csrf" value="{{ csrf }}">
-              <input type="hidden" name="next" value="{{ here }}">
-              <button type="submit"
-                      class="site-button site-button-yellow site-button-large">
-                <Icon name="star" :size="18" stroke="currentColor" />
-                {{ _("web.created.make_default", hero=name) }}
-              </button>
-            </form>
-          {% endif %}
-          {% if game.site.start_links and default %}<PlayNowButton :hero="default" />{% endif %}
-          <a href="{{ url('/' ~ game.id ~ '/heroes') }}"
-             class="site-link-light">{{ _("web.heroes.back") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
-          {% if roster.free %}
-            <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
-               class="site-link-light">{{ _("web.created.another") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
-          {% endif %}
-        </div>
+    {% if look %}
+      {% set faction = game.heroes.factions[look.faction] %}
+      {% set who = _("web.creator.who", hero_class=_("games." ~ game.id ~ ".class." ~ look.hero_class), faction=_("games." ~ game.id ~ ".faction." ~ look.faction)) %}
+      <div data-faction="{{ look.faction }}" class="created-stage enter-panel">
+        <CreatorStage :look="look" :who="who" :hair="faction.place(look.hair_style)" :beard="faction.place(look.facial_hair)" :figure="figure" :name="name" />
       </div>
-    </section>
-    <HeroSummary :hero="hero" :slot="slot" :slots="roster.slots" :default="default and default.persona.id == hero.persona.id" />
+    {% endif %}
+    <div class="created-side">
+      <section aria-labelledby="created-what"
+               class="site-box site-box-green created-box enter-panel">
+        <span aria-hidden="true" class="created-disc"><Icon name="tick" :size="48" stroke="#0A0A0A" /></span>
+        <div class="created-text">
+          <h2 id="created-what" class="site-box-title">{{ _("web.created.what", hero=name) }}</h2>
+          {% if default and default.persona.id == hero.persona.id %}
+            <p>{{ _("web.created.default", hero=name, slot=slot, slots=roster.slots) }}</p>
+            {% if from_game %}<p>{{ _("web.created.from_game", game=game.name, hero=name) }}</p>{% endif %}
+          {% else %}
+            <p>{{ _("web.created.further", slot=slot, slots=roster.slots, game=game.name) }}</p>
+            {% if default %}<p>{{ _("web.created.stays", hero=default.persona.name, game=game.name) }}</p>{% endif %}
+          {% endif %}
+          {% if kit %}<p class="created-kit">{{ _("web.created.kit", kit=kit) }}</p>{% endif %}
+          <div class="site-actions">
+            {% if hero.playable and not (default and default.persona.id == hero.persona.id) %}
+              <form method="post"
+                    action="{{ url('/' ~ game.id ~ '/heroes/' ~ hero.persona.id ~ '/default') }}">
+                <input type="hidden" name="csrf" value="{{ csrf }}">
+                <input type="hidden" name="next" value="{{ here }}">
+                <button type="submit"
+                        class="site-button site-button-yellow site-button-large">
+                  <Icon name="star" :size="18" stroke="currentColor" />
+                  {{ _("web.created.make_default", hero=name) }}
+                </button>
+              </form>
+            {% endif %}
+            {% if game.site.start_links and default %}<PlayNowButton :hero="default" />{% endif %}
+            <a href="{{ url('/' ~ game.id ~ '/heroes') }}"
+               class="site-link-light">{{ _("web.heroes.back") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+            {% if roster.free %}
+              <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
+                 class="site-link-light">{{ _("web.created.another") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+      <HeroSummary :hero="hero" :slot="slot" :slots="roster.slots" :default="default and default.persona.id == hero.persona.id" />
+    </div>
   </div>
 </Layout>

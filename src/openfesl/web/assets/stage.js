@@ -9,16 +9,28 @@ import { reducedMotion } from "./naming.js";
 // The renderers that draw WebGL in software, as browsers name them where they do.
 const SOFTWARE = /swiftshader|llvmpipe|softpipe|lavapipe|basic render/i;
 
+// A hero just created greets once: the game's model cheers, or its glyph hops.
+document.addEventListener("DOMContentLoaded", () => {
+  const stage = document.querySelector("[data-stage][data-arrived]");
+  const shown = stage && heroStage(stage);
+  if (shown?.modelled) {
+    shown.react("cheer");
+  } else if (shown) {
+    stage.querySelector("[data-hop]").classList.add("hop");
+  }
+});
+
 /**
  * Prepares a hero's stage, loading the game's model where the page offers it.
  *
  * @param {HTMLElement} stage - The stage, whose [data-model] script describes the hero's model.
- * @returns {{show: Function, react: Function}} The stage.
+ * @returns {{modelled: boolean, show: Function, react: Function}} The stage, and whether it loads
+ *   the model.
  */
 export function heroStage(stage) {
   const described = stage.querySelector("script[data-model]");
   if (!described || !("WebGL2RenderingContext" in window) || drawnInSoftware()) {
-    return { show() {}, react() {} };
+    return { modelled: false, show() {}, react() {} };
   }
   const standIn = stage.querySelector("[data-stand-in]");
   const caption = stage.querySelector("[data-caption]");
@@ -95,9 +107,15 @@ export function heroStage(stage) {
     delete stage.dataset.shown;
     standIn.removeAttribute("aria-hidden");
     caption.textContent = ownCaption;
+    // A reaction that the model can no longer play, such as a new hero's cheer, is the glyph's
+    // hop.
+    if (reaction) {
+      stage.querySelector("[data-hop]").classList.add("hop");
+    }
   }
 
   return {
+    modelled: true,
     /**
      * Shows the model in another look once it is loaded, and gives it the look's label.
      *

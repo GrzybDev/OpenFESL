@@ -1,16 +1,35 @@
-/* The page after a hero was created: the green box with the big tick beside the new card. */
+/* The page after a hero was created: the new hero on the creator's stage, and beside it the green
+   box with the big tick over the new card; on phones the stage comes first. */
 @layer pages {
   .created {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
     gap: 20px 28px;
     margin-top: 30px;
   }
 
+  .created-stage {
+    overflow: clip;
+    border: 3px solid #000;
+    border-radius: 10px;
+    box-shadow: 0 4px 0 rgb(0 0 0 / 0.3);
+  }
+
+  .created-side {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+
+    /* The card's basis, meant for a row of cards, would set its height in this column. */
+    > .hero-summary {
+      flex: none;
+    }
+  }
+
   .created-box {
     display: flex;
-    flex: 1 1 520px;
     flex-wrap: wrap;
     align-items: flex-start;
     gap: 20px 28px;
@@ -50,5 +69,16 @@
   .created-kit {
     font-size: 14px;
     line-height: 1.45;
+  }
+
+  @media (width >= 40rem) {
+    .created {
+      grid-template-columns: minmax(0, 55fr) minmax(0, 45fr);
+    }
+
+    /* A hero made before the creator has no look to stand on the stage. */
+    .created-side:only-child {
+      grid-column: 1 / -1;
+    }
   }
 }

@@ -207,6 +207,12 @@
     line-height: 1.4;
   }
 
+  /* A new hero greets once the page's entrance (60 + 240 ms) has brought its stage in. */
+  .creator-stage-arrived .stage-hero.hop,
+  .creator-stage-arrived .hop > .stage-bubble {
+    animation-delay: 300ms;
+  }
+
   @keyframes creator-hop {
     50% {
       translate: 0 -8px;
@@ -300,6 +306,29 @@
 
     .stage-caption {
       max-width: 520px;
+    }
+
+    /* The stage of a hero just created, beside the page's box rather than the creator's panel. */
+    .creator-stage-arrived {
+      min-height: 460px;
+
+      .stage-sky {
+        inset: 0;
+      }
+
+      .stage-hero {
+        width: min(300px, 62%);
+      }
+
+      .stage-glyph {
+        width: 112px;
+        height: 112px;
+      }
+
+      .stage-bubble {
+        left: 68%;
+        width: 190px;
+      }
     }
   }
 }

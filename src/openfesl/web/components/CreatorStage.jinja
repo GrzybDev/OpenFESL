@@ -1,9 +1,9 @@
-{#def look, who: str, hair: int, beard: int, figure: dict | None = None #}
+{#def look, who: str, hair: int, beard: int, figure: dict | None = None, name: str = "" #}
 {# The creator's stage: on the ground under the sky, the hero's class glyph on its faction's
    colour over its look in words, with its speech bubble, and the note that the game shows the
    hero with its own models. Where the deployment keeps the game's models of heroes, the stage's
-   script shows the game's model of the hero in the glyph's place, with its own caption and
-   label. #}
+   script shows the game's model of the hero in the glyph's place, with its own caption and label.
+   Named, it is the stage of a hero just created, who reports by its name and greets once. #}
 {% set chosen = {
   "who": who,
   "skin": look.skin_tone,
@@ -12,8 +12,9 @@
   "beard": _("web.creator.figure.beard", style=beard) if beard else _("web.creator.figure.no_beard"),
 } %}
 <figure data-stage
+        {% if name %}data-arrived{% endif %}
         {% if figure %} data-figures="{{ url('/' ~ game.id ~ '/heroes/figure') }}" data-model-caption="{{ _('web.creator.model.caption') }}" data-model-label="{{ _('web.creator.model', **chosen) }}" {% endif %}
-        class="creator-stage">
+        class="creator-stage{% if name %} creator-stage-arrived{% endif %}">
   <div aria-hidden="true" class="stage-sky">
     <svg class="stage-clouds">
       <rect width="100%" height="100%" filter="url(#site-clouds)" />
@@ -38,8 +39,12 @@
       </svg>
       <p class="bubble-title">{{ _("web.creator.bubble") }}</p>
       <p class="bubble-text">
-        <span data-bubble-who>{{ _("web.creator.bubble.who", who=who) }}</span>
-        <span class="bubble-wide">{{ _("web.creator.bubble.right") }}</span><span class="bubble-narrow">{{ _("web.creator.bubble.below") }}</span>
+        {% if name %}
+          {{ _("web.creator.bubble.created", name=name, who=who) }}
+        {% else %}
+          <span data-bubble-who>{{ _("web.creator.bubble.who", who=who) }}</span>
+          <span class="bubble-wide">{{ _("web.creator.bubble.right") }}</span><span class="bubble-narrow">{{ _("web.creator.bubble.below") }}</span>
+        {% endif %}
       </p>
     </div>
   </div>

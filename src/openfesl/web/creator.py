@@ -150,6 +150,7 @@ class CreatorPages:
                 if hero.faction and hero.hero_class
                 else "",
                 from_game=_from_game(request.query_params),
+                figure=self._document(game, hero.look) if hero.look else None,
             )
 
         return show_created
