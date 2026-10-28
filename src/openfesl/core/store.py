@@ -98,8 +98,8 @@ class Bundle:
         members: The numbers of the products it holds, which need not be sold alone.
         box: The number of the box of which it gives one product at random, if it is one.
         section: The name of the hot deals' section it is listed in; after them when none.
-        pool: What the rotation picked it from, such as a set's name, which a later period
-            of its section does not pick again for a while.
+        pool: What the rotation made it of, such as a set's name, which a later period of
+            its section does not pick again for a while.
         source: Who made it: the admin, or the rotation by itself.
     """
 

@@ -2,29 +2,48 @@ from typing import Annotated, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, NonNegativeInt, PositiveInt, model_validator
 
-from openfesl.core.calendar import Schedule, Zone
+from openfesl.core.calendar import Schedule, Window, Zone
 from openfesl.core.store_rules import DropEntry, Rounding
 
 type Percent = Annotated[int, Field(ge=0, lt=100)]
 
 
 class Offer(BaseModel):
-    """Items that hot deals sell together under a name of the game's texts, such as a set.
+    """What hot deals sell under a name of the game's texts: items together, or a random box.
 
     Attributes:
         name: The id of its name in the game's texts.
         description: The id of the text the game shows about it; its items' names when none.
         members: Its items, each with its ownership, written such as 1129 for good or
             2153 x25.
-        price: Its price; the sum of its items' prices less the section's discount when none.
+        box: The key of the store's box of which it gives one drop, instead of items.
+        price: Its price; for items the sum of their prices less the section's discount, for
+            a box the box's own, when none.
+        pool: The name of the offers it is picked with, such as the other faction's box of a
+            family; its own name when none.
+        window: The days of each year it is sold on instead of by its section's schedule.
     """
 
     model_config = ConfigDict(frozen=True)
 
     name: str
     description: str | None = None
-    members: Annotated[tuple[DropEntry, ...], Field(min_length=1)]
+    members: tuple[DropEntry, ...] = ()
+    box: str | None = None
     price: PositiveInt | None = None
+    pool: str | None = None
+    window: Window | None = None
+
+    @property
+    def picked(self) -> str:
+        """The name of the offers it is picked with."""
+        return self.pool or self.name
+
+    @model_validator(mode="after")
+    def _check_contents(self) -> Self:
+        if bool(self.members) == bool(self.box):
+            raise ValueError(f"the offer {self.name} sells either items or a box")
+        return self
 
 
 class ItemSection(BaseModel):
@@ -59,8 +78,9 @@ class OfferSection(BaseModel):
     Attributes:
         kind: offers.
         enabled: Whether the section is listed.
-        schedule: When its deals change.
-        size: How many offers of each faction it sells in a period; all of them when none.
+        schedule: When its deals change; none for a section whose offers have windows.
+        size: How many offers of each faction a period picks, offers picked together as one
+            and those of both factions apart; all of them when none.
         discount: The lowest and highest discount on an offer's items in percent, of which
             each period picks one in steps of 5.
         gap: The days after an offer left the section before it may come back.
@@ -72,7 +92,7 @@ class OfferSection(BaseModel):
 
     kind: Literal["offers"]
     enabled: bool = True
-    schedule: Schedule
+    schedule: Schedule | None = None
     size: PositiveInt | None = None
     discount: tuple[Percent, Percent] = (0, 0)
     gap: NonNegativeInt = 0
@@ -83,6 +103,8 @@ class OfferSection(BaseModel):
     def _check_discount(self) -> Self:
         if self.discount[0] > self.discount[1]:
             raise ValueError("a section's lowest discount is above its highest")
+        if self.schedule is None and (self.sets or any(not o.window for o in self.offers)):
+            raise ValueError("offers without a window need their section's schedule")
         return self
 
 

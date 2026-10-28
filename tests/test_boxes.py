@@ -6,7 +6,7 @@ from xml.etree import ElementTree
 import pytest
 from accounts import select_value
 from heroes import MAGMA, wallets
-from store import ROYAL_SOLDIER, buy, items, listed, shopper, stock
+from store import ROYAL_SOLDIER, buy, items, listed, shopper, stock, without_rotation
 from support import fetch
 
 from openfesl.core.drops import Box, Drop, below_value, pick
@@ -77,6 +77,7 @@ async def test_a_bought_box_gives_one_item_the_hero_may_use_and_never_one_it_own
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     await stock(server_url, tmp_path, capsys)
+    await without_rotation(database_url)
     # Of the game data's Royal Soldier Supply Drop, the invented catalogue holds the pet alone,
     # beside the tonics the box gives a hero who owns every drop.
     box = await select_value(

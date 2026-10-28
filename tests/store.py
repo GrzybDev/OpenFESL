@@ -204,6 +204,13 @@ async def grant(database_url: str, hero: int, currency: str, amount: int) -> Non
     )
 
 
+async def without_rotation(database_url: str) -> None:
+    """Switch the hot deals' rotation off as the admin does, so that only added bundles are sold."""
+    await execute(
+        database_url, "INSERT INTO setting (key, value) VALUES ('bfheroes.deals.enabled', 'off')"
+    )
+
+
 @asynccontextmanager
 async def kept_by_server(server_url: str) -> AsyncIterator[tuple[dict[str, str], int]]:
     """Have a dedicated server keep the data of Ann's Royal soldier while it plays in its game.

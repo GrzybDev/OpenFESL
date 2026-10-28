@@ -5,11 +5,16 @@ from sqlalchemy.dialects.postgresql import insert as upsert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.calendar import Period
-from openfesl.core.deal_picks import History, NewDeal
+from openfesl.core.deal_picks import History, NewDeal, SoldBox
 from openfesl.core.deals import Maker
 from openfesl.core.inventory import Ownership
 from openfesl.core.store import AUTO
-from openfesl.storage.models import StoreBundleMemberRow, StoreBundleRow, StoreProductRow
+from openfesl.storage.models import (
+    StoreBoxRow,
+    StoreBundleMemberRow,
+    StoreBundleRow,
+    StoreProductRow,
+)
 from openfesl.storage.store import product_of
 
 type Key = tuple[int, Ownership, str]
@@ -49,6 +54,7 @@ class SqlDealStore:
                 StoreBundleRow.section == section,
                 StoreBundleRow.source == AUTO,
                 StoreBundleRow.starts_at == period.start,
+                StoreBundleRow.ends_at == period.end,
             )
             if await session.scalar(select(made)):
                 return
@@ -80,6 +86,9 @@ async def _history(
         .where(*others)
     )
     products = await session.scalars(select(StoreProductRow).where(StoreProductRow.game == game))
+    boxes = await session.scalars(
+        select(StoreBoxRow).where(StoreBoxRow.game == game, StoreBoxRow.kind == "box")
+    )
     return History(
         recent=frozenset(pool for pool in recent if pool),
         live=frozenset(pool for pool in live if pool),
@@ -87,6 +96,10 @@ async def _history(
         products={
             (row.item_id, Ownership(row.type, row.days, row.uses), row.currency): product_of(row)
             for row in products
+        },
+        boxes={
+            row.key: SoldBox(row.id, row.currency, row.value, row.faction, row.hero_class)
+            for row in boxes
         },
     )
 
@@ -160,13 +173,15 @@ async def _add(
             section=section,
             pool=bundle.pool,
             source=AUTO,
+            box_id=bundle.box,
         )
         .returning(StoreBundleRow.id)
     )
     members = {
         numbers[(product.item_id, product.ownership, product.currency)] for product in deal.products
     }
-    await session.execute(
-        insert(StoreBundleMemberRow),
-        [{"bundle_id": number, "product_id": member} for member in sorted(members)],
-    )
+    if members:
+        await session.execute(
+            insert(StoreBundleMemberRow),
+            [{"bundle_id": number, "product_id": member} for member in sorted(members)],
+        )

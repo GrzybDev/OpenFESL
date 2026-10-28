@@ -1,4 +1,4 @@
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from functools import partial
@@ -8,10 +8,10 @@ from typing import Protocol
 from babel import Locale
 from babel.lists import format_list
 
-from openfesl.core.calendar import Period, periods
+from openfesl.core.calendar import Period, Window, periods
 from openfesl.core.catalogues import Catalogue, Catalogues
 from openfesl.core.deal_picks import History, NewDeal, pick_items, pick_offers
-from openfesl.core.deal_rules import DealRules, ItemSection, OfferSection
+from openfesl.core.deal_rules import DealRules, ItemSection, Offer, OfferSection
 from openfesl.core.games import Game
 from openfesl.core.overrides import overridden
 from openfesl.core.policies import SettingStore
@@ -102,7 +102,7 @@ class HotDeals:
         self._random = random or SystemRandom()
         self._clock = clock or (lambda: datetime.now(UTC))
         # The periods made or found made, which later looks need not ask the store about.
-        self._made: set[tuple[str, str, datetime]] = set()
+        self._made: set[tuple[str, str, datetime, datetime]] = set()
 
     async def rules(self, game: Game) -> DealRules | None:
         """Return how a game's hot deals change, with the instance's settings over its data.
@@ -191,27 +191,52 @@ class HotDeals:
         for name, section in ordered:
             if not section.enabled:
                 continue
-            for period in periods(section.schedule, now, rules.zone):
-                made = (game.id, name, period.start)
+            for period, offers in _steps(rules, section, now):
+                made = (game.id, name, period.start, period.end)
                 if made in self._made:
                     continue
                 gap = section.gap if isinstance(section, OfferSection) else 0
-                make = partial(_picked, game, rules, section, catalogue, self._random)
+                make = partial(_picked, game, rules, section, offers, catalogue, self._random)
                 await self._store.generate(game.id, name, period, gap, make)
                 self._made.add(made)
+
+
+def _steps(
+    rules: DealRules, section: ItemSection | OfferSection, now: datetime
+) -> list[tuple[Period, Sequence[Offer]]]:
+    # The periods of the section's schedule that run, then those of its offers' windows, each
+    # with its offers.
+    if isinstance(section, ItemSection):
+        return [(period, ()) for period in periods(section.schedule, now, rules.zone)]
+    offers = rules.offers(section)
+    plain = [given for given in offers if given.window is None]
+    steps: list[tuple[Period, Sequence[Offer]]] = (
+        [(period, plain) for period in periods(section.schedule, now, rules.zone)]
+        if section.schedule
+        else []
+    )
+    windows: dict[Window, list[Offer]] = {}
+    for given in offers:
+        if given.window is not None:
+            windows.setdefault(given.window, []).append(given)
+    for window, sold in windows.items():
+        if running := window.running(now, rules.zone):
+            steps.append((running, sold))
+    return steps
 
 
 def _picked(
     game: Game,
     rules: DealRules,
     section: ItemSection | OfferSection,
+    offers: Sequence[Offer],
     catalogue: Catalogue,
     random: Random,
     history: History,
 ) -> list[NewDeal]:
     if isinstance(section, ItemSection):
         return pick_items(game, rules, section, catalogue, history, random)
-    return pick_offers(game, rules, section, catalogue, history, random)
+    return pick_offers(game, rules, section, offers, catalogue, history, random)
 
 
 def _text(game: Game, catalogue: Catalogue, name: str, language: str, faction: str | None) -> str:

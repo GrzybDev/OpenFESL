@@ -41,8 +41,7 @@ discount = [25, 50]
 gap = 42
 sets = true
 
-# The emote pairs that were half price in October 2011.
-# New Royal Emote Bundle (41039, HD 20111007)
+# New Royal Emote Bundle (41039, HD 20111007), half price in October 2011 as its National pair
 [[deals.sections.sale.offers]]
 name = "WEST_Custom_Bundle_NewRoyalEmoteBundle"
 members = [5047, 5048]
@@ -51,6 +50,304 @@ members = [5047, 5048]
 [[deals.sections.sale.offers]]
 name = "WEST_Custom_Bundle_NewNationalEmoteBundle"
 members = [5043, 5046]
+
+# Seasonal sets: sold in their events' windows at half their items' price, as new sets are.
+[deals.sections.seasonal]
+kind = "offers"
+discount = [50, 50]
+
+# Cliffhanger's Bundle (34140, HD 20120106), for January
+[[deals.sections.seasonal.offers]]
+name = "WEST_Custom_Bundle_CliffhangersBundle"
+members = [1046, 1047, 1048, 1049, 1050, 1051, 1052, 1094, 1126, 1127]
+window = { dates = ["01-01", "01-31"] }
+
+# Alpiner's Bundle (34141, HD 20120106), for January
+[[deals.sections.seasonal.offers]]
+name = "WEST_Custom_Bundle_AlpinersBundle"
+members = [1053, 1054, 1055, 1056, 1057, 1058, 1059, 1093, 1125, 1128]
+window = { dates = ["01-01", "01-31"] }
+
+# The Bundles of Love of Valentine's Day, whose texts promise an item nobody identified, so they
+# have none: the faction's rose and trousers with ten gift-package traps (tid 315081).
+[[deals.sections.seasonal.offers]]
+name = "WEST_Custom_Bundle_RoyalBundleofLove"
+members = [1126, 1127, "2172 x10"]
+window = { dates = ["02-13", "02-15"] }
+
+[[deals.sections.seasonal.offers]]
+name = "WEST_Custom_Bundle_NationalBundleofLove"
+members = [1125, 1128, "2171 x10"]
+window = { dates = ["02-13", "02-15"] }
+
+# Casey Rabbit Set (35866, HD 20120408), for Easter, Good Friday to Easter Monday
+[[deals.sections.seasonal.offers]]
+name = "WEST_Custom_Bundle_CaseyRabbitSet"
+members = [1361, 1362, 1363, 1364, 1365, 1366, 1374, "2176 x25"]
+window = { easter = [-2, 1] }
+
+# Bunny Darko Set (35865, HD 20120408), for Easter, Good Friday to Easter Monday
+[[deals.sections.seasonal.offers]]
+name = "WEST_Custom_Bundle_BunnyDarkoSet"
+members = [1368, 1369, 1370, 1371, 1372, 1373, "2175 x25"]
+window = { easter = [-2, 1] }
+
+# Grim's Varg Set (42386, HD 20121019), for Halloween
+[[deals.sections.seasonal.offers]]
+name = "WEST_Custom_Bundle_GrimsVargSet"
+members = [1106, 1107, 1108, 1109, 1110, 1111, 1112, 1113, "2156 30d"]
+window = { dates = ["10-19", "10-31"] }
+
+# Zed's Dead Set (42388, HD 20141004), for Halloween
+[[deals.sections.seasonal.offers]]
+name = "WEST_Custom_Bundle_ZedsDeadSet"
+members = [1026, 1027, 1028, 1029, 1030, 1033, 1034]
+window = { dates = ["10-19", "10-31"] }
+
+# The Slave Mummy (42244, HD 20131015), for Halloween
+[[deals.sections.seasonal.offers]]
+name = "WEST_Custom_Bundle_TheSlaveMummy"
+description = "WEST_Custom_Bundle_TheSlaveMummy_HotDealsDesc"
+members = [1495, 1496, 1497, 1498, 1499, 1500, 1508]
+window = { dates = ["10-19", "10-31"] }
+
+# Nicolai's Nocturnal Set (24184, HD 20131015), for Halloween
+[[deals.sections.seasonal.offers]]
+name = "WEST_Custom_Bundle_NicolaisNocturnalSet"
+members = [1114, 1115, 1116, 1117, 1118, 1119, 1120, 1121, "2157 30d"]
+window = { dates = ["10-19", "10-31"] }
+
+# Screamin Skeleton Set (42387, HD 20141004), for Halloween
+[[deals.sections.seasonal.offers]]
+name = "WEST_Custom_Bundle_ScreaminSkeletonSet"
+members = [407, 408, 409, 410, 594, 1031]
+window = { dates = ["10-19", "10-31"] }
+
+# The Anubis Servant (42243, HD 20131015), for Halloween
+[[deals.sections.seasonal.offers]]
+name = "WEST_Custom_Bundle_TheAnubisServant"
+description = "WEST_Custom_Bundle_TheAnubisServant_HotDealsDesc"
+members = [1486, 1487, 1488, 1510, 1513, 1514]
+window = { dates = ["10-19", "10-31"] }
+
+# Bushido Set (43904, HD 20120702), for the Rising Sun
+[[deals.sections.seasonal.offers]]
+name = "WEST_Custom_Bundle_BushidoSet"
+description = "WEST_Custom_Bundle_BushidoSet_HotDealsDesc"
+members = [1515, 1516, 1517, 1518, 1519, 1520, 1521]
+window = { dates = ["11-21", "11-30"] }
+
+# Samurai Set (43905, HD 20120702), for the Rising Sun
+[[deals.sections.seasonal.offers]]
+name = "WEST_Custom_Bundle_SamuraiSet"
+description = "WEST_Custom_Bundle_SamuraiSet_HotDealsDesc"
+members = [1522, 1523, 1524, 1525, 1526, 1527, 1528]
+window = { dates = ["11-21", "11-30"] }
+
+# Santa's Holiday Set (44154, HD 20140104), for Christmas
+[[deals.sections.seasonal.offers]]
+name = "WEST_Custom_Bundle_SantasHolidaySet"
+description = "WEST_Custom_Bundle_SantasHolidaySet2_HotDealsDesc"
+members = [1060, 1325, 1326, 1327, 1328, 1329]
+window = { dates = ["12-01", "12-25"] }
+
+# Nikolaus' Wintry Set (44153, HD 20140104), for Christmas
+[[deals.sections.seasonal.offers]]
+name = "WEST_Custom_Bundle_NikolausWintrySet"
+description = "WEST_Custom_Bundle_NikolausWintrySet2_HotDealsDesc"
+members = [1062, 1320, 1321, 1322, 1323, 1324]
+window = { dates = ["12-01", "12-25"] }
+
+# Random boxes: the class and Widget Supply Drops, always on sale at the store's box prices (all
+# in every 2012 capture). Their own texts were never parsed into the game, so they have none.
+[deals.sections.boxes]
+kind = "offers"
+schedule = { every = 7 }
+
+[[deals.sections.boxes.offers]]
+name = "WEST_Custom_Bundle_RoyalCommandoSupplyDrop"
+box = "royal-commando-supply-drop"
+
+[[deals.sections.boxes.offers]]
+name = "WEST_Custom_Bundle_RoyalSoldierSupplyDrop"
+box = "royal-soldier-supply-drop"
+
+[[deals.sections.boxes.offers]]
+name = "WEST_Custom_Bundle_RoyalGunnerSupplyDrop"
+box = "royal-gunner-supply-drop"
+
+[[deals.sections.boxes.offers]]
+name = "WEST_Custom_Bundle_NationalCommandoSupplyDrop"
+box = "national-commando-supply-drop"
+
+[[deals.sections.boxes.offers]]
+name = "WEST_Custom_Bundle_NationalSoldierSupplyDrop"
+box = "national-soldier-supply-drop"
+
+[[deals.sections.boxes.offers]]
+name = "WEST_Custom_Bundle_NationalGunnerSupplyDrop"
+box = "national-gunner-supply-drop"
+
+[[deals.sections.boxes.offers]]
+name = "WEST_Custom_Bundle_WidgetSupplyDrop"
+box = "royal-widget-supply-drop"
+
+[[deals.sections.boxes.offers]]
+name = "WEST_Custom_Bundle_WidgetSupplyDrop2"
+box = "national-widget-supply-drop"
+
+# Themed boxes: three families of a Royal and a National box at a time; every 14 days the oldest
+# leaves and another comes, so each stays six weeks and comes back no sooner than six weeks
+# later (4 to 13 themed boxes at once in 2012). A box keeps its own text only where the store's
+# drops match what the text promises: the Pandora's Boxes and Spoils of War promised a Valor
+# Points Boost for a duplicate, the Spare Parts a pet and the Ace's and Aviator's drops widgets.
+[deals.sections.themed]
+kind = "offers"
+schedule = { every = 14, lasts = 42 }
+size = 1
+gap = 42
+
+[[deals.sections.themed.offers]]
+name = "WEST_Custom_Bundle_RoyalMechanicalDrop"
+description = "WEST_Custom_Bundle_RoyalMechanicalDrop_HotDealsDesc"
+box = "royal-mechanical"
+pool = "mechanical"
+
+[[deals.sections.themed.offers]]
+name = "WEST_Custom_Bundle_NationalMechanicalDrop"
+description = "WEST_Custom_Bundle_NationalMechanicalDrop_HotDealsDesc"
+box = "national-mechanical"
+pool = "mechanical"
+
+[[deals.sections.themed.offers]]
+name = "WEST_Custom_Bundle_RoyalCosmicDrop"
+description = "WEST_Custom_Bundle_RoyalCosmicDrop_HotDealsDesc"
+box = "royal-cosmic"
+pool = "cosmic"
+
+[[deals.sections.themed.offers]]
+name = "WEST_Custom_Bundle_NationalCosmicDrop"
+description = "WEST_Custom_Bundle_NationalCosmicDrop_HotDealsDesc"
+box = "national-cosmic"
+pool = "cosmic"
+
+[[deals.sections.themed.offers]]
+name = "WEST_Custom_Bundle_InventorsExperimentalDrop"
+description = "WEST_Custom_Bundle_InventorsExperimentalDrop_HotDealsDesc"
+box = "royal-experimental"
+pool = "experimental"
+
+[[deals.sections.themed.offers]]
+name = "WEST_Custom_Bundle_DrDoktorsExperimentalDrop"
+description = "WEST_Custom_Bundle_DrDoktorsExperimentalDrop_HotDealsDesc"
+box = "national-experimental"
+pool = "experimental"
+
+[[deals.sections.themed.offers]]
+name = "WEST_Custom_Bundle_RoadRangersSpareParts"
+box = "royal-spare-parts"
+pool = "spare-parts"
+
+[[deals.sections.themed.offers]]
+name = "WEST_Custom_Bundle_TrackHuntersSpareParts"
+box = "national-spare-parts"
+pool = "spare-parts"
+
+[[deals.sections.themed.offers]]
+name = "WEST_Custom_Bundle_RoyalPandorasBox"
+box = "royal-pandora"
+pool = "pandora"
+
+[[deals.sections.themed.offers]]
+name = "WEST_Custom_Bundle_NationalPandorasBox"
+box = "national-pandora"
+pool = "pandora"
+
+[[deals.sections.themed.offers]]
+name = "WEST_Custom_Bundle_CruelSpoilsOfWar"
+box = "royal-spoils-of-war"
+pool = "spoils-of-war"
+
+[[deals.sections.themed.offers]]
+name = "WEST_Custom_Bundle_BrutalSpoilsOfWar"
+box = "national-spoils-of-war"
+pool = "spoils-of-war"
+
+[[deals.sections.themed.offers]]
+name = "WEST_Custom_Bundle_AviatorsSupplyDrop"
+box = "royal-ace-supply-drop"
+pool = "ace"
+
+[[deals.sections.themed.offers]]
+name = "WEST_Custom_Bundle_AcesSupplyDrop"
+box = "national-ace-supply-drop"
+pool = "ace"
+
+[[deals.sections.themed.offers]]
+name = "WEST_Custom_Bundle_RoyalLostTreasure"
+description = "WEST_Custom_Bundle_RoyalLostTreasure_HotDealsDesc"
+box = "royal-lost-treasure"
+pool = "lost-treasure"
+
+[[deals.sections.themed.offers]]
+name = "WEST_Custom_Bundle_NationalLostTreasure"
+description = "WEST_Custom_Bundle_NationalLostTreasure_HotDealsDesc"
+box = "national-lost-treasure"
+pool = "lost-treasure"
+
+# Event boxes, sold through their events, whose daily gift on the rewards page is one of them:
+# the Trick-or-Treat bags and the sarcophagi of Halloween, the Bento Boxes of the Rising Sun week
+# and Santa's and Nikolaus' Visits of Christmas, as their texts date them.
+[deals.sections.events]
+kind = "offers"
+
+[[deals.sections.events.offers]]
+name = "WEST_Custom_Bundle_RoyalTrickorTreat"
+description = "WEST_Custom_Bundle_RoyalTrickorTreat_HotDealsDesc"
+box = "royal-trick-or-treat"
+window = { dates = ["10-19", "10-31"] }
+
+[[deals.sections.events.offers]]
+name = "WEST_Custom_Bundle_NationalTrickorTreat"
+description = "WEST_Custom_Bundle_NationalTrickorTreat_HotDealsDesc"
+box = "national-trick-or-treat"
+window = { dates = ["10-19", "10-31"] }
+
+[[deals.sections.events.offers]]
+name = "WEST_Custom_Bundle_PharaohMummysSarcophagus"
+description = "WEST_Custom_Bundle_PharaohMummysSarcophagus_HotDealsDesc"
+box = "royal-sarcophagus"
+window = { dates = ["10-19", "10-31"] }
+
+[[deals.sections.events.offers]]
+name = "WEST_Custom_Bundle_AnubisGodSarcophagus"
+description = "WEST_Custom_Bundle_AnubisGodSarcophagus_HotDealsDesc"
+box = "national-sarcophagus"
+window = { dates = ["10-19", "10-31"] }
+
+[[deals.sections.events.offers]]
+name = "WEST_Custom_Bundle_RoyalBentoBoxSupplyDrop"
+description = "WEST_Custom_Bundle_RoyalBentoBoxSupplyDrop_HotDealsDesc"
+box = "royal-bento-box"
+window = { dates = ["11-21", "11-27"] }
+
+[[deals.sections.events.offers]]
+name = "WEST_Custom_Bundle_NationalBentoBoxSupplyDrop"
+description = "WEST_Custom_Bundle_NationalBentoBoxSupplyDrop_HotDealsDesc"
+box = "national-bento-box"
+window = { dates = ["11-21", "11-27"] }
+
+[[deals.sections.events.offers]]
+name = "WEST_Custom_Bundle_SantasSackSupplyDrop"
+description = "WEST_Custom_Bundle_SantasSackSupplyDrop_HotDealsDesc"
+box = "royal-santas-visit"
+window = { dates = ["12-01", "12-25"] }
+
+[[deals.sections.events.offers]]
+name = "WEST_Custom_Bundle_NikolausSackSupplyDrop"
+description = "WEST_Custom_Bundle_NikolausSackSupplyDrop_HotDealsDesc"
+box = "national-nikolaus-visit"
+window = { dates = ["12-01", "12-25"] }
 
 # Popular: the standing list of every 2012 capture, always at its October 2012 price.
 [deals.sections.popular]
@@ -252,7 +549,10 @@ members = [1241, 1242, 1243, 1245, 1246, 1247, 1248, 1249, 1250]
 # Burly Bruce Mega Bundle (23240, HD 20110406)
 [[deals.sets]]
 name = "WEST_Custom_Bundle_BurlyBruceMegaBundle"
-members = [1241, 1242, 1243, 1244, 1245, 1246, 1247, 1248, 1249, 1250, "2165 x25", "2167 x25", "2169 x25", 5041]
+members = [
+    1241, 1242, 1243, 1244, 1245, 1246, 1247, 1248, 1249, 1250, 5041,
+    "2165 x25", "2167 x25", "2169 x25",
+]
 
 # Sidney's Skyranger Set (22322, HD 20111007)
 [[deals.sets]]
@@ -493,7 +793,10 @@ members = [1251, 1252, 1253, 1255, 1256, 1257, 1258, 1259, 1260]
 # Savage Sly Mega Bundle (23275, HD 20110406)
 [[deals.sets]]
 name = "WEST_Custom_Bundle_SavageSlyMegaBundle"
-members = [1251, 1252, 1253, 1254, 1255, 1256, 1257, 1258, 1259, 1260, "2166 x25", "2168 x25", "2170 x25", 5040]
+members = [
+    1251, 1252, 1253, 1254, 1255, 1256, 1257, 1258, 1259, 1260, 5040,
+    "2166 x25", "2168 x25", "2170 x25",
+]
 
 # Steiner's Stratospheric Set (22399, HD 20111007)
 [[deals.sets]]

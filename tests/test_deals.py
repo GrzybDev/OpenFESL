@@ -1,6 +1,7 @@
 import asyncio
 from collections.abc import AsyncIterator
 from datetime import UTC, datetime, timedelta
+from itertools import pairwise
 from pathlib import Path
 from random import Random
 from xml.etree import ElementTree
@@ -13,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from store import ROYAL_SOLDIER, attribute, buy, deals, grant, shopper
 from support import cli, fetch
 
+from openfesl.core.calendar import Schedule, periods
 from openfesl.core.catalogue import CatalogueDocument, CatalogueFile, CatalogueItem
 from openfesl.core.catalogues import Catalogues
 from openfesl.core.deal_rules import DealRules
@@ -26,22 +28,35 @@ from openfesl.storage.store import SqlProductStore
 
 pytestmark = pytest.mark.anyio
 
-# An invented catalogue: a cap, a scarf and a coat of each faction, which the Deal of the Day
-# puts together; seven pairs of Royal trousers, each a set of its own; and two boosts.
 ROYAL, NATIONAL = "1", "2"
 HAT, NECK, JACKET, LEGS = "0", "2", "4", "6"
-CLOTHES = {
-    101: ("Invented Cap", ROYAL, HAT),
-    102: ("Invented Scarf", ROYAL, NECK),
-    103: ("Invented Coat", ROYAL, JACKET),
-    201: ("Invented Helmet", NATIONAL, HAT),
-    202: ("Invented Collar", NATIONAL, NECK),
-    203: ("Invented Tunic", NATIONAL, JACKET),
-    **{310 + n: (f"Invented Trousers {n}", ROYAL, LEGS) for n in range(1, 8)},
+
+type Invented = dict[int, tuple[str, str, dict[str, str]]]
+
+
+def worn(name: str, side: str, slot: str) -> tuple[str, str, dict[str, str]]:
+    return name, "appearance", {"faction": side, "slot": slot}
+
+
+# An invented catalogue: a cap, a scarf and a coat of each faction, which the Deal of the Day
+# puts together; seven pairs of Royal trousers, each a set of its own; two boosts; and the tonic
+# that the store's boxes give a hero who owns all their drops, which makes the store keep them.
+INVENTED: Invented = {
+    101: worn("Invented Cap", ROYAL, HAT),
+    102: worn("Invented Scarf", ROYAL, NECK),
+    103: worn("Invented Coat", ROYAL, JACKET),
+    201: worn("Invented Helmet", NATIONAL, HAT),
+    202: worn("Invented Collar", NATIONAL, NECK),
+    203: worn("Invented Tunic", NATIONAL, JACKET),
+    **{310 + n: worn(f"Invented Trousers {n}", ROYAL, LEGS) for n in range(1, 8)},
+    9000: ("Invented XP Boost", "convenience", {}),
+    9005: ("Invented Valor Boost", "convenience", {}),
+    2153: ("Invented Tonic", "ability", {"consumable": "true"}),
 }
-BOOSTS = {9000: "Invented XP Boost", 9005: "Invented Valor Boost"}
 # The game's own name of the boost pair, which the game data lists among the popular deals.
 BOOST_PAIR = "WEST_Custom_Bundle_XPVPBoostBundle"
+# The game's own names of the Widget Supply Drops, which may give a boost.
+WIDGET_DROPS = ("WEST_Custom_Bundle_WidgetSupplyDrop", "WEST_Custom_Bundle_WidgetSupplyDrop2")
 DAILY = "web.deals.daily.name"
 
 # The invented catalogue's deals: the Deal of the Day, a set each Monday that comes back no
@@ -78,6 +93,37 @@ RULES = DealRules.model_validate(
         "sets": [{"name": f"Invented Set {n}", "members": [310 + n]} for n in range(1, 8)],
     }
 )
+# The store's themed boxes, a family of a Royal and a National box each, three families at a
+# time for six weeks; and the Royal Trick-or-Treat bag, sold through Halloween.
+FAMILIES = ("mechanical", "cosmic", "experimental", "spare-parts", "pandora", "spoils-of-war")
+BOX_RULES = DealRules.model_validate(
+    {
+        "currency": "_PF",
+        "sections": {
+            "themed": {
+                "kind": "offers",
+                "schedule": {"every": 14, "lasts": 42},
+                "size": 1,
+                "gap": 42,
+                "offers": [
+                    {"name": f"{side} {family}", "box": f"{side}-{family}", "pool": family}
+                    for family in FAMILIES
+                    for side in ("royal", "national")
+                ],
+            },
+            "events": {
+                "kind": "offers",
+                "offers": [
+                    {
+                        "name": "Invented Bag",
+                        "box": "royal-trick-or-treat",
+                        "window": {"dates": ["10-19", "10-31"]},
+                    }
+                ],
+            },
+        },
+    }
+)
 # A Sunday, a second before midnight in UTC.
 SUNDAY = datetime(2026, 11, 1, 23, 59, 59, tzinfo=UTC)
 MONDAY = datetime(2026, 11, 2, tzinfo=UTC)
@@ -85,15 +131,15 @@ MONDAY = datetime(2026, 11, 2, tzinfo=UTC)
 type Line = tuple[str | None, str, int, int | None]
 
 
-def catalogue_file(folder: Path, clothes: dict[int, tuple[str, str, str]]) -> Path:
-    """Write the invented catalogue as `openfesl catalogue extract` writes it."""
+def catalogue_file(folder: Path, invented: Invented) -> Path:
+    """Write an invented catalogue as `openfesl catalogue extract` writes it."""
     items = [
-        CatalogueItem(id=number, kind="appearance", fields={"faction": side, "slot": slot})
-        for number, (_, side, slot) in clothes.items()
-    ] + [CatalogueItem(id=number, kind="convenience", fields={}) for number in BOOSTS]
-    names = {number: name for number, (name, _, _) in clothes.items()} | BOOSTS
-    english = {f"WEST_Custom_Item_{number}": name for number, name in names.items()}
+        CatalogueItem(id=number, kind=kind, fields=fields)
+        for number, (_, kind, fields) in invented.items()
+    ]
+    english = {f"WEST_Custom_Item_{number}": name for number, (name, _, _) in invented.items()}
     english[BOOST_PAIR] = "Invented Boost Pair"
+    english |= dict.fromkeys(WIDGET_DROPS, "Invented Widget Drop")
     document = CatalogueDocument(format=1, game="bfheroes", items=tuple(items))
     file = folder / "catalogue.zip"
     file.write_bytes(CatalogueFile(document, {"en": english}, {}).write())
@@ -129,10 +175,10 @@ async def import_catalogue(
     server_url: str,
     folder: Path,
     capsys: pytest.CaptureFixture[str],
-    clothes: dict[int, tuple[str, str, str]] = CLOTHES,
+    invented: Invented = INVENTED,
 ) -> None:
-    """Import the invented catalogue as the admin does, and wait for the store to fill from it."""
-    await cli(capsys, "catalogue", "import", str(catalogue_file(folder, clothes)))
+    """Import an invented catalogue as the admin does, and wait for the store to fill from it."""
+    await cli(capsys, "catalogue", "import", str(catalogue_file(folder, invented)))
     with anyio.fail_after(5):
         while not len(ElementTree.fromstring((await fetch(server_url, "/ofb/products", MAGMA))[2])):
             await anyio.sleep(0.05)
@@ -286,9 +332,14 @@ async def test_the_game_lists_and_sells_the_deal_of_the_day_and_the_admins_offer
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    # Without the trousers, so that the Deal of the Day has one piece for each of its slots.
-    clothes = {number: item for number, item in CLOTHES.items() if item[2] != LEGS}
-    await import_catalogue(server_url, tmp_path, capsys, clothes)
+    # Without the trousers, so that the Deal of the Day has one piece for each of its slots,
+    # and without the tonic, so that the store keeps only the boxes that give boosts.
+    kept = {
+        number: item
+        for number, item in INVENTED.items()
+        if item[2].get("slot") != LEGS and number != 2153
+    }
+    await import_catalogue(server_url, tmp_path, capsys, kept)
     cookie, hero = await shopper(server_url, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
     boost = await select_value(
         database_url, "SELECT id FROM store_product WHERE item_id = 9000 AND published"
@@ -306,14 +357,16 @@ async def test_the_game_lists_and_sells_the_deal_of_the_day_and_the_admins_offer
     bought = [await buy(server_url, cookie, hero, number) for number in (royal, offered)]
 
     # The game data's sections whose items the catalogue has: the Deal of the Day of each
-    # faction and the boost pair, then the admin's offer.
+    # faction, the Widget Supply Drops and the boost pair, then the admin's offer.
     assert [
         (attribute(deal, "Product Name"), attribute(deal, "gameOrder")) for deal in english
     ] == [
         ("Deal of the Day: Royal Army", "1"),
         ("Deal of the Day: National Army", "2"),
-        ("Invented Boost Pair", "3"),
-        ("Invented Offer", "4"),
+        ("Invented Widget Drop", "3"),
+        ("Invented Widget Drop", "4"),
+        ("Invented Boost Pair", "5"),
+        ("Invented Offer", "6"),
     ]
     assert attribute(english[0], "hotdealsDescription") == (
         "Invented Cap, Invented Scarf, and Invented Coat"
@@ -331,3 +384,48 @@ async def test_the_game_lists_and_sells_the_deal_of_the_day_and_the_admins_offer
     _, _, body = await fetch(server_url, f"/nucleus/entitlements/{hero}", MAGMA, cookie)
     tags = {entry.findtext("entitlementTag") for entry in ElementTree.fromstring(body)}
     assert {"101-unlm", "102-unlm", "103-unlm", "9000-tlmd"} <= tags
+
+
+async def test_themed_families_change_one_at_a_time_and_come_back_six_weeks_after_leaving(
+    rotation: Rotation,
+) -> None:
+    rotation.game = rotation.game.model_copy(update={"deals": BOX_RULES})
+    [first, *_] = periods(Schedule(every=14, lasts=42), MONDAY, "UTC")
+    steps = []
+    for number in range(8):
+        rotation.now = first.start + timedelta(days=14 * number)
+        listed = [bundle.bundle for bundle in await rotation.deals.current(rotation.game)]
+        steps.append([bundle for bundle in listed if bundle.section == "themed"])
+
+    # Each box is named by its faction and family.
+    families = [{bundle.name.split()[1] for bundle in step} for step in steps]
+    # Three families at a time, each with both factions' boxes at the store's box prices.
+    prices = {"mechanical": 999, "cosmic": 999, "pandora": 1199, "spoils-of-war": 1199}
+    for step, found in zip(steps, families, strict=True):
+        assert len(found) == 3
+        assert sorted(bundle.faction or "" for bundle in step) == ["national"] * 3 + ["royal"] * 3
+        assert all(bundle.price == prices.get(bundle.name.split()[1], 1999) for bundle in step)
+    for before, after in pairwise(families):
+        assert len(after - before) == len(before - after) == 1
+    for family in FAMILIES:
+        present = [step for step, found in enumerate(families) if family in found]
+        # Back after six weeks away at the soonest, three steps of two weeks.
+        assert all(later - earlier in (1, 4, 5, 6, 7) for earlier, later in pairwise(present))
+
+
+async def test_an_event_box_is_sold_only_through_its_event(rotation: Rotation) -> None:
+    rotation.game = rotation.game.model_copy(update={"deals": BOX_RULES})
+    sold = []
+    for moment in (
+        datetime(2026, 10, 18, 23, 59, 59, tzinfo=UTC),
+        datetime(2026, 10, 19, tzinfo=UTC),
+        datetime(2026, 10, 31, 23, 59, 59, tzinfo=UTC),
+        datetime(2026, 11, 1, tzinfo=UTC),
+        datetime(2027, 10, 25, tzinfo=UTC),
+    ):
+        rotation.now = moment
+        sold.append(
+            [name for section, name, _, _ in await rotation.listed() if section == "events"]
+        )
+
+    assert sold == [[], ["Invented Bag"], ["Invented Bag"], [], ["Invented Bag"]]

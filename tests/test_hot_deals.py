@@ -4,7 +4,19 @@ from pathlib import Path
 import pytest
 from accounts import select_value
 from heroes import wallets
-from store import CHEER, ITEMS, ROYAL_SOLDIER, attribute, buy, deals, grant, items, shopper, stock
+from store import (
+    CHEER,
+    ITEMS,
+    ROYAL_SOLDIER,
+    attribute,
+    buy,
+    deals,
+    grant,
+    items,
+    shopper,
+    stock,
+    without_rotation,
+)
 
 from openfesl.core.store import Bundle
 from openfesl.storage.store import SqlProductStore
@@ -26,6 +38,7 @@ async def test_a_hot_deal_sells_its_members_together_while_it_runs(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     await stock(server_url, tmp_path, capsys, [*ITEMS, CHEER])
+    await without_rotation(database_url)
     now = datetime.now(UTC)
     royal_set = Bundle(
         "WEST_Custom_Bundle_Invented",

@@ -28,6 +28,18 @@ def _zone(name: str) -> str:
 type Zone = Annotated[str, AfterValidator(_zone)]
 
 
+def _month_day(text: str) -> str:
+    # A day of every year, written MM-DD; 29 February is not one.
+    try:
+        date.fromisoformat(f"2001-{text}")
+    except ValueError:
+        raise ValueError(f"{text!r} is no day of every year such as 10-31") from None
+    return text
+
+
+type MonthDay = Annotated[str, AfterValidator(_month_day)]
+
+
 class Schedule(BaseModel):
     """When the periods of something that recurs start and how long each lasts, in whole days.
 
@@ -48,6 +60,65 @@ class Schedule(BaseModel):
         if not self.starts or max(self.starts) >= self.every:
             raise ValueError("a schedule's periods start on days within its cycle")
         return self
+
+
+class Window(BaseModel):
+    """The days of each year on which something runs, from its first day to its last.
+
+    Attributes:
+        dates: Its first and last days, written MM-DD.
+        easter: Its first and last days as days after Western Easter Sunday, before it below 0.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    dates: tuple[MonthDay, MonthDay] | None = None
+    easter: tuple[int, int] | None = None
+
+    @model_validator(mode="after")
+    def _check_days(self) -> Self:
+        if (self.dates is None) == (self.easter is None):
+            raise ValueError("a window has either dates or days after Easter")
+        dates, offsets = self.dates or ("", ""), self.easter or (0, 0)
+        if dates[0] > dates[1] or offsets[0] > offsets[1]:
+            raise ValueError("a window's first day is after its last")
+        return self
+
+    def days(self, year: int) -> tuple[date, date]:
+        """Return the window's first and last days in a year.
+
+        Args:
+            year: The year.
+        """
+        if self.easter:
+            sunday = easter(year)
+            return sunday + timedelta(self.easter[0]), sunday + timedelta(self.easter[1])
+        assert self.dates
+        first, last = self.dates
+        return date.fromisoformat(f"{year}-{first}"), date.fromisoformat(f"{year}-{last}")
+
+    def running(self, now: datetime, zone: str) -> Period | None:
+        """Return the window's period that runs at a moment, if one does.
+
+        Args:
+            now: The moment.
+            zone: The time zone whose midnights its days start at.
+        """
+        first, last = self.days(today(now, zone).year)
+        period = Period(day_start(first, zone), day_start(last + timedelta(1), zone))
+        return period if period.start <= now < period.end else None
+
+    def day(self, now: datetime, zone: str) -> int | None:
+        """Return which of the window's days a moment falls on, from 1, if it falls on one.
+
+        Args:
+            now: The moment.
+            zone: The time zone whose midnights its days start at.
+        """
+        if self.running(now, zone) is None:
+            return None
+        day = today(now, zone)
+        return (day - self.days(day.year)[0]).days + 1
 
 
 @dataclass(frozen=True, slots=True)
@@ -101,3 +172,22 @@ def periods(schedule: Schedule, now: datetime, zone: str) -> list[Period]:
             if period.start <= now < period.end:
                 found.append(period)
     return found
+
+
+def easter(year: int) -> date:
+    """Return the Western Easter Sunday of a year, by the Gregorian computus.
+
+    Args:
+        year: The year.
+    """
+    # The anonymous Gregorian algorithm (Meeus, Jones and Butcher).
+    golden = year % 19
+    century, rest = divmod(year, 100)
+    leaps, leap = divmod(century, 4)
+    proemptosis = (century - (century + 8) // 25 + 1) // 3
+    epact = (19 * golden + century - leaps - proemptosis + 15) % 30
+    quarter, remainder = divmod(rest, 4)
+    weekday = (32 + 2 * leap + 2 * quarter - epact - remainder) % 7
+    shift = (golden + 11 * epact + 22 * weekday) // 451
+    month, day = divmod(epact + weekday - 7 * shift + 114, 31)
+    return date(year, month, day + 1)

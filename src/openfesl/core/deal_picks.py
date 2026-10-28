@@ -23,16 +23,37 @@ class History:
     """What a section's new period must not repeat, and what the store's products cost.
 
     Attributes:
-        recent: What the section picked that ended within its gap or still runs, by pool.
+        recent: What the section sold that ended within its gap or still runs, by pool.
         live: What the rotation's other sections sell when the period starts, by pool.
         live_items: The items of the rotation's bundles that run when the period starts.
         products: The store's products, sold alone or not, by item, ownership and currency.
+        boxes: The store's boxes, by key.
     """
 
     recent: frozenset[str]
     live: frozenset[str]
     live_items: frozenset[int]
     products: Priced
+    boxes: Mapping[str, SoldBox]
+
+
+@dataclass(frozen=True, slots=True)
+class SoldBox:
+    """A box of a game's store as hot deals sell it.
+
+    Attributes:
+        id: Its number.
+        currency: The currency of its price.
+        price: Its price.
+        faction: The faction whose heroes may open it; any when none.
+        hero_class: The class whose heroes may open it; any when none.
+    """
+
+    id: int
+    currency: str
+    price: int
+    faction: str | None
+    hero_class: str | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,33 +73,43 @@ def pick_offers(
     game: Game,
     rules: DealRules,
     section: OfferSection,
+    offers: Sequence[Offer],
     catalogue: Catalogue,
     history: History,
     random: Random,
 ) -> list[NewDeal]:
     """Return the deals of a period of a section of offers: every offer, or a few of each faction.
 
-    An offer that the section sold within its gap, or another section sells, is left out, as
-    is one with an item the catalogue lacks or the store does not price.
+    Offers picked together, such as a family's boxes of both factions, count as one. An offer
+    that the section sold within its gap, or another section sells, is left out, as is one with
+    an item the catalogue lacks or the store does not price, or a box the store lacks.
 
     Args:
         game: The game.
         rules: The game's hot-deal rules.
         section: The section.
+        offers: The offers of the period.
         catalogue: The game's imported catalogue.
         history: What the section must not repeat, and what the products cost.
         random: The source of chance.
     """
-    groups: dict[str | None, list[NewDeal]] = {}
-    for given in rules.offers(section):
-        if given.name in history.recent or given.name in history.live:
+    used = history.recent | history.live
+    taken = {given.picked for given in offers if given.name in used}
+    pools: dict[str, list[NewDeal]] = {}
+    for given in offers:
+        if given.picked in taken:
             continue
         deal = _offer_deal(game, rules, section, catalogue, history, given, random)
         if deal is not None:
-            groups.setdefault(deal.bundle.faction, []).append(deal)
+            pools.setdefault(given.picked, []).append(deal)
+    groups: dict[str | None, list[list[NewDeal]]] = {}
+    for deals in pools.values():
+        factions = {deal.bundle.faction for deal in deals}
+        groups.setdefault(factions.pop() if len(factions) == 1 else None, []).append(deals)
     picked = []
-    for deals in groups.values():
-        picked += random.sample(deals, min(section.size, len(deals))) if section.size else deals
+    for found in groups.values():
+        chosen = random.sample(found, min(section.size, len(found))) if section.size else found
+        picked += [deal for deals in chosen for deal in deals]
     return _ordered(game, picked)
 
 
@@ -161,6 +192,8 @@ def _offer_deal(
     random: Random,
 ) -> NewDeal | None:
     assert game.store is not None and game.heroes is not None
+    if given.box is not None:
+        return _box_deal(history, given)
     items = [catalogue.item(item_id) for item_id, _ in given.members]
     found = [item for item in items if item is not None and game.store.sellable(item)]
     fit = _fit(found, list(game.heroes.factions), list(game.heroes.classes))
@@ -187,6 +220,25 @@ def _offer_deal(
         source=AUTO,
     )
     return NewDeal(bundle, members)
+
+
+def _box_deal(history: History, given: Offer) -> NewDeal | None:
+    box = history.boxes.get(given.box or "")
+    if box is None:
+        logger.debug("Leaving out the offer %s, whose box the store lacks", given.name)
+        return None
+    bundle = Bundle(
+        name=given.name,
+        description=given.description,
+        currency=box.currency,
+        price=given.price or box.price,
+        faction=box.faction,
+        hero_class=box.hero_class,
+        box=box.id,
+        pool=given.name,
+        source=AUTO,
+    )
+    return NewDeal(bundle, ())
 
 
 def _product(

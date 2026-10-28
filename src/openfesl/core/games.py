@@ -17,7 +17,7 @@ from pydantic import (
 
 from openfesl.core.catalogue import CatalogueRules
 from openfesl.core.chests import ChestRules
-from openfesl.core.deal_rules import DealRules
+from openfesl.core.deal_rules import DealRules, OfferSection
 from openfesl.core.game_pages import Listing, PageKind, Site, Stats, Theme
 from openfesl.core.hero_rules import HeroRules
 from openfesl.core.policies import Policies
@@ -434,6 +434,15 @@ class Game(BaseModel):
             raise ValueError("hot deals need a store and heroes")
         if self.deals.currency not in self.currencies:
             raise ValueError(f"hot deals are priced in an unknown currency: {self.deals.currency}")
+        offers = [
+            offer
+            for section in self.deals.sections.values()
+            if isinstance(section, OfferSection)
+            for offer in section.offers
+        ]
+        boxes = {box.key for box in self.store.boxes if box.kind == "box"}
+        if unknown := {offer.box for offer in offers if offer.box} - boxes:
+            raise ValueError(f"hot deals sell boxes the store lacks: {sorted(unknown)}")
         return self
 
     @model_validator(mode="after")

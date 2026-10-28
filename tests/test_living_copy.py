@@ -8,7 +8,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from openfesl.core.catalogues import Catalogue, Catalogues
-from openfesl.core.deal_picks import History, pick_items, pick_offers
+from openfesl.core.deal_picks import History, SoldBox, pick_items, pick_offers
 from openfesl.core.deal_rules import ItemSection, OfferSection
 from openfesl.core.games import Game, load_games
 from openfesl.core.store import Product
@@ -40,7 +40,7 @@ async def catalogue(database_url: str, bfheroes: Game) -> AsyncIterator[Catalogu
 
 
 def sold_alone(game: Game, catalogue: Catalogue) -> History:
-    """Return a history of nothing sold before, with every product the store's data seeds."""
+    """Return a history of nothing sold before, with the products and boxes the store seeds."""
     rules = game.store
     assert rules
     products = {
@@ -53,7 +53,11 @@ def sold_alone(game: Game, catalogue: Catalogue) -> History:
         for ownership in rule.sold
         if (price := rules.price(rule, ownership))
     }
-    return History(frozenset(), frozenset(), frozenset(), products)
+    boxes = {
+        box.key: SoldBox(0, box.currency, box.value, box.faction, box.hero_class)
+        for box in rules.boxes
+    }
+    return History(frozenset(), frozenset(), frozenset(), products, boxes)
 
 
 async def test_every_deal_of_the_game_data_is_made_of_the_copys_items_and_named_by_its_texts(
@@ -71,12 +75,13 @@ async def test_every_deal_of_the_game_data_is_made_of_the_copys_items_and_named_
             deals = pick_items(game, rules, section, catalogue, history, Random(1))
         else:
             every = section.model_copy(update={"size": None})
-            deals = pick_offers(game, rules, every, catalogue, history, Random(1))
+            offers = rules.offers(section)
+            deals = pick_offers(game, rules, every, offers, catalogue, history, Random(1))
         made[name] = {deal.bundle.faction or "" for deal in deals} | {
             deal.bundle.name for deal in deals if isinstance(section, OfferSection)
         }
 
-    # Each faction's Deal of the Day, and every offer of the other sections.
+    # Each faction's Deal of the Day, and every offer and box of the other sections.
     assert made["daily"] == {"royal", "national"}
     for name, section in rules.sections.items():
         if isinstance(section, OfferSection):
