@@ -25,10 +25,11 @@ UNKNOWN_SESSION = "UNKNOWN_SESSION"
 VALIDATION_FAILED = "VALIDATION_FAILED"
 USER_DOES_NOT_MATCH = "USER_DOES_NOT_MATCH"
 NOT_NUMERIC = "NOT_NUMERIC"
-# OpenFESL's own causes for a game process that asks what only a dedicated server may, and for
-# a credit of a currency, amount or id that no server may send.
+# OpenFESL's own causes for a game process that asks what only a dedicated server may, for a
+# credit of a currency, amount or id, and for a stack of a tag or count that no server may send.
 NOT_A_SERVER = "NOT_A_SERVER"
 INVALID_CREDIT = "INVALID_CREDIT"
+INVALID_STACK = "INVALID_STACK"
 # The original service's refusal of a credit whose id it credited already, which a game tells
 # apart from other refusals by its cause.
 INTERNAL_ERROR = "INTERNAL_ERROR"
@@ -173,17 +174,7 @@ class Magma:
                 no such persona, the game's servers may not credit the currency, the amount or
                 id does not fit, or the credit with that id was credited already.
         """
-        server = await self.server(relay_token, game)
-        persona = await self._personas.find_by_id(persona_id)
-        if (
-            persona is None
-            or persona.namespace != game.namespace
-            or not await self._trust.keeps_persona(server, persona.id)
-        ):
-            logger.info(
-                "A dedicated server credited persona %d, which it keeps no data of", persona_id
-            )
-            raise MagmaError(VALIDATION_FAILED, USER_DOES_NOT_MATCH)
+        persona = await self._kept_by_server(relay_token, game, persona_id)
         currency = game.currencies.get(code)
         if (
             currency is None
@@ -194,6 +185,57 @@ class Magma:
             raise MagmaError(VALIDATION_FAILED, INVALID_CREDIT)
         if await self._wallets.credit_from_server(game, persona, code, amount, transaction) is None:
             raise MagmaError(INTERNAL_ERROR, DUPLICATE_TRANSACTION_UUID)
+
+    async def stack_chests(
+        self,
+        relay_token: str | None,
+        game: Game,
+        account_id: int,
+        persona_id: int,
+        tag: str,
+        count: int,
+    ) -> None:
+        """Stack the treasure chests that a dedicated server says a player's persona picked up.
+
+        Args:
+            relay_token: The token the hook added to the request; none when it added none.
+            game: The game whose Magma host was asked.
+            account_id: The persona's account.
+            persona_id: The persona.
+            tag: The tag of the persona's stack.
+            count: How many it picked up; more than the game's servers stack at once are cut
+                to that.
+
+        Raises:
+            MagmaError: When the token names no dedicated server of the game, the server keeps
+                no such persona of the account, or the game's servers may not stack the tag or
+                the count is below one.
+        """
+        persona = await self._kept_by_server(relay_token, game, persona_id)
+        if persona.account_id != account_id:
+            raise MagmaError(VALIDATION_FAILED, USER_DOES_NOT_MATCH)
+        rules = game.chests
+        if rules is None or tag != rules.tag or count < 1:
+            raise MagmaError(VALIDATION_FAILED, INVALID_STACK)
+        await self._entitlements.stack_uses(
+            account_id, persona.id, rules.tag, min(count, rules.most)
+        )
+
+    async def _kept_by_server(
+        self, relay_token: str | None, game: Game, persona_id: int
+    ) -> Persona:
+        server = await self.server(relay_token, game)
+        persona = await self._personas.find_by_id(persona_id)
+        if (
+            persona is None
+            or persona.namespace != game.namespace
+            or not await self._trust.keeps_persona(server, persona.id)
+        ):
+            logger.info(
+                "A dedicated server named persona %d, which it keeps no data of", persona_id
+            )
+            raise MagmaError(VALIDATION_FAILED, USER_DOES_NOT_MATCH)
+        return persona
 
     async def entitlements(
         self, session_id: str | None, game: Game, persona_id: int, tag: str = ""

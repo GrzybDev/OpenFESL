@@ -72,6 +72,8 @@ allowance = 2500
 # definition of the key, item 7353, so it is sold on the site alone.
 [chests]
 tag = "BFH_TREASURE_CHEST"
+# The request carries no id that would tell a repeat, so each stacks at most this many.
+most = 5
 key = 7353
 key_price = 499
 currency = "_PF"

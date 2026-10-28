@@ -112,7 +112,16 @@ async def test_a_dedicated_server_looks_up_its_players_hero_names_by_its_relay_t
     assert token not in logged and ann.relay_token not in logged
 
 
-async def test_a_dedicated_server_credits_a_rounds_valor_once_within_its_cap(
+async def chests(database_url: str) -> object:
+    """Return the heroes' stacks of treasure chests, as hero:chests, in the order they began."""
+    return await select_value(
+        database_url,
+        "SELECT string_agg(persona_id || ':' || use_count, ' ' ORDER BY id) FROM entitlement"
+        " WHERE tag = 'BFH_TREASURE_CHEST'",
+    )
+
+
+async def test_a_dedicated_server_credits_a_rounds_valor_once_and_stacks_its_chests_within_caps(
     server_url: str, database_url: str, capsys: pytest.CaptureFixture[str]
 ) -> None:
     await make_heroes(server_url, (PLAYER, "Bramble"), (HOST, "Keeper"))
@@ -120,7 +129,7 @@ async def test_a_dedicated_server_credits_a_rounds_valor_once_within_its_cap(
     briar = await create_hero(server_url.replace("ws://", "http://").rstrip("/"), PLAYER, "Briar")
     async with game(server_url) as ann, game(server_url) as server:
         cookie, account, hero = await start(server_url, ann, PLAYER)
-        created, _ = await host(server_url, server)
+        created, host_account = await host(server_url, server)
         await approve(capsys, server, ann, created)
         token = server.relay_token
 
@@ -142,6 +151,29 @@ async def test_a_dedicated_server_credits_a_rounds_valor_once_within_its_cap(
             await send("_DV", 2**31, str(uuid.uuid4())),
             await send("_DV", 5, "x" * 65),
             await send("_DV", 5, str(uuid.uuid4()), persona=briar),
+        ]
+
+        async def stack(
+            count: int,
+            persona: int = hero,
+            owner: int = account,
+            tag: str = "BFH_TREASURE_CHEST",
+            relay: str | None = token,
+        ) -> bytes:
+            path = f"/nucleus/stackEntitlementUseCount/{owner}/{persona}/{tag}/{count}"
+            return await ask(server_url, path, relay, post=True)
+
+        # Two stacks at once, which both find the hero without chests, add up.
+        stacked = await asyncio.gather(stack(2), stack(3))
+        first_chests = await chests(database_url)
+        beyond_most = await stack(9)
+        not_stacked = [
+            await stack(2, relay=None),
+            await stack(2, relay=ann.relay_token),
+            await stack(2, persona=briar),
+            await stack(2, owner=host_account),
+            await stack(2, tag="2005-lmct"),
+            await stack(0),
         ]
         balances = await wallets(server_url, cookie, hero)
 
@@ -171,3 +203,12 @@ async def test_a_dedicated_server_credits_a_rounds_valor_once_within_its_cap(
     assert ledger == "_DV:server:250 _DV:server:100 _DV:server:650 _DH:server:0"
     assert topped == [2**31 - 1, 2**31 - 1]
     assert topped_up["_PF"] == 2**31 - 1
+    assert [*stacked, beyond_most] == [b"<success />"] * 3
+    assert first_chests == f"{hero}:5"
+    assert [cause(body) for body in not_stacked] == [
+        "NO_SESSION",
+        "NOT_A_SERVER",
+        *["USER_DOES_NOT_MATCH"] * 2,
+        *["INVALID_STACK"] * 2,
+    ]
+    assert await chests(database_url) == f"{hero}:10"

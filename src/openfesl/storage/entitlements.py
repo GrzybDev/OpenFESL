@@ -226,6 +226,29 @@ class SqlEntitlementStore:
                 )
             )
 
+    async def stack_uses(self, account_id: int, persona_id: int, tag: str, uses: int) -> None:
+        """Add uses to a persona's row of a tag that names no item, creating the row if missing.
+
+        The row is added or changed in one statement, so stacks at once add up.
+
+        Args:
+            account_id: The persona's account.
+            persona_id: The persona.
+            tag: The tag, such as that of the persona's stack of treasure chests.
+            uses: How many uses to add.
+        """
+        statement = insert(EntitlementRow).values(
+            account_id=account_id, persona_id=persona_id, tag=tag, use_count=uses
+        )
+        async with self._sessions.begin() as session:
+            await session.execute(
+                statement.on_conflict_do_update(
+                    index_elements=[EntitlementRow.persona_id, _item_number],
+                    index_where=EntitlementRow.persona_id.is_not(None),
+                    set_={"use_count": func.coalesce(EntitlementRow.use_count, 0) + uses},
+                )
+            )
+
     async def take_out(self, entitlement_id: int, status: str) -> None:
         """Take a persona's item out of use, or out of its list, as its game says.
 

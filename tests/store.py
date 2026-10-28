@@ -212,13 +212,15 @@ async def without_rotation(database_url: str) -> None:
 
 
 @asynccontextmanager
-async def kept_by_server(server_url: str) -> AsyncIterator[tuple[dict[str, str], int]]:
+async def kept_by_server(
+    server_url: str,
+) -> AsyncIterator[tuple[dict[str, str], int, str | None]]:
     """Have a dedicated server keep the data of Ann's Royal soldier while it plays in its game.
 
     Hosting must be open, so that the server's game is listed at once.
 
     Yields:
-        The server's magma cookie and Ann's hero.
+        The server's magma cookie, Ann's hero and the server's relay token.
     """
     for account in ("ann@example.test", "host@example.test"):
         async with game(server_url) as registering:
@@ -229,4 +231,4 @@ async def kept_by_server(server_url: str) -> AsyncIterator[tuple[dict[str, str],
         cookie, _, _ = await start(server_url, server, "host@example.test", role="host")
         created = await server.theater(THEATER, "CGAM", SERVER_GAME)
         await let_in(server, ann, created.fields)
-        yield cookie, hero
+        yield cookie, hero, server.relay_token

@@ -8,8 +8,9 @@ import pytest
 from accounts import execute, select_value
 from heroes import MAGMA, wallets
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from store import ROYAL_SOLDIER, shopper, stock
+from store import ROYAL_SOLDIER, kept_by_server, shopper, stock
 from support import fetch
+from test_server_calls import ask
 
 from openfesl.core.catalogues import Catalogues
 from openfesl.core.chests import ChestRefusal, ChestRefused, Chests
@@ -105,22 +106,28 @@ async def opened(services: Services, persona: Persona) -> Product | ChestRefusal
         return refused.refusal
 
 
-@pytest.mark.usefixtures("prompt_actions", "base")
+@pytest.mark.usefixtures("prompt_actions", "open_hosting")
 async def test_a_key_bought_with_funds_opens_a_stacked_chest_into_an_item_that_fits_the_hero(
     services: Services, server_url: str, database_url: str
 ) -> None:
-    cookie, number = await shopper(server_url, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
-    hero = await hero_of(services, number)
-    await chests(database_url, number, 2)
-    key = await select_value(database_url, "SELECT id FROM store_product WHERE account")
+    async with kept_by_server(server_url) as (cookie, number, token):
+        hero = await hero_of(services, number)
+        # The round's end, at which the server stacks the chests the hero picked up.
+        path = f"/nucleus/stackEntitlementUseCount/{hero.account_id}/{number}/BFH_TREASURE_CHEST/2"
+        stacked = await ask(server_url, path, token, post=True)
+        key = await select_value(database_url, "SELECT id FROM store_product WHERE account")
 
-    # The site sells the key, which the game would not know, to the account.
-    await services.purchases.purchase_for_account(services.game, hero.account_id, f"OFB-DBFH:{key}")
-    won = await opened(services, hero)
-    without_key = await opened(services, hero)
+        # The site sells the key, which the game would not know, to the account.
+        await services.purchases.purchase_for_account(
+            services.game, hero.account_id, f"OFB-DBFH:{key}"
+        )
+        won = await opened(services, hero)
+        without_key = await opened(services, hero)
+        _, _, body = await fetch(server_url, f"/nucleus/entitlements/{number}", MAGMA, cookie)
+        balances = await wallets(server_url, cookie, number)
 
+    assert stacked == b"<success />"
     assert isinstance(won, Product)
-    _, _, body = await fetch(server_url, f"/nucleus/entitlements/{number}", MAGMA, cookie)
     assert won.ownership.tag(won.item_id).encode() in body
     # Of the chest's drops in the invented catalogue, those of the Royal soldier.
     assert won.item_id in {2153, 2005, 3015, 521}
@@ -129,7 +136,7 @@ async def test_a_key_bought_with_funds_opens_a_stacked_chest_into_an_item_that_f
         await held(database_url, "7353-lmct"),
         await held(database_url, "BFH_TREASURE_CHEST", number),
     ) == (0, 1)
-    assert (await wallets(server_url, cookie, number))["_PF"] == 2500 - 499
+    assert balances["_PF"] == 2500 - 499
     # Nothing in the game's own lists sells the key.
     _, _, offered = await fetch(server_url, "/ofb/products", MAGMA)
     assert b"7353-" not in offered

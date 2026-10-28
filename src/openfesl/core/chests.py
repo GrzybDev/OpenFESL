@@ -19,6 +19,7 @@ class ChestRules(BaseModel):
 
     Attributes:
         tag: The tag of a hero's stack of the chests it picked up.
+        most: The most chests a server stacks on a hero at once.
         key: The item number of the key that opens one chest, which the account holds.
         key_price: What a key costs.
         currency: The currency keys are bought with, which the account holds.
@@ -28,6 +29,7 @@ class ChestRules(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     tag: str
+    most: PositiveInt
     key: PositiveInt
     key_price: PositiveInt
     currency: str

@@ -141,7 +141,7 @@ async def test_a_server_cannot_buy_for_the_player_whose_data_it_keeps(
     server_url: str, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     await stock(server_url, tmp_path, capsys)
-    async with kept_by_server(server_url) as (cookie, hero):
+    async with kept_by_server(server_url) as (cookie, hero, _):
         _, _, kept = await fetch(server_url, f"/nucleus/entitlements/{hero}", MAGMA, cookie)
         bought = await buy(server_url, cookie, hero, PET)
 

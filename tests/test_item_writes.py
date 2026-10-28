@@ -47,7 +47,7 @@ async def entitlement(database_url: str, tag: str, persona: int | None = None) -
 async def test_a_dedicated_server_takes_the_uses_its_player_used_and_never_adds_any(
     server_url: str, database_url: str
 ) -> None:
-    async with kept_by_server(server_url) as (cookie, hero):
+    async with kept_by_server(server_url) as (cookie, hero, _):
         # The bandages every hero starts with.
         bandages = await entitlement(database_url, "2005-lmct", hero)
 

@@ -133,6 +133,16 @@ class EntitlementStore(Protocol):
             uses: How many uses were used.
         """
 
+    async def stack_uses(self, account_id: int, persona_id: int, tag: str, uses: int) -> None:
+        """Add uses to a persona's row of a tag that names no item, creating the row if missing.
+
+        Args:
+            account_id: The persona's account.
+            persona_id: The persona.
+            tag: The tag, such as that of the persona's stack of treasure chests.
+            uses: How many uses to add.
+        """
+
     async def take_out(self, entitlement_id: int, status: str) -> None:
         """Take a persona's item out of use, or out of its list, as its game says.
 

@@ -7,6 +7,7 @@ from openfesl.core.games import Game
 from openfesl.core.magma import Magma
 from openfesl.protocol.magma import name, success
 from openfesl.web.magma import XML, UserId
+from openfesl.web.magma_heroes import PersonaId
 
 # The token of the relay session whose game process sent a request, which the hook adds while
 # the process's WebSocket is open.
@@ -39,6 +40,17 @@ def servers_router(game: Game, magma: Magma) -> APIRouter:
         relay_token: RelayToken = None,
     ) -> Response:
         await magma.credit(relay_token, game, persona_id, currency, amount, transaction)
+        return Response(success(), media_type=XML)
+
+    @router.post("/nucleus/stackEntitlementUseCount/{userId}/{personaId}/{tag}/{count}")
+    async def stack_chests(
+        account_id: AccountId,
+        persona_id: PersonaId,
+        tag: str,
+        count: int,
+        relay_token: RelayToken = None,
+    ) -> Response:
+        await magma.stack_chests(relay_token, game, account_id, persona_id, tag, count)
         return Response(success(), media_type=XML)
 
     return router
