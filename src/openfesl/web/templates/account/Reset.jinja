@@ -1,0 +1,35 @@
+{#def address: str, error: str, notice: str, check: str, services: bool, password_games: list, personas: list #}
+{# The request for a link that sets a new game password: the same answer follows for every
+   address, and beside it what a new game password changes. #}
+<AccountPage :title="_('web.account.password')"
+             :subtitle="_('web.account.reset.subtitle')"
+             :turnstile="check != ''">
+  <div class="account-page-main">
+    <Panel tag="form"
+           method="post"
+           :action="url('/password-reset')"
+           aria-labelledby="reset-request"
+           class="enter-panel account-page-panel">
+      <CsrfField />
+      {% if notice == "check" %}
+        <Alert :label="_('web.account.notice.not_sent')" :title="_('web.account.notice.check')" glyph="warn" alert />
+      {% elif notice == "form" %}
+        <Alert :label="_('web.account.notice.not_sent')" :title="_('web.account.notice.form')" glyph="warn" alert>{{ _("web.account.notice.form.text") }}</Alert>
+      {% endif %}
+      <div class="account-page-form">
+        <Bar id="reset-request" large>{{ _("web.account.reset.request") }}</Bar>
+        <p class="bar-text body-text">{{ _("web.account.reset.request.text") }}</p>
+        <TextField id="reset-email" name="email" type="email" autocomplete="username" :maxlength="63" :label="_('web.account.address')" :value="address" :note="_('web.account.reset.email', games=listed(password_games))" :error="error" />
+        {% if check %}<TurnstileCheck :key="check" />{% endif %}
+        <ActionButton :label="_('web.account.reset.send')" :busy="_('web.account.notice.sending')" />
+      </div>
+    </Panel>
+    {% if services %}<p class="body-text side-note">{{ _("web.account.reset.services") }}</p>{% endif %}
+    <div class="account-page-after">
+      <SmallAction :href="url('/sign-in')" :label="_('web.account.reset.back')" />
+    </div>
+  </div>
+  <div class="account-page-side">
+    <ResetChanges :personas="personas" />
+  </div>
+</AccountPage>

@@ -1,4 +1,4 @@
-from collections.abc import Collection
+from collections.abc import Collection, Sequence
 from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import Select, delete, exists, func, select, update
@@ -16,9 +16,16 @@ from openfesl.core.accounts import (
 from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin
 from openfesl.core.identities import Identity
+from openfesl.core.password_resets import KeptReset
 from openfesl.core.verification import Confirmation, Link
 from openfesl.storage.admin import action_row
-from openfesl.storage.models import AccountRow, LoginTokenRow, PersonaRow, SignInIdentityRow
+from openfesl.storage.models import (
+    AccountRow,
+    LoginTokenRow,
+    PasswordResetRow,
+    PersonaRow,
+    SignInIdentityRow,
+)
 
 REMEMBERED_LOGINS = 8
 REMEMBERED_FOR = timedelta(days=180)
@@ -358,14 +365,85 @@ class SqlAccountStore:
             password_hash: The new password's hash.
         """
         async with self._sessions.begin() as session:
+            await _set_password(session, account_id, password_hash)
+
+    async def keep_reset(self, account_id: int, link: Link) -> None:
+        """Keep a reset link, which replaces the account's earlier one.
+
+        Args:
+            account_id: The account whose game password it sets.
+            link: The link as the store keeps it.
+        """
+        async with self._sessions.begin() as session:
             await session.execute(
-                update(AccountRow)
-                .where(AccountRow.id == account_id)
-                .values(password_hash=password_hash, session_epoch=AccountRow.session_epoch + 1)
+                delete(PasswordResetRow).where(PasswordResetRow.account_id == account_id)
             )
-            await session.execute(
-                delete(LoginTokenRow).where(LoginTokenRow.account_id == account_id)
+            session.add(
+                PasswordResetRow(
+                    token_hash=link.token_hash, account_id=account_id, expires_at=link.expires_at
+                )
             )
+
+    async def reset_of(self, token_hash: bytes) -> KeptReset | None:
+        """Return the reset link that a token names, without using it; None for an unknown one.
+
+        Args:
+            token_hash: The SHA-256 digest of the token the link carries.
+        """
+        async with self._sessions() as session:
+            row = await session.get(PasswordResetRow, token_hash)
+        return KeptReset(row.account_id, row.expires_at <= datetime.now(UTC)) if row else None
+
+    async def use_reset(self, token_hash: bytes, password_hash: str) -> int | None:
+        """Use a working reset link: set its account's game password and confirm its address.
+
+        The account's web sessions and remembered logins end, as with any new password. An
+        address that waited for its link loses the identities at sign-in services linked
+        meanwhile, which its mailbox never proved.
+
+        Args:
+            token_hash: The SHA-256 digest of the token the link carries.
+            password_hash: The new game password's hash.
+
+        Returns:
+            How many identities it unlinked; None when the link did not work, once used or
+            expired.
+        """
+        async with self._sessions.begin() as session:
+            account_id = await session.scalar(
+                delete(PasswordResetRow)
+                .where(
+                    PasswordResetRow.token_hash == token_hash,
+                    PasswordResetRow.expires_at > datetime.now(UTC),
+                )
+                .returning(PasswordResetRow.account_id)
+            )
+            if account_id is None:
+                return None
+            waited = await session.scalar(
+                select(AccountRow.verification_hash.is_not(None)).where(AccountRow.id == account_id)
+            )
+            unlinked: Sequence[str] = ()
+            if waited:
+                # Whoever linked them never proved the mailbox, as a registration with someone
+                # else's address and one's own service would not have.
+                unlinked = (
+                    await session.scalars(
+                        delete(SignInIdentityRow)
+                        .where(SignInIdentityRow.account_id == account_id)
+                        .returning(SignInIdentityRow.service)
+                    )
+                ).all()
+            # The link went to the address, so opening it confirms the address as its own
+            # link would.
+            await _set_password(
+                session,
+                account_id,
+                password_hash,
+                verification_hash=None,
+                verification_expires_at=None,
+            )
+        return len(unlinked)
 
     async def change_country(self, account_id: int, country: str) -> None:
         """Replace the country an account chose.
@@ -491,6 +569,17 @@ class SqlAccountStore:
                 .values(verification_hash=None, verification_expires_at=None)
             )
             session.add(action_row(AdminAction.ACCOUNT_VERIFIED, str(account_id), {}, admin))
+
+
+async def _set_password(
+    session: AsyncSession, account_id: int, password_hash: str, **values: object
+) -> None:
+    await session.execute(
+        update(AccountRow)
+        .where(AccountRow.id == account_id)
+        .values(password_hash=password_hash, session_epoch=AccountRow.session_epoch + 1, **values)
+    )
+    await session.execute(delete(LoginTokenRow).where(LoginTokenRow.account_id == account_id))
 
 
 def _is_hex(text: str) -> bool:

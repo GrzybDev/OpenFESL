@@ -84,6 +84,17 @@ class SignInProofRow(Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
+class PasswordResetRow(Base):
+    __tablename__ = "password_reset"
+
+    token_hash: Mapped[bytes] = mapped_column(LargeBinary, primary_key=True)
+    # One link per account: a new one replaces the last.
+    account_id: Mapped[int] = mapped_column(
+        ForeignKey("account.id", ondelete="CASCADE"), unique=True
+    )
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
 class PersonaRow(Base):
     __tablename__ = "persona"
 

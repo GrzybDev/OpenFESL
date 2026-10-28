@@ -7,6 +7,7 @@ from openfesl.server.stores import Stores
 from openfesl.web.account.display_name import DisplayNamePages
 from openfesl.web.account.proof import ProofPages
 from openfesl.web.account.register import RegisterPages
+from openfesl.web.account.reset import ResetPages
 from openfesl.web.account.services import SignInServices
 from openfesl.web.account.sign_in import SignInPages
 from openfesl.web.activity import activity_routes
@@ -31,7 +32,7 @@ def include_public_routes(
     services: GameServices,
     stores: Stores,
 ) -> None:
-    """Add the public pages, the launcher's sign-in and the site's sign-in and registration.
+    """Add the public pages, the launcher's sign-in and the site's accounts.
 
     Args:
         app: The application, whose state holds the services that the lifespan starts.
@@ -116,3 +117,12 @@ def include_public_routes(
         sign_in_services,
     )
     app.include_router(display_name.routes())
+    resets = ResetPages(
+        pages,
+        games,
+        lambda: app.state.resets,
+        settings.sends_mail,
+        turnstile,
+        bool(settings.sign_in_services),
+    )
+    app.include_router(resets.routes())

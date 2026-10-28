@@ -28,6 +28,8 @@ async def test_an_account_made_in_a_game_signs_in_with_its_address_and_game_pass
         # Without a mail server and with the site's confirmation on, nobody can register.
         assert "Registration needs the server&#39;s mail, which is not set up." in shown
         assert "Forgotten game password" not in shown
+        reset = await client.get(f"{base}/password-reset")
+        assert "A game password reset needs the server&#39;s mail" in reset.text
         assert "Each game keeps its own: soldiers in Bad Company 2 and heroes in" in shown
 
         # An unknown address and a wrong password get one answer, so neither reveals an account.

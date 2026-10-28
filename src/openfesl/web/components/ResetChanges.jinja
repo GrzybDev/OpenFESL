@@ -1,0 +1,10 @@
+{#def personas: list #}
+{# What a new game password changes, beside both pages of the reset. #}
+<section aria-labelledby="reset-changes">
+  <Bar id="reset-changes">{{ _("web.account.reset.changes") }}</Bar>
+  <ul class="info-rows">
+    <InfoRow glyph="key" :label="_('web.account.reset.changes.games')">{{ _("web.account.reset.changes.games.text") }}</InfoRow>
+    <InfoRow glyph="clock" :label="_('web.account.reset.changes.sign_in')">{{ _("web.account.reset.changes.sign_in.text") }}</InfoRow>
+    <InfoRow glyph="people" :label="_('web.account.reset.changes.rest')">{{ _("web.account.reset.changes.rest.text", personas=listed(personas)) }}</InfoRow>
+  </ul>
+</section>

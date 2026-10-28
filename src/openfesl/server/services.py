@@ -28,6 +28,7 @@ from openfesl.core.logins import Logins
 from openfesl.core.magma import Magma
 from openfesl.core.mail import Outbox
 from openfesl.core.messages import MessageService
+from openfesl.core.password_resets import PasswordResets
 from openfesl.core.personas import PersonaService
 from openfesl.core.playnow import PlayNow
 from openfesl.core.policies import GamePolicies
@@ -98,7 +99,8 @@ class GameServices:
 
         Args:
             app: The application, whose state hands the pages the launcher sign-in, the site's
-                sign-in with its e-mailed proofs, its registration and the display names.
+                sign-in with its e-mailed proofs, its registration, the display names and the
+                game password resets.
         """
         settings, games, stores = self._settings, self._games, self._stores
         routes, commands = self._routes, self._commands
@@ -124,6 +126,7 @@ class GameServices:
         await personas.prepare(await accounts.prepare(games))
         app.state.launcher = LauncherService(logins, games, personas, self._launcher_sessions)
         mailings = Mailings()
+        attempts = Attempts()
         sign_in = WebSignIn(
             stores.accounts,
             stores.identities,
@@ -131,12 +134,15 @@ class GameServices:
             policies,
             games,
             verification,
-            Attempts(),
+            attempts,
             mailings,
         )
         app.state.sign_in = sign_in
         app.state.proof_mail = ProofMail(
             stores.identities, stores.accounts, sign_in, outbox, mailings
+        )
+        app.state.resets = PasswordResets(
+            stores.accounts, stores.accounts, logins, outbox, mailings, attempts
         )
         app.state.display_names = DisplayNames(stores.accounts, stores.personas, games)
         app.state.registration = WebRegistration(

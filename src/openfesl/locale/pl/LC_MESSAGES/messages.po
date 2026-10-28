@@ -59,6 +59,18 @@ msgstr ""
 "\n"
 "{reset}\n"
 
+msgid "account.mail.reset.subject"
+msgstr "Ustawienie nowego hasła do gier konta OpenFESL"
+
+#, python-brace-format
+msgid "account.mail.reset.body"
+msgstr ""
+"Dla konta OpenFESL z tym adresem e-mail poproszono o nowe hasło do gier. Ten link pozwala je ustawić:\n"
+"\n"
+"{link}\n"
+"\n"
+"Jest ważny do {expires} i działa jeden raz. Bez niego hasło do gier pozostaje bez zmian.\n"
+
 msgid "web.language.name"
 msgstr "Polski"
 
@@ -5087,3 +5099,120 @@ msgstr "Po zapisaniu otworzy się strona konta."
 
 msgid "web.account.display_name.after.services"
 msgstr "Można na niej łączyć usługi takie jak %(services)s."
+
+msgid "web.account.reset.subtitle"
+msgstr "Nowe hasło przez e-mail"
+
+msgid "web.account.reset.request"
+msgstr "Link do ustawienia nowego hasła"
+
+msgid "web.account.reset.request.text"
+msgstr "Link do ustawienia nowego hasła do gier trafia na adres e-mail konta. Jest ważny przez godzinę i działa jeden raz."
+
+msgid "web.account.reset.email"
+msgstr "Adres, którym konto się loguje, także w grach takich jak %(games)s."
+
+msgid "web.account.reset.send"
+msgstr "Wyślij link"
+
+msgid "web.account.reset.services"
+msgstr "Konto, którego adres nie odbiera już poczty, loguje się przez połączoną usługę; nowe hasło do gier ustawia wtedy na stronie konta."
+
+msgid "web.account.reset.back"
+msgstr "Powrót do logowania"
+
+msgid "web.account.reset.changes"
+msgstr "Co zmienia nowe hasło do gier"
+
+msgid "web.account.reset.changes.games"
+msgstr "Gry"
+
+msgid "web.account.reset.changes.games.text"
+msgstr "Zapamiętane w grach logowania wygasają, więc każdy komputer raz poprosi o nowe hasło."
+
+msgid "web.account.reset.changes.sign_in"
+msgstr "Logowanie"
+
+msgid "web.account.reset.changes.sign_in.text"
+msgstr "Wstrzymanie logowania tym adresem kończy się wraz z nowym hasłem."
+
+msgid "web.account.reset.changes.rest"
+msgstr "Bez zmian"
+
+msgid "web.account.reset.changes.rest.text"
+msgstr "Połączone usługi, nazwa wyświetlana, %(personas)s pozostają bez zmian; usługi połączone, gdy adres czekał jeszcze na potwierdzenie, zostają odłączone."
+
+msgid "web.account.reset.new"
+msgstr "Nowe hasło do gier"
+
+msgid "web.account.reset.account"
+msgstr "Konto"
+
+msgid "web.account.reset.password"
+msgstr "Od 8 do 31 znaków. Zmiana kończy zapamiętane w grach logowania, więc każdy komputer raz poprosi o nowe hasło."
+
+msgid "web.account.reset.save"
+msgstr "Zapisz hasło do gier"
+
+msgid "web.account.reset.busy"
+msgstr "Zapisywanie"
+
+msgid "web.account.reset.not_saved"
+msgstr "Nie zapisano"
+
+msgid "web.account.reset.again"
+msgstr "Poproś o nowy link"
+
+msgid "web.account.reset.requested"
+msgstr "Wysłano prośbę o link"
+
+msgid "web.account.reset.requested.subtitle"
+msgstr "Hasło do gier"
+
+msgid "web.account.reset.requested.text"
+msgstr "Jeśli adresu %(address)s używa jakieś konto, trafia na niego wiadomość z linkiem do ustawienia nowego hasła do gier. Link jest ważny przez godzinę i działa jeden raz."
+
+msgid "web.account.reset.requested.again"
+msgstr "Kolejna prośba dla tego samego adresu w ciągu 10 minut nie wysyła drugiej wiadomości; pierwszy link pozostaje ważny."
+
+msgid "web.account.reset.done"
+msgstr "Hasło do gier zmienione"
+
+msgid "web.account.reset.done.subtitle"
+msgstr "Hasło do gier"
+
+msgid "web.account.reset.done.text"
+msgstr "Logowanie na tej stronie i w grach wymaga teraz nowego hasła do gier. Zapamiętane w grach logowania wygasły, więc każdy komputer raz o nie poprosi."
+
+msgid "web.account.reset.done.unlinked"
+msgstr "Adres czekał do tej pory na potwierdzenie, więc połączone w tym czasie usługi logowania zostały odłączone; strona konta pozwala połączyć je ponownie."
+
+msgid "web.account.reset.expired"
+msgstr "Link wygasł"
+
+msgid "web.account.reset.expired.subtitle"
+msgstr "Hasło do gier"
+
+msgid "web.account.reset.expired.text"
+msgstr "Link do ustawienia nowego hasła jest ważny przez godzinę. Hasło do gier się nie zmieniło; można poprosić o nowy link."
+
+msgid "web.account.reset.unknown"
+msgstr "Nieprawidłowy link"
+
+msgid "web.account.reset.unknown.subtitle"
+msgstr "Hasło do gier"
+
+msgid "web.account.reset.unknown.text"
+msgstr "Link jest nieprawidłowy lub został już użyty."
+
+msgid "web.account.reset.unavailable"
+msgstr "Ustawienie nowego hasła niedostępne"
+
+msgid "web.account.reset.unavailable.subtitle"
+msgstr "Poczta nieskonfigurowana"
+
+msgid "web.account.reset.unavailable.text"
+msgstr "Ustawienie nowego hasła do gier wymaga poczty serwera, która nie jest skonfigurowana."
+
+msgid "web.account.reset.unavailable.services"
+msgstr "Konto z połączoną usługą loguje się przez nią, a nowe hasło do gier ustawia na stronie konta."

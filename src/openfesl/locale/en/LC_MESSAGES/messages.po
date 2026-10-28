@@ -58,6 +58,18 @@ msgstr ""
 "\n"
 "{reset}\n"
 
+msgid "account.mail.reset.subject"
+msgstr "Set a new game password for an OpenFESL account"
+
+#, python-brace-format
+msgid "account.mail.reset.body"
+msgstr ""
+"A new game password was requested for the OpenFESL account with this e-mail address. This link sets it:\n"
+"\n"
+"{link}\n"
+"\n"
+"It is valid until {expires} and works once. Without it, the game password stays as it is.\n"
+
 msgid "web.language.name"
 msgstr "English"
 
@@ -4955,3 +4967,120 @@ msgstr "After saving, the account page opens."
 
 msgid "web.account.display_name.after.services"
 msgstr "It links services such as %(services)s."
+
+msgid "web.account.reset.subtitle"
+msgstr "Reset by e-mail"
+
+msgid "web.account.reset.request"
+msgstr "Send a reset link"
+
+msgid "web.account.reset.request.text"
+msgstr "A link to set a new game password goes to the account's e-mail address. It is valid for one hour and works once."
+
+msgid "web.account.reset.email"
+msgstr "The address the account signs in with, in games such as %(games)s too."
+
+msgid "web.account.reset.send"
+msgstr "Send the link"
+
+msgid "web.account.reset.services"
+msgstr "An account whose address no longer receives mail signs in through a linked service; its account page then sets a new game password."
+
+msgid "web.account.reset.back"
+msgstr "Back to sign-in"
+
+msgid "web.account.reset.changes"
+msgstr "What a new game password changes"
+
+msgid "web.account.reset.changes.games"
+msgstr "Games"
+
+msgid "web.account.reset.changes.games.text"
+msgstr "The logins the game remembers end, so each PC asks for the new password once."
+
+msgid "web.account.reset.changes.sign_in"
+msgstr "Sign-in"
+
+msgid "web.account.reset.changes.sign_in.text"
+msgstr "A pause on sign-in for the address ends with the new password."
+
+msgid "web.account.reset.changes.rest"
+msgstr "Unchanged"
+
+msgid "web.account.reset.changes.rest.text"
+msgstr "Linked services, the display name, %(personas)s stay as they are; services linked while the address still waited for its link are unlinked."
+
+msgid "web.account.reset.new"
+msgstr "New game password"
+
+msgid "web.account.reset.account"
+msgstr "Account"
+
+msgid "web.account.reset.password"
+msgstr "8 to 31 characters. A change ends the logins the game remembers, so each PC asks for the new password once."
+
+msgid "web.account.reset.save"
+msgstr "Save game password"
+
+msgid "web.account.reset.busy"
+msgstr "Saving"
+
+msgid "web.account.reset.not_saved"
+msgstr "Not saved"
+
+msgid "web.account.reset.again"
+msgstr "Request a new link"
+
+msgid "web.account.reset.requested"
+msgstr "Link requested"
+
+msgid "web.account.reset.requested.subtitle"
+msgstr "Game password"
+
+msgid "web.account.reset.requested.text"
+msgstr "If an account uses %(address)s, a mail with a link to set a new game password is on its way there. The link is valid for one hour and works once."
+
+msgid "web.account.reset.requested.again"
+msgstr "A new request for the same address within 10 minutes sends no second mail; the first link stays valid."
+
+msgid "web.account.reset.done"
+msgstr "Game password changed"
+
+msgid "web.account.reset.done.subtitle"
+msgstr "Game password"
+
+msgid "web.account.reset.done.text"
+msgstr "Sign-in here and game logins now take the new game password. The logins the game remembered have ended, so each PC asks for it once."
+
+msgid "web.account.reset.done.unlinked"
+msgstr "The address was waiting for its link until now, so the sign-in services linked meanwhile were unlinked; they can be linked again on the account page."
+
+msgid "web.account.reset.expired"
+msgstr "Link expired"
+
+msgid "web.account.reset.expired.subtitle"
+msgstr "Game password"
+
+msgid "web.account.reset.expired.text"
+msgstr "A reset link is valid for one hour. The game password is unchanged; a new link can be requested."
+
+msgid "web.account.reset.unknown"
+msgstr "Link not valid"
+
+msgid "web.account.reset.unknown.subtitle"
+msgstr "Game password"
+
+msgid "web.account.reset.unknown.text"
+msgstr "The link is not valid or has been used already."
+
+msgid "web.account.reset.unavailable"
+msgstr "Reset not available"
+
+msgid "web.account.reset.unavailable.subtitle"
+msgstr "Mail not set up"
+
+msgid "web.account.reset.unavailable.text"
+msgstr "A game password reset needs the server's mail, which is not set up."
+
+msgid "web.account.reset.unavailable.services"
+msgstr "An account with a linked service signs in through it, and its account page sets a new game password."
