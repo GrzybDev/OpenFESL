@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from openfesl.storage.accounts import SqlAccountStore
 from openfesl.storage.admin import SqlAdminLog
 from openfesl.storage.associations import SqlAssociationStore
+from openfesl.storage.catalogues import SqlCatalogueStore
 from openfesl.storage.entitlements import SqlEntitlementStore
 from openfesl.storage.game_icons import SqlGameIconStore
 from openfesl.storage.history import SqlHistoryStore
@@ -29,6 +30,7 @@ class Stores:
         self.accounts = SqlAccountStore(sessions)
         self.admin_log = SqlAdminLog(sessions)
         self.associations = SqlAssociationStore(sessions)
+        self.catalogues = SqlCatalogueStore(sessions)
         self.entitlements = SqlEntitlementStore(sessions)
         self.game_icons = SqlGameIconStore(sessions)
         self.history = SqlHistoryStore(sessions)

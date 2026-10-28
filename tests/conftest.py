@@ -18,6 +18,7 @@ from support import FESL, PUBLIC_URL, Mailbox, game
 from testcontainers.community.postgres import PostgresContainer
 
 from openfesl.core import admin, history, trust
+from openfesl.core.games import Game, load_games
 from openfesl.server.cli import RelayServer, main, uvicorn_config
 from openfesl.storage.database import migrate
 from openfesl.storage.history import SqlHistoryStore
@@ -55,7 +56,7 @@ async def relay_server(
         # The keys too, so that the next server starts with the game data's keys, unlimited.
         tables = (
             "account, stat, game_server, provider, setting, admin_action, product_key, "
-            "activity_hour, activity_day, game_icon"
+            "activity_hour, activity_day, game_icon, catalogue"
         )
         await connection.execute(text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE"))
     await engine.dispose()
@@ -115,6 +116,13 @@ async def history_store(database_url: str) -> AsyncIterator[SqlHistoryStore]:
     async with engine.begin() as connection:
         await connection.execute(text("TRUNCATE activity_hour, activity_day"))
     await engine.dispose()
+
+
+@pytest.fixture(scope="session")
+def bfheroes() -> Game:
+    game = load_games().by_id("bfheroes")
+    assert game is not None
+    return game
 
 
 @pytest.fixture

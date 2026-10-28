@@ -4,6 +4,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
+from inspect import isawaitable
 from typing import Any, Protocol
 
 from openfesl.core.admins import Role
@@ -63,6 +64,9 @@ class AdminAction(StrEnum):
     GAME_ICON = "game_icon"
     """Stored or removed the icon of the game whose id is the target; the details say whether
     the game has one now."""
+    CATALOGUE_IMPORT = "catalogue_import"
+    """Replaced the catalogue of the game named as the target with one from a player's copy; the
+    details hold how many items it has, in how many languages and how many icons were kept."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -178,7 +182,7 @@ class AdminFeed:
 
         Args:
             action: The kind.
-            handler: Called with the action.
+            handler: Called with the action; what it returns is awaited when it can be.
         """
         self._handlers.setdefault(action, []).append(handler)
 
@@ -193,7 +197,8 @@ class AdminFeed:
                 self._after = action.id
                 for handler in self._handlers.get(action.action, []):
                     try:
-                        handler(action)
+                        if isawaitable(applied := handler(action)):
+                            await applied
                     except Exception:
                         logger.exception("Could not apply the admin's action %d", action.id)
 

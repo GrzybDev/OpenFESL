@@ -357,6 +357,29 @@ class GameServerRow(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class CatalogueRow(Base):
+    __tablename__ = "catalogue"
+
+    partition: Mapped[str] = mapped_column(primary_key=True)
+    document: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    # The import the document comes from, whose folder holds its icons.
+    revision: Mapped[str]
+    icons: Mapped[int]
+    imported_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+
+class CatalogueTextRow(Base):
+    __tablename__ = "catalogue_text"
+
+    partition: Mapped[str] = mapped_column(
+        ForeignKey("catalogue.partition", ondelete="CASCADE"), primary_key=True
+    )
+    language: Mapped[str] = mapped_column(primary_key=True)
+    texts: Mapped[dict[str, str]] = mapped_column(JSONB)
+
+
 class ActivityHourRow(Base):
     __tablename__ = "activity_hour"
 

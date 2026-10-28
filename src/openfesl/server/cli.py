@@ -164,6 +164,9 @@ def main(argv: Sequence[str] | None = None) -> None:
         type=Path,
         help="the file to write, <game>-catalogue.zip here by default; an existing one is replaced",
     )
+    catalogue_actions.add_parser(
+        "import", help="replace a game's catalogue on the server with the one a file holds"
+    ).add_argument("file", type=Path, help="the file that catalogue extract wrote")
     args = parser.parse_args(argv)
 
     if args.command == "catalogue" and args.action == "extract":

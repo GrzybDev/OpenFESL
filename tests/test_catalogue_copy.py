@@ -1,34 +1,45 @@
+from datetime import date
 from pathlib import Path
 from zipfile import ZipFile
 
 import pytest
 from game_files import COPY, NEEDS_COPY
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from openfesl.core.catalogue import CatalogueFile
-from openfesl.core.games import load_games
+from openfesl.core.catalogues import Catalogues
+from openfesl.core.games import Game, load_games
 from openfesl.extraction import extract, find_game
 from openfesl.formats.definitions import read_definitions
+from openfesl.storage.catalogues import IconFolder, SqlCatalogueStore
+from openfesl.storage.database import migrate
 
 pytestmark = NEEDS_COPY
 
 
 @pytest.fixture(scope="module")
-def catalogue(tmp_path_factory: pytest.TempPathFactory) -> CatalogueFile:
+def written(tmp_path_factory: pytest.TempPathFactory) -> Path:
     assert COPY
     folder = Path(COPY)
-    extracted = extract(find_game(load_games(), folder), folder)
-    written = tmp_path_factory.mktemp("catalogue") / "bfheroes-catalogue.zip"
-    written.write_bytes(extracted.write())
+    file = tmp_path_factory.mktemp("catalogue") / "bfheroes-catalogue.zip"
+    file.write_bytes(extract(find_game(load_games(), folder), folder).write())
+    return file
+
+
+@pytest.fixture(scope="module")
+def catalogue(written: Path) -> CatalogueFile:
     return CatalogueFile.read(written.read_bytes())
 
 
-def test_the_copy_gives_every_kind_of_item_with_names_and_icons(catalogue: CatalogueFile) -> None:
+def test_the_copy_gives_every_kind_of_item_with_names_and_icons(
+    catalogue: CatalogueFile, bfheroes: Game
+) -> None:
     document = catalogue.document
     items = {item.id: item for item in document.items}
-    game = load_games().by_id("bfheroes")
-    assert game and game.catalogue
-    kinds = {item.kind for item in document.items}
-    assert kinds == {item_file.kind for item_file in game.catalogue.items}
+    rules = bfheroes.catalogue
+    assert rules is not None
+    assert {item.kind for item in document.items} == {item_file.kind for item_file in rules.items}
     # A National Soldier's SMG, and the last of the five levels of the bandage, with only the
     # fields that the game's rules read.
     smg = items[3169]
@@ -49,17 +60,52 @@ def test_the_copy_gives_every_kind_of_item_with_names_and_icons(catalogue: Catal
 
 def test_the_copy_gives_the_daily_missions_and_the_xp_of_each_level(
     catalogue: CatalogueFile,
+    bfheroes: Game,
 ) -> None:
     document = catalogue.document
     daily = document.daily_missions
     assert len(daily) == 366
     assert (daily[0], daily[299], daily[365]) == (6127, 6123, 6041)
-    rules = load_games().by_id("bfheroes")
-    assert COPY and rules and rules.catalogue
-    with ZipFile(Path(COPY) / rules.catalogue.definitions) as definitions:
+    rules = bfheroes.catalogue
+    assert COPY and rules
+    with ZipFile(Path(COPY) / rules.definitions) as definitions:
         missions = read_definitions(definitions.read("Missions.xml"), "item")
     categories = {mission.id: mission.fields.get("category") for mission in missions}
     assert {categories[mission] for mission in daily} == {"DailyMission"}
     experience = document.experience
     assert len(experience) == 30
     assert (experience[1], experience[2], experience[29]) == (600, 1_200, 286_400)
+
+
+@pytest.mark.anyio
+async def test_the_server_reads_the_copys_catalogue_as_the_game_does(
+    written: Path, database_url: str, tmp_path: Path, bfheroes: Game
+) -> None:
+    engine = create_async_engine(database_url)
+    await migrate(engine)
+    catalogues = Catalogues(
+        SqlCatalogueStore(async_sessionmaker(engine)), IconFolder(tmp_path), load_games()
+    )
+    try:
+        await catalogues.import_file(written.read_bytes(), admin=None)
+        english = await catalogues.of(bfheroes, "en")
+    finally:
+        async with engine.begin() as connection:
+            await connection.execute(text("TRUNCATE catalogue, admin_action CASCADE"))
+        await engine.dispose()
+
+    smg, head = english.item(3169), english.item(1)
+    assert smg and head
+    assert (smg.kind, smg.slot, smg.factions, smg.classes) == (
+        "weapon",
+        None,
+        frozenset({"national"}),
+        frozenset({"soldier"}),
+    )
+    assert head.slot == "head" and head.factions == {"royal"}
+    assert english.name(3169) and english.name(2004)
+    assert english.daily_mission(date(2026, 1, 1)) == 6127
+    assert english.name(6127)
+    assert english.xp_to_next(1) == 600 and english.xp_to_next(30) is None
+    [kept] = (tmp_path / "catalogues" / "bfheroes").iterdir()
+    assert len(list(kept.iterdir())) == english.contents.icons

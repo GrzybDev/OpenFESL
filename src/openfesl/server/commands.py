@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from openfesl.core.accounts import Account, AccountState
 from openfesl.core.admin import AdminAction
+from openfesl.core.catalogues import Catalogues
 from openfesl.core.game_icons import icon_png
 from openfesl.core.games import Game, Games, load_games
 from openfesl.core.personas import Persona, PersonaState
@@ -24,6 +25,7 @@ from openfesl.extraction import ExtractionError, extract, find_game
 from openfesl.server.settings import Settings
 from openfesl.storage.accounts import SqlAccountStore
 from openfesl.storage.admin import SqlAdminLog
+from openfesl.storage.catalogues import IconFolder, SqlCatalogueStore
 from openfesl.storage.database import migrate
 from openfesl.storage.game_icons import SqlGameIconStore
 from openfesl.storage.keys import SqlKeyStore
@@ -58,6 +60,8 @@ async def run(settings: Settings, args: argparse.Namespace) -> None:
             await _kick(settings, args)
         case "icons":
             await _icons(settings, args)
+        case "catalogue":
+            await _import_catalogue(settings, args.file)
 
 
 def extract_catalogue(folder: Path, out: Path | None) -> None:
@@ -93,6 +97,25 @@ async def _database(settings: Settings) -> AsyncIterator[async_sessionmaker[Asyn
         yield async_sessionmaker(engine)
     finally:
         await engine.dispose()
+
+
+async def _import_catalogue(settings: Settings, file: Path) -> None:
+    try:
+        data = file.read_bytes()
+    except OSError as error:
+        sys.exit(str(error))
+    async with _database(settings) as sessions:
+        icons = IconFolder(settings.files_path) if settings.files_path else None
+        catalogues = Catalogues(SqlCatalogueStore(sessions), icons, load_games())
+        try:
+            imported = await catalogues.import_file(data, admin=None)
+        except ValueError as error:
+            sys.exit(f"{file} holds no catalogue that this server imports: {error}")
+    kept = f"{imported.icons} icons" if icons else "no icons, as FILES_PATH names no folder"
+    print(
+        f"Imported the catalogue of {imported.game.name}: {imported.items} items, "
+        f"texts in {imported.languages} languages and {kept}"
+    )
 
 
 async def _keys(settings: Settings, args: argparse.Namespace) -> None:

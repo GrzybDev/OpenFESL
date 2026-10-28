@@ -11,6 +11,7 @@ from openfesl.core.accounts import AccountService
 from openfesl.core.admin import AdminFeed
 from openfesl.core.associations import AssociationService
 from openfesl.core.browsing import Browsing
+from openfesl.core.catalogues import Catalogues
 from openfesl.core.census import Census
 from openfesl.core.connect import connect_routes
 from openfesl.core.display_names import DisplayNames
@@ -52,6 +53,7 @@ from openfesl.core.web_registration import WebRegistration
 from openfesl.server.mail import SmtpMailer
 from openfesl.server.settings import Settings
 from openfesl.server.stores import Stores
+from openfesl.storage.catalogues import IconFolder
 from openfesl.web.game_icons import presence_art
 
 
@@ -91,6 +93,8 @@ class GameServices:
         self.rich_presence = RichPresence(self.hosting, settings.discord_application_id, art)
         self.history = OnlineHistory(stores.history, self.census, games)
         self.feed = AdminFeed(stores.admin_log)
+        icons = IconFolder(settings.files_path) if settings.files_path else None
+        self.catalogues = Catalogues(stores.catalogues, icons, games)
         self.policies = GamePolicies(stores.settings)
         self.terms = Terms.load()
 
@@ -193,8 +197,10 @@ class GameServices:
         routes.update(PlayNow(hosting).routes())
         players.follow(feed)
         joining.follow(feed)
+        self.catalogues.follow(feed)
         await feed.start()
         await self.rich_presence.follow_icons(stores.game_icons, feed)
+        await self.catalogues.load()
         followers = [
             asyncio.create_task(trust.follow_approvals()),
             asyncio.create_task(feed.follow()),

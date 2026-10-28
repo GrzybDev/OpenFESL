@@ -4075,6 +4075,9 @@ msgstr "Until %(time)s UTC"
 msgid "web.admin.audit.logins"
 msgstr "Remembered logins: %(count)s"
 
+msgid "web.admin.audit.catalogue"
+msgstr "Items: %(items)s · languages: %(languages)s · icons: %(icons)s"
+
 msgid "web.admin.audit.from_key"
 msgstr "%(tags)s · from %(key)s"
 
@@ -4170,6 +4173,9 @@ msgstr "Changed key grants and labels"
 
 msgid "web.admin.audit.action.key_limits"
 msgstr "Changed key limits"
+
+msgid "web.admin.audit.action.catalogue_import"
+msgstr "Imported catalogue"
 
 msgid "web.admin.audit.action.setting"
 msgstr "Changed a rule"

@@ -1,5 +1,6 @@
 from enum import StrEnum
 from ipaddress import ip_address
+from pathlib import Path
 from typing import Annotated
 
 from fastapi.requests import HTTPConnection
@@ -74,6 +75,8 @@ class Settings(BaseSettings):
             list of their settings, such as {"id": "discord", "name": "Discord", "kind":
             "oauth2", ...}; their tiles show in this order. Their pages send the browser back
             to /sign-in/callback.
+        files_path: The folder where the server keeps the files it serves besides its own,
+            such as the icons of the games' imported catalogues; without one it keeps none.
     """
 
     database_url: str
@@ -100,6 +103,7 @@ class Settings(BaseSettings):
     turnstile_site_key: str | None = None
     turnstile_secret_key: SecretStr | None = None
     sign_in_services: list[SignInService] = []
+    files_path: Path | None = None
 
     @field_validator("database_url")
     @classmethod

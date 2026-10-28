@@ -30,6 +30,7 @@ GLYPHS = {
     AdminAction.PROVIDER_REVOKE: "x",
     AdminAction.ENTITLEMENT_GRANT: "plus",
     AdminAction.KEY_ADD: "plus",
+    AdminAction.CATALOGUE_IMPORT: "edit",
 }
 _TAKEN = {"disabled", "banned", "deactivated", "revoked", "DISABLED", "off", "removed"}
 
@@ -326,6 +327,15 @@ async def _rows(
             said = _setting_value(say, games, target, details)
             if target == "hosting_mode":
                 kind = "hosting_mode"
+        elif action is AdminAction.CATALOGUE_IMPORT:
+            game = games.by_id(target)
+            shown = game.name if game else target
+            said = say(
+                "web.admin.audit.catalogue",
+                items=details.get("items", 0),
+                languages=details.get("languages", 0),
+                icons=details.get("icons", 0),
+            )
         rows.append(
             AuditRow(
                 entry,
