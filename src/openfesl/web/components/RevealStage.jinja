@@ -1,0 +1,18 @@
+{#def glyph: str, size: int, recipient: str, item: str, line: str #}
+{# What a box or chest just opened gave a hero: on a dark stage a yellow burst grows and the item
+   rises into it, followed by the item's name and what the hero holds of it. The motion plays
+   while its dialog is modal. #}
+<div aria-hidden="true" class="reveal-stage">
+  <svg focusable="false" class="reveal-texture">
+    <rect width="100%" height="100%" filter="url(#site-dark)" />
+  </svg>
+  <svg focusable="false" viewBox="0 0 200 200" class="reveal-burst">
+    <path d="M100 10L112 70 170 40 130 88 190 100 130 112 170 160 112 130 100 190 88 130 30 160 70 112 10 100 70 88 30 40 88 70z" />
+  </svg>
+  <span class="reveal-item"><Icon :name="glyph" :size="size" stroke="currentColor" /></span>
+</div>
+<div role="status">
+  <p class="reveal-for">{{ recipient }}</p>
+  <p class="reveal-name">{{ item }}</p>
+  <p class="reveal-line">{{ line }}</p>
+</div>

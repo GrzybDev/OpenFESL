@@ -4,6 +4,10 @@
 {% set title = _("web.chests.title") %}
 {% set price = number(key.price) ~ " " ~ _("games." ~ game.id ~ ".currency." ~ key.currency) if key else "" %}
 <Layout :title="title">
+  {% if heroes and toast and toast.key == "web.chests.opened" %}
+    {% set opened = heroes|selectattr("hero.persona.id", "equalto", toast.values.hero_id|int)|list %}
+    {% if opened %}<ChestReveal :held="opened[0]" :keys="keys" />{% endif %}
+  {% endif %}
   <section aria-labelledby="chests-title" class="creator-head">
     <div class="creator-intro">
       <Plaque id="chests-title">{{ title }}</Plaque>
@@ -38,7 +42,7 @@
       <h2 id="chests-heroes" class="chests-heading">{{ _n("web.chests.total", total) }}</h2>
       <ul role="list" class="chest-cards enter-rows">
         {% for held in heroes %}
-          <ChestCard :held="held" />
+          <ChestCard :held="held" :keys="keys" :price="price" />
         {% endfor %}
       </ul>
     </section>

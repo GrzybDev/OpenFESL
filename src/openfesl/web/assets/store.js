@@ -18,7 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
     closes(reveal, document.querySelector("[data-buy-open]"));
     // Open in the page's flow without scripts, it opens over the page with them.
     reveal.close();
-    reveal.classList.add("revealing");
     reveal.showModal();
   }
 });

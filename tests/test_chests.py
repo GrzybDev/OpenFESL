@@ -9,8 +9,9 @@ import httpx2
 import pytest
 from accounts import PASSWORD, execute, post_sign_in, select_value
 from heroes import MAGMA, create_hero, wallets
+from identity import form_token
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from store import ROYAL_SOLDIER, kept_by_server, shopper, stock
+from store import NAMES, ROYAL_SOLDIER, kept_by_server, shopper, stock
 from support import fetch, visible
 from test_server_calls import ask
 
@@ -111,31 +112,51 @@ async def opened(services: Services, persona: Persona) -> Product | ChestRefusal
 
 
 @pytest.mark.usefixtures("prompt_actions", "open_hosting")
-async def test_a_key_bought_with_funds_opens_a_stacked_chest_into_an_item_that_fits_the_hero(
+async def test_a_stacked_chest_opens_on_the_page_into_an_item_the_game_lists(
     services: Services, server_url: str, database_url: str
 ) -> None:
+    base = server_url.replace("ws://", "http://").rstrip("/")
     async with kept_by_server(server_url) as (cookie, number, token):
         hero = await hero_of(services, number)
         # The round's end, at which the server stacks the chests the hero picked up.
         path = f"/nucleus/stackEntitlementUseCount/{hero.account_id}/{number}/BFH_TREASURE_CHEST/2"
         stacked = await ask(server_url, path, token, post=True)
         key = await select_value(database_url, "SELECT id FROM store_product WHERE account")
-
         # The site sells the key, which the game would not know, to the account.
         await services.purchases.purchase_for_account(
             services.game, hero.account_id, f"OFB-DBFH:{key}"
         )
-        won = await opened(services, hero)
-        without_key = await opened(services, hero)
+        others = await select_value(database_url, "SELECT id FROM persona WHERE name = 'host'")
+        async with httpx2.AsyncClient() as site:
+            await post_sign_in(site, base, "ann@example.test", PASSWORD)
+            page = await site.get(f"{base}{PAGE}")
+            opening = f"{base}{PAGE}/{number}/open"
+            # A form from another site opens nothing.
+            await site.post(opening, data={"csrf": "forged"})
+            expired = visible((await site.get(f"{base}{PAGE}")).content)
+            form = {"csrf": form_token(page.text)}
+            await site.post(opening, data=form)
+            revealed = visible((await site.get(f"{base}{PAGE}")).content)
+            await site.post(opening, data=form)
+            without_key = visible((await site.get(f"{base}{PAGE}")).content)
+            not_hers = await site.post(f"{base}{PAGE}/{others}/open", data=form)
         _, _, body = await fetch(server_url, f"/nucleus/entitlements/{number}", MAGMA, cookie)
         balances = await wallets(server_url, cookie, number)
 
     assert stacked == b"<success />"
-    assert isinstance(won, Product)
-    assert won.ownership.tag(won.item_id).encode() in body
+    assert "No chest was opened: the form had expired. No key was used." in expired
     # Of the chest's drops in the invented catalogue, those of the Royal soldier.
-    assert won.item_id in {2153, 2005, 3015, 521}
-    assert without_key is ChestRefusal.NO_KEY
+    [(item, won)] = [
+        (item, NAMES[item])
+        for item in (2153, 2005, 3015, 521)
+        if f"for ann {NAMES[item]} " in revealed
+    ]
+    assert f"{item}-".encode() in body
+    assert f"Chest opened for ann: {won}, " in revealed
+    assert f"1 key used; no keys left. Chest opened Item for ann {won} " in revealed
+    assert "No keys left; ann has 1 chest to open." in revealed
+    assert "No chest was opened: the account has no key left." in without_key
+    assert not_hers.status_code == 404
     assert (
         await held(database_url, "7353-lmct"),
         await held(database_url, "BFH_TREASURE_CHEST", number),

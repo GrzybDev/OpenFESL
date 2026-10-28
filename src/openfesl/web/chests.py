@@ -6,17 +6,19 @@ from babel import Locale
 from babel.lists import format_list
 from babel.numbers import format_percent
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from starlette.exceptions import HTTPException
 
 from openfesl.core.catalogues import Catalogue, Catalogues
-from openfesl.core.chests import ChestDrop, ChestRules, Chests, key_tag
+from openfesl.core.chests import ChestDrop, ChestRefused, ChestRules, Chests, key_tag
 from openfesl.core.entitlements import ACTIVE, EntitlementQuery, EntitlementStore
 from openfesl.core.games import Game, Games
 from openfesl.core.heroes import Hero, Roster
-from openfesl.core.inventory import COUNTED, RENTED, Ownership
+from openfesl.core.inventory import COUNTED, PERMANENT, RENTED, Ownership
 from openfesl.core.texts import localize, translate, translate_count
 from openfesl.web.account.session import signed_in
 from openfesl.web.pages import Pages, number
+from openfesl.web.sessions import form_matches, form_token, toast
 from openfesl.web.site import site_bar
 
 CHESTS = "/treasure-chests"
@@ -94,12 +96,12 @@ class ChestsPages:
         self._catalogues = catalogues
 
     def routes(self) -> APIRouter:
-        """Return the treasure chests page of each game that lists it."""
+        """Return the treasure chests page of each game that lists it, and its forms."""
         router = APIRouter()
         for game in self._games.with_page("treasure-chests"):
-            router.add_api_route(
-                f"/{game.id}{CHESTS}", self._page(game), response_class=HTMLResponse
-            )
+            base = f"/{game.id}{CHESTS}"
+            router.add_api_route(base, self._page(game), response_class=HTMLResponse)
+            router.add_api_route(base + "/{hero_id}/open", self._open(game), methods=["POST"])
         return router
 
     def _page(self, game: Game) -> Callable[[Request], Awaitable[Response]]:
@@ -121,30 +123,79 @@ class ChestsPages:
                 lists=await self._lists(game, catalogue, language),
                 imported=catalogue.imported,
                 next=localize(f"/{game.id}{CHESTS}", language),
+                csrf=form_token(request) if player else "",
             )
 
         return show_chests
+
+    def _open(self, game: Game) -> Callable[[Request, int], Awaitable[Response]]:
+        async def open_chest(request: Request, hero_id: int) -> Response:
+            form = await request.form()
+            language = request.state.language
+            page = localize(f"/{game.id}{CHESTS}", language)
+            bar = await site_bar(request)
+            if bar is None or bar.roster is None:
+                return RedirectResponse(page, 303)
+            hero = next((hero for hero in bar.roster.heroes if hero.persona.id == hero_id), None)
+            if hero is None:
+                raise HTTPException(404)
+            name = hero.persona.name
+            if not form_matches(request, form):
+                toast(request, "web.chests.refused.form", error=True, hero=name)
+                return RedirectResponse(page, 303)
+            try:
+                won = await self._chests.open(game, hero.persona)
+            except ChestRefused as refused:
+                toast(request, f"web.chests.refused.{refused.refusal}", error=True, hero=name)
+                return RedirectResponse(page, 303)
+            catalogue = await self._catalogues.of(game, language)
+            key = await self._chests.key(game)
+            keys = await self._keys(_rules(game), hero.persona.account_id)
+            worth = {"worth": _amount(game, won.price, won.currency, language)}
+            if key:
+                worth["price"] = _amount(game, key.price, key.currency, language)
+            toast(
+                request,
+                "web.chests.opened",
+                error=False,
+                hero=name,
+                item=catalogue.name(won.item_id) or str(won.item_id),
+                term=_term(won.ownership, language),
+                keys=_count("web.chests.opened.keys", keys, language)
+                if keys
+                else translate("web.chests.opened.keys.none", language),
+                # What the reveal on the next page says of the item and whose it is.
+                line=translate("web.chests.reveal.worth" + ("" if key else ".unsold"), language)
+                % {"term": _term(won.ownership, language, start=True), **worth},
+                hero_id=str(hero_id),
+            )
+            return RedirectResponse(page, 303)
+
+        return open_chest
+
+    async def _keys(self, rules: ChestRules, account_id: int) -> int:
+        query = EntitlementQuery(tag=key_tag(rules), status=ACTIVE)
+        return sum(
+            entry.uses or 0 for entry in await self._entitlements.of_account(account_id, query)
+        )
 
     async def _held(
         self, rules: ChestRules, account_id: int, roster: Roster
     ) -> tuple[int, list[HeroChests]]:
         # The account's keys, and the chests each of its heroes has to open.
-        query = EntitlementQuery(tag=key_tag(rules), status=ACTIVE)
-        kept = await self._entitlements.of_account(account_id, query)
         heroes = []
         for hero in roster.heroes:
             stacks = await self._entitlements.of_persona(hero.persona.id, rules.tag)
             stack = stacks[0] if stacks else None
             count = (stack.uses or 0) if stack and stack.status == ACTIVE else 0
             heroes.append(HeroChests(hero, count, stack.granted if stack else None))
-        return sum(entry.uses or 0 for entry in kept), heroes
+        return await self._keys(rules, account_id), heroes
 
     async def _lists(self, game: Game, catalogue: Catalogue, language: str) -> ChestLists | None:
         odds = await self._chests.odds(game)
         if odds is None:
             return None
-        currency = translate(f"games.{game.id}.currency.{odds.currency}", language)
-        worth = f"{number(odds.worth, language)} {currency}" if odds.worth else ""
+        worth = _amount(game, odds.worth, odds.currency, language) if odds.worth else ""
         factions = {
             faction: [_line(drop, catalogue, language) for drop in drops]
             for faction, drops in odds.factions.items()
@@ -152,8 +203,10 @@ class ChestsPages:
         return ChestLists(worth, factions)
 
 
-def _term(ownership: Ownership, language: str) -> str:
-    # For how long or for how many uses a hero gets an item, as part of a sentence.
+def _term(ownership: Ownership, language: str, start: bool = False) -> str:
+    # For how long or for how many uses a hero gets an item, within a sentence or starting one.
+    if ownership.type == PERMANENT and start:
+        return translate("web.chests.held.permanent.start", language)
     if ownership.type == RENTED and ownership.days:
         return _count("web.chests.held.days", ownership.days, language)
     if ownership.type == COUNTED and ownership.uses:
@@ -178,6 +231,13 @@ def _line(drop: ChestDrop, catalogue: Catalogue, language: str) -> DropLine:
     elif low != high:
         chance = translate("web.chests.chance.range", language) % {"low": low, "high": high}
     return DropLine(name, _term(drop.products[0].ownership, language), chance)
+
+
+def _amount(game: Game, amount: int, currency: str, language: str) -> str:
+    # An amount with its currency's name, such as 499 Funds.
+    return (
+        f"{number(amount, language)} {translate(f'games.{game.id}.currency.{currency}', language)}"
+    )
 
 
 def _count(key: str, count: int, language: str) -> str:

@@ -1,0 +1,21 @@
+/* The reveal of an opened chest: the item on the reveal's stage, with the keys and chests left
+   under it. */
+@layer components {
+  .chest-reveal {
+    &:modal {
+      width: min(470px, calc(100% - 16px));
+    }
+
+    &:not(:modal) {
+      max-width: 470px;
+      margin: 0 0 30px;
+    }
+  }
+
+  .reveal-after {
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #5c4a3c;
+  }
+}

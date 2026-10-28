@@ -1,0 +1,109 @@
+/* What a box or chest gave: over a dark stage a yellow burst grows and the item rises into it
+   once the dialog opens over the page; reduced motion and the page without scripts show the final
+   state. */
+@layer components {
+  .reveal-stage {
+    position: relative;
+    isolation: isolate;
+    height: 210px;
+    margin-top: 14px;
+    overflow: hidden;
+    border: 3px solid #000;
+    border-radius: 6px;
+    background: #1e1815;
+  }
+
+  .reveal-texture {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+  }
+
+  .reveal-burst {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    width: 230px;
+    height: 230px;
+    margin-left: -115px;
+    fill: #f2c12e;
+    stroke: #0a0a0a;
+    stroke-width: 4;
+    stroke-linejoin: round;
+  }
+
+  .reveal-item {
+    position: absolute;
+    top: 59px;
+    left: 50%;
+    display: grid;
+    width: 86px;
+    height: 86px;
+    margin-left: -43px;
+    place-items: center;
+    border: 3px solid #000;
+    border-radius: 6px;
+    background: #cdbfa6;
+    box-shadow: 0 4px 0 #000;
+    color: #3b2d23;
+  }
+
+  .reveal-for {
+    margin-top: 14px;
+    font: 800 13px/1.2 var(--site-heading);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #5c4a3c;
+  }
+
+  .reveal-name {
+    margin-top: 4px;
+    font: 800 25px/1.15 var(--site-heading);
+    color: #fff;
+    overflow-wrap: anywhere;
+    text-shadow: var(--site-outline);
+  }
+
+  .reveal-line {
+    margin-top: 6px;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  /* The burst grows, and the item rises as it does. */
+  :modal {
+    .reveal-burst {
+      animation: reveal-burst 240ms var(--ease-menu) both;
+    }
+
+    .reveal-item {
+      animation: reveal-item 240ms var(--ease-menu) 120ms both;
+    }
+  }
+
+  @keyframes reveal-burst {
+    from {
+      opacity: 0;
+      scale: 0.6;
+    }
+  }
+
+  @keyframes reveal-item {
+    from {
+      opacity: 0;
+      translate: 0 40px;
+      scale: 0.7;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :modal {
+      .reveal-burst,
+      .reveal-item {
+        animation: fade-in 100ms linear both;
+      }
+    }
+  }
+}

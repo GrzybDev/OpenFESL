@@ -15,20 +15,11 @@
       <Icon name="x" :size="18" stroke="currentColor" />
     </button>
     <h2 id="reveal-title" class="site-dialog-title">{{ _("web.store.reveal.title") }}</h2>
-    <div aria-hidden="true" class="reveal-stage">
-      <svg focusable="false" class="reveal-texture">
-        <rect width="100%" height="100%" filter="url(#site-dark)" />
-      </svg>
-      <svg viewBox="0 0 200 200" class="reveal-burst">
-        <path d="M100 10L112 70 170 40 130 88 190 100 130 112 170 160 112 130 100 190 88 130 30 160 70 112 10 100 70 88 30 40 88 70z" />
-      </svg>
-      <span class="reveal-item"><Icon name="bag" :size="36" stroke="currentColor" /></span>
-    </div>
-    <div role="status">
-      <p class="reveal-for">{{ _("web.store.reveal.for", hero=reveal["hero"]) }}</p>
-      <p class="reveal-name">{{ reveal["item"] }}</p>
-      <p class="reveal-line">{{ reveal["line"] }}</p>
-    </div>
+    <RevealStage glyph="bag"
+                 :size="36"
+                 :recipient="_('web.store.reveal.for', hero=reveal['hero'])"
+                 :item="reveal['item']"
+                 :line="reveal['line']" />
     <p class="store-hint">{{ _("web.store.reveal.after", game=game.name) }}</p>
     <div class="site-dialog-actions js-only">
       <button type="button" data-close class="site-button site-button-ghost">{{ _("web.dialog.close") }}</button>

@@ -1,0 +1,45 @@
+{#def held, keys: int #}
+{# What the chest just opened gave a hero: a burst grows and the item rises into it; then what
+   the item is worth, the keys and chests left, and another opening while both remain. Scripts
+   show it as a dialog; without them it stands still at the top. #}
+{% set values = toast.values %}
+{% set hero = held.hero %}
+<dialog id="chest-reveal"
+        open
+        aria-labelledby="chest-reveal-title"
+        data-modal
+        data-reveal
+        data-returns="{{ 'chest-open-' ~ hero.persona.id if held.count else 'chests-title' }}"
+        class="site-dialog chest-reveal">
+  <div class="site-dialog-box">
+    <a href="{{ here }}"
+       data-close
+       class="site-dialog-close"
+       aria-label="{{ _('web.dialog.close') }}"><Icon name="x" :size="18" stroke="currentColor" /></a>
+    <h2 id="chest-reveal-title" class="site-dialog-title">{{ _("web.chests.reveal.title") }}</h2>
+    <RevealStage glyph="star"
+                 :size="40"
+                 :recipient="_('web.chests.reveal.for', hero=hero.persona.name)"
+                 :item="values.item"
+                 :line="values.line" />
+    <p class="reveal-after">
+      {{ _("web.chests.reveal.listed", game=game.name) }}
+      {% set left_keys = _n("web.chests.reveal.keys", keys) if keys else _("web.chests.reveal.keys.none") %}
+      {% set left_chests = _n("web.chests.reveal.chests", held.count, hero=hero.persona.name) if held.count else _("web.chests.reveal.chests.none", hero=hero.persona.name) %}
+      {{ _("web.chests.reveal.left", keys=left_keys, chests=left_chests) }}
+    </p>
+    <div class="site-dialog-actions">
+      {% if held.count and keys %}
+        <form method="post"
+              action="{{ url('/' ~ game.id ~ '/treasure-chests/' ~ hero.persona.id ~ '/open') }}">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <button type="submit" class="site-button site-button-large">
+            <Icon name="key" :size="18" stroke="#FEDE01" />
+            {{ _("web.chests.reveal.again") }}
+          </button>
+        </form>
+      {% endif %}
+      <a href="{{ here }}" data-close class="site-button site-button-ghost">{{ _("web.dialog.close") }}</a>
+    </div>
+  </div>
+</dialog>

@@ -7258,3 +7258,96 @@ msgstr "%(low)s–%(high)s"
 
 msgid "web.chests.chance.up_to"
 msgstr "do %(chance)s"
+
+msgid "web.chests.open"
+msgstr "Otwórz skrzynię · 1 klucz"
+
+msgid "web.chests.open.why"
+msgstr "Brak kluczy. Klucz kosztuje %(price)s."
+
+msgid "web.chests.open.why.unsold"
+msgstr "Brak kluczy."
+
+msgid "web.chests.opened"
+msgstr "Otwarto skrzynię bohatera %(hero)s: %(item)s, %(term)s. %(keys)s"
+
+msgid "web.chests.opened.keys.one"
+msgstr "Użyto 1 klucza; został %(count)s klucz."
+
+msgid "web.chests.opened.keys.few"
+msgstr "Użyto 1 klucza; zostały %(count)s klucze."
+
+msgid "web.chests.opened.keys.many"
+msgstr "Użyto 1 klucza; zostało %(count)s kluczy."
+
+msgid "web.chests.opened.keys.other"
+msgstr "Użyto 1 klucza; zostało %(count)s klucza."
+
+msgid "web.chests.opened.keys.none"
+msgstr "Użyto 1 klucza; nie ma już kluczy."
+
+msgid "web.chests.refused.form"
+msgstr "Żadna skrzynia nie została otwarta: formularz wygasł. Nie użyto klucza."
+
+msgid "web.chests.refused.no-key"
+msgstr "Żadna skrzynia nie została otwarta: konto nie ma już kluczy."
+
+msgid "web.chests.refused.no-chest"
+msgstr "Żadna skrzynia nie została otwarta: %(hero)s nie ma już skrzyń do otwarcia. Nie użyto klucza."
+
+msgid "web.chests.refused.nothing"
+msgstr "Żadna skrzynia nie została otwarta: skrzynie w tym serwisie nie zawierają niczego, co %(hero)s może dostać. Nie użyto klucza."
+
+msgid "web.chests.held.permanent.start"
+msgstr "Na stałe"
+
+msgid "web.chests.reveal.title"
+msgstr "Skrzynia otwarta"
+
+msgid "web.chests.reveal.for"
+msgstr "Przedmiot dla bohatera %(hero)s"
+
+msgid "web.chests.reveal.worth"
+msgstr "%(term)s · wartość %(worth)s; klucz kosztuje %(price)s."
+
+msgid "web.chests.reveal.worth.unsold"
+msgstr "%(term)s · wartość %(worth)s."
+
+msgid "web.chests.reveal.listed"
+msgstr "%(game)s pokaże go od następnego logowania."
+
+msgid "web.chests.reveal.keys.one"
+msgstr "Został %(count)s klucz"
+
+msgid "web.chests.reveal.keys.few"
+msgstr "Zostały %(count)s klucze"
+
+msgid "web.chests.reveal.keys.many"
+msgstr "Zostało %(count)s kluczy"
+
+msgid "web.chests.reveal.keys.other"
+msgstr "Zostało %(count)s klucza"
+
+msgid "web.chests.reveal.keys.none"
+msgstr "Nie ma już kluczy"
+
+msgid "web.chests.reveal.chests.one"
+msgstr "%(hero)s ma %(count)s skrzynię do otwarcia."
+
+msgid "web.chests.reveal.chests.few"
+msgstr "%(hero)s ma %(count)s skrzynie do otwarcia."
+
+msgid "web.chests.reveal.chests.many"
+msgstr "%(hero)s ma %(count)s skrzyń do otwarcia."
+
+msgid "web.chests.reveal.chests.other"
+msgstr "%(hero)s ma %(count)s skrzyni do otwarcia."
+
+msgid "web.chests.reveal.chests.none"
+msgstr "%(hero)s nie ma już skrzyń do otwarcia."
+
+msgid "web.chests.reveal.left"
+msgstr "%(keys)s; %(chests)s"
+
+msgid "web.chests.reveal.again"
+msgstr "Otwórz następną · 1 klucz"

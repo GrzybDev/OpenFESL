@@ -6922,3 +6922,78 @@ msgstr "%(low)s–%(high)s"
 
 msgid "web.chests.chance.up_to"
 msgstr "up to %(chance)s"
+
+msgid "web.chests.open"
+msgstr "Open a chest · 1 key"
+
+msgid "web.chests.open.why"
+msgstr "No keys left. A key costs %(price)s."
+
+msgid "web.chests.open.why.unsold"
+msgstr "No keys left."
+
+msgid "web.chests.opened"
+msgstr "Chest opened for %(hero)s: %(item)s, %(term)s. %(keys)s"
+
+msgid "web.chests.opened.keys.one"
+msgstr "1 key used; %(count)s key left."
+
+msgid "web.chests.opened.keys.other"
+msgstr "1 key used; %(count)s keys left."
+
+msgid "web.chests.opened.keys.none"
+msgstr "1 key used; no keys left."
+
+msgid "web.chests.refused.form"
+msgstr "No chest was opened: the form had expired. No key was used."
+
+msgid "web.chests.refused.no-key"
+msgstr "No chest was opened: the account has no key left."
+
+msgid "web.chests.refused.no-chest"
+msgstr "No chest was opened: %(hero)s has no chest left to open. No key was used."
+
+msgid "web.chests.refused.nothing"
+msgstr "No chest was opened: chests on this service hold nothing %(hero)s may get. No key was used."
+
+msgid "web.chests.held.permanent.start"
+msgstr "Permanent"
+
+msgid "web.chests.reveal.title"
+msgstr "Chest opened"
+
+msgid "web.chests.reveal.for"
+msgstr "Item for %(hero)s"
+
+msgid "web.chests.reveal.worth"
+msgstr "%(term)s · worth %(worth)s; a key costs %(price)s."
+
+msgid "web.chests.reveal.worth.unsold"
+msgstr "%(term)s · worth %(worth)s."
+
+msgid "web.chests.reveal.listed"
+msgstr "%(game)s lists it from its next login."
+
+msgid "web.chests.reveal.keys.one"
+msgstr "%(count)s key left"
+
+msgid "web.chests.reveal.keys.other"
+msgstr "%(count)s keys left"
+
+msgid "web.chests.reveal.keys.none"
+msgstr "No keys left"
+
+msgid "web.chests.reveal.chests.one"
+msgstr "%(hero)s has %(count)s chest to open."
+
+msgid "web.chests.reveal.chests.other"
+msgstr "%(hero)s has %(count)s chests to open."
+
+msgid "web.chests.reveal.chests.none"
+msgstr "%(hero)s has no chest left to open."
+
+msgid "web.chests.reveal.left"
+msgstr "%(keys)s; %(chests)s"
+
+msgid "web.chests.reveal.again"
+msgstr "Open another · 1 key"
