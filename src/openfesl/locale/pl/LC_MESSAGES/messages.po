@@ -7081,3 +7081,180 @@ msgstr "Kupiono %(item)s dla %(hero)s. Wydano %(price)s %(currency)s."
 
 msgid "web.store.done.box"
 msgstr "Otwarto %(item)s dla %(hero)s: %(won)s, %(ownership)s. Wydano %(price)s %(currency)s."
+
+msgid "web.site.page.treasure-chests"
+msgstr "Skrzynie skarbów"
+
+msgid "web.chests.title"
+msgstr "Skrzynie skarbów"
+
+msgid "web.chests.lead"
+msgstr "Bohaterowie znajdują skrzynie skarbów w meczach. Klucz otwiera jedną skrzynię, a każda skrzynia daje bohaterowi, który ją znalazł, jeden przedmiot."
+
+msgid "web.chests.lead.worth"
+msgstr "Bohaterowie znajdują skrzynie skarbów w meczach. Klucz otwiera jedną skrzynię, a każda skrzynia daje bohaterowi, który ją znalazł, przedmiot wart co najmniej %(worth)s."
+
+msgid "web.chests.keys.title"
+msgstr "Klucze"
+
+msgid "web.chests.keys.count.one"
+msgstr "%(count)s klucz"
+
+msgid "web.chests.keys.count.few"
+msgstr "%(count)s klucze"
+
+msgid "web.chests.keys.count.many"
+msgstr "%(count)s kluczy"
+
+msgid "web.chests.keys.count.other"
+msgstr "%(count)s klucza"
+
+msgid "web.chests.keys.rule"
+msgstr "Klucz kosztuje %(price)s, należy do konta i otwiera skrzynię dowolnego bohatera."
+
+msgid "web.chests.keys.rule.unsold"
+msgstr "Klucz należy do konta i otwiera skrzynię dowolnego bohatera. Ten serwis nie sprzedaje jeszcze kluczy."
+
+msgid "web.chests.total.one"
+msgstr "%(count)s skrzynia do otwarcia"
+
+msgid "web.chests.total.few"
+msgstr "%(count)s skrzynie do otwarcia"
+
+msgid "web.chests.total.many"
+msgstr "%(count)s skrzyń do otwarcia"
+
+msgid "web.chests.total.other"
+msgstr "%(count)s skrzyni do otwarcia"
+
+msgid "web.chests.hero.empty"
+msgstr "Na razie bez skrzyń"
+
+msgid "web.chests.hero.none"
+msgstr "Brak skrzyń"
+
+msgid "web.chests.hero.found"
+msgstr "ostatnią znaleziono %(date)s"
+
+msgid "web.chests.hero.never"
+msgstr "żadnej jeszcze nie znaleziono"
+
+msgid "web.heroes.chests"
+msgstr "Skrzynie"
+
+msgid "web.heroes.chests.count.one"
+msgstr "%(count)s do otwarcia"
+
+msgid "web.heroes.chests.count.few"
+msgstr "%(count)s do otwarcia"
+
+msgid "web.heroes.chests.count.many"
+msgstr "%(count)s do otwarcia"
+
+msgid "web.heroes.chests.count.other"
+msgstr "%(count)s do otwarcia"
+
+msgid "web.heroes.chests.none"
+msgstr "jeszcze brak"
+
+msgid "web.chests.box.heroes"
+msgstr "%(total)s: %(heroes)s."
+
+msgid "web.chests.box.none"
+msgstr "Na razie bez skrzyń."
+
+msgid "web.chests.box.rule"
+msgstr "Bohaterowie znajdują skrzynie w meczach. Klucz otwiera jedną skrzynię i kosztuje %(price)s."
+
+msgid "web.chests.box.worth"
+msgstr "Każda skrzynia daje przedmiot wart co najmniej %(worth)s."
+
+msgid "web.chests.box.open"
+msgstr "Otwórz skrzynie"
+
+msgid "web.chests.box.about"
+msgstr "O skrzyniach skarbów"
+
+msgid "web.chests.hero.later"
+msgstr "Skrzynie znalezione w meczu pojawiają się tu po zakończeniu rundy."
+
+msgid "web.chests.none"
+msgstr "Brak skrzyń do otwarcia"
+
+msgid "web.chests.none.text"
+msgstr "Żaden bohater tego konta nie ma teraz skrzyni. Bohaterowie znajdują skrzynie w meczach; każda czeka tu, aż otworzy ją klucz."
+
+msgid "web.chests.none.no_hero"
+msgstr "Konto nie ma jeszcze bohatera. Bohaterowie znajdują skrzynie w meczach; każda czeka tu, aż otworzy ją klucz."
+
+msgid "web.chests.none.play"
+msgstr "Graj teraz jako %(hero)s"
+
+msgid "web.chests.signed_out"
+msgstr "Zaloguj się, aby otwierać skrzynie"
+
+msgid "web.chests.signed_out.text"
+msgstr "Skrzynie należą do bohaterów konta, a klucze do samego konta. Po zalogowaniu ta strona pokazuje skrzynie każdego bohatera."
+
+msgid "web.chests.lists.title"
+msgstr "Co może dać skrzynia"
+
+msgid "web.chests.lists.text"
+msgstr "Skrzynia daje bohaterowi, który ją znalazł, pasujący do niego przedmiot, więc skrzynie każdej frakcji mają własną listę. Listy i szanse ustala administracja tego serwisu. Wynajem, który bohater już ma, trwa dłużej, a użycia się sumują."
+
+msgid "web.chests.lists.worth"
+msgstr "Każdy przedmiot jest wart co najmniej %(worth)s."
+
+msgid "web.chests.lists.owned"
+msgstr "Szanse dotyczą bohatera, który nie ma żadnego z tych przedmiotów: skrzynia nigdy nie daje przedmiotu, który bohater ma na stałe, a jego szansę dzielą pozostałe przedmioty."
+
+msgid "web.chests.lists.faction"
+msgstr "Skrzynie – %(faction)s"
+
+msgid "web.chests.lists.chance"
+msgstr "szansa"
+
+msgid "web.chests.lists.by_class"
+msgstr "%(names)s, zależnie od klasy bohatera"
+
+msgid "web.chests.lists.nothing"
+msgstr "Na razie nic dla tych bohaterów."
+
+msgid "web.chests.lists.empty"
+msgstr "Skrzynie w tym serwisie nie zawierają jeszcze niczego."
+
+msgid "web.chests.lists.missing"
+msgstr "Listy pojawią się, gdy administracja tego serwisu zaimportuje katalog gry."
+
+msgid "web.chests.held.permanent"
+msgstr "na stałe"
+
+msgid "web.chests.held.days.one"
+msgstr "%(count)s dzień"
+
+msgid "web.chests.held.days.few"
+msgstr "%(count)s dni"
+
+msgid "web.chests.held.days.many"
+msgstr "%(count)s dni"
+
+msgid "web.chests.held.days.other"
+msgstr "%(count)s dnia"
+
+msgid "web.chests.held.uses.one"
+msgstr "%(count)s użycie"
+
+msgid "web.chests.held.uses.few"
+msgstr "%(count)s użycia"
+
+msgid "web.chests.held.uses.many"
+msgstr "%(count)s użyć"
+
+msgid "web.chests.held.uses.other"
+msgstr "%(count)s użycia"
+
+msgid "web.chests.chance.range"
+msgstr "%(low)s–%(high)s"
+
+msgid "web.chests.chance.up_to"
+msgstr "do %(chance)s"

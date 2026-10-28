@@ -1,4 +1,7 @@
+from collections.abc import Mapping
+from dataclasses import dataclass
 from enum import StrEnum
+from fractions import Fraction
 from typing import TYPE_CHECKING, Protocol
 
 from pydantic import BaseModel, ConfigDict, PositiveInt
@@ -7,7 +10,7 @@ from openfesl.core.inventory import COUNTED, Ownership
 
 # For annotations only, since the games' data holds the rules below.
 if TYPE_CHECKING:
-    from openfesl.core.drops import Drops
+    from openfesl.core.drops import Box, Drops
     from openfesl.core.games import Game
     from openfesl.core.heroes import Heroes
     from openfesl.core.personas import Persona
@@ -57,6 +60,36 @@ class ChestRefused(Exception):
         self.refusal = refusal
 
 
+@dataclass(frozen=True, slots=True)
+class ChestDrop:
+    """One of the things the chests of a faction's heroes give, with its chance.
+
+    Attributes:
+        products: The product, or the products owned alike of which a hero gets those that fit
+            its class.
+        chance: The lowest and the highest chance among the faction's classes.
+    """
+
+    products: tuple[Product, ...]
+    chance: tuple[Fraction, Fraction]
+
+
+@dataclass(frozen=True, slots=True)
+class ChestOdds:
+    """What a game's treasure chests give the heroes of each faction, with the chances.
+
+    Attributes:
+        worth: What every item a chest gives is worth at least; none where chests do not
+            promise it.
+        currency: The currency of that worth.
+        factions: The drops by faction, in the order of the game's factions.
+    """
+
+    worth: int | None
+    currency: str
+    factions: dict[str, list[ChestDrop]]
+
+
 class ChestStore(Protocol):
     """Where the keys and chests are kept and used up."""
 
@@ -78,7 +111,7 @@ class ChestStore(Protocol):
 
 
 class Chests:
-    """Opens the treasure chests that heroes pick up, each with a key of their account."""
+    """Opens heroes' treasure chests with their accounts' keys, and tells what chests give."""
 
     def __init__(
         self, products: ProductStore, store: ChestStore, heroes: Heroes, drops: Drops
@@ -120,6 +153,52 @@ class Chests:
         await self._store.open_chest(persona, key_tag(rules), rules.tag, won)
         return won
 
+    async def key(self, game: Game) -> Product | None:
+        """Return the product that sells an account a game's keys, if its store sells them.
+
+        Args:
+            game: The game.
+        """
+        rules = game.chests
+        return await self._products.account_product(game.id, rules.key) if rules else None
+
+    async def worth(self, game: Game) -> tuple[int, str] | None:
+        """Return what every item a game's chest gives is worth at least, where chests promise it.
+
+        Args:
+            game: The game.
+
+        Returns:
+            The amount and its currency, or None for a game whose chests make no such promise.
+        """
+        rules = game.chests
+        box = await self._products.box_by_key(game.id, rules.contents) if rules else None
+        return (box.value, box.currency) if box and box.worth_rule else None
+
+    async def odds(self, game: Game) -> ChestOdds | None:
+        """Return what a chest gives the heroes of each faction, with the chances.
+
+        The chances are those of a hero that owns none of the items, as a chest gives a hero no
+        item it owns for good.
+
+        Args:
+            game: The game.
+
+        Returns:
+            The odds, or None for a game without chests, heroes or a box of the chests' contents.
+        """
+        rules, heroes = game.chests, game.heroes
+        box = await self._products.box_by_key(game.id, rules.contents) if rules else None
+        if box is None or heroes is None:
+            return None
+        factions = {
+            faction: _drops(
+                box, [self._drops.odds(game, box, faction, kind) for kind in heroes.classes]
+            )
+            for faction in heroes.factions
+        }
+        return ChestOdds(box.value if box.worth_rule else None, box.currency, factions)
+
 
 def key_tag(rules: ChestRules) -> str:
     """Return the tag of an account's keys, which it holds as uses of the key item.
@@ -128,3 +207,23 @@ def key_tag(rules: ChestRules) -> str:
         rules: The game's chest rules.
     """
     return Ownership(COUNTED).tag(rules.key)
+
+
+def _drops(box: Box, by_class: list[Mapping[Product, Fraction]]) -> list[ChestDrop]:
+    # A product that every class may get is a drop of its own; those for some classes join the
+    # others owned alike, so that each class's chances add up to the whole.
+    given = [drop.product for drop in box.drops] + ([box.fallback] if box.fallback else [])
+    groups: dict[object, list[Product]] = {}
+    for product in dict.fromkeys(given):
+        classes = sum(product in chances for chances in by_class)
+        if classes:
+            key = product if classes == len(by_class) else product.ownership
+            groups.setdefault(key, []).append(product)
+    drops = []
+    for products in groups.values():
+        chances = [
+            sum((odds.get(item, Fraction(0)) for item in products), Fraction(0))
+            for odds in by_class
+        ]
+        drops.append(ChestDrop(tuple(products), (min(chances), max(chances))))
+    return drops

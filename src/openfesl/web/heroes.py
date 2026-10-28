@@ -6,6 +6,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.exceptions import HTTPException
 
 from openfesl.core.catalogues import Catalogues
+from openfesl.core.chests import Chests
 from openfesl.core.entitlements import ACTIVE, EntitlementStore
 from openfesl.core.games import Game, Games
 from openfesl.core.hero_items import held
@@ -43,6 +44,7 @@ class HeroCard:
         items: The items it holds: the starting kit of its faction and class and those kept for
             it while they are in use and have time left.
         low: How many of the items kept for it have few uses left.
+        chests: How many treasure chests it has to open; none in a game without them.
     """
 
     hero: Hero
@@ -52,6 +54,7 @@ class HeroCard:
     points: tuple[int, int]
     items: int
     low: int
+    chests: int | None
 
 
 class HeroesPages:
@@ -66,6 +69,7 @@ class HeroesPages:
         wallets: Wallets,
         entitlements: EntitlementStore,
         catalogues: Catalogues,
+        chests: Chests,
     ) -> None:
         """Prepare the heroes page of each game whose heroes are made on its site.
 
@@ -75,8 +79,9 @@ class HeroesPages:
             heroes: Lists the heroes and keeps the default one.
             sent: Lets each form that buys a hero slot buy once.
             wallets: Reads the heroes' Hero Points without opening their wallets.
-            entitlements: Lists the items kept for each hero.
+            entitlements: Lists the items and treasure chests kept for each hero.
             catalogues: Give the XP each level needs, once imported.
+            chests: Tell what a key costs and what a chest's item is worth.
         """
         self._pages = pages
         self._games = games
@@ -85,6 +90,7 @@ class HeroesPages:
         self._wallets = wallets
         self._entitlements = entitlements
         self._catalogues = catalogues
+        self._chests = chests
 
     def routes(self) -> APIRouter:
         """Return each game's heroes page and its forms of the default hero, new names and slots."""
@@ -123,6 +129,8 @@ class HeroesPages:
                 roster=bar.roster,
                 cards=await self._cards(game, bar.roster, request.state.language),
                 funds=bar.funds,
+                key=await self._chests.key(game),
+                worth=await self._chests.worth(game),
                 csrf=form_token(request),
             )
 
@@ -287,13 +295,19 @@ class HeroesPages:
         for slot, (hero, earned) in enumerate(zip(roster.heroes, points, strict=True), 1):
             kept = await self._entitlements.of_persona(hero.persona.id)
             owned = held(rules, hero.faction, hero.hero_class, kept)
+            # A stack of treasure chests counts chests rather than the uses of an item.
+            chests = game.chests.tag if game.chests else None
             low = sum(
                 1
                 for item in kept
                 if item.status == ACTIVE
                 and item.uses is not None
                 and item.uses <= rules.running_low
+                and item.tag != chests
             )
+            stacks = [
+                item.uses or 0 for item in kept if item.tag == chests and item.status == ACTIVE
+            ]
             cards.append(
                 HeroCard(
                     hero=hero,
@@ -303,6 +317,7 @@ class HeroesPages:
                     points=earned,
                     items=len(owned),
                     low=low,
+                    chests=sum(stacks) if chests else None,
                 )
             )
         return cards

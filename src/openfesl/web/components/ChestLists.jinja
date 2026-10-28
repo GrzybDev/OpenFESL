@@ -1,0 +1,46 @@
+{#def lists, imported: bool #}
+{# What a treasure chest can give the heroes of each faction, with the chances, in the dark orange
+   box; before the game's catalogue is imported, why the lists are missing. #}
+{% set rules = game.heroes %}
+<section aria-labelledby="chest-lists-title"
+         class="info-boxes chest-lists enter-panel">
+  <Splash />
+  <div class="info-box chest-lists-box">
+    <h2 id="chest-lists-title" class="info-box-title">{{ _("web.chests.lists.title") }}</h2>
+    <span aria-hidden="true" class="info-box-disc"><Icon name="chest" :size="22" stroke="#0A0A0A" /></span>
+    {% if lists %}
+      <p class="chest-lists-text">
+        {{ _("web.chests.lists.text") }}
+        {% if lists.worth %}{{ _("web.chests.lists.worth", worth=lists.worth) }}{% endif %}
+        {{ _("web.chests.lists.owned") }}
+      </p>
+      <div class="chest-lists-factions">
+        {% for faction, lines in lists.factions.items() %}
+          <div data-faction="{{ faction }}">
+            <h3 class="chest-lists-faction">
+              <span aria-hidden="true"
+                    class="chest-lists-glyph"><Icon :name="rules.factions[faction].glyph" :size="16" stroke="currentColor" /></span>
+              {{ _("web.chests.lists.faction", faction=_("games." ~ game.id ~ ".faction." ~ faction)) }}
+            </h3>
+            {% if lines %}
+              <ul role="list" class="chest-drops">
+                {% for line in lines %}
+                  <li>
+                    <span class="chest-drop-name"><strong>{{ line.name }}</strong> · {{ line.held }}</span>
+                    <span class="chest-drop-chance"><span class="sr-only">{{ _("web.chests.lists.chance") }}</span>{{ line.chance }}</span>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p>{{ _("web.chests.lists.nothing") }}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% elif imported %}
+      <p class="chest-lists-text">{{ _("web.chests.lists.empty") }}</p>
+    {% else %}
+      <p class="chest-lists-text">{{ _("web.chests.lists.missing") }}</p>
+    {% endif %}
+  </div>
+</section>

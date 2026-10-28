@@ -136,6 +136,8 @@ class EntitlementStore(Protocol):
     async def stack_uses(self, account_id: int, persona_id: int, tag: str, uses: int) -> None:
         """Add uses to a persona's row of a tag that names no item, creating the row if missing.
 
+        The row's grant time becomes the latest stack's, such as when it last found a chest.
+
         Args:
             account_id: The persona's account.
             persona_id: The persona.

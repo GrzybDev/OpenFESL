@@ -6775,3 +6775,150 @@ msgstr "%(item)s bought for %(hero)s. %(price)s %(currency)s spent."
 
 msgid "web.store.done.box"
 msgstr "%(item)s opened for %(hero)s: %(won)s, %(ownership)s. %(price)s %(currency)s spent."
+
+msgid "web.site.page.treasure-chests"
+msgstr "Treasure chests"
+
+msgid "web.chests.title"
+msgstr "Treasure chests"
+
+msgid "web.chests.lead"
+msgstr "Heroes find treasure chests in matches. A key opens one chest, and each chest gives the hero that found it one item."
+
+msgid "web.chests.lead.worth"
+msgstr "Heroes find treasure chests in matches. A key opens one chest, and each chest gives the hero that found it an item worth at least %(worth)s."
+
+msgid "web.chests.keys.title"
+msgstr "Keys"
+
+msgid "web.chests.keys.count.one"
+msgstr "%(count)s key"
+
+msgid "web.chests.keys.count.other"
+msgstr "%(count)s keys"
+
+msgid "web.chests.keys.rule"
+msgstr "A key costs %(price)s, belongs to the account and opens a chest of any hero."
+
+msgid "web.chests.keys.rule.unsold"
+msgstr "A key belongs to the account and opens a chest of any hero. This service sells no keys yet."
+
+msgid "web.chests.total.one"
+msgstr "%(count)s chest to open"
+
+msgid "web.chests.total.other"
+msgstr "%(count)s chests to open"
+
+msgid "web.chests.hero.empty"
+msgstr "No chests yet"
+
+msgid "web.chests.hero.none"
+msgstr "No chests"
+
+msgid "web.chests.hero.found"
+msgstr "last found %(date)s"
+
+msgid "web.chests.hero.never"
+msgstr "none found yet"
+
+msgid "web.heroes.chests"
+msgstr "Chests"
+
+msgid "web.heroes.chests.count.one"
+msgstr "%(count)s to open"
+
+msgid "web.heroes.chests.count.other"
+msgstr "%(count)s to open"
+
+msgid "web.heroes.chests.none"
+msgstr "none yet"
+
+msgid "web.chests.box.heroes"
+msgstr "%(total)s: %(heroes)s."
+
+msgid "web.chests.box.none"
+msgstr "No chests yet."
+
+msgid "web.chests.box.rule"
+msgstr "Heroes find chests in matches. A key opens one chest and costs %(price)s."
+
+msgid "web.chests.box.worth"
+msgstr "Each chest gives an item worth at least %(worth)s."
+
+msgid "web.chests.box.open"
+msgstr "Open chests"
+
+msgid "web.chests.box.about"
+msgstr "About treasure chests"
+
+msgid "web.chests.hero.later"
+msgstr "Chests found in matches show up here after the round ends."
+
+msgid "web.chests.none"
+msgstr "No chests to open"
+
+msgid "web.chests.none.text"
+msgstr "None of the account's heroes has a chest right now. Heroes find chests in matches; each one waits here until a key opens it."
+
+msgid "web.chests.none.no_hero"
+msgstr "The account has no hero yet. Heroes find chests in matches; each one waits here until a key opens it."
+
+msgid "web.chests.none.play"
+msgstr "Play Now as %(hero)s"
+
+msgid "web.chests.signed_out"
+msgstr "Sign in to open chests"
+
+msgid "web.chests.signed_out.text"
+msgstr "Chests belong to the heroes of an account and keys to the account. After signing in, this page shows each hero's chests."
+
+msgid "web.chests.lists.title"
+msgstr "What a chest can give"
+
+msgid "web.chests.lists.text"
+msgstr "A chest gives the hero that found it an item that fits the hero, so each faction's chests hold their own list. The administrators of this service set the lists and the chances. A rental the hero already has runs longer, and uses are added."
+
+msgid "web.chests.lists.worth"
+msgstr "Every item is worth at least %(worth)s."
+
+msgid "web.chests.lists.owned"
+msgstr "The chances are those of a hero that owns none of the items: a chest never gives an item the hero owns for good, and the other items share its chance."
+
+msgid "web.chests.lists.faction"
+msgstr "%(faction)s chests"
+
+msgid "web.chests.lists.chance"
+msgstr "chance"
+
+msgid "web.chests.lists.by_class"
+msgstr "%(names)s, by the hero's class"
+
+msgid "web.chests.lists.nothing"
+msgstr "Nothing for these heroes yet."
+
+msgid "web.chests.lists.empty"
+msgstr "Chests on this service hold nothing yet."
+
+msgid "web.chests.lists.missing"
+msgstr "The lists appear once the administrators of this service import the game's catalogue."
+
+msgid "web.chests.held.permanent"
+msgstr "permanent"
+
+msgid "web.chests.held.days.one"
+msgstr "%(count)s day"
+
+msgid "web.chests.held.days.other"
+msgstr "%(count)s days"
+
+msgid "web.chests.held.uses.one"
+msgstr "%(count)s use"
+
+msgid "web.chests.held.uses.other"
+msgstr "%(count)s uses"
+
+msgid "web.chests.chance.range"
+msgstr "%(low)s–%(high)s"
+
+msgid "web.chests.chance.up_to"
+msgstr "up to %(chance)s"

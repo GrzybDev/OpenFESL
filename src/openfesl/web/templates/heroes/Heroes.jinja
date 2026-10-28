@@ -1,6 +1,7 @@
-{#def roster, cards: list, funds: int #}
+{#def roster, cards: list, funds: int, key = None, worth = None #}
 {# An account's heroes: its slots, each hero's card hanging from the beam with a free slot's card
-   after them, or the way to the first hero, and the account's wallets. #}
+   after them, or the way to the first hero; then Play Now, the account's wallets and the heroes'
+   treasure chests. #}
 {% set title = _("web.heroes.title") %}
 {% set rules = game.heroes %}
 {% set bought = toast and toast.key == "web.slots.done" %}
@@ -76,7 +77,11 @@
          class="site-button site-button-go site-button-large"><Icon name="plus" :size="18" stroke="currentColor" />{{ _("web.bar.create") }}</a>
     </section>
   {% endif %}
-  <WalletsBox :cards="cards">
-  {% if game.site.start_links %}<PlayNowBox :hero="roster.playing" />{% endif %}
-  </WalletsBox>
+  <div class="info-boxes">
+    {% if game.site.start_links %}<PlayNowBox :hero="roster.playing" />{% endif %}
+    <WalletsBox :cards="cards" />
+    {% if game.chests and "treasure-chests" in game.pages %}
+      <ChestsBox :cards="cards" :key="key" :worth="worth" />
+    {% endif %}
+  </div>
 </Layout>

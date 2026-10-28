@@ -200,6 +200,14 @@ class ProductStore(Protocol):
             account: Whether it is sold to accounts rather than to heroes.
         """
 
+    async def account_product(self, game: str, item_id: int) -> Product | None:
+        """Return the first product of an item that a game's store sells accounts, if any.
+
+        Args:
+            game: The game's data-file name.
+            item_id: The item's number.
+        """
+
     async def add_bundle(self, game: str, bundle: Bundle) -> int:
         """Add a bundle to a game's store.
 

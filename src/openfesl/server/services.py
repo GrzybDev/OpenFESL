@@ -13,6 +13,7 @@ from openfesl.core.associations import AssociationService
 from openfesl.core.browsing import Browsing
 from openfesl.core.catalogues import Catalogues
 from openfesl.core.census import Census
+from openfesl.core.chests import Chests
 from openfesl.core.connect import connect_routes
 from openfesl.core.deals import HotDeals
 from openfesl.core.display_names import DisplayNames
@@ -128,6 +129,7 @@ class GameServices:
             drops,
             self.deals,
         )
+        self.chests = Chests(stores.products, stores.purchases, self.heroes, drops)
         self.item_writes = ItemWrites(stores.entitlements)
         self.policies = GamePolicies(stores.settings)
         self.terms = Terms.load()

@@ -1,5 +1,6 @@
 from collections.abc import Callable
 from dataclasses import dataclass
+from fractions import Fraction
 from random import Random, SystemRandom
 from typing import TYPE_CHECKING
 
@@ -92,21 +93,43 @@ class Drops:
         Returns:
             The product, or None when the hero may get no drop and the box has no fallback.
         """
-        contents = self._catalogues.contents(game)
         kept = await self._entitlements.of_persona(persona.id)
         owned = {int(entry.tag.partition("-")[0]) for entry in kept if _owned(entry.tag)}
-        owned |= granted(game.heroes, hero.faction, hero.hero_class)
-        owned |= {item.id for item in contents.items.values() if item.base}
+        may_get = self._fitting(game, hero.faction, hero.hero_class, hero.level, owned)
+        return pick(box, may_get, self._random)
+
+    def odds(self, game: Game, box: Box, faction: str, hero_class: str) -> dict[Product, Fraction]:
+        """Return what a box gives a hero of a faction and class, with the chance of each.
+
+        The chances are those of a hero at the highest level that owns none of the drops.
+
+        Args:
+            game: The game.
+            box: The box.
+            faction: The hero's faction.
+            hero_class: The hero's class.
+        """
+        level = game.heroes.highest_level if game.heroes else 0
+        return odds(box, self._fitting(game, faction, hero_class, level, set()))
+
+    def _fitting(
+        self, game: Game, faction: str | None, hero_class: str | None, level: int, owned: set[int]
+    ) -> Callable[[Product], bool]:
+        # Whether a hero may get a product: it fits the hero, and the hero does not own it for
+        # good, nor holds it as the game grants it itself.
+        contents = self._catalogues.contents(game)
+        owned = owned | {item.id for item in contents.items.values() if item.base}
+        owned |= granted(game.heroes, faction, hero_class)
 
         def may_get(product: Product) -> bool:
             item = contents.items.get(product.item_id)
             return (
                 item is not None
-                and fits(item, {item.kind}, hero.faction, hero.hero_class, hero.level)
+                and fits(item, {item.kind}, faction, hero_class, level)
                 and gains(product.item_id, product.ownership, owned)
             )
 
-        return pick(box, may_get, self._random)
+        return may_get
 
 
 def pick(box: Box, may_get: Callable[[Product], bool], random: Random) -> Product | None:
@@ -120,15 +143,31 @@ def pick(box: Box, may_get: Callable[[Product], bool], random: Random) -> Produc
         may_get: Tells whether the hero may get a product.
         random: The source of chance.
     """
-    tiers: dict[int, tuple[int, list[Product]]] = {}
-    for drop in box.drops:
-        if may_get(drop.product):
-            tiers.setdefault(drop.tier, (drop.weight, []))[1].append(drop.product)
+    tiers = _tiers(box, may_get)
     if not tiers:
         return box.fallback
-    weights = [weight for weight, _ in tiers.values()]
-    [(_, products)] = random.choices(list(tiers.values()), weights)
+    weights = [weight for weight, _ in tiers]
+    [(_, products)] = random.choices(tiers, weights)
     return random.choice(products)
+
+
+def odds(box: Box, may_get: Callable[[Product], bool]) -> dict[Product, Fraction]:
+    """Return the chance of each product a box gives a hero, as pick gives them.
+
+    Args:
+        box: The box.
+        may_get: Tells whether the hero may get a product.
+    """
+    tiers = _tiers(box, may_get)
+    if not tiers:
+        return {box.fallback: Fraction(1)} if box.fallback else {}
+    total = sum(weight for weight, _ in tiers)
+    chances: dict[Product, Fraction] = {}
+    for weight, products in tiers:
+        for product in products:
+            share = Fraction(weight, total * len(products))
+            chances[product] = chances.get(product, Fraction(0)) + share
+    return chances
 
 
 def below_value(box: Box) -> list[Product]:
@@ -147,6 +186,15 @@ def below_value(box: Box) -> list[Product]:
         for product in given
         if product.currency != box.currency or product.price < box.value
     ]
+
+
+def _tiers(box: Box, may_get: Callable[[Product], bool]) -> list[tuple[int, list[Product]]]:
+    # The tiers of the drops a hero may get, each with its weight, in the box's order.
+    tiers: dict[int, tuple[int, list[Product]]] = {}
+    for drop in box.drops:
+        if may_get(drop.product):
+            tiers.setdefault(drop.tier, (drop.weight, []))[1].append(drop.product)
+    return list(tiers.values())
 
 
 def _owned(tag: str) -> bool:

@@ -1,0 +1,73 @@
+{#def heroes: list | None, keys: int, key, lists, imported: bool, next: str #}
+{# The treasure chests of an account's heroes: its keys, each hero's chests and what a chest can
+   give the heroes of each faction; signed out, the way to sign in in place of the chests. #}
+{% set title = _("web.chests.title") %}
+{% set price = number(key.price) ~ " " ~ _("games." ~ game.id ~ ".currency." ~ key.currency) if key else "" %}
+<Layout :title="title">
+  <section aria-labelledby="chests-title" class="creator-head">
+    <div class="creator-intro">
+      <Plaque id="chests-title">{{ title }}</Plaque>
+      <p class="site-lead">
+        {% if lists and lists.worth %}
+          {{ _("web.chests.lead.worth", worth=lists.worth) }}
+        {% else %}
+          {{ _("web.chests.lead") }}
+        {% endif %}
+      </p>
+    </div>
+    {% if heroes is not none %}
+      <KeysPanel :keys="keys" :price="price" />
+    {% endif %}
+  </section>
+  {% set total = heroes|sum(attribute="count") if heroes else 0 %}
+  {% if heroes is none %}
+    <section aria-labelledby="chests-closed" class="chests-empty enter-panel">
+      <Icon name="chest" :size="88" stroke="#3B2D23" class="chests-empty-art" />
+      <div class="chests-empty-text">
+        <h2 id="chests-closed" class="chests-empty-title">{{ _("web.chests.signed_out") }}</h2>
+        <p>{{ _("web.chests.signed_out.text") }}</p>
+        <p class="site-actions">
+          <a href="{{ url('/sign-in') }}?{{ {'next': next}|urlencode }}"
+             class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+          <a href="{{ url('/register') }}" class="site-link">{{ _("web.account.sign_in.create") }}</a>
+        </p>
+      </div>
+    </section>
+  {% elif total %}
+    <section aria-labelledby="chests-heroes" class="chests-heroes">
+      <h2 id="chests-heroes" class="chests-heading">{{ _n("web.chests.total", total) }}</h2>
+      <ul role="list" class="chest-cards enter-rows">
+        {% for held in heroes %}
+          <ChestCard :held="held" />
+        {% endfor %}
+      </ul>
+    </section>
+  {% else %}
+    <section aria-labelledby="chests-none"
+             class="chests-empty chests-empty-dashed enter-panel">
+      <svg aria-hidden="true" viewBox="0 0 40 32" class="chests-empty-art">
+        <path d="M3 14h34v15H3zM3 14c0-6 4-10 9-10h16c5 0 9 4 9 10z" />
+      </svg>
+      <div class="chests-empty-text">
+        <h2 id="chests-none" class="chests-empty-title">{{ _("web.chests.none") }}</h2>
+        {% set hero = bar.roster.playing %}
+        {% if hero %}
+          <p>{{ _("web.chests.none.text") }}</p>
+          {% if game.site.start_links %}
+            <p class="site-actions">
+              <a href="{{ url('/' ~ game.id ~ '/play-now') }}"
+                 class="site-button site-button-large"><Icon name="go" :size="18" stroke="#FEDE01" />{{ _("web.chests.none.play", hero=hero.persona.name) }}</a>
+            </p>
+          {% endif %}
+        {% else %}
+          <p>{{ _("web.chests.none.no_hero") }}</p>
+          <p class="site-actions">
+            <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
+               class="site-button site-button-go site-button-large"><Icon name="plus" :size="18" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+          </p>
+        {% endif %}
+      </div>
+    </section>
+  {% endif %}
+  <ChestLists :lists="lists" :imported="imported" />
+</Layout>

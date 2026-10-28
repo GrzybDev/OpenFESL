@@ -229,7 +229,8 @@ class SqlEntitlementStore:
     async def stack_uses(self, account_id: int, persona_id: int, tag: str, uses: int) -> None:
         """Add uses to a persona's row of a tag that names no item, creating the row if missing.
 
-        The row is added or changed in one statement, so stacks at once add up.
+        The row is added or changed in one statement, so stacks at once add up, and its grant
+        time becomes the latest stack's, such as when the persona last found a chest.
 
         Args:
             account_id: The persona's account.
@@ -245,7 +246,10 @@ class SqlEntitlementStore:
                 statement.on_conflict_do_update(
                     index_elements=[EntitlementRow.persona_id, _item_number],
                     index_where=EntitlementRow.persona_id.is_not(None),
-                    set_={"use_count": func.coalesce(EntitlementRow.use_count, 0) + uses},
+                    set_={
+                        "use_count": func.coalesce(EntitlementRow.use_count, 0) + uses,
+                        "granted_at": func.now(),
+                    },
                 )
             )
 

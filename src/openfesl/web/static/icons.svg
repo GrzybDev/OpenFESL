@@ -392,4 +392,7 @@
   <symbol id="sticker" viewBox="0 0 100 100">
     <path d="M50 3l9 15 17-6 0 18 18 3-10 15 12 13-17 7 3 18-18-3-6 17-13-12-13 12-6-17-18 3 3-18-17-7 12-13L6 33l18-3 0-18 17 6z" stroke-width="4" stroke-linejoin="round"/>
   </symbol>
+  <symbol id="chest" viewBox="0 0 24 24">
+    <path d="M3 10.5h18V20H3zM3 10.5c0-3.2 2-5.5 5-5.5h8c3 0 5 2.3 5 5.5M10 10.5v4h4v-4" fill="none" stroke-width="2.2" stroke-linejoin="round"/>
+  </symbol>
 </svg>

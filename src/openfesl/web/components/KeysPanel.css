@@ -1,0 +1,33 @@
+/* The account's keys on the beige panel of the hero slots: a yellow key disc, beige while the
+   account has none, and the count beside it. */
+@layer components {
+  .keys-panel {
+    flex-basis: 400px;
+  }
+
+  .keys-count {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+  }
+
+  .keys-disc {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border: 3px solid #000;
+    border-radius: 50%;
+    background: #f2c12e;
+    transition: background-color 150ms var(--ease-menu);
+  }
+
+  .keys-disc-none {
+    background: #c5bba7;
+  }
+
+  .keys-number {
+    font: 800 22px/1.2 var(--site-heading);
+  }
+}

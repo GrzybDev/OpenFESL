@@ -1,0 +1,37 @@
+{#def cards: list, key = None, worth = None #}
+{# The heroes' treasure chests in the dark orange info box under the heroes: how many each hero
+   has to open and what a key costs, with the way to open them, or that no hero has one yet. #}
+{% set total = cards|sum(attribute="chests") %}
+{% set currency = "games." ~ game.id ~ ".currency." %}
+<section aria-labelledby="chests-box-title"
+         class="info-box info-box-darkorange">
+  <h2 id="chests-box-title" class="info-box-title">{{ _("web.chests.title") }}</h2>
+  <span aria-hidden="true" class="info-box-disc"><Icon name="chest" :size="22" stroke="#0A0A0A" /></span>
+  {% if total %}
+    {% set lines = [] %}
+    {% for card in cards if card.chests %}
+      {% set kept = lines.append(card.hero.persona.name ~ " " ~ number(card.chests)) %}
+    {% endfor %}
+    {% set count %}<strong>{{ _n("web.chests.total", total) }}</strong>{% endset %}
+    <p class="info-box-note">{{ _("web.chests.box.heroes", total=count, heroes=listed(lines)) }}</p>
+  {% else %}
+    <p class="info-box-note">{{ _("web.chests.box.none") }}</p>
+  {% endif %}
+  <p class="info-box-note">
+    {% if key %}
+      {{ _("web.chests.box.rule", price=number(key.price) ~ " " ~ _(currency ~ key.currency)) }}
+      {% if worth %}{{ _("web.chests.box.worth", worth=number(worth[0]) ~ " " ~ _(currency ~ worth[1])) }}{% endif %}
+    {% else %}
+      {{ _("web.chests.lead") }}
+    {% endif %}
+  </p>
+  <div class="play-now-box-actions">
+    {% if total %}
+      <a href="{{ url('/' ~ game.id ~ '/treasure-chests') }}"
+         class="site-button"><Icon name="chest" :size="16" stroke="#FEDE01" />{{ _("web.chests.box.open") }}</a>
+    {% else %}
+      <a href="{{ url('/' ~ game.id ~ '/treasure-chests') }}"
+         class="info-box-link">{{ _("web.chests.box.about") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+    {% endif %}
+  </div>
+</section>

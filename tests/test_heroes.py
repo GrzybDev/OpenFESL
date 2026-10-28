@@ -188,6 +188,13 @@ async def test_the_heroes_page_lists_each_hero_and_changes_the_hero_the_game_log
         "UPDATE entitlement SET use_count = 2 WHERE persona_id = :hero",
         hero=first,
     )
+    # A server stacked a treasure chest on the second hero, whose bandages are all there.
+    await execute(
+        database_url,
+        "INSERT INTO entitlement (account_id, persona_id, tag, use_count, status)"
+        " SELECT account_id, id, 'BFH_TREASURE_CHEST', 1, 'ACTIVE' FROM persona WHERE id = :hero",
+        hero=second,
+    )
     # A hero the launcher made before the site's creator, without a faction, class or look.
     await execute(
         database_url,
@@ -206,7 +213,9 @@ async def test_the_heroes_page_lists_each_hero_and_changes_the_hero_the_game_log
         # the one the game could not start with.
         assert shown.index("Brassbuckle") < shown.index("Tin_Tankard") < shown.index("Oldlamp")
         assert "3 of 4 used" in shown and "Free hero slot" in shown
-        assert "12 items · 1 running low" in shown and "0 unspent of 0" in shown
+        assert "12 items · 1 running low Chests none yet" in shown and "0 unspent of 0" in shown
+        assert "items · none running low Chests 1 to open" in shown
+        assert "1 chest to open : Tin_Tankard 1." in shown
         heroes = (first, second, legacy)
         offered = [f"/bfheroes/heroes/{hero}/default" in page.text for hero in heroes]
         assert offered == [False, True, False]

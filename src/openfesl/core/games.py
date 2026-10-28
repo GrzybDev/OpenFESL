@@ -498,6 +498,12 @@ class Game(BaseModel):
             raise ValueError("the host page needs the server_files that hosting involves")
         return self
 
+    @model_validator(mode="after")
+    def _check_chests_page(self) -> Self:
+        if "treasure-chests" in self.pages and not (self.chests and self.heroes and self.site):
+            raise ValueError("the treasure chests page needs chests, heroes and a site")
+        return self
+
 
 class Games:
     """The games the server serves, found by the client string of a FESL Hello."""

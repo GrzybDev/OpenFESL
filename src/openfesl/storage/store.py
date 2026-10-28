@@ -129,6 +129,27 @@ class SqlProductStore:
             )
             return product_of(row) if row else None
 
+    async def account_product(self, game: str, item_id: int) -> Product | None:
+        """Return the first product of an item that a game's store sells accounts, if any.
+
+        Args:
+            game: The game's data-file name.
+            item_id: The item's number.
+        """
+        async with self._sessions() as session:
+            row = await session.scalar(
+                select(StoreProductRow)
+                .where(
+                    StoreProductRow.game == game,
+                    StoreProductRow.item_id == item_id,
+                    StoreProductRow.published,
+                    StoreProductRow.account,
+                )
+                .order_by(StoreProductRow.sort, StoreProductRow.id)
+                .limit(1)
+            )
+            return product_of(row) if row else None
+
     async def add_bundle(self, game: str, bundle: Bundle) -> int:
         """Add a bundle to a game's store.
 

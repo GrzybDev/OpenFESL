@@ -7,10 +7,11 @@ executable = "BFHeroes.exe"
 # played with live on OpenFESL.
 partition = "/eagames/bfwest"
 namespace = "bfwest"
-# The web pages the game's menu shows beside its front page: the guide to playing and the Funds
-# page. The server list is drawn for games with squads and a server browser that finds servers by
-# name, and the leaderboard for other stats than this game's, so neither is listed.
-pages = ["play", "funds"]
+# The web pages the game's menu shows beside its front page: the guide to playing, the treasure
+# chests of an account's heroes and the Funds page. The server list is drawn for games with squads
+# and a server browser that finds servers by name, and the leaderboard for other stats than this
+# game's, so neither is listed.
+pages = ["play", "treasure-chests", "funds"]
 # The stats of the player's account rather than of a hero: the tutorial, the last session and its
 # length, the daily missions and the pop-item counts. The game's stats dictionary gives each key its
 # owner, yet it names a hero and an account by the same owner type, telling them apart by the id
@@ -283,10 +284,11 @@ start_links = true
 name = "game"
 pages = ["play", "leaderboard", "host"]
 
-# The store's items and the Funds, whose pages lie under the store's address.
+# The store's items, the treasure chests and the Funds; the store's own pages lie under its
+# address.
 [[site.menus]]
 name = "store"
-pages = ["funds"]
+pages = ["treasure-chests", "funds"]
 section = "/store"
 
 # Heroes, which the game creates none of: with no hero it opens the website's creator and quits.

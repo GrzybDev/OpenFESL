@@ -1,0 +1,80 @@
+/* The treasure chests page: the heroes' cards in a grid under the count of chests to open, and
+   the dashed panel in their place when there is none to open or nobody is signed in. */
+@layer pages {
+  .chests-heroes {
+    margin-top: 40px;
+  }
+
+  .chests-heading {
+    margin-bottom: 16px;
+    font: 800 23px/1.2 var(--site-heading);
+    color: #fff;
+    text-shadow: var(--site-outline);
+  }
+
+  .chest-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: 40px 22px;
+  }
+
+  .chests-empty {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 22px;
+    margin-top: 40px;
+    padding: 18px;
+    border: 3px dashed #3b2d23;
+    border-radius: 8px;
+    background: rgb(241 233 222 / 0.7);
+    font-size: 15px;
+    line-height: 1.5;
+
+    > p,
+    .chests-empty-text > p:not(.site-actions) {
+      max-width: 58ch;
+      margin-top: 8px;
+    }
+
+    .site-actions {
+      margin-top: 14px;
+    }
+  }
+
+  .chests-empty-dashed {
+    gap: 20px 36px;
+    padding: 26px clamp(16px, 3vw, 40px);
+    background: rgb(241 233 222 / 0.6);
+
+    .chests-empty-art {
+      width: 150px;
+      height: 120px;
+      fill: none;
+      stroke: #3b2d23;
+      stroke-width: 1.6;
+      stroke-dasharray: 3 2;
+    }
+
+    .chests-empty-title {
+      font-size: 28px;
+    }
+  }
+
+  .chests-empty-art {
+    flex: 0 0 auto;
+  }
+
+  .chests-empty-text {
+    flex: 1 1 260px;
+    min-width: 0;
+  }
+
+  .chests-empty-title {
+    font: 800 23px/1.15 var(--site-heading);
+    color: #fff;
+    text-shadow: var(--site-outline);
+  }
+}

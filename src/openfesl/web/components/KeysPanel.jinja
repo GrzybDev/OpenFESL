@@ -1,0 +1,19 @@
+{#def keys: int, price: str #}
+{# The account's treasure chest keys on the beige panel: how many it holds, what one costs and
+   what it opens. #}
+<section aria-labelledby="keys-title" class="slot-panel keys-panel">
+  <h2 id="keys-title" class="slot-panel-title">{{ _("web.chests.keys.title") }}</h2>
+  <div class="keys-count">
+    <span aria-hidden="true"
+          class="keys-disc{% if not keys %} keys-disc-none{% endif %}"><Icon name="key" :size="24" stroke="#0A0A0A" /></span>
+    <p class="keys-number">{{ _n("web.chests.keys.count", keys) }}</p>
+  </div>
+  <p class="slot-note">
+    {% if price %}
+      {{ _("web.chests.keys.rule", price=price) }}
+    {% else %}
+      {{ _("web.chests.keys.rule.unsold") }}
+    {% endif %}
+  </p>
+  {{ content }}
+</section>

@@ -1,0 +1,81 @@
+/* What a chest can give, in the dark orange box (white text only): a list per faction with the
+   item, for how long or how many uses, and its chance on the right. */
+@layer components {
+  .chest-lists-box {
+    --box: #9b4e14;
+    --box-edge: #cd751e;
+    --box-ink: #fff;
+  }
+
+  .info-boxes.chest-lists {
+    position: relative;
+    isolation: isolate;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .chest-lists-text {
+    max-width: 80ch;
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .chest-lists-factions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    gap: 16px 22px;
+    margin-top: 14px;
+  }
+
+  .chest-lists-faction {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font: 800 15px/1.2 var(--site-heading);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .chest-lists-glyph {
+    display: grid;
+    width: 28px;
+    height: 28px;
+    place-items: center;
+    border: 2px solid #000;
+    border-radius: 50%;
+    background: var(--faction);
+    color: var(--faction-ink);
+  }
+
+  .chest-drops {
+    overflow: hidden;
+    border: 2px solid #000;
+    border-radius: 6px;
+
+    > li {
+      display: flex;
+      min-height: 44px;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 10px;
+    }
+
+    > li:nth-child(even) {
+      background: rgb(0 0 0 / 0.22);
+    }
+  }
+
+  .chest-drop-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  .chest-drop-chance {
+    font: 800 16px/1 var(--site-heading);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+}

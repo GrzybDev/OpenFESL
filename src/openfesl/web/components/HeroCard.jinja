@@ -94,6 +94,16 @@
             <span class="hero-scope">· {{ _("web.heroes.items.none_low") }}</span>
           {% endif %}
         </dd>
+        {% if card.chests is not none %}
+          <dt>{{ _("web.heroes.chests") }}</dt>
+          <dd>
+            {% if card.chests %}
+              <strong>{{ _n("web.heroes.chests.count", card.chests) }}</strong>
+            {% else %}
+              {{ _("web.heroes.chests.none") }}
+            {% endif %}
+          </dd>
+        {% endif %}
         <dt>{{ _("web.heroes.enlisted") }}</dt>
         <dd>
           {{ when(hero.created, "yMMMd") }}

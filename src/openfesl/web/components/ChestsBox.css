@@ -1,0 +1,8 @@
+/* The dark orange info box of the heroes' treasure chests, which takes white text only. */
+@layer components {
+  .info-box-darkorange {
+    --box: #9b4e14;
+    --box-edge: #cd751e;
+    --box-ink: #fff;
+  }
+}

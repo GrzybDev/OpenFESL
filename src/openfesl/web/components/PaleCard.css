@@ -1,0 +1,36 @@
+/* A pale card hung over a splatter, with a band in its faction's colours across its top. */
+@layer components {
+  .pale-hanger {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+  }
+
+  .pale-card {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #f1e9de;
+    box-shadow:
+      inset 0 0 0 3px #f8f4ef,
+      0 4px 0 rgb(0 0 0 / 0.3);
+    color: #1f1712;
+  }
+
+  .pale-band {
+    display: flex;
+    min-height: 34px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 14px;
+    border-bottom: 3px solid #000;
+    background: var(--faction);
+    color: var(--faction-ink);
+    font: 800 13px/1 var(--site-heading);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+}
