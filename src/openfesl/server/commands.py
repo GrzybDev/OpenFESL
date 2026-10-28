@@ -182,11 +182,19 @@ async def _servers(settings: Settings, args: argparse.Namespace) -> None:
             case "list":
                 for server in await store.all():
                     state = ServerState.REVOKED if server.revoked else server.state
-                    print(f"{server.ugid}  {state}  {_provider_of(server)}  {server.name}")
+                    shown = "official" if server.official else state
+                    print(f"{server.ugid}  {shown}  {_provider_of(server)}  {server.name}")
             case "approve" | "revoke":
                 state = ServerState.APPROVED if args.action == "approve" else ServerState.REVOKED
                 if not await store.set_state(args.ugid, state, admin=None):
                     sys.exit(f"No server has the id {args.ugid}")
+            case "official" | "unofficial":
+                found = await store.find([args.ugid])
+                if not found:
+                    sys.exit(f"No server has the id {args.ugid}")
+                if found[0].state is not ServerState.APPROVED or found[0].revoked:
+                    sys.exit(f"The server {args.ugid} is not approved")
+                await store.set_official(args.ugid, args.action == "official", admin=None)
 
 
 def _provider_of(server: GameServer) -> str:

@@ -111,6 +111,12 @@ class SqlServerStore:
                 .returning(ProviderRow.id)
             )
             if changed is not None:
+                # The marks go for good, also for a server that reports another provider later.
+                await session.execute(
+                    update(GameServerRow)
+                    .where(GameServerRow.provider_id == provider_id)
+                    .values(official=False)
+                )
                 action = AdminAction.PROVIDER_REVOKE
                 session.add(action_row(action, provider_id.hex(), {}, admin))
         return changed is not None
@@ -191,16 +197,58 @@ class SqlServerStore:
         Returns:
             Whether a server has that id.
         """
+        # A server that is not approved loses its mark, which approving it again does not return.
+        kept = GameServerRow.official if state is ServerState.APPROVED else False
         async with self._sessions.begin() as session:
             changed = await session.scalar(
                 update(GameServerRow)
                 .where(GameServerRow.ugid == ugid)
-                .values(state=state.value)
+                .values(state=state.value, official=kept)
                 .returning(GameServerRow.ugid)
             )
             if changed is not None:
                 details = {"state": state.value}
                 session.add(action_row(AdminAction.SERVER_STATE, ugid, details, admin))
+        return changed is not None
+
+    async def set_official(self, ugid: str, official: bool, admin: Admin | None) -> bool:
+        """Mark a server as official or remove its mark, recording it among the admin's actions.
+
+        Args:
+            ugid: The server's persistent game id.
+            official: Whether it is to be official.
+            admin: The admin who decided; None for the command line.
+
+        Returns:
+            Whether the mark changed: only an approved server whose provider is not revoked
+            takes it.
+        """
+        revoked_provider = select(ProviderRow.id).where(
+            ProviderRow.id == GameServerRow.provider_id, ProviderRow.revoked
+        )
+        async with self._sessions.begin() as session:
+            # Waits for a revocation of the provider under way: the update's check alone reads
+            # the provider as it was when the update started.
+            await session.execute(
+                select(ProviderRow.id)
+                .join(GameServerRow, GameServerRow.provider_id == ProviderRow.id)
+                .where(GameServerRow.ugid == ugid)
+                .with_for_update(read=True, of=ProviderRow)
+            )
+            changed = await session.scalar(
+                update(GameServerRow)
+                .where(
+                    GameServerRow.ugid == ugid,
+                    GameServerRow.state == ServerState.APPROVED.value,
+                    GameServerRow.official != official,
+                    ~revoked_provider.exists(),
+                )
+                .values(official=official)
+                .returning(GameServerRow.ugid)
+            )
+            if changed is not None:
+                details = {"official": official}
+                session.add(action_row(AdminAction.SERVER_OFFICIAL, ugid, details, admin))
         return changed is not None
 
     async def decisions(self, ugids: Collection[str]) -> dict[str, Decision]:
@@ -253,4 +301,5 @@ def _server(row: GameServerRow, provider: ProviderRow | None) -> GameServer:
         provider_id=row.provider_id,
         provider=_provider(provider) if provider else None,
         first_seen=row.created_at,
+        official_mark=row.official,
     )

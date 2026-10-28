@@ -96,6 +96,12 @@ def main(argv: Sequence[str] | None = None) -> None:
         "ugid"
     )
     server_actions.add_parser("revoke", help="stop a server from hosting").add_argument("ugid")
+    server_actions.add_parser(
+        "official", help="mark an approved server as run by this service's administrators"
+    ).add_argument("ugid")
+    server_actions.add_parser("unofficial", help="remove a server's official mark").add_argument(
+        "ugid"
+    )
     setting_actions = commands.add_parser(
         "settings", help="show or override the site's and the games' policies"
     ).add_subparsers(dest="action", required=True)

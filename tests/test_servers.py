@@ -1,9 +1,12 @@
+import asyncio
 import struct
 import uuid
 from pathlib import Path
 
 import anyio
 import pytest
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async_engine
 from support import (
     Game,
     TheaterAnswer,
@@ -17,6 +20,7 @@ from support import (
 )
 
 from openfesl.protocol.relay import Channel, ConnectionKey
+from openfesl.storage.servers import SqlServerStore
 
 pytestmark = pytest.mark.anyio
 
@@ -24,12 +28,23 @@ FESL = ConnectionKey(Channel.FESL, 1)
 THEATER = ConnectionKey(Channel.THEATER, 1)
 
 
-async def providers_shown(looker: Game, created: TheaterAnswer) -> list[str]:
-    """Return the provider attributes that a lookup of a listed game shows."""
+async def shown(looker: Game, created: TheaterAnswer, attribute: str) -> list[str] | None:
+    """Return the values of an attribute, in any spelling, that a lookup of a listed game shows.
+
+    None while the game is not listed, as before the server reads its approval back.
+    """
     ids = [("LID", created.fields["LID"]), ("GID", created.fields["GID"])]
     looked_up = await looker.theater(THEATER, "GDAT", ids)
-    assert looked_up.error is None
-    return [value for key, value in looked_up.fields.items() if key.casefold() == "b-u-provider"]
+    if looked_up.error:
+        return None
+    return [value for key, value in looked_up.fields.items() if key.casefold() == attribute]
+
+
+async def until_marked(looker: Game, created: TheaterAnswer, mark: str) -> None:
+    """Wait until a game shows the game's own server mark as the admin last decided."""
+    with anyio.fail_after(5):
+        while await shown(looker, created, "b-u-ea") != [mark]:
+            await anyio.sleep(0.02)
 
 
 async def games_seen(player: Game) -> int:
@@ -151,12 +166,18 @@ async def test_servers_report_the_provider_whose_file_they_hold(
         await cli(capsys, "servers", "approve", ugid)
         await until_seen(server, 1)
         await report(server, created, ("B-U-Provider", "forged"))
-        assert await providers_shown(server, created) == ["Invented Hosting"]
+        assert await shown(server, created, "b-u-provider") == ["Invented Hosting"]
 
-        # Revoking the provider revokes its servers, also those that report it later.
+        # Revoking the provider revokes its servers, also those that report it later, and
+        # takes their official marks.
+        await cli(capsys, "servers", "official", ugid)
+        assert "  official  Invented Hosting  " in await cli(capsys, "servers", "list")
         await cli(capsys, "providers", "revoke", added)
         await server.theater_push(THEATER, "GREM")
     assert await cli(capsys, "providers", "list") == f"{added}  revoked  Invented Hosting\n"
+    assert "  revoked  Invented Hosting  " in await cli(capsys, "servers", "list")
+    with pytest.raises(SystemExit, match="is not approved"):
+        await cli(capsys, "servers", "official", ugid)
     async with game(server_url) as newcomer:
         await connect_server(newcomer)
         created = await create(newcomer)
@@ -167,6 +188,46 @@ async def test_servers_report_the_provider_whose_file_they_hold(
         await newcomer.theater_push(THEATER, "GREM")
     with pytest.raises(SystemExit, match="No provider has the id"):
         await cli(capsys, "providers", "revoke", "not-an-id")
+
+
+async def until_waiting(engine: AsyncEngine, count: int) -> None:
+    """Wait until some number of the database's sessions wait for a lock."""
+    waiting = text("SELECT count(*) FROM pg_stat_activity WHERE wait_event_type = 'Lock'")
+    with anyio.fail_after(5):
+        while True:
+            # A connection of its own each time, as a transaction reads the activity only once.
+            async with engine.connect() as connection:
+                if await connection.scalar(waiting) >= count:
+                    return
+            await anyio.sleep(0.02)
+
+
+async def test_a_mark_set_while_its_provider_is_revoked_does_not_outlast_the_revocation(
+    server_url: str, database_url: str, capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    out = tmp_path / "ProviderId.dat"
+    await cli(capsys, "providers", "add", "Invented Hosting", "--out", str(out))
+    provider_id = out.read_bytes()[:16]
+    async with game(server_url) as server:
+        await connect_server(server)
+        created = await create(server)
+        ugid = created.fields["UGID"]
+        await report(server, created, ("B-U-Provider", masked(provider_id, bytes(8))))
+        await cli(capsys, "servers", "approve", ugid)
+    engine = create_async_engine(database_url)
+    store = SqlServerStore(async_sessionmaker(engine))
+    async with engine.connect() as holding:
+        # The server's row stays locked, so the revocation halts with its provider revoked.
+        await holding.execute(
+            text("SELECT ugid FROM game_server WHERE ugid = :ugid FOR UPDATE"), {"ugid": ugid}
+        )
+        revoking = asyncio.create_task(store.revoke_provider(provider_id, None))
+        await until_waiting(engine, 1)
+        marking = asyncio.create_task(store.set_official(ugid, True, None))
+        await until_waiting(engine, 2)
+    assert (await revoking, await marking) == (True, False)
+    assert not (await store.find([ugid]))[0].official_mark
+    await engine.dispose()
 
 
 async def test_open_hosting_lists_every_server_at_once_and_still_records_it(
@@ -185,10 +246,58 @@ async def test_open_hosting_lists_every_server_at_once_and_still_records_it(
         recorded = f"{ugid}  pending  {unknown.hex().upper()}  Invented Server #1\n"
         assert await cli(capsys, "servers", "list") == recorded
         await report(server, created, ("B-U-PROVIDER", "forged"))
-        assert await providers_shown(ann, created) == []
+        assert await shown(ann, created, "b-u-provider") == []
 
         # Closing hosting again hides the servers that wait for approval.
         assert await cli(capsys, "hosting", "approved") == "approved\n"
         await until_seen(ann, 0)
         await cli(capsys, "hosting", "open")
         await until_seen(ann, 1)
+
+
+async def test_only_official_servers_show_the_games_own_mark_until_unmarked_or_revoked(
+    prompt_decisions: None, server_url: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    async with game(server_url) as kept, game(server_url) as other, game(server_url) as newcomer:
+        await connect_server(kept)
+        kept_game = await create(kept, name="Invented Official Rush")
+        await connect_server(other)
+        other_game = await create(other, name="Invented Other Rush")
+        kept_ugid, secret = kept_game.fields["UGID"], kept_game.fields["SECRET"]
+        for created in (kept_game, other_game):
+            await cli(capsys, "servers", "approve", created.fields["UGID"])
+        await until_seen(kept, 2)
+        await until_marked(kept, kept_game, "0")
+
+        # Only the admin marks a server; no host sets the game's mark for its own game.
+        await report(other, other_game, ("b-u-EA", "1"))
+        await cli(capsys, "servers", "official", kept_ugid)
+        await until_marked(kept, kept_game, "1")
+        assert await shown(kept, other_game, "b-u-ea") == ["0"]
+        listed = await cli(capsys, "servers", "list")
+        assert f"{kept_ugid}  official  -  Invented Official Rush\n" in listed
+        assert "  approved  -  Invented Other Rush" in listed
+        await report(kept, kept_game, ("B-U-EA", "0"))
+        assert await shown(kept, kept_game, "b-u-ea") == ["1"]
+        await cli(capsys, "servers", "unofficial", kept_ugid)
+        await until_marked(kept, kept_game, "0")
+        await cli(capsys, "servers", "official", kept_ugid)
+        await until_marked(kept, kept_game, "1")
+
+        # Revoking a server takes its mark for good: approving it again does not return it.
+        await cli(capsys, "servers", "revoke", kept_ugid)
+        await kept.theater_push(THEATER, "GREM")
+        await cli(capsys, "servers", "approve", kept_ugid)
+        assert f"{kept_ugid}  approved  -  " in await cli(capsys, "servers", "list")
+        again = await create(kept, kept_ugid, secret)
+        assert again.error is None
+        await until_seen(other, 2)
+        assert await shown(other, again, "b-u-ea") == ["0"]
+
+        # Only approved servers take the mark.
+        await connect_server(newcomer)
+        waiting = (await create(newcomer, name="Invented Waiting Rush")).fields["UGID"]
+        with pytest.raises(SystemExit, match=f"The server {waiting} is not approved"):
+            await cli(capsys, "servers", "official", waiting)
+    with pytest.raises(SystemExit, match="No server has the id"):
+        await cli(capsys, "servers", "official", str(uuid.uuid4()))

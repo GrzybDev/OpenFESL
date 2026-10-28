@@ -44,6 +44,9 @@ class AdminAction(StrEnum):
     SERVER_STATE = "server_state"
     """Approved or revoked the dedicated server whose persistent game id is the target; the
     details hold its new state."""
+    SERVER_OFFICIAL = "server_official"
+    """Marked the dedicated server whose persistent game id is the target as official, or removed
+    the mark; the details say which."""
     ENTITLEMENT_GRANT = "entitlement_grant"
     """Granted the account numbered as the target entitlements by hand; the details hold their
     tags and the product key whose grants they were, if any."""

@@ -12,6 +12,7 @@ from openfesl.core.servers import (
     BAD_SECRET,
     Admission,
     Approval,
+    GameServer,
     new_identity,
     reported_provider,
 )
@@ -370,8 +371,17 @@ class Hosting:
         if server is None or server.revoked:
             self.end(hosted)
             return
+        self.update_server(hosted, server)
+
+    def update_server(self, hosted: HostedGame, server: GameServer) -> None:
+        """Show a game as the admin left the dedicated server that hosts it.
+
+        Args:
+            hosted: The game.
+            server: The server, as stored now.
+        """
         hosted.server = server
-        _label(game, hosted)
+        _label(hosted.host.game, hosted)
 
     def end(self, hosted: HostedGame) -> None:
         """Remove a dedicated server's game whose server or provider the admin revoked.
@@ -411,14 +421,22 @@ def _same_host(host: TheaterConnection, connection: TheaterConnection) -> bool:
 
 
 def _label(game: Game, hosted: HostedGame) -> None:
-    # Only the master server says who provides a game, whatever the host sends and however it
-    # spells the key: the name of the provider its server reports, once the admin knows it.
-    if name := game.provider_attribute:
-        for key in [key for key in hosted.basic if key.casefold() == name.casefold()]:
-            del hosted.basic[key]
-        provider = hosted.server.provider if hosted.server else None
-        if provider is not None:
-            hosted.basic[name] = provider.name
+    # Only the master server says who provides a game and whether the game's own mark shows,
+    # whatever the host sends and however it spells the keys: the name of the provider its server
+    # reports, once the admin knows it, and 1 only for an official server.
+    server = hosted.server
+    provider = server.provider if server else None
+    _set(hosted.basic, game.provider_attribute, provider.name if provider else None)
+    _set(hosted.basic, game.official_attribute, "1" if server and server.official else "0")
+
+
+def _set(attributes: dict[str, str], name: str | None, value: str | None) -> None:
+    if name is None:
+        return
+    for key in [key for key in attributes if key.casefold() == name.casefold()]:
+        del attributes[key]
+    if value is not None:
+        attributes[name] = value
 
 
 def _provider_in(game: Game, sent: Mapping[str, str]) -> bytes | None:

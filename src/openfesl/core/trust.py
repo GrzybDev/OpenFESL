@@ -132,8 +132,8 @@ class ServerTrust:
 
     async def _listed(self, hosted: HostedGame) -> bool:
         # The admin may have decided otherwise since the game listed.
-        standings = await self._approval.standings([hosted.ugid])
-        return standings.get(hosted.ugid) is Standing.LISTED
+        current = await self._approval.current([hosted.ugid])
+        return hosted.ugid in current and current[hosted.ugid][1] is Standing.LISTED
 
     async def follow_approvals(self) -> None:
         """Apply the admin's decisions to the games of dedicated servers until cancelled."""
@@ -146,13 +146,15 @@ class ServerTrust:
                 logger.exception("Could not read the admin's decisions about hosting servers")
 
     async def apply_decisions(self) -> None:
-        """List, hide or end the games of dedicated servers as the admin last decided."""
+        """Mark, list, hide or end the games of dedicated servers as the admin last decided."""
         vetted = [hosted for hosted in self._hosting.every() if hosted.server is not None]
         if not vetted:
             return
-        standings = await self._approval.standings({hosted.ugid for hosted in vetted})
+        current = await self._approval.current({hosted.ugid for hosted in vetted})
         for hosted in vetted:
-            standing = standings.get(hosted.ugid, Standing.REFUSED)
+            server, standing = current.get(hosted.ugid, (hosted.server, Standing.REFUSED))
+            if server is not None and server != hosted.server:
+                self._hosting.update_server(hosted, server)
             listed = standing is Standing.LISTED
             if standing is Standing.REFUSED:
                 self._hosting.end(hosted)

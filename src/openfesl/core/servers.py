@@ -93,6 +93,7 @@ class GameServer:
         provider_id: The provider id its games last reported, known to the admin or not.
         provider: The provider the admin created with that id, if any.
         first_seen: When it first tried to host; None for one not stored yet.
+        official_mark: Whether the admin marked it as run by the service's administrators.
     """
 
     ugid: str
@@ -102,11 +103,20 @@ class GameServer:
     provider_id: bytes | None = None
     provider: Provider | None = None
     first_seen: datetime | None = None
+    official_mark: bool = False
 
     @property
     def revoked(self) -> bool:
         """Whether the admin revoked the server or its provider."""
         return self.state is ServerState.REVOKED or bool(self.provider and self.provider.revoked)
+
+    @property
+    def official(self) -> bool:
+        """Whether the admin marked it as run by the service's administrators and it is not revoked.
+
+        The mark changes how lists show its games and nothing else: it grants no trust.
+        """
+        return self.official_mark and not self.revoked
 
     def standing(self, mode: HostingMode) -> Standing:
         """Return where the server's games stand with players.
@@ -264,6 +274,19 @@ class ServerStore(Protocol):
             Whether a server has that id.
         """
 
+    async def set_official(self, ugid: str, official: bool, admin: Admin | None) -> bool:
+        """Mark a server as official or remove its mark, recording it among the admin's actions.
+
+        Args:
+            ugid: The server's persistent game id.
+            official: Whether it is to be official.
+            admin: The admin who decided; None for the command line.
+
+        Returns:
+            Whether the mark changed: only an approved server whose provider is not revoked
+            takes it.
+        """
+
     async def all(self) -> list[GameServer]:
         """Return every server that ever hosted, oldest first."""
 
@@ -410,14 +433,16 @@ class Approval:
         """Return whose games players see now: every dedicated server's or approved ones'."""
         return await self._store.hosting_mode()
 
-    async def standings(self, ugids: Collection[str]) -> dict[str, Standing]:
-        """Return where the games of dedicated servers stand with players as of now.
+    async def current(self, ugids: Collection[str]) -> dict[str, tuple[GameServer, Standing]]:
+        """Return dedicated servers as the admin left them, with where their games stand now.
 
         Args:
             ugids: The servers' persistent game ids; ids no server has are left out.
         """
         mode = await self._store.hosting_mode()
-        return {server.ugid: server.standing(mode) for server in await self._store.find(ugids)}
+        return {
+            server.ugid: (server, server.standing(mode)) for server in await self._store.find(ugids)
+        }
 
     def _note_attempt(self, ugid: str, refused: bool) -> None:
         # Kept for a day, in memory: the counts only tell the admin what a server does lately.

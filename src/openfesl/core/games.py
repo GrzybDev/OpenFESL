@@ -255,6 +255,9 @@ class Game(BaseModel):
         lobbies: The Theater lobbies of all of the game's clients.
         provider_attribute: The basic game attribute in which dedicated servers report their
             provider and game lists show the provider's name; hosts cannot set it themselves.
+        official_attribute: The basic game attribute by which the game's server browser marks
+            and filters servers of its own: 1 for the games of servers the admin marked official,
+            0 for every other; hosts cannot set it themselves.
         policies: How the game's services behave by default where the game handles more than
             one behaviour.
         countries: The age limits of the countries whose limits differ from the defaults, by
@@ -299,6 +302,7 @@ class Game(BaseModel):
     relationships: RelationshipRules | None = None
     lobbies: list[Lobby] = []
     provider_attribute: str | None = None
+    official_attribute: str | None = None
     policies: Policies
     countries: dict[str, Ages] = {}
     pages: list[PageKind]

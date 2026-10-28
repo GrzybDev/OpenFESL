@@ -615,6 +615,7 @@ class GameServerRow(Base):
     # No foreign key: a server keeps the id it reports also while the admin knows no such
     # provider, so that one created later is recognised.
     provider_id: Mapped[bytes | None] = mapped_column(LargeBinary)
+    official: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
