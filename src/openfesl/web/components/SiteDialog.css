@@ -83,6 +83,12 @@
     margin-top: 16px;
   }
 
+  /* The amount that is missing, beside what the account has. */
+  .site-short {
+    font-weight: 700;
+    color: #8c1e18;
+  }
+
   .site-dialog-why {
     min-height: 1.4em;
     margin-top: 8px;

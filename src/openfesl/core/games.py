@@ -348,6 +348,9 @@ class Game(BaseModel):
         points = self.currencies.get(self.heroes.points) if self.heroes else None
         if self.heroes and (points is None or points.scope is not Scope.PERSONA):
             raise ValueError("the heroes' points need a currency that each persona holds")
+        paid = self.currencies.get(self.heroes.currency) if self.heroes else None
+        if self.heroes and (paid is None or paid.scope is not Scope.ACCOUNT):
+            raise ValueError("the heroes' prices need a currency that the account holds")
         return self
 
     @model_validator(mode="after")

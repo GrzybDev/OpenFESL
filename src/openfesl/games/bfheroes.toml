@@ -271,6 +271,9 @@ starting_items = { "2005-lmct" = 10 }
 # an item runs low.
 points = "_DH"
 running_low = 3
+# A new name costs Funds, the currency of the account; renames follow the rule of new names.
+currency = "_PF"
+rename_price = 1499
 
 # Royal Army first, as the 2012 creator listed them.
 [heroes.factions.royal]

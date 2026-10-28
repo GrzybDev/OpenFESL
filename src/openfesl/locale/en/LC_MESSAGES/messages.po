@@ -168,7 +168,7 @@ msgid "web.creator.lead.first"
 msgstr "The first hero becomes the default hero, the one OpenFESLHook's launcher logs the game in with."
 
 msgid "web.creator.lead.kept"
-msgstr "Faction, class and the look chosen here stay with the hero."
+msgstr "Faction, class and the look chosen here stay with the hero; a new name later costs %(price)s %(currency)s."
 
 msgid "web.creator.lead.full"
 msgstr "A new hero needs a free hero slot."
@@ -402,7 +402,7 @@ msgid "web.selector.free"
 msgstr "Slot %(slot)s · free"
 
 msgid "web.selector.all"
-msgstr "All heroes and slots"
+msgstr "All heroes, renames and slots"
 
 msgid "web.heroes.title"
 msgstr "My heroes"
@@ -478,6 +478,57 @@ msgstr "%(hero)s is now the default hero: OpenFESLHook's launcher logs %(game)s 
 
 msgid "web.heroes.back"
 msgstr "Back to my heroes"
+
+msgid "web.rename.action"
+msgstr "Rename"
+
+msgid "web.rename.price.short"
+msgstr "%(price)s %(currency)s"
+
+msgid "web.rename.title"
+msgstr "Rename %(hero)s"
+
+msgid "web.rename.name"
+msgstr "New name"
+
+msgid "web.rename.hint"
+msgstr "2 to 16 letters, digits, _ or -. Names ignore capitals."
+
+msgid "web.rename.same"
+msgstr "That is the hero's name now."
+
+msgid "web.rename.price"
+msgstr "Price"
+
+msgid "web.rename.funds_now"
+msgstr "%(currency)s now"
+
+msgid "web.rename.funds_after"
+msgstr "%(currency)s after"
+
+msgid "web.rename.short"
+msgstr "%(amount)s short"
+
+msgid "web.rename.submit"
+msgstr "Rename for %(price)s %(currency)s"
+
+msgid "web.rename.cancel"
+msgstr "Cancel"
+
+msgid "web.rename.needs.free"
+msgstr "Choose a name that is free."
+
+msgid "web.rename.why.funds"
+msgstr "The account has %(funds)s %(currency)s; a rename costs %(price)s."
+
+msgid "web.rename.done"
+msgstr "Renamed %(old)s to %(new)s. %(price)s %(currency)s spent; %(game)s shows the new name from its next login."
+
+msgid "web.rename.refused.funds"
+msgstr "%(hero)s was not renamed: the account has %(funds)s %(currency)s; a rename costs %(price)s. Nothing was spent."
+
+msgid "web.rename.refused.form"
+msgstr "%(hero)s was not renamed: the form had expired. Nothing was spent."
 
 msgid "web.heroes.wallet.shared"
 msgstr "account, all heroes"

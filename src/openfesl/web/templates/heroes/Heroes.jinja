@@ -1,4 +1,4 @@
-{#def roster, cards: list #}
+{#def roster, cards: list, funds: int #}
 {# An account's heroes: its slots, each hero's card hanging from the beam with a free slot's card
    after them, or the way to the first hero, and the account's wallets. #}
 {% set title = _("web.heroes.title") %}
@@ -21,7 +21,7 @@
       <h2 id="heroes-list" class="sr-only">{{ _("web.heroes.list") }}</h2>
       <ul role="list" class="hero-cards enter-rows">
         {% for card in cards %}
-          <HeroCard :card="card" />
+          <HeroCard :card="card" :funds="funds" />
         {% endfor %}
         {% for number in range(roster.heroes|length + 1, roster.slots + 1) %}
           <li class="hero-hanger">

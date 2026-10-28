@@ -68,7 +68,7 @@
     color: #5c4a3c;
     animation: site-fade-in 120ms linear;
 
-    &:is([data-check="format"], [data-check="taken"], [data-check="refused"]) {
+    &:is([data-check="format"], [data-check="taken"], [data-check="refused"], [data-check="same"]) {
       color: #8c1e18;
     }
 

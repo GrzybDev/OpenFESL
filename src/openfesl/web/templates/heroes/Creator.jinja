@@ -19,7 +19,7 @@
         <p class="site-lead">
           {{ _("web.creator.lead") }}
           {% if not roster.default %}{{ _("web.creator.lead.first") }}{% endif %}
-          {{ _("web.creator.lead.kept") }}
+          {{ _("web.creator.lead.kept", price=number(rules.rename_price), currency=_("games." ~ game.id ~ ".currency." ~ rules.currency)) }}
         </p>
       {% endif %}
       {% if roster and roster.heroes %}

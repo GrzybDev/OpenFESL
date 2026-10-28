@@ -1,0 +1,83 @@
+{#def hero, funds: int, name: str = "", check: str = "", dialog: bool = False #}
+{# The form that gives a hero a new name for Funds: the name checked as it is typed, the price
+   and the Funds left after it, and why it cannot be sent when the account has too few. Heroes
+   pages open it as a dialog; without scripts it is a page of its own. #}
+{% set rules = game.heroes %}
+{% set price = rules.rename_price %}
+{% set short = funds < price %}
+{% set id = hero.persona.id %}
+{% set currency = _("games." ~ game.id ~ ".currency." ~ rules.currency) %}
+<form method="post"
+      action="{{ url('/' ~ game.id ~ '/heroes/' ~ id ~ '/rename') }}"
+      data-rename-form
+      class="site-dialog-box">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  {% if dialog %}
+    <button type="button"
+            data-close
+            class="site-dialog-close"
+            aria-label="{{ _('web.dialog.close') }}">
+      <Icon name="x" :size="18" stroke="currentColor" />
+    </button>
+  {% endif %}
+  {% set title = _("web.rename.title", hero=hero.persona.name) %}
+  {% if dialog %}
+    <h2 id="rename-title-{{ id }}" class="site-dialog-title">{{ title }}</h2>
+  {% else %}
+    <h1 id="rename-title-{{ id }}" class="site-dialog-title">{{ title }}</h1>
+  {% endif %}
+  <label for="rename-name-{{ id }}" class="naming-label">{{ _("web.rename.name") }}</label>
+  <input id="rename-name-{{ id }}"
+         name="name"
+         type="text"
+         required
+         minlength="{{ rules.name_length[0] }}"
+         maxlength="{{ rules.name_length[1] }}"
+         pattern="{{ rules.name }}"
+         autocomplete="off"
+         spellcheck="false"
+         aria-describedby="rename-hint-{{ id }} rename-status-{{ id }}"
+         {% if check and check != "free" %} aria-invalid="true"{% endif %}
+         value="{{ name }}"
+         class="naming-input">
+  <p id="rename-hint-{{ id }}" class="naming-hint">{{ _("web.rename.hint") }}</p>
+  <NameStatus :id="'rename-status-' ~ id" :name="name" :check="check" />
+  <dl class="site-facts">
+    <dt>{{ _("web.rename.price") }}</dt>
+    <dd>
+      {{ number(price) }} {{ currency }}
+    </dd>
+    {% if short %}
+      <dt>{{ _("web.rename.funds_now", currency=currency) }}</dt>
+      <dd>
+        {{ number(funds) }} <span class="site-short">· {{ _("web.rename.short", amount=number(price - funds)) }}</span>
+      </dd>
+    {% else %}
+      <dt>{{ _("web.rename.funds_after", currency=currency) }}</dt>
+      <dd>
+        {{ number(funds - price) }}
+      </dd>
+    {% endif %}
+  </dl>
+  <div class="site-dialog-actions">
+    <button type="submit"
+            aria-describedby="rename-why-{{ id }}"
+            {% if short %} aria-disabled="true"{% endif %}
+            data-submit
+            class="site-button site-button-go site-button-large">
+      <Icon name="edit" :size="18" stroke="currentColor" />
+      {{ _("web.rename.submit", price=number(price), currency=currency) }}
+    </button>
+    {% if dialog %}
+      <button type="button" data-close class="site-button site-button-ghost">{{ _("web.rename.cancel") }}</button>
+    {% else %}
+      <a href="{{ url('/' ~ game.id ~ '/heroes') }}"
+         class="site-button site-button-ghost">{{ _("web.rename.cancel") }}</a>
+    {% endif %}
+  </div>
+  <p id="rename-why-{{ id }}" data-why class="site-dialog-why">
+    {% if short %}
+      {{ _("web.rename.why.funds", funds=number(funds), price=number(price), currency=currency) }}
+    {% endif %}
+  </p>
+</form>

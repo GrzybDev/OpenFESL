@@ -136,9 +136,20 @@ def _count_text(context: Context, key: str, count: int, /, **values: object) -> 
 
 @pass_context
 def _number(context: Context, value: float, places: int | None = None) -> str:
-    # A number with places keeps that many decimals, as ratios show them. Languages group the
-    # digits of whole numbers from a length of their own, as the catalogues say.
-    language = context["language"]
+    return number(value, context["language"], places)
+
+
+def number(value: float, language: str, places: int | None = None) -> str:
+    """Return a number as a language writes it.
+
+    Languages group the digits of whole numbers from a length of their own, as the catalogues
+    say.
+
+    Args:
+        value: The number.
+        language: The language code.
+        places: The decimals to keep, as ratios show them; as many as it has when omitted.
+    """
     pattern = None if places is None else "#,##0." + "0" * places
     grouped = len(str(abs(int(value)))) >= int(translate("web.number.grouped_from", language))
     return format_decimal(value, pattern, locale=language, group_separator=grouped)

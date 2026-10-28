@@ -1,7 +1,7 @@
 // The hero creator: the hero on the stage follows every choice, the look tabs and Surprise me
 // work, and I'm done opens the naming dialog, whose name is checked as it is typed. Without
 // scripts the same form shows every list and its naming part, and the server checks the name.
-const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+import { checkName, closeDialog, decode, fill, flash, reducedMotion } from "./naming.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.querySelector("[data-creator]");
@@ -184,61 +184,16 @@ function creator(form) {
     input.select();
   }
   for (const button of naming.querySelectorAll("[data-close]")) {
-    button.addEventListener("click", () => closeNaming());
+    button.addEventListener("click", () => closeDialog(naming, done));
   }
   naming.addEventListener("cancel", (event) => {
     event.preventDefault();
-    closeNaming();
+    closeDialog(naming, done);
   });
-
-  /** Plays the dialog's closing, closes it and returns to I'm done. */
-  function closeNaming() {
-    naming.classList.add("closing");
-    setTimeout(
-      () => {
-        naming.classList.remove("closing");
-        naming.close();
-        done.focus();
-      },
-      reducedMotion.matches ? 100 : 120,
-    );
-  }
-
-  let timer;
-  let asked = 0;
-  input.addEventListener("input", () => {
-    clearTimeout(timer);
-    const name = input.value.trim();
-    check = "";
-    const status = naming.querySelector("[data-check]");
-    status.dataset.check = "";
-    status.textContent = name ? fill(texts.checking, { name }) : "";
-    input.removeAttribute("aria-invalid");
+  checkName(naming, input, form.dataset.nameCheck, texts.checking, (found) => {
+    check = found;
     ready();
-    if (name) {
-      timer = setTimeout(() => ask(name), 250);
-    }
   });
-
-  /**
-   * Asks the server what a name meets and shows its answer, unless the name changed since.
-   *
-   * @param {string} name - The name.
-   */
-  async function ask(name) {
-    const number = ++asked;
-    const address = `${form.dataset.nameCheck}?${new URLSearchParams({ name })}`;
-    const answer = await fetch(address, { headers: { Accept: "text/html" } });
-    if (!answer.ok || number !== asked) {
-      return;
-    }
-    const page = new DOMParser().parseFromString(await answer.text(), "text/html");
-    const status = page.querySelector("[data-check]");
-    naming.querySelector("[data-check]").replaceWith(status);
-    check = status.dataset.check;
-    input.setAttribute("aria-invalid", String(check !== "free"));
-    ready();
-  }
 
   /** Says what Create hero still needs, and shows it unavailable until the name is free. */
   function ready() {
@@ -256,32 +211,8 @@ function creator(form) {
   form.addEventListener("submit", (event) => {
     if (naming.querySelector("[data-create]").getAttribute("aria-disabled") === "true") {
       event.preventDefault();
-      const why = naming.querySelector("[data-why]");
-      why.classList.remove("flash");
-      void why.offsetWidth;
-      why.classList.add("flash");
+      flash(naming.querySelector("[data-why]"));
       input.focus();
     }
   });
-}
-
-/**
- * Fills a text's placeholders, written %(name)s, with values.
- *
- * @param {string} text - The text, as the page gave it.
- * @param {Object<string, string|number>} values - The values by placeholder.
- * @returns {string} The text with its values, as plain text.
- */
-function fill(text, values) {
-  return decode(text).replace(/%\((\w+)\)s/g, (_, name) => String(values[name] ?? ""));
-}
-
-/**
- * Returns the plain text of a text that the page escaped for HTML.
- *
- * @param {string} text - The escaped text.
- * @returns {string} The plain text.
- */
-function decode(text) {
-  return new DOMParser().parseFromString(text, "text/html").documentElement.textContent;
 }

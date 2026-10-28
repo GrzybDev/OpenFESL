@@ -216,6 +216,42 @@
     flex-wrap: wrap;
     gap: 6px;
     margin-top: auto;
+
+    > form {
+      display: contents;
+    }
+  }
+
+  .hero-rename {
+    flex-wrap: wrap;
+    gap: 2px 7px;
+    padding-block: 2px;
+    font-size: 15px;
+  }
+
+  .hero-price {
+    font-size: 14px;
+    font-weight: 700;
+    color: #5c4a3c;
+  }
+
+  /* A hero just renamed: its new name is highlighted, and the highlight fades. */
+  .hero-name-renamed {
+    margin-inline: -4px;
+    padding-inline: 4px;
+    border-radius: 4px;
+    animation: hero-renamed 600ms var(--ease-menu) both;
+
+    @media (prefers-reduced-motion: reduce) {
+      animation-duration: 100ms;
+      animation-timing-function: linear;
+    }
+  }
+
+  @keyframes hero-renamed {
+    from {
+      background-color: #ffe27a;
+    }
   }
 
   @keyframes hero-xp-grow {

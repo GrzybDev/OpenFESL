@@ -10,6 +10,7 @@ from openfesl.core.games import Game
 from openfesl.core.hero_rules import HeroRules
 from openfesl.core.personas import Persona
 from openfesl.core.stats import PERSONA, Owner, StatStore, bucket_of, partition_of
+from openfesl.core.wallets import Wallet
 from openfesl.protocol.rank import Period
 
 
@@ -22,15 +23,17 @@ class NameCheck(StrEnum):
 
 
 class Refusal(StrEnum):
-    """Why a hero was not created."""
+    """Why a hero was not created or renamed."""
 
     FORMAT = "format"
     TAKEN = "taken"
     NO_SLOT = "no-slot"
+    SAME = "same"
+    FUNDS = "funds"
 
 
 class HeroRefused(Exception):
-    """Raised for a hero that was not created; nothing was stored."""
+    """Raised for a hero that was not created or renamed; nothing was stored or spent."""
 
     def __init__(self, refusal: Refusal) -> None:
         """Say why the hero was not created.
@@ -185,6 +188,20 @@ class HeroStore(Protocol):
                 request at the same time.
         """
 
+    async def rename(self, persona: Persona, name: str, price: Wallet, amount: int) -> None:
+        """Give a hero a new name and take its price from a wallet, both or neither.
+
+        Args:
+            persona: The hero's persona.
+            name: The new name.
+            price: The wallet the price is taken from.
+            amount: The price.
+
+        Raises:
+            HeroRefused: When the name is taken, also by a request at the same time, or the
+                wallet holds less than the price.
+        """
+
     async def set_default(
         self, account_id: int, game: str, namespace: str, persona_id: int
     ) -> bool:
@@ -276,6 +293,34 @@ class Heroes:
         if not any(hero.persona.id == persona_id and hero.playable for hero in roster.heroes):
             return False
         return await self._store.set_default(account_id, game.id, game.namespace, persona_id)
+
+    async def rename(self, game: Game, persona: Persona, name: str) -> None:
+        """Give one of an account's heroes a new name for the price the game's data sets.
+
+        The game shows the new name from its next login.
+
+        Args:
+            game: The game, which has hero rules.
+            persona: The hero's persona.
+            name: The new name.
+
+        Raises:
+            HeroRefused: When the name breaks the rule, is the hero's own or is taken, or the
+                account has too little to pay.
+        """
+        rules = _rules(game)
+        if not re.fullmatch(rules.name, name):
+            raise HeroRefused(Refusal.FORMAT)
+        if name.casefold() == persona.name.casefold():
+            raise HeroRefused(Refusal.SAME)
+        wallet = Wallet(
+            game.id,
+            rules.currency,
+            persona.account_id,
+            None,
+            game.currencies[rules.currency].allowance,
+        )
+        await self._store.rename(persona, name, wallet, rules.rename_price)
 
     async def create(self, game: Game, account_id: int, look: Look, name: str) -> Persona:
         """Create a hero with its starting stats and items.

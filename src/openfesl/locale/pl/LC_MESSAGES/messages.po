@@ -177,7 +177,7 @@ msgid "web.creator.lead.first"
 msgstr "Pierwszy bohater zostaje domyślnym bohaterem, z którym program uruchamiający OpenFESLHook uruchamia grę."
 
 msgid "web.creator.lead.kept"
-msgstr "Wybrane tu frakcja, klasa i wygląd zostają z bohaterem na stałe."
+msgstr "Wybrane tu frakcja, klasa i wygląd zostają z bohaterem na stałe; późniejsza zmiana nazwy kosztuje %(price)s %(currency)s."
 
 msgid "web.creator.lead.full"
 msgstr "Nowy bohater potrzebuje wolnego miejsca."
@@ -435,7 +435,7 @@ msgid "web.selector.free"
 msgstr "Miejsce %(slot)s · wolne"
 
 msgid "web.selector.all"
-msgstr "Wszyscy bohaterowie i miejsca"
+msgstr "Wszyscy bohaterowie, zmiany nazw i miejsca"
 
 msgid "web.heroes.title"
 msgstr "Moi bohaterowie"
@@ -529,6 +529,57 @@ msgstr "%(hero)s jest teraz domyślnym bohaterem: program uruchamiający OpenFES
 
 msgid "web.heroes.back"
 msgstr "Wróć do moich bohaterów"
+
+msgid "web.rename.action"
+msgstr "Zmień nazwę"
+
+msgid "web.rename.price.short"
+msgstr "%(price)s %(currency)s"
+
+msgid "web.rename.title"
+msgstr "Nowa nazwa dla %(hero)s"
+
+msgid "web.rename.name"
+msgstr "Nowa nazwa"
+
+msgid "web.rename.hint"
+msgstr "Od 2 do 16 liter, cyfr, _ lub -. Wielkość liter się nie liczy."
+
+msgid "web.rename.same"
+msgstr "To obecna nazwa bohatera."
+
+msgid "web.rename.price"
+msgstr "Cena"
+
+msgid "web.rename.funds_now"
+msgstr "%(currency)s teraz"
+
+msgid "web.rename.funds_after"
+msgstr "%(currency)s po zapłacie"
+
+msgid "web.rename.short"
+msgstr "brakuje %(amount)s"
+
+msgid "web.rename.submit"
+msgstr "Zmień nazwę za %(price)s %(currency)s"
+
+msgid "web.rename.cancel"
+msgstr "Anuluj"
+
+msgid "web.rename.needs.free"
+msgstr "Potrzebna jest wolna nazwa."
+
+msgid "web.rename.why.funds"
+msgstr "Konto ma %(funds)s %(currency)s; zmiana nazwy kosztuje %(price)s."
+
+msgid "web.rename.done"
+msgstr "Zmieniono nazwę bohatera %(old)s na %(new)s. Wydano %(price)s %(currency)s; gra %(game)s pokaże nową nazwę od następnego logowania."
+
+msgid "web.rename.refused.funds"
+msgstr "Nazwa bohatera %(hero)s nie została zmieniona: konto ma %(funds)s %(currency)s, a zmiana nazwy kosztuje %(price)s. Nic nie zostało wydane."
+
+msgid "web.rename.refused.form"
+msgstr "Nazwa bohatera %(hero)s nie została zmieniona: formularz wygasł. Nic nie zostało wydane."
 
 msgid "web.heroes.wallet.shared"
 msgstr "konto, wszyscy bohaterowie"

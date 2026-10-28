@@ -1,0 +1,9 @@
+{#def hero, funds: int, name: str, check: str #}
+{# The page that gives a hero a new name, where the heroes page has no scripts to open its
+   dialog, or the server refused the name sent. #}
+{% set title = _("web.rename.title", hero=hero.persona.name) %}
+<Layout :title="title">
+  <div class="rename-page">
+    <RenameForm :hero="hero" :funds="funds" :name="name" :check="check" />
+  </div>
+</Layout>

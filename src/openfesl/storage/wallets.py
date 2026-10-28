@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 
-from sqlalchemy import ColumnElement, and_, func, or_, select
+from sqlalchemy import ColumnElement, and_, func, or_, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -31,32 +31,7 @@ class SqlWalletStore:
         if not wallets:
             return []
         async with self._sessions.begin() as session:
-            # Only the transaction that opens a wallet records its allowance: one that meets the
-            # wallet being opened waits for the other to commit and opens nothing.
-            opened = await session.execute(
-                insert(WalletRow)
-                .values(
-                    [
-                        {
-                            "game": wallet.game,
-                            "currency": wallet.currency,
-                            "account_id": wallet.account_id,
-                            "persona_id": wallet.persona_id,
-                            "balance": wallet.allowance,
-                        }
-                        for wallet in wallets
-                    ]
-                )
-                .on_conflict_do_nothing()
-                .returning(WalletRow.id, WalletRow.balance)
-            )
-            entries = [
-                {"wallet_id": wallet_id, "delta": balance, "balance": balance, "reason": ALLOWANCE}
-                for wallet_id, balance in opened
-                if balance
-            ]
-            if entries:
-                await session.execute(insert(WalletEntryRow).values(entries))
+            await open_wallets(session, wallets)
             return await _held(session, wallets)
 
     async def peek(self, wallets: Sequence[Wallet]) -> list[int]:
@@ -98,6 +73,74 @@ class SqlWalletStore:
             )
             found = {(row[0], row[1], row[2], row[3]): int(row[4]) for row in rows}
         return [found.get(_key(wallet), wallet.allowance) for wallet in wallets]
+
+
+async def open_wallets(session: AsyncSession, wallets: Sequence[Wallet]) -> None:
+    """Open the wallets that are new with their allowance, recorded in their ledgers.
+
+    Only the transaction that opens a wallet records its allowance: one that meets the wallet being
+    opened waits for the other to commit and opens nothing.
+
+    Args:
+        session: The transaction to open them in.
+        wallets: The wallets, at least one.
+    """
+    opened = await session.execute(
+        insert(WalletRow)
+        .values(
+            [
+                {
+                    "game": wallet.game,
+                    "currency": wallet.currency,
+                    "account_id": wallet.account_id,
+                    "persona_id": wallet.persona_id,
+                    "balance": wallet.allowance,
+                }
+                for wallet in wallets
+            ]
+        )
+        .on_conflict_do_nothing()
+        .returning(WalletRow.id, WalletRow.balance)
+    )
+    entries = [
+        {"wallet_id": wallet_id, "delta": balance, "balance": balance, "reason": ALLOWANCE}
+        for wallet_id, balance in opened
+        if balance
+    ]
+    if entries:
+        await session.execute(insert(WalletEntryRow).values(entries))
+
+
+async def spend(session: AsyncSession, wallet: Wallet, amount: int, reason: str) -> int | None:
+    """Take an amount from a wallet, opening it first, and record it in its ledger.
+
+    The balance is checked and changed in one statement, so two spendings at once never take it
+    below zero.
+
+    Args:
+        session: The transaction to spend in, which is rolled back when anything after fails.
+        wallet: The wallet.
+        amount: The amount.
+        reason: Why, as the ledger keeps it.
+
+    Returns:
+        The balance left, or None when the wallet holds less than the amount.
+    """
+    await open_wallets(session, [wallet])
+    spent = (
+        await session.execute(
+            update(WalletRow)
+            .where(_matching([wallet]), WalletRow.balance >= amount)
+            .values(balance=WalletRow.balance - amount)
+            .returning(WalletRow.id, WalletRow.balance)
+        )
+    ).first()
+    if spent is None:
+        return None
+    wallet_id, balance = spent
+    entry = {"wallet_id": wallet_id, "delta": -amount, "balance": balance, "reason": reason}
+    await session.execute(insert(WalletEntryRow).values(entry))
+    return int(balance)
 
 
 def _key(wallet: Wallet) -> tuple[str, str, int, int | None]:

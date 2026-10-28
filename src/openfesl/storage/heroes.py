@@ -1,13 +1,19 @@
 from sqlalchemy import func, select, update
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.heroes import HeroRecords, HeroRefused, NewHero, Refusal
 from openfesl.core.personas import Persona
 from openfesl.core.stats import PERSONA, bucket_of
+from openfesl.core.wallets import Wallet
 from openfesl.protocol.rank import Period
 from openfesl.storage.models import EntitlementRow, HeroAccountRow, PersonaRow, StatRow
 from openfesl.storage.personas import persona_of
+from openfesl.storage.wallets import spend
+
+# The ledger's reason for a hero's new name.
+RENAME = "rename"
 
 
 class SqlHeroStore:
@@ -62,6 +68,31 @@ class SqlHeroStore:
                 )
             )
         return found is not None
+
+    async def rename(self, persona: Persona, name: str, price: Wallet, amount: int) -> None:
+        """Give a hero a new name and take its price from a wallet, both or neither.
+
+        Args:
+            persona: The hero's persona.
+            name: The new name.
+            price: The wallet the price is taken from.
+            amount: The price.
+
+        Raises:
+            HeroRefused: When the name is taken, also by a request at the same time, or the
+                wallet holds less than the price.
+        """
+        async with self._sessions.begin() as session:
+            try:
+                # A savepoint, so that a taken name leaves the transaction usable to refuse.
+                async with session.begin_nested():
+                    await session.execute(
+                        update(PersonaRow).where(PersonaRow.id == persona.id).values(name=name)
+                    )
+            except IntegrityError:
+                raise HeroRefused(Refusal.TAKEN) from None
+            if await spend(session, price, amount, RENAME) is None:
+                raise HeroRefused(Refusal.FUNDS)
 
     async def set_default(
         self, account_id: int, game: str, namespace: str, persona_id: int

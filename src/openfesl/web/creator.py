@@ -89,11 +89,14 @@ class CreatorPages:
 
         return create
 
-    def _check(self, game: Game) -> Callable[[Request, str], Awaitable[Response]]:
-        async def check_name(request: Request, name: str = "") -> Response:
-            checked = await self._heroes.check(game, name.strip())
+    def _check(self, game: Game) -> Callable[[Request, str, str], Awaitable[Response]]:
+        async def check_name(request: Request, name: str = "", current: str = "") -> Response:
+            # A hero being renamed keeps its current name, which counts as taken by others.
+            name = name.strip()
+            same = current and name.casefold() == current.casefold()
+            check = "same" if same else (await self._heroes.check(game, name)).value
             return self._pages.render(
-                request, "heroes.NameCheck", game=game, name=name.strip(), check=checked.value
+                request, "heroes.NameCheck", game=game, name=name, check=check
             )
 
         return check_name

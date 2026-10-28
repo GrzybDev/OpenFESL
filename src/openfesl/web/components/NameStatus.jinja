@@ -1,6 +1,6 @@
-{#def name: str, check: str #}
+{#def name: str, check: str, id: str = "name-status" #}
 {# What a wanted hero name meets, as the naming dialog says it while the name is typed. #}
-<p id="name-status"
+<p id="{{ id }}"
    role="status"
    data-check="{{ check }}"
    class="name-status">
@@ -13,6 +13,9 @@
   {% elif check == "refused" %}
     <Icon name="warn" :size="18" stroke="currentColor" />
     {{ _("web.creator.name.refused", name=name) }}
+  {% elif check == "same" %}
+    <Icon name="warn" :size="18" stroke="currentColor" />
+    {{ _("web.rename.same") }}
   {% elif check == "free" %}
     <Icon name="tick" :size="18" stroke="currentColor" />
     {{ _("web.creator.name.free", name=name) }}

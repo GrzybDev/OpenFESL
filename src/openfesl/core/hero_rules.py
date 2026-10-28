@@ -109,6 +109,8 @@ class HeroRules(BaseModel):
         starting_items: The items a new hero is granted with their uses, by their Magma tag:
             those the game does not grant itself.
         points: The currency of the points each hero earns with its levels and spends alone.
+        currency: The currency, which an account's heroes share, that new names are paid in.
+        rename_price: What a new name costs.
         running_low: The uses left at which an item limited by uses counts as running low.
     """
 
@@ -128,6 +130,8 @@ class HeroRules(BaseModel):
     loadouts: dict[str, dict[str, Loadout]]
     starting_items: dict[str, PositiveInt] = {}
     points: str
+    currency: str
+    rename_price: PositiveInt
     running_low: PositiveInt
 
     @model_validator(mode="after")

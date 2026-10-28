@@ -1,0 +1,7 @@
+/* The page of a hero's new name: the dialog's form in the page's flow. */
+@layer pages {
+  .rename-page {
+    max-width: 520px;
+    color: #1f1712;
+  }
+}

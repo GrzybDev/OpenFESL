@@ -1,4 +1,4 @@
-{#def card #}
+{#def card, funds: int #}
 {# A hero's card, a folder hanging from the beam on two strings: its faction's tab, the default
    hero's stamp, its name, class and level, its XP, its facts and what can be done with it. #}
 {% set hero = card.hero %}
@@ -6,6 +6,7 @@
 {% set id = hero.persona.id %}
 {# A hero becoming the default one: its stamp lands, and the previous default's stamp fades. #}
 {% set switched = toast and toast.key == "web.heroes.toast.default" %}
+{% set renamed = toast and toast.key == "web.rename.done" and toast.values.new == hero.persona.name %}
 <li id="hero-{{ id }}"
     {% if hero.faction %} data-faction="{{ hero.faction }}"{% endif %}
     class="hero-hanger">
@@ -22,7 +23,7 @@
       {% endif %}
       <div class="hero-heading">
         <h3 id="hero-name-{{ id }}"
-            class="hero-name{% if hero.persona.name|length > 13 %} hero-name-long{% endif %}">
+            class="hero-name{% if hero.persona.name|length > 13 %} hero-name-long{% endif %}{% if renamed %} hero-name-renamed{% endif %}">
           {{ hero.persona.name }}
           {% if card.default %}<span class="sr-only">{{ _("web.heroes.default.sr") }}</span>{% endif %}
         </h3>
@@ -98,18 +99,31 @@
           {{ when(hero.created, "yMMMd") }}
         </dd>
       </dl>
-      {# A hero made before the creator has no faction, class or look to start the game with. #}
-      {% if not card.default and hero.playable %}
-        <form method="post"
-              action="{{ url('/' ~ game.id ~ '/heroes/' ~ id ~ '/default') }}"
-              class="hero-actions">
-          <input type="hidden" name="csrf" value="{{ csrf }}">
-          <button type="submit" class="site-button site-button-yellow">
-            <Icon name="star" :size="15" stroke="currentColor" />
-            {{ _("web.heroes.make_default") }}
-          </button>
-        </form>
-      {% endif %}
+      <div class="hero-actions">
+        <a href="{{ url('/' ~ game.id ~ '/heroes/' ~ id ~ '/rename') }}"
+           data-opens="rename-{{ id }}"
+           class="site-button site-button-ghost hero-rename"><Icon name="edit" :size="17" stroke="currentColor" />{{ _("web.rename.action") }}<span class="sr-only">{{ hero.persona.name }}</span><span class="hero-price">· {{ _("web.rename.price.short", price=number(rules.rename_price), currency=_("games." ~ game.id ~ ".currency." ~ rules.currency)) }}</span></a>
+        {# A hero made before the creator has no faction, class or look to start the game with. #}
+        {% if not card.default and hero.playable %}
+          <form method="post"
+                action="{{ url('/' ~ game.id ~ '/heroes/' ~ id ~ '/default') }}">
+            <input type="hidden" name="csrf" value="{{ csrf }}">
+            <button type="submit" class="site-button site-button-yellow">
+              <Icon name="star" :size="15" stroke="currentColor" />
+              {{ _("web.heroes.make_default") }} <span class="sr-only">{{ hero.persona.name }}</span>
+            </button>
+          </form>
+        {% endif %}
+      </div>
     </article>
   </div>
+  <dialog id="rename-{{ id }}"
+          aria-labelledby="rename-title-{{ id }}"
+          data-rename
+          data-check-address="{{ url('/' ~ game.id ~ '/heroes/name') }}?{{ {'current': hero.persona.name}|urlencode }}"
+          data-checking="{{ _('web.creator.name.checking', name='%(name)s') }}"
+          data-needs-free="{{ _('web.rename.needs.free') }}"
+          class="site-dialog">
+    <RenameForm :hero="hero" :funds="funds" dialog />
+  </dialog>
 </li>

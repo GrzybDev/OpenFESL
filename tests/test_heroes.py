@@ -232,3 +232,60 @@ async def test_the_heroes_page_lists_each_hero_and_changes_the_hero_the_game_log
     assert (await launcher_sign_in(server_url, "bob@example.test", PASSWORD)).json()[
         "personaName"
     ] == "Mudlark"
+
+
+async def test_a_new_name_costs_funds_only_when_it_is_given(
+    base: str, server_url: str, database_url: str
+) -> None:
+    hero = await create_hero(base, "ann@example.test", "Brassbuckle")
+    stranger = await create_hero(base, "bob@example.test", "Copperpot")
+    rename = f"{base}/bfheroes/heroes/{hero}/rename"
+    async with httpx2.AsyncClient() as client:
+        await post_sign_in(client, base, "ann@example.test", PASSWORD)
+        page = await client.get(rename)
+        assert "Funds after</dt><dd>1,001" in markup(page.content)
+        csrf = form_token(page.text)
+        check = {"name": "brassBUCKLE", "current": "Brassbuckle"}
+        same = await client.get(f"{base}/bfheroes/heroes/name", params=check)
+        assert 'data-check="same"' in same.text
+        # Another account's hero has no rename page, and a form from another site renames nothing.
+        theirs = f"{base}/bfheroes/heroes/{stranger}/rename"
+        asked = await client.get(theirs)
+        sent = await client.post(theirs, data={"csrf": csrf, "name": "Mudlark"})
+        assert (asked.status_code, sent.status_code) == (404, 404)
+        named = "SELECT name FROM persona WHERE id = :hero"
+        assert await select_value(database_url, named, hero=stranger) == "Copperpot"
+        await client.post(rename, data={"csrf": "forged", "name": "Mudlark"})
+        refused = visible((await client.get(f"{base}/bfheroes/heroes")).content)
+        assert "Brassbuckle was not renamed: the form had expired. Nothing was spent." in refused
+
+        # A name that another hero holds comes back in the form, which says so.
+        taken = await client.post(rename, data={"csrf": csrf, "name": "copperpot"})
+        assert taken.status_code == 409 and 'value="copperpot"' in taken.text
+        assert "copperpot is taken. Names ignore capitals." in markup(taken.content)
+        # Nothing was spent, so the Funds were not even taken out of their allowance.
+        assert await select_value(database_url, "SELECT count(*) FROM wallet") == 0
+
+        await client.post(rename, data={"csrf": csrf, "name": "Copper_Kettle"})
+        heroes = visible((await client.get(f"{base}/bfheroes/heroes")).content)
+        assert "Renamed Brassbuckle to Copper_Kettle. 1,499 Funds spent;" in heroes
+        assert "1,001 Funds 0 Valor Points" in heroes
+        poor = await client.post(rename, data={"csrf": csrf, "name": "Kettle_Two"})
+        assert poor.status_code == 303
+        heroes = markup((await client.get(f"{base}/bfheroes/heroes")).content)
+        assert "the account has 1,001 Funds; a rename costs 1,499. Nothing was spent." in heroes
+
+        # Two renames at once with the price of one: one is given, and the balance stays whole.
+        await execute(database_url, "UPDATE wallet SET balance = 1500")
+        raced = await asyncio.gather(
+            client.post(rename, data={"csrf": csrf, "name": "Kettle_Two"}),
+            client.post(rename, data={"csrf": csrf, "name": "Kettle_Three"}),
+        )
+        assert all(answer.status_code == 303 for answer in raced)
+    assert await select_value(database_url, "SELECT balance FROM wallet") == 1
+    ledger = await select_value(
+        database_url, "SELECT string_agg(reason || ':' || delta, ' ' ORDER BY id) FROM wallet_entry"
+    )
+    assert ledger == "allowance:2500 rename:-1499 rename:-1499"
+    session = (await launcher_sign_in(server_url, "ann@example.test", PASSWORD)).json()
+    assert session["personaName"] in ("Kettle_Two", "Kettle_Three")
