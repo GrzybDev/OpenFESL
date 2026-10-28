@@ -2423,7 +2423,7 @@ msgstr "Konto zostało utworzone."
 msgid "web.account.toast.named"
 msgstr "Zapisano nazwę wyświetlaną: %(name)s."
 
-msgid "web.admin.toast.failed"
+msgid "web.toast.failed"
 msgstr "Zmiana nie została zapisana. Spróbuj ponownie."
 
 msgid "web.admin.home.sessions.one"
@@ -5052,7 +5052,7 @@ msgstr "Prywatne"
 msgid "web.account.display_name.subtitle"
 msgstr "Wybierana raz przez konta utworzone w grze"
 
-msgid "web.account.display_name.not_saved"
+msgid "web.account.notice.not_saved"
 msgstr "Nie zapisano"
 
 msgid "web.account.display_name.taken"
@@ -5157,9 +5157,6 @@ msgstr "Zapisz hasło do gier"
 msgid "web.account.reset.busy"
 msgstr "Zapisywanie"
 
-msgid "web.account.reset.not_saved"
-msgstr "Nie zapisano"
-
 msgid "web.account.reset.again"
 msgstr "Poproś o nowy link"
 
@@ -5216,3 +5213,76 @@ msgstr "Ustawienie nowego hasła do gier wymaga poczty serwera, która nie jest 
 
 msgid "web.account.reset.unavailable.services"
 msgstr "Konto z połączoną usługą loguje się przez nią, a nowe hasło do gier ustawia na stronie konta."
+
+msgid "web.account.page"
+msgstr "Konto"
+
+msgid "web.account.page.account"
+msgstr "Strona konta"
+
+msgid "web.account.page.subtitle"
+msgstr "%(name)s · jedno konto do wszystkich gier"
+
+msgid "web.account.page.intro"
+msgstr ""
+"Jedno konto OpenFESL obsługuje wszystkie gry na tej stronie. Nazwa wyświetlana jest publiczna; adres e-mail i sposoby logowania są prywatne."
+
+msgid "web.account.index"
+msgstr "Sekcje konta"
+
+msgid "web.account.profile"
+msgstr "Profil"
+
+msgid "web.account.change"
+msgstr "Zmień"
+
+msgid "web.account.display_name.change"
+msgstr "nazwę wyświetlaną"
+
+msgid "web.account.display_name.new"
+msgstr "Nowa nazwa wyświetlana"
+
+msgid "web.account.display_name.kept"
+msgstr "%(personas)s zachowują swoje nazwy."
+
+msgid "web.account.details"
+msgstr "Dane"
+
+msgid "web.account.made.site"
+msgstr "Ta strona"
+
+msgid "web.account.country.change"
+msgstr "kraj"
+
+msgid "web.account.country.note"
+msgstr "Gry otrzymują kraj razem z danymi konta."
+
+msgid "web.account.country.action"
+msgstr "Zapisz kraj"
+
+msgid "web.account.address.note"
+msgstr ""
+"Adres e-mail jest nazwą logowania w grach, które o nią proszą, takich jak %(games)s. Strony publiczne nigdy go nie pokazują."
+
+msgid "web.account.unconfirmed.chip"
+msgstr "Niepotwierdzony"
+
+msgid "web.account.unconfirmed.text"
+msgstr ""
+"Potwierdza go link wysłany na adres %(address)s dnia %(date)s. %(where)s"
+
+msgid "web.account.unconfirmed.game"
+msgstr ""
+"Konta założone w %(game)s nie czekają na niego w tym serwisie, więc w tym "
+"czasie działa logowanie na stronie i w grach."
+
+msgid "web.account.unconfirmed.site"
+msgstr ""
+"Konta założone na tej stronie nie czekają na niego w tym serwisie, więc w "
+"tym czasie działa logowanie na stronie i w grach."
+
+msgid "web.account.unconfirmed.sent"
+msgstr "Jest ważny do %(expires)s. Przycisk na stronie, którą otwiera, potwierdza adres."
+
+msgid "web.account.toast.country"
+msgstr "Zapisano kraj: %(country)s."

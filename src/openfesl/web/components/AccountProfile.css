@@ -1,0 +1,116 @@
+/* The account page's profile: the display name large on its light row, the details as facts with
+   the country's fold as their last row, and the notice's form on the notice's light block. */
+@layer components {
+  .profile-name > summary,
+  .profile-country > summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 12px;
+    margin-top: 2px;
+    color: var(--ink);
+  }
+
+  .profile-name > summary {
+    min-height: 56px;
+    background: var(--row-light);
+    padding: 6px 6px 6px 14px;
+  }
+
+  .profile-name-value {
+    overflow-wrap: anywhere;
+    font-family: var(--font-sans);
+    font-size: 22px;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+
+  .profile-country > summary {
+    min-height: 44px;
+    background: var(--row-alt);
+    padding-left: 14px;
+  }
+
+  .profile-fold-label {
+    margin-right: auto;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .profile-fold-value {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .profile-country .country-select {
+    select {
+      height: 44px;
+    }
+
+    svg {
+      top: 14px;
+    }
+  }
+
+  .account-address {
+    overflow-wrap: anywhere;
+  }
+
+  /* A state of a fact's value, such as an address not confirmed yet, in a small black chip. */
+  .account-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 10px;
+    background: var(--ink);
+    padding: 3px 7px 3px 4px;
+    font-family: var(--area-font);
+    font-size: 12px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    color: var(--bright);
+    text-transform: uppercase;
+    vertical-align: middle;
+
+    svg {
+      stroke: var(--accent);
+    }
+  }
+
+  .fact:has(.account-fact-link) {
+    padding-right: 0;
+
+    dd {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0 4px;
+    }
+  }
+
+  .account-fact-link {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    padding-inline: 14px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-decoration-line: underline;
+    text-transform: none;
+  }
+
+  .account-section > .alert:has(+ .alert-form) {
+    padding-bottom: 0;
+  }
+
+  .account-section > .alert-form {
+    margin-top: 0;
+  }
+}

@@ -1,0 +1,10 @@
+{#def id: str, title: str, extra: str = "" #}
+{# One of the account page's parts: a framed panel under its large bar, with the count or word that
+   the bar names at its end. The index links to it, and its forms swap it. #}
+<section id="{{ id }}"
+         aria-labelledby="{{ id }}-title"
+         data-account-part
+         class="panel account-section">
+  <Bar :id="id ~ '-title'" :extra="extra" large>{{ title }}</Bar>
+  {{ content }}
+</section>

@@ -2375,7 +2375,7 @@ msgstr "Account created."
 msgid "web.account.toast.named"
 msgstr "Display name saved: %(name)s."
 
-msgid "web.admin.toast.failed"
+msgid "web.toast.failed"
 msgstr "The change was not saved. Try again."
 
 msgid "web.admin.home.sessions.one"
@@ -4920,7 +4920,7 @@ msgstr "Private"
 msgid "web.account.display_name.subtitle"
 msgstr "Asked once for accounts made in a game"
 
-msgid "web.account.display_name.not_saved"
+msgid "web.account.notice.not_saved"
 msgstr "Not saved"
 
 msgid "web.account.display_name.taken"
@@ -5025,9 +5025,6 @@ msgstr "Save game password"
 msgid "web.account.reset.busy"
 msgstr "Saving"
 
-msgid "web.account.reset.not_saved"
-msgstr "Not saved"
-
 msgid "web.account.reset.again"
 msgstr "Request a new link"
 
@@ -5084,3 +5081,75 @@ msgstr "A game password reset needs the server's mail, which is not set up."
 
 msgid "web.account.reset.unavailable.services"
 msgstr "An account with a linked service signs in through it, and its account page sets a new game password."
+
+msgid "web.account.page"
+msgstr "Account"
+
+msgid "web.account.page.account"
+msgstr "The account page"
+
+msgid "web.account.page.subtitle"
+msgstr "%(name)s · one account for every game"
+
+msgid "web.account.page.intro"
+msgstr ""
+"One OpenFESL account serves every game on this site. The display name is public; the e-mail address and the ways in are private."
+
+msgid "web.account.index"
+msgstr "Account sections"
+
+msgid "web.account.profile"
+msgstr "Profile"
+
+msgid "web.account.change"
+msgstr "Change"
+
+msgid "web.account.display_name.change"
+msgstr "the display name"
+
+msgid "web.account.display_name.new"
+msgstr "New display name"
+
+msgid "web.account.display_name.kept"
+msgstr "%(personas)s keep their own names."
+
+msgid "web.account.details"
+msgstr "Details"
+
+msgid "web.account.made.site"
+msgstr "This site"
+
+msgid "web.account.country.change"
+msgstr "the country"
+
+msgid "web.account.country.note"
+msgstr "Games receive the country with the account's details."
+
+msgid "web.account.country.action"
+msgstr "Save country"
+
+msgid "web.account.address.note"
+msgstr ""
+"The e-mail address is the login name in games that ask for one, such as %(games)s. Public pages never show it."
+
+msgid "web.account.unconfirmed.chip"
+msgstr "Not confirmed"
+
+msgid "web.account.unconfirmed.text"
+msgstr "The link sent to %(address)s on %(date)s confirms it. %(where)s"
+
+msgid "web.account.unconfirmed.game"
+msgstr ""
+"Accounts made in %(game)s do not wait for it on this service, so signing "
+"in and game logins work meanwhile."
+
+msgid "web.account.unconfirmed.site"
+msgstr ""
+"Accounts made on this site do not wait for it on this service, so signing "
+"in and game logins work meanwhile."
+
+msgid "web.account.unconfirmed.sent"
+msgstr "It is valid until %(expires)s. A button on the page it opens confirms the address."
+
+msgid "web.account.toast.country"
+msgstr "Country saved: %(country)s."

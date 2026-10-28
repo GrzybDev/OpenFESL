@@ -287,7 +287,7 @@ class SqlAccountStore:
         return bool(taken)
 
     async def name_account(self, account_id: int, name: str) -> bool:
-        """Give an account without a display name one.
+        """Give an account a display name, in place of the one it had, if any.
 
         Args:
             account_id: The account.
@@ -300,9 +300,7 @@ class SqlAccountStore:
         try:
             async with self._sessions.begin() as session:
                 await session.execute(
-                    update(AccountRow)
-                    .where(AccountRow.id == account_id, AccountRow.display_name.is_(None))
-                    .values(display_name=name)
+                    update(AccountRow).where(AccountRow.id == account_id).values(display_name=name)
                 )
         except IntegrityError:
             return False

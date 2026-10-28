@@ -285,11 +285,15 @@ function announce(message) {
 
 // A toast that says a change was saved leaves after 4 s; one that says it failed stays until
 // dismissed.
-document.addEventListener("DOMContentLoaded", () => {
-  for (const toast of document.querySelectorAll(".toast[data-leaves]")) {
+document.addEventListener("DOMContentLoaded", timeToasts);
+
+/** Has each toast that arrived and says a change was saved leave after 4 s. */
+function timeToasts() {
+  for (const toast of document.querySelectorAll(".toast[data-leaves]:not([data-timed])")) {
+    toast.dataset.timed = "";
     setTimeout(() => leave(toast), 4000);
   }
-});
+}
 
 document.addEventListener("click", (event) => {
   const button = event.target instanceof Element ? event.target.closest("[data-dismiss]") : null;
@@ -489,4 +493,87 @@ function closeMenu(menu) {
     },
     reducedMotion.matches ? 0 : 100,
   );
+}
+
+// The account page's forms swap only their part: it cross-fades in with the toast of the change,
+// and Cloudflare's check in it is drawn anew. A change the server did not answer says so in an
+// error toast that stays.
+document.addEventListener("htmx:after:swap", (event) => {
+  const part = event.target instanceof Element ? event.target.closest("[data-account-part]") : null;
+  if (!part) {
+    return;
+  }
+  timeToasts();
+  part.animate([{ opacity: 0.4 }, { opacity: 1 }], {
+    duration: reducedMotion.matches ? 100 : 120,
+    easing: "linear",
+  });
+  for (const check of part.querySelectorAll(".cf-turnstile:empty")) {
+    window.turnstile?.render(check, {
+      sitekey: check.dataset.sitekey,
+      language: check.dataset.language,
+      theme: "light",
+    });
+  }
+  followParts?.();
+});
+
+for (const failure of ["htmx:error", "htmx:response:error"]) {
+  document.addEventListener(failure, (event) => {
+    if (event.target instanceof Element && event.target.closest("[data-account-form]")) {
+      const toast = document.getElementById("toast-failed")?.content.cloneNode(true);
+      if (toast) {
+        document.getElementById("toasts")?.append(toast);
+      }
+    }
+  });
+}
+
+// The account page's index marks the part being read, its block sliding to the part's link.
+const followParts = accountIndex(document.querySelector("[data-account-index]"));
+
+/**
+ * Marks in the account page's index the part being read as the page scrolls: the last part whose
+ * top passed the upper third of the window, the first before any did, and the last one once the
+ * page is scrolled to its end.
+ *
+ * @param {Element | null} nav - The index, if the page has one.
+ * @returns {(() => void) | undefined} Marks the part again, as after one was swapped.
+ */
+function accountIndex(nav) {
+  if (!nav) {
+    return undefined;
+  }
+  const block = nav.querySelector(".account-index-block");
+  let pending = false;
+  const mark = () => {
+    pending = false;
+    const parts = [...document.querySelectorAll("[data-account-part]")];
+    const ended = innerHeight + scrollY >= document.documentElement.scrollHeight - 2;
+    const passed = parts.filter((part) => part.getBoundingClientRect().top <= innerHeight / 3);
+    const part = ended ? parts.at(-1) : (passed.at(-1) ?? parts[0]);
+    const current = part && nav.querySelector(`a[href="#${part.id}"]`);
+    for (const link of nav.querySelectorAll("a")) {
+      if (link === current) {
+        link.setAttribute("aria-current", "true");
+      } else {
+        link.removeAttribute("aria-current");
+      }
+    }
+    if (current) {
+      block.style.width = `${current.offsetWidth}px`;
+      block.style.height = `${current.offsetHeight}px`;
+      block.style.transform = `translate(${current.offsetLeft}px, ${current.offsetTop}px)`;
+    }
+  };
+  const later = () => {
+    if (!pending) {
+      pending = true;
+      requestAnimationFrame(mark);
+    }
+  };
+  addEventListener("scroll", later, { passive: true });
+  addEventListener("resize", later);
+  mark();
+  return later;
 }

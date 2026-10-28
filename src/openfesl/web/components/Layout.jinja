@@ -95,7 +95,11 @@
         <div class="vignette" aria-hidden="true"></div>
       {% endif %}
       <div class="area-content">{{ content }}</div>
-      {% if toast and not admin %}<Toast />{% endif %}
+      {% if not admin %}
+        <div id="toasts" class="toasts">
+          {% if toast %}<Toast />{% endif %}
+        </div>
+      {% endif %}
     </main>
     <footer class="shell-footer">
       <div class="shell-row">

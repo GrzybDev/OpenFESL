@@ -5,6 +5,7 @@ from openfesl.server.services import GameServices
 from openfesl.server.settings import Settings
 from openfesl.server.stores import Stores
 from openfesl.web.account.display_name import DisplayNamePages
+from openfesl.web.account.page import AccountPages
 from openfesl.web.account.proof import ProofPages
 from openfesl.web.account.register import RegisterPages
 from openfesl.web.account.reset import ResetPages
@@ -117,6 +118,18 @@ def include_public_routes(
         sign_in_services,
     )
     app.include_router(display_name.routes())
+    account = AccountPages(
+        pages,
+        games,
+        stores.accounts.account,
+        lambda: app.state.account_management,
+        lambda: app.state.sign_in,
+        services.policies,
+        services.terms,
+        settings.sends_mail,
+        turnstile,
+    )
+    app.include_router(account.routes())
     resets = ResetPages(
         pages,
         games,

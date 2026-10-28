@@ -1,0 +1,93 @@
+/* The account page's index sticks to the top of the window; the block behind the current part
+   slides to it, only where scripts mark one. */
+@layer components {
+  .account-index {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    margin-bottom: 22px;
+    background: var(--ink);
+    box-shadow: 0 6px 16px rgb(0 0 0 / 0.35);
+
+    ul {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0 8px;
+      padding-inline: 12px;
+    }
+  }
+
+  .account-index-block {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: none;
+    background: var(--menu-current);
+    transition:
+      transform 180ms var(--ease-menu),
+      width 180ms var(--ease-menu);
+
+    .account-index:has([aria-current]) & {
+      display: block;
+    }
+  }
+
+  .account-index-link {
+    display: flex;
+    min-width: 170px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding-inline: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    color: var(--bright);
+    text-transform: uppercase;
+
+    &:hover {
+      text-decoration-line: none;
+      background: var(--menu-hover);
+    }
+
+    &[aria-current] {
+      background: none;
+    }
+  }
+
+  .account-index-count {
+    font-weight: 600;
+    color: var(--soft);
+  }
+
+  /* On phones the parts share one row in equal columns. */
+  @media (width < 40rem) {
+    .account-index {
+      margin-bottom: 18px;
+
+      ul {
+        display: grid;
+        grid-auto-columns: minmax(0, 1fr);
+        grid-auto-flow: column;
+        padding-inline: 0;
+      }
+    }
+
+    .account-index-link {
+      min-width: 0;
+      gap: 4px;
+      padding-inline: 2px;
+      font-size: 14px;
+      letter-spacing: 0.03em;
+      text-align: center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .account-index-block {
+      transition: none;
+    }
+  }
+}

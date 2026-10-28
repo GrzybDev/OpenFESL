@@ -382,7 +382,7 @@ def _decide(
             await apply()
             toast(request, f"web.admin.toast.{decision}", name=name)
         else:
-            toast(request, "web.admin.toast.failed", error=True)
+            toast(request, "web.toast.failed", error=True)
         return RedirectResponse(back, 303)
 
     return decide

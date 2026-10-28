@@ -5,6 +5,7 @@ from typing import Any
 
 from fastapi import FastAPI, WebSocket
 
+from openfesl.core.account_management import AccountManagement
 from openfesl.core.account_settings import AccountSettingsService
 from openfesl.core.accounts import AccountService
 from openfesl.core.admin import AdminFeed
@@ -99,8 +100,8 @@ class GameServices:
 
         Args:
             app: The application, whose state hands the pages the launcher sign-in, the site's
-                sign-in with its e-mailed proofs, its registration, the display names and the
-                game password resets.
+                sign-in with its e-mailed proofs, its registration, the display names, the game
+                password resets and the account management.
         """
         settings, games, stores = self._settings, self._games, self._stores
         routes, commands = self._routes, self._commands
@@ -145,6 +146,7 @@ class GameServices:
             stores.accounts, stores.accounts, logins, outbox, mailings, attempts
         )
         app.state.display_names = DisplayNames(stores.accounts, stores.personas, games)
+        app.state.account_management = AccountManagement(stores.accounts)
         app.state.registration = WebRegistration(
             stores.accounts,
             stores.identities,

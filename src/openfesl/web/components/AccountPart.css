@@ -1,0 +1,83 @@
+/* The account page's parts: framed panels whose sides stand beside each other on wide screens and
+   wrap on narrow ones. A swapped part cross-fades in (app.js). */
+@layer components {
+  .account-section {
+    scroll-margin-top: 56px;
+
+    & + & {
+      margin-top: 22px;
+    }
+
+    > * + * {
+      margin-top: 10px;
+    }
+  }
+
+  .account-sides {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .account-side {
+    min-width: 0;
+    flex: 1 1 480px;
+  }
+
+  /* A fold's black button that names what opening it does, its caret turned while it is open. */
+  .account-change {
+    display: flex;
+    min-height: 44px;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+    background: var(--ink);
+    padding: 0 12px 0 14px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--bright);
+    text-transform: uppercase;
+
+    svg {
+      stroke: var(--accent);
+    }
+  }
+
+  /* A fold opens by height. */
+  .account-fold {
+    interpolate-size: allow-keywords;
+  }
+
+  .account-fold::details-content {
+    height: 0;
+    overflow: clip;
+    transition:
+      height 200ms var(--ease-menu),
+      content-visibility 200ms allow-discrete;
+  }
+
+  .account-fold[open]::details-content {
+    height: auto;
+  }
+
+  .account-form {
+    display: grid;
+
+    > .field-label:first-of-type {
+      margin-top: 2px;
+    }
+
+    .small-action {
+      justify-self: start;
+      margin-top: 6px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .account-fold::details-content {
+      transition: none;
+    }
+  }
+}

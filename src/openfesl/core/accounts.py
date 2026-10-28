@@ -175,6 +175,13 @@ class AccountStore(Protocol):
             account_id: The account's number.
         """
 
+    async def record(self, account_id: int) -> AccountRecord | None:
+        """Return a player's account by its number, with when it was made.
+
+        Args:
+            account_id: The account's number.
+        """
+
     async def add(
         self,
         nuid: str,
@@ -211,7 +218,7 @@ class AccountStore(Protocol):
         """
 
     async def name_account(self, account_id: int, name: str) -> bool:
-        """Give an account without a display name one.
+        """Give an account a display name, in place of the one it had, if any.
 
         Args:
             account_id: The account.

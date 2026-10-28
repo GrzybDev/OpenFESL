@@ -294,7 +294,7 @@ def provider_routes(
             await apply()
             toast(request, "web.admin.toast.provider_revoke", name=name)
         else:
-            toast(request, "web.admin.toast.failed", error=True)
+            toast(request, "web.toast.failed", error=True)
         return RedirectResponse(back, 303)
 
     return router

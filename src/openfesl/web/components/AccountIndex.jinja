@@ -1,0 +1,18 @@
+{#def parts: list #}
+{# The index of the account page's parts, which stays at the top while the page scrolls: plain
+   links, each with the count it names, if any. Where scripts run, a block slides behind the part
+   in view; without them no part is marked, so the mark is never wrong. #}
+<nav aria-label="{{ _('web.account.index') }}"
+     data-account-index
+     class="account-index">
+  <span aria-hidden="true" class="account-index-block"></span>
+  <ul>
+    {% for part in parts %}
+      <li>
+        <a href="#{{ part.id }}" class="account-index-link">{{ part.label }}
+          {%- if part.count is defined %}<span class="account-index-count">{{ number(part.count) }}<span class="sr-only"> {{ part.noun }}</span></span>{% endif -%}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+</nav>

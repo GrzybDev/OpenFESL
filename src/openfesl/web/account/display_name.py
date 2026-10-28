@@ -10,6 +10,7 @@ from openfesl.core.problems import Problem
 from openfesl.core.registration import Terms
 from openfesl.core.texts import localize, translate
 from openfesl.web.account.fields import field_errors
+from openfesl.web.account.page import answered
 from openfesl.web.account.services import SignInServices
 from openfesl.web.account.session import DISPLAY_NAME, SITE, open_page, signed_in
 from openfesl.web.pages import Pages
@@ -17,7 +18,7 @@ from openfesl.web.sessions import form_matches, form_token, inside, notify, toas
 
 
 class DisplayNamePages:
-    """The step where an account made in a game chooses its display name, once."""
+    """The step that names an account made in a game, and the account page's form that renames."""
 
     def __init__(
         self,
@@ -46,25 +47,29 @@ class DisplayNamePages:
         self._services = services
 
     def routes(self) -> APIRouter:
-        """Return the display name's page and its form."""
+        """Return the display name's page and the form that chooses or changes the name."""
         router = APIRouter()
 
         @router.get(DISPLAY_NAME, response_class=HTMLResponse)
         async def page(request: Request, next: str = "") -> Response:
             back = inside(next, SITE)
-            account = await self._unnamed(request)
+            account = await self._signed_in(request)
             if not isinstance(account, Account):
-                return account or _done(request, back)
+                return account
+            if account.display_name is not None:
+                return _done(request, back)
             return await self._render(request, account, back)
 
         @router.post(DISPLAY_NAME)
         async def choose(request: Request) -> Response:
             form = await request.form()
             back = inside(str(form.get("next", "")), SITE)
-            account = await self._unnamed(request)
+            account = await self._signed_in(request)
             if not isinstance(account, Account):
-                return account or _done(request, back)
+                return account
             name = str(form.get("display_name", "")).strip()
+            if account.display_name is not None:
+                return await self._rename(request, account, name, form_matches(request, form))
             if not form_matches(request, form):
                 return await self._render(request, account, back, name, notice="form")
             if problem := await self._names().choose(account, name):
@@ -74,15 +79,23 @@ class DisplayNamePages:
 
         return router
 
-    async def _unnamed(self, request: Request) -> Account | Response | None:
-        # The signed-in account while it has no display name; the sign-in page for a visitor
-        # who is not signed in, and None for an account that has one already.
+    async def _signed_in(self, request: Request) -> Account | Response:
+        # The signed-in account, or the sign-in page for a visitor who is not signed in.
         player = signed_in(request)
         account = await self._accounts(player.account_id) if player else None
         if account is None:
             notify(request, "needed", page="display_name")
             return open_page(request, "/sign-in", localize(DISPLAY_NAME, request.state.language))
-        return account if account.display_name is None else None
+        return account
+
+    async def _rename(self, request: Request, account: Account, name: str, sent: bool) -> Response:
+        # The account page's form, which changes the display name of an account that has one.
+        if not sent:
+            return answered(request, "profile", form="display_name", value=name, notice="form")
+        if problem := await self._names().choose(account, name):
+            return answered(request, "profile", [problem], form="display_name", value=name)
+        toast(request, "web.account.toast.named", name=name)
+        return answered(request, "profile")
 
     async def _render(
         self,

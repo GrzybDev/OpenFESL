@@ -1,0 +1,18 @@
+/* The account page: the title block beside the sentence that explains the account, above the index
+   and the parts. */
+@layer pages {
+  .account-intro {
+    min-width: 0;
+    flex: 0 1 560px;
+    margin-bottom: 14px;
+    font-family: var(--font-sans);
+    font-size: 17px;
+    line-height: 1.5;
+    font-weight: 500;
+    color: var(--soft);
+  }
+
+  .account-head {
+    margin-bottom: 8px;
+  }
+}

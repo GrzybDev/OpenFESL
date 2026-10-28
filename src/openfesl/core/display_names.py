@@ -33,7 +33,7 @@ class Suggestion:
 
 
 class DisplayNames:
-    """The display name that an account made in a game chooses once, at its first web sign-in."""
+    """Gives accounts their display names, at the first web sign-in or from the account page."""
 
     def __init__(self, accounts: AccountStore, personas: PersonaStore, games: Games) -> None:
         """Name accounts from the store.
@@ -74,7 +74,7 @@ class DisplayNames:
         return None
 
     async def choose(self, account: Account, name: str) -> Problem | None:
-        """Give an account without a display name the one it chose.
+        """Give an account the display name it chose, first or in place of its earlier one.
 
         Args:
             account: The account.

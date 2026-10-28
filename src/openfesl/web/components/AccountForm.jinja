@@ -1,0 +1,15 @@
+{#def action: str, part: str #}
+{# A form of the account page, which sends its change and comes back to its part. Where scripts run,
+   htmx swaps only that part and the toast that says what came of the change. #}
+<form method="post"
+      action="{{ url(action) }}"
+      hx-post="{{ url(action) }}"
+      hx-target="#{{ part }}"
+      hx-select="#{{ part }}"
+      hx-swap="outerHTML"
+      hx-select-oob="#toasts"
+      data-account-form
+      class="account-form">
+  <CsrfField />
+  {{ content }}
+</form>

@@ -150,7 +150,7 @@
     position: relative;
     isolation: isolate;
     flex-grow: 1;
-    overflow: hidden;
+    overflow: clip;
     background: var(--field);
     font-family: var(--area-font);
     color: var(--bright);

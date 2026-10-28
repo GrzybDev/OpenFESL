@@ -1,0 +1,90 @@
+{#def overview, made_in, said: dict, errors: dict, countries: list, sent, waits: bool, mail: bool, check: str, accepted: bool, password_games: list, personas: list #}
+{# The account page's profile: its notices, the public display name and, beside it, the private
+   details with the country. Both change in folds that open on arrival only when their form left
+   something to change. #}
+{% set account = overview.account %}
+{% set form = said.get("form") %}
+{% set notice = said.get("notice") %}
+<AccountPart id="profile" :title="_('web.account.profile')">
+{% if notice == "form" %}
+  <Alert :label="_('web.account.notice.not_saved')" :title="_('web.account.notice.form')" glyph="warn" alert>{{ _("web.account.notice.form.text") }}</Alert>
+{% elif form == "display_name" and errors.get("display_name") and said.problems[0][1] == "taken" %}
+  <Alert :label="_('web.account.notice.not_saved')" :title="_('web.account.display_name.taken')" glyph="warn" alert />
+{% elif notice == "check" %}
+  <Alert :label="_('web.account.notice.not_sent')" :title="_('web.account.notice.check')" glyph="warn" alert />
+{% elif notice == "link_sent" %}
+  <Alert :label="_('web.account.notice.link_sent')" :title="_('web.account.notice.link_sent.title', address=said.address)" glyph="tick">{{ _("web.account.unconfirmed.sent", expires=moment(said.expires)) }}</Alert>
+{% elif notice == "link_wait" %}
+  <Alert :label="_('web.account.notice.link_sent')" :title="_('web.account.notice.link_wait', time=when(said.last, 'Hm'))" glyph="tick">{{ _("web.account.notice.link_wait.text", time=when(said.until, 'Hm')) }}</Alert>
+{% endif %}
+{% if sent and notice not in ("link_sent", "link_wait") %}
+  {% set where = _("web.account.unconfirmed.game", game=_("games." ~ made_in.id ~ ".short")) if made_in else _("web.account.unconfirmed.site") %}
+  <Alert :label="_('web.account.notice.unconfirmed')" :title="_('web.account.notice.unconfirmed.title')" glyph="mail">{{ _("web.account.notice.unconfirmed.text", address=account.nuid, date=when(sent, "yMMMd")) if waits else _("web.account.unconfirmed.text", address=account.nuid, date=when(sent, "yMMMd"), where=where) }}</Alert>
+  {% if mail %}
+    <form method="post"
+          action="{{ url('/account/confirmation') }}"
+          class="alert-form">
+      <CsrfField />
+      {% if check %}<TurnstileCheck :key="check" />{% endif %}
+      <SmallAction :label="_('web.account.notice.unconfirmed.send')" :busy="_('web.account.notice.sending')" />
+    </form>
+  {% endif %}
+{% endif %}
+<div class="account-sides">
+  <div class="account-side">
+    <Bar tag="h3" :extra="_('web.account.public')">{{ _("web.account.display_name") }}</Bar>
+    <details {% if form == "display_name" %}open{% endif %}
+             class="fold account-fold profile-name">
+      <summary>
+        <span class="profile-name-value">{{ account.display_name }}</span>
+        <span class="account-change">{{ _("web.account.change") }}<span class="sr-only"> {{ _("web.account.display_name.change") }}</span><Icon name="caret" :size="14" class="fold-chevron" /></span>
+      </summary>
+      <AccountForm action="/account/display-name" part="profile">
+      <TextField id="display-name" name="display_name" autocomplete="nickname" pattern="[A-Za-z0-9_\\-]{4,16}" :minlength="4" :maxlength="16" :label="_('web.account.display_name.new')" :value="said.value if form == 'display_name' else account.display_name" :note="_('web.account.display_name.rule')" :error="errors.get('display_name', '') if form == 'display_name' else ''" :focus="form == 'display_name'" />
+      <SmallAction :label="_('web.account.display_name.action')" :busy="_('web.account.display_name.busy')" />
+      </AccountForm>
+    </details>
+    <p class="body-text side-note">{{ _("web.account.display_name.kept", personas=listed(personas))|capitalize }}</p>
+  </div>
+  <div class="account-side">
+    <Bar tag="h3" :extra="_('web.account.private')">{{ _("web.account.details") }}</Bar>
+    <dl class="facts">
+      <Fact :label="_('web.account.address')" plain>
+        <span class="account-address">{{ account.nuid }}</span>
+        {% if sent %}<span class="account-chip"><Icon name="mail" :size="12" stroke="currentColor" />{{ _("web.account.unconfirmed.chip") }}</span>{% endif %}
+      </Fact>
+      <Fact :label="_('web.account.display_name.made')">
+        {% if made_in %}
+          <GameChip :of="made_in" />
+        {% else %}
+          {{ _("web.account.made.site") }}
+        {% endif %}
+        {{ when(overview.created, "yMMMd") }}
+      </Fact>
+      <Fact :label="_('web.account.terms.short')">
+        <span>{{ _("web.account.display_name.terms" if accepted else "web.account.display_name.terms.not") }}</span>
+        <a href="{{ url('/terms') }}" class="account-fact-link">{{ _("web.account.terms.read") }}</a>
+      </Fact>
+    </dl>
+    <details {% if form == "country" %}open{% endif %}
+             class="fold account-fold profile-country">
+      <summary>
+        <span class="profile-fold-label">{{ _("web.account.country") }}</span>
+        <span class="profile-fold-value">{{ country(account.country) }}</span>
+        <span class="account-change">{{ _("web.account.change") }}<span class="sr-only"> {{ _("web.account.country.change") }}</span><Icon name="caret" :size="14" class="fold-chevron" /></span>
+      </summary>
+      <AccountForm action="/account/country" part="profile">
+      {% set error = errors.get("country", "") if form == "country" else "" %}
+      <CountrySelect id="country" :countries="countries" :value="account.country" :error="error" :describedby="'country-error' if error else 'country-note'" />
+      {% if error %}
+        <FieldError id="country-error">{{ error }}</FieldError>
+      {% else %}
+        <p id="country-note" class="field-note">{{ _("web.account.country.note") }}</p>
+      {% endif %}
+      <SmallAction :label="_('web.account.country.action')" :busy="_('web.account.display_name.busy')" />
+      </AccountForm>
+    </details>
+    <p class="body-text side-note">{{ _("web.account.address.note", games=listed(password_games)) }}</p>
+  </div>
+</div>
+</AccountPart>

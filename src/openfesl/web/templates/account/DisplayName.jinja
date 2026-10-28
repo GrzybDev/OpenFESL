@@ -15,9 +15,9 @@
       <CsrfField />
       {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
       {% if taken %}
-        <Alert :label="_('web.account.display_name.not_saved')" :title="_('web.account.display_name.taken')" glyph="warn" alert />
+        <Alert :label="_('web.account.notice.not_saved')" :title="_('web.account.display_name.taken')" glyph="warn" alert />
       {% elif notice == "form" %}
-        <Alert :label="_('web.account.display_name.not_saved')" :title="_('web.account.notice.form')" glyph="warn" alert>{{ _("web.account.notice.form.text") }}</Alert>
+        <Alert :label="_('web.account.notice.not_saved')" :title="_('web.account.notice.form')" glyph="warn" alert>{{ _("web.account.notice.form.text") }}</Alert>
       {% endif %}
       <Alert :label="_('web.account.display_name.first')" :title="_('web.account.display_name.made_in', game=made_in.name) if made_in else _('web.account.display_name.none')" glyph="tag">{{ _("web.account.display_name.why", personas=listed(personas)) }}</Alert>
       <div class="account-page-form">
