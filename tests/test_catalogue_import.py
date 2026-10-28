@@ -57,7 +57,7 @@ async def test_an_imported_catalogue_names_items_in_the_pages_language_with_its_
     printed = await cli(capsys, "catalogue", "import", str(file))
 
     assert printed == (
-        "Imported the catalogue of Battlefield Heroes: 10 items, texts in 2 languages and 6 icons\n"
+        "Imported the catalogue of Battlefield Heroes: 12 items, texts in 2 languages and 6 icons\n"
     )
     [kept] = (tmp_path / "files" / "catalogues" / "bfheroes").iterdir()
     assert len(list(kept.iterdir())) == 6 and (kept / "item1.webp").read_bytes()[8:12] == b"WEBP"
@@ -105,7 +105,7 @@ async def test_an_imported_catalogue_names_items_in_the_pages_language_with_its_
     async with httpx2.AsyncClient() as client:
         log = (await sign_in(client, base, next="/admin/audit")).text
     assert "Imported catalogue" in log and "Battlefield Heroes" in log
-    assert "Items: 10 · languages: 2 · icons: 6" in log
+    assert "Items: 12 · languages: 2 · icons: 6" in log
 
 
 async def test_a_new_import_replaces_the_whole_catalogue_for_every_server_that_follows(

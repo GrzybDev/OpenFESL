@@ -23,6 +23,9 @@ logger = logging.getLogger(__name__)
 
 NOT_LOGGED_IN = 20
 
+# The status of an entitlement in use; any other is the admin's reason for taking it away.
+ACTIVE = "ACTIVE"
+
 
 @dataclass(frozen=True, slots=True)
 class Entitlement:

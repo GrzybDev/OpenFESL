@@ -60,6 +60,12 @@ class ItemFields(BaseModel):
         level: The lowest level that may use it.
         team: The id of the one team whose heroes may use it, which missions give instead of
             a faction mask; 0 fits either team.
+        base: The flag of an item that every hero it fits holds without being granted it, if
+            the definitions mark such items.
+        prerequisite: The number of the mission that a hero completes before it may take this
+            one, 0 for none, if the definitions name one.
+        repeatable: The flag that is false for a mission that a hero completes only once, if
+            the definitions say so.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -69,6 +75,9 @@ class ItemFields(BaseModel):
     slot: str
     level: str
     team: str
+    base: str | None = None
+    prerequisite: str | None = None
+    repeatable: str | None = None
 
 
 class DailyMissions(BaseModel):

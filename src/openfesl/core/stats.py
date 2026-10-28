@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Game
@@ -17,9 +17,14 @@ from openfesl.protocol.rank import (
     OwnerUpdates,
     Period,
     Stat,
+    StatUpdate,
     UpdateStats,
     UpdateType,
 )
+
+# For annotations only, since the check of players' own writes reads stats through this module.
+if TYPE_CHECKING:
+    from openfesl.core.hero_items import OwnWrites
 
 PERSONA = 1
 # The SDK's owner type for values of the whole game, which dedicated servers only add to.
@@ -81,7 +86,7 @@ class Change:
         bucket: The period it updates.
         kind: How the value combines with the stored one.
         value: The number to combine.
-        text: The text to keep; an empty one keeps the stored text.
+        text: The text to keep; none keeps the stored text.
     """
 
     owner: Owner
@@ -89,7 +94,7 @@ class Change:
     bucket: Bucket
     kind: UpdateType
     value: float
-    text: str
+    text: str | None
 
 
 class StatStore(Protocol):
@@ -140,17 +145,21 @@ def period_start(period: Period, day: date, past: int = 0) -> date:
 class StatsService:
     """The rank transactions that read and update stats."""
 
-    def __init__(self, store: StatStore, personas: PersonaStore, trust: ServerTrust) -> None:
+    def __init__(
+        self, store: StatStore, personas: PersonaStore, trust: ServerTrust, own: OwnWrites
+    ) -> None:
         """Serve stats from a store.
 
         Args:
             store: Where stats are kept.
             personas: Where the personas that own stats are found.
             trust: Which dedicated servers host games that players see, and who plays in them.
+            own: What players' own games may write of their heroes' and accounts' stats.
         """
         self._store = store
         self._personas = personas
         self._trust = trust
+        self._own = own
 
     def routes(self) -> dict[tuple[str, str], Route[Any]]:
         """Return the handlers of the service's transactions."""
@@ -227,12 +236,13 @@ class StatsService:
         )
 
     async def update_stats(self, connection: FeslConnection, request: UpdateStats) -> Message:
-        """Update stats as a dedicated server reports its players' rounds, all or nothing.
+        """Update stats as servers report players' rounds or games keep their own, all or nothing.
 
-        Only the game's dedicated servers write, and only while they host a game players see:
-        players' stats come from the rounds they play, and a client could write any number. A
-        server that logs in as a player writes only for the personas it keeps, and any server
-        writes the stats of an account only for an account whose persona it keeps.
+        Players' stats come from the rounds they play, which the game's dedicated servers write
+        while they host a game players see, and a client could write any number. A server that
+        logs in as a player writes only for the personas it keeps, and any server writes the
+        stats of an account only for an account whose persona it keeps. A player's own game
+        writes only what the game keeps itself of its hero and account.
 
         Args:
             connection: The FESL connection the request came on.
@@ -240,28 +250,30 @@ class StatsService:
 
         Raises:
             TransactionError: When the session is not a dedicated server's that hosts such a
-                game, an owner is not a persona of the game, the game or a player the server may
-                write for, or the request is too large.
+                game and its game may not write the request, an owner is not a persona of the
+                game, the game or a player the server may write for, or the request is too
+                large.
         """
         game = game_of(connection)
-        if not await self._trust.serves(connection.session):
-            raise TransactionError(PARAMETERS_ERROR)
+        trusted = await self._trust.serves(connection.session)
+        if trusted:
+            owned = [await self._writable(connection, game, updates) for updates in request.owners]
+        else:
+            owned = await self._own.owners(connection, game, request)
         day = _today()
-        changes: list[Change] = []
-        for updates in request.owners:
-            owners = await self._writable(connection, game, updates)
-            changes.extend(
-                Change(
-                    owner=owners[update.key],
-                    key=update.key,
-                    bucket=Bucket(period, period_start(period, day)),
-                    kind=update.kind,
-                    value=update.value,
-                    text=update.text,
-                )
-                for update in updates.stats
-                for period in dict.fromkeys(update.periods)
+        changes = [
+            Change(
+                owner=owners[update.key],
+                key=update.key,
+                bucket=Bucket(period, period_start(period, day)),
+                kind=update.kind,
+                value=update.value,
+                text=_text(game, update, trusted),
             )
+            for updates, owners in zip(request.owners, owned, strict=True)
+            for update in updates.stats
+            for period in dict.fromkeys(update.periods)
+        ]
         if len(changes) > MAXIMUM_ENTRIES:
             raise TransactionError(PARAMETERS_ERROR)
         await self._store.apply(partition_of(game), changes)
@@ -294,6 +306,13 @@ class StatsService:
             raise TransactionError(PARAMETERS_ERROR)
         if owner.type == ACCOUNT and not await self._trust.keeps_account(session, owner.id):
             raise TransactionError(PARAMETERS_ERROR)
+
+
+def _text(game: Game, update: StatUpdate, trusted: bool) -> str | None:
+    # A player's game writes an emptied list of items as an empty text, which clears the stored
+    # one, while servers send an empty text with every number they write, which keeps it.
+    stat = game.heroes.written_stat(update.key) if game.heroes and not trusted else None
+    return update.text if stat and stat.listed else update.text or None
 
 
 def game_of(connection: FeslConnection) -> Game:

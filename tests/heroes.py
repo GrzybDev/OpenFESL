@@ -1,10 +1,14 @@
 """Helpers of the tests of heroes, which games such as Battlefield Heroes make on their site."""
 
+from xml.etree import ElementTree
+
 import httpx2
 from accounts import PASSWORD, post_sign_in
 from identity import form_token
+from support import FESL, THEATER, Game, enter_theater, fetch, launcher_sign_in
 
 CREATOR = "/bfheroes/user/createHero"
+MAGMA = "www.battlefieldheroes.com"
 
 
 def look(**chosen: str) -> dict[str, str]:
@@ -36,3 +40,30 @@ async def create_hero(base: str, address: str, name: str, **chosen: str) -> int:
         created = await create(client, base, name, **chosen)
     assert created.status_code == 303, created.text
     return int(created.headers["location"].split("/")[3])
+
+
+async def start(
+    server_url: str, process: Game, account: str, role: str = "play"
+) -> tuple[dict[str, str], int, int]:
+    """Sign an account in at the launcher and log its game in to FESL and Theater as its hero.
+
+    Args:
+        server_url: The server's relay address.
+        process: The game process.
+        account: The account's login name.
+        role: Whether the game is started to play or to host.
+
+    Returns:
+        The magma cookie the game sends, the account's number and the hero's.
+    """
+    session = (await launcher_sign_in(server_url, account, PASSWORD, role=role)).json()
+    cookie = {"Cookie": f"magma={session['sessionId']}"}
+    _, _, body = await fetch(server_url, "/nucleus/authToken", MAGMA, cookie)
+    token = ElementTree.fromstring(body).findtext("token") or ""
+    await process.hello(FESL, "bfwest-pc", client_type="client-noreg")
+    silent = [("TXN", "NuLogin"), ("returnEncryptedInfo", "0"), ("encryptedInfo", token)]
+    account_id = int((await process.request(FESL, "acct", silent))["userId"])
+    hero = [("TXN", "NuLoginPersona"), ("name", session["personaName"])]
+    playing = await process.request(FESL, "acct", hero)
+    await enter_theater(process, THEATER, "bfwest-pc", playing["lkey"])
+    return cookie, account_id, int(playing["userId"])

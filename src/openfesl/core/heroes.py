@@ -268,20 +268,17 @@ class Heroes:
             found = values.get((owner, key))
             return int(found.value) if found else None
 
-        heroes = []
-        for (persona, created), owner in zip(records.personas, owners, strict=True):
-            team = stat(owner, rules.stats.faction)
-            kit = stat(owner, rules.stats.hero_class)
-            heroes.append(
-                Hero(
-                    persona=persona,
-                    created=created,
-                    faction=next((k for k, f in rules.factions.items() if f.team == team), None),
-                    hero_class=next((k for k, c in rules.classes.items() if c.kit == kit), None),
-                    level=max(stat(owner, rules.stats.level) or 1, 1),
-                    xp=stat(owner, rules.stats.xp) or 0,
-                )
+        heroes = [
+            Hero(
+                persona=persona,
+                created=created,
+                faction=rules.faction_of(stat(owner, rules.stats.faction)),
+                hero_class=rules.class_of(stat(owner, rules.stats.hero_class)),
+                level=max(stat(owner, rules.stats.level) or 1, 1),
+                xp=stat(owner, rules.stats.xp) or 0,
             )
+            for (persona, created), owner in zip(records.personas, owners, strict=True)
+        ]
         return Roster(heroes, rules.slots + records.bought, records.default_id)
 
     async def check(self, game: Game, name: str) -> NameCheck:

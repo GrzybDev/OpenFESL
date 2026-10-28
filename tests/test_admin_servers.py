@@ -2,10 +2,10 @@ from pathlib import Path
 
 import httpx2
 import pytest
-from heroes import create_hero
+from heroes import create_hero, start
 from identity import IdentityProvider, form_token, sign_in
 from support import THEATER, cli, connect_server, create, game, masked, report
-from test_player_servers import SERVER_GAME, register, start
+from test_player_servers import SERVER_GAME, register
 
 pytestmark = pytest.mark.anyio
 KEEPER = {"sub": "keeper-3", "preferred_username": "invented-keeper", "groups": ["fesl-admins"]}

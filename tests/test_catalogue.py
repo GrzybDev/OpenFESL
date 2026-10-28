@@ -28,7 +28,7 @@ async def test_a_copy_of_the_game_gives_a_file_of_its_items_texts_icons_and_tabl
     printed = await cli(capsys, "catalogue", "extract", str(copy), "-o", str(out))
 
     assert printed == (
-        f"Wrote the catalogue of Battlefield Heroes to {out}: 10 items, texts in 2 languages "
+        f"Wrote the catalogue of Battlefield Heroes to {out}: 12 items, texts in 2 languages "
         "and 6 icons\n"
     )
     assert fingerprint(copy) == before
@@ -49,10 +49,18 @@ async def test_a_copy_of_the_game_gives_a_file_of_its_items_texts_icons_and_tabl
         (9000, "convenience", (), None),
         (6000, "mission", (), "mission6000"),
         (6001, "mission", (), None),
+        (6002, "mission", (), None),
+        (6003, "mission", (), None),
     ]
     # Only the fields that the game's rules read.
     hat, rifle, tonic = document.items[0], document.items[2], document.items[5]
-    assert hat.fields == {"faction": "1", "kits": "7", "slot": "0", "minLevel": "1"}
+    assert hat.fields == {
+        "faction": "1",
+        "kits": "7",
+        "slot": "0",
+        "minLevel": "1",
+        "default": "True",
+    }
     assert rifle.fields == {"faction": "3", "kits": "4"}
     assert tonic.fields == {"faction": "3", "kits": "7"}
     assert set(extracted.icons) == {item.icon for item in document.items if item.icon}

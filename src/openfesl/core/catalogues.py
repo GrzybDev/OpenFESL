@@ -125,6 +125,9 @@ class Item:
         fields: The values of its definition that the game's rules read, as the definitions
             name them.
         names: The ids of its name in the language table, tried in order.
+        base: Whether every hero it fits holds it without being granted it.
+        prerequisite: The mission a hero completes before it may take this one, if any.
+        repeatable: Whether a hero may complete it again, for a mission.
     """
 
     id: int
@@ -137,6 +140,9 @@ class Item:
     icon: str | None
     fields: Mapping[str, str]
     names: tuple[str, ...]
+    base: bool
+    prerequisite: int | None
+    repeatable: bool
 
 
 @dataclass(frozen=True, slots=True)
@@ -285,6 +291,14 @@ class Catalogues:
         """
         feed.on(AdminAction.CATALOGUE_IMPORT, self._imported)
 
+    def contents(self, game: Game) -> Contents:
+        """Return what a game's imported catalogue holds besides its texts; nothing before then.
+
+        Args:
+            game: The game.
+        """
+        return self._contents.get(game.id, Contents())
+
     async def of(self, game: Game, language: str) -> Catalogue:
         """Return a game's catalogue with its texts in a language, in English where it has none.
 
@@ -292,7 +306,7 @@ class Catalogues:
             game: The game.
             language: The language code, such as pl.
         """
-        contents = self._contents.get(game.id, Contents())
+        contents = self.contents(game)
         if contents.revision is None:
             return Catalogue(contents)
         partition, revision = partition_of(game), contents.revision
@@ -379,6 +393,7 @@ def _contents(rules: CatalogueRules, stored: StoredCatalogue) -> Contents:
         template = names.get(item.kind, "")
         # A level after the first is often named by the first one alone.
         numbers = dict.fromkeys((item.id, *item.levels[:1]))
+        prerequisite = rules.fields.prerequisite
         found[item.id] = Item(
             id=item.id,
             kind=item.kind,
@@ -390,6 +405,9 @@ def _contents(rules: CatalogueRules, stored: StoredCatalogue) -> Contents:
             icon=item.icon,
             fields=values,
             names=tuple(text_id(template.replace("{id}", str(n))) for n in numbers if template),
+            base=_flag(values, rules.fields.base, missing=False),
+            prerequisite=(_number(values.get(prerequisite)) or None) if prerequisite else None,
+            repeatable=_flag(values, rules.fields.repeatable, missing=True),
         )
     document = stored.document
     return Contents(
@@ -402,6 +420,12 @@ def _number(text: str | None) -> int | None:
         return int(text) if text is not None else None
     except ValueError:
         return None
+
+
+def _flag(values: Mapping[str, str], field: str | None, missing: bool) -> bool:
+    # Definitions write their flags as true or false, in any case.
+    text = values.get(field) if field else None
+    return missing if text is None else text.strip().lower() == "true"
 
 
 def _factions(values: Mapping[str, str], rules: CatalogueRules) -> frozenset[str]:

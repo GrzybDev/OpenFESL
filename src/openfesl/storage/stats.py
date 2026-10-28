@@ -269,12 +269,12 @@ class SqlStatStore:
                     period_start=change.bucket.start,
                     key=change.key,
                     value=_combine(change.kind, literal(0.0), change.value),
-                    text=change.text,
+                    text=change.text or "",
                 )
                 updated: dict[str, Any] = {
                     "value": _combine(change.kind, StatRow.value, change.value)
                 }
-                if change.text:
+                if change.text is not None:
                     updated["text"] = change.text
                 await session.execute(
                     statement.on_conflict_do_update(constraint="stat_pkey", set_=updated)

@@ -28,7 +28,7 @@ EXPERIENCE = [0, *(100 * level for level in range(1, 30))]
 DEFINITIONS = {
     "Items.xml": """<database><items>
         <item id="1"><faction>1</faction><kits>7</kits><slot>0</slot><minLevel>1</minLevel>
-          <template layer="1">invented_hat</template></item>
+          <default>True</default><template layer="1">invented_hat</template></item>
         <item id="2"><faction>2</faction><kits>2</kits><slot>11</slot><minLevel>1</minLevel></item>
         </items></database>""",
     "Weapons.xml": """<weapons><!-- invented_rifle --><item id="3000"><faction>3</faction>
@@ -48,7 +48,11 @@ DEFINITIONS = {
         <item id="6000"><category>DailyMission</category><kits>9</kits><minLevel>0</minLevel>
           <teamPrereq>2</teamPrereq><criterias><criteria><val>1</val></criteria></criterias></item>
         <item id="6001"><category>DailyMission</category><kits>63</kits><minLevel>5</minLevel>
-          <teamPrereq>0</teamPrereq></item></missions>""",
+          <teamPrereq>0</teamPrereq></item>
+        <item id="6002"><category>General</category><kits>63</kits><minLevel>0</minLevel>
+          <missionPrereq>6003</missionPrereq><repeatable>false</repeatable></item>
+        <item id="6003"><category>General</category><kits>63</kits><minLevel>0</minLevel>
+          <missionPrereq>0</missionPrereq><repeatable>false</repeatable></item></missions>""",
     "DefaultCustomization.xml": """<?xml version="1.0" encoding="utf-8" ?><customizations>
         <team id="1"><kit id="0"><appearance>2</appearance><equipment>3000;2000</equipment>
         </kit></team></customizations>""",

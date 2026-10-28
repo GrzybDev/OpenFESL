@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from openfesl.core.catalogue import CatalogueFile
 from openfesl.core.catalogues import Catalogues
 from openfesl.core.games import Game, load_games
+from openfesl.core.hero_items import fits
 from openfesl.extraction import extract, find_game
 from openfesl.formats.definitions import read_definitions
 from openfesl.storage.catalogues import IconFolder, SqlCatalogueStore
@@ -66,12 +67,14 @@ def test_the_copy_gives_the_daily_missions_and_the_xp_of_each_level(
     daily = document.daily_missions
     assert len(daily) == 366
     assert (daily[0], daily[299], daily[365]) == (6127, 6123, 6041)
+    # The rotation lists every daily mission, which is how the server tells them apart.
     rules = bfheroes.catalogue
     assert COPY and rules
     with ZipFile(Path(COPY) / rules.definitions) as definitions:
         missions = read_definitions(definitions.read("Missions.xml"), "item")
-    categories = {mission.id: mission.fields.get("category") for mission in missions}
-    assert {categories[mission] for mission in daily} == {"DailyMission"}
+    assert set(daily) == {
+        mission.id for mission in missions if mission.fields.get("category") == "DailyMission"
+    }
     experience = document.experience
     assert len(experience) == 30
     assert (experience[1], experience[2], experience[29]) == (600, 1_200, 286_400)
@@ -109,3 +112,30 @@ async def test_the_server_reads_the_copys_catalogue_as_the_game_does(
     assert english.xp_to_next(1) == 600 and english.xp_to_next(30) is None
     [kept] = (tmp_path / "catalogues" / "bfheroes").iterdir()
     assert len(list(kept.iterdir())) == english.contents.icons
+    # What a new hero's game writes of its loadout fits it, and its first mission comes with
+    # level 1 and needs no other first, so the server takes the game's own writes of a new hero.
+    # Without the catalogue, the server holds the base items that it marks for each faction.
+    rules = bfheroes.heroes
+    assert rules
+    chained = english.item(6001)
+    assert chained and chained.prerequisite == 6000
+    for faction, loadouts in rules.loadouts.items():
+        assert set(rules.factions[faction].base_items) == {
+            item.id
+            for item in english.contents.items.values()
+            if item.base and faction in item.factions
+        }
+        for hero_class, loadout in loadouts.items():
+            for key, numbers in (
+                (rules.stats.appearance, loadout.appearance),
+                (rules.stats.equipment, loadout.equipment),
+                (rules.stats.emotes, loadout.emotes),
+                ("c_wmid0", loadout.missions),
+            ):
+                stat = rules.written_stat(key)
+                found = [english.item(number) for number in numbers]
+                assert stat and all(
+                    item and fits(item, stat.items, faction, hero_class, 1) for item in found
+                ), (faction, hero_class, key)
+            missions = [english.item(number) for number in loadout.missions]
+            assert missions and all(item and item.prerequisite is None for item in missions)

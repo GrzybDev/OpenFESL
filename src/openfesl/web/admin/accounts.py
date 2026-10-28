@@ -10,15 +10,13 @@ from starlette.datastructures import QueryParams
 from openfesl.core.accounts import AccountRecord, RememberedLogin
 from openfesl.core.admins import Role
 from openfesl.core.census import Census, Server
-from openfesl.core.entitlements import Entitlement, EntitlementQuery, StatusChange
+from openfesl.core.entitlements import ACTIVE, Entitlement, EntitlementQuery, StatusChange
 from openfesl.core.games import Game, Games
 from openfesl.core.personas import PersonaRecord, PersonaState
 from openfesl.core.session import GameSession, Players
 from openfesl.web.admin.auth import AdminSessions
 
 PAGE_SIZE = 25
-# The status of an entitlement the admin did not take away.
-ACTIVE = "ACTIVE"
 
 
 class AccountDirectory(Protocol):

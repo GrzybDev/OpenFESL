@@ -4,13 +4,12 @@ from xml.etree import ElementTree
 import httpx2
 import pytest
 from accounts import PASSWORD, execute, post_sign_in, select_value
-from heroes import CREATOR, create, create_hero
+from heroes import CREATOR, MAGMA, create, create_hero
 from identity import form_token
 from support import FESL, fetch, game, launcher_sign_in, markup, once_token, visible
 
 pytestmark = pytest.mark.anyio
 
-MAGMA = "www.battlefieldheroes.com"
 CREATION = ("c_team", "c_kit", "c_skc", "c_hrc", "c_ft", "c_hrs", "c_fhrs", "level")
 
 

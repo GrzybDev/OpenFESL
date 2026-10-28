@@ -6,8 +6,9 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.exceptions import HTTPException
 
 from openfesl.core.catalogues import Catalogues
-from openfesl.core.entitlements import EntitlementStore
+from openfesl.core.entitlements import ACTIVE, EntitlementStore
 from openfesl.core.games import Game, Games
+from openfesl.core.hero_items import held
 from openfesl.core.heroes import Hero, Heroes, HeroRefused, Refusal, Roster
 from openfesl.core.texts import localize, translate
 from openfesl.core.wallets import Wallets
@@ -39,8 +40,8 @@ class HeroCard:
         xp_needed: The XP its level needs to the next, from the catalogue's rank table; none
             without a catalogue or at the highest level.
         points: The Hero Points it has to spend, and those it earned in all.
-        items: The items it owns: the starting kit of its faction and class and those kept for
-            it.
+        items: The items it holds: the starting kit of its faction and class and those kept for
+            it while they are in use and have time left.
         low: How many of the items kept for it have few uses left.
     """
 
@@ -285,14 +286,11 @@ class HeroesPages:
         cards = []
         for slot, (hero, earned) in enumerate(zip(roster.heroes, points, strict=True), 1):
             kept = await self._entitlements.of_persona(hero.persona.id)
-            owned = {int(item.tag.partition("-")[0]) for item in kept if item.status == "ACTIVE"}
-            if hero.faction and hero.hero_class:
-                loadout = rules.loadouts[hero.faction][hero.hero_class]
-                owned |= {*loadout.appearance, *loadout.equipment, *loadout.emotes}
+            owned = held(rules, hero.faction, hero.hero_class, kept)
             low = sum(
                 1
                 for item in kept
-                if item.status == "ACTIVE"
+                if item.status == ACTIVE
                 and item.uses is not None
                 and item.uses <= rules.running_low
             )

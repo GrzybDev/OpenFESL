@@ -1,8 +1,12 @@
+import re
 from typing import Self
 
 from pydantic import BaseModel, ConfigDict, Field, PositiveInt, model_validator
 
 from openfesl.core.game_pages import Colour, Glyph
+
+# The numbers of the items that a stat names as text, joined by semicolons; none at all when empty.
+_ITEM_LIST = re.compile(r"(?:[0-9]+(?:;[0-9]+)*)?")
 
 
 class Faction(BaseModel):
@@ -13,6 +17,9 @@ class Faction(BaseModel):
         hair_styles: The item numbers of the hair styles a hero of the faction may wear, in the
             order the creator lists them; a hero may also wear none, stored as 0.
         facial_hair: The item numbers of its facial hair, likewise.
+        base_items: The item numbers of what every hero of the faction holds without being
+            granted it, of every class, which the server counts as held while it has no
+            catalogue to tell the classes apart.
         colour: The faction's colour, behind its glyph.
         ink: The colour of the glyph and text on it.
         glyph: The faction's glyph.
@@ -23,6 +30,7 @@ class Faction(BaseModel):
     team: int
     hair_styles: list[PositiveInt]
     facial_hair: list[PositiveInt]
+    base_items: list[PositiveInt] = []
     colour: Colour
     ink: Colour
     glyph: Glyph
@@ -49,6 +57,7 @@ class Loadout(BaseModel):
         appearance: The clothes it wears.
         equipment: The items on its equipment bar.
         emotes: Its emotes.
+        missions: The missions it may wish for from the start.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -56,6 +65,7 @@ class Loadout(BaseModel):
     appearance: list[int]
     equipment: list[int]
     emotes: list[int]
+    missions: list[int] = []
 
 
 class HeroStats(BaseModel):
@@ -73,6 +83,9 @@ class HeroStats(BaseModel):
         emotes: The emotes, likewise.
         level: The level.
         xp: The XP gathered within the level.
+        completed: How often the hero completed a mission, with {id} for the mission's number.
+        daily_completed: The day of the year, from 0, whose daily mission the hero's account
+            completed last; a stat of the account.
     """
 
     model_config = ConfigDict(frozen=True, validate_by_name=True)
@@ -88,6 +101,43 @@ class HeroStats(BaseModel):
     emotes: str
     level: str
     xp: str
+    completed: str
+    daily_completed: str
+
+
+class WrittenStat(BaseModel):
+    """Stats that a player's own game writes, of its hero or of its account, and their values.
+
+    Attributes:
+        keys: The pattern that the stats' keys match whole.
+        items: The kinds of the items that a stat names by their numbers, 0 naming none; empty
+            for a stat that holds a plain number.
+        listed: Whether a stat names its items as a text of numbers joined by semicolons rather
+            than one item as its number.
+        highest: The highest number that a stat without items holds, from 0.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    keys: re.Pattern[str]
+    items: frozenset[str] = frozenset()
+    listed: bool = False
+    highest: int = 0
+
+    def numbers(self, value: float, text: str) -> list[int] | None:
+        """Return the numbers that a write of the stat holds, or None for one it cannot hold.
+
+        Args:
+            value: The number written.
+            text: The text written.
+        """
+        if self.listed:
+            if value or not _ITEM_LIST.fullmatch(text):
+                return None
+            return [int(number) for number in text.split(";") if number]
+        if text or not value.is_integer() or value < 0 or not (self.items or value <= self.highest):
+            return None
+        return [int(value)]
 
 
 class HeroRules(BaseModel):
@@ -108,6 +158,9 @@ class HeroRules(BaseModel):
         loadouts: What a new hero starts with, by faction and class.
         starting_items: The items a new hero is granted with their uses, by their Magma tag:
             those the game does not grant itself.
+        written: The stats that a player's own game writes, of its hero and of its account.
+        granted: The kinds of items that the game grants every hero itself: each item of the
+            kind that fits the hero's faction and class, once the hero reaches its level.
         points: The currency of the points each hero earns with its levels and spends alone.
         currency: The currency, which an account's heroes share, that slots and new names are
             paid in.
@@ -131,11 +184,37 @@ class HeroRules(BaseModel):
     starting_stats: dict[str, float] = {}
     loadouts: dict[str, dict[str, Loadout]]
     starting_items: dict[str, PositiveInt] = {}
+    written: list[WrittenStat] = []
+    granted: frozenset[str] = frozenset()
     points: str
     currency: str
     rename_price: PositiveInt
     slot_price: PositiveInt
     running_low: PositiveInt
+
+    def faction_of(self, team: int | None) -> str | None:
+        """Return the faction whose team number a hero's faction stat holds, if it is one.
+
+        Args:
+            team: The stat's number; none when the hero has no such stat.
+        """
+        return next((name for name, faction in self.factions.items() if faction.team == team), None)
+
+    def class_of(self, kit: int | None) -> str | None:
+        """Return the class whose kit number a hero's class stat holds, if it is one.
+
+        Args:
+            kit: The stat's number; none when the hero has no such stat.
+        """
+        return next((name for name, found in self.classes.items() if found.kit == kit), None)
+
+    def written_stat(self, key: str) -> WrittenStat | None:
+        """Return how a player's own game writes a stat, if it writes it at all.
+
+        Args:
+            key: The stat's key.
+        """
+        return next((stat for stat in self.written if stat.keys.fullmatch(key)), None)
 
     @model_validator(mode="after")
     def _check_lists(self) -> Self:

@@ -19,6 +19,7 @@ from openfesl.core.entitlements import EntitlementService
 from openfesl.core.fesl import Route
 from openfesl.core.game_http import GameHttp
 from openfesl.core.games import Games
+from openfesl.core.hero_items import OwnWrites
 from openfesl.core.heroes import Heroes
 from openfesl.core.history import OnlineHistory
 from openfesl.core.hosting import Hosting
@@ -185,7 +186,8 @@ class GameServices:
         routes.update(EntitlementService(stores.entitlements, trust).routes())
         routes.update(KeyService(stores.keys).routes())
         routes.update(self.game_http.routes())
-        routes.update(StatsService(stores.stats, stores.personas, trust).routes())
+        own = OwnWrites(stores.stats, stores.entitlements, self.catalogues)
+        routes.update(StatsService(stores.stats, stores.personas, trust, own).routes())
         routes.update(LeaderboardService(stores.stats).routes())
         routes.update(RecordService(stores.records).routes())
         routes.update(

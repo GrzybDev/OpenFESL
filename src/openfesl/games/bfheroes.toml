@@ -84,13 +84,17 @@ KOR_KR = "ko"
 
 # What the fields of a definition mean: the factions and kits as bit masks, the slot of what is
 # worn, the lowest level, which 1.89 sets to 1 for every item but the missions, and the one team
-# that a mission is for.
+# that a mission is for; the clothes marked default, which every hero they fit holds; and the
+# mission to complete before a mission, and whether a mission is completed more than once.
 [catalogue.fields]
 factions = "faction"
 classes = "kits"
 slot = "slot"
 level = "minLevel"
 team = "teamPrereq"
+base = "default"
+prerequisite = "missionPrereq"
+repeatable = "repeatable"
 
 [catalogue.factions]
 royal = 1
@@ -264,9 +268,28 @@ skin_tones = ["#2E2017", "#682800", "#8A4A00", "#AC5C00", "#CC7820", "#EC8212", 
 skin_order = [9, 8, 7, 6, 5, 4, 3, 2, 1]
 hair_colours = ["#F8E5B2", "#8E664A", "#FF7352", "#2E2017", "#C59D81"]
 hair_order = [1, 3, 5, 2, 4]
-stats = { faction = "c_team", class = "c_kit", skin_tone = "c_skc", hair_colour = "c_hrc", hair_style = "c_hrs", facial_hair = "c_fhrs", appearance = "c_apr", equipment = "c_eqp", emotes = "c_emo", level = "level", xp = "xp" }
+stats = { faction = "c_team", class = "c_kit", skin_tone = "c_skc", hair_colour = "c_hrc", hair_style = "c_hrs", facial_hair = "c_fhrs", appearance = "c_apr", equipment = "c_eqp", emotes = "c_emo", level = "level", xp = "xp", completed = "aw{id}", daily_completed = "cdm" }
 starting_stats = { c_ft = 0, level = 1 }
 starting_items = { "2005-lmct" = 10 }
+# The stats that the game writes itself, each set for all time: its hero's look, equipment bar and
+# emotes as item numbers joined by semicolons, the look as 0 when empty; the mission it wishes for
+# in each of the hero's three mission slots; the mission completed in a slot, which it only clears
+# once shown; a number its mission manager keeps; and its account's tutorial status, 0 to 2, and
+# the start and length of its last session (BFHeroes.exe 1.89 0x007b11a6, 0x007c2169, 0x00683d63).
+# Its dedicated servers check the look and equipment against the item definitions again
+# (0x007b98a7).
+written = [
+    { keys = "c_apr", items = ["appearance"], listed = true },
+    { keys = "c_eqp", items = ["weapon", "ability"], listed = true },
+    { keys = "c_emo", items = ["emote"], listed = true },
+    { keys = "c_wmid[0-2]", items = ["mission"] },
+    { keys = "c_cmid[0-2]" },
+    { keys = "c_tut", highest = 2 },
+    { keys = "c_ltp|c_ltm|c_slm", highest = 4294967295 },
+]
+# The game grants each hero itself every mission of its team and class whose level the hero has
+# reached (0x007ba79f).
+granted = ["mission"]
 # The Hero Points each hero earns with its levels, and the uses left at which the heroes page says
 # an item runs low.
 points = "_DH"
@@ -277,11 +300,13 @@ currency = "_PF"
 rename_price = 1499
 slot_price = 1749
 
-# Royal Army first, as the 2012 creator listed them.
+# Royal Army first, as the 2012 creator listed them. The base items are the clothes that Items.xml
+# marks default for the faction, alike in 1.46 and 1.89.
 [heroes.factions.royal]
 team = 2
 hair_styles = [82, 83, 84, 85, 86, 87]
 facial_hair = [102, 103, 104, 105, 106, 107, 108, 109]
+base_items = [1, 2, 29, 30, 31, 99, 100, 248, 249, 367, 368, 373, 392]
 colour = "#24508F"
 ink = "#F2C12E"
 glyph = "crown"
@@ -290,6 +315,7 @@ glyph = "crown"
 team = 1
 hair_styles = [120, 121, 122, 123, 124, 125]
 facial_hair = [126, 127, 128, 129, 130, 131, 132, 133]
+base_items = [7, 8, 56, 69, 70, 112, 113, 250, 251, 416, 417, 418, 420]
 colour = "#A3221B"
 ink = "#FFFFFF"
 glyph = "chevrons"
@@ -299,15 +325,16 @@ commando = { kit = 0, glyph = "reticle" }
 soldier = { kit = 1, glyph = "heart-cross" }
 gunner = { kit = 2, glyph = "shield-bars" }
 
+# Each team and kit's lists of DefaultCustomization.xml, its first mission among them.
 [heroes.loadouts.royal]
-commando = { appearance = [4, 5, 32, 29], equipment = [3001, 3013, 2136, 3156, 2005], emotes = [5000, 5007, 5016] }
-soldier = { appearance = [4, 936, 935, 29], equipment = [3011, 3009, 2075, 3156, 2005], emotes = [5000, 5007, 5016] }
-gunner = { appearance = [4, 36, 444, 29], equipment = [3003, 3009, 2026, 3156, 2005], emotes = [5000, 5007, 5016] }
+commando = { appearance = [4, 5, 32, 29], equipment = [3001, 3013, 2136, 3156, 2005], emotes = [5000, 5007, 5016], missions = [6000] }
+soldier = { appearance = [4, 936, 935, 29], equipment = [3011, 3009, 2075, 3156, 2005], emotes = [5000, 5007, 5016], missions = [6000] }
+gunner = { appearance = [4, 36, 444, 29], equipment = [3003, 3009, 2026, 3156, 2005], emotes = [5000, 5007, 5016], missions = [6000] }
 
 [heroes.loadouts.national]
-commando = { appearance = [10, 981, 979, 56], equipment = [3002, 3014, 2141, 3155, 2005], emotes = [5000, 5007, 5016] }
-soldier = { appearance = [10, 980, 978, 56], equipment = [3012, 3010, 2075, 3155, 2005], emotes = [5000, 5007, 5016] }
-gunner = { appearance = [10, 73, 9, 56], equipment = [3004, 3010, 2026, 3155, 2005], emotes = [5000, 5007, 5016] }
+commando = { appearance = [10, 981, 979, 56], equipment = [3002, 3014, 2141, 3155, 2005], emotes = [5000, 5007, 5016], missions = [6000] }
+soldier = { appearance = [10, 980, 978, 56], equipment = [3012, 3010, 2075, 3155, 2005], emotes = [5000, 5007, 5016], missions = [6000] }
+gunner = { appearance = [10, 73, 9, 56], equipment = [3004, 3010, 2026, 3155, 2005], emotes = [5000, 5007, 5016], missions = [6000] }
 
 # The Theater lobby the dedicated servers list their games in. Lobbies are kept on EA's servers,
 # not in the client, and a dedicated server asks for any (LID -1); this is the one the game was

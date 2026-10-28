@@ -6,12 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin
-from openfesl.core.entitlements import Entitlement, EntitlementQuery, StatusChange
+from openfesl.core.entitlements import ACTIVE, Entitlement, EntitlementQuery, StatusChange
 from openfesl.core.games import Grant
 from openfesl.storage.admin import action_row
 from openfesl.storage.models import AdminActionRow, EntitlementRow
 
-ACTIVE = "ACTIVE"
 # What the game reads for an entitlement the admin took away.
 REVOKED = "DISABLED"
 

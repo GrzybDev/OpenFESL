@@ -2,17 +2,15 @@ from xml.etree import ElementTree
 
 import anyio
 import pytest
-from heroes import create_hero
+from heroes import MAGMA, create_hero, start
 from support import (
     FESL,
     THEATER,
     Game,
     cli,
-    enter_theater,
     fetch,
     game,
     ids,
-    launcher_sign_in,
     let_in,
     log_in_player,
     update_stats,
@@ -21,8 +19,6 @@ from support import (
 from openfesl.protocol.fields import Fields
 
 pytestmark = pytest.mark.anyio
-
-MAGMA = "www.battlefieldheroes.com"
 
 # The game a Battlefield Heroes 1.89 dedicated server lists, as the game sends it.
 SERVER_GAME = [
@@ -52,33 +48,6 @@ async def register(server_url: str, account: str) -> None:
     # Battlefield Heroes registers no accounts, so they come from another game here.
     async with game(server_url) as registering:
         await log_in_player(registering, FESL, account)
-
-
-async def start(
-    server_url: str, process: Game, account: str, role: str = "play"
-) -> tuple[dict[str, str], int, int]:
-    """Sign an account in at the launcher and log its game in to FESL and Theater as its hero.
-
-    Args:
-        server_url: The server's relay address.
-        process: The game process.
-        account: The account's login name.
-        role: Whether the game is started to play or to host.
-
-    Returns:
-        The magma cookie the game sends, the account's number and the hero's.
-    """
-    session = (await launcher_sign_in(server_url, account, "secret-pass", role=role)).json()
-    cookie = {"Cookie": f"magma={session['sessionId']}"}
-    _, _, body = await fetch(server_url, "/nucleus/authToken", MAGMA, cookie)
-    token = ElementTree.fromstring(body).findtext("token") or ""
-    await process.hello(FESL, "bfwest-pc", client_type="client-noreg")
-    silent = [("TXN", "NuLogin"), ("returnEncryptedInfo", "0"), ("encryptedInfo", token)]
-    account_id = int((await process.request(FESL, "acct", silent))["userId"])
-    hero = [("TXN", "NuLoginPersona"), ("name", session["personaName"])]
-    playing = await process.request(FESL, "acct", hero)
-    await enter_theater(process, THEATER, "bfwest-pc", playing["lkey"])
-    return cookie, account_id, int(playing["userId"])
 
 
 async def hero_of(player: Game, name: str) -> int:
