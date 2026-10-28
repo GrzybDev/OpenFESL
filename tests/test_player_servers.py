@@ -1,8 +1,11 @@
+import asyncio
 from xml.etree import ElementTree
 
 import anyio
 import pytest
-from heroes import MAGMA, create_hero, start
+from accounts import select_value
+from heroes import MAGMA, create_hero, start, wallets
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from support import (
     FESL,
     THEATER,
@@ -16,7 +19,10 @@ from support import (
     update_stats,
 )
 
+from openfesl.core.stats import PERSONA, Change, LevelPoints, Levels, Owner, bucket_of
 from openfesl.protocol.fields import Fields
+from openfesl.protocol.rank import Period, UpdateType
+from openfesl.storage.stats import SqlStatStore
 
 pytestmark = pytest.mark.anyio
 
@@ -193,3 +199,56 @@ async def test_a_server_that_logs_in_as_a_player_keeps_the_rounds_of_the_players
     assert revoked["errorCode"] == "21"
     assert after == ("error", "USER_DOES_NOT_MATCH")
     assert values(kept) == ["260.0000", "25.0000"]
+
+
+@pytest.mark.usefixtures("prompt_decisions")
+async def test_a_hero_earns_a_hero_point_on_each_even_level_once(
+    server_url: str, database_url: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    accounts = ("ann@example.test", "host@example.test")
+    base = server_url.replace("ws://", "http://").rstrip("/")
+    for account in accounts:
+        await register(server_url, account)
+        await create_hero(base, account, account.split("@")[0])
+    async with game(server_url) as ann, game(server_url) as server:
+        cookie, _, hero = await start(server_url, ann, "ann@example.test")
+        await start(server_url, server, "host@example.test", role="host")
+        created = await server.theater(THEATER, "CGAM", SERVER_GAME)
+        await cli(capsys, "servers", "approve", created.fields["UGID"])
+        await until_listed(ann)
+        await let_in(server, ann, created.fields)
+
+        # From level 1: two levels gained one by one, three at once, then the level set lower
+        # and raised again through levels already paid for, and a level not paid for yet.
+        points = []
+        for kind, levels in ((3, "1"), (3, "1"), (3, "3"), (0, "2"), (3, "2"), (3, "4")):
+            pushed = update_stats((str(hero), "1", [(kind, "level", levels, "", "0")]))
+            assert "errorCode" not in await server.request(FESL, "rank", pushed)
+            points.append((await wallets(server_url, cookie, hero))["_DH"])
+        level = await ann.request(FESL, "rank", get_stats(hero, "level"))
+        # Two changes of the level at once pay its points once.
+        engine = create_async_engine(database_url)
+        store = SqlStatStore(async_sessionmaker(engine))
+        all_time = bucket_of(Period.ALL_TIME, 0)
+        raised = Change(Owner(PERSONA, hero), "level", all_time, UpdateType.SET, 10.0, None)
+        earned = Levels("level", 30, LevelPoints(2, "bfheroes", "_DH", 0))
+        await asyncio.gather(*(store.apply("/eagames/bfwest", [raised], earned) for _ in range(2)))
+        await engine.dispose()
+        # A level past the highest is kept as the highest, and one below the first as the first.
+        bounded = []
+        for kind, levels in ((3, "1000000000"), (0, "-3")):
+            pushed = update_stats((str(hero), "1", [(kind, "level", levels, "", "0")]))
+            assert "errorCode" not in await server.request(FESL, "rank", pushed)
+            [kept] = values(await ann.request(FESL, "rank", get_stats(hero, "level")))
+            bounded.append((kept, (await wallets(server_url, cookie, hero))["_DH"]))
+
+    assert points == [1, 1, 3, 3, 3, 4]
+    assert values(level) == ["8.0000"]
+    assert bounded == [("30.0000", 15), ("1.0000", 15)]
+    ledger = await select_value(
+        database_url,
+        "SELECT string_agg(reason || ':' || delta, ' ' ORDER BY wallet_entry.id) FROM wallet_entry"
+        " JOIN wallet ON wallet.id = wallet_id WHERE persona_id = :hero AND currency = '_DH'",
+        hero=hero,
+    )
+    assert ledger == "level:1 level:2 level:1 level:1 level:10"

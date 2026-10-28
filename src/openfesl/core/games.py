@@ -351,6 +351,10 @@ class Game(BaseModel):
         paid = self.currencies.get(self.heroes.currency) if self.heroes else None
         if self.heroes and (paid is None or paid.scope is not Scope.ACCOUNT):
             raise ValueError("the heroes' prices need a currency that the account holds")
+        # The XP table runs from level 0 to the one below the highest, which leads nowhere.
+        table = self.catalogue.experience.levels if self.catalogue else None
+        if self.heroes and table is not None and self.heroes.highest_level != table:
+            raise ValueError("the heroes' highest level must end the catalogue's XP table")
         return self
 
     @model_validator(mode="after")

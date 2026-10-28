@@ -161,7 +161,10 @@ class HeroRules(BaseModel):
         written: The stats that a player's own game writes, of its hero and of its account.
         granted: The kinds of items that the game grants every hero itself: each item of the
             kind that fits the hero's faction and class, once the hero reaches its level.
+        highest_level: The highest level a hero reaches; its level stays between 1 and this.
         points: The currency of the points each hero earns with its levels and spends alone.
+        points_every: How many levels earn a hero one of its points: one on each level that is a
+            multiple of this; none where the game's servers credit them instead.
         currency: The currency, which an account's heroes share, that slots and new names are
             paid in.
         rename_price: What a new name costs.
@@ -186,7 +189,9 @@ class HeroRules(BaseModel):
     starting_items: dict[str, PositiveInt] = {}
     written: list[WrittenStat] = []
     granted: frozenset[str] = frozenset()
+    highest_level: PositiveInt
     points: str
+    points_every: PositiveInt | None = None
     currency: str
     rename_price: PositiveInt
     slot_price: PositiveInt

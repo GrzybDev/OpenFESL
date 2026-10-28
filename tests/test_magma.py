@@ -2,14 +2,13 @@ import asyncio
 from xml.etree import ElementTree
 
 import pytest
-from heroes import create_hero
+from heroes import MAGMA, create_hero, wallets
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 from support import FESL, fetch, game, launcher_sign_in, log_in_player
 
 pytestmark = pytest.mark.anyio
 
-MAGMA = "www.battlefieldheroes.com"
 NO_STORE = "no-store, no-transform"
 
 
@@ -44,17 +43,6 @@ async def play(server_url: str, account: str, *made: str) -> tuple[dict[str, str
             hero = [("TXN", "NuLoginPersona"), ("name", name)]
             heroes.append(int((await player.request(FESL, "acct", hero))["userId"]))
     return cookie, heroes
-
-
-async def wallets(server_url: str, cookie: dict[str, str], hero: int) -> dict[str, int]:
-    """Return the balances in a hero's wallets, by currency, as the game loads them."""
-    _, _, body = await fetch(server_url, f"/nucleus/wallets/{hero}", MAGMA, cookie)
-    answer = ElementTree.fromstring(body)
-    assert answer.tag == "billingAccounts"
-    return {
-        wallet.findtext("currency") or "": int(wallet.findtext("balance") or "")
-        for wallet in answer.iter("walletAccount")
-    }
 
 
 def refusal(body: bytes) -> tuple[str | None, str | None, str | None]:

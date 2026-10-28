@@ -24,9 +24,23 @@ from sqlalchemy.orm import aliased
 
 from openfesl.core.leaderboards import Ranked, Standing
 from openfesl.core.rankings import KD, Line
-from openfesl.core.stats import PERSONA, Bucket, Change, Owner, Value
-from openfesl.protocol.rank import RankOrder, UpdateType
+from openfesl.core.stats import (
+    PERSONA,
+    Bucket,
+    Change,
+    LevelPoints,
+    Levels,
+    Owner,
+    Value,
+    bucket_of,
+)
+from openfesl.core.wallets import Wallet
+from openfesl.protocol.rank import Period, RankOrder, UpdateType
 from openfesl.storage.models import PersonaRow, StatRow
+from openfesl.storage.wallets import grant_up_to
+
+# The ledger's reason for the points that a persona earns with its level.
+LEVEL = "level"
 
 
 class SqlStatStore:
@@ -249,8 +263,10 @@ class SqlStatStore:
                     return _line(row, sums)
         return None
 
-    async def apply(self, partition: str, changes: Sequence[Change]) -> None:
-        """Apply updates in their order, all of them or none.
+    async def apply(
+        self, partition: str, changes: Sequence[Change], levels: Levels | None = None
+    ) -> None:
+        """Apply updates in their order, all of them or none, with the points a level earns.
 
         A value never stored counts as 0, which is the game's own default: games send their
         values as offsets from the defaults in their own data.
@@ -258,9 +274,17 @@ class SqlStatStore:
         Args:
             partition: The game's partition.
             changes: The updates.
+            levels: How the personas' levels are kept: each level an update changes stays
+                within its bounds, and each persona whose level changes is credited at once the
+                points that its level earns and never earned before, so that none is credited
+                twice or taken back; none for a game whose personas have no levels.
         """
         async with self._sessions.begin() as session:
             for change in changes:
+                value = _combine(change.kind, literal(0.0), change.value)
+                combined = _combine(change.kind, StatRow.value, change.value)
+                if levels and change.owner.type == PERSONA and change.key == levels.key:
+                    value, combined = (_bounded(level, levels) for level in (value, combined))
                 statement = insert(StatRow).values(
                     partition=partition,
                     owner_type=change.owner.type,
@@ -268,17 +292,51 @@ class SqlStatStore:
                     period=change.bucket.period,
                     period_start=change.bucket.start,
                     key=change.key,
-                    value=_combine(change.kind, literal(0.0), change.value),
+                    value=value,
                     text=change.text or "",
                 )
-                updated: dict[str, Any] = {
-                    "value": _combine(change.kind, StatRow.value, change.value)
-                }
+                updated: dict[str, Any] = {"value": combined}
                 if change.text is not None:
                     updated["text"] = change.text
                 await session.execute(
                     statement.on_conflict_do_update(constraint="stat_pkey", set_=updated)
                 )
+            if levels and levels.points:
+                await _grant_points(session, partition, changes, levels.key, levels.points)
+
+
+async def _grant_points(
+    session: AsyncSession,
+    partition: str,
+    changes: Sequence[Change],
+    key: str,
+    points: LevelPoints,
+) -> None:
+    raised = {
+        change.owner.id for change in changes if change.owner.type == PERSONA and change.key == key
+    }
+    if not raised:
+        return
+    bucket = bucket_of(Period.ALL_TIME, 0)
+    levels = await session.execute(
+        select(PersonaRow.id, PersonaRow.account_id, StatRow.value)
+        .join(StatRow, StatRow.owner_id == PersonaRow.id)
+        .where(
+            PersonaRow.id.in_(raised),
+            StatRow.partition == partition,
+            StatRow.owner_type == PERSONA,
+            StatRow.key == key,
+            StatRow.period == bucket.period,
+            StatRow.period_start == bucket.start,
+        )
+        # One order of the wallets' locks for every transaction.
+        .order_by(PersonaRow.id)
+    )
+    for persona_id, account_id, level in levels:
+        earned = int(level) // points.every
+        if earned > 0:
+            wallet = Wallet(points.game, points.currency, account_id, persona_id, points.allowance)
+            await grant_up_to(session, wallet, earned, LEVEL)
 
 
 def _owned(
@@ -353,6 +411,10 @@ def _ranked(row: type[StatRow]) -> ColumnElement[bool]:
     # A disabled persona keeps its stats but leaves the leaderboards, so it takes no one's place.
     in_use = exists().where(PersonaRow.id == row.owner_id, PersonaRow.disabled_at.is_(None))
     return (row.owner_type != PERSONA) | in_use
+
+
+def _bounded(level: ColumnElement[float], levels: Levels) -> ColumnElement[float]:
+    return func.least(func.greatest(level, 1.0), float(levels.highest))
 
 
 def _combine(

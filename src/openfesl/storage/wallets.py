@@ -143,6 +143,40 @@ async def spend(session: AsyncSession, wallet: Wallet, amount: int, reason: str)
     return int(balance)
 
 
+async def grant_up_to(session: AsyncSession, wallet: Wallet, total: int, reason: str) -> None:
+    """Credit a wallet with what a reason has yet to grant it of a total, taking none back.
+
+    The wallet is opened first and locked while its ledger is read, so that grants at the same
+    time credit the total once.
+
+    Args:
+        session: The transaction to credit in.
+        wallet: The wallet.
+        total: What the reason grants the wallet in all.
+        reason: Why, as the ledger keeps it.
+    """
+    await open_wallets(session, [wallet])
+    wallet_id = await session.scalar(
+        select(WalletRow.id).where(_matching([wallet])).with_for_update()
+    )
+    granted = await session.scalar(
+        select(func.coalesce(func.sum(WalletEntryRow.delta), 0)).where(
+            WalletEntryRow.wallet_id == wallet_id, WalletEntryRow.reason == reason
+        )
+    )
+    missing = total - int(granted or 0)
+    if missing <= 0:
+        return
+    balance = await session.scalar(
+        update(WalletRow)
+        .where(WalletRow.id == wallet_id)
+        .values(balance=WalletRow.balance + missing)
+        .returning(WalletRow.balance)
+    )
+    entry = {"wallet_id": wallet_id, "delta": missing, "balance": balance, "reason": reason}
+    await session.execute(insert(WalletEntryRow).values(entry))
+
+
 def _key(wallet: Wallet) -> tuple[str, str, int, int | None]:
     return (wallet.game, wallet.currency, wallet.account_id, wallet.persona_id)
 

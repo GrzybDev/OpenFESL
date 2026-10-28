@@ -97,6 +97,39 @@ class Change:
     text: str | None
 
 
+@dataclass(frozen=True, slots=True)
+class LevelPoints:
+    """The points that a game's personas earn with their level.
+
+    Attributes:
+        every: A persona earns a point on each level that is a multiple of this.
+        game: The game's data-file name.
+        currency: The points' currency, which each persona holds on its own.
+        allowance: What a wallet of the points opens with.
+    """
+
+    every: int
+    game: str
+    currency: str
+    allowance: int
+
+
+@dataclass(frozen=True, slots=True)
+class Levels:
+    """How a game keeps its personas' levels, and the points they earn with them.
+
+    Attributes:
+        key: The key of the stat that holds a persona's level.
+        highest: The highest level, as the lowest is 1.
+        points: The points that personas earn with their level; none for a game whose personas
+            earn none.
+    """
+
+    key: str
+    highest: int
+    points: LevelPoints | None
+
+
 class StatStore(Protocol):
     """Where the stats of a game's partition are kept."""
 
@@ -112,8 +145,10 @@ class StatStore(Protocol):
             bucket: The period.
         """
 
-    async def apply(self, partition: str, changes: Sequence[Change]) -> None:
-        """Apply updates in their order, all of them or none.
+    async def apply(
+        self, partition: str, changes: Sequence[Change], levels: Levels | None = None
+    ) -> None:
+        """Apply updates in their order, all of them or none, with the points a level earns.
 
         A value never stored counts as 0, which is the game's own default: games send their
         values as offsets from the defaults in their own data.
@@ -121,6 +156,10 @@ class StatStore(Protocol):
         Args:
             partition: The game's partition.
             changes: The updates.
+            levels: How the personas' levels are kept: each level an update changes stays
+                within its bounds, and each persona whose level changes is credited at once the
+                points that its level earns and never earned before, so that none is credited
+                twice or taken back; none for a game whose personas have no levels.
         """
 
 
@@ -276,7 +315,7 @@ class StatsService:
         ]
         if len(changes) > MAXIMUM_ENTRIES:
             raise TransactionError(PARAMETERS_ERROR)
-        await self._store.apply(partition_of(game), changes)
+        await self._store.apply(partition_of(game), changes, _levels(game))
         return Message()
 
     async def _writable(
@@ -414,6 +453,17 @@ def partition_of(game: Game) -> str:
 
 def _today() -> date:
     return datetime.now(UTC).date()
+
+
+def _levels(game: Game) -> Levels | None:
+    rules = game.heroes
+    if rules is None:
+        return None
+    points = None
+    if rules.points_every is not None:
+        allowance = game.currencies[rules.points].allowance
+        points = LevelPoints(rules.points_every, game.id, rules.points, allowance)
+    return Levels(rules.stats.level, rules.highest_level, points)
 
 
 def bucket_of(period: Period, past: int) -> Bucket:

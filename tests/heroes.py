@@ -67,3 +67,14 @@ async def start(
     playing = await process.request(FESL, "acct", hero)
     await enter_theater(process, THEATER, "bfwest-pc", playing["lkey"])
     return cookie, account_id, int(playing["userId"])
+
+
+async def wallets(server_url: str, cookie: dict[str, str], hero: int) -> dict[str, int]:
+    """Return the balances in a hero's wallets, by currency, as the game loads them."""
+    _, _, body = await fetch(server_url, f"/nucleus/wallets/{hero}", MAGMA, cookie)
+    answer = ElementTree.fromstring(body)
+    assert answer.tag == "billingAccounts"
+    return {
+        wallet.findtext("currency") or "": int(wallet.findtext("balance") or "")
+        for wallet in answer.iter("walletAccount")
+    }
