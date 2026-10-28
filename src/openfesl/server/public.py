@@ -62,7 +62,13 @@ def include_public_routes(
     app.include_router(game_icon_routes(games, stores.game_icons))
     if services.catalogue_files is not None:
         app.include_router(
-            catalogue_file_routes(games, services.catalogues, services.catalogue_files)
+            catalogue_file_routes(
+                games,
+                services.catalogues,
+                services.catalogue_files,
+                services.game_art,
+                services.magma,
+            )
         )
     app.include_router(shell_routes(pages, services.terms))
     app.include_router(menu_routes(pages, games, census))
@@ -92,7 +98,7 @@ def include_public_routes(
         )
     )
 
-    app.include_router(mugshot_routes(games, services.mugshots))
+    app.include_router(mugshot_routes(games, services.mugshots, services.game_art, services.magma))
     app.include_router(
         CreatorPages(pages, games, services.heroes, services.catalogues, services.figures).routes()
     )

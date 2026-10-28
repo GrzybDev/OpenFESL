@@ -183,3 +183,65 @@ async def test_the_tiles_save_a_choice_once_it_rests_and_say_when_it_failed(
     assert await section.locator("input[value=nobody]").is_checked()
     await page.wait_for_timeout(4500)
     assert await page.get_by_text("The change was not saved. Try again.").count() == 1
+
+
+@pytest.mark.usefixtures("prompt_actions")
+async def test_a_games_files_and_portraits_reach_only_those_its_art_is_shown_to(
+    files: Path,
+    admin_provider: IdentityProvider,
+    base: str,
+    server_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    await cli(capsys, "catalogue", "import", str(await extracted(tmp_path, capsys)))
+    hero = await create_hero(base, ANN, "Brassbuckle", faction="royal")
+    [kept] = (files / "catalogues" / "bfheroes").iterdir()
+    folder = f"/catalogues/bfheroes/{kept.name}"
+    paths = [
+        f"{folder}/icons/item1.webp",
+        f"{folder}/models/invented_hat.glb",
+        f"{folder}/textures/invented_hair.webp",
+        f"/mugshots/bfheroes/{hero}/1.png",
+    ]
+    public = "public, max-age=31536000, s-maxage=600, immutable"
+    private = "private, max-age=31536000, immutable"
+
+    async with (
+        game(server_url) as player,
+        httpx2.AsyncClient() as admin,
+        httpx2.AsyncClient() as ann,
+        httpx2.AsyncClient() as visitor,
+    ):
+        cookie, _, _ = await start(server_url, player, ANN)
+        await upload(server_url, cookie, hero, png_image(64, 64))
+        admin_provider.user = KEEPER
+        await sign_in(admin, base, next=PAGE)
+        await post_sign_in(ann, base, ANN, PASSWORD)
+        with anyio.fail_after(5):
+            while (await ann.get(base + FIGURE, params=ROYAL)).status_code != 200:
+                await anyio.sleep(0.05)
+
+        async def answers(client: httpx2.AsyncClient, **headers: str) -> set[tuple[int, str]]:
+            # What each of the game's files answers a viewer: its status and how it may be kept.
+            found = [await client.get(base + path, headers=headers) for path in paths]
+            return {(answer.status_code, answer.headers["cache-control"]) for answer in found}
+
+        # By default a visitor gets nothing that a proxy could keep for players; the players,
+        # the admins and the game, through its own session, get the files kept by their own
+        # browsers alone.
+        assert await answers(visitor) == {(404, "no-store")}
+        assert await answers(visitor, Cookie="magma=invented-session") == {(404, "no-store")}
+        for viewer, headers in ((ann, {}), (admin, {}), (visitor, cookie)):
+            assert await answers(viewer, **headers) == {(200, private)}
+
+        # Everyone gets the files, which shared caches keep only ten minutes.
+        await choose(admin, base, "everyone")
+        assert await answers(visitor) == {(200, public)}
+
+        # Nobody gets them, admins and the game included, though every file stays kept.
+        await choose(admin, base, "nobody")
+        for viewer, headers in ((visitor, {}), (ann, {}), (admin, {}), (visitor, cookie)):
+            assert await answers(viewer, **headers) == {(404, "no-store")}
+        await choose(admin, base, "signed_in")
+        assert await answers(ann) == {(200, private)}

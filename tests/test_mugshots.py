@@ -155,7 +155,8 @@ async def test_a_heros_picture_is_its_class_glyph_until_its_game_sends_a_portrai
     assert pictures(waiting) == ["reticle", "reticle"] and "/mugshots/" not in waiting
     assert pictures(shown) == [address, address]
     assert shown.count('alt="Portrait of Brassbuckle from the game"') == 2
-    # Browsers keep each version, as a new one comes under a new address.
+    # The player's browser keeps each version, as a new one comes under a new address; by
+    # default only signed-in players see the game's art, so no shared cache keeps it.
     assert served.content == portrait and served.headers["content-type"] == "image/png"
-    assert served.headers["cache-control"] == "public, max-age=31536000, immutable"
+    assert served.headers["cache-control"] == "private, max-age=31536000, immutable"
     assert [response.status_code for response in missing] == [404] * 3

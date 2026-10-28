@@ -94,10 +94,13 @@ async def test_an_imported_catalogue_names_items_in_the_pages_language_and_serve
     assert (polish.xp_to_next(1), polish.xp_to_next(29)) == (100, 2_900)
     assert polish.xp_to_next(30) is None and polish.xp_to_next(0) is None
 
-    # Browsers keep an import's files for good, as a new import comes under a new address.
+    # A signed-in viewer's browser keeps an import's files for good, as a new import comes
+    # under a new address.
     base = server_url.replace("ws://", "http://").rstrip("/")
     folder = f"{base}/catalogues/bfheroes/{kept.name}"
+    admin_provider.user = KEEPER
     async with httpx2.AsyncClient() as client:
+        log = (await sign_in(client, base, next="/admin/audit")).text
         model = await client.get(f"{folder}/models/invented_hat.glb")
         texture = await client.get(f"{folder}/textures/invented_hair.webp")
         missing = [
@@ -108,13 +111,9 @@ async def test_an_imported_catalogue_names_items_in_the_pages_language_and_serve
         ]
     assert model.status_code == 200 and model.headers["content-type"] == "model/gltf-binary"
     assert model.content == (kept / "models" / "invented_hat.glb").read_bytes()
-    assert model.headers["cache-control"] == "public, max-age=31536000, immutable"
+    assert model.headers["cache-control"] == "private, max-age=31536000, immutable"
     assert texture.headers["content-type"] == "image/webp"
     assert [response.status_code for response in missing] == [404] * 4
-
-    admin_provider.user = KEEPER
-    async with httpx2.AsyncClient() as client:
-        log = (await sign_in(client, base, next="/admin/audit")).text
     assert "Imported catalogue" in log and "Battlefield Heroes" in log
     assert "Items: 12 · languages: 2 · icons: 5 · hero models: 4 · textures: 2" in log
 
@@ -224,7 +223,11 @@ async def test_a_file_that_holds_no_catalogue_is_refused_on_the_command_line(
 
 @pytest.mark.usefixtures("prompt_actions")
 async def test_the_icon_of_a_withheld_item_is_kept_for_the_admin_panel_alone(
-    files: Path, server_url: str, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    files: Path,
+    admin_provider: IdentityProvider,
+    server_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     old = CatalogueFile.read((await extracted(tmp_path, capsys)).read_bytes())
     # One of the shirts that the game data withholds.
@@ -239,7 +242,9 @@ async def test_the_icon_of_a_withheld_item_is_kept_for_the_admin_panel_alone(
     [kept] = (files / "catalogues" / "bfheroes").iterdir()
     base = server_url.replace("ws://", "http://").rstrip("/")
     folder = f"{base}/catalogues/bfheroes/{kept.name}/icons"
+    admin_provider.user = KEEPER
     async with httpx2.AsyncClient() as client:
+        await sign_in(client, base)
         with anyio.fail_after(5):
             while (await client.get(f"{folder}/item257.webp")).status_code != 404:
                 await anyio.sleep(0.05)
