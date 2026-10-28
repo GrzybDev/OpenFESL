@@ -1,0 +1,35 @@
+{#def kit, ware, point, hero: str, tag: str, equipping: bool, back: str, back_label: str #}
+{# What was bought, over the item: the price point, what it cost and left the account, and what
+   the hero has now. Its script tells the game of the item, which then loads it. #}
+{% set product = point.offer.product %}
+{% set price %}<InGamePrice :kit="kit" :amount="product.price" :currency="product.currency" />{% endset %}
+{% set balance %}<InGamePrice :kit="kit" :amount="point.balance" :currency="product.currency" />{% endset %}
+{% set term %}<InGameTerm :ownership="product.ownership" lower />{% endset %}
+<div class="bought-backdrop">
+  <div id="bought"
+       role="status"
+       data-tag="{{ tag }}"
+       data-equip="{{ '1' if equipping else '0' }}"
+       class="bought">
+    <div class="bought-inner">
+      <span aria-hidden="true" class="bought-disc">
+        <InGameGlyph name="tick" :size="28" stroke="#0a0a0a" />
+      </span>
+      <h2 class="bought-title">{{ _("web.ingame.bought.equipped" if equipping else "web.ingame.bought") }}</h2>
+      <p class="bought-first">{{ _("web.ingame.bought.what", item=ware.name, term=term | trim, hero=hero) }}</p>
+      <p>{{ _("web.ingame.bought.spent", price=price | trim, balance=balance | trim) }}</p>
+      <p class="bought-now">
+        {% if ware.left and ware.left.unit == "permanent" %}
+          {{ _("web.ingame.bought.permanent", hero=hero) }}
+        {% else %}
+          {% set left %}<InGameLeft :left="ware.left" lower />{% endset %}
+          {{ _("web.ingame.bought.left", hero=hero, left=left | trim) }}
+        {% endif %}
+      </p>
+      <a href="{{ back }}" class="button button-dark">
+        <InGameGlyph name="back" :size="16" stroke="#fede01" />
+        {{ back_label }}
+      </a>
+    </div>
+  </div>
+</div>

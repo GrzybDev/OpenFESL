@@ -1,7 +1,9 @@
+import re
 from pathlib import Path
+from urllib.parse import urlencode
 
 import pytest
-from heroes import MAGMA
+from heroes import MAGMA, wallets
 from store import CHEER, ITEMS, ROYAL_SOLDIER, grant, listed, offers, shopper, stock
 from support import fetch, visible
 
@@ -10,9 +12,13 @@ pytestmark = pytest.mark.anyio
 STORE = "/en/game/store"
 
 
-async def opened(server_url: str, path: str, cookie: dict[str, str]) -> str:
-    """Open a page of the in-game store as the game's browser does."""
-    _, _, page = await fetch(server_url, path, MAGMA, cookie)
+async def opened(
+    server_url: str, path: str, cookie: dict[str, str], form: dict[str, str] | None = None
+) -> str:
+    """Open a page of the in-game store as the game's browser does, or send one of its forms."""
+    body = urlencode(form).encode() if form is not None else None
+    headers = {**cookie, "Content-Type": "application/x-www-form-urlencoded"} if form else cookie
+    _, _, page = await fetch(server_url, path, MAGMA, headers, body)
     return page.decode()
 
 
@@ -106,3 +112,67 @@ async def test_the_game_store_opens_only_for_a_hero_of_the_sessions_account(
     for page in refused:
         assert "<title>offline</title>" in page
         assert "The store is offline" in visible(page.encode())
+
+
+@pytest.mark.usefixtures("prompt_actions")
+async def test_a_hero_buys_in_the_game_store_and_a_refusal_spends_nothing(
+    base: str,
+    server_url: str,
+    database_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    await stock(server_url, tmp_path, capsys, [*ITEMS, CHEER])
+    cookie, hero = await shopper(server_url, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    bob, bob_hero = await shopper(server_url, "bob@example.test", "Copperpot", **ROYAL_SOLDIER)
+    await grant(database_url, hero, "_DV", 600)
+    rifle = f"{STORE}/weapons/3015?personaId={hero}"
+    token = re.search(r'name="csrf" value="([^"]+)"', await opened(server_url, rifle, cookie))
+    assert token is not None
+    day = await product(server_url, "3015-tlmd 1d")
+    for_good = await product(server_url, "3015-unlm")
+
+    def form(product: str, price: int, csrf: str = token[1]) -> dict[str, str]:
+        return {"csrf": csrf, "product": product, "price": str(price), "equip": "1"}
+
+    # A form of an older page, a price that changed meanwhile and a price above the balance.
+    expired = await opened(server_url, rifle, cookie, form(day, 250, "forged"))
+    assert "Not bought The store's page had expired. Nothing was spent;" in visible(
+        expired.encode()
+    )
+    changed = await opened(server_url, rifle, cookie, form(day, 200))
+    assert "The price points of this item changed a moment ago." in visible(changed.encode())
+    poor = visible((await opened(server_url, rifle, cookie, form(for_good, 6720))).encode())
+    assert "Need more Funds" in poor and "Short 4,220 Funds" in poor
+    # Nor is the cheer sold, which the game grants the hero.
+    emote = f"{STORE}/emotes/5016?personaId={hero}"
+    cheer = await product(server_url, "5016-unlm")
+    owned = visible((await opened(server_url, emote, cookie, form(cheer, 1680))).encode())
+    assert "Brassbuckle owns this item permanently by now. Nothing was spent." in owned
+    # Nor may the account buy for another account's hero.
+    theirs = f"{STORE}/weapons/3015?personaId={bob_hero}"
+    assert "<title>offline</title>" in await opened(server_url, theirs, cookie, form(day, 250))
+    assert await wallets(server_url, cookie, hero) == {"_DH": 0, "_DV": 600, "_PF": 2500}
+    assert await wallets(server_url, bob, bob_hero) == {"_DH": 0, "_DV": 0, "_PF": 2500}
+
+    bought = visible((await opened(server_url, rifle, cookie, form(day, 250))).encode())
+    assert "Bought and equipped Invented Rifle, 1 day, for Brassbuckle." in bought
+    assert "250 Valor Points spent; the account has 350 Valor Points." in bought
+    assert "Brassbuckle now has 1 day left." in bought
+    # The item the page tells the game of is the one the game then loads.
+    _, _, held = await fetch(server_url, f"/nucleus/entitlements/{hero}", MAGMA, cookie)
+    assert "<entitlementTag>3015-tlmd</entitlementTag>" in held.decode()
+
+    # The game counts 7 of the hero's 10 bandages left in the round; 25 more make it 32.
+    bandages = f"{STORE}/widgets/2005?personaId={hero}&eqp=2005_7"
+    pack = await product(server_url, "2005-lmct x25")
+    restocked = await opened(server_url, bandages, cookie, form(pack, 175) | {"equip": "0"})
+    assert "Brassbuckle now has 32 uses left." in visible(restocked.encode())
+    # The last item named of a slot is the one worn there, as buying and equipping names the
+    # bought one last: the coat, then the partner's shirt of the same slot, and the other way.
+    clothing = [
+        visible((await opened(server_url, f"{STORE}/clothing{query}", cookie)).encode())
+        for query in (f"?personaId={hero}&eqp=3+1468", f"?personaId={hero}&eqp=1468+3")
+    ]
+    assert "Invented Coat Not owned" in clothing[0]
+    assert "Invented Coat Equipped" in clothing[1]

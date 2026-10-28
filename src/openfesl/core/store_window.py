@@ -1,5 +1,5 @@
 import math
-from collections.abc import Collection, Iterable, Mapping
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
@@ -183,7 +183,7 @@ class StoreWindows:
         game: Game,
         persona: Persona,
         language: str,
-        equipped: Collection[int] = (),
+        equipped: Sequence[int] = (),
         uses: Mapping[int, int] | None = None,
     ) -> StoreWindow | None:
         """Return what a game's in-game store sells one of its heroes, by category.
@@ -192,7 +192,8 @@ class StoreWindows:
             game: The hero's game.
             persona: The hero, which the asking account owns.
             language: The language of the item names, such as en.
-            equipped: Items the game says the hero has equipped, besides those its stats name.
+            equipped: Items the game says the hero has equipped, in its order, besides those its
+                stats name.
             uses: The uses left that the game counts in the running round, by item; fewer than
                 the stored ones, as uses spent in a round are stored at its end.
 
@@ -213,7 +214,12 @@ class StoreWindows:
         loadout = granted(game.heroes, hero.faction, hero.hero_class)
         catalogue = await self._catalogues.of(game, language)
         balances = await self._wallets.of_persona(game, persona)
-        worn = await self._heroes.worn(game, persona.id) | set(equipped)
+        # The game's list is newer than the hero's stats, and buying and equipping adds to its
+        # end: the last item named of a slot is the one worn there.
+        worn: dict[str | int, int] = {}
+        for named in [*await self._heroes.worn(game, persona.id), *equipped]:
+            item = catalogue.item(named)
+            worn[item.slot if item and item.slot else named] = named
         holdings = {
             number: (entitlement.status, _held(entitlement))
             for entitlement in await self._entitlements.of_persona(persona.id)
@@ -259,7 +265,7 @@ class StoreWindows:
                     description=list(store.describe(catalogue, item_id)),
                     left=left,
                     low=_low(left, game.heroes),
-                    equipped=item_id in worn,
+                    equipped=item_id in worn.values(),
                     points=points,
                 )
             )

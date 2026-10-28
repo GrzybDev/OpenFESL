@@ -737,5 +737,5 @@ categories = [
     { key = "clothing", kinds = ["appearance"], glyph = "shirt" },
     { key = "widgets", kinds = ["ability"], glyph = "flask" },
     { key = "emotes", kinds = ["emote"], glyph = "emote" },
-    { key = "boosts", kinds = ["convenience"], glyph = "boost" },
+    { key = "boosts", kinds = ["convenience"], glyph = "boost", equips = false },
 ]

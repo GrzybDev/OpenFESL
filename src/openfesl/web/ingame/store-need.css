@@ -172,4 +172,14 @@
   .row-hl {
     animation-duration: 100ms;
   }
+
+  .spinner {
+    animation: none;
+  }
+
+  .bought-backdrop,
+  .bought,
+  .message {
+    animation: fade 100ms linear;
+  }
 }

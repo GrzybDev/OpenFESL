@@ -120,6 +120,10 @@
   background: #f2c12e;
 }
 
+.busy .tile {
+  cursor: default;
+}
+
 .tile-title {
   display: block;
   font:
@@ -179,6 +183,11 @@
   vertical-align: -2px;
 }
 
+.buttons {
+  overflow: hidden;
+  padding-bottom: 3px;
+}
+
 .button {
   display: inline-block;
   height: 46px;
@@ -216,6 +225,96 @@
   transform: translateY(2px);
 }
 
+.buttons .button {
+  float: left;
+  width: 48.7%;
+  margin-right: 2.6%;
+  padding: 0 8px;
+  line-height: 1;
+  text-align: center;
+}
+
+.buttons .button:last-child {
+  margin-right: 0;
+}
+
+.buttons .button:only-child {
+  width: 100%;
+}
+
+.button-go {
+  background: #3d6b1f;
+}
+
+.button-go:hover {
+  background: #4f8628;
+}
+
+.button[aria-disabled="true"],
+.button[aria-disabled="true"]:hover {
+  background: #6e6a63;
+  cursor: default;
+}
+
+.button[aria-disabled="true"]:active {
+  -webkit-box-shadow: 0 3px 0 #000000;
+  box-shadow: 0 3px 0 #000000;
+  -webkit-transform: none;
+  transform: none;
+}
+
+.buying {
+  display: none;
+  position: relative;
+  height: 46px;
+  margin: 0;
+  padding-left: 46px;
+  font:
+    700 14px/46px "Trebuchet MS",
+    Arial,
+    sans-serif;
+}
+
+.busy .buying {
+  display: block;
+}
+
+.busy .buttons,
+.busy .need-link {
+  display: none;
+}
+
+/* A ring with a dark arc, drawn by borders: the game's browser draws no SVG inside HTML. */
+.spinner {
+  position: absolute;
+  top: 8px;
+  left: 6px;
+  width: 30px;
+  height: 30px;
+  border: 4px solid #c5bba7;
+  border-top-color: #1a1412;
+  -webkit-border-radius: 15px;
+  border-radius: 15px;
+  -webkit-animation: spin 1s linear infinite;
+  animation: spin 1s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .need-link,
 .ext {
   display: inline-block;
@@ -237,4 +336,11 @@
 .ext .glyph {
   margin-right: 5px;
   vertical-align: -2px;
+}
+
+.note {
+  margin: 8px 0 0;
+  color: #5c4a3c;
+  font-size: 12px;
+  line-height: 16px;
 }

@@ -1,6 +1,7 @@
-{#def kit, visit, shelf, ware, wearer: str, chosen = None #}
+{#def kit, visit, shelf, ware, wearer: str, chosen = None, bought = None, tag: str = "", equipping: bool = False, refused: str = "" #}
 {# An item of the in-game store: who may use it, what the hero has of it, and its price points as
-   tiles, each with what buying it leaves. Without scripts the tiles reload the page. #}
+   tiles, each with what buying it leaves and its buy buttons; then what was bought, over it, or
+   why a purchase was refused, above it. Without scripts the tiles reload the page. #}
 {% set key = shelf.category.key %}
 {% set category = _("games." ~ kit.game.id ~ ".store." ~ key) %}
 {% set hero = visit.window.hero.persona.name %}
@@ -10,7 +11,13 @@
 <InGameWindow :kit="kit" :visit="visit" :title="ware.name">
   <main id="panel" class="panel">
     <InGameHead :back="back" :back_label="back_label" :heading="false">{{ category }}</InGameHead>
+    {% if bought %}
+      <InGameBought :kit="kit" :ware="ware" :point="bought" :hero="hero" :tag="tag" :equipping="equipping" :back="back" :back_label="back_label" />
+    {% endif %}
     <div class="panel-body">
+      {% if refused %}
+        <InGameRefused :cause="refused" :hero="hero" :close="visit.link(key, ware.item.id)" />
+      {% endif %}
       <div class="ware">
         <span aria-hidden="true" class="icon">
           <InGameGlyph :name="shelf.category.glyph" :size="28" stroke="#3b2d23" />

@@ -1,8 +1,11 @@
 {#def kit, visit, shelf, ware, point, shown: bool #}
-{# What buying a price point leaves, or for a price above the balance both amounts and the way
-   to need more. #}
+{# What buying a price point does and its buttons: Buy and, for an item to equip that the hero
+   does not use yet, Buy and equip. A price above the balance leaves the buttons unavailable,
+   says both amounts and leads to need more. While the purchase is sent, a spinner says so. #}
 {% set product = point.offer.product %}
 {% set key = shelf.category.key %}
+{% set price %}<InGamePrice :kit="kit" :amount="product.price" :currency="product.currency" />{% endset %}
+{% set two = shelf.category.equips and not ware.equipped %}
 <div id="pick-{{ product.id }}"
      class="pick{% if not shown %} pick-off{% endif %}">
   {% if point.short %}
@@ -16,11 +19,48 @@
     {% set kept %}<InGamePrice :kit="kit" :amount="point.balance - product.price" :currency="product.currency" />{% endset %}
     <p class="outcome">{{ _("web.ingame.outcome", left=after | trim, balance=kept | trim) }}</p>
   {% endif %}
+  <form method="post"
+        action="{{ visit.link(key, ware.item.id) }}"
+        class="buy">
+    <input type="hidden" name="csrf" value="{{ visit.token }}">
+    <input type="hidden" name="product" value="{{ product.id }}">
+    <input type="hidden" name="price" value="{{ product.price }}">
+    <div class="buttons">
+      <button type="submit"
+              name="equip"
+              value="0"
+              {% if point.short %}aria-disabled="true"{% endif %}
+              class="button {{ 'button-dark pair' if two else 'button-go' }}">
+        <InGameGlyph name="bag" :size="17" :stroke="'#fede01' if two and not point.short else '#ffffff'" />
+        {{ _("web.ingame.buy") }}
+      </button>
+      {% if two %}
+        <button type="submit"
+                name="equip"
+                value="1"
+                {% if point.short %}aria-disabled="true"{% endif %}
+                class="button button-go equip">
+          <InGameGlyph name="download" :size="17" stroke="#ffffff" />
+          {{ _("web.ingame.buy.equip") }}
+        </button>
+      {% endif %}
+    </div>
+    {% set term %}<InGameTerm :ownership="product.ownership" lower />{% endset %}
+    <p role="status" class="buying">
+      <span aria-hidden="true" class="spinner"></span>
+      {{ _("web.ingame.buying", term=term | trim, price=price | trim) }}
+    </p>
+  </form>
   {% if point.short %}
     <a href="{{ visit.link(key, ware.item.id, 'need', product=product.id) }}"
        class="need-link">
       {{ _("web.ingame.need.link", currency=_("games." ~ kit.game.id ~ ".currency." ~ product.currency)) -}}
       <InGameGlyph name="go" :size="12" stroke="#7a1d16" />
     </a>
+  {% endif %}
+  {% if not shelf.category.equips %}
+    <p class="note">{{ _("games." ~ kit.game.id ~ ".store." ~ key ~ ".note") }}</p>
+  {% elif ware.equipped %}
+    <p class="note">{{ _("web.ingame.equipped.note", hero=visit.window.hero.persona.name) }}</p>
   {% endif %}
 </div>

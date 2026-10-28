@@ -7493,6 +7493,9 @@ msgstr "Emotki"
 msgid "games.bfheroes.store.boosts"
 msgstr "Wzmocnienia"
 
+msgid "games.bfheroes.store.boosts.note"
+msgstr "Wzmocnienia działają bez wyposażania."
+
 msgid "games.bfheroes.store.note"
 msgstr "Umiejętności kupuje się za Hero Points w menu gry, nie tutaj."
 
@@ -7510,6 +7513,9 @@ msgstr "od"
 
 msgid "web.ingame.equipped"
 msgstr "W użyciu"
+
+msgid "web.ingame.equipped.note"
+msgstr "%(hero)s ma ten przedmiot w użyciu; zakup go uzupełnia."
 
 msgid "web.ingame.left.none"
 msgstr "Nie w posiadaniu"
@@ -7615,6 +7621,48 @@ msgstr "Konto ma %(balance)s; ten wariant kosztuje %(price)s."
 
 msgid "web.ingame.outcome"
 msgstr "Po zakupie: %(left)s; na koncie zostanie %(balance)s."
+
+msgid "web.ingame.buy"
+msgstr "Kup"
+
+msgid "web.ingame.buy.equip"
+msgstr "Kup i wyposaż"
+
+msgid "web.ingame.buying"
+msgstr "Kupowanie: %(term)s za %(price)s…"
+
+msgid "web.ingame.bought"
+msgstr "Kupiono"
+
+msgid "web.ingame.bought.equipped"
+msgstr "Kupiono i wyposażono"
+
+msgid "web.ingame.bought.what"
+msgstr "%(item)s, %(term)s, dla bohatera %(hero)s."
+
+msgid "web.ingame.bought.spent"
+msgstr "Wydano %(price)s; na koncie jest %(balance)s."
+
+msgid "web.ingame.bought.permanent"
+msgstr "%(hero)s ma ten przedmiot na stałe."
+
+msgid "web.ingame.bought.left"
+msgstr "%(hero)s ma teraz: %(left)s."
+
+msgid "web.ingame.refused"
+msgstr "Nie kupiono"
+
+msgid "web.ingame.refused.changed"
+msgstr "Warianty tego przedmiotu przed chwilą się zmieniły. Nic nie zostało wydane; poniżej są aktualne warianty."
+
+msgid "web.ingame.refused.owned"
+msgstr "%(hero)s ma już ten przedmiot na stałe. Nic nie zostało wydane."
+
+msgid "web.ingame.refused.expired"
+msgstr "Strona sklepu wygasła. Nic nie zostało wydane; poniżej są aktualne warianty."
+
+msgid "web.ingame.refused.close"
+msgstr "Zamknij komunikat"
 
 msgid "web.ingame.need.link"
 msgstr "Skąd biorą się %(currency)s"

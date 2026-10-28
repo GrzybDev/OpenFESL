@@ -1,7 +1,9 @@
+import hashlib
+import hmac
 import logging
 import re
 from collections.abc import Awaitable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any
 from urllib.parse import urlencode
 
@@ -13,6 +15,7 @@ from openfesl.core.game_pages import SiteWallet
 from openfesl.core.games import Game
 from openfesl.core.magma import Magma, MagmaError
 from openfesl.core.personas import Persona
+from openfesl.core.purchases import ALREADY_OWNED, INSUFFICIENT_FUNDS, PurchaseRefused, Purchases
 from openfesl.core.store_window import PricePoint, Shelf, StoreWindow, StoreWindows, Ware
 from openfesl.core.texts import translate
 from openfesl.web.in_game import digest, inline, language_of
@@ -32,9 +35,20 @@ _SEGMENT = re.compile(r"[a-z]{2}(?:-[A-Za-z]{2})?")
 # by eqp: item numbers joined by +, a consumable's with _ and its uses left in the round.
 _EQUIPPED = re.compile(r"(?P<item>[0-9]{1,9})(?:_(?P<uses>[0-9]{1,9}))?")
 _MOST_EQUIPPED = 64
+# Why a purchase was refused, as the item's page words it.
+CHANGED = "changed"
+OWNED = "owned"
+EXPIRED = "expired"
+_REFUSALS = (CHANGED, OWNED, EXPIRED)
 
 # The store's stylesheets by part, which its pages inline as one style in this order.
-_STYLES = ("store-window.css", "store-lists.css", "store-item.css", "store-need.css")
+_STYLES = (
+    "store-window.css",
+    "store-lists.css",
+    "store-item.css",
+    "store-overlays.css",
+    "store-need.css",
+)
 
 
 class _Closed(Exception):
@@ -70,12 +84,14 @@ class Visit:
         segment: The language the game names in the address, such as en.
         window: The hero's store.
         persona: The hero.
+        token: What the store's forms send back, from the game's session.
         equipped: The game's list of what the hero has equipped, as its query sent it.
     """
 
     segment: str
     window: StoreWindow
     persona: Persona
+    token: str
     equipped: str
 
     def path(self, *parts: str | int) -> str:
@@ -99,16 +115,20 @@ class Visit:
         return f"{self.path(*parts)}?{urlencode(kept | values)}"
 
 
-def window_router(game: Game, magma: Magma, windows: StoreWindows) -> APIRouter:
+def window_router(
+    game: Game, magma: Magma, windows: StoreWindows, purchases: Purchases
+) -> APIRouter:
     """Return the store that a game opens in its own browser during a match, on its Magma host.
 
     The game names the hero in the query and the session in its magma cookie; the hero must be
-    the session's account's own.
+    the session's account's own. Buying goes through the store's purchases, and the page then
+    tells the game through its script bridge, so that the game loads the item.
 
     Args:
         game: The game, whose store data names the in-game store's categories.
         magma: Answers about who asks.
         windows: Opens a hero's store.
+        purchases: Sells the store's products.
     """
     router = APIRouter()
     if game.store is None or game.store.in_game is None:
@@ -120,14 +140,16 @@ def window_router(game: Game, magma: Magma, windows: StoreWindows) -> APIRouter:
         persona_id = _number(query.get("personaId"))
         if not persona_id or not _SEGMENT.fullmatch(segment):
             raise _Closed
+        session = magma.session(session_id)
         persona = await magma.persona(session_id, game, persona_id, own=True)
         entries = _entries(query.get("eqp", ""))
-        items = {int(entry["item"]) for entry in entries}
+        items = [int(entry["item"]) for entry in entries]
         uses = {int(entry["item"]): int(entry["uses"]) for entry in entries if entry["uses"]}
         window = await windows.open(game, persona, game.language_of(segment), items, uses)
         if window is None:
             raise _Closed
-        return Visit(segment, window, persona, " ".join(entry[0] for entry in entries))
+        token = hmac.new(session.token.encode(), b"in-game store", hashlib.sha256).hexdigest()
+        return Visit(segment, window, persona, token, " ".join(entry[0] for entry in entries))
 
     def page(segment: str, template: str, **context: Any) -> Response:
         language = language_of(game, segment)
@@ -182,6 +204,8 @@ def window_router(game: Game, magma: Magma, windows: StoreWindows) -> APIRouter:
             if shelf is None or ware is None:
                 return RedirectResponse(found.link(*([category] if shelf else [])), 303)
             query = request.query_params
+            bought = ware.point(_number(query.get("bought")))
+            refused = query.get("refused", "")
             return page(
                 segment,
                 "ingame.Item",
@@ -190,7 +214,56 @@ def window_router(game: Game, magma: Magma, windows: StoreWindows) -> APIRouter:
                 ware=ware,
                 wearer=_wearer(game, ware, language_of(game, segment)),
                 chosen=_chosen(ware, _number(query.get("pick"))),
+                bought=bought,
+                tag=bought.offer.product.ownership.tag(ware.item.id) if bought else "",
+                equipping=query.get("equip") == "1",
+                refused=refused if refused in _REFUSALS else "",
             )
+
+        return await guarded(segment, answer())
+
+    @router.post(STORE + "/{category}/{item}")
+    async def buy(
+        request: Request, segment: str, category: str, item: str, session_id: SessionId = None
+    ) -> Response:
+        async def answer() -> Response:
+            found = await visit(request, segment, session_id)
+            shelf, ware = _ware(found.window, category, item)
+            if shelf is None or ware is None:
+                return RedirectResponse(found.link(), 303)
+            form = await request.form()
+            point = ware.point(_number(str(form.get("product", ""))))
+            price = _number(str(form.get("price", "")))
+            sent = str(form.get("csrf", ""))
+            if not hmac.compare_digest(found.token.encode(), sent.encode()):
+                return RedirectResponse(found.link(category, item, refused=EXPIRED), 303)
+            if point is None or point.offer.product.price != price:
+                return RedirectResponse(found.link(category, item, refused=CHANGED), 303)
+            if point.after is None:
+                return RedirectResponse(found.link(category, item, refused=OWNED), 303)
+            number = point.offer.product.id
+            try:
+                await purchases.purchase(game, found.persona, point.offer.product_id)
+            except PurchaseRefused as refused:
+                if refused.cause == INSUFFICIENT_FUNDS:
+                    return RedirectResponse(found.link(category, item, "need", product=number), 303)
+                cause = OWNED if refused.cause == ALREADY_OWNED else CHANGED
+                return RedirectResponse(found.link(category, item, refused=cause), 303)
+            # The game's count of a consumable's uses in the round grows by the uses bought.
+            more = point.offer.product.ownership.uses or 0
+            equipped = [
+                f"{entry['item']}_{int(entry['uses']) + more}"
+                if entry["uses"] and int(entry["item"]) == ware.item.id
+                else entry[0]
+                for entry in _entries(found.equipped)
+            ]
+            equip = shelf.category.equips and form.get("equip") == "1"
+            if equip and not ware.equipped:
+                # The game equips the item once told of it, so the next pages show it equipped.
+                equipped.append(str(ware.item.id))
+            found = replace(found, equipped=" ".join(equipped))
+            values = {"bought": number, "equip": int(equip)}
+            return RedirectResponse(found.link(category, item, **values), 303)
 
         return await guarded(segment, answer())
 

@@ -1,0 +1,17 @@
+{#def cause: str, hero: str, close: str #}
+{# Why a purchase was refused, above the item, saying that nothing was spent. Its button closes
+   it; without scripts it reloads the item without it. #}
+<div id="message" role="alert" class="message">
+  <div class="message-inner">
+    <span aria-hidden="true" class="message-disc">
+      <InGameGlyph name="warn" :size="20" stroke="#0a0a0a" />
+    </span>
+    <p class="message-title">{{ _("web.ingame.refused") }}</p>
+    <p class="message-text">{{ _("web.ingame.refused." ~ cause, hero=hero) }}</p>
+    <a href="{{ close }}"
+       aria-label="{{ _('web.ingame.refused.close') }}"
+       class="dismiss">
+      <InGameGlyph name="x" :size="18" stroke="#ffffff" />
+    </a>
+  </div>
+</div>

@@ -164,6 +164,7 @@ class StoreCategory(BaseModel):
         key: Its name, which its address and the ids of its texts hold.
         kinds: The kinds of its items, as the catalogue knows them.
         glyph: The glyph of its tile.
+        equips: Whether its items are equipped to be used, so that buying may equip them.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -171,6 +172,7 @@ class StoreCategory(BaseModel):
     key: Annotated[str, Field(pattern=r"^[a-z][a-z-]*$")]
     kinds: frozenset[str]
     glyph: Glyph
+    equips: bool = True
 
 
 class InGameStore(BaseModel):

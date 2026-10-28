@@ -117,7 +117,7 @@ def _add_middleware(
                     services.purchases,
                     services.item_writes,
                 ),
-                window_router(game, services.magma, services.windows),
+                window_router(game, services.magma, services.windows, services.purchases),
             ],
         )
         for game in games

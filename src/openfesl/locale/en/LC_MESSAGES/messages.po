@@ -7109,6 +7109,9 @@ msgstr "Emotes"
 msgid "games.bfheroes.store.boosts"
 msgstr "Boosts"
 
+msgid "games.bfheroes.store.boosts.note"
+msgstr "Boosts work without equipping."
+
 msgid "games.bfheroes.store.note"
 msgstr "Abilities are bought with Hero Points in the game's menu, not here."
 
@@ -7126,6 +7129,9 @@ msgstr "from"
 
 msgid "web.ingame.equipped"
 msgstr "Equipped"
+
+msgid "web.ingame.equipped.note"
+msgstr "%(hero)s has it equipped; buying adds to it."
 
 msgid "web.ingame.left.none"
 msgstr "Not owned"
@@ -7201,6 +7207,48 @@ msgstr "The account has %(balance)s; this costs %(price)s."
 
 msgid "web.ingame.outcome"
 msgstr "After buying: %(left)s; the account keeps %(balance)s."
+
+msgid "web.ingame.buy"
+msgstr "Buy"
+
+msgid "web.ingame.buy.equip"
+msgstr "Buy and equip"
+
+msgid "web.ingame.buying"
+msgstr "Buying %(term)s for %(price)s…"
+
+msgid "web.ingame.bought"
+msgstr "Bought"
+
+msgid "web.ingame.bought.equipped"
+msgstr "Bought and equipped"
+
+msgid "web.ingame.bought.what"
+msgstr "%(item)s, %(term)s, for %(hero)s."
+
+msgid "web.ingame.bought.spent"
+msgstr "%(price)s spent; the account has %(balance)s."
+
+msgid "web.ingame.bought.permanent"
+msgstr "%(hero)s now owns it permanently."
+
+msgid "web.ingame.bought.left"
+msgstr "%(hero)s now has %(left)s."
+
+msgid "web.ingame.refused"
+msgstr "Not bought"
+
+msgid "web.ingame.refused.changed"
+msgstr "The price points of this item changed a moment ago. Nothing was spent; the price points below are current."
+
+msgid "web.ingame.refused.owned"
+msgstr "%(hero)s owns this item permanently by now. Nothing was spent."
+
+msgid "web.ingame.refused.expired"
+msgstr "The store's page had expired. Nothing was spent; the price points below are current."
+
+msgid "web.ingame.refused.close"
+msgstr "Close the message"
 
 msgid "web.ingame.need.link"
 msgstr "Where %(currency)s come from"
