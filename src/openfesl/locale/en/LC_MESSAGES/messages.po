@@ -4464,6 +4464,12 @@ msgstr "%(service)s could not be reached."
 msgid "web.account.notice.unreachable.text"
 msgstr "The other services and the e-mail address with the game password work as usual."
 
+msgid "web.account.notice.taken.title"
+msgstr "The %(service)s account was linked to another OpenFESL account meanwhile."
+
+msgid "web.account.notice.taken.text"
+msgstr "No account was made. Signing in through %(service)s opens the account it is linked to."
+
 msgid "web.account.notice.no_registration"
 msgstr "Registration not available"
 
@@ -4611,6 +4617,9 @@ msgstr "4 to 16 characters: A-Z, a-z, 0-9, _ and -. No other account may use it,
 msgid "web.account.public"
 msgstr "Public"
 
+msgid "web.account.optional"
+msgstr "Optional"
+
 msgid "web.account.country"
 msgstr "Country"
 
@@ -4692,6 +4701,12 @@ msgstr "Registration needs the terms accepted."
 msgid "web.account.register"
 msgstr "Create an account"
 
+msgid "web.account.register.service"
+msgstr "Create the account"
+
+msgid "web.account.register.service.subtitle"
+msgstr "Signing in through %(service)s"
+
 msgid "web.account.register.not_registered"
 msgstr "Not registered"
 
@@ -4704,8 +4719,20 @@ msgstr "Registration with this address is paused for a few minutes."
 msgid "web.account.register.paused.text"
 msgstr "Requests with it came in recently. Links already sent to it stay valid; the form keeps its values."
 
+msgid "web.account.register.service.new"
+msgstr "The %(service)s account %(name)s is not linked to an OpenFESL account yet."
+
+msgid "web.account.register.service.text"
+msgstr "This step creates an OpenFESL account with %(service)s as a way in. An account made in a game signs in with its address and game password instead and links %(service)s on its account page."
+
 msgid "web.account.register.signs_in"
 msgstr "E-mail address and game password"
+
+msgid "web.account.register.names"
+msgstr "E-mail address and display name"
+
+msgid "web.account.register.email.verified"
+msgstr "Filled in from the address %(service)s marks as verified, and editable. Public pages never show it."
 
 msgid "web.account.register.email"
 msgstr "The login name in games that ask for one, such as %(games)s. Public pages never show it."
@@ -4719,11 +4746,20 @@ msgstr "8 to 31 characters. Games such as %(games)s ask for it with the e-mail a
 msgid "web.account.register.public"
 msgstr "Display name, country and age"
 
+msgid "web.account.register.name.suggested"
+msgstr "Suggested from the %(service)s name, which fits the rules and is free."
+
+msgid "web.account.register.age.bar"
+msgstr "Country and age"
+
 msgid "web.account.register.country.reported"
 msgstr "The country is suggested from the one Cloudflare reports for this connection and can be changed."
 
 msgid "web.account.register.age"
 msgstr "The birth date is checked against the chosen country's age limit and not stored. Games receive the country with the account's details."
+
+msgid "web.account.register.password.optional"
+msgstr "Games that log in with an address and password, such as %(games)s, need it; the account page can set it later. 8 to 31 characters, not the password of any service."
 
 msgid "web.account.register.action"
 msgstr "Create account"
@@ -4797,6 +4833,9 @@ msgstr "Mail not set up"
 msgid "web.account.register.unavailable.text"
 msgstr "Registration needs the server's mail, which is not set up. Existing accounts sign in as usual."
 
+msgid "web.account.register.unavailable.service"
+msgstr "The %(service)s account %(name)s is not linked to an OpenFESL account. An existing account signs in another way and links %(service)s on its account page."
+
 msgid "web.account.confirm"
 msgstr "Confirm the e-mail address"
 
@@ -4823,6 +4862,12 @@ msgstr "OpenFESL account"
 
 msgid "web.account.confirm.done.already.text"
 msgstr "The e-mail address of this account is confirmed."
+
+msgid "web.account.confirm.service"
+msgstr "%(service)s, used for the registration, is now one of its ways in."
+
+msgid "web.account.confirm.password"
+msgstr "Games that log in with an address and password, such as %(games)s, need a game password, which the account page sets."
 
 msgid "web.account.confirm.open"
 msgstr "Open the account"

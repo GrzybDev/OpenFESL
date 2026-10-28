@@ -3,6 +3,7 @@ from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import Select, delete, exists, func, select, update
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.accounts import (
@@ -14,9 +15,10 @@ from openfesl.core.accounts import (
 )
 from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin
+from openfesl.core.identities import Identity
 from openfesl.core.verification import Confirmation, Link
 from openfesl.storage.admin import action_row
-from openfesl.storage.models import AccountRow, LoginTokenRow, PersonaRow
+from openfesl.storage.models import AccountRow, LoginTokenRow, PersonaRow, SignInIdentityRow
 
 REMEMBERED_LOGINS = 8
 REMEMBERED_FOR = timedelta(days=180)
@@ -215,8 +217,9 @@ class SqlAccountStore:
         verification: Link | None = None,
         made_in: str | None = None,
         display_name: str | None = None,
+        identity: Identity | None = None,
     ) -> Account | None:
-        """Create an account, or return None when its name or display name is taken.
+        """Create an account, or return None when its name, display name or identity is taken.
 
         Args:
             nuid: The login name.
@@ -227,25 +230,42 @@ class SqlAccountStore:
             verification: The link that must confirm its e-mail address before it logs in.
             made_in: The id of the game whose client registers it; None for the site.
             display_name: Its public display name, which the site's registration gives it.
+            identity: An identity at a sign-in service that becomes a way in with it; nothing is
+                made while the identity opens another account.
         """
-        async with self._sessions.begin() as session:
-            row = await session.scalar(
-                insert(AccountRow)
-                .values(
-                    nuid=nuid,
-                    password_hash=password_hash,
-                    country=country,
-                    terms_version=terms_version,
-                    server=server,
-                    verification_hash=verification.token_hash if verification else None,
-                    verification_expires_at=verification.expires_at if verification else None,
-                    made_in=made_in,
-                    display_name=display_name,
+        try:
+            async with self._sessions.begin() as session:
+                row = await session.scalar(
+                    insert(AccountRow)
+                    .values(
+                        nuid=nuid,
+                        password_hash=password_hash,
+                        country=country,
+                        terms_version=terms_version,
+                        server=server,
+                        verification_hash=verification.token_hash if verification else None,
+                        verification_expires_at=verification.expires_at if verification else None,
+                        made_in=made_in,
+                        display_name=display_name,
+                    )
+                    .on_conflict_do_nothing()
+                    .returning(AccountRow)
                 )
-                .on_conflict_do_nothing()
-                .returning(AccountRow)
-            )
-            return _account(row) if row else None
+                if row is not None and identity is not None:
+                    session.add(
+                        SignInIdentityRow(
+                            service=identity.service,
+                            subject=identity.subject,
+                            account_id=row.id,
+                            name=identity.name,
+                        )
+                    )
+                    await session.flush()
+                account = _account(row) if row else None
+        except IntegrityError:
+            # The identity opens another account, so the transaction made neither.
+            return None
+        return account
 
     async def display_name_taken(self, name: str) -> bool:
         """Return whether an account uses a display name, compared regardless of case.

@@ -1,53 +1,15 @@
 import json
-from collections.abc import AsyncIterator
 from datetime import timedelta
 
 import httpx2
 import pytest
 from accounts import PASSWORD, execute, returned, sign_in_through, sign_out
-from identity import IdentityProvider, form_token, identity_provider
+from identity import IdentityProvider, form_token
 from support import Mailbox, cli, markup
 
 from openfesl.core import proofs
 
 pytestmark = pytest.mark.anyio
-
-
-@pytest.fixture
-async def services(
-    monkeypatch: pytest.MonkeyPatch,
-) -> AsyncIterator[tuple[IdentityProvider, IdentityProvider]]:
-    # Before the server starts, which reads its sign-in services once: an OpenID Connect service
-    # and a plain OAuth2 one that lists the account's addresses, as GitHub does.
-    async with identity_provider() as connect, identity_provider() as plain:
-        configured = [
-            {
-                "id": "connect",
-                "name": "Invented Connect",
-                "glyph": "globe",
-                "issuer": connect.url,
-                "client_id": "site-client",
-                "client_secret": "invented-secret",
-                "scope": "openid email profile",
-            },
-            {
-                "id": "plain",
-                "name": "Invented Plain",
-                "kind": "oauth2",
-                "glyph": "code",
-                "authorize_url": f"{plain.url}/oauth/authorize",
-                "token_url": f"{plain.url}/oauth/token",
-                "userinfo_url": f"{plain.url}/api/user",
-                "emails_url": f"{plain.url}/api/emails",
-                "client_id": "site-client",
-                "client_secret": "invented-secret",
-                "scope": "read:user user:email",
-                "subject_claim": "id",
-                "name_claim": "login",
-            },
-        ]
-        monkeypatch.setenv("SIGN_IN_SERVICES", json.dumps(configured))
-        yield connect, plain
 
 
 async def test_a_linked_identity_signs_in_at_once_and_a_new_one_goes_to_the_account_step(

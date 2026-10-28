@@ -1,24 +1,50 @@
-{#def next: str, values: dict, errors: dict, notice: str, countries: list, order: list, reported: bool, check: str, confirm: bool, mail: bool, password_games: list #}
-{# Registration with an e-mail address: the address and game password, then the display name, the
-   country and age, and the terms; beside it what happens next. The game password never comes
-   back with the form. #}
+{#def next: str, values: dict, errors: dict, notice: str, service, identity, countries: list, order: list, reported: bool, check: str, confirm: bool, mail: bool, password_games: list #}
+{# Registration with an e-mail address, or the step that creates the account for a service's new
+   identity: the service's answer on top, then the address, the display name, the country and age,
+   the game password (optional after a service) and the terms; beside it what happens next. The
+   game password never comes back with the form. #}
 {% set games = listed(password_games) %}
-{% set title = _("web.account.register") %}
+{% if service %}
+  {% set title = _("web.account.register.service") %}
+  {% set subtitle = _("web.account.register.service.subtitle", service=service.name) %}
+{% else %}
+  {% set title = _("web.account.register") %}
+  {% set subtitle = _("web.account.sign_in.subtitle") %}
+{% endif %}
 {# The fields in the form's order, which the error summary follows, with the ids it links to. #}
 {% set named = {"email": ("register-email", _("web.account.address")), "password": ("register-password", _("web.account.password")), "display_name": ("register-name", _("web.account.display_name")), "country": ("register-country", _("web.account.country")), "birth": ("register-birth-" ~ order[0], _("web.account.birth")), "terms": ("register-terms", _("web.account.terms.short"))} %}
-{% set wrong = ["email", "password", "display_name", "country", "birth", "terms"]|select("in", errors)|list %}
+{% set order_of_fields = ["email", "display_name", "country", "birth", "password", "terms"] if service else ["email", "password", "display_name", "country", "birth", "terms"] %}
+{% set wrong = order_of_fields|select("in", errors)|list %}
 {% set age_note %}{% if reported %}{{ _("web.account.register.country.reported") }} {% endif %}{{ _("web.account.register.age") }}{% endset %}
-<AccountPage :title="title"
-             :subtitle="_('web.account.sign_in.subtitle')"
-             :turnstile="check != ''">
+{# The game password comes first in the direct registration, and last and optional after a
+   service. #}
+{% macro password_field() %}
+  <PasswordField id="register-password"
+                 :label="_('web.account.password')"
+                 :tag="_('web.account.optional') if service else ''"
+                 note="register-password-note"
+                 :error="errors.get('password', '')"
+                 :optional="service is not none"
+                 new>
+    <p id="register-password-note" class="field-note">
+      {{ _("web.account.register.password.optional" if service else "web.account.register.password", games=games) }}
+    </p>
+  </PasswordField>
+{% endmacro %}
+{# The display name joins the address after a service, and heads the public part otherwise. #}
+{% macro name_field() %}
+  {% set suggested = service and values.display_name and values.display_name == identity.name %}
+  <TextField id="register-name" name="display_name" autocomplete="nickname" pattern="[A-Za-z0-9_\\-]{4,16}" :minlength="4" :maxlength="16" :label="_('web.account.display_name')" :tag="_('web.account.public')" :value="values.display_name" :note="(_('web.account.register.name.suggested', service=service.name) ~ ' ' if suggested else '') ~ _('web.account.display_name.rule')" :error="errors.get('display_name', '')" />
+{% endmacro %}
+<AccountPage :title="title" :subtitle="subtitle" :turnstile="check != ''">
   <div class="account-page-main register-main">
     <Panel tag="form"
            method="post"
-           :action="url('/register')"
+           :action="url('/register/service' if service else '/register')"
            aria-labelledby="account-title"
            class="enter-panel account-page-panel register-form">
       <CsrfField />
-      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+      {% if next and not service %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
       {% if wrong %}
         <ErrorSummary :label="_('web.account.register.not_registered')" :count="wrong|length">
         {% for field in wrong %}
@@ -34,21 +60,43 @@
       {% elif notice == "form" %}
         <Alert :label="_('web.account.register.not_registered')" :title="_('web.account.notice.form')" glyph="warn" alert>{{ _("web.account.notice.form.text") }}</Alert>
       {% endif %}
+      {% if service %}
+        <div role="status" class="alert">
+          <p class="alert-label">
+            <span aria-hidden="true"
+                  class="alert-glyph"><Icon :name="service.glyph" stroke="#0A0A0A" /></span>{{ service.name }}
+          </p>
+          <p class="alert-title">{{ _("web.account.register.service.new", service=service.name, name=identity.name) }}</p>
+          <p class="alert-text">{{ _("web.account.register.service.text", service=service.name) }}</p>
+          <div class="register-ways">
+            <SmallAction :href="url('/sign-in')" :label="_('web.account.sign_in.email.only')" />
+            <button type="submit"
+                    formaction="{{ url('/register/service/cancel') }}"
+                    formnovalidate
+                    class="form-button">
+              <span aria-hidden="true"
+                    class="form-glyph"><Icon name="x" :size="14" stroke="#F4F4EE" /></span>{{ _("web.account.proof.cancel") }}
+            </button>
+          </div>
+        </div>
+      {% endif %}
       <div class="account-page-form">
-        <Bar large>{{ _("web.account.register.signs_in") }}</Bar>
-        {% set address_note %}{{ _("web.account.register.email", games=games) }}{% if mail %} {{ _("web.account.register.email.link") }}{% endif %}{% endset %}
+        <Bar large>{{ _("web.account.register.names" if service else "web.account.register.signs_in") }}</Bar>
+        {% if service and identity.address %}
+          {% set address_note = _("web.account.register.email.verified", service=service.name) %}
+        {% else %}
+          {% set address_note %}{{ _("web.account.register.email", games=games) }}{% if mail %} {{ _("web.account.register.email.link") }}{% endif %}{% endset %}
+        {% endif %}
         <TextField id="register-email" name="email" type="email" autocomplete="email" :maxlength="63" :label="_('web.account.address')" :value="values.email" :note="address_note" :error="errors.get('email', '')" />
-        <PasswordField id="register-password"
-                       :label="_('web.account.password')"
-                       note="register-password-note"
-                       :error="errors.get('password', '')"
-                       new>
-          <p id="register-password-note" class="field-note">{{ _("web.account.register.password", games=games) }}</p>
-        </PasswordField>
+        {{ password_field() if not service else name_field() }}
       </div>
       <div class="account-page-form">
-        <Bar large>{{ _("web.account.register.public") }}</Bar>
-        <TextField id="register-name" name="display_name" autocomplete="nickname" pattern="[A-Za-z0-9_\\-]{4,16}" :minlength="4" :maxlength="16" :label="_('web.account.display_name')" :tag="_('web.account.public')" :value="values.display_name" :note="_('web.account.display_name.rule')" :error="errors.get('display_name', '')" />
+        {% if service %}
+          <Bar large>{{ _("web.account.register.age.bar") }}</Bar>
+        {% else %}
+          <Bar large>{{ _("web.account.register.public") }}</Bar>
+          {{ name_field() }}
+        {% endif %}
         <div class="register-pair">
           <div>
             <CountrySelect id="register-country" :countries="countries" :value="values.country" :error="errors.get('country', '')" :describedby="('register-country-error ' if errors.get('country') else '') ~ 'register-age'" />
@@ -59,6 +107,9 @@
         {% if errors.get("birth") %}<FieldError id="register-birth-error">{{ errors.birth }}</FieldError>{% endif %}
         <p id="register-age" class="field-note">{{ age_note }}</p>
       </div>
+      {% if service %}
+        <div class="account-page-form">{{ password_field() }}</div>
+      {% endif %}
       <div class="account-page-form">
         <TermsCheck id="register-terms" :checked="values.terms" :error="errors.get('terms', '')" />
         {% if check %}<TurnstileCheck :key="check" />{% endif %}
@@ -84,10 +135,12 @@
         </li>
       </ol>
     </section>
-    <section aria-labelledby="register-made">
-      <Bar id="register-made" large>{{ _("web.account.register.made") }}</Bar>
-      <p class="bar-text body-text">{{ _("web.account.register.made.text", games=games) }}</p>
-      <SmallAction :href="url('/sign-in') ~ ('?next=' ~ next|urlencode if next else '')" :label="_('web.account.sign_in')" />
-    </section>
+    {% if not service %}
+      <section aria-labelledby="register-made">
+        <Bar id="register-made" large>{{ _("web.account.register.made") }}</Bar>
+        <p class="bar-text body-text">{{ _("web.account.register.made.text", games=games) }}</p>
+        <SmallAction :href="url('/sign-in') ~ ('?next=' ~ next|urlencode if next else '')" :label="_('web.account.sign_in')" />
+      </section>
+    {% endif %}
   </div>
 </AccountPage>

@@ -10,6 +10,7 @@ from openfesl.core.admins import Admin
 from openfesl.core.entitlements import EntitlementStore
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Game, Games
+from openfesl.core.identities import Identity
 from openfesl.core.keys import KeyRefusal, KeyStore
 from openfesl.core.logins import INVALID_PASSWORD, UNKNOWN_USER, Logins
 from openfesl.core.policies import ConcurrentLogin, GamePolicies, Policies
@@ -185,8 +186,9 @@ class AccountStore(Protocol):
         verification: Link | None = None,
         made_in: str | None = None,
         display_name: str | None = None,
+        identity: Identity | None = None,
     ) -> Account | None:
-        """Create an account, or return None when its name or display name is taken.
+        """Create an account, or return None when its name, display name or identity is taken.
 
         Args:
             nuid: The login name.
@@ -197,6 +199,8 @@ class AccountStore(Protocol):
             verification: The link that must confirm its e-mail address before it logs in.
             made_in: The id of the game whose client registers it; None for the site.
             display_name: Its public display name, which the site's registration gives it.
+            identity: An identity at a sign-in service that becomes a way in with it; nothing is
+                made while the identity opens another account.
         """
 
     async def display_name_taken(self, name: str) -> bool:

@@ -187,10 +187,19 @@ def _language_name(context: Context, code: str) -> str:
     return str(Locale.parse(code).get_display_name(_locale(context)))
 
 
+def listed(items: list[str], language: str) -> str:
+    """Return names joined as a language lists them, such as "A, B and C".
+
+    Args:
+        items: The names.
+        language: The language code.
+    """
+    return str(format_list(items, locale=Locale.parse(translate("web.locale", language))))
+
+
 @pass_context
 def _listed(context: Context, items: list[str]) -> str:
-    # Names joined as the page's language lists them, such as "A, B and C".
-    return str(format_list(items, locale=_locale(context)))
+    return listed(items, context["language"])
 
 
 def _locale(context: Context) -> Locale:

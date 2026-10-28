@@ -97,6 +97,7 @@ def include_public_routes(
         pages,
         games,
         services.policies,
+        sign_in_services,
         lambda: app.state.registration,
         settings.sends_mail,
         turnstile,

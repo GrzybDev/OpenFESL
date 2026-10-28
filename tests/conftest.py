@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 from collections.abc import AsyncIterator, Iterator
 
@@ -145,3 +146,40 @@ async def base(server_url: str) -> AsyncIterator[str]:
         for address in ("ann@example.test", "bob@example.test"):
             await register(player, address)
     yield server_url.replace("ws://", "http://").rstrip("/")
+
+
+@pytest.fixture
+async def services(
+    monkeypatch: pytest.MonkeyPatch,
+) -> AsyncIterator[tuple[IdentityProvider, IdentityProvider]]:
+    # Before the server starts, which reads its sign-in services once: an OpenID Connect service
+    # and a plain OAuth2 one that lists the account's addresses, as GitHub does.
+    async with identity_provider() as connect, identity_provider() as plain:
+        configured = [
+            {
+                "id": "connect",
+                "name": "Invented Connect",
+                "glyph": "globe",
+                "issuer": connect.url,
+                "client_id": "site-client",
+                "client_secret": "invented-secret",
+                "scope": "openid email profile",
+            },
+            {
+                "id": "plain",
+                "name": "Invented Plain",
+                "kind": "oauth2",
+                "glyph": "code",
+                "authorize_url": f"{plain.url}/oauth/authorize",
+                "token_url": f"{plain.url}/oauth/token",
+                "userinfo_url": f"{plain.url}/api/user",
+                "emails_url": f"{plain.url}/api/emails",
+                "client_id": "site-client",
+                "client_secret": "invented-secret",
+                "scope": "read:user user:email",
+                "subject_claim": "id",
+                "name_claim": "login",
+            },
+        ]
+        monkeypatch.setenv("SIGN_IN_SERVICES", json.dumps(configured))
+        yield connect, plain

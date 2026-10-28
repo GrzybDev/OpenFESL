@@ -139,6 +139,7 @@ class GameServices:
         )
         app.state.registration = WebRegistration(
             stores.accounts,
+            stores.identities,
             logins,
             policies,
             games,

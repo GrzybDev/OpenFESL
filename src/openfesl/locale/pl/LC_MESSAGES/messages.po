@@ -4590,6 +4590,12 @@ msgstr "Nie udało się połączyć z usługą %(service)s."
 msgid "web.account.notice.unreachable.text"
 msgstr "Pozostałe usługi oraz adres e-mail z hasłem do gier działają jak zwykle."
 
+msgid "web.account.notice.taken.title"
+msgstr "Konto w usłudze %(service)s zostało w międzyczasie połączone z innym kontem OpenFESL."
+
+msgid "web.account.notice.taken.text"
+msgstr "Nie utworzono konta. Logowanie przez usługę %(service)s otwiera konto, z którym jest połączone."
+
 msgid "web.account.notice.no_registration"
 msgstr "Rejestracja niedostępna"
 
@@ -4737,6 +4743,9 @@ msgstr "Od 4 do 16 znaków: A-Z, a-z, 0-9, _ i -. Żadne inne konto nie może je
 msgid "web.account.public"
 msgstr "Publiczna"
 
+msgid "web.account.optional"
+msgstr "Opcjonalne"
+
 msgid "web.account.country"
 msgstr "Kraj"
 
@@ -4824,6 +4833,12 @@ msgstr "Rejestracja wymaga akceptacji warunków."
 msgid "web.account.register"
 msgstr "Rejestracja"
 
+msgid "web.account.register.service"
+msgstr "Zakładanie konta"
+
+msgid "web.account.register.service.subtitle"
+msgstr "Logowanie przez %(service)s"
+
 msgid "web.account.register.not_registered"
 msgstr "Nie zarejestrowano"
 
@@ -4836,8 +4851,20 @@ msgstr "Rejestracja tym adresem jest wstrzymana na kilka minut."
 msgid "web.account.register.paused.text"
 msgstr "Niedawno wpłynęły z nim inne żądania. Wysłane już linki pozostają ważne; formularz zachowuje wpisane wartości."
 
+msgid "web.account.register.service.new"
+msgstr "Konto %(name)s w usłudze %(service)s nie jest jeszcze połączone z kontem OpenFESL."
+
+msgid "web.account.register.service.text"
+msgstr "Ten krok tworzy konto OpenFESL z usługą %(service)s jako sposobem logowania. Konto utworzone w grze loguje się zamiast tego swoim adresem i hasłem do gier, a usługę %(service)s łączy na stronie konta."
+
 msgid "web.account.register.signs_in"
 msgstr "Adres e-mail i hasło do gier"
+
+msgid "web.account.register.names"
+msgstr "Adres e-mail i nazwa wyświetlana"
+
+msgid "web.account.register.email.verified"
+msgstr "Wpisany na podstawie adresu, który usługa %(service)s oznacza jako zweryfikowany; można go zmienić. Strony publiczne nigdy go nie pokazują."
 
 msgid "web.account.register.email"
 msgstr "Nazwa logowania w grach, które o nią proszą, takich jak %(games)s. Strony publiczne nigdy nie pokazują adresu."
@@ -4851,11 +4878,20 @@ msgstr "Od 8 do 31 znaków. Gry takie jak %(games)s proszą o nie razem z adrese
 msgid "web.account.register.public"
 msgstr "Nazwa wyświetlana, kraj i wiek"
 
+msgid "web.account.register.name.suggested"
+msgstr "Podpowiedziana na podstawie nazwy w usłudze %(service)s, która spełnia zasady i jest wolna."
+
+msgid "web.account.register.age.bar"
+msgstr "Kraj i wiek"
+
 msgid "web.account.register.country.reported"
 msgstr "Kraj jest podpowiedziany na podstawie tego, który Cloudflare zgłasza dla tego połączenia, i można go zmienić."
 
 msgid "web.account.register.age"
 msgstr "Data urodzenia jest sprawdzana z limitem wieku wybranego kraju i nie jest zapisywana. Gry otrzymują kraj razem z danymi konta."
+
+msgid "web.account.register.password.optional"
+msgstr "Potrzebują go gry logujące się adresem i hasłem, takie jak %(games)s; można je ustawić później na stronie konta. Od 8 do 31 znaków, nie hasło żadnej usługi."
 
 msgid "web.account.register.action"
 msgstr "Utwórz konto"
@@ -4929,6 +4965,9 @@ msgstr "Poczta nieskonfigurowana"
 msgid "web.account.register.unavailable.text"
 msgstr "Rejestracja wymaga poczty serwera, która nie jest skonfigurowana. Istniejące konta logują się jak zwykle."
 
+msgid "web.account.register.unavailable.service"
+msgstr "Konto %(name)s w usłudze %(service)s nie jest połączone z kontem OpenFESL. Istniejące konto loguje się w inny sposób, a usługę %(service)s łączy na stronie konta."
+
 msgid "web.account.confirm"
 msgstr "Potwierdź adres e-mail"
 
@@ -4955,6 +4994,12 @@ msgstr "Konto OpenFESL"
 
 msgid "web.account.confirm.done.already.text"
 msgstr "Adres e-mail tego konta jest potwierdzony."
+
+msgid "web.account.confirm.service"
+msgstr "Usługa %(service)s, użyta do rejestracji, jest teraz jednym ze sposobów logowania konta."
+
+msgid "web.account.confirm.password"
+msgstr "Gry logujące się adresem i hasłem, takie jak %(games)s, potrzebują hasła do gier, które ustawia się na stronie konta."
 
 msgid "web.account.confirm.open"
 msgstr "Otwórz konto"

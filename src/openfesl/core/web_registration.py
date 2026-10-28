@@ -3,6 +3,7 @@ from datetime import UTC, date, datetime
 
 from openfesl.core.accounts import Account, AccountStore
 from openfesl.core.games import Games
+from openfesl.core.identities import Identity, IdentityStore
 from openfesl.core.limits import Mailings, Wait
 from openfesl.core.logins import Logins
 from openfesl.core.mail import Outbox
@@ -78,22 +79,34 @@ class Confirmed:
 
     Attributes:
         waited: Whether it waited for the link to sign in and log in to games.
+        service: The id of the first service linked to it, through which it was registered if
+            any.
+        password: Whether it has a game password.
     """
 
     waited: bool
+    service: str | None
+    password: bool
+
+
+@dataclass(frozen=True, slots=True)
+class IdentityTaken:
+    """A service's identity that another account was linked to meanwhile, so nothing was made."""
 
 
 # What came of a registration: the problems of its form, a birth date under the age limit, the wait
-# while the address had mail lately, the mail that went out, or the account that signs in at once.
-type Registered = list[Problem] | TooYoung | Wait | Mailed | Account
+# while the address had mail lately, the identity linked elsewhere meanwhile, the mail that went
+# out, or the account that signs in at once.
+type Registered = list[Problem] | TooYoung | Wait | IdentityTaken | Mailed | Account
 
 
 class WebRegistration:
-    """Registers accounts on the site."""
+    """Registers accounts on the site, directly or after a service's new identity."""
 
     def __init__(
         self,
         accounts: AccountStore,
+        identities: IdentityStore,
         logins: Logins,
         policies: GamePolicies,
         games: Games,
@@ -106,6 +119,7 @@ class WebRegistration:
 
         Args:
             accounts: Where the accounts are kept.
+            identities: Where the identities linked to them are kept.
             logins: Hashes game passwords.
             policies: The site's policy, which says whether accounts wait for their link, and
                 the games' age checks.
@@ -116,6 +130,7 @@ class WebRegistration:
             terms: The terms that registration accepts.
         """
         self._accounts = accounts
+        self._identities = identities
         self._logins = logins
         self._policies = policies
         self._games = games
@@ -132,8 +147,23 @@ class WebRegistration:
         """
         return self._outbox.sends or not await self._policies.site_confirmation()
 
-    async def register(self, form: Registration, language: str) -> Registered:
-        """Register an account from a form.
+    async def suggested_name(self, name: str) -> str:
+        """Return a name as the display name to suggest, when it fits the rules and is free.
+
+        Args:
+            name: The name, such as a service's name of the account.
+
+        Returns:
+            The name, or an empty string when it does not fit or another account uses it.
+        """
+        if display_name_problem(name) or await self._accounts.display_name_taken(name):
+            return ""
+        return name
+
+    async def register(
+        self, form: Registration, identity: Identity | None, language: str
+    ) -> Registered:
+        """Register an account from a form, linking a service's new identity to it if any.
 
         While the site's policy is on, every address gets the same answer: a new one the link
         that confirms it, one that has an account a mail that says so. While it is off, the
@@ -141,6 +171,8 @@ class WebRegistration:
 
         Args:
             form: What the form sent.
+            identity: The identity that a service answered with, which becomes a way in; None
+                for the direct registration.
             language: The language code of the page, which the mail is written in.
         """
         born = _birth_date(*form.birth)
@@ -148,7 +180,7 @@ class WebRegistration:
             problem
             for problem in (
                 address_problem(form.address),
-                password_problem(form.password),
+                password_problem(form.password) if form.password or not identity else None,
                 await self._display_name_problem(form.display_name),
                 None if is_country(form.country) else Problem("country", "missing"),
                 born if isinstance(born, Problem) else None,
@@ -167,10 +199,12 @@ class WebRegistration:
             return wait
         found = await self._accounts.find(form.address)
         if found is None:
-            account = await self._create(form, language, confirm)
+            account = await self._create(form, identity, language, confirm)
             if account is not None:
                 return Mailed(account.nuid) if confirm else account
-            # Another registration took the address or the display name meanwhile.
+            # Another registration took the address, the display name or the identity meanwhile.
+            if identity and await self._identities.account_of(identity.service, identity.subject):
+                return IdentityTaken()
             found = await self._accounts.find(form.address)
             if found is None:
                 return [Problem("display_name", "taken", form.display_name)]
@@ -207,10 +241,17 @@ class WebRegistration:
             The account that it confirmed, or why it confirmed nothing.
         """
         confirmed = await self._verification.confirm(token)
-        account = await self._accounts.account(confirmed) if isinstance(confirmed, int) else None
-        if account is None:
+        found = await self._accounts.account(confirmed) if isinstance(confirmed, int) else None
+        credentials = await self._accounts.find(found.nuid) if found else None
+        if credentials is None:
             return confirmed if isinstance(confirmed, Confirmation) else Confirmation.UNKNOWN
-        return Confirmed(await self._policies.confirms(self._games.by_id(account.made_in or "")))
+        account = credentials.account
+        linked = await self._identities.linked(account.id)
+        return Confirmed(
+            await self._policies.confirms(self._games.by_id(account.made_in or "")),
+            linked[0].service if linked else None,
+            credentials.password_hash is not None,
+        )
 
     async def _display_name_problem(self, name: str) -> Problem | None:
         if problem := display_name_problem(name):
@@ -232,8 +273,10 @@ class WebRegistration:
                 refusals.append(TooYoung(ages.parental_age, consent=True))
         return max(refusals, key=lambda refusal: refusal.age, default=None)
 
-    async def _create(self, form: Registration, language: str, confirm: bool) -> Account | None:
-        password_hash = await self._logins.hash(form.password)
+    async def _create(
+        self, form: Registration, identity: Identity | None, language: str, confirm: bool
+    ) -> Account | None:
+        password_hash = await self._logins.hash(form.password) if form.password else None
         # Every web account that the server can mail gets its link, so its address shows as not
         # confirmed until its link confirms it, even while the policy lets it in without.
         token, link = new_link() if self._outbox.sends else (None, None)
@@ -244,6 +287,7 @@ class WebRegistration:
             self._terms.version,
             verification=link,
             display_name=form.display_name,
+            identity=identity,
         )
         if account is None:
             return None

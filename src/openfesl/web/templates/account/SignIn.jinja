@@ -22,7 +22,7 @@
           <Alert :label="_('web.account.notice.not_signed_in')" :title="_('web.account.notice.check')" glyph="warn" alert>{{ _("web.account.notice.wrong.text") }}</Alert>
         {% elif kind == "paused" %}
           <Alert :label="_('web.account.notice.paused')" :title="_('web.account.notice.paused.title')" glyph="clock" alert>{{ _("web.account.notice.paused.text") }}{% if services %} {{ _("web.account.notice.paused.services") }}{% endif %}{% if mail %} {{ _("web.account.notice.paused.reset") }}{% endif %}</Alert>
-        {% elif kind in ("failed", "unreachable") %}
+        {% elif kind in ("failed", "unreachable", "taken") %}
           <Alert :label="_('web.account.notice.not_signed_in')" :title="_('web.account.notice.' ~ kind ~ '.title', service=notice.service)" glyph="warn" alert>{{ _("web.account.notice." ~ kind ~ ".text", service=notice.service) }}</Alert>
         {% elif kind == "unconfirmed" %}
           {% if notice.get("check") %}
