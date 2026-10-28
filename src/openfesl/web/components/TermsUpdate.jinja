@@ -1,0 +1,23 @@
+{#def terms: dict, next: str = "", notice: str = "", open: bool = False #}
+{# The notice that the terms have a version the account has not accepted, which some games wait
+   for: the text in a fold, open on its own page, and the form that accepts that version. #}
+{% if notice == "form" %}
+  <Alert :label="_('web.account.notice.not_saved')" :title="_('web.account.notice.form')" glyph="warn" alert>{{ _("web.account.notice.form.text") }}</Alert>
+{% elif notice == "changed" %}
+  <Alert :label="_('web.account.notice.not_saved')" :title="_('web.account.terms.update.changed')" glyph="warn" alert />
+{% endif %}
+<Alert :label="_('web.account.terms.update')" :title="_('web.account.terms.update.title')" glyph="doc">{{ _("web.account.terms.update.text") }}</Alert>
+<details {% if open %}open{% endif %} class="fold terms-update">
+  <summary>
+    <span aria-hidden="true"><Icon name="down" stroke="#F4F4EE" class="fold-chevron" /></span>{{ _("web.account.terms.update.read") }}
+  </summary>
+  <div class="terms-text">
+    {% for paragraph in terms.paragraphs %}<p>{{ paragraph }}</p>{% endfor %}
+  </div>
+</details>
+<form method="post" action="{{ url('/account/terms') }}" class="alert-form">
+  <CsrfField />
+  <input type="hidden" name="version" value="{{ terms.version }}">
+  {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+  <SmallAction :label="_('web.account.terms.update.action')" :busy="_('web.account.terms.update.busy')" />
+</form>

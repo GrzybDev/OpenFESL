@@ -7,6 +7,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from openfesl.core.games import Games
 from openfesl.core.limits import Wait
 from openfesl.core.policies import GamePolicies
+from openfesl.core.registration import Terms
 from openfesl.core.sign_in import LinkSent, Refusal, SignInRefused, WebSignIn
 from openfesl.core.texts import localize, translate
 from openfesl.web.account.services import SignInServices
@@ -46,6 +47,7 @@ class SignInPages:
         mail: bool,
         turnstile: Turnstile | None,
         services: SignInServices,
+        terms: Terms,
     ) -> None:
         """Prepare the sign-in pages.
 
@@ -58,6 +60,8 @@ class SignInPages:
             turnstile: Cloudflare's check of the forms that take an address; None when the
                 deployment sets none up.
             services: The sign-in services, whose tiles lead the page.
+            terms: The terms, whose current version an account that accepted an older one is
+                offered after signing in.
         """
         self._pages = pages
         self._games = games
@@ -66,6 +70,7 @@ class SignInPages:
         self._mail = mail
         self._turnstile = turnstile
         self._services = services
+        self._terms = terms
 
     def routes(self) -> APIRouter:
         """Return the sign-in page and the forms that sign in and out."""
@@ -97,7 +102,7 @@ class SignInPages:
                 return await self._render(request, back, notice, address, status)
             request.session.pop(WAITING, None)
             start(request, account, way="")
-            return landing(request, account, back)
+            return landing(request, account, back, self._terms.version)
 
         @router.post("/sign-in/confirmation")
         async def confirmation(request: Request) -> Response:

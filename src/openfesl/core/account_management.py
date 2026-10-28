@@ -12,7 +12,7 @@ from openfesl.core.logins import Logins
 from openfesl.core.mail import Outbox
 from openfesl.core.personas import Persona, PersonaStore
 from openfesl.core.problems import Problem, password_problem
-from openfesl.core.registration import is_country
+from openfesl.core.registration import Terms, is_country
 
 
 @dataclass(frozen=True, slots=True)
@@ -74,6 +74,7 @@ class AccountManagement:
         outbox: Outbox,
         games: Games,
         services: Collection[str],
+        terms: Terms,
     ) -> None:
         """Manage the accounts in the stores.
 
@@ -88,6 +89,7 @@ class AccountManagement:
             games: The games, each of which the overview names with the account's personas.
             services: The ids of the configured sign-in services, whose identities alone sign
                 in.
+            terms: The terms, whose current version the accounts accept.
         """
         self._accounts = accounts
         self._identities = identities
@@ -97,6 +99,7 @@ class AccountManagement:
         self._outbox = outbox
         self._games = games
         self._services = services
+        self._terms = terms
 
     async def overview(self, account_id: int) -> AccountOverview | None:
         """Return what the player of an account sees of it; None for an unknown account.
@@ -218,6 +221,21 @@ class AccountManagement:
             Whether it was unlinked.
         """
         return await self._identities.unlink(account.id, service, self._services)
+
+    async def accept_terms(self, account: Account, version: str) -> bool:
+        """Record that an account accepted the terms, without which games may refuse its logins.
+
+        Args:
+            account: The account.
+            version: The version of the terms that the page showed.
+
+        Returns:
+            Whether it was recorded, which it is not when the terms changed since they were shown.
+        """
+        if version != self._terms.version:
+            return False
+        await self._accounts.accept_terms(account.id, version)
+        return True
 
     async def sign_out_everywhere(self, account: Account) -> None:
         """End every web session of an account and the logins the games remember for it.

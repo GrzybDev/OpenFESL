@@ -1,4 +1,4 @@
-{#def overview, made_in, said: dict, errors: dict, countries: list, sent, waits: bool, mail: bool, check: str, accepted: bool, password_games: list, personas: list #}
+{#def overview, made_in, said: dict, errors: dict, countries: list, sent, waits: bool, mail: bool, check: str, accepted: bool, terms: dict, password_games: list, personas: list #}
 {# The account page's profile: its notices, the public display name and, beside it, the private
    details with the country. Both change in folds that open on arrival only when their form left
    something to change. #}
@@ -29,6 +29,9 @@
       <SmallAction :label="_('web.account.notice.unconfirmed.send')" :busy="_('web.account.notice.sending')" />
     </form>
   {% endif %}
+{% endif %}
+{% if not accepted %}
+  <TermsUpdate :terms="terms" :next="url('/account') ~ '#profile'" />
 {% endif %}
 <div class="account-sides">
   <div class="account-side">

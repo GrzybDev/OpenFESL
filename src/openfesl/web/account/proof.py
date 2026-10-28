@@ -8,6 +8,7 @@ from openfesl.core.accounts import Account
 from openfesl.core.games import Games
 from openfesl.core.limits import Wait
 from openfesl.core.proofs import PATH, ProofFound, ProofGone, ProofMail
+from openfesl.core.registration import Terms
 from openfesl.core.sign_in import ProofTarget, Refusal, SignInRefused, WebSignIn
 from openfesl.core.texts import localize, translate
 from openfesl.web.account.message import SECRET
@@ -41,6 +42,7 @@ class ProofPages:
         proof_mail: Callable[[], ProofMail],
         mail: bool,
         turnstile: Turnstile | None,
+        terms: Terms,
     ) -> None:
         """Prepare the proof's page.
 
@@ -53,6 +55,8 @@ class ProofPages:
             mail: Whether the server sends mail, which the proof by e-mail and resets need.
             turnstile: Cloudflare's check of the forms that take a password or send mail; None
                 when the deployment sets none up.
+            terms: The terms, whose current version an account that accepted an older one is
+                offered after signing in.
         """
         self._pages = pages
         self._games = games
@@ -61,6 +65,7 @@ class ProofPages:
         self._proof_mail = proof_mail
         self._mail = mail
         self._turnstile = turnstile
+        self._terms = terms
 
     def routes(self) -> APIRouter:
         """Return the proof's page and its forms."""
@@ -153,7 +158,8 @@ class ProofPages:
                 return self._link_page(request, token, used)
             view = self._services.view(used.identity.service, request.state.language)
             name = view.name if view else used.identity.service
-            return proved(request, used.account, used.identity, name, used.linked)
+            terms = self._terms.version
+            return proved(request, used.account, used.identity, name, used.linked, terms)
 
         return router
 
@@ -199,7 +205,8 @@ class ProofPages:
         identity, _ = pending
         linked = await self._sign_in().link(account, identity)
         service = self._services.view(identity.service, request.state.language)
-        return proved(request, account, identity, service.name if service else "", linked)
+        name = service.name if service else ""
+        return proved(request, account, identity, name, linked, self._terms.version)
 
     def _render(
         self,

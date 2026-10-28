@@ -4799,6 +4799,36 @@ msgstr "Jeden tekst dla wszystkich gier na tej stronie, akceptowany raz dla kont
 msgid "web.account.terms.read"
 msgstr "Przeczytaj warunki"
 
+msgid "web.account.terms.update"
+msgstr "Nowe warunki"
+
+msgid "web.account.terms.update.subtitle"
+msgstr "Nowa wersja"
+
+msgid "web.account.terms.update.title"
+msgstr "Warunki OpenFESL mają nową wersję."
+
+msgid "web.account.terms.update.text"
+msgstr "Gry logują konto po zaakceptowaniu tej wersji; gra bez własnego ekranu warunków do tego czasu odmawia logowania."
+
+msgid "web.account.terms.update.read"
+msgstr "Przeczytaj nową wersję"
+
+msgid "web.account.terms.update.action"
+msgstr "Zaakceptuj warunki"
+
+msgid "web.account.terms.update.busy"
+msgstr "Akceptowanie"
+
+msgid "web.account.terms.update.changed"
+msgstr "Warunki w międzyczasie znów się zmieniły; poniżej jest aktualna wersja."
+
+msgid "web.account.terms.update.later"
+msgstr "Nie teraz"
+
+msgid "web.account.terms.update.later.text"
+msgstr "Strona konta proponuje tę wersję, dopóki nie zostanie zaakceptowana."
+
 msgid "web.account.error.count.one"
 msgstr "%(count)s pole wymaga zmiany."
 
@@ -5306,6 +5336,9 @@ msgstr "Jest ważny do %(expires)s. Przycisk na stronie, którą otwiera, potwie
 
 msgid "web.account.toast.country"
 msgstr "Zapisano kraj: %(country)s."
+
+msgid "web.account.toast.terms"
+msgstr "Zaakceptowano warunki."
 
 msgid "web.account.games"
 msgstr "Gry"

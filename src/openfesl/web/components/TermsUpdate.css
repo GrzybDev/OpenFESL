@@ -1,0 +1,30 @@
+/* The fold that holds the terms' text under their notice, opened from a row like the alert's. */
+@layer components {
+  .terms-update {
+    > summary {
+      display: flex;
+      min-height: 44px;
+      align-items: center;
+      gap: 10px;
+      background: var(--row);
+      padding: 0 14px 0 6px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink);
+
+      > span {
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        background: var(--ink);
+      }
+    }
+
+    .terms-text {
+      margin-top: 2px;
+    }
+  }
+}

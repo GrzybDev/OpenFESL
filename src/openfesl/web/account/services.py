@@ -8,6 +8,7 @@ from fastapi.responses import RedirectResponse, Response
 from openfesl.core.account_management import AccountManagement
 from openfesl.core.accounts import Account
 from openfesl.core.identities import Identity
+from openfesl.core.registration import Terms
 from openfesl.core.sign_in import ProofNeeded, Refusal, SignInRefused, WebSignIn
 from openfesl.core.texts import localize, translate
 from openfesl.web.account.session import (
@@ -69,6 +70,7 @@ class SignInServices:
         sign_in: Callable[[], WebSignIn],
         accounts: Callable[[int], Awaitable[Account | None]],
         management: Callable[[], AccountManagement],
+        terms: Terms,
     ) -> None:
         """Prepare a client for each service.
 
@@ -79,6 +81,8 @@ class SignInServices:
             sign_in: Returns the sign-in checks, once the application has started.
             accounts: Returns an account by its number.
             management: Returns the account management, which links and unlinks services.
+            terms: The terms, whose current version an account that accepted an older one is
+                offered after signing in.
         """
         self._clients = {
             service.id: ServiceClient(service, f"sign-in-{service.id}", CALLBACK, public_url)
@@ -87,6 +91,7 @@ class SignInServices:
         self._sign_in = sign_in
         self._accounts = accounts
         self._management = management
+        self._terms = terms
 
     def views(self, language: str) -> list[ServiceView]:
         """Return the services as the sign-in page shows them.
@@ -264,7 +269,7 @@ class SignInServices:
             return RedirectResponse(localize(target, language), 303)
         request.session.pop(WAITING, None)
         start(request, account, way=service.name)
-        return landing(request, account, back)
+        return landing(request, account, back, self._terms.version)
 
     async def _proved(
         self, request: Request, service: SignInService, answer: ServiceAnswer
@@ -292,7 +297,7 @@ class SignInServices:
         linked = await sign_in.link(found, identity)
         pending_client = self._clients.get(identity.service)
         name = pending_client.service.name if pending_client else identity.service
-        return proved(request, found, identity, name, linked)
+        return proved(request, found, identity, name, linked, self._terms.version)
 
 
 def _scope(scope: str, language: str) -> str:

@@ -13,6 +13,7 @@ from openfesl.web.account.register import RegisterPages
 from openfesl.web.account.reset import ResetPages
 from openfesl.web.account.services import SignInServices
 from openfesl.web.account.sign_in import SignInPages
+from openfesl.web.account.terms import TermsPages
 from openfesl.web.activity import activity_routes
 from openfesl.web.front import front_routes
 from openfesl.web.game_icons import game_icon_routes
@@ -83,6 +84,7 @@ def include_public_routes(
         lambda: app.state.sign_in,
         stores.accounts.account,
         lambda: app.state.account_management,
+        services.terms,
     )
     sign_in = SignInPages(
         pages,
@@ -92,6 +94,7 @@ def include_public_routes(
         settings.sends_mail,
         turnstile,
         sign_in_services,
+        services.terms,
     )
     proof = ProofPages(
         pages,
@@ -101,6 +104,7 @@ def include_public_routes(
         lambda: app.state.proof_mail,
         settings.sends_mail,
         turnstile,
+        services.terms,
     )
     register = RegisterPages(
         pages,
@@ -138,6 +142,10 @@ def include_public_routes(
         turnstile,
     )
     app.include_router(account.routes())
+    terms = TermsPages(
+        pages, stores.accounts.account, lambda: app.state.account_management, services.terms
+    )
+    app.include_router(terms.routes())
     game_password = GamePasswordForms(
         pages,
         games,

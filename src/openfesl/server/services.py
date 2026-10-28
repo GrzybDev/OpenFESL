@@ -155,6 +155,7 @@ class GameServices:
             outbox,
             games,
             [service.id for service in settings.sign_in_services],
+            self.terms,
         )
         app.state.registration = WebRegistration(
             stores.accounts,

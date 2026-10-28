@@ -34,6 +34,7 @@ from openfesl.web.account.session import (
     to_sign_in,
 )
 from openfesl.web.account.sign_in import password_games
+from openfesl.web.account.terms import terms_shown
 from openfesl.web.pages import Pages, Toast
 from openfesl.web.sessions import form_matches, form_token, toast
 from openfesl.web.turnstile import Turnstile
@@ -201,6 +202,7 @@ class AccountPages:
             mail=self._mail,
             check=self._turnstile.site_key if self._turnstile and waiting and self._mail else "",
             accepted=account.terms_version == self._terms.version,
+            terms=terms_shown(self._terms, language),
             password_games=password_games(self._games, language),
             game_names=[translate(f"games.{game.id}.short", language) for game in self._games],
             services=self._services.views(language),

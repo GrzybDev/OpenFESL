@@ -1,0 +1,18 @@
+{#def next: str, notice: str, terms: dict #}
+{# The terms offered after signing in to an account that accepted an older version: the notice
+   with the text and its acceptance, and the way on to the page that was to open without it. #}
+<AccountPage :title="_('web.terms.title')"
+             :subtitle="_('web.account.terms.update.subtitle')"
+             page="account">
+  <div class="account-page-main">
+    <Panel tag="section"
+           :aria-label="_('web.terms.title')"
+           class="enter-panel account-page-panel">
+      <TermsUpdate :terms="terms" :next="next" :notice="notice" open />
+    </Panel>
+    <div class="account-page-after">
+      <SmallAction :href="next or url('/account')" :label="_('web.account.terms.update.later')" />
+      <p class="body-text">{{ _("web.account.terms.update.later.text") }}</p>
+    </div>
+  </div>
+</AccountPage>

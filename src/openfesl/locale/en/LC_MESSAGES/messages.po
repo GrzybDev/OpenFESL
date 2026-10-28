@@ -4673,6 +4673,36 @@ msgstr "One text for every game on this site, accepted once for the account."
 msgid "web.account.terms.read"
 msgstr "Read the terms"
 
+msgid "web.account.terms.update"
+msgstr "New terms"
+
+msgid "web.account.terms.update.subtitle"
+msgstr "New version"
+
+msgid "web.account.terms.update.title"
+msgstr "The OpenFESL terms have a new version."
+
+msgid "web.account.terms.update.text"
+msgstr "Games log the account in once it accepts this version; a game without a terms screen of its own refuses its logins until then."
+
+msgid "web.account.terms.update.read"
+msgstr "Read the new version"
+
+msgid "web.account.terms.update.action"
+msgstr "Accept the terms"
+
+msgid "web.account.terms.update.busy"
+msgstr "Accepting"
+
+msgid "web.account.terms.update.changed"
+msgstr "The terms changed again meanwhile; the current version is shown."
+
+msgid "web.account.terms.update.later"
+msgstr "Not now"
+
+msgid "web.account.terms.update.later.text"
+msgstr "The account page offers this version until it is accepted."
+
 msgid "web.account.error.count.one"
 msgstr "%(count)s field needs a change."
 
@@ -5167,6 +5197,9 @@ msgstr "It is valid until %(expires)s. A button on the page it opens confirms th
 
 msgid "web.account.toast.country"
 msgstr "Country saved: %(country)s."
+
+msgid "web.account.toast.terms"
+msgstr "Terms accepted."
 
 msgid "web.account.games"
 msgstr "Games"
