@@ -30,7 +30,11 @@ async def test_a_launcher_session_is_kept_while_its_account_plays_and_a_ttl_afte
         server=False,
         state=AccountState.ACTIVE,
         state_until=None,
+        state_changed=None,
         verification_expires_at=None,
+        display_name=None,
+        made_in=None,
+        session_epoch=0,
     )
     session_id = sessions.issue(session)
 

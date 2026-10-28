@@ -34,6 +34,7 @@ from openfesl.core.registration import Terms
 from openfesl.core.rich_presence import RichPresence
 from openfesl.core.servers import Approval
 from openfesl.core.session import GameSession, Players
+from openfesl.core.sign_in import WebSignIn
 from openfesl.core.stats import StatsService
 from openfesl.core.telemetry import telemetry_routes
 from openfesl.core.texts import load_texts
@@ -91,8 +92,8 @@ class GameServices:
         """Start the services and their followers once the database is ready, and stop them after.
 
         Args:
-            app: The application, whose state hands the pages the e-mail verification and the
-                launcher sign-in.
+            app: The application, whose state hands the pages the e-mail verification, the
+                launcher sign-in and the site's sign-in.
         """
         settings, games, stores = self._settings, self._games, self._stores
         routes, commands = self._routes, self._commands
@@ -116,6 +117,7 @@ class GameServices:
         personas = PersonaService(stores.personas)
         await personas.prepare(await accounts.prepare(games))
         app.state.launcher = LauncherService(logins, games, personas, self._launcher_sessions)
+        app.state.sign_in = WebSignIn(logins, policies, games)
         routes.update(connect_routes(games, policies))
         routes.update(telemetry_routes())
         routes.update(accounts.routes())

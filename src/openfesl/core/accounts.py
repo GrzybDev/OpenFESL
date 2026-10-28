@@ -82,8 +82,13 @@ class Account:
         server: Whether the account belongs to a game's dedicated servers.
         state: Whether the admin lets it log in.
         state_until: When a state other than active ends, if it does.
+        state_changed: When its state last changed, if it ever did.
         verification_expires_at: When the link that confirms its e-mail address expires, while
             it waits for that; None once confirmed or when it never had to be.
+        display_name: The public name that the site shows for it, once it has one.
+        made_in: The id of the game whose client registered it; None for the site's own
+            registrations.
+        session_epoch: The number its web sessions carry; a session with another one ended.
     """
 
     id: int
@@ -93,7 +98,11 @@ class Account:
     server: bool
     state: AccountState
     state_until: datetime | None
+    state_changed: datetime | None
     verification_expires_at: datetime | None
+    display_name: str | None
+    made_in: str | None
+    session_epoch: int
 
     def login_error(self) -> int | None:
         """Return the NuLogin error that the account's state refuses its logins with, if any."""
@@ -110,13 +119,11 @@ class AccountRecord:
         account: The account.
         created: When it was registered.
         last_login: When it last logged in, if it ever did.
-        state_changed: When the admin last changed its state, if ever.
     """
 
     account: Account
     created: datetime
     last_login: datetime | None
-    state_changed: datetime | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -160,6 +167,13 @@ class AccountStore(Protocol):
             token_hash: The SHA-256 digest of the token the game kept.
         """
 
+    async def account(self, account_id: int) -> Account | None:
+        """Return an account by its number.
+
+        Args:
+            account_id: The account's number.
+        """
+
     async def add(
         self,
         nuid: str,
@@ -169,6 +183,7 @@ class AccountStore(Protocol):
         *,
         server: bool = False,
         verification: Link | None = None,
+        made_in: str | None = None,
     ) -> Account | None:
         """Create an account, or return None when the name is taken.
 
@@ -179,6 +194,7 @@ class AccountStore(Protocol):
             terms_version: The version of the terms accepted on registration, if current.
             server: Whether the account belongs to a game's dedicated servers.
             verification: The link that must confirm its e-mail address before it logs in.
+            made_in: The id of the game whose client registers it; None for the site.
         """
 
     async def accept_terms(self, account_id: int, version: str) -> None:
@@ -209,7 +225,7 @@ class AccountStore(Protocol):
         """
 
     async def change_password(self, account_id: int, password_hash: str) -> None:
-        """Replace an account's password and forget every login remembered with the old one.
+        """Replace an account's password, ending its web sessions and remembered logins.
 
         Args:
             account_id: The account.
@@ -227,7 +243,7 @@ class AccountStore(Protocol):
     async def set_state(
         self, account_id: int, state: AccountState, until: datetime | None, admin: Admin | None
     ) -> None:
-        """Change whether an account may log in and record the change among the admin's actions.
+        """Change whether an account may log in, ending its web sessions, and record the change.
 
         Args:
             account_id: The account.
@@ -377,7 +393,12 @@ class AccountService:
         accepted = request.tos_version if request.tos_version == self._terms.version else None
         token, link = new_link() if verify else (None, None)
         account = await self._store.add(
-            request.nuid, password_hash, request.country.upper(), accepted, verification=link
+            request.nuid,
+            password_hash,
+            request.country.upper(),
+            accepted,
+            verification=link,
+            made_in=connection.game.id,
         )
         if account is None:
             raise TransactionError(ALREADY_REGISTERED)

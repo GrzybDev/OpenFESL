@@ -13,6 +13,11 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# The setting that says whether accounts registered on the site's pages wait for the link that
+# confirms their address; each game's accounts.email_verification says it for the accounts made in
+# the game.
+SITE_CONFIRMATION = "site.accounts.email_verification"
+
 
 class ConcurrentLogin(StrEnum):
     """What a player's login does while the account is logged in elsewhere."""
@@ -212,6 +217,14 @@ class GamePolicies:
             except KeyError, ValueError:
                 logger.warning("Ignoring the setting %s, which no policy takes", key)
         return policies
+
+    async def site_confirmation(self) -> bool:
+        """Return whether accounts registered on the site wait until a link confirms their address.
+
+        It is on unless the instance turns it off, and read on every use like the games' policies.
+        """
+        values = await self._store.settings(SITE_CONFIRMATION)
+        return values.get(SITE_CONFIRMATION) != "off"
 
 
 def _older(version: str, minimum: str) -> bool:

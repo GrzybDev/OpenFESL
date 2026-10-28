@@ -1,0 +1,7 @@
+{#def glyph: str, label: str #}
+{# A row of a list that explains something, such as how accounts work: the glyph's badge, the
+   label in capitals and, as the content, a sentence. #}
+<li class="info-row">
+  <span aria-hidden="true" class="badge"><Icon :name="glyph" stroke="#0A0A0A" fill="#0A0A0A" /></span>
+  <span class="info-text"><span class="info-label">{{ label }}</span><span class="info-sentence">{{ content }}</span></span>
+</li>

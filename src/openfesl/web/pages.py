@@ -86,6 +86,21 @@ class Viewer:
     counts: Mapping[str, int] = field(default_factory=dict)
 
 
+@dataclass(frozen=True, slots=True)
+class Player:
+    """The account signed in on the site's pages, as the shell's account menu shows it.
+
+    Attributes:
+        account_id: The account's number.
+        name: Its public display name, once it has one.
+        way: The name of the service it signed in through; empty for the e-mail address.
+    """
+
+    account_id: int
+    name: str | None
+    way: str
+
+
 def built_assets() -> Assets:
     """Return the built files' addresses, from the manifest of the latest build."""
     try:
@@ -280,10 +295,13 @@ class Pages:
             switch: Whether the shell offers the page in the other languages.
             headers: Headers of the response.
             viewer: The admin signed in to the admin panel, on its pages.
-            csrf: The token that the admin panel's forms send back.
+            csrf: The token that the page's forms send back; the session's when empty, as for
+                the account menu's sign-out.
             context: The template's own values.
         """
         language, path = _address(request)
+        session = request.scope.get("session") or {}
+        player: Player | None = request.scope.get("state", {}).get("player")
         query = f"?{request.url.query}" if request.url.query else ""
         shared = dict(
             language=language,
@@ -294,7 +312,8 @@ class Pages:
             game=game,
             steel=steel,
             viewer=viewer,
-            csrf=csrf,
+            player=player,
+            csrf=csrf or session.get("csrf", ""),
             # The time the page's values are from.
             now=datetime.now(UTC),
             games=[

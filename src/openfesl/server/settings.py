@@ -50,8 +50,9 @@ class Settings(BaseSettings):
         hook_default_url: The relay address OpenFESLHook's releases connect to when no
             OpenFESLHook.ini names another; the guide to playing explains that file to players
             of other servers.
-        session_secret: The key that signs the admin panel's session cookie; without one each
-            start of the server picks its own, which signs every admin out.
+        session_secret: The key that signs the session cookie of the admin panel and the site's
+            accounts; without one each start of the server picks its own, which signs everyone
+            out.
         admin_oidc_name: The name of the admin panel's sign-in provider on its button.
         admin_oidc_issuer: The OpenID Connect issuer the admins sign in through, whose discovery
             document names its endpoints, such as https://auth.example.com/application/o/fesl/;
@@ -101,6 +102,11 @@ class Settings(BaseSettings):
     def _empty_as_unset(cls, value: object) -> object:
         # Hosts such as Dokploy switch a variable off by leaving it empty.
         return value or None
+
+    @property
+    def sends_mail(self) -> bool:
+        """Whether the server sends mail, which needs a mail server, a sender and a public URL."""
+        return bool(self.smtp_host and self.smtp_sender and self.public_url)
 
     def client_address(self, connection: HTTPConnection) -> Address | None:
         """Return the address of the client behind a request or WebSocket.

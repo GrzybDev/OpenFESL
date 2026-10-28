@@ -1,0 +1,50 @@
+{#def page: str = "" #}
+{# The shell bar's last item: the way to sign in, or the signed-in account's menu, a details element
+   that opens without scripts. The menu names the account and the way it signed in, never its
+   e-mail address; an account without a display name reaches only that form and sign-out. #}
+{% if player %}
+  <details data-account-menu class="account-entry">
+    <summary {% if page == "account" %}aria-current="page"{% endif %}
+             class="shell-link account-summary">
+      <Icon name="user" :size="18" stroke="currentColor" class="account-glyph" />
+      {% if player.name %}
+        <span class="phone-sr-only">{{ player.name }}</span><span class="sr-only">{{ _("web.account.menu.named") }}</span>
+      {% else %}
+        <span class="phone-sr-only">{{ _("web.account.menu.unnamed") }}</span><span class="sr-only">{{ _("web.account.menu.unnamed.hidden") }}</span>
+      {% endif %}
+      <Icon name="caret" :size="14" stroke="currentColor" class="account-caret wide-only" />
+    </summary>
+    <div class="account-menu">
+      <p class="account-who">
+        {{ _("web.account.menu.signed_in_as") if player.name else _("web.account.menu.signed_in") }}
+        <span class="account-who-name">{{ player.name or _("web.account.menu.no_name") }}</span>
+        {{ _("web.account.menu.through", service=player.way) if player.way else _("web.account.menu.with_address") }}
+      </p>
+      <ul>
+        <li>
+          {% if player.name %}
+            <a href="{{ url('/account') }}"
+               {% if page == "account" %}aria-current="page"{% endif %}
+               class="account-item"><Icon name="user" :size="18" stroke="currentColor" />{{ _("web.account.menu.account") }}</a>
+          {% else %}
+            <a href="{{ url('/account/display-name') }}"
+               {% if page == "display_name" %}aria-current="page"{% endif %}
+               class="account-item"><Icon name="tag" :size="18" fill="currentColor" />{{ _("web.account.menu.display_name") }}</a>
+          {% endif %}
+        </li>
+        <li>
+          <form method="post" action="{{ url('/sign-out') }}">
+            <CsrfField />
+            <button type="submit" class="account-item">
+              <Icon name="sign-out" :size="18" stroke="currentColor" />{{ _("web.account.menu.sign_out") }}
+            </button>
+          </form>
+        </li>
+      </ul>
+    </div>
+  </details>
+{% else %}
+  <a href="{{ url('/sign-in') }}"
+     {% if page == "sign_in" %}aria-current="page"{% endif %}
+     class="shell-link account-sign-in"><Icon name="user" :size="18" stroke="currentColor" class="wide-only" />{{ _("web.account.menu.sign_in") }}</a>
+{% endif %}

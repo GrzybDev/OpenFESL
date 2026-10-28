@@ -5,6 +5,7 @@ from openfesl.core.verification import Confirmation, EmailVerification
 from openfesl.server.services import GameServices
 from openfesl.server.settings import Settings
 from openfesl.server.stores import Stores
+from openfesl.web.account.sign_in import SignInPages
 from openfesl.web.activity import activity_routes
 from openfesl.web.front import front_routes
 from openfesl.web.game_icons import game_icon_routes
@@ -28,7 +29,7 @@ def include_public_routes(
     services: GameServices,
     stores: Stores,
 ) -> None:
-    """Add the public pages, the e-mail confirmation and the launcher's sign-in to the application.
+    """Add the public pages, the e-mail confirmation and the launcher's and the site's sign-in.
 
     Args:
         app: The application, whose state holds the services that the lifespan starts.
@@ -74,3 +75,7 @@ def include_public_routes(
 
     app.include_router(verification_routes(confirm, pages))
     app.include_router(launcher_routes(lambda: app.state.launcher))
+    sign_in = SignInPages(
+        pages, games, services.policies, lambda: app.state.sign_in, settings.sends_mail
+    )
+    app.include_router(sign_in.routes())

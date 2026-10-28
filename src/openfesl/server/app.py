@@ -16,6 +16,7 @@ from openfesl.server.services import GameServices
 from openfesl.server.settings import Settings
 from openfesl.server.stores import Stores
 from openfesl.storage.database import migrate
+from openfesl.web.account.session import PlayerSessionMiddleware
 from openfesl.web.game_http import GameHttpMiddleware
 from openfesl.web.languages import LanguageMiddleware
 from openfesl.web.magma import magma_app
@@ -64,7 +65,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.mount("/static", StaticAssets(directory=STATIC))
     include_public_routes(app, settings, games, pages, services, stores)
     include_admin_routes(app, settings, games, pages, services, stores)
-    _add_middleware(app, settings, games, services)
+    _add_middleware(app, settings, games, services, stores)
 
     @app.get("/health", response_class=PlainTextResponse)
     async def health() -> str:
@@ -73,14 +74,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     return app
 
 
-def _add_middleware(app: FastAPI, settings: Settings, games: Games, services: GameServices) -> None:
+def _add_middleware(
+    app: FastAPI, settings: Settings, games: Games, services: GameServices, stores: Stores
+) -> None:
     # The last one added sees a request first: the game's HTTP keeps its own answers. Only the
-    # admin panel stores anything in the session, so other pages set no cookie.
+    # sign-ins and their forms store anything in the session, so other pages set no cookie.
     secret = settings.session_secret.get_secret_value() if settings.session_secret else None
+    app.add_middleware(PlayerSessionMiddleware, accounts=stores.accounts.account)
     app.add_middleware(
         SessionMiddleware,
         secret_key=secret or secrets.token_urlsafe(32),
-        session_cookie="openfesl_admin",
+        session_cookie="openfesl_session",
         max_age=SESSION_COOKIE_AGE,
         same_site="lax",
         # Browsers send a Secure cookie only over HTTPS, as a deployment serves the pages.

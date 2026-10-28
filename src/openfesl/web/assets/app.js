@@ -438,3 +438,55 @@ function closeDialog(dialog) {
   dialog.classList.add("closing");
   setTimeout(() => dialog.close(), reducedMotion.matches ? 100 : 120);
 }
+
+// A game password field's button shows the password as text and hides it again.
+document.addEventListener("click", (event) => {
+  const button =
+    event.target instanceof Element ? event.target.closest("[data-show-password]") : null;
+  if (!button) {
+    return;
+  }
+  const shown = button.getAttribute("aria-pressed") !== "true";
+  button.setAttribute("aria-pressed", String(shown));
+  button.parentElement.querySelector("input").type = shown ? "text" : "password";
+});
+
+// The account menu closes with Escape, a click outside it or the choice of an item, playing its
+// closing first; without scripts its summary closes it at once.
+document.addEventListener("click", (event) => {
+  const menu = document.querySelector("[data-account-menu][open]");
+  if (!menu || !(event.target instanceof Element)) {
+    return;
+  }
+  const summary = event.target.closest("summary");
+  if (summary?.parentElement === menu) {
+    event.preventDefault();
+    closeMenu(menu);
+  } else if (!menu.contains(event.target)) {
+    closeMenu(menu);
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  const menu = document.querySelector("[data-account-menu][open]");
+  if (menu && event.key === "Escape") {
+    closeMenu(menu);
+    menu.querySelector("summary").focus();
+  }
+});
+
+/**
+ * Plays the account menu's closing and closes it.
+ *
+ * @param {HTMLDetailsElement} menu - The open account menu.
+ */
+function closeMenu(menu) {
+  menu.classList.add("closing");
+  setTimeout(
+    () => {
+      menu.open = false;
+      menu.classList.remove("closing");
+    },
+    reducedMotion.matches ? 0 : 100,
+  );
+}

@@ -1,0 +1,48 @@
+/* The site's account pages: a panel of 600 px beside a column that explains, which wraps under the
+   panel on phones. Inside the panel the parts stand 14 px apart and a form's blocks 2 px. */
+@layer components {
+  .account-page-columns {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  .account-page-main {
+    min-width: 0;
+    flex: 0 1 600px;
+  }
+
+  .account-page-side {
+    display: grid;
+    min-width: 0;
+    max-width: 560px;
+    flex: 1 1 380px;
+    gap: 22px;
+
+    .action {
+      margin-top: 2px;
+    }
+  }
+
+  .account-page-panel > * + * {
+    margin-top: 14px;
+  }
+
+  /* A block joined to the bar above it. */
+  .account-page-joined {
+    margin-top: 2px;
+  }
+
+  .account-page-form {
+    display: grid;
+
+    .bar + .field-label {
+      margin-top: 2px;
+    }
+
+    .action-button {
+      margin-top: 6px;
+    }
+  }
+}

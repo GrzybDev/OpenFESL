@@ -259,4 +259,25 @@
   <symbol id="open" viewBox="0 0 20 20">
     <path d="M5 9.5h10v7.5H5zM7.4 9.5V7a2.6 2.6 0 0 1 5.1-.8" fill="none" stroke-width="2.2"/>
   </symbol>
+  <symbol id="user" viewBox="0 0 20 20">
+    <path d="M10 3a3.4 3.4 0 1 1 0 6.8A3.4 3.4 0 0 1 10 3zM3.6 17.2c.9-3.1 3.4-4.9 6.4-4.9s5.5 1.8 6.4 4.9" fill="none" stroke-width="2" stroke-linecap="square"/>
+  </symbol>
+  <symbol id="people" viewBox="0 0 20 20">
+    <path d="M7 4.2a2.6 2.6 0 1 1 0 5.2a2.6 2.6 0 0 1 0-5.2zM2.4 16.4c.6-2.6 2.3-4.1 4.6-4.1s4 1.5 4.6 4.1M13.6 5a2.3 2.3 0 1 1 0 4.6M14.6 12.5c1.6.4 2.7 1.7 3.1 3.9" fill="none" stroke-width="1.9" stroke-linecap="square"/>
+  </symbol>
+  <symbol id="caret" viewBox="0 0 20 20">
+    <path d="M5 7.5l5 5 5-5" fill="none" stroke-width="2.4" stroke-linecap="square"/>
+  </symbol>
+  <symbol id="sign-out" viewBox="0 0 20 20">
+    <path d="M8.5 3H3.5v14h5M12 6l4 4-4 4M16 10H7.5" fill="none" stroke-width="2" stroke-linecap="square"/>
+  </symbol>
+  <symbol id="show" viewBox="0 0 20 20">
+    <path d="M1.8 10s3-5.4 8.2-5.4 8.2 5.4 8.2 5.4-3 5.4-8.2 5.4S1.8 10 1.8 10zM10 7.6a2.4 2.4 0 1 0 0 4.8a2.4 2.4 0 1 0 0-4.8z" fill="none" stroke-width="1.8"/>
+  </symbol>
+  <symbol id="hide" viewBox="0 0 20 20">
+    <path d="M1.8 10s3-5.4 8.2-5.4 8.2 5.4 8.2 5.4-3 5.4-8.2 5.4S1.8 10 1.8 10zM3 17 17 3" fill="none" stroke-width="1.8"/>
+  </symbol>
+  <symbol id="mail" viewBox="0 0 20 20">
+    <path d="M2.8 4.8h14.4v10.4H2.8zM2.8 5.2 10 11l7.2-5.8" fill="none" stroke-width="1.9"/>
+  </symbol>
 </svg>

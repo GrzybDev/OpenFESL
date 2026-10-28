@@ -38,9 +38,15 @@ class AccountRow(Base):
     # Set while the account waits for the link that confirms its e-mail address.
     verification_hash: Mapped[bytes | None] = mapped_column(LargeBinary, unique=True)
     verification_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Moved on whenever the account's web sessions must end, such as on a password change.
+    session_epoch: Mapped[int] = mapped_column(server_default="0")
+    display_name: Mapped[str | None]
+    # The game whose client registered the account; none for the site's own registrations.
+    made_in: Mapped[str | None]
 
 
 Index("account_nuid_key", func.lower(AccountRow.nuid), unique=True)
+Index("account_display_name_key", func.lower(AccountRow.display_name), unique=True)
 
 
 class LoginTokenRow(Base):

@@ -1,0 +1,199 @@
+/* The account entry at the end of the shell bar: a shell link while signed out, a menu while
+   signed in that drops from the entry on wider screens and spans the window as a sheet under the
+   bar's first line on phones. The menu scales in from its top right (120 ms) and its caret turns
+   over (160 ms); the sheet slides down 8 px (160 ms). Reduced motion only fades. */
+@layer components {
+  .account-sign-in,
+  .account-summary {
+    gap: 8px;
+    font-size: 15px;
+    color: var(--shell-link);
+
+    &[aria-current="page"] {
+      border-bottom: 2px solid var(--shell-bright);
+      color: var(--shell-bright);
+    }
+  }
+
+  .account-entry[open] > .account-summary {
+    color: var(--shell-bright);
+  }
+
+  /* Signing in or out swaps only the entry in the bar that stays, cross-fading it. */
+  .account-entry,
+  .account-sign-in {
+    view-transition-name: account;
+  }
+
+  ::view-transition-group(account) {
+    animation-duration: 120ms;
+  }
+
+  .account-summary {
+    list-style: none;
+    cursor: pointer;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+
+  .account-caret {
+    transition: rotate 160ms var(--ease-menu);
+
+    [open] > summary & {
+      rotate: 180deg;
+    }
+  }
+
+  .account-menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    z-index: 30;
+    border-block: 1px solid var(--shell-edge);
+    background: var(--tile);
+    box-shadow: 0 18px 30px rgb(0 0 0 / 0.6);
+    animation: account-sheet 160ms var(--ease-menu) both;
+
+    ul {
+      padding: 4px 0 8px;
+    }
+  }
+
+  .account-who {
+    border-bottom: 1px solid var(--shell-line);
+    padding: 14px 16px 12px;
+    font-size: 13px;
+    line-height: 1.35;
+    font-weight: 500;
+    color: var(--shell-muted);
+  }
+
+  .account-who-name {
+    display: block;
+    margin-block: 2px;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--shell-bright);
+    overflow-wrap: anywhere;
+  }
+
+  .account-item {
+    display: flex;
+    width: 100%;
+    min-height: 52px;
+    align-items: center;
+    gap: 12px;
+    padding-inline: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--shell-text);
+    text-align: left;
+    cursor: pointer;
+
+    svg {
+      color: var(--shell-link);
+    }
+
+    &:hover {
+      background: var(--tile-cell);
+      color: var(--shell-bright);
+      text-decoration-line: underline;
+    }
+
+    &[aria-current="page"] {
+      background: var(--shell-line);
+      color: var(--shell-bright);
+    }
+  }
+
+  /* On phones the entry is a 44 px glyph button, which joins the sheet while it is open. */
+  @media (width < 40rem) {
+    .account-summary {
+      justify-content: center;
+      width: 44px;
+      padding-inline: 0;
+    }
+
+    .account-entry[open] > .account-summary {
+      margin-bottom: -6px;
+      padding-bottom: 6px;
+      background: var(--tile);
+      box-sizing: content-box;
+    }
+
+    .account-menu {
+      top: 56px;
+    }
+  }
+
+  @media (width >= 40rem) {
+    .account-entry {
+      position: relative;
+    }
+
+    .account-menu {
+      left: auto;
+      top: calc(100% + 6px);
+      width: 268px;
+      border-inline: 1px solid var(--shell-edge);
+      box-shadow: 0 14px 30px rgb(0 0 0 / 0.55);
+      transform-origin: top right;
+      animation-name: account-menu;
+      animation-duration: 120ms;
+
+      ul {
+        padding: 6px 0;
+      }
+    }
+
+    .account-who {
+      padding: 12px 14px;
+    }
+
+    .account-who-name {
+      font-size: 16px;
+    }
+
+    .account-item {
+      min-height: 44px;
+      padding-inline: 14px;
+      font-size: 15px;
+    }
+  }
+
+  /* With scripts the menu plays its closing before the details element closes. */
+  .account-entry.closing .account-menu {
+    animation: fade-out 100ms var(--ease-menu) both;
+  }
+
+  @keyframes account-menu {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+  }
+
+  @keyframes account-sheet {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .account-menu {
+      animation: fade-in 100ms linear both;
+    }
+
+    .account-caret {
+      transition: none;
+    }
+
+    ::view-transition-group(account) {
+      animation-duration: 100ms;
+    }
+  }
+}

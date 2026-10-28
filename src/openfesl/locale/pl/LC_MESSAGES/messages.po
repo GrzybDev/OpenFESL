@@ -2264,6 +2264,12 @@ msgstr "Bad Company 2"
 msgid "games.bfheroes.short"
 msgstr "Heroes"
 
+msgid "games.bfbc2.personas.kept"
+msgstr "żołnierzy w Bad Company 2"
+
+msgid "games.bfheroes.personas.kept"
+msgstr "bohaterów w Battlefield Heroes"
+
 msgid "web.admin.servers"
 msgstr "Serwery"
 
@@ -4253,3 +4259,174 @@ msgstr "W trakcie meczu"
 #, python-brace-format
 msgid "presence.mode_on_map"
 msgstr "{mode} na mapie {map}"
+
+msgid "web.account.menu.sign_in"
+msgstr "Zaloguj się"
+
+msgid "web.account.menu.named"
+msgstr ", menu konta"
+
+msgid "web.account.menu.unnamed"
+msgstr "Konto"
+
+msgid "web.account.menu.unnamed.hidden"
+msgstr " – menu"
+
+msgid "web.account.menu.signed_in_as"
+msgstr "Zalogowano jako"
+
+msgid "web.account.menu.signed_in"
+msgstr "Zalogowano"
+
+msgid "web.account.menu.no_name"
+msgstr "Brak nazwy wyświetlanej"
+
+msgid "web.account.menu.through"
+msgstr "przez %(service)s"
+
+msgid "web.account.menu.with_address"
+msgstr "adresem e-mail"
+
+msgid "web.account.menu.account"
+msgstr "Konto"
+
+msgid "web.account.menu.display_name"
+msgstr "Nazwa wyświetlana"
+
+msgid "web.account.menu.sign_out"
+msgstr "Wyloguj się"
+
+msgid "web.account.address"
+msgstr "Adres e-mail"
+
+msgid "web.account.password"
+msgstr "Hasło do gier"
+
+msgid "web.account.password.show"
+msgstr "Pokaż hasło do gier"
+
+msgid "web.account.sign_in"
+msgstr "Logowanie"
+
+msgid "web.account.sign_in.subtitle"
+msgstr "Jedno konto OpenFESL do każdej gry"
+
+msgid "web.account.sign_in.email.only"
+msgstr "Logowanie adresem e-mail"
+
+msgid "web.account.sign_in.password.note"
+msgstr "Hasło, którego używają gry takie jak %(games)s."
+
+msgid "web.account.sign_in.forgotten"
+msgstr "Zapomniane hasło do gier"
+
+msgid "web.account.sign_in.action"
+msgstr "Zaloguj się"
+
+msgid "web.account.sign_in.busy"
+msgstr "Logowanie"
+
+msgid "web.account.sign_in.side"
+msgstr "Konta utworzone w grze logują się tutaj tym samym adresem e-mail i hasłem do gier."
+
+msgid "web.account.sign_in.new"
+msgstr "Jeszcze bez konta"
+
+msgid "web.account.sign_in.create"
+msgstr "Utwórz konto"
+
+msgid "web.account.sign_in.create.text"
+msgstr "Rejestracja wymaga adresu e-mail, hasła do gier, daty urodzenia, kraju i publicznej nazwy wyświetlanej."
+
+msgid "web.account.how"
+msgstr "Jak działa konto"
+
+msgid "web.account.how.account"
+msgstr "Jedno konto"
+
+msgid "web.account.how.account.text"
+msgstr "Każda gra na tej stronie korzysta z tego samego konta OpenFESL."
+
+msgid "web.account.how.ways"
+msgstr "Sposoby logowania"
+
+msgid "web.account.how.ways.text"
+msgstr "Adres e-mail z hasłem do gier, którymi logują się też gry takie jak %(games)s."
+
+msgid "web.account.how.personas"
+msgstr "Postacie"
+
+msgid "web.account.how.personas.text"
+msgstr "Każda gra przechowuje własne postacie: %(personas)s."
+
+msgid "web.account.how.public"
+msgstr "Publiczne"
+
+msgid "web.account.how.public.text"
+msgstr "Profile, rankingi i listy znajomych pokazują tylko nazwę wyświetlaną. Adres e-mail i sposoby logowania pozostają prywatne."
+
+msgid "web.account.notice.not_signed_in"
+msgstr "Nie zalogowano"
+
+msgid "web.account.notice.wrong"
+msgstr "Adres e-mail i hasło do gier nie pasują do żadnego konta."
+
+msgid "web.account.notice.wrong.text"
+msgstr "Adres pozostaje wpisany; pole hasła do gier jest znowu puste."
+
+msgid "web.account.notice.wrong.reset"
+msgstr "Zapomniane hasło do gier można %(reset)s."
+
+msgid "web.account.notice.wrong.reset.link"
+msgstr "zastąpić nowym przez e-mail"
+
+msgid "web.account.notice.unconfirmed"
+msgstr "Adres niepotwierdzony"
+
+msgid "web.account.notice.unconfirmed.title"
+msgstr "Adres e-mail tego konta nie jest jeszcze potwierdzony."
+
+msgid "web.account.notice.unconfirmed.text"
+msgstr "Potwierdza go link wysłany na adres %(address)s dnia %(date)s; logowanie na stronie i w grach działa po jego otwarciu. Nowy link zastępuje poprzedni."
+
+msgid "web.account.notice.deactivated"
+msgstr "Dezaktywowane"
+
+msgid "web.account.notice.deactivated.title"
+msgstr "To konto jest dezaktywowane."
+
+msgid "web.account.notice.deactivated.text"
+msgstr "Prośba o usunięcie dezaktywowała je dnia %(date)s. Usunięcie kończy administrator; do tego czasu konto nie może logować się tutaj ani w grach."
+
+msgid "web.account.notice.signed_out"
+msgstr "Wylogowano"
+
+msgid "web.account.notice.signed_out.title"
+msgstr "Wylogowano."
+
+msgid "web.account.notice.signed_out.text"
+msgstr "Sesja tej strony zakończyła się."
+
+msgid "web.account.notice.expired"
+msgstr "Sesja wygasła"
+
+msgid "web.account.notice.expired.title"
+msgstr "Sesja wygasła. Zaloguj się ponownie."
+
+msgid "web.account.notice.next"
+msgstr "Po zalogowaniu otworzy się ponownie poprzednia strona."
+
+msgid "web.account.notice.form"
+msgstr "Formularz wygasł. Spróbuj ponownie."
+
+msgid "web.account.notice.form.text"
+msgstr "Nic nie zostało zmienione."
+
+msgid "web.account.notice.no_registration"
+msgstr "Rejestracja niedostępna"
+
+msgid "web.account.notice.no_registration.title"
+msgstr "Rejestracja wymaga poczty serwera, która nie jest skonfigurowana."
+
+msgid "web.account.notice.no_registration.text"
+msgstr "Istniejące konta logują się jak zwykle adresem e-mail i hasłem do gier."

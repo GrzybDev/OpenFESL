@@ -11,7 +11,7 @@ from openfesl.core.admin import AdminAction
 from openfesl.core.game_icons import icon_png
 from openfesl.core.games import Game, Games, load_games
 from openfesl.core.personas import Persona, PersonaState
-from openfesl.core.policies import GamePolicies, setting_key
+from openfesl.core.policies import SITE_CONFIRMATION, GamePolicies, setting_key
 from openfesl.core.servers import (
     GameServer,
     HostingMode,
@@ -151,12 +151,23 @@ async def _settings(settings: Settings, args: argparse.Namespace) -> None:
         store = SqlSettingStore(sessions)
         policies = GamePolicies(store)
         if args.action == "list":
+            site = _switch(await policies.site_confirmation())
+            print(f"{SITE_CONFIRMATION}  {site}" + ("" if site == "on" else "  (default on)"))
             for game in games:
                 current = await policies.of(game)
                 for name in game.policies.names():
                     value, default = current.text(name), game.policies.text(name)
                     line = f"{setting_key(game, name)}  {value}"
                     print(line if value == default else f"{line}  (default {default})")
+            return
+        if args.key == SITE_CONFIRMATION:
+            if args.action == "set" and args.value not in ("on", "off"):
+                sys.exit(f"{args.key} takes on or off, not {args.value!r}")
+            # The default is on, so only off is kept.
+            turned_off = args.action == "set" and args.value == "off"
+            if args.action != "get":
+                await store.change(args.key, "off" if turned_off else None, admin=None)
+            print(_switch(await policies.site_confirmation()))
             return
         game, name = _policy(games, args.key)
         match args.action:
@@ -169,6 +180,10 @@ async def _settings(settings: Settings, args: argparse.Namespace) -> None:
             case "reset":
                 await store.change(args.key, None, admin=None)
         print((await policies.of(game)).text(name))
+
+
+def _switch(on: bool) -> str:
+    return "on" if on else "off"
 
 
 def _policy(games: Games, key: str) -> tuple[Game, str]:

@@ -1,7 +1,7 @@
 {#def title: str | None = None, page: str = "", admin: bool = False #}
-{# The shell around every page: the bar with OpenFESL's games and languages, the area dressed in
-   the page's game or OpenFESL's steel, and the footer. The admin panel's bar names the panel in
-   place of the games. #}
+{# The shell around every page: the bar with OpenFESL's games, languages and the account entry,
+   the area dressed in the page's game or OpenFESL's steel, and the footer. The admin panel's bar
+   names the panel in place of the games and keeps its own sign-in. #}
 <!DOCTYPE html>
 <html lang="{{ language }}">
   <head>
@@ -63,6 +63,7 @@
             {% endfor %}
           </nav>
         {% endif %}
+        {% if not admin %}<AccountEntry :page="page" />{% endif %}
       </div>
     </header>
     <main id="area"

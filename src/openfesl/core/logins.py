@@ -52,6 +52,21 @@ class Logins:
             TransactionError: When no account has the name, the password is wrong, the account
                 belongs to dedicated servers or the admin took it out of use.
         """
+        credentials = await self.verify(nuid, password)
+        _check_state(credentials.account)
+        return credentials
+
+    async def verify(self, nuid: str, password: str) -> Credentials:
+        """Return the player account that a name and password belong to, whatever its state.
+
+        Args:
+            nuid: The login name, matched regardless of case.
+            password: The password.
+
+        Raises:
+            TransactionError: When no account has the name, the password is wrong or the
+                account belongs to dedicated servers.
+        """
         credentials = await self._store.find(nuid)
         if credentials is None:
             raise TransactionError(UNKNOWN_USER)
@@ -63,7 +78,6 @@ class Logins:
             )
         if not valid:
             raise TransactionError(INVALID_PASSWORD)
-        _check_state(credentials.account)
         return credentials
 
     async def recall(self, token: str) -> Account:

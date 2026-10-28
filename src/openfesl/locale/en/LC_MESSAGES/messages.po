@@ -2224,6 +2224,12 @@ msgstr "Bad Company 2"
 msgid "games.bfheroes.short"
 msgstr "Heroes"
 
+msgid "games.bfbc2.personas.kept"
+msgstr "soldiers in Bad Company 2"
+
+msgid "games.bfheroes.personas.kept"
+msgstr "heroes in Battlefield Heroes"
+
 msgid "web.admin.servers"
 msgstr "Servers"
 
@@ -4129,3 +4135,174 @@ msgstr "In a match"
 #, python-brace-format
 msgid "presence.mode_on_map"
 msgstr "{mode} on {map}"
+
+msgid "web.account.menu.sign_in"
+msgstr "Sign in"
+
+msgid "web.account.menu.named"
+msgstr ", account menu"
+
+msgid "web.account.menu.unnamed"
+msgstr "Account"
+
+msgid "web.account.menu.unnamed.hidden"
+msgstr " menu"
+
+msgid "web.account.menu.signed_in_as"
+msgstr "Signed in as"
+
+msgid "web.account.menu.signed_in"
+msgstr "Signed in"
+
+msgid "web.account.menu.no_name"
+msgstr "No display name yet"
+
+msgid "web.account.menu.through"
+msgstr "through %(service)s"
+
+msgid "web.account.menu.with_address"
+msgstr "with the e-mail address"
+
+msgid "web.account.menu.account"
+msgstr "Account"
+
+msgid "web.account.menu.display_name"
+msgstr "Display name"
+
+msgid "web.account.menu.sign_out"
+msgstr "Sign out"
+
+msgid "web.account.address"
+msgstr "E-mail address"
+
+msgid "web.account.password"
+msgstr "Game password"
+
+msgid "web.account.password.show"
+msgstr "Show the game password"
+
+msgid "web.account.sign_in"
+msgstr "Sign in"
+
+msgid "web.account.sign_in.subtitle"
+msgstr "One OpenFESL account for every game"
+
+msgid "web.account.sign_in.email.only"
+msgstr "Sign in with an e-mail address"
+
+msgid "web.account.sign_in.password.note"
+msgstr "The password games such as %(games)s ask for."
+
+msgid "web.account.sign_in.forgotten"
+msgstr "Forgotten game password"
+
+msgid "web.account.sign_in.action"
+msgstr "Sign in"
+
+msgid "web.account.sign_in.busy"
+msgstr "Signing in"
+
+msgid "web.account.sign_in.side"
+msgstr "Accounts made in a game sign in here with the same e-mail address and game password."
+
+msgid "web.account.sign_in.new"
+msgstr "No account yet"
+
+msgid "web.account.sign_in.create"
+msgstr "Create an account"
+
+msgid "web.account.sign_in.create.text"
+msgstr "Registration asks for an e-mail address, a game password, a birth date, the country and a public display name."
+
+msgid "web.account.how"
+msgstr "How the account works"
+
+msgid "web.account.how.account"
+msgstr "One account"
+
+msgid "web.account.how.account.text"
+msgstr "Every game on this site uses the same OpenFESL account."
+
+msgid "web.account.how.ways"
+msgstr "Ways in"
+
+msgid "web.account.how.ways.text"
+msgstr "The e-mail address with the game password, which games such as %(games)s log in with too."
+
+msgid "web.account.how.personas"
+msgstr "Personas"
+
+msgid "web.account.how.personas.text"
+msgstr "Each game keeps its own: %(personas)s."
+
+msgid "web.account.how.public"
+msgstr "Public"
+
+msgid "web.account.how.public.text"
+msgstr "Profiles, leaderboards and friends lists show only the display name. The e-mail address and the ways in stay private."
+
+msgid "web.account.notice.not_signed_in"
+msgstr "Not signed in"
+
+msgid "web.account.notice.wrong"
+msgstr "The e-mail address and game password do not match an account."
+
+msgid "web.account.notice.wrong.text"
+msgstr "The address stays filled in; the game password field is empty again."
+
+msgid "web.account.notice.wrong.reset"
+msgstr "A forgotten game password can be %(reset)s."
+
+msgid "web.account.notice.wrong.reset.link"
+msgstr "reset by e-mail"
+
+msgid "web.account.notice.unconfirmed"
+msgstr "Address not confirmed"
+
+msgid "web.account.notice.unconfirmed.title"
+msgstr "The e-mail address of this account is not confirmed yet."
+
+msgid "web.account.notice.unconfirmed.text"
+msgstr "The link sent to %(address)s on %(date)s confirms it; signing in and game logins work once it is opened. A new link replaces the previous one."
+
+msgid "web.account.notice.deactivated"
+msgstr "Deactivated"
+
+msgid "web.account.notice.deactivated.title"
+msgstr "This account is deactivated."
+
+msgid "web.account.notice.deactivated.text"
+msgstr "A deletion request deactivated it on %(date)s. An admin completes the deletion; until then the account cannot sign in here or log in to games."
+
+msgid "web.account.notice.signed_out"
+msgstr "Signed out"
+
+msgid "web.account.notice.signed_out.title"
+msgstr "Signed out."
+
+msgid "web.account.notice.signed_out.text"
+msgstr "This site's session has ended."
+
+msgid "web.account.notice.expired"
+msgstr "Session expired"
+
+msgid "web.account.notice.expired.title"
+msgstr "The session expired. Sign in again."
+
+msgid "web.account.notice.next"
+msgstr "After signing in, the page that was open opens again."
+
+msgid "web.account.notice.form"
+msgstr "The form expired. Try again."
+
+msgid "web.account.notice.form.text"
+msgstr "Nothing was changed."
+
+msgid "web.account.notice.no_registration"
+msgstr "Registration not available"
+
+msgid "web.account.notice.no_registration.title"
+msgstr "Registration needs the server's mail, which is not set up."
+
+msgid "web.account.notice.no_registration.text"
+msgstr "Existing accounts sign in as usual with the e-mail address and game password."

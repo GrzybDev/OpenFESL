@@ -40,10 +40,23 @@ def check_form(request: Request, form: Mapping[str, Any]) -> None:
     Raises:
         FormExpired: When its token is not the session's.
     """
+    if not form_matches(request, form):
+        raise FormExpired
+
+
+def form_matches(request: Request, form: Mapping[str, Any]) -> bool:
+    """Return whether a form came from a page of this session.
+
+    Args:
+        request: The form's request.
+        form: The form's fields.
+    """
     token = request.session.get("csrf")
     sent = form.get("csrf")
-    if not token or not isinstance(sent, str) or not secrets.compare_digest(token, sent):
-        raise FormExpired
+    if not token or not isinstance(sent, str):
+        return False
+    # As bytes, since compare_digest refuses text that is not ASCII.
+    return secrets.compare_digest(token.encode(), sent.encode())
 
 
 def toast(request: Request, key: str, error: bool = False, **values: str) -> None:
@@ -70,6 +83,9 @@ def take_toast(request: Request) -> Toast | None:
 
 def notify(request: Request, kind: str, **values: str) -> None:
     """Have the next sign-in page say what happened, such as a session that expired.
+
+    The admin panel's and the site's sign-in pages share it, as one browser signs in to one of
+    them at a time.
 
     Args:
         request: The request in which it happened.

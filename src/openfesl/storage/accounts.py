@@ -94,6 +94,18 @@ class SqlAccountStore:
             )
             return total or 0, [_record(row) for row in rows]
 
+    async def account(self, account_id: int) -> Account | None:
+        """Return an account by its number.
+
+        Args:
+            account_id: The account's number.
+        """
+        if account_id not in _BIGINT:
+            return None
+        async with self._sessions() as session:
+            row = await session.get(AccountRow, account_id)
+        return _account(row) if row else None
+
     async def record(self, account_id: int) -> AccountRecord | None:
         """Return a player's account by its number.
 
@@ -201,6 +213,7 @@ class SqlAccountStore:
         *,
         server: bool = False,
         verification: Link | None = None,
+        made_in: str | None = None,
     ) -> Account | None:
         """Create an account, or return None when the name is taken.
 
@@ -211,6 +224,7 @@ class SqlAccountStore:
             terms_version: The version of the terms accepted on registration, if current.
             server: Whether the account belongs to a game's dedicated servers.
             verification: The link that must confirm its e-mail address before it logs in.
+            made_in: The id of the game whose client registers it; None for the site.
         """
         async with self._sessions.begin() as session:
             row = await session.scalar(
@@ -223,6 +237,7 @@ class SqlAccountStore:
                     server=server,
                     verification_hash=verification.token_hash if verification else None,
                     verification_expires_at=verification.expires_at if verification else None,
+                    made_in=made_in,
                 )
                 .on_conflict_do_nothing()
                 .returning(AccountRow)
@@ -279,7 +294,7 @@ class SqlAccountStore:
         return True
 
     async def change_password(self, account_id: int, password_hash: str) -> None:
-        """Replace an account's password and forget every login remembered with the old one.
+        """Replace an account's password, ending its web sessions and remembered logins.
 
         Args:
             account_id: The account.
@@ -289,7 +304,7 @@ class SqlAccountStore:
             await session.execute(
                 update(AccountRow)
                 .where(AccountRow.id == account_id)
-                .values(password_hash=password_hash)
+                .values(password_hash=password_hash, session_epoch=AccountRow.session_epoch + 1)
             )
             await session.execute(
                 delete(LoginTokenRow).where(LoginTokenRow.account_id == account_id)
@@ -310,7 +325,7 @@ class SqlAccountStore:
     async def set_state(
         self, account_id: int, state: AccountState, until: datetime | None, admin: Admin | None
     ) -> None:
-        """Change whether an account may log in and record the change among the admin's actions.
+        """Change whether an account may log in, ending its web sessions, and record the change.
 
         Args:
             account_id: The account.
@@ -322,7 +337,12 @@ class SqlAccountStore:
             await session.execute(
                 update(AccountRow)
                 .where(AccountRow.id == account_id)
-                .values(state=state.value, state_until=until, state_changed_at=func.now())
+                .values(
+                    state=state.value,
+                    state_until=until,
+                    state_changed_at=func.now(),
+                    session_epoch=AccountRow.session_epoch + 1,
+                )
             )
             details = {"state": state.value, "until": until.isoformat() if until else None}
             session.add(action_row(AdminAction.ACCOUNT_STATE, str(account_id), details, admin))
@@ -398,7 +418,7 @@ def _is_hex(text: str) -> bool:
 
 
 def _record(row: AccountRow) -> AccountRecord:
-    return AccountRecord(_account(row), row.created_at, row.last_login_at, row.state_changed_at)
+    return AccountRecord(_account(row), row.created_at, row.last_login_at)
 
 
 def _account(row: AccountRow) -> Account:
@@ -410,5 +430,9 @@ def _account(row: AccountRow) -> Account:
         server=row.server,
         state=AccountState(row.state),
         state_until=row.state_until,
+        state_changed=row.state_changed_at,
         verification_expires_at=row.verification_expires_at,
+        display_name=row.display_name,
+        made_in=row.made_in,
+        session_epoch=row.session_epoch,
     )

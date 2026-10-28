@@ -11,6 +11,7 @@ from uvicorn.protocols.websockets.websockets_sansio_impl import WebSocketsSansIO
 
 from openfesl.core.accounts import AccountState
 from openfesl.core.personas import PersonaState
+from openfesl.core.policies import SITE_CONFIRMATION
 from openfesl.core.servers import HostingMode
 from openfesl.protocol.packet import MAX_SIZE
 from openfesl.relay.endpoint import close_sessions
@@ -96,10 +97,13 @@ def main(argv: Sequence[str] | None = None) -> None:
     )
     server_actions.add_parser("revoke", help="stop a server from hosting").add_argument("ugid")
     setting_actions = commands.add_parser(
-        "settings", help="show or override the games' policies"
+        "settings", help="show or override the site's and the games' policies"
     ).add_subparsers(dest="action", required=True)
-    setting_actions.add_parser("list", help="list every policy of every game with its value")
-    key_help = "the game and the policy, such as bfbc2.accounts.concurrent_login"
+    setting_actions.add_parser("list", help="list every policy of the site and the games")
+    key_help = (
+        "the game and the policy, such as bfbc2.accounts.concurrent_login, or the site's "
+        + SITE_CONFIRMATION
+    )
     setting_actions.add_parser("get", help="show a policy's value").add_argument(
         "key", help=key_help
     )

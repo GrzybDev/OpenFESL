@@ -1,0 +1,80 @@
+{#def next: str, notice, address: str, mail: bool, registration: bool, password_games: list, personas: list #}
+{# The site's sign-in: the e-mail address and game password under what happened at the last
+   attempt, and beside them the way to a new account and how accounts work. #}
+{% set title = _("web.account.sign_in") %}
+{% set games = listed(password_games) %}
+{% set query = "?next=" ~ next|urlencode if next else "" %}
+<AccountPage :title="title" :subtitle="_('web.account.sign_in.subtitle')">
+  <div class="account-page-main">
+    <Panel tag="section"
+           aria-labelledby="sign-in-email"
+           class="enter-panel account-page-panel">
+      {% if notice %}
+        {% set kind = notice.kind %}
+        {% if kind == "wrong" %}
+          {% set reset %}<a href="{{ url('/password-reset') }}">{{ _("web.account.notice.wrong.reset.link") }}</a>{% endset %}
+          <Alert :label="_('web.account.notice.not_signed_in')" :title="_('web.account.notice.wrong')" glyph="warn" alert>{{ _("web.account.notice.wrong.text") }}{% if mail %} {{ _("web.account.notice.wrong.reset", reset=reset) }}{% endif %}</Alert>
+        {% elif kind == "unconfirmed" %}
+          <Alert :label="_('web.account.notice.unconfirmed')" :title="_('web.account.notice.unconfirmed.title')" glyph="mail">{{ _("web.account.notice.unconfirmed.text", address=notice.address, date=when(notice.sent, "yMMMd")) }}</Alert>
+        {% elif kind == "deactivated" %}
+          <Alert :label="_('web.account.notice.deactivated')" :title="_('web.account.notice.deactivated.title')" glyph="lock" alert>{{ _("web.account.notice.deactivated.text", date=when(notice.since, "yMMMd")) }}</Alert>
+        {% elif kind == "signed_out" %}
+          <Alert :label="_('web.account.notice.signed_out')" :title="_('web.account.notice.signed_out.title')" glyph="tick">{{ _("web.account.notice.signed_out.text") }}</Alert>
+        {% elif kind == "expired" %}
+          <Alert :label="_('web.account.notice.expired')" :title="_('web.account.notice.expired.title')" glyph="clock">{% if next %}{{ _("web.account.notice.next") }}{% endif %}</Alert>
+        {% else %}
+          <Alert :label="_('web.account.notice.not_signed_in')" :title="_('web.account.notice.form')" glyph="warn" alert>{{ _("web.account.notice.form.text") }}</Alert>
+        {% endif %}
+      {% endif %}
+      <form method="post"
+            action="{{ url('/sign-in') }}"
+            class="account-page-form">
+        <CsrfField />
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+        <Bar id="sign-in-email" large>{{ _("web.account.sign_in.email.only") }}</Bar>
+        <label for="sign-in-address" class="field-label field-label-joined">{{ _("web.account.address") }}</label>
+        <input id="sign-in-address"
+               name="email"
+               type="email"
+               value="{{ address }}"
+               required
+               autocomplete="username"
+               spellcheck="false"
+               class="field-input">
+        <PasswordField id="sign-in-password"
+                       :label="_('web.account.password')"
+                       note="sign-in-password-note"
+                       :focus="notice is not none and notice.kind == 'wrong'">
+          <div class="field-note password-note">
+            <p id="sign-in-password-note">{{ _("web.account.sign_in.password.note", games=games) }}</p>
+            {% if mail %}<a href="{{ url('/password-reset') }}">{{ _("web.account.sign_in.forgotten") }}</a>{% endif %}
+          </div>
+        </PasswordField>
+        <ActionButton :label="_('web.account.sign_in.action')" :busy="_('web.account.sign_in.busy')" />
+      </form>
+    </Panel>
+    <p class="body-text side-note">{{ _("web.account.sign_in.side") }}</p>
+  </div>
+  <div class="account-page-side">
+    <section aria-labelledby="sign-in-new">
+      <Bar id="sign-in-new" large>{{ _("web.account.sign_in.new") }}</Bar>
+      {% if registration %}
+        <Action :href="url('/register') ~ query" :label="_('web.account.sign_in.create')" />
+        <p class="body-text side-note">{{ _("web.account.sign_in.create.text") }}</p>
+      {% else %}
+        <div class="account-page-joined">
+          <Alert :label="_('web.account.notice.no_registration')" :title="_('web.account.notice.no_registration.title')" glyph="mail">{{ _("web.account.notice.no_registration.text") }}</Alert>
+        </div>
+      {% endif %}
+    </section>
+    <section aria-labelledby="sign-in-how">
+      <Bar id="sign-in-how">{{ _("web.account.how") }}</Bar>
+      <ul class="info-rows">
+        <InfoRow glyph="user" :label="_('web.account.how.account')">{{ _("web.account.how.account.text") }}</InfoRow>
+        <InfoRow glyph="key" :label="_('web.account.how.ways')">{{ _("web.account.how.ways.text", games=games) }}</InfoRow>
+        <InfoRow glyph="people" :label="_('web.account.how.personas')">{{ _("web.account.how.personas.text", personas=listed(personas)) }}</InfoRow>
+        <InfoRow glyph="show" :label="_('web.account.how.public')">{{ _("web.account.how.public.text") }}</InfoRow>
+      </ul>
+    </section>
+  </div>
+</AccountPage>

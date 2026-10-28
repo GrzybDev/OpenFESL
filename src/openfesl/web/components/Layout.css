@@ -36,8 +36,11 @@
     padding-inline: var(--gutter);
   }
 
+  /* Above the area, which the account menu's sheet covers on phones. */
   .shell-bar {
     view-transition-name: shell;
+    position: relative;
+    z-index: 20;
     border-bottom: 1px solid var(--shell-line);
     background: var(--shell);
 
