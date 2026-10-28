@@ -1,4 +1,5 @@
 import asyncio
+import re
 import struct
 import uuid
 from pathlib import Path
@@ -14,11 +15,15 @@ from support import (
     connect_server,
     create,
     enter_as_player,
+    fetch,
     game,
+    markup,
     masked,
     report,
+    visible,
 )
 
+from openfesl.core.census import slug
 from openfesl.protocol.relay import Channel, ConnectionKey
 from openfesl.storage.servers import SqlServerStore
 
@@ -255,12 +260,31 @@ async def test_open_hosting_lists_every_server_at_once_and_still_records_it(
         await until_seen(ann, 1)
 
 
-async def test_only_official_servers_show_the_games_own_mark_until_unmarked_or_revoked(
+async def marked_on_pages(server_url: str) -> list[str]:
+    """Return the servers whose names the server list marks, and whether their pages say why."""
+    _, _, body = await fetch(server_url, "/bfbc2/servers")
+    names = re.findall(r'>([^<>]+)</a><span class="official-chip">Official<', markup(body))
+    for name in names:
+        _, _, page = await fetch(server_url, f"/bfbc2/servers/{slug(name)}")
+        assert "Run by the administrators of this service." in visible(page)
+    return names
+
+
+async def last_page_marked(server_url: str, name: str) -> bool:
+    """Return whether the last known page of a server that stopped hosting shows the mark."""
+    _, _, page = await fetch(server_url, f"/bfbc2/servers/{slug(name)}")
+    assert "Not hosting" in visible(page)
+    marked = "official-badge" in markup(page)
+    assert marked == ("Run by the administrators of this service." in visible(page))
+    return marked
+
+
+async def test_official_servers_show_their_mark_in_game_and_on_the_pages_until_unmarked(
     prompt_decisions: None, server_url: str, capsys: pytest.CaptureFixture[str]
 ) -> None:
     async with game(server_url) as kept, game(server_url) as other, game(server_url) as newcomer:
         await connect_server(kept)
-        kept_game = await create(kept, name="Invented Official Rush")
+        kept_game = await create(kept, name="Invented Kestrel Rush")
         await connect_server(other)
         other_game = await create(other, name="Invented Other Rush")
         kept_ugid, secret = kept_game.fields["UGID"], kept_game.fields["SECRET"]
@@ -268,25 +292,38 @@ async def test_only_official_servers_show_the_games_own_mark_until_unmarked_or_r
             await cli(capsys, "servers", "approve", created.fields["UGID"])
         await until_seen(kept, 2)
         await until_marked(kept, kept_game, "0")
+        assert await marked_on_pages(server_url) == []
 
         # Only the admin marks a server; no host sets the game's mark for its own game.
         await report(other, other_game, ("b-u-EA", "1"))
         await cli(capsys, "servers", "official", kept_ugid)
         await until_marked(kept, kept_game, "1")
         assert await shown(kept, other_game, "b-u-ea") == ["0"]
+        assert await marked_on_pages(server_url) == ["Invented Kestrel Rush"]
         listed = await cli(capsys, "servers", "list")
-        assert f"{kept_ugid}  official  -  Invented Official Rush\n" in listed
+        assert f"{kept_ugid}  official  -  Invented Kestrel Rush\n" in listed
         assert "  approved  -  Invented Other Rush" in listed
         await report(kept, kept_game, ("B-U-EA", "0"))
         assert await shown(kept, kept_game, "b-u-ea") == ["1"]
         await cli(capsys, "servers", "unofficial", kept_ugid)
         await until_marked(kept, kept_game, "0")
+        assert await marked_on_pages(server_url) == []
         await cli(capsys, "servers", "official", kept_ugid)
         await until_marked(kept, kept_game, "1")
 
-        # Revoking a server takes its mark for good: approving it again does not return it.
+        # The last known page of a game that ended shows the mark as the admin decides it since.
+        ids = [("LID", kept_game.fields["LID"]), ("GID", kept_game.fields["GID"])]
+        assert (await kept.theater(THEATER, "RGAM", ids)).error is None
+        assert await last_page_marked(server_url, "Invented Kestrel Rush")
+        await cli(capsys, "servers", "unofficial", kept_ugid)
+        assert not await last_page_marked(server_url, "Invented Kestrel Rush")
+        await cli(capsys, "servers", "official", kept_ugid)
+        assert await last_page_marked(server_url, "Invented Kestrel Rush")
+
+        # Revoking a server takes its mark for good: its last known page shows none, and
+        # approving it again does not return it.
         await cli(capsys, "servers", "revoke", kept_ugid)
-        await kept.theater_push(THEATER, "GREM")
+        assert not await last_page_marked(server_url, "Invented Kestrel Rush")
         await cli(capsys, "servers", "approve", kept_ugid)
         assert f"{kept_ugid}  approved  -  " in await cli(capsys, "servers", "list")
         again = await create(kept, kept_ugid, secret)

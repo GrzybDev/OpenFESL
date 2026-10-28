@@ -1,5 +1,6 @@
 {#def server #}
-{# The badges of a server's state: full, empty or room for a squad, and hardcore. #}
+{# The badges of a server's state: full, empty or room for a squad, hardcore, and the official
+   mark, which pages that wear a game's own website leave out. #}
 {% if server.free == 0 %}
   <Badge name="full" />
 {% elif server.players == 0 %}
@@ -8,3 +9,6 @@
   <Badge name="squad" />
 {% endif %}
 {% if server.hardcore %}<Badge name="bolt" />{% endif %}
+{% if server.official and not game.site %}
+  <span aria-hidden="true" class="badge official-badge"><Icon name="star" fill="#0A0A0A" /></span>
+{% endif %}

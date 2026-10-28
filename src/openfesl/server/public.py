@@ -62,7 +62,7 @@ def include_public_routes(
     app.include_router(menu_routes(pages, games, census))
     app.include_router(front_routes(pages, games, census, history, stores.keys))
     app.include_router(activity_routes(pages, games, census, history))
-    app.include_router(server_routes(pages, games, census))
+    app.include_router(server_routes(pages, games, census, services.approval))
     app.include_router(leaderboard_routes(pages, games, census, stores.stats))
     app.include_router(
         player_routes(pages, games, census, stores.stats, stores.personas, stores.records)

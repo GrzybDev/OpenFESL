@@ -165,7 +165,7 @@
   .player-server {
     display: grid;
     min-width: 460px;
-    grid-template-columns: 64px minmax(180px, 1fr) 160px 44px;
+    grid-template-columns: 98px minmax(180px, 1fr) 160px 44px;
     gap: 2px;
     color: var(--ink);
 
@@ -201,7 +201,7 @@
   @media (width < 40rem) {
     .player-server {
       min-width: 0;
-      grid-template-columns: 64px minmax(0, 1fr) 44px;
+      grid-template-columns: 98px minmax(0, 1fr) 44px;
 
       > .player-server-players {
         grid-row: 2;

@@ -78,6 +78,7 @@
                     <div>
                       <p class="row-facts">{{ _("web.server.since", time=busiest.since.strftime("%H:%M")) }}{% if busiest.expansion %} · <Published kind="expansion" :label="busiest.expansion" />{% endif %}</p>
                       <p class="row-text">{{ _("games." ~ game.id ~ ".joining") }}</p>
+                      {% if busiest.official and not game.site %}<OfficialNote />{% endif %}
                     </div>
                     <div class="row-actions">
                       {% if href %}<SmallAction :href="href" :label="_('web.server.page')" />{% endif %}

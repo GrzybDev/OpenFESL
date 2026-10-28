@@ -224,6 +224,22 @@
     color: var(--bright);
   }
 
+  /* The busiest server's official mark, in the game's accent as the tile names no badges. */
+  .tile-official {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    align-self: center;
+    background: var(--accent);
+    padding: 3px 7px 3px 5px;
+    font-size: 12px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+    text-transform: uppercase;
+  }
+
   .tile-players {
     display: flex;
     align-items: baseline;

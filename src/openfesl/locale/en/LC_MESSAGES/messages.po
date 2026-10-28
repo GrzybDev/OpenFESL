@@ -903,6 +903,9 @@ msgstr "Hardcore"
 msgid "web.server.official"
 msgstr "Official"
 
+msgid "web.server.official.note"
+msgstr "Run by the administrators of this service."
+
 msgid "web.server.unpublished"
 msgstr "Not published"
 

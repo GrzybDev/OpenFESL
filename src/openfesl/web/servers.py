@@ -11,6 +11,7 @@ from starlette.datastructures import QueryParams
 
 from openfesl.core.census import Census, Label, Server
 from openfesl.core.games import Game, Games
+from openfesl.core.servers import Approval
 from openfesl.core.texts import translate
 from openfesl.web.pages import Pages
 
@@ -141,7 +142,7 @@ class Filters:
         return "desc" if self.descending else "asc"
 
 
-def server_routes(pages: Pages, games: Games, census: Census) -> APIRouter:
+def server_routes(pages: Pages, games: Games, census: Census, approval: Approval) -> APIRouter:
     """Return each game's server list and its servers' pages.
 
     Args:
@@ -149,6 +150,7 @@ def server_routes(pages: Pages, games: Games, census: Census) -> APIRouter:
         games: The games, of which those that list the server list get it and their servers'
             pages under their id.
         census: Knows the servers each game's hosts list.
+        approval: Knows the official mark of the servers that stopped hosting.
     """
     router = APIRouter()
     for game in games.with_page("servers"):
@@ -156,7 +158,9 @@ def server_routes(pages: Pages, games: Games, census: Census) -> APIRouter:
             f"/{game.id}/servers", _list(pages, census, game), response_class=HTMLResponse
         )
         router.add_api_route(
-            f"/{game.id}/servers/{{slug}}", _page(pages, census, game), response_class=HTMLResponse
+            f"/{game.id}/servers/{{slug}}",
+            _page(pages, census, approval, game),
+            response_class=HTMLResponse,
         )
     return router
 
@@ -216,10 +220,15 @@ def _list(pages: Pages, census: Census, game: Game) -> Callable[[Request], Await
 
 
 def _page(
-    pages: Pages, census: Census, game: Game
+    pages: Pages, census: Census, approval: Approval, game: Game
 ) -> Callable[[Request, str], Awaitable[HTMLResponse]]:
     async def show_server(request: Request, slug: str) -> HTMLResponse:
         server = census.server(game, slug)
+        if server is not None and server.ended and server.ugid:
+            # The admin may change the mark after the game ended, also from another process.
+            current = await approval.current([server.ugid])
+            official = server.ugid in current and current[server.ugid][0].official
+            server = replace(server, official=official)
         activity = census.activity(game)
         total = activity.servers
         if server is None:

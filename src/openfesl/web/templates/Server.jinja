@@ -25,8 +25,14 @@
         <div class="server-about">
           <div class="server-name-bar">
             <h1>{{ server.name }}</h1>
-            <p>{% if not hosting %}<span class="server-gone">{{ _("web.server.not_hosting") }}</span>{% endif %}{% if server.hardcore %}<span class="server-hardcore"><Badge name="bolt" />{{ _("web.server.hardcore") }}</span>{% endif %}</p>
+            {% set official = server.official and not game.site %}
+            <p>
+              {%- if not hosting %}<span class="server-gone">{{ _("web.server.not_hosting") }}</span>{% endif %}
+              {%- if official %}<span class="server-mark"><span aria-hidden="true" class="badge official-badge"><Icon name="star" fill="#0A0A0A" /></span>{{ _("web.server.official") }}</span>{% endif %}
+              {%- if server.hardcore %}<span class="server-mark"><Badge name="bolt" />{{ _("web.server.hardcore") }}</span>{% endif -%}
+            </p>
           </div>
+          {% if official %}<p class="server-official">{{ _("web.server.official.note") }}</p>{% endif %}
           {% if not hosting %}
             <p class="server-last">{{ _("web.server.settings.last", time=server.ended.strftime("%H:%M")) }}</p>
           {% endif %}

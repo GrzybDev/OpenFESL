@@ -90,7 +90,7 @@
             </div>
             <div class="row-details player-match">
               <div>
-                <p class="row-facts"><Published kind="mode" :label="server.mode" /> · <Published kind="map" :label="server.map" />{% if server.hardcore %} · {{ _("web.server.hardcore") }}{% endif %} · <Published kind="region" :label="server.region" /></p>
+                <p class="row-facts"><Published kind="mode" :label="server.mode" /> · <Published kind="map" :label="server.map" />{% if server.hardcore %} · {{ _("web.server.hardcore") }}{% endif %} · <Published kind="region" :label="server.region" />{% if server.official and not game.site %} · {{ _("web.server.official") }}{% endif %}</p>
                 {% for seat in server.roster if seat.name == persona.name and "score" in seat.numbers and "kills" in seat.numbers and "deaths" in seat.numbers %}
                   <p class="row-text">{{ _("web.player.round", score=number(seat.numbers.score), kills=number(seat.numbers.kills), deaths=number(seat.numbers.deaths)) }}</p>
                 {% endfor %}

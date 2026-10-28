@@ -86,6 +86,8 @@ class Server:
         ugid: The persistent game id of the dedicated server that hosts it, by which the admin
             panel knows the server.
         ended: When it stopped hosting, for a server whose page shows what it was last.
+        official: Whether the admin marked the dedicated server that hosts it as run by the
+            service's administrators.
     """
 
     slug: str
@@ -104,6 +106,7 @@ class Server:
     message: str
     ugid: str | None = None
     ended: datetime | None = None
+    official: bool = False
 
     @property
     def free(self) -> int:
@@ -259,6 +262,7 @@ class Census:
             ),
             message=_message(listing.message, attributes),
             ugid=hosted.ugid or None,
+            official=hosted.server is not None and hosted.server.official,
         )
 
 

@@ -55,10 +55,23 @@
     color: var(--ink);
   }
 
-  .server-hardcore {
+  /* A mark of the server in its name bar, with its badge: official, hardcore. */
+  .server-mark {
     display: flex;
     align-items: center;
     gap: 8px;
+  }
+
+  /* What an official server's mark means, under its name. */
+  .server-official {
+    margin-top: 2px;
+    background: var(--row-light);
+    padding: 10px 14px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 600;
+    color: var(--ink);
   }
 
   .server-last {

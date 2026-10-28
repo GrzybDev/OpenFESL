@@ -200,6 +200,7 @@
                               </ul>
                             {% endif %}
                             <p class="row-text server-joining">{% if server.free == 0 %}{{ _("web.servers.taken", count=number(server.max_players)) }} {% endif %}{{ _("games." ~ game.id ~ ".joining") }}</p>
+                            {% if server.official and not game.site %}<OfficialNote />{% endif %}
                           </div>
                           <div class="row-actions">
                             <SmallAction :href="href" :label="_('web.server.page')" />

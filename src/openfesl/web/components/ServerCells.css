@@ -5,7 +5,8 @@
   .server-columns {
     --cell: var(--row);
     display: grid;
-    grid-template-columns: 64px minmax(200px, 1fr) 140px 150px 160px 150px 44px;
+    /* The badge column fits three: room, hardcore and the official mark. */
+    grid-template-columns: 98px minmax(200px, 1fr) 140px 150px 160px 150px 44px;
     gap: 2px;
   }
 
@@ -13,7 +14,7 @@
      cards instead. */
   .server-table {
     @media (width >= 40rem) {
-      min-width: 920px;
+      min-width: 954px;
     }
   }
 
@@ -34,6 +35,20 @@
   .cell-name {
     gap: 6px;
     padding: 0 0 0 12px;
+  }
+
+  /* An official server's name and its chip, which goes under a name too long for both. */
+  .server-label {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 10px;
+
+    .server-name {
+      flex: 0 1 auto;
+    }
   }
 
   .server-name {

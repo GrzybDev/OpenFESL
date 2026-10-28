@@ -62,6 +62,9 @@
                   <dd>
                     {% if tile.busiest %}
                       <span class="tile-server">{{ tile.busiest.name }}</span>
+                      {% if tile.busiest.official %}
+                        <span class="tile-official"><Icon name="star" :size="14" fill="#0A0A0A" />{{ _("web.server.official") }}</span>
+                      {% endif %}
                       <span class="tile-players"><Count :value="tile.busiest.players" class="count-sm live-value" />&nbsp;/&nbsp;{{ number(tile.busiest.max_players) }}<span class="tile-free">{{ _("web.server.free", count=number(tile.busiest.free)) }}</span></span>
                     {% elif activity.servers %}
                       <span class="tile-none">{{ _("web.activity.no_room" ~ room) }}</span>

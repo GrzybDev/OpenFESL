@@ -979,6 +979,9 @@ msgstr "Hardcore"
 msgid "web.server.official"
 msgstr "Oficjalny"
 
+msgid "web.server.official.note"
+msgstr "Serwer prowadzi administracja tego serwisu."
+
 msgid "web.server.unpublished"
 msgstr "Brak danych"
 

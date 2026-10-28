@@ -1,0 +1,17 @@
+@layer components {
+  .official-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 600;
+
+    .badge {
+      width: 22px;
+      height: 22px;
+    }
+  }
+}
