@@ -4205,6 +4205,9 @@ msgstr "Signing in"
 msgid "web.account.sign_in.side"
 msgstr "Accounts made in a game sign in here with the same e-mail address and game password."
 
+msgid "web.account.sign_in.pauses"
+msgstr "After several failed attempts for one address, sign-in with it pauses for a few minutes."
+
 msgid "web.account.sign_in.new"
 msgstr "No account yet"
 
@@ -4255,6 +4258,18 @@ msgstr "A forgotten game password can be %(reset)s."
 
 msgid "web.account.notice.wrong.reset.link"
 msgstr "reset by e-mail"
+
+msgid "web.account.notice.paused"
+msgstr "Paused"
+
+msgid "web.account.notice.paused.title"
+msgstr "Sign-in with this address is paused for a few minutes."
+
+msgid "web.account.notice.paused.text"
+msgstr "Several attempts with it did not match."
+
+msgid "web.account.notice.paused.reset"
+msgstr "A new game password set through an e-mailed link ends the pause."
 
 msgid "web.account.notice.unconfirmed"
 msgstr "Address not confirmed"

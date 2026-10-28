@@ -4329,6 +4329,9 @@ msgstr "Logowanie"
 msgid "web.account.sign_in.side"
 msgstr "Konta utworzone w grze logują się tutaj tym samym adresem e-mail i hasłem do gier."
 
+msgid "web.account.sign_in.pauses"
+msgstr "Po kilku nieudanych próbach z jednym adresem logowanie nim zostaje wstrzymane na kilka minut."
+
 msgid "web.account.sign_in.new"
 msgstr "Jeszcze bez konta"
 
@@ -4379,6 +4382,18 @@ msgstr "Zapomniane hasło do gier można %(reset)s."
 
 msgid "web.account.notice.wrong.reset.link"
 msgstr "zastąpić nowym przez e-mail"
+
+msgid "web.account.notice.paused"
+msgstr "Wstrzymane"
+
+msgid "web.account.notice.paused.title"
+msgstr "Logowanie tym adresem jest wstrzymane na kilka minut."
+
+msgid "web.account.notice.paused.text"
+msgstr "Kilka prób z tym adresem było nieudanych."
+
+msgid "web.account.notice.paused.reset"
+msgstr "Nowe hasło do gier ustawione przez link z wiadomości e-mail kończy wstrzymanie."
 
 msgid "web.account.notice.unconfirmed"
 msgstr "Adres niepotwierdzony"

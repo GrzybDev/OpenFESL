@@ -14,6 +14,8 @@
         {% if kind == "wrong" %}
           {% set reset %}<a href="{{ url('/password-reset') }}">{{ _("web.account.notice.wrong.reset.link") }}</a>{% endset %}
           <Alert :label="_('web.account.notice.not_signed_in')" :title="_('web.account.notice.wrong')" glyph="warn" alert>{{ _("web.account.notice.wrong.text") }}{% if mail %} {{ _("web.account.notice.wrong.reset", reset=reset) }}{% endif %}</Alert>
+        {% elif kind == "paused" %}
+          <Alert :label="_('web.account.notice.paused')" :title="_('web.account.notice.paused.title')" glyph="clock" alert>{{ _("web.account.notice.paused.text") }}{% if mail %} {{ _("web.account.notice.paused.reset") }}{% endif %}</Alert>
         {% elif kind == "unconfirmed" %}
           <Alert :label="_('web.account.notice.unconfirmed')" :title="_('web.account.notice.unconfirmed.title')" glyph="mail">{{ _("web.account.notice.unconfirmed.text", address=notice.address, date=when(notice.sent, "yMMMd")) }}</Alert>
         {% elif kind == "deactivated" %}
@@ -53,7 +55,7 @@
         <ActionButton :label="_('web.account.sign_in.action')" :busy="_('web.account.sign_in.busy')" />
       </form>
     </Panel>
-    <p class="body-text side-note">{{ _("web.account.sign_in.side") }}</p>
+    <p class="body-text side-note">{{ _("web.account.sign_in.side") }} {{ _("web.account.sign_in.pauses") }}</p>
   </div>
   <div class="account-page-side">
     <section aria-labelledby="sign-in-new">

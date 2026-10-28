@@ -7,6 +7,8 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 from support import FESL, Game, cli, game, markup, registration
 
+from openfesl.core.limits import FAILURES, Attempts
+
 pytestmark = pytest.mark.anyio
 
 PASSWORD = "secret-pass"
@@ -144,3 +146,34 @@ async def test_waiting_and_deactivated_accounts_are_named_only_after_the_right_p
         deactivated = await post_sign_in(client, base, "dan@example.test", PASSWORD)
         assert deactivated.status_code == 403
         assert "A deletion request deactivated it on " in deactivated.text
+
+
+async def test_sign_in_pauses_per_address_whether_or_not_an_account_uses_it(base: str) -> None:
+    async with httpx2.AsyncClient() as client:
+        for address in ("ann@example.test", "nobody@example.test"):
+            for _ in range(FAILURES):
+                assert (await post_sign_in(client, base, address, "wrong-pass")).status_code == 400
+            paused = await post_sign_in(client, base, address.upper(), PASSWORD)
+            assert paused.status_code == 429
+            assert "Sign-in with this address is paused for a few minutes." in paused.text
+        assert (await post_sign_in(client, base, "bob@example.test", PASSWORD)).status_code == 303
+
+
+def test_a_paused_address_resumes_once_its_oldest_failure_is_old_enough() -> None:
+    now = [0.0]
+    attempts = Attempts(limit=2, window=10.0, clock=lambda: now[0])
+    attempts.failed("ann@example.test")
+    now[0] = 6.0
+    attempts.failed("ANN@example.test ")
+    paused = attempts.paused("ann@example.test")
+    now[0] = 11.0
+    resumed = attempts.paused("ann@example.test")
+    attempts.failed("ann@example.test")
+    again = attempts.paused("ann@example.test")
+    attempts.clear("ann@example.test")
+    assert (paused, resumed, again, attempts.paused("ann@example.test")) == (
+        True,
+        False,
+        True,
+        False,
+    )

@@ -3,6 +3,7 @@ from enum import Enum, auto
 from openfesl.core.accounts import STATE_ERRORS, Account, AccountState
 from openfesl.core.fesl import TransactionError
 from openfesl.core.games import Games
+from openfesl.core.limits import Attempts
 from openfesl.core.logins import Logins
 from openfesl.core.policies import GamePolicies
 
@@ -13,6 +14,8 @@ class Refusal(Enum):
     WRONG = auto()
     """No account has the address or the game password is not its own, which are never told
     apart, so the answer reveals no account."""
+    PAUSED = auto()
+    """Too many attempts with the address failed lately."""
     UNCONFIRMED = auto()
     """The account waits for the link that confirms its address."""
     DEACTIVATED = auto()
@@ -38,7 +41,9 @@ class SignInRefused(Exception):
 class WebSignIn:
     """Decides whether an account signs in on the site's pages."""
 
-    def __init__(self, logins: Logins, policies: GamePolicies, games: Games) -> None:
+    def __init__(
+        self, logins: Logins, policies: GamePolicies, games: Games, attempts: Attempts
+    ) -> None:
         """Check sign-ins against the accounts and the instance's policies.
 
         Args:
@@ -46,10 +51,12 @@ class WebSignIn:
             policies: The site's and each game's policies, which say whether an account waits
                 for its address to be confirmed.
             games: The games, which the accounts they registered name.
+            attempts: Counts the failed attempts with each address.
         """
         self._logins = logins
         self._policies = policies
         self._games = games
+        self._attempts = attempts
 
     async def with_password(self, address: str, password: str) -> Account:
         """Return the account that an e-mail address and its game password sign in.
@@ -59,13 +66,17 @@ class WebSignIn:
             password: The account's game password.
 
         Raises:
-            SignInRefused: When the address and password match no account, or the account may
-                not sign in.
+            SignInRefused: When sign-in with the address is paused, the address and password
+                match no account, or the account may not sign in.
         """
+        if self._attempts.paused(address):
+            raise SignInRefused(Refusal.PAUSED)
         try:
             credentials = await self._logins.verify(address, password)
         except TransactionError:
+            self._attempts.failed(address)
             raise SignInRefused(Refusal.WRONG) from None
+        self._attempts.clear(address)
         await self.admit(credentials.account)
         return credentials.account
 

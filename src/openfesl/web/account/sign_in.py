@@ -17,7 +17,12 @@ from openfesl.web.sessions import form_matches, form_token, inside, notify, take
 # Every page of the site, in any language, which a sign-in may return to.
 SITE = ("/",)
 
-_STATUS = {Refusal.WRONG: 400, Refusal.UNCONFIRMED: 403, Refusal.DEACTIVATED: 403}
+_STATUS = {
+    Refusal.WRONG: 400,
+    Refusal.PAUSED: 429,
+    Refusal.UNCONFIRMED: 403,
+    Refusal.DEACTIVATED: 403,
+}
 
 
 class SignInPages:
@@ -125,6 +130,8 @@ def _refusal_notice(refused: SignInRefused) -> dict[str, Any]:
             return {"kind": "unconfirmed", "address": account.nuid, "sent": sent}
         case Refusal.DEACTIVATED if account:
             return {"kind": "deactivated", "since": account.state_changed}
+        case Refusal.PAUSED:
+            return {"kind": "paused"}
     return {"kind": "wrong"}
 
 
