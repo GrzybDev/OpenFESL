@@ -1,3 +1,4 @@
+import re
 import tomllib
 from collections.abc import Iterable, Iterator
 from enum import StrEnum
@@ -199,6 +200,8 @@ class Game(BaseModel):
             players in their games, by tag.
         http: What the game fetches over HTTP.
         currencies: The currencies of the players' wallets, by the code the game knows each by.
+        account_stats: The stats that belong to a player's account rather than to one of its
+            personas, by patterns that their keys match whole.
         records: The records a persona may keep, by name, with the most entries each holds.
         associations: The association list types the game keeps, by name.
         lobbies: The Theater lobbies of all of the game's clients.
@@ -231,6 +234,7 @@ class Game(BaseModel):
     automatic_grants: list[Grant] = []
     http: Http = Http()
     currencies: dict[str, Currency] = {}
+    account_stats: list[re.Pattern[str]] = []
     records: dict[str, int] = {}
     associations: dict[str, ListRule] = {}
     lobbies: list[Lobby] = []
@@ -272,6 +276,14 @@ class Game(BaseModel):
             country: The country's ISO code, in either case.
         """
         return self.countries.get(country.upper(), Ages())
+
+    def owned_by_account(self, key: str) -> bool:
+        """Tell whether a stat belongs to a player's account rather than to one of its personas.
+
+        Args:
+            key: The stat's key.
+        """
+        return any(pattern.fullmatch(key) for pattern in self.account_stats)
 
     @field_validator("partition", mode="before")
     @classmethod

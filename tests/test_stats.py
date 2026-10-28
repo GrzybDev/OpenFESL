@@ -1,3 +1,4 @@
+import re
 from datetime import date, datetime, time, timedelta
 
 import anyio
@@ -5,19 +6,23 @@ import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from support import (
     CREATE_GAME,
+    Answer,
     Game,
     enter_theater,
     game,
     host_game,
+    let_in,
     log_in_player,
     log_in_server,
     update_stats,
 )
 
+from openfesl.core.games import Games, load_games
 from openfesl.core.stats import GAME_WIDE, MAXIMUM_ENTRIES, Bucket, Owner, Value, period_start
 from openfesl.protocol.fields import Fields
 from openfesl.protocol.rank import Period
 from openfesl.protocol.relay import Channel, ConnectionKey
+from openfesl.server import app
 from openfesl.server.cli import main
 from openfesl.storage.stats import SqlStatStore
 
@@ -34,10 +39,22 @@ async def play_as(player: Game, nuid: str, name: str) -> str:
     return playing["userId"]
 
 
-async def host(server: Game) -> None:
+async def host(server: Game) -> Answer:
     # Dedicated servers write stats only while they host a game players see.
     await anyio.to_thread.run_sync(main, ["hosting", "open"])
-    await host_game(server)
+    return await host_game(server)
+
+
+@pytest.fixture
+def account_stats(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Game data that keeps a tutorial flag and item counts per account; the server starts with it.
+    def load() -> Games:
+        bfbc2 = load_games().by_id("bfbc2")
+        assert bfbc2 is not None
+        owned = [re.compile("tutorial"), re.compile("item[0-9]+")]
+        return Games([bfbc2.model_copy(update={"account_stats": owned})])
+
+    monkeypatch.setattr(app, "load_games", load)
 
 
 def keys(*names: str) -> Fields:
@@ -154,6 +171,61 @@ async def test_stats_are_kept_per_period_and_for_the_whole_game(server_url: str)
             assert "errorCode" not in await server.request(FESL, "rank", added)
         whole = await player.request(FESL, "rank", get_stats("1", "kills", owner_type="11"))
         assert whole["stats.0.value"] == "10.0000"
+
+
+@pytest.mark.usefixtures("account_stats")
+async def test_an_accounts_stats_are_kept_apart_from_a_persona_with_the_same_number(
+    server_url: str,
+) -> None:
+    async with game(server_url) as cid, game(server_url) as ann, game(server_url) as server:
+        cid_account = (await log_in_player(cid, FESL, "cid@example.test"))["userId"]
+        for name in ("Cid_01", "Cid_02"):
+            await cid.request(FESL, "acct", [("TXN", "NuAddPersona"), ("name", name)])
+        ann_account = (await log_in_player(ann, FESL, "ann@example.test"))["userId"]
+        await ann.request(FESL, "acct", [("TXN", "NuAddPersona"), ("name", "Ann_01")])
+        playing = await ann.request(FESL, "acct", [("TXN", "NuLoginPersona"), ("name", "Ann_01")])
+        await enter_theater(ann, THEATER, "bfbc2-pc", playing["lkey"])
+        # Cid's second persona has the number of Ann's account: the game names an account and a
+        # persona by the same owner type, and only the key tells which one it means.
+        lookup = [("TXN", "NuLookupUserInfo"), ("userInfo.0.userName", "Cid_02")]
+        found = await ann.request(FESL, "acct", [*lookup, ("userInfo.[]", "1")])
+        assert found["userInfo.0.userId"] == ann_account
+        await let_in(server, ann, await host(server))
+
+        same_number = [
+            (3, "score", "40.0000", "", "0"),
+            (3, "tutorial", "1.0000", "", "0"),
+            (3, "item7", "2.0000", "", "0"),
+        ]
+        written = await server.request(FESL, "rank", update_stats((ann_account, "1", same_number)))
+        outside = update_stats((cid_account, "1", [(3, "tutorial", "1.0000", "", "0")]))
+        refused = await server.request(FESL, "rank", outside)
+
+        loaded = await server.request(
+            FESL, "rank", get_stats(ann_account, "score", "tutorial", "item7")
+        )
+        listed = await ann.request(
+            FESL,
+            "rank",
+            [
+                ("TXN", "GetStatsForOwners"),
+                ("owners.0.ownerId", ann_account),
+                ("owners.0.ownerType", "1"),
+                ("owners.[]", "1"),
+                ("periodId", "0"),
+                *keys("score", "item7"),
+            ],
+        )
+        ann_own = await ann.request(FESL, "rank", get_stats("", "score", "tutorial", "item7"))
+        await cid.request(FESL, "acct", [("TXN", "NuLoginPersona"), ("name", "Cid_02")])
+        cid_own = await cid.request(FESL, "rank", get_stats("", "score", "tutorial"))
+
+    assert "errorCode" not in written
+    assert refused["errorCode"] == "21"
+    assert values(loaded) == [("score", "40.0000"), ("tutorial", "1.0000"), ("item7", "2.0000")]
+    assert values(listed, "stats.0.stats.") == [("score", "40.0000"), ("item7", "2.0000")]
+    assert values(ann_own) == [("score", "0.0000"), ("tutorial", "1.0000"), ("item7", "2.0000")]
+    assert values(cid_own) == [("score", "40.0000"), ("tutorial", "0.0000")]
 
 
 async def test_only_dedicated_servers_that_host_write_and_a_refused_update_changes_nothing(

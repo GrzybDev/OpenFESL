@@ -24,6 +24,9 @@ from openfesl.protocol.rank import (
 PERSONA = 1
 # The SDK's owner type for values of the whole game, which dedicated servers only add to.
 GAME_WIDE = 11
+# The server's own owner type for the stats of an account, which a game names by a persona's type
+# and the account's id; no type of the SDK's for accounts is known.
+ACCOUNT = -1
 
 # Bounds one request's answer or writes; a dedicated server asks for its game's whole template.
 MAXIMUM_ENTRIES = 16384
@@ -36,7 +39,7 @@ _MONTHS = {Period.MONTHLY: 1, Period.QUARTERLY: 3, Period.YEARLY: 12}
 
 @dataclass(frozen=True, slots=True)
 class Owner:
-    """Whose stats: a persona, the whole game or another owner type the SDK knows.
+    """Whose stats: a persona, an account, the whole game or another owner type the SDK knows.
 
     Attributes:
         type: The owner type, 1 for a persona.
@@ -176,15 +179,17 @@ class StatsService:
         # would retry every upload until it quits.
         if account and account.server and not await self._trust.admits(connection.session):
             raise TransactionError(PARAMETERS_ERROR)
-        owner = owner_of(connection, request.owner, request.owner_type)
+        owners = stat_owners(connection, game, request.owner, request.owner_type, request.keys)
         check_size(1, request.keys)
         found = await self._store.values(
             partition_of(game),
-            [owner],
+            list(dict.fromkeys(owners.values())),
             request.keys,
             bucket_of(request.period_id, request.period_past),
         )
-        return GetStatsAnswer(stats=[stat_of(key, found.get((owner, key))) for key in request.keys])
+        return GetStatsAnswer(
+            stats=[stat_of(key, found.get((owners[key], key))) for key in request.keys]
+        )
 
     async def get_stats_for_owners(
         self, connection: FeslConnection, request: GetStatsForOwners
@@ -198,9 +203,12 @@ class StatsService:
         game = game_of(connection)
         owners = [Owner(owner.owner_type, owner.owner_id) for owner in request.owners]
         check_size(len(owners), request.keys)
+        kept = {
+            (owner, key): kept_under(game, owner, key) for owner in owners for key in request.keys
+        }
         found = await self._store.values(
             partition_of(game),
-            owners,
+            list(dict.fromkeys(kept.values())),
             request.keys,
             bucket_of(request.period_id, request.period_past),
         )
@@ -209,7 +217,9 @@ class StatsService:
                 OwnerStats(
                     owner_id=owner.id,
                     owner_type=owner.type,
-                    stats=[stat_of(key, found.get((owner, key))) for key in request.keys],
+                    stats=[
+                        stat_of(key, found.get((kept[owner, key], key))) for key in request.keys
+                    ],
                 )
                 for owner in owners
             ]
@@ -219,7 +229,8 @@ class StatsService:
         """Update stats as a dedicated server reports its players' rounds, all or nothing.
 
         Only the game's dedicated servers write, and only while they host a game players see:
-        players' stats come from the rounds they play, and a client could write any number.
+        players' stats come from the rounds they play, and a client could write any number. The
+        stats of an account are written only for a player in the server's game.
 
         Args:
             connection: The FESL connection the request came on.
@@ -227,8 +238,8 @@ class StatsService:
 
         Raises:
             TransactionError: When the session is not a dedicated server's that hosts such a
-                game, an owner is not a persona of the game or the game, or the request is too
-                large.
+                game, an owner is not a persona of the game, the game or a player in the server's
+                game, or the request is too large.
         """
         game = game_of(connection)
         account = connection.session.account
@@ -239,10 +250,10 @@ class StatsService:
         day = _today()
         changes: list[Change] = []
         for updates in request.owners:
-            owner = await self._writable(connection, game, updates)
+            owners = await self._writable(connection, game, updates)
             changes.extend(
                 Change(
-                    owner=owner,
+                    owner=owners[update.key],
                     key=update.key,
                     bucket=Bucket(period, period_start(period, day)),
                     kind=update.kind,
@@ -259,16 +270,26 @@ class StatsService:
 
     async def _writable(
         self, connection: FeslConnection, game: Game, updates: OwnerUpdates
-    ) -> Owner:
-        owner = owner_of(connection, updates.owner, updates.owner_type)
-        if owner.type == GAME_WIDE:
-            return owner
-        if owner.type != PERSONA:
+    ) -> dict[str, Owner]:
+        named = owner_of(connection, updates.owner, updates.owner_type)
+        if named.type not in (PERSONA, GAME_WIDE):
             raise TransactionError(PARAMETERS_ERROR)
-        persona = await self._personas.find_by_id(owner.id)
-        if persona is None or persona.namespace != game.namespace:
-            raise TransactionError(UNKNOWN_PERSONA)
-        return owner
+        keys = [update.key for update in updates.stats]
+        owners = stat_owners(connection, game, updates.owner, updates.owner_type, keys)
+        # An owner named without stats is checked too.
+        for owner in dict.fromkeys(owners.values()) or [named]:
+            await self._check_writable(connection, game, owner)
+        return owners
+
+    async def _check_writable(self, connection: FeslConnection, game: Game, owner: Owner) -> None:
+        if owner.type == PERSONA:
+            persona = await self._personas.find_by_id(owner.id)
+            if persona is None or persona.namespace != game.namespace:
+                raise TransactionError(UNKNOWN_PERSONA)
+        elif owner.type == ACCOUNT and not await self._trust.admits_player(
+            connection.session, owner.id
+        ):
+            raise TransactionError(PARAMETERS_ERROR)
 
 
 def game_of(connection: FeslConnection) -> Game:
@@ -301,6 +322,48 @@ def owner_of(connection: FeslConnection, owner_id: int, owner_type: int) -> Owne
     if connection.session.persona is None:
         raise TransactionError(NOT_LOGGED_IN)
     return Owner(PERSONA, connection.session.persona.id)
+
+
+def kept_under(game: Game, owner: Owner, key: str) -> Owner:
+    """Return the owner that a stat is kept under, for the owner a request names.
+
+    A game names an account by a persona's owner type, so the stats of accounts are kept under
+    the account that has the id named.
+
+    Args:
+        game: The game.
+        owner: The owner the request names.
+        key: The stat's key.
+    """
+    if owner.type == PERSONA and game.owned_by_account(key):
+        return Owner(ACCOUNT, owner.id)
+    return owner
+
+
+def stat_owners(
+    connection: FeslConnection, game: Game, owner_id: int, owner_type: int, keys: Sequence[str]
+) -> dict[str, Owner]:
+    """Return the owner that each of a request's stats is kept under, by key.
+
+    A request that names no owner is about the session: its persona, and its account for the
+    stats of accounts.
+
+    Args:
+        connection: The FESL connection the request came on.
+        game: The session's game.
+        owner_id: The owner's id, 0 when left out.
+        owner_type: The owner's type.
+        keys: The stats' keys.
+
+    Raises:
+        TransactionError: When the request names no owner and the session plays no persona.
+    """
+    owner = owner_of(connection, owner_id, owner_type)
+    account = connection.session.account
+    if not owner_id and account is not None:
+        mine = Owner(ACCOUNT, account.id)
+        return {key: mine if game.owned_by_account(key) else owner for key in keys}
+    return {key: kept_under(game, owner, key) for key in keys}
 
 
 def check_size(owners: int, keys: Sequence[str]) -> None:

@@ -11,6 +11,11 @@ namespace = "bfwest"
 # is drawn for games with squads and a server browser that finds servers by name, and the
 # leaderboard for other stats than this game's, so neither is listed.
 pages = ["play"]
+# The stats of the player's account rather than of a hero: the tutorial, the last session and its
+# length, the daily missions and the pop-item counts. The game's stats dictionary gives each key its
+# owner, yet it names a hero and an account by the same owner type, telling them apart by the id
+# alone (BFHeroes.exe 1.89 0x006aa1fb).
+account_stats = ["c_tut", "c_ltm", "c_slm", "cdm", "edm", "dmc", "pi[0-9]+"]
 
 # The one client string of versions 1.46 and 1.89, which their dedicated servers greet FESL with
 # too. The game takes its Theater address from the Hello answer; the port is the one that its
