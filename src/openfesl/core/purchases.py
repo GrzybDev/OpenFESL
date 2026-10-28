@@ -61,6 +61,21 @@ class Purchase:
     items: tuple[tuple[int, Ownership], ...]
 
 
+@dataclass(frozen=True, slots=True)
+class Refund:
+    """What a refund of a hero's abilities gave back and took.
+
+    Attributes:
+        currency: The currency the abilities were paid in.
+        balance: The hero's balance in it after the refund.
+        items: The items taken back, by number.
+    """
+
+    currency: str
+    balance: int
+    items: list[int]
+
+
 class PurchaseStore(Protocol):
     """Where purchases are paid, given and recorded."""
 
@@ -74,6 +89,17 @@ class PurchaseStore(Protocol):
             PurchaseRefused: When the hero gains no item, as it owns them for good or they were
                 taken away, or the wallet holds less than the price, also after another
                 purchase at the same time.
+        """
+
+    async def refund(self, persona: Persona, wallet: Wallet) -> Refund | None:
+        """Take back what a hero bought from a wallet and credit what it paid, all or nothing.
+
+        Args:
+            persona: The hero.
+            wallet: The hero's own wallet, whose purchases are refunded.
+
+        Returns:
+            What was refunded, or None when nothing bought from the wallet is left to refund.
         """
 
 
@@ -189,6 +215,22 @@ class Purchases:
     async def _hero(self, game: Game, persona: Persona) -> Hero | None:
         roster = await self._heroes.roster(game, persona.account_id)
         return next((hero for hero in roster.heroes if hero.persona.id == persona.id), None)
+
+    async def refund(self, game: Game, persona: Persona) -> Refund | None:
+        """Refund a hero's abilities: take back all it bought with its points and credit them.
+
+        Only what was bought is taken back, so the abilities the hero starts with stay.
+
+        Args:
+            game: The hero's game.
+            persona: The hero, which the asking account owns.
+
+        Returns:
+            What was refunded, or None when the hero bought nothing with its points.
+        """
+        if game.heroes is None:
+            return None
+        return await self._store.refund(persona, wallet_of(game, persona, game.heroes.points))
 
 
 def _for(hero: Hero | None, faction: str | None, hero_class: str | None) -> TypeGuard[Hero]:

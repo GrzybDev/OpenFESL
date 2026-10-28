@@ -1,6 +1,13 @@
 from datetime import UTC, datetime, timedelta, timezone
 
-from openfesl.protocol.magma import BundleEntry, ProductEntry, hot_deals, products
+from openfesl.protocol.magma import (
+    BundleEntry,
+    ProductEntry,
+    hot_deals,
+    nothing_refunded,
+    products,
+    refunded,
+)
 
 
 def test_each_product_is_one_price_point_with_how_the_item_is_owned() -> None:
@@ -96,3 +103,13 @@ def test_a_hot_deal_carries_its_one_price_and_its_members_with_their_own() -> No
         b'<pricePoints><pricePoint currency="_PF" price="900" /></pricePoints></product>'
         b"</association></product></products>"
     )
+
+
+def test_a_refund_names_the_heros_new_balance_and_the_items_taken_back() -> None:
+    # The game fails a refund whose answer lacks the Hero Points wallet, and reports NO_CHANGE.
+    assert refunded("_DH", 3, [2096, 2097]) == (
+        b'<success code="REFUNDED">'
+        b"<walletAccount><currency>_DH</currency><balance>3</balance></walletAccount>"
+        b"<refunded><item>2096</item><item>2097</item></refunded></success>"
+    )
+    assert nothing_refunded() == b'<success code="NO_CHANGE" />'

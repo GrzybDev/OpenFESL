@@ -102,10 +102,39 @@ def billing_accounts(balances: Mapping[str, int]) -> bytes:
     """
     root = Element("billingAccounts")
     for currency, balance in balances.items():
-        wallet = SubElement(root, "walletAccount")
-        SubElement(wallet, "currency").text = currency
-        SubElement(wallet, "balance").text = str(balance)
+        _wallet_account(root, currency, balance)
     return _document(root)
+
+
+def refunded(currency: str, balance: int, items: Iterable[int]) -> bytes:
+    """Return the answer to a refund of a hero's abilities, which the game needs a wallet in.
+
+    Args:
+        currency: The currency the abilities were paid in.
+        balance: The hero's balance in it after the refund.
+        items: The items taken back, by number.
+    """
+    root = Element("success", code="REFUNDED")
+    _wallet_account(root, currency, balance)
+    SubElement(root, "refunded").extend(_text("item", str(item)) for item in items)
+    return _document(root)
+
+
+def nothing_refunded() -> bytes:
+    """Return the answer to a refund of a hero who bought no abilities, which the game reports."""
+    return _document(Element("success", code="NO_CHANGE"))
+
+
+def _wallet_account(parent: Element, currency: str, balance: int) -> None:
+    wallet = SubElement(parent, "walletAccount")
+    SubElement(wallet, "currency").text = currency
+    SubElement(wallet, "balance").text = str(balance)
+
+
+def _text(name: str, text: str) -> Element:
+    element = Element(name)
+    element.text = text
+    return element
 
 
 @dataclass(frozen=True, slots=True)

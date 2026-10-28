@@ -9,10 +9,11 @@ from openfesl.core.games import Credits
 from openfesl.core.wallets import MOST_BALANCE, Wallet
 from openfesl.storage.models import WalletEntryRow, WalletRow
 
-# The ledger's reasons for the amount that a wallet opens with and for a dedicated server's
-# credit.
+# The ledger's reasons for the amount that a wallet opens with, for a dedicated server's
+# credit, and for what a refund gave back.
 ALLOWANCE = "allowance"
 SERVER = "server"
+REFUND = "refund"
 
 
 class SqlWalletStore:
@@ -52,7 +53,8 @@ class SqlWalletStore:
     async def earned(self, wallets: Sequence[Wallet]) -> list[int]:
         """Return what wallets ever received, from their ledgers, without opening any.
 
-        A new wallet counts the allowance it opens with.
+        A new wallet counts the allowance it opens with; what refunds gave back was received
+        before and is not counted again.
 
         Args:
             wallets: The wallets.
@@ -70,7 +72,11 @@ class SqlWalletStore:
                 )
                 .outerjoin(
                     WalletEntryRow,
-                    and_(WalletEntryRow.wallet_id == WalletRow.id, WalletEntryRow.delta > 0),
+                    and_(
+                        WalletEntryRow.wallet_id == WalletRow.id,
+                        WalletEntryRow.delta > 0,
+                        WalletEntryRow.reason != REFUND,
+                    ),
                 )
                 .where(_matching(wallets))
                 .group_by(WalletRow.id)

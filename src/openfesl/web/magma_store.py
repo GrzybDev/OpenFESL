@@ -10,7 +10,15 @@ from openfesl.core.item_writes import ItemWrites
 from openfesl.core.magma import Magma
 from openfesl.core.purchases import Purchases
 from openfesl.core.store import Deal, Offer, Store
-from openfesl.protocol.magma import BundleEntry, ProductEntry, hot_deals, products, success
+from openfesl.protocol.magma import (
+    BundleEntry,
+    ProductEntry,
+    hot_deals,
+    nothing_refunded,
+    products,
+    refunded,
+    success,
+)
 from openfesl.web.magma import XML, SessionId, UserId
 
 # The id of a product, as the game buys it, and of an item's entitlement, as it changes one.
@@ -58,6 +66,15 @@ def store_router(
         persona = await magma.persona(session_id, game, persona_id, own=True)
         won = await purchases.purchase(game, persona, product_id)
         return Response(products([_entry(won)]) if won else success(), media_type=XML)
+
+    # The game reads the hero's new balance and the items it no longer holds (BFHeroes.exe
+    # 1.89 0x006a17d0).
+    @router.post("/nucleus/refundAbilities/{userId}")
+    async def refund(persona_id: UserId, session_id: SessionId = None) -> Response:
+        persona = await magma.persona(session_id, game, persona_id, own=True)
+        done = await purchases.refund(game, persona)
+        answer = refunded(done.currency, done.balance, done.items) if done else nothing_refunded()
+        return Response(answer, media_type=XML)
 
     # A player's game and the dedicated server keeping the player change the items it uses.
     @router.post("/nucleus/entitlement/{entitlementId}/useCount/{uses}")
