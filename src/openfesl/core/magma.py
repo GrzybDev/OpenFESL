@@ -211,7 +211,7 @@ class Magma:
             MagmaError: When the request names no session that is known, or the persona is
                 not the game's, or neither its account's nor one its account keeps as a server.
         """
-        persona = await self._persona(session_id, game, persona_id)
+        persona = await self.persona(session_id, game, persona_id)
         return await self._entitlements.of_persona(persona.id, tag)
 
     async def wallets(self, session_id: str | None, game: Game, persona_id: int) -> dict[str, int]:
@@ -226,16 +226,35 @@ class Magma:
             MagmaError: When the request names no session that is known, or the persona is
                 not the game's, or neither its account's nor one its account keeps as a server.
         """
-        persona = await self._persona(session_id, game, persona_id)
+        persona = await self.persona(session_id, game, persona_id)
         return await self._wallets.of_persona(game, persona)
 
-    async def _persona(self, session_id: str | None, game: Game, persona_id: int) -> Persona:
+    async def persona(
+        self, session_id: str | None, game: Game, persona_id: int, *, own: bool = False
+    ) -> Persona:
+        """Return a persona of the game that the asking account owns, or keeps as a server.
+
+        Args:
+            session_id: The magma cookie's value; none when the request carries no cookie.
+            game: The game whose Magma host was asked.
+            persona_id: The persona.
+            own: Whether only the account's own personas are returned, for what only a
+                player may do, such as buying; a server's players are refused then.
+
+        Raises:
+            MagmaError: When the request names no session that is known, or the persona is
+                not the game's, or neither the account's nor, unless it must be its own, one
+                the account keeps as a server.
+        """
         account_id = self.session(session_id).account_id
         persona = await self._personas.find_by_id(persona_id)
         if (
             persona is None
             or persona.namespace != game.namespace
-            or not (persona.account_id == account_id or await self._keeps(account_id, persona))
+            or not (
+                persona.account_id == account_id
+                or (not own and await self._keeps(account_id, persona))
+            )
         ):
             logger.info(
                 "Account %d asked Magma about persona %d, which it may not read",

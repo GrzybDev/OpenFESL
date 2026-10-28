@@ -103,6 +103,14 @@ class ProductStore(Protocol):
             game: The game's data-file name.
         """
 
+    async def product(self, game: str, number: int) -> Product | None:
+        """Return a product a game's store sells to heroes, if it lists one by a number.
+
+        Args:
+            game: The game's data-file name.
+            number: The product's number.
+        """
+
 
 class Store:
     """The games' stores, whose products their data seeds from the imported catalogues."""

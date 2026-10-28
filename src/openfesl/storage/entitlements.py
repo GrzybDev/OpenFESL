@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from datetime import UTC, datetime
 
 from sqlalchemy import exists, func, select, update
 from sqlalchemy.dialects.postgresql import Insert, insert
@@ -8,6 +9,7 @@ from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin
 from openfesl.core.entitlements import ACTIVE, Entitlement, EntitlementQuery, StatusChange
 from openfesl.core.games import Grant
+from openfesl.core.inventory import Held, Ownership, fold
 from openfesl.storage.admin import action_row
 from openfesl.storage.models import AdminActionRow, EntitlementRow
 
@@ -16,6 +18,8 @@ REVOKED = "DISABLED"
 
 # What an account owns itself, apart from what its personas own each.
 _ACCOUNTS = EntitlementRow.persona_id.is_(None)
+# A persona's item is named before the first '-' of its tag, how it is owned after.
+_item_number = func.split_part(EntitlementRow.tag, "-", 1)
 
 
 class SqlEntitlementStore:
@@ -186,12 +190,56 @@ class SqlEntitlementStore:
         """
         statement = select(EntitlementRow).where(EntitlementRow.persona_id == persona_id)
         if tag:
-            # A persona's item is named before the first '-' of its tag, how it is owned after.
-            item = func.split_part(EntitlementRow.tag, "-", 1)
-            statement = statement.where(item == tag.partition("-")[0])
+            statement = statement.where(_item_number == tag.partition("-")[0])
         async with self._sessions() as session:
             rows = await session.scalars(statement.order_by(EntitlementRow.id))
             return [_entitlement(row) for row in rows]
+
+
+async def add_item(
+    session: AsyncSession, account_id: int, persona_id: int, item_id: int, gained: Ownership
+) -> Held | None:
+    """Fold an item that a persona gains into its one row of the item, under the row's lock.
+
+    Args:
+        session: The transaction to add it in.
+        account_id: The persona's account.
+        persona_id: The persona.
+        item_id: The item's number.
+        gained: How the persona gains it.
+
+    Returns:
+        How the persona holds the item then, or None when that changes nothing: it owns the item
+        for good, or the item is out of use, as when the admin took it away.
+    """
+    now = datetime.now(UTC)
+    row = await _locked_item(session, persona_id, item_id)
+    if row is None:
+        held = fold(None, gained, now)
+        assert held is not None
+        added = await session.scalar(
+            insert(EntitlementRow)
+            .values(
+                account_id=account_id,
+                persona_id=persona_id,
+                tag=f"{item_id}-{held.type}",
+                use_count=held.uses,
+                expires_at=held.expires,
+            )
+            .on_conflict_do_nothing()
+            .returning(EntitlementRow.id)
+        )
+        if added is not None:
+            return held
+        # Another transaction added the item meanwhile; its row is folded into.
+        row = await _locked_item(session, persona_id, item_id)
+        assert row is not None
+    folded = fold(_held(row), gained, now) if row.status == ACTIVE else None
+    if folded is not None:
+        row.tag = f"{item_id}-{folded.type}"
+        row.use_count = folded.uses
+        row.expires_at = folded.expires
+    return folded
 
 
 def grant_statement(account_id: int, grants: Sequence[Grant]) -> Insert:
@@ -235,3 +283,17 @@ def _entitlement(row: EntitlementRow) -> Entitlement:
         uses=row.use_count,
         expires=row.expires_at,
     )
+
+
+async def _locked_item(
+    session: AsyncSession, persona_id: int, item_id: int
+) -> EntitlementRow | None:
+    return await session.scalar(
+        select(EntitlementRow)
+        .where(EntitlementRow.persona_id == persona_id, _item_number == str(item_id))
+        .with_for_update()
+    )
+
+
+def _held(row: EntitlementRow) -> Held:
+    return Held(row.tag.split("-")[1] if "-" in row.tag else "", row.expires_at, row.use_count)

@@ -1,12 +1,16 @@
 """Helpers of the tests of the stores, which sell the items of imported catalogues."""
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from pathlib import Path
 from xml.etree import ElementTree
 
 import anyio
 import pytest
-from heroes import MAGMA
-from support import cli, fetch
+from accounts import PASSWORD, execute
+from heroes import MAGMA, create_hero, start
+from support import FESL, THEATER, cli, fetch, game, launcher_sign_in, let_in, log_in_player
+from test_player_servers import SERVER_GAME
 
 from openfesl.core.catalogue import CatalogueDocument, CatalogueFile, CatalogueItem
 
@@ -41,6 +45,8 @@ ITEMS = [
     CatalogueItem(id=6000, kind="mission", fields={"teamPrereq": "0", "kits": "63"}),
     item(9000, "convenience"),
 ]
+# An emote of every loadout, which the game grants each hero itself.
+CHEER = item(5016, "emote")
 NAMES = {
     1: "Invented Hat",
     2: "Invented Quiff",
@@ -56,6 +62,7 @@ NAMES = {
     3015: "Invented Rifle",
     3042: "Invented Longrifle",
     5001: "Invented Wave",
+    5016: "Invented Cheer",
     9000: "Invented Boost",
 }
 
@@ -76,9 +83,23 @@ async def offers(server_url: str) -> list[ElementTree.Element]:
     return list(ElementTree.fromstring(body))
 
 
-async def stock(server_url: str, folder: Path, capsys: pytest.CaptureFixture[str]) -> None:
+async def items(server_url: str, cookie: dict[str, str], hero: int) -> list[str]:
+    """Return a hero's items as the game loads them, each as its tag and uses."""
+    _, _, body = await fetch(server_url, f"/nucleus/entitlements/{hero}", MAGMA, cookie)
+    return [
+        f"{entry.findtext('entitlementTag')} {entry.findtext('useCount')}"
+        for entry in ElementTree.fromstring(body)
+    ]
+
+
+async def stock(
+    server_url: str,
+    folder: Path,
+    capsys: pytest.CaptureFixture[str],
+    items: list[CatalogueItem] = ITEMS,
+) -> None:
     """Import the invented catalogue as the admin does, and wait for the store to fill from it."""
-    await cli(capsys, "catalogue", "import", str(catalogue_file(folder)))
+    await cli(capsys, "catalogue", "import", str(catalogue_file(folder, items)))
     with anyio.fail_after(30):
         while not await offers(server_url):
             await anyio.sleep(0.05)
@@ -101,3 +122,74 @@ def listed(product: ElementTree.Element) -> str:
         f"{product.get('productId')} {attributes['entitlementTag']}{extra}"
         f" {point.get('price')}{point.get('currency')}"
     )
+
+
+# The creator's choices of a Royal Army soldier, whom the invented rifle fits.
+ROYAL_SOLDIER = {"faction": "royal", "class": "soldier"}
+
+
+async def shopper(
+    server_url: str, account: str, name: str, **look: str
+) -> tuple[dict[str, str], int]:
+    """Create a hero on the site and sign its account in at the launcher.
+
+    Returns:
+        The magma cookie the game sends, and the hero's number.
+    """
+    hero = await create_hero(
+        server_url.replace("ws://", "http://").rstrip("/"), account, name, **look
+    )
+    session = (await launcher_sign_in(server_url, account, PASSWORD)).json()
+    return {"Cookie": f"magma={session['sessionId']}"}, hero
+
+
+async def buy(
+    server_url: str, cookie: dict[str, str], hero: int, product: int | str
+) -> tuple[str, str | None]:
+    """Buy a product by its number for a hero as the game does, with a POST without a body.
+
+    Returns:
+        The answer's root, and the cause of its failure, if it is one.
+    """
+    path = f"/ofb/purchase/{hero}/OFB-DBFH:{product}"
+    answer = ElementTree.fromstring((await fetch(server_url, path, MAGMA, cookie, b""))[2])
+    failure = answer.find("failure")
+    return answer.tag, failure.get("cause") if failure is not None else None
+
+
+async def grant(database_url: str, hero: int, currency: str, amount: int) -> None:
+    """Credit a hero's wallet of a currency, its account's for a currency the heroes share."""
+    await execute(
+        database_url,
+        "WITH changed AS (INSERT INTO wallet AS kept (account_id, game, currency, persona_id,"
+        " balance) SELECT account_id, 'bfheroes', CAST(:currency AS text),"
+        " CASE WHEN CAST(:currency AS text) = '_DH' THEN id END, CAST(:amount AS bigint)"
+        " FROM persona WHERE id = :hero ON CONFLICT (account_id, game, currency, persona_id)"
+        " DO UPDATE SET balance = kept.balance + :amount RETURNING id, balance)"
+        " INSERT INTO wallet_entry (wallet_id, delta, balance, reason)"
+        " SELECT id, :amount, balance, 'admin' FROM changed",
+        hero=hero,
+        currency=currency,
+        amount=amount,
+    )
+
+
+@asynccontextmanager
+async def kept_by_server(server_url: str) -> AsyncIterator[tuple[dict[str, str], int]]:
+    """Have a dedicated server keep the data of Ann's Royal soldier while it plays in its game.
+
+    Hosting must be open, so that the server's game is listed at once.
+
+    Yields:
+        The server's magma cookie and Ann's hero.
+    """
+    for account in ("ann@example.test", "host@example.test"):
+        async with game(server_url) as registering:
+            await log_in_player(registering, FESL, account)
+        await shopper(server_url, account, account.split("@")[0], **ROYAL_SOLDIER)
+    async with game(server_url) as ann, game(server_url) as server:
+        _, _, hero = await start(server_url, ann, "ann@example.test")
+        cookie, _, _ = await start(server_url, server, "host@example.test", role="host")
+        created = await server.theater(THEATER, "CGAM", SERVER_GAME)
+        await let_in(server, ann, created.fields)
+        yield cookie, hero

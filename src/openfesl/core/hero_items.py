@@ -43,10 +43,21 @@ def held(
     )
     # The tags of what is neither worn nor used, such as a treasure chest's, name no item.
     items = {int(number) for number in tags if number.isascii() and number.isdecimal()}
-    if faction and hero_class:
-        loadout = rules.loadouts[faction][hero_class]
-        items |= {*loadout.appearance, *loadout.equipment, *loadout.emotes}
-    return items
+    return items | granted(rules, faction, hero_class)
+
+
+def granted(rules: HeroRules | None, faction: str | None, hero_class: str | None) -> set[int]:
+    """Return the numbers of the items the game grants a hero itself: its loadout's.
+
+    Args:
+        rules: The game's hero rules; none for a game whose heroes are not made on its site.
+        faction: The hero's faction, if it has one.
+        hero_class: The hero's class, if it has one.
+    """
+    if rules is None or not (faction and hero_class):
+        return set()
+    loadout = rules.loadouts[faction][hero_class]
+    return {*loadout.appearance, *loadout.equipment, *loadout.emotes}
 
 
 def fits(

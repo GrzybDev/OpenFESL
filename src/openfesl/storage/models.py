@@ -247,6 +247,29 @@ class StoreProductRow(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class PurchaseRow(Base):
+    __tablename__ = "purchase"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    game: Mapped[str]
+    account_id: Mapped[int] = mapped_column(
+        ForeignKey("account.id", ondelete="CASCADE"), index=True
+    )
+    # The hero who bought, for what a hero owns.
+    persona_id: Mapped[int | None] = mapped_column(
+        ForeignKey("persona.id", ondelete="CASCADE"), index=True
+    )
+    # The id the game bought it by, and whether it was a product, a bundle or a box.
+    product_id: Mapped[str]
+    kind: Mapped[str]
+    currency: Mapped[str]
+    price: Mapped[int] = mapped_column(BigInteger)
+    # What the hero or account gained.
+    outcome: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    refunded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
 class ProductKeyRow(Base):
     __tablename__ = "product_key"
 

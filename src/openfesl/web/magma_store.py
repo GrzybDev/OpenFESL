@@ -1,21 +1,29 @@
 import asyncio
 import gzip
+from typing import Annotated
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Path, Request
 from fastapi.responses import Response
 
 from openfesl.core.games import Game
+from openfesl.core.magma import Magma
+from openfesl.core.purchases import Purchases
 from openfesl.core.store import Offer, Store
-from openfesl.protocol.magma import ProductEntry, products
-from openfesl.web.magma import XML
+from openfesl.protocol.magma import ProductEntry, products, success
+from openfesl.web.magma import XML, SessionId, UserId
+
+# The id of a product, as the game buys it.
+ProductId = Annotated[str, Path(alias="productId")]
 
 
-def store_router(game: Game, store: Store) -> APIRouter:
+def store_router(game: Game, magma: Magma, store: Store, purchases: Purchases) -> APIRouter:
     """Return the routes of a game's store on its Magma host.
 
     Args:
         game: The game whose store they serve.
+        magma: Answers about who asks.
         store: The games' stores.
+        purchases: Sells the stores' products.
     """
     router = APIRouter()
     # The store's list, plain and compressed, as of a count of the store's changes: the game and
@@ -35,6 +43,16 @@ def store_router(game: Game, store: Store) -> APIRouter:
         if "gzip" in request.headers.get("Accept-Encoding", ""):
             return Response(packed, media_type=XML, headers={"Content-Encoding": "gzip"})
         return Response(plain, media_type=XML)
+
+    # The game adds what it bought itself once the answer is a success (BFHeroes.exe 1.89
+    # 0x007bafb7).
+    @router.post("/ofb/purchase/{userId}/{productId}")
+    async def purchase(
+        persona_id: UserId, product_id: ProductId, session_id: SessionId = None
+    ) -> Response:
+        persona = await magma.persona(session_id, game, persona_id, own=True)
+        await purchases.purchase(game, persona, product_id)
+        return Response(success(), media_type=XML)
 
     # No hot deals yet, while a game still needs the list to load a persona.
     @router.get("/{language}/game/hotDeals")

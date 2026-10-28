@@ -89,6 +89,24 @@ class SqlProductStore:
             )
             return [_product(row) for row in rows]
 
+    async def product(self, game: str, number: int) -> Product | None:
+        """Return a product a game's store sells to heroes, if it lists one by a number.
+
+        Args:
+            game: The game's data-file name.
+            number: The product's number.
+        """
+        async with self._sessions() as session:
+            row = await session.scalar(
+                select(StoreProductRow).where(
+                    StoreProductRow.id == number,
+                    StoreProductRow.game == game,
+                    StoreProductRow.published,
+                    StoreProductRow.account.is_(False),
+                )
+            )
+            return _product(row) if row else None
+
 
 async def _lock(session: AsyncSession, game: str) -> None:
     # Held until the transaction ends, on any server.

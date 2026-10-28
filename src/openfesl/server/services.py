@@ -38,6 +38,7 @@ from openfesl.core.playnow import PlayNow
 from openfesl.core.policies import GamePolicies
 from openfesl.core.presence import PresenceService
 from openfesl.core.proofs import ProofMail
+from openfesl.core.purchases import Purchases
 from openfesl.core.records import RecordService
 from openfesl.core.registration import Terms
 from openfesl.core.relay_tokens import RelayTokens
@@ -104,6 +105,9 @@ class GameServices:
         icons = IconFolder(settings.files_path) if settings.files_path else None
         self.catalogues = Catalogues(stores.catalogues, icons, games)
         self.store = Store(stores.products, self.catalogues, games)
+        self.purchases = Purchases(
+            stores.products, stores.purchases, self.catalogues, self.heroes, stores.entitlements
+        )
         self.policies = GamePolicies(stores.settings)
         self.terms = Terms.load()
 

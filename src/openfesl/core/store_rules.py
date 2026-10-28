@@ -129,6 +129,21 @@ class StoreRules(BaseModel):
         """
         return self.ids.replace("{id}", str(number))
 
+    def number(self, product_id: str) -> int | None:
+        """Return the number of a product that the game names by its id, if the id is one.
+
+        Args:
+            product_id: The id, as a purchase's path carries it.
+        """
+        prefix, _, suffix = self.ids.partition("{id}")
+        if not (product_id.startswith(prefix) and product_id.endswith(suffix)):
+            return None
+        number = product_id[len(prefix) : len(product_id) - len(suffix)]
+        # A number the database holds, of at most 18 digits.
+        if not (number.isascii() and number.isdecimal() and len(number) <= 18):
+            return None
+        return int(number)
+
     def sellable(self, item: Item) -> bool:
         """Tell whether the store may sell or drop an item at all.
 

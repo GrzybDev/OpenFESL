@@ -71,6 +71,22 @@ class WalletStore(Protocol):
         """
 
 
+def wallet_of(game: Game, persona: Persona, code: str) -> Wallet:
+    """Return the wallet from which a persona spends a currency of its game.
+
+    A persona spends its account's balance in a currency that the account's personas share,
+    and its own in the others.
+
+    Args:
+        game: The persona's game.
+        persona: The persona.
+        code: The currency.
+    """
+    currency = game.currencies[code]
+    owner = persona.id if currency.scope is Scope.PERSONA else None
+    return Wallet(game.id, code, persona.account_id, owner, currency.allowance)
+
+
 class Wallets:
     """The balances that players spend in the currencies of their games."""
 
@@ -85,16 +101,14 @@ class Wallets:
     async def of_persona(self, game: Game, persona: Persona) -> dict[str, int]:
         """Return what a persona has to spend in each currency of its game, by code.
 
-        A persona spends its account's balance in a currency that the account's personas share,
-        and its own in the others. A wallet opens on its first use with the currency's
-        allowance, so an account or a persona gets each allowance once, whatever made the
-        persona.
+        A wallet opens on its first use with the currency's allowance, so an account or a
+        persona gets each allowance once, whatever made the persona.
 
         Args:
             game: The persona's game.
             persona: The persona.
         """
-        wallets = [_wallet(game, persona, code) for code in game.currencies]
+        wallets = [wallet_of(game, persona, code) for code in game.currencies]
         return dict(zip(game.currencies, await self._store.balances(wallets), strict=True))
 
     async def credit_from_server(
@@ -115,7 +129,7 @@ class Wallets:
         credits = game.currencies[code].credits
         assert credits is not None
         return await self._store.credit_from_server(
-            _wallet(game, persona, code), amount, transaction, credits
+            wallet_of(game, persona, code), amount, transaction, credits
         )
 
     async def of_personas(
@@ -150,10 +164,3 @@ class Wallets:
             for code in codes
         ]
         return await self._store.peek(wallets)
-
-
-def _wallet(game: Game, persona: Persona, code: str) -> Wallet:
-    # A persona spends its account's balance in a currency that the account's personas share.
-    currency = game.currencies[code]
-    owner = persona.id if currency.scope is Scope.PERSONA else None
-    return Wallet(game.id, code, persona.account_id, owner, currency.allowance)
