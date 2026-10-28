@@ -1,0 +1,129 @@
+/* The Play Now badge at the right of the site's header (beside the game's name on phones): a
+   tilted yellow disc with a ring and a red-brown ribbon under it, which straightens, grows and
+   glows under the pointer and sinks when pressed. */
+@layer components {
+  .site-header:has(> .play-badge) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "name badge" "nav nav";
+  }
+
+  .play-badge {
+    grid-area: badge;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: -4px 0 4px;
+    color: #0a0a0a;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  .play-badge-disc {
+    display: grid;
+    width: 84px;
+    height: 84px;
+    place-items: center;
+    border: 3px solid #000;
+    border-radius: 50%;
+    background: #f2c12e;
+    box-shadow:
+      inset 0 0 0 5px #ffe27a,
+      inset 0 0 0 7px #000,
+      0 4px 0 #000,
+      0 0 0 0 rgb(255 226 122 / 0.5);
+    rotate: -6deg;
+    transition:
+      rotate 160ms var(--ease-menu),
+      scale 160ms var(--ease-menu),
+      box-shadow 160ms var(--ease-menu);
+
+    .play-badge:hover & {
+      rotate: -2deg;
+      scale: 1.05;
+      box-shadow:
+        inset 0 0 0 5px #ffe27a,
+        inset 0 0 0 7px #000,
+        0 4px 0 #000,
+        0 0 0 6px rgb(255 226 122 / 0.5);
+    }
+
+    .play-badge:active & {
+      scale: 0.96;
+      transition-duration: 100ms;
+    }
+  }
+
+  .play-badge-name {
+    max-width: 64px;
+    font: italic 800 19px/0.95 var(--site-comic);
+    text-align: center;
+    text-transform: lowercase;
+  }
+
+  .play-badge-ribbon {
+    position: relative;
+    margin-top: -12px;
+    padding: 4px 10px 5px;
+    border: 2px solid #000;
+    border-radius: 4px;
+    background: #521f1c;
+    box-shadow: 0 2px 0 #000;
+    color: #fff;
+    font: 800 13px/1.1 var(--site-heading);
+    white-space: nowrap;
+
+    /* The 2012 chrome is lowercase, but a hero's name keeps its capitals. */
+    &::first-letter {
+      text-transform: lowercase;
+    }
+  }
+
+  /* A new default hero's name fades into the ribbon on the page after the change. */
+  .play-badge-changed {
+    animation: fade-in 150ms var(--ease-menu) both;
+  }
+
+  @media (width >= 40rem) {
+    .site-header:has(> .play-badge) {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-areas: "name nav badge";
+    }
+
+    .play-badge {
+      margin-bottom: 8px;
+    }
+
+    .play-badge-disc {
+      width: 96px;
+      height: 96px;
+    }
+
+    .play-badge-name {
+      max-width: 72px;
+      font-size: 21px;
+    }
+
+    .play-badge-ribbon {
+      padding-inline: 12px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .play-badge-disc {
+      transition: box-shadow 100ms linear;
+
+      .play-badge:is(:hover, :active) & {
+        rotate: -6deg;
+        scale: none;
+      }
+    }
+
+    .play-badge-changed {
+      animation-duration: 100ms;
+    }
+  }
+}

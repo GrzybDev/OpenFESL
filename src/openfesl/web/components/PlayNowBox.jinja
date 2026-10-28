@@ -1,0 +1,26 @@
+{#def hero = None #}
+{# The blue info box on Play Now: the hero it starts the game as through OpenFESLHook's launcher,
+   or that it needs a hero first. A new default hero's name fades in after the change. #}
+{% set changed = toast and toast.key == "web.heroes.toast.default" %}
+<section aria-labelledby="play-now-box" class="info-box info-box-blue">
+  <h2 id="play-now-box" class="info-box-title">{{ _("web.play_now.title") }}</h2>
+  <span aria-hidden="true" class="info-box-disc"><Icon name="play" :size="20" stroke="#0A0A0A" /></span>
+  {% if hero %}
+    {% set name %}<strong>{{ hero.persona.name }}</strong>{% endset %}
+    <p class="info-box-note{% if changed %} play-now-box-changed{% endif %}">
+      {{ _("web.play_now.box", game=game.name, hero=name) }}
+    </p>
+  {% else %}
+    <p class="info-box-note">{{ _("web.play_now.box.none", game=game.name) }}</p>
+  {% endif %}
+  <div class="play-now-box-actions">
+    {% if hero %}
+      <a href="{{ url('/' ~ game.id ~ '/play-now') }}"
+         class="site-button"><Icon name="play" :size="16" stroke="#FEDE01" />{{ _("web.play_now.title") }}</a>
+    {% endif %}
+    {% if "play" in game.pages %}
+      <a href="{{ url('/' ~ game.id ~ '/play') }}"
+         class="play-panel-link">{{ _("web.site.page.play") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+    {% endif %}
+  </div>
+</section>

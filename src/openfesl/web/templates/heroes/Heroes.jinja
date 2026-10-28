@@ -76,5 +76,7 @@
          class="site-button site-button-go site-button-large"><Icon name="plus" :size="18" stroke="currentColor" />{{ _("web.bar.create") }}</a>
     </section>
   {% endif %}
-  <WalletsBox :cards="cards" />
+  <WalletsBox :cards="cards">
+  {% if game.site.start_links %}<PlayNowBox :hero="roster.playing" />{% endif %}
+  </WalletsBox>
 </Layout>

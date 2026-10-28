@@ -228,7 +228,7 @@ msgid "web.creator.lead"
 msgstr "Losowy bohater już czeka: wystarczy zmienić frakcję, klasę i wygląd, a potem nadać nazwę."
 
 msgid "web.creator.lead.first"
-msgstr "Pierwszy bohater zostaje domyślnym bohaterem, z którym program uruchamiający OpenFESLHook uruchamia grę."
+msgstr "Pierwszy bohater zostaje domyślnym bohaterem, z którym „Graj” uruchamia grę."
 
 msgid "web.creator.lead.kept"
 msgstr "Wybrane tu frakcja, klasa i wygląd zostają z bohaterem na stałe; późniejsza zmiana nazwy kosztuje %(price)s %(currency)s."
@@ -456,16 +456,13 @@ msgid "web.created.default"
 msgstr "%(hero)s jest domyślnym bohaterem, w miejscu %(slot)s z %(slots)s."
 
 msgid "web.created.from_game"
-msgstr "Gra %(game)s zamknęła się po otwarciu tej strony; po ponownym uruchomieniu użyje bohatera %(hero)s."
-
-msgid "web.created.logs_in"
-msgstr "Program uruchamiający OpenFESLHook uruchamia grę %(game)s z bohaterem %(hero)s."
+msgstr "Gra %(game)s zamknęła się po otwarciu tej strony. „Graj” uruchomi ją ponownie z bohaterem %(hero)s."
 
 msgid "web.created.further"
 msgstr "Miejsce %(slot)s z %(slots)s. Gra %(game)s pokaże nowego bohatera od następnego logowania."
 
 msgid "web.created.stays"
-msgstr "Domyślnym bohaterem pozostaje %(hero)s, więc program uruchamiający OpenFESLHook uruchamia grę %(game)s z tym bohaterem."
+msgstr "Domyślnym bohaterem pozostaje %(hero)s, więc „Graj” uruchamia grę z tym bohaterem."
 
 msgid "web.created.kit"
 msgstr "Wyposażenie startowe jest gotowe: %(kit)s."
@@ -495,7 +492,7 @@ msgid "web.heroes.title"
 msgstr "Moi bohaterowie"
 
 msgid "web.heroes.lead"
-msgstr "Bohaterów tworzy się na tej stronie, a gra się nimi w %(game)s. Program uruchamiający OpenFESLHook uruchamia grę z domyślnym bohaterem: %(hero)s. Bohaterów nie można usuwać."
+msgstr "Bohaterów tworzy się na tej stronie, a gra się nimi w %(game)s. „Graj” uruchamia grę z domyślnym bohaterem: %(hero)s. Bohaterów nie można usuwać."
 
 msgid "web.heroes.lead.none"
 msgstr "Jeszcze nie ma bohatera. Bohaterów tworzy się na tej stronie, a gra się nimi w %(game)s; gra otwiera tę stronę, gdy loguje się konto bez bohaterów."
@@ -579,7 +576,7 @@ msgid "web.heroes.make_default"
 msgstr "Ustaw jako domyślnego"
 
 msgid "web.heroes.toast.default"
-msgstr "%(hero)s jest teraz domyślnym bohaterem: program uruchamiający OpenFESLHook uruchamia grę %(game)s z tym bohaterem."
+msgstr "%(hero)s jest teraz domyślnym bohaterem. „Graj” uruchamia grę z tym bohaterem."
 
 msgid "web.heroes.back"
 msgstr "Wróć do moich bohaterów"
@@ -672,7 +669,7 @@ msgid "web.arrival.text"
 msgstr "Gra otwiera tę stronę, gdy konto, którym się loguje, nie ma bohatera, a potem się zamyka."
 
 msgid "web.arrival.next"
-msgstr "Wystarczy utworzyć bohatera poniżej; po ponownym uruchomieniu gra %(game)s użyje tego bohatera."
+msgstr "Wystarczy utworzyć bohatera poniżej; potem „Graj” uruchomi z nim grę %(game)s."
 
 msgid "web.arrival.signed_in"
 msgstr "Zalogowano tu jako %(account)s. Jeśli gra użyła innego konta:"
@@ -690,7 +687,7 @@ msgid "web.arrival.has_hero"
 msgstr "Konto ma już bohatera"
 
 msgid "web.arrival.has_hero.text"
-msgstr "Gra %(game)s otworzyła tę stronę, bo przy logowaniu konto nie miało bohatera. Od tego czasu powstał bohater %(hero)s, więc gra użyje go od następnego uruchomienia."
+msgstr "Gra %(game)s otworzyła tę stronę, bo przy logowaniu konto nie miało bohatera. Od tego czasu powstał bohater %(hero)s, więc „Graj” może uruchomić z nim grę."
 
 msgid "games.bfheroes.faction.royal"
 msgstr "Royal Army"
@@ -6519,3 +6516,28 @@ msgstr "Wystarczy raz uruchomić grę %(game)s z jej folderu i zaznaczyć w prog
 
 msgid "web.play_now.how.setup"
 msgstr "Jak zagrać: instalacja OpenFESLHook"
+
+msgid "web.play_now.badge"
+msgstr "Graj!"
+
+#, python-format
+msgid "web.play_now.badge.as"
+msgstr "Jako %(hero)s"
+
+msgid "web.play_now.badge.sign_in"
+msgstr "Zaloguj się, by grać"
+
+msgid "web.play_now.badge.no_hero"
+msgstr "Najpierw utwórz bohatera"
+
+#, python-format
+msgid "web.play_now.as"
+msgstr "Graj jako %(hero)s"
+
+#, python-format
+msgid "web.play_now.box"
+msgstr "„Graj” uruchamia grę %(game)s z domyślnym bohaterem, %(hero)s, przez program uruchamiający OpenFESLHook. Każde uruchomienie używa jednorazowego linku."
+
+#, python-format
+msgid "web.play_now.box.none"
+msgstr "„Graj” wymaga bohatera. Gdy już powstanie, „Graj” uruchamia grę %(game)s z domyślnym bohaterem przez program uruchamiający OpenFESLHook."

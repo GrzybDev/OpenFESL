@@ -1,7 +1,9 @@
 {#def cards: list #}
-{# The account's wallets in the brown box: its shared balances and each hero's own Hero Points. #}
-<section aria-labelledby="wallets-title" class="info-boxes">
-  <div class="info-box info-box-brown">
+{# The row of info boxes under the heroes, which ends with the account's wallets in the brown box:
+   its shared balances and each hero's own Hero Points. The boxes given as content come first. #}
+<div class="info-boxes">
+  {{ content }}
+  <section aria-labelledby="wallets-title" class="info-box info-box-brown">
     <h2 id="wallets-title" class="info-box-title">{{ _("web.site.wallets") }}</h2>
     <span aria-hidden="true" class="info-box-disc"><Icon name="coin" :size="22" stroke="#0A0A0A" /></span>
     <dl class="wallet-rows">
@@ -34,5 +36,5 @@
       </div>
     </dl>
     <p class="info-box-note">{{ _("web.heroes.wallet.note") }}</p>
-  </div>
-</section>
+  </section>
+</div>

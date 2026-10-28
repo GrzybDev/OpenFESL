@@ -59,7 +59,7 @@ async def test_a_hero_made_on_the_site_is_the_hero_the_game_logs_in_with(
         arrived = await client.get(f"{base}{created.headers['location']}")
         done = markup(arrived.content)
         assert "Mossgrove is the default hero, in slot 1 of 4." in done
-        assert "when it starts again, it logs in as Mossgrove" in done
+        assert "Play Now starts it again as Mossgrove" in done
         # The bar shows the default hero from now on.
         assert "Default hero Mossgrove" in visible(arrived.content)
         # The game may have used another account, whose sign-in returns to the creator.

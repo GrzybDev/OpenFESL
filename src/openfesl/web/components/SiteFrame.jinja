@@ -47,6 +47,7 @@
        {% if path == '/' ~ game.id %} aria-current="page"{% endif %}
        class="site-name"><span class="site-title">{{ game.name }}</span><span class="site-on">{{ _("web.site.on") }}</span></a>
     <SiteNav />
+    {% if game.site.start_links %}<PlayNowBadge />{% endif %}
   </header>
   {% if player %}
     <SiteBar />

@@ -207,7 +207,7 @@ msgid "web.creator.lead"
 msgstr "A random hero stands ready: change its faction, class and look, then name it."
 
 msgid "web.creator.lead.first"
-msgstr "The first hero becomes the default hero, the one OpenFESLHook's launcher logs the game in with."
+msgstr "The first hero becomes the default hero, the one Play Now starts the game with."
 
 msgid "web.creator.lead.kept"
 msgstr "Faction, class and the look chosen here stay with the hero; a new name later costs %(price)s %(currency)s."
@@ -411,16 +411,13 @@ msgid "web.created.default"
 msgstr "%(hero)s is the default hero, in slot %(slot)s of %(slots)s."
 
 msgid "web.created.from_game"
-msgstr "%(game)s closed when it sent this page; when it starts again, it logs in as %(hero)s."
-
-msgid "web.created.logs_in"
-msgstr "OpenFESLHook's launcher logs %(game)s in as %(hero)s."
+msgstr "%(game)s closed when it sent this page. Play Now starts it again as %(hero)s."
 
 msgid "web.created.further"
 msgstr "Slot %(slot)s of %(slots)s. %(game)s lists the new hero from its next login."
 
 msgid "web.created.stays"
-msgstr "%(hero)s stays the default hero, so OpenFESLHook's launcher logs %(game)s in as %(hero)s."
+msgstr "%(hero)s stays the default hero, so Play Now starts the game as %(hero)s."
 
 msgid "web.created.kit"
 msgstr "The starting kit is in place: %(kit)s."
@@ -450,7 +447,7 @@ msgid "web.heroes.title"
 msgstr "My heroes"
 
 msgid "web.heroes.lead"
-msgstr "Heroes are created on this site and played in %(game)s. OpenFESLHook's launcher logs the game in as the default hero, %(hero)s. Heroes cannot be deleted."
+msgstr "Heroes are created on this site and played in %(game)s. Play Now starts the game as the default hero, %(hero)s. Heroes cannot be deleted."
 
 msgid "web.heroes.lead.none"
 msgstr "No hero yet. Heroes are created on this site and played in %(game)s; the game opens this site when an account without heroes logs in."
@@ -516,7 +513,7 @@ msgid "web.heroes.make_default"
 msgstr "Make default"
 
 msgid "web.heroes.toast.default"
-msgstr "%(hero)s is now the default hero: OpenFESLHook's launcher logs %(game)s in as %(hero)s."
+msgstr "%(hero)s is now the default hero. Play Now starts the game as %(hero)s."
 
 msgid "web.heroes.back"
 msgstr "Back to my heroes"
@@ -609,7 +606,7 @@ msgid "web.arrival.text"
 msgstr "The game opens this page when the account it logs in with has no hero, and then closes."
 
 msgid "web.arrival.next"
-msgstr "Create a hero below; when %(game)s starts again, it logs in with that hero."
+msgstr "Create a hero below; Play Now then starts %(game)s with it."
 
 msgid "web.arrival.signed_in"
 msgstr "Signed in here as %(account)s. If the game used another account:"
@@ -627,7 +624,7 @@ msgid "web.arrival.has_hero"
 msgstr "The account has a hero now"
 
 msgid "web.arrival.has_hero.text"
-msgstr "%(game)s sent this page because the account had no hero when the game logged in. %(hero)s has been created since, so the game logs in with it from its next start."
+msgstr "%(game)s sent this page because the account had no hero when the game logged in. %(hero)s has been created since, so Play Now can start the game with it."
 
 msgid "games.bfheroes.faction.royal"
 msgstr "Royal Army"
@@ -6273,3 +6270,28 @@ msgstr "Start %(game)s once from its folder and tick “Open Play links from the
 
 msgid "web.play_now.how.setup"
 msgstr "How to play: setting up OpenFESLHook"
+
+msgid "web.play_now.badge"
+msgstr "Play now!"
+
+#, python-format
+msgid "web.play_now.badge.as"
+msgstr "As %(hero)s"
+
+msgid "web.play_now.badge.sign_in"
+msgstr "Sign in to play"
+
+msgid "web.play_now.badge.no_hero"
+msgstr "Create a hero first"
+
+#, python-format
+msgid "web.play_now.as"
+msgstr "Play Now as %(hero)s"
+
+#, python-format
+msgid "web.play_now.box"
+msgstr "Play Now starts %(game)s as the default hero, %(hero)s, through OpenFESLHook's launcher. Each start uses a one-time link."
+
+#, python-format
+msgid "web.play_now.box.none"
+msgstr "Play Now needs a hero. Once one exists, Play Now starts %(game)s as the default hero through OpenFESLHook's launcher."

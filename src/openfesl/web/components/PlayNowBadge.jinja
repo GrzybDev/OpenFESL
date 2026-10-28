@@ -1,0 +1,18 @@
+{# The badge in the header of a game's own site that leads to Play Now, with a ribbon that names the
+   hero the game starts as, or what Play Now needs first. #}
+{% set page = "/" ~ game.id ~ "/play-now" %}
+{% set hero = bar.roster.playing if bar and bar.roster else none %}
+<a href="{{ url(page) }}"
+   {% if path == page %} aria-current="page"{% endif %}
+   class="play-badge">
+  <span class="play-badge-disc"><span class="play-badge-name">{{ _("web.play_now.badge") }}</span></span>
+  <span class="play-badge-ribbon{% if toast and toast.key == 'web.heroes.toast.default' %} play-badge-changed{% endif %}">
+    {%- if not player -%}
+      {{ _("web.play_now.badge.sign_in") }}
+    {%- elif hero -%}
+      {{ _("web.play_now.badge.as", hero=hero.persona.name) }}
+    {%- else -%}
+      {{ _("web.play_now.badge.no_hero") }}
+    {%- endif -%}
+  </span>
+</a>

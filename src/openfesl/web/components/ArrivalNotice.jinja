@@ -8,6 +8,11 @@
     {% if roster and roster.default %}
       <h2 id="arrival-title" class="site-box-title">{{ _("web.arrival.has_hero") }}</h2>
       <p>{{ _("web.arrival.has_hero.text", game=game.name, hero=roster.default.persona.name) }}</p>
+      {% if game.site.start_links %}
+        <div class="site-actions">
+          <PlayNowButton :hero="roster.default" />
+        </div>
+      {% endif %}
     {% else %}
       <h2 id="arrival-title" class="site-box-title">{{ _("web.arrival.title", game=game.name) }}</h2>
       {% if player %}

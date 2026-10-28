@@ -1,0 +1,26 @@
+/* The blue info box on Play Now beside the wallets, with its button and the way to How to play. */
+@layer components {
+  .info-box-blue {
+    --box: #325f89;
+    --box-edge: #4b8fc4;
+    --box-ink: #fff;
+  }
+
+  .play-now-box-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 18px;
+    margin-top: 12px;
+  }
+
+  .play-now-box-changed {
+    animation: fade-in 150ms var(--ease-menu) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .play-now-box-changed {
+      animation-duration: 100ms;
+    }
+  }
+}
