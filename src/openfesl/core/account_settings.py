@@ -7,6 +7,7 @@ from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, Transact
 from openfesl.core.logins import UNKNOWN_USER, Logins
 from openfesl.core.policies import GamePolicies
 from openfesl.core.registration import INVALID_VALUE, birth_date_error, is_country
+from openfesl.core.texts import language_of
 from openfesl.protocol.acct import (
     NuGetAccountAnswer,
     NuGetAccountByNuid,
@@ -57,7 +58,7 @@ class AccountSettingsService:
         credentials = await self._store.find(_player(connection).nuid)
         if credentials is None:
             raise TransactionError(UNKNOWN_USER)
-        return _details(credentials.account)
+        return _details(credentials.account, connection)
 
     async def get_account_by_nuid(
         self, connection: FeslConnection, request: NuGetAccountByNuid
@@ -71,7 +72,8 @@ class AccountSettingsService:
         Raises:
             TransactionError: When the name or password is wrong.
         """
-        return _details((await self._logins.check(request.nuid, request.password)).account)
+        credentials = await self._logins.check(request.nuid, request.password)
+        return _details(credentials.account, connection)
 
     async def update_account(self, connection: FeslConnection, request: NuUpdateAccount) -> Message:
         """Change the country of the session's account, the only detail of the form it keeps.
@@ -141,5 +143,11 @@ def _player(connection: FeslConnection) -> Account:
     return account
 
 
-def _details(account: Account) -> NuGetAccountAnswer:
-    return NuGetAccountAnswer(nuid=account.nuid, user_id=account.id, country=account.country)
+def _details(account: Account, connection: FeslConnection) -> NuGetAccountAnswer:
+    assert connection.hello is not None
+    return NuGetAccountAnswer(
+        nuid=account.nuid,
+        user_id=account.id,
+        country=account.country,
+        language=language_of(connection.hello.locale),
+    )

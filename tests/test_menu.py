@@ -24,9 +24,9 @@ def counts(body: bytes) -> list[int]:
 @pytest.mark.usefixtures("open_hosting")
 async def test_the_menu_counts_each_games_players_and_servers(server_url: str) -> None:
     status, _, body = await fetch(server_url, "/")
-    # Online, in matches, in the menus and servers on the tile, then servers and online in the
-    # table.
-    assert (status, counts(body)) == (200, [0, 0, 0, 0, 0, 0])
+    # Online, in matches, in the menus and servers on each game's tile, then each game's servers
+    # and online in the table and their sums.
+    assert (status, counts(body)) == (200, [0] * 14)
     assert b"No servers are online right now." in body
 
     async with game(server_url) as server, game(server_url) as playing, game(server_url) as idle:
@@ -37,8 +37,10 @@ async def test_the_menu_counts_each_games_players_and_servers(server_url: str) -
 
         status, _, body = await fetch(server_url, "/")
         page = body.decode()
-        # The busiest server with room for a squad of four comes after the tile's figures.
-        assert (status, counts(body)) == (200, [2, 1, 1, 1, 1, 1, 2])
+        # The busiest server with room for a squad of four comes after the tile's figures, and the
+        # game with players online comes first.
+        tiles = [2, 1, 1, 1, 1, 0, 0, 0, 0]
+        assert (status, counts(body)) == (200, [*tiles, 1, 2, 0, 0, 1, 2])
         assert "Invented Ridge Rush" in page
         assert "7 free" in page
         assert "2 online" in page

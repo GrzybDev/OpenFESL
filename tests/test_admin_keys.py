@@ -22,11 +22,12 @@ async def test_admins_add_disable_and_enable_product_keys_that_moderators_only_s
         assert "ACTIVATE-VETERAN" in page and "6 of 6 here" in page and "Keys: 6" in page
 
         # New codes are unique in any case and keep to the characters the game's prompt takes.
-        added = await client.post(f"{base}/admin/keys", data={"csrf": token, "code": "LAN-2026"})
+        new = {"csrf": token, "code": "LAN-2026", "game": "bfbc2"}
+        added = await client.post(f"{base}/admin/keys", data=new)
         assert "Added LAN-2026." in (await client.get(base + added.headers["location"])).text
-        taken = await client.post(f"{base}/admin/keys", data={"csrf": token, "code": "lan-2026"})
+        taken = await client.post(f"{base}/admin/keys", data=new | {"code": "lan-2026"})
         assert taken.status_code == 400 and "A key with this code exists already" in taken.text
-        wrong = await client.post(f"{base}/admin/keys", data={"csrf": token, "code": "a b"})
+        wrong = await client.post(f"{base}/admin/keys", data=new | {"code": "a b"})
         assert wrong.status_code == 400
 
         # Disabling asks first; the game then refuses the key and the guide leaves it out.
@@ -70,7 +71,8 @@ async def test_admins_edit_a_keys_grants_labels_and_limits_which_the_game_and_gu
     async with httpx2.AsyncClient() as client:
         page = (await sign_in(client, base, next="/admin/keys")).text
         token = form_token(page)
-        await client.post(f"{base}/admin/keys", data={"csrf": token, "code": "LAN-2026"})
+        new = {"csrf": token, "code": "LAN-2026", "game": "bfbc2"}
+        await client.post(f"{base}/admin/keys", data=new)
         edit = f"{base}/admin/keys/LAN-2026"
         assert "Edit key" in (await client.get(edit)).text
 

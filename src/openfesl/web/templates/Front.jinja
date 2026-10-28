@@ -49,7 +49,8 @@
 
       <section aria-labelledby="front-busiest" class="front-busiest">
         {% set free %}{% if busiest %}<Free :server="busiest" />{% endif %}{% endset %}
-        <Bar id="front-busiest" :extra="free" wrap>{{ _("web.front.busiest") }}</Bar>
+        {% set room = "" if game.listing.squad > 1 else ".free" %}
+        <Bar id="front-busiest" :extra="free" wrap>{{ _("web.front.busiest" ~ room) }}</Bar>
         {% if busiest %}
           {% set href = url('/' ~ game.id ~ '/servers/' ~ busiest.slug) if "servers" in game.pages else "" %}
           <div class="table-scroll">
@@ -76,7 +77,7 @@
                   <div role="cell" aria-colspan="7" class="row-details">
                     <div>
                       <p class="row-facts">{{ _("web.server.since", time=busiest.since.strftime("%H:%M")) }}{% if busiest.expansion %} · <Published kind="expansion" :label="busiest.expansion" />{% endif %}</p>
-                      <p class="row-text">{{ _("web.server.joining") }}</p>
+                      <p class="row-text">{{ _("games." ~ game.id ~ ".joining") }}</p>
                     </div>
                     <div class="row-actions">
                       {% if href %}<SmallAction :href="href" :label="_('web.server.page')" />{% endif %}
@@ -89,7 +90,7 @@
           </div>
         {% else %}
           <div class="row-details front-none">
-            <p>{{ _("web.activity.no_room") if activity.servers else _("web.activity.no_servers") }}</p>
+            <p>{{ _("web.activity.no_room" ~ room) if activity.servers else _("web.activity.no_servers") }}</p>
             {% if activity.servers and "servers" in game.pages %}
               <SmallAction :href="url('/' ~ game.id ~ '/servers')" :label="_('web.front.all_servers')" />
             {% elif not activity.servers and "host" in game.pages %}
@@ -118,7 +119,7 @@
             </li>
             <li>
               {% set code %}{% if key %}<FileName :text="key" />{% endif %}{% endset %}
-              <div><StepNumber :number="3" /><p class="body-text">{% if key %}{{ _("web.front.setup.account", key=code) }}{% else %}{{ _("web.front.setup.account.plain") }}{% endif %}</p></div>
+              <div><StepNumber :number="3" /><p class="body-text">{% if game.launched %}{{ _("web.front.setup.launcher") }}{% elif key %}{{ _("web.front.setup.account", key=code) }}{% else %}{{ _("web.front.setup.account.plain") }}{% endif %}</p></div>
               {% if key %}
                 <CopyButton :value="key" :label="_('web.front.setup.copy')" :note="_('web.front.setup.copied')" />
               {% endif %}

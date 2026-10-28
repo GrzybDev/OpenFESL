@@ -56,14 +56,15 @@
                     <Count :value="activity.servers" class="live-value" />
                   </dd>
                 </div>
+                {% set room = "" if tile.game.listing.squad > 1 else ".free" %}
                 <div class="tile-busiest">
-                  <dt>{{ _("web.activity.busiest") }}</dt>
+                  <dt>{{ _("web.activity.busiest" ~ room) }}</dt>
                   <dd>
                     {% if tile.busiest %}
                       <span class="tile-server">{{ tile.busiest.name }}</span>
                       <span class="tile-players"><Count :value="tile.busiest.players" class="count-sm live-value" />&nbsp;/&nbsp;{{ number(tile.busiest.max_players) }}<span class="tile-free">{{ _("web.server.free", count=number(tile.busiest.free)) }}</span></span>
                     {% elif activity.servers %}
-                      <span class="tile-none">{{ _("web.activity.no_room") }}</span>
+                      <span class="tile-none">{{ _("web.activity.no_room" ~ room) }}</span>
                     {% else %}
                       <span class="tile-none">{{ _("web.activity.no_servers") }}</span>
                     {% endif %}

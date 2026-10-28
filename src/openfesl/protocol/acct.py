@@ -86,11 +86,15 @@ class NuGetAccountByNuid(Message):
 
 
 class NuGetAccountAnswer(Message):
-    """The account's details; the service keeps no names, address, birth date or e-mail choices."""
+    """The account's details; the service keeps no names, address, birth date or e-mail choices.
+
+    Accounts keep no language either, so the language is that of the game that asks.
+    """
 
     nuid: str
     user_id: int
     country: str
+    language: str
 
 
 class NuUpdatePassword(Message):

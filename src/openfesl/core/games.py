@@ -76,8 +76,9 @@ class Http(BaseModel):
 
     Attributes:
         locker: The URL that GetLockerURL hands out, where the server answers the locker.
-        nucleus: The host of the game's Magma/Nucleus account layer, where it fetches the login
-            token its launcher session was started with; none for a game that logs in over FESL
+        magma: The host of the game's Magma web services, which the server answers as a whole:
+            the account layer, where the game fetches the login token of the launcher session it
+            was started with, the store and the website; none for a game that logs in over FESL
             alone.
         files: The editorial files by URL, as UTF-8 templates whose `${news_<language>}`
             placeholders take the news text in that language.
@@ -86,7 +87,7 @@ class Http(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     locker: str | None = None
-    nucleus: str | None = None
+    magma: str | None = None
     files: dict[str, str] = {}
 
 
@@ -231,6 +232,15 @@ class Game(BaseModel):
             None,
         )
 
+    @property
+    def launched(self) -> bool:
+        """Whether the game logs in with a launcher's sign-in instead of on a screen of its own.
+
+        Such a game is started with the launcher's session, which its Magma host trades for
+        the token it logs in with.
+        """
+        return self.http.magma is not None
+
     def ages(self, country: str) -> Ages:
         """Return the age limits of a country on registration.
 
@@ -339,13 +349,15 @@ class Games:
 
 
 def load_games(folder: Traversable | None = None) -> Games:
-    """Read every game's TOML data file and the editorial files it names.
+    """Read every game's TOML data file and the editorial files it names, in the files' order.
 
     Args:
         folder: The folder of data files; the games that ship with the server when omitted.
     """
     folder = folder or files("openfesl") / "games"
-    return Games(_load(entry, folder) for entry in folder.iterdir() if entry.name.endswith(".toml"))
+    # A folder lists its files in an order of the file system's own.
+    entries = sorted(folder.iterdir(), key=lambda entry: entry.name)
+    return Games(_load(entry, folder) for entry in entries if entry.name.endswith(".toml"))
 
 
 def _load(entry: Traversable, folder: Traversable) -> Game:

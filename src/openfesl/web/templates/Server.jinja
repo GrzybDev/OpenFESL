@@ -115,7 +115,7 @@
           </section>
           <div class="server-copy">
             <CopyBlock :value="server.name" :label="_('web.server.copy')" :note="_('web.server.copied')" :field_label="_('web.servers.name')" :hint="_('web.server.select')" />
-            <p class="body-text js-only">{{ _("web.server.joining") }}{% if "play" in game.pages %} <a href="{{ url('/' ~ game.id ~ '/play') }}" class="reload">{{ _("web.front.play") }}</a>{% endif %}</p>
+            <p class="body-text js-only">{{ _("games." ~ game.id ~ ".joining") }}{% if "play" in game.pages %} <a href="{{ url('/' ~ game.id ~ '/play') }}" class="reload">{{ _("web.front.play") }}</a>{% endif %}</p>
           </div>
         </div>
 

@@ -1,0 +1,79 @@
+name = "Battlefield Heroes"
+# The game's executable, next to which OpenFESLHook goes; started with +dedicated, the same
+# executable is the game's dedicated server.
+executable = "BFHeroes.exe"
+# The game's Plasma partition and persona namespace are kept on EA's servers, not in the client,
+# which only reads the partition back from the Hello answer; these are the ones the game was
+# played with live on OpenFESL.
+partition = "/eagames/bfwest"
+namespace = "bfwest"
+# The web pages the game's menu shows beside its front page: the guide to playing. The server list
+# is drawn for games with squads and a server browser that finds servers by name, and the
+# leaderboard for other stats than this game's, so neither is listed.
+pages = ["play"]
+
+# The one client string of versions 1.46 and 1.89, which their dedicated servers greet FESL with
+# too. The game takes its Theater address from the Hello answer; the port is the one that its
+# Settings/EABackend/GameManager.con names in a line it leaves commented out. The game is free to
+# play, so no entitlement is needed to log in.
+[clients.bfwest-pc]
+theater_port = 18275
+
+# The host of the game's Magma web services, the default of 1.89's magmaHost and 1.46's PROD
+# environment: the account layer where the game trades the session it was started with for its
+# login token, the store and the website.
+[http]
+magma = "www.battlefieldheroes.com"
+
+# How the services behave where the game handles more than one behaviour; the instance's
+# settings override each.
+[policies]
+# A birth date is checked against the country's age limits (or: false).
+registration.age_check = true
+# A player old enough to register but not without a parent's consent registers (or: refuse).
+registration.under_parental_age = "allow"
+# A new account logs in only once the link sent to its address was opened (or: true).
+accounts.email_verification = false
+# A login while the account plays elsewhere signs the other game out (or: refuse).
+accounts.concurrent_login = "replace"
+# The oldest client version that may connect, such as "1.89"; older ones are told to update.
+connect.minimum_client_version = ""
+# The oldest OpenFESLHook version that may connect, such as "0.2.0"; older hooks and those
+# that name no version are told to update.
+connect.minimum_hook_version = ""
+# Whether players are told that the service is busy. The game's dedicated servers greet FESL as
+# its clients do, so they are kept out too.
+connect.maintenance = false
+
+# The game's website of autumn 2012, as the web pages draw it: its yellow links and Play Now badge
+# on a dark frame, red-brown menus and boxes, green buttons, parchment rows and white headings. Its
+# heading typeface is not free, so one that the pages ship takes its place.
+[theme]
+font = "Barlow"
+accent = "#FEDE01"
+accent_hover = "#FFE366"
+menu_current = "#521F1C"
+badge = "#77813B"
+badge_edge = "#4F5627"
+field = "#262626"
+mottle = "#D7C8AF"
+grit = "#F1E9DE"
+panel = "rgba(82, 31, 28, 0.82)"
+panel_edge = "#B9453E"
+row = "#D7C8AF"
+row_alt = "#C5BBA7"
+row_light = "#F1E9DE"
+score_row = "#C4BAA6"
+score_row_alt = "#C9C099"
+subtitle = "#141414"
+bright = "#F8F4EF"
+soft = "#DDDDDD"
+
+# The Theater lobby the dedicated servers list their games in. Lobbies are kept on EA's servers,
+# not in the client, and a dedicated server asks for any (LID -1); this is the one the game was
+# played with live on OpenFESL.
+[[lobbies]]
+id = 1
+name = "bfwestPC01"
+locale = "en_US"
+max_games = 10000

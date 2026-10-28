@@ -163,6 +163,9 @@ msgstr "Serwery"
 msgid "web.activity.busiest"
 msgstr "Najbardziej oblegany z miejscem dla oddziału"
 
+msgid "web.activity.busiest.free"
+msgstr "Najbardziej oblegany z wolnym miejscem"
+
 msgid "web.activity.share.one"
 msgstr "W meczach: %(matches)s z %(count)s osoby online"
 
@@ -180,6 +183,9 @@ msgstr "Nikogo nie ma online"
 
 msgid "web.activity.no_room"
 msgstr "Żaden serwer nie ma teraz miejsca dla oddziału."
+
+msgid "web.activity.no_room.free"
+msgstr "Żaden serwer nie ma teraz wolnego miejsca."
 
 msgid "web.activity.no_servers"
 msgstr "Żaden serwer nie działa w tej chwili."
@@ -234,6 +240,9 @@ msgstr "Wszystkie gry"
 msgid "games.bfbc2.tagline"
 msgstr "Gra sieciowa na PC"
 
+msgid "games.bfheroes.tagline"
+msgstr "Gra sieciowa na PC"
+
 msgid "web.game.menu.servers"
 msgstr "Serwery"
 
@@ -261,6 +270,9 @@ msgstr "Wszystkie serwery"
 msgid "web.front.busiest"
 msgstr "Najbardziej oblegany serwer z miejscem dla oddziału"
 
+msgid "web.front.busiest.free"
+msgstr "Najbardziej oblegany serwer z wolnym miejscem"
+
 msgid "web.servers.status"
 msgstr "Stan"
 
@@ -285,10 +297,13 @@ msgstr "Strona serwera"
 msgid "web.server.since"
 msgstr "Działa od %(time)s UTC"
 
-msgid "web.server.joining"
+msgid "games.bfbc2.joining"
 msgstr ""
 "Do serwera dołącza się w grze; jej przeglądarka serwerów znajduje go po "
 "nazwie."
+
+msgid "games.bfheroes.joining"
+msgstr "Do serwera dołącza się w grze."
 
 msgid "web.server.page"
 msgstr "Strona serwera"
@@ -337,6 +352,9 @@ msgstr "Uruchom grę i utwórz konto; gdy gra poprosi o klucz, wpisz %(key)s."
 
 msgid "web.front.setup.account.plain"
 msgstr "Uruchom grę i utwórz konto."
+
+msgid "web.front.setup.launcher"
+msgstr "Uruchom grę; najpierw otworzy się okno logowania. Zaloguj się kontem tego serwisu założonym w innej grze, bo ta gra nie zakłada kont."
 
 msgid "web.front.setup.copy"
 msgstr "Kopiuj klucz"
@@ -1527,6 +1545,9 @@ msgstr ""
 "OpenFESLHook działa z wydaniem gry na Windows ze Steam, Origin lub "
 "aplikacji EA."
 
+msgid "games.bfheroes.releases"
+msgstr "OpenFESLHook działa z wersjami 1.46 i 1.89 gry na Windows."
+
 msgid "web.play.steps"
 msgstr "Przygotowanie gry w kilku krokach"
 
@@ -1614,6 +1635,15 @@ msgstr ""
 msgid "web.play.account.plain"
 msgstr "Uruchom grę i utwórz konto na jej ekranie logowania."
 
+msgid "web.play.launcher"
+msgstr "Zaloguj się"
+
+msgid "web.play.launcher.where"
+msgstr "W oknie logowania"
+
+msgid "web.play.launcher.text"
+msgstr "Uruchom grę: OpenFESLHook najpierw otwiera okno logowania, a potem uruchamia grę. Gra nie zakłada kont, więc zaloguj się kontem tego serwisu założonym w innej grze."
+
 msgid "web.play.server_list"
 msgstr "Lista serwerów"
 
@@ -1633,10 +1663,13 @@ msgstr "%(count)s serwerów"
 msgid "web.play.servers.other"
 msgstr "%(count)s serwera"
 
-msgid "web.play.joining"
+msgid "games.bfbc2.joining.guide"
 msgstr ""
 "Do serwerów dołącza się z przeglądarki serwerów w grze; pokazuje ona te "
 "same serwery co ta strona."
+
+msgid "games.bfheroes.joining.guide"
+msgstr "Do serwerów dołącza się w grze."
 
 msgid "web.play.keys"
 msgstr "Klucze produktu"
@@ -2227,6 +2260,9 @@ msgstr "Każdy serwer od razu wystawia swoją grę. Serwery są nadal zapisywane
 
 msgid "games.bfbc2.short"
 msgstr "Bad Company 2"
+
+msgid "games.bfheroes.short"
+msgstr "Heroes"
 
 msgid "web.admin.servers"
 msgstr "Serwery"

@@ -33,3 +33,16 @@ async def test_the_guide_names_the_hook_this_server_and_the_enabled_keys(
     assert "Status weterana" not in page
     for shown in ("5 kluczy", "Gra sieciowa", "Wskaż hookowi ten serwer"):
         assert shown in page
+
+
+async def test_a_game_its_launcher_signs_in_is_set_up_without_making_an_account_in_it(
+    server_url: str,
+) -> None:
+    # Battlefield Heroes has no login screen: the hook's launcher signs in before it starts it.
+    _, _, guide = await fetch(server_url, "/bfheroes/play")
+    _, _, front = await fetch(server_url, "/bfheroes")
+
+    assert ">4</span>Sign in" in guide.decode()
+    for page in (guide.decode(), front.decode()):
+        assert "BFHeroes.exe" in page and "sign-in window" in page
+        assert "create an account" not in page

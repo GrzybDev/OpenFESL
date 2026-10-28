@@ -66,11 +66,12 @@
               <HookLines :relay="relay" />
             </GuideStep>
           {% endif %}
+          {% set account = "web.play.launcher" if game.launched else "web.play.account" %}
           <GuideStep :number="4 if relay else 3"
-                     :heading="_('web.play.account')"
-                     :where="_('web.play.account.where')">
+                     :heading="_(account)"
+                     :where="_(account ~ '.where')">
             {% set key %}{% if play_key %}<FileName :text="play_key.key.code" />{% endif %}{% endset %}
-            <p class="body-text guide-fill">{% if play_key %}{{ _("web.play.account.text", key=key) }}{% else %}{{ _("web.play.account.plain") }}{% endif %}</p>
+            <p class="body-text guide-fill">{% if game.launched %}{{ _("web.play.launcher.text") }}{% elif play_key %}{{ _("web.play.account.text", key=key) }}{% else %}{{ _("web.play.account.plain") }}{% endif %}</p>
             {% if play_key %}
               <div class="play-key">
                 <span>{{ play_key.key.code }}</span>
@@ -82,7 +83,7 @@
             {% endif %}
           </GuideStep>
         </ol>
-        <p class="body-text side-note">{{ _("web.play.joining") }}</p>
+        <p class="body-text side-note">{{ _("games." ~ game.id ~ ".joining.guide") }}</p>
       </section>
 
       {% if keys %}

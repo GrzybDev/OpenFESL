@@ -23,6 +23,7 @@ from openfesl.core.keys import KeyService
 from openfesl.core.launcher import LauncherService, LauncherSessions
 from openfesl.core.leaderboards import LeaderboardService
 from openfesl.core.logins import Logins
+from openfesl.core.magma import Magma
 from openfesl.core.messages import MessageService
 from openfesl.core.personas import PersonaService
 from openfesl.core.playnow import PlayNow
@@ -63,7 +64,8 @@ class GameServices:
         self._theater = Theater(games, self._commands)
         self._launcher_sessions = LauncherSessions()
         self.players = Players()
-        self.game_http = GameHttp(games, self.players, load_texts("news"), self._launcher_sessions)
+        self.game_http = GameHttp(games, self.players, load_texts("news"))
+        self.magma = Magma(self._launcher_sessions)
         self.approval = Approval(stores.servers)
         self.hosting = Hosting(self.approval)
         self.census = Census(self.hosting, self.players)

@@ -8,8 +8,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from starlette.exceptions import HTTPException
 from starlette.middleware.sessions import SessionMiddleware
 
-from openfesl.core.game_http import GameHttp
-from openfesl.core.games import load_games
+from openfesl.core.games import Games, load_games
 from openfesl.relay.endpoint import relay_endpoint
 from openfesl.server.admin import include_admin_routes
 from openfesl.server.public import include_public_routes
@@ -19,6 +18,7 @@ from openfesl.server.stores import Stores
 from openfesl.storage.database import migrate
 from openfesl.web.game_http import GameHttpMiddleware
 from openfesl.web.languages import LanguageMiddleware
+from openfesl.web.magma import magma_app
 from openfesl.web.pages import STATIC, Pages, StaticAssets
 from openfesl.web.security import SecurityHeadersMiddleware
 
@@ -64,7 +64,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.mount("/static", StaticAssets(directory=STATIC))
     include_public_routes(app, settings, games, pages, services, stores)
     include_admin_routes(app, settings, games, pages, services, stores)
-    _add_middleware(app, settings, services.game_http)
+    _add_middleware(app, settings, games, services)
 
     @app.get("/health", response_class=PlainTextResponse)
     async def health() -> str:
@@ -73,7 +73,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     return app
 
 
-def _add_middleware(app: FastAPI, settings: Settings, game_http: GameHttp) -> None:
+def _add_middleware(app: FastAPI, settings: Settings, games: Games, services: GameServices) -> None:
     # The last one added sees a request first: the game's HTTP keeps its own answers. Only the
     # admin panel stores anything in the session, so other pages set no cookie.
     secret = settings.session_secret.get_secret_value() if settings.session_secret else None
@@ -88,4 +88,6 @@ def _add_middleware(app: FastAPI, settings: Settings, game_http: GameHttp) -> No
     )
     app.add_middleware(LanguageMiddleware)
     app.add_middleware(SecurityHeadersMiddleware)
-    app.add_middleware(GameHttpMiddleware, http=game_http)
+    app.add_middleware(
+        GameHttpMiddleware, http=services.game_http, magma=magma_app(services.magma), games=games
+    )

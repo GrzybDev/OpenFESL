@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from email.message import Message
 
 import anyio
+import httpx2
 import pytest
 from websockets.asyncio.client import ClientConnection, connect
 from websockets.typing import Subprotocol
@@ -368,17 +369,21 @@ async def fetch(
     path: str,
     host: str | None = None,
     headers: Mapping[str, str] | None = None,
+    body: bytes | None = None,
 ) -> tuple[int, Message, bytes]:
-    """Send a GET to the server, as the hook forwards the game's HTTP when a host is given.
+    """Send a GET to the server, or a POST with a body, as the hook forwards the game's HTTP.
 
     Args:
         server_url: The server's relay address.
         path: The address on the server, with its query.
         host: The game's host, sent as X-OpenFESL-Host.
         headers: More request headers, sent again on each redirect followed.
+        body: The body of a POST.
     """
     request = urllib.request.Request(
-        server_url.replace("ws://", "http://", 1).rstrip("/") + path, headers=dict(headers or {})
+        server_url.replace("ws://", "http://", 1).rstrip("/") + path,
+        body,
+        dict(headers or {}),
     )
     if host is not None:
         request.add_header("X-OpenFESL-Host", host)
@@ -391,6 +396,24 @@ async def fetch(
             return error.code, error.headers, error.read()
 
     return await asyncio.to_thread(send)
+
+
+async def launcher_sign_in(
+    server_url: str, account: str, password: str, game: str = "bfheroes", role: str = "play"
+) -> httpx2.Response:
+    """Sign an account in at the server as OpenFESLHook's launcher does before it starts a game.
+
+    Args:
+        server_url: The server's relay address.
+        account: The account's login name.
+        password: The account's password.
+        game: The game's data-file name.
+        role: Whether the game is started to play or to host.
+    """
+    base = server_url.replace("ws://", "http://", 1).rstrip("/")
+    body = {"game": game, "role": role, "account": account, "password": password}
+    async with httpx2.AsyncClient() as client:
+        return await client.post(f"{base}/launcher/session", json=body)
 
 
 def markup(body: bytes) -> str:

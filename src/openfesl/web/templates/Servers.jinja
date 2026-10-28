@@ -199,7 +199,7 @@
                                 {% if server.roster|length > 4 %}<li><a href="{{ href }}">{{ _("web.servers.more", count=number(server.roster|length - 4)) }}</a></li>{% endif %}
                               </ul>
                             {% endif %}
-                            <p class="row-text server-joining">{% if server.free == 0 %}{{ _("web.servers.taken", count=number(server.max_players)) }} {% endif %}{{ _("web.server.joining") }}</p>
+                            <p class="row-text server-joining">{% if server.free == 0 %}{{ _("web.servers.taken", count=number(server.max_players)) }} {% endif %}{{ _("games." ~ game.id ~ ".joining") }}</p>
                           </div>
                           <div class="row-actions">
                             <SmallAction :href="href" :label="_('web.server.page')" />
