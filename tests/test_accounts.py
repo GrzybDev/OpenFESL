@@ -1,7 +1,8 @@
 from datetime import UTC, datetime, timedelta
 
-import anyio
 import pytest
+from sqlalchemy import func, update
+from sqlalchemy.ext.asyncio import create_async_engine
 from support import (
     cli,
     enter_theater,
@@ -14,6 +15,7 @@ from support import (
 )
 
 from openfesl.protocol.relay import Channel, ConnectionKey, Data
+from openfesl.storage.models import AccountRow
 
 pytestmark = pytest.mark.anyio
 
@@ -187,7 +189,7 @@ async def test_registration_checks_the_birth_date_against_the_country_age_limits
 
 
 async def test_the_admin_takes_an_account_out_of_use_which_signs_its_player_out(
-    prompt_actions: None, server_url: str, capsys: pytest.CaptureFixture[str]
+    prompt_actions: None, server_url: str, database_url: str, capsys: pytest.CaptureFixture[str]
 ) -> None:
     persona = [("TXN", "NuLoginPersona"), ("name", "Ann_01")]
     again = login("ann@example.test", "secret-pass")
@@ -234,14 +236,21 @@ async def test_the_admin_takes_an_account_out_of_use_which_signs_its_player_out(
             if isinstance(frame, Data) and frame.packet.command == "DISC"
         ]
 
-    until = (datetime.now(UTC) + timedelta(seconds=1)).isoformat()
+    until = (datetime.now(UTC) + timedelta(hours=1)).isoformat()
     await cli(capsys, "accounts", "state", "ann@example.test", "banned", "--until", until)
     async with game(server_url) as ann:
         await ann.hello(FESL, "bfbc2-pc")
         assert (await ann.request(FESL, "acct", again))["errorCode"] == "103"
-        with anyio.fail_after(5):
-            while "errorCode" in await ann.request(FESL, "acct", again):
-                await anyio.sleep(0.1)
+        # The ban's end is moved to now instead of awaited: a short ban could end on a busy
+        # machine before the first login.
+        engine = create_async_engine(database_url)
+        async with engine.begin() as connection:
+            ann_account = AccountRow.nuid == "ann@example.test"
+            await connection.execute(
+                update(AccountRow).where(ann_account).values(state_until=func.now())
+            )
+        await engine.dispose()
+        assert "errorCode" not in await ann.request(FESL, "acct", again)
 
     for args, message in [
         (("nobody@example.test", "banned"), "No player's account"),
