@@ -1,0 +1,156 @@
+import asyncio
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager, suppress
+from typing import Any
+
+from fastapi import FastAPI, WebSocket
+
+from openfesl.core.account_settings import AccountSettingsService
+from openfesl.core.accounts import AccountService
+from openfesl.core.admin import AdminFeed
+from openfesl.core.associations import AssociationService
+from openfesl.core.browsing import Browsing
+from openfesl.core.census import Census
+from openfesl.core.connect import connect_routes
+from openfesl.core.entitlements import EntitlementService
+from openfesl.core.fesl import Route
+from openfesl.core.game_http import GameHttp
+from openfesl.core.games import Games
+from openfesl.core.history import OnlineHistory
+from openfesl.core.hosting import Hosting
+from openfesl.core.joining import Joining
+from openfesl.core.keys import KeyService
+from openfesl.core.launcher import LauncherService, LauncherSessions
+from openfesl.core.leaderboards import LeaderboardService
+from openfesl.core.logins import Logins
+from openfesl.core.messages import MessageService
+from openfesl.core.personas import PersonaService
+from openfesl.core.playnow import PlayNow
+from openfesl.core.policies import GamePolicies
+from openfesl.core.presence import PresenceService
+from openfesl.core.records import RecordService
+from openfesl.core.registration import Terms
+from openfesl.core.rich_presence import RichPresence
+from openfesl.core.servers import Approval
+from openfesl.core.session import GameSession, Players
+from openfesl.core.stats import StatsService
+from openfesl.core.telemetry import telemetry_routes
+from openfesl.core.texts import load_texts
+from openfesl.core.theater import Theater, TheaterRoute, theater_routes
+from openfesl.core.verification import EmailVerification
+from openfesl.server.mail import SmtpMailer
+from openfesl.server.settings import Settings
+from openfesl.server.stores import Stores
+from openfesl.web.game_icons import presence_art
+
+
+class GameServices:
+    """The games' side of the server: their sessions, the games they host and what they call."""
+
+    def __init__(self, settings: Settings, games: Games, stores: Stores) -> None:
+        """Build what the games' sessions and the pages share before the server starts.
+
+        Args:
+            settings: The deployment's settings.
+            games: The games the server serves.
+            stores: The database's stores.
+        """
+        self._settings = settings
+        self._games = games
+        self._stores = stores
+        self._routes: dict[tuple[str, str], Route[Any]] = {}
+        self._commands: dict[str, TheaterRoute[Any]] = {}
+        self._theater = Theater(games, self._commands)
+        self._launcher_sessions = LauncherSessions()
+        self.players = Players()
+        self.game_http = GameHttp(games, self.players, load_texts("news"), self._launcher_sessions)
+        self.approval = Approval(stores.servers)
+        self.hosting = Hosting(self.approval)
+        self.census = Census(self.hosting, self.players)
+        art = presence_art(settings.public_url)
+        self.rich_presence = RichPresence(self.hosting, settings.discord_application_id, art)
+        self.history = OnlineHistory(stores.history, self.census, games)
+        self.feed = AdminFeed(stores.admin_log)
+        self.policies = GamePolicies(stores.settings)
+        self.terms = Terms.load()
+
+    @asynccontextmanager
+    async def running(self, app: FastAPI) -> AsyncIterator[None]:
+        """Start the services and their followers once the database is ready, and stop them after.
+
+        Args:
+            app: The application, whose state hands the pages the e-mail verification and the
+                launcher sign-in.
+        """
+        settings, games, stores = self._settings, self._games, self._stores
+        routes, commands = self._routes, self._commands
+        hosting, players, feed, policies = self.hosting, self.players, self.feed, self.policies
+        logins = Logins(stores.accounts)
+        mailer = None
+        if settings.smtp_host and settings.smtp_sender:
+            mailer = SmtpMailer(settings, settings.smtp_host, settings.smtp_sender)
+        verification = EmailVerification(stores.accounts, mailer, settings.public_url)
+        app.state.verification = verification
+        accounts = AccountService(
+            stores.accounts,
+            logins,
+            stores.entitlements,
+            stores.keys,
+            self.terms,
+            policies,
+            verification,
+        )
+        personas = PersonaService(stores.personas)
+        await personas.prepare(await accounts.prepare(games))
+        app.state.launcher = LauncherService(logins, games, personas, self._launcher_sessions)
+        routes.update(connect_routes(games, policies))
+        routes.update(telemetry_routes())
+        routes.update(accounts.routes())
+        routes.update(AccountSettingsService(stores.accounts, logins, policies).routes())
+        routes.update(personas.routes())
+        routes.update(EntitlementService(stores.entitlements, hosting).routes())
+        routes.update(KeyService(stores.keys).routes())
+        routes.update(self.game_http.routes())
+        routes.update(StatsService(stores.stats, stores.personas, hosting).routes())
+        routes.update(LeaderboardService(stores.stats).routes())
+        routes.update(RecordService(stores.records).routes())
+        routes.update(
+            AssociationService(stores.associations, stores.personas, players, hosting).routes()
+        )
+        routes.update(PresenceService(stores.personas, players, stores.associations).routes())
+        messages = MessageService(stores.messages, stores.personas, players, stores.associations)
+        routes.update(messages.routes())
+        commands.update(theater_routes())
+        commands.update(hosting.routes())
+        commands.update(Browsing(hosting).routes())
+        joining = Joining(hosting)
+        commands.update(joining.routes())
+        routes.update(PlayNow(hosting).routes())
+        players.follow(feed)
+        joining.follow(feed)
+        await feed.start()
+        await self.rich_presence.follow_icons(stores.game_icons, feed)
+        followers = [
+            asyncio.create_task(hosting.follow_approvals()),
+            asyncio.create_task(feed.follow()),
+            asyncio.create_task(self.history.follow()),
+            asyncio.create_task(self.rich_presence.follow_changes()),
+        ]
+        yield
+        for follower in followers:
+            follower.cancel()
+            with suppress(asyncio.CancelledError):
+                await follower
+        await messages.close()
+
+    def start_session(self, websocket: WebSocket, hook_version: str | None) -> GameSession:
+        """Create the core's session for a game that connected to the relay.
+
+        Args:
+            websocket: The accepted WebSocket that carries the game.
+            hook_version: The version of the hook that opened it, when its User-Agent names one.
+        """
+        address = self._settings.client_address(websocket)
+        return GameSession(
+            self._routes, self.players, address, self._theater, hook_version, self.rich_presence
+        )

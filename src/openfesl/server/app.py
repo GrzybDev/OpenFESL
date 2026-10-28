@@ -1,94 +1,26 @@
-import asyncio
 import secrets
 from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager, suppress
-from typing import Any
+from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, WebSocket
+from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from starlette.exceptions import HTTPException
 from starlette.middleware.sessions import SessionMiddleware
 
-from openfesl.core.account_settings import AccountSettingsService
-from openfesl.core.accounts import AccountService
-from openfesl.core.admin import AdminFeed
-from openfesl.core.admins import GroupRoles
-from openfesl.core.associations import AssociationService
-from openfesl.core.browsing import Browsing
-from openfesl.core.census import Census
-from openfesl.core.connect import connect_routes
-from openfesl.core.entitlements import EntitlementService
-from openfesl.core.fesl import Route
 from openfesl.core.game_http import GameHttp
 from openfesl.core.games import load_games
-from openfesl.core.history import OnlineHistory
-from openfesl.core.hosting import Hosting
-from openfesl.core.joining import Joining
-from openfesl.core.keys import KeyService
-from openfesl.core.launcher import LauncherService, LauncherSessions
-from openfesl.core.leaderboards import LeaderboardService
-from openfesl.core.logins import Logins
-from openfesl.core.messages import MessageService
-from openfesl.core.personas import PersonaService
-from openfesl.core.playnow import PlayNow
-from openfesl.core.policies import GamePolicies
-from openfesl.core.presence import PresenceService
-from openfesl.core.records import RecordService
-from openfesl.core.registration import Terms
-from openfesl.core.rich_presence import RichPresence
-from openfesl.core.servers import Approval
-from openfesl.core.session import GameSession, Players
-from openfesl.core.stats import StatsService
-from openfesl.core.telemetry import telemetry_routes
-from openfesl.core.texts import load_texts
-from openfesl.core.theater import Theater, TheaterRoute, theater_routes
-from openfesl.core.verification import Confirmation, EmailVerification
 from openfesl.relay.endpoint import relay_endpoint
-from openfesl.server.mail import SmtpMailer
+from openfesl.server.admin import include_admin_routes
+from openfesl.server.public import include_public_routes
+from openfesl.server.services import GameServices
 from openfesl.server.settings import Settings
-from openfesl.storage.accounts import SqlAccountStore
-from openfesl.storage.admin import SqlAdminLog
-from openfesl.storage.associations import SqlAssociationStore
+from openfesl.server.stores import Stores
 from openfesl.storage.database import migrate
-from openfesl.storage.entitlements import SqlEntitlementStore
-from openfesl.storage.game_icons import SqlGameIconStore
-from openfesl.storage.history import SqlHistoryStore
-from openfesl.storage.keys import SqlKeyStore
-from openfesl.storage.messages import SqlMessageStore
-from openfesl.storage.personas import SqlPersonaStore
-from openfesl.storage.records import SqlRecordStore
-from openfesl.storage.servers import SqlServerStore
-from openfesl.storage.settings import SqlSettingStore
-from openfesl.storage.stats import SqlStatStore
-from openfesl.web.activity import activity_routes
-from openfesl.web.admin.account_decisions import account_decision_routes
-from openfesl.web.admin.accounts import AccountViews, account_routes
-from openfesl.web.admin.audit import audit_routes
-from openfesl.web.admin.auth import AdminSessions, NeedsRole, SignInNeeded, SignInProvider
-from openfesl.web.admin.entitlements import entitlement_routes
-from openfesl.web.admin.home import home_routes
-from openfesl.web.admin.key_edit import key_edit_routes
-from openfesl.web.admin.keys import key_routes
-from openfesl.web.admin.providers import provider_routes
-from openfesl.web.admin.servers import ServerViews, decision_routes, server_list_routes
-from openfesl.web.admin.settings import settings_routes
-from openfesl.web.front import front_routes
 from openfesl.web.game_http import GameHttpMiddleware
-from openfesl.web.game_icons import game_icon_routes, presence_art
-from openfesl.web.host import host_routes
 from openfesl.web.languages import LanguageMiddleware
-from openfesl.web.launcher import launcher_routes
-from openfesl.web.leaderboard import leaderboard_routes
-from openfesl.web.menu import menu_routes
 from openfesl.web.pages import STATIC, Pages, StaticAssets
-from openfesl.web.play import play_routes, relay_address
-from openfesl.web.players import player_routes
 from openfesl.web.security import SecurityHeadersMiddleware
-from openfesl.web.servers import server_routes
-from openfesl.web.sessions import FormExpired
-from openfesl.web.shell import shell_routes
-from openfesl.web.verification import verification_routes
 
 # The session cookie outlives a session, so that an expired one can say so.
 SESSION_COOKIE_AGE = 14 * 24 * 3600
@@ -103,95 +35,23 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         settings: The deployment's settings; read from the environment when omitted.
     """
     settings = settings or Settings()
-    routes: dict[tuple[str, str], Route[Any]] = {}
-    players = Players()
     games = load_games()
-    launcher_sessions = LauncherSessions()
-    game_http = GameHttp(games, players, load_texts("news"), launcher_sessions)
-    commands: dict[str, TheaterRoute[Any]] = {}
-    theater = Theater(games, commands)
     # The engine connects on first use, inside the lifespan.
     engine = create_async_engine(settings.database_url, pool_pre_ping=True, hide_parameters=True)
-    sessions = async_sessionmaker(engine)
-    approval = Approval(SqlServerStore(sessions))
-    hosting = Hosting(approval)
-    census = Census(hosting, players)
-    art = presence_art(settings.public_url)
-    rich_presence = RichPresence(hosting, settings.discord_application_id, art)
-    icons = SqlGameIconStore(sessions)
-    history = OnlineHistory(SqlHistoryStore(sessions), census, games)
-    stats = SqlStatStore(sessions)
-    persona_store = SqlPersonaStore(sessions)
-    records = SqlRecordStore(sessions)
-    entitlements = SqlEntitlementStore(sessions)
-    keys = SqlKeyStore(sessions)
-    feed = AdminFeed(SqlAdminLog(sessions))
+    stores = Stores(async_sessionmaker(engine))
+    services = GameServices(settings, games, stores)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         await migrate(engine)
         # A new database starts with the games' keys; from then on the admin manages them.
-        if not await keys.has_keys():
-            await keys.import_keys(games.keys)
-        store = SqlAccountStore(sessions)
-        logins = Logins(store)
-        policies = GamePolicies(SqlSettingStore(sessions))
-        mailer = None
-        if settings.smtp_host and settings.smtp_sender:
-            mailer = SmtpMailer(settings, settings.smtp_host, settings.smtp_sender)
-        verification = EmailVerification(store, mailer, settings.public_url)
-        app.state.verification = verification
-        accounts = AccountService(
-            store, logins, entitlements, keys, Terms.load(), policies, verification
-        )
-        personas = PersonaService(persona_store)
-        await personas.prepare(await accounts.prepare(games))
-        app.state.launcher = LauncherService(logins, games, personas, launcher_sessions)
-        routes.update(connect_routes(games, policies))
-        routes.update(telemetry_routes())
-        routes.update(accounts.routes())
-        routes.update(AccountSettingsService(store, logins, policies).routes())
-        routes.update(personas.routes())
-        routes.update(EntitlementService(entitlements, hosting).routes())
-        routes.update(KeyService(keys).routes())
-        routes.update(game_http.routes())
-        routes.update(StatsService(stats, persona_store, hosting).routes())
-        routes.update(LeaderboardService(stats).routes())
-        routes.update(RecordService(records).routes())
-        associations = SqlAssociationStore(sessions)
-        routes.update(AssociationService(associations, persona_store, players, hosting).routes())
-        routes.update(PresenceService(persona_store, players, associations).routes())
-        messages = MessageService(SqlMessageStore(sessions), persona_store, players, associations)
-        routes.update(messages.routes())
-        commands.update(theater_routes())
-        commands.update(hosting.routes())
-        commands.update(Browsing(hosting).routes())
-        joining = Joining(hosting)
-        commands.update(joining.routes())
-        routes.update(PlayNow(hosting).routes())
-        players.follow(feed)
-        joining.follow(feed)
-        await feed.start()
-        await rich_presence.follow_icons(icons, feed)
-        followers = [
-            asyncio.create_task(hosting.follow_approvals()),
-            asyncio.create_task(feed.follow()),
-            asyncio.create_task(history.follow()),
-            asyncio.create_task(rich_presence.follow_changes()),
-        ]
-        yield
-        for follower in followers:
-            follower.cancel()
-            with suppress(asyncio.CancelledError):
-                await follower
-        await messages.close()
+        if not await stores.keys.has_keys():
+            await stores.keys.import_keys(games.keys)
+        async with services.running(app):
+            yield
         await engine.dispose()
 
-    def start_session(websocket: WebSocket, hook_version: str | None) -> GameSession:
-        address = settings.client_address(websocket)
-        return GameSession(routes, players, address, theater, hook_version, rich_presence)
-
-    pages = Pages(games, census)
+    pages = Pages(games, services.census)
     app = FastAPI(
         title="OpenFESL",
         lifespan=lifespan,
@@ -200,88 +60,20 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         openapi_url=None,
         exception_handlers={HTTPException: pages.not_found, Exception: pages.failure},
     )
-
-    async def confirm(token: str) -> Confirmation:
-        verification: EmailVerification = app.state.verification
-        return await verification.confirm(token)
-
-    app.add_api_websocket_route("/", relay_endpoint(start_session))
+    app.add_api_websocket_route("/", relay_endpoint(services.start_session))
     app.mount("/static", StaticAssets(directory=STATIC))
-    app.include_router(game_icon_routes(games, icons))
-    app.include_router(shell_routes(pages, Terms.load()))
-    app.include_router(menu_routes(pages, games, census))
-    app.include_router(front_routes(pages, games, census, history, keys))
-    app.include_router(activity_routes(pages, games, census, history))
-    app.include_router(server_routes(pages, games, census))
-    app.include_router(leaderboard_routes(pages, games, census, stats))
-    app.include_router(player_routes(pages, games, census, stats, persona_store, records))
+    include_public_routes(app, settings, games, pages, services, stores)
+    include_admin_routes(app, settings, games, pages, services, stores)
+    _add_middleware(app, settings, services.game_http)
 
-    def relay(request: Request) -> str:
-        return relay_address(request, settings.public_url)
+    @app.get("/health", response_class=PlainTextResponse)
+    async def health() -> str:
+        return "ok"
 
-    app.include_router(play_routes(pages, games, census, keys, relay, settings.hook_default_url))
-    app.include_router(
-        host_routes(
-            pages, games, census, approval, settings.contact_email, relay, settings.hook_default_url
-        )
-    )
-    app.include_router(verification_routes(confirm, pages))
-    app.include_router(launcher_routes(lambda: app.state.launcher))
-    server_views = ServerViews(games, census, approval, SqlServerStore(sessions))
-    sign_in = AdminSessions(
-        pages, _sign_in_provider(settings), settings.public_url, server_views.menu_counts
-    )
-    app.include_router(sign_in.routes())
-    app.include_router(
-        home_routes(sign_in, games, census, players, SqlAccountStore(sessions), server_views)
-    )
-    app.include_router(server_list_routes(sign_in, server_views))
-    app.include_router(decision_routes(sign_in, server_views, hosting.apply_decisions))
-    app.include_router(provider_routes(sign_in, games, server_views, hosting.apply_decisions))
-    account_views = AccountViews(games, census, players, SqlAccountStore(sessions), persona_store)
-    app.include_router(account_routes(sign_in, account_views, entitlements, Terms.load().version))
-    app.include_router(entitlement_routes(sign_in, account_views, entitlements, keys, games))
-    app.include_router(key_routes(sign_in, games, keys))
-    app.include_router(key_edit_routes(sign_in, games, keys))
-    app.include_router(
-        audit_routes(
-            sign_in,
-            games,
-            SqlAdminLog(sessions),
-            SqlAccountStore(sessions),
-            persona_store,
-            server_views.store,
-        )
-    )
-    setting_store = SqlSettingStore(sessions)
-    app.include_router(
-        settings_routes(
-            sign_in,
-            games,
-            GamePolicies(setting_store),
-            setting_store,
-            server_views.store,
-            server_views,
-            hosting.apply_decisions,
-            sign_in.provider,
-            icons,
-            settings.public_url,
-            feed.apply,
-        )
-    )
-    app.include_router(
-        account_decision_routes(
-            sign_in,
-            account_views,
-            SqlAccountStore(sessions),
-            persona_store,
-            SqlAdminLog(sessions),
-            feed.apply,
-        )
-    )
-    app.add_exception_handler(SignInNeeded, sign_in.sign_in_needed)
-    app.add_exception_handler(FormExpired, sign_in.form_expired)
-    app.add_exception_handler(NeedsRole, sign_in.needs_role)
+    return app
+
+
+def _add_middleware(app: FastAPI, settings: Settings, game_http: GameHttp) -> None:
     # The last one added sees a request first: the game's HTTP keeps its own answers. Only the
     # admin panel stores anything in the session, so other pages set no cookie.
     secret = settings.session_secret.get_secret_value() if settings.session_secret else None
@@ -297,22 +89,3 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.add_middleware(LanguageMiddleware)
     app.add_middleware(SecurityHeadersMiddleware)
     app.add_middleware(GameHttpMiddleware, http=game_http)
-
-    @app.get("/health", response_class=PlainTextResponse)
-    async def health() -> str:
-        return "ok"
-
-    return app
-
-
-def _sign_in_provider(settings: Settings) -> SignInProvider | None:
-    secret = settings.admin_oidc_client_secret
-    if not (settings.admin_oidc_issuer and settings.admin_oidc_client_id and secret):
-        return None
-    return SignInProvider(
-        settings.admin_oidc_name,
-        settings.admin_oidc_issuer,
-        settings.admin_oidc_client_id,
-        secret.get_secret_value(),
-        GroupRoles(settings.admin_group, settings.moderator_group),
-    )
