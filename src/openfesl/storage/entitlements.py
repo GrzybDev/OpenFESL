@@ -302,6 +302,65 @@ async def add_item(
     return folded
 
 
+async def add_account_item(session: AsyncSession, account_id: int, tag: str, uses: int) -> int:
+    """Add uses of an item that an account owns itself, such as keys, creating its one row.
+
+    Args:
+        session: The transaction to add them in.
+        account_id: The account.
+        tag: The item's tag.
+        uses: How many uses to add.
+
+    Returns:
+        The uses the account holds then.
+    """
+    statement = insert(EntitlementRow).values(account_id=account_id, tag=tag, use_count=uses)
+    held = await session.scalar(
+        statement.on_conflict_do_update(
+            index_elements=[EntitlementRow.account_id, EntitlementRow.tag],
+            index_where=_ACCOUNTS,
+            set_={"use_count": func.coalesce(EntitlementRow.use_count, 0) + uses},
+        ).returning(EntitlementRow.use_count)
+    )
+    return int(held or 0)
+
+
+async def use_one(session: AsyncSession, account_id: int, persona_id: int | None, tag: str) -> bool:
+    """Take one use of an item in use, of an account or of one of its personas, if it has one.
+
+    The check and the change are one statement, so two at once never take the last use twice.
+
+    Args:
+        session: The transaction to take it in.
+        account_id: The account.
+        persona_id: The persona whose item it is; none for the account's own.
+        tag: The item's tag.
+
+    Returns:
+        Whether a use was taken.
+    """
+    # By the columns of the unique index of a persona's items, or of the account's own, which
+    # then finds the row instead of a scan of every entitlement.
+    owner = (
+        (EntitlementRow.persona_id == persona_id, _item_number == tag.partition("-")[0])
+        if persona_id is not None
+        else (_ACCOUNTS,)
+    )
+    taken = await session.scalar(
+        update(EntitlementRow)
+        .where(
+            EntitlementRow.account_id == account_id,
+            *owner,
+            EntitlementRow.tag == tag,
+            EntitlementRow.status == ACTIVE,
+            EntitlementRow.use_count >= 1,
+        )
+        .values(use_count=EntitlementRow.use_count - 1)
+        .returning(EntitlementRow.id)
+    )
+    return taken is not None
+
+
 def grant_statement(account_id: int, grants: Sequence[Grant]) -> Insert:
     """Return the statement that grants an account entitlements; held ones keep their status.
 

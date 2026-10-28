@@ -65,6 +65,17 @@ credits = { most = 1000, within = 600 }
 scope = "account"
 allowance = 2500
 
+# Treasure chests, which a hero picks up in rounds: the dedicated server stacks them on the hero
+# at the round's end, one request per hero (BFHeroes.exe 1.89 0x006963cc), and the website opened
+# each with a treasure chest key of 499 Funds (June 2012), which the account held. The game has no
+# definition of the key, item 7353, so it is sold on the site alone.
+[chests]
+tag = "BFH_TREASURE_CHEST"
+key = 7353
+key_price = 499
+currency = "_PF"
+contents = "treasure-chest"
+
 # The game's catalogue: its items, their names and icons, the daily missions and the XP of each
 # level, which `openfesl catalogue extract` reads from a player's copy and the server imports;
 # none of it ships with the server. The game loads every definition file below in one go, and

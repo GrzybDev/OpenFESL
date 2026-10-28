@@ -16,6 +16,7 @@ from pydantic import (
 )
 
 from openfesl.core.catalogue import CatalogueRules
+from openfesl.core.chests import ChestRules
 from openfesl.core.game_pages import Listing, PageKind, Site, Stats, Theme
 from openfesl.core.hero_rules import HeroRules
 from openfesl.core.policies import Policies
@@ -263,6 +264,8 @@ class Game(BaseModel):
             imports from a player's copy, and what it means; none for a game without one.
         heroes: How the game's heroes are made on its site and kept; none for a game whose
             personas are made in the game.
+        chests: How the game's servers stack treasure chests on heroes and keys open them;
+            none for a game without them.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -294,6 +297,7 @@ class Game(BaseModel):
     product_names: dict[str, str] = {}
     catalogue: CatalogueRules | None = None
     heroes: HeroRules | None = None
+    chests: ChestRules | None = None
 
     @property
     def play_key(self) -> ProductKey | None:
@@ -415,6 +419,18 @@ class Game(BaseModel):
         for box in boxes:
             if box.faction not in {None, *factions} or box.hero_class not in {None, *classes}:
                 raise ValueError(f"the box {box.key} names a faction or class the heroes lack")
+        return self
+
+    @model_validator(mode="after")
+    def _check_chests(self) -> Self:
+        if self.chests is None:
+            return self
+        currency = self.currencies.get(self.chests.currency)
+        if currency is None or currency.scope is not Scope.ACCOUNT:
+            raise ValueError("keys need a currency that the account holds")
+        boxes = {box.key for box in self.store.boxes} if self.store else set()
+        if self.chests.contents not in boxes:
+            raise ValueError(f"the chests' contents name no box: {self.chests.contents}")
         return self
 
     @model_validator(mode="after")

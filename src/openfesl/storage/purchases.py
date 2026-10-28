@@ -1,6 +1,7 @@
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from openfesl.core.chests import ChestRefusal, ChestRefused
 from openfesl.core.personas import Persona
 from openfesl.core.purchases import (
     ALREADY_OWNED,
@@ -9,8 +10,9 @@ from openfesl.core.purchases import (
     PurchaseRefused,
     Refund,
 )
+from openfesl.core.store import Product
 from openfesl.core.wallets import Wallet
-from openfesl.storage.entitlements import add_item
+from openfesl.storage.entitlements import add_account_item, add_item, use_one
 from openfesl.storage.models import EntitlementRow, PurchaseRow
 from openfesl.storage.wallets import REFUND, credit, spend
 
@@ -64,6 +66,38 @@ class SqlPurchaseStore:
                 )
             )
 
+    async def buy_for_account(
+        self, account_id: int, product_id: str, product: Product, wallet: Wallet
+    ) -> None:
+        """Pay a product's price, give the account the item and record it, all or nothing.
+
+        Args:
+            account_id: The account.
+            product_id: The id the product was bought by.
+            product: The product, which the account owns once bought.
+            wallet: The account's wallet the price is paid from.
+
+        Raises:
+            PurchaseRefused: When the wallet holds less than the price, also after another
+                purchase at the same time.
+        """
+        tag = product.ownership.tag(product.item_id)
+        async with self._sessions.begin() as session:
+            await add_account_item(session, account_id, tag, product.ownership.uses or 1)
+            if await spend(session, wallet, product.price, PURCHASE) is None:
+                raise PurchaseRefused(INSUFFICIENT_FUNDS)
+            session.add(
+                PurchaseRow(
+                    game=wallet.game,
+                    account_id=account_id,
+                    product_id=product_id,
+                    kind="product",
+                    currency=wallet.currency,
+                    price=product.price,
+                    outcome={"items": [product.item_id]},
+                )
+            )
+
     async def refund(self, persona: Persona, wallet: Wallet) -> Refund | None:
         """Take back what a hero bought from a wallet and credit what it paid, all or nothing.
 
@@ -105,3 +139,29 @@ class SqlPurchaseStore:
             balance = await credit(session, wallet, sum(row.price for row in bought), REFUND)
             assert balance is not None
             return Refund(wallet.currency, balance, items)
+
+    async def open_chest(self, persona: Persona, key: str, chest: str, won: Product) -> None:
+        """Use up one of an account's keys and one of its hero's chests, and give what it held.
+
+        All changes are made or none.
+
+        Args:
+            persona: The hero.
+            key: The tag of the account's keys.
+            chest: The tag of the hero's chests.
+            won: What the chest gives.
+
+        Raises:
+            ChestRefused: When the account has no key or the hero no chest, also after another
+                opening at the same time, or the hero came to own the item for good meanwhile.
+        """
+        async with self._sessions.begin() as session:
+            if not await use_one(session, persona.account_id, None, key):
+                raise ChestRefused(ChestRefusal.NO_KEY)
+            if not await use_one(session, persona.account_id, persona.id, chest):
+                raise ChestRefused(ChestRefusal.NO_CHEST)
+            added = await add_item(
+                session, persona.account_id, persona.id, won.item_id, won.ownership
+            )
+            if added is None:
+                raise ChestRefused(ChestRefusal.NOTHING)

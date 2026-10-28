@@ -8,7 +8,7 @@ from openfesl.core.admin import AdminAction, AdminFeed, LoggedAction
 from openfesl.core.catalogues import Catalogue, Catalogues
 from openfesl.core.drops import Box
 from openfesl.core.games import Game, Games
-from openfesl.core.inventory import Ownership
+from openfesl.core.inventory import COUNTED, Ownership
 from openfesl.core.store_rules import BoxRule
 from openfesl.core.texts import BASE_LANGUAGE
 
@@ -25,6 +25,7 @@ class NewProduct:
         currency: The currency of the price.
         price: The price.
         published: Whether it is sold alone, rather than only as a box's drop.
+        account: Whether the account owns it rather than one of its heroes.
     """
 
     item_id: int
@@ -32,6 +33,7 @@ class NewProduct:
     currency: str
     price: int
     published: bool = True
+    account: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -195,12 +197,13 @@ class ProductStore(Protocol):
             game: The game's data-file name.
         """
 
-    async def product(self, game: str, number: int) -> Product | None:
-        """Return a product a game's store sells to heroes, if it lists one by a number.
+    async def product(self, game: str, number: int, account: bool = False) -> Product | None:
+        """Return a product a game's store sells, if it lists one by a number.
 
         Args:
             game: The game's data-file name.
             number: The product's number.
+            account: Whether it is sold to accounts rather than to heroes.
         """
 
     async def add_bundle(self, game: str, bundle: Bundle) -> int:
@@ -235,6 +238,14 @@ class ProductStore(Protocol):
         Args:
             game: The game's data-file name.
             number: The box's number.
+        """
+
+    async def box_by_key(self, game: str, key: str) -> Box | None:
+        """Return a box of a game's store with its drops, if it has one by a key.
+
+        Args:
+            game: The game's data-file name.
+            key: The key the game's data knows the box by.
         """
 
 
@@ -386,6 +397,12 @@ class Store:
         products += sorted(
             (found for found in given if not found.published), key=lambda found: found.item_id
         )
+        # A key, which the game has no definition of, is sold to the account alone.
+        if chests := game.chests:
+            key = Ownership(COUNTED, uses=1)
+            products.append(
+                NewProduct(chests.key, key, chests.currency, chests.key_price, account=True)
+            )
         if products and await self._store.stock(game.id, products, boxes):
             logger.info("Stocked the store of %s with %d products", game.name, len(products))
 

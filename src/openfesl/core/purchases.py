@@ -10,7 +10,7 @@ from openfesl.core.heroes import Hero, Heroes
 from openfesl.core.inventory import Ownership, gains
 from openfesl.core.magma import MagmaError
 from openfesl.core.personas import Persona
-from openfesl.core.store import Bundle, Offer, ProductStore, offer
+from openfesl.core.store import Bundle, Offer, Product, ProductStore, offer
 from openfesl.core.texts import BASE_LANGUAGE
 from openfesl.core.wallets import Wallet, wallet_of
 
@@ -88,6 +88,22 @@ class PurchaseStore(Protocol):
         Raises:
             PurchaseRefused: When the hero gains no item, as it owns them for good or they were
                 taken away, or the wallet holds less than the price, also after another
+                purchase at the same time.
+        """
+
+    async def buy_for_account(
+        self, account_id: int, product_id: str, product: Product, wallet: Wallet
+    ) -> None:
+        """Pay a product's price, give the account the item and record it, all or nothing.
+
+        Args:
+            account_id: The account.
+            product_id: The id the product was bought by.
+            product: The product, which the account owns once bought.
+            wallet: The account's wallet the price is paid from.
+
+        Raises:
+            PurchaseRefused: When the wallet holds less than the price, also after another
                 purchase at the same time.
         """
 
@@ -215,6 +231,31 @@ class Purchases:
     async def _hero(self, game: Game, persona: Persona) -> Hero | None:
         roster = await self._heroes.roster(game, persona.account_id)
         return next((hero for hero in roster.heroes if hero.persona.id == persona.id), None)
+
+    async def purchase_for_account(self, game: Game, account_id: int, product_id: str) -> None:
+        """Sell an account a product that it owns rather than one of its heroes, such as a key.
+
+        Args:
+            game: The game.
+            account_id: The account.
+            product_id: The id the product is bought by.
+
+        Raises:
+            PurchaseRefused: When the store sells no such product to accounts, or the price is
+                more than the account's wallet holds.
+        """
+        rules = game.store
+        number = rules.number(product_id) if rules else None
+        product = (
+            await self._products.product(game.id, number, account=True)
+            if number is not None
+            else None
+        )
+        if product is None:
+            raise PurchaseRefused(UNKNOWN_PRODUCT)
+        allowance = game.currencies[product.currency].allowance
+        wallet = Wallet(game.id, product.currency, account_id, None, allowance)
+        await self._store.buy_for_account(account_id, product_id, product, wallet)
 
     async def refund(self, game: Game, persona: Persona) -> Refund | None:
         """Refund a hero's abilities: take back all it bought with its points and credit them.

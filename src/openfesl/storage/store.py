@@ -63,6 +63,7 @@ class SqlProductStore:
                         "currency": product.currency,
                         "price": product.price,
                         "published": product.published,
+                        "account": product.account,
                         "sort": sort,
                     }
                     for sort, product in enumerate(products)
@@ -108,12 +109,13 @@ class SqlProductStore:
             )
             return [_product(row) for row in rows]
 
-    async def product(self, game: str, number: int) -> Product | None:
-        """Return a product a game's store sells to heroes, if it lists one by a number.
+    async def product(self, game: str, number: int, account: bool = False) -> Product | None:
+        """Return a product a game's store sells, if it lists one by a number.
 
         Args:
             game: The game's data-file name.
             number: The product's number.
+            account: Whether it is sold to accounts rather than to heroes.
         """
         async with self._sessions() as session:
             row = await session.scalar(
@@ -121,7 +123,7 @@ class SqlProductStore:
                     StoreProductRow.id == number,
                     StoreProductRow.game == game,
                     StoreProductRow.published,
-                    StoreProductRow.account.is_(False),
+                    StoreProductRow.account.is_(account),
                 )
             )
             return _product(row) if row else None
@@ -235,10 +237,20 @@ class SqlProductStore:
             game: The game's data-file name.
             number: The box's number.
         """
+        return await self._box(StoreBoxRow.game == game, StoreBoxRow.id == number)
+
+    async def box_by_key(self, game: str, key: str) -> Box | None:
+        """Return a box of a game's store with its drops, if it has one by a key.
+
+        Args:
+            game: The game's data-file name.
+            key: The key the game's data knows the box by.
+        """
+        return await self._box(StoreBoxRow.game == game, StoreBoxRow.key == key)
+
+    async def _box(self, *chosen: ColumnElement[bool]) -> Box | None:
         async with self._sessions() as session:
-            row = await session.scalar(
-                select(StoreBoxRow).where(StoreBoxRow.game == game, StoreBoxRow.id == number)
-            )
+            row = await session.scalar(select(StoreBoxRow).where(*chosen))
             if row is None:
                 return None
             drops = await session.execute(
