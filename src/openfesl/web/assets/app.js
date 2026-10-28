@@ -16,6 +16,7 @@ import "./styles.js";
 import { closeMenu } from "./site.js";
 import "./creator.js";
 import "./rename.js";
+import "./play-now.js";
 import "htmx.org";
 
 // A chevron block whose page takes longer than 300 ms to arrive shows that it is loading, and

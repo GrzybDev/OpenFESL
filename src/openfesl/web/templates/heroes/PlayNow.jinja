@@ -1,0 +1,39 @@
+{#def state: str, minutes: int, link = None #}
+{# Play Now: the panel of the start link the page made, which its script opens and follows until
+   the launcher takes it or it ends, beside how Play Now works and what to do when nothing
+   starts. Without scripts the panel stays as it was made, and its button opens the link. #}
+{% set title = _("web.play_now.title") %}
+<Layout :title="title">
+  <Plaque id="play-now-title">{{ title }}</Plaque>
+  <div class="play-now">
+    <section aria-labelledby="play-now-state"
+             aria-live="polite"
+             {% if link %} data-start-link="{{ link.address }}" data-status="{{ url('/' ~ game.id ~ '/play-now/status') }}?{{ {'link': link.ticket}|urlencode }}"{% endif %}
+             class="play-now-panel enter-panel">
+      <svg aria-hidden="true"
+           focusable="false"
+           viewBox="0 0 200 40"
+           preserveAspectRatio="none"
+           class="play-now-splash">
+        <use href="{{ static('icons.svg') }}#splash" />
+      </svg>
+      <PlayNowPanel :state="state" :minutes="minutes" :link="link" />
+    </section>
+    <aside aria-labelledby="play-now-how"
+           class="site-box site-box-pale play-now-how enter-panel">
+      <h2 id="play-now-how" class="play-now-how-title">{{ _("web.play_now.how") }}</h2>
+      <ol class="play-now-steps">
+        <li>{{ _n("web.play_now.how.link", minutes) }}</li>
+        <li>{{ _("web.play_now.how.launcher", game=game.name) }}</li>
+        <li>{{ _("web.play_now.how.start", game=game.name) }}</li>
+      </ol>
+      <p>{{ _("web.play_now.how.password") }}</p>
+      <h3 class="play-now-how-nothing">{{ _("web.play_now.nothing") }}</h3>
+      <p>{{ _("web.play_now.nothing.text", game=game.name) }}</p>
+      {% if "play" in game.pages %}
+        <a href="{{ url('/' ~ game.id ~ '/play') }}"
+           class="site-link">{{ _("web.play_now.how.setup") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+      {% endif %}
+    </aside>
+  </div>
+</Layout>

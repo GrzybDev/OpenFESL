@@ -96,12 +96,36 @@ class Logins:
         _check_state(account)
         return account
 
-    async def remember(self, account_id: int, password_hash: str) -> str:
+    async def vouch(self, account_id: int, epoch: int) -> tuple[Account, str]:
+        """Hand out a login token for an account signed in on the site, which needs no password.
+
+        Args:
+            account_id: The account.
+            epoch: The session epoch of the site's sign-in that vouches for it.
+
+        Returns:
+            The account and the token.
+
+        Raises:
+            TransactionError: When the account is gone or belongs to dedicated servers, its site
+                sessions ended since, or the admin took it out of use.
+        """
+        account = await self._store.account(account_id)
+        credentials = await self._store.find(account.nuid) if account else None
+        if credentials is None or credentials.account.server:
+            raise TransactionError(UNKNOWN_USER)
+        if credentials.account.session_epoch != epoch:
+            raise TransactionError(INVALID_PASSWORD)
+        _check_state(credentials.account)
+        return credentials.account, await self.remember(account_id, credentials.password_hash)
+
+    async def remember(self, account_id: int, password_hash: str | None) -> str:
         """Hand out a token that logs an account in later without its password.
 
         Args:
             account_id: The account.
-            password_hash: The hash the login's password was checked against.
+            password_hash: The hash the login's password was checked against; None for an
+                account without a password that the site vouched for.
 
         Raises:
             TransactionError: When the password changed since it was checked, so that a login

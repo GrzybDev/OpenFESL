@@ -1,0 +1,95 @@
+{#def state: str, minutes: int, link = None #}
+{# The Play Now panel in one of its states: the start link waiting for the launcher, not taken
+   for a while, taken, or ended unused; or what Play Now needs first, a sign-in or a hero. The
+   page's script swaps in the panel of each new state of its link. #}
+{% set heroes = url("/" ~ game.id ~ "/heroes") %}
+{% set again = url("/" ~ game.id ~ "/play-now") %}
+{% set play = url("/" ~ game.id ~ "/play") if "play" in game.pages else "" %}
+{% set glyphs = {
+  "signed-out": "sign-in",
+  "no-hero": "plus",
+  "waiting": "play",
+  "missing": "warn",
+  "taken": "tick",
+  "ended": "clock"
+} %}
+<div data-state="{{ state }}"
+     class="site-box play-panel play-panel-{{ state }}">
+  <span aria-hidden="true" class="play-disc">
+    {% if state == "waiting" %}
+      <svg viewBox="0 0 120 120" class="play-ring">
+        <circle cx="60" cy="60" r="50" />
+      </svg>
+    {% endif %}
+    <Icon :name="glyphs[state]" :size="52" stroke="currentColor" />
+  </span>
+  <div class="play-panel-text">
+    {% if state == "signed-out" %}
+      <h2 id="play-now-state" tabindex="-1" class="site-box-title">{{ _("web.play_now.signed_out") }}</h2>
+      <p>{{ _("web.play_now.signed_out.text") }}</p>
+      <p class="play-panel-small">{{ _("web.play_now.signed_out.after") }}</p>
+      <div class="site-actions">
+        <a href="{{ url('/sign-in') }}?{{ {'next': again}|urlencode }}"
+           class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+        <a href="{{ url('/register') }}"
+           class="play-panel-link">{{ _("web.account.sign_in.create") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+      </div>
+    {% elif state == "no-hero" %}
+      <h2 id="play-now-state" tabindex="-1" class="site-box-title">{{ _("web.play_now.no_hero") }}</h2>
+      <p>{{ _("web.play_now.no_hero.text", game=game.name) }}</p>
+      <p class="play-panel-small">{{ _("web.play_now.no_hero.first") }}</p>
+      <div class="site-actions">
+        <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
+           class="site-button site-button-go site-button-large"><Icon name="plus" :size="18" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+      </div>
+    {% elif state == "taken" %}
+      <h2 id="play-now-state" tabindex="-1" class="site-box-title">{{ _("web.play_now.taken", game=game.name) }}</h2>
+      <p>{{ _("web.play_now.taken.text", time=when(link.taken, 'Hm'), hero=link.hero) }}</p>
+      <p class="play-panel-small">{{ _("web.play_now.taken.used") }}</p>
+      <div class="site-actions">
+        <a href="{{ heroes }}"
+           class="site-button site-button-large"><Icon name="star" :size="18" stroke="#FEDE01" />{{ _("web.heroes.title") }}</a>
+      </div>
+    {% elif state == "ended" %}
+      <h2 id="play-now-state" tabindex="-1" class="site-box-title">{{ _("web.play_now.ended") }}</h2>
+      <p>{{ _n("web.play_now.ended.text", minutes) }}</p>
+      <p class="play-panel-small">{{ _("web.play_now.ended.unused") }}</p>
+      <div class="site-actions">
+        {% if play %}
+          <a href="{{ play }}"
+             class="site-button site-button-large"><Icon name="book" :size="18" stroke="#FEDE01" />{{ _("web.site.page.play") }}</a>
+        {% endif %}
+        <a href="{{ again }}"
+           class="site-button"><Icon name="retry" :size="17" stroke="#FEDE01" />{{ _("web.play_now.again") }}</a>
+      </div>
+    {% else %}
+      {% set ends = when(link.ends, 'Hm') %}
+      {% if state == "missing" %}
+        <h2 id="play-now-state" tabindex="-1" class="site-box-title">{{ _("web.play_now.missing") }}</h2>
+        <p>{{ _("web.play_now.missing.text", game=game.name) }}</p>
+        <p class="play-panel-small">{{ _("web.play_now.missing.ends", time=ends) }}</p>
+      {% else %}
+        <h2 id="play-now-state"
+            tabindex="-1"
+            class="site-box-title">{{ _("web.play_now.waiting", game=game.name, hero=link.hero) }}</h2>
+        <p>{{ _("web.play_now.waiting.text") }}</p>
+        <p class="play-panel-small">{{ _("web.play_now.waiting.ends", time=ends) }}</p>
+      {% endif %}
+      <div class="site-actions">
+        {% if state == "missing" %}
+          {% if play %}
+            <a href="{{ play }}"
+               class="site-button site-button-yellow site-button-large"><Icon name="book" :size="18" stroke="currentColor" />{{ _("web.site.page.play") }}</a>
+          {% endif %}
+          <a href="{{ again }}"
+             class="site-button"><Icon name="retry" :size="17" stroke="#FEDE01" />{{ _("web.play_now.again") }}</a>
+        {% else %}
+          <a href="{{ link.address }}"
+             class="site-button site-button-go site-button-large"><Icon name="play" :size="18" stroke="currentColor" />{{ _("web.play_now.open") }}</a>
+          <a href="{{ heroes }}"
+             class="play-panel-link">{{ _("web.play_now.change") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>

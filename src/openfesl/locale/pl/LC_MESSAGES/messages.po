@@ -6393,3 +6393,129 @@ msgstr "Mecze rankingowe: {goal}"
 
 msgid "web.rewards.milestone.matches.description"
 msgstr "Funds dla konta, jednorazowo, gdy jego bohaterowie rozegrają razem tyle meczów rankingowych."
+
+msgid "web.play_now.title"
+msgstr "Graj"
+
+msgid "web.play_now.signed_out"
+msgstr "Gra wymaga zalogowania"
+
+msgid "web.play_now.signed_out.text"
+msgstr "„Graj” uruchamia grę dla zalogowanego konta: program uruchamiający loguje się jednorazowym linkiem, więc w grze nie wpisuje się hasła."
+
+msgid "web.play_now.signed_out.after"
+msgstr "Po zalogowaniu ta strona utworzy link startowy."
+
+msgid "web.play_now.no_hero"
+msgstr "„Graj” wymaga bohatera"
+
+#, python-format
+msgid "web.play_now.no_hero.text"
+msgstr "%(game)s uruchamia się z domyślnym bohaterem konta, a to konto nie ma jeszcze żadnego. Bohaterów tworzy się na tej stronie."
+
+msgid "web.play_now.no_hero.first"
+msgstr "Pierwszy bohater zostaje domyślnym bohaterem."
+
+#, python-format
+msgid "web.play_now.waiting"
+msgstr "Uruchamianie gry %(game)s z bohaterem %(hero)s"
+
+msgid "web.play_now.waiting.text"
+msgstr "Przeglądarka pyta o otwarcie programu uruchamiającego OpenFESLHook; wystarczy się zgodzić. Program loguje się linkiem startowym i uruchamia grę."
+
+#, python-format
+msgid "web.play_now.waiting.ends"
+msgstr "Link startowy działa raz i wygasa o %(time)s UTC."
+
+msgid "web.play_now.open"
+msgstr "Otwórz program uruchamiający"
+
+msgid "web.play_now.change"
+msgstr "Zmień domyślnego bohatera"
+
+msgid "web.play_now.missing"
+msgstr "Program uruchamiający nie przejął linku startowego"
+
+#, python-format
+msgid "web.play_now.missing.text"
+msgstr "Program uruchamiający OpenFESLHook otwiera linki startowe, gdy pozwala na to któraś kopia gry %(game)s: wystarczy raz uruchomić grę z jej folderu i zaznaczyć w programie uruchamiającym „Otwieraj linki «Graj» ze strony w tej kopii gry”. Bez OpenFESLHook przeglądarka nie ma czym otworzyć linku; strona „Jak zagrać” opisuje, jak go zainstalować."
+
+#, python-format
+msgid "web.play_now.missing.ends"
+msgstr "Link startowy działa do %(time)s UTC; po zaznaczeniu tej opcji przycisk „Uruchom ponownie” otworzy nowy."
+
+msgid "web.play_now.again"
+msgstr "Uruchom ponownie"
+
+#, python-format
+msgid "web.play_now.taken"
+msgstr "Gra %(game)s się uruchamia"
+
+#, python-format
+msgid "web.play_now.taken.text"
+msgstr "Program uruchamiający przejął link startowy o %(time)s UTC i loguje się z bohaterem %(hero)s. Tę stronę można zamknąć."
+
+msgid "web.play_now.taken.used"
+msgstr "Link startowy został zużyty; „Graj” za każdym razem tworzy nowy."
+
+msgid "web.play_now.ended"
+msgstr "Ten link startowy wygasł"
+
+#, python-format
+msgid "web.play_now.ended.text.one"
+msgstr "Każdy link startowy działa raz, przez %(count)s minutę. „Uruchom ponownie” tworzy nowy."
+
+#, python-format
+msgid "web.play_now.ended.text.few"
+msgstr "Każdy link startowy działa raz, przez %(count)s minuty. „Uruchom ponownie” tworzy nowy."
+
+#, python-format
+msgid "web.play_now.ended.text.many"
+msgstr "Każdy link startowy działa raz, przez %(count)s minut. „Uruchom ponownie” tworzy nowy."
+
+#, python-format
+msgid "web.play_now.ended.text.other"
+msgstr "Każdy link startowy działa raz, przez %(count)s minuty. „Uruchom ponownie” tworzy nowy."
+
+msgid "web.play_now.ended.unused"
+msgstr "Tym linkiem niczego nie uruchomiono."
+
+msgid "web.play_now.how"
+msgstr "Jak działa „Graj”"
+
+#, python-format
+msgid "web.play_now.how.link.one"
+msgstr "Ta strona tworzy link startowy dla zalogowanego konta. Działa on raz, przez %(count)s minutę."
+
+#, python-format
+msgid "web.play_now.how.link.few"
+msgstr "Ta strona tworzy link startowy dla zalogowanego konta. Działa on raz, przez %(count)s minuty."
+
+#, python-format
+msgid "web.play_now.how.link.many"
+msgstr "Ta strona tworzy link startowy dla zalogowanego konta. Działa on raz, przez %(count)s minut."
+
+#, python-format
+msgid "web.play_now.how.link.other"
+msgstr "Ta strona tworzy link startowy dla zalogowanego konta. Działa on raz, przez %(count)s minuty."
+
+#, python-format
+msgid "web.play_now.how.launcher"
+msgstr "Przeglądarka przekazuje link programowi uruchamiającemu OpenFESLHook w tej kopii gry %(game)s, która otwiera linki startowe."
+
+#, python-format
+msgid "web.play_now.how.start"
+msgstr "Program loguje się nim i uruchamia grę %(game)s z domyślnym bohaterem. Hasła nie trzeba wpisywać."
+
+msgid "web.play_now.how.password"
+msgstr "Program uruchamiający może też zalogować się sam adresem e-mail konta i hasłem do gier."
+
+msgid "web.play_now.nothing"
+msgstr "Gdy nic się nie uruchamia"
+
+#, python-format
+msgid "web.play_now.nothing.text"
+msgstr "Wystarczy raz uruchomić grę %(game)s z jej folderu i zaznaczyć w programie uruchamiającym „Otwieraj linki «Graj» ze strony w tej kopii gry”. Przy kilku kopiach linki otwiera ta, w której opcję zaznaczono ostatnio."
+
+msgid "web.play_now.how.setup"
+msgstr "Jak zagrać: instalacja OpenFESLHook"

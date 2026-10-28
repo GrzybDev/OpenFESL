@@ -238,13 +238,14 @@ class AccountStore(Protocol):
             version: The version it accepted.
         """
 
-    async def remember(self, account_id: int, token_hash: bytes, password_hash: str) -> bool:
+    async def remember(self, account_id: int, token_hash: bytes, password_hash: str | None) -> bool:
         """Keep a login token so the game can log in without the password later.
 
         Args:
             account_id: The account.
             token_hash: The SHA-256 digest of the token handed to the game.
-            password_hash: The hash the login's password was checked against.
+            password_hash: The hash the login's password was checked against; None for an
+                account without a password.
 
         Returns:
             Whether the token was kept, which it is not once the password changed.

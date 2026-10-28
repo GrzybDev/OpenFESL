@@ -273,6 +273,9 @@ wallets = [
     { currency = "_PF", glyph = "coin", fill = "#F2C12E", ink = "#0A0A0A" },
     { currency = "_DV", glyph = "valor", fill = "#B9453E", ink = "#FFFFFF" },
 ]
+# OpenFESLHook's launcher opens the site's start links, openfesl-bfheroes://launch?role=play&code=,
+# once a copy of the game was allowed to open them.
+start_links = true
 
 [[site.menus]]
 name = "game"

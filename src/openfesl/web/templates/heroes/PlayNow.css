@@ -1,0 +1,88 @@
+/* The Play Now page: the panel beside the pale box on how Play Now works, which goes under it on
+   narrow screens, with numbered steps on yellow discs. */
+@layer pages {
+  .play-now {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 34px 30px;
+    margin-top: 28px;
+  }
+
+  .play-now-panel {
+    position: relative;
+    isolation: isolate;
+    flex: 1 1 560px;
+    min-width: 0;
+  }
+
+  .play-now-splash {
+    position: absolute;
+    bottom: -18px;
+    left: 4%;
+    z-index: -1;
+    width: 92%;
+    height: 30px;
+    fill: #1b100c;
+  }
+
+  .play-now-how {
+    flex: 0 1 380px;
+    min-width: 0;
+    padding: 0 18px 16px;
+    font-size: 14px;
+    line-height: 1.45;
+
+    > p {
+      margin-top: 14px;
+      color: #2b2018;
+    }
+
+    .site-link {
+      margin-top: 4px;
+    }
+  }
+
+  .play-now-how-title {
+    display: inline-block;
+    margin-left: -18px;
+    padding: 10px 28px 9px 18px;
+    border-radius: 5px 0 0;
+    background: #893531;
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 100%, 0 100%);
+    font: 800 18px/1.2 var(--site-heading);
+    color: #fff;
+    text-shadow: var(--site-outline-thin);
+  }
+
+  .play-now-steps {
+    display: grid;
+    gap: 12px;
+    margin-top: 14px;
+    counter-reset: step;
+
+    > li {
+      display: flex;
+      gap: 12px;
+      counter-increment: step;
+
+      &::before {
+        content: counter(step);
+        display: grid;
+        flex: 0 0 auto;
+        width: 30px;
+        height: 30px;
+        place-items: center;
+        border: 2px solid #000;
+        border-radius: 50%;
+        background: #f2c12e;
+        font: 800 15px/1 var(--site-heading);
+      }
+    }
+  }
+
+  .play-now-how-nothing {
+    margin-top: 16px;
+    font: 800 16px/1.25 var(--site-heading);
+  }
+}

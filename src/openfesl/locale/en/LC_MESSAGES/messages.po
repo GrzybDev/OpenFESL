@@ -6163,3 +6163,113 @@ msgstr "Ranked matches: {goal}"
 
 msgid "web.rewards.milestone.matches.description"
 msgstr "Funds for the account, once, when its heroes have finished this many ranked matches together."
+
+msgid "web.play_now.title"
+msgstr "Play Now"
+
+msgid "web.play_now.signed_out"
+msgstr "Sign in to play"
+
+msgid "web.play_now.signed_out.text"
+msgstr "Play Now starts the game for the signed-in account: the launcher logs in with a one-time link, so no password is typed into the game."
+
+msgid "web.play_now.signed_out.after"
+msgstr "After signing in, this page makes the start link."
+
+msgid "web.play_now.no_hero"
+msgstr "Play Now needs a hero"
+
+#, python-format
+msgid "web.play_now.no_hero.text"
+msgstr "%(game)s starts as the account's default hero, and this account has none yet. Heroes are created on this site."
+
+msgid "web.play_now.no_hero.first"
+msgstr "The first hero becomes the default hero."
+
+#, python-format
+msgid "web.play_now.waiting"
+msgstr "Starting %(game)s as %(hero)s"
+
+msgid "web.play_now.waiting.text"
+msgstr "The browser asks to open OpenFESLHook's launcher; allow it. The launcher logs in with the start link and starts the game."
+
+#, python-format
+msgid "web.play_now.waiting.ends"
+msgstr "The start link works once and ends at %(time)s UTC."
+
+msgid "web.play_now.open"
+msgstr "Open the launcher"
+
+msgid "web.play_now.change"
+msgstr "Change the default hero"
+
+msgid "web.play_now.missing"
+msgstr "The launcher has not taken the start link"
+
+#, python-format
+msgid "web.play_now.missing.text"
+msgstr "OpenFESLHook's launcher opens start links once a copy of %(game)s allows it: start the game once from its folder and tick “Open Play links from the website with this copy” in the launcher. Without OpenFESLHook, the browser has nothing to open the link with; How to play shows how to set it up."
+
+#, python-format
+msgid "web.play_now.missing.ends"
+msgstr "The start link stays valid until %(time)s UTC; once the option is ticked, Start again opens a new one."
+
+msgid "web.play_now.again"
+msgstr "Start again"
+
+#, python-format
+msgid "web.play_now.taken"
+msgstr "%(game)s is starting"
+
+#, python-format
+msgid "web.play_now.taken.text"
+msgstr "The launcher took the start link at %(time)s UTC and logs in as %(hero)s. This page can be closed."
+
+msgid "web.play_now.taken.used"
+msgstr "The start link is used up; Play Now makes a new one each time."
+
+msgid "web.play_now.ended"
+msgstr "This start link has ended"
+
+#, python-format
+msgid "web.play_now.ended.text.one"
+msgstr "Each start link works once, for %(count)s minute. Start again for a new one."
+
+#, python-format
+msgid "web.play_now.ended.text.other"
+msgstr "Each start link works once, for %(count)s minutes. Start again for a new one."
+
+msgid "web.play_now.ended.unused"
+msgstr "Nothing was started with this link."
+
+msgid "web.play_now.how"
+msgstr "How Play Now works"
+
+#, python-format
+msgid "web.play_now.how.link.one"
+msgstr "This page makes a start link for the signed-in account. It works once, for %(count)s minute."
+
+#, python-format
+msgid "web.play_now.how.link.other"
+msgstr "This page makes a start link for the signed-in account. It works once, for %(count)s minutes."
+
+#, python-format
+msgid "web.play_now.how.launcher"
+msgstr "The browser hands the link to OpenFESLHook's launcher, in the copy of %(game)s that opens start links."
+
+#, python-format
+msgid "web.play_now.how.start"
+msgstr "The launcher logs in with it and starts %(game)s as the default hero. No password is typed."
+
+msgid "web.play_now.how.password"
+msgstr "The launcher can also log in by itself with the account's e-mail address and game password."
+
+msgid "web.play_now.nothing"
+msgstr "When nothing starts"
+
+#, python-format
+msgid "web.play_now.nothing.text"
+msgstr "Start %(game)s once from its folder and tick “Open Play links from the website with this copy” in the launcher. With several copies, the last one whose launcher had it ticked opens the links."
+
+msgid "web.play_now.how.setup"
+msgstr "How to play: setting up OpenFESLHook"

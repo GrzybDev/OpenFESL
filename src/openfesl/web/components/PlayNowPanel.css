@@ -1,0 +1,186 @@
+/* The Play Now panel: a 2012 box in the colour of its state with a large status disc, whose ring
+   turns while the start link waits for the launcher; the disc of a taken link grows in. */
+@layer components {
+  .play-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px 28px;
+    padding-block: 24px;
+
+    .site-box-title {
+      font-size: 22px;
+      text-shadow: var(--site-outline);
+    }
+
+    > .play-panel-text > p {
+      margin-top: 12px;
+    }
+
+    > .play-panel-text > .play-panel-small {
+      margin-top: 8px;
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--box-small);
+    }
+
+    .site-actions {
+      margin-top: 16px;
+    }
+  }
+
+  .play-panel-waiting,
+  .play-panel-no-hero {
+    --box: #325f89;
+    --box-edge: #4b8fc4;
+    --box-small: #e8eef5;
+  }
+
+  .play-panel-missing {
+    --box: #9b4e14;
+    --box-edge: #cd751e;
+    --box-small: #fff1e0;
+  }
+
+  .play-panel-taken {
+    --box: #4f5627;
+    --box-edge: #77813b;
+    --box-small: #eef0e2;
+  }
+
+  .play-panel-ended {
+    --box: #576d81;
+    --box-edge: #83a4c0;
+    --box-small: #e8eef5;
+  }
+
+  .play-panel-signed-out {
+    --box: #893531;
+    --box-edge: #c54d47;
+    --box-small: #ffe9e6;
+  }
+
+  .play-panel-text {
+    flex: 1 1 300px;
+    min-width: 0;
+  }
+
+  .play-disc {
+    position: relative;
+    display: grid;
+    flex: 0 0 auto;
+    width: 76px;
+    height: 76px;
+    place-items: center;
+    border: 3px solid #000;
+    border-radius: 50%;
+    background: #f2c12e;
+    box-shadow: 0 4px 0 #000;
+    color: #0a0a0a;
+
+    .play-panel-missing & {
+      background: #fff;
+      color: #9b4e14;
+    }
+
+    .play-panel-ended & {
+      background: #c9ccd1;
+    }
+
+    .play-panel-no-hero & {
+      border-style: dashed;
+      background: transparent;
+      color: #fff;
+    }
+
+    .play-panel-taken & {
+      animation: play-grow 160ms var(--ease-menu) both;
+    }
+
+    > svg:last-child {
+      position: relative;
+      width: 36px;
+      height: 36px;
+    }
+  }
+
+  .play-ring {
+    position: absolute;
+    inset: -3px;
+    width: calc(100% + 6px);
+    height: calc(100% + 6px);
+    fill: none;
+    stroke: #0a0a0a;
+    stroke-width: 6;
+    stroke-dasharray: 40 24;
+    stroke-linecap: round;
+    animation: spin 1.4s linear infinite;
+  }
+
+  .play-panel-link {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 6px;
+    font: 800 15px/1.1 var(--site-heading);
+    color: #fede01;
+    text-decoration-line: underline;
+  }
+
+  /* On phones the disc stands beside the title, with the text and actions under both. */
+  @media (width < 40rem) {
+    .play-panel {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 0 16px;
+      padding: 18px 16px;
+
+      .site-actions {
+        gap: 8px;
+      }
+
+      .site-button-large {
+        min-height: 44px;
+        padding: 0 18px 0 12px;
+        font-size: 16px;
+      }
+    }
+
+    .play-panel-text {
+      display: contents;
+
+      > :not(h2) {
+        grid-column: 1 / -1;
+      }
+    }
+  }
+
+  @keyframes play-grow {
+    from {
+      scale: 0.9;
+    }
+  }
+
+  @media (width >= 40rem) {
+    .play-panel .site-box-title {
+      font-size: 27px;
+    }
+
+    .play-disc {
+      width: 120px;
+      height: 120px;
+
+      > svg:last-child {
+        width: 52px;
+        height: 52px;
+      }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .play-ring,
+    .play-panel-taken .play-disc {
+      animation: none;
+    }
+  }
+}

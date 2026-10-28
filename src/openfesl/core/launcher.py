@@ -12,6 +12,7 @@ from openfesl.core.heroes import Heroes
 from openfesl.core.logins import Logins
 from openfesl.core.personas import Persona, PersonaService
 from openfesl.core.session import GameSession, Players
+from openfesl.core.start_links import StartLinks
 
 logger = logging.getLogger(__name__)
 
@@ -151,6 +152,7 @@ class LauncherService:
         personas: PersonaService,
         heroes: Heroes,
         sessions: LauncherSessions,
+        links: StartLinks,
     ) -> None:
         """Sign players in against the account store.
 
@@ -161,12 +163,14 @@ class LauncherService:
             heroes: The heroes of the games whose heroes are made on their site, of which the
                 game logs in the default one.
             sessions: Where the sign-in is kept for the game to pick up.
+            links: The start links the site made, which sign their accounts in once.
         """
         self._logins = logins
         self._games = games
         self._personas = personas
         self._heroes = heroes
         self._sessions = sessions
+        self._links = links
 
     async def sign_in(
         self, game: str, role: str, account: str, password: str
@@ -187,26 +191,59 @@ class LauncherService:
                 account's state refuses its logins, no persona could be made for it or, in a
                 game whose heroes are made on its site, it has no hero to start the game as.
         """
-        served = self._games.by_id(game)
-        if served is None:
-            raise LauncherError(Refusal.UNKNOWN_GAME)
+        served = self._served(game)
         try:
             credentials = await self._logins.check(account, password)
-            assert credentials.password_hash is not None
             token = await self._logins.remember(credentials.account.id, credentials.password_hash)
         except TransactionError as refused:
             raise LauncherError(STATE_REFUSALS.get(refused.code, Refusal.WRONG_SIGN_IN)) from None
-        persona = await self._persona(credentials.account, served, role)
+        return await self._start(credentials.account, served, role, token)
+
+    async def redeem(self, game: str, role: str, code: str) -> tuple[str, LauncherSession]:
+        """Trade a start link's code for a launcher session that plays a game.
+
+        Args:
+            game: The game's data-file name.
+            role: Whether the game is started to play or to host; a start link only plays.
+            code: The start link's code, which works once.
+
+        Returns:
+            The session id to launch the game with, and the session it names.
+
+        Raises:
+            LauncherError: When the game is unknown; the code is unknown, used, ended or made
+                for another game, or the role hosts; the account's state refuses its logins; or
+                it has no hero to play as.
+        """
+        served = self._served(game)
+        link = self._links.take(code, game) if role != HOST else None
+        if link is None:
+            raise LauncherError(Refusal.WRONG_SIGN_IN)
+        try:
+            account, token = await self._logins.vouch(link.account_id, link.epoch)
+        except TransactionError as refused:
+            raise LauncherError(STATE_REFUSALS.get(refused.code, Refusal.WRONG_SIGN_IN)) from None
+        session_id, session = await self._start(account, served, role, token)
+        self._links.signed_in(link, session.persona_name)
+        return session_id, session
+
+    def _served(self, game: str) -> Game:
+        served = self._games.by_id(game)
+        if served is None:
+            raise LauncherError(Refusal.UNKNOWN_GAME)
+        return served
+
+    async def _start(
+        self, account: Account, game: Game, role: str, token: str
+    ) -> tuple[str, LauncherSession]:
+        persona = await self._persona(account, game, role)
         if persona is None:
-            raise LauncherError(Refusal.NO_HERO if served.heroes else Refusal.NO_PERSONA)
+            raise LauncherError(Refusal.NO_HERO if game.heroes else Refusal.NO_PERSONA)
         session = LauncherSession(
-            token=token,
-            account_id=credentials.account.id,
-            account_name=credentials.account.nuid,
-            persona_name=persona.name,
+            token=token, account_id=account.id, account_name=account.nuid, persona_name=persona.name
         )
         session_id = self._sessions.issue(session)
-        logger.info("Launcher signed account %d in to %s to %s", credentials.account.id, game, role)
+        logger.info("Launcher signed account %d in to %s to %s", account.id, game.id, role)
         return session_id, session
 
     async def _persona(self, account: Account, game: Game, role: str) -> Persona | None:
@@ -216,6 +253,6 @@ class LauncherService:
         if not game.heroes:
             return await self._personas.first_or_new(account, game.namespace)
         roster = await self._heroes.roster(game, account.id)
-        usable = [hero for hero in roster.heroes if role == HOST or hero.playable]
-        hero = roster.default if roster.default in usable else next(iter(usable), None)
+        hosting = roster.default or next(iter(roster.heroes), None)
+        hero = hosting if role == HOST else roster.playing
         return hero.persona if hero else None

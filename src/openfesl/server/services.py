@@ -51,6 +51,7 @@ from openfesl.core.rich_presence import RichPresence
 from openfesl.core.servers import Approval
 from openfesl.core.session import GameSession, Players
 from openfesl.core.sign_in import WebSignIn
+from openfesl.core.start_links import StartLinks
 from openfesl.core.stats import StatsService
 from openfesl.core.store import Store
 from openfesl.core.telemetry import telemetry_routes
@@ -86,6 +87,7 @@ class GameServices:
         self._theater = Theater(games, self._commands)
         self.players = Players()
         self._launcher_sessions = LauncherSessions(self.players)
+        self.start_links = StartLinks()
         self.game_http = GameHttp(games, self.players, load_texts("news"))
         self.approval = Approval(stores.servers)
         self.hosting = Hosting(self.approval)
@@ -161,7 +163,7 @@ class GameServices:
         personas = PersonaService(stores.personas)
         await personas.prepare(await accounts.prepare(games))
         app.state.launcher = LauncherService(
-            logins, games, personas, self.heroes, self._launcher_sessions
+            logins, games, personas, self.heroes, self._launcher_sessions, self.start_links
         )
         mailings = Mailings()
         attempts = Attempts()

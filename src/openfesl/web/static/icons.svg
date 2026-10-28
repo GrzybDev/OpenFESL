@@ -364,4 +364,11 @@
   <symbol id="window-closed" viewBox="0 0 24 24">
     <path d="M3.5 5h17v14h-17zM3.5 9h17M14 13l4 4M18 13l-4 4" fill="none" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
   </symbol>
+  <symbol id="splash" viewBox="0 0 200 40">
+    <path d="M10 22c8-9 30-12 52-10 14-8 30-9 44-2 16-6 40-6 58 0 12 1 26 4 30 10-6 8-22 10-38 9-10 6-28 8-42 4-16 6-36 6-52 1-16 3-36 2-46-4-6-2-8-5-6-8z"/>
+    <circle cx="18" cy="35" r="3"/>
+    <circle cx="188" cy="31" r="4"/>
+    <circle cx="170" cy="37" r="2"/>
+    <circle cx="40" cy="6" r="2.5"/>
+  </symbol>
 </svg>

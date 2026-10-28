@@ -116,6 +116,12 @@ class Roster:
         """How many more heroes the account may create."""
         return max(self.slots - len(self.heroes), 0)
 
+    @property
+    def playing(self) -> Hero | None:
+        """The hero the game is started to play as: the default one, or else the oldest playable."""
+        usable = [hero for hero in self.heroes if hero.playable]
+        return self.default if self.default in usable else next(iter(usable), None)
+
 
 @dataclass(frozen=True, slots=True)
 class HeroRecords:

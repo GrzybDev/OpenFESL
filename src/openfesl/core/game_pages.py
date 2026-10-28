@@ -204,6 +204,9 @@ class Site(BaseModel):
             browser; OpenFESLHook sends them to /open/<host>/<path>.
         addresses: The pages those addresses open, by the address's path, as paths below the
             game's own pages; every other address opens the game's front page.
+        start_links: Whether OpenFESLHook's launcher opens the site's start links,
+            openfesl-<game id>: addresses with a one-time code, so that the site starts the game
+            as the account's default hero; for games whose heroes are made on their site.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -212,6 +215,7 @@ class Site(BaseModel):
     wallets: list[SiteWallet] = []
     host: str | None = None
     addresses: dict[str, str] = {}
+    start_links: bool = False
 
 
 class Insignia(BaseModel):
