@@ -40,6 +40,11 @@ function creator(form) {
       form.dataset.hairColour = field.value;
     }
     describe();
+    // The game's model nods to a faction and flexes for a class; a look only repaints it.
+    const reaction = { faction: "nod", class: "flex" }[field.name];
+    if (reaction) {
+      stage.react(reaction);
+    }
   });
 
   /**
@@ -168,6 +173,7 @@ function creator(form) {
       pick(form.querySelectorAll(`[data-for="${form.dataset.faction}"] [name=${name}]`));
     }
     hop();
+    stage.react("wave");
   });
 
   /**

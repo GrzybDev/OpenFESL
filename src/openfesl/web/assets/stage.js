@@ -4,6 +4,7 @@
 // that fail to load or once the browser takes the model's drawing away. Without scripts they
 // stay, and so they do where WebGL is drawn without a graphics card, as loading the model there
 // holds the page up for about a second.
+import { reducedMotion } from "./naming.js";
 
 // The renderers that draw WebGL in software, as browsers name them where they do.
 const SOFTWARE = /swiftshader|llvmpipe|softpipe|lavapipe|basic render/i;
@@ -12,12 +13,12 @@ const SOFTWARE = /swiftshader|llvmpipe|softpipe|lavapipe|basic render/i;
  * Prepares a hero's stage, loading the game's model where the page offers it.
  *
  * @param {HTMLElement} stage - The stage, whose [data-model] script describes the hero's model.
- * @returns {{show: Function}} The stage.
+ * @returns {{show: Function, react: Function}} The stage.
  */
 export function heroStage(stage) {
   const described = stage.querySelector("script[data-model]");
   if (!described || !("WebGL2RenderingContext" in window) || drawnInSoftware()) {
-    return { show() {} };
+    return { show() {}, react() {} };
   }
   const standIn = stage.querySelector("[data-stand-in]");
   const caption = stage.querySelector("[data-caption]");
@@ -29,6 +30,8 @@ export function heroStage(stage) {
   let model = null;
   let wanted = null;
   let asked = 0;
+  let shown = 0;
+  let reaction = "";
   let failed = false;
   start(JSON.parse(described.textContent));
 
@@ -40,7 +43,7 @@ export function heroStage(stage) {
   async function start(figure) {
     try {
       const { showModel } = await import("./hero-model.js");
-      model = await showModel(canvas, figure, fallBack);
+      model = await showModel(canvas, figure, fallBack, reducedMotion);
       if (wanted) {
         await model.wear(await describe(wanted));
       }
@@ -55,6 +58,7 @@ export function heroStage(stage) {
       canvas.setAttribute("role", "img");
       canvas.setAttribute("aria-label", stage.dataset.modelLabel);
       caption.textContent = stage.dataset.modelCaption;
+      play();
     }
   }
 
@@ -70,6 +74,14 @@ export function heroStage(stage) {
       throw new Error(`the hero's model answered ${answer.status}`);
     }
     return answer.json();
+  }
+
+  /** Plays the reaction to the last choice, once the model wears the look it brought. */
+  function play() {
+    if (model && stage.dataset.shown && shown === asked && reaction) {
+      model.react(reaction);
+      reaction = "";
+    }
   }
 
   /** Shows the glyph and look in words for good, freeing the model. */
@@ -109,10 +121,21 @@ export function heroStage(stage) {
         const figure = await describe(look);
         if (number === asked && !failed) {
           await model.wear(figure);
+          shown = number;
+          play();
         }
       } catch {
         fallBack();
       }
+    },
+    /**
+     * Has the model react to a choice once the look that the choice brought is shown.
+     *
+     * @param {string} role - The reaction's role, such as nod.
+     */
+    react(role) {
+      reaction = role;
+      play();
     },
   };
 }

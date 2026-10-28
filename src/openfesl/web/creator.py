@@ -216,7 +216,8 @@ class CreatorPages:
 def figure_document(game: Game, figure: Figure) -> dict[str, Any]:
     """Return a hero as the game's menu draws it, as the stage's script reads it.
 
-    Files are named by their addresses; the pose names its clip.
+    Files are named by their addresses; the pose names its clip, and the clips that the stage
+    plays in each role are named by role.
 
     Args:
         game: The hero's game.
@@ -230,6 +231,7 @@ def figure_document(game: Game, figure: Figure) -> dict[str, Any]:
     role, time = figure.pose
     return {
         "skeleton": address("models", rig.model),
+        "roles": rig.roles,
         "pose": [next(iter(rig.roles.get(role, ())), role), time],
         "parts": [address("models", name) for name in figure.parts],
         "layers": [

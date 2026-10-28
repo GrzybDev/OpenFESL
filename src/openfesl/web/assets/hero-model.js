@@ -4,10 +4,12 @@
 // The stage loads this module only on a deployment that keeps the game's models.
 import {
   AnimationMixer,
+  AnimationUtils,
   ClampToEdgeWrapping,
   ColorManagement,
   LinearFilter,
   LinearMipmapLinearFilter,
+  LoopOnce,
   MathUtils,
   Mesh,
   NearestFilter,
@@ -31,6 +33,13 @@ ColorManagement.enabled = false;
 // The part of the portrait's square frame that the stage shows, as left, top, width and height:
 // the stage's 300 x 420 box, with the hero standing on its ground.
 const FRAME = [0.2227, 0.1592, 0.5829, 0.8161];
+// How long the hero blends between its menu idle and a reaction, in seconds.
+const BLEND = 0.2;
+// The shortest and longest wait for the next idle of the face, in seconds.
+const FACE_WAIT = [4, 8];
+// The time between frames, at most 30 a second, in milliseconds; a little less, so that a display
+// refreshing twice as often draws every other refresh.
+const FRAME_TIME = 1000 / 30 - 2;
 
 const LAYER_VERTEX = /* glsl */ `
 varying vec2 vUv;
@@ -99,14 +108,16 @@ void main() {
 const loader = new GLTFLoader();
 
 /**
- * Shows the game's model of a hero on a canvas, framed in the stage's box.
+ * Shows the game's model of a hero on a canvas, framed in the stage's box: in the menu's idle
+ * while the canvas is on screen, or still in the menu's pose under reduced motion.
  *
  * @param {HTMLCanvasElement} canvas - The canvas, which the page sizes.
  * @param {object} figure - The hero, as the server describes it.
  * @param {() => void} lost - Called once the browser takes the canvas's drawing away.
+ * @param {MediaQueryList} stillness - Whether the reader asks for reduced motion.
  * @returns {Promise<HeroModel>} The model, drawn once.
  */
-export async function showModel(canvas, figure, lost) {
+export async function showModel(canvas, figure, lost, stillness) {
   const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   canvas.addEventListener(
@@ -118,20 +129,20 @@ export async function showModel(canvas, figure, lost) {
     { once: true },
   );
   renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
-  const model = new HeroModel(renderer);
+  const model = new HeroModel(renderer, stillness);
   await model.wear(figure);
-  new ResizeObserver(() => model.fit()).observe(canvas);
   return model;
 }
 
 /** The game's model of a hero on its canvas, which wears one look after another. */
 class HeroModel {
   /**
-   * Prepares a model drawn by a renderer.
+   * Prepares a model drawn by a renderer, which moves only while its canvas is seen.
    *
    * @param {WebGLRenderer} renderer - The renderer of the model's canvas.
+   * @param {MediaQueryList} stillness - Whether the reader asks for reduced motion.
    */
-  constructor(renderer) {
+  constructor(renderer, stillness) {
     this.renderer = renderer;
     this.asked = 0;
     this.skeleton = "";
@@ -163,6 +174,37 @@ class HeroModel {
       blending: NormalBlending,
     });
     this.camera = null;
+    this.idle = null;
+    this.reaction = null;
+    this.still = stillness.matches;
+    this.seen = false;
+    this.running = false;
+    this.last = 0;
+    this.nextFace = 0;
+    this.watching = new AbortController();
+    const { signal } = this.watching;
+    this.observers = [
+      new ResizeObserver(() => this.fit()),
+      new IntersectionObserver(([entry]) => {
+        this.seen = entry.isIntersecting;
+        this.wake();
+      }),
+    ];
+    for (const observer of this.observers) {
+      observer.observe(renderer.domElement);
+    }
+    document.addEventListener("visibilitychange", () => this.wake(), { signal });
+    stillness.addEventListener(
+      "change",
+      () => {
+        this.still = stillness.matches;
+        if (this.root) {
+          this.settle();
+          this.draw();
+        }
+      },
+      { signal },
+    );
   }
 
   /**
@@ -206,10 +248,99 @@ class HeroModel {
       this.parts = parts;
     }
     this.camera = portraitCamera(figure.camera);
-    const [clip, time] = figure.pose;
-    this.mixer.stopAllAction();
-    this.mixer.clipAction(this.clips[clip]).play();
-    this.mixer.setTime(time);
+    this.roles = figure.roles;
+    this.pose = figure.pose;
+    if (rig) {
+      // The idles of the face move only its own joints, on top of the menu's idle.
+      this.faces = (figure.roles.faces ?? []).map((name) =>
+        AnimationUtils.makeClipAdditive(this.clips[name]),
+      );
+      this.idle = null;
+      this.reaction = null;
+    }
+    this.settle();
+    this.draw();
+  }
+
+  /** Holds the hero still in the menu's pose under reduced motion, or plays the menu's idle. */
+  settle() {
+    if (this.still) {
+      const [clip, time] = this.pose;
+      this.mixer.stopAllAction();
+      this.idle = null;
+      this.reaction = null;
+      this.mixer.clipAction(this.clips[clip]).play();
+      this.mixer.setTime(time);
+    } else if (!this.idle) {
+      this.mixer.stopAllAction();
+      this.idle = this.mixer.clipAction(this.clips[this.roles.idle[0]]).play();
+      this.nextFace = wait(FACE_WAIT);
+    }
+    this.wake();
+  }
+
+  /**
+   * Plays a reaction once, cutting short the one playing, and returns to the menu's idle; a hero
+   * held still does not react.
+   *
+   * @param {string} role - The reaction's role, such as nod.
+   */
+  react(role) {
+    const clip = this.clips[this.roles[role]?.[0]];
+    if (!this.idle || !clip) {
+      return;
+    }
+    const action = this.mixer.clipAction(clip);
+    const from = this.reaction ?? this.idle;
+    action.reset().setLoop(LoopOnce, 1).play();
+    action.clampWhenFinished = true;
+    if (from !== action) {
+      from.crossFadeTo(action, BLEND, false);
+    }
+    this.reaction = action;
+  }
+
+  /** Starts the frames while the hero moves and its canvas is seen, and stops them otherwise. */
+  wake() {
+    const running = Boolean(this.idle) && this.seen && !document.hidden;
+    if (running && !this.running) {
+      this.last = performance.now();
+      requestAnimationFrame((time) => this.tick(time));
+    }
+    this.running = running;
+  }
+
+  /**
+   * Moves the hero on and draws it, at most 30 times a second.
+   *
+   * @param {number} now - The time of the frame, in milliseconds.
+   */
+  tick(now) {
+    if (!this.running) {
+      return;
+    }
+    requestAnimationFrame((time) => this.tick(time));
+    const elapsed = now - this.last;
+    if (elapsed < FRAME_TIME) {
+      return;
+    }
+    this.last = now;
+    // A frame long delayed, as after a busy moment, does not throw the hero far ahead.
+    const step = Math.min(elapsed, 100) / 1000;
+    this.nextFace -= step;
+    if (this.nextFace <= 0 && this.faces.length > 0) {
+      const face = this.faces[Math.floor(Math.random() * this.faces.length)];
+      this.mixer.clipAction(face).reset().setLoop(LoopOnce, 1).play();
+      this.nextFace = wait(FACE_WAIT);
+    }
+    const reaction = this.reaction;
+    if (reaction && reaction.getClip().duration - reaction.time <= BLEND) {
+      this.idle.enabled = true;
+      this.idle.play();
+      reaction.crossFadeTo(this.idle, BLEND, false);
+      this.reaction = null;
+    }
+    this.mixer.update(step);
     this.draw();
   }
 
@@ -248,7 +379,7 @@ class HeroModel {
   /** Sizes the drawing to the canvas and draws the hero again. */
   fit() {
     const canvas = this.renderer.domElement;
-    if (canvas.clientWidth > 0) {
+    if (canvas.clientWidth > 0 && this.root) {
       this.renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
       this.draw();
     }
@@ -264,6 +395,12 @@ class HeroModel {
   /** Frees everything the model holds, its canvas's drawing too. */
   dispose() {
     ++this.asked;
+    this.idle = null;
+    this.wake();
+    this.watching.abort();
+    for (const observer of this.observers) {
+      observer.disconnect();
+    }
     this.dropMeshes();
     this.material.uniforms.warp.value?.dispose();
     this.material.dispose();
@@ -355,6 +492,16 @@ function texture(picture, filter) {
   wrapped.wrapT = ClampToEdgeWrapping;
   wrapped.needsUpdate = true;
   return wrapped;
+}
+
+/**
+ * Returns a random wait between two lengths.
+ *
+ * @param {number[]} range - The shortest and the longest wait.
+ * @returns {number} The wait.
+ */
+function wait([shortest, longest]) {
+  return shortest + Math.random() * (longest - shortest);
 }
 
 /**

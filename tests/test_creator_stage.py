@@ -95,6 +95,15 @@ async def test_the_creator_offers_the_games_model_only_with_an_import(
     assert figure.pop("camera")["look_at"] == [0.0, 1.024, 0.0]
     assert figure == {
         "skeleton": f"{folder}/models/british_male_soldier.glb",
+        "roles": {
+            "idle": ["idle"],
+            "faces": ["face_idle1"],
+            "poses": ["hands", "default"],
+            "nod": ["yes"],
+            "flex": ["flex"],
+            "wave": ["wave"],
+            "cheer": ["cheer"],
+        },
         "pose": ["idle", 5.6],
         "parts": [f"{folder}/models/invented_hat.glb"],
         "layers": [],
@@ -208,7 +217,7 @@ async def test_the_stage_shows_the_games_model_and_falls_back_to_the_look_in_wor
     not PORTRAIT, reason="OPENFESL_TEST_BFHEROES_PORTRAIT names no saved portrait from the game"
 )
 @pytest.mark.usefixtures("prompt_actions")
-async def test_the_stage_draws_the_hero_of_the_games_own_portrait_as_the_game_does(
+async def test_the_stage_draws_and_moves_the_hero_as_the_games_menu_does(
     files: Path, base: str, tmp_path: Path, capsys: pytest.CaptureFixture[str], edge: Browser
 ) -> None:
     assert COPY and PORTRAIT
@@ -251,6 +260,20 @@ async def test_the_stage_draws_the_hero_of_the_games_own_portrait_as_the_game_do
     # The render trial measured 0.97 and a difference of 4 at the portrait's own size.
     assert overlap > 0.94
     assert max(difference.mean) < 10
+
+    # Once the reader allows motion, the hero plays the menu's idle; asked for reduced motion
+    # again, it holds still.
+    await page.emulate_media(reduced_motion="no-preference")
+    moving = [await frame(page) for _ in range(2)]
+    await page.emulate_media(reduced_motion="reduce")
+    held = [await frame(page) for _ in range(2)]
+    assert moving[0] != moving[1] and held[0] == held[1]
+
+
+async def frame(page: Page) -> bytes:
+    """Return what a page's model shows after a moment of its life, as a PNG picture."""
+    await page.wait_for_timeout(400)
+    return await page.locator("canvas").screenshot()
 
 
 def hero_pixels(picture: Image.Image) -> Image.Image:
