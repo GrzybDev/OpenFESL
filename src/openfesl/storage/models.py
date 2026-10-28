@@ -10,7 +10,6 @@ from sqlalchemy import (
     Index,
     LargeBinary,
     SmallInteger,
-    UniqueConstraint,
     func,
 )
 from sqlalchemy.dialects.postgresql import JSONB
@@ -75,16 +74,39 @@ Index("persona_name_key", PersonaRow.namespace, func.lower(PersonaRow.name), uni
 
 class EntitlementRow(Base):
     __tablename__ = "entitlement"
-    # One row per tag, so a key entered again grants nothing twice and a revoked tag stays so.
-    __table_args__ = (UniqueConstraint("account_id", "tag"),)
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
     account_id: Mapped[int] = mapped_column(ForeignKey("account.id", ondelete="CASCADE"))
+    # The persona that owns it, for a game whose personas own items each; none for the
+    # account's own.
+    persona_id: Mapped[int | None] = mapped_column(ForeignKey("persona.id", ondelete="CASCADE"))
     tag: Mapped[str]
     group_name: Mapped[str | None]
     product_id: Mapped[str | None]
     status: Mapped[str] = mapped_column(default="ACTIVE")
     granted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    use_count: Mapped[int | None]
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+# One row per tag of an account, so a key entered again grants nothing twice and a revoked tag
+# stays so.
+Index(
+    "entitlement_tag_key",
+    EntitlementRow.account_id,
+    EntitlementRow.tag,
+    unique=True,
+    postgresql_where=EntitlementRow.persona_id.is_(None),
+)
+# One row per item of a persona, named before the first '-' of its Magma tag, since a game keeps
+# one row of each item and ignores the others.
+Index(
+    "entitlement_item_key",
+    EntitlementRow.persona_id,
+    func.split_part(EntitlementRow.tag, "-", 1),
+    unique=True,
+    postgresql_where=EntitlementRow.persona_id.is_not(None),
+)
 
 
 class ProductKeyRow(Base):

@@ -88,6 +88,5 @@ def _add_middleware(app: FastAPI, settings: Settings, games: Games, services: Ga
     )
     app.add_middleware(LanguageMiddleware)
     app.add_middleware(SecurityHeadersMiddleware)
-    app.add_middleware(
-        GameHttpMiddleware, http=services.game_http, magma=magma_app(services.magma), games=games
-    )
+    magma = {game.http.magma: magma_app(game, services.magma) for game in games if game.http.magma}
+    app.add_middleware(GameHttpMiddleware, http=services.game_http, magma=magma)

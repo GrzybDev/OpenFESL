@@ -15,6 +15,9 @@ ACTIVE = "ACTIVE"
 # What the game reads for an entitlement the admin took away.
 REVOKED = "DISABLED"
 
+# What an account owns itself, apart from what its personas own each.
+_ACCOUNTS = EntitlementRow.persona_id.is_(None)
+
 
 class SqlEntitlementStore:
     """Entitlements in PostgreSQL."""
@@ -37,6 +40,7 @@ class SqlEntitlementStore:
                 omitted.
         """
         held = exists().where(
+            _ACCOUNTS,
             EntitlementRow.account_id == account_id,
             EntitlementRow.tag == tag,
             EntitlementRow.status == ACTIVE,
@@ -60,7 +64,9 @@ class SqlEntitlementStore:
             await session.execute(grant_statement(account_id, [grant]))
             status = await session.scalar(
                 select(EntitlementRow.status).where(
-                    EntitlementRow.account_id == account_id, EntitlementRow.tag == grant.tag
+                    _ACCOUNTS,
+                    EntitlementRow.account_id == account_id,
+                    EntitlementRow.tag == grant.tag,
                 )
             )
             return status == ACTIVE
@@ -86,7 +92,9 @@ class SqlEntitlementStore:
             held = set(
                 await session.scalars(
                     select(EntitlementRow.tag).where(
-                        EntitlementRow.account_id == account_id, EntitlementRow.tag.in_(tags)
+                        _ACCOUNTS,
+                        EntitlementRow.account_id == account_id,
+                        EntitlementRow.tag.in_(tags),
                     )
                 )
             )
@@ -115,6 +123,7 @@ class SqlEntitlementStore:
             changed = await session.scalar(
                 update(EntitlementRow)
                 .where(
+                    _ACCOUNTS,
                     EntitlementRow.account_id == account_id,
                     EntitlementRow.tag == tag,
                     EntitlementRow.status != status,
@@ -152,7 +161,7 @@ class SqlEntitlementStore:
             account_id: The account.
             query: The filters.
         """
-        statement = select(EntitlementRow).where(EntitlementRow.account_id == account_id)
+        statement = select(EntitlementRow).where(_ACCOUNTS, EntitlementRow.account_id == account_id)
         if query.id:
             number = int(query.id) if query.id.isdigit() else -1
             statement = statement.where(EntitlementRow.id == number)
@@ -166,17 +175,24 @@ class SqlEntitlementStore:
                 statement = statement.where(column == value)
         async with self._sessions() as session:
             rows = await session.scalars(statement.order_by(EntitlementRow.id))
-            return [
-                Entitlement(
-                    id=row.id,
-                    tag=row.tag,
-                    group=row.group_name,
-                    product=row.product_id,
-                    status=row.status,
-                    granted=row.granted_at,
-                )
-                for row in rows
-            ]
+            return [_entitlement(row) for row in rows]
+
+    async def of_persona(self, persona_id: int, tag: str = "") -> list[Entitlement]:
+        """Return the items a persona owns, one entitlement per item.
+
+        Args:
+            persona_id: The persona.
+            tag: A tag whose item alone is returned, however the tag says it is owned; every
+                item when empty.
+        """
+        statement = select(EntitlementRow).where(EntitlementRow.persona_id == persona_id)
+        if tag:
+            # A persona's item is named before the first '-' of its tag, how it is owned after.
+            item = func.split_part(EntitlementRow.tag, "-", 1)
+            statement = statement.where(item == tag.partition("-")[0])
+        async with self._sessions() as session:
+            rows = await session.scalars(statement.order_by(EntitlementRow.id))
+            return [_entitlement(row) for row in rows]
 
 
 def grant_statement(account_id: int, grants: Sequence[Grant]) -> Insert:
@@ -201,8 +217,22 @@ def grant_statement(account_id: int, grants: Sequence[Grant]) -> Insert:
     # grant names when it lacks them, since the game's checks compare both.
     return statement.on_conflict_do_update(
         index_elements=[EntitlementRow.account_id, EntitlementRow.tag],
+        index_where=_ACCOUNTS,
         set_={
             "group_name": func.coalesce(EntitlementRow.group_name, statement.excluded.group_name),
             "product_id": func.coalesce(EntitlementRow.product_id, statement.excluded.product_id),
         },
+    )
+
+
+def _entitlement(row: EntitlementRow) -> Entitlement:
+    return Entitlement(
+        id=row.id,
+        tag=row.tag,
+        group=row.group_name,
+        product=row.product_id,
+        status=row.status,
+        granted=row.granted_at,
+        uses=row.use_count,
+        expires=row.expires_at,
     )

@@ -62,10 +62,10 @@ class GameServices:
         self._routes: dict[tuple[str, str], Route[Any]] = {}
         self._commands: dict[str, TheaterRoute[Any]] = {}
         self._theater = Theater(games, self._commands)
-        self._launcher_sessions = LauncherSessions()
         self.players = Players()
+        self._launcher_sessions = LauncherSessions(self.players)
         self.game_http = GameHttp(games, self.players, load_texts("news"))
-        self.magma = Magma(self._launcher_sessions)
+        self.magma = Magma(self._launcher_sessions, stores.personas, stores.entitlements)
         self.approval = Approval(stores.servers)
         self.hosting = Hosting(self.approval)
         self.census = Census(self.hosting, self.players)

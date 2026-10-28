@@ -25,15 +25,18 @@ NOT_LOGGED_IN = 20
 
 @dataclass(frozen=True, slots=True)
 class Entitlement:
-    """Something an account owns, such as a game or downloadable content.
+    """Something an account owns, such as a game or downloadable content, or a persona's item.
 
     Attributes:
         id: The entitlement's number.
-        tag: What it entitles to, such as BFBC2:PC:VIETNAM_ACCESS.
+        tag: What it entitles to, such as BFBC2:PC:VIETNAM_ACCESS, or a persona's item and how
+            the persona owns it, such as 3002-unlm.
         group: The group the game asks for by name, if any.
         product: The store product it came with, if any.
         status: ACTIVE, or the admin's reason for taking it away.
         granted: When it was granted.
+        uses: The uses or seconds left of an item limited by them.
+        expires: When an item limited by date ends.
     """
 
     id: int
@@ -42,6 +45,8 @@ class Entitlement:
     product: str | None
     status: str
     granted: datetime
+    uses: int | None
+    expires: datetime | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -98,6 +103,15 @@ class EntitlementStore(Protocol):
         Args:
             account_id: The account.
             query: The filters.
+        """
+
+    async def of_persona(self, persona_id: int, tag: str = "") -> list[Entitlement]:
+        """Return the items a persona owns, one entitlement per item.
+
+        Args:
+            persona_id: The persona.
+            tag: A tag whose item alone is returned, however the tag says it is owned; every
+                item when empty.
         """
 
 

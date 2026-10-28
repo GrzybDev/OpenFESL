@@ -1,6 +1,9 @@
 import logging
 
+from openfesl.core.entitlements import Entitlement, EntitlementStore
+from openfesl.core.games import Game
 from openfesl.core.launcher import LauncherSession, LauncherSessions
+from openfesl.core.personas import Persona, PersonaStore
 
 logger = logging.getLogger(__name__)
 
@@ -12,6 +15,12 @@ NO_SESSION_ID = "0"
 NOT_LOGGED_IN = "NOT_LOGGED_IN"
 NO_SESSION = "NO_SESSION"
 UNKNOWN_SESSION = "UNKNOWN_SESSION"
+
+# The original service's refusals of a persona that a path names, which a game tells apart by
+# their causes: one that the asker may not read, or an id that is no number, with its field.
+VALIDATION_FAILED = "VALIDATION_FAILED"
+USER_DOES_NOT_MATCH = "USER_DOES_NOT_MATCH"
+NOT_NUMERIC = "NOT_NUMERIC"
 
 
 class MagmaError(Exception):
@@ -30,15 +39,21 @@ class MagmaError(Exception):
 
 
 class Magma:
-    """Finds who asks Magma: the launcher session that a request's magma cookie names."""
+    """Answers Magma about the personas of the account whose launcher session a cookie names."""
 
-    def __init__(self, sessions: LauncherSessions) -> None:
-        """Find the askers among the launcher's sign-ins.
+    def __init__(
+        self, sessions: LauncherSessions, personas: PersonaStore, entitlements: EntitlementStore
+    ) -> None:
+        """Find the askers among the launcher's sign-ins and their personas in the stores.
 
         Args:
             sessions: The launcher's sign-ins, by session id.
+            personas: Where the personas are found.
+            entitlements: Where the personas' items are kept.
         """
         self._sessions = sessions
+        self._personas = personas
+        self._entitlements = entitlements
 
     def session(self, session_id: str | None) -> LauncherSession:
         """Return the launcher session that a request's magma cookie names.
@@ -57,3 +72,36 @@ class Magma:
             logger.info("A Magma request named an unknown launcher session")
             raise MagmaError(NOT_LOGGED_IN, UNKNOWN_SESSION)
         return session
+
+    async def entitlements(
+        self, session_id: str | None, game: Game, persona_id: int, tag: str = ""
+    ) -> list[Entitlement]:
+        """Return the items that a persona of the asking account owns, one entitlement per item.
+
+        Args:
+            session_id: The magma cookie's value; none when the request carries no cookie.
+            game: The game whose Magma host was asked.
+            persona_id: The persona.
+            tag: A tag whose item alone is returned, however the tag says it is owned; every
+                item when empty.
+
+        Raises:
+            MagmaError: When the request names no session that is known, or the persona is
+                not one of its account's in the game.
+        """
+        persona = await self._persona(session_id, game, persona_id)
+        return await self._entitlements.of_persona(persona.id, tag)
+
+    async def _persona(self, session_id: str | None, game: Game, persona_id: int) -> Persona:
+        account_id = self.session(session_id).account_id
+        persona = await self._personas.find_by_id(persona_id)
+        if (
+            persona is None
+            or persona.account_id != account_id
+            or persona.namespace != game.namespace
+        ):
+            logger.info(
+                "Account %d asked Magma about persona %d, not its own", account_id, persona_id
+            )
+            raise MagmaError(VALIDATION_FAILED, USER_DOES_NOT_MATCH)
+        return persona

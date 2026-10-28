@@ -21,7 +21,10 @@ theater_port = 18275
 
 # The host of the game's Magma web services, the default of 1.89's magmaHost and 1.46's PROD
 # environment: the account layer where the game trades the session it was started with for its
-# login token, the store and the website.
+# login token, the store and the website. What the game reads from it: dates to the minute in
+# UTC (BFHeroes.exe 1.89 0x0069e3fe); the best single entitlement of each item of a hero,
+# ignoring the others (0x007baaa6); and a refusal of a hero that a path names, reported as error
+# 6011 for USER_DOES_NOT_MATCH and 6009 for NOT_NUMERIC in the field userId (0x0069def5).
 [http]
 magma = "www.battlefieldheroes.com"
 

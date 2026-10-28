@@ -1,12 +1,43 @@
 from xml.etree import ElementTree
 
 import pytest
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import create_async_engine
 from support import FESL, fetch, game, launcher_sign_in, log_in_player
 
 pytestmark = pytest.mark.anyio
 
 MAGMA = "www.battlefieldheroes.com"
 NO_STORE = "no-store, no-transform"
+
+
+async def play(server_url: str, account: str) -> tuple[dict[str, str], int]:
+    """Register an account in another game, then start Battlefield Heroes with it as the hook does.
+
+    Returns:
+        The magma cookie the game sends and the number of the hero it plays.
+    """
+    async with game(server_url) as registering:
+        await log_in_player(registering, FESL, account)
+    session = (await launcher_sign_in(server_url, account, "secret-pass")).json()
+    cookie = {"Cookie": f"magma={session['sessionId']}"}
+    _, _, body = await fetch(server_url, "/nucleus/authToken", MAGMA, cookie)
+    token = ElementTree.fromstring(body).findtext("token") or ""
+    async with game(server_url) as player:
+        await player.hello(FESL, "bfwest-pc", client_type="client-noreg")
+        silent = [("TXN", "NuLogin"), ("returnEncryptedInfo", "0"), ("encryptedInfo", token)]
+        await player.request(FESL, "acct", silent)
+        hero = [("TXN", "NuLoginPersona"), ("name", session["personaName"])]
+        playing = await player.request(FESL, "acct", hero)
+    return cookie, int(playing["userId"])
+
+
+def refusal(body: bytes) -> tuple[str | None, str | None, str | None]:
+    """Return the code, cause and field of a Magma error document."""
+    answer = ElementTree.fromstring(body)
+    failure = answer.find("failure")
+    assert answer.tag == "error" and failure is not None
+    return answer.get("code"), failure.get("cause"), failure.get("field")
 
 
 async def test_a_game_started_by_the_launcher_logs_in_with_the_token_of_its_session(
@@ -78,3 +109,61 @@ async def test_a_token_request_without_a_known_session_gets_an_error_the_game_lo
         "0": (200, "error", "NOT_LOGGED_IN", "NO_SESSION"),
         "made-up": (200, "error", "NOT_LOGGED_IN", "UNKNOWN_SESSION"),
     }
+
+
+async def test_a_heros_items_load_by_its_number_beside_the_stores_empty_lists(
+    server_url: str, database_url: str
+) -> None:
+    cookie, hero = await play(server_url, "hero@example.test")
+    # A consumable with uses left and a rental, as the database keeps a hero's items.
+    engine = create_async_engine(database_url)
+    async with engine.begin() as connection:
+        await connection.execute(
+            text(
+                "INSERT INTO entitlement (account_id, persona_id, tag, use_count, expires_at,"
+                " status, granted_at) SELECT account_id, id, item.*, 'ACTIVE', '2026-10-20 12:00Z'"
+                " FROM persona, (VALUES ('2005-lmct', 3, NULL::timestamptz),"
+                " ('3002-tlmd', NULL, '2026-11-03 18:30+01')) AS item WHERE persona.id = :hero"
+            ),
+            {"hero": hero},
+        )
+    await engine.dispose()
+
+    status, headers, body = await fetch(server_url, f"/nucleus/entitlements/{hero}", MAGMA, cookie)
+    items = [
+        [entry.findtext(name) for name in ("entitlementTag", "useCount", "terminationDate")]
+        for entry in ElementTree.fromstring(body).iter("entitlement")
+    ]
+    # The store's refresh after a purchase asks for the item a tag names, whichever way the hero
+    # owns it.
+    refreshed = f"/nucleus/entitlements/{hero}?entitlementTag=3002-unlm"
+    _, _, body = await fetch(server_url, refreshed, MAGMA, cookie)
+    found = [entry.findtext("entitlementTag") for entry in ElementTree.fromstring(body)]
+    store = [
+        await fetch(server_url, path, MAGMA, cookie)
+        for path in ("/ofb/products", "/en/game/hotDeals")
+    ]
+
+    assert (status, headers["Cache-Control"]) == (200, NO_STORE)
+    assert items == [["2005-lmct", "3", ""], ["3002-tlmd", "0", "2026-11-03T17:30Z"]]
+    assert found == ["3002-tlmd"]
+    for status, _, body in store:
+        assert (status, body) == (200, b"<products />")
+
+
+async def test_a_hero_of_another_account_is_refused_with_the_errors_the_game_maps(
+    server_url: str,
+) -> None:
+    cookie, _ = await play(server_url, "ann@example.test")
+    _, other = await play(server_url, "bob@example.test")
+
+    refusals = [
+        refusal((await fetch(server_url, path, MAGMA, cookie))[2])
+        for path in (f"/nucleus/entitlements/{other}", "/nucleus/entitlements/bob")
+    ]
+
+    # The game reports them as errors 6011 and 6009.
+    assert refusals == [
+        ("VALIDATION_FAILED", "USER_DOES_NOT_MATCH", None),
+        ("VALIDATION_FAILED", "NOT_NUMERIC", "userId"),
+    ]

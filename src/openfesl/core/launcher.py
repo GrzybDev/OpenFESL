@@ -9,12 +9,14 @@ from openfesl.core.accounts import STATE_ERRORS
 from openfesl.core.fesl import TransactionError
 from openfesl.core.games import Games
 from openfesl.core.logins import Logins
-from openfesl.core.personas import PersonaService
+from openfesl.core.personas import Persona, PersonaService
+from openfesl.core.session import GameSession, Players
 
 logger = logging.getLogger(__name__)
 
-# The game fetches its token again whenever it logs in anew, such as after switching personas or
-# losing its connection, so a launcher session lasts as long as a day of play.
+# A game names its launcher session in every Magma request, a dedicated server's for days on end,
+# and fetches its token again whenever it logs in anew, such as after losing its connection. So a
+# session is kept while its account is logged in to a game, and for this long past its last use.
 SESSION_TTL = 24 * 3600.0
 
 
@@ -48,34 +50,43 @@ class LauncherError(Exception):
 
 @dataclass(frozen=True, slots=True)
 class LauncherSession:
-    """What a launcher sign-in holds until the game it starts logs in.
+    """What a launcher sign-in holds for the game it starts, which names it in its Magma requests.
 
     Attributes:
         token: The login token the game logs in with, which nucleus/authToken hands it.
+        account_id: The account that signed in.
         account_name: The account's login name.
         persona_name: The persona the game plays or hosts as.
     """
 
     token: str
+    account_id: int
     account_name: str
     persona_name: str
 
 
 class LauncherSessions:
-    """The sign-ins the launcher made, kept by session id for the games they start to log in."""
+    """The sign-ins the launcher made, kept by session id while the games they start use them."""
 
     def __init__(
-        self, ttl: float = SESSION_TTL, clock: Callable[[], float] = time.monotonic
+        self,
+        players: Players,
+        ttl: float = SESSION_TTL,
+        clock: Callable[[], float] = time.monotonic,
     ) -> None:
-        """Keep sign-ins for a while.
+        """Keep sign-ins while their accounts are logged in and for a while past their last use.
 
         Args:
-            ttl: How long a session id is good for, in seconds.
+            players: The game sessions that accounts are logged in on.
+            ttl: How long a session id outlives its last use once its account is logged in to no
+                game, in seconds.
             clock: Reads the current time in seconds, for the expiry.
         """
+        self._players = players
         self._ttl = ttl
         self._clock = clock
         self._sessions: dict[str, tuple[LauncherSession, float]] = {}
+        players.on_leave(self._left)
 
     def issue(self, session: LauncherSession) -> str:
         """Keep a sign-in under a new session id and return the id.
@@ -89,24 +100,41 @@ class LauncherSessions:
         return session_id
 
     def find(self, session_id: str) -> LauncherSession | None:
-        """Return the sign-in a session id names, while it has not expired.
+        """Return the sign-in a session id names while it is kept, which this use extends.
 
         Args:
-            session_id: The id the game carries to nucleus/authToken.
+            session_id: The id that the game carries in its Magma requests.
         """
         kept = self._sessions.get(session_id)
         if kept is None:
             return None
         session, expiry = kept
-        if self._clock() >= expiry:
+        now = self._clock()
+        if self._expired(session, expiry, now):
             del self._sessions[session_id]
             return None
+        self._sessions[session_id] = (session, now + self._ttl)
         return session
 
     def _purge(self) -> None:
         now = self._clock()
-        for session_id in [name for name, (_, expiry) in self._sessions.items() if now >= expiry]:
+        for session_id in [
+            name
+            for name, (session, expiry) in self._sessions.items()
+            if self._expired(session, expiry, now)
+        ]:
             del self._sessions[session_id]
+
+    def _left(self, session: GameSession, persona: Persona) -> None:
+        # A game that lost its connection fetches its token again to log in anew, so the end of its
+        # last game counts as a use, however long ago it last asked for anything.
+        expiry = self._clock() + self._ttl
+        for session_id, (kept, _) in list(self._sessions.items()):
+            if kept.account_id == persona.account_id:
+                self._sessions[session_id] = (kept, expiry)
+
+    def _expired(self, session: LauncherSession, expiry: float, now: float) -> bool:
+        return now >= expiry and self._players.online(session.account_id) is None
 
 
 class LauncherService:
@@ -159,7 +187,10 @@ class LauncherService:
         if persona is None:
             raise LauncherError(Refusal.NO_PERSONA)
         session = LauncherSession(
-            token=token, account_name=credentials.account.nuid, persona_name=persona.name
+            token=token,
+            account_id=credentials.account.id,
+            account_name=credentials.account.nuid,
+            persona_name=persona.name,
         )
         session_id = self._sessions.issue(session)
         logger.info("Launcher signed account %d in to %s to %s", credentials.account.id, game, role)
