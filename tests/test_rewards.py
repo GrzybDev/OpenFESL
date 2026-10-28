@@ -178,7 +178,7 @@ async def test_a_claim_and_a_key_purchase_for_one_account_at_once_both_go_throug
     with anyio.fail_after(10):
         await asyncio.gather(
             SqlRewardStore(sessions).grant(claim),
-            SqlPurchaseStore(sessions).buy_for_account(account, "key", key, wallet),
+            SqlPurchaseStore(sessions).buy_for_account(account, "key", key, wallet, 1),
         )
     await engine.dispose()
 

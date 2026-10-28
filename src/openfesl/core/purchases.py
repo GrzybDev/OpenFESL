@@ -93,7 +93,7 @@ class PurchaseStore(Protocol):
         """
 
     async def buy_for_account(
-        self, account_id: int, product_id: str, product: Product, wallet: Wallet
+        self, account_id: int, product_id: str, product: Product, wallet: Wallet, count: int
     ) -> None:
         """Pay a product's price, give the account the item and record it, all or nothing.
 
@@ -102,6 +102,7 @@ class PurchaseStore(Protocol):
             product_id: The id the product was bought by.
             product: The product, which the account owns once bought.
             wallet: The account's wallet the price is paid from.
+            count: How many of the product are bought at once, for its price that many times.
 
         Raises:
             PurchaseRefused: When the wallet holds less than the price, also after another
@@ -236,13 +237,16 @@ class Purchases:
         roster = await self._heroes.roster(game, persona.account_id)
         return next((hero for hero in roster.heroes if hero.persona.id == persona.id), None)
 
-    async def purchase_for_account(self, game: Game, account_id: int, product_id: str) -> None:
+    async def purchase_for_account(
+        self, game: Game, account_id: int, product_id: str, count: int = 1
+    ) -> None:
         """Sell an account a product that it owns rather than one of its heroes, such as a key.
 
         Args:
             game: The game.
             account_id: The account.
             product_id: The id the product is bought by.
+            count: How many of the product to sell at once, for its price that many times.
 
         Raises:
             PurchaseRefused: When the store sells no such product to accounts, or the price is
@@ -259,7 +263,7 @@ class Purchases:
             raise PurchaseRefused(UNKNOWN_PRODUCT)
         allowance = game.currencies[product.currency].allowance
         wallet = Wallet(game.id, product.currency, account_id, None, allowance)
-        await self._store.buy_for_account(account_id, product_id, product, wallet)
+        await self._store.buy_for_account(account_id, product_id, product, wallet, count)
 
     async def refund(self, game: Game, persona: Persona) -> Refund | None:
         """Refund a hero's abilities: take back all it bought with its points and credit them.

@@ -1,6 +1,6 @@
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 
 from babel import Locale
 from babel.lists import format_list
@@ -15,11 +15,13 @@ from openfesl.core.entitlements import ACTIVE, EntitlementQuery, EntitlementStor
 from openfesl.core.games import Game, Games
 from openfesl.core.heroes import Hero, Roster
 from openfesl.core.inventory import COUNTED, PERMANENT, RENTED, Ownership
-from openfesl.core.texts import localize, translate, translate_count
+from openfesl.core.texts import localize
+from openfesl.core.wallets import Wallets
 from openfesl.web.account.session import signed_in
-from openfesl.web.pages import Pages, number
+from openfesl.web.pages import Pages
 from openfesl.web.sessions import form_matches, form_token, toast
 from openfesl.web.site import site_bar
+from openfesl.web.store_texts import StoreTexts
 
 CHESTS = "/treasure-chests"
 
@@ -79,6 +81,7 @@ class ChestsPages:
         chests: Chests,
         entitlements: EntitlementStore,
         catalogues: Catalogues,
+        wallets: Wallets,
     ) -> None:
         """Prepare the treasure chests page of each game that lists it.
 
@@ -88,12 +91,14 @@ class ChestsPages:
             chests: Tells what the chests give and what a key costs.
             entitlements: Hold the account's keys and its heroes' chests.
             catalogues: Name the items the chests give, once imported.
+            wallets: Tell what the account has to pay keys with, opening nothing.
         """
         self._pages = pages
         self._games = games
         self._chests = chests
         self._entitlements = entitlements
         self._catalogues = catalogues
+        self._wallets = wallets
 
     def routes(self) -> APIRouter:
         """Return the treasure chests page of each game that lists it, and its forms."""
@@ -109,9 +114,14 @@ class ChestsPages:
             language = request.state.language
             bar = await site_bar(request)
             player = signed_in(request)
-            heroes, keys = None, 0
+            key = await self._chests.key(game)
+            heroes, keys, funds = None, 0, 0
             if bar and bar.roster is not None and player:
                 keys, heroes = await self._held(_rules(game), player.account_id, bar.roster)
+                if key:
+                    [funds] = await self._wallets.of_account(
+                        game, player.account_id, [key.currency]
+                    )
             catalogue = await self._catalogues.of(game, language)
             return self._pages.render(
                 request,
@@ -119,8 +129,9 @@ class ChestsPages:
                 game=game,
                 heroes=heroes,
                 keys=keys,
-                key=await self._chests.key(game),
-                lists=await self._lists(game, catalogue, language),
+                key=key,
+                funds=funds,
+                lists=await self._lists(StoreTexts(game, language, datetime.now(UTC)), catalogue),
                 imported=catalogue.imported,
                 next=localize(f"/{game.id}{CHESTS}", language),
                 csrf=form_token(request) if player else "",
@@ -150,34 +161,32 @@ class ChestsPages:
                 return RedirectResponse(page, 303)
             catalogue = await self._catalogues.of(game, language)
             key = await self._chests.key(game)
-            keys = await self._keys(_rules(game), hero.persona.account_id)
-            worth = {"worth": _amount(game, won.price, won.currency, language)}
+            keys = await held_keys(self._entitlements, _rules(game), hero.persona.account_id)
+            texts = StoreTexts(game, language, datetime.now(UTC))
+            worth = {"worth": texts.priced(won.price, won.currency)}
             if key:
-                worth["price"] = _amount(game, key.price, key.currency, language)
+                worth["price"] = texts.priced(key.price, key.currency)
             toast(
                 request,
                 "web.chests.opened",
                 error=False,
                 hero=name,
                 item=catalogue.name(won.item_id) or str(won.item_id),
-                term=_term(won.ownership, language),
-                keys=_count("web.chests.opened.keys", keys, language)
+                term=_term(won.ownership, texts),
+                keys=texts.count("web.chests.opened.keys", keys)
                 if keys
-                else translate("web.chests.opened.keys.none", language),
+                else texts.text("web.chests.opened.keys.none"),
                 # What the reveal on the next page says of the item and whose it is.
-                line=translate("web.chests.reveal.worth" + ("" if key else ".unsold"), language)
-                % {"term": _term(won.ownership, language, start=True), **worth},
+                line=texts.text(
+                    "web.chests.reveal.worth" + ("" if key else ".unsold"),
+                    term=_term(won.ownership, texts, start=True),
+                    **worth,
+                ),
                 hero_id=str(hero_id),
             )
             return RedirectResponse(page, 303)
 
         return open_chest
-
-    async def _keys(self, rules: ChestRules, account_id: int) -> int:
-        query = EntitlementQuery(tag=key_tag(rules), status=ACTIVE)
-        return sum(
-            entry.uses or 0 for entry in await self._entitlements.of_account(account_id, query)
-        )
 
     async def _held(
         self, rules: ChestRules, account_id: int, roster: Roster
@@ -189,59 +198,60 @@ class ChestsPages:
             stack = stacks[0] if stacks else None
             count = (stack.uses or 0) if stack and stack.status == ACTIVE else 0
             heroes.append(HeroChests(hero, count, stack.granted if stack else None))
-        return await self._keys(rules, account_id), heroes
+        return await held_keys(self._entitlements, rules, account_id), heroes
 
-    async def _lists(self, game: Game, catalogue: Catalogue, language: str) -> ChestLists | None:
-        odds = await self._chests.odds(game)
+    async def _lists(self, texts: StoreTexts, catalogue: Catalogue) -> ChestLists | None:
+        odds = await self._chests.odds(texts.game)
         if odds is None:
             return None
-        worth = _amount(game, odds.worth, odds.currency, language) if odds.worth else ""
+        worth = texts.priced(odds.worth, odds.currency) if odds.worth else ""
         factions = {
-            faction: [_line(drop, catalogue, language) for drop in drops]
+            faction: [_line(drop, catalogue, texts) for drop in drops]
             for faction, drops in odds.factions.items()
         }
         return ChestLists(worth, factions)
 
 
-def _term(ownership: Ownership, language: str, start: bool = False) -> str:
+def _term(ownership: Ownership, texts: StoreTexts, start: bool = False) -> str:
     # For how long or for how many uses a hero gets an item, within a sentence or starting one.
     if ownership.type == PERMANENT and start:
-        return translate("web.chests.held.permanent.start", language)
+        return texts.text("web.chests.held.permanent.start")
     if ownership.type == RENTED and ownership.days:
-        return _count("web.chests.held.days", ownership.days, language)
+        return texts.count("web.chests.held.days", ownership.days)
     if ownership.type == COUNTED and ownership.uses:
-        return _count("web.chests.held.uses", ownership.uses, language)
-    return translate("web.chests.held.permanent", language)
+        return texts.count("web.chests.held.uses", ownership.uses)
+    return texts.text("web.chests.held.permanent")
 
 
-def _line(drop: ChestDrop, catalogue: Catalogue, language: str) -> DropLine:
-    locale = Locale.parse(translate("web.locale", language))
+def _line(drop: ChestDrop, catalogue: Catalogue, texts: StoreTexts) -> DropLine:
+    locale = Locale.parse(texts.text("web.locale"))
     names = [catalogue.name(product.item_id) or str(product.item_id) for product in drop.products]
     name = names[0]
     if len(names) > 1:
         # One item of several, by the class of the hero that opens the chest.
         joined = str(format_list(names, style="or", locale=locale))
-        name = translate("web.chests.lists.by_class", language) % {"names": joined}
+        name = texts.text("web.chests.lists.by_class", names=joined)
     low, high = (
         str(format_percent(float(value), "#,##0.#%", locale=locale)) for value in drop.chance
     )
     chance = low
     if low != high and not drop.chance[0]:
-        chance = translate("web.chests.chance.up_to", language) % {"chance": high}
+        chance = texts.text("web.chests.chance.up_to", chance=high)
     elif low != high:
-        chance = translate("web.chests.chance.range", language) % {"low": low, "high": high}
-    return DropLine(name, _term(drop.products[0].ownership, language), chance)
+        chance = texts.text("web.chests.chance.range", low=low, high=high)
+    return DropLine(name, _term(drop.products[0].ownership, texts), chance)
 
 
-def _amount(game: Game, amount: int, currency: str, language: str) -> str:
-    # An amount with its currency's name, such as 499 Funds.
-    return (
-        f"{number(amount, language)} {translate(f'games.{game.id}.currency.{currency}', language)}"
-    )
+async def held_keys(entitlements: EntitlementStore, rules: ChestRules, account_id: int) -> int:
+    """Return how many keys an account holds.
 
-
-def _count(key: str, count: int, language: str) -> str:
-    return translate_count(key, count, language) % {"count": number(count, language)}
+    Args:
+        entitlements: Where the account's keys are kept.
+        rules: The game's chest rules, which name the key.
+        account_id: The account.
+    """
+    query = EntitlementQuery(tag=key_tag(rules), status=ACTIVE)
+    return sum(entry.uses or 0 for entry in await entitlements.of_account(account_id, query))
 
 
 def _rules(game: Game) -> ChestRules:

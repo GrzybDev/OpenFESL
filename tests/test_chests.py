@@ -12,7 +12,7 @@ from heroes import MAGMA, create_hero, wallets
 from identity import form_token
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from store import NAMES, ROYAL_SOLDIER, kept_by_server, shopper, stock
-from support import fetch, visible
+from support import fetch, once_token, visible
 from test_server_calls import ask
 
 from openfesl.core.catalogues import Catalogues
@@ -121,11 +121,6 @@ async def test_a_stacked_chest_opens_on_the_page_into_an_item_the_game_lists(
         # The round's end, at which the server stacks the chests the hero picked up.
         path = f"/nucleus/stackEntitlementUseCount/{hero.account_id}/{number}/BFH_TREASURE_CHEST/2"
         stacked = await ask(server_url, path, token, post=True)
-        key = await select_value(database_url, "SELECT id FROM store_product WHERE account")
-        # The site sells the key, which the game would not know, to the account.
-        await services.purchases.purchase_for_account(
-            services.game, hero.account_id, f"OFB-DBFH:{key}"
-        )
         others = await select_value(database_url, "SELECT id FROM persona WHERE name = 'host'")
         async with httpx2.AsyncClient() as site:
             await post_sign_in(site, base, "ann@example.test", PASSWORD)
@@ -135,6 +130,9 @@ async def test_a_stacked_chest_opens_on_the_page_into_an_item_the_game_lists(
             await site.post(opening, data={"csrf": "forged"})
             expired = visible((await site.get(f"{base}{PAGE}")).content)
             form = {"csrf": form_token(page.text)}
+            # The site sells the key, which the game would not know, to the account.
+            bought = {**form, "keys": "1", "price": "499", "once": once_token(page.text)}
+            await site.post(f"{base}{PAGE}/keys", data=bought)
             await site.post(opening, data=form)
             revealed = visible((await site.get(f"{base}{PAGE}")).content)
             await site.post(opening, data=form)
@@ -230,3 +228,65 @@ async def test_the_chests_page_lists_each_heros_chests_and_what_a_chest_gives(
         assert "Invented Longrifle · permanent chance up to 2.2%" in page
     assert "The account has no hero yet." in heroless and "Create a hero" in heroless
     assert "No chests to open" in chestless and "Play Now as Copperpot" in chestless
+
+
+@pytest.mark.usefixtures("prompt_actions")
+async def test_keys_are_bought_a_few_at_once_and_only_with_the_funds_for_them(
+    base: str,
+    server_url: str,
+    database_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    await stock(server_url, tmp_path, capsys)
+    await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    keys = f"{base}{PAGE}/keys"
+    async with httpx2.AsyncClient() as visitor, httpx2.AsyncClient() as ann:
+        signed_out = await visitor.get(keys)
+        await post_sign_in(ann, base, "ann@example.test", PASSWORD)
+        page = await ann.get(keys)
+        form = {"csrf": form_token(page.text), "price": "499", "once": once_token(page.text)}
+        # A form without its one-time token buys nothing.
+        await ann.post(keys, data={"csrf": form["csrf"], "price": "499", "keys": "1"})
+        tokenless = visible((await ann.get(f"{base}{PAGE}")).content)
+        await ann.post(keys, data={**form, "keys": "5"})
+        bought = visible((await ann.get(f"{base}{PAGE}")).content)
+        # The form sent again, as Back and sending it do, buys nothing more.
+        await ann.post(keys, data={**form, "keys": "5"})
+        again = visible((await ann.get(f"{base}{PAGE}")).content)
+        # Two keys at once are not one of the numbers sold, and one key costs more than is left.
+        await ann.post(keys, data={**form, "keys": "2"})
+        unsold = visible((await ann.get(f"{base}{PAGE}")).content)
+        form["once"] = once_token((await ann.get(keys)).text)
+        await ann.post(keys, data={**form, "keys": "1"})
+        refused = visible((await ann.get(keys)).content)
+        # The admin changes the key's price while the page shows the old one.
+        await execute(
+            database_url, "UPDATE store_product SET price = 999 WHERE account AND item_id = 7353"
+        )
+        await ann.post(keys, data={**form, "keys": "1"})
+        repriced = visible((await ann.get(keys)).content)
+
+    assert signed_out.status_code == 303 and "/sign-in" in signed_out.headers["location"]
+    offered = visible(page.content)
+    assert "1 key 499 Funds 3 keys 1,497 Funds 5 keys 2,495 Funds" in offered
+    assert "Funds now 2,500" in offered
+    assert "No keys were bought: the form had expired. Nothing was spent." in tokenless
+    assert "5 keys bought. 2,495 Funds spent." in bought and "Keys 5 keys" in bought
+    assert "This purchase of keys was made already; sending it again bought no more keys." in again
+    assert "this service does not sell that number of keys now. Nothing was spent." in unsold
+    assert (
+        "No keys were bought: the account has 5 Funds; 1 key costs 499 Funds. Nothing was spent."
+        in refused
+    )
+    assert "1 key 499 Funds 494 short" in refused
+    assert (
+        "No keys were bought: the price of a key changed to 999 Funds. Nothing was spent; the "
+        "page shows the new price."
+    ) in repriced
+    assert "1 key 999 Funds" in repriced
+    assert await held(database_url, "7353-lmct") == 5
+    ledger = await select_value(
+        database_url, "SELECT string_agg(delta::text, ' ' ORDER BY id) FROM wallet_entry"
+    )
+    assert ledger == "2500 -2495"

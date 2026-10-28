@@ -67,7 +67,7 @@ class SqlPurchaseStore:
             )
 
     async def buy_for_account(
-        self, account_id: int, product_id: str, product: Product, wallet: Wallet
+        self, account_id: int, product_id: str, product: Product, wallet: Wallet, count: int
     ) -> None:
         """Pay a product's price, give the account the item and record it, all or nothing.
 
@@ -76,15 +76,17 @@ class SqlPurchaseStore:
             product_id: The id the product was bought by.
             product: The product, which the account owns once bought.
             wallet: The account's wallet the price is paid from.
+            count: How many of the product are bought at once, for its price that many times.
 
         Raises:
             PurchaseRefused: When the wallet holds less than the price, also after another
                 purchase at the same time.
         """
         tag = product.ownership.tag(product.item_id)
+        price = product.price * count
         async with self._sessions.begin() as session:
-            await add_account_item(session, account_id, tag, product.ownership.uses or 1)
-            if await spend(session, wallet, product.price, PURCHASE) is None:
+            await add_account_item(session, account_id, tag, (product.ownership.uses or 1) * count)
+            if await spend(session, wallet, price, PURCHASE) is None:
                 raise PurchaseRefused(INSUFFICIENT_FUNDS)
             session.add(
                 PurchaseRow(
@@ -93,8 +95,8 @@ class SqlPurchaseStore:
                     product_id=product_id,
                     kind="product",
                     currency=wallet.currency,
-                    price=product.price,
-                    outcome={"items": [product.item_id]},
+                    price=price,
+                    outcome={"items": [product.item_id], "count": count},
                 )
             )
 

@@ -30,4 +30,33 @@
   .keys-number {
     font: 800 22px/1.2 var(--site-heading);
   }
+
+  /* Keys just bought: the count pops, and the disc of an account that had none turns yellow. */
+  .keys-number-new {
+    display: inline-block;
+    animation: keys-pop 200ms var(--ease-menu) both;
+  }
+
+  .keys-disc-new {
+    animation: keys-fill 150ms var(--ease-menu) both;
+  }
+
+  @keyframes keys-pop {
+    from {
+      scale: 1.15;
+    }
+  }
+
+  @keyframes keys-fill {
+    from {
+      background: #c5bba7;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .keys-number-new,
+    .keys-disc-new {
+      animation: none;
+    }
+  }
 }

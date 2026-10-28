@@ -1,7 +1,8 @@
-{#def held, keys: int #}
+{#def held, keys: int, key #}
 {# What the chest just opened gave a hero: a burst grows and the item rises into it; then what
-   the item is worth, the keys and chests left, and another opening while both remain. Scripts
-   show it as a dialog; without them it stands still at the top. #}
+   the item is worth, the keys and chests left, and another opening while both remain, or the
+   purchase of keys while only chests do. Scripts show it as a dialog; without them it stands
+   still at the top. #}
 {% set values = toast.values %}
 {% set hero = held.hero %}
 <dialog id="chest-reveal"
@@ -38,6 +39,10 @@
             {{ _("web.chests.reveal.again") }}
           </button>
         </form>
+      {% elif held.count and key %}
+        <a href="{{ url('/' ~ game.id ~ '/treasure-chests/keys') }}"
+           data-opens="buy-keys"
+           class="site-button site-button-large"><Icon name="key" :size="18" stroke="#FEDE01" />{{ _("web.chests.keys.buy") }}</a>
       {% endif %}
       <a href="{{ here }}" data-close class="site-button site-button-ghost">{{ _("web.dialog.close") }}</a>
     </div>

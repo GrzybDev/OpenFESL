@@ -7351,3 +7351,69 @@ msgstr "%(keys)s; %(chests)s"
 
 msgid "web.chests.reveal.again"
 msgstr "Otwórz następną · 1 klucz"
+
+msgid "web.chests.keys.buy"
+msgstr "Kup klucze"
+
+msgid "web.chests.keys.each"
+msgstr "%(price)s za sztukę"
+
+msgid "web.chests.keys.how_many"
+msgstr "Ile"
+
+msgid "web.chests.keys.submit"
+msgstr "Kup za %(price)s"
+
+msgid "web.chests.keys.why"
+msgstr "Konto ma %(funds)s; %(cost)s."
+
+msgid "web.chests.keys.cost.one"
+msgstr "%(count)s klucz kosztuje %(price)s"
+
+msgid "web.chests.keys.cost.few"
+msgstr "%(count)s klucze kosztują %(price)s"
+
+msgid "web.chests.keys.cost.many"
+msgstr "%(count)s kluczy kosztuje %(price)s"
+
+msgid "web.chests.keys.cost.other"
+msgstr "%(count)s klucza kosztuje %(price)s"
+
+msgid "web.chests.keys.belong"
+msgstr "Klucze należą do konta i otwierają skrzynię dowolnego bohatera."
+
+msgid "web.chests.keys.bought.one"
+msgstr "Kupiono %(count)s klucz."
+
+msgid "web.chests.keys.bought.few"
+msgstr "Kupiono %(count)s klucze."
+
+msgid "web.chests.keys.bought.many"
+msgstr "Kupiono %(count)s kluczy."
+
+msgid "web.chests.keys.bought.other"
+msgstr "Kupiono %(count)s klucza."
+
+msgid "web.chests.keys.done"
+msgstr "%(keys)s Wydano %(price)s."
+
+msgid "web.chests.keys.done.again"
+msgstr "Ten zakup kluczy został już dokonany; ponowne wysłanie nie kupiło kolejnych kluczy. Nic więcej nie zostało wydane."
+
+msgid "web.chests.keys.refused.form"
+msgstr "Nie kupiono kluczy: formularz wygasł. Nic nie zostało wydane."
+
+msgid "web.chests.keys.refused.unsold"
+msgstr "Nie kupiono kluczy: ten serwis nie sprzedaje teraz takiej liczby kluczy. Nic nie zostało wydane."
+
+msgid "web.chests.keys.refused.price"
+msgstr "Nie kupiono kluczy: cena klucza zmieniła się na %(price)s. Nic nie zostało wydane; strona pokazuje nową cenę."
+
+msgid "web.chests.keys.refused.funds"
+msgstr "Nie kupiono kluczy: konto ma %(funds)s; %(cost)s. Nic nie zostało wydane."
+
+msgid "web.chests.none.keys"
+msgstr "Klucze można kupić w każdej chwili."
+
+msgid "web.account.page.keys"
+msgstr "Kupowanie kluczy"

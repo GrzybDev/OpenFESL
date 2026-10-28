@@ -1,0 +1,12 @@
+{#def key, keys: int, funds: int #}
+{# The page that buys treasure chest keys, where a page has no scripts to open its dialog. #}
+{% set title = _("web.chests.keys.buy") %}
+<Layout :title="title">
+  <div class="rename-page">
+    {% if key %}
+      <KeysForm :key="key" :keys="keys" :funds="funds" />
+    {% else %}
+      <p class="site-lead">{{ _("web.chests.keys.rule.unsold") }}</p>
+    {% endif %}
+  </div>
+</Layout>

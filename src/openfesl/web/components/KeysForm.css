@@ -1,0 +1,136 @@
+/* The key purchase: a tile per number of keys, yellow while chosen, with a black key disc, the
+   price and what the account lacks for it in dark red; the reason in red when it cannot pay. */
+@layer components {
+  .keys-packs {
+    margin-top: 14px;
+  }
+
+  .keys-legend {
+    font: 800 13px/1.2 var(--site-heading);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #5c4a3c;
+  }
+
+  .keys-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .keys-tile {
+    position: relative;
+    display: flex;
+    min-width: 0;
+  }
+
+  .keys-radio {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    opacity: 0;
+  }
+
+  .keys-face {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 12px 8px 10px;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #f1e9de;
+    box-shadow:
+      inset 0 0 0 2px #f8f4ef,
+      0 3px 0 rgb(0 0 0 / 0.3);
+    text-align: center;
+    cursor: pointer;
+    transition:
+      background-color 150ms var(--ease-menu),
+      box-shadow 150ms var(--ease-menu);
+
+    .keys-radio:checked + & {
+      background: #f2c12e;
+      box-shadow:
+        inset 0 0 0 2px #ffe27a,
+        0 3px 0 rgb(0 0 0 / 0.3);
+    }
+
+    .keys-radio:focus-visible + & {
+      outline: 3px solid #fff;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 6px #0a0a0a;
+    }
+  }
+
+  .keys-face-disc {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border: 2px solid #000;
+    border-radius: 50%;
+    background: #1a1412;
+  }
+
+  .keys-face-count {
+    font: 800 19px/1.15 var(--site-heading);
+  }
+
+  .keys-face-price {
+    font-size: 14px;
+
+    strong {
+      font: 800 16px/1.2 var(--site-heading);
+    }
+  }
+
+  .keys-face-short {
+    min-height: 18px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #8c1e18;
+  }
+
+  .keys-facts {
+    margin-top: 14px;
+  }
+
+  .keys-why {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: #8c1e18;
+
+    svg {
+      flex: 0 0 auto;
+      margin-top: 1px;
+    }
+
+    &.flash {
+      animation: site-flash 600ms linear;
+    }
+  }
+
+  .keys-note {
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: #2b2018;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .keys-face {
+      transition: none;
+    }
+  }
+}

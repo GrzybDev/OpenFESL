@@ -27,6 +27,8 @@ class ChestRules(BaseModel):
         key_price: What a key costs.
         currency: The currency keys are bought with, which the account holds.
         contents: The key of the store's box that gives a chest's contents.
+        packs: The numbers of keys the site sells at once, each for the key's price that many
+            times.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -37,6 +39,7 @@ class ChestRules(BaseModel):
     key_price: PositiveInt
     currency: str
     contents: str
+    packs: list[PositiveInt] = [1]
 
 
 class ChestRefusal(StrEnum):

@@ -1,4 +1,4 @@
-{#def heroes: list | None, keys: int, key, lists, imported: bool, next: str #}
+{#def heroes: list | None, keys: int, key, funds: int, lists, imported: bool, next: str #}
 {# The treasure chests of an account's heroes: its keys, each hero's chests and what a chest can
    give the heroes of each faction; signed out, the way to sign in in place of the chests. #}
 {% set title = _("web.chests.title") %}
@@ -6,7 +6,7 @@
 <Layout :title="title">
   {% if heroes and toast and toast.key == "web.chests.opened" %}
     {% set opened = heroes|selectattr("hero.persona.id", "equalto", toast.values.hero_id|int)|list %}
-    {% if opened %}<ChestReveal :held="opened[0]" :keys="keys" />{% endif %}
+    {% if opened %}<ChestReveal :held="opened[0]" :keys="keys" :key="key" />{% endif %}
   {% endif %}
   <section aria-labelledby="chests-title" class="creator-head">
     <div class="creator-intro">
@@ -20,7 +20,13 @@
       </p>
     </div>
     {% if heroes is not none %}
-      <KeysPanel :keys="keys" :price="price" />
+      <KeysPanel :keys="keys" :price="price">
+      {% if key %}
+        <a href="{{ url('/' ~ game.id ~ '/treasure-chests/keys') }}"
+           data-opens="buy-keys"
+           class="site-button slot-buy"><Icon name="key" :size="16" stroke="#FEDE01" />{{ _("web.chests.keys.buy") }}<span class="slot-price"><Icon name="coin" :size="15" stroke="currentColor" />{{ _("web.chests.keys.each", price=price) }}</span></a>
+      {% endif %}
+      </KeysPanel>
     {% endif %}
   </section>
   {% set total = heroes|sum(attribute="count") if heroes else 0 %}
@@ -56,7 +62,10 @@
         <h2 id="chests-none" class="chests-empty-title">{{ _("web.chests.none") }}</h2>
         {% set hero = bar.roster.playing %}
         {% if hero %}
-          <p>{{ _("web.chests.none.text") }}</p>
+          <p>
+            {{ _("web.chests.none.text") }}
+            {% if key %}{{ _("web.chests.none.keys") }}{% endif %}
+          </p>
           {% if game.site.start_links %}
             <p class="site-actions">
               <a href="{{ url('/' ~ game.id ~ '/play-now') }}"
@@ -74,4 +83,12 @@
     </section>
   {% endif %}
   <ChestLists :lists="lists" :imported="imported" />
+  {% if heroes is not none and key %}
+    <dialog id="buy-keys"
+            aria-labelledby="buy-keys-title"
+            data-modal
+            class="site-dialog">
+      <KeysForm :key="key" :keys="keys" :funds="funds" dialog />
+    </dialog>
+  {% endif %}
 </Layout>

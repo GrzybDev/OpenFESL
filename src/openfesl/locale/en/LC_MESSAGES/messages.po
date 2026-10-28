@@ -6997,3 +6997,57 @@ msgstr "%(keys)s; %(chests)s"
 
 msgid "web.chests.reveal.again"
 msgstr "Open another · 1 key"
+
+msgid "web.chests.keys.buy"
+msgstr "Buy keys"
+
+msgid "web.chests.keys.each"
+msgstr "%(price)s each"
+
+msgid "web.chests.keys.how_many"
+msgstr "How many"
+
+msgid "web.chests.keys.submit"
+msgstr "Buy for %(price)s"
+
+msgid "web.chests.keys.why"
+msgstr "The account has %(funds)s; %(cost)s."
+
+msgid "web.chests.keys.cost.one"
+msgstr "%(count)s key costs %(price)s"
+
+msgid "web.chests.keys.cost.other"
+msgstr "%(count)s keys cost %(price)s"
+
+msgid "web.chests.keys.belong"
+msgstr "Keys belong to the account and open a chest of any hero."
+
+msgid "web.chests.keys.bought.one"
+msgstr "%(count)s key bought."
+
+msgid "web.chests.keys.bought.other"
+msgstr "%(count)s keys bought."
+
+msgid "web.chests.keys.done"
+msgstr "%(keys)s %(price)s spent."
+
+msgid "web.chests.keys.done.again"
+msgstr "This purchase of keys was made already; sending it again bought no more keys. Nothing more was spent."
+
+msgid "web.chests.keys.refused.form"
+msgstr "No keys were bought: the form had expired. Nothing was spent."
+
+msgid "web.chests.keys.refused.unsold"
+msgstr "No keys were bought: this service does not sell that number of keys now. Nothing was spent."
+
+msgid "web.chests.keys.refused.price"
+msgstr "No keys were bought: the price of a key changed to %(price)s. Nothing was spent; the page shows the new price."
+
+msgid "web.chests.keys.refused.funds"
+msgstr "No keys were bought: the account has %(funds)s; %(cost)s. Nothing was spent."
+
+msgid "web.chests.none.keys"
+msgstr "Keys can be bought at any time."
+
+msgid "web.account.page.keys"
+msgstr "Buying keys"

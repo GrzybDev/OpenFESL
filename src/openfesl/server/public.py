@@ -15,6 +15,7 @@ from openfesl.web.account.services import SignInServices
 from openfesl.web.account.sign_in import SignInPages
 from openfesl.web.account.terms import TermsPages
 from openfesl.web.activity import activity_routes
+from openfesl.web.chest_keys import KeyPages
 from openfesl.web.chests import ChestsPages
 from openfesl.web.creator import CreatorPages
 from openfesl.web.front import front_routes
@@ -100,7 +101,23 @@ def include_public_routes(
     )
     app.include_router(
         ChestsPages(
-            pages, games, services.chests, stores.entitlements, services.catalogues
+            pages,
+            games,
+            services.chests,
+            stores.entitlements,
+            services.catalogues,
+            services.wallets,
+        ).routes()
+    )
+    app.include_router(
+        KeyPages(
+            pages,
+            games,
+            services.chests,
+            sent,
+            services.purchases,
+            stores.entitlements,
+            services.wallets,
         ).routes()
     )
     app.include_router(open_routes(games))

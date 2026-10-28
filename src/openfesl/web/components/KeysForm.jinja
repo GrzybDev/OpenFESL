@@ -1,0 +1,121 @@
+{#def key, keys: int, funds: int, dialog: bool = False #}
+{# The form that buys treasure chest keys a few at a time: a tile for each number of keys with its
+   price and what the account lacks for it, then the price, the Funds after and the keys after for
+   the chosen number, and why it cannot be sent while the account has too few Funds. The chests
+   page opens it as a dialog; without scripts it is a page of its own, where the tiles say what
+   each number costs. #}
+{% set currency = _("games." ~ game.id ~ ".currency." ~ key.currency) %}
+{% set suffix = "" if dialog else "-page" %}
+{% set ns = namespace(first=None) %}
+<form method="post"
+      action="{{ url('/' ~ game.id ~ '/treasure-chests/keys') }}"
+      data-keys-form
+      data-once
+      class="site-dialog-box keys-form">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <input type="hidden" name="price" value="{{ key.price }}">
+  <input type="hidden" name="once" value="{{ once_token() }}">
+  {% if dialog %}
+    <button type="button"
+            data-close
+            class="site-dialog-close"
+            aria-label="{{ _('web.dialog.close') }}">
+      <Icon name="x" :size="18" stroke="currentColor" />
+    </button>
+    <h2 id="buy-keys-title" class="site-dialog-title">{{ _("web.chests.keys.buy") }}</h2>
+  {% else %}
+    <h1 id="buy-keys-title-page" class="site-dialog-title">{{ _("web.chests.keys.buy") }}</h1>
+  {% endif %}
+  <fieldset class="keys-packs">
+    <legend class="keys-legend">{{ _("web.chests.keys.how_many") }}</legend>
+    <div class="keys-tiles">
+      {% for count in game.chests.packs %}
+        {% set price = key.price * count %}
+        {% set price_text = number(price) ~ " " ~ currency %}
+        {% set short = price - funds %}
+        {% set pack = namespace(
+          price=price_text,
+          short=short > 0,
+          after=_("web.rename.short", amount=number(short)) if short > 0 else number(funds - price),
+          keys=number(keys) ~ " → " ~ number(keys + count),
+          label=_("web.chests.keys.submit", price=price_text),
+          why=_("web.chests.keys.why", funds=number(funds) ~ " " ~ currency, cost=_n("web.chests.keys.cost", count, price=price_text)) if short > 0 else ""
+        ) %}
+        {% if loop.first %}
+          {% set ns.first = pack %}
+        {% endif %}
+        <label class="keys-tile">
+          <input type="radio"
+                 name="keys"
+                 value="{{ count }}"
+                 {% if loop.first %}checked{% endif %}
+                 aria-describedby="keys-short-{{ count }}{{ suffix }}"
+                 data-pack-price="{{ pack.price }}"
+                 data-pack-after="{{ pack.after }}"
+                 data-pack-keys="{{ pack.keys }}"
+                 data-pack-label="{{ pack.label }}"
+                 data-pack-why="{{ pack.why }}"
+                 class="keys-radio">
+          <span class="keys-face">
+            <span aria-hidden="true" class="keys-face-disc"><Icon name="key" :size="22" stroke="#FEDE01" /></span>
+            <span class="keys-face-count">{{ _n("web.chests.keys.count", count) }}</span>
+            <span class="keys-face-price"><strong>{{ number(price) }}</strong> {{ currency }}</span>
+            <span id="keys-short-{{ count }}{{ suffix }}" class="keys-face-short">
+              {% if short > 0 %}{{ _("web.rename.short", amount=number(short)) }}{% endif %}
+            </span>
+          </span>
+        </label>
+      {% endfor %}
+    </div>
+  </fieldset>
+  {% set first = ns.first %}
+  {# What the chosen number costs and leaves follows the choice, which needs scripts. #}
+  <dl class="site-facts keys-facts">
+    <dt class="js-only">{{ _("web.rename.price") }}</dt>
+    <dd class="js-only" data-fact="price">
+      {{ first.price }}
+    </dd>
+    <dt>{{ _("web.rename.funds_now", currency=currency) }}</dt>
+    <dd>
+      {{ number(funds) }}
+    </dd>
+    <dt class="js-only">{{ _("web.rename.funds_after", currency=currency) }}</dt>
+    <dd class="js-only{% if first.short %} site-short{% endif %}"
+        data-fact="after">
+      {{ first.after }}
+    </dd>
+    <dt class="js-only">{{ _("web.chests.keys.title") }}</dt>
+    <dd class="js-only" data-fact="keys">
+      {{ first.keys }}
+    </dd>
+  </dl>
+  <p id="buy-keys-why{{ suffix }}"
+     data-why
+     {% if not first.short %}hidden{% endif %}
+     class="keys-why">
+    <Icon name="warn" :size="18" stroke="currentColor" />
+    <span data-why-text>{{ first.why }}</span>
+  </p>
+  <p class="keys-note">{{ _("web.chests.keys.belong") }} {{ _("web.heroes.wallet.note") }}</p>
+  <div class="site-dialog-actions">
+    <button type="submit"
+            aria-describedby="buy-keys-why{{ suffix }}"
+            {% if first.short %} aria-disabled="true"{% endif %}
+            class="site-button site-button-go site-button-large">
+      <Icon name="coin" :size="18" stroke="currentColor" />
+      <span class="js-only" data-label>{{ first.label }}</span>
+      <span class="no-js-only">{{ _("web.chests.keys.buy") }}</span>
+    </button>
+    <FundsLink data-earn :hidden="not first.short" class="site-button site-button-ghost" />
+    {% if dialog %}
+      <button type="button"
+              data-close
+              data-cancel
+              {% if first.short %}hidden{% endif %}
+              class="site-button site-button-ghost">{{ _("web.rename.cancel") }}</button>
+    {% else %}
+      <a href="{{ url('/' ~ game.id ~ '/treasure-chests') }}"
+         class="site-button site-button-ghost">{{ _("web.rename.cancel") }}</a>
+    {% endif %}
+  </div>
+</form>
