@@ -7,9 +7,9 @@ from typing import Any, Protocol
 
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Game, ListRule
-from openfesl.core.hosting import Hosting
 from openfesl.core.personas import NOT_LOGGED_IN, PERSONA, Persona, PersonaStore
 from openfesl.core.session import Players
+from openfesl.core.trust import ServerTrust
 from openfesl.protocol.asso import (
     AddAssociations,
     AssociationOutcome,
@@ -167,7 +167,7 @@ class AssociationService:
     """The asso transactions that read and change association lists, such as friends."""
 
     def __init__(
-        self, store: AssociationStore, personas: PersonaStore, players: Players, hosting: Hosting
+        self, store: AssociationStore, personas: PersonaStore, players: Players, trust: ServerTrust
     ) -> None:
         """Serve association lists from a store.
 
@@ -175,12 +175,12 @@ class AssociationService:
             store: Where the lists are kept.
             personas: Where owners and members are looked up.
             players: Where the owners of changed lists are found online.
-            hosting: Where the games are that dedicated servers host.
+            trust: Which dedicated servers host games that players see, and who plays in them.
         """
         self._store = store
         self._personas = personas
         self._players = players
-        self._hosting = hosting
+        self._trust = trust
 
     def routes(self) -> dict[tuple[str, str], Route[Any]]:
         """Return the handlers of the service's transactions."""
@@ -362,7 +362,7 @@ class AssociationService:
         kept = rule is not None and rule.kept_by_servers
         account = connection.session.account
         if account is not None and account.server:
-            hosts = kept and await self._hosting.admits(connection.session)
+            hosts = kept and await self._trust.admits(connection.session)
             return _Reach.ANYONE if hosts else _Reach.OWN
         return _Reach.NOBODY if kept and change else _Reach.OWN
 

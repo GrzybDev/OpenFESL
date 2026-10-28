@@ -14,9 +14,10 @@ from openfesl.protocol.acct import (
 )
 from openfesl.protocol.message import Message
 
-# For annotations only, since hosting reaches the account service, which imports this module.
+# For annotations only, since the trust checks reach the account service, which imports this
+# module.
 if TYPE_CHECKING:
-    from openfesl.core.hosting import Hosting
+    from openfesl.core.trust import ServerTrust
 
 logger = logging.getLogger(__name__)
 
@@ -118,15 +119,15 @@ class EntitlementStore(Protocol):
 class EntitlementService:
     """The acct transactions that list entitlements and let dedicated servers grant them."""
 
-    def __init__(self, store: EntitlementStore, hosting: Hosting) -> None:
+    def __init__(self, store: EntitlementStore, trust: ServerTrust) -> None:
         """Serve entitlements from a store.
 
         Args:
             store: Where the entitlements are kept.
-            hosting: Where the games are that dedicated servers host.
+            trust: Which dedicated servers host games that players see, and who plays in them.
         """
         self._store = store
-        self._hosting = hosting
+        self._trust = trust
 
     def routes(self) -> dict[tuple[str, str], Route[Any]]:
         """Return the handlers of the service's transactions."""
@@ -204,7 +205,7 @@ class EntitlementService:
     ) -> bool:
         tag = request.entitlement_tag
         grant = next((grant for grant in game.automatic_grants if grant.tag == tag), None)
-        if grant is None or not await self._hosting.admits_player(
+        if grant is None or not await self._trust.admits_player(
             connection.session, request.master_id
         ):
             return False
@@ -225,7 +226,7 @@ class EntitlementService:
         # Anyone logs in like a dedicated server, so only one that hosts a game players see
         # reads the entitlements of the players in it, such as their veteran tags.
         if owner != account.id and not (
-            account.server and await self._hosting.admits_player(connection.session, owner)
+            account.server and await self._trust.admits_player(connection.session, owner)
         ):
             raise TransactionError(PARAMETERS_ERROR)
         query = EntitlementQuery(

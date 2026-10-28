@@ -2,7 +2,8 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Self
 
-from openfesl.core.hosting import GAME, NO_GAME, HostedGame, Hosting, Player, PlayerState
+from openfesl.core.hosted_games import HostedGame, Player, PlayerState
+from openfesl.core.hosting import GAME, NO_GAME, Hosting
 from openfesl.core.theater import FAILED, TheaterConnection, TheaterError, TheaterRoute
 from openfesl.protocol.theater import (
     GameData,

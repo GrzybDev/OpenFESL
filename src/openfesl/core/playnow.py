@@ -5,7 +5,8 @@ from typing import Any
 
 from openfesl.core.fesl import FeslConnection, Route, TransactionError
 from openfesl.core.games import Game
-from openfesl.core.hosting import GAME, HostedGame, Hosting
+from openfesl.core.hosted_games import HostedGame
+from openfesl.core.hosting import GAME, Hosting
 from openfesl.core.personas import NOT_LOGGED_IN
 from openfesl.protocol.message import Message
 from openfesl.protocol.pnow import (

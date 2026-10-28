@@ -7,7 +7,8 @@ from typing import Any
 
 from openfesl.core.accounts import AccountState
 from openfesl.core.admin import AdminAction, AdminFeed, LoggedAction
-from openfesl.core.hosting import NO_GAME, NOT_FOUND, HostedGame, Hosting, Player, PlayerState
+from openfesl.core.hosted_games import HostedGame, Player, PlayerState
+from openfesl.core.hosting import NO_GAME, NOT_FOUND, Hosting
 from openfesl.core.personas import Persona, PersonaState
 from openfesl.core.theater import (
     BAD_PARAMETERS,

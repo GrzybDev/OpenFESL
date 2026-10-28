@@ -1,22 +1,17 @@
-import asyncio
 import itertools
 import logging
 import secrets
 from collections.abc import Callable, Iterator, Mapping
-from dataclasses import dataclass, field
-from datetime import UTC, datetime
-from enum import Enum, auto
 from ipaddress import IPv4Address
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from openfesl.core.games import Game, Lobby
+from openfesl.core.hosted_games import HostedGame, Player
 from openfesl.core.personas import Persona
 from openfesl.core.servers import (
     BAD_SECRET,
     Admission,
     Approval,
-    GameServer,
-    Standing,
     new_identity,
     reported_provider,
 )
@@ -33,9 +28,6 @@ from openfesl.protocol.theater import (
     attributes_size,
 )
 
-if TYPE_CHECKING:
-    from openfesl.core.session import GameSession
-
 logger = logging.getLogger(__name__)
 
 GAME = "G"
@@ -46,161 +38,10 @@ LOBBY_FULL = "lbfl"
 NO_GAME = "ngam"
 NOT_FOUND = "ntfn"
 
-# The admin decides in another process, so the server reads the decisions back this often.
-APPROVAL_CHECK_INTERVAL = 5.0
-
 # Each attribute map travels whole in one row of a game list, which the game drops past 8223
 # bytes, so a map as written stays below that with room for the row's other fields, which
 # the game's read limits keep under about 1200 bytes.
 MAXIMUM_ATTRIBUTES_SIZE = 6144
-
-
-class PlayerState(Enum):
-    """How far a player got into a hosted game."""
-
-    QUEUED = auto()
-    """It waits in the game's queue for a place."""
-    JOINING = auto()
-    """The host was asked whether it may join (EGRQ) and has not answered."""
-    APPROVED = auto()
-    """The host allowed it and it connects to the host (EGEG)."""
-    ENTERED = auto()
-    """The host reported it in the game (PENT)."""
-
-
-@dataclass(eq=False)
-class Player:
-    """A player of a hosted game, from its EGAM until its host reports it left.
-
-    Attributes:
-        pid: The number the server gave the player within the game.
-        persona: Who plays.
-        connection: The player's Theater connection.
-        participant: Whether it plays rather than watches.
-        address: The player's public IPv4 address.
-        port: The public port of the player's game socket.
-        internal_address: The player's LAN address, its public one when its game knows none.
-        internal_port: The port of the player's game socket on its LAN.
-        request: The `R-U-` attributes the player's game sent for the host.
-        group: The playgroup the player joins with, if any.
-        looked_up: The player its EGAM named the game by, if it did.
-        ticket: What the player proves to its host that the server let it in with.
-        state: How far it got.
-        attributes: The player's `P-` attributes by full key.
-        deadline: When the host's answer is due, while the server waits for it.
-    """
-
-    pid: int
-    persona: Persona
-    connection: TheaterConnection
-    participant: bool
-    address: IPv4Address
-    port: int
-    internal_address: IPv4Address
-    internal_port: int
-    request: dict[str, str]
-    group: int | None
-    looked_up: Persona | None
-    ticket: str
-    state: PlayerState = PlayerState.QUEUED
-    attributes: dict[str, str] = field(default_factory=dict)
-    deadline: asyncio.TimerHandle | None = None
-
-    def stop_waiting(self) -> None:
-        """Stop waiting for the host's answer about the player."""
-        if self.deadline is not None:
-            self.deadline.cancel()
-            self.deadline = None
-
-
-@dataclass(eq=False)
-class HostedGame:
-    """A game a host lists in a lobby, as its CGAM and later updates describe it.
-
-    Attributes:
-        lobby: The lobby it is listed in.
-        id: Its number, unique on the server.
-        host: The Theater connection of its host.
-        type: G for a game, P for a playgroup.
-        name: Its name.
-        address: The host's public IPv4 address.
-        port: The host's public game port.
-        internal_address: The host's LAN address, when the host knows it.
-        internal_port: The host's LAN game port.
-        ugid: Its persistent id.
-        server: The dedicated server that hosts it; none for a player's own playgroup.
-        listed: Whether players see it; games of servers waiting for approval are hidden.
-        key: The key the game's traffic is encrypted with, which joining players get too.
-        join: Who may join: O open, W wait, C closed.
-        max_players: How many participants it takes.
-        max_observers: How many observers it takes.
-        observers: How many observers it has.
-        queue_length: How many players may wait for a place.
-        dequeue: Whether the server lets waiting players in as places free; otherwise the
-            host picks them itself (DQEG).
-        password: Whether joining needs a password.
-        version: The game protocol version its players need.
-        basic: The `B-U-` attributes by full key.
-        details: The `D-` attributes by full key.
-        players: Its players that are past the queue, by PID.
-        queue: Its waiting players, first in line first.
-        pids: The numbers its next players get.
-        since: When the host listed it.
-    """
-
-    lobby: Lobby
-    id: int
-    host: TheaterConnection
-    type: str
-    name: str
-    address: IPv4Address
-    port: int
-    internal_address: str | None
-    internal_port: int | None
-    ugid: str
-    server: GameServer | None
-    listed: bool
-    key: str
-    join: str
-    max_players: int
-    max_observers: int
-    observers: int
-    queue_length: int
-    dequeue: bool
-    password: bool
-    version: str
-    basic: dict[str, str]
-    details: dict[str, str] = field(default_factory=dict)
-    players: dict[int, Player] = field(default_factory=dict)
-    queue: list[Player] = field(default_factory=list)
-    pids: Iterator[int] = field(default_factory=lambda: itertools.count(1))
-    since: datetime = field(default_factory=lambda: datetime.now(UTC))
-
-    def everyone(self) -> list[Player]:
-        """Return its players and those waiting in its queue."""
-        return [*self.players.values(), *self.queue]
-
-    def in_game(self) -> list[Player]:
-        """Return the participants its host reported in the game, which game lists show."""
-        return [
-            player
-            for player in self.players.values()
-            if player.participant and player.state is PlayerState.ENTERED
-        ]
-
-    def taken(self) -> int:
-        """Return how many participants join or are in the game."""
-        return sum(player.participant for player in self.players.values())
-
-    def has_room(self, player: Player) -> bool:
-        """Return whether a player fits besides the participants joining or in the game.
-
-        Observers are left to the host, which knows how many watch.
-
-        Args:
-            player: The player that wants a place.
-        """
-        return not player.participant or self.taken() < self.max_players
 
 
 class Hosting:
@@ -482,72 +323,6 @@ class Hosting:
         """
         return sum(hosted.type == GAME for hosted in self.games(game, lobby))
 
-    async def admits(self, session: GameSession) -> bool:
-        """Return whether a session hosts a game that players see as of now.
-
-        The servers of a game share their FESL login, so only this tells a dedicated server
-        that keeps its players' stats and lists from anyone who logs in like one.
-
-        Args:
-            session: The session.
-        """
-        hosted = self._served_by(session)
-        return hosted is not None and await self._listed(hosted)
-
-    async def admits_player(self, session: GameSession, account_id: int) -> bool:
-        """Return whether a session hosts a game that players see as of now, with a player in it.
-
-        Args:
-            session: The session.
-            account_id: The player's account.
-        """
-        hosted = self._served_by(session)
-        if hosted is None or all(
-            player.persona.account_id != account_id for player in hosted.players.values()
-        ):
-            return False
-        return await self._listed(hosted)
-
-    def _served_by(self, session: GameSession) -> HostedGame | None:
-        return next(
-            (
-                hosted
-                for hosted in self.every()
-                if hosted.type == GAME and hosted.server and hosted.host.session is session
-            ),
-            None,
-        )
-
-    async def _listed(self, hosted: HostedGame) -> bool:
-        # The admin may have decided otherwise since the game listed.
-        standings = await self._approval.standings([hosted.ugid])
-        return standings.get(hosted.ugid) is Standing.LISTED
-
-    async def follow_approvals(self) -> None:
-        """Apply the admin's decisions to the games of dedicated servers until cancelled."""
-        while True:
-            await asyncio.sleep(APPROVAL_CHECK_INTERVAL)
-            try:
-                await self.apply_decisions()
-            except Exception:
-                # The database may be away for a moment; the next check tries again.
-                logger.exception("Could not read the admin's decisions about hosting servers")
-
-    async def apply_decisions(self) -> None:
-        """List, hide or end the games of dedicated servers as the admin last decided."""
-        vetted = [hosted for hosted in self.every() if hosted.server is not None]
-        if not vetted:
-            return
-        standings = await self._approval.standings({hosted.ugid for hosted in vetted})
-        for hosted in vetted:
-            standing = standings.get(hosted.ugid, Standing.REFUSED)
-            listed = standing is Standing.LISTED
-            if standing is Standing.REFUSED:
-                self._end(hosted)
-            elif hosted.listed != listed:
-                hosted.listed = listed
-                logger.info("Game %d %s", hosted.id, "listed" if listed else "hidden")
-
     def _free_lobby(self, game: Game, wanted: int, type: str) -> Lobby:
         lobbies = [lobby for lobby in game.lobbies if lobby.id == wanted] or game.lobbies
         for lobby in lobbies:
@@ -593,12 +368,17 @@ class Hosting:
             return
         server = await self._approval.attach(hosted.ugid, provider_id)
         if server is None or server.revoked:
-            self._end(hosted)
+            self.end(hosted)
             return
         hosted.server = server
         _label(game, hosted)
 
-    def _end(self, hosted: HostedGame) -> None:
+    def end(self, hosted: HostedGame) -> None:
+        """Remove a dedicated server's game whose server or provider the admin revoked.
+
+        Args:
+            hosted: The game.
+        """
         # A dedicated server that loses its connection drops its players and quits after ten
         # losses in ten minutes, so the host keeps it: GREM ends the game, and its next CGAM is
         # refused.

@@ -5,8 +5,8 @@ from typing import Any, Protocol
 
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, TransactionError
 from openfesl.core.games import Game
-from openfesl.core.hosting import Hosting
 from openfesl.core.personas import NOT_LOGGED_IN, UNKNOWN_PERSONA, PersonaStore
+from openfesl.core.trust import ServerTrust
 from openfesl.protocol.message import Message
 from openfesl.protocol.rank import (
     GetStats,
@@ -137,17 +137,17 @@ def period_start(period: Period, day: date, past: int = 0) -> date:
 class StatsService:
     """The rank transactions that read and update stats."""
 
-    def __init__(self, store: StatStore, personas: PersonaStore, hosting: Hosting) -> None:
+    def __init__(self, store: StatStore, personas: PersonaStore, trust: ServerTrust) -> None:
         """Serve stats from a store.
 
         Args:
             store: Where stats are kept.
             personas: Where the personas that own stats are found.
-            hosting: Where the games are that dedicated servers host.
+            trust: Which dedicated servers host games that players see, and who plays in them.
         """
         self._store = store
         self._personas = personas
-        self._hosting = hosting
+        self._trust = trust
 
     def routes(self) -> dict[tuple[str, str], Route[Any]]:
         """Return the handlers of the service's transactions."""
@@ -174,7 +174,7 @@ class StatsService:
         account = connection.session.account
         # Refused, a server uploads none of the player's stats that session; given them, it
         # would retry every upload until it quits.
-        if account and account.server and not await self._hosting.admits(connection.session):
+        if account and account.server and not await self._trust.admits(connection.session):
             raise TransactionError(PARAMETERS_ERROR)
         owner = owner_of(connection, request.owner, request.owner_type)
         check_size(1, request.keys)
@@ -234,7 +234,7 @@ class StatsService:
         account = connection.session.account
         if account is None or not account.server:
             raise TransactionError(PARAMETERS_ERROR)
-        if not await self._hosting.admits(connection.session):
+        if not await self._trust.admits(connection.session):
             raise TransactionError(PARAMETERS_ERROR)
         day = _today()
         changes: list[Change] = []

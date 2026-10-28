@@ -38,6 +38,7 @@ from openfesl.core.stats import StatsService
 from openfesl.core.telemetry import telemetry_routes
 from openfesl.core.texts import load_texts
 from openfesl.core.theater import Theater, TheaterRoute, theater_routes
+from openfesl.core.trust import ServerTrust
 from openfesl.core.verification import EmailVerification
 from openfesl.core.wallets import Wallets
 from openfesl.server.mail import SmtpMailer
@@ -74,6 +75,7 @@ class GameServices:
         )
         self.approval = Approval(stores.servers)
         self.hosting = Hosting(self.approval)
+        self.trust = ServerTrust(self.hosting, self.approval)
         self.census = Census(self.hosting, self.players)
         art = presence_art(settings.public_url)
         self.rich_presence = RichPresence(self.hosting, settings.discord_application_id, art)
@@ -92,7 +94,8 @@ class GameServices:
         """
         settings, games, stores = self._settings, self._games, self._stores
         routes, commands = self._routes, self._commands
-        hosting, players, feed, policies = self.hosting, self.players, self.feed, self.policies
+        hosting, trust, players = self.hosting, self.trust, self.players
+        feed, policies = self.feed, self.policies
         logins = Logins(stores.accounts)
         mailer = None
         if settings.smtp_host and settings.smtp_sender:
@@ -116,14 +119,14 @@ class GameServices:
         routes.update(accounts.routes())
         routes.update(AccountSettingsService(stores.accounts, logins, policies).routes())
         routes.update(personas.routes())
-        routes.update(EntitlementService(stores.entitlements, hosting).routes())
+        routes.update(EntitlementService(stores.entitlements, trust).routes())
         routes.update(KeyService(stores.keys).routes())
         routes.update(self.game_http.routes())
-        routes.update(StatsService(stores.stats, stores.personas, hosting).routes())
+        routes.update(StatsService(stores.stats, stores.personas, trust).routes())
         routes.update(LeaderboardService(stores.stats).routes())
         routes.update(RecordService(stores.records).routes())
         routes.update(
-            AssociationService(stores.associations, stores.personas, players, hosting).routes()
+            AssociationService(stores.associations, stores.personas, players, trust).routes()
         )
         routes.update(PresenceService(stores.personas, players, stores.associations).routes())
         messages = MessageService(stores.messages, stores.personas, players, stores.associations)
@@ -139,7 +142,7 @@ class GameServices:
         await feed.start()
         await self.rich_presence.follow_icons(stores.game_icons, feed)
         followers = [
-            asyncio.create_task(hosting.follow_approvals()),
+            asyncio.create_task(trust.follow_approvals()),
             asyncio.create_task(feed.follow()),
             asyncio.create_task(self.history.follow()),
             asyncio.create_task(self.rich_presence.follow_changes()),

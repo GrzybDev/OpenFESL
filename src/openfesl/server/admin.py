@@ -38,7 +38,7 @@ def include_admin_routes(
         services: The games' side of the server, which the panel shows and changes.
         stores: The database's stores.
     """
-    census, players, apply = services.census, services.players, services.hosting.apply_decisions
+    census, players, apply = services.census, services.players, services.trust.apply_decisions
     server_views = ServerViews(games, census, services.approval, stores.servers)
     sign_in = AdminSessions(
         pages, _sign_in_provider(settings), settings.public_url, server_views.menu_counts
