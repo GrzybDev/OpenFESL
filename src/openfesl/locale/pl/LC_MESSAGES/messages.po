@@ -7959,8 +7959,51 @@ msgstr ""
 "modeli bohaterów, a strony pokazują zamiast nich grafiki zastępcze. "
 "Folder na pliki wskazuje FILES_PATH."
 
+msgid "web.admin.catalogue.confirm"
+msgstr "Zastąpić katalog gry %(game)s?"
+
+msgid "web.admin.catalogue.confirm.any"
+msgstr "Zastąpić katalog gry?"
+
+msgid "web.admin.catalogue.confirm.text"
+msgstr ""
+"Obecny katalog (przedmioty: %(items)s, import %(time)s, %(who)s) nie "
+"zostaje zachowany. Odrzucony plik niczego nie zmienia."
+
+msgid "web.admin.catalogue.confirm.text.command"
+msgstr ""
+"Obecny katalog (przedmioty: %(items)s, import %(time)s z wiersza poleceń)"
+" nie zostaje zachowany. Odrzucony plik niczego nie zmienia."
+
+msgid "web.admin.catalogue.confirm.replace"
+msgstr "Zastąp"
+
 msgid "web.admin.catalogue.confirm.check"
 msgstr "Zastąp w całości obecny katalog gry %(game)s"
+
+msgid "web.admin.catalogue.uploading"
+msgstr "Wysyłanie"
+
+msgid "web.admin.catalogue.uploading.amount"
+msgstr "%(sent)s z %(size)s"
+
+msgid "web.admin.catalogue.uploading.text"
+msgstr "Opuszczenie strony przerywa wysyłanie, a katalog pozostaje bez zmian."
+
+msgid "web.admin.catalogue.stop"
+msgstr "Przerwij wysyłanie"
+
+msgid "web.admin.catalogue.importing"
+msgstr "Importowanie"
+
+msgid "web.admin.catalogue.importing.title"
+msgstr "Odczyt pliku i zastępowanie katalogu."
+
+msgid "web.admin.catalogue.importing.text"
+msgstr ""
+"Obecny katalog działa do końca importu, a potem zmienia się cały naraz. "
+"Importy jednej gry odbywają się po kolei, więc ten może najpierw czekać "
+"na inny import tej samej gry."
 
 msgid "web.admin.catalogue.done"
 msgstr "Zaimportowano"
@@ -8004,6 +8047,11 @@ msgstr ""
 msgid "web.admin.catalogue.refused.unknown"
 msgstr "Ten plik zawiera katalog gry, której ten serwis nie obsługuje (%(id)s)."
 
+msgid "web.admin.catalogue.refused.size"
+msgstr ""
+"%(file)s ma %(size)s; plik katalogu ma najwyżej %(most)s, więc nie został"
+" wysłany."
+
 msgid "web.admin.catalogue.refused.large"
 msgstr "Wysłany plik ma %(size)s; plik katalogu ma najwyżej %(most)s."
 
@@ -8011,6 +8059,21 @@ msgid "web.admin.catalogue.refused.unpacked"
 msgstr ""
 "Ten plik po rozpakowaniu zajmuje ponad %(most)s, więcej niż jakikolwiek "
 "katalog."
+
+msgid "web.admin.catalogue.stopped"
+msgstr "Wysyłanie przerwane"
+
+msgid "web.admin.catalogue.stopped.title"
+msgstr "Plik %(file)s nie został wysłany w całości."
+
+msgid "web.admin.catalogue.stopped.at"
+msgstr "Przerwano przy %(sent)s z %(size)s."
+
+msgid "web.admin.catalogue.stopped.lost"
+msgstr "Połączenie z serwerem zostało zerwane przy %(sent)s z %(size)s."
+
+msgid "web.admin.catalogue.stopped.text"
+msgstr "Katalog pozostaje bez zmian; plik pozostaje wybrany."
 
 msgid "web.admin.catalogue.managed"
 msgstr "Import katalogów wymaga roli administratora."

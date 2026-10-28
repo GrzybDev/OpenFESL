@@ -1,6 +1,6 @@
 /* The import of a catalogue: what came of the last one on top, then its three steps on the panel's
-   rows, the file field with its name and the chooser, and the command for the server's host on
-   black. */
+   rows, the file field with its name and the chooser, the upload's bar in the accent and the
+   import's spinning square, and the command for the server's host on black. */
 @layer components {
   .catalogue-import {
     display: grid;
@@ -178,6 +178,19 @@
     box-shadow: 0 0 0 6px var(--ink);
   }
 
+  .catalogue-file:has(:disabled) {
+    cursor: default;
+
+    .catalogue-file-row {
+      opacity: 0.55;
+    }
+
+    .catalogue-file-choose {
+      background: var(--bar-dark);
+      color: var(--soft);
+    }
+  }
+
   .catalogue-confirm-box {
     display: flex;
     min-height: 52px;
@@ -191,6 +204,94 @@
     line-height: 1.35;
     font-weight: 600;
     cursor: pointer;
+  }
+
+  .catalogue-progress {
+    display: grid;
+    gap: 8px;
+
+    .form-button {
+      justify-self: start;
+    }
+  }
+
+  .catalogue-progress-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 4px 12px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .catalogue-amount {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .catalogue-bar {
+    width: 100%;
+    height: 16px;
+    appearance: none;
+    border: 2px solid var(--ink);
+    background: var(--ink);
+
+    &::-webkit-progress-bar {
+      background: var(--ink);
+    }
+
+    &::-webkit-progress-value {
+      background: var(--accent);
+      transition: inline-size 110ms linear;
+    }
+
+    &::-moz-progress-bar {
+      background: var(--accent);
+    }
+  }
+
+  .catalogue-importing {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .catalogue-importing-square {
+    display: grid;
+    width: 52px;
+    height: 52px;
+    flex: none;
+    place-items: center;
+    background: var(--ink);
+
+    svg {
+      animation: spin 900ms linear infinite;
+    }
+  }
+
+  .catalogue-importing-text {
+    display: grid;
+    gap: 4px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 500;
+
+    .alert-label {
+      font-family: var(--area-font);
+    }
+  }
+
+  .catalogue-importing-title {
+    font-size: 18px;
+    line-height: 1.25;
+    font-weight: 700;
   }
 
   .catalogue-host {
@@ -212,6 +313,41 @@
 
     .copy-icons {
       background: var(--bar-dark);
+    }
+  }
+
+  .catalogue-confirm-file {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-sans);
+    font-size: 17px;
+    line-height: 1.3;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+
+    svg {
+      flex: none;
+    }
+  }
+
+  .confirm-text {
+    display: grid;
+    gap: 8px;
+    margin-top: 10px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .catalogue-importing-square svg {
+      animation: none;
+    }
+
+    .catalogue-bar::-webkit-progress-value {
+      transition: none;
     }
   }
 }

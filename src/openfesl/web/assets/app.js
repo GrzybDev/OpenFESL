@@ -19,6 +19,7 @@ import "./rename.js";
 import "./play-now.js";
 import "./store.js";
 import "./chests.js";
+import "./catalogue.js";
 import "htmx.org";
 
 // A chevron block whose page takes longer than 300 ms to arrive shows that it is loading, and
@@ -209,13 +210,25 @@ for (const failure of ["htmx:error", "htmx:response:error"]) {
   });
 }
 
-// After a change on the previous page, such as a purchase: a number that names its value from
-// before the change counts to its new one.
-document.addEventListener("DOMContentLoaded", () => {
-  for (const element of document.querySelectorAll("[data-count-from]")) {
+// After a change on the previous page, such as a purchase, or in a part of the page that a
+// script swapped in, such as an import's blocks: a number that names its value from before the
+// change counts to its new one, and the part's toasts leave in time.
+document.addEventListener("DOMContentLoaded", () => countFrom(document));
+document.addEventListener("swapped", (event) => {
+  countFrom(event.target);
+  timeToasts();
+});
+
+/**
+ * Counts each number in a part of the page from the value it names from before a change.
+ *
+ * @param {ParentNode} part - The part, or the whole page.
+ */
+function countFrom(part) {
+  for (const element of part.querySelectorAll("[data-count-from]")) {
     countTo(element, Number(element.dataset.countFrom));
   }
-});
+}
 
 /**
  * Counts a number that a refresh or a change changed from its old value to its new one.

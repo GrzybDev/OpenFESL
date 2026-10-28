@@ -7528,8 +7528,51 @@ msgstr ""
 "and pages show placeholders instead. FILES_PATH names the folder that "
 "keeps them."
 
+msgid "web.admin.catalogue.confirm"
+msgstr "Replace the catalogue of %(game)s?"
+
+msgid "web.admin.catalogue.confirm.any"
+msgstr "Replace a game's catalogue?"
+
+msgid "web.admin.catalogue.confirm.text"
+msgstr ""
+"The current one (%(items)s items, imported %(time)s by %(who)s) is not "
+"kept. A refused file changes nothing."
+
+msgid "web.admin.catalogue.confirm.text.command"
+msgstr ""
+"The current one (%(items)s items, imported %(time)s from the command "
+"line) is not kept. A refused file changes nothing."
+
+msgid "web.admin.catalogue.confirm.replace"
+msgstr "Replace"
+
 msgid "web.admin.catalogue.confirm.check"
 msgstr "Replace the current catalogue of %(game)s as a whole"
+
+msgid "web.admin.catalogue.uploading"
+msgstr "Uploading"
+
+msgid "web.admin.catalogue.uploading.amount"
+msgstr "%(sent)s of %(size)s"
+
+msgid "web.admin.catalogue.uploading.text"
+msgstr "Leaving this page stops the upload, and the catalogue stays as it was."
+
+msgid "web.admin.catalogue.stop"
+msgstr "Stop upload"
+
+msgid "web.admin.catalogue.importing"
+msgstr "Importing"
+
+msgid "web.admin.catalogue.importing.title"
+msgstr "Reading the file and replacing the catalogue."
+
+msgid "web.admin.catalogue.importing.text"
+msgstr ""
+"The current catalogue stays in use until the import ends, then all of it "
+"changes at once. Imports of a game take turns, so this one may first wait"
+" for another import of the same game."
 
 msgid "web.admin.catalogue.done"
 msgstr "Imported"
@@ -7575,11 +7618,31 @@ msgstr ""
 "This file holds the catalogue of a game this service does not serve "
 "(%(id)s)."
 
+msgid "web.admin.catalogue.refused.size"
+msgstr ""
+"%(file)s has %(size)s; a catalogue file holds at most %(most)s, so it was"
+" not sent."
+
 msgid "web.admin.catalogue.refused.large"
 msgstr "The file sent has %(size)s; a catalogue file holds at most %(most)s."
 
 msgid "web.admin.catalogue.refused.unpacked"
 msgstr "This file unpacks to more than %(most)s, more than any catalogue holds."
+
+msgid "web.admin.catalogue.stopped"
+msgstr "Upload stopped"
+
+msgid "web.admin.catalogue.stopped.title"
+msgstr "%(file)s was not sent in full."
+
+msgid "web.admin.catalogue.stopped.at"
+msgstr "Stopped at %(sent)s of %(size)s."
+
+msgid "web.admin.catalogue.stopped.lost"
+msgstr "The connection to the server ended at %(sent)s of %(size)s."
+
+msgid "web.admin.catalogue.stopped.text"
+msgstr "The catalogue stays as it was; the file stays chosen."
 
 msgid "web.admin.catalogue.managed"
 msgstr "Catalogues are imported with the admin role."

@@ -1,7 +1,9 @@
 {#def views: list, manages: bool, keeps_files: bool, result, most: int #}
 {# The import of a catalogue in three steps: making the file from a copy of the game, choosing it
-   and sending it, with what came of the last import on top. A replacement is confirmed with a
-   required box, and the page comes back with the result. Moderators see the role note alone. #}
+   and sending it, with what came of the last import on top. Where scripts run, the file goes up in
+   the background with its progress and can be stopped, a replacement is confirmed in a dialog
+   and the result replaces the page's blocks in place; without them the form asks with a
+   required box and the page comes back with the result. Moderators see the role note alone. #}
 {% set first = views[0].game %}
 {% set replaced = views|selectattr("contents.revision")|list %}
 {% set file = first.id ~ "-catalogue.zip" %}
@@ -16,7 +18,7 @@
             class="badge"><Icon name="lock" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.catalogue.managed") }}
     </p>
   {% else %}
-    <div class="catalogue-result">
+    <div data-catalogue-result class="catalogue-result">
       {% if result and result.kind != "needed" %}
         <CatalogueResult :result="result" :views="views" :most="most" />
       {% endif %}
@@ -33,6 +35,10 @@
     <form method="post"
           enctype="multipart/form-data"
           action="{{ url('/admin/catalogues') }}"
+          data-catalogue-upload
+          data-most="{{ most }}"
+          data-megabytes="{{ _('web.admin.catalogue.megabytes', count='{count}') }}"
+          {% if replaced %} data-replaces{% endif %}
           class="catalogue-form">
       <CsrfField />
       <ol class="catalogue-steps">
@@ -54,7 +60,7 @@
             <span class="catalogue-file-label">{{ _("web.admin.catalogue.file") }}</span>
             <span class="catalogue-file-row">
               <span aria-hidden="true" class="catalogue-file-glyph"><Icon name="doc" stroke="currentColor" /></span>
-              <span data-file-name
+              <span data-catalogue-file-name
                     data-none="{{ _('web.admin.catalogue.file.none') }}"
                     class="catalogue-file-name js-only">{{ _("web.admin.catalogue.file.none") }}</span>
               <input type="file"
@@ -68,12 +74,13 @@
                     class="catalogue-file-choose js-only">{{ _("web.admin.catalogue.file.choose") }}</span>
             </span>
           </label>
-          {% if result and result.kind == "needed" %}
-            <p role="alert" class="field-note field-error catalogue-needed">
-              <span aria-hidden="true"
-                    class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.catalogue.file.needed") }}
-            </p>
-          {% endif %}
+          <p data-catalogue-needed
+             role="alert"
+             {% if not result or result.kind != "needed" %} hidden{% endif %}
+             class="field-note field-error catalogue-needed">
+            <span aria-hidden="true"
+                  class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.catalogue.file.needed") }}
+          </p>
           <p id="catalogue-file-note" class="catalogue-step-hint">{{ _("web.admin.catalogue.file.hint") }}</p>
         </li>
         <li class="catalogue-step">
@@ -82,7 +89,7 @@
           </h3>
           <p class="catalogue-step-text">{{ _("web.admin.catalogue.replaces") }}</p>
           {% if replaced %}
-            <label class="catalogue-confirm-box">
+            <label class="catalogue-confirm-box no-js-only">
               <span>{{ _("web.admin.catalogue.confirm.check", game=listed(replaced|map(attribute="game.name")|list)) }}</span>
               <span class="check-place">
                 <input type="checkbox" name="confirmed" value="1" required class="check">
@@ -90,7 +97,37 @@
               </span>
             </label>
           {% endif %}
-          <ActionButton :label="_('web.admin.catalogue.submit')" />
+          <div data-catalogue-send>
+            <ActionButton :label="_('web.admin.catalogue.submit')" />
+          </div>
+          <div data-catalogue-progress hidden class="catalogue-progress">
+            <p class="catalogue-progress-head">
+              <span>{{ _("web.admin.catalogue.uploading") }}</span>
+              <span data-amount="{{ _('web.admin.catalogue.uploading.amount', sent='{sent}', size='{size}') }}"
+                    class="catalogue-amount"></span>
+            </p>
+            <progress max="1"
+                      value="0"
+                      aria-label="{{ _('web.admin.catalogue.uploading') }}"
+                      class="catalogue-bar"></progress>
+            <p class="catalogue-step-text">{{ _("web.admin.catalogue.uploading.text") }}</p>
+            <button type="button" data-catalogue-stop class="form-button">
+              <span aria-hidden="true"
+                    class="form-glyph"><Icon name="x" :size="14" stroke="#F4F4EE" /></span>{{ _("web.admin.catalogue.stop") }}
+            </button>
+          </div>
+          <div data-catalogue-importing
+               hidden
+               role="status"
+               class="catalogue-importing">
+            <span aria-hidden="true"
+                  class="catalogue-importing-square"><Icon name="busy" :size="26" stroke="#9FC3E6" /></span>
+            <p class="catalogue-importing-text">
+              <span class="alert-label">{{ _("web.admin.catalogue.importing") }}</span>
+              <span class="catalogue-importing-title">{{ _("web.admin.catalogue.importing.title") }}</span>
+              <span>{{ _("web.admin.catalogue.importing.text") }}</span>
+            </p>
+          </div>
         </li>
       </ol>
     </form>
@@ -101,5 +138,61 @@
         <CopyButton :value="host" :label="_('web.admin.catalogue.host.copy')" :note="_('web.admin.catalogue.command.copied')" size="icon" />
       </div>
     </div>
+    <template data-catalogue-confirm>
+      <section aria-labelledby="confirm-question"
+               aria-describedby="confirm-text"
+               class="confirm">
+        <div class="confirm-head">
+          <h2 id="confirm-question">
+            {{ _("web.admin.catalogue.confirm", game=replaced[0].game.name) if replaced|length == 1 else _("web.admin.catalogue.confirm.any") }}
+          </h2>
+          <button type="button"
+                  data-close
+                  class="confirm-close"
+                  aria-label="{{ _('web.admin.close') }}">
+            <span><Icon name="x" :size="14" stroke="currentColor" /></span>
+          </button>
+        </div>
+        <div class="confirm-body">
+          <p class="catalogue-confirm-file">
+          <Icon name="doc" :size="18" stroke="currentColor" /><span data-chosen></span>
+        </p>
+        <div id="confirm-text" class="confirm-text">
+          <p>{{ _("web.admin.catalogue.replaces") }}</p>
+          {% for view in replaced %}
+            {% set imported = view.imported %}
+            <p>
+              {%- if replaced|length > 1 %}<strong>{{ view.game.name }}:</strong> {% endif -%}
+              {%- if imported and imported.name %}{{ _("web.admin.catalogue.confirm.text", items=number(view.contents.items|length), time=when(imported.at, "yMMMd"), who=imported.name) }}{% else %}{{ _("web.admin.catalogue.confirm.text.command", items=number(view.contents.items|length), time=when(imported.at, "yMMMd") if imported else "") }}{% endif -%}
+            </p>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="confirm-buttons">
+        <button type="button" data-close class="form-button">
+          <span aria-hidden="true"
+                class="form-glyph"><Icon name="x" :size="14" stroke="#F4F4EE" /></span>{{ _("web.admin.cancel") }}
+        </button>
+        <button type="button" data-catalogue-replace class="small-action chevron">
+          <span aria-hidden="true" class="small-action-square"><Chevron :size="16" /></span><span class="small-action-label">{{ _("web.admin.catalogue.confirm.replace") }}</span>
+        </button>
+      </div>
+    </section>
+    </template>
+    <template data-catalogue-refused-size>
+      <Alert :label="_('web.admin.catalogue.refused')" :title="_('web.admin.catalogue.refused.size', file='{file}', size='{size}', most=megabytes(most))" glyph="warn" alert>
+      {{ _("web.admin.catalogue.unchanged") }}
+      </Alert>
+    </template>
+    <template data-catalogue-stopped>
+      <Alert :label="_('web.admin.catalogue.stopped')" :title="_('web.admin.catalogue.stopped.title', file='{file}')" glyph="warn" alert>
+      {{ _("web.admin.catalogue.stopped.at", sent="{sent}", size="{size}") }} {{ _("web.admin.catalogue.stopped.text") }}
+      </Alert>
+    </template>
+    <template data-catalogue-lost>
+      <Alert :label="_('web.admin.catalogue.stopped')" :title="_('web.admin.catalogue.stopped.title', file='{file}')" glyph="warn" alert>
+      {{ _("web.admin.catalogue.stopped.lost", sent="{sent}", size="{size}") }} {{ _("web.admin.catalogue.stopped.text") }}
+      </Alert>
+    </template>
   {% endif %}
 </section>

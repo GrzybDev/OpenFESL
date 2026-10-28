@@ -6,7 +6,7 @@
 {% if result.kind == "imported" %}
   {% set view = views|selectattr("game.id", "equalto", result.game)|first %}
   {% set before, after = result.before, result.after %}
-  <div role="status" class="alert catalogue-done">
+  <div role="status" tabindex="-1" class="alert catalogue-done">
     <p class="alert-label">
       <span aria-hidden="true"
             class="alert-glyph"><Icon name="tick" stroke="#0A0A0A" /></span>{{ _("web.admin.catalogue.done") }}
