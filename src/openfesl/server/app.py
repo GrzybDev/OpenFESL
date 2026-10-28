@@ -81,7 +81,9 @@ def _add_middleware(
     # The last one added sees a request first: the game's HTTP keeps its own answers. Only the
     # sign-ins and their forms store anything in the session, so other pages set no cookie.
     secret = settings.session_secret.get_secret_value() if settings.session_secret else None
-    app.add_middleware(SiteBarMiddleware, games=games, wallets=services.wallets)
+    app.add_middleware(
+        SiteBarMiddleware, games=games, wallets=services.wallets, heroes=services.heroes
+    )
     app.add_middleware(PlayerSessionMiddleware, accounts=stores.accounts.account)
     app.add_middleware(
         SessionMiddleware,

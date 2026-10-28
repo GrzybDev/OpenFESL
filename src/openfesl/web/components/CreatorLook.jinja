@@ -1,0 +1,52 @@
+{#def rules, look #}
+{# The creator's look on parchment: the hair styles and facial hair of each faction, and the skin
+   tone and hair colour swatches. #}
+<div class="creator-look">
+  <svg aria-hidden="true" focusable="false" class="site-texture">
+    <rect width="100%" height="100%" filter="url(#site-parchment)" />
+    <rect width="100%" height="100%" filter="url(#site-grain)" />
+  </svg>
+  {% for field, lists in [("hair_style", "hair_styles"), ("facial_hair", "facial_hair")] %}
+    <div class="look-panel">
+      {% for faction_id, choice in rules.factions.items() %}
+        {% set items = choice[lists] %}
+        {% set chosen = look[field] if faction_id == look.faction else -1 %}
+        <fieldset class="look-list">
+          <legend class="look-legend">{{ _("web.creator." ~ field ~ ".of", faction=_("games." ~ game.id ~ ".faction." ~ faction_id)) }}</legend>
+          <div class="look-grid">
+            {% for item in [0] + items %}
+              <label class="look-tile">
+                <input type="radio"
+                       name="{{ field }}"
+                       value="{{ item }}"
+                       {% if item == chosen %} checked{% endif %}>
+                <span class="look-face">
+                  <span>{{ _("web.creator.style", number=loop.index0) if loop.index0 else _("web.creator.none") }}</span>
+                </span>
+              </label>
+            {% endfor %}
+          </div>
+        </fieldset>
+      {% endfor %}
+    </div>
+  {% endfor %}
+  {% for field, count, order, attribute in [("skin_tone", rules.skin_tones|length, rules.skin_order, "data-skin"), ("hair_colour", rules.hair_colours|length, rules.hair_order, "data-hair-colour")] %}
+    <fieldset class="swatches">
+      <legend>
+        <span class="swatch-label">{{ _("web.creator." ~ field) }}</span>
+        <span class="swatch-value">{{ _("web.creator.of", n=look[field], count=count) }}</span>
+      </legend>
+      <div class="swatch-row">
+        {% for value in order %}
+          <label {{ attribute }}="{{ value }}" class="swatch">
+            <input type="radio"
+                   name="{{ field }}"
+                   value="{{ value }}"
+                   aria-label="{{ _('web.creator.' ~ field ~ '.choice', n=value, count=count) }}"
+                   {% if value == look[field] %} checked{% endif %}>
+          </label>
+        {% endfor %}
+      </div>
+    </fieldset>
+  {% endfor %}
+</div>

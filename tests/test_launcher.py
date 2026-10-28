@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, cast
 
 import pytest
+from accounts import execute
 from support import FESL, cli, game, launcher_sign_in, log_in_player
 
 from openfesl.core.accounts import Account, AccountState
@@ -67,7 +68,7 @@ async def test_a_launcher_session_is_kept_while_its_account_plays_and_a_ttl_afte
 
 
 async def test_a_sign_in_is_refused_with_a_reason_the_launcher_words(
-    server_url: str, capsys: pytest.CaptureFixture[str]
+    server_url: str, database_url: str, capsys: pytest.CaptureFixture[str]
 ) -> None:
     account = "ann@example.test"
     async with game(server_url) as player:
@@ -75,9 +76,21 @@ async def test_a_sign_in_is_refused_with_a_reason_the_launcher_words(
 
     wrong = await launcher_sign_in(server_url, account, "a-wrong-password")
     unknown = await launcher_sign_in(server_url, account, "secret-pass", game="made-up")
+    # A persona without the faction and class of a hero made on the site, as an earlier
+    # server made them: the game cannot play it, while a server it hosts logs in as it.
+    await execute(
+        database_url,
+        "INSERT INTO persona (account_id, namespace, name)"
+        " SELECT id, 'bfwest', 'Ann_bare' FROM account WHERE nuid = :account",
+        account=account,
+    )
+    no_hero = await launcher_sign_in(server_url, account, "secret-pass")
+    hosting = await launcher_sign_in(server_url, account, "secret-pass", role="host")
     await cli(capsys, "accounts", "state", account, "banned")
     banned = await launcher_sign_in(server_url, account, "secret-pass")
 
     assert (wrong.status_code, wrong.json()) == (401, {"error": "wrong-sign-in"})
     assert (unknown.status_code, unknown.json()) == (404, {"error": "unknown-game"})
+    assert (no_hero.status_code, no_hero.json()) == (401, {"error": "no-hero"})
+    assert hosting.json()["personaName"] == "Ann_bare"
     assert (banned.status_code, banned.json()) == (401, {"error": "banned"})

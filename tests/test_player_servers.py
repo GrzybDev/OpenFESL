@@ -2,6 +2,7 @@ from xml.etree import ElementTree
 
 import anyio
 import pytest
+from heroes import create_hero
 from support import (
     FESL,
     THEATER,
@@ -124,16 +125,20 @@ async def magma(server_url: str, cookie: dict[str, str], path: str) -> tuple[str
 async def test_a_server_that_logs_in_as_a_player_keeps_the_rounds_of_the_players_in_its_game(
     server_url: str, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    # Cid registers first, so Ann's account has the number of Cid's hero: the game names an
-    # account and a hero by the same owner type, and only the key tells which one it means.
-    for account in ("cid@example.test", "ann@example.test", "host@example.test"):
+    # Cid registers first and Ann makes her hero first, so Ann's account has the number of Cid's
+    # hero: the game names an account and a hero by the same owner type, and only the key tells
+    # which one it means.
+    accounts = ("cid@example.test", "ann@example.test", "host@example.test")
+    for account in accounts:
         await register(server_url, account)
+    base = server_url.replace("ws://", "http://").rstrip("/")
+    for account in (accounts[1], accounts[0], accounts[2]):
+        await create_hero(base, account, account.split("@")[0])
+    # Ann's second hero stays out of the server's game.
+    ann_two = await create_hero(base, accounts[1], "ann_two")
     async with game(server_url) as ann, game(server_url) as server:
         _, ann_account, ann_hero = await start(server_url, ann, "ann@example.test")
-        await launcher_sign_in(server_url, "cid@example.test", "secret-pass")
-        # Ann's second hero stays out of the server's game.
-        await ann.request(FESL, "acct", [("TXN", "NuAddPersona"), ("name", "ann_two")])
-        cid_hero, ann_two = [await hero_of(ann, name) for name in ("cid", "ann_two")]
+        cid_hero = await hero_of(ann, "cid")
         assert cid_hero == ann_account
         cookie, _, _ = await start(server_url, server, "host@example.test", role="host")
         created = await server.theater(THEATER, "CGAM", SERVER_GAME)

@@ -10,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from openfesl.core.catalogue import CatalogueRules
 from openfesl.core.game_pages import Listing, PageKind, Site, Stats, Theme
+from openfesl.core.hero_rules import HeroRules
 from openfesl.core.policies import Policies
 
 
@@ -228,6 +229,8 @@ class Game(BaseModel):
             name of the answer's first product.
         catalogue: Where a copy of the game keeps its catalogue of items, which the server
             imports from a player's copy, and what it means; none for a game without one.
+        heroes: How the game's heroes are made on its site and kept; none for a game whose
+            personas are made in the game.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -257,6 +260,7 @@ class Game(BaseModel):
     stats: Stats = Stats()
     product_names: dict[str, str] = {}
     catalogue: CatalogueRules | None = None
+    heroes: HeroRules | None = None
 
     @property
     def play_key(self) -> ProductKey | None:

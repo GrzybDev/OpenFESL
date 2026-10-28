@@ -1,0 +1,102 @@
+/* A hero's small card: a pale folder with its faction's tab, the default hero's stamp, the
+   outlined name, the class and level, and the slot. */
+@layer components {
+  .hero-summary {
+    position: relative;
+    flex: 0 1 300px;
+    min-width: 0;
+    margin-top: 34px;
+    border: 3px solid #000;
+    border-radius: 0 8px 8px;
+    background: #f1e9de;
+    box-shadow:
+      inset 0 0 0 3px #f8f4ef,
+      0 4px 0 rgb(0 0 0 / 0.3);
+    color: #1f1712;
+  }
+
+  .hero-tab {
+    position: absolute;
+    top: -34px;
+    left: -3px;
+    display: flex;
+    height: 34px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 14px 0 9px;
+    border: 3px solid #000;
+    border-bottom: 0;
+    border-radius: 8px 8px 0 0;
+    background: var(--faction);
+    color: var(--faction-ink);
+    font: 800 13px/1 var(--site-heading);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .hero-summary-body {
+    position: relative;
+    padding: 16px;
+  }
+
+  /* The name, and the default hero's stamp beside it, or above it when both do not fit. */
+  .hero-heading {
+    display: flex;
+    flex-wrap: wrap-reverse;
+    align-items: center;
+    gap: 8px 10px;
+  }
+
+  .hero-stamp {
+    margin: 0 -6px 0 auto;
+    padding: 4px 9px;
+    border: 3px solid #a3221b;
+    border-radius: 5px;
+    color: #a3221b;
+    font: 800 13px/1 var(--site-heading);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    rotate: -8deg;
+  }
+
+  .hero-name {
+    min-width: 0;
+    font: 800 25px/1.15 var(--site-heading);
+    color: #fff;
+    overflow-wrap: break-word;
+    text-shadow: var(--site-outline);
+  }
+
+  /* Names of up to 16 characters fit a card's line whole. */
+  .hero-name-long {
+    font-size: 21px;
+  }
+
+  .hero-kind {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    font: 800 17px/1.2 var(--site-heading);
+  }
+
+  .hero-glyph {
+    display: grid;
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    border: 2px solid #000;
+    border-radius: 50%;
+    background: var(--faction);
+    color: var(--faction-ink);
+  }
+
+  .hero-slot {
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 1px dashed #a8977f;
+    font-size: 14px;
+    color: #5c4a3c;
+  }
+}

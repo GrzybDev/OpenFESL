@@ -240,6 +240,62 @@ wallets = [
 name = "game"
 pages = ["play", "leaderboard", "host"]
 
+# Heroes, which the game creates none of: with no hero it opens the website's creator and quits.
+# The website made a hero as a persona with the stats the game reads at its login: its faction's
+# team and its class's kit, its skin tone and hair colour by number, its hair and facial hair by
+# item number, 0 for none, the clothes, equipment bar and emotes of its faction and class from
+# DefaultCustomization.xml, and level 1, which the dedicated servers add levels to
+# (BFHeroes.exe 1.89 0x006add86 refuses level 0). The creator of autumn 2012 chose no face, so the
+# face type stays 0. The game grants itself every item of those lists but the consumables
+# (0x007b9deb), so the site grants the bandages, with uses of this server's choosing. Every account
+# has 4 hero slots, and names are 2 to 16 letters, digits, _ or -, unique ignoring capitals.
+[heroes]
+slots = 4
+# The hyphen is escaped, as browsers read a pattern attribute in the v mode that requires it.
+name = "[A-Za-z0-9_\\-]{2,16}"
+name_length = [2, 16]
+# The 2012 colours of the skin tones, darkest first, and of the hair colours, listed in the
+# creator's own orders.
+skin_tones = ["#2E2017", "#682800", "#8A4A00", "#AC5C00", "#CC7820", "#EC8212", "#EA943C", "#FEBE7C", "#F8D6B2"]
+skin_order = [9, 8, 7, 6, 5, 4, 3, 2, 1]
+hair_colours = ["#F8E5B2", "#8E664A", "#FF7352", "#2E2017", "#C59D81"]
+hair_order = [1, 3, 5, 2, 4]
+stats = { faction = "c_team", class = "c_kit", skin_tone = "c_skc", hair_colour = "c_hrc", hair_style = "c_hrs", facial_hair = "c_fhrs", appearance = "c_apr", equipment = "c_eqp", emotes = "c_emo", level = "level", xp = "xp" }
+starting_stats = { c_ft = 0, level = 1 }
+starting_items = { "2005-lmct" = 10 }
+
+# Royal Army first, as the 2012 creator listed them.
+[heroes.factions.royal]
+team = 2
+hair_styles = [82, 83, 84, 85, 86, 87]
+facial_hair = [102, 103, 104, 105, 106, 107, 108, 109]
+colour = "#24508F"
+ink = "#F2C12E"
+glyph = "crown"
+
+[heroes.factions.national]
+team = 1
+hair_styles = [120, 121, 122, 123, 124, 125]
+facial_hair = [126, 127, 128, 129, 130, 131, 132, 133]
+colour = "#A3221B"
+ink = "#FFFFFF"
+glyph = "chevrons"
+
+[heroes.classes]
+commando = { kit = 0, glyph = "reticle" }
+soldier = { kit = 1, glyph = "heart-cross" }
+gunner = { kit = 2, glyph = "shield-bars" }
+
+[heroes.loadouts.royal]
+commando = { appearance = [4, 5, 32, 29], equipment = [3001, 3013, 2136, 3156, 2005], emotes = [5000, 5007, 5016] }
+soldier = { appearance = [4, 936, 935, 29], equipment = [3011, 3009, 2075, 3156, 2005], emotes = [5000, 5007, 5016] }
+gunner = { appearance = [4, 36, 444, 29], equipment = [3003, 3009, 2026, 3156, 2005], emotes = [5000, 5007, 5016] }
+
+[heroes.loadouts.national]
+commando = { appearance = [10, 981, 979, 56], equipment = [3002, 3014, 2141, 3155, 2005], emotes = [5000, 5007, 5016] }
+soldier = { appearance = [10, 980, 978, 56], equipment = [3012, 3010, 2075, 3155, 2005], emotes = [5000, 5007, 5016] }
+gunner = { appearance = [10, 73, 9, 56], equipment = [3004, 3010, 2026, 3155, 2005], emotes = [5000, 5007, 5016] }
+
 # The Theater lobby the dedicated servers list their games in. Lobbies are kept on EA's servers,
 # not in the client, and a dedicated server asks for any (LID -1); this is the one the game was
 # played with live on OpenFESL.

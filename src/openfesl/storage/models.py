@@ -115,6 +115,19 @@ class PersonaRow(Base):
 Index("persona_name_key", PersonaRow.namespace, func.lower(PersonaRow.name), unique=True)
 
 
+class HeroAccountRow(Base):
+    __tablename__ = "hero_account"
+
+    account_id: Mapped[int] = mapped_column(
+        ForeignKey("account.id", ondelete="CASCADE"), primary_key=True
+    )
+    game: Mapped[str] = mapped_column(primary_key=True)
+    # The hero the game is started as; the account's first hero until another is chosen.
+    default_persona_id: Mapped[int | None] = mapped_column(
+        ForeignKey("persona.id", ondelete="SET NULL")
+    )
+
+
 class EntitlementRow(Base):
     __tablename__ = "entitlement"
 

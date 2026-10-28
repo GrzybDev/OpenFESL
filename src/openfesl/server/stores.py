@@ -6,6 +6,7 @@ from openfesl.storage.associations import SqlAssociationStore
 from openfesl.storage.catalogues import SqlCatalogueStore
 from openfesl.storage.entitlements import SqlEntitlementStore
 from openfesl.storage.game_icons import SqlGameIconStore
+from openfesl.storage.heroes import SqlHeroStore
 from openfesl.storage.history import SqlHistoryStore
 from openfesl.storage.identities import SqlIdentityStore
 from openfesl.storage.keys import SqlKeyStore
@@ -33,6 +34,7 @@ class Stores:
         self.catalogues = SqlCatalogueStore(sessions)
         self.entitlements = SqlEntitlementStore(sessions)
         self.game_icons = SqlGameIconStore(sessions)
+        self.heroes = SqlHeroStore(sessions)
         self.history = SqlHistoryStore(sessions)
         self.identities = SqlIdentityStore(sessions)
         self.keys = SqlKeyStore(sessions)

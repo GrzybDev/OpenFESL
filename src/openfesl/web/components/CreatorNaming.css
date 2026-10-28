@@ -1,0 +1,76 @@
+/* The creator's naming part: the name field whose edge and status line follow the server's
+   answer, and the starting kit of each faction and class. */
+@layer components {
+  .naming {
+    margin-top: 30px;
+  }
+
+  .naming-label {
+    display: block;
+    margin-top: 14px;
+    font: 800 13px/1.2 var(--site-heading);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #5c4a3c;
+  }
+
+  .naming-input {
+    display: block;
+    width: 100%;
+    min-height: 50px;
+    margin-top: 6px;
+    padding-inline: 14px;
+    border: 3px solid #000;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: inset 0 2px 0 #d9d0c2;
+    color: #1f1712;
+    font: 800 21px/1.2 var(--site-heading);
+    transition: border-color 150ms var(--ease-menu);
+
+    &[aria-invalid="true"] {
+      border-color: #8c1e18;
+    }
+  }
+
+  .naming-hint {
+    margin-top: 8px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: #5c4a3c;
+  }
+
+  .name-status {
+    display: flex;
+    min-height: 30px;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #5c4a3c;
+
+    &:is([data-check="format"], [data-check="taken"], [data-check="refused"]) {
+      color: #8c1e18;
+    }
+
+    &[data-check="free"] {
+      color: #2f5a14;
+    }
+
+    > svg {
+      flex: 0 0 auto;
+    }
+  }
+
+  .naming-kits {
+    display: grid;
+    gap: 4px;
+    font-weight: 400;
+  }
+
+  .naming-kit-who {
+    font-weight: 700;
+  }
+}

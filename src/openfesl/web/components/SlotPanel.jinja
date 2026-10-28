@@ -1,0 +1,17 @@
+{#def roster, taking: int = 0 #}
+{# An account's hero slots: a pip per slot, filled when used and yellow for the one a new hero
+   takes, with the count and a note under them. #}
+<section aria-labelledby="slots-title" class="slot-panel">
+  <h2 id="slots-title" class="slot-panel-title">{{ _("web.slots.title") }}</h2>
+  <div class="slot-count">
+    <span role="img"
+          aria-label="{{ _('web.slots.used.label', used=roster.heroes|length, slots=roster.slots) }}"
+          class="slot-pips">
+      {% for number in range(1, roster.slots + 1) %}
+        <span class="slot-pip{% if number <= roster.heroes|length %} slot-pip-used{% elif number == taking %} slot-pip-taking{% endif %}"></span>
+      {% endfor %}
+    </span>
+    <p class="slot-used">{{ _("web.slots.used", used=roster.heroes|length, slots=roster.slots) }}</p>
+  </div>
+  {% if content|trim %}<p class="slot-note">{{ content }}</p>{% endif %}
+</section>

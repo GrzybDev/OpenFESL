@@ -1,0 +1,67 @@
+/* A page's title on a wooden plaque: wood with grain and two nails, tilted, lowercase in the
+   comic face with the outlined white letters. */
+@layer components {
+  .plaque {
+    position: relative;
+    display: inline-block;
+    padding: 8px 34px 10px;
+    border: 3px solid #120b07;
+    border-radius: 8px;
+    background: #7b4a22;
+    box-shadow:
+      inset 0 3px 0 #9c6532,
+      inset 0 -4px 0 #5b3415,
+      0 4px 0 #000;
+    rotate: -1.2deg;
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 8px;
+      height: 8px;
+      margin-top: -4px;
+      border-radius: 50%;
+      background: #2a1a0e;
+      box-shadow: inset 1px 1px 0 #b98a55;
+    }
+
+    &::before {
+      left: 10px;
+    }
+
+    &::after {
+      right: 10px;
+    }
+  }
+
+  .plaque-grain {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: #5e3717;
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+
+    path {
+      vector-effect: non-scaling-stroke;
+    }
+  }
+
+  .plaque-title {
+    position: relative;
+    font: italic 800 32px/1.1 var(--site-comic);
+    color: #fff;
+    text-transform: lowercase;
+    text-shadow: var(--site-outline);
+  }
+
+  @media (width >= 40rem) {
+    .plaque-title {
+      font-size: 36px;
+    }
+  }
+}

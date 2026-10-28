@@ -1,0 +1,184 @@
+/* The one-screen creator: the wooden panel with the faction and class glyphs, look tiles and
+   swatches. Choices are told apart by their yellow tiles and rings. */
+@layer components {
+  .creator {
+    margin-top: 30px;
+  }
+
+  .creator-box {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    overflow: clip;
+    border: 3px solid #000;
+    border-radius: 10px;
+    background: #7b4a22;
+    box-shadow: 0 4px 0 rgb(0 0 0 / 0.3);
+  }
+
+  /* The wooden panel with the choices. */
+  .creator-panel {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+    padding: 12px 10px 14px;
+    border: 3px solid #120b07;
+    background: #7b4a22;
+    box-shadow:
+      inset 0 3px 0 #9c6532,
+      inset 0 -4px 0 #5b3415,
+      0 4px 0 rgb(0 0 0 / 0.35);
+  }
+
+  .panel-grain {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+
+    path {
+      fill: none;
+      stroke: #5e3717;
+      stroke-width: 2;
+      vector-effect: non-scaling-stroke;
+    }
+  }
+
+  .creator-row {
+    min-width: 0;
+
+    & + & {
+      margin-top: 16px;
+    }
+  }
+
+  .panel-label {
+    margin-bottom: 8px;
+    font: 800 18px/1.2 var(--site-heading);
+    letter-spacing: 0.02em;
+    color: #fff;
+    text-transform: lowercase;
+    text-shadow: var(--site-outline-thin);
+  }
+
+  .faction-tiles,
+  .class-tiles {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .class-tiles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  /* A choice whose radio stays in the page for the keyboard and screen readers. */
+  .creator-tile,
+  .look-tile,
+  .swatch {
+    position: relative;
+    display: block;
+    cursor: pointer;
+
+    > input {
+      position: absolute;
+      inset: 0 auto auto 0;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+    }
+  }
+
+  .creator-face {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 4px 10px;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #2e2420;
+    box-shadow: 0 3px 0 #000;
+    color: #fff;
+    text-align: center;
+    transition:
+      background-color 150ms var(--ease-menu),
+      color 150ms var(--ease-menu);
+
+    :checked + & {
+      background: #f2c12e;
+      color: #0a0a0a;
+    }
+
+    :focus-visible + & {
+      outline: 3px solid #fff;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 6px #0a0a0a;
+    }
+  }
+
+  .creator-tile-name {
+    font: 800 15px/1.1 var(--site-heading);
+  }
+
+  .creator-role {
+    font-size: 13px;
+    line-height: 1.3;
+    color: #d9cfc4;
+
+    :checked + .creator-face & {
+      color: #3b2d23;
+    }
+  }
+
+  .creator-glyph {
+    display: grid;
+    width: 54px;
+    height: 54px;
+    place-items: center;
+    border: 3px solid #000;
+    border-radius: 10px;
+    background: var(--faction);
+    box-shadow:
+      inset 0 -6px 0 rgb(0 0 0 / 0.25),
+      inset 0 4px 0 rgb(255 255 255 / 0.18);
+    color: var(--faction-ink);
+    transition: background-color 150ms var(--ease-menu);
+
+    > svg {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  @media (width >= 40rem) {
+    .creator-panel {
+      padding: 16px 16px 18px;
+      border-radius: 8px;
+    }
+
+    .class-tiles {
+      gap: 10px;
+    }
+
+    .creator-face {
+      padding: 10px 6px 12px;
+    }
+
+    .creator-glyph {
+      width: 68px;
+      height: 68px;
+
+      > svg {
+        width: 42px;
+        height: 42px;
+      }
+    }
+
+    .creator-tile-name {
+      font-size: 17px;
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{#def rules, roster, look, name: str, refused: str, notice: str, kits: dict, next: str #}
+{# The hero creator: the slots, and the one-screen creator, or why no hero can be created now. #}
+{% set title = _("web.creator.title") %}
+{% set slot = roster.heroes|length + 1 if roster else 1 %}
+<Layout :title="title">
+  {% if refused == "taken" %}
+    <SiteMessage :shown="{'key': 'web.creator.refused.taken', 'values': {'name': name}, 'error': True}" />
+  {% elif notice == "form" %}
+    <SiteMessage :shown="{'key': 'web.creator.refused.form', 'values': {}, 'error': True}" />
+  {% endif %}
+  <section aria-labelledby="creator-title" class="creator-head">
+    <div class="creator-intro">
+      <Plaque id="creator-title">{{ title }}</Plaque>
+      {% if player and not roster.free %}
+        <p class="site-lead">{{ _("web.creator.lead.full") }}</p>
+      {% elif player %}
+        <p class="site-lead">
+          {{ _("web.creator.lead") }}
+          {% if not roster.default %}{{ _("web.creator.lead.first") }}{% endif %}
+          {{ _("web.creator.lead.kept") }}
+        </p>
+      {% endif %}
+    </div>
+    {% if player %}
+      <SlotPanel :roster="roster" :taking="slot if roster.free else 0">
+      {% if roster.free %}
+        {{ _("web.slots.taking", slot=slot) }}
+      {% else %}
+        {{ _n("web.slots.free", rules.slots) }}
+      {% endif %}
+      </SlotPanel>
+    {% endif %}
+  </section>
+  {% if not player %}
+    <section aria-labelledby="creator-closed"
+             class="creator-closed creator-unavailable">
+      <span aria-hidden="true"
+            class="creator-unavailable-disc"><Icon name="sign-in" :size="34" stroke="#0A0A0A" /></span>
+      <div class="creator-unavailable-text">
+        <h2 id="creator-closed" class="site-box-title">{{ _("web.creator.signed_out") }}</h2>
+        <p>{{ _("web.creator.signed_out.text") }}</p>
+        <p class="site-actions">
+          <a href="{{ url('/sign-in') }}?{{ {'next': next}|urlencode }}"
+             class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+          <a href="{{ url('/register') }}"
+             class="site-link">{{ _("web.account.sign_in.create") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+        </p>
+      </div>
+    </section>
+  {% elif not roster.free %}
+    <section aria-labelledby="creator-closed"
+             class="site-box site-box-pale creator-closed">
+      <h2 id="creator-closed" class="site-box-title">{{ _n("web.creator.full", roster.slots) }}</h2>
+      <p>{{ _("web.creator.full.text") }}</p>
+    </section>
+  {% else %}
+    <CreatorForm :rules="rules" :look="look" :roster="roster" :name="name" :refused="refused" :kits="kits" :slot="slot" />
+  {% endif %}
+</Layout>

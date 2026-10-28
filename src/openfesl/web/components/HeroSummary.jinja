@@ -1,0 +1,36 @@
+{#def hero, slot: int, slots: int, default: bool = False #}
+{# A hero's small card: its faction's tab, the default hero's stamp, its name, class and level,
+   and its slot. #}
+{% set rules = game.heroes %}
+<article aria-labelledby="hero-{{ hero.persona.id }}"
+         {% if hero.faction %} data-faction="{{ hero.faction }}"{% endif %}
+         class="hero-summary">
+  {% if hero.faction %}
+    <p class="hero-tab">
+      <Icon :name="rules.factions[hero.faction].glyph" :size="16" stroke="currentColor" />
+      {{ _("games." ~ game.id ~ ".faction." ~ hero.faction) }}
+    </p>
+  {% endif %}
+  <div class="hero-summary-body">
+    <div class="hero-heading">
+      <h3 id="hero-{{ hero.persona.id }}"
+          class="hero-name{% if hero.persona.name|length > 13 %} hero-name-long{% endif %}">
+        {{ hero.persona.name }}
+        {% if default %}<span class="sr-only">{{ _("web.heroes.default.sr") }}</span>{% endif %}
+      </h3>
+      {% if default %}
+        <span aria-hidden="true" class="hero-stamp">{{ _("web.heroes.stamp") }}</span>
+      {% endif %}
+    </div>
+    <p class="hero-kind">
+      {% if hero.hero_class %}
+        <span aria-hidden="true"
+              class="hero-glyph"><Icon :name="rules.classes[hero.hero_class].glyph" :size="18" stroke="currentColor" /></span>
+        {{ _("web.heroes.kind", hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class), level=hero.level) }}
+      {% else %}
+        {{ _("web.heroes.level", level=hero.level) }}
+      {% endif %}
+    </p>
+    <p class="hero-slot">{{ _("web.creator.slot.of", slot=slot, slots=slots) }}</p>
+  </div>
+</article>

@@ -1,0 +1,60 @@
+{#def rules, look, roster, name: str, refused: str, kits: dict, slot: int #}
+{# The one-screen creator: the faction, class and look on the wooden panel, then the naming part,
+   whose Create hero sends the form; the server checks the name. #}
+<form method="post"
+      action="{{ url('/' ~ game.id ~ '/user/createHero') }}"
+      aria-labelledby="creator-title"
+      data-faction="{{ look.faction }}"
+      class="creator enter-panel">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <div class="creator-box">
+    <div class="creator-panel">
+      <svg aria-hidden="true"
+           focusable="false"
+           viewBox="0 0 300 600"
+           preserveAspectRatio="none"
+           class="panel-grain">
+        <path d="M0 40c60-6 120 6 180 0s90-6 120 2M0 190c70 5 140-5 200 0s70 4 100-2M0 360c50-4 110 4 160 0s100-5 140 1M0 530c80 4 150-4 220 0s60 3 80-1" />
+      </svg>
+      <fieldset class="creator-row">
+        <legend class="panel-label">{{ _("web.creator.faction") }}</legend>
+        <div class="faction-tiles">
+          {% for faction_id, choice in rules.factions.items() %}
+            <label data-faction="{{ faction_id }}" class="creator-tile faction-tile">
+              <input type="radio"
+                     name="faction"
+                     value="{{ faction_id }}"
+                     {% if faction_id == look.faction %} checked{% endif %}>
+              <span class="creator-face">
+                <span aria-hidden="true"
+                      class="creator-glyph"><Icon :name="choice.glyph" :size="42" stroke="currentColor" /></span>
+                <span class="creator-tile-name">{{ _("games." ~ game.id ~ ".faction." ~ faction_id) }}</span>
+              </span>
+            </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+      <fieldset class="creator-row">
+        <legend class="panel-label">{{ _("web.creator.class") }}</legend>
+        <div class="class-tiles">
+          {% for class_id, choice in rules.classes.items() %}
+            <label class="creator-tile class-tile">
+              <input type="radio"
+                     name="class"
+                     value="{{ class_id }}"
+                     {% if class_id == look.hero_class %} checked{% endif %}>
+              <span class="creator-face">
+                <span aria-hidden="true"
+                      class="creator-glyph"><Icon :name="choice.glyph" :size="42" stroke="currentColor" /></span>
+                <span class="creator-tile-name">{{ _("games." ~ game.id ~ ".class." ~ class_id) }}</span>
+                <span class="creator-role">{{ _("games." ~ game.id ~ ".class." ~ class_id ~ ".role") }}</span>
+              </span>
+            </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+      <CreatorLook :rules="rules" :look="look" />
+    </div>
+  </div>
+  <CreatorNaming :rules="rules" :roster="roster" :name="name" :refused="refused" :kits="kits" :slot="slot" />
+</form>

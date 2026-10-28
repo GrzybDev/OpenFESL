@@ -125,6 +125,231 @@ msgstr "Sign in through a service"
 msgid "web.site.wallets"
 msgstr "Wallets"
 
+msgid "web.bar.default"
+msgstr "Default hero"
+
+msgid "web.bar.level"
+msgstr "level "
+
+msgid "web.bar.no_hero"
+msgstr "No hero yet"
+
+msgid "web.bar.create"
+msgstr "Create a hero"
+
+msgid "web.slots.title"
+msgstr "Hero slots"
+
+msgid "web.slots.used"
+msgstr "%(used)s of %(slots)s used"
+
+msgid "web.slots.used.label"
+msgstr "%(used)s of %(slots)s hero slots used"
+
+msgid "web.slots.taking"
+msgstr "The new hero takes slot %(slot)s, the yellow one, and keeps it: heroes cannot be deleted."
+
+msgid "web.slots.free.one"
+msgstr "Every account has %(count)s free hero slot."
+
+msgid "web.slots.free.other"
+msgstr "Every account has %(count)s free hero slots."
+
+msgid "web.creator.title"
+msgstr "Create a hero"
+
+msgid "web.creator.lead"
+msgstr "A random hero stands ready: change its faction, class and look, then name it."
+
+msgid "web.creator.lead.first"
+msgstr "The first hero becomes the default hero, the one OpenFESLHook's launcher logs the game in with."
+
+msgid "web.creator.lead.kept"
+msgstr "Faction, class and the look chosen here stay with the hero."
+
+msgid "web.creator.lead.full"
+msgstr "A new hero needs a free hero slot."
+
+msgid "web.creator.signed_out"
+msgstr "Sign in to create a hero"
+
+msgid "web.creator.signed_out.text"
+msgstr "Heroes belong to an account. After signing in, the creator opens here."
+
+msgid "web.creator.full.one"
+msgstr "The %(count)s hero slot is in use"
+
+msgid "web.creator.full.other"
+msgstr "All %(count)s hero slots are in use"
+
+msgid "web.creator.full.text"
+msgstr "Heroes cannot be deleted, so a new hero needs another slot."
+
+msgid "web.creator.refused.taken"
+msgstr "%(name)s was not created: the name was taken a moment earlier. No hero slot was used, and the other choices are kept below."
+
+msgid "web.creator.refused.form"
+msgstr "The hero was not created: the form had expired. No hero slot was used, and the choices are kept below."
+
+msgid "web.creator.who"
+msgstr "%(hero_class)s of the %(faction)s"
+
+msgid "web.creator.faction"
+msgstr "Faction"
+
+msgid "web.creator.class"
+msgstr "Class"
+
+msgid "web.creator.hair_style"
+msgstr "Hair style"
+
+msgid "web.creator.facial_hair"
+msgstr "Facial hair"
+
+msgid "web.creator.hair_style.of"
+msgstr "%(faction)s hair styles"
+
+msgid "web.creator.facial_hair.of"
+msgstr "%(faction)s facial hair"
+
+msgid "web.creator.style"
+msgstr "Style %(number)s"
+
+msgid "web.creator.none"
+msgstr "None"
+
+msgid "web.creator.skin_tone"
+msgstr "Skin tone"
+
+msgid "web.creator.hair_colour"
+msgstr "Hair colour"
+
+msgid "web.creator.skin_tone.choice"
+msgstr "Skin tone %(n)s of %(count)s"
+
+msgid "web.creator.hair_colour.choice"
+msgstr "Hair colour %(n)s of %(count)s"
+
+msgid "web.creator.of"
+msgstr "%(n)s of %(count)s"
+
+msgid "web.creator.naming"
+msgstr "Name the hero"
+
+msgid "web.creator.name"
+msgstr "Hero name"
+
+msgid "web.creator.name.hint"
+msgstr "2 to 16 letters, digits, _ or -. Names ignore capitals, so Mossgrove and mossgrove are one name."
+
+msgid "web.creator.name.format"
+msgstr "Use 2 to 16 letters, digits, _ or -."
+
+msgid "web.creator.name.refused"
+msgstr "%(name)s was taken a moment earlier. No hero slot was used."
+
+msgid "web.creator.slot"
+msgstr "Hero slot"
+
+msgid "web.creator.slot.of"
+msgstr "Slot %(slot)s of %(slots)s"
+
+msgid "web.creator.default"
+msgstr "Default hero"
+
+msgid "web.creator.default.stays"
+msgstr "%(hero)s stays the default hero"
+
+msgid "web.creator.default.becomes"
+msgstr "Becomes the default hero"
+
+msgid "web.creator.kit"
+msgstr "Starting kit"
+
+msgid "web.creator.kit.uses.one"
+msgstr "%(item)s (%(count)s use)"
+
+msgid "web.creator.kit.uses.other"
+msgstr "%(item)s (%(count)s uses)"
+
+msgid "web.creator.kit.items.one"
+msgstr "%(count)s item for the equipment bar"
+
+msgid "web.creator.kit.items.other"
+msgstr "%(count)s items for the equipment bar"
+
+msgid "web.creator.kit.emotes.one"
+msgstr "%(count)s emote"
+
+msgid "web.creator.kit.emotes.other"
+msgstr "%(count)s emotes"
+
+msgid "web.creator.create"
+msgstr "Create hero"
+
+msgid "web.created.title"
+msgstr "Hero created"
+
+msgid "web.created.slot"
+msgstr "%(hero)s took slot %(slot)s."
+
+msgid "web.created.what"
+msgstr "%(hero)s was created"
+
+msgid "web.created.default"
+msgstr "%(hero)s is the default hero, in slot %(slot)s of %(slots)s."
+
+msgid "web.created.logs_in"
+msgstr "OpenFESLHook's launcher logs %(game)s in as %(hero)s."
+
+msgid "web.created.further"
+msgstr "Slot %(slot)s of %(slots)s. %(game)s lists the new hero from its next login."
+
+msgid "web.created.stays"
+msgstr "%(hero)s stays the default hero, so OpenFESLHook's launcher logs %(game)s in as %(hero)s."
+
+msgid "web.created.kit"
+msgstr "The starting kit is in place: %(kit)s."
+
+msgid "web.created.another"
+msgstr "Create another hero"
+
+msgid "web.heroes.stamp"
+msgstr "Default"
+
+msgid "web.heroes.default.sr"
+msgstr "(default hero)"
+
+msgid "web.heroes.kind"
+msgstr "%(hero_class)s · level %(level)s"
+
+msgid "web.heroes.level"
+msgstr "Level %(level)s"
+
+msgid "games.bfheroes.faction.royal"
+msgstr "Royal Army"
+
+msgid "games.bfheroes.faction.national"
+msgstr "National Army"
+
+msgid "games.bfheroes.class.commando"
+msgstr "Commando"
+
+msgid "games.bfheroes.class.soldier"
+msgstr "Soldier"
+
+msgid "games.bfheroes.class.gunner"
+msgstr "Gunner"
+
+msgid "games.bfheroes.class.commando.role"
+msgstr "Fastest, with the least health. Sniper rifles and knives."
+
+msgid "games.bfheroes.class.soldier.role"
+msgstr "All-round, with healing. SMGs and shotguns."
+
+msgid "games.bfheroes.class.gunner.role"
+msgstr "Most health, slowest. Machine guns and shotguns."
+
 msgid "games.bfheroes.menu.game"
 msgstr "The game"
 

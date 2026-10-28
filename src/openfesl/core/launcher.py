@@ -5,9 +5,10 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from enum import StrEnum
 
-from openfesl.core.accounts import STATE_ERRORS
+from openfesl.core.accounts import STATE_ERRORS, Account
 from openfesl.core.fesl import TransactionError
-from openfesl.core.games import Games
+from openfesl.core.games import Game, Games
+from openfesl.core.heroes import Heroes
 from openfesl.core.logins import Logins
 from openfesl.core.personas import Persona, PersonaService
 from openfesl.core.session import GameSession, Players
@@ -19,6 +20,8 @@ logger = logging.getLogger(__name__)
 # session is kept while its account is logged in to a game, and for this long past its last use.
 SESSION_TTL = 24 * 3600.0
 
+HOST = "host"
+
 
 class Refusal(StrEnum):
     """Why a launcher sign-in was refused, which the launcher words for the player."""
@@ -29,6 +32,7 @@ class Refusal(StrEnum):
     BANNED = "banned"
     DEACTIVATED = "deactivated"
     NO_PERSONA = "no-persona"
+    NO_HERO = "no-hero"
 
 
 # The account states that refuse a login, by the NuLogin error each refuses it with.
@@ -141,7 +145,12 @@ class LauncherService:
     """Signs a player in for a launcher and starts a session the game then logs in from."""
 
     def __init__(
-        self, logins: Logins, games: Games, personas: PersonaService, sessions: LauncherSessions
+        self,
+        logins: Logins,
+        games: Games,
+        personas: PersonaService,
+        heroes: Heroes,
+        sessions: LauncherSessions,
     ) -> None:
         """Sign players in against the account store.
 
@@ -149,11 +158,14 @@ class LauncherService:
             logins: Checks passwords and hands out login tokens.
             games: The games the server serves, to refuse a launcher for one it does not.
             personas: Where the account's persona is found or made, so the game logs one in.
+            heroes: The heroes of the games whose heroes are made on their site, of which the
+                game logs in the default one.
             sessions: Where the sign-in is kept for the game to pick up.
         """
         self._logins = logins
         self._games = games
         self._personas = personas
+        self._heroes = heroes
         self._sessions = sessions
 
     async def sign_in(
@@ -172,7 +184,8 @@ class LauncherService:
 
         Raises:
             LauncherError: When the game is unknown, the account or password is wrong, the
-                account's state refuses its logins or no persona could be made for it.
+                account's state refuses its logins, no persona could be made for it or, in a
+                game whose heroes are made on its site, it has no hero to start the game as.
         """
         served = self._games.by_id(game)
         if served is None:
@@ -183,9 +196,9 @@ class LauncherService:
             token = await self._logins.remember(credentials.account.id, credentials.password_hash)
         except TransactionError as refused:
             raise LauncherError(STATE_REFUSALS.get(refused.code, Refusal.WRONG_SIGN_IN)) from None
-        persona = await self._personas.first_or_new(credentials.account, served.namespace)
+        persona = await self._persona(credentials.account, served, role)
         if persona is None:
-            raise LauncherError(Refusal.NO_PERSONA)
+            raise LauncherError(Refusal.NO_HERO if served.heroes else Refusal.NO_PERSONA)
         session = LauncherSession(
             token=token,
             account_id=credentials.account.id,
@@ -195,3 +208,14 @@ class LauncherService:
         session_id = self._sessions.issue(session)
         logger.info("Launcher signed account %d in to %s to %s", credentials.account.id, game, role)
         return session_id, session
+
+    async def _persona(self, account: Account, game: Game, role: str) -> Persona | None:
+        # A game whose heroes are made on its site is given none. It plays as the default hero,
+        # or else the oldest, of those it can play; a server it hosts plays as none of them, so
+        # it logs in as any.
+        if not game.heroes:
+            return await self._personas.first_or_new(account, game.namespace)
+        roster = await self._heroes.roster(game, account.id)
+        usable = [hero for hero in roster.heroes if role == HOST or hero.playable]
+        hero = roster.default if roster.default in usable else next(iter(usable), None)
+        return hero.persona if hero else None

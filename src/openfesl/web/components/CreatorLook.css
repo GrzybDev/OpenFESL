@@ -1,0 +1,138 @@
+/* The creator's look: the tiles of each faction's lists and the swatches. */
+@layer components {
+  /* The look, on parchment: the hair and facial hair tiles and the colour swatches. */
+  .creator-look {
+    position: relative;
+    isolation: isolate;
+    margin-top: 16px;
+    padding: 10px 8px 12px;
+    border: 3px solid #000;
+    border-radius: 6px;
+    background: #d7c8af;
+    color: #1f1712;
+  }
+
+  .look-panel + .look-panel {
+    margin-top: 12px;
+  }
+
+  .look-list {
+    min-width: 0;
+
+    & + & {
+      margin-top: 12px;
+    }
+  }
+
+  .look-legend {
+    margin-bottom: 6px;
+    font: 800 16px/1.2 var(--site-heading);
+    text-transform: lowercase;
+  }
+
+  .look-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .look-face {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 4px;
+    border: 2px solid #000;
+    border-radius: 8px;
+    background: #f1e9de;
+    font: 800 13px/1.1 var(--site-heading);
+    transition: background-color 150ms var(--ease-menu);
+
+    :checked + & {
+      background: #f2c12e;
+    }
+
+    :focus-visible + & {
+      outline: 3px solid #fff;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 6px #0a0a0a;
+    }
+  }
+
+  .swatches {
+    min-width: 0;
+    margin-top: 14px;
+
+    & + & {
+      margin-top: 12px;
+    }
+
+    legend {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 4px 10px;
+      margin-bottom: 6px;
+    }
+  }
+
+  .swatch-label {
+    font: 800 16px/1.2 var(--site-heading);
+    text-transform: lowercase;
+  }
+
+  .swatch-value {
+    font-size: 13px;
+    color: #5c4a3c;
+  }
+
+  .swatch-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .swatch {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+
+    &::before {
+      content: "";
+      display: block;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--skin);
+      box-shadow: 0 0 0 2px #000;
+      transition: box-shadow 150ms var(--ease-menu);
+    }
+
+    &[data-hair-colour]::before {
+      background: var(--hair);
+    }
+
+    &:has(:checked)::before {
+      box-shadow:
+        0 0 0 2px #000,
+        0 0 0 5px #f2c12e,
+        0 0 0 7px #000;
+    }
+
+    &:has(:focus-visible)::before {
+      outline: 3px solid #fff;
+      outline-offset: 6px;
+    }
+  }
+
+  @media (width >= 40rem) {
+    .creator-look {
+      padding: 12px;
+    }
+
+    .look-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+}

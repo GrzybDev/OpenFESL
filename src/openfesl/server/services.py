@@ -19,6 +19,7 @@ from openfesl.core.entitlements import EntitlementService
 from openfesl.core.fesl import Route
 from openfesl.core.game_http import GameHttp
 from openfesl.core.games import Games
+from openfesl.core.heroes import Heroes
 from openfesl.core.history import OnlineHistory
 from openfesl.core.hosting import Hosting
 from openfesl.core.joining import Joining
@@ -81,6 +82,7 @@ class GameServices:
         self.hosting = Hosting(self.approval)
         self.trust = ServerTrust(self.hosting, self.approval)
         self.wallets = Wallets(stores.wallets)
+        self.heroes = Heroes(stores.heroes, stores.stats)
         self.magma = Magma(
             self._launcher_sessions,
             self.players,
@@ -130,7 +132,9 @@ class GameServices:
         )
         personas = PersonaService(stores.personas)
         await personas.prepare(await accounts.prepare(games))
-        app.state.launcher = LauncherService(logins, games, personas, self._launcher_sessions)
+        app.state.launcher = LauncherService(
+            logins, games, personas, self.heroes, self._launcher_sessions
+        )
         mailings = Mailings()
         attempts = Attempts()
         sign_in = WebSignIn(

@@ -1,0 +1,54 @@
+/* The page after a hero was created: the green box with the big tick beside the new card. */
+@layer pages {
+  .created {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 20px 28px;
+    margin-top: 30px;
+  }
+
+  .created-box {
+    display: flex;
+    flex: 1 1 520px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 20px 28px;
+    min-width: 0;
+    padding-block: 24px;
+
+    .site-box-title {
+      font-size: 27px;
+      text-shadow: var(--site-outline);
+    }
+  }
+
+  .created-disc {
+    display: grid;
+    flex: 0 0 auto;
+    width: 96px;
+    height: 96px;
+    place-items: center;
+    border: 3px solid #000;
+    border-radius: 50%;
+    background: #f2c12e;
+    box-shadow:
+      inset 0 0 0 5px #ffe27a,
+      inset 0 0 0 7px #000,
+      0 4px 0 #000;
+  }
+
+  .created-text {
+    flex: 1 1 320px;
+    min-width: 0;
+
+    > p {
+      margin-top: 8px;
+    }
+  }
+
+  .created-kit {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+}

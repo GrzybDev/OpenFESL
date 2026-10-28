@@ -323,4 +323,24 @@
     <circle cx="160" cy="30" r="4"/>
     <circle cx="40" cy="170" r="5"/>
   </symbol>
+  <symbol id="crown" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9.5" fill="none" stroke-width="2.2"/>
+    <path d="M7.2 15.5L6.6 9l3 2.6L12 7.2l2.4 4.4 3-2.6-.6 6.5z" fill="none" stroke-width="2" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="chevrons" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9.5" fill="none" stroke-width="2.2"/>
+    <path d="M7 11.5l5-4 5 4M7 16.5l5-4 5 4" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="reticle" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="7" fill="none" stroke-width="2.2"/>
+    <path d="M12 2.5v6M12 15.5v6M2.5 12h6M15.5 12h6" fill="none" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="heart-cross" viewBox="0 0 24 24">
+    <path d="M12 20.5s-7.5-4.6-7.5-10.4A4.2 4.2 0 0 1 12 7.4a4.2 4.2 0 0 1 7.5 2.7c0 5.8-7.5 10.4-7.5 10.4z" fill="none" stroke-width="2.2" stroke-linejoin="round"/>
+    <path d="M12 10.5v6M9 13.5h6" fill="none" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="shield-bars" viewBox="0 0 24 24">
+    <path d="M12 2.8l7.5 3v6.4c0 4.6-3.2 7.8-7.5 9.4-4.3-1.6-7.5-4.8-7.5-9.4V5.8z" fill="none" stroke-width="2.2" stroke-linejoin="round"/>
+    <path d="M8.5 10.5h7M8.5 14.5h7" fill="none" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
 </svg>

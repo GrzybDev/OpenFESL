@@ -2,6 +2,7 @@ import asyncio
 from xml.etree import ElementTree
 
 import pytest
+from heroes import create_hero
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 from support import FESL, fetch, game, launcher_sign_in, log_in_player
@@ -18,14 +19,18 @@ async def play(server_url: str, account: str, *made: str) -> tuple[dict[str, str
     Args:
         server_url: The server's relay address.
         account: The account's login name.
-        made: Further heroes the account makes, besides the one the launcher gives it.
+        made: The names of further heroes the account makes on the site, after the one named
+            after its login.
 
     Returns:
-        The magma cookie the game sends and the numbers of the heroes it plays, the launcher's
+        The magma cookie the game sends and the numbers of the heroes it plays, the site's
         first.
     """
     async with game(server_url) as registering:
         await log_in_player(registering, FESL, account)
+    base = server_url.replace("ws://", "http://").rstrip("/")
+    for name in (account.split("@")[0], *made):
+        await create_hero(base, account, name)
     session = (await launcher_sign_in(server_url, account, "secret-pass")).json()
     cookie = {"Cookie": f"magma={session['sessionId']}"}
     _, _, body = await fetch(server_url, "/nucleus/authToken", MAGMA, cookie)
@@ -35,8 +40,6 @@ async def play(server_url: str, account: str, *made: str) -> tuple[dict[str, str
         await player.hello(FESL, "bfwest-pc", client_type="client-noreg")
         silent = [("TXN", "NuLogin"), ("returnEncryptedInfo", "0"), ("encryptedInfo", token)]
         await player.request(FESL, "acct", silent)
-        for name in made:
-            await player.request(FESL, "acct", [("TXN", "NuAddPersona"), ("name", name)])
         for name in (session["personaName"], *made):
             hero = [("TXN", "NuLoginPersona"), ("name", name)]
             heroes.append(int((await player.request(FESL, "acct", hero))["userId"]))
@@ -69,10 +72,11 @@ async def test_a_game_started_by_the_launcher_logs_in_with_the_token_of_its_sess
     account = "hero@example.test"
     async with game(server_url) as registering:
         await log_in_player(registering, FESL, account)
+    await create_hero(server_url.replace("ws://", "http://").rstrip("/"), account, "hero")
     signed_in = await launcher_sign_in(server_url, account, "secret-pass")
     assert signed_in.status_code == 200
     session = signed_in.json()
-    # An account without a hero in the game is given one named after its login.
+    # The game logs in with the account's default hero, made on the site.
     assert (session["accountName"], session["personaName"]) == (account, "hero")
 
     # The game started with the session id sends it as its magma cookie for the token.
@@ -109,7 +113,7 @@ async def test_a_game_started_by_the_launcher_logs_in_with_the_token_of_its_sess
     assert "errorCode" not in playing
     for status, _, body in collected:
         assert (status, ElementTree.fromstring(body).tag) == (200, "success")
-    # A second sign-in keeps the hero the first one made.
+    # A second sign-in keeps the same hero.
     again = await launcher_sign_in(server_url, account, "secret-pass")
     assert again.json()["personaName"] == "hero"
 
@@ -137,15 +141,16 @@ async def test_a_hero_loads_its_items_its_wallets_and_the_stores_empty_lists(
     server_url: str, database_url: str
 ) -> None:
     cookie, [hero] = await play(server_url, "hero@example.test")
-    # A consumable with uses left and a rental, as the database keeps a hero's items.
+    # A rental beside the bandages the hero was created with, as the database keeps a hero's
+    # items.
     engine = create_async_engine(database_url)
     async with engine.begin() as connection:
         await connection.execute(
             text(
                 "INSERT INTO entitlement (account_id, persona_id, tag, use_count, expires_at,"
                 " status, granted_at) SELECT account_id, id, item.*, 'ACTIVE', '2026-10-20 12:00Z'"
-                " FROM persona, (VALUES ('2005-lmct', 3, NULL::timestamptz),"
-                " ('3002-tlmd', NULL, '2026-11-03 18:30+01')) AS item WHERE persona.id = :hero"
+                " FROM persona, (VALUES ('3002-tlmd', NULL::integer,"
+                " '2026-11-03 18:30+01'::timestamptz)) AS item WHERE persona.id = :hero"
             ),
             {"hero": hero},
         )
@@ -168,7 +173,7 @@ async def test_a_hero_loads_its_items_its_wallets_and_the_stores_empty_lists(
     ]
 
     assert (status, headers["Cache-Control"]) == (200, NO_STORE)
-    assert items == [["2005-lmct", "3", ""], ["3002-tlmd", "0", "2026-11-03T17:30Z"]]
+    assert items == [["2005-lmct", "10", ""], ["3002-tlmd", "0", "2026-11-03T17:30Z"]]
     assert found == ["3002-tlmd"]
     # Every currency the game keeps a balance in, the account's Funds with their allowance.
     assert balances == {"_DH": 0, "_DV": 0, "_PF": 2500}
@@ -200,7 +205,6 @@ async def test_a_hero_of_another_account_is_refused_with_the_errors_the_game_map
 async def test_an_account_is_granted_its_starting_funds_once_for_all_its_heroes(
     server_url: str, database_url: str
 ) -> None:
-    # The game makes no heroes itself; its SDK's NuAddPersona makes a second one here.
     cookie, [first, second] = await play(server_url, "ann@example.test", "ann_two")
     other_cookie, [other] = await play(server_url, "bob@example.test")
 

@@ -226,12 +226,12 @@ class PersonaService:
             request: The new persona's name.
 
         Raises:
-            TransactionError: When the name is invalid, taken or disabled by the admin, or the
-                account has its maximum.
+            TransactionError: When the name is invalid, taken or disabled by the admin, the
+                account has its maximum, or the game's heroes are made on its site.
         """
         account, namespace = _context(connection)
         # The dedicated servers' persona exists already; their shared login proves nothing.
-        if account.server:
+        if account.server or _made_on_site(connection):
             raise TransactionError(PARAMETERS_ERROR)
         if not _NAME.fullmatch(request.name):
             raise TransactionError(PARAMETERS_ERROR)
@@ -252,10 +252,11 @@ class PersonaService:
             request: The persona's name.
 
         Raises:
-            TransactionError: When the account has no persona of that name.
+            TransactionError: When the account has no persona of that name, or the game's
+                heroes are made on its site, which keeps them all.
         """
         account, _ = _context(connection)
-        if account.server:
+        if account.server or _made_on_site(connection):
             raise TransactionError(PARAMETERS_ERROR)
         persona = await self._own(connection, request.name)
         await self._store.disable(persona.id)
@@ -392,6 +393,11 @@ def _base(name: str) -> str:
 
 def _numbered(base: str) -> Iterator[str]:
     return (name for number in range(1, 100) if _NAME.fullmatch(name := f"{base}{number}"))
+
+
+def _made_on_site(connection: FeslConnection) -> bool:
+    # Such a game's heroes come with the stats of their creation, in the account's slots.
+    return connection.game is not None and connection.game.heroes is not None
 
 
 def _context(connection: FeslConnection) -> tuple[Account, str]:

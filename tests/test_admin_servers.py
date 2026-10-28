@@ -2,6 +2,7 @@ from pathlib import Path
 
 import httpx2
 import pytest
+from heroes import create_hero
 from identity import IdentityProvider, form_token, sign_in
 from support import THEATER, cli, connect_server, create, game, masked, report
 from test_player_servers import SERVER_GAME, register, start
@@ -106,6 +107,7 @@ async def test_a_server_of_a_game_without_providers_is_approved_in_one_step(
     admin_provider.user = KEEPER
     base = server_url.replace("ws://", "http://").rstrip("/")
     await register(server_url, "host@example.test")
+    await create_hero(base, "host@example.test", "host")
     async with httpx2.AsyncClient() as client, game(server_url) as server:
         await start(server_url, server, "host@example.test", role="host")
         created = await server.theater(THEATER, "CGAM", SERVER_GAME)

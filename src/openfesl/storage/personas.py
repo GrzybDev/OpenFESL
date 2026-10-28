@@ -43,7 +43,7 @@ class SqlPersonaStore:
                 )
                 .order_by(PersonaRow.id)
             )
-            return [_persona(row) for row in rows]
+            return [persona_of(row) for row in rows]
 
     async def records(self, account_ids: list[int]) -> dict[int, list[PersonaRecord]]:
         """Return the personas of some accounts in every namespace, oldest first, by account.
@@ -63,7 +63,7 @@ class SqlPersonaStore:
             for row in rows:
                 found[row.account_id].append(
                     PersonaRecord(
-                        _persona(row), row.created_at, row.disabled_at, PersonaState(row.state)
+                        persona_of(row), row.created_at, row.disabled_at, PersonaState(row.state)
                     )
                 )
             return found
@@ -77,7 +77,7 @@ class SqlPersonaStore:
         wanted = [number for number in persona_ids if number in _BIGINT]
         async with self._sessions() as session:
             rows = await session.scalars(select(PersonaRow).where(PersonaRow.id.in_(wanted)))
-            return {row.id: _persona(row) for row in rows}
+            return {row.id: persona_of(row) for row in rows}
 
     async def find(self, namespace: str, name: str) -> Persona | None:
         """Return the enabled persona with a name, matched regardless of case.
@@ -94,7 +94,7 @@ class SqlPersonaStore:
                     PersonaRow.disabled_at.is_(None),
                 )
             )
-        return _persona(row) if row else None
+        return persona_of(row) if row else None
 
     async def find_by_id(self, persona_id: int) -> Persona | None:
         """Return an enabled persona by its number.
@@ -107,7 +107,7 @@ class SqlPersonaStore:
             return None
         async with self._sessions() as session:
             row = await session.get(PersonaRow, persona_id)
-        return _persona(row) if row and row.disabled_at is None else None
+        return persona_of(row) if row and row.disabled_at is None else None
 
     async def search(self, namespace: str, pattern: str, limit: int) -> list[Persona]:
         """Return players' enabled personas whose names match a pattern regardless of case.
@@ -131,7 +131,7 @@ class SqlPersonaStore:
                 .order_by(func.lower(PersonaRow.name))
                 .limit(limit)
             )
-            return [_persona(row) for row in rows]
+            return [persona_of(row) for row in rows]
 
     async def add(self, account_id: int, namespace: str, name: str) -> Persona | None:
         """Create a persona, or return None when the name is taken in the namespace.
@@ -148,7 +148,7 @@ class SqlPersonaStore:
                 .on_conflict_do_nothing()
                 .returning(PersonaRow)
             )
-            return _persona(row) if row else None
+            return persona_of(row) if row else None
 
     async def disable(self, persona_id: int) -> None:
         """Take a persona out of use; its name stays taken.
@@ -176,7 +176,7 @@ class SqlPersonaStore:
                 )
                 .order_by(PersonaRow.namespace)
             )
-            return [_persona(row) for row in rows]
+            return [persona_of(row) for row in rows]
 
     async def blocked(self, namespace: str, name: str) -> bool:
         """Return whether the admin disabled the persona with a name.
@@ -212,5 +212,10 @@ class SqlPersonaStore:
             session.add(action_row(AdminAction.PERSONA_STATE, str(persona_id), details, admin))
 
 
-def _persona(row: PersonaRow) -> Persona:
+def persona_of(row: PersonaRow) -> Persona:
+    """Return the persona that a row of the persona table holds.
+
+    Args:
+        row: The row.
+    """
     return Persona(id=row.id, account_id=row.account_id, namespace=row.namespace, name=row.name)

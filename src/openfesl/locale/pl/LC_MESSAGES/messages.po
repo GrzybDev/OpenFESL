@@ -128,6 +128,261 @@ msgstr "Zaloguj się przez usługę"
 msgid "web.site.wallets"
 msgstr "Portfele"
 
+msgid "web.bar.default"
+msgstr "Domyślny bohater"
+
+msgid "web.bar.level"
+msgstr "poziom "
+
+msgid "web.bar.no_hero"
+msgstr "Jeszcze bez bohatera"
+
+msgid "web.bar.create"
+msgstr "Utwórz bohatera"
+
+msgid "web.slots.title"
+msgstr "Miejsca na bohaterów"
+
+msgid "web.slots.used"
+msgstr "Zajęte: %(used)s z %(slots)s"
+
+msgid "web.slots.used.label"
+msgstr "Zajęte miejsca na bohaterów: %(used)s z %(slots)s"
+
+msgid "web.slots.taking"
+msgstr "Nowy bohater zajmie miejsce %(slot)s, to żółte, i zachowa je na stałe: bohaterów nie można usuwać."
+
+msgid "web.slots.free.one"
+msgstr "Każde konto ma %(count)s bezpłatne miejsce na bohatera."
+
+msgid "web.slots.free.few"
+msgstr "Każde konto ma %(count)s bezpłatne miejsca na bohaterów."
+
+msgid "web.slots.free.many"
+msgstr "Każde konto ma %(count)s bezpłatnych miejsc na bohaterów."
+
+msgid "web.slots.free.other"
+msgstr "Każde konto ma %(count)s bezpłatnego miejsca na bohaterów."
+
+msgid "web.creator.title"
+msgstr "Utwórz bohatera"
+
+msgid "web.creator.lead"
+msgstr "Losowy bohater już czeka: wystarczy zmienić frakcję, klasę i wygląd, a potem nadać nazwę."
+
+msgid "web.creator.lead.first"
+msgstr "Pierwszy bohater zostaje domyślnym bohaterem, z którym program uruchamiający OpenFESLHook uruchamia grę."
+
+msgid "web.creator.lead.kept"
+msgstr "Wybrane tu frakcja, klasa i wygląd zostają z bohaterem na stałe."
+
+msgid "web.creator.lead.full"
+msgstr "Nowy bohater potrzebuje wolnego miejsca."
+
+msgid "web.creator.signed_out"
+msgstr "Tworzenie bohatera wymaga zalogowania"
+
+msgid "web.creator.signed_out.text"
+msgstr "Bohaterowie należą do konta. Po zalogowaniu kreator otworzy się tutaj."
+
+msgid "web.creator.full.one"
+msgstr "%(count)s miejsce na bohatera jest zajęte"
+
+msgid "web.creator.full.few"
+msgstr "Wszystkie %(count)s miejsca na bohaterów są zajęte"
+
+msgid "web.creator.full.many"
+msgstr "Wszystkie %(count)s miejsc na bohaterów jest zajętych"
+
+msgid "web.creator.full.other"
+msgstr "Wszystkie %(count)s miejsca na bohaterów są zajęte"
+
+msgid "web.creator.full.text"
+msgstr "Bohaterów nie można usuwać, więc nowy bohater potrzebuje kolejnego miejsca."
+
+msgid "web.creator.refused.taken"
+msgstr "Bohater %(name)s nie powstał: nazwa została zajęta przed chwilą. Żadne miejsce nie zostało użyte, a pozostałe wybory są zachowane poniżej."
+
+msgid "web.creator.refused.form"
+msgstr "Bohater nie powstał: formularz wygasł. Żadne miejsce nie zostało użyte, a wybory są zachowane poniżej."
+
+msgid "web.creator.who"
+msgstr "%(hero_class)s · %(faction)s"
+
+msgid "web.creator.faction"
+msgstr "Frakcja"
+
+msgid "web.creator.class"
+msgstr "Klasa"
+
+msgid "web.creator.hair_style"
+msgstr "Fryzura"
+
+msgid "web.creator.facial_hair"
+msgstr "Zarost"
+
+msgid "web.creator.hair_style.of"
+msgstr "Fryzury: %(faction)s"
+
+msgid "web.creator.facial_hair.of"
+msgstr "Zarost: %(faction)s"
+
+msgid "web.creator.style"
+msgstr "Styl %(number)s"
+
+msgid "web.creator.none"
+msgstr "Brak"
+
+msgid "web.creator.skin_tone"
+msgstr "Odcień skóry"
+
+msgid "web.creator.hair_colour"
+msgstr "Kolor włosów"
+
+msgid "web.creator.skin_tone.choice"
+msgstr "Odcień skóry %(n)s z %(count)s"
+
+msgid "web.creator.hair_colour.choice"
+msgstr "Kolor włosów %(n)s z %(count)s"
+
+msgid "web.creator.of"
+msgstr "%(n)s z %(count)s"
+
+msgid "web.creator.naming"
+msgstr "Nadaj nazwę bohaterowi"
+
+msgid "web.creator.name"
+msgstr "Nazwa bohatera"
+
+msgid "web.creator.name.hint"
+msgstr "Od 2 do 16 liter, cyfr, _ lub -. Wielkość liter się nie liczy, więc Mossgrove i mossgrove to ta sama nazwa."
+
+msgid "web.creator.name.format"
+msgstr "Nazwa ma od 2 do 16 znaków: litery, cyfry, _ lub -."
+
+msgid "web.creator.name.refused"
+msgstr "Nazwa %(name)s została zajęta przed chwilą. Żadne miejsce nie zostało użyte."
+
+msgid "web.creator.slot"
+msgstr "Miejsce"
+
+msgid "web.creator.slot.of"
+msgstr "Miejsce %(slot)s z %(slots)s"
+
+msgid "web.creator.default"
+msgstr "Domyślny bohater"
+
+msgid "web.creator.default.stays"
+msgstr "Domyślnym bohaterem pozostaje %(hero)s"
+
+msgid "web.creator.default.becomes"
+msgstr "Zostanie domyślnym bohaterem"
+
+msgid "web.creator.kit"
+msgstr "Wyposażenie startowe"
+
+msgid "web.creator.kit.uses.one"
+msgstr "%(item)s (%(count)s użycie)"
+
+msgid "web.creator.kit.uses.few"
+msgstr "%(item)s (%(count)s użycia)"
+
+msgid "web.creator.kit.uses.many"
+msgstr "%(item)s (%(count)s użyć)"
+
+msgid "web.creator.kit.uses.other"
+msgstr "%(item)s (%(count)s użycia)"
+
+msgid "web.creator.kit.items.one"
+msgstr "%(count)s przedmiot na pasek wyposażenia"
+
+msgid "web.creator.kit.items.few"
+msgstr "%(count)s przedmioty na pasek wyposażenia"
+
+msgid "web.creator.kit.items.many"
+msgstr "%(count)s przedmiotów na pasek wyposażenia"
+
+msgid "web.creator.kit.items.other"
+msgstr "%(count)s przedmiotu na pasek wyposażenia"
+
+msgid "web.creator.kit.emotes.one"
+msgstr "%(count)s emotka"
+
+msgid "web.creator.kit.emotes.few"
+msgstr "%(count)s emotki"
+
+msgid "web.creator.kit.emotes.many"
+msgstr "%(count)s emotek"
+
+msgid "web.creator.kit.emotes.other"
+msgstr "%(count)s emotki"
+
+msgid "web.creator.create"
+msgstr "Utwórz bohatera"
+
+msgid "web.created.title"
+msgstr "Bohater utworzony"
+
+msgid "web.created.slot"
+msgstr "%(hero)s zajmuje miejsce %(slot)s."
+
+msgid "web.created.what"
+msgstr "Utworzono bohatera %(hero)s"
+
+msgid "web.created.default"
+msgstr "%(hero)s jest domyślnym bohaterem, w miejscu %(slot)s z %(slots)s."
+
+msgid "web.created.logs_in"
+msgstr "Program uruchamiający OpenFESLHook uruchamia grę %(game)s z bohaterem %(hero)s."
+
+msgid "web.created.further"
+msgstr "Miejsce %(slot)s z %(slots)s. Gra %(game)s pokaże nowego bohatera od następnego logowania."
+
+msgid "web.created.stays"
+msgstr "Domyślnym bohaterem pozostaje %(hero)s, więc program uruchamiający OpenFESLHook uruchamia grę %(game)s z tym bohaterem."
+
+msgid "web.created.kit"
+msgstr "Wyposażenie startowe jest gotowe: %(kit)s."
+
+msgid "web.created.another"
+msgstr "Utwórz kolejnego bohatera"
+
+msgid "web.heroes.stamp"
+msgstr "Domyślny"
+
+msgid "web.heroes.default.sr"
+msgstr "(domyślny bohater)"
+
+msgid "web.heroes.kind"
+msgstr "%(hero_class)s · poziom %(level)s"
+
+msgid "web.heroes.level"
+msgstr "Poziom %(level)s"
+
+msgid "games.bfheroes.faction.royal"
+msgstr "Royal Army"
+
+msgid "games.bfheroes.faction.national"
+msgstr "National Army"
+
+msgid "games.bfheroes.class.commando"
+msgstr "Komandos"
+
+msgid "games.bfheroes.class.soldier"
+msgstr "Żołnierz"
+
+msgid "games.bfheroes.class.gunner"
+msgstr "Strzelec"
+
+msgid "games.bfheroes.class.commando.role"
+msgstr "Najszybsza klasa, z najmniejszą ilością zdrowia. Karabiny snajperskie i noże."
+
+msgid "games.bfheroes.class.soldier.role"
+msgstr "Wszechstronna klasa z leczeniem. Pistolety maszynowe i strzelby."
+
+msgid "games.bfheroes.class.gunner.role"
+msgstr "Najwięcej zdrowia, najwolniejsza klasa. Karabiny maszynowe i strzelby."
+
 msgid "games.bfheroes.menu.game"
 msgstr "Gra"
 

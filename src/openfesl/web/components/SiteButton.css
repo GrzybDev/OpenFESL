@@ -1,0 +1,92 @@
+/* The buttons of a game's own site, as the 2012 site drew them: black pills with a yellow glyph,
+   green for creating and confirming, yellow for making default, outlined to go back, and grey
+   while unavailable; plus underlined links on dark boxes. */
+@layer components {
+  .site-button {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 18px 0 14px;
+    border: 2px solid #000;
+    border-radius: 24px;
+    background: #1a1412;
+    box-shadow:
+      inset 0 2px 0 #4a3f3a,
+      0 3px 0 #000;
+    color: #fff;
+    font: 800 16px/1.1 var(--site-heading);
+    cursor: pointer;
+    transition: scale 100ms var(--ease-menu);
+
+    &:hover {
+      text-decoration: none;
+    }
+
+    &:active {
+      scale: 0.96;
+    }
+
+    &[aria-disabled="true"] {
+      background: #6e6a63;
+      box-shadow:
+        inset 0 2px 0 #8c8780,
+        0 3px 0 #000;
+      cursor: not-allowed;
+    }
+  }
+
+  .site-button-large {
+    min-height: 50px;
+    padding: 0 24px 0 16px;
+    font-size: 18px;
+  }
+
+  .site-button-go {
+    background: #3d6b1f;
+    box-shadow:
+      inset 0 2px 0 #6e9b3f,
+      0 3px 0 #000;
+  }
+
+  .site-button-yellow {
+    background: #f2c12e;
+    box-shadow:
+      inset 0 2px 0 #ffe38a,
+      0 3px 0 #000;
+    color: #0a0a0a;
+  }
+
+  .site-button-ghost {
+    min-height: 48px;
+    background: transparent;
+    box-shadow: none;
+    color: #1f1712;
+  }
+
+  .site-link-light {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 6px;
+    font: 800 15px/1.1 var(--site-heading);
+    color: #fff;
+    text-decoration-line: underline;
+  }
+
+  .site-link {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 6px;
+    font: 800 15px/1.1 var(--site-heading);
+    color: #7a1d16;
+    text-decoration-line: underline;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-button {
+      transition: none;
+    }
+  }
+}
