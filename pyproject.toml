@@ -22,6 +22,7 @@ dependencies = [
     "jinja2>=3.1.6",
     "jinjax>=0.66",
     "joserfc>=1.7.7",
+    "pillow>=13.0.0",
     "pwdlib[argon2]>=0.3.1",
     "pydantic>=2.14.1",
     "pydantic-settings>=2.16.1",
@@ -93,7 +94,7 @@ layers = [
     "openfesl.server",
     "openfesl.relay | openfesl.web | openfesl.storage",
     "openfesl.core",
-    "openfesl.protocol",
+    "openfesl.protocol | openfesl.formats",
 ]
 
 [tool.djlint]
