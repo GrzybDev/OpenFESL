@@ -8,7 +8,8 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 from openfesl.core.game_http import GameHttp
 
 GAME_HOST = "X-OpenFESL-Host"
-# Neither a proxy nor the game's own HTTP stack may keep or rewrite what the game fetches.
+# Neither a proxy nor the game's own HTTP stack may keep or rewrite what the game fetches, but for
+# answers that say how long they may be kept.
 CACHE_CONTROL = "no-store, no-transform"
 
 
@@ -47,7 +48,7 @@ class GameHttpMiddleware:
 
         async def send_uncached(message: Message) -> None:
             if message["type"] == "http.response.start":
-                MutableHeaders(scope=message)["Cache-Control"] = CACHE_CONTROL
+                MutableHeaders(scope=message).setdefault("Cache-Control", CACHE_CONTROL)
             await send(message)
 
         magma = self._magma.get(host.split(":")[0].lower())

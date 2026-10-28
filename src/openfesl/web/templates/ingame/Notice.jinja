@@ -1,0 +1,31 @@
+{#def game, styles, address: str = "", box: bool = False #}
+{# What a game's ad windows show in place of ads: where the parts of the game on the site are,
+   with the site's address as plain text, since whether these windows open links is not known.
+   The menu's strip shows it on two lines, the other windows in a box. #}
+{% set title = game.name ~ " " ~ _("web.site.on") %}
+<!DOCTYPE html>
+<html lang="{{ language }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title }}</title>
+    {{ styles }}
+  </head>
+  <body>
+    <main{% if box %} class="box"{% endif %}>
+      <h1>
+        <span>{{ game.name }}</span>
+        <span>{{ _("web.site.on") }}</span>
+      </h1>
+      {% if box %}<hr>{% endif %}
+      {% if address %}
+        <p>
+          {{ _("games." ~ game.id ~ ".notice") }}
+          <b>{{ address }}</b>
+        </p>
+      {% else %}
+        <p>{{ _("games." ~ game.id ~ ".notice.here") }}</p>
+      {% endif %}
+    </main>
+  </body>
+</html>

@@ -7288,3 +7288,9 @@ msgstr "The store is offline"
 
 msgid "web.ingame.offline.text"
 msgstr "The store could not open for this hero. Reopening the store tries again."
+
+msgid "games.bfheroes.notice"
+msgstr "Hero creator, hero slots, renames, treasure chests and Funds:"
+
+msgid "games.bfheroes.notice.here"
+msgstr "Hero creator, hero slots, renames, treasure chests and Funds are on this service's website."

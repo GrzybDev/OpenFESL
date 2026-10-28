@@ -1,0 +1,61 @@
+/* The game's ad windows: one notice that fits any window from 300 by 50 pixels, in the menu's
+   strip or in a box, for the game's browser, WebKit 533 of 2010. */
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+body {
+  overflow: hidden;
+  background: #1e1815;
+  color: #d9cfc4;
+  font:
+    13px/18px Arial,
+    Helvetica,
+    sans-serif;
+}
+main {
+  padding: 18px 24px 0;
+}
+.box {
+  padding: 46px 20px 0;
+  text-align: center;
+}
+h1 {
+  margin: 0;
+  color: #fff;
+  font:
+    700 20px/24px "Trebuchet MS",
+    Arial,
+    sans-serif;
+  text-shadow:
+    1.5px 0 0 #000,
+    -1.5px 0 0 #000,
+    0 1.5px 0 #000,
+    0 -1.5px 0 #000,
+    0 3px 0 #000;
+}
+.box h1 span {
+  display: block;
+}
+.box hr {
+  width: 64px;
+  height: 3px;
+  margin: 16px auto 0;
+  border: 0;
+  background: #f2c12e;
+}
+p {
+  margin: 6px 0 0;
+}
+.box p {
+  margin-top: 16px;
+}
+b {
+  color: #fede01;
+}
+.box b {
+  display: block;
+  margin-top: 4px;
+  font-size: 15px;
+}

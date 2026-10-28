@@ -98,3 +98,14 @@ async def test_the_store_page_tells_the_game_of_what_was_bought(
     await page.get_by_text("Bought", exact=True).wait_for()
     assert await called(calls, 1) == [["notifyPurchase", "3015-tlmd"]]
     await context.close()
+
+
+async def test_the_ad_beside_the_store_has_the_game_hide_its_space(
+    server_url: str, edge: Browser
+) -> None:
+    base = server_url.replace("ws://", "http://").rstrip("/")
+    context, calls = await game_window(edge, base, {"Cookie": "magma=0"}, BRIDGE)
+    page = await context.new_page()
+    await page.goto(f"{base}/en/game/ingameAd?personaId=1&lvl=1&eqp=&kr=-1")
+    assert await called(calls, 1) == [["showAds", False]]
+    await context.close()

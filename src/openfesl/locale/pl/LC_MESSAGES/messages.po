@@ -7702,3 +7702,9 @@ msgstr "Sklep jest niedostępny"
 
 msgid "web.ingame.offline.text"
 msgstr "Sklep nie mógł się otworzyć dla tego bohatera. Ponowne otwarcie sklepu to kolejna próba."
+
+msgid "games.bfheroes.notice"
+msgstr "Kreator bohaterów, miejsca na bohaterów, zmiany nazw, skrzynie skarbów i Funds:"
+
+msgid "games.bfheroes.notice.here"
+msgstr "Kreator bohaterów, miejsca na bohaterów, zmiany nazw, skrzynie skarbów i Funds są na stronie tego serwisu."

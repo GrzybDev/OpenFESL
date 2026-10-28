@@ -5,7 +5,7 @@ from urllib.parse import urlencode
 import pytest
 from heroes import MAGMA, wallets
 from store import CHEER, ITEMS, ROYAL_SOLDIER, grant, listed, offers, shopper, stock
-from support import fetch, visible
+from support import PUBLIC_URL, fetch, visible
 
 pytestmark = pytest.mark.anyio
 
@@ -176,3 +176,25 @@ async def test_a_hero_buys_in_the_game_store_and_a_refusal_spends_nothing(
     ]
     assert "Invented Coat Not owned" in clothing[0]
     assert "Invented Coat Equipped" in clothing[1]
+
+
+@pytest.fixture
+def public_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Before the server starts, which reads its address from the environment.
+    monkeypatch.setenv("PUBLIC_URL", PUBLIC_URL)
+
+
+@pytest.mark.usefixtures("public_url")
+async def test_the_ad_windows_name_where_the_site_is_instead_of_ads(server_url: str) -> None:
+    site = PUBLIC_URL.removeprefix("http://")
+    for window in ("footer", "popup", "loading", "eor"):
+        _, headers, body = await fetch(server_url, f"/en/game/{window}", MAGMA)
+        shown = visible(body)
+        assert f"renames, treasure chests and Funds: {site}/bfheroes" in shown
+        # The menus open them again and again, so the game keeps them a while.
+        assert headers["Cache-Control"] == "public, max-age=86400"
+    _, _, body = await fetch(server_url, "/pl/game/footer", MAGMA)
+    assert f"skrzynie skarbów i Funds: {site}/pl/bfheroes" in visible(body)
+    # The site has no pages in Brazilian Portuguese, which the game names br.
+    _, _, body = await fetch(server_url, "/br/game/footer", MAGMA)
+    assert f"renames, treasure chests and Funds: {site}/bfheroes" in visible(body)

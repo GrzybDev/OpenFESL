@@ -25,7 +25,7 @@ def inline(name: str) -> str:
     text = (FOLDER / name).read_text("utf-8")
     if not name.endswith(".css"):
         return text
-    # The game fetches every page anew through the hook.
+    # The game fetches every page anew through the hook, and the ad windows' pages stay small.
     text = _SPACE.sub(" ", _COMMENT.sub("", text))
     return _AROUND.sub(lambda found: found[1], text).strip()
 

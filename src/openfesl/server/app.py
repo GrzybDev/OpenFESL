@@ -21,6 +21,7 @@ from openfesl.web.game_http import GameHttpMiddleware
 from openfesl.web.languages import LanguageMiddleware
 from openfesl.web.magma import magma_app
 from openfesl.web.magma_heroes import hero_router
+from openfesl.web.magma_notices import notices_router
 from openfesl.web.magma_servers import servers_router
 from openfesl.web.magma_social import social_router
 from openfesl.web.magma_store import store_router
@@ -118,6 +119,7 @@ def _add_middleware(
                     services.item_writes,
                 ),
                 window_router(game, services.magma, services.windows, services.purchases),
+                notices_router(game, settings.public_url),
             ],
         )
         for game in games
