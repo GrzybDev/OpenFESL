@@ -5344,3 +5344,133 @@ msgstr ""
 
 msgid "games.bfheroes.personas.made"
 msgstr "Przed uruchomieniem Battlefield Heroes otwiera się okno logowania, w którym loguje się adresem e-mail i hasłem do gier tego konta."
+
+msgid "web.account.index.sign_in"
+msgstr "Logowanie"
+
+msgid "web.account.index.ways.one"
+msgstr "sposób logowania"
+
+msgid "web.account.index.ways.few"
+msgstr "sposoby logowania"
+
+msgid "web.account.index.ways.many"
+msgstr "sposobów logowania"
+
+msgid "web.account.index.ways.other"
+msgstr "sposobu logowania"
+
+msgid "web.account.security"
+msgstr "Logowanie i bezpieczeństwo"
+
+msgid "web.account.ways.one"
+msgstr "%(count)s sposób logowania"
+
+msgid "web.account.ways.few"
+msgstr "%(count)s sposoby logowania"
+
+msgid "web.account.ways.many"
+msgstr "%(count)s sposobów logowania"
+
+msgid "web.account.ways.other"
+msgstr "%(count)s sposobu logowania"
+
+msgid "web.account.ways.title"
+msgstr "Sposoby logowania"
+
+msgid "web.account.ways.note"
+msgstr ""
+"Każdy sposób logowania otwiera to samo konto, a ostatniego nie można usunąć."
+
+msgid "web.account.ways.last"
+msgstr "Nie można usunąć ostatniego sposobu logowania."
+
+msgid "web.account.password.set"
+msgstr "Ustawione · używają go"
+
+msgid "web.account.password.none"
+msgstr ""
+"Nie ustawiono · logowanie do %(games)s jest odrzucane, dopóki nie zostanie ustawione"
+
+msgid "web.account.password.change"
+msgstr "lub usuń hasło do gier"
+
+msgid "web.account.password.set_action"
+msgstr "Ustaw"
+
+msgid "web.account.password.set_hidden"
+msgstr "hasło do gier"
+
+msgid "web.account.password.current"
+msgstr "Obecne hasło do gier"
+
+msgid "web.account.password.current.note"
+msgstr "Hasło do gier używane teraz."
+
+msgid "web.account.password.new"
+msgstr "Nowe hasło do gier"
+
+msgid "web.account.password.new.note"
+msgstr ""
+"Od 8 do 31 znaków. Zmiana kończy logowania zapamiętane przez gry, więc każdy komputer raz poprosi o nowe hasło do gier."
+
+msgid "web.account.password.first.note"
+msgstr ""
+"Od 8 do 31 znaków. Logowanie do %(games)s będzie wtedy działać z adresem %(address)s i tym hasłem do gier, którym można też zalogować się tutaj."
+
+msgid "web.account.password.action"
+msgstr "Zapisz hasło do gier"
+
+msgid "web.account.password.remove"
+msgstr "Usuń hasło do gier"
+
+msgid "web.account.password.remove.note"
+msgstr ""
+"Logowanie do %(games)s będzie odrzucane, dopóki hasło do gier nie zostanie ustawione ponownie. Przed usunięciem pojawi się pytanie."
+
+msgid "web.account.password.last"
+msgstr ""
+"Hasło do gier jest ostatnim sposobem logowania. Można je usunąć po połączeniu usługi."
+
+msgid "web.account.password.remove.question"
+msgstr "Usunąć hasło do gier?"
+
+msgid "web.account.password.remove.text"
+msgstr ""
+"Logowanie do %(games)s będzie odrzucane, dopóki hasło do gier nie zostanie ustawione ponownie, a logowania zapamiętane przez gry się zakończą. Na tej stronie konto nadal loguje się przez %(services)s."
+
+msgid "web.account.password.remove.action"
+msgstr "Usuń"
+
+msgid "web.account.password.remove.busy"
+msgstr "Usuwanie"
+
+msgid "web.account.error.current_password.wrong"
+msgstr "To nie jest obecne hasło do gier tego konta."
+
+msgid "web.account.error.current_password.reset"
+msgstr "Zapomniane hasło można %(reset)s."
+
+msgid "web.account.error.current_password.reset.link"
+msgstr "zastąpić nowym przez e-mail"
+
+msgid "web.account.error.current_password.paused"
+msgstr ""
+"Kilka prób z nim się nie zgadzało, więc zmiana jest wstrzymana na kilka minut."
+
+msgid "web.account.toast.password_changed"
+msgstr "Zmieniono hasło do gier. Każdy komputer raz o nie poprosi."
+
+msgid "web.account.toast.password_set"
+msgstr ""
+"Ustawiono hasło do gier. Logowanie do %(games)s działa z adresem %(address)s i tym hasłem."
+
+msgid "web.account.toast.password_removed"
+msgstr "Usunięto hasło do gier; konto loguje się przez %(services)s."
+
+msgid "web.account.games.no_password"
+msgstr ""
+"%(game)s loguje się adresem e-mail i hasłem do gier, a to konto nie ma jeszcze hasła do gier."
+
+msgid "web.account.games.set_password"
+msgstr "Ustaw hasło do gier w sekcji Logowanie i bezpieczeństwo"

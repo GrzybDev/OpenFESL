@@ -1,10 +1,11 @@
 import httpx2
 import pytest
 from accounts import PASSWORD, execute, post_registration, post_sign_in
-from identity import form_token
-from support import FESL, Mailbox, cli, game, log_in_persona, login, markup
+from identity import IdentityProvider, form_token
+from support import FESL, Mailbox, cli, entitle_game, game, log_in_persona, login, markup
 
 from openfesl.core.games import load_games
+from openfesl.core.limits import FAILURES
 from openfesl.core.stats import bucket_of, partition_of
 from openfesl.protocol.rank import Period
 
@@ -95,3 +96,119 @@ async def test_an_account_that_has_not_opened_its_link_is_offered_a_new_one_once
         assert waits.headers["location"] == "/account#profile"
         assert "Another one can be sent from" in (await client.get(f"{base}/account")).text
         assert not mailbox.messages
+
+
+async def test_the_game_password_changes_with_the_current_one_and_goes_only_with_a_way_left(
+    services: tuple[IdentityProvider, IdentityProvider],
+    server_url: str,
+    database_url: str,
+    base: str,
+) -> None:
+    await execute(
+        database_url,
+        "UPDATE account SET display_name = 'Invented_Ann' WHERE nuid = 'ann@example.test'",
+    )
+    async with httpx2.AsyncClient() as client, httpx2.AsyncClient() as elsewhere:
+        await post_sign_in(client, base, "ann@example.test", PASSWORD)
+        await post_sign_in(elsewhere, base, "ann@example.test", PASSWORD)
+        page = await client.get(f"{base}/account")
+        assert "Set · used by" in markup(page.content)
+        form = {
+            "csrf": form_token(page.text),
+            "current_password": "wrong-pass",
+            "password": "short",
+        }
+        refused = await client.post(f"{base}/account/game-password", data=form)
+        assert refused.headers["location"] == "/account#sign-in"
+        page = await client.get(f"{base}/account")
+        assert "2 fields need a change." in page.text
+        assert "This is not the account&#39;s current game password." in page.text
+        assert "A game password has 8 to 31 characters; the one sent had 5." in page.text
+
+        # The other browser's session and the logins the game remembers end; this one stays.
+        async with game(server_url) as player:
+            await player.hello(FESL, "bfbc2-pc")
+            await player.request(
+                FESL, "acct", entitle_game("ann@example.test", PASSWORD, "ACTIVATE-GAME")
+            )
+            answer = await player.request(FESL, "acct", login("ann@example.test", PASSWORD))
+            token = answer["encryptedLoginInfo"]
+        changed = await client.post(
+            f"{base}/account/game-password",
+            data={**form, "current_password": PASSWORD, "password": "Kettle-Lamp-77"},
+        )
+        assert changed.headers["location"] == "/account#sign-in"
+        assert "Game password changed." in (await client.get(f"{base}/account")).text
+        assert (await elsewhere.get(f"{base}/account")).headers["location"].startswith("/sign-in")
+        async with game(server_url) as player:
+            await player.hello(FESL, "bfbc2-pc")
+            remembered = [
+                ("TXN", "NuLogin"),
+                ("returnEncryptedInfo", "0"),
+                ("encryptedInfo", token),
+            ]
+            assert (await player.request(FESL, "acct", remembered))["errorCode"] == "122"
+
+        # The game password is the last way in until a configured service is linked; an
+        # identity of a service the deployment no longer configures signs nothing in.
+        await execute(
+            database_url,
+            "INSERT INTO sign_in_identity (service, subject, account_id, name)"
+            " SELECT 'retired', 'r-ann', id, 'ann-retired' FROM account"
+            " WHERE nuid = 'ann@example.test'",
+        )
+        removal = {"csrf": form["csrf"], "confirmed": "1"}
+        kept = await client.post(f"{base}/account/game-password/remove", data=removal)
+        assert kept.headers["location"] == "/account#sign-in"
+        assert "The last way in cannot be removed." in (await client.get(f"{base}/account")).text
+        await execute(
+            database_url,
+            "INSERT INTO sign_in_identity (service, subject, account_id, name)"
+            " SELECT 'plain', '4711', id, 'ann-plain' FROM account WHERE nuid = 'ann@example.test'",
+        )
+        question = await client.get(f"{base}/account/game-password/remove")
+        assert "Remove the game password?" in question.text
+        removed = await client.post(f"{base}/account/game-password/remove", data=removal)
+        assert removed.headers["location"] == "/account#sign-in"
+        page = await client.get(f"{base}/account")
+        assert "Game password removed; the account signs in through Invented Plain." in page.text
+        assert "logins to Bad Company 2 and Heroes are refused until one is set" in page.text
+        async with game(server_url) as player:
+            await player.hello(FESL, "bfbc2-pc")
+            answer = await player.request(FESL, "acct", login("ann@example.test", "Kettle-Lamp-77"))
+            assert answer["errorCode"] == "122"
+
+        # Setting it again needs no current one.
+        set_again = await client.post(
+            f"{base}/account/game-password",
+            data={"csrf": form["csrf"], "password": "Lamp-Kettle-88"},
+        )
+        assert set_again.headers["location"] == "/account#sign-in"
+        assert "Game password set." in (await client.get(f"{base}/account")).text
+
+
+async def test_a_wrong_current_game_password_counts_toward_the_addresss_pause(
+    database_url: str, base: str
+) -> None:
+    await execute(
+        database_url,
+        "UPDATE account SET display_name = 'Invented_Bob' WHERE nuid = 'bob@example.test'",
+    )
+    async with httpx2.AsyncClient() as client:
+        await post_sign_in(client, base, "bob@example.test", PASSWORD)
+        page = await client.get(f"{base}/account")
+        form = {
+            "csrf": form_token(page.text),
+            "current_password": "wrong-pass",
+            "password": "Kettle-Lamp-77",
+        }
+        for _ in range(FAILURES):
+            await client.post(f"{base}/account/game-password", data=form)
+        await client.post(
+            f"{base}/account/game-password", data={**form, "current_password": PASSWORD}
+        )
+        assert (
+            "changing it is paused for a few minutes" in (await client.get(f"{base}/account")).text
+        )
+    async with httpx2.AsyncClient() as other:
+        assert (await post_sign_in(other, base, "bob@example.test", PASSWORD)).status_code == 429

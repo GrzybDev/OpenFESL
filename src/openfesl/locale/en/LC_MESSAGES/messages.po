@@ -5193,3 +5193,119 @@ msgstr ""
 
 msgid "games.bfheroes.personas.made"
 msgstr "Battlefield Heroes starts with a sign-in window, which signs in with this account's e-mail address and game password."
+
+msgid "web.account.index.sign_in"
+msgstr "Sign-in"
+
+msgid "web.account.index.ways.one"
+msgstr "way in"
+
+msgid "web.account.index.ways.other"
+msgstr "ways in"
+
+msgid "web.account.security"
+msgstr "Sign-in and security"
+
+msgid "web.account.ways.one"
+msgstr "%(count)s way in"
+
+msgid "web.account.ways.other"
+msgstr "%(count)s ways in"
+
+msgid "web.account.ways.title"
+msgstr "Ways in"
+
+msgid "web.account.ways.note"
+msgstr ""
+"Every way in opens the same account, and the last one cannot be removed."
+
+msgid "web.account.ways.last"
+msgstr "The last way in cannot be removed."
+
+msgid "web.account.password.set"
+msgstr "Set · used by"
+
+msgid "web.account.password.none"
+msgstr "Not set · logins to %(games)s are refused until one is set"
+
+msgid "web.account.password.change"
+msgstr "or remove the game password"
+
+msgid "web.account.password.set_action"
+msgstr "Set"
+
+msgid "web.account.password.set_hidden"
+msgstr "a game password"
+
+msgid "web.account.password.current"
+msgstr "Current game password"
+
+msgid "web.account.password.current.note"
+msgstr "The game password in use now."
+
+msgid "web.account.password.new"
+msgstr "New game password"
+
+msgid "web.account.password.new.note"
+msgstr ""
+"8 to 31 characters. A change ends the logins that games remember, so each PC asks for the new game password once."
+
+msgid "web.account.password.first.note"
+msgstr ""
+"8 to 31 characters. Logins to %(games)s then work with %(address)s and this game password, which signs in here too."
+
+msgid "web.account.password.action"
+msgstr "Save game password"
+
+msgid "web.account.password.remove"
+msgstr "Remove game password"
+
+msgid "web.account.password.remove.note"
+msgstr ""
+"Logins to %(games)s are refused until a game password is set again. Asks for confirmation first."
+
+msgid "web.account.password.last"
+msgstr ""
+"The game password is the last way in. It can be removed once a service is linked."
+
+msgid "web.account.password.remove.question"
+msgstr "Remove the game password?"
+
+msgid "web.account.password.remove.text"
+msgstr ""
+"Logins to %(games)s are refused until a game password is set again, and the logins that games remember end. The account keeps signing in on this site through %(services)s."
+
+msgid "web.account.password.remove.action"
+msgstr "Remove"
+
+msgid "web.account.password.remove.busy"
+msgstr "Removing"
+
+msgid "web.account.error.current_password.wrong"
+msgstr "This is not the account's current game password."
+
+msgid "web.account.error.current_password.reset"
+msgstr "A forgotten one can be %(reset)s."
+
+msgid "web.account.error.current_password.reset.link"
+msgstr "reset by e-mail"
+
+msgid "web.account.error.current_password.paused"
+msgstr ""
+"Several attempts with it did not match, so changing it is paused for a few minutes."
+
+msgid "web.account.toast.password_changed"
+msgstr "Game password changed. Each PC asks for it once."
+
+msgid "web.account.toast.password_set"
+msgstr "Game password set. Logins to %(games)s work with %(address)s and it."
+
+msgid "web.account.toast.password_removed"
+msgstr "Game password removed; the account signs in through %(services)s."
+
+msgid "web.account.games.no_password"
+msgstr ""
+"%(game)s logs in with the e-mail address and a game password, and this account has no game password yet."
+
+msgid "web.account.games.set_password"
+msgstr "Set a game password under Sign-in and security"

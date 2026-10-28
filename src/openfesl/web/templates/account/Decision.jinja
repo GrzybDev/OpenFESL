@@ -1,0 +1,21 @@
+{#def name: str, question: str, text: str, action: str, label: str, busy: str, back: str #}
+{# A change to the account that asks first, as a page of its own: the question and what the change
+   does. Where scripts run, its panel opens as a dialog over the account page. #}
+{% set title = _("web.account.page") %}
+<Layout :title="title" page="account">
+  <PageHead labelledby="decision-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="decision-title">{{ name }}</TitleBlock>
+    </div>
+  </PageHead>
+  <Panel class="enter-panel confirm-frame">
+    <Confirmation :question="question"
+                  :action="action"
+                  :label="label"
+                  :busy="busy"
+                  :back="back"
+                  glyph="x">
+      <p id="confirm-text" class="body-text">{{ text }}</p>
+    </Confirmation>
+  </Panel>
+</Layout>

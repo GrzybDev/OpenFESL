@@ -146,7 +146,15 @@ class GameServices:
             stores.accounts, stores.accounts, logins, outbox, mailings, attempts
         )
         app.state.display_names = DisplayNames(stores.accounts, stores.personas, games)
-        app.state.account_management = AccountManagement(stores.accounts, stores.personas, games)
+        app.state.account_management = AccountManagement(
+            stores.accounts,
+            stores.identities,
+            stores.personas,
+            logins,
+            attempts,
+            games,
+            [service.id for service in settings.sign_in_services],
+        )
         app.state.registration = WebRegistration(
             stores.accounts,
             stores.identities,

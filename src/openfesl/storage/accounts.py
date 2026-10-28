@@ -365,6 +365,23 @@ class SqlAccountStore:
         async with self._sessions.begin() as session:
             await _set_password(session, account_id, password_hash)
 
+    async def remove_password(self, account_id: int, services: Collection[str]) -> bool:
+        """Remove an account's password, ending its web sessions and remembered logins.
+
+        Args:
+            account_id: The account.
+            services: The ids of the configured sign-in services, whose identities alone sign in.
+
+        Returns:
+            Whether it was removed, which it is not while no identity at a configured sign-in
+            service is linked to the account, as the password is then its last way in.
+        """
+        async with self._sessions.begin() as session:
+            if not await lock_ways_in(session, account_id, services):
+                return False
+            await _set_password(session, account_id, None)
+        return True
+
     async def keep_reset(self, account_id: int, link: Link) -> None:
         """Keep a reset link, which replaces the account's earlier one.
 
@@ -569,8 +586,33 @@ class SqlAccountStore:
             session.add(action_row(AdminAction.ACCOUNT_VERIFIED, str(account_id), {}, admin))
 
 
+async def lock_ways_in(session: AsyncSession, account_id: int, services: Collection[str]) -> bool:
+    """Lock an account's ways in and return whether an identity at a sign-in service is one.
+
+    The lock makes concurrent changes to the same account's ways in wait for each other, so
+    that two of them cannot together leave it without one.
+
+    Args:
+        session: The transaction that changes them.
+        account_id: The account.
+        services: The ids of the configured sign-in services, whose identities alone sign in.
+    """
+    await session.execute(
+        select(AccountRow.id).where(AccountRow.id == account_id).with_for_update()
+    )
+    linked = await session.scalar(
+        select(
+            exists().where(
+                SignInIdentityRow.account_id == account_id,
+                SignInIdentityRow.service.in_(services),
+            )
+        )
+    )
+    return bool(linked)
+
+
 async def _set_password(
-    session: AsyncSession, account_id: int, password_hash: str, **values: object
+    session: AsyncSession, account_id: int, password_hash: str | None, **values: object
 ) -> None:
     await session.execute(
         update(AccountRow)

@@ -1,0 +1,103 @@
+{#def overview, said: dict, errors: dict, games: list, services: list, mail: bool #}
+{# The account page's sign-in and security: the ways in, the first of which is the game password.
+   Its fold sets it or changes it with the current one, and leads to its removal, which asks
+   first and is offered only while a linked service stays a way in. #}
+{% set form = said.get("form") %}
+{% set notice = said.get("notice") %}
+{% set password_errors = errors if form == "password" else {} %}
+{% set used = listed(games) %}
+{% set fields = [("current_password", "current-password", _("web.account.password.current")), ("password", "new-password", _("web.account.password.new") if overview.password else _("web.account.password"))] %}
+<AccountPart id="sign-in" :title="_('web.account.security')" :extra="_n('web.account.ways', overview.ways_in)">
+{% if notice == "form" %}
+  <Alert :label="_('web.account.notice.not_saved')" :title="_('web.account.notice.form')" glyph="warn" alert>{{ _("web.account.notice.form.text") }}</Alert>
+{% elif notice == "last" %}
+  <Alert :label="_('web.account.notice.not_saved')" :title="_('web.account.ways.last')" glyph="warn" alert />
+{% elif password_errors %}
+  <ErrorSummary :label="_('web.account.notice.not_saved')" :count="password_errors|length">
+  {% for field, id, label in fields if field in password_errors %}
+    <li>
+      <a href="#{{ id }}">{{ label }}</a>
+    </li>
+  {% endfor %}
+  </ErrorSummary>
+{% endif %}
+<div class="account-sides">
+  <section aria-labelledby="ways-title" class="account-side security-ways">
+    <Bar tag="h3" id="ways-title">{{ _("web.account.ways.title") }}</Bar>
+    <ul aria-labelledby="ways-title" class="ways">
+      <li>
+        <details {% if form == "password" %}open{% endif %} class="fold account-fold">
+          <summary class="way">
+            <span aria-hidden="true" class="badge way-glyph"><Icon name="key" :size="22" stroke="#0A0A0A" /></span>
+            <span class="way-text">
+              <span class="way-name">{{ _("web.account.password") }}</span>
+              {% if overview.password %}
+                <span class="way-state">{{ _("web.account.password.set") }}
+                  {% for game in overview.games %}
+                    <GameChip :of="game.game" />
+                  {% endfor %}
+                </span>
+              {% else %}
+                <span class="way-state">{{ _("web.account.password.none", games=used) }}</span>
+              {% endif %}
+            </span>
+            {% if overview.password %}
+              <span class="account-change">{{ _("web.account.change") }}<span class="sr-only"> {{ _("web.account.password.change") }}</span><Icon name="caret" :size="14" class="fold-chevron" /></span>
+            {% else %}
+              <span class="account-change">{{ _("web.account.password.set_action") }}<span class="sr-only"> {{ _("web.account.password.set_hidden") }}</span><Icon name="caret" :size="14" class="fold-chevron" /></span>
+            {% endif %}
+          </summary>
+          <AccountForm action="/account/game-password" part="sign-in">
+          {% if overview.password %}
+            {% set current_error %}
+              {%- if ["current_password", "wrong", ""] in said.get("problems", []) -%}
+                {% set reset %}<a href="{{ url('/password-reset') }}">{{ _("web.account.error.current_password.reset.link") }}</a>{% endset %}
+                {{ _("web.account.error.current_password.wrong") }}{% if mail %} {{ _("web.account.error.current_password.reset", reset=reset) }}{% endif %}
+              {%- else -%}
+                {{ password_errors.get('current_password', '') }}
+              {%- endif -%}
+            {% endset %}
+            <PasswordField id="current-password"
+                           name="current_password"
+                           :label="_('web.account.password.current')"
+                           note="current-password-note"
+                           :error="current_error|trim">
+              <div class="field-note password-note">
+                <p id="current-password-note">{{ _("web.account.password.current.note") }}</p>
+                {% if mail %}<a href="{{ url('/password-reset') }}">{{ _("web.account.sign_in.forgotten") }}</a>{% endif %}
+              </div>
+            </PasswordField>
+          {% endif %}
+          <PasswordField id="new-password"
+                         :label="_('web.account.password.new') if overview.password else _('web.account.password')"
+                         note="new-password-note"
+                         :error="password_errors.get('password', '')"
+                         new>
+            <p id="new-password-note" class="field-note">{{ _("web.account.password.new.note" if overview.password else "web.account.password.first.note", games=used, address=overview.account.nuid) }}</p>
+          </PasswordField>
+          <SmallAction :label="_('web.account.password.action')" :busy="_('web.account.display_name.busy')" />
+          </AccountForm>
+          {% if overview.password and (overview.linked or services) %}
+            <div class="way-remove">
+              {% if overview.ways_in > 1 %}
+                <FormButton icon="x" :href="url('/account/game-password/remove')" dialog>{{ _("web.account.password.remove") }}</FormButton>
+                <p class="body-text">{{ _("web.account.password.remove.note", games=used) }}</p>
+              {% else %}
+                <button type="button"
+                        disabled
+                        aria-describedby="password-last"
+                        class="form-button">
+                  <span aria-hidden="true"
+                        class="form-glyph"><Icon name="x" :size="14" stroke="#F4F4EE" /></span>{{ _("web.account.password.remove") }}
+                </button>
+                <p id="password-last" class="body-text">{{ _("web.account.password.last") }}</p>
+              {% endif %}
+            </div>
+          {% endif %}
+        </details>
+      </li>
+    </ul>
+    <p class="body-text side-note">{{ _("web.account.ways.note") }}</p>
+  </section>
+</div>
+</AccountPart>

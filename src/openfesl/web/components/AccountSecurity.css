@@ -1,0 +1,91 @@
+/* The account page's ways in: rows of alternating shades, each with its glyph's badge, its name and
+   state, and the button that changes or unlinks it; the game password's row opens its forms. */
+@layer components {
+  .security-ways {
+    flex: 999 1 620px;
+  }
+
+  .ways {
+    display: grid;
+    gap: 2px;
+    margin-top: 2px;
+
+    .account-form {
+      padding: 10px 0 4px;
+    }
+  }
+
+  .way {
+    display: flex;
+    min-height: 60px;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    background: var(--row);
+    padding: 8px;
+    color: var(--ink);
+
+    li:nth-child(even) > &,
+    li:nth-child(even) > details > & {
+      background: var(--row-alt);
+    }
+  }
+
+  .way-glyph.badge {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    place-items: center;
+    border: 1px solid var(--badge-edge);
+    background: var(--badge);
+  }
+
+  .way-text {
+    display: grid;
+    min-width: 0;
+    flex: 1 1 260px;
+    gap: 4px;
+  }
+
+  .way-name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    font-size: 17px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .way-state {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.3;
+    font-weight: 500;
+  }
+
+  .way-remove {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    padding: 10px 0 4px;
+
+    p {
+      flex: 1 1 300px;
+      color: var(--soft);
+    }
+
+    .form-button:disabled {
+      opacity: 0.62;
+      cursor: not-allowed;
+    }
+  }
+}

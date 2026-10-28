@@ -20,6 +20,7 @@ from openfesl.core.texts import localize, translate
 from openfesl.core.verification import VALID_FOR
 from openfesl.protocol.rank import Period
 from openfesl.web.account.fields import field_errors
+from openfesl.web.account.services import SignInServices
 from openfesl.web.account.session import DISPLAY_NAME, open_page, shown, signed_in
 from openfesl.web.account.sign_in import password_games
 from openfesl.web.pages import Pages, Toast
@@ -98,6 +99,7 @@ class AccountPages:
         accounts: Callable[[int], Awaitable[Account | None]],
         management: Callable[[], AccountManagement],
         sign_in: Callable[[], WebSignIn],
+        services: SignInServices,
         policies: GamePolicies,
         rankings: RankingStore,
         terms: Terms,
@@ -112,6 +114,7 @@ class AccountPages:
             accounts: Returns an account by its number.
             management: Returns the account management, once the application has started.
             sign_in: Returns the site's sign-in, which sends new confirmation links.
+            services: The sign-in services, which the page offers to link.
             policies: The site's and each game's policies, which say whether an account waits
                 for its confirmation link.
             rankings: The players' stats, whose ranks and scores the page shows.
@@ -125,6 +128,7 @@ class AccountPages:
         self._accounts = accounts
         self._management = management
         self._sign_in = sign_in
+        self._services = services
         self._policies = policies
         self._rankings = rankings
         self._terms = terms
@@ -222,6 +226,8 @@ class AccountPages:
             check=self._turnstile.site_key if self._turnstile and waiting and self._mail else "",
             accepted=account.terms_version == self._terms.version,
             password_games=password_games(self._games, language),
+            game_names=[translate(f"games.{game.id}.short", language) for game in self._games],
+            services=self._services.views(language),
             personas=[translate(f"games.{game.id}.personas", language) for game in self._games],
             failed=Toast("web.toast.failed", {}, error=True),
         )

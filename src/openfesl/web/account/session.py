@@ -63,6 +63,16 @@ def landing(request: Request, account: Account, back: str) -> RedirectResponse:
     return RedirectResponse(back or localize("/account", request.state.language), 303)
 
 
+def renew(request: Request, epoch: int) -> None:
+    """Keep this browser signed in after a change that ended the account's other sessions.
+
+    Args:
+        request: The request that made the change.
+        epoch: The account's session epoch since the change.
+    """
+    request.session[PLAYER] = {**request.session[PLAYER], "epoch": epoch}
+
+
 def end(request: Request) -> None:
     """Sign the account out of the site's pages in this browser.
 

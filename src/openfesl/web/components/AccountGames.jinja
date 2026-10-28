@@ -1,7 +1,7 @@
-{#def games: list #}
+{#def games: list, password: bool #}
 {# The account page's games: every game on this site with the names the account plays under there,
    each with its rank and score and a link to its player page where the game has a leaderboard,
-   and where the game makes them. #}
+   where the game makes them and, while the account has no game password, that games need one. #}
 {% set played = namespace(counts=[]) %}
 {% for game, lines in games if lines %}
   {% set played.counts = played.counts + [_n("games." ~ game.id ~ ".personas.count", lines|length)] %}
@@ -35,6 +35,10 @@
             </li>
           {% endfor %}
         </ul>
+      {% endif %}
+      {% if not password %}
+        <p class="bar-text body-text">{{ _("web.account.games.no_password", game=_("games." ~ game.id ~ ".short")) }}</p>
+        <RowLink href="#sign-in" :label="_('web.account.games.set_password')" />
       {% endif %}
       <p class="body-text side-note">{{ _("games." ~ game.id ~ ".personas.made") }}</p>
     </section>

@@ -69,6 +69,10 @@
       margin-top: 2px;
     }
 
+    > .field-label ~ .field-label {
+      margin-top: 10px;
+    }
+
     .small-action {
       justify-self: start;
       margin-top: 6px;

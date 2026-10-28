@@ -1,6 +1,7 @@
 import logging
 import re
 import secrets
+from collections.abc import Collection
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import StrEnum
@@ -262,6 +263,18 @@ class AccountStore(Protocol):
         Args:
             account_id: The account.
             password_hash: The new password's hash.
+        """
+
+    async def remove_password(self, account_id: int, services: Collection[str]) -> bool:
+        """Remove an account's password, ending its web sessions and remembered logins.
+
+        Args:
+            account_id: The account.
+            services: The ids of the configured sign-in services, whose identities alone sign in.
+
+        Returns:
+            Whether it was removed, which it is not while no identity at a configured sign-in
+            service is linked to the account, as the password is then its last way in.
         """
 
     async def change_country(self, account_id: int, country: str) -> None:
