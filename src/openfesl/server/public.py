@@ -76,6 +76,11 @@ def include_public_routes(
     app.include_router(verification_routes(confirm, pages))
     app.include_router(launcher_routes(lambda: app.state.launcher))
     sign_in = SignInPages(
-        pages, games, services.policies, lambda: app.state.sign_in, settings.sends_mail
+        pages,
+        games,
+        services.policies,
+        lambda: app.state.sign_in,
+        settings.sends_mail,
+        settings.turnstile,
     )
     app.include_router(sign_in.routes())

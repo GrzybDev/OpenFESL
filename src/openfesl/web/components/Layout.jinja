@@ -1,4 +1,4 @@
-{#def title: str | None = None, page: str = "", admin: bool = False #}
+{#def title: str | None = None, page: str = "", admin: bool = False, turnstile: bool = False #}
 {# The shell around every page: the bar with OpenFESL's games, languages and the account entry,
    the area dressed in the page's game or OpenFESL's steel, and the footer. The admin panel's bar
    names the panel in place of the games and keeps its own sign-in. #}
@@ -27,6 +27,12 @@
           content='{"includeIndicatorCSS": false, "noSwap": [204, 304, "4xx", "5xx"], "morphIgnore": ["data-htmx-powered", "style", "data-open", "aria-expanded", "open"]}'>
     {% if assets.head %}<script src="{{ assets.head }}"></script>{% endif %}
     {% if assets.app %}<script type="module" src="{{ assets.app }}"></script>{% endif %}
+    {# Cloudflare's check, only on the pages whose forms it guards. #}
+    {% if turnstile %}
+      <script src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+              async
+              defer></script>
+    {% endif %}
   </head>
   <body>
     <a href="#area" class="skip-link">{{ _("web.shell.skip") }}</a>

@@ -1,0 +1,9 @@
+{#def key: str #}
+{# Cloudflare Turnstile's check above a form's button, which tells people from automated requests.
+   Cloudflare's script, which the layout loads on such pages, draws its widget here. #}
+<div class="turnstile">
+  <div class="cf-turnstile"
+       data-sitekey="{{ key }}"
+       data-language="{{ language }}"
+       data-theme="light"></div>
+</div>

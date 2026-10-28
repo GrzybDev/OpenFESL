@@ -8,6 +8,7 @@ from pydantic_settings import BaseSettings
 from sqlalchemy.engine import make_url
 
 from openfesl.core.connection import Address
+from openfesl.web.turnstile import Turnstile
 
 # A Discord application's id, a snowflake of up to 20 digits.
 type ApplicationId = Annotated[str, StringConstraints(pattern=r"^[0-9]{1,20}$")]
@@ -64,6 +65,10 @@ class Settings(BaseSettings):
         discord_application_id: The id of the Discord application whose Rich Presence shows
             what players do in their games, sent to the hooks that ask for it; without one no
             presence is sent.
+        turnstile_site_key: The site key of Cloudflare Turnstile, whose check guards the forms
+            that take an e-mail address or send mail; without it and the secret key no form is
+            checked.
+        turnstile_secret_key: The secret key of Cloudflare Turnstile.
     """
 
     database_url: str
@@ -87,6 +92,8 @@ class Settings(BaseSettings):
     admin_group: str | None = None
     moderator_group: str | None = None
     discord_application_id: ApplicationId | None = None
+    turnstile_site_key: str | None = None
+    turnstile_secret_key: SecretStr | None = None
 
     @field_validator("database_url")
     @classmethod
@@ -107,6 +114,14 @@ class Settings(BaseSettings):
     def sends_mail(self) -> bool:
         """Whether the server sends mail, which needs a mail server, a sender and a public URL."""
         return bool(self.smtp_host and self.smtp_sender and self.public_url)
+
+    @property
+    def turnstile(self) -> Turnstile | None:
+        """Cloudflare Turnstile's check of the forms, which needs its site key and secret key."""
+        secret = self.turnstile_secret_key
+        if not (self.turnstile_site_key and secret):
+            return None
+        return Turnstile(self.turnstile_site_key, secret.get_secret_value(), self.client_address)
 
     def client_address(self, connection: HTTPConnection) -> Address | None:
         """Return the address of the client behind a request or WebSocket.

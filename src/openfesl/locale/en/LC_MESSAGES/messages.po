@@ -4244,6 +4244,12 @@ msgstr "Public"
 msgid "web.account.how.public.text"
 msgstr "Profiles, leaderboards and friends lists show only the display name. The e-mail address and the ways in stay private."
 
+msgid "web.account.how.check"
+msgstr "Cloudflare check"
+
+msgid "web.account.how.check.text"
+msgstr "The e-mail sign-in, registration, reset and new-link forms use Cloudflare Turnstile to tell people from automated requests."
+
 msgid "web.account.notice.not_signed_in"
 msgstr "Not signed in"
 
@@ -4258,6 +4264,9 @@ msgstr "A forgotten game password can be %(reset)s."
 
 msgid "web.account.notice.wrong.reset.link"
 msgstr "reset by e-mail"
+
+msgid "web.account.notice.check"
+msgstr "The check did not pass. Try again."
 
 msgid "web.account.notice.paused"
 msgstr "Paused"

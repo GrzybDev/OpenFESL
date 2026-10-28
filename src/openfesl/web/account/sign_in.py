@@ -13,6 +13,7 @@ from openfesl.core.verification import VALID_FOR
 from openfesl.web.account.session import end, signed_in, start
 from openfesl.web.pages import Pages
 from openfesl.web.sessions import form_matches, form_token, inside, notify, take_notice
+from openfesl.web.turnstile import Turnstile
 
 # Every page of the site, in any language, which a sign-in may return to.
 SITE = ("/",)
@@ -35,6 +36,7 @@ class SignInPages:
         policies: GamePolicies,
         sign_in: Callable[[], WebSignIn],
         mail: bool,
+        turnstile: Turnstile | None,
     ) -> None:
         """Prepare the sign-in pages.
 
@@ -44,12 +46,15 @@ class SignInPages:
             policies: The site's policies, which decide whether registration needs mail.
             sign_in: Returns the sign-in checks, once the application has started.
             mail: Whether the server sends mail, which registration and resets need.
+            turnstile: Cloudflare's check of the forms that take an address; None when the
+                deployment sets none up.
         """
         self._pages = pages
         self._games = games
         self._policies = policies
         self._sign_in = sign_in
         self._mail = mail
+        self._turnstile = turnstile
 
     def routes(self) -> APIRouter:
         """Return the sign-in page and the forms that sign in and out."""
@@ -69,6 +74,8 @@ class SignInPages:
             if not form_matches(request, form):
                 return _again(request, back, "form")
             address = str(form.get("email", "")).strip()
+            if self._turnstile and not await self._turnstile.passed(request, form):
+                return await self._render(request, back, {"kind": "check"}, address, 400)
             try:
                 account = await self._sign_in().with_password(
                     address, str(form.get("password", ""))
@@ -100,7 +107,7 @@ class SignInPages:
     ) -> HTMLResponse:
         language = request.state.language
         registration = self._mail or not await self._policies.site_confirmation()
-        return self._pages.render(
+        page = self._pages.render(
             request,
             "account.SignIn",
             status,
@@ -109,6 +116,7 @@ class SignInPages:
             next=back,
             notice=notice,
             address=address,
+            check=self._turnstile.site_key if self._turnstile else "",
             mail=self._mail,
             registration=registration,
             password_games=[
@@ -120,6 +128,9 @@ class SignInPages:
                 translate(f"games.{game.id}.personas.kept", language) for game in self._games
             ],
         )
+        if self._turnstile:
+            self._turnstile.allow(page)
+        return page
 
 
 def _refusal_notice(refused: SignInRefused) -> dict[str, Any]:

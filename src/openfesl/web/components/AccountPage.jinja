@@ -1,7 +1,7 @@
-{#def title: str, subtitle: str, page: str = "sign_in" #}
+{#def title: str, subtitle: str, page: str = "sign_in", turnstile: bool = False #}
 {# A page of the site's accounts in OpenFESL's steel: the title block, then the page's panel
    column and the column beside it that the content gives, the panel first on phones. #}
-<Layout :title="title" :page="page">
+<Layout :title="title" :page="page" :turnstile="turnstile">
   <PageHead labelledby="account-title">
     <div class="enter-title page-title">
       <TitleBlock :title="title" id="account-title">{{ subtitle }}</TitleBlock>

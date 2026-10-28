@@ -1,13 +1,20 @@
+import asyncio
 from collections.abc import AsyncIterator
 
 import httpx2
 import pytest
+import uvicorn
 from identity import form_token
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
+from starlette.applications import Starlette
+from starlette.requests import Request
+from starlette.responses import JSONResponse, Response
+from starlette.routing import Route
 from support import FESL, Game, cli, game, markup, registration
 
 from openfesl.core.limits import FAILURES, Attempts
+from openfesl.web import turnstile as turnstile_module
 
 pytestmark = pytest.mark.anyio
 
@@ -177,3 +184,60 @@ def test_a_paused_address_resumes_once_its_oldest_failure_is_old_enough() -> Non
         True,
         False,
     )
+
+
+@pytest.fixture
+async def turnstile(monkeypatch: pytest.MonkeyPatch) -> AsyncIterator[list[dict[str, str]]]:
+    # Cloudflare's siteverify, which passes the token "passed"; set before the server starts.
+    checked: list[dict[str, str]] = []
+
+    async def siteverify(request: Request) -> Response:
+        form = {key: str(value) for key, value in (await request.form()).items()}
+        checked.append(form)
+        return JSONResponse({"success": form.get("response") == "passed"})
+
+    app = Starlette(routes=[Route("/siteverify", siteverify, methods=["POST"])])
+    server = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=0, log_level="warning"))
+    task = asyncio.create_task(server.serve())
+    while not server.started:
+        await asyncio.sleep(0.01)
+    port = server.servers[0].sockets[0].getsockname()[1]
+    monkeypatch.setattr(turnstile_module, "SITEVERIFY", f"http://127.0.0.1:{port}/siteverify")
+    monkeypatch.setenv("TURNSTILE_SITE_KEY", "invented-site-key")
+    monkeypatch.setenv("TURNSTILE_SECRET_KEY", "invented-secret-key")
+    yield checked
+    server.should_exit = True
+    await task
+
+
+async def test_the_cloudflare_check_guards_the_password_form_before_anything_is_counted(
+    turnstile: list[dict[str, str]], base: str
+) -> None:
+    async with httpx2.AsyncClient() as client:
+        page = await client.get(f"{base}/sign-in")
+        assert 'data-sitekey="invented-site-key"' in page.text
+        assert "Cloudflare Turnstile to tell people from automated requests" in page.text
+        policy = page.headers["content-security-policy"]
+        assert "script-src 'self' https://challenges.cloudflare.com;" in policy
+        assert "frame-src https://challenges.cloudflare.com" in policy
+        assert (
+            "challenges.cloudflare.com"
+            not in (await client.get(f"{base}/terms")).headers["content-security-policy"]
+        )
+
+        for token in ["", *["failed"] * FAILURES]:
+            refused = await post_sign_in(
+                client, base, "ann@example.test", "wrong-pass", **{"cf-turnstile-response": token}
+            )
+            assert refused.status_code == 400
+            assert "The check did not pass. Try again." in refused.text
+        passed = await post_sign_in(
+            client, base, "ann@example.test", PASSWORD, **{"cf-turnstile-response": "passed"}
+        )
+        assert passed.status_code == 303
+    # Cloudflare compares the token with the address of the client that passed the check.
+    assert turnstile[-1] == {
+        "secret": "invented-secret-key",
+        "response": "passed",
+        "remoteip": "127.0.0.1",
+    }

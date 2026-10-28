@@ -1,4 +1,5 @@
 from starlette.datastructures import MutableHeaders
+from starlette.responses import Response
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 # Every script, style and font comes from this server, so an injected tag cannot run, and no
@@ -12,6 +13,24 @@ HEADERS = {
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "same-origin",
 }
+
+
+def allow(response: Response, directive: str, source: str) -> None:
+    """Widen a directive of a page's policy to another source, adding the directive if needed.
+
+    Args:
+        response: The page.
+        directive: The directive, such as script-src.
+        source: The source it allows too, such as an origin.
+    """
+    policy = response.headers.get("Content-Security-Policy", HEADERS["Content-Security-Policy"])
+    parts = policy.split("; ")
+    found = [index for index, part in enumerate(parts) if part.split(" ", 1)[0] == directive]
+    if found:
+        parts[found[0]] += f" {source}"
+    else:
+        parts.append(f"{directive} {source}")
+    response.headers["Content-Security-Policy"] = "; ".join(parts)
 
 
 class SecurityHeadersMiddleware:

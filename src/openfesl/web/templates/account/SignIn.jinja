@@ -1,10 +1,12 @@
-{#def next: str, notice, address: str, mail: bool, registration: bool, password_games: list, personas: list #}
+{#def next: str, notice, address: str, check: str, mail: bool, registration: bool, password_games: list, personas: list #}
 {# The site's sign-in: the e-mail address and game password under what happened at the last
    attempt, and beside them the way to a new account and how accounts work. #}
 {% set title = _("web.account.sign_in") %}
 {% set games = listed(password_games) %}
 {% set query = "?next=" ~ next|urlencode if next else "" %}
-<AccountPage :title="title" :subtitle="_('web.account.sign_in.subtitle')">
+<AccountPage :title="title"
+             :subtitle="_('web.account.sign_in.subtitle')"
+             :turnstile="check != ''">
   <div class="account-page-main">
     <Panel tag="section"
            aria-labelledby="sign-in-email"
@@ -14,6 +16,8 @@
         {% if kind == "wrong" %}
           {% set reset %}<a href="{{ url('/password-reset') }}">{{ _("web.account.notice.wrong.reset.link") }}</a>{% endset %}
           <Alert :label="_('web.account.notice.not_signed_in')" :title="_('web.account.notice.wrong')" glyph="warn" alert>{{ _("web.account.notice.wrong.text") }}{% if mail %} {{ _("web.account.notice.wrong.reset", reset=reset) }}{% endif %}</Alert>
+        {% elif kind == "check" %}
+          <Alert :label="_('web.account.notice.not_signed_in')" :title="_('web.account.notice.check')" glyph="warn" alert>{{ _("web.account.notice.wrong.text") }}</Alert>
         {% elif kind == "paused" %}
           <Alert :label="_('web.account.notice.paused')" :title="_('web.account.notice.paused.title')" glyph="clock" alert>{{ _("web.account.notice.paused.text") }}{% if mail %} {{ _("web.account.notice.paused.reset") }}{% endif %}</Alert>
         {% elif kind == "unconfirmed" %}
@@ -52,6 +56,7 @@
             {% if mail %}<a href="{{ url('/password-reset') }}">{{ _("web.account.sign_in.forgotten") }}</a>{% endif %}
           </div>
         </PasswordField>
+        {% if check %}<TurnstileCheck :key="check" />{% endif %}
         <ActionButton :label="_('web.account.sign_in.action')" :busy="_('web.account.sign_in.busy')" />
       </form>
     </Panel>
@@ -76,6 +81,9 @@
         <InfoRow glyph="key" :label="_('web.account.how.ways')">{{ _("web.account.how.ways.text", games=games) }}</InfoRow>
         <InfoRow glyph="people" :label="_('web.account.how.personas')">{{ _("web.account.how.personas.text", personas=listed(personas)) }}</InfoRow>
         <InfoRow glyph="show" :label="_('web.account.how.public')">{{ _("web.account.how.public.text") }}</InfoRow>
+        {% if check %}
+          <InfoRow glyph="shield-check" :label="_('web.account.how.check')">{{ _("web.account.how.check.text") }}</InfoRow>
+        {% endif %}
       </ul>
     </section>
   </div>

@@ -1,0 +1,10 @@
+/* The place of Cloudflare's 300 × 65 widget on the light row above a form's button. */
+@layer components {
+  .turnstile {
+    width: 300px;
+    max-width: 100%;
+    min-height: 65px;
+    margin-top: 14px;
+    background: var(--row-light);
+  }
+}

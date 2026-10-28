@@ -4368,6 +4368,12 @@ msgstr "Publiczne"
 msgid "web.account.how.public.text"
 msgstr "Profile, rankingi i listy znajomych pokazują tylko nazwę wyświetlaną. Adres e-mail i sposoby logowania pozostają prywatne."
 
+msgid "web.account.how.check"
+msgstr "Kontrola Cloudflare"
+
+msgid "web.account.how.check.text"
+msgstr "Formularze logowania adresem e-mail, rejestracji, nowego hasła do gier i nowego linku używają Cloudflare Turnstile, aby odróżnić ludzi od zautomatyzowanych żądań."
+
 msgid "web.account.notice.not_signed_in"
 msgstr "Nie zalogowano"
 
@@ -4382,6 +4388,9 @@ msgstr "Zapomniane hasło do gier można %(reset)s."
 
 msgid "web.account.notice.wrong.reset.link"
 msgstr "zastąpić nowym przez e-mail"
+
+msgid "web.account.notice.check"
+msgstr "Kontrola nie została zaliczona. Spróbuj ponownie."
 
 msgid "web.account.notice.paused"
 msgstr "Wstrzymane"
