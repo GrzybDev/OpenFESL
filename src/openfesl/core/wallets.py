@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
+from openfesl.core.admins import Admin
 from openfesl.core.games import Credits, Game, Scope
 from openfesl.core.personas import Persona
 
@@ -154,6 +155,25 @@ class WalletLedgers(Protocol):
 
         Args:
             wallets: The wallets.
+        """
+
+    async def change(
+        self, wallet: Wallet, amount: int, hero: str | None, note: str, admin: Admin
+    ) -> tuple[int, bool]:
+        """Grant to a wallet or take from it, opening it first with its allowance.
+
+        The balance, its ledger entry and the admin's log change together, and only while the
+        balance stays between 0 and the most a game holds.
+
+        Args:
+            wallet: The wallet.
+            amount: What to add, below 0 to take.
+            hero: The name of the hero whose own wallet it is, which the log keeps.
+            note: Why, as the admin wrote it.
+            admin: The admin who changed it.
+
+        Returns:
+            The balance before, and whether it changed.
         """
 
 

@@ -1,14 +1,24 @@
 from collections.abc import Collection, Sequence
 from typing import Any
 
-from sqlalchemy import Row, Select, and_, func, select
+from sqlalchemy import Row, Select, and_, func, select, update
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from openfesl.core.wallets import Ledger, LedgerEntry, Wallet, WalletHead
-from openfesl.storage.models import PurchaseRow, WalletEntryRow, WalletRow
+from openfesl.core.admin import AdminAction
+from openfesl.core.admins import Admin
+from openfesl.core.wallets import MOST_BALANCE, Ledger, LedgerEntry, Wallet, WalletHead
+from openfesl.storage.admin import action_row
+from openfesl.storage.models import AdminActionRow, PurchaseRow, WalletEntryRow, WalletRow
 from openfesl.storage.purchases import PURCHASE
-from openfesl.storage.wallets import matching
+from openfesl.storage.wallets import ADMIN, locked, matching
 
+# An admin's grant or take is logged with the number of its ledger entry.
+_GRANTED = and_(
+    WalletEntryRow.reason == ADMIN,
+    AdminActionRow.action == AdminAction.WALLET_CHANGE,
+    AdminActionRow.details["entry"].as_integer() == WalletEntryRow.id,
+)
 # A purchase and the change of its wallet that paid it are written in one transaction, whose
 # start both take as their time, so the time ties a purchase to its ledger entry.
 _PAID = and_(
@@ -20,7 +30,7 @@ _PAID = and_(
 
 
 class SqlLedgerStore:
-    """The wallets' ledgers in PostgreSQL, as the admin panel reads them."""
+    """The wallets' ledgers in PostgreSQL, as the admin panel reads them and grants or takes."""
 
     def __init__(self, sessions: async_sessionmaker[AsyncSession]) -> None:
         """Use a database through its session factory.
@@ -82,17 +92,73 @@ class SqlLedgerStore:
                 heads.append(WalletHead(opened is not None, _entry(row) if row else None))
         return heads
 
+    async def change(
+        self, wallet: Wallet, amount: int, hero: str | None, note: str, admin: Admin
+    ) -> tuple[int, bool]:
+        """Grant to a wallet or take from it, opening it first with its allowance.
 
-def _entries() -> Select[WalletEntryRow, int | None, dict[str, Any] | None]:
+        The balance, its ledger entry and the admin's log change together, and only while the
+        balance stays between 0 and the most a game holds.
+
+        Args:
+            wallet: The wallet.
+            amount: What to add, below 0 to take.
+            hero: The name of the hero whose own wallet it is, which the log keeps.
+            note: Why, as the admin wrote it.
+            admin: The admin who changed it.
+
+        Returns:
+            The balance before, and whether it changed.
+        """
+        async with self._sessions.begin() as session:
+            wallet_id, balance = await locked(session, wallet)
+            after = balance + amount
+            if not 0 <= after <= MOST_BALANCE:
+                return balance, False
+            entry = await session.scalar(
+                insert(WalletEntryRow)
+                .values(wallet_id=wallet_id, delta=amount, balance=after, reason=ADMIN)
+                .returning(WalletEntryRow.id)
+            )
+            await session.execute(
+                update(WalletRow).where(WalletRow.id == wallet_id).values(balance=after)
+            )
+            details = {
+                "game": wallet.game,
+                "currency": wallet.currency,
+                "persona": wallet.persona_id,
+                "hero": hero,
+                "amount": amount,
+                "before": balance,
+                "entry": entry,
+                "note": note,
+            }
+            target = str(wallet.account_id)
+            session.add(action_row(AdminAction.WALLET_CHANGE, target, details, admin))
+            return balance, True
+
+
+def _entries() -> Select[
+    WalletEntryRow, int | None, dict[str, Any] | None, str | None, dict[str, Any] | None
+]:
     return (
-        select(WalletEntryRow, PurchaseRow.id, PurchaseRow.outcome)
+        select(
+            WalletEntryRow,
+            PurchaseRow.id,
+            PurchaseRow.outcome,
+            AdminActionRow.admin_name,
+            AdminActionRow.details,
+        )
         .join(WalletRow, WalletRow.id == WalletEntryRow.wallet_id)
         .outerjoin(PurchaseRow, _PAID)
+        .outerjoin(AdminActionRow, _GRANTED)
     )
 
 
-def _entry(row: Row[WalletEntryRow, int | None, dict[str, Any] | None]) -> LedgerEntry:
-    entry, purchase, outcome = row
+def _entry(
+    row: Row[WalletEntryRow, int | None, dict[str, Any] | None, str | None, dict[str, Any] | None],
+) -> LedgerEntry:
+    entry, purchase, outcome, admin, details = row
     return LedgerEntry(
         id=entry.id,
         at=entry.created_at,
@@ -101,4 +167,6 @@ def _entry(row: Row[WalletEntryRow, int | None, dict[str, Any] | None]) -> Ledge
         reason=entry.reason,
         purchase=purchase,
         items=tuple(outcome["items"]) if outcome else (),
+        admin=admin,
+        note=details.get("note") if details else None,
     )

@@ -146,6 +146,7 @@ _ACCOUNT_ACTIONS = [
     AdminAction.ACCOUNT_STATE,
     AdminAction.HERO_SLOTS,
     AdminAction.CHEST_KEYS,
+    AdminAction.WALLET_CHANGE,
     AdminAction.ACCOUNT_VERIFIED,
     AdminAction.DELETION_REQUEST,
     AdminAction.SESSION_END,

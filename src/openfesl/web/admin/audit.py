@@ -15,7 +15,13 @@ from openfesl.core.games import Games
 from openfesl.core.personas import Persona, PersonaRecord
 from openfesl.core.servers import GameServer, Provider
 from openfesl.core.texts import localize, translate
-from openfesl.web.admin.audit_heroes import count_entry, hero_entry, item_entry, slot_entry
+from openfesl.web.admin.audit_heroes import (
+    count_entry,
+    hero_entry,
+    item_entry,
+    slot_entry,
+    wallet_entry,
+)
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.settings import policy_views
 from openfesl.web.pages import moment
@@ -289,6 +295,7 @@ async def _rows(
             AdminAction.ENTITLEMENT_STATE,
             AdminAction.HERO_SLOTS,
             AdminAction.CHEST_KEYS,
+            AdminAction.WALLET_CHANGE,
         ):
             number = int(target) if target.isdigit() else -1
             shown = account(number)
@@ -312,6 +319,8 @@ async def _rows(
                 said = slot_entry(details, language)
             elif action is AdminAction.CHEST_KEYS:
                 kind, said = count_entry(action, details, language)
+            elif action is AdminAction.WALLET_CHANGE:
+                kind, shown, href, said = wallet_entry(target, details, shown, language)
         elif action in (AdminAction.PERSONA_STATE, AdminAction.PLAYER_KICK, *HERO_ACTIONS):
             persona = persona_list.get(int(target)) if target.isdigit() else None
             hero = persona is not None and persona.namespace in heroes
@@ -436,6 +445,8 @@ def _glyph(action: AdminAction, kind: str, details: dict[str, Any]) -> str:
         return "star" if details.get("shown") else "star-off"
     if action in (AdminAction.CHESTS, AdminAction.CHEST_KEYS):
         return "x" if details.get("count", 0) < 0 else "plus"
+    if action is AdminAction.WALLET_CHANGE:
+        return "x" if details.get("amount", 0) < 0 else "plus"
     state = kind.rpartition(".")[2]
     if action in (AdminAction.SETTING, AdminAction.KEY_GRANTS, AdminAction.KEY_LIMITS):
         return "edit"

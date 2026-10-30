@@ -4,7 +4,7 @@ from typing import Any, Self
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.datastructures import QueryParams
 from starlette.exceptions import HTTPException
 
@@ -12,10 +12,14 @@ from openfesl.core.admins import Role
 from openfesl.core.catalogues import Catalogues
 from openfesl.core.games import Game, Games, Scope
 from openfesl.core.heroes import Hero, Heroes
-from openfesl.core.wallets import Ledger, Wallet, WalletHead, WalletLedgers, Wallets
+from openfesl.core.texts import translate
+from openfesl.core.wallets import MOST_BALANCE, Ledger, Wallet, WalletHead, WalletLedgers, Wallets
 from openfesl.web.admin.accounts import AccountView, AccountViews
-from openfesl.web.admin.auth import AdminSessions
+from openfesl.web.admin.auth import AdminSessions, back_to
+from openfesl.web.pages import number, whole_number
+from openfesl.web.sessions import check_form, toast
 
+SECTION = "accounts"
 PAGE_SIZE = 50
 # The ledger's reasons by the groups its filter offers.
 REASONS = {
@@ -200,9 +204,10 @@ def wallet_routes(
     views: WalletAdminViews,
     catalogues: Catalogues,
 ) -> APIRouter:
-    """Return an account's wallets and its heroes', and the ledger of each.
+    """Return an account's wallets and its heroes', the ledger of each, and grants and takes.
 
-    Every role reads them, and looking never opens a wallet.
+    Every role reads them, and looking never opens a wallet. A grant or a take needs the admin
+    role and a note, and stays within what a game's balance holds.
 
     Args:
         sessions: Signs admins in and renders the panel's pages.
@@ -230,6 +235,72 @@ def wallet_routes(
             found=await views.of_account(view.record.account.id),
             manages=admin.role is Role.ADMIN,
         )
+
+    async def wallet_line(account_id: str, game: str, key: str) -> tuple[AccountView, WalletLine]:
+        view = await account(account_id)
+        for found in await views.of_account(view.record.account.id):
+            line = next((line for line in found.lines if line.key == key), None)
+            if found.game.id == game and line is not None:
+                return view, line
+        raise HTTPException(404)
+
+    @router.get("/admin/accounts/{account_id}/wallets/{game}/{key}", response_class=HTMLResponse)
+    async def ask_change(request: Request, account_id: str, game: str, key: str) -> Response:
+        admin = sessions.admin(request, Role.ADMIN, SECTION)
+        view, line = await wallet_line(account_id, game, key)
+        back = back_to(request, request.query_params.get("back", ""), _wallets(view))
+        return await sessions.render(
+            request, "admin.WalletChange", admin=admin, view=view, line=line, back=back, form={}
+        )
+
+    @router.post("/admin/accounts/{account_id}/wallets/{game}/{key}")
+    async def change(request: Request, account_id: str, game: str, key: str) -> Response:
+        admin = sessions.admin(request, Role.ADMIN, SECTION)
+        form = await request.form()
+        check_form(request, form)
+        view, line = await wallet_line(account_id, game, key)
+        back = back_to(request, str(form.get("back", "")), _wallets(view))
+        note = str(form.get("note", "")).strip()
+        written = str(form.get("amount", "")).strip()
+        taking = form.get("direction") == "take"
+        amount = whole_number(written, MOST_BALANCE) or 0
+        after = line.balance - amount if taking else line.balance + amount
+        error = "amount" if amount <= 0 else "fewer" if after < 0 else ""
+        error = error or ("more" if after > MOST_BALANCE else "") or ("note" if not note else "")
+        if error:
+            fields = {
+                "amount": written,
+                "note": note,
+                "error": error,
+                "direction": "take" if taking else "grant",
+            }
+            return await sessions.render(
+                request,
+                "admin.WalletChange",
+                400,
+                admin=admin,
+                view=view,
+                line=line,
+                back=back,
+                form=fields,
+            )
+        hero = line.hero.persona.name if line.hero else None
+        change = -amount if taking else amount
+        before, done = await views.ledgers.change(line.wallet, change, hero, note, admin)
+        language = request.state.language
+        values = {
+            "amount": number(amount, language),
+            "currency": translate(f"games.{game}.currency.{line.wallet.currency}", language),
+            "owner": hero or view.record.account.nuid,
+            "before": number(before, language),
+            "after": number(before + change, language),
+            "most": number(MOST_BALANCE, language),
+        }
+        done_key = "taken" if taking else "granted"
+        refused = "fewer" if taking else "more"
+        key = f"web.admin.toast.wallet.{done_key if done else refused}"
+        toast(request, key, error=not done, **values)
+        return RedirectResponse(back, 303)
 
     @router.get("/admin/accounts/{account_id}/ledger", response_class=HTMLResponse)
     async def ledger(request: Request, account_id: str) -> Response:
@@ -273,3 +344,7 @@ def wallet_routes(
         )
 
     return router
+
+
+def _wallets(view: AccountView) -> str:
+    return f"/admin/accounts/{view.record.account.id}/wallets"

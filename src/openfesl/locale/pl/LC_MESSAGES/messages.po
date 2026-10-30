@@ -10834,3 +10834,54 @@ msgstr "Przyznanie"
 
 msgid "web.admin.ledger.reason.take"
 msgstr "Odebranie"
+
+msgid "web.admin.wallets.change"
+msgstr "Przyznaj lub odbierz"
+
+msgid "web.admin.wallets.change.of"
+msgstr "Przyznaj lub odbierz %(currency)s: %(owner)s"
+
+msgid "web.admin.wallets.managed"
+msgstr "Zmiana sald wymaga roli administratora."
+
+msgid "web.admin.wallets.dialog"
+msgstr "Przyznanie lub odebranie: %(currency)s"
+
+msgid "web.admin.wallets.dialog.submit"
+msgstr "Zapisz zmianę"
+
+msgid "web.admin.wallets.dialog.amount"
+msgstr "Kwota: %(currency)s"
+
+msgid "web.admin.wallets.dialog.text"
+msgstr "Zapisywane razem z wpisem w historii i w dzienniku zmian w jednej transakcji. Gra wczytuje salda przy następnym logowaniu i przy otwarciu sklepu."
+
+msgid "web.admin.wallets.dialog.points"
+msgstr "Bohater zdobywa je z poziomami; przyznanie dotyczy poziomu, który ich nie dał. Gra wczytuje saldo przy następnym logowaniu bohatera."
+
+msgid "web.admin.wallets.refused.max"
+msgstr "Niemożliwe: saldo wyniosłoby %(after)s, a gra odczytuje salda tylko do %(max)s."
+
+msgid "web.admin.wallets.refused.below"
+msgstr "Niemożliwe: %(wallet)s ma %(balance)s, więc można odebrać najwyżej tyle."
+
+msgid "web.admin.toast.wallet.granted"
+msgstr "Przyznano %(amount)s %(currency)s: %(owner)s, %(before)s → %(after)s."
+
+msgid "web.admin.toast.wallet.taken"
+msgstr "Odebrano %(amount)s %(currency)s: %(owner)s, %(before)s → %(after)s."
+
+msgid "web.admin.toast.wallet.fewer"
+msgstr "Nic nie odebrano: %(owner)s ma teraz %(before)s %(currency)s, mniej niż żądane %(amount)s."
+
+msgid "web.admin.toast.wallet.more"
+msgstr "Nic nie przyznano: saldo przekroczyłoby %(most)s, najwięcej ile odczytuje gra."
+
+msgid "web.admin.audit.action.wallet_change.granted"
+msgstr "Przyznanie do portfela"
+
+msgid "web.admin.audit.action.wallet_change.taken"
+msgstr "Odebranie z portfela"
+
+msgid "web.admin.audit.wallet"
+msgstr "%(amount)s %(currency)s, %(before)s → %(after)s · wpis %(entry)s"

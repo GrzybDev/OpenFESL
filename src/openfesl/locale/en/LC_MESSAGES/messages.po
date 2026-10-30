@@ -10236,3 +10236,54 @@ msgstr "Admin grant"
 
 msgid "web.admin.ledger.reason.take"
 msgstr "Admin take"
+
+msgid "web.admin.wallets.change"
+msgstr "Grant or take"
+
+msgid "web.admin.wallets.change.of"
+msgstr "Grant or take %(currency)s of %(owner)s"
+
+msgid "web.admin.wallets.managed"
+msgstr "Balances are changed with the admin role."
+
+msgid "web.admin.wallets.dialog"
+msgstr "Grant or take %(currency)s"
+
+msgid "web.admin.wallets.dialog.submit"
+msgstr "Save change"
+
+msgid "web.admin.wallets.dialog.amount"
+msgstr "Amount of %(currency)s"
+
+msgid "web.admin.wallets.dialog.text"
+msgstr "Written with its ledger entry and the audit entry in one transaction. The game reads balances at the next login and when its store opens."
+
+msgid "web.admin.wallets.dialog.points"
+msgstr "The hero earns these with its levels; a grant is for a level that brought none. The game reads the balance at the hero's next login."
+
+msgid "web.admin.wallets.refused.max"
+msgstr "Not possible: the balance would be %(after)s, and the game reads balances only up to %(max)s."
+
+msgid "web.admin.wallets.refused.below"
+msgstr "Not possible: %(wallet)s holds %(balance)s, so at most %(balance)s can be taken."
+
+msgid "web.admin.toast.wallet.granted"
+msgstr "Granted %(amount)s %(currency)s to %(owner)s: %(before)s → %(after)s."
+
+msgid "web.admin.toast.wallet.taken"
+msgstr "Took %(amount)s %(currency)s from %(owner)s: %(before)s → %(after)s."
+
+msgid "web.admin.toast.wallet.fewer"
+msgstr "Nothing was taken: %(owner)s holds %(before)s %(currency)s by now, fewer than the %(amount)s asked."
+
+msgid "web.admin.toast.wallet.more"
+msgstr "Nothing was granted: the balance would pass %(most)s, the most the game reads."
+
+msgid "web.admin.audit.action.wallet_change.granted"
+msgstr "Wallet grant"
+
+msgid "web.admin.audit.action.wallet_change.taken"
+msgstr "Wallet take"
+
+msgid "web.admin.audit.wallet"
+msgstr "%(amount)s %(currency)s, %(before)s → %(after)s · ledger entry %(entry)s"

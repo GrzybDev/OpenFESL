@@ -47,6 +47,10 @@ class AdminAction(StrEnum):
     """Granted the account numbered as the target treasure chest keys of a game, or took some;
     the details hold the game, how many, below 0 for a take, the keys before and after and the
     note."""
+    WALLET_CHANGE = "wallet_change"
+    """Granted to a wallet of the account numbered as the target, or took from it; the details
+    hold the game, the currency, the hero whose own wallet it is, if any, the amount, below 0
+    for a take, the balance before, the ledger entry's number and the admin's note."""
     ITEM_GRANT = "item_grant"
     """Granted the hero whose persona is numbered as the target an item; the details hold its
     number, how the hero gained it, how it holds the item then and the admin's note."""

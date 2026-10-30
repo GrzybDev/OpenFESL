@@ -45,8 +45,22 @@
   }
 
   .wallet-decide {
-    display: grid;
+    display: flex;
+    gap: 2px;
     background: var(--cell);
+
+    > .form-button {
+      flex: 1;
+      padding-inline: 10px;
+    }
+  }
+
+  .admin-wallets-managed {
+    min-width: 1000px;
+
+    .wallet-columns {
+      grid-template-columns: minmax(200px, 1fr) 150px 140px 190px 320px;
+    }
   }
 
   .ledger-tabs {
@@ -105,6 +119,12 @@
   }
 
   /* Where a table does not fit, each wallet and each change is a block of its own. */
+  @container (width < 1000px) {
+    .admin-wallets-managed {
+      min-width: 0;
+    }
+  }
+
   @container (width < 860px) {
     .admin-wallets,
     .admin-ledger {

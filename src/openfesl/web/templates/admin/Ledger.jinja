@@ -124,6 +124,14 @@
           {% if not line.head.opened %}
             <p class="bar-text body-text">{{ _("web.admin.wallets.closed.text", amount=number(line.wallet.allowance), currency=currency) }}</p>
           {% endif %}
+          {% if manages %}
+            <SmallAction :href="base ~ '/wallets/' ~ game.id ~ '/' ~ line.key ~ '?' ~ {'back': here}|urlencode" :label="_('web.admin.wallets.change')" dialog />
+          {% else %}
+            <p class="bar-text account-role-note">
+              <span aria-hidden="true"
+                    class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.wallets.managed") }}
+            </p>
+          {% endif %}
         </section>
         {% if ledger.counts %}
           <form method="get"

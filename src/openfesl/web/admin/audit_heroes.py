@@ -1,11 +1,12 @@
 from datetime import datetime
 from typing import Any
+from urllib.parse import urlencode
 
 from openfesl.core.admin import AdminAction
 from openfesl.core.catalogues import Catalogues
 from openfesl.core.games import Games
 from openfesl.core.personas import Persona
-from openfesl.core.texts import translate
+from openfesl.core.texts import localize, translate
 from openfesl.web.pages import moment
 from openfesl.web.pages import number as grouped
 
@@ -88,6 +89,37 @@ def count_entry(action: AdminAction, details: dict[str, Any], language: str) -> 
     }
     kind = f"{action.value}.{'taken' if count < 0 else 'granted'}"
     return kind, translate("web.admin.audit.counted", language) % counts
+
+
+def wallet_entry(
+    target: str, details: dict[str, Any], owner: str, language: str
+) -> tuple[str, str, str, str]:
+    """Return how the audit log shows a grant to or take from one of an account's wallets.
+
+    Args:
+        target: The account's number.
+        details: The change's details, as the admin's log keeps them; a take is below 0.
+        owner: The account in words, which the log names for a wallet of the account's own.
+        language: The log's language.
+
+    Returns:
+        The kind of the action, the wallet's hero or account in words, the panel's page of the
+        wallet's ledger and what changed in words.
+    """
+    amount, before = details["amount"], details["before"]
+    code, hero = details["currency"], details.get("persona")
+    key = f"{code}-{hero}" if hero else code
+    query = urlencode({"game": details["game"], "wallet": key})
+    said = translate("web.admin.audit.wallet", language) % {
+        "amount": grouped(abs(amount), language),
+        "currency": translate(f"games.{details['game']}.currency.{code}", language),
+        "before": grouped(before, language),
+        "after": grouped(before + amount, language),
+        "entry": details["entry"],
+    }
+    kind = f"wallet_change.{'taken' if amount < 0 else 'granted'}"
+    href = localize(f"/admin/accounts/{target}/ledger?{query}", language)
+    return kind, details.get("hero") or owner, href, said
 
 
 def _held(values: dict[str, Any], language: str) -> str:

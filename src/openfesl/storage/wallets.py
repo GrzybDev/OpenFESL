@@ -10,10 +10,11 @@ from openfesl.core.wallets import MOST_BALANCE, Wallet
 from openfesl.storage.models import WalletEntryRow, WalletRow
 
 # The ledger's reasons for the amount that a wallet opens with, for a dedicated server's
-# credit, and for what a refund gave back.
+# credit, for what a refund gave back, and for an admin's grant or take.
 ALLOWANCE = "allowance"
 SERVER = "server"
 REFUND = "refund"
+ADMIN = "admin"
 
 
 class SqlWalletStore:
@@ -112,7 +113,7 @@ class SqlWalletStore:
             The balance, or None when the ledger holds the transaction id already.
         """
         async with self._sessions.begin() as session:
-            wallet_id, _ = await _locked(session, wallet)
+            wallet_id, _ = await locked(session, wallet)
             credited = await session.scalar(
                 select(func.coalesce(func.sum(WalletEntryRow.delta), 0)).where(
                     WalletEntryRow.wallet_id == wallet_id,
@@ -212,7 +213,7 @@ async def credit(
     Returns:
         The balance, or None when the ledger holds the transaction id already.
     """
-    wallet_id, balance = await _locked(session, wallet)
+    wallet_id, balance = await locked(session, wallet)
     added = max(0, min(amount, MOST_BALANCE - balance))
     entry = {
         "wallet_id": wallet_id,
@@ -251,7 +252,7 @@ async def grant_up_to(session: AsyncSession, wallet: Wallet, total: int, reason:
         total: What the reason grants the wallet in all.
         reason: Why, as the ledger keeps it.
     """
-    wallet_id, _ = await _locked(session, wallet)
+    wallet_id, _ = await locked(session, wallet)
     granted = await session.scalar(
         select(func.coalesce(func.sum(WalletEntryRow.delta), 0)).where(
             WalletEntryRow.wallet_id == wallet_id, WalletEntryRow.reason == reason
@@ -262,8 +263,17 @@ async def grant_up_to(session: AsyncSession, wallet: Wallet, total: int, reason:
         await credit(session, wallet, missing, reason)
 
 
-async def _locked(session: AsyncSession, wallet: Wallet) -> tuple[int, int]:
-    # Opened first, so that there is a row to lock; returns its id and balance.
+async def locked(session: AsyncSession, wallet: Wallet) -> tuple[int, int]:
+    """Open a wallet if it is new and lock it until the transaction ends.
+
+    Args:
+        session: The transaction.
+        wallet: The wallet.
+
+    Returns:
+        The wallet's row number and balance.
+    """
+    # Opened first, so that there is a row to lock.
     await open_wallets(session, [wallet])
     locked = await session.execute(
         select(WalletRow.id, WalletRow.balance).where(matching([wallet])).with_for_update()
