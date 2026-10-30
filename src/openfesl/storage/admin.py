@@ -156,6 +156,9 @@ _PERSONA_ACTIONS = [
     AdminAction.PLAYER_KICK,
     AdminAction.HERO_RENAME,
     AdminAction.HERO_DEFAULT,
+    AdminAction.ITEM_GRANT,
+    AdminAction.ITEM_CHANGE,
+    AdminAction.ITEM_REVOKE,
     AdminAction.MUGSHOT_REMOVE,
 ]
 

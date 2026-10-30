@@ -6,8 +6,16 @@ import pytest
 from accounts import execute, select_value
 from heroes import create_hero
 from identity import IdentityProvider, form_token, sign_in
+from playwright.async_api import Browser
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from store import ROYAL_SOLDIER, stock
 from support import visible
+
+from openfesl.core.admins import Admin, Role
+from openfesl.core.hero_admin import TooManyUses
+from openfesl.core.inventory import COUNTED, Ownership
+from openfesl.core.personas import Persona
+from openfesl.storage.hero_admin import SqlHeroAdmin
 
 pytestmark = pytest.mark.anyio
 WARDEN = {"sub": "warden-7", "preferred_username": "invented-warden", "groups": ["fesl-moderators"]}
@@ -165,3 +173,98 @@ async def test_moderators_rename_and_disable_heroes_and_admins_choose_the_defaul
             "Brassbuckle → Copper_Kettle · Ticket 59",
         ):
             assert line in log
+
+
+@pytest.mark.usefixtures("prompt_actions")
+async def test_admins_grant_change_and_revoke_items_that_fit_the_hero(
+    admin_provider: IdentityProvider,
+    base: str,
+    server_url: str,
+    database_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    edge: Browser,
+) -> None:
+    await stock(server_url, tmp_path, capsys)
+    brass = await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    ann = await account_of(database_url, "ann@example.test")
+    hero = f"{base}/admin/accounts/{ann}/heroes/{brass}"
+    grant = f"{hero}/items/grant"
+    admin_provider.user = WARDEN
+    async with httpx2.AsyncClient() as client:
+        await sign_in(client, base, next=f"/admin/accounts/{ann}")
+        assert (await client.get(grant)).status_code == 403
+    admin_provider.user = KEEPER
+    async with httpx2.AsyncClient() as client:
+        await sign_in(client, base, next=f"/admin/accounts/{ann}")
+        # The search finds items by name; one for another faction and class is refused.
+        found = visible((await client.get(grant, params={"q": "rifle"})).content)
+        assert "2 items match." in found and "Invented Longrifle" in found
+        # A number longer than any item's finds nothing.
+        endless = await client.get(grant, params={"q": "9" * 5000})
+        assert "No item matches" in visible(endless.content)
+        unfit = await client.get(grant, params={"q": "rifle", "item": "3042"})
+        assert "Does not fit" in visible(unfit.content) and "Requires: National Army" in unfit.text
+        token = form_token(unfit.text)
+        refused = await client.post(
+            grant, data={"csrf": token, "item": "3042", "ownership": "perm", "note": "Prize"}
+        )
+        assert "Not granted: Brassbuckle cannot use Invented Longrifle." in visible(refused.content)
+        # A rental, then more days of it, and the withheld shirt, which only admins grant.
+        rented = await changed(client, grant, item="3015", ownership="7d", note="Event prize")
+        assert "Granted Invented Rifle to Brassbuckle: Ends" in rented
+        longer = visible(
+            (await client.get(grant, params={"item": "3015", "ownership": "3d"})).content
+        )
+        assert "Adds 3 days: ends" in longer
+        await changed(client, grant, item="3015", ownership="3d", note="Event prize, part two")
+        shirt = await changed(client, grant, item="257", ownership="perm", note="Contest winner")
+        assert "Invented Logo Shirt item 257 · granted by hand only" in shirt
+        # Uses add to those the hero has; a base item is held for good.
+        uses = visible((await client.get(grant, params={"item": "2005", "uses": "25"})).content)
+        assert "Adds 25 uses: 10 → 35 uses left." in uses
+        await changed(client, grant, item="2005", ownership="perm", uses="25", note="Outage")
+        most = {"csrf": token, "item": "2005", "uses": "2147483647", "note": "Typo"}
+        over = await client.post(grant, data=most)
+        assert over.status_code == 400
+        assert (
+            "Not possible: there would be 2,147,483,682 uses, more than the game reads."
+            in visible(over.content)
+        )
+        # A grant at the same time is bounded again under the item's lock.
+        engine = create_async_engine(database_url)
+        persona = Persona(brass, ann, "bfheroes", "Brassbuckle")
+        with pytest.raises(TooManyUses):
+            await SqlHeroAdmin(async_sessionmaker(engine)).grant_item(
+                persona, 2005, Ownership(COUNTED, uses=2**31 - 1), "Race", Admin("", "", Role.ADMIN)
+            )
+        await engine.dispose()
+        held = await client.post(
+            grant, data={"csrf": token, "item": "1", "ownership": "perm", "note": "Twice"}
+        )
+        assert "Brassbuckle holds Invented Hat for good" in visible(held.content)
+
+        fewer = await changed(client, f"{hero}/items/2005/change", value="3", note="Counted twice")
+        assert "Changed Invented Bandage of Brassbuckle." in fewer
+        assert "Invented Bandage item 2005 Kind Abilities 3 uses left Running low" in fewer
+        revoked = await changed(client, f"{hero}/items/3015/revoke", note="Granted twice")
+        assert "Revoked Invented Rifle from Brassbuckle. Nothing was refunded." in revoked
+        ended = visible((await client.get(hero, params={"items": "ended"})).content)
+        assert "Invented Rifle item 3015 Kind Weapons" in ended
+        assert "From Admin Revoked" in ended and "Grant again" in ended
+        log = visible((await client.get(f"{base}/admin/audit", params={"account": ann})).content)
+        assert "Item revoked Brassbuckle" in log and "Invented Rifle · Granted twice" in log
+        assert "Invented Bandage, 35 uses left → 3 uses left · Counted twice" in log
+        context = await edge.new_context(locale="en-GB")
+        for name, value in client.cookies.items():
+            await context.add_cookies([{"name": name, "value": value, "url": base}])
+    # With scripts, the grant's own button waits for the note, not the search's inside its form.
+    page = await context.new_page()
+    await page.goto(f"{grant}?item=3015")
+    granting, note = page.get_by_role("button", name="Grant item"), page.locator("#admin-note")
+    await note.fill("Prize")
+    await note.fill("")
+    assert await granting.get_attribute("aria-disabled") == "true"
+    await note.fill("Prize")
+    assert await granting.get_attribute("aria-disabled") == "false"
+    await context.close()

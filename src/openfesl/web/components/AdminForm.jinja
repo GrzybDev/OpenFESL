@@ -1,8 +1,9 @@
-{#def question: str, action: str, label: str, busy: str, back: str, glyph: str = "go", note: str = "", error: str = "", why: str = "" #}
+{#def question: str, action: str, label: str, busy: str, back: str, glyph: str = "go", note: str = "", error: str = "", why: str = "", search: str = "" #}
 {# The black-headed panel of a change to a player's account or hero that asks for a note, as the
    account state's form: the content holds the change's fields and what it does, then the note that
    the audit log keeps with the change, what is still needed, and the buttons that go back or send
-   it. Where scripts run, a link with data-dialog opens it over its page. #}
+   it. A form with a search sends the search's fields, which name the admin-search form, to its
+   own page. Where scripts run, a link with data-dialog opens it over its page. #}
 <section aria-labelledby="confirm-question"
          aria-describedby="confirm-text"
          data-confirm
@@ -16,6 +17,10 @@
       <span><Icon name="x" :size="14" stroke="currentColor" /></span>
     </button>
   </div>
+  {% if search %}
+    <form id="admin-search" method="get" action="{{ search }}">
+    </form>
+  {% endif %}
   <form method="post"
         action="{{ action }}"
         data-admin-form

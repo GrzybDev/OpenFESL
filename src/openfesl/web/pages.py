@@ -163,6 +163,23 @@ def number(value: float, language: str, places: int | None = None) -> str:
     return format_decimal(value, pattern, locale=language, group_separator=grouped)
 
 
+def whole_number(text: str, most: int, least: int = 1) -> int | None:
+    """Return the whole number from least to most that a form's field holds, if it holds one.
+
+    The field may group the digits as number() writes them in any language.
+
+    Args:
+        text: The field's text.
+        most: The highest number the field takes.
+        least: The lowest number the field takes.
+    """
+    digits = "".join(text.replace(",", "").split())
+    # More digits than most has are too many, and int() refuses thousands of them outright.
+    if not (digits.isascii() and digits.isdecimal()) or len(digits) > len(str(most)):
+        return None
+    return int(digits) if least <= int(digits) <= most else None
+
+
 def moment(value: datetime, language: str, day: str = "yMMMd") -> str:
     """Return a day and a time of day in UTC as a language writes them.
 

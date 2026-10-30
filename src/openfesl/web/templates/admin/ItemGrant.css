@@ -1,0 +1,99 @@
+/* The form that grants a hero an item: the search and what it found, whether the chosen item fits,
+   the ways to own it and what the grant adds. */
+@layer pages {
+  .admin-search {
+    display: flex;
+    gap: 2px;
+
+    > .field-input {
+      flex: 1;
+    }
+  }
+
+  .admin-matches {
+    display: grid;
+    gap: 2px;
+    margin-top: 2px;
+  }
+
+  .admin-match {
+    display: flex;
+    min-height: 52px;
+    align-items: center;
+    gap: 10px;
+    background: var(--row);
+    padding: 4px 12px 4px 4px;
+    color: var(--ink);
+    transition: background-color 120ms linear;
+
+    &:hover {
+      background: var(--row-hover);
+    }
+
+    &[aria-current] {
+      background: var(--accent);
+    }
+
+    .cell-stack {
+      display: flex;
+    }
+  }
+
+  .admin-match-fit {
+    margin-left: auto;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .admin-fit {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    background: var(--row-light);
+    padding: 10px 12px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+
+    .badge {
+      flex: none;
+    }
+  }
+
+  .admin-fit-no {
+    background: var(--row);
+  }
+
+  .admin-tiles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 2px;
+  }
+
+  .admin-uses {
+    margin-top: 2px;
+
+    .admin-grant:not(:has([name="ownership"][value="uses"]:checked)) & {
+      display: none;
+    }
+  }
+
+  .admin-result {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .admin-grant > .body-text:last-child {
+    margin-top: 12px;
+  }
+
+  @media (width < 40rem) {
+    .admin-tiles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+}

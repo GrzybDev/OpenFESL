@@ -37,6 +37,15 @@ class AdminAction(StrEnum):
     HERO_DEFAULT = "hero_default"
     """Made the hero whose persona is numbered as the target its account's default hero; the
     details hold the name of the default hero before, if any, and the admin's note."""
+    ITEM_GRANT = "item_grant"
+    """Granted the hero whose persona is numbered as the target an item; the details hold its
+    number, how the hero gained it, how it holds the item then and the admin's note."""
+    ITEM_CHANGE = "item_change"
+    """Changed when a rental of the hero whose persona is numbered as the target ends, or the uses
+    it has left of an item; the details hold the item's number, both values and the note."""
+    ITEM_REVOKE = "item_revoke"
+    """Took an item out of use of the hero whose persona is numbered as the target; the details
+    hold its number and the admin's note."""
     MUGSHOT_REMOVE = "mugshot_remove"
     """Removed the portrait that the game sent of the hero whose persona is numbered as the
     target; the details hold the admin's note."""

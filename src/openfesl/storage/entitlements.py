@@ -300,7 +300,7 @@ async def add_item(
         for good, or the item is out of use, as when the admin took it away.
     """
     now = datetime.now(UTC)
-    row = await _locked_item(session, persona_id, item_id)
+    row = await locked_item(session, persona_id, item_id)
     if row is None:
         held = fold(None, gained, now)
         assert held is not None
@@ -319,7 +319,7 @@ async def add_item(
         if added is not None:
             return held
         # Another transaction added the item meanwhile; its row is folded into.
-        row = await _locked_item(session, persona_id, item_id)
+        row = await locked_item(session, persona_id, item_id)
         assert row is not None
     folded = fold(_held(row), gained, now) if row.status == ACTIVE else None
     if folded is not None:
@@ -431,9 +431,16 @@ def _entitlement(row: EntitlementRow) -> Entitlement:
     )
 
 
-async def _locked_item(
+async def locked_item(
     session: AsyncSession, persona_id: int, item_id: int
 ) -> EntitlementRow | None:
+    """Return a persona's row of an item, locked until the transaction ends, if it has one.
+
+    Args:
+        session: The transaction.
+        persona_id: The persona.
+        item_id: The item's number.
+    """
     return await session.scalar(
         select(EntitlementRow)
         .where(EntitlementRow.persona_id == persona_id, _item_number == str(item_id))

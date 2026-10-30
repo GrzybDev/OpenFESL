@@ -120,7 +120,7 @@
             <div class="table-scroll">
               <div role="table"
                    aria-labelledby="hero-items"
-                   class="table admin-hero-inventory">
+                   class="table admin-hero-inventory{% if manages %} admin-hero-inventory-managed{% endif %}">
                 <div role="rowgroup">
                   <div role="row" class="admin-item-columns">
                     <div role="columnheader"
@@ -129,6 +129,10 @@
                     <div role="columnheader" class="column-head">{{ _("web.admin.items.column.ownership") }}</div>
                     <div role="columnheader" class="column-head">{{ _("web.admin.items.column.from") }}</div>
                     <div role="columnheader" class="column-head">{{ _("web.admin.items.column.state") }}</div>
+                    {% if manages %}
+                      <div role="columnheader"
+                           class="column-head"><span class="sr-only">{{ _("web.admin.decision") }}</span></div>
+                    {% endif %}
                   </div>
                 </div>
                 <div role="rowgroup" class="enter-rows table-rows">
@@ -176,6 +180,31 @@
                         <span class="admin-item-state">{{ badge("tick" if row.state == "active" else "x") }}{{ _("web.admin.items.state." ~ row.state) }}</span>
                         {% if row.ended %}<span class="cell-ago">{{ when(row.ended, "yMMMd") }}</span>{% endif %}
                       </div>
+                      {% if manages %}
+                        {% set label = catalogue.name(row.item_id) or _("web.admin.items.unnamed", id=row.item_id) %}
+                        <div role="cell" class="admin-item-decide">
+                          {% if row.entry and row.state == "active" %}
+                            {% if row.held.type in ("tlmd", "lmct") %}
+                              <a href="{{ base }}/items/{{ row.item_id }}/change"
+                                 data-dialog
+                                 aria-haspopup="dialog"
+                                 aria-label="{{ _('web.admin.items.change.of', item=label) }}"
+                                 class="form-button"><span aria-hidden="true" class="form-glyph"><Icon name="edit" :size="14" stroke="#F4F4EE" /></span>{{ _("web.admin.items.change") }}</a>
+                            {% endif %}
+                            <a href="{{ base }}/items/{{ row.item_id }}/revoke"
+                               data-dialog
+                               aria-haspopup="dialog"
+                               aria-label="{{ _('web.admin.items.revoke.of', item=label) }}"
+                               class="form-button"><span aria-hidden="true" class="form-glyph"><Icon name="x" :size="14" stroke="#F4F4EE" /></span>{{ _("web.admin.items.revoke") }}</a>
+                          {% elif row.entry %}
+                            <a href="{{ base }}/items/grant?{{ {'item': row.item_id}|urlencode }}"
+                               data-dialog
+                               aria-haspopup="dialog"
+                               aria-label="{{ _('web.admin.items.again.of', item=label) }}"
+                               class="form-button"><span aria-hidden="true" class="form-glyph"><Icon name="plus" :size="14" stroke="#F4F4EE" /></span>{{ _("web.admin.items.again") }}</a>
+                          {% endif %}
+                        </div>
+                      {% endif %}
                     </div>
                   {% endfor %}
                 </div>
@@ -184,7 +213,12 @@
           {% else %}
             <p class="bar-text body-text">{{ _("web.admin.items.none." ~ tab) }}</p>
           {% endif %}
-          <p class="body-text side-note">{{ _("web.admin.items.next_login") }}</p>
+          <div class="list-foot">
+            <p class="body-text">{{ _("web.admin.items.next_login") }}</p>
+            {% if manages %}
+              <SmallAction :href="base ~ '/items/grant'" :label="_('web.admin.items.grant')" dialog />
+            {% endif %}
+          </div>
         </section>
       </div>
 

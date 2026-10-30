@@ -7,7 +7,12 @@ from typing import Protocol
 from openfesl.core.admin import AuditEntry
 from openfesl.core.admins import Admin
 from openfesl.core.heroes import Hero, Roster
+from openfesl.core.inventory import Held, Ownership
 from openfesl.core.personas import Persona, PersonaState
+
+
+class TooManyUses(Exception):
+    """Raised for an item grant after which a hero would hold more uses than the game reads."""
 
 
 class ItemSource(StrEnum):
@@ -96,6 +101,62 @@ class HeroAdminStore(Protocol):
             was: The default hero before, if any.
             note: Why, as the admin wrote it.
             admin: The admin who chose it.
+        """
+
+    async def grant_item(
+        self, persona: Persona, item_id: int, gained: Ownership, note: str, admin: Admin
+    ) -> Held | None:
+        """Grant a hero an item, as the game folds what it gains; one taken out of use returns.
+
+        Args:
+            persona: The hero's persona.
+            item_id: The item's number.
+            gained: How the hero gains it.
+            note: Why, as the admin wrote it.
+            admin: The admin who granted it.
+
+        Returns:
+            How the hero holds the item then, or None when it owns the item for good already.
+
+        Raises:
+            TooManyUses: When the hero would then hold more uses than the game reads, also
+                after a grant at the same time; nothing is granted.
+        """
+
+    async def change_item(
+        self,
+        persona: Persona,
+        item_id: int,
+        expires: datetime | None,
+        uses: int | None,
+        note: str,
+        admin: Admin,
+    ) -> bool:
+        """Change when a hero's rental of an item ends, or how many uses it has left of one.
+
+        Args:
+            persona: The hero's persona.
+            item_id: The item's number.
+            expires: The rental's new end, for an item the hero rents.
+            uses: The new number of uses left, for an item counted in uses.
+            note: Why, as the admin wrote it.
+            admin: The admin who changed it.
+
+        Returns:
+            Whether the hero holds the item in use that way.
+        """
+
+    async def revoke_item(self, persona: Persona, item_id: int, note: str, admin: Admin) -> bool:
+        """Take an item out of a hero's use, refunding nothing.
+
+        Args:
+            persona: The hero's persona.
+            item_id: The item's number.
+            note: Why, as the admin wrote it.
+            admin: The admin who took it.
+
+        Returns:
+            Whether the hero held it in use.
         """
 
     async def remove_mugshot(self, persona: Persona, note: str, admin: Admin) -> bool:

@@ -10,11 +10,12 @@ from fastapi.responses import HTMLResponse
 from starlette.datastructures import QueryParams
 
 from openfesl.core.admin import AdminAction, AuditEntry, AuditFilter, Auditor
+from openfesl.core.catalogues import Catalogues
 from openfesl.core.games import Games
 from openfesl.core.personas import Persona, PersonaRecord
 from openfesl.core.servers import GameServer, Provider
 from openfesl.core.texts import localize, translate
-from openfesl.web.admin.audit_heroes import hero_entry
+from openfesl.web.admin.audit_heroes import hero_entry, item_entry
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.settings import policy_views
 from openfesl.web.pages import moment
@@ -36,9 +37,18 @@ GLYPHS = {
     AdminAction.HERO_RENAME: "edit",
     AdminAction.HERO_DEFAULT: "star",
     AdminAction.MUGSHOT_REMOVE: "x",
+    AdminAction.ITEM_GRANT: "plus",
+    AdminAction.ITEM_CHANGE: "edit",
+    AdminAction.ITEM_REVOKE: "x",
 }
-# What the admin does to a hero, whose persona is the target.
-HERO_ACTIONS = (AdminAction.HERO_RENAME, AdminAction.HERO_DEFAULT, AdminAction.MUGSHOT_REMOVE)
+# What the admin does to a hero's items, and to a hero, whose persona is the target.
+ITEM_ACTIONS = (AdminAction.ITEM_GRANT, AdminAction.ITEM_CHANGE, AdminAction.ITEM_REVOKE)
+HERO_ACTIONS = (
+    AdminAction.HERO_RENAME,
+    AdminAction.HERO_DEFAULT,
+    AdminAction.MUGSHOT_REMOVE,
+    *ITEM_ACTIONS,
+)
 # The glyph of each choice of who sees a game's art, as its tile on the catalogues page wears it.
 ART_GLYPHS = {"everyone": "eye", "signed_in": "key", "nobody": "edit"}
 _TAKEN = {"disabled", "banned", "deactivated", "revoked", "DISABLED", "off", "removed"}
@@ -182,6 +192,7 @@ def audit_routes(
     accounts: Names,
     personas: PersonaNames,
     servers: ServerNames,
+    catalogues: Catalogues,
 ) -> APIRouter:
     """Return the audit log: the changes made in the panel and on the command line.
 
@@ -194,6 +205,7 @@ def audit_routes(
         accounts: Names the accounts.
         personas: Names the personas.
         servers: Names the providers and servers.
+        catalogues: Name the items of the games' heroes.
     """
     router = APIRouter()
 
@@ -211,7 +223,8 @@ def audit_routes(
         everyone = total
         if listing.admin is not None:
             everyone, _ = await log.entries(AuditFilter(None, listing.account, owned), 0, 0)
-        rows = await _rows(request.state.language, games, entries, accounts, personas, servers)
+        language = request.state.language
+        rows = await _rows(language, games, entries, accounts, personas, servers, catalogues)
         named = await accounts.names([listing.account]) if listing.account is not None else {}
         return await sessions.render(
             request,
@@ -237,6 +250,7 @@ async def _rows(
     accounts: Names,
     personas: PersonaNames,
     servers: ServerNames,
+    catalogues: Catalogues,
 ) -> list[AuditRow]:
     def say(name: str, /, **values: Any) -> str:
         text = translate(name, language)
@@ -304,6 +318,8 @@ async def _rows(
                     said = say("web.admin.audit.default_moved", hero=details["default"])
             elif action in (AdminAction.HERO_RENAME, AdminAction.HERO_DEFAULT):
                 said = hero_entry(action, details, said, language)
+            elif action in ITEM_ACTIONS and persona is not None:
+                said = await item_entry(action, details, persona, games, catalogues, language)
         elif action in (AdminAction.PROVIDER_ADD, AdminAction.PROVIDER_REVOKE):
             shown = providers.get(target, str(details.get("name", target)))
             href = page(f"/admin/providers/{target}")

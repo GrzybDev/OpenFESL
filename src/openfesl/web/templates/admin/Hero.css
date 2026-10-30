@@ -67,6 +67,25 @@
     --cell: var(--row-alt);
   }
 
+  .admin-hero-inventory-managed {
+    min-width: 980px;
+
+    .admin-item-columns {
+      grid-template-columns: minmax(216px, 1fr) 120px 170px 130px 150px 224px;
+    }
+  }
+
+  .admin-item-decide {
+    display: flex;
+    gap: 2px;
+    background: var(--cell);
+
+    > .form-button {
+      flex: 1;
+      padding-inline: 10px;
+    }
+  }
+
   .admin-item-name {
     gap: 10px;
     padding-block: 6px;
@@ -191,6 +210,12 @@
   }
 
   /* Where the table does not fit, each item is a block: its name, then how it is held. */
+  @container (width < 960px) {
+    .admin-hero-inventory-managed {
+      min-width: 0;
+    }
+  }
+
   @container (width < 760px) {
     .admin-hero-inventory {
       min-width: 0;

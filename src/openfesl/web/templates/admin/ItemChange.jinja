@@ -1,0 +1,66 @@
+{#def page, row, change: str, back: str, form #}
+{# Changing or revoking a hero's item, as a page of its own: a rental takes a new end, an
+   item counted in uses a new number of uses left, and revoking says that nothing is refunded.
+   Where scripts run, it opens as a dialog over the hero's page. #}
+{% set game = page.game %}
+{% set hero = page.card.hero %}
+{% set account = page.view.record.account %}
+{% set item = page.catalogue.item(row.item_id) %}
+{% set name = page.catalogue.name(row.item_id) or _("web.admin.items.unnamed", id=row.item_id) %}
+{% set held = row.held %}
+{% set counted = held.type == "lmct" %}
+{% set title = _("web.admin.hero.title") %}
+{% set path = "/admin/accounts/" ~ account.id ~ "/heroes/" ~ hero.persona.id ~ "/items/" ~ row.item_id ~ "/" ~ change %}
+{% set error = form.get("error", "") %}
+{% if counted %}
+  {% set now = _n("web.store.tile.uses", held.uses or 0) %}
+{% elif held.expires %}
+  {% set now = _("web.admin.items.ends", date=when(held.expires, "yMMMd")) %}
+{% else %}
+  {% set now = _("web.store.price.permanent") %}
+{% endif %}
+<AdminPage :title="title ~ ' · ' ~ hero.persona.name" current="accounts">
+  <PageHead labelledby="item-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="item-title">{{ hero.persona.name }}</TitleBlock>
+    </div>
+  </PageHead>
+  <Panel class="enter-panel confirm-frame">
+    <AdminForm :question="_('web.admin.items.change.title') if change == 'change' else _('web.admin.items.revoke.confirm', item=name)" :action="url(path)" :label="_('web.admin.items.' ~ change)" :busy="_('web.admin.items.' ~ change ~ '.busy')" :back="back" :glyph="'x' if change == 'revoke' else 'go'" :note="form.get('note', '')" :error="error" :why="_('web.admin.still_needed', what=_('web.admin.still_needed.' ~ ('uses' if counted else 'end'))) if error == 'value' else ''">
+    <p class="confirm-account">
+      <span>{{ name }}</span>
+      <span>{{ _("games." ~ game.id ~ ".item_kind." ~ item.kind) if item else _("web.admin.items.kind.unknown") }} · {{ _("web.admin.items.held_by", id=row.item_id, hero=hero.persona.name) }}</span>
+    </p>
+    {% if change == "revoke" %}
+      <dl class="facts">
+        <Fact :label="_('web.admin.heroes.column.hero')" plain>
+          {{ hero.persona.name }}
+        </Fact>
+        <Fact :label="_('web.admin.items.column.ownership')" plain>
+          {{ now }}
+        </Fact>
+        <Fact :label="_('web.admin.items.column.from')" plain>
+          {{ _("web.admin.items.from." ~ row.source) if row.source else "–" }}
+        </Fact>
+      </dl>
+      <p id="confirm-text" class="body-text">{{ _("web.admin.items.revoke.text") }}</p>
+    {% else %}
+      <label for="item-value"
+             class="field-label field-label-joined">{{ _("web.admin.items.change.uses") if counted else _("web.admin.items.change.end") }}</label>
+      <input id="item-value"
+             name="value"
+             {% if counted %} type="number" min="0" max="2147483647" value="{{ form.get('value') or held.uses or 0 }}" {% else %} type="date" value="{{ form.get('value') or held.expires.strftime('%Y-%m-%d') }}" {% endif %}
+             required
+             autofocus
+             data-needed="{{ _('web.admin.still_needed.' ~ ('uses' if counted else 'end')) }}"
+             aria-describedby="confirm-text"
+             {% if error == "value" %} aria-invalid="true"{% endif %}
+             class="field-input{% if error == 'value' %} field-invalid{% endif %}">
+      <p id="confirm-text" class="field-note">
+        {{ _("web.admin.items.change.now", now=now) }} {{ _("web.admin.items.change.uses.text") if counted else _("web.admin.items.change.end.text") }}
+      </p>
+      <p class="body-text">{{ _("web.admin.items.next_login.short") }}</p>
+    {% endif %}
+    </AdminForm>
+  </Panel>
+</AdminPage>

@@ -10242,7 +10242,7 @@ msgid "web.admin.hero.portrait.confirm.text"
 msgstr "Ten obraz przesłała gra %(game)s. Usunięcie go kasuje; strony pokazują grafikę zastępczą, dopóki gra nie prześle nowego portretu."
 
 msgid "web.admin.hero.managed"
-msgstr "Ustawienie bohatera domyślnego i usunięcie portretu wymagają roli administratora."
+msgstr "Ustawienie bohatera domyślnego, usunięcie portretu i zmiany przedmiotów wymagają roli administratora."
 
 msgid "web.admin.toast.hero.renamed"
 msgstr "Zmieniono nazwę z %(old)s na %(new)s. %(game)s pokazuje nową nazwę od następnego logowania bohatera."
@@ -10303,3 +10303,231 @@ msgstr "domyślny teraz: %(hero)s"
 
 msgid "web.admin.audit.default_was"
 msgstr "wcześniej: %(hero)s"
+
+msgid "web.admin.items.grant"
+msgstr "Przyznaj przedmiot"
+
+msgid "web.admin.items.grant.submit"
+msgstr "Przyznaj przedmiot"
+
+msgid "web.admin.items.grant.busy"
+msgstr "Przyznawanie…"
+
+msgid "web.admin.still_needed.item"
+msgstr "przedmiotu"
+
+msgid "web.admin.still_needed.uses"
+msgstr "liczby użyć"
+
+msgid "web.admin.still_needed.end"
+msgstr "nowego końca"
+
+msgid "web.admin.items.refused"
+msgstr "Nie przyznano: %(hero)s nie może używać przedmiotu %(item)s."
+
+msgid "web.admin.items.held_permanent"
+msgstr "%(hero)s ma przedmiot %(item)s na stałe; nie ma czego dodać."
+
+msgid "web.admin.items.more"
+msgstr "Niemożliwe: liczba użyć wyniosłaby %(after)s, więcej niż odczytuje gra."
+
+msgid "web.admin.items.search"
+msgstr "Przedmiot · nazwa lub numer"
+
+msgid "web.admin.items.search.hint"
+msgstr "Wystarczy nazwa albo numer przedmiotu."
+
+msgid "web.admin.items.search.no_catalogue"
+msgstr "Katalog gry %(game)s nie został zaimportowany, więc przedmiot wskazuje się numerem."
+
+msgid "web.admin.items.search.count.one"
+msgstr "Pasujące przedmioty: %(count)s."
+
+msgid "web.admin.items.search.count.few"
+msgstr "Pasujące przedmioty: %(count)s."
+
+msgid "web.admin.items.search.count.many"
+msgstr "Pasujące przedmioty: %(count)s."
+
+msgid "web.admin.items.search.count.other"
+msgstr "Pasujące przedmioty: %(count)s."
+
+msgid "web.admin.items.search.none"
+msgstr "Żaden przedmiot nie pasuje do „%(query)s”."
+
+msgid "web.admin.items.match.fits"
+msgstr "Pasuje"
+
+msgid "web.admin.items.match.refused"
+msgstr "Nie pasuje"
+
+msgid "web.admin.items.fit"
+msgstr "Pasuje do bohatera %(hero)s: %(rule)s."
+
+msgid "web.admin.items.unfit"
+msgstr "%(hero)s nie może używać przedmiotu %(item)s. Wymaga: %(rule)s. Sklep i gra odrzucają go tak samo."
+
+msgid "web.admin.items.unchecked"
+msgstr "Bez sprawdzenia w katalogu: frakcja, klasa, poziom i sposób posiadania pozostają nieznane do importu katalogu."
+
+msgid "web.admin.items.ownership"
+msgstr "Posiadanie"
+
+msgid "web.admin.items.tile.uses"
+msgstr "Użycia"
+
+msgid "web.admin.items.tile.left.one"
+msgstr "Teraz: %(count)s"
+
+msgid "web.admin.items.tile.left.few"
+msgstr "Teraz: %(count)s"
+
+msgid "web.admin.items.tile.left.many"
+msgstr "Teraz: %(count)s"
+
+msgid "web.admin.items.tile.left.other"
+msgstr "Teraz: %(count)s"
+
+msgid "web.admin.items.tile.below"
+msgstr "Liczba poniżej"
+
+msgid "web.admin.items.tile.counted"
+msgstr "Liczony w użyciach"
+
+msgid "web.admin.items.tile.not_counted"
+msgstr "Nie liczony w użyciach"
+
+msgid "web.admin.items.tile.held"
+msgstr "Posiadany na stałe"
+
+msgid "web.admin.items.tile.kept"
+msgstr "Na zawsze"
+
+msgid "web.admin.items.tile.replaces"
+msgstr "Zastępuje wypożyczenie"
+
+msgid "web.admin.items.uses"
+msgstr "Użycia do dodania"
+
+msgid "web.admin.items.new"
+msgstr "Nowy przedmiot: %(held)s."
+
+msgid "web.admin.items.adds_uses.one"
+msgstr "Dodaje użycia: %(count)s, pozostanie %(old)s → %(new)s."
+
+msgid "web.admin.items.adds_uses.few"
+msgstr "Dodaje użycia: %(count)s, pozostanie %(old)s → %(new)s."
+
+msgid "web.admin.items.adds_uses.many"
+msgstr "Dodaje użycia: %(count)s, pozostanie %(old)s → %(new)s."
+
+msgid "web.admin.items.adds_uses.other"
+msgstr "Dodaje użycia: %(count)s, pozostanie %(old)s → %(new)s."
+
+msgid "web.admin.items.adds_days.one"
+msgstr "Dodaje dni: %(count)s, koniec %(old)s → %(new)s."
+
+msgid "web.admin.items.adds_days.few"
+msgstr "Dodaje dni: %(count)s, koniec %(old)s → %(new)s."
+
+msgid "web.admin.items.adds_days.many"
+msgstr "Dodaje dni: %(count)s, koniec %(old)s → %(new)s."
+
+msgid "web.admin.items.adds_days.other"
+msgstr "Dodaje dni: %(count)s, koniec %(old)s → %(new)s."
+
+msgid "web.admin.items.becomes_permanent"
+msgstr "Przechodzi na stałe; wypożyczenie do %(date)s zostaje zastąpione."
+
+msgid "web.admin.items.next_login.short"
+msgstr "Gra wczytuje przedmioty przy następnym logowaniu bohatera."
+
+msgid "web.admin.items.change.title"
+msgstr "Zmiana przedmiotu"
+
+msgid "web.admin.items.change"
+msgstr "Zmień"
+
+msgid "web.admin.items.change.busy"
+msgstr "Zapisywanie…"
+
+msgid "web.admin.items.change.of"
+msgstr "Zmień przedmiot %(item)s"
+
+msgid "web.admin.items.revoke"
+msgstr "Odbierz"
+
+msgid "web.admin.items.revoke.busy"
+msgstr "Odbieranie…"
+
+msgid "web.admin.items.revoke.of"
+msgstr "Odbierz przedmiot %(item)s"
+
+msgid "web.admin.items.revoke.confirm"
+msgstr "Odebrać przedmiot %(item)s?"
+
+msgid "web.admin.items.revoke.text"
+msgstr "Przedmiot od razu znika z ekwipunku; gra wczytuje przedmioty przy następnym logowaniu bohatera. Nic nie jest zwracane: zwrot to przyznanie waluty z notatką wskazującą zakup."
+
+msgid "web.admin.items.again"
+msgstr "Przyznaj ponownie"
+
+msgid "web.admin.items.again.of"
+msgstr "Przyznaj ponownie przedmiot %(item)s"
+
+msgid "web.admin.items.held_by"
+msgstr "przedmiot %(id)s · ma go %(hero)s"
+
+msgid "web.admin.items.change.end"
+msgstr "Nowy koniec · UTC"
+
+msgid "web.admin.items.change.uses"
+msgstr "Pozostałe użycia"
+
+msgid "web.admin.items.change.now"
+msgstr "Teraz: %(now)s."
+
+msgid "web.admin.items.change.end.text"
+msgstr "Wypożyczenie trwa do końca wybranego dnia według UTC, zamiast do obecnego końca."
+
+msgid "web.admin.items.change.uses.text"
+msgstr "Liczba zastępuje pozostałe użycia."
+
+msgid "web.admin.toast.item.granted"
+msgstr "Przyznano przedmiot %(item)s bohaterowi %(hero)s: %(held)s. Gra wczytuje przedmioty przy następnym logowaniu bohatera."
+
+msgid "web.admin.toast.item.held"
+msgstr "Nic nie przyznano: %(hero)s ma przedmiot %(item)s na stałe."
+
+msgid "web.admin.toast.item.more"
+msgstr "Nic nie przyznano: liczba użyć przedmiotu %(item)s bohatera %(hero)s przekroczyłaby to, co odczytuje gra."
+
+msgid "web.admin.toast.item.changed"
+msgstr "Zmieniono przedmiot %(item)s bohatera %(hero)s."
+
+msgid "web.admin.toast.item.revoked"
+msgstr "Odebrano przedmiot %(item)s bohaterowi %(hero)s. Nic nie zostało zwrócone."
+
+msgid "web.admin.toast.item.unchanged"
+msgstr "Nic się nie zmieniło: %(hero)s nie ma już przedmiotu %(item)s w użyciu."
+
+msgid "web.admin.audit.action.item_grant"
+msgstr "Przyznanie przedmiotu"
+
+msgid "web.admin.audit.action.item_change"
+msgstr "Zmiana przedmiotu"
+
+msgid "web.admin.audit.action.item_revoke"
+msgstr "Odebranie przedmiotu"
+
+msgid "web.admin.audit.item"
+msgstr "%(item)s, %(held)s"
+
+msgid "web.admin.audit.uses"
+msgstr "pozostałe użycia: %(count)s"
+
+msgid "web.admin.audit.ends"
+msgstr "do %(time)s"
+
+msgid "web.admin.audit.changed"
+msgstr "%(before)s → %(after)s"

@@ -9674,7 +9674,7 @@ msgid "web.admin.hero.portrait.confirm.text"
 msgstr "%(game)s uploaded this image. Removing it deletes it; pages show a placeholder until the game sends a new portrait."
 
 msgid "web.admin.hero.managed"
-msgstr "Making a hero the default and removing its portrait need the admin role."
+msgstr "Making a hero the default, removing its portrait and changing items need the admin role."
 
 msgid "web.admin.toast.hero.renamed"
 msgstr "Renamed %(old)s to %(new)s. %(game)s shows the new name from the hero's next login."
@@ -9735,3 +9735,207 @@ msgstr "default moved to %(hero)s"
 
 msgid "web.admin.audit.default_was"
 msgstr "was %(hero)s"
+
+msgid "web.admin.items.grant"
+msgstr "Grant an item"
+
+msgid "web.admin.items.grant.submit"
+msgstr "Grant item"
+
+msgid "web.admin.items.grant.busy"
+msgstr "Granting…"
+
+msgid "web.admin.still_needed.item"
+msgstr "an item"
+
+msgid "web.admin.still_needed.uses"
+msgstr "a number of uses"
+
+msgid "web.admin.still_needed.end"
+msgstr "a new end"
+
+msgid "web.admin.items.refused"
+msgstr "Not granted: %(hero)s cannot use %(item)s."
+
+msgid "web.admin.items.held_permanent"
+msgstr "%(hero)s holds %(item)s for good; there is nothing to add."
+
+msgid "web.admin.items.more"
+msgstr "Not possible: there would be %(after)s uses, more than the game reads."
+
+msgid "web.admin.items.search"
+msgstr "Item · name or number"
+
+msgid "web.admin.items.search.hint"
+msgstr "Type a name or an item number."
+
+msgid "web.admin.items.search.no_catalogue"
+msgstr "The catalogue of %(game)s is not imported: type the item number."
+
+msgid "web.admin.items.search.count.one"
+msgstr "%(count)s item matches."
+
+msgid "web.admin.items.search.count.other"
+msgstr "%(count)s items match."
+
+msgid "web.admin.items.search.none"
+msgstr "No item matches “%(query)s”."
+
+msgid "web.admin.items.match.fits"
+msgstr "Fits"
+
+msgid "web.admin.items.match.refused"
+msgstr "Does not fit"
+
+msgid "web.admin.items.fit"
+msgstr "Fits %(hero)s: %(rule)s."
+
+msgid "web.admin.items.unfit"
+msgstr "%(hero)s cannot use %(item)s. Requires: %(rule)s. The store and the game refuse it the same way."
+
+msgid "web.admin.items.unchecked"
+msgstr "Not checked against the catalogue: the faction, class, level and how the item is held are unknown until the catalogue is imported."
+
+msgid "web.admin.items.ownership"
+msgstr "Ownership"
+
+msgid "web.admin.items.tile.uses"
+msgstr "Uses"
+
+msgid "web.admin.items.tile.left.one"
+msgstr "%(count)s left now"
+
+msgid "web.admin.items.tile.left.other"
+msgstr "%(count)s left now"
+
+msgid "web.admin.items.tile.below"
+msgstr "Number below"
+
+msgid "web.admin.items.tile.counted"
+msgstr "Counted in uses"
+
+msgid "web.admin.items.tile.not_counted"
+msgstr "Not counted in uses"
+
+msgid "web.admin.items.tile.held"
+msgstr "Held for good"
+
+msgid "web.admin.items.tile.kept"
+msgstr "Kept for good"
+
+msgid "web.admin.items.tile.replaces"
+msgstr "Replaces the rental"
+
+msgid "web.admin.items.uses"
+msgstr "Uses to add"
+
+msgid "web.admin.items.new"
+msgstr "New item: %(held)s."
+
+msgid "web.admin.items.adds_uses.one"
+msgstr "Adds %(count)s use: %(old)s → %(new)s uses left."
+
+msgid "web.admin.items.adds_uses.other"
+msgstr "Adds %(count)s uses: %(old)s → %(new)s uses left."
+
+msgid "web.admin.items.adds_days.one"
+msgstr "Adds %(count)s day: ends %(old)s → %(new)s."
+
+msgid "web.admin.items.adds_days.other"
+msgstr "Adds %(count)s days: ends %(old)s → %(new)s."
+
+msgid "web.admin.items.becomes_permanent"
+msgstr "Becomes permanent; the rental ending %(date)s is replaced."
+
+msgid "web.admin.items.next_login.short"
+msgstr "The game reads items at the hero's next login."
+
+msgid "web.admin.items.change.title"
+msgstr "Change an item"
+
+msgid "web.admin.items.change"
+msgstr "Change"
+
+msgid "web.admin.items.change.busy"
+msgstr "Saving…"
+
+msgid "web.admin.items.change.of"
+msgstr "Change %(item)s"
+
+msgid "web.admin.items.revoke"
+msgstr "Revoke"
+
+msgid "web.admin.items.revoke.busy"
+msgstr "Revoking…"
+
+msgid "web.admin.items.revoke.of"
+msgstr "Revoke %(item)s"
+
+msgid "web.admin.items.revoke.confirm"
+msgstr "Revoke %(item)s?"
+
+msgid "web.admin.items.revoke.text"
+msgstr "The item leaves the hero's inventory now; the game reads items at the hero's next login. Nothing is refunded: a refund is a grant of the currency with a note that names the purchase."
+
+msgid "web.admin.items.again"
+msgstr "Grant again"
+
+msgid "web.admin.items.again.of"
+msgstr "Grant %(item)s again"
+
+msgid "web.admin.items.held_by"
+msgstr "item %(id)s · held by %(hero)s"
+
+msgid "web.admin.items.change.end"
+msgstr "New end · UTC"
+
+msgid "web.admin.items.change.uses"
+msgstr "Uses left"
+
+msgid "web.admin.items.change.now"
+msgstr "Now: %(now)s."
+
+msgid "web.admin.items.change.end.text"
+msgstr "The rental lasts to the end of the chosen day in UTC, in place of its end now."
+
+msgid "web.admin.items.change.uses.text"
+msgstr "The number replaces the uses left."
+
+msgid "web.admin.toast.item.granted"
+msgstr "Granted %(item)s to %(hero)s: %(held)s. The game reads items at the hero's next login."
+
+msgid "web.admin.toast.item.held"
+msgstr "Nothing was granted: %(hero)s holds %(item)s for good."
+
+msgid "web.admin.toast.item.more"
+msgstr "Nothing was granted: %(hero)s would hold more uses of %(item)s than the game reads."
+
+msgid "web.admin.toast.item.changed"
+msgstr "Changed %(item)s of %(hero)s."
+
+msgid "web.admin.toast.item.revoked"
+msgstr "Revoked %(item)s from %(hero)s. Nothing was refunded."
+
+msgid "web.admin.toast.item.unchanged"
+msgstr "Nothing changed: %(hero)s no longer holds %(item)s in use."
+
+msgid "web.admin.audit.action.item_grant"
+msgstr "Item granted"
+
+msgid "web.admin.audit.action.item_change"
+msgstr "Item changed"
+
+msgid "web.admin.audit.action.item_revoke"
+msgstr "Item revoked"
+
+msgid "web.admin.audit.item"
+msgstr "%(item)s, %(held)s"
+
+msgid "web.admin.audit.uses"
+msgstr "%(count)s uses left"
+
+msgid "web.admin.audit.ends"
+msgstr "ends %(time)s"
+
+msgid "web.admin.audit.changed"
+msgstr "%(before)s → %(after)s"

@@ -1,7 +1,13 @@
+from datetime import datetime
 from typing import Any
 
 from openfesl.core.admin import AdminAction
+from openfesl.core.catalogues import Catalogues
+from openfesl.core.games import Games
+from openfesl.core.personas import Persona
 from openfesl.core.texts import translate
+from openfesl.web.pages import moment
+from openfesl.web.pages import number as grouped
 
 
 def hero_entry(action: AdminAction, details: dict[str, Any], owner: str, language: str) -> str:
@@ -19,3 +25,45 @@ def hero_entry(action: AdminAction, details: dict[str, Any], owner: str, languag
     if details.get("was"):
         return translate("web.admin.audit.default_was", language) % {"hero": details["was"]}
     return owner
+
+
+async def item_entry(
+    action: AdminAction,
+    details: dict[str, Any],
+    persona: Persona,
+    games: Games,
+    catalogues: Catalogues,
+    language: str,
+) -> str:
+    """Return what the audit log says of an item that the admin granted a hero, changed or revoked.
+
+    Args:
+        action: What the admin did: granted the item, changed how it is held or revoked it.
+        details: The change's details, as the admin's log keeps them.
+        persona: The hero's persona.
+        games: The games, one of which the hero plays.
+        catalogues: Name the items.
+        language: The log's language.
+    """
+    played = next(game for game in games if game.namespace == persona.namespace)
+    catalogue = await catalogues.of(played, language)
+    item = details["item"]
+    name = catalogue.name(item) or translate("web.admin.items.unnamed", language) % {"id": item}
+    if action is AdminAction.ITEM_REVOKE:
+        return name
+    held = _held(details, language)
+    if action is AdminAction.ITEM_CHANGE:
+        changed = {"before": _held(details["before"], language), "after": held}
+        held = translate("web.admin.audit.changed", language) % changed
+    return translate("web.admin.audit.item", language) % {"item": name, "held": held}
+
+
+def _held(values: dict[str, Any], language: str) -> str:
+    # How a hero holds an item, as the log keeps it.
+    if values.get("uses") is not None:
+        uses = grouped(values["uses"], language)
+        return translate("web.admin.audit.uses", language) % {"count": uses}
+    if values.get("expires"):
+        day = moment(datetime.fromisoformat(values["expires"]), language)
+        return translate("web.admin.audit.ends", language) % {"time": day}
+    return translate("web.store.price.permanent", language)

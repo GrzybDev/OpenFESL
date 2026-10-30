@@ -1,0 +1,144 @@
+{#def page, grant, back: str, note: str, error: str #}
+{# Granting a hero an item, as a page of its own: the search of the game's catalogue by
+   name or number, whether the chosen item fits the hero, the ways to own it with what each does,
+   and what the grant adds. Without the catalogue an item is chosen by number, unchecked. Where
+   scripts run, it opens as a dialog over the hero's page and follows each choice. #}
+{% set game = page.game %}
+{% set catalogue = page.catalogue %}
+{% set hero = page.card.hero %}
+{% set account = page.view.record.account %}
+{% set title = _("web.admin.hero.title") %}
+{% set path = "/admin/accounts/" ~ account.id ~ "/heroes/" ~ hero.persona.id ~ "/items/grant" %}
+{% set icons = catalogue.contents.icons %}
+{% set chosen_name = catalogue.name(grant.item) or _("web.admin.items.unnamed", id=grant.item) if grant.item else "" %}
+{% if error == "item" %}
+  {% set why = _("web.admin.still_needed", what=_("web.admin.still_needed.item")) %}
+{% elif error == "fit" %}
+  {% set why = _("web.admin.items.refused", hero=hero.persona.name, item=chosen_name) %}
+{% elif error == "result" %}
+  {% set why = _("web.admin.items.held_permanent", hero=hero.persona.name, item=chosen_name) %}
+{% elif error == "more" %}
+  {% set why = _("web.admin.items.more", after=number(grant.over)) %}
+{% else %}
+  {% set why = "" %}
+{% endif %}
+{% if grant.item and not grant.fits %}
+  {% set blocked = _("web.admin.items.refused", hero=hero.persona.name, item=chosen_name) %}
+{% elif grant.item and not grant.result %}
+  {% set blocked = _("web.admin.items.held_permanent", hero=hero.persona.name, item=chosen_name) %}
+{% elif grant.item and grant.over %}
+  {% set blocked = _("web.admin.items.more", after=number(grant.over)) %}
+{% else %}
+  {% set blocked = "" %}
+{% endif %}
+<AdminPage :title="title ~ ' · ' ~ hero.persona.name" current="accounts">
+  <PageHead labelledby="grant-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="grant-title">{{ hero.persona.name }}</TitleBlock>
+    </div>
+  </PageHead>
+  <Panel class="enter-panel confirm-frame">
+    <AdminForm :question="_('web.admin.items.grant')" :action="url(path)" :label="_('web.admin.items.grant.submit')" :busy="_('web.admin.items.grant.busy')" :back="back" :note="note" :error="error" :why="why" :search="url(path)">
+    <p class="confirm-account">
+      <span>{{ hero.persona.name }}</span>
+      <span>{{ _("web.admin.hero.line", faction=_("games." ~ game.id ~ ".faction." ~ hero.faction), hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class), level=number(hero.level), id=hero.persona.id) if hero.faction and hero.hero_class else _("web.admin.hero.heading", id=hero.persona.id) }}</span>
+    </p>
+    <label for="grant-q" class="field-label field-label-joined">{{ _("web.admin.items.search") }}</label>
+    <div class="admin-search">
+      <input id="grant-q"
+             name="q"
+             form="admin-search"
+             type="search"
+             value="{{ grant.query }}"
+             autocomplete="off"
+             spellcheck="false"
+             {% if not grant.item %} autofocus{% endif %}
+             data-refresh
+             aria-describedby="grant-found"
+             class="field-input">
+      <input type="hidden" name="back" form="admin-search" value="{{ back }}">
+      <button type="submit" form="admin-search" class="list-button no-js-only">{{ _("web.admin.find.search") }}</button>
+    </div>
+    <div data-live="{{ url(path) }}"
+         {% if blocked %} data-blocked="{{ blocked }}"{% endif %}
+         class="admin-grant">
+      <p id="grant-found" aria-live="polite" class="field-note">
+        {% if not catalogue.imported %}
+          {{ _("web.admin.items.search.no_catalogue", game=game.name) }}
+        {% elif not grant.query %}
+          {{ _("web.admin.items.search.hint") }}
+        {% elif grant.matches %}
+          {{ _n("web.admin.items.search.count", grant.matches|length) }}
+        {% else %}
+          {{ _("web.admin.items.search.none", query=grant.query) }}
+        {% endif %}
+      </p>
+      {% if grant.matches %}
+        <ul class="admin-matches">
+          {% for number, item in grant.matches %}
+            {% set name = catalogue.name(number) %}
+            <li>
+              <a href="{{ url(path) }}?{{ {'q': grant.query, 'item': number, 'back': back}|urlencode }}"
+                 data-choose
+                 {% if number == grant.item %} aria-current="true"{% endif %}
+                 class="admin-match">
+                {% if icons and item and item.icon %}
+                  <img src="{{ url('/admin/icons/' ~ game.id ~ '/' ~ number) }}"
+                       alt=""
+                       class="admin-item-icon">
+                {% else %}
+                  <span aria-hidden="true"
+                        class="admin-item-icon admin-item-icon-none"><Icon name="doc" :size="18" stroke="currentColor" /></span>
+                {% endif %}
+                <span class="cell-stack">
+                  <span class="admin-hero-strong">{{ name or _("web.admin.items.unnamed", id=number) }}</span>
+                  <span class="admin-item-kind">
+                    {{ _("games." ~ game.id ~ ".item_kind." ~ item.kind) if item else _("web.admin.items.kind.unknown") }} · {{ _("web.admin.items.number", id=number) }}
+                    {%- if item and item.withheld %} · {{ _("web.admin.items.withheld") }}{% endif -%}
+                  </span>
+                </span>
+                {% if number == grant.item and item %}
+                  <span class="admin-match-fit">{{ _("web.admin.items.match.fits") if grant.fits else _("web.admin.items.match.refused") }}</span>
+                {% endif %}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      <input type="hidden"
+             name="item"
+             value="{{ grant.item or '' }}"
+             data-needed="{{ _('web.admin.still_needed.item') }}">
+      {% if grant.item %}
+        <p class="admin-fit{% if not grant.fits %} admin-fit-no{% endif %}">
+          <span aria-hidden="true" class="badge"><Icon :name="'tick' if grant.fits and catalogue.item(grant.item) else 'warn'" :size="14" stroke="#0A0A0A" fill="#0A0A0A" /></span>
+          {{ grant.fit }}
+        </p>
+        {% if grant.fits %}
+          <fieldset class="choice-tiles admin-tiles">
+            <legend class="sr-only">{{ _("web.admin.items.ownership") }}</legend>
+            {% for tile in grant.tiles %}
+              <ChoiceTile name="ownership" :value="tile.key" :title="tile.title" :glyph="tile.glyph" :checked="tile.key == grant.ownership" :disabled="tile.disabled">
+              <span class="choice-text">{{ tile.hint }}</span>
+              </ChoiceTile>
+            {% endfor %}
+          </fieldset>
+          <div class="admin-uses">
+            <label for="grant-uses" class="field-label field-label-joined">{{ _("web.admin.items.uses") }}</label>
+            <input id="grant-uses"
+                   name="uses"
+                   type="number"
+                   min="1"
+                   max="2147483647"
+                   value="{{ grant.uses }}"
+                   data-refresh
+                   class="field-input">
+          </div>
+          <p class="bar-text admin-result">{{ blocked or grant.result }}</p>
+        {% endif %}
+      {% endif %}
+      <p id="confirm-text" class="body-text">{{ _("web.admin.items.next_login.short") }}</p>
+    </div>
+    </AdminForm>
+  </Panel>
+</AdminPage>

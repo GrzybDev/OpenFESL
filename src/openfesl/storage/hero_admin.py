@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import func, select, update
@@ -7,10 +7,14 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin
-from openfesl.core.hero_admin import HeroHistory, ItemSource
+from openfesl.core.entitlements import ACTIVE
+from openfesl.core.hero_admin import HeroHistory, ItemSource, TooManyUses
 from openfesl.core.heroes import Hero, HeroRefused, Refusal
+from openfesl.core.inventory import COUNTED, RENTED, Held, Ownership, fold
 from openfesl.core.personas import Persona, PersonaState
+from openfesl.core.wallets import MOST_BALANCE
 from openfesl.storage.admin import action_row, audit_entry
+from openfesl.storage.entitlements import REVOKED, add_item, locked_item
 from openfesl.storage.heroes import set_default
 from openfesl.storage.models import (
     AdminActionRow,
@@ -23,6 +27,8 @@ from openfesl.storage.mugshots import SHOWN
 
 # What each kind of purchase that a hero makes gave it the items through.
 _PURCHASES = {"product": ItemSource.STORE, "bundle": ItemSource.HOT_DEAL, "box": ItemSource.BOX}
+# The admin's actions that a hero's history reads.
+_RECORDED = [AdminAction.PERSONA_STATE, AdminAction.ITEM_GRANT, AdminAction.ITEM_REVOKE]
 
 
 class SqlHeroAdmin:
@@ -61,17 +67,24 @@ class SqlHeroAdmin:
             mugshot = await session.scalar(
                 select(MugshotRow.updated_at).where(MugshotRow.persona_id == persona_id, SHOWN)
             )
-            state = await session.scalar(
+            actions = await session.scalars(
                 select(AdminActionRow)
                 .where(
-                    AdminActionRow.action == AdminAction.PERSONA_STATE,
+                    AdminActionRow.action.in_(_RECORDED),
                     AdminActionRow.target == str(persona_id),
                 )
-                .order_by(AdminActionRow.id.desc())
-                .limit(1)
+                .order_by(AdminActionRow.id)
             )
+            state, revoked = None, {}
+            for row in actions:
+                if row.action == AdminAction.PERSONA_STATE:
+                    state = audit_entry(row)
+                elif row.action == AdminAction.ITEM_REVOKE:
+                    revoked[row.details["item"]] = row.at
+                else:
+                    found.append((row.at, row.details["item"], ItemSource.ADMIN))
         sources = {item: source for _, item, source in sorted(found)}
-        return HeroHistory(sources, {}, mugshot, audit_entry(state) if state else None)
+        return HeroHistory(sources, revoked, mugshot, state)
 
     async def rename(self, persona: Persona, name: str, note: str, admin: Admin) -> None:
         """Give a hero a new name, free of charge.
@@ -143,6 +156,104 @@ class SqlHeroAdmin:
             details = {"was": was.persona.name if was else None, "note": note}
             session.add(action_row(AdminAction.HERO_DEFAULT, str(persona.id), details, admin))
 
+    async def grant_item(
+        self, persona: Persona, item_id: int, gained: Ownership, note: str, admin: Admin
+    ) -> Held | None:
+        """Grant a hero an item, as the game folds what it gains; one taken out of use returns.
+
+        Args:
+            persona: The hero's persona.
+            item_id: The item's number.
+            gained: How the hero gains it.
+            note: Why, as the admin wrote it.
+            admin: The admin who granted it.
+
+        Returns:
+            How the hero holds the item then, or None when it owns the item for good already.
+
+        Raises:
+            TooManyUses: When the hero would then hold more uses than the game reads, also
+                after a grant at the same time; nothing is granted.
+        """
+        async with self._sessions.begin() as session:
+            row = await locked_item(session, persona.id, item_id)
+            if row is not None and row.status != ACTIVE:
+                held = fold(None, gained, datetime.now(UTC))
+                assert held is not None
+                row.status, row.tag = ACTIVE, f"{item_id}-{held.type}"
+                row.use_count, row.expires_at = held.uses, held.expires
+            else:
+                held = await add_item(session, persona.account_id, persona.id, item_id, gained)
+            if held is None:
+                return None
+            if (held.uses or 0) > MOST_BALANCE:
+                # Leaving the block by the exception rolls the folded uses back.
+                raise TooManyUses
+            details = {"item": item_id, "ownership": gained.written, "note": note}
+            details |= _left(held.expires, held.uses)
+            session.add(action_row(AdminAction.ITEM_GRANT, str(persona.id), details, admin))
+            return held
+
+    async def change_item(
+        self,
+        persona: Persona,
+        item_id: int,
+        expires: datetime | None,
+        uses: int | None,
+        note: str,
+        admin: Admin,
+    ) -> bool:
+        """Change when a hero's rental of an item ends, or how many uses it has left of one.
+
+        Args:
+            persona: The hero's persona.
+            item_id: The item's number.
+            expires: The rental's new end, for an item the hero rents.
+            uses: The new number of uses left, for an item counted in uses.
+            note: Why, as the admin wrote it.
+            admin: The admin who changed it.
+
+        Returns:
+            Whether the hero holds the item in use that way.
+        """
+        async with self._sessions.begin() as session:
+            row = await locked_item(session, persona.id, item_id)
+            if row is None or row.status != ACTIVE:
+                return False
+            before = _left(row.expires_at, row.use_count)
+            held = row.tag.partition("-")[2]
+            if held == COUNTED and uses is not None:
+                row.use_count = uses
+            elif held == RENTED and expires is not None:
+                row.expires_at = expires
+            else:
+                return False
+            details = {"item": item_id, "before": before, "note": note}
+            details |= _left(row.expires_at, row.use_count)
+            session.add(action_row(AdminAction.ITEM_CHANGE, str(persona.id), details, admin))
+            return True
+
+    async def revoke_item(self, persona: Persona, item_id: int, note: str, admin: Admin) -> bool:
+        """Take an item out of a hero's use, refunding nothing.
+
+        Args:
+            persona: The hero's persona.
+            item_id: The item's number.
+            note: Why, as the admin wrote it.
+            admin: The admin who took it.
+
+        Returns:
+            Whether the hero held it in use.
+        """
+        async with self._sessions.begin() as session:
+            row = await locked_item(session, persona.id, item_id)
+            if row is None or row.status != ACTIVE:
+                return False
+            row.status = REVOKED
+            details = {"item": item_id, "note": note}
+            session.add(action_row(AdminAction.ITEM_REVOKE, str(persona.id), details, admin))
+            return True
+
     async def remove_mugshot(self, persona: Persona, note: str, admin: Admin) -> bool:
         """Remove the mugshot that the game sent of a hero, until it sends another.
 
@@ -165,3 +276,8 @@ class SqlHeroAdmin:
                 target = str(persona.id)
                 session.add(action_row(AdminAction.MUGSHOT_REMOVE, target, {"note": note}, admin))
             return removed is not None
+
+
+def _left(expires: datetime | None, uses: int | None) -> dict[str, Any]:
+    # What a hero has of an item, as the log keeps it.
+    return {"expires": expires.isoformat() if expires else None, "uses": uses}
