@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import partial
 
 from starlette.requests import Request
@@ -7,6 +7,7 @@ from starlette.types import ASGIApp, Receive, Scope, Send
 from openfesl.core.game_pages import SiteWallet
 from openfesl.core.games import Game, Games
 from openfesl.core.heroes import Heroes, Roster
+from openfesl.core.rewards import Reward, Rewards, RewardState
 from openfesl.core.wallets import Wallets
 from openfesl.web.pages import Player
 
@@ -26,11 +27,18 @@ class SiteBar:
         wallets: The balances the account has to spend, each with how the bar draws it.
         roster: The account's heroes, in a game whose heroes are made on its site.
         funds: What the account has to pay the game's prices with, in such a game.
+        rewards: Its game's rewards as the account sees them now, which its pages read.
     """
 
     wallets: list[tuple[SiteWallet, int]]
     roster: Roster | None
     funds: int
+    rewards: list[Reward] = field(default_factory=list)
+
+    @property
+    def ready(self) -> int:
+        """How many of its game's rewards the account may claim now."""
+        return sum(reward.state is RewardState.CLAIMABLE for reward in self.rewards)
 
 
 async def site_bar(request: Request) -> SiteBar | None:
@@ -54,7 +62,9 @@ class SiteBarMiddleware:
     page.
     """
 
-    def __init__(self, app: ASGIApp, games: Games, wallets: Wallets, heroes: Heroes) -> None:
+    def __init__(
+        self, app: ASGIApp, games: Games, wallets: Wallets, heroes: Heroes, rewards: Rewards
+    ) -> None:
         """Read the bars of the games that have a site of their own.
 
         Args:
@@ -62,11 +72,13 @@ class SiteBarMiddleware:
             games: The games the server serves.
             wallets: The players' wallets.
             heroes: The heroes of the games whose heroes are made on their site.
+            rewards: The rewards of the games whose sites give them, which the menus count.
         """
         self._app = app
         self._games = {game.id: game for game in games if game.site}
         self._wallets = wallets
         self._heroes = heroes
+        self._rewards = rewards
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         """Answer a request with the bar of its game's site in its state, when it has one.
@@ -99,4 +111,5 @@ class SiteBarMiddleware:
             return SiteBar(list(zip(shown, balances, strict=True)), None, 0)
         roster = await self._heroes.roster(game, player.account_id)
         [funds] = await self._wallets.of_account(game, player.account_id, [game.heroes.currency])
-        return SiteBar(list(zip(shown, balances, strict=True)), roster, funds)
+        rewards = await self._rewards.available(game, player.account_id)
+        return SiteBar(list(zip(shown, balances, strict=True)), roster, funds, rewards)

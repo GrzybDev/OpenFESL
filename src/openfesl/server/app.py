@@ -89,7 +89,11 @@ def _add_middleware(
     # sign-ins and their forms store anything in the session, so other pages set no cookie.
     secret = settings.session_secret.get_secret_value() if settings.session_secret else None
     app.add_middleware(
-        SiteBarMiddleware, games=games, wallets=services.wallets, heroes=services.heroes
+        SiteBarMiddleware,
+        games=games,
+        wallets=services.wallets,
+        heroes=services.heroes,
+        rewards=services.rewards,
     )
     app.add_middleware(PlayerSessionMiddleware, accounts=stores.accounts.account)
     app.add_middleware(

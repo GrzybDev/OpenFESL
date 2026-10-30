@@ -15,7 +15,7 @@ from openfesl.core.entitlements import ACTIVE, EntitlementQuery, EntitlementStor
 from openfesl.core.games import Game, Games
 from openfesl.core.heroes import Hero, Roster
 from openfesl.core.inventory import COUNTED, PERMANENT, RENTED, Ownership
-from openfesl.core.rewards import FIRST_CHEST, Rewards, RewardState
+from openfesl.core.rewards import FIRST_CHEST, RewardState
 from openfesl.core.texts import localize
 from openfesl.core.wallets import Wallets
 from openfesl.web.account.session import signed_in
@@ -83,7 +83,6 @@ class ChestsPages:
         entitlements: EntitlementStore,
         catalogues: Catalogues,
         wallets: Wallets,
-        rewards: Rewards,
     ) -> None:
         """Prepare the treasure chests page of each game that lists it.
 
@@ -94,7 +93,6 @@ class ChestsPages:
             entitlements: Hold the account's keys and its heroes' chests.
             catalogues: Name the items the chests give, once imported.
             wallets: Tell what the account has to pay keys with, opening nothing.
-            rewards: Tell whether the account's first key waits to be claimed.
         """
         self._pages = pages
         self._games = games
@@ -102,7 +100,6 @@ class ChestsPages:
         self._entitlements = entitlements
         self._catalogues = catalogues
         self._wallets = wallets
-        self._rewards = rewards
 
     def routes(self) -> APIRouter:
         """Return the treasure chests page of each game that lists it, and its forms."""
@@ -124,7 +121,7 @@ class ChestsPages:
                 keys, heroes = await self._held(_rules(game), player.account_id, bar.roster)
                 waits = any(
                     reward.key == FIRST_CHEST and reward.state is RewardState.CLAIMABLE
-                    for reward in await self._rewards.available(game, player.account_id)
+                    for reward in bar.rewards
                 )
                 if key:
                     [funds] = await self._wallets.of_account(

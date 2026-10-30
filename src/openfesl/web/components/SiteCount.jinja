@@ -1,0 +1,3 @@
+{#def count: int #}
+{# How many rewards the account may claim, in a green circle, said in words to screen readers. #}
+<span class="site-count"><span aria-hidden="true">{{ number(count) }}</span><span class="sr-only">{{ _n("web.site.rewards_count", count) }}</span></span>

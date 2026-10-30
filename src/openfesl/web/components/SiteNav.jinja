@@ -1,6 +1,7 @@
 {# The menus of a game's own site: a tab per menu that lists one of the game's pages, open without
    scripts as a disclosure, and a signed-in account's heroes; the tab of the current page's menu
-   wears the menus' colour. #}
+   wears the menus' colour. The rewards to claim are counted in green on their entry and the tab
+   of its menu, as the 2012 site counted them. #}
 {% set glyphs = {
   "play": "book",
   "leaderboard": "bars",
@@ -25,10 +26,14 @@
             {% set ns.current = True %}
           {% endif %}
         {% endfor %}
+        {% set ready = bar.ready if bar and "rewards" in entries else 0 %}
         <li>
           <details data-site-menu class="site-menu">
             <summary class="site-tab{% if ns.current %} site-tab-current{% endif %}">
-              {{ _("games." ~ game.id ~ ".menu." ~ menu.name) }}<Icon name="down" :size="12" stroke="#FEDE01" class="site-turn" />
+              {{ _("games." ~ game.id ~ ".menu." ~ menu.name) }}
+              {%- if ready %}<SiteCount :count="ready" />
+              {% endif -%}
+              <Icon name="down" :size="12" stroke="#FEDE01" class="site-turn" />
             </summary>
             <ul class="site-entries">
               {% for kind in entries %}
@@ -36,7 +41,10 @@
                 <li>
                   <a href="{{ url(base) }}"
                      {% if path == base %} aria-current="page"{% endif %}
-                     class="site-entry"><Icon :name="glyphs[kind]" :size="16" stroke="#F2C12E" />{{ _("web.site.page." ~ kind) }}</a>
+                     class="site-entry"><Icon :name="glyphs[kind]" :size="16" stroke="#F2C12E" />{{ _("web.site.page." ~ kind) }}
+                    {%- if kind == "rewards" and ready %}<SiteCount :count="ready" />
+                    {% endif -%}
+                  </a>
                 </li>
               {% endfor %}
             </ul>

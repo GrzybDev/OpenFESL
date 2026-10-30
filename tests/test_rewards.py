@@ -9,7 +9,7 @@ import anyio
 import pytest
 from accounts import execute, select_value
 from heroes import create_hero
-from living import NATIONAL, ROYAL, import_catalogue, setting, worn
+from living import NATIONAL, ROYAL, freeze, import_catalogue, setting, worn
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from store import ROYAL_SOLDIER
@@ -56,6 +56,9 @@ INVENTED = {
 }
 # The fifth day of Christmas, and the birthday a year apart.
 CHRISTMAS = datetime(2026, 12, 5, 12, tzinfo=UTC)
+# A day without events, which the server's own pages see while a test makes its heroes, so that
+# they take no event's baselines before the test's clock does.
+QUIET = datetime(2026, 3, 2, tzinfo=UTC)
 BIRTHDAYS = (datetime(2026, 6, 26, tzinfo=UTC), datetime(2027, 6, 30, tzinfo=UTC))
 
 
@@ -115,8 +118,10 @@ async def site(
     database_url: str,
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
     bfheroes: Game,
 ) -> AsyncIterator[Site]:
+    freeze(monkeypatch, QUIET)
     await import_catalogue(server_url, tmp_path, capsys, INVENTED)
     engine = create_async_engine(database_url)
     found = Site(bfheroes, async_sessionmaker(engine))

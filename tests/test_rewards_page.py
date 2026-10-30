@@ -68,6 +68,8 @@ async def test_the_rewards_page_shows_each_gift_and_gives_a_claimed_one_once_to_
     # The heroes were made more than a month before Christmas, so their packs ran out.
     assert "Starter pack · Cutthroat Not claimed" in shown
     assert "Coming up: Valentine's Day from 13 Feb" in shown
+    # The menus count what waits: the Royal gift and the first hero's Funds.
+    assert shown.count("2 rewards to claim") == 2
     # Each hero gets one roll of the box; the default hero is picked.
     assert visible(picking.content).count("Opens at once for this hero") == 2
     assert re.search(rf'value="{soldier}"[^>]* checked', picking.text)
@@ -79,6 +81,7 @@ async def test_the_rewards_page_shows_each_gift_and_gives_a_claimed_one_once_to_
     assert "Claimed this year · 1" in after
     money = visible(funded.content)
     assert "3,100 Funds" in money
+    assert "rewards to claim" not in money and "Nothing to claim right now" in money
     assert "Świąteczne prezenty, dzień 5 z 24." in polish
     assert "Odebrane w tym roku · 2" in polish
 

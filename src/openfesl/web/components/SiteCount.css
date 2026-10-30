@@ -1,0 +1,18 @@
+/* The green count of rewards to claim beside a menu's name, as the 2012 site's green circle. */
+@layer components {
+  .site-count {
+    display: inline-grid;
+    min-width: 24px;
+    height: 24px;
+    place-items: center;
+    margin-inline: 4px;
+    padding-inline: 6px;
+    border: 2px solid #000;
+    border-radius: 12px;
+    background: #3d6b1f;
+    color: #fff;
+    font: 800 13px/1 var(--site-heading);
+    text-shadow: none;
+    text-transform: none;
+  }
+}

@@ -125,7 +125,6 @@ def include_public_routes(
             stores.entitlements,
             services.catalogues,
             services.wallets,
-            services.rewards,
         ).routes()
     )
     app.include_router(

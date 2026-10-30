@@ -9067,3 +9067,15 @@ msgstr "Nic nie przyznano: nagroda %(reward)s nie może trafić do bohatera %(he
 
 msgid "web.rewards.refused.expired"
 msgstr "Nic nie przyznano: minął czas na odebranie nagrody %(reward)s."
+
+msgid "web.site.rewards_count.one"
+msgstr "%(count)s nagroda do odebrania"
+
+msgid "web.site.rewards_count.few"
+msgstr "%(count)s nagrody do odebrania"
+
+msgid "web.site.rewards_count.many"
+msgstr "%(count)s nagród do odebrania"
+
+msgid "web.site.rewards_count.other"
+msgstr "%(count)s nagrody do odebrania"

@@ -8559,3 +8559,9 @@ msgstr "Nothing was given: %(reward)s cannot go to %(hero)s."
 
 msgid "web.rewards.refused.expired"
 msgstr "Nothing was given: the time to claim %(reward)s ran out."
+
+msgid "web.site.rewards_count.one"
+msgstr "%(count)s reward to claim"
+
+msgid "web.site.rewards_count.other"
+msgstr "%(count)s rewards to claim"

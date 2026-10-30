@@ -8,13 +8,14 @@ from openfesl.core.catalogues import Catalogues
 from openfesl.core.entitlements import EntitlementStore
 from openfesl.core.games import Game, Games
 from openfesl.core.reward_claims import Claimed
-from openfesl.core.rewards import Reward, RewardRefused, Rewards, RewardState
+from openfesl.core.rewards import Reward, RewardRefused, Rewards
 from openfesl.core.store import ProductStore
 from openfesl.core.texts import localize
 from openfesl.web.account.session import signed_in
 from openfesl.web.pages import Pages, listed
 from openfesl.web.reward_cards import RewardCards, reward_cards
 from openfesl.web.sessions import form_matches, form_token, toast
+from openfesl.web.site import site_bar
 
 REWARDS = "/rewards"
 CLAIM = "/rewards/claim"
@@ -71,6 +72,7 @@ class RewardsPages:
             running = await self._rewards.running(game)
             upcoming = [words.event(run) for run in await self._rewards.upcoming(game)]
             player = signed_in(request)
+            bar = await site_bar(request)
             # The milestone that counts the account's heroes up to its first one.
             first_hero = next(
                 (m for m in rules.milestones.values() if m.enabled and not m.stats and m.goal == 1),
@@ -82,8 +84,8 @@ class RewardsPages:
             ]
             available: list[Reward] = []
             history: list[Claimed] = []
-            if words.roster and player:
-                available = await self._rewards.available(game, player.account_id)
+            if bar and bar.roster and player:
+                available = bar.rewards
                 history = await self._rewards.history(game, player.account_id)
             return self._pages.render(
                 request,
@@ -96,7 +98,7 @@ class RewardsPages:
                 sections=await cards.sections(available, running),
                 past=[words.past(claimed) for claimed in history] + words.lapsed(history),
                 claimed=len(history),
-                ready=sum(reward.state is RewardState.CLAIMABLE for reward in available),
+                ready=bar.ready if bar else 0,
                 daily=words.daily(running),
                 year=str(today(words.now, rules.zone).year),
                 next=localize(f"/{game.id}{REWARDS}", texts.language),
@@ -110,9 +112,10 @@ class RewardsPages:
         async def show_claim(request: Request) -> Response:
             # The claim form as a page of its own, where scripts show it as a dialog.
             cards = await self._cards(game, request)
+            bar = await site_bar(request)
             fields = request.query_params
             key, faction = fields.get("key", ""), fields.get("faction", "")
-            reward = _named(await self._available(game, request, cards), key, faction)
+            reward = _named(bar.rewards if bar else [], key, faction)
             page = localize(f"/{game.id}{REWARDS}", request.state.language)
             if reward is None:
                 return RedirectResponse(page, 303)
@@ -139,8 +142,9 @@ class RewardsPages:
                 return RedirectResponse(page, 303)
             cards = await self._cards(game, request)
             claims, words = cards.claims, cards.words
+            bar = await site_bar(request)
             key, faction = str(form.get("key", "")), str(form.get("faction", ""))
-            reward = _named(await self._available(game, request, cards), key, faction)
+            reward = _named(bar.rewards if bar else [], key, faction)
             if reward is None:
                 message, values = claims.refused(key, None, None, "")
                 toast(request, message, error=True, **values)
@@ -186,14 +190,6 @@ class RewardsPages:
         stores = self._catalogues, self._entitlements, self._products
         art = self._pages.shows_art(request, game)
         return await reward_cards(request, game, rules, *stores, art)
-
-    async def _available(self, game: Game, request: Request, cards: RewardCards) -> list[Reward]:
-        # The rewards the signed-in account sees now; none for a visitor or an account in a
-        # game without heroes.
-        player = signed_in(request)
-        if player is None or cards.words.roster is None:
-            return []
-        return await self._rewards.available(game, player.account_id)
 
 
 def _named(rewards: list[Reward], key: str, faction: str) -> Reward | None:
