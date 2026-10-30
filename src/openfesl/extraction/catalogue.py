@@ -87,7 +87,7 @@ def _read_fields(game: Game) -> set[str]:
     # parts.
     rules = game.catalogue
     fields = {name for name in rules.fields.model_dump().values() if name} if rules else set()
-    prices = game.store.prices if game.store else []
+    prices = game.store.prices.values() if game.store else []
     fields |= {field for rule in prices for field in rule.fields}
     return fields | ({rules.models.layer} if rules and rules.models else set())
 

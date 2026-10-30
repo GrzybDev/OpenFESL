@@ -48,7 +48,7 @@ async def test_the_store_data_names_the_copys_items_and_every_box_is_worth_its_p
 
     rules = game.store
     assert rules
-    named = {item for rule in rules.prices for item in rule.items}
+    named = {item for rule in rules.prices.values() for item in rule.items}
     for box in rules.boxes:
         named |= {item for tier in box.tiers for item, _ in tier.drops}
         named |= {box.fallback[0]} if box.fallback else set()

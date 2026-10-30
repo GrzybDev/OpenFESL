@@ -133,7 +133,7 @@ def grant_form(page: HeroPage, chosen: Mapping[str, object], language: str) -> G
         and game.store is not None
         and any(
             sold.type == COUNTED
-            for rule in game.store.prices
+            for rule in game.store.prices.values()
             if rule.covers(item)
             for sold in rule.sold
         )

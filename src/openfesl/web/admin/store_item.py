@@ -93,7 +93,7 @@ def store_item_routes(sessions: AdminSessions, views: StoreAdminViews) -> APIRou
         form: Mapping[str, str] | None = None,
         refused: PriceRefused | None = None,
     ) -> HTMLResponse:
-        _, rules = views.game(game.id)
+        rules = await views.rules(game)
         language = request.state.language
         catalogue, prices = await views.item(game, item_id, language)
         texts = StoreTexts(game, language, datetime.now(UTC))
@@ -118,7 +118,8 @@ def store_item_routes(sessions: AdminSessions, views: StoreAdminViews) -> APIRou
 
     async def change(request: Request, game_id: str, item_id: int) -> Change:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        game, rules = views.game(game_id)
+        game = views.game(game_id)
+        rules = await views.rules(game)
         form = await request.form()
         check_form(request, form)
         catalogue, prices = await views.item(game, item_id, request.state.language)
@@ -140,7 +141,7 @@ def store_item_routes(sessions: AdminSessions, views: StoreAdminViews) -> APIRou
     @router.get(path, response_class=HTMLResponse)
     async def item(request: Request, game_id: str, item_id: int) -> HTMLResponse:
         admin = sessions.admin(request)
-        game, _ = views.game(game_id)
+        game = views.game(game_id)
         return await page(request, admin, game, item_id)
 
     @router.post(path)
@@ -221,7 +222,7 @@ def _ownership(written: str) -> Ownership:
 
 def _adding(game: Game, rules: StoreRules, prices: ItemPrices) -> Adding:
     points = game.heroes.points if game.heroes else None
-    priced = {rule.currency for rule in rules.prices}
+    priced = {rule.currency for rule in rules.prices.values()}
     currencies = [code for code in game.currencies if code in priced and code != points]
     uses = any(rule.use_price for rule in rules.rules(prices.item))
     return Adding(currencies, uses, [f"{days}d" for days in sorted(rules.rentals)] + ["perm"])

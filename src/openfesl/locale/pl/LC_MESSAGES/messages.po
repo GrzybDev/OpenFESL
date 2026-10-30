@@ -10983,7 +10983,7 @@ msgid "web.admin.store.no_catalogue"
 msgstr "Ceny wymagają katalogu gry %(game)s."
 
 msgid "web.admin.store.no_catalogue.text"
-msgstr "Sklep pokazuje przedmioty z katalogu; po imporcie każdy przedmiot dostaje ceny według zasady swojego rodzaju."
+msgstr "Sklep pokazuje przedmioty z katalogu; po imporcie każdy przedmiot dostaje ceny według zasady swojego rodzaju. Zasady rodzajów można ustawić już teraz."
 
 msgid "web.admin.store.points.count.one"
 msgstr "%(count)s punkt cenowy"
@@ -11219,6 +11219,9 @@ msgstr "Nie zapisano: %(duration)s nie jest okresem z zasad; zasady znają %(day
 msgid "web.admin.store.refused.uses"
 msgstr "Nie zapisano: %(uses)s nie jest liczbą użyć."
 
+msgid "web.admin.store.refused.sold"
+msgstr "Nie zapisano: przy tej wartości cena (%(point)s) wyniosłaby %(price)s; cena wynosi od 1 do %(most)s."
+
 msgid "web.admin.toast.store.saved"
 msgstr "Zapisano ceny przedmiotu %(item)s."
 
@@ -11254,3 +11257,228 @@ msgstr "wyłączony"
 
 msgid "web.admin.refused.role.store"
 msgstr "Zmiany w sklepie wymagają roli administratora."
+
+msgid "games.bfheroes.price_rule.class-weapons"
+msgstr "Bronie z zestawów klas"
+
+msgid "games.bfheroes.price_rule.tier-one-weapons"
+msgstr "Bronie Tier 1"
+
+msgid "games.bfheroes.price_rule.super-weapons"
+msgstr "Bronie Super i Uber"
+
+msgid "games.bfheroes.price_rule.other-weapons"
+msgstr "Pozostałe bronie"
+
+msgid "games.bfheroes.price_rule.weapon-rentals"
+msgstr "Wypożyczenia broni"
+
+msgid "games.bfheroes.price_rule.pets"
+msgstr "Zwierzaki"
+
+msgid "games.bfheroes.price_rule.rocket-packs"
+msgstr "Plecaki rakietowe"
+
+msgid "games.bfheroes.price_rule.clothing"
+msgstr "Ubrania"
+
+msgid "games.bfheroes.price_rule.emotes"
+msgstr "Gesty"
+
+msgid "games.bfheroes.price_rule.boosts"
+msgstr "Wzmocnienia"
+
+msgid "games.bfheroes.price_rule.consumables"
+msgstr "Gadżety na użycia"
+
+msgid "games.bfheroes.price_rule.widgets"
+msgstr "Gadżety trwałe"
+
+msgid "games.bfheroes.price_rule.ability-levels"
+msgstr "Stopnie umiejętności"
+
+msgid "web.admin.store.views"
+msgstr "Widoki cen"
+
+msgid "web.admin.store.view.items"
+msgstr "Przedmioty"
+
+msgid "web.admin.store.view.rules"
+msgstr "Zasady rodzajów"
+
+msgid "web.admin.store.rules"
+msgstr "Zasady rodzajów · na podstawie danych gry"
+
+msgid "web.admin.store.rules.count.one"
+msgstr "%(count)s zasada"
+
+msgid "web.admin.store.rules.count.few"
+msgstr "%(count)s zasady"
+
+msgid "web.admin.store.rules.count.many"
+msgstr "%(count)s zasad"
+
+msgid "web.admin.store.rules.count.other"
+msgstr "%(count)s zasady"
+
+msgid "web.admin.store.rules.column.rule"
+msgstr "Zasada"
+
+msgid "web.admin.store.rules.column.value"
+msgstr "Wartość"
+
+msgid "web.admin.store.rules.column.sold"
+msgstr "Sprzedawany jako"
+
+msgid "web.admin.store.rules.column.items"
+msgstr "Przedmioty"
+
+msgid "web.admin.store.rules.seed"
+msgstr "dane gry: %(value)s"
+
+msgid "web.admin.store.rules.fixed"
+msgstr "1 za stopień, stała cena"
+
+msgid "web.admin.store.rules.drops_only"
+msgstr "Nie sprzedawany osobno; wycenia zawartość skrzynek"
+
+msgid "web.admin.store.rules.items.one"
+msgstr "%(count)s przedmiot"
+
+msgid "web.admin.store.rules.items.few"
+msgstr "%(count)s przedmioty"
+
+msgid "web.admin.store.rules.items.many"
+msgstr "%(count)s przedmiotów"
+
+msgid "web.admin.store.rules.items.other"
+msgstr "%(count)s przedmiotu"
+
+msgid "web.admin.store.rules.own.one"
+msgstr "z własnymi cenami: %(count)s"
+
+msgid "web.admin.store.rules.own.few"
+msgstr "z własnymi cenami: %(count)s"
+
+msgid "web.admin.store.rules.own.many"
+msgstr "z własnymi cenami: %(count)s"
+
+msgid "web.admin.store.rules.own.other"
+msgstr "z własnymi cenami: %(count)s"
+
+msgid "web.admin.store.rules.not_editable"
+msgstr "nie do zmiany"
+
+msgid "web.admin.store.rules.edit"
+msgstr "Zmień: %(rule)s"
+
+msgid "web.admin.store.rules.shares"
+msgstr "Udział ceny stałej przy wypożyczeniu"
+
+msgid "web.admin.store.rules.rounding"
+msgstr "Zaokrąglenie"
+
+msgid "web.admin.store.rules.seeded"
+msgstr "Źródło wartości"
+
+msgid "web.admin.store.rules.seeded.text"
+msgstr "Dane gry %(game)s; wartość i sposoby sprzedaży każdej zasady można zmienić."
+
+msgid "web.admin.store.rules.form"
+msgstr "Zasada · %(rule)s"
+
+msgid "web.admin.store.rules.value"
+msgstr "Cena na stałe"
+
+msgid "web.admin.store.rules.use_price"
+msgstr "Cena użycia"
+
+msgid "web.admin.store.rules.packs"
+msgstr "Pakiety użyć"
+
+msgid "web.admin.store.rules.packs.hint"
+msgstr "Liczby użyć oddzielone przecinkami, np. 25, 110."
+
+msgid "web.admin.store.rules.apply.text"
+msgstr "Przedmioty bez własnych cen przyjmą ceny z zasady; następny krok podaje ich liczbę."
+
+msgid "web.admin.store.rules.apply"
+msgstr "Zastosuj zasadę"
+
+msgid "web.admin.store.rules.confirm"
+msgstr "Zastosować zasadę %(rule)s?"
+
+msgid "web.admin.store.rules.confirm.change"
+msgstr "Zmiana teraz"
+
+msgid "web.admin.store.rules.confirm.keep"
+msgstr "Zachowują ceny"
+
+msgid "web.admin.store.rules.confirm.example"
+msgstr "Przykład"
+
+msgid "web.admin.store.rules.confirm.changed.one"
+msgstr "%(count)s przedmiot bez własnych cen"
+
+msgid "web.admin.store.rules.confirm.changed.few"
+msgstr "%(count)s przedmioty bez własnych cen"
+
+msgid "web.admin.store.rules.confirm.changed.many"
+msgstr "%(count)s przedmiotów bez własnych cen"
+
+msgid "web.admin.store.rules.confirm.changed.other"
+msgstr "%(count)s przedmiotu bez własnych cen"
+
+msgid "web.admin.store.rules.confirm.kept.one"
+msgstr "%(count)s przedmiot z cenami lub sprzedażą ustawionymi ręcznie"
+
+msgid "web.admin.store.rules.confirm.kept.few"
+msgstr "%(count)s przedmioty z cenami lub sprzedażą ustawionymi ręcznie"
+
+msgid "web.admin.store.rules.confirm.kept.many"
+msgstr "%(count)s przedmiotów z cenami lub sprzedażą ustawionymi ręcznie"
+
+msgid "web.admin.store.rules.confirm.kept.other"
+msgstr "%(count)s przedmiotu z cenami lub sprzedażą ustawionymi ręcznie"
+
+msgid "web.admin.store.rules.confirm.text"
+msgstr "Nowe ceny obowiązują od następnego zakupu; kupione przedmioty zachowują zapłaconą cenę. Gorące oferty z rabatem przyjmą nowe sumy przy następnym kroku rotacji."
+
+msgid "web.admin.store.rules.confirm.submit.one"
+msgstr "Zastosuj do %(count)s przedmiotu"
+
+msgid "web.admin.store.rules.confirm.submit.few"
+msgstr "Zastosuj do %(count)s przedmiotów"
+
+msgid "web.admin.store.rules.confirm.submit.many"
+msgstr "Zastosuj do %(count)s przedmiotów"
+
+msgid "web.admin.store.rules.confirm.submit.other"
+msgstr "Zastosuj do %(count)s przedmiotu"
+
+msgid "web.admin.store.rules.confirm.busy"
+msgstr "Stosowanie…"
+
+msgid "web.admin.store.rules.example"
+msgstr "%(item)s: %(points)s"
+
+msgid "web.admin.store.rules.point"
+msgstr "%(currency)s, %(ownership)s: %(price)s"
+
+msgid "web.admin.toast.store.rule"
+msgstr "Zastosowano zasadę %(rule)s. Zmienione przedmioty: %(count)s."
+
+msgid "web.admin.audit.action.store_rule"
+msgstr "Zmiana zasady"
+
+msgid "web.admin.audit.rule"
+msgstr "Zmienione przedmioty: %(changed)s; zachowane ustawienia ręczne: %(kept)s · %(value)s, sprzedawany jako: %(sold)s"
+
+msgid "web.admin.store.rules.rounding.step"
+msgstr "Wypożyczenia za %(currency)s są zaokrąglane w dół do wielokrotności %(step)s."
+
+msgid "web.admin.store.rules.rounding.ending"
+msgstr "Wypożyczenia za %(currency)s są zaokrąglane w dół do ceny kończącej się na %(ending)s."
+
+msgid "web.admin.store.rules.rounding.exact"
+msgstr "Pozostałe wypożyczenia mają dokładne ceny."

@@ -28,6 +28,7 @@ from openfesl.web.admin.servers import (
 from openfesl.web.admin.settings import settings_routes
 from openfesl.web.admin.store import StoreAdminViews, store_routes
 from openfesl.web.admin.store_item import store_item_routes
+from openfesl.web.admin.store_rules import store_rule_routes
 from openfesl.web.admin.wallets import WalletAdminViews, wallet_routes
 from openfesl.web.pages import Pages
 from openfesl.web.sessions import FormExpired
@@ -123,9 +124,12 @@ def include_admin_routes(
             services.mugshots,
         )
     )
-    store_views = StoreAdminViews(games, services.catalogues, stores.prices, services.feed.apply)
+    store_views = StoreAdminViews(
+        games, services.catalogues, stores.prices, stores.settings, services.feed.apply
+    )
     app.include_router(store_routes(sign_in, store_views))
     app.include_router(store_item_routes(sign_in, store_views))
+    app.include_router(store_rule_routes(sign_in, store_views))
     app.include_router(
         audit_routes(
             sign_in,

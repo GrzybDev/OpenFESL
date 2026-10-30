@@ -1,5 +1,5 @@
 from collections import Counter
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from math import ceil
@@ -15,6 +15,8 @@ from openfesl.core.admins import Admin
 from openfesl.core.catalogues import Catalogue, Catalogues
 from openfesl.core.games import Game, Games
 from openfesl.core.inventory import COUNTED, PERMANENT, RENTED
+from openfesl.core.policies import SettingStore
+from openfesl.core.store import store_rules
 from openfesl.core.store_items import requirement
 from openfesl.core.store_prices import (
     ItemPrices,
@@ -143,6 +145,7 @@ class StoreAdminViews:
         games: Games,
         catalogues: Catalogues,
         prices: PriceStore,
+        settings: SettingStore,
         apply_actions: Callable[[], Awaitable[None]],
     ) -> None:
         """Read the stores' price points and the catalogues whose items they sell.
@@ -151,16 +154,18 @@ class StoreAdminViews:
             games: The games, of which those with store rules have a store.
             catalogues: The games' imported catalogues.
             prices: Where the stores' price points are kept.
+            settings: The instance's settings, which override the price rules of the games' data.
             apply_actions: Hands the admin's recorded actions to the running server, whose
-                games' lists of products then show the new prices at once.
+                games' lists of products then show the new prices and rules at once.
         """
         self.games = [game for game in games if game.store and game.heroes]
         self._catalogues = catalogues
         self._prices = prices
+        self._settings = settings
         self._apply_actions = apply_actions
 
-    def game(self, game_id: str) -> tuple[Game, StoreRules]:
-        """Return a game with a store, and its store's rules.
+    def game(self, game_id: str) -> Game:
+        """Return a game with a store.
 
         Args:
             game_id: The game's data-file name.
@@ -169,9 +174,19 @@ class StoreAdminViews:
             HTTPException: 404 when no game with a store has the name.
         """
         game = next((game for game in self.games if game.id == game_id), None)
-        if game is None or game.store is None:
+        if game is None:
             raise HTTPException(404)
-        return game, game.store
+        return game
+
+    async def rules(self, game: Game) -> StoreRules:
+        """Return how a game's store prices items, with the instance's settings over its data.
+
+        Args:
+            game: The game, which has a store.
+        """
+        rules = await store_rules(game, self._settings)
+        assert rules is not None
+        return rules
 
     async def prices(self, game: Game, language: str) -> tuple[Catalogue, list[ItemPrices]]:
         """Return a game's catalogue and every item its store prices, with its price points.
@@ -180,7 +195,7 @@ class StoreAdminViews:
             game: The game, which has a store.
             language: The language of the items' names.
         """
-        _, rules = self.game(game.id)
+        rules = await self.rules(game)
         catalogue = await self._catalogues.of(game, language)
         products = await self._prices.every(game.id)
         return catalogue, item_prices(game, rules, catalogue, products)
@@ -206,6 +221,26 @@ class StoreAdminViews:
         changed = await self._prices.save_points(game.id, item_id, points, reset, admin)
         await self._apply_actions()
         return changed
+
+    async def apply_rule(
+        self,
+        game: Game,
+        settings: Mapping[str, str | None],
+        points: list[PointChange],
+        details: dict[str, Any],
+        admin: Admin,
+    ) -> None:
+        """Change a price rule and the price points it gives, and record it as one action.
+
+        Args:
+            game: The game, which has a store.
+            settings: The settings that override the rule's fields, by key; None removes one.
+            points: The price points the rule changes, those to add among them.
+            details: What the admin's log keeps of the change: the rule and what it changed.
+            admin: The admin who applied it.
+        """
+        await self._prices.apply_rule(game.id, settings, points, details, admin)
+        await self._apply_actions()
 
     async def item(self, game: Game, item_id: int, language: str) -> tuple[Catalogue, ItemPrices]:
         """Return a game's catalogue and one item its store prices, with its price points.
@@ -255,7 +290,8 @@ class StoreAdminViews:
         start = (listing.page - 1) * PAGE_SIZE
         shown = chosen[start : start + PAGE_SIZE]
         rows = [price_row(game, texts, name, prices) for name, prices in shown]
-        order = list(dict.fromkeys(rule.kind for rule in self.game(game.id)[1].prices))
+        rules = (await self.rules(game)).prices.values()
+        order = list(dict.fromkeys(rule.kind for rule in rules))
         counted = Counter(prices.item.kind for prices in found)
         return PriceList(
             game,
@@ -289,7 +325,7 @@ def store_routes(sessions: AdminSessions, views: StoreAdminViews) -> APIRouter:
     @router.get("/admin/store/{game_id}", response_class=HTMLResponse)
     async def prices(request: Request, game_id: str) -> HTMLResponse:
         admin = sessions.admin(request)
-        game, _ = views.game(game_id)
+        game = views.game(game_id)
         listing = ItemList.read(request.query_params)
         found = await views.listed(game, listing, request.state.language)
         return await sessions.render(

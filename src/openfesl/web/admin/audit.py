@@ -22,7 +22,7 @@ from openfesl.web.admin.audit_heroes import (
     slot_entry,
     wallet_entry,
 )
-from openfesl.web.admin.audit_store import price_entry
+from openfesl.web.admin.audit_store import price_entry, rule_entry
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.settings import policy_views
 from openfesl.web.pages import moment
@@ -49,6 +49,7 @@ GLYPHS = {
     AdminAction.ITEM_CHANGE: "edit",
     AdminAction.ITEM_REVOKE: "x",
     AdminAction.STORE_PRICES: "edit",
+    AdminAction.STORE_RULE: "retry",
 }
 # What the admin does to a hero's items, and to a hero, whose persona is the target.
 ITEM_ACTIONS = (AdminAction.ITEM_GRANT, AdminAction.ITEM_CHANGE, AdminAction.ITEM_REVOKE)
@@ -392,6 +393,8 @@ async def _rows(
             shown, href, said = await price_entry(details, games, catalogues, language)
             if details.get("reset"):
                 kind = "store_prices.reset"
+        elif action is AdminAction.STORE_RULE:
+            shown, href, said = rule_entry(details, games, language)
         elif action is AdminAction.CATALOGUE_IMPORT:
             game = games.by_id(target)
             shown = game.name if game else target

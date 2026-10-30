@@ -1,0 +1,87 @@
+/* The price rules of a game's store: each rule's row beside the chosen rule's form, the shares
+   and rounding that hold for all of them under the list. Where the table does not fit, each rule
+   is a block of its own. */
+@layer pages {
+  .rules-list .table.rules-table {
+    min-width: 860px;
+  }
+
+  .rules-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns: minmax(200px, 1.2fr) 120px 110px minmax(180px, 1.3fr) 150px 44px;
+    gap: 2px;
+  }
+
+  .rules-row:nth-child(even) {
+    --cell: var(--row-alt);
+  }
+
+  .rules-row[aria-current="true"] {
+    --cell: var(--accent);
+  }
+
+  .rules-value {
+    align-items: flex-end;
+    font-family: var(--font-sans);
+    font-size: 18px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rules-facts {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    margin-top: 14px;
+  }
+
+  .rules-form {
+    display: grid;
+    gap: 2px;
+  }
+
+  .rules-fields {
+    display: grid;
+    gap: 4px;
+    border: 0;
+    margin: 0;
+    background: var(--panel);
+    padding: 12px;
+  }
+
+  .rules-input {
+    text-align: right;
+    font-family: var(--font-sans);
+    font-size: 22px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @container (width < 860px) {
+    .rules-list .table.rules-table {
+      min-width: 0;
+
+      [role="rowgroup"]:first-child {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
+    }
+
+    .rules-row.rules-columns {
+      grid-template-columns: minmax(0, 1fr) auto 44px;
+
+      > :nth-child(2),
+      > :nth-child(4),
+      > :nth-child(5) {
+        grid-column: 1 / -1;
+      }
+
+      > :last-child {
+        grid-row: 1;
+        grid-column: 3;
+      }
+    }
+  }
+}

@@ -212,6 +212,9 @@ class GamePolicies:
         policies = game.policies
         prefix = setting_key(game, "")
         for key, value in (await self._store.settings(prefix)).items():
+            # The game's other settings, such as its store's, belong to other rules.
+            if key.removeprefix(prefix).partition(".")[0] not in Policies.model_fields:
+                continue
             try:
                 policies = policies.overridden(key.removeprefix(prefix), value)
             except KeyError, ValueError:

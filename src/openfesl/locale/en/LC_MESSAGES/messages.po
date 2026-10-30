@@ -10385,7 +10385,7 @@ msgid "web.admin.store.no_catalogue"
 msgstr "Prices need the catalogue of %(game)s."
 
 msgid "web.admin.store.no_catalogue.text"
-msgstr "The store lists the catalogue's items; once it is imported, every item takes the prices of its kind's rule."
+msgstr "The store lists the catalogue's items; once it is imported, every item takes the prices of its kind's rule. The kind rules can be set meanwhile."
 
 msgid "web.admin.store.points.count.one"
 msgstr "%(count)s price point"
@@ -10591,6 +10591,9 @@ msgstr "Not saved: %(duration)s is not a duration of the rules; they know %(days
 msgid "web.admin.store.refused.uses"
 msgstr "Not saved: %(uses)s is no number of uses."
 
+msgid "web.admin.store.refused.sold"
+msgstr "Not saved: at this value, %(point)s would cost %(price)s; a price is from 1 to %(most)s."
+
 msgid "web.admin.toast.store.saved"
 msgstr "Saved the prices of %(item)s."
 
@@ -10626,3 +10629,192 @@ msgstr "switched off"
 
 msgid "web.admin.refused.role.store"
 msgstr "The store is changed with the admin role."
+
+msgid "games.bfheroes.price_rule.class-weapons"
+msgstr "Weapons of the class sets"
+
+msgid "games.bfheroes.price_rule.tier-one-weapons"
+msgstr "Tier 1 weapons"
+
+msgid "games.bfheroes.price_rule.super-weapons"
+msgstr "Super and Uber weapons"
+
+msgid "games.bfheroes.price_rule.other-weapons"
+msgstr "Other weapons"
+
+msgid "games.bfheroes.price_rule.weapon-rentals"
+msgstr "Weapon rentals"
+
+msgid "games.bfheroes.price_rule.pets"
+msgstr "Pets"
+
+msgid "games.bfheroes.price_rule.rocket-packs"
+msgstr "Rocket packs"
+
+msgid "games.bfheroes.price_rule.clothing"
+msgstr "Clothing"
+
+msgid "games.bfheroes.price_rule.emotes"
+msgstr "Emotes"
+
+msgid "games.bfheroes.price_rule.boosts"
+msgstr "Boosts"
+
+msgid "games.bfheroes.price_rule.consumables"
+msgstr "Widgets in uses"
+
+msgid "games.bfheroes.price_rule.widgets"
+msgstr "Lasting widgets"
+
+msgid "games.bfheroes.price_rule.ability-levels"
+msgstr "Ability levels"
+
+msgid "web.admin.store.views"
+msgstr "Views of the prices"
+
+msgid "web.admin.store.view.items"
+msgstr "Items"
+
+msgid "web.admin.store.view.rules"
+msgstr "Kind rules"
+
+msgid "web.admin.store.rules"
+msgstr "Kind rules · seeded from game data"
+
+msgid "web.admin.store.rules.count.one"
+msgstr "%(count)s rule"
+
+msgid "web.admin.store.rules.count.other"
+msgstr "%(count)s rules"
+
+msgid "web.admin.store.rules.column.rule"
+msgstr "Rule"
+
+msgid "web.admin.store.rules.column.value"
+msgstr "Value"
+
+msgid "web.admin.store.rules.column.sold"
+msgstr "Sold as"
+
+msgid "web.admin.store.rules.column.items"
+msgstr "Items"
+
+msgid "web.admin.store.rules.seed"
+msgstr "game data: %(value)s"
+
+msgid "web.admin.store.rules.fixed"
+msgstr "1 per step, fixed"
+
+msgid "web.admin.store.rules.drops_only"
+msgstr "Not sold alone; prices box drops"
+
+msgid "web.admin.store.rules.items.one"
+msgstr "%(count)s item"
+
+msgid "web.admin.store.rules.items.other"
+msgstr "%(count)s items"
+
+msgid "web.admin.store.rules.own.one"
+msgstr "%(count)s with own prices"
+
+msgid "web.admin.store.rules.own.other"
+msgstr "%(count)s with own prices"
+
+msgid "web.admin.store.rules.not_editable"
+msgstr "not editable"
+
+msgid "web.admin.store.rules.edit"
+msgstr "Change %(rule)s"
+
+msgid "web.admin.store.rules.shares"
+msgstr "Rental shares of the permanent price"
+
+msgid "web.admin.store.rules.rounding"
+msgstr "Rounding"
+
+msgid "web.admin.store.rules.seeded"
+msgstr "Seeded from"
+
+msgid "web.admin.store.rules.seeded.text"
+msgstr "The game data of %(game)s; every rule's value and ways of selling can be changed."
+
+msgid "web.admin.store.rules.form"
+msgstr "Rule · %(rule)s"
+
+msgid "web.admin.store.rules.value"
+msgstr "Permanent price"
+
+msgid "web.admin.store.rules.use_price"
+msgstr "Price of a use"
+
+msgid "web.admin.store.rules.packs"
+msgstr "Packs of uses"
+
+msgid "web.admin.store.rules.packs.hint"
+msgstr "Numbers of uses, separated by commas, such as 25, 110."
+
+msgid "web.admin.store.rules.apply.text"
+msgstr "Items without own prices take the rule's prices; the next step says how many."
+
+msgid "web.admin.store.rules.apply"
+msgstr "Apply the rule"
+
+msgid "web.admin.store.rules.confirm"
+msgstr "Apply the rule %(rule)s?"
+
+msgid "web.admin.store.rules.confirm.change"
+msgstr "Change now"
+
+msgid "web.admin.store.rules.confirm.keep"
+msgstr "Keep their prices"
+
+msgid "web.admin.store.rules.confirm.example"
+msgstr "Example"
+
+msgid "web.admin.store.rules.confirm.changed.one"
+msgstr "%(count)s item without own prices"
+
+msgid "web.admin.store.rules.confirm.changed.other"
+msgstr "%(count)s items without own prices"
+
+msgid "web.admin.store.rules.confirm.kept.one"
+msgstr "%(count)s item priced or sold by hand"
+
+msgid "web.admin.store.rules.confirm.kept.other"
+msgstr "%(count)s items priced or sold by hand"
+
+msgid "web.admin.store.rules.confirm.text"
+msgstr "New prices apply to the next purchase; bought items keep what was paid. Hot-deal offers priced as a discount follow the new sums at their next rotation step."
+
+msgid "web.admin.store.rules.confirm.submit.one"
+msgstr "Apply to %(count)s item"
+
+msgid "web.admin.store.rules.confirm.submit.other"
+msgstr "Apply to %(count)s items"
+
+msgid "web.admin.store.rules.confirm.busy"
+msgstr "Applying…"
+
+msgid "web.admin.store.rules.example"
+msgstr "%(item)s: %(points)s"
+
+msgid "web.admin.store.rules.point"
+msgstr "%(currency)s, %(ownership)s: %(price)s"
+
+msgid "web.admin.toast.store.rule"
+msgstr "Applied the rule %(rule)s. Items it changed: %(count)s."
+
+msgid "web.admin.audit.action.store_rule"
+msgstr "Rule changed"
+
+msgid "web.admin.audit.rule"
+msgstr "Items changed: %(changed)s; kept as set by hand: %(kept)s · %(value)s, sold as %(sold)s"
+
+msgid "web.admin.store.rules.rounding.step"
+msgstr "Rentals in %(currency)s round down to a multiple of %(step)s."
+
+msgid "web.admin.store.rules.rounding.ending"
+msgstr "Rentals in %(currency)s round down to a price ending in %(ending)s."
+
+msgid "web.admin.store.rules.rounding.exact"
+msgstr "Other rentals stay exact."

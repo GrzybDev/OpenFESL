@@ -9,7 +9,9 @@ from openfesl.core.catalogues import Catalogue, Catalogues
 from openfesl.core.drops import Box
 from openfesl.core.games import Game, Games
 from openfesl.core.inventory import COUNTED, PERMANENT, Ownership
-from openfesl.core.store_rules import BoxRule
+from openfesl.core.overrides import overridden
+from openfesl.core.policies import SettingStore
+from openfesl.core.store_rules import BoxRule, StoreRules
 from openfesl.core.texts import BASE_LANGUAGE
 
 logger = logging.getLogger(__name__)
@@ -263,17 +265,25 @@ class ProductStore(Protocol):
 class Store:
     """The games' stores, whose products their data seeds from the imported catalogues."""
 
-    def __init__(self, store: ProductStore, catalogues: Catalogues, games: Games) -> None:
+    def __init__(
+        self,
+        store: ProductStore,
+        catalogues: Catalogues,
+        games: Games,
+        settings: SettingStore,
+    ) -> None:
         """Keep the stores' products in a store.
 
         Args:
             store: Where the products are kept.
             catalogues: The games' imported catalogues, whose items the stores sell.
             games: The games the server serves.
+            settings: The instance's settings, which override the price rules of the games' data.
         """
         self._store = store
         self._catalogues = catalogues
         self._games = games
+        self._settings = settings
         self._changes = 0
 
     @property
@@ -297,14 +307,16 @@ class Store:
     def follow(self, feed: AdminFeed) -> None:
         """Fill a game's store once the admin imported its first catalogue elsewhere.
 
-        Each import and each change of an item's prices counts as a change of the stores'
-        products. Follow the feed after the catalogues do, so that the store reads the new one.
+        Each import, each change of an item's prices and each applied rule counts as a change
+        of the stores' products. Follow the feed after the catalogues do, so that the store
+        reads the new one.
 
         Args:
             feed: The admin's actions as the log records them.
         """
         feed.on(AdminAction.CATALOGUE_IMPORT, self._imported)
         feed.on(AdminAction.STORE_PRICES, self._changed)
+        feed.on(AdminAction.STORE_RULE, self._changed)
 
     async def offers(self, game: Game) -> list[Offer]:
         """Return the products a game's store lists, with their items' names and kinds.
@@ -340,7 +352,7 @@ class Store:
         self._changes += 1
 
     async def _stock(self, game: Game) -> None:
-        rules = game.store
+        rules = await store_rules(game, self._settings)
         catalogue = await self._catalogues.of(game, BASE_LANGUAGE)
         if rules is None or not catalogue.imported:
             return
@@ -393,6 +405,19 @@ class Store:
             )
         if products and await self._store.stock(game.id, products, boxes):
             logger.info("Stocked the store of %s with %d products", game.name, len(products))
+
+
+async def store_rules(game: Game, settings: SettingStore) -> StoreRules | None:
+    """Return how a game's store prices items, with the instance's settings over its data.
+
+    Args:
+        game: The game.
+        settings: The instance's settings, such as bfheroes.store.prices.clothing.value.
+    """
+    if game.store is None:
+        return None
+    prefix = f"{game.id}.store."
+    return overridden(game.store, prefix, await settings.settings(prefix))
 
 
 def offer(game: Game, catalogue: Catalogue, product: Product) -> Offer:

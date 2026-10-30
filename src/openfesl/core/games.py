@@ -425,7 +425,7 @@ class Game(BaseModel):
 
     @model_validator(mode="after")
     def _check_store(self) -> Self:
-        rules = self.store.prices if self.store else []
+        rules = self.store.prices.values() if self.store else []
         boxes = self.store.boxes if self.store else []
         used = {rule.currency for rule in rules} | {box.currency for box in boxes}
         if unknown := used - self.currencies.keys():

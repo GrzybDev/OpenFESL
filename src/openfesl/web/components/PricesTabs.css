@@ -1,0 +1,7 @@
+/* The tabs of a game's store prices, at the start of their panel. */
+@layer components {
+  .prices-tabs {
+    justify-content: flex-start;
+    margin-bottom: 14px;
+  }
+}

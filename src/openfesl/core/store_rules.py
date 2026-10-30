@@ -213,8 +213,8 @@ class StoreRules(BaseModel):
         rounding: How a rental's price is rounded down, by currency; kept exact in others.
         descriptions: The ids of the game's texts that describe an item, with {id} for its
             number; the first one the catalogue holds describes it.
-        prices: The price rules; the first rule of each currency that covers an item prices it
-            in that currency.
+        prices: The price rules by key, in order; the first rule of each currency that covers an
+            item prices it in that currency.
         excluded: The items never sold nor dropped.
         boxes: The boxes and their drops.
         in_game: The store the game opens in its own browser; none for a game without one.
@@ -226,7 +226,7 @@ class StoreRules(BaseModel):
     rentals: dict[PositiveInt, Annotated[int, Field(gt=0, le=100)]] = {}
     rounding: dict[str, Rounding] = {}
     descriptions: list[str] = []
-    prices: list[PriceRule]
+    prices: dict[Annotated[str, Field(pattern=r"^[a-z][a-z-]*$")], PriceRule]
     excluded: Exclusions = Exclusions()
     boxes: list[BoxRule] = []
     in_game: InGameStore | None = None
@@ -282,7 +282,7 @@ class StoreRules(BaseModel):
             item: The item, from the game's catalogue.
         """
         found: dict[str, PriceRule] = {}
-        for rule in self.prices:
+        for rule in self.prices.values():
             if rule.currency not in found and rule.covers(item):
                 found[rule.currency] = rule
         return list(found.values())
@@ -338,7 +338,7 @@ class StoreRules(BaseModel):
 
     @model_validator(mode="after")
     def _check_sold(self) -> Self:
-        for rule in self.prices:
+        for rule in self.prices.values():
             for ownership in rule.sold:
                 if not self.price(rule, ownership):
                     raise ValueError(f"a rule of {rule.kind} sells {ownership} at no price")

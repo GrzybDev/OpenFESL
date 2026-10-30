@@ -21,6 +21,7 @@ from openfesl.core.store import (
     ListedBundle,
     ProductStore,
     offer,
+    store_rules,
 )
 from openfesl.core.store import Offer as Listing
 from openfesl.core.texts import BASE_LANGUAGE
@@ -186,6 +187,8 @@ class HotDeals:
         catalogue = await self._catalogues.of(game, BASE_LANGUAGE)
         if not catalogue.imported:
             return
+        # Items the store lacks products of are priced by its rules as the instance sets them.
+        game = game.model_copy(update={"store": await store_rules(game, self._settings)})
         # Offers before items, so that a period's items avoid the offers that run with them.
         ordered = sorted(rules.sections.items(), key=lambda pair: pair[1].kind == "items")
         for name, section in ordered:

@@ -25,6 +25,7 @@
            current="store">
   <StoreHead :game="game" current="prices" :subtitle="_('web.admin.store.subtitle', game=game.name)" />
   <Panel class="enter-panel">
+    <PricesTabs :game="game" current="items" />
     <nav aria-label="{{ _('web.admin.store.items') }}"
          class="tabs prices-back">
       <Tab :href="list" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.store.all_items") }}</Tab>

@@ -41,11 +41,12 @@ items = [
 
 # The first rule of a currency that covers an item prices it in that currency; an item no rule
 # covers, such as a mission, is not sold. Funds (_PF) are the account's, Valor Points (_DV) too,
-# and Hero Points (_DH) the hero's own.
+# and Hero Points (_DH) the hero's own. The admin panel names each rule by its key, and the
+# setting bfheroes.store.prices.<key>.<field> overrides a field, such as its value.
 
 # Battlefield: Bad Company 2 class weapons: a set with its weapon cost 6,720 Funds more than the set
 # alone (22,980 against 16,260), as 1,120 BattleFunds did in 2010.
-[[store.prices]]
+[store.prices.class-weapons]
 kind = "weapon"
 items = [3015, 3025, 3038, 3041, 3042, 3043]
 currency = "_PF"
@@ -53,7 +54,7 @@ value = 6720
 sold = ["perm"]
 
 # Tier 1 weapons, 1,200 BattleFunds in 2010.
-[[store.prices]]
+[store.prices.tier-one-weapons]
 kind = "weapon"
 items = [3148, 3149, 3150, 3151, 3152, 3153]
 currency = "_PF"
@@ -62,7 +63,7 @@ sold = ["perm"]
 
 # Super and Uber weapons and their stolen and pilfered copies of the other faction, 560
 # BattleFunds each in 2010.
-[[store.prices]]
+[store.prices.super-weapons]
 kind = "weapon"
 items = [
     3016, 3017, 3019, 3020, 3021, 3022, 3023, 3024, 3026, 3027, 3028, 3029, 3030, 3031, 3032, 3033,
@@ -77,21 +78,21 @@ sold = ["perm"]
 
 # Other weapons sell for Valor Points alone; boxes that drop them for Funds value them as Super
 # weapons.
-[[store.prices]]
+[store.prices.other-weapons]
 kind = "weapon"
 currency = "_PF"
 value = 3360
 
 # Every weapon also rents for Valor Points, from a value of 5,000, the permanent price that some
 # weapons got in February 2013; no Valor Point price of 2012 survives.
-[[store.prices]]
+[store.prices.weapon-rentals]
 kind = "weapon"
 currency = "_DV"
 value = 5000
 sold = ["1d", "3d", "7d", "30d"]
 
 # Pets, about 900 Funds (Drayseen the Dragon was refunded at 899 in June 2012).
-[[store.prices]]
+[store.prices.pets]
 kind = "appearance"
 items = [362, 521, 973, 974, 1123, 1124, 1507, 1529, 1530, 1581, 1583]
 currency = "_PF"
@@ -99,7 +100,7 @@ value = 900
 sold = ["perm"]
 
 # The rocket packs, at their archived price.
-[[store.prices]]
+[store.prices.rocket-packs]
 kind = "appearance"
 items = [589, 597]
 currency = "_PF"
@@ -108,14 +109,14 @@ sold = ["perm"]
 
 # Clothing, about 2,600 Funds an item: the median of the item prices of the appearance sets of
 # July 2012.
-[[store.prices]]
+[store.prices.clothing]
 kind = "appearance"
 currency = "_PF"
 value = 2600
 sold = ["perm", "30d"]
 
 # Emotes, 280 BattleFunds for good in 2010.
-[[store.prices]]
+[store.prices.emotes]
 kind = "emote"
 currency = "_PF"
 value = 1680
@@ -123,7 +124,7 @@ sold = ["perm", "30d"]
 
 # Boosts and the other convenience items, 6,299 Funds for 30 days (the XP and VP boost bundle of
 # 2012 cost 12,598).
-[[store.prices]]
+[store.prices.boosts]
 kind = "convenience"
 currency = "_PF"
 value = 12598
@@ -131,7 +132,7 @@ sold = ["30d"]
 
 # Widgets and consumables in packs of uses, about 7 Funds a use: a Christmas class drop of 4,350
 # Funds gave 610 tonics and promised at least its price.
-[[store.prices]]
+[store.prices.consumables]
 kind = "ability"
 fields = { consumable = "true" }
 currency = "_PF"
@@ -140,7 +141,7 @@ sold = ["x25", "x110"]
 
 # The widgets that last a while, such as the claw attacks, which only boxes drop; their value is
 # inferred.
-[[store.prices]]
+[store.prices.widgets]
 kind = "ability"
 fields = { widget = "true" }
 currency = "_PF"
@@ -148,7 +149,7 @@ value = 3360
 
 # Each level of an ability that heroes learn costs one Hero Point, as every level's cost in
 # Abilities.xml says.
-[[store.prices]]
+[store.prices.ability-levels]
 kind = "ability"
 fields = { consumable = "", widget = "" }
 currency = "_DH"

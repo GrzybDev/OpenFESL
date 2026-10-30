@@ -14,6 +14,7 @@
            current="store">
   <StoreHead :game="game" current="prices" :subtitle="_('web.admin.store.subtitle', game=game.name)" :counts="{'prices': found.kinds.values()|sum}" />
   <Panel class="enter-panel">
+    <PricesTabs :game="game" current="items" />
     {% if not catalogue.imported %}
       <div class="prices-missing">
         <p class="prices-missing-head">

@@ -35,12 +35,10 @@ async def price_entry(
         shown = f"{shown} · {game.store.product_id(points[0]['product'])}"
     said = []
     for point in points:
-        ownership = Ownership.read(point["ownership"])
-        assert isinstance(ownership, Ownership)
         named = texts.text(
             "web.admin.store.point.named",
             currency=texts.currency(point["currency"]),
-            ownership=texts.ownership(ownership, inline=True),
+            ownership=_owned(texts, point["ownership"]),
         )
         before, after = point["from"], texts.amount(point["to"])
         parts = []
@@ -54,3 +52,39 @@ async def price_entry(
         said.append(texts.text("web.admin.audit.price", point=named, change=", ".join(parts)))
     href = localize(f"/admin/store/{game.id}/items/{item}", language)
     return shown, href, "; ".join(said)
+
+
+def rule_entry(details: dict[str, Any], games: Games, language: str) -> tuple[str, str | None, str]:
+    """Return how the audit log shows a price rule that the admin changed and applied.
+
+    Args:
+        details: The change's details, as the admin's log keeps them.
+        games: The games, whose stores the rule prices.
+        language: The log's language.
+
+    Returns:
+        The rule in words, the panel's page of it and what changed in words.
+    """
+    game, key = games.by_id(details["game"]), details["rule"]
+    if game is None:
+        return key, None, ""
+    texts = StoreTexts(game, language, datetime.now(UTC))
+    after = details["after"]
+    value = after["use_price"] or after["value"]
+    said = texts.text(
+        "web.admin.audit.rule",
+        changed=texts.amount(details["changed"]),
+        kept=texts.amount(details["kept"]),
+        value=texts.amount(value),
+        sold=", ".join(_owned(texts, written) for written in after["sold"])
+        or texts.text("web.admin.store.rules.drops_only"),
+    )
+    href = localize(f"/admin/store/{game.id}/rules?rule={key}", language)
+    return texts.text(f"games.{game.id}.price_rule.{key}"), href, said
+
+
+def _owned(texts: StoreTexts, written: str) -> str:
+    # An ownership as the log keeps it, such as 30d, in words.
+    ownership = Ownership.read(written)
+    assert isinstance(ownership, Ownership)
+    return texts.ownership(ownership, inline=True)

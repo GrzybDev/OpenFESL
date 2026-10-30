@@ -42,13 +42,24 @@ class SqlSettingStore:
             admin: The admin who changed it; None for the command line.
         """
         async with self._sessions.begin() as session:
-            if value is None:
-                await session.execute(delete(SettingRow).where(SettingRow.key == key))
-            else:
-                statement = insert(SettingRow).values(key=key, value=value)
-                await session.execute(
-                    statement.on_conflict_do_update(
-                        index_elements=[SettingRow.key], set_={"value": statement.excluded.value}
-                    )
-                )
+            await put_setting(session, key, value)
             session.add(action_row(AdminAction.SETTING, key, {"value": value}, admin))
+
+
+async def put_setting(session: AsyncSession, key: str, value: str | None) -> None:
+    """Set or remove a setting within a transaction, which records the change itself.
+
+    Args:
+        session: The transaction's session.
+        key: The setting's key.
+        value: Its new value; None removes it.
+    """
+    if value is None:
+        await session.execute(delete(SettingRow).where(SettingRow.key == key))
+        return
+    statement = insert(SettingRow).values(key=key, value=value)
+    await session.execute(
+        statement.on_conflict_do_update(
+            index_elements=[SettingRow.key], set_={"value": statement.excluded.value}
+        )
+    )

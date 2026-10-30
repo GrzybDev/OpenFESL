@@ -172,3 +172,86 @@ async def test_admins_change_add_and_reset_an_items_price_points_that_the_game_t
         assert "Funds, permanent: 2,400 → 2,600; Funds, 30 days: sold again" in log
         assert "Valor Points, 7 days: added at 1,000" in log
         assert "Funds, permanent: 2,600 → 2,400; Funds, 30 days: switched off" in log
+
+
+@pytest.mark.usefixtures("prompt_actions")
+async def test_admins_apply_a_changed_kind_rule_to_the_items_without_own_prices(
+    admin_provider: IdentityProvider,
+    base: str,
+    server_url: str,
+    database_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    # A rule changed before the import prices the store that the import fills.
+    await execute(
+        database_url,
+        "INSERT INTO setting (key, value) VALUES ('bfheroes.store.prices.emotes.value', '2000')",
+    )
+    await stock(server_url, tmp_path, capsys)
+    await execute(database_url, "UPDATE store_product SET price = 9999 WHERE item_id = 3042")
+    rules = f"{base}/admin/store/bfheroes/rules"
+    weapons = f"{rules}/class-weapons"
+    admin_provider.user = WARDEN
+    async with httpx2.AsyncClient() as client:
+        shown = visible((await sign_in(client, base, next="/admin/store/bfheroes/rules")).content)
+        assert "Emotes Emotes Currency Funds 2,000 game data: 1,680" in shown
+        assert "Weapons of the class sets Weapons Currency Funds 6,720" in shown
+        assert "2 items 1 with own prices" in shown and "Ability levels" in shown
+        token = form_token(shown := (await client.get(rules)).text)
+        assert (await client.post(weapons, data={"csrf": token})).status_code == 403
+    admin_provider.user = KEEPER
+    async with httpx2.AsyncClient() as client:
+        page = await sign_in(client, base, next="/admin/store/bfheroes/rules?rule=class-weapons")
+        token = form_token(page.text)
+        refused = await client.post(weapons, data={"csrf": token, "value": "0"})
+        assert refused.status_code == 400
+        assert "A price is from 1 to 2,147,483,647; 0 is not." in visible(refused.content)
+        # A day's rental share of a value of 10 Valor Points rounds down to nothing.
+        rentals = {"csrf": token, "value": "10", "sold-1d": "1", "sold-30d": "1"}
+        free = await client.post(f"{rules}/weapon-rentals/apply", data=rentals)
+        assert free.status_code == 400
+        free = await client.post(f"{rules}/weapon-rentals", data=rentals)
+        assert (
+            "Not saved: at this value, 1 day would cost 0; a price is from 1 to 2,147,483,647."
+            in visible(free.content)
+        )
+        changed = {"csrf": token, "value": "7,000", "sold-perm": "1", "sold-30d": "1"}
+        asked = visible((await client.post(weapons, data=changed)).content)
+        assert "Apply the rule Weapons of the class sets?" in asked
+        assert "Change now 1 item without own prices" in asked
+        assert "Keep their prices 1 item priced or sold by hand" in asked
+        assert "Invented Rifle: Funds, 30 days: 3,500 · Funds, permanent: 7,000" in asked
+        applied = await client.post(f"{weapons}/apply", data=changed, follow_redirects=True)
+        assert "Applied the rule Weapons of the class sets. Items it changed: 1." in visible(
+            applied.content
+        )
+        sold = [listed(product) for product in await offers(server_url)]
+        assert "OFB-DBFH:13 3015-unlm 7000_PF" in sold and "3015-tlmd 30d 3500_PF" in " ".join(sold)
+        assert "OFB-DBFH:18 3042-unlm 9999_PF" in sold
+        assert "OFB-DBFH:23 5001-unlm 2000_PF" in sold
+        kept = await select_value(
+            database_url,
+            "SELECT value FROM setting WHERE key = 'bfheroes.store.prices.class-weapons.sold'",
+        )
+        assert kept == '["30d", "perm"]'
+        log = visible((await client.get(f"{base}/admin/audit")).content)
+        assert "Rule changed Weapons of the class sets" in log
+        assert "Items changed: 1; kept as set by hand: 1 · 7,000, sold as 30 days, permanent" in log
+
+        # The coat, which is not sold, keeps its points switched off.
+        coat = {"csrf": token, "unsold": "1", "price-1": "2600", "price-2": "1300"}
+        assert (await client.post(f"{base}/admin/store/bfheroes/items/3", data=coat)).is_redirect
+        clothing = {"csrf": token, "value": "2,800", "sold-perm": "1", "sold-30d": "1"}
+        asked = visible((await client.post(f"{rules}/clothing", data=clothing)).content)
+        assert "Change now 0 items without own prices" in asked
+        assert "Keep their prices 1 item priced or sold by hand" in asked
+        await client.post(f"{rules}/clothing/apply", data=clothing)
+        assert not any(" 3-" in listed(product) for product in await offers(server_url))
+
+        seeded = {"csrf": token, "value": "6720", "sold-perm": "1"}
+        await client.post(f"{weapons}/apply", data=seeded)
+        left = await select_value(
+            database_url, "SELECT count(*) FROM setting WHERE key LIKE 'bfheroes.store.%'"
+        )
+        assert left == 2

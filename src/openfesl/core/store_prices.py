@@ -1,7 +1,7 @@
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Protocol
+from typing import Any, Protocol
 
 from openfesl.core.admins import Admin
 from openfesl.core.catalogues import Catalogue, Item
@@ -167,6 +167,95 @@ class PriceStore(Protocol):
             PriceRefused: When a point to add is one the store has, also at the same time.
         """
 
+    async def apply_rule(
+        self,
+        game: str,
+        settings: Mapping[str, str | None],
+        points: Sequence[PointChange],
+        details: dict[str, Any],
+        admin: Admin,
+    ) -> None:
+        """Change a price rule and the price points it gives, and record it as one action.
+
+        Args:
+            game: The game's data-file name.
+            settings: The settings that override the rule's fields, by key; None removes one.
+            points: The price points the rule changes, those to add among them.
+            details: What the admin's log keeps of the change: the rule and what it changed.
+            admin: The admin who applied it.
+        """
+
+
+@dataclass(frozen=True, slots=True)
+class Applied:
+    """What applying a changed price rule does to the items it prices.
+
+    Attributes:
+        points: The price points it changes, those it adds among them.
+        changed: How many items take its prices, having none of their own in its currency.
+        kept: How many items keep their own prices or ways of being sold.
+        example: The first item that takes its prices, with its points then.
+    """
+
+    points: list[PointChange]
+    changed: int
+    kept: int
+    example: tuple[Item, list[PointChange]] | None
+
+
+def applied(old: StoreRules, new: StoreRules, key: str, found: Iterable[ItemPrices]) -> Applied:
+    """Return what applying a changed price rule does to the items it prices.
+
+    An item whose points in the rule's currency all hold the old rule's prices and are sold as it
+    sells them takes the new rule's: its prices, sold as it sells them, its other points in the
+    currency switched off and the ones it sells added. An item with a price of its own, or a point
+    sold otherwise, such as one not sold at all, keeps its points, as do the items the store never
+    sells.
+
+    Args:
+        old: The rules before the change, by which the items' prices are their own or not.
+        new: The rules after it.
+        key: The changed rule's key.
+        found: The items of the game's catalogue with their price points.
+    """
+    before, after = old.prices[key], new.prices[key]
+    points: list[PointChange] = []
+    changed = kept = 0
+    example = None
+    for prices in found:
+        item = prices.item
+        if prices.unsold or not any(rule is before for rule in old.rules(item)):
+            continue
+        lines = [line for line in prices.lines if line.product.currency == before.currency]
+        if any(
+            line.own or line.product.published != (line.product.ownership in before.sold)
+            for line in lines
+        ):
+            kept += 1
+            continue
+        taken = []
+        for line in lines:
+            product = line.product
+            price = new.price(after, product.ownership)
+            taken.append(
+                PointChange(
+                    product.id,
+                    product.item_id,
+                    product.ownership,
+                    product.currency,
+                    price or product.price,
+                    price is not None and product.ownership in after.sold,
+                )
+            )
+        held = {line.product.ownership for line in lines}
+        for ownership in after.sold:
+            if ownership not in held and (price := new.price(after, ownership)):
+                taken.append(PointChange(None, item.id, ownership, after.currency, price, True))
+        changed += 1
+        points += taken
+        example = example or (item, taken)
+    return Applied(points, changed, kept, example)
+
 
 def item_prices(
     game: Game, rules: StoreRules, catalogue: Catalogue, products: Iterable[Product]
@@ -185,7 +274,7 @@ def item_prices(
     held: dict[int, list[Product]] = {}
     for product in products:
         held.setdefault(product.item_id, []).append(product)
-    kinds = {rule.kind for rule in rules.prices}
+    kinds = {rule.kind for rule in rules.prices.values()}
     heroes = game.heroes
     starting = (
         {

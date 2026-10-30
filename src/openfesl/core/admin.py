@@ -114,6 +114,10 @@ class AdminAction(StrEnum):
     game:item; the details hold each changed point's product number, currency, ownership, price
     before and after and whether it was and is sold, and whether the admin reset them to the
     rules."""
+    STORE_RULE = "store_rule"
+    """Changed a price rule of a game's store and applied it, the target naming both as
+    game:rule; the details hold the rule's values before and after, how many items took its
+    prices and how many kept their own."""
 
 
 @dataclass(frozen=True, slots=True)

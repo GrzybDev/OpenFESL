@@ -128,7 +128,7 @@ class GameServices:
         self.catalogues = Catalogues(stores.catalogues, self.catalogue_files, games)
         self.figures = Figures(self.catalogues)
         self.game_art = GameArt(stores.game_art)
-        self.store = Store(stores.products, self.catalogues, games)
+        self.store = Store(stores.products, self.catalogues, games, stores.settings)
         drops = Drops(self.catalogues, stores.entitlements)
         self.deals = HotDeals(stores.products, stores.deals, stores.settings, self.catalogues)
         self.purchases = Purchases(
