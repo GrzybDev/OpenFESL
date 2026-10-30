@@ -1,6 +1,7 @@
 /* The Funds page: the balance cards in a row of three that stacks on phones, each with its coin,
-   number and whom it belongs to; the signed-out box in their place; and the outlined heading over
-   the sources of Funds. */
+   number and whom it belongs to; the signed-out box in their place; the outlined heading over
+   the sources of Funds; and the rewards that give Funds in one pale box, a row each, with the
+   heroes' rows under them. */
 @layer pages {
   .funds-lead {
     max-width: 70ch;
@@ -183,9 +184,132 @@
     text-decoration-line: underline;
   }
 
+  .funds-rewards {
+    margin-top: 54px;
+
+    .site-lead {
+      max-width: 72ch;
+      margin-top: 10px;
+    }
+  }
+
+  .funds-rewards-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 18px;
+  }
+
+  .funds-rewards-list {
+    margin-top: 18px;
+    padding-top: 4px;
+  }
+
+  .funds-reward {
+    padding-block: 14px;
+
+    & + & {
+      border-top: 2px solid #3b2d23;
+    }
+  }
+
+  .funds-reward-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #2b2018;
+
+    .progress-bar {
+      flex: 0 1 180px;
+    }
+
+    .reward-line-done {
+      font-weight: 700;
+      color: #2f5a14;
+    }
+  }
+
+  .funds-reward-disc {
+    display: grid;
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border: 2px solid #000;
+    border-radius: 50%;
+    background: #f2c12e;
+    color: #0a0a0a;
+  }
+
+  .funds-reward-disc-done {
+    background: #2f5a14;
+    color: #fff;
+  }
+
+  .funds-reward-name {
+    flex: 1 1 240px;
+    min-width: 0;
+  }
+
+  .funds-reward-title {
+    font: 800 18px/1.25 var(--site-heading);
+    color: #1f1712;
+  }
+
+  /* What a reward gives, on the dark pill with the currency's coin. */
+  .funds-reward-amount {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px 6px 7px;
+    border: 2px solid #000;
+    border-radius: 999px;
+    background: #1a1412;
+    font: 800 15px/1.1 var(--site-heading);
+    white-space: nowrap;
+    color: #fff;
+  }
+
+  .funds-reward-rows {
+    margin: 10px 0 0 54px;
+  }
+
+  /* A hero's row, led by the disc of where it stands: claimed, ready or counting. */
+  .reward-line-disc {
+    grid-template-columns: auto minmax(0, 1fr) minmax(96px, 150px);
+
+    .reward-line-state {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      border: 2px solid #3b2d23;
+      border-radius: 50%;
+      color: #3b2d23;
+    }
+
+    .reward-line-state-done {
+      border-color: #000;
+      background: #2f5a14;
+      color: #fff;
+    }
+  }
+
   @media (width < 40rem) {
     .funds-title {
       font-size: 26px;
+    }
+
+    .funds-reward-rows {
+      margin-left: 0;
+    }
+
+    .funds-reward-head .progress-bar {
+      flex-basis: 100%;
     }
   }
 }

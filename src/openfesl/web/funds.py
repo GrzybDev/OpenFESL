@@ -3,27 +3,47 @@ from collections.abc import Awaitable, Callable
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, Response
 
+from openfesl.core.catalogues import Catalogues
+from openfesl.core.entitlements import EntitlementStore
 from openfesl.core.games import Game, Games
+from openfesl.core.rewards import Rewards
+from openfesl.core.store import ProductStore
 from openfesl.core.wallets import Wallets
 from openfesl.web.account.session import signed_in
 from openfesl.web.pages import Pages
+from openfesl.web.reward_cards import reward_cards
 from openfesl.web.site import site_bar
 
 
 class FundsPages:
     """The Funds page of a game's site: the balances, and where Funds come from on this server."""
 
-    def __init__(self, pages: Pages, games: Games, wallets: Wallets) -> None:
+    def __init__(
+        self,
+        pages: Pages,
+        games: Games,
+        wallets: Wallets,
+        rewards: Rewards,
+        catalogues: Catalogues,
+        entitlements: EntitlementStore,
+        products: ProductStore,
+    ) -> None:
         """Prepare the Funds page of each game that lists it.
 
         Args:
             pages: Renders the pages.
             games: The games, of which those with the page, heroes and a site get it.
             wallets: Read the heroes' points without opening their wallets.
+            rewards: Tell how the game gives rewards, the milestones that give Funds among them.
+            catalogues: Name what rewards give, once imported.
+            entitlements: Hold what the heroes own.
+            products: Hold the boxes that rewards give from.
         """
         self._pages = pages
         self._games = games
         self._wallets = wallets
+        self._rewards = rewards
+        self._stores = catalogues, entitlements, products
 
     def routes(self) -> APIRouter:
         """Return each game's Funds page, at the address of the game's own website."""
@@ -44,6 +64,11 @@ class FundsPages:
             points = await self._wallets.of_personas(
                 game, [hero.persona for hero in heroes], rules.points
             )
+            milestones = []
+            if rewards := await self._rewards.rules(game):
+                art = self._pages.shows_art(request, game)
+                cards = await reward_cards(request, game, rewards, *self._stores, art)
+                milestones = await cards.milestones(bar.rewards if bar and player else [])
             return self._pages.render(
                 request,
                 "store.Funds",
@@ -55,6 +80,7 @@ class FundsPages:
                 given=await self._wallets.allowance_given(game, player.account_id, rules.currency)
                 if bar and player
                 else None,
+                milestones=milestones,
             )
 
         return show_funds

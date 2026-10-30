@@ -1,0 +1,19 @@
+{#def line, next: str = "", disc: bool = False #}
+{# A row of a reward's card: whose it is, how far it got or when it was claimed, and its bar or
+   its Claim, which returns to the next page once sent; with a disc, the glyph of where it stands
+   leads it: claimed, ready or counting. #}
+<li class="reward-line{% if disc %} reward-line-disc{% endif %}">
+  {% if disc %}
+    <span aria-hidden="true"
+          class="reward-line-state{% if line.done %} reward-line-state-done{% endif %}"><Icon :name="'tick' if line.done else 'gift' if line.claim else 'clock'" :size="16" stroke="currentColor" /></span>
+  {% endif %}
+  <p>
+    <strong>{{ line.name }}</strong>
+    <span{% if line.done or line.claim %} class="reward-line-done"{% endif %}>{{ line.text }}</span>
+  </p>
+  {% if line.claim %}
+    <RewardClaim :claiming="line.claim" :next="next" small />
+  {% elif line.share is not none %}
+    <ProgressBar :share="line.share" :label="line.name ~ ': ' ~ line.text" />
+  {% endif %}
+</li>

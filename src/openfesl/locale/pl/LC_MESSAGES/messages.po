@@ -9091,3 +9091,24 @@ msgstr "Odbieranie jest wstrzymane; ta nagroda poczeka."
 
 msgid "web.rewards.when.kept"
 msgstr "Dzień %(day)s z %(days)s, zachowany z dnia wstrzymania · do %(date)s"
+
+msgid "web.funds.rewards"
+msgstr "Nagrody na stronie dające %(currency)s"
+
+msgid "web.funds.rewards.all"
+msgstr "Wszystkie nagrody, także przedmioty"
+
+msgid "web.funds.rewards.each"
+msgstr "%(name)s · dla każdego bohatera"
+
+msgid "web.funds.rewards.amount"
+msgstr "+%(amount)s"
+
+msgid "web.funds.rewards.amount.each"
+msgstr "+%(amount)s za bohatera"
+
+msgid "web.funds.rewards.best"
+msgstr "Najlepszy wynik: %(hero)s, %(progress)s"
+
+msgid "games.bfheroes.funds.rewards.lead"
+msgstr "Nagrody ustala administracja tego serwisu. Pierwszy bohater i 100 meczów liczą się raz na konto; każdy poziom liczy się raz dla każdego bohatera, który go osiągnie. Odbiór od razu dodaje %(currency)s na konto."

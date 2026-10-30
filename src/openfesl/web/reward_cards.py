@@ -59,6 +59,12 @@ class Card:
         tone: The state's kind, which picks its glyph and colour.
         claim: How it is claimed now; none when it may not be, or its rows are claimed.
         needs: What gets it the hero it lacks: create a hero in a free slot, or buy a slot.
+        name: A milestone's name, which states its goal, and that each hero counts for it
+            where each does.
+        each: Whether each hero counts for a milestone on its own.
+        amount: The Funds a milestone gives, for each hero where each counts.
+        best: How far the hero got that came closest to a milestone that each hero counts for,
+            while none reached it.
     """
 
     id: str
@@ -75,6 +81,10 @@ class Card:
     tone: str
     claim: Claiming | None = None
     needs: str | None = None
+    name: str = ""
+    each: bool = False
+    amount: str = ""
+    best: Line | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -310,6 +320,18 @@ class RewardCards:
                     lines.append(Line(name, ready, claim=await self.claims.claiming(reward)))
                 else:
                     lines.append(self._progress(name, reward, milestone.progress))
+            named = texts.text(milestone.name).format(goal=texts.amount(milestone.goal))
+            funds = words.funds(milestone.gift.funds)
+            # Where each hero counts and none reached it yet, the one that got furthest.
+            reached = any(line.done or line.claim for line in lines)
+            best = None
+            if milestone.each and lines and not reached:
+                top = max(lines, key=lambda line: line.share or 0)
+                best = Line(
+                    top.name,
+                    texts.text("web.funds.rewards.best", hero=top.name, progress=top.text),
+                    share=top.share,
+                )
             cards.append(
                 Card(
                     id=f"reward-milestone-{key}",
@@ -326,6 +348,17 @@ class RewardCards:
                         "web.rewards.state.funds", currency=texts.currency(rules.currency)
                     ),
                     tone="funds",
+                    name=texts.text("web.funds.rewards.each", name=named)
+                    if milestone.each
+                    else named,
+                    each=milestone.each,
+                    amount=texts.text(
+                        "web.funds.rewards.amount.each"
+                        if milestone.each
+                        else "web.funds.rewards.amount",
+                        amount=funds,
+                    ),
+                    best=best,
                 )
             )
         return cards

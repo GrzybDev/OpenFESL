@@ -14,7 +14,7 @@ from openfesl.core.texts import localize
 from openfesl.web.account.session import signed_in
 from openfesl.web.pages import Pages, listed
 from openfesl.web.reward_cards import RewardCards, reward_cards
-from openfesl.web.sessions import form_matches, form_token, toast
+from openfesl.web.sessions import form_matches, form_token, inside, toast
 from openfesl.web.site import site_bar
 
 REWARDS = "/rewards"
@@ -134,7 +134,9 @@ class RewardsPages:
     def _claim(self, game: Game) -> Callable[[Request], Awaitable[Response]]:
         async def claim(request: Request) -> Response:
             form = await request.form()
-            page = localize(f"/{game.id}{REWARDS}", request.state.language)
+            # The page the claim came from, such as the Funds page, else the rewards page.
+            page = inside(str(form.get("next", "")), ("/",))
+            page = page or localize(f"/{game.id}{REWARDS}", request.state.language)
             player = signed_in(request)
             if player is None:
                 return RedirectResponse(page, 303)

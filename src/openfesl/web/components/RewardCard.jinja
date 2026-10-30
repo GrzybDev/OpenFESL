@@ -50,17 +50,7 @@
       {% if card.lines %}
         <ul class="reward-rows">
           {% for line in card.lines %}
-            <li class="reward-line">
-              <p>
-                <strong>{{ line.name }}</strong>
-                <span{% if line.done or line.claim %} class="reward-line-done"{% endif %}>{{ line.text }}</span>
-              </p>
-              {% if line.claim %}
-                <RewardClaim :claiming="line.claim" small />
-              {% elif line.share is not none %}
-                <ProgressBar :share="line.share" :label="line.name ~ ': ' ~ line.text" />
-              {% endif %}
-            </li>
+            <RewardLine :line="line" />
           {% endfor %}
         </ul>
       {% endif %}

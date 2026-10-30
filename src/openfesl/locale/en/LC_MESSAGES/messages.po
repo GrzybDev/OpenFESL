@@ -8577,3 +8577,24 @@ msgstr "Claims are paused; this reward waits."
 
 msgid "web.rewards.when.kept"
 msgstr "Day %(day)s of %(days)s, kept from a paused day · until %(date)s"
+
+msgid "web.funds.rewards"
+msgstr "Web rewards with %(currency)s"
+
+msgid "web.funds.rewards.all"
+msgstr "All rewards, items included"
+
+msgid "web.funds.rewards.each"
+msgstr "%(name)s · for each hero"
+
+msgid "web.funds.rewards.amount"
+msgstr "+%(amount)s"
+
+msgid "web.funds.rewards.amount.each"
+msgstr "+%(amount)s a hero"
+
+msgid "web.funds.rewards.best"
+msgstr "Best: %(hero)s, %(progress)s"
+
+msgid "games.bfheroes.funds.rewards.lead"
+msgstr "The administrators of this service set the rewards. The first hero and 100 matches count once for the account; each level counts once for every hero that reaches it. Claim adds the %(currency)s to the account at once."

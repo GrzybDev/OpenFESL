@@ -1,7 +1,8 @@
-{#def claiming, small: bool = False #}
+{#def claiming, small: bool = False, next: str = "" #}
 {# Claim on a reward's card. A reward for one of several heroes opens its claim dialog, where the
-   hero is picked, and without scripts leads to the claim page; any other is sent at once. While
-   claims are paused it stays in view, unavailable, saying why. #}
+   hero is picked, and without scripts leads to the claim page; any other is sent at once and
+   returns to the next page, if given. While claims are paused it stays in view, unavailable,
+   saying why. #}
 {% set id = "claim-" ~ claiming.key|replace(":", "-") ~ "-" ~ (claiming.faction or "account") %}
 {% set classes = "site-button site-button-go" ~ ("" if small else " site-button-large") %}
 {% if claiming.paused %}
@@ -36,6 +37,7 @@
     <input type="hidden" name="csrf" value="{{ csrf }}">
     <input type="hidden" name="key" value="{{ claiming.key }}">
     <input type="hidden" name="faction" value="{{ claiming.faction }}">
+    {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
     <button type="submit" class="{{ classes }}">
       <Icon name="gift" :size="18" stroke="currentColor" />
       {{ _("web.rewards.claim") }}<span class="sr-only">{{ claiming.label }}</span>

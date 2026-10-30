@@ -1,6 +1,9 @@
-{#def from_game: bool, points: list, allowance: int, given = None #}
+{#def from_game: bool, points: list, allowance: int, milestones: list, given = None #}
 {# The Funds page: why the game opened it, the account's balances or the way to see them, and the
-   rule that Funds are not sold, with the sources they come from on this server. #}
+   rule that Funds are not sold, with the sources they come from on this server: the starting
+   allowance and the rewards that give Funds with what each gives. A reward of the account says
+   where it stands in its own row; one that each hero gets lists the heroes with how far each got
+   and Claim once one reached it, or, while none did, the hero that came closest. #}
 {% set rules = game.heroes %}
 {% set funds = _("games." ~ game.id ~ ".currency." ~ rules.currency) %}
 <Layout :title="funds">
@@ -105,4 +108,54 @@
       </div>
     {% endif %}
   </section>
+  {% if milestones %}
+    <section aria-labelledby="funds-rewards" class="funds-rewards">
+      <div class="funds-rewards-head">
+        <h2 id="funds-rewards" class="funds-title">{{ _("web.funds.rewards", currency=funds) }}</h2>
+        {% if "rewards" in game.pages %}
+          <a href="{{ url('/' ~ game.id ~ '/rewards') }}"
+             class="site-link">{{ _("web.funds.rewards.all") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+        {% endif %}
+      </div>
+      <p class="site-lead">{{ _("games." ~ game.id ~ ".funds.rewards.lead", currency=funds) }}</p>
+      <ul role="list" class="store-box store-box-pale funds-rewards-list">
+        {% for card in milestones %}
+          {% set alone = card.lines[0] if not card.each and card.lines|length == 1 else none %}
+          {% set shown = alone or card.best %}
+          <li class="funds-reward">
+            <div class="funds-reward-head">
+              <span aria-hidden="true"
+                    class="funds-reward-disc{% if alone and alone.done %} funds-reward-disc-done{% endif %}"><Icon :name="'tick' if alone and alone.done else card.glyph" :size="20" stroke="currentColor" /></span>
+              <div class="funds-reward-name">
+                <h3 class="funds-reward-title">{{ card.name }}</h3>
+                {% if shown %}
+                  <p {% if alone and (alone.done or alone.claim) %} class="reward-line-done"{% endif %}>{{ shown.text }}</p>
+                {% elif card.text %}
+                  <p>{{ card.text }}</p>
+                {% endif %}
+              </div>
+              {% if alone and alone.claim %}
+                <RewardClaim :claiming="alone.claim" :next="here" small />
+              {% elif shown and shown.share is not none %}
+                <ProgressBar :share="shown.share" :label="card.name ~ ': ' ~ shown.text" />
+              {% endif %}
+              <p class="funds-reward-amount">
+                <span aria-hidden="true"
+                      data-wallet="{{ rules.currency }}"
+                      class="store-coin"><Icon name="coin" :size="12" stroke="currentColor" /></span>
+                {{ card.amount }}
+              </p>
+            </div>
+            {% if card.each and not card.best and card.lines %}
+              <ul class="reward-rows funds-reward-rows">
+                {% for line in card.lines %}
+                  <RewardLine :line="line" :next="here" disc />
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
 </Layout>
