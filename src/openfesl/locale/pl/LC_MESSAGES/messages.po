@@ -10885,3 +10885,285 @@ msgstr "Odebranie z portfela"
 
 msgid "web.admin.audit.wallet"
 msgstr "%(amount)s %(currency)s, %(before)s → %(after)s · wpis %(entry)s"
+
+msgid "web.admin.menu.store"
+msgstr "Sklep"
+
+msgid "web.admin.store.title"
+msgstr "Sklep"
+
+msgid "web.admin.store.subtitle"
+msgstr "Ceny: %(game)s"
+
+msgid "web.admin.store.tabs"
+msgstr "Części sklepu"
+
+msgid "web.admin.store.tab.prices"
+msgstr "Ceny"
+
+msgid "web.admin.store.items"
+msgstr "Przedmioty"
+
+msgid "web.admin.store.search"
+msgstr "Nazwa lub numer"
+
+msgid "web.admin.store.search.hint"
+msgstr "Początek nazwy albo numer przedmiotu"
+
+msgid "web.admin.store.column.item"
+msgstr "Przedmiot"
+
+msgid "web.admin.store.column.kind"
+msgstr "Rodzaj"
+
+msgid "web.admin.store.column.requires"
+msgstr "Wymaga"
+
+msgid "web.admin.store.column.points"
+msgstr "Punkty cenowe"
+
+msgid "web.admin.store.column.state"
+msgstr "Stan"
+
+msgid "web.admin.store.column.edit"
+msgstr "Ceny"
+
+msgid "web.admin.store.state.sale"
+msgstr "W sprzedaży"
+
+msgid "web.admin.store.state.off"
+msgstr "Niesprzedawany"
+
+msgid "web.admin.store.state.own"
+msgstr "Własne ceny"
+
+msgid "web.admin.store.state.fixed"
+msgstr "Stała cena"
+
+msgid "web.admin.store.edit.of"
+msgstr "Ceny: %(item)s"
+
+msgid "web.admin.store.none"
+msgstr "Żaden przedmiot nie pasuje do filtra."
+
+msgid "web.admin.store.list.note"
+msgstr "Według nazwy · %(count)s na stronę · ceny wynikają z zasady rodzaju, chyba że przedmiot ma własne."
+
+msgid "web.admin.store.filter"
+msgstr "Filtr"
+
+msgid "web.admin.store.filter.clear"
+msgstr "Wyczyść filtr"
+
+msgid "web.admin.store.filter.kind"
+msgstr "Rodzaj"
+
+msgid "web.admin.store.filter.faction"
+msgstr "Frakcja"
+
+msgid "web.admin.store.filter.class"
+msgstr "Klasa"
+
+msgid "web.admin.store.filter.state"
+msgstr "Stan"
+
+msgid "web.admin.store.filter.all"
+msgstr "Wszystkie"
+
+msgid "web.admin.store.filter.any"
+msgstr "Dowolna"
+
+msgid "web.admin.store.filter.apply"
+msgstr "Pokaż przedmioty"
+
+msgid "web.admin.store.none.head"
+msgstr "Brak przedmiotów"
+
+msgid "web.admin.store.no_catalogue"
+msgstr "Ceny wymagają katalogu gry %(game)s."
+
+msgid "web.admin.store.no_catalogue.text"
+msgstr "Sklep pokazuje przedmioty z katalogu; po imporcie każdy przedmiot dostaje ceny według zasady swojego rodzaju."
+
+msgid "web.admin.store.points.count.one"
+msgstr "%(count)s punkt cenowy"
+
+msgid "web.admin.store.points.count.few"
+msgstr "%(count)s punkty cenowe"
+
+msgid "web.admin.store.points.count.many"
+msgstr "%(count)s punktów cenowych"
+
+msgid "web.admin.store.points.count.other"
+msgstr "%(count)s punktu cenowego"
+
+msgid "web.admin.store.points.none"
+msgstr "Brak"
+
+msgid "web.admin.store.steps.one"
+msgstr "%(count)s stopień"
+
+msgid "web.admin.store.steps.few"
+msgstr "%(count)s stopnie"
+
+msgid "web.admin.store.steps.many"
+msgstr "%(count)s stopni"
+
+msgid "web.admin.store.steps.other"
+msgstr "%(count)s stopnia"
+
+msgid "web.admin.store.fixed.ways"
+msgstr "%(currency)s: 1 za stopień · stała cena"
+
+msgid "web.admin.store.unsold.withheld"
+msgstr "Wstrzymany · przyznawany tylko ręcznie"
+
+msgid "web.admin.store.unsold.base"
+msgstr "Ma go każdy bohater, któremu pasuje"
+
+msgid "web.admin.store.unsold.starting"
+msgstr "Wyposażenie startowe"
+
+msgid "web.admin.store.unsold.look"
+msgstr "Część wyglądu bohatera"
+
+msgid "web.admin.store.unsold.excluded"
+msgstr "Pominięty w danych gry"
+
+msgid "web.admin.store.unsold.unpriced"
+msgstr "Bez zasady cenowej"
+
+msgid "web.admin.store.unsold.text.withheld"
+msgstr "Dane gry go wstrzymują: nigdy nie jest sprzedawany, losowany ani dawany w nagrodę, a administracja przyznaje go ręcznie na stronie bohatera."
+
+msgid "web.admin.store.unsold.text.base"
+msgstr "Każdy bohater, któremu pasuje, ma go od początku, więc nie jest sprzedawany."
+
+msgid "web.admin.store.unsold.text.starting"
+msgstr "Gra daje go w wyposażeniu startowym, więc nie jest sprzedawany."
+
+msgid "web.admin.store.unsold.text.look"
+msgstr "Bohater dostaje go razem z wyglądem przy tworzeniu, więc nie jest sprzedawany."
+
+msgid "web.admin.store.unsold.text.excluded"
+msgstr "Dane gry pomijają go w sklepie."
+
+msgid "web.admin.store.unsold.text.unpriced"
+msgstr "Żadna zasada sklepu nie wycenia jego rodzaju."
+
+msgid "web.admin.store.all_items"
+msgstr "Wszystkie przedmioty"
+
+msgid "web.admin.store.fact.kind"
+msgstr "Rodzaj"
+
+msgid "web.admin.store.fact.requires"
+msgstr "Wymaga"
+
+msgid "web.admin.store.fact.rule"
+msgstr "Zasada"
+
+msgid "web.admin.store.rule.use"
+msgstr "%(price)s za użycie"
+
+msgid "web.admin.store.rule.none"
+msgstr "Brak"
+
+msgid "web.admin.store.points"
+msgstr "Punkty cenowe"
+
+msgid "web.admin.store.points.own.one"
+msgstr "%(total)s · własne: %(count)s"
+
+msgid "web.admin.store.points.own.few"
+msgstr "%(total)s · własne: %(count)s"
+
+msgid "web.admin.store.points.own.many"
+msgstr "%(total)s · własne: %(count)s"
+
+msgid "web.admin.store.points.own.other"
+msgstr "%(total)s · własne: %(count)s"
+
+msgid "web.admin.store.point.column.product"
+msgstr "Produkt"
+
+msgid "web.admin.store.point.column.currency"
+msgstr "Waluta"
+
+msgid "web.admin.store.point.column.ownership"
+msgstr "Posiadanie"
+
+msgid "web.admin.store.point.column.price"
+msgstr "Cena"
+
+msgid "web.admin.store.point.column.from"
+msgstr "Źródło"
+
+msgid "web.admin.store.point.column.sold"
+msgstr "Sprzedaż"
+
+msgid "web.admin.store.step"
+msgstr "Stopień %(step)s z %(steps)s"
+
+msgid "web.admin.store.point.own"
+msgstr "Własna cena"
+
+msgid "web.admin.store.point.rule_value"
+msgstr "zasada: %(price)s"
+
+msgid "web.admin.store.point.no_rule"
+msgstr "żadna zasada tak go nie wycenia"
+
+msgid "web.admin.store.point.rule"
+msgstr "Zasada"
+
+msgid "web.admin.store.point.on"
+msgstr "Sprzedawany"
+
+msgid "web.admin.store.point.off"
+msgstr "Wyłączony"
+
+msgid "web.admin.store.points.empty"
+msgstr "Sklep nie ma dla niego punktów cenowych."
+
+msgid "web.admin.store.ability"
+msgstr "Każdy stopień umiejętności kupuje się w menu gry, a zwrot w menu oddaje wszystkie wydane punkty. Tych cen nie można zmieniać."
+
+msgid "web.admin.store.managed"
+msgstr "Zmiana cen wymaga roli administratora."
+
+msgid "web.admin.store.keep.title"
+msgstr "Jak działają zmiany"
+
+msgid "web.admin.store.keep_products"
+msgstr "Zmieniona cena obowiązuje od następnego zakupu. Punkt cenowy na stałe zachowuje numer produktu, bo gra kupuje według niego, więc punkt, który nie jest już sprzedawany, zostaje wyłączony, a nie usunięty."
+
+msgid "web.admin.store.ways"
+msgstr "%(currency)s: %(ways)s"
+
+msgid "web.admin.store.ways.days.one"
+msgstr "%(numbers)s dzień"
+
+msgid "web.admin.store.ways.days.few"
+msgstr "%(numbers)s dni"
+
+msgid "web.admin.store.ways.days.many"
+msgstr "%(numbers)s dni"
+
+msgid "web.admin.store.ways.days.other"
+msgstr "%(numbers)s dnia"
+
+msgid "web.admin.store.ways.uses.one"
+msgstr "%(numbers)s użycie"
+
+msgid "web.admin.store.ways.uses.few"
+msgstr "%(numbers)s użycia"
+
+msgid "web.admin.store.ways.uses.many"
+msgstr "%(numbers)s użyć"
+
+msgid "web.admin.store.ways.uses.other"
+msgstr "%(numbers)s użycia"
+
+msgid "web.admin.store.ways.permanent"
+msgstr "na stałe"

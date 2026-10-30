@@ -10287,3 +10287,255 @@ msgstr "Wallet take"
 
 msgid "web.admin.audit.wallet"
 msgstr "%(amount)s %(currency)s, %(before)s → %(after)s · ledger entry %(entry)s"
+
+msgid "web.admin.menu.store"
+msgstr "Store"
+
+msgid "web.admin.store.title"
+msgstr "Store"
+
+msgid "web.admin.store.subtitle"
+msgstr "Prices of %(game)s"
+
+msgid "web.admin.store.tabs"
+msgstr "The store's parts"
+
+msgid "web.admin.store.tab.prices"
+msgstr "Prices"
+
+msgid "web.admin.store.items"
+msgstr "Items"
+
+msgid "web.admin.store.search"
+msgstr "Name or number"
+
+msgid "web.admin.store.search.hint"
+msgstr "The start of a name, or an item number"
+
+msgid "web.admin.store.column.item"
+msgstr "Item"
+
+msgid "web.admin.store.column.kind"
+msgstr "Kind"
+
+msgid "web.admin.store.column.requires"
+msgstr "Requires"
+
+msgid "web.admin.store.column.points"
+msgstr "Price points"
+
+msgid "web.admin.store.column.state"
+msgstr "State"
+
+msgid "web.admin.store.column.edit"
+msgstr "Prices"
+
+msgid "web.admin.store.state.sale"
+msgstr "On sale"
+
+msgid "web.admin.store.state.off"
+msgstr "Not sold"
+
+msgid "web.admin.store.state.own"
+msgstr "Own prices"
+
+msgid "web.admin.store.state.fixed"
+msgstr "Fixed"
+
+msgid "web.admin.store.edit.of"
+msgstr "Prices of %(item)s"
+
+msgid "web.admin.store.none"
+msgstr "No item matches the filter."
+
+msgid "web.admin.store.list.note"
+msgstr "Sorted by name · %(count)s per page · prices follow the kind's rule unless the item has own prices."
+
+msgid "web.admin.store.filter"
+msgstr "Filter"
+
+msgid "web.admin.store.filter.clear"
+msgstr "Clear the filter"
+
+msgid "web.admin.store.filter.kind"
+msgstr "Kind"
+
+msgid "web.admin.store.filter.faction"
+msgstr "Faction"
+
+msgid "web.admin.store.filter.class"
+msgstr "Class"
+
+msgid "web.admin.store.filter.state"
+msgstr "State"
+
+msgid "web.admin.store.filter.all"
+msgstr "All"
+
+msgid "web.admin.store.filter.any"
+msgstr "Any"
+
+msgid "web.admin.store.filter.apply"
+msgstr "Show items"
+
+msgid "web.admin.store.none.head"
+msgstr "No items"
+
+msgid "web.admin.store.no_catalogue"
+msgstr "Prices need the catalogue of %(game)s."
+
+msgid "web.admin.store.no_catalogue.text"
+msgstr "The store lists the catalogue's items; once it is imported, every item takes the prices of its kind's rule."
+
+msgid "web.admin.store.points.count.one"
+msgstr "%(count)s price point"
+
+msgid "web.admin.store.points.count.other"
+msgstr "%(count)s price points"
+
+msgid "web.admin.store.points.none"
+msgstr "None"
+
+msgid "web.admin.store.steps.one"
+msgstr "%(count)s step"
+
+msgid "web.admin.store.steps.other"
+msgstr "%(count)s steps"
+
+msgid "web.admin.store.fixed.ways"
+msgstr "%(currency)s: 1 per step · fixed"
+
+msgid "web.admin.store.unsold.withheld"
+msgstr "Withheld · granted by hand only"
+
+msgid "web.admin.store.unsold.base"
+msgstr "Held by every hero it fits"
+
+msgid "web.admin.store.unsold.starting"
+msgstr "Starting kit"
+
+msgid "web.admin.store.unsold.look"
+msgstr "Part of a hero's look"
+
+msgid "web.admin.store.unsold.excluded"
+msgstr "Left out by the game data"
+
+msgid "web.admin.store.unsold.unpriced"
+msgstr "Priced by no rule"
+
+msgid "web.admin.store.unsold.text.withheld"
+msgstr "The game data withholds it: it is never sold, rolled or rewarded, and admins grant it by hand on a hero's page."
+
+msgid "web.admin.store.unsold.text.base"
+msgstr "Every hero it fits holds it from the start, so it is never sold."
+
+msgid "web.admin.store.unsold.text.starting"
+msgstr "The game grants it with a starting kit, so it is never sold."
+
+msgid "web.admin.store.unsold.text.look"
+msgstr "A hero takes it with its look when it is created, so it is never sold."
+
+msgid "web.admin.store.unsold.text.excluded"
+msgstr "The game data leaves it out of the store."
+
+msgid "web.admin.store.unsold.text.unpriced"
+msgstr "No rule of the store prices its kind."
+
+msgid "web.admin.store.all_items"
+msgstr "All items"
+
+msgid "web.admin.store.fact.kind"
+msgstr "Kind"
+
+msgid "web.admin.store.fact.requires"
+msgstr "Requires"
+
+msgid "web.admin.store.fact.rule"
+msgstr "Rule"
+
+msgid "web.admin.store.rule.use"
+msgstr "%(price)s a use"
+
+msgid "web.admin.store.rule.none"
+msgstr "None"
+
+msgid "web.admin.store.points"
+msgstr "Price points"
+
+msgid "web.admin.store.points.own.one"
+msgstr "%(total)s · %(count)s own"
+
+msgid "web.admin.store.points.own.other"
+msgstr "%(total)s · %(count)s own"
+
+msgid "web.admin.store.point.column.product"
+msgstr "Product"
+
+msgid "web.admin.store.point.column.currency"
+msgstr "Currency"
+
+msgid "web.admin.store.point.column.ownership"
+msgstr "Ownership"
+
+msgid "web.admin.store.point.column.price"
+msgstr "Price"
+
+msgid "web.admin.store.point.column.from"
+msgstr "From"
+
+msgid "web.admin.store.point.column.sold"
+msgstr "Sold"
+
+msgid "web.admin.store.step"
+msgstr "Step %(step)s of %(steps)s"
+
+msgid "web.admin.store.point.own"
+msgstr "Own price"
+
+msgid "web.admin.store.point.rule_value"
+msgstr "rule: %(price)s"
+
+msgid "web.admin.store.point.no_rule"
+msgstr "no rule prices it so"
+
+msgid "web.admin.store.point.rule"
+msgstr "Rule"
+
+msgid "web.admin.store.point.on"
+msgstr "Sold"
+
+msgid "web.admin.store.point.off"
+msgstr "Off"
+
+msgid "web.admin.store.points.empty"
+msgstr "The store keeps no price point of it."
+
+msgid "web.admin.store.ability"
+msgstr "Each step of an ability is bought in the game's menu, whose refund returns every spent point. These prices are not editable."
+
+msgid "web.admin.store.managed"
+msgstr "Prices are changed with the admin role."
+
+msgid "web.admin.store.keep.title"
+msgstr "How changes apply"
+
+msgid "web.admin.store.keep_products"
+msgstr "A changed price applies to the next purchase. A price point keeps its product's id for good, as the game buys by it, so one that is no longer sold is switched off rather than deleted."
+
+msgid "web.admin.store.ways"
+msgstr "%(currency)s %(ways)s"
+
+msgid "web.admin.store.ways.days.one"
+msgstr "%(numbers)s day"
+
+msgid "web.admin.store.ways.days.other"
+msgstr "%(numbers)s days"
+
+msgid "web.admin.store.ways.uses.one"
+msgstr "%(numbers)s use"
+
+msgid "web.admin.store.ways.uses.other"
+msgstr "%(numbers)s uses"
+
+msgid "web.admin.store.ways.permanent"
+msgstr "permanent"

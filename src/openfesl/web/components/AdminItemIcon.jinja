@@ -1,0 +1,12 @@
+{#def game, item, shown: bool #}
+{# An item's icon on a row of the admin panel, withheld items' too, or a dashed placeholder where the
+   catalogue keeps none. #}
+{% if shown and item and item.icon %}
+  <img src="{{ url('/admin/icons/' ~ game.id ~ '/' ~ item.id) }}"
+       alt=""
+       loading="lazy"
+       class="admin-item-icon">
+{% else %}
+  <span aria-hidden="true"
+        class="admin-item-icon admin-item-icon-none"><Icon name="doc" :size="18" stroke="currentColor" /></span>
+{% endif %}

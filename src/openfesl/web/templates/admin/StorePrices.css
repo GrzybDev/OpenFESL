@@ -1,0 +1,230 @@
+/* A game's store prices: the search over its items, their rows with the icon, kind, requirement,
+   price points and state, and the filter of kind tiles, faction and class picks and state rows.
+   Where the table does not fit, each item is a block of its own. */
+@layer pages {
+  .prices-search {
+    display: flex;
+    margin-top: 2px;
+  }
+
+  .prices-search-label {
+    display: flex;
+    align-items: center;
+    background: var(--accent);
+    padding-inline: 14px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .prices-search-input {
+    min-width: 0;
+    flex: 1;
+    border: 0;
+    background: var(--row-light);
+    padding: 12px 14px;
+    font-size: 16px;
+    color: var(--ink);
+  }
+
+  .prices-list .table.prices-items {
+    min-width: 960px;
+  }
+
+  .prices-item-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns:
+      minmax(220px, 1.3fr) 120px minmax(150px, 0.9fr) minmax(220px, 1.4fr)
+      150px 44px;
+    gap: 2px;
+  }
+
+  .prices-item-row:nth-child(even) {
+    --cell: var(--row-alt);
+  }
+
+  .prices-item-name {
+    gap: 10px;
+    padding-block: 6px;
+
+    .account-link {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
+  .prices-number,
+  .prices-product {
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+
+  .prices-points {
+    font-weight: 700;
+  }
+
+  .prices-state {
+    gap: 8px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .prices-missing {
+    display: grid;
+    max-width: 560px;
+    gap: 10px;
+    background: var(--row-light);
+    padding: 18px;
+    color: var(--ink);
+  }
+
+  .prices-missing-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .prices-missing-title {
+    font-family: var(--font-sans);
+    font-size: 22px;
+    line-height: 1.2;
+    font-weight: 800;
+  }
+
+  .prices-filter {
+    display: grid;
+    gap: 2px;
+  }
+
+  .prices-filter-part {
+    display: grid;
+    min-width: 0;
+    gap: 2px;
+    border: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .prices-filter-legend {
+    width: 100%;
+    background: var(--accent);
+    color: var(--ink);
+  }
+
+  .bar-link {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  .choice-tiles.prices-kind-tiles {
+    grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+
+    .choice-tile {
+      min-height: 0;
+      gap: 4px;
+      padding: 8px 4px;
+    }
+
+    .choice-square {
+      width: 26px;
+      height: 26px;
+    }
+
+    .choice-title {
+      font-size: 12px;
+    }
+
+    .choice-tile:has(:checked) .choice-text {
+      color: var(--ink);
+    }
+  }
+
+  .prices-filter-row {
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    gap: 2px;
+  }
+
+  .prices-filter-pick {
+    position: relative;
+    display: grid;
+    min-height: 52px;
+    place-items: center;
+    background: var(--ink);
+    padding: 6px 4px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--bright);
+    cursor: pointer;
+    transition: background-color 150ms var(--ease-menu);
+
+    &:hover {
+      background: var(--menu-hover);
+    }
+
+    &:has(:checked) {
+      background: var(--accent);
+      color: var(--ink);
+    }
+
+    &:has(:focus-visible) {
+      outline: 3px solid #ffffff;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 6px var(--ink);
+    }
+  }
+
+  @container (width < 960px) {
+    .prices-list .table.prices-items {
+      min-width: 0;
+
+      [role="rowgroup"]:first-child {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
+    }
+
+    .prices-item-row.prices-item-columns {
+      grid-template-columns: minmax(0, 1fr) 44px;
+
+      > :nth-child(1) {
+        grid-column: 1;
+      }
+
+      > :nth-child(n + 2):nth-child(-n + 5) {
+        grid-column: 1 / -1;
+        grid-row: auto;
+      }
+
+      > :nth-child(2),
+      > :nth-child(3) {
+        display: none;
+      }
+
+      > :last-child {
+        grid-row: 1;
+        grid-column: 2;
+      }
+    }
+  }
+}

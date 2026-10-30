@@ -1,0 +1,91 @@
+/* An item's prices in a game's store: its name and facts, then its price points with their
+   product, currency, ownership, price, where the price comes from and whether it is sold. Where
+   the table does not fit, each price point is a block of its own. */
+@layer pages {
+  .prices-back {
+    justify-content: flex-start;
+    margin-bottom: 12px;
+  }
+
+  .prices-item-main {
+    display: grid;
+    gap: 14px;
+    container-type: inline-size;
+  }
+
+  .prices-item-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+    font-size: 22px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .prices-item-number {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+  }
+
+  .prices-facts {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  .prices-unsold {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+  }
+
+  .prices-points-table {
+    min-width: 850px;
+  }
+
+  .prices-point-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns: 170px 150px 130px 120px minmax(140px, 1fr) 160px;
+    gap: 2px;
+  }
+
+  .prices-point-row:nth-child(even) {
+    --cell: var(--row-alt);
+  }
+
+  .prices-price {
+    justify-content: flex-end;
+    font-family: var(--font-sans);
+    font-size: 20px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .prices-from {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  @container (width < 820px) {
+    .prices-points-table {
+      min-width: 0;
+
+      [role="rowgroup"]:first-child {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
+    }
+
+    .prices-point-row.prices-point-columns {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+}

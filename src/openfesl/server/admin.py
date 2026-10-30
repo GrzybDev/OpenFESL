@@ -26,6 +26,8 @@ from openfesl.web.admin.servers import (
     server_list_routes,
 )
 from openfesl.web.admin.settings import settings_routes
+from openfesl.web.admin.store import StoreAdminViews, store_routes
+from openfesl.web.admin.store_item import store_item_routes
 from openfesl.web.admin.wallets import WalletAdminViews, wallet_routes
 from openfesl.web.pages import Pages
 from openfesl.web.sessions import FormExpired
@@ -53,7 +55,14 @@ def include_admin_routes(
     server_views = ServerViews(
         games, census, services.approval, stores.servers, services.game_marks
     )
-    sections = frozenset({"catalogues"} if any(game.catalogue for game in games) else ())
+    sections = frozenset(
+        name
+        for name, served in (
+            ("catalogues", any(game.catalogue for game in games)),
+            ("store", any(game.store and game.heroes for game in games)),
+        )
+        if served
+    )
     sign_in = AdminSessions(
         pages,
         _sign_in_provider(settings),
@@ -114,6 +123,9 @@ def include_admin_routes(
             services.mugshots,
         )
     )
+    store_views = StoreAdminViews(games, services.catalogues, stores.prices)
+    app.include_router(store_routes(sign_in, store_views))
+    app.include_router(store_item_routes(sign_in, store_views))
     app.include_router(
         audit_routes(
             sign_in,

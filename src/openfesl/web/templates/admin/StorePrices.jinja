@@ -1,0 +1,166 @@
+{#def found, glyphs: dict, pages: int, size: int #}
+{# A game's store prices: its items by name with their kind, which heroes may have them,
+   their price points and how the store sells them, beside the filter by kind, faction, class and
+   state and the search by name or number. Where scripts run, a choice applies at once; without
+   them Show items sends the filter. #}
+{% set game = found.game %}
+{% set listing = found.listing %}
+{% set catalogue = found.catalogue %}
+{% set list = url("/admin/store/" ~ game.id) %}
+{% set states = {"sale": "tick", "off": "x", "own": "edit", "fixed": "lock"} %}
+{% set icons = catalogue.contents.icons > 0 %}
+{% set filtered = listing.kind or listing.faction or listing.hero_class or listing.states or listing.search %}
+<AdminPage :title="_('web.admin.store.title') ~ ' · ' ~ game.name"
+           current="store">
+  <StoreHead :game="game" current="prices" :subtitle="_('web.admin.store.subtitle', game=game.name)" :counts="{'prices': found.kinds.values()|sum}" />
+  <Panel class="enter-panel">
+    {% if not catalogue.imported %}
+      <div class="prices-missing">
+        <p class="prices-missing-head">
+          <span aria-hidden="true"
+                class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.store.none.head") }}
+        </p>
+        <p class="prices-missing-title">{{ _("web.admin.store.no_catalogue", game=game.name) }}</p>
+        <p class="body-text">{{ _("web.admin.store.no_catalogue.text") }}</p>
+        <SmallAction :href="url('/admin/catalogues')" :label="_('web.admin.menu.catalogues')" />
+      </div>
+    {% else %}
+      <div class="list-layout admin-layout" data-store-front>
+        <section aria-labelledby="store-results"
+                 class="list-main admin-list prices-list">
+          <Bar id="store-results" :extra="number(found.total)">{{ _("web.admin.store.items") }}</Bar>
+          <p class="prices-search">
+            <label for="prices-search" class="prices-search-label">{{ _("web.admin.store.search") }}</label>
+            <input id="prices-search"
+                   name="q"
+                   type="search"
+                   form="prices-filter"
+                   value="{{ listing.search }}"
+                   maxlength="64"
+                   autocomplete="off"
+                   placeholder="{{ _('web.admin.store.search.hint') }}"
+                   class="prices-search-input">
+          </p>
+          <div class="table-scroll table-scroll-flush">
+            <div role="table"
+                 aria-labelledby="store-results"
+                 class="table prices-items">
+              <div role="rowgroup" class="admin-list-head">
+                <div role="row" class="prices-item-columns">
+                  <div role="columnheader"
+                       aria-sort="ascending"
+                       class="column-head column-name">{{ _("web.admin.store.column.item") }}</div>
+                  <div role="columnheader" class="column-head">{{ _("web.admin.store.column.kind") }}</div>
+                  <div role="columnheader" class="column-head">{{ _("web.admin.store.column.requires") }}</div>
+                  <div role="columnheader" class="column-head">{{ _("web.admin.store.column.points") }}</div>
+                  <div role="columnheader" class="column-head">{{ _("web.admin.store.column.state") }}</div>
+                  <div role="columnheader"><span class="sr-only">{{ _("web.admin.store.column.edit") }}</span></div>
+                </div>
+              </div>
+              <div role="rowgroup" class="enter-rows table-rows">
+                {% for row in found.rows %}
+                  {% set item = row.prices.item %}
+                  {% set state = row.prices.state.value %}
+                  {% set href = list ~ "/items/" ~ item.id %}
+                  <div role="row" class="prices-item-columns prices-item-row">
+                    <div role="cell" class="admin-cell prices-item-name">
+                      <AdminItemIcon :game="game" :item="item" :shown="icons" />
+                      <a href="{{ href }}" class="account-link"><span class="admin-hero-strong">{{ row.name }}</span><span class="cell-ago prices-number">{{ _("web.admin.items.number", id=item.id) }}</span></a>
+                    </div>
+                    <div role="cell" class="admin-cell admin-item-kind">
+                      <span aria-hidden="true" class="cell-label">{{ _("web.admin.store.column.kind") }}</span>{{ _("games." ~ game.id ~ ".item_kind." ~ item.kind) }}
+                    </div>
+                    <div role="cell" class="admin-cell">
+                      <span aria-hidden="true"
+                            class="cell-label">{{ _("web.admin.store.column.requires") }}</span>{{ row.requires }}
+                    </div>
+                    <div role="cell" class="admin-cell cell-stack">
+                      <span aria-hidden="true" class="cell-label">{{ _("web.admin.store.column.points") }}</span>
+                      <span class="prices-points">{{ row.summary }}</span>
+                      <span class="cell-ago">{{ row.ways }}</span>
+                    </div>
+                    <div role="cell" class="admin-cell prices-state">
+                      <Badge :name="states[state]" lines />{{ _("web.admin.store.state." ~ state) }}
+                    </div>
+                    <div role="cell" class="cell-end">
+                      <EndSquare :href="href" :label="_('web.admin.store.edit.of', item=row.name)" />
+                    </div>
+                  </div>
+                {% else %}
+                  <div role="row">
+                    <div role="cell" aria-colspan="6" class="row-details list-empty">
+                      <div>
+                        <p class="list-empty-title">{{ _("web.admin.store.none") }}</p>
+                      </div>
+                      <SmallAction :href="list" :label="_('web.admin.store.filter.clear')" />
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          <div class="list-foot">
+            <p>
+              <span class="list-range">{{ _("web.admin.store.list.note", count=number(size)) }}</span>
+            </p>
+            <Pager :base="list" :view="listing" :pages="pages" />
+          </div>
+        </section>
+
+        <div class="list-side admin-side">
+          <form id="prices-filter"
+                method="get"
+                action="{{ list }}"
+                aria-labelledby="prices-filter-title"
+                data-store-filter
+                class="prices-filter">
+            <h2 id="prices-filter-title" class="bar bar-large">
+              <span>{{ _("web.admin.store.filter") }}</span>
+              {% if filtered %}<a href="{{ list }}"
+   class="bar-extra bar-link">{{ _("web.admin.store.filter.clear") }}</a>{% endif %}
+            </h2>
+            <fieldset class="prices-filter-part">
+              <legend class="bar prices-filter-legend">{{ _("web.admin.store.filter.kind") }}</legend>
+              <div class="choice-tiles prices-kind-tiles">
+                <ChoiceTile name="kind" value="" :title="_('web.admin.store.filter.all')" glyph="items" :checked="not listing.kind">
+                <span class="choice-text">{{ number(found.kinds.values()|sum) }}</span>
+                </ChoiceTile>
+                {% for kind, count in found.kinds.items() %}
+                  <ChoiceTile name="kind" :value="kind" :title="_('games.' ~ game.id ~ '.item_kind.' ~ kind)" :glyph="glyphs.get(kind, 'items')" :checked="listing.kind == kind">
+                  <span class="choice-text">{{ number(count) }}</span>
+                  </ChoiceTile>
+                {% endfor %}
+              </div>
+            </fieldset>
+            {% for name, field, options in [("faction", "faction", game.heroes.factions), ("class", "hero_class", game.heroes.classes)] %}
+              <fieldset class="prices-filter-part">
+                <legend class="bar prices-filter-legend">{{ _("web.admin.store.filter." ~ name) }}</legend>
+                <div class="prices-filter-row">
+                  {% for option in [""] + options|list %}
+                    <label class="prices-filter-pick">
+                      <input type="radio"
+                             name="{{ name }}"
+                             value="{{ option }}"
+                             {% if listing[field] == option %} checked{% endif %}
+                             class="choice-input">
+                      <span>{{ _("games." ~ game.id ~ "." ~ name ~ "." ~ option) if option else _("web.admin.store.filter.any") }}</span>
+                    </label>
+                  {% endfor %}
+                </div>
+              </fieldset>
+            {% endfor %}
+            <fieldset class="prices-filter-part">
+              <legend class="bar prices-filter-legend">{{ _("web.admin.store.filter.state") }}</legend>
+              {% for state, count in found.states.items() %}
+                <CheckRow :name="state.value" :label="_('web.admin.store.state.' ~ state.value)" :glyph="states[state.value]" :count="count" :checked="state in listing.states" lines />
+              {% endfor %}
+            </fieldset>
+            <div class="find-button">
+              <FormButton icon="find">{{ _("web.admin.store.filter.apply") }}</FormButton>
+            </div>
+          </form>
+        </div>
+      </div>
+    {% endif %}
+  </Panel>
+</AdminPage>

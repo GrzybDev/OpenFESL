@@ -1,8 +1,8 @@
-{#def name: str, label: str, glyph: str, count: int, checked: bool = False #}
+{#def name: str, label: str, glyph: str, count: int, checked: bool = False, lines: bool = False #}
 {# A checkbox row of a filter panel: the state's badge, its word, how many it would show and the
-   box, which the whole row toggles. #}
+   box, which the whole row toggles. A glyph drawn in lines is stroked. #}
 <label class="check-row">
-  <span class="check-glyph"><Badge :name="glyph" /></span>
+  <span class="check-glyph"><Badge :name="glyph" :lines="lines" /></span>
   <span class="check-label">{{ label }}</span>
   <span class="check-count">{{ number(count) }}</span>
   <span class="check-place">
