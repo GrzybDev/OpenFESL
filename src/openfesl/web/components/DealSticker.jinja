@@ -1,0 +1,8 @@
+{#def off: str #}
+{# A deal's discount on its yellow burst, read out as the share of the usual price it takes off. #}
+<p data-live class="deal-sticker">
+  <svg aria-hidden="true" viewBox="0 0 100 100" class="store-sticker-burst">
+    <use href="{{ static('icons.svg') }}#sticker" />
+  </svg>
+  <span aria-hidden="true">{{ _("web.store.sticker", off=off) }}</span><span class="sr-only">{{ _("web.store.sticker.label", off=off) }}</span>
+</p>

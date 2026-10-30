@@ -369,6 +369,8 @@ wallets = [
 # OpenFESLHook's launcher opens the site's start links, openfesl-bfheroes://launch?role=play&code=,
 # once a copy of the game was allowed to open them.
 start_links = true
+# The front page offers each faction's deal of the day, as the 2012 front page did.
+front_deals = "daily"
 
 [[site.menus]]
 name = "game"

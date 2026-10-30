@@ -8830,8 +8830,128 @@ msgstr "Anyone can search; friend requests need a signed-in account."
 msgid "web.friends.none.search"
 msgstr "Player search finds heroes and players by name."
 
+msgid "web.play_now.box.signed_out"
+msgstr "Play Now starts %(game)s as the account's default hero, so it needs a signed-in account with a hero."
+
+msgid "web.front.this_week"
+msgstr "This week"
+
+msgid "web.front.event.days"
+msgstr "%(dates)s · day %(day)s of %(days)s"
+
+msgid "web.front.event.waits"
+msgstr "Today's gift waits · for %(heroes)s"
+
+msgid "web.front.event.waits.once"
+msgstr "Waits · for %(heroes)s"
+
+msgid "web.front.event.claimed"
+msgstr "Claimed today for %(hero)s"
+
+msgid "web.front.event.claimed.once"
+msgstr "Claimed for %(hero)s"
+
+msgid "web.front.event.on_rewards"
+msgstr "on the rewards page"
+
+msgid "web.front.event.next"
+msgstr "Next gifts at %(when)s."
+
+msgid "web.front.event.sign_in"
+msgstr "Sign in to claim today's gifts."
+
+msgid "web.front.event.sign_in.once"
+msgstr "Sign in to claim its gifts."
+
+msgid "web.front.event.no_hero"
+msgstr "Gifts go to a hero of their faction. Create a hero first."
+
+msgid "web.front.event.none"
+msgstr "No event this week"
+
+msgid "web.front.event.all_year"
+msgstr "Milestones and starter packs are on the rewards page all year."
+
+msgid "web.front.top"
+msgstr "Top heroes"
+
+msgid "web.front.top.lead"
+msgstr "This week's score from ranked rounds, since Monday 00:00 UTC."
+
 msgid "web.front.top.place"
 msgstr "Place"
+
+msgid "web.front.top.score"
+msgstr "Score"
+
+msgid "web.front.top.none"
+msgstr "No hero is on this week's board yet."
+
+msgid "web.front.start"
+msgstr "How to start"
+
+msgid "web.front.start.account"
+msgstr "An OpenFESL account"
+
+msgid "web.front.start.account.text"
+msgstr "Sign-in and registration are on this site; one account holds every hero."
+
+msgid "web.front.start.account.done"
+msgstr "Signed in as %(name)s"
+
+msgid "web.front.start.hero"
+msgstr "A hero"
+
+msgid "web.front.start.hero.text.one"
+msgstr "Pick a faction, a class, a look and a name. Every account has %(count)s free hero slot."
+
+msgid "web.front.start.hero.text.other"
+msgstr "Pick a faction, a class, a look and a name. Every account has %(count)s free hero slots."
+
+msgid "web.front.start.hero.done.one"
+msgstr "%(hero)s and %(count)s more hero"
+
+msgid "web.front.start.hero.done.other"
+msgstr "%(hero)s and %(count)s more heroes"
+
+msgid "web.front.start.game"
+msgstr "OpenFESLHook and the game"
+
+msgid "web.front.start.game.text"
+msgstr "An original copy of %(game)s with OpenFESLHook installed. Play Now then starts the game as the default hero."
+
+msgid "web.front.deal"
+msgstr "Deal of the Day"
+
+msgid "web.front.deal.new_in"
+msgstr "New deals in"
+
+msgid "web.front.deal.until"
+msgstr "New deals at %(time)s"
+
+msgid "web.front.deal.see"
+msgstr "See the deal"
+
+msgid "web.front.deal.no_hero"
+msgstr "Create a hero first: deals are bought for one hero of the deal's faction."
+
+msgid "web.front.online"
+msgstr "Online now"
+
+msgid "web.front.online.players"
+msgstr "online"
+
+msgid "web.front.online.in_matches"
+msgstr "in matches"
+
+msgid "web.front.online.counted"
+msgstr "Counted at %(time)s."
+
+msgid "web.front.online.none"
+msgstr "Nobody is playing right now. Counted at %(time)s."
+
+msgid "web.front.start.game.launcher"
+msgstr "%(game)s starts with OpenFESLHook's sign-in window, which signs in with the account's e-mail address and game password."
 
 msgid "web.error.site.plaque.404"
 msgstr "Not found"
@@ -9156,3 +9276,6 @@ msgstr "The rank is the all-time score board's, ranked at %(time)s."
 
 msgid "web.hero.unranked"
 msgstr "not ranked yet"
+
+msgid "web.front.top.all"
+msgstr "All leaderboards"

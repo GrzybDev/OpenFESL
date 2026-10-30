@@ -9,6 +9,8 @@ from accounts import PASSWORD, execute, post_sign_in, select_value
 from heroes import create_hero
 from identity import form_token
 from living import ROYAL, freeze, import_catalogue, setting, worn
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
 from store import ROYAL_SOLDIER
 from support import visible
 from test_rewards import CHRISTMAS, INVENTED
@@ -237,6 +239,36 @@ async def test_a_claim_that_gives_nothing_says_when_it_was_claimed_or_when_its_d
     )
     assert "Nothing was given: day 5 of Christmas gifts ended at 00:00 UTC." in late
     assert "Nothing was given: Christmas gifts ended at 00:00 UTC." in over
+
+
+@pytest.mark.usefixtures("prompt_actions")
+async def test_each_signed_in_page_runs_the_rewards_once_and_takes_an_events_counts_once(
+    base: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # A day of Halloween, whose four missions count from the counts taken at its start.
+    freeze(monkeypatch, datetime(2026, 10, 28, 14, tzinfo=UTC))
+    await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    statements: list[str] = []
+
+    def executed(*arguments: object) -> None:
+        statements.append(str(arguments[2]))
+
+    pages = (REWARDS, CHESTS, "/bfheroes/store/purchaseFunds", "/bfheroes", "/bfheroes/heroes")
+    taken: dict[str, tuple[int, int]] = {}
+    async with httpx2.AsyncClient() as client:
+        await post_sign_in(client, base, "ann@example.test", PASSWORD)
+        await client.get(f"{base}{REWARDS}")
+        event.listen(Engine, "before_cursor_execute", executed)
+        try:
+            for path in pages:
+                statements.clear()
+                await client.get(f"{base}{path}")
+                baselines = [s for s in statements if "reward_baseline" in s]
+                taken[path] = (len(baselines), sum(s.startswith("INSERT") for s in baselines))
+        finally:
+            event.remove(Engine, "before_cursor_execute", executed)
+
+    assert taken == dict.fromkeys(pages, (4, 0))
 
 
 @pytest.mark.usefixtures("prompt_actions")

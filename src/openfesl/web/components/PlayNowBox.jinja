@@ -1,6 +1,7 @@
 {#def hero = None #}
 {# The blue info box on Play Now: the hero it starts the game as through OpenFESLHook's launcher,
-   or that it needs a hero first. A new default hero's name fades in after the change. #}
+   or that it needs a hero, or a signed-in account, first. A new default hero's name fades in
+   after the change. #}
 {% set changed = toast and toast.key == "web.heroes.toast.default" %}
 <section aria-labelledby="play-now-box" class="info-box info-box-blue">
   <h2 id="play-now-box" class="info-box-title">{{ _("web.play_now.title") }}</h2>
@@ -10,8 +11,10 @@
     <p class="info-box-note{% if changed %} play-now-box-changed{% endif %}">
       {{ _("web.play_now.box", game=game.name, hero=name) }}
     </p>
-  {% else %}
+  {% elif player %}
     <p class="info-box-note">{{ _("web.play_now.box.none", game=game.name) }}</p>
+  {% else %}
+    <p class="info-box-note">{{ _("web.play_now.box.signed_out", game=game.name) }}</p>
   {% endif %}
   <div class="play-now-box-actions">
     {% if hero %}

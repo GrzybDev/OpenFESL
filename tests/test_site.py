@@ -4,7 +4,7 @@ from accounts import PASSWORD, execute, post_sign_in, select_value
 from identity import form_token
 from support import markup, visible
 
-from openfesl.core.history import OnlineHistory
+from openfesl.web.heroes_front import HeroesFrontPages
 
 pytestmark = pytest.mark.anyio
 
@@ -78,7 +78,7 @@ async def test_a_game_sites_missing_and_failing_pages_keep_its_frame(
     async with httpx2.AsyncClient() as client:
         await post_sign_in(client, base, "ann@example.test", PASSWORD)
         missing = await client.get(f"{base}/pl/bfheroes/invented-page")
-        monkeypatch.setattr(OnlineHistory, "overview", fail)
+        monkeypatch.setattr(HeroesFrontPages, "_top", fail)
         failing = await client.get(f"{base}/bfheroes?again=1")
         elsewhere = await client.get(f"{base}/invented-page")
 

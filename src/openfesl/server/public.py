@@ -25,6 +25,7 @@ from openfesl.web.front import front_routes
 from openfesl.web.funds import FundsPages
 from openfesl.web.game_icons import game_icon_routes
 from openfesl.web.heroes import HeroesPages
+from openfesl.web.heroes_front import HeroesFrontPages
 from openfesl.web.host import host_routes
 from openfesl.web.hot_deals import HotDealsPages
 from openfesl.web.launcher import launcher_routes
@@ -80,6 +81,17 @@ def include_public_routes(
     app.include_router(shell_routes(pages, services.terms))
     app.include_router(menu_routes(pages, games, census))
     app.include_router(front_routes(pages, games, census, history, stores.keys))
+    app.include_router(
+        HeroesFrontPages(
+            pages,
+            games,
+            census,
+            services.rewards,
+            services.deals,
+            services.hero_boards,
+            (services.catalogues, stores.entitlements, stores.products),
+        ).routes()
+    )
     app.include_router(activity_routes(pages, games, census, history))
     app.include_router(server_routes(pages, games, census, services.approval))
     app.include_router(leaderboard_routes(pages, games, census, stores.stats))

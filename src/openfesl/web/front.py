@@ -25,7 +25,8 @@ def front_routes(
         keys: Lists the product keys, of which the one that lets players in is named.
     """
     router = APIRouter()
-    for game in games:
+    # A game with heroes made on its site has a front page of its own.
+    for game in (game for game in games if not (game.heroes and game.site)):
         router.add_api_route(
             f"/{game.id}",
             _front(pages, games, census, history, keys, game),

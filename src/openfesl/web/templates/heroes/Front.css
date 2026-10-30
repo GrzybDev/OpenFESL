@@ -1,0 +1,391 @@
+/* The game's front page: a main column of plaque-headed sections and a column of boxes beside
+   it, one column on phones. The event that runs is a pale card under a dark head with a row for
+   each faction's gift; the week's best heroes are rows with their place, class, level and score;
+   the three steps to start are cards side by side. */
+@layer pages {
+  .front-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
+    align-items: start;
+    gap: 40px 34px;
+  }
+
+  .front-section + .front-section {
+    margin-top: 44px;
+  }
+
+  /* The title of the week's best with the way to every leaderboard beside it. */
+  .front-top-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 18px;
+  }
+
+  .front-section .site-lead {
+    margin-top: 12px;
+  }
+
+  .front-event {
+    position: relative;
+    margin-top: 18px;
+    overflow: hidden;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #f1e9de;
+    box-shadow:
+      inset 0 0 0 3px #f8f4ef,
+      0 4px 0 rgb(0 0 0 / 0.3);
+    color: #1f1712;
+  }
+
+  .front-event-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border-bottom: 3px solid #000;
+    background: #2e2420;
+    color: #c9bfb3;
+    font: 800 14px/1.3 var(--site-heading);
+  }
+
+  .front-event-disc {
+    display: grid;
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border: 3px solid #000;
+    border-radius: 50%;
+    background: #f2c12e;
+  }
+
+  .front-event-body {
+    padding: 14px 18px 16px;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .front-gift {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding-block: 10px;
+    border-top: 1px dashed #a8977f;
+    font-size: 14px;
+
+    &:first-of-type {
+      margin-top: 10px;
+    }
+
+    strong,
+    span {
+      display: block;
+    }
+
+    strong {
+      font: 800 16px/1.25 var(--site-heading);
+    }
+
+    span {
+      font-weight: 700;
+    }
+  }
+
+  .front-gift-disc {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border: 2px solid #000;
+    border-radius: 50%;
+    background: var(--faction, #2e2420);
+    color: var(--faction-ink, #f2c12e);
+  }
+
+  .front-gift-claimed {
+    color: #2f5a14;
+  }
+
+  .front-gift-locked {
+    color: #5c4a3c;
+  }
+
+  .front-event-foot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px dashed #a8977f;
+    font-size: 14px;
+    color: #5c4a3c;
+  }
+
+  .front-no-event,
+  .front-no-top {
+    margin-top: 18px;
+  }
+
+  .front-top {
+    margin-top: 16px;
+    padding: 4px 18px;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #f1e9de;
+    box-shadow:
+      inset 0 0 0 3px #f8f4ef,
+      0 4px 0 rgb(0 0 0 / 0.3);
+    color: #1f1712;
+  }
+
+  .front-top-row {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 12px;
+    padding-block: 10px;
+
+    & + & {
+      border-top: 1px dashed #a8977f;
+    }
+  }
+
+  .front-top-place {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border-radius: 50%;
+    background: #1a1412;
+    color: #fff;
+    font: 800 16px/1 var(--site-heading);
+  }
+
+  .front-top-name {
+    min-width: 0;
+    font-size: 14px;
+
+    strong {
+      display: block;
+      font: 800 18px/1.2 var(--site-heading);
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .front-top-score {
+    min-width: 70px;
+    text-align: right;
+
+    span {
+      display: block;
+      font: 800 11px/1.3 var(--site-heading);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5c4a3c;
+    }
+
+    strong {
+      font: 800 20px/1.2 var(--site-heading);
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .front-step-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+    gap: 18px;
+    margin-top: 18px;
+  }
+
+  .front-step {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #f1e9de;
+    box-shadow:
+      inset 0 0 0 3px #f8f4ef,
+      0 4px 0 rgb(0 0 0 / 0.3);
+    color: #1f1712;
+    font-size: 14px;
+    line-height: 1.45;
+
+    h3 {
+      font: 800 19px/1.2 var(--site-heading);
+    }
+
+    .site-actions {
+      margin-top: auto;
+    }
+  }
+
+  .front-step-number {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border: 3px solid #000;
+    border-radius: 50%;
+    background: #f2c12e;
+    font: 800 18px/1 var(--site-heading);
+  }
+
+  .front-step-done {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+    font-weight: 700;
+    color: #2f5a14;
+  }
+
+  .front-side {
+    display: grid;
+    gap: 40px;
+    padding-top: 14px;
+  }
+
+  .info-box-bluegray {
+    --box: #576d81;
+    --box-edge: #83a4c0;
+  }
+
+  /* The time to the next deals, inline on the box's orange. */
+  .front-deal-timer {
+    margin-top: 12px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #fff;
+
+    > span {
+      display: block;
+    }
+  }
+
+  .front-deal-list {
+    margin-top: 10px;
+  }
+
+  .front-deal {
+    position: relative;
+    padding-block: 12px;
+    border-top: 1px dashed rgb(255 255 255 / 0.5);
+
+    .deal-sticker {
+      top: 4px;
+      right: -6px;
+      width: 54px;
+      height: 54px;
+      font-size: 15px;
+    }
+
+    > p + p {
+      margin-top: 6px;
+    }
+
+    .site-button {
+      margin-top: 10px;
+    }
+  }
+
+  .front-deal-faction {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 56px;
+    font: 800 13px/1.2 var(--site-heading);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .front-deal-icons {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+
+    .deal-icon {
+      width: 52px;
+      height: 52px;
+    }
+  }
+
+  .front-deal-note {
+    padding-top: 10px;
+    border-top: 1px dashed rgb(255 255 255 / 0.5);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.45;
+  }
+
+  .front-deal-price {
+    font-size: 15px;
+
+    s {
+      margin-right: 6px;
+    }
+
+    strong {
+      font: 800 22px/1.2 var(--site-heading);
+    }
+  }
+
+  .front-online-counts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 14px;
+
+    > div {
+      display: flex;
+      flex-direction: column-reverse;
+      padding: 10px 12px;
+      border: 2px solid #000;
+      border-radius: 6px;
+      background: rgb(0 0 0 / 0.25);
+    }
+
+    dd {
+      font: 800 28px/1.1 var(--site-heading);
+    }
+
+    dt {
+      font: 800 14px/1.3 var(--site-heading);
+    }
+  }
+
+  @media (width < 64rem) {
+    .front-columns {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (width < 40rem) {
+    .front-top-row {
+      grid-template-columns: auto minmax(0, 1fr) auto auto;
+      gap: 8px;
+
+      > .friend-disc {
+        display: none;
+      }
+    }
+
+    .front-top-score {
+      min-width: 0;
+    }
+
+    .front-gift {
+      grid-template-columns: auto minmax(0, 1fr);
+
+      .site-button {
+        grid-column: 2;
+        justify-self: start;
+      }
+    }
+  }
+}

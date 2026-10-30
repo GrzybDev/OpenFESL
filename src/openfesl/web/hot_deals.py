@@ -55,6 +55,7 @@ class DealCard:
         price: Its price as the page's language writes it.
         original: Its usual price, while it is on sale.
         currency: The currency of its price.
+        faction: The faction whose heroes may have it; none for any hero's.
         icons: Its items as the card draws them; none for a box.
         lines: What it holds or may give, a line each.
         requires: Which heroes may have it.
@@ -75,6 +76,7 @@ class DealCard:
     price: str
     original: str
     currency: str
+    faction: str | None
     icons: list[Icon]
     lines: list[str]
     requires: str
@@ -163,7 +165,9 @@ class HotDealsPages:
                 if (gift := part.on(run.day)).box
             }
             for deal in await self._deals.hot_deals(game, language):
-                card = await self._card(texts, game, catalogue, deal, heroes, shown, rules, free)
+                card = await deal_card(
+                    texts, catalogue, self._products, deal, heroes, shown, rules, free
+                )
                 # The admin's offers that name no section of the rotation have a shelf of their
                 # own.
                 section = deal.listed.bundle.section
@@ -185,69 +189,83 @@ class HotDealsPages:
 
         return show_deals
 
-    async def _card(
-        self,
-        texts: StoreTexts,
-        game: Game,
-        catalogue: Catalogue,
-        deal: Deal,
-        heroes: list[Hero] | None,
-        shown: bool,
-        rules: DealRules | None,
-        free: set[str],
-    ) -> DealCard:
-        listed = deal.listed
-        bundle = listed.bundle
-        lines: list[str] = []
-        icons: list[Icon] = []
-        box = await self._products.box(game.id, bundle.box) if bundle.box is not None else None
-        if box is not None:
-            count = len(box.drops)
-            if box.worth_rule:
-                worth = texts.priced(box.value, box.currency)
-                lines.append(texts.count("web.deals.card.box.worth", count, worth=worth))
-            else:
-                lines.append(texts.count("web.deals.card.box", count))
-            if bundle.description:
-                lines.append(" ".join(paragraphs(deal.description)))
+
+async def deal_card(
+    texts: StoreTexts,
+    catalogue: Catalogue,
+    products: ProductStore,
+    deal: Deal,
+    heroes: list[Hero] | None,
+    shown: bool,
+    rules: DealRules | None,
+    free: set[str],
+) -> DealCard:
+    """Return a hot deal as its card shows it.
+
+    Args:
+        texts: Writes the page's language for the deal's game.
+        catalogue: The game's imported catalogue, which names and draws the deal's items.
+        products: Hold the boxes that random boxes give from.
+        deal: The deal.
+        heroes: The account's heroes, which the card says may have it; none for a visitor.
+        shown: Whether the page shows the game's art to its viewer.
+        rules: How the game's rotation makes deals; none without a rotation.
+        free: The keys of the boxes that an event that runs gives free once a day.
+    """
+    game = texts.game
+    listed = deal.listed
+    bundle = listed.bundle
+    lines: list[str] = []
+    icons: list[Icon] = []
+    box = await products.box(game.id, bundle.box) if bundle.box is not None else None
+    if box is not None:
+        count = len(box.drops)
+        if box.worth_rule:
+            worth = texts.priced(box.value, box.currency)
+            lines.append(texts.count("web.deals.card.box.worth", count, worth=worth))
         else:
-            lines = _items(texts, deal)
-            glyphs = kind_glyphs(game)
-            for member in deal.members[:MOST_ICONS]:
-                src = icon_url(game.id, catalogue, member.product.item_id, shown)
-                icons.append(Icon(src, glyphs.get(member.kind, "bag")))
-        faction, hero_class = bundle.faction, bundle.hero_class
-        fit = [
-            hero.persona.name
-            for hero in heroes or []
-            if (not faction or hero.faction == faction)
-            and (not hero_class or hero.hero_class == hero_class)
-        ]
-        section = rules.sections.get(bundle.section) if rules and bundle.section else None
-        original = bundle.original_price
-        ends = bundle.ends
-        return DealCard(
-            number=listed.id,
-            href=localize(f"/{game.id}{ITEM.format(number=listed.id)}", texts.language),
-            name=deal.name,
-            box=box is not None,
-            off=texts.amount(discount(bundle.price, original))
-            if original and original > bundle.price
-            else "",
-            price=texts.amount(bundle.price),
-            original=texts.amount(original) if original and original > bundle.price else "",
-            currency=bundle.currency,
-            icons=icons,
-            lines=lines,
-            requires=_requires(texts, faction, hero_class),
-            heroes=fit if heroes is not None else None,
-            ends=ends,
-            soon=bool(ends and texts.days_left(ends) <= 1),
-            left=texts.countdown(ends) if ends else "",
-            until=texts.moment(ends) if ends else "",
-            leaves=bool(section and section.leaves),
-            free=box is not None and box.key in free,
-        )
+            lines.append(texts.count("web.deals.card.box", count))
+        if bundle.description:
+            lines.append(" ".join(paragraphs(deal.description)))
+    else:
+        lines = _items(texts, deal)
+        glyphs = kind_glyphs(game)
+        for member in deal.members[:MOST_ICONS]:
+            src = icon_url(game.id, catalogue, member.product.item_id, shown)
+            icons.append(Icon(src, glyphs.get(member.kind, "bag")))
+    faction, hero_class = bundle.faction, bundle.hero_class
+    fit = [
+        hero.persona.name
+        for hero in heroes or []
+        if (not faction or hero.faction == faction)
+        and (not hero_class or hero.hero_class == hero_class)
+    ]
+    section = rules.sections.get(bundle.section) if rules and bundle.section else None
+    original = bundle.original_price
+    ends = bundle.ends
+    return DealCard(
+        number=listed.id,
+        href=localize(f"/{game.id}{ITEM.format(number=listed.id)}", texts.language),
+        name=deal.name,
+        box=box is not None,
+        off=texts.amount(discount(bundle.price, original))
+        if original and original > bundle.price
+        else "",
+        price=texts.amount(bundle.price),
+        original=texts.amount(original) if original and original > bundle.price else "",
+        currency=bundle.currency,
+        faction=faction,
+        icons=icons,
+        lines=lines,
+        requires=_requires(texts, faction, hero_class),
+        heroes=fit if heroes is not None else None,
+        ends=ends,
+        soon=bool(ends and texts.days_left(ends) <= 1),
+        left=texts.countdown(ends) if ends else "",
+        until=texts.moment(ends) if ends else "",
+        leaves=bool(section and section.leaves),
+        free=box is not None and box.key in free,
+    )
 
 
 def _discount(rules: DealRules | None, shelf: str) -> int | None:

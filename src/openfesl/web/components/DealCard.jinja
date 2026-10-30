@@ -14,31 +14,13 @@
   </p>
   <div class="deal-head">
     <h3 id="deal-{{ card.number }}" class="deal-name">{{ card.name }}</h3>
-    {% if card.off %}
-      <p data-live class="deal-sticker">
-        <svg aria-hidden="true" viewBox="0 0 100 100" class="store-sticker-burst">
-          <use href="{{ static('icons.svg') }}#sticker" />
-        </svg>
-        <span aria-hidden="true">{{ _("web.store.sticker", off=card.off) }}</span><span class="sr-only">{{ _("web.store.sticker.label", off=card.off) }}</span>
-      </p>
-    {% endif %}
+    {% if card.off %}<DealSticker :off="card.off" />{% endif %}
   </div>
   <div aria-hidden="true" class="deal-art">
     {% if card.box %}
       <span class="deal-icon deal-icon-drawn"><Icon name="box" :size="26" stroke="currentColor" /></span>
     {% else %}
-      {% for icon in card.icons %}
-        {% if icon.src %}
-          <img src="{{ icon.src }}"
-               width="58"
-               height="58"
-               alt=""
-               loading="lazy"
-               class="deal-icon">
-        {% else %}
-          <span class="deal-icon deal-icon-drawn"><Icon :name="icon.glyph" :size="26" stroke="currentColor" /></span>
-        {% endif %}
-      {% endfor %}
+      <DealIcons :icons="card.icons" />
     {% endif %}
   </div>
   <div class="deal-body">

@@ -1,0 +1,265 @@
+{#def event, next_event, top: list, shares: list, ranked, deals: list, ends, left: str, activity, counted, roster #}
+{# The front page of a game with heroes on its own site: in the main column the event that runs
+   with where its gifts, today's for a daily event, stand for the account, the week's best heroes
+   and how to start; beside it Play Now, each faction's deal of the day with its discount, items
+   and price, and who plays now. The week's best are the first of its score board, with the
+   factions' shares of it and when it was ranked. Claims happen on the rewards page, which the
+   event's lines lead to. #}
+{% set rules = game.heroes %}
+{% set signed = player and roster %}
+{% set has_hero = signed and roster.heroes %}
+<Layout :title="game.name">
+  <h1 class="sr-only">{{ game.name }}</h1>
+  <div class="front-columns">
+    <div class="front-main">
+      <section aria-labelledby="front-week" class="front-section">
+        <Plaque id="front-week" :level="2">{{ _("web.front.this_week") }}</Plaque>
+        {% if event %}
+          {% set info, run, gifts, daily = event %}
+          <Splash />
+          <article aria-labelledby="front-event" class="front-event">
+            <div class="front-event-head">
+              <span aria-hidden="true" class="front-event-disc"><Icon name="gift" :size="24" stroke="#0A0A0A" /></span>
+              <div>
+                <h3 id="front-event" class="site-heading">{{ info.name }}</h3>
+                <p>{{ _("web.front.event.days", dates=info.dates, day=run.day, days=run.days) if run.day else info.dates }}</p>
+              </div>
+            </div>
+            <div class="front-event-body">
+              <p>{{ info.summary }}</p>
+              {% for gift in gifts %}
+                <div {% if gift.faction %}data-faction="{{ gift.faction }}"{% endif %}
+                     class="front-gift">
+                  <span aria-hidden="true" class="front-gift-disc">
+                    <Icon :name="rules.factions[gift.faction].glyph if gift.faction else 'user'" :size="18" stroke="currentColor" />
+                  </span>
+                  <p>
+                    <strong>{{ _("games." ~ game.id ~ ".faction." ~ gift.faction) if gift.faction else _("web.rewards.band.account") }}</strong>
+                    {% if gift.text %}
+                      <span class="front-gift-{{ gift.state }}">
+                        {% if gift.state == "claimed" %}<Icon name="tick" :size="14" stroke="currentColor" />{% endif %}
+                        {{ gift.text }}
+                      </span>
+                    {% endif %}
+                  </p>
+                  {% if gift.state == "claimable" %}
+                    <a href="{{ url('/' ~ game.id ~ '/rewards') }}"
+                       class="site-button site-button-go"><Icon name="gift" :size="16" stroke="currentColor" />{{ _("web.rewards.claim") }}<span class="sr-only">{{ _("web.front.event.on_rewards") }}</span></a>
+                  {% endif %}
+                </div>
+              {% endfor %}
+              <p class="front-event-foot">
+                <Icon name="clock" :size="16" stroke="currentColor" />
+                {% if not signed %}
+                  {{ _("web.front.event.sign_in" if run.event.daily else "web.front.event.sign_in.once") }}
+                {% elif not has_hero %}
+                  {{ _("web.front.event.no_hero") }}
+                {% elif daily %}
+                  {{ _("web.front.event.next", when=daily) }}
+                {% else %}
+                  <a href="{{ url('/' ~ game.id ~ '/rewards') }}" class="site-link">{{ _("web.site.page.rewards") }}</a>
+                {% endif %}
+              </p>
+            </div>
+          </article>
+        {% else %}
+          <div class="site-empty front-no-event">
+            <span aria-hidden="true"
+                  class="site-empty-disc"><Icon name="gift" :size="30" stroke="currentColor" /></span>
+            <div>
+              <h3 class="site-empty-title">{{ _("web.front.event.none") }}</h3>
+              {% if next_event %}
+                <p>{{ _("web.rewards.none.next", event=next_event.name, date=next_event.start) }}</p>
+              {% endif %}
+              <p>{{ _("web.front.event.all_year") }}</p>
+              <p class="site-actions">
+                <a href="{{ url('/' ~ game.id ~ '/rewards') }}"
+                   class="site-button"><Icon name="gift" :size="16" stroke="#FEDE01" />{{ _("web.site.page.rewards") }}</a>
+              </p>
+            </div>
+          </div>
+        {% endif %}
+      </section>
+      <section aria-labelledby="front-top" class="front-section">
+        <div class="front-top-head">
+          <Plaque id="front-top" :level="2">{{ _("web.front.top") }}</Plaque>
+          {% if "leaderboards" in game.pages %}
+            <a href="{{ url('/' ~ game.id ~ '/leaderboards/score/weekly/0/1') }}"
+               class="site-link">{{ _("web.front.top.all") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+          {% endif %}
+        </div>
+        <p class="site-lead">
+          {{ _("web.front.top.lead") }}
+          {% if ranked %}{{ _("web.boards.ranked", time=when(ranked, "Hm") ~ " UTC") }}{% endif %}
+        </p>
+        {% if top %}
+          {% if shares %}<FactionSplit :shares="shares" />{% endif %}
+          <ol class="front-top enter-rows">
+            {% for line in top %}
+              <li class="front-top-row">
+                <span class="front-top-place"><span class="sr-only">{{ _("web.front.top.place") }}</span>{{ line.place }}</span>
+                <span aria-hidden="true"
+                      {% if line.faction %}data-faction="{{ line.faction }}"{% endif %}
+                      class="friend-disc">
+                  {% if line.hero_class %}
+                    <Icon :name="rules.classes[line.hero_class].glyph" :size="20" stroke="currentColor" />
+                  {% endif %}
+                </span>
+                <p class="front-top-name">
+                  <strong>{{ line.name }}</strong>
+                  <span>
+                    {{ _("web.search.hero", faction=_("games." ~ game.id ~ ".faction." ~ line.faction) if line.faction else "", hero_class=_("games." ~ game.id ~ ".class." ~ line.hero_class) if line.hero_class else "", player=line.player) }}
+                  </span>
+                </p>
+                <span class="search-level"><span class="sr-only">{{ _("web.bar.level") }}</span>{{ line.level }}</span>
+                <p class="front-top-score">
+                  <span>{{ _("web.front.top.score") }}</span><strong>{{ line.value }}</strong>
+                </p>
+              </li>
+            {% endfor %}
+          </ol>
+        {% else %}
+          <div class="site-empty front-no-top">
+            <div>
+              <h3 class="site-empty-title">{{ _("web.front.top.none") }}</h3>
+              <p>{{ _n("web.boards.rule.week", game.heroes.profile.listed_after // 3600) if game.heroes.profile else "" }}</p>
+            </div>
+          </div>
+        {% endif %}
+      </section>
+      <section aria-labelledby="front-start" class="front-section">
+        <Plaque id="front-start" :level="2">{{ _("web.front.start") }}</Plaque>
+        <ol class="front-step-list enter-rows">
+          <li class="front-step">
+            <span aria-hidden="true" class="front-step-number">1</span>
+            <h3>{{ _("web.front.start.account") }}</h3>
+            <p>{{ _("web.front.start.account.text") }}</p>
+            {% if player %}
+              <p class="front-step-done">
+                <Icon name="tick" :size="16" stroke="currentColor" />{{ _("web.front.start.account.done", name=player.name or "") }}
+              </p>
+            {% else %}
+              <p class="site-actions">
+                <a href="{{ url('/register') }}"
+                   class="site-button site-button-go">{{ _("web.account.sign_in.create") }}</a>
+              </p>
+            {% endif %}
+          </li>
+          <li class="front-step">
+            <span aria-hidden="true" class="front-step-number">2</span>
+            <h3>{{ _("web.front.start.hero") }}</h3>
+            <p>{{ _n("web.front.start.hero.text", rules.slots) }}</p>
+            {% if has_hero %}
+              {% set first = roster.playing or roster.heroes[0] %}
+              <p class="front-step-done">
+                <Icon name="tick" :size="16" stroke="currentColor" />
+                {% if roster.heroes|length > 1 %}
+                  {{ _n("web.front.start.hero.done", roster.heroes|length - 1, hero=first.persona.name) }}
+                {% else %}
+                  {{ first.persona.name }}
+                {% endif %}
+              </p>
+            {% elif signed %}
+              <p class="site-actions">
+                <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
+                   class="site-button site-button-go"><Icon name="plus" :size="16" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+              </p>
+            {% endif %}
+          </li>
+          <li class="front-step">
+            <span aria-hidden="true" class="front-step-number">3</span>
+            <h3>{{ _("web.front.start.game") }}</h3>
+            <p>{{ _("web.front.start.game.text", game=game.name) }}</p>
+            {% set hook %}<FileName text="dinput8.dll" />{% endset %}
+            {% set executable %}<FileName :text="game.executable" />{% endset %}
+            <p>
+              {{ _("web.front.setup.folder", file=hook, executable=executable) }}
+              {{ _("web.front.start.game.launcher", game=game.name) }}
+            </p>
+            <Download file="dinput8.dll" />
+            {% if "play" in game.pages %}
+              <p class="site-actions">
+                <a href="{{ url('/' ~ game.id ~ '/play') }}" class="site-link">{{ _("web.site.page.play") }}</a>
+              </p>
+            {% endif %}
+          </li>
+        </ol>
+      </section>
+    </div>
+    <div class="front-side">
+      {% if game.site.start_links %}<PlayNowBox :hero="roster.playing if roster else none" />{% endif %}
+      {% if deals %}
+        <section aria-labelledby="front-deals"
+                 data-deal
+                 class="info-box info-box-darkorange front-deals">
+          <h2 id="front-deals" class="info-box-title">{{ _("web.front.deal") }}</h2>
+          <span aria-hidden="true" class="info-box-disc"><Icon name="deal" :size="20" stroke="#0A0A0A" /></span>
+          {% if ends %}
+            <p class="deal-timer front-deal-timer">
+              <Icon name="clock" :size="16" stroke="currentColor" />
+              <span data-live class="js-only">{{ _("web.front.deal.new_in") }}
+                <strong role="timer"
+                        data-left="{{ seconds_left(ends) }}"
+                        data-format="{{ _('web.store.countdown') }}">{{ left }}</strong></span>
+              <span class="no-js-only">{{ _("web.front.deal.until", time=moment(ends)) }}</span>
+            </p>
+          {% endif %}
+          <ul role="list" class="front-deal-list">
+            {% for card in deals %}
+              <li class="front-deal">
+                {% if card.faction %}
+                  <p class="front-deal-faction" data-faction="{{ card.faction }}">
+                    <Icon :name="rules.factions[card.faction].glyph" :size="16" stroke="currentColor" />{{ _("games." ~ game.id ~ ".faction." ~ card.faction) }}
+                  </p>
+                {% endif %}
+                {% if card.off %}<DealSticker :off="card.off" />{% endif %}
+                {% if card.icons %}
+                  <div aria-hidden="true" class="front-deal-icons">
+                    <DealIcons :icons="card.icons[:3]" />
+                  </div>
+                {% endif %}
+                {% for line in card.lines %}<p>{{ line }}</p>{% endfor %}
+                <p class="front-deal-price">
+                  {% if card.original %}
+                    <s><span class="sr-only">{{ _("web.store.was") }}</span>{{ card.original }}</s>
+                  {% endif %}
+                  <strong>{{ card.price }}</strong> {{ _("games." ~ game.id ~ ".currency." ~ card.currency) }}
+                </p>
+                <a href="{{ card.href }}" class="site-button"><Icon name="bag" :size="16" stroke="#FEDE01" />{{ _("web.front.deal.see") }}<span class="sr-only">{{ card.name }}</span></a>
+              </li>
+            {% endfor %}
+          </ul>
+          {% if signed and not has_hero %}
+            <p class="front-deal-note">
+              {{ _("web.front.deal.no_hero") }}
+              <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
+                 class="site-link-light">{{ _("web.bar.create") }}</a>
+            </p>
+          {% endif %}
+        </section>
+      {% endif %}
+      <section aria-labelledby="front-online"
+               class="info-box info-box-bluegray front-online">
+        <h2 id="front-online" class="info-box-title">{{ _("web.front.online") }}</h2>
+        <span aria-hidden="true" class="info-box-disc"><Icon name="people" :size="20" stroke="#0A0A0A" /></span>
+        <dl class="front-online-counts">
+          <div>
+            <dt>{{ _("web.front.online.players") }}</dt>
+            <dd>
+              {{ number(activity.online) }}
+            </dd>
+          </div>
+          <div>
+            <dt>{{ _("web.front.online.in_matches") }}</dt>
+            <dd>
+              {{ number(activity.in_matches) }}
+            </dd>
+          </div>
+        </dl>
+        <p class="info-box-note">
+          {{ _("web.front.online.none" if not activity.online else "web.front.online.counted", time=when(counted, "Hm") ~ " UTC") }}
+        </p>
+      </section>
+    </div>
+  </div>
+</Layout>

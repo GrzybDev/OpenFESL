@@ -9362,8 +9362,140 @@ msgstr "Wyszukiwać może każdy; zaproszenia do znajomych wymagają zalogowania
 msgid "web.friends.none.search"
 msgstr "Wyszukiwarka graczy znajduje bohaterów i graczy po nazwie."
 
+msgid "web.play_now.box.signed_out"
+msgstr "Play Now uruchamia %(game)s jako domyślnego bohatera konta, więc wymaga zalogowania i bohatera."
+
+msgid "web.front.this_week"
+msgstr "W tym tygodniu"
+
+msgid "web.front.event.days"
+msgstr "%(dates)s · dzień %(day)s z %(days)s"
+
+msgid "web.front.event.waits"
+msgstr "Dzisiejszy prezent czeka · dla: %(heroes)s"
+
+msgid "web.front.event.waits.once"
+msgstr "Czeka · dla: %(heroes)s"
+
+msgid "web.front.event.claimed"
+msgstr "Odebrano dziś dla bohatera %(hero)s"
+
+msgid "web.front.event.claimed.once"
+msgstr "Odebrano dla bohatera %(hero)s"
+
+msgid "web.front.event.on_rewards"
+msgstr "na stronie nagród"
+
+msgid "web.front.event.next"
+msgstr "Kolejne prezenty: %(when)s."
+
+msgid "web.front.event.sign_in"
+msgstr "Dzisiejsze prezenty można odebrać po zalogowaniu."
+
+msgid "web.front.event.sign_in.once"
+msgstr "Prezenty z tego wydarzenia można odebrać po zalogowaniu."
+
+msgid "web.front.event.no_hero"
+msgstr "Prezenty trafiają do bohatera danej frakcji, więc najpierw potrzebny jest bohater."
+
+msgid "web.front.event.none"
+msgstr "W tym tygodniu nie ma wydarzenia"
+
+msgid "web.front.event.all_year"
+msgstr "Kamienie milowe i pakiety startowe są na stronie nagród przez cały rok."
+
+msgid "web.front.top"
+msgstr "Najlepsi bohaterowie"
+
+msgid "web.front.top.lead"
+msgstr "Wynik z rund rankingowych w tym tygodniu, od poniedziałku 00:00 UTC."
+
 msgid "web.front.top.place"
 msgstr "Miejsce"
+
+msgid "web.front.top.score"
+msgstr "Wynik"
+
+msgid "web.front.top.none"
+msgstr "W tygodniowym rankingu nie ma jeszcze bohaterów."
+
+msgid "web.front.start"
+msgstr "Jak zacząć"
+
+msgid "web.front.start.account"
+msgstr "Konto OpenFESL"
+
+msgid "web.front.start.account.text"
+msgstr "Logowanie i rejestracja są na tej stronie; jedno konto mieści wszystkich bohaterów."
+
+msgid "web.front.start.account.done"
+msgstr "Zalogowano jako %(name)s"
+
+msgid "web.front.start.hero"
+msgstr "Bohater"
+
+msgid "web.front.start.hero.text.one"
+msgstr "Wybór frakcji, klasy, wyglądu i nazwy. Każde konto ma %(count)s darmowe miejsce na bohatera."
+
+msgid "web.front.start.hero.text.few"
+msgstr "Wybór frakcji, klasy, wyglądu i nazwy. Każde konto ma %(count)s darmowe miejsca na bohaterów."
+
+msgid "web.front.start.hero.text.many"
+msgstr "Wybór frakcji, klasy, wyglądu i nazwy. Każde konto ma %(count)s darmowych miejsc na bohaterów."
+
+msgid "web.front.start.hero.text.other"
+msgstr "Wybór frakcji, klasy, wyglądu i nazwy. Każde konto ma %(count)s darmowego miejsca na bohaterów."
+
+msgid "web.front.start.hero.done.one"
+msgstr "%(hero)s i %(count)s inny bohater"
+
+msgid "web.front.start.hero.done.few"
+msgstr "%(hero)s i %(count)s innych bohaterów"
+
+msgid "web.front.start.hero.done.many"
+msgstr "%(hero)s i %(count)s innych bohaterów"
+
+msgid "web.front.start.hero.done.other"
+msgstr "%(hero)s i %(count)s innego bohatera"
+
+msgid "web.front.start.game"
+msgstr "OpenFESLHook i gra"
+
+msgid "web.front.start.game.text"
+msgstr "Oryginalna kopia %(game)s z zainstalowanym OpenFESLHook. Play Now uruchamia wtedy grę jako domyślnego bohatera."
+
+msgid "web.front.deal"
+msgstr "Okazja dnia"
+
+msgid "web.front.deal.new_in"
+msgstr "Nowe okazje za"
+
+msgid "web.front.deal.until"
+msgstr "Nowe okazje: %(time)s"
+
+msgid "web.front.deal.see"
+msgstr "Zobacz okazję"
+
+msgid "web.front.deal.no_hero"
+msgstr "Najpierw potrzebny jest bohater: okazje kupuje się dla jednego bohatera z frakcji okazji."
+
+msgid "web.front.online"
+msgstr "Teraz w grze"
+
+msgid "web.front.online.players"
+msgstr "w grze"
+
+msgid "web.front.online.in_matches"
+msgstr "w meczach"
+
+msgid "web.front.online.counted"
+msgstr "Stan z %(time)s."
+
+msgid "web.front.online.none"
+msgstr "Teraz nikt nie gra. Stan z %(time)s."
+
+msgid "web.front.start.game.launcher"
+msgstr "Przed uruchomieniem %(game)s otwiera się okno logowania OpenFESLHook, w którym loguje się adresem e-mail i hasłem do gier konta."
 
 msgid "web.error.site.plaque.404"
 msgstr "Nie znaleziono"
@@ -9700,3 +9832,6 @@ msgstr "Miejsce według rankingu wyniku od początku, stan na %(time)s."
 
 msgid "web.hero.unranked"
 msgstr "jeszcze bez miejsca"
+
+msgid "web.front.top.all"
+msgstr "Wszystkie rankingi"

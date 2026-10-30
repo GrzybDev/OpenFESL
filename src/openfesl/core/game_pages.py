@@ -229,6 +229,8 @@ class Site(BaseModel):
             as the account's default hero; for games whose heroes are made on their site.
         paths: The paths below the game's pages of the kinds of pages that keep the website's
             own address rather than their kind's name.
+        front_deals: The section of the hot deals whose deals the front page offers, as the
+            deal of the day; none for a front page without them.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -239,6 +241,7 @@ class Site(BaseModel):
     addresses: dict[str, str] = {}
     start_links: bool = False
     paths: dict[PageKind, str] = {}
+    front_deals: str | None = None
 
     def path(self, kind: PageKind) -> str:
         """Return the path of a kind of page below the game's pages, such as /play.
