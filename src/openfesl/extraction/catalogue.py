@@ -124,13 +124,14 @@ def _definitions(
 
 def _named(game: Game, found: Sequence[CatalogueItem]) -> set[str]:
     # The texts that the site and Magma show, by the ids that text_id gives: the items' names,
-    # the store's descriptions of them, and the texts of the hot deals and rewards.
+    # the store's descriptions of them, and the texts of the hot deals, rewards and profiles.
     rules = game.catalogue
     if rules is None:
         return set()
     items = catalogue_items(rules, found)
     texts = game.deals.texts if game.deals else set()
     texts |= game.rewards.texts if game.rewards else set()
+    texts |= game.heroes.profile.texts if game.heroes and game.heroes.profile else set()
     if store := game.store:
         texts |= {text.replace("{id}", str(item)) for text in store.descriptions for item in items}
     return {name for item in items.values() for name in item.names} | {text_id(t) for t in texts}

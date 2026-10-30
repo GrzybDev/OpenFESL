@@ -9370,3 +9370,75 @@ msgstr "Serwer nie mógł wyświetlić tej strony."
 
 msgid "web.error.site.500.text"
 msgstr "Ponowna próba za chwilę zwykle pomaga; błąd jest zapisany w dzienniku serwera."
+
+msgid "web.error.site.profile.title"
+msgstr "Pod tym adresem nie ma strony bohatera ani gracza."
+
+msgid "web.error.site.profile.text"
+msgstr "Wyszukiwarka graczy znajduje bohaterów i graczy po nazwach."
+
+msgid "web.hero.player"
+msgstr "gracz %(player)s"
+
+msgid "web.hero.equipped"
+msgstr "Wyposażenie"
+
+msgid "web.hero.item"
+msgstr "Przedmiot %(number)s"
+
+msgid "web.hero.missing"
+msgstr "Nazwy i ikony przedmiotów pojawią się, gdy ten serwis zaimportuje katalog gry."
+
+msgid "web.hero.info"
+msgstr "Dane żołnierza"
+
+msgid "web.hero.no_rounds"
+msgstr "Brak rozegranych rund. Te liczby pojawią się po pierwszej rundzie bohatera %(hero)s."
+
+msgid "web.hero.pair"
+msgstr "%(first)s · %(second)s"
+
+msgid "web.hero.of"
+msgstr "%(xp)s z %(needed)s"
+
+msgid "web.hero.time"
+msgstr "%(hours)s godz. %(minutes)s min"
+
+msgid "web.hero.fact.rating"
+msgstr "Ranking umiejętności"
+
+msgid "web.hero.fact.kills_deaths"
+msgstr "Zabójstwa · zgony"
+
+msgid "web.hero.fact.kills_ratio"
+msgstr "Stosunek"
+
+msgid "web.hero.fact.accuracy"
+msgstr "Celność"
+
+msgid "web.hero.fact.suicides"
+msgstr "Samobójstwa"
+
+msgid "web.hero.fact.experience"
+msgstr "Doświadczenie"
+
+msgid "web.hero.fact.score"
+msgstr "Wynik"
+
+msgid "web.hero.fact.wins_losses"
+msgstr "Wygrane · przegrane"
+
+msgid "web.hero.fact.wins_ratio"
+msgstr "Stosunek"
+
+msgid "web.hero.fact.captures"
+msgstr "Punkty za flagi"
+
+msgid "web.hero.fact.rocket_captures"
+msgstr "Przejęte rakiety"
+
+msgid "web.hero.fact.time"
+msgstr "Czas gry"
+
+msgid "web.hero.fact.enlisted"
+msgstr "W służbie od"

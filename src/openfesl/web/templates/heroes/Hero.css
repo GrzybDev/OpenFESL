@@ -1,0 +1,229 @@
+/* A hero's profile: the head with the clipped picture and the outlined name, then what it wears
+   beside the red Soldier Info box with its rows of facts; on phones one column, with the worn
+   items in a row that scrolls sideways. */
+@layer pages {
+  .info-box-red {
+    --box: #893531;
+    --box-edge: #c54d47;
+    --box-ink: #fff;
+  }
+
+  .profile-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px 28px;
+  }
+
+  /* Larger than on the heroes' cards, with a frame and shadow to match. */
+  .profile-head .hero-mugshot {
+    flex: 0 0 132px;
+    height: 144px;
+    border-width: 3px;
+    box-shadow: 4px 4px 0 rgb(0 0 0 / 0.25);
+  }
+
+  .profile-who {
+    display: grid;
+    flex: 1 1 190px;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .profile-faction {
+    display: inline-flex;
+    justify-self: start;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 2px solid #000;
+    border-radius: 6px;
+    background: var(--faction);
+    color: var(--faction-ink);
+    font: 800 13px/1 var(--site-heading);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .profile-name {
+    font: 800 clamp(30px, 4vw, 40px) / 1.1 var(--site-heading);
+    color: #fff;
+    overflow-wrap: anywhere;
+    text-shadow: var(--site-outline);
+  }
+
+  .profile-kind {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font: 800 18px/1.2 var(--site-heading);
+  }
+
+  .profile-player {
+    font-size: 15px;
+    color: #2b2018;
+  }
+
+  .profile-title {
+    font-weight: 700;
+  }
+
+  .profile-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    align-items: start;
+    gap: 40px 34px;
+    margin-top: 40px;
+  }
+
+  .profile-label {
+    font: 800 13px/1.2 var(--site-heading);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #5c4a3c;
+  }
+
+  .profile-items {
+    display: grid;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .profile-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    line-height: 1.3;
+  }
+
+  .profile-icon {
+    display: grid;
+    flex: 0 0 auto;
+    width: 56px;
+    height: 56px;
+    place-items: center;
+    overflow: hidden;
+    border: 2px solid #000;
+    background: #cdbfa6;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+
+  .profile-unknown {
+    display: grid;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 2px dashed #5c4a3c;
+    color: #3b2d23;
+    font: 800 14px/1 var(--site-heading);
+  }
+
+  .profile-item-name {
+    display: grid;
+    min-width: 0;
+    font-weight: 700;
+  }
+
+  .profile-item-level {
+    font-weight: 400;
+    color: #5c4a3c;
+  }
+
+  .profile-missing {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    padding: 10px 14px;
+    border: 2px solid #000;
+    border-radius: 6px;
+    background: #f8f4ef;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .profile-none {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 10px 14px;
+    border: 2px dashed rgb(255 255 255 / 0.7);
+    border-radius: 6px;
+    font-weight: 700;
+
+    svg {
+      flex: 0 0 auto;
+      margin-top: 1px;
+    }
+  }
+
+  .profile-facts {
+    margin-top: 12px;
+    font-size: 15px;
+
+    > div {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 2px 14px;
+      padding-block: 7px;
+      border-top: 1px dashed rgb(255 255 255 / 0.4);
+    }
+
+    dt {
+      font-weight: 700;
+    }
+
+    dd {
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+  }
+
+  @media (width < 40rem) {
+    .profile-head {
+      gap: 14px 18px;
+    }
+
+    .profile-head .hero-mugshot {
+      flex-basis: 104px;
+      height: 114px;
+    }
+
+    .profile-columns {
+      grid-template-columns: minmax(0, 1fr);
+      margin-top: 28px;
+    }
+
+    /* The worn items scroll sideways as tiles, their names under them. */
+    .profile-items {
+      grid-auto-columns: 76px;
+      grid-auto-flow: column;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      scroll-snap-type: x proximity;
+    }
+
+    .profile-item {
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      scroll-snap-align: start;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .profile-item-name {
+      font-weight: 400;
+    }
+  }
+}

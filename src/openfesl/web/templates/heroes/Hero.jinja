@@ -1,0 +1,85 @@
+{#def hero, player: str, title: str | None, equipped: list, facts: list, played: bool, imported: bool #}
+{# A hero's public profile, as the 2012 site drew it: the head with the hero's picture, faction,
+   class, level, prestige rank and player; what it wears and has on its equipment bar; and its
+   Soldier Info, the stats of its rounds, which a hero without rounds shows empty with when they
+   fill. #}
+{% set rules = game.heroes %}
+{% set name = hero.persona.name %}
+<Layout :title="name">
+  <div class="profile"
+       {% if hero.faction %}data-faction="{{ hero.faction }}"{% endif %}>
+    <section aria-labelledby="profile-name" class="profile-head enter-title">
+      <HeroMugshot :hero="hero" />
+      <div class="profile-who">
+        {% if hero.faction %}
+          <p class="profile-faction">
+            <Icon :name="rules.factions[hero.faction].glyph" :size="16" stroke="currentColor" />
+            {{ _("games." ~ game.id ~ ".faction." ~ hero.faction) }}
+          </p>
+        {% endif %}
+        <h1 id="profile-name" class="profile-name">{{ name }}</h1>
+        <p class="profile-kind">
+          {% if hero.hero_class %}
+            <span aria-hidden="true"
+                  class="friend-disc"><Icon :name="rules.classes[hero.hero_class].glyph" :size="20" stroke="currentColor" /></span>
+            {{ _("games." ~ game.id ~ ".class." ~ hero.hero_class) }}
+          {% endif %}
+          <span class="search-level"><span class="sr-only">{{ _("web.bar.level") }}</span>{{ hero.level }}</span>
+        </p>
+        <p class="profile-player">
+          {% if title %}<span class="profile-title">{{ title }}</span> ·{% endif %}
+          {{ _("web.hero.player", player=player) }}
+        </p>
+      </div>
+    </section>
+    <div class="profile-columns">
+      <section aria-labelledby="profile-equipped" class="profile-equipped">
+        <h2 id="profile-equipped" class="profile-label">{{ _("web.hero.equipped") }}</h2>
+        <ul role="list" class="profile-items enter-rows">
+          {% for item in equipped %}
+            <li class="profile-item">
+              <span aria-hidden="true" class="profile-icon">
+                {% if item.icon %}
+                  <img src="{{ item.icon }}" alt="" loading="lazy" decoding="async">
+                {% elif item.glyph %}
+                  <Icon :name="item.glyph" :size="26" stroke="#3B2D23" />
+                {% else %}
+                  <span class="profile-unknown">?</span>
+                {% endif %}
+              </span>
+              <span class="profile-item-name">
+                {{ item.name or _("web.hero.item", number=item.id) }}
+                {% if item.level %}<span class="profile-item-level">{{ _("web.heroes.level", level=item.level) }}</span>{% endif %}
+              </span>
+            </li>
+          {% endfor %}
+        </ul>
+        {% if not imported %}
+          <p class="profile-missing">
+            <span aria-hidden="true" class="profile-unknown">?</span>{{ _("web.hero.missing") }}
+          </p>
+        {% endif %}
+      </section>
+      <section aria-labelledby="profile-info"
+               class="info-box info-box-red profile-info enter-panel">
+        <h2 id="profile-info" class="info-box-title">{{ _("web.hero.info") }}</h2>
+        {% if not played %}
+          <p class="profile-none">
+            <Icon name="clock" :size="18" stroke="currentColor" />{{ _("web.hero.no_rounds", hero=name) }}
+          </p>
+        {% endif %}
+        <dl class="profile-facts">
+          {% for fact in facts %}
+            <div>
+              <dt>{{ _("web.hero.fact." ~ fact.name) }}</dt>
+              <dd>
+                {%- if fact.value is none %}–{% elif fact.value is string %}{{ fact.value }}{% else %}{{ when(fact.value, "yMMMd") }}{% endif -%}
+              </dd>
+            </div>
+          {% endfor %}
+        </dl>
+        <p class="info-box-note">{{ _("web.player.reported") }}</p>
+      </section>
+    </div>
+  </div>
+</Layout>

@@ -56,10 +56,12 @@
     {% endfor %}
     {% if player and game.heroes %}
       {% set mine = "/" ~ game.id ~ "/heroes" %}
+      {# Heroes' public profiles lie under the address too, and belong to no menu. #}
+      {% set profile = path[mine|length + 1:].isdigit() %}
       <li>
         <a href="{{ url(mine) }}"
            {% if path == mine %} aria-current="page"{% endif %}
-           class="site-tab{% if path.startswith(mine) or path.endswith('/createHero') %} site-tab-current{% endif %}">{{ _("web.site.heroes") }}</a>
+           class="site-tab{% if (path.startswith(mine) and not profile) or path.endswith('/createHero') %} site-tab-current{% endif %}">{{ _("web.site.heroes") }}</a>
       </li>
     {% endif %}
   </ul>

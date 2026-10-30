@@ -435,6 +435,32 @@ currency = "_PF"
 rename_price = 1499
 slot_price = 1749
 
+# The stats that a hero's public profile shows, as the 2012 site did: the keys of the game's stats
+# dictionary (BFHeroes.exe 1.89 0x006aa1fb) that its dedicated servers add to at the end of each
+# round (python/bf2/stats/stats.py), every one kept for all time and the weekly ones by week too.
+[heroes.profile]
+rating = "elo"
+kills = "ki"
+deaths = "dt"
+hits = "hi"
+shots = "fi"
+suicides = "su"
+score = "rs"
+wins = "win"
+losses = "los"
+captures = "cpc"
+rocket_captures = "rc"
+time = "ct"
+
+# The prestige rank, which the servers pack as the rotation times 256 plus the level, from level 10
+# on (Settings/RankSettings.con); the site named the level and wrote the rotation as a numeral.
+[heroes.profile.rank]
+key = "prs"
+level = "Player_Prestige_Level_{n}"
+rotation = "Player_Prestige_Rotation_{n}"
+levels = 13
+rotations = 100
+
 # Royal Army first, as the 2012 creator listed them. The base items are the clothes that Items.xml
 # marks default for the faction, alike in 1.46 and 1.89.
 [heroes.factions.royal]

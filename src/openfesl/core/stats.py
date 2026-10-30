@@ -145,6 +145,15 @@ class StatStore(Protocol):
             bucket: The period.
         """
 
+    async def owned(self, partition: str, owner: Owner, bucket: Bucket) -> dict[str, Value]:
+        """Return every stat that an owner has stored in a period, by key.
+
+        Args:
+            partition: The game's partition.
+            owner: Whose stats.
+            bucket: The period.
+        """
+
     async def apply(
         self, partition: str, changes: Sequence[Change], levels: Levels | None = None
     ) -> None:

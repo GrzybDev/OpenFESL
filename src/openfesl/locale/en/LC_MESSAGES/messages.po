@@ -8838,3 +8838,75 @@ msgstr "The server could not show this page."
 
 msgid "web.error.site.500.text"
 msgstr "Trying again in a moment usually works; the error is in the server's log."
+
+msgid "web.error.site.profile.title"
+msgstr "No hero or player page is at this address."
+
+msgid "web.error.site.profile.text"
+msgstr "Player search finds heroes and players by their names."
+
+msgid "web.hero.player"
+msgstr "player %(player)s"
+
+msgid "web.hero.equipped"
+msgstr "Equipped"
+
+msgid "web.hero.item"
+msgstr "Item %(number)s"
+
+msgid "web.hero.missing"
+msgstr "Names and icons of items show once this service imports the game's catalogue."
+
+msgid "web.hero.info"
+msgstr "Soldier Info"
+
+msgid "web.hero.no_rounds"
+msgstr "No rounds yet. These numbers fill after %(hero)s's first round."
+
+msgid "web.hero.pair"
+msgstr "%(first)s · %(second)s"
+
+msgid "web.hero.of"
+msgstr "%(xp)s of %(needed)s"
+
+msgid "web.hero.time"
+msgstr "%(hours)s h %(minutes)s min"
+
+msgid "web.hero.fact.rating"
+msgstr "Skill rating"
+
+msgid "web.hero.fact.kills_deaths"
+msgstr "Kills · deaths"
+
+msgid "web.hero.fact.kills_ratio"
+msgstr "Ratio"
+
+msgid "web.hero.fact.accuracy"
+msgstr "Accuracy"
+
+msgid "web.hero.fact.suicides"
+msgstr "Suicides"
+
+msgid "web.hero.fact.experience"
+msgstr "Experience"
+
+msgid "web.hero.fact.score"
+msgstr "Score"
+
+msgid "web.hero.fact.wins_losses"
+msgstr "Wins · losses"
+
+msgid "web.hero.fact.wins_ratio"
+msgstr "Ratio"
+
+msgid "web.hero.fact.captures"
+msgstr "Flag points"
+
+msgid "web.hero.fact.rocket_captures"
+msgstr "Rocket captures"
+
+msgid "web.hero.fact.time"
+msgstr "Time"
+
+msgid "web.hero.fact.enlisted"
+msgstr "Enlisted"

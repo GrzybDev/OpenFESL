@@ -4,6 +4,7 @@ from typing import Self
 from pydantic import BaseModel, ConfigDict, Field, PositiveInt, model_validator
 
 from openfesl.core.game_pages import Colour, Glyph
+from openfesl.core.profiles import ProfileRules
 
 # The numbers of the items that a stat names as text, joined by semicolons; none at all when empty.
 _ITEM_LIST = re.compile(r"(?:[0-9]+(?:;[0-9]+)*)?")
@@ -182,6 +183,7 @@ class HeroRules(BaseModel):
         slot_price: What a further hero slot costs.
         running_low: The uses left at which an item limited by uses runs low.
         running_low_days: The days left at which a rental runs low; one with hours left does.
+        profile: The stats that a hero's public profile shows; none for a game without profiles.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -209,6 +211,7 @@ class HeroRules(BaseModel):
     slot_price: PositiveInt
     running_low: PositiveInt
     running_low_days: PositiveInt
+    profile: ProfileRules | None = None
 
     def faction_of(self, team: int | None) -> str | None:
         """Return the faction whose team number a hero's faction stat holds, if it is one.

@@ -1,18 +1,23 @@
-{#def code: int #}
+{#def code: int, kind: str = "" #}
 {# The page of an address without a page or of a request that failed. A game's own site keeps its
-   frame around it: a plaque, the dashed panel that says what happened, and the ways on. #}
+   frame around it: a plaque, the dashed panel that says what happened, and the ways on; the
+   profile of a hero or player that is not public answers like one that never existed. #}
 {% if game and game.site %}
+  {% set kind = kind or code|string %}
   {% set title = _("web.error.site.plaque.%d" % code) %}
   <Layout :title="title">
     <Plaque id="error-title">{{ title }}</Plaque>
     <div class="site-empty enter-panel">
-      <span aria-hidden="true" class="site-empty-disc"><Icon name="warn" :size="30" stroke="currentColor" /></span>
+      <span aria-hidden="true"
+            class="site-empty-disc"><Icon :name="'find' if kind == 'profile' else 'warn'" :size="30" stroke="currentColor" /></span>
       <div>
-        <h2 class="site-empty-title">{{ _("web.error.site.%d.title" % code) }}</h2>
-        <p>{{ _("web.error.site.%d.text" % code) }}</p>
+        <h2 class="site-empty-title">{{ _("web.error.site." ~ kind ~ ".title") }}</h2>
+        <p>{{ _("web.error.site." ~ kind ~ ".text") }}</p>
         <p class="site-actions">
           {% if code == 500 %}
             <a href="{{ here }}" class="site-link">{{ _("web.error.500.again") }}</a>
+          {% elif kind == "profile" and "search" in game.pages %}
+            <a href="{{ url('/' ~ game.id ~ '/search') }}" class="site-link">{{ _("web.site.page.search") }}</a>
           {% endif %}
           <a href="{{ url('/' ~ game.id) }}" class="site-link">{{ game.name }}</a>
         </p>

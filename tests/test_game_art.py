@@ -5,7 +5,7 @@ from pathlib import Path
 import anyio
 import httpx2
 import pytest
-from accounts import PASSWORD, post_sign_in
+from accounts import PASSWORD, execute, post_sign_in
 from heroes import create_hero, pictures, start
 from identity import IdentityProvider, form_token, sign_in
 from playwright.async_api import Browser, Route
@@ -48,11 +48,16 @@ async def test_who_sees_a_games_art_changes_its_pages_at_once_and_is_logged(
     admin_provider: IdentityProvider,
     base: str,
     server_url: str,
+    database_url: str,
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     await cli(capsys, "catalogue", "import", str(await extracted(tmp_path, capsys)))
     hero = await create_hero(base, ANN, "Brassbuckle", faction="royal")
+    # A display name makes the account and its heroes' profiles public.
+    await execute(
+        database_url, "UPDATE account SET display_name = 'Quillfuse' WHERE nuid = :ann", ann=ANN
+    )
     async with game(server_url) as player:
         cookie, _, _ = await start(server_url, player, ANN)
         await upload(server_url, cookie, hero, png_image(64, 64))
@@ -71,35 +76,38 @@ async def test_who_sees_a_games_art_changes_its_pages_at_once_and_is_logged(
                 await anyio.sleep(0.05)
 
         async def seen() -> list[bool]:
-            # Whether the creator's model reaches a visitor, the player and an admin, and
-            # whether the player's hero card shows the game's portrait.
+            # Whether the creator's model reaches a visitor, the player and an admin, whether
+            # the player's hero card shows the game's portrait, and whether the hero's public
+            # profile shows it to the visitor.
             models = [
                 (await client.get(base + FIGURE, params=ROYAL)).status_code == 200
                 for client in (visitor, ann, admin)
             ]
-            return [*models, portrait in (await ann.get(f"{base}/bfheroes/heroes")).text]
+            card = (await ann.get(f"{base}/bfheroes/heroes")).text
+            profile = (await visitor.get(f"{base}/bfheroes/heroes/{hero}")).text
+            return [*models, portrait in card, portrait in profile]
 
         # By default signed-in players, admins and the game see the art; a visitor gets
         # placeholders.
         page = html.unescape((await admin.get(base + PAGE)).text)
         assert checked(page) == ["signed_in"] and "Default setting." in page
-        assert await seen() == [False, True, True, True]
+        assert await seen() == [False, True, True, True, False]
 
         page = await choose(admin, base, "everyone")
         assert "Battlefield Heroes shows the game's art to everyone." in page
         assert checked(page) == ["everyone"]
         assert re.search(r"Chosen \d+ \w+ \d{4}, \d\d:\d\d UTC · invented-keeper\.", page)
-        assert await seen() == [True, True, True, True]
+        assert await seen() == [True, True, True, True, True]
 
         page = await choose(admin, base, "nobody")
         assert "Battlefield Heroes shows placeholders instead of the game's art." in page
-        assert await seen() == [False, False, False, False]
+        assert await seen() == [False, False, False, False, False]
         hidden = (await ann.get(f"{base}/bfheroes/heroes")).text
         assert pictures(hidden) == ["reticle", "reticle"]
 
         # Changing back needs no import, as every file stayed kept.
         await choose(admin, base, "signed_in")
-        assert await seen() == [False, True, True, True]
+        assert await seen() == [False, True, True, True, False]
         log = html.unescape((await admin.get(f"{base}/admin/audit")).text)
 
     for action in (

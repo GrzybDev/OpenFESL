@@ -76,6 +76,26 @@ class SqlStatStore:
                 for row in rows
             }
 
+    async def owned(self, partition: str, owner: Owner, bucket: Bucket) -> dict[str, Value]:
+        """Return every stat that an owner has stored in a period, by key.
+
+        Args:
+            partition: The game's partition.
+            owner: Whose stats.
+            bucket: The period.
+        """
+        async with self._sessions() as session:
+            rows = await session.scalars(
+                select(StatRow).where(
+                    StatRow.partition == partition,
+                    StatRow.owner_type == owner.type,
+                    StatRow.owner_id == owner.id,
+                    StatRow.period == bucket.period,
+                    StatRow.period_start == bucket.start,
+                )
+            )
+            return {row.key: Value(row.value, row.text) for row in rows}
+
     async def ranked(
         self,
         partition: str,
