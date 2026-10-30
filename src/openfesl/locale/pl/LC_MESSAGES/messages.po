@@ -9079,3 +9079,15 @@ msgstr "%(count)s nagród do odebrania"
 
 msgid "web.site.rewards_count.other"
 msgstr "%(count)s nagrody do odebrania"
+
+msgid "web.rewards.paused"
+msgstr "Odbieranie nagród jest teraz wstrzymane"
+
+msgid "web.rewards.paused.text"
+msgstr "Administracja tego serwisu na jakiś czas wstrzymała odbieranie nagród. Misje i kamienie milowe liczą się dalej, a codzienne prezenty z dni wstrzymania można odebrać później, do końca wydarzenia."
+
+msgid "web.rewards.paused.why"
+msgstr "Odbieranie jest wstrzymane; ta nagroda poczeka."
+
+msgid "web.rewards.when.kept"
+msgstr "Dzień %(day)s z %(days)s, zachowany z dnia wstrzymania · do %(date)s"

@@ -1,4 +1,6 @@
-from collections.abc import Callable
+import asyncio
+import logging
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, replace
 from datetime import UTC, date, datetime, timedelta
 from enum import StrEnum
@@ -30,6 +32,11 @@ from openfesl.protocol.rank import Period as StatPeriod
 
 # The key of the reward that a first treasure chest brings.
 FIRST_CHEST = "first-chest"
+# How often, in seconds, a day on which claims are paused is looked for, also with nobody on the
+# site; a pause is recorded within this long of its day's start.
+PAUSE_CHECK_INTERVAL = 60.0
+
+logger = logging.getLogger(__name__)
 
 
 class RewardState(StrEnum):
@@ -93,6 +100,8 @@ class Reward:
         claim: The account's claim of it, once claimed, whenever that was: a milestone is
             claimed once, in whichever year its goal is reached.
         event: The key of the event that brings it; none for a reward that no event brings.
+        kept: Whether it is the daily gift of an earlier day, on which claims were paused, so
+            that it waits until its event ends.
     """
 
     key: str
@@ -109,6 +118,7 @@ class Reward:
     goal: int | None = None
     claim: Claim | None = None
     event: str | None = None
+    kept: bool = False
 
 
 class Rewards:
@@ -163,6 +173,9 @@ class Rewards:
     async def available(self, game: Game, account_id: int) -> list[Reward]:
         """Return the rewards an account sees now, claimed ones and those it lacks a hero for.
 
+        A day on which claims are paused is recorded the first time an account sees them so,
+        and its daily gifts wait until their event ends; once claimed, they are left out.
+
         Args:
             game: The game.
             account_id: The account.
@@ -171,6 +184,8 @@ class Rewards:
         if rules is None:
             return []
         now = self._clock()
+        if rules.paused:
+            await self._store.pause(game.id, today(now, rules.zone))
         heroes = (await self._heroes.roster(game, account_id)).heroes
         found = [
             *await self._events(game, rules, heroes, now),
@@ -185,7 +200,28 @@ class Rewards:
             if (reward.key, reward.faction) in claims
             else reward
             for reward in found
+            if not (reward.kept and (reward.key, reward.faction) in claims)
         ]
+
+    async def follow_pauses(self, games: Iterable[Game]) -> None:
+        """Record each day on which claims of the games' rewards are paused, until cancelled.
+
+        A day is recorded also when no account looks at the rewards, so that the daily gifts of
+        every paused day wait until their event ends.
+
+        Args:
+            games: The games, of which those with rewards are followed.
+        """
+        while True:
+            try:
+                for game in games:
+                    rules = await self.rules(game)
+                    if rules is not None and rules.paused:
+                        await self._store.pause(game.id, today(self._clock(), rules.zone))
+            except Exception:
+                # The database may be away for a moment; the next check tries again.
+                logger.exception("Could not record the days on which claims are paused")
+            await asyncio.sleep(PAUSE_CHECK_INTERVAL)
 
     async def running(self, game: Game) -> list[Run]:
         """Return the events of a game's calendar that run now.
@@ -304,8 +340,11 @@ class Rewards:
     async def _events(
         self, game: Game, rules: RewardRules, heroes: list[Hero], now: datetime
     ) -> list[Reward]:
+        runs = _running(rules, now)
+        firsts = [today(run.period.start, rules.zone) for run in runs if run.event.daily]
+        paused = await self._store.paused(game.id, min(firsts)) if firsts else set()
         found = []
-        for key, event, part, ends, day in _parts(rules, now):
+        for key, event, part, ends, day, kept in _parts(rules, now, runs, paused):
             gift, goal = part.on(day), part.goal
             counting = [h for h in heroes if not goal or goal.hero_class in (None, h.hero_class)]
             fitting = tuple(
@@ -323,6 +362,7 @@ class Rewards:
                 ends,
                 day,
                 event=event,
+                kept=kept,
             )
             if goal:
                 hero, progress = await self._best(game, key, goal, part.faction, counting)
@@ -488,17 +528,37 @@ def _run(key: str, event: Event, year: int, zone: str) -> Run:
     return Run(key, event, event.window.period(year, zone), (last - first).days + 1, None)
 
 
-def _parts(rules: RewardRules, now: datetime) -> list[tuple[str, str, Part, datetime, int | None]]:
+def _parts(
+    rules: RewardRules, now: datetime, runs: list[Run], paused: set[date]
+) -> list[tuple[str, str, Part, datetime, int | None, bool]]:
     # Each part of the events that run, with its key, its event's, when it can no longer be
-    # claimed and its day; a daily gift is claimed on its day alone.
+    # claimed, its day and whether that day is kept: a daily gift is claimed on its day alone,
+    # or until its event ends where claims were paused on its day.
     found = []
-    for run in _running(rules, now):
-        day = today(now, rules.zone)
-        number = run.day if run.event.daily else None
-        key = f"{run.key}:{day.year}" + (f":{number}" if number else "")
-        ends = day_start(day + timedelta(1), rules.zone) if number else run.period.end
+    day = today(now, rules.zone)
+    for run in runs:
         parts = [part for part in run.event.parts.values() if part.enabled]
-        found += [(key, run.key, part, ends, number) for part in parts]
+        days: list[tuple[int | None, datetime, bool]] = [(None, run.period.end, False)]
+        if run.event.daily:
+            first = today(run.period.start, rules.zone)
+            days = [(run.day, day_start(day + timedelta(1), rules.zone), False)]
+            days += [
+                ((kept - first).days + 1, run.period.end, True)
+                for kept in sorted(paused)
+                if first <= kept < day
+            ]
+        found += [
+            (
+                f"{run.key}:{day.year}" + (f":{number}" if number else ""),
+                run.key,
+                part,
+                ends,
+                number,
+                kept,
+            )
+            for number, ends, kept in days
+            for part in parts
+        ]
     return found
 
 

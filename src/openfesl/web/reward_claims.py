@@ -45,6 +45,7 @@ class Claiming:
         hint: Which heroes may have it and which one the form picks; empty without choices.
         extra: What the account gets besides, a line each.
         funds: The Funds the account gets.
+        paused: Whether claims are paused, so that it waits.
     """
 
     key: str
@@ -56,6 +57,7 @@ class Claiming:
     hint: str
     extra: list[str]
     funds: int
+    paused: bool
 
 
 class RewardClaims:
@@ -133,6 +135,7 @@ class RewardClaims:
             hint,
             words.extra(gift),
             gift.funds,
+            words.rules.paused,
         )
 
     async def reveal(self, hero: Hero, gift: Gift, given: Given) -> dict[str, str | None] | None:
@@ -224,7 +227,7 @@ class RewardClaims:
             if not (claimed := words.hero(claim.hero)):
                 return "web.rewards.refused.claimed", values
             values["hero"] = claimed.persona.name
-            if reward.day and reward.faction:
+            if reward.day and reward.faction and not reward.kept:
                 faction = texts.factions(frozenset({reward.faction}))
                 return "web.rewards.refused.claimed.today", values | {"faction": faction}
             return "web.rewards.refused.claimed.hero", values

@@ -103,6 +103,7 @@ class RewardsPages:
                 year=str(today(words.now, rules.zone).year),
                 next=localize(f"/{game.id}{REWARDS}", texts.language),
                 reveal=request.session.pop(REVEAL, None),
+                paused=rules.paused,
                 csrf=form_token(request) if player else "",
             )
 

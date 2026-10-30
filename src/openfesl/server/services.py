@@ -276,6 +276,7 @@ class GameServices:
             asyncio.create_task(trust.follow_approvals()),
             asyncio.create_task(feed.follow()),
             asyncio.create_task(self.history.follow()),
+            asyncio.create_task(self.rewards.follow_pauses(games)),
             asyncio.create_task(self.rich_presence.follow_changes()),
         ]
         yield

@@ -1,9 +1,21 @@
 {#def claiming, small: bool = False #}
 {# Claim on a reward's card. A reward for one of several heroes opens its claim dialog, where the
-   hero is picked, and without scripts leads to the claim page; any other is sent at once. #}
+   hero is picked, and without scripts leads to the claim page; any other is sent at once. While
+   claims are paused it stays in view, unavailable, saying why. #}
 {% set id = "claim-" ~ claiming.key|replace(":", "-") ~ "-" ~ (claiming.faction or "account") %}
 {% set classes = "site-button site-button-go" ~ ("" if small else " site-button-large") %}
-{% if claiming.choices %}
+{% if claiming.paused %}
+  <p class="site-actions">
+    <button type="button"
+            aria-disabled="true"
+            aria-describedby="{{ id }}-why"
+            class="{{ classes }}">
+      <Icon name="gift" :size="18" stroke="currentColor" />
+      {{ _("web.rewards.claim") }}<span class="sr-only">{{ claiming.label }}</span>
+    </button>
+    <span id="{{ id }}-why" class="reward-why">{{ _("web.rewards.paused.why") }}</span>
+  </p>
+{% elif claiming.choices %}
   <p class="site-actions">
     <a href="{{ url('/' ~ game.id ~ '/rewards/claim') }}?{{ {'key': claiming.key, 'faction': claiming.faction}|urlencode }}"
        data-opens="{{ id }}"

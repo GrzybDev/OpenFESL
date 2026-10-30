@@ -132,6 +132,12 @@
     }
   }
 
+  .reward-why {
+    font-size: 13px;
+    font-weight: 700;
+    color: #5c4a3c;
+  }
+
   .reward-claimed .reward-state {
     color: #2f5a14;
   }

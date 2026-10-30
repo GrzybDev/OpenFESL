@@ -1,6 +1,6 @@
 from collections.abc import Collection
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 from typing import Protocol
 
 from openfesl.core.inventory import Ownership
@@ -141,6 +141,22 @@ class RewardStore(Protocol):
 
         Raises:
             RewardRefused: When the account claimed the reward already, also at the same time.
+        """
+
+    async def pause(self, game: str, day: date) -> None:
+        """Record that claims were paused on a day, whose daily gifts wait until their events end.
+
+        Args:
+            game: The game's data-file name.
+            day: The day.
+        """
+
+    async def paused(self, game: str, since: date) -> set[date]:
+        """Return the days from one on which claims were paused.
+
+        Args:
+            game: The game's data-file name.
+            since: The first day to look at.
         """
 
     async def claims(self, game: str, account_id: int, since: datetime) -> list[Claim]:

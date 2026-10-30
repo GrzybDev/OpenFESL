@@ -1,5 +1,5 @@
 from collections.abc import Collection
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlalchemy import String, cast, func, literal, select, update
 from sqlalchemy.dialects.postgresql import JSONB, insert
@@ -10,7 +10,7 @@ from openfesl.core.reward_claims import Claim, Grant
 from openfesl.core.rewards import RewardRefusal, RewardRefused
 from openfesl.core.stats import PERSONA, Bucket
 from openfesl.storage.entitlements import add_account_item, add_item
-from openfesl.storage.models import RewardBaselineRow, RewardClaimRow, StatRow
+from openfesl.storage.models import RewardBaselineRow, RewardClaimRow, RewardPauseRow, StatRow
 from openfesl.storage.wallets import credit
 
 # The ledger's reason for the Funds that rewards give.
@@ -151,6 +151,33 @@ class SqlRewardStore:
                 update(RewardClaimRow).where(RewardClaimRow.id == claim).values(outcome=outcome)
             )
             return given
+
+    async def pause(self, game: str, day: date) -> None:
+        """Record that claims were paused on a day, whose daily gifts wait until their events end.
+
+        Args:
+            game: The game's data-file name.
+            day: The day.
+        """
+        async with self._sessions.begin() as session:
+            await session.execute(
+                insert(RewardPauseRow).values(game=game, day=day).on_conflict_do_nothing()
+            )
+
+    async def paused(self, game: str, since: date) -> set[date]:
+        """Return the days from one on which claims were paused.
+
+        Args:
+            game: The game's data-file name.
+            since: The first day to look at.
+        """
+        async with self._sessions() as session:
+            days = await session.scalars(
+                select(RewardPauseRow.day).where(
+                    RewardPauseRow.game == game, RewardPauseRow.day >= since
+                )
+            )
+            return set(days)
 
     async def claims(self, game: str, account_id: int, since: datetime) -> list[Claim]:
         """Return the rewards an account claimed since a moment, the latest first.

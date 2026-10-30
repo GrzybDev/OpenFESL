@@ -28,17 +28,20 @@ class SiteBar:
         roster: The account's heroes, in a game whose heroes are made on its site.
         funds: What the account has to pay the game's prices with, in such a game.
         rewards: Its game's rewards as the account sees them now, which its pages read.
+        paused: Whether claims of its game's rewards are paused.
     """
 
     wallets: list[tuple[SiteWallet, int]]
     roster: Roster | None
     funds: int
     rewards: list[Reward] = field(default_factory=list)
+    paused: bool = False
 
     @property
     def ready(self) -> int:
-        """How many of its game's rewards the account may claim now."""
-        return sum(reward.state is RewardState.CLAIMABLE for reward in self.rewards)
+        """How many of its game's rewards the account may claim now; none while claims pause."""
+        claimable = sum(reward.state is RewardState.CLAIMABLE for reward in self.rewards)
+        return 0 if self.paused else claimable
 
 
 async def site_bar(request: Request) -> SiteBar | None:
@@ -112,4 +115,6 @@ class SiteBarMiddleware:
         roster = await self._heroes.roster(game, player.account_id)
         [funds] = await self._wallets.of_account(game, player.account_id, [game.heroes.currency])
         rewards = await self._rewards.available(game, player.account_id)
-        return SiteBar(list(zip(shown, balances, strict=True)), roster, funds, rewards)
+        rules = await self._rewards.rules(game)
+        paused = rules is not None and rules.paused
+        return SiteBar(list(zip(shown, balances, strict=True)), roster, funds, rewards, paused)

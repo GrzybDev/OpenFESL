@@ -127,6 +127,40 @@ async def test_the_first_chests_key_waits_on_the_chests_page_until_it_is_claimed
     assert "1 key" in taken
 
 
+@pytest.mark.usefixtures("christmas", "prompt_actions")
+async def test_while_claims_are_paused_the_page_says_so_and_the_days_gifts_wait_for_later(
+    base: str,
+    server_url: str,
+    database_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    await import_catalogue(server_url, tmp_path, capsys, INVENTED)
+    await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    await setting(database_url, "bfheroes.rewards.paused", "on")
+    async with httpx2.AsyncClient() as client:
+        await post_sign_in(client, base, "ann@example.test", PASSWORD)
+        paused = await client.get(f"{base}{REWARDS}")
+        form = {"csrf": form_token(paused.text), "key": "milestone:first-hero", "faction": ""}
+        await client.post(f"{base}{CLAIM}", data=form)
+        refused = visible((await client.get(f"{base}{REWARDS}")).content)
+        await setting(database_url, "bfheroes.rewards.paused", "off")
+        freeze(monkeypatch, CHRISTMAS + timedelta(days=1))
+        resumed = visible((await client.get(f"{base}{REWARDS}")).content)
+
+    shown = visible(paused.content)
+    assert "Claims are paused for now" in shown
+    assert re.search(r'aria-disabled="true"\s+aria-describedby="claim-christmas', paused.text)
+    assert "Claims are paused; this reward waits." in shown
+    assert "rewards to claim" not in shown and "Ready to claim 0" in shown
+    assert "Nothing to claim right now" not in shown
+    assert "Nothing was given: claims are paused for now." in refused
+    # The paused fifth day's gift for Brassbuckle waits beside the sixth day's.
+    assert "Day 5 of 24, kept from a paused day · until 24 Dec" in resumed
+    assert "Day 6 of 24 · until 00:00 UTC" in resumed
+
+
 @pytest.mark.usefixtures("prompt_actions")
 async def test_a_gifts_box_reveals_what_it_gave_and_says_whether_the_hero_had_it(
     base: str,

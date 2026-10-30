@@ -418,3 +418,44 @@ def always(rewards: list[Reward]) -> dict[str, tuple[RewardState, int | None]]:
         for r in rewards
         if r.key.split(":")[0] in ("starter", "milestone", "first-chest")
     }
+
+
+async def test_a_daily_gift_of_a_day_with_claims_paused_waits_until_its_event_ends(
+    site: Site, base: str, database_url: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    hero = await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    site.now = datetime(2026, 12, 3, 12, tzinfo=UTC)
+    await setting(database_url, "bfheroes.rewards.paused", "on")
+    paused = await site.claim(hero, "christmas:2026:3", "royal")
+    # The server finds claims paused on the third day, which no account looks at; they go on
+    # again the next.
+    monkeypatch.setattr("openfesl.core.rewards.PAUSE_CHECK_INTERVAL", 0.01)
+    third = "SELECT count(*) FROM reward_pause WHERE day = '2026-12-03'"
+    following = asyncio.create_task(site.rewards.follow_pauses([site.game]))
+    with anyio.fail_after(5):
+        while not await select_value(database_url, third):
+            await asyncio.sleep(0.02)
+    following.cancel()
+    await setting(database_url, "bfheroes.rewards.paused", "off")
+    site.now = datetime(2026, 12, 4, 12, tzinfo=UTC)
+    # The Royal Christmas gifts alone: the hero's starter pack is not one of them.
+    waiting = {
+        (r.key, r.kept, r.ends)
+        for r in await site.available(hero)
+        if (r.event, r.faction) == ("christmas", "royal")
+    }
+    late = await site.claim(hero, "christmas:2026:3", "royal")
+    after = {(r.key, r.faction) for r in await site.available(hero)}
+    site.now = datetime(2026, 12, 25, tzinfo=UTC)
+    ended = await site.claim(hero, "christmas:2026:4", "royal")
+
+    assert paused is RewardRefusal.PAUSED
+    # The paused day's gift waits until Christmas Eve ends; the day before it is gone.
+    assert waiting == {
+        ("christmas:2026:4", False, datetime(2026, 12, 5, tzinfo=UTC)),
+        ("christmas:2026:3", True, datetime(2026, 12, 25, tzinfo=UTC)),
+    }
+    assert isinstance(late, list) and len(late) == 1
+    assert ("christmas:2026:3", "royal") not in after
+    assert ("christmas:2026:4", "royal") in after
+    assert ended is RewardRefusal.UNKNOWN

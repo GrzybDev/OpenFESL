@@ -64,8 +64,9 @@ async def relay_server(
         await connection.execute(text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE"))
         # The stores' products and bundles, numbered from 1 again.
         await connection.execute(text("TRUNCATE store_product, store_bundle, store_box CASCADE"))
-        # The stats that rewards' goals count from, which belong to no account.
-        await connection.execute(text("TRUNCATE reward_baseline"))
+        # The stats that rewards' goals count from, and the days claims were paused, which
+        # belong to no account.
+        await connection.execute(text("TRUNCATE reward_baseline, reward_pause"))
         await connection.execute(text("ALTER SEQUENCE store_id RESTART"))
     await engine.dispose()
 

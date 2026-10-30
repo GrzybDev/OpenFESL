@@ -401,6 +401,14 @@ class RewardBaselineRow(Base):
     taken_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class RewardPauseRow(Base):
+    __tablename__ = "reward_pause"
+
+    game: Mapped[str] = mapped_column(primary_key=True)
+    # A day on which claims were paused, whose daily gifts wait until their events end.
+    day: Mapped[date] = mapped_column(primary_key=True)
+
+
 class ProductKeyRow(Base):
     __tablename__ = "product_key"
 

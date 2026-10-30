@@ -8565,3 +8565,15 @@ msgstr "%(count)s reward to claim"
 
 msgid "web.site.rewards_count.other"
 msgstr "%(count)s rewards to claim"
+
+msgid "web.rewards.paused"
+msgstr "Claims are paused for now"
+
+msgid "web.rewards.paused.text"
+msgstr "The administrators of this service have paused claiming for a while. Missions and milestones keep counting, and the daily gifts of the paused days can be claimed afterwards, until their event ends."
+
+msgid "web.rewards.paused.why"
+msgstr "Claims are paused; this reward waits."
+
+msgid "web.rewards.when.kept"
+msgstr "Day %(day)s of %(days)s, kept from a paused day · until %(date)s"

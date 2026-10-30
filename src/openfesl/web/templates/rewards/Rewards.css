@@ -1,6 +1,7 @@
 /* The rewards page: the account's counts on the beige panel beside the title, each section's
    plaque over its cards, the dashed panel when nothing waits or the account has no hero, the
-   claims of the year folded in a pale box, and the next events in a line. Signed out, the
+   claims of the year folded in a pale box, and the next events in a line; the blue-grey notice
+   of paused claims leads. Signed out, the
    running events sit beside the red box that leads to the sign-in. */
 @layer pages {
   .rewards-account {
@@ -31,6 +32,28 @@
 
   .rewards-section {
     margin-top: 44px;
+  }
+
+  .rewards-paused {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-top: 32px;
+  }
+
+  .rewards-paused-disc {
+    display: grid;
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border: 3px solid #000;
+    border-radius: 50%;
+    background: #f2c12e;
+  }
+
+  .rewards-paused-title {
+    font: 800 18px/1.25 var(--site-heading);
   }
 
   .rewards-empty {

@@ -1,8 +1,9 @@
-{#def events: list, upcoming: list, coming: str, first_hero: str, sections: list, past: list, claimed: int, ready: int, daily: str, year: str, next: str, reveal: dict | None #}
+{#def events: list, upcoming: list, coming: str, first_hero: str, sections: list, past: list, claimed: int, ready: int, daily: str, year: str, next: str, reveal: dict | None, paused: bool #}
 {# The rewards page: the account's counts beside the title, then each section under its plaque
    with its rewards' cards, the rewards claimed this year folded away, and the next events.
    Signed out it shows the running events alone with the way to sign in; an account without a
-   hero gets one panel that leads to the creator. #}
+   hero gets one panel that leads to the creator. While claims are paused a notice leads in place
+   of the panel that says nothing is to claim. #}
 {% set title = _("web.site.page.rewards") %}
 {% set signed = bar and bar.roster %}
 <Layout :title="title">
@@ -40,6 +41,16 @@
       </section>
     {% endif %}
   </section>
+  {% if paused and signed %}
+    <section aria-labelledby="rewards-paused"
+             class="site-box site-box-bluegray rewards-paused">
+      <span aria-hidden="true" class="rewards-paused-disc"><Icon name="pause" :size="22" stroke="#0A0A0A" /></span>
+      <div>
+        <h2 id="rewards-paused" class="rewards-paused-title">{{ _("web.rewards.paused") }}</h2>
+        <p>{{ _("web.rewards.paused.text") }}</p>
+      </div>
+    </section>
+  {% endif %}
   {% if not signed %}
     <div class="rewards-signed-out enter-rows">
       {% for event in events %}
@@ -84,7 +95,7 @@
       </div>
     </section>
   {% else %}
-    {% if not ready %}
+    {% if not ready and not paused %}
       <section aria-labelledby="rewards-none" class="rewards-empty enter-panel">
         <span aria-hidden="true" class="rewards-empty-disc"><Icon name="gift" :size="34" stroke="currentColor" /></span>
         <div>

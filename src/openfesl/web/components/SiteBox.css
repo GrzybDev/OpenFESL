@@ -44,6 +44,11 @@
     --box-ink: #0f0b08;
   }
 
+  .site-box-bluegray {
+    --box: #576d81;
+    --box-edge: #83a4c0;
+  }
+
   .site-box-pale {
     --box: #f1e9de;
     --box-edge: #f8f4ef;

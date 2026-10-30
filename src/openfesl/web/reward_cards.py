@@ -159,7 +159,10 @@ class RewardCards:
         words, texts, gift = self.words, self.words.texts, reward.gift
         run = events.get(reward.event or "")
         when = ""
-        if run and reward.day and reward.ends:
+        if run and reward.kept:
+            last = words.dated(words.last_day(reward))
+            when = texts.text("web.rewards.when.kept", day=reward.day, days=run.days, date=last)
+        elif run and reward.day and reward.ends:
             ends = words.clock(reward.ends)
             when = texts.text("web.rewards.when.day", day=reward.day, days=run.days, ends=ends)
         elif run and reward.ends and reward.goal is None:
