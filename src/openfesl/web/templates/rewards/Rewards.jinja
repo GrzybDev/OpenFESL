@@ -1,0 +1,134 @@
+{#def events: list, upcoming: list, coming: str, first_hero: str, sections: list, past: list, claimed: int, ready: int, daily: str, year: str, next: str #}
+{# The rewards page: the account's counts beside the title, then each section under its plaque
+   with its rewards' cards, the rewards claimed this year folded away, and the next events.
+   Signed out it shows the running events alone with the way to sign in; an account without a
+   hero gets one panel that leads to the creator. #}
+{% set title = _("web.site.page.rewards") %}
+{% set signed = bar and bar.roster %}
+<Layout :title="title">
+  <section aria-labelledby="rewards-title" class="creator-head">
+    <div class="creator-intro">
+      <Plaque id="rewards-title">{{ title }}</Plaque>
+      <p class="site-lead">{{ _("games." ~ game.id ~ ".rewards.lead") }}</p>
+    </div>
+    {% if signed %}
+      <section aria-labelledby="rewards-account" class="slot-panel rewards-account">
+        <h2 id="rewards-account" class="slot-panel-title">{{ _("web.rewards.account") }}</h2>
+        <dl class="rewards-facts">
+          <div>
+            <dt>{{ _("web.rewards.ready") }}</dt>
+            <dd>
+              {{ number(ready) }}
+            </dd>
+          </div>
+          {% if daily %}
+            <div>
+              <dt>{{ _("web.rewards.next_daily") }}</dt>
+              <dd>
+                {{ daily }}
+              </dd>
+            </div>
+          {% endif %}
+          <div>
+            <dt>{{ _("web.rewards.claimed_in", year=year) }}</dt>
+            <dd>
+              {{ number(claimed) }}
+            </dd>
+          </div>
+        </dl>
+      </section>
+    {% endif %}
+  </section>
+  {% if not signed %}
+    <div class="rewards-signed-out enter-rows">
+      {% for event in events %}
+        <article aria-labelledby="event-{{ loop.index }}" class="pale-card">
+          <p class="pale-band reward-band-account">
+            <Icon name="people" :size="16" stroke="currentColor" />{{ _("web.rewards.band.both") }}
+          </p>
+          <div class="reward-body">
+            <div class="reward-head">
+              <span aria-hidden="true" class="reward-glyph"><Icon name="gift" :size="26" stroke="#F2C12E" /></span>
+              <div>
+                <h2 id="event-{{ loop.index }}" class="reward-title">{{ event.name }}</h2>
+                <p class="reward-text">{{ event.dates }} · {{ event.summary }}</p>
+              </div>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+      <section aria-labelledby="rewards-sign-in" class="site-box site-box-red">
+        <h2 id="rewards-sign-in" class="site-box-title">{{ _("web.rewards.signed_out") }}</h2>
+        <p>{{ _("web.rewards.signed_out.text") }}</p>
+        <p class="site-actions">
+          <a href="{{ url('/sign-in') }}?{{ {'next': next}|urlencode }}"
+             class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+          <a href="{{ url('/register') }}" class="site-link-light">{{ _("web.account.sign_in.create") }}</a>
+        </p>
+      </section>
+    </div>
+  {% elif not bar.roster.heroes %}
+    <section aria-labelledby="rewards-no-hero" class="rewards-empty enter-panel">
+      <span aria-hidden="true" class="rewards-empty-disc"><Icon name="plus" :size="34" stroke="currentColor" /></span>
+      <div>
+        <h2 id="rewards-no-hero" class="rewards-empty-title">{{ _("web.bar.no_hero") }}</h2>
+        <p>
+          {{ _("web.rewards.no_hero") }}
+          {% if first_hero %}{{ _("web.rewards.no_hero.first", amount=first_hero) }}{% endif %}
+        </p>
+        <p class="site-actions">
+          <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
+             class="site-button site-button-go site-button-large"><Icon name="plus" :size="18" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+        </p>
+      </div>
+    </section>
+  {% else %}
+    {% if not ready %}
+      <section aria-labelledby="rewards-none" class="rewards-empty enter-panel">
+        <span aria-hidden="true" class="rewards-empty-disc"><Icon name="gift" :size="34" stroke="currentColor" /></span>
+        <div>
+          <h2 id="rewards-none" class="rewards-empty-title">{{ _("web.rewards.none") }}</h2>
+          {% for event in upcoming %}
+            <p>{{ _("web.rewards.none.next", event=event.name, date=event.start) }} {{ event.summary }}</p>
+          {% endfor %}
+          {% if sections %}<p>{{ _("web.rewards.none.counting") }}</p>{% endif %}
+        </div>
+      </section>
+    {% endif %}
+    {% for section in sections %}
+      <section aria-labelledby="rewards-{{ section.key }}" class="rewards-section">
+        <SectionHead :id="'rewards-' ~ section.key" :title="_('web.rewards.section.' ~ section.key)" :flip="loop.index is even">{{ section.lead }}</SectionHead>
+        <ul role="list" class="reward-cards enter-rows">
+          {% for card in section.cards %}
+            <RewardCard :card="card" />
+          {% endfor %}
+        </ul>
+      </section>
+    {% endfor %}
+    {% if past %}
+      <details class="rewards-history">
+        <summary>
+          <Icon name="tick" :size="18" stroke="#2F5A14" />
+          <h2 class="rewards-history-title">{{ _("web.rewards.history", count=number(claimed)) }}</h2>
+          <Icon name="down" :size="16" stroke="currentColor" class="rewards-history-turn" />
+        </summary>
+        <ul class="rewards-history-rows">
+          {% for row in past %}
+            <li>
+              <span class="rewards-history-day">{{ row.day }}</span>
+              <strong>{{ row.name }}</strong>
+              <span>{{ row.given or _("web.rewards.history.lapsed") }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </details>
+    {% endif %}
+  {% endif %}
+  {% if coming %}
+    <p class="rewards-coming">
+      <Icon name="clock" :size="18" stroke="currentColor" />
+      <strong>{{ _("web.rewards.coming_up") }}</strong>
+      <span>{{ _("web.rewards.coming_up.events", events=coming) }}</span>
+    </p>
+  {% endif %}
+</Layout>

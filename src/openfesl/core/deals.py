@@ -9,7 +9,7 @@ from babel import Locale
 from babel.lists import format_list
 
 from openfesl.core.calendar import Period, Window, periods
-from openfesl.core.catalogues import Catalogue, Catalogues
+from openfesl.core.catalogues import Catalogue, Catalogues, game_text
 from openfesl.core.deal_picks import History, NewDeal, pick_items, pick_offers
 from openfesl.core.deal_rules import DealRules, ItemSection, Offer, OfferSection
 from openfesl.core.games import Game
@@ -23,7 +23,7 @@ from openfesl.core.store import (
     offer,
 )
 from openfesl.core.store import Offer as Listing
-from openfesl.core.texts import BASE_LANGUAGE, translate
+from openfesl.core.texts import BASE_LANGUAGE
 
 type Maker = Callable[[History], list[NewDeal]]
 
@@ -245,24 +245,12 @@ def _deal(
     assert game.store is not None
     bundle = listed.bundle
     members = [offer(game, catalogue, product) for product in listed.members]
-    name = _text(game, catalogue, bundle.name, language, bundle.faction)
+    name = game_text(game, catalogue, bundle.name, language, bundle.faction)
     names = [member.name for member in members]
     description = (
-        _text(game, catalogue, bundle.description, language, bundle.faction)
+        game_text(game, catalogue, bundle.description, language, bundle.faction)
         if bundle.description
         else format_list(names, locale=Locale.parse(language, sep="-"))
     )
     product_id = game.store.product_id(listed.id)
     return Deal(listed, product_id, order, name, description, members)
-
-
-def _text(game: Game, catalogue: Catalogue, name: str, language: str, faction: str | None) -> str:
-    # A text of the game's language table, else of the server's own, with the faction's name.
-    if found := catalogue.text(name):
-        return found
-    try:
-        text = translate(name, language)
-    except KeyError:
-        return name
-    named = translate(f"games.{game.id}.faction.{faction}", language) if faction else ""
-    return text.format(faction=named)

@@ -253,7 +253,7 @@ class StoreTexts:
         if sold.kind is Kind.DEAL:
             return self.text("web.store.hint.deal" if sold.ends else "web.store.hint.bundle")
         codes = dict.fromkeys(price.currency for price in sold.prices)
-        currencies = self._or([self.currency(code) for code in codes])
+        currencies = self.alternatives([self.currency(code) for code in codes])
         types = {price.ownership.type for price in sold.prices if price.ownership}
         if COUNTED in types:
             key = "web.store.hint.uses"
@@ -303,9 +303,16 @@ class StoreTexts:
         return max(math.ceil((ends - self._now) / timedelta(days=1)), 0)
 
     def _either(self, prefix: str, names: frozenset[str]) -> str:
-        return self._or([translate(prefix + name, self.language) for name in sorted(names)])
+        return self.alternatives(
+            [translate(prefix + name, self.language) for name in sorted(names)]
+        )
 
-    def _or(self, names: list[str]) -> str:
+    def alternatives(self, names: list[str]) -> str:
+        """Return names joined with or, as the language joins them.
+
+        Args:
+            names: The names.
+        """
         return str(format_list(names, style="or", locale=self._locale()))
 
     def _locale(self) -> Locale:

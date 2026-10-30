@@ -6,8 +6,8 @@ from pydantic import BaseModel, ConfigDict, PositiveInt, StringConstraints
 # CSS colours only, so that a data file puts nothing else into the themes' stylesheet.
 type Colour = Annotated[str, StringConstraints(pattern=r"^(#[0-9A-Fa-f]{6}|rgba\([0-9., ]+\))$")]
 # The kinds of web pages a game may list; the server list brings the servers' pages with it and
-# the leaderboard the players' pages. The store, hot deals, treasure chests and Funds pages belong
-# to a game with heroes made on its own site.
+# the leaderboard the players' pages. The store, hot deals, treasure chests, Funds and rewards
+# pages belong to a game with heroes made on its own site.
 type PageKind = Literal[
     "servers",
     "leaderboard",
@@ -18,6 +18,7 @@ type PageKind = Literal[
     "hot-deals",
     "treasure-chests",
     "funds",
+    "rewards",
 ]
 
 

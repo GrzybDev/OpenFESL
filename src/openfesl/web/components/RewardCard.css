@@ -1,0 +1,148 @@
+/* A reward's pale card: the band of whom it is for in its faction's colours or the account's
+   dark brown, a dark square with the yellow glyph of what it gives, dashed rows of what it gives
+   and of the heroes' progress, and a state line in the colour of its kind. A claimed or expired
+   reward's card turns a darker beige. */
+@layer components {
+  .reward-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+    gap: 40px 22px;
+    margin-top: 18px;
+  }
+
+  .reward-claimed,
+  .reward-expired {
+    background: #e2d8c8;
+    box-shadow:
+      inset 0 0 0 3px #ebe3d6,
+      0 4px 0 rgb(0 0 0 / 0.3);
+  }
+
+  .reward-band-account {
+    background: #2e2420;
+    color: #f2c12e;
+  }
+
+  .reward-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 16px 16px;
+  }
+
+  .reward-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    > div {
+      min-width: 0;
+    }
+  }
+
+  .reward-glyph {
+    display: grid;
+    flex: 0 0 auto;
+    width: 56px;
+    height: 56px;
+    place-items: center;
+    border: 3px solid #000;
+    border-radius: 6px;
+    background: #3b2d23;
+  }
+
+  /* An item's icon on the pale tile that the game draws icons on. */
+  .reward-icon {
+    background: #cdbfa6;
+    object-fit: contain;
+  }
+
+  .reward-title {
+    font: 800 21px/1.2 var(--site-heading);
+    overflow-wrap: anywhere;
+  }
+
+  .reward-text {
+    margin-top: 4px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: #2b2018;
+  }
+
+  .reward-rows {
+    border-top: 1px dashed #a8977f;
+    font-size: 14px;
+    line-height: 1.4;
+
+    > li {
+      padding-block: 7px;
+    }
+
+    > li + li {
+      border-top: 1px dashed #a8977f;
+    }
+
+    &.reward-when {
+      padding-top: 7px;
+    }
+  }
+
+  .reward-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(96px, 120px);
+    align-items: center;
+    gap: 12px;
+
+    strong {
+      display: block;
+      font: 800 15px/1.25 var(--site-heading);
+    }
+
+    span {
+      display: block;
+      font-size: 13px;
+      color: #5c4a3c;
+    }
+
+    .site-actions {
+      justify-self: end;
+    }
+  }
+
+  .reward-line .reward-line-done {
+    font-weight: 700;
+    color: #2f5a14;
+  }
+
+  .reward-state {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px dashed #a8977f;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.4;
+
+    > svg {
+      flex: 0 0 auto;
+      margin-top: 2px;
+    }
+  }
+
+  .reward-claimed .reward-state {
+    color: #2f5a14;
+  }
+
+  .reward-soon .reward-state {
+    color: #8c1e18;
+  }
+
+  .reward-locked .reward-state,
+  .reward-expired .reward-state,
+  .reward-waiting .reward-state {
+    color: #5c4a3c;
+  }
+}

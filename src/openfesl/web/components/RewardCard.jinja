@@ -1,0 +1,81 @@
+{#def card #}
+{# A reward on its pale card: a band naming whom it is for, the icon of the first item it gives or
+   the glyph of what it gives with its name and text, what it gives, its day or end, the heroes'
+   progress or claims, and a state line with its glyph. A gift that lacks a hero of its faction
+   offers to create one or to buy a slot for it. #}
+{% set rules = game.heroes %}
+{% set glyphs = {
+  "claimed": "tick",
+  "expired": "warn",
+  "waiting": "clock",
+  "locked": "lock",
+  "soon": "clock",
+  "funds": "coin"
+} %}
+<li id="{{ card.id }}"
+    {% if card.faction %} data-faction="{{ card.faction }}"{% endif %}
+    class="pale-hanger">
+  <Splash />
+  <article aria-labelledby="{{ card.id }}-title"
+           class="pale-card reward-{{ card.tone }}">
+    <p class="pale-band{% if not card.faction %} reward-band-account{% endif %}">
+      <Icon :name="rules.factions[card.faction].glyph if card.faction else 'user'" :size="16" stroke="currentColor" />
+      {{ card.band }}
+    </p>
+    <div class="reward-body">
+      <div class="reward-head">
+        {% if card.icon %}
+          <img src="{{ card.icon }}"
+               width="56"
+               height="56"
+               alt=""
+               loading="lazy"
+               class="reward-glyph reward-icon">
+        {% else %}
+          <span aria-hidden="true" class="reward-glyph"><Icon :name="card.glyph" :size="26" stroke="#F2C12E" /></span>
+        {% endif %}
+        <div>
+          <h3 id="{{ card.id }}-title" class="reward-title">{{ card.title }}</h3>
+          {% if card.text %}<p class="reward-text">{{ card.text }}</p>{% endif %}
+        </div>
+      </div>
+      {% if card.gifts %}
+        <ul class="reward-rows">
+          {% for gift in card.gifts %}<li>{{ gift }}</li>{% endfor %}
+        </ul>
+      {% endif %}
+      {% if card.when %}<p class="reward-rows reward-when">{{ card.when }}</p>{% endif %}
+      {% if card.lines %}
+        <ul class="reward-rows">
+          {% for line in card.lines %}
+            <li class="reward-line">
+              <p>
+                <strong>{{ line.name }}</strong>
+                <span{% if line.done %} class="reward-line-done"{% endif %}>{{ line.text }}</span>
+              </p>
+              {% if line.share is not none %}
+                <ProgressBar :share="line.share" :label="line.name ~ ': ' ~ line.text" />
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      <p class="reward-state">
+        <Icon :name="glyphs.get(card.tone, 'gift')" :size="16" stroke="currentColor" />
+        <span>{{ card.state }}</span>
+      </p>
+      {% if card.needs == "create" %}
+        <p class="site-actions">
+          <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
+             class="site-button site-button-go"><Icon name="plus" :size="16" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+        </p>
+      {% elif card.needs == "slot" %}
+        <p class="site-actions">
+          <a href="{{ url('/' ~ game.id ~ '/user/buyCharacterSlots') }}?{{ {'next': here}|urlencode }}"
+             data-opens="buy-slot"
+             class="site-button"><Icon name="coin" :size="16" stroke="#FEDE01" />{{ _("web.slots.buy") }}</a>
+        </p>
+      {% endif %}
+    </div>
+  </article>
+</li>

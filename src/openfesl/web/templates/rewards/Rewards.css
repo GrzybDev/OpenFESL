@@ -1,0 +1,165 @@
+/* The rewards page: the account's counts on the beige panel beside the title, each section's
+   plaque over its cards, the dashed panel when nothing waits or the account has no hero, the
+   claims of the year folded in a pale box, and the next events in a line. Signed out, the
+   running events sit beside the red box that leads to the sign-in. */
+@layer pages {
+  .rewards-account {
+    flex: 0 1 400px;
+  }
+
+  .rewards-facts {
+    margin-top: 8px;
+    font-size: 14px;
+
+    > div {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 4px 12px;
+      padding-block: 8px;
+      border-top: 1px dashed #a8977f;
+    }
+
+    > div:last-child {
+      border-bottom: 1px dashed #a8977f;
+    }
+
+    dd {
+      font: 800 15px/1.3 var(--site-heading);
+    }
+  }
+
+  .rewards-section {
+    margin-top: 44px;
+  }
+
+  .rewards-empty {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 28px;
+    margin-top: 40px;
+    padding: 24px clamp(16px, 3vw, 36px);
+    border: 3px dashed #3b2d23;
+    border-radius: 8px;
+    background: rgb(241 233 222 / 0.6);
+    font-size: 15px;
+    line-height: 1.5;
+
+    > div {
+      flex: 1 1 260px;
+      min-width: 0;
+    }
+
+    p {
+      max-width: 62ch;
+      margin-top: 6px;
+    }
+
+    .site-actions {
+      margin-top: 14px;
+    }
+  }
+
+  .rewards-empty-disc {
+    display: grid;
+    flex: 0 0 auto;
+    width: 88px;
+    height: 88px;
+    place-items: center;
+    border: 3px dashed #3b2d23;
+    border-radius: 50%;
+    color: #3b2d23;
+  }
+
+  .rewards-empty-title {
+    font: 800 26px/1.15 var(--site-heading);
+    color: #fff;
+    text-shadow: var(--site-outline);
+  }
+
+  .rewards-signed-out {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+    gap: 24px 22px;
+    margin-top: 36px;
+  }
+
+  .rewards-history {
+    margin-top: 44px;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #f1e9de;
+    box-shadow:
+      inset 0 0 0 3px #f8f4ef,
+      0 4px 0 rgb(0 0 0 / 0.3);
+    color: #1f1712;
+
+    > summary {
+      display: flex;
+      min-height: 52px;
+      align-items: center;
+      gap: 10px;
+      padding: 0 18px;
+      cursor: pointer;
+    }
+
+    &[open] .rewards-history-turn {
+      rotate: 180deg;
+    }
+  }
+
+  .rewards-history-title {
+    flex: 1;
+    font: 800 19px/1.2 var(--site-heading);
+  }
+
+  .rewards-history-turn {
+    transition: rotate 160ms var(--ease-menu);
+  }
+
+  .rewards-history-rows {
+    padding: 0 18px 12px;
+    font-size: 14px;
+    line-height: 1.4;
+
+    > li {
+      display: grid;
+      grid-template-columns: 80px minmax(0, 1fr) minmax(0, 1.4fr);
+      gap: 4px 14px;
+      padding-block: 8px;
+      border-top: 1px dashed #a8977f;
+    }
+  }
+
+  .rewards-history-day {
+    color: #5c4a3c;
+  }
+
+  .rewards-coming {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    margin-top: 28px;
+    font-size: 15px;
+    color: #2b2018;
+
+    > strong {
+      font: 800 15px/1.2 var(--site-heading);
+    }
+  }
+
+  @media (width < 40rem) {
+    .rewards-history-rows > li {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rewards-history-turn {
+      transition: none;
+    }
+  }
+}

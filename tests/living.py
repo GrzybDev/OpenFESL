@@ -1,7 +1,10 @@
 """Helpers of the tests of the living site: hot deals that change by themselves, and rewards."""
 
 from collections.abc import Mapping
+from datetime import datetime, timedelta, tzinfo
 from pathlib import Path
+from time import monotonic
+from typing import Self
 from xml.etree import ElementTree
 
 import anyio
@@ -54,6 +57,26 @@ async def import_catalogue(
     with anyio.fail_after(30):
         while not len(ElementTree.fromstring((await fetch(server_url, "/ofb/products", MAGMA))[2])):
             await anyio.sleep(0.05)
+
+
+def freeze(monkeypatch: pytest.MonkeyPatch, moment: datetime) -> None:
+    """Set the clock of the server's rewards, their pages and the items they give to a moment.
+
+    The server runs in the tests' process. From the moment the clock runs on as a real one does,
+    so that what a claim gives is later than the page that claims it.
+    """
+    started = monotonic()
+
+    class Clock(datetime):
+        @classmethod
+        def now(cls, tz: tzinfo | None = None) -> Self:
+            ticked = moment + timedelta(seconds=monotonic() - started)
+            shown = ticked.astimezone(tz) if tz else ticked.replace(tzinfo=None)
+            return cls.combine(shown.date(), shown.timetz())
+
+    modules = ("core.rewards", "web.reward_texts", "storage.entitlements")
+    for module in modules:
+        monkeypatch.setattr(f"openfesl.{module}.datetime", Clock)
 
 
 async def setting(database_url: str, key: str, value: str) -> None:

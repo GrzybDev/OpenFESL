@@ -19,6 +19,7 @@ from openfesl.storage.personas import SqlPersonaStore
 from openfesl.storage.purchases import SqlPurchaseStore
 from openfesl.storage.records import SqlRecordStore
 from openfesl.storage.relationships import SqlRelationshipStore
+from openfesl.storage.rewards import SqlRewardStore
 from openfesl.storage.servers import SqlServerStore
 from openfesl.storage.settings import SqlSettingStore
 from openfesl.storage.stats import SqlStatStore
@@ -52,6 +53,7 @@ class Stores:
         self.personas = SqlPersonaStore(sessions)
         self.records = SqlRecordStore(sessions)
         self.relationships = SqlRelationshipStore(sessions)
+        self.rewards = SqlRewardStore(sessions)
         self.servers = SqlServerStore(sessions)
         self.settings = SqlSettingStore(sessions)
         self.stats = SqlStatStore(sessions)

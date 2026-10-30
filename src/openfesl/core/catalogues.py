@@ -26,7 +26,7 @@ from openfesl.core.catalogue import (
 from openfesl.core.games import Game, Games
 from openfesl.core.hero_models import HeroModels
 from openfesl.core.stats import partition_of
-from openfesl.core.texts import BASE_LANGUAGE
+from openfesl.core.texts import BASE_LANGUAGE, translate
 
 logger = logging.getLogger(__name__)
 
@@ -308,6 +308,28 @@ def paragraphs(text: str) -> tuple[str, ...]:
     """
     parts = (html.unescape(_TAG.sub("", part)) for part in _BREAK.split(text))
     return tuple(" ".join(part.split()) for part in parts if part.strip())
+
+
+def game_text(
+    game: Game, catalogue: Catalogue, name: str, language: str, faction: str | None = None
+) -> str:
+    """Return a text of the game's language table, else the server's own, else its id.
+
+    Args:
+        game: The game, whose texts name its factions.
+        catalogue: The game's imported catalogue, in the language.
+        name: The text's id.
+        language: The language code.
+        faction: The faction whose name stands for {faction} in the server's own text.
+    """
+    if found := catalogue.text(name):
+        return found
+    try:
+        text = translate(name, language)
+    except KeyError:
+        return name
+    named = translate(f"games.{game.id}.faction.{faction}", language) if faction else ""
+    return text.format(faction=named)
 
 
 @dataclass(frozen=True, slots=True)

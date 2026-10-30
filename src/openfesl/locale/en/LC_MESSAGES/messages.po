@@ -8265,3 +8265,198 @@ msgstr "%(count)s of %(goal)s kills"
 
 msgid "web.rewards.progress.wins"
 msgstr "%(count)s of %(goal)s wins"
+
+msgid "web.site.page.rewards"
+msgstr "Rewards"
+
+msgid "games.bfheroes.menu.community"
+msgstr "Community"
+
+msgid "games.bfheroes.rewards.lead"
+msgstr "Rewards count per account and faction: each one is claimed once for the Royal Army and once for the National Army. Items go to one hero of that faction; Funds and keys go to the account."
+
+msgid "web.rewards.account"
+msgstr "This account"
+
+msgid "web.rewards.ready"
+msgstr "Ready to claim"
+
+msgid "web.rewards.next_daily"
+msgstr "Next daily gifts"
+
+msgid "web.rewards.next_daily.at"
+msgstr "%(time)s · %(left)s"
+
+msgid "web.rewards.section.today"
+msgstr "Today"
+
+msgid "web.rewards.section.today.lead"
+msgstr "%(event)s, day %(day)s of %(days)s. %(summary)s"
+
+msgid "web.rewards.section.events"
+msgstr "Event rewards"
+
+msgid "web.rewards.section.events.lead"
+msgstr "%(event)s, %(dates)s. %(summary)s"
+
+msgid "web.rewards.section.missions"
+msgstr "Missions"
+
+msgid "web.rewards.section.missions.lead"
+msgstr "Progress counts on one hero from the event's start, from ranked rounds."
+
+msgid "web.rewards.section.heroes"
+msgstr "New heroes"
+
+msgid "web.rewards.section.heroes.lead"
+msgstr "A starter pack for each new hero, matched to its faction and class."
+
+msgid "web.rewards.section.milestones"
+msgstr "Milestones"
+
+msgid "web.rewards.section.milestones.lead"
+msgstr "Funds for the levels each hero reaches and for what the account's heroes achieve together."
+
+msgid "web.rewards.section.key"
+msgstr "Treasure chest key"
+
+msgid "web.rewards.section.key.lead"
+msgstr "A first key once the account's first treasure chest arrives."
+
+msgid "web.rewards.band.account"
+msgstr "Account"
+
+msgid "web.rewards.band.both"
+msgstr "Both factions"
+
+msgid "web.rewards.milestone.title"
+msgstr "%(name)s · %(amount)s"
+
+msgid "web.rewards.gift.box"
+msgstr "One item at random"
+
+msgid "web.rewards.gift.box.worth"
+msgstr "One item at random, worth at least %(worth)s"
+
+msgid "web.rewards.gift.funds"
+msgstr "%(amount)s for the account"
+
+msgid "web.rewards.gift.keys.one"
+msgstr "%(count)s treasure chest key for the account"
+
+msgid "web.rewards.gift.keys.other"
+msgstr "%(count)s treasure chest keys for the account"
+
+msgid "web.rewards.when.day"
+msgstr "Day %(day)s of %(days)s · until %(ends)s"
+
+msgid "web.rewards.when.until"
+msgstr "Until %(date)s"
+
+msgid "web.rewards.state.ready"
+msgstr "Ready · for %(heroes)s"
+
+msgid "web.rewards.state.ready.account"
+msgstr "Ready to claim"
+
+msgid "web.rewards.state.goal_met"
+msgstr "Goal met by %(hero)s · claim by %(when)s"
+
+msgid "web.rewards.state.starter"
+msgstr "For %(hero)s only · claim by %(date)s"
+
+msgid "web.rewards.state.soon.one"
+msgstr "Claim by %(date)s · %(count)s day left"
+
+msgid "web.rewards.state.soon.other"
+msgstr "Claim by %(date)s · %(count)s days left"
+
+msgid "web.rewards.state.last_day"
+msgstr "Claim by %(date)s · last day"
+
+msgid "web.rewards.state.expired.one"
+msgstr "Expired on %(date)s; it was not claimed. A starter pack can be claimed for %(count)s day after its hero's creation."
+
+msgid "web.rewards.state.expired.other"
+msgstr "Expired on %(date)s; it was not claimed. A starter pack can be claimed for %(count)s days after its hero's creation."
+
+msgid "web.rewards.state.progress"
+msgstr "In progress · ends %(when)s"
+
+msgid "web.rewards.state.chest"
+msgstr "Waits for the account's first treasure chest."
+
+msgid "web.rewards.state.unfit"
+msgstr "None of the account's heroes can take it."
+
+msgid "web.rewards.state.needs"
+msgstr "Needs a %(faction)s hero."
+
+msgid "web.rewards.state.needs.class"
+msgstr "Locked: needs a %(faction)s %(hero_class)s, and the account has none."
+
+msgid "web.rewards.state.slot"
+msgstr "Slot %(slot)s is free."
+
+msgid "web.rewards.state.full"
+msgstr "All %(count)s slots are in use; another slot costs %(price)s."
+
+msgid "web.rewards.state.claimed"
+msgstr "Claimed on %(date)s: %(given)s."
+
+msgid "web.rewards.state.claimed.hero"
+msgstr "Claimed on %(date)s for %(hero)s: %(given)s."
+
+msgid "web.rewards.state.next"
+msgstr "The next one comes at %(time)s."
+
+msgid "web.rewards.state.funds"
+msgstr "%(currency)s go to the account"
+
+msgid "web.rewards.row.all"
+msgstr "All heroes"
+
+msgid "web.rewards.row.claimed"
+msgstr "Claimed on %(date)s"
+
+msgid "web.rewards.row.ready"
+msgstr "Goal reached"
+
+msgid "web.rewards.signed_out"
+msgstr "Sign in to claim"
+
+msgid "web.rewards.signed_out.text"
+msgstr "Rewards go to an account's heroes and wallet, so claiming needs a signed-in account."
+
+msgid "web.rewards.no_hero"
+msgstr "Gifts, missions and starter packs go to heroes."
+
+msgid "web.rewards.no_hero.first"
+msgstr "The account's first hero also brings %(amount)s as a milestone."
+
+msgid "web.rewards.none"
+msgstr "Nothing to claim right now"
+
+msgid "web.rewards.none.next"
+msgstr "Next: %(event)s from %(date)s."
+
+msgid "web.rewards.none.counting"
+msgstr "Missions and milestones below keep counting."
+
+msgid "web.rewards.history"
+msgstr "Claimed this year · %(count)s"
+
+msgid "web.rewards.history.lapsed"
+msgstr "Not claimed"
+
+msgid "web.rewards.coming_up"
+msgstr "Coming up:"
+
+msgid "web.rewards.coming_up.event"
+msgstr "%(event)s from %(date)s"
+
+msgid "web.rewards.coming_up.events"
+msgstr "%(events)s."
+
+msgid "web.rewards.claimed_in"
+msgstr "Claimed in %(year)s"

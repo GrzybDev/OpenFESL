@@ -51,6 +51,7 @@ from openfesl.core.records import RecordService
 from openfesl.core.registration import Terms
 from openfesl.core.relationships import Relationships
 from openfesl.core.relay_tokens import RelayTokens
+from openfesl.core.rewards import Rewards
 from openfesl.core.rich_presence import RichPresence
 from openfesl.core.servers import Approval
 from openfesl.core.session import GameSession, Players
@@ -138,6 +139,16 @@ class GameServices:
             self.deals,
         )
         self.chests = Chests(stores.products, stores.purchases, self.heroes, drops)
+        self.rewards = Rewards(
+            stores.rewards,
+            stores.settings,
+            self.heroes,
+            stores.stats,
+            stores.entitlements,
+            self.catalogues,
+            stores.products,
+            drops,
+        )
         self.item_writes = ItemWrites(stores.entitlements)
         self.windows = StoreWindows(
             stores.products, self.catalogues, self.heroes, stores.entitlements, self.wallets

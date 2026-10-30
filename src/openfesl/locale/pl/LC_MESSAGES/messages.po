@@ -8755,3 +8755,216 @@ msgstr "Zabójstwa: %(count)s z %(goal)s"
 
 msgid "web.rewards.progress.wins"
 msgstr "Zwycięstwa: %(count)s z %(goal)s"
+
+msgid "web.site.page.rewards"
+msgstr "Nagrody"
+
+msgid "games.bfheroes.menu.community"
+msgstr "Społeczność"
+
+msgid "games.bfheroes.rewards.lead"
+msgstr "Nagrody liczą się dla konta i frakcji: każdą odbiera się raz dla Royal Army i raz dla National Army. Przedmioty trafiają do jednego bohatera tej frakcji, a Funds i klucze na konto."
+
+msgid "web.rewards.account"
+msgstr "To konto"
+
+msgid "web.rewards.ready"
+msgstr "Do odebrania"
+
+msgid "web.rewards.next_daily"
+msgstr "Kolejne codzienne prezenty"
+
+msgid "web.rewards.next_daily.at"
+msgstr "%(time)s · %(left)s"
+
+msgid "web.rewards.section.today"
+msgstr "Dzisiaj"
+
+msgid "web.rewards.section.today.lead"
+msgstr "%(event)s, dzień %(day)s z %(days)s. %(summary)s"
+
+msgid "web.rewards.section.events"
+msgstr "Nagrody z wydarzeń"
+
+msgid "web.rewards.section.events.lead"
+msgstr "%(event)s, %(dates)s. %(summary)s"
+
+msgid "web.rewards.section.missions"
+msgstr "Misje"
+
+msgid "web.rewards.section.missions.lead"
+msgstr "Postęp liczy się dla jednego bohatera od początku wydarzenia, z rund rankingowych."
+
+msgid "web.rewards.section.heroes"
+msgstr "Nowi bohaterowie"
+
+msgid "web.rewards.section.heroes.lead"
+msgstr "Pakiet startowy dla każdego nowego bohatera, dobrany do jego frakcji i klasy."
+
+msgid "web.rewards.section.milestones"
+msgstr "Kamienie milowe"
+
+msgid "web.rewards.section.milestones.lead"
+msgstr "Funds za poziomy osiągane przez każdego bohatera i za to, co bohaterowie konta osiągną razem."
+
+msgid "web.rewards.section.key"
+msgstr "Klucz do skrzyni"
+
+msgid "web.rewards.section.key.lead"
+msgstr "Pierwszy klucz, gdy na konto trafi pierwsza skrzynia skarbów."
+
+msgid "web.rewards.band.account"
+msgstr "Konto"
+
+msgid "web.rewards.band.both"
+msgstr "Obie frakcje"
+
+msgid "web.rewards.milestone.title"
+msgstr "%(name)s · %(amount)s"
+
+msgid "web.rewards.gift.box"
+msgstr "Jeden losowy przedmiot"
+
+msgid "web.rewards.gift.box.worth"
+msgstr "Jeden losowy przedmiot wart co najmniej %(worth)s"
+
+msgid "web.rewards.gift.funds"
+msgstr "%(amount)s na konto"
+
+msgid "web.rewards.gift.keys.one"
+msgstr "%(count)s klucz do skrzyni na konto"
+
+msgid "web.rewards.gift.keys.few"
+msgstr "%(count)s klucze do skrzyń na konto"
+
+msgid "web.rewards.gift.keys.many"
+msgstr "%(count)s kluczy do skrzyń na konto"
+
+msgid "web.rewards.gift.keys.other"
+msgstr "%(count)s klucza do skrzyń na konto"
+
+msgid "web.rewards.when.day"
+msgstr "Dzień %(day)s z %(days)s · do %(ends)s"
+
+msgid "web.rewards.when.until"
+msgstr "Do %(date)s"
+
+msgid "web.rewards.state.ready"
+msgstr "Gotowe · dla: %(heroes)s"
+
+msgid "web.rewards.state.ready.account"
+msgstr "Gotowe do odebrania"
+
+msgid "web.rewards.state.goal_met"
+msgstr "Cel osiągnięty przez bohatera %(hero)s · do odebrania do %(when)s"
+
+msgid "web.rewards.state.starter"
+msgstr "Tylko dla bohatera %(hero)s · do odebrania do %(date)s"
+
+msgid "web.rewards.state.soon.one"
+msgstr "Do odebrania do %(date)s · został %(count)s dzień"
+
+msgid "web.rewards.state.soon.few"
+msgstr "Do odebrania do %(date)s · zostały %(count)s dni"
+
+msgid "web.rewards.state.soon.many"
+msgstr "Do odebrania do %(date)s · zostało %(count)s dni"
+
+msgid "web.rewards.state.soon.other"
+msgstr "Do odebrania do %(date)s · zostało %(count)s dnia"
+
+msgid "web.rewards.state.last_day"
+msgstr "Do odebrania do %(date)s · ostatni dzień"
+
+msgid "web.rewards.state.expired.one"
+msgstr "Wygasł %(date)s bez odebrania. Pakiet startowy można odebrać przez %(count)s dzień od utworzenia bohatera."
+
+msgid "web.rewards.state.expired.few"
+msgstr "Wygasł %(date)s bez odebrania. Pakiet startowy można odebrać przez %(count)s dni od utworzenia bohatera."
+
+msgid "web.rewards.state.expired.many"
+msgstr "Wygasł %(date)s bez odebrania. Pakiet startowy można odebrać przez %(count)s dni od utworzenia bohatera."
+
+msgid "web.rewards.state.expired.other"
+msgstr "Wygasł %(date)s bez odebrania. Pakiet startowy można odebrać przez %(count)s dnia od utworzenia bohatera."
+
+msgid "web.rewards.state.progress"
+msgstr "W toku · do %(when)s"
+
+msgid "web.rewards.state.chest"
+msgstr "Czeka na pierwszą skrzynię skarbów konta."
+
+msgid "web.rewards.state.unfit"
+msgstr "Żaden bohater konta nie może jej dostać."
+
+msgid "web.rewards.state.needs"
+msgstr "Wymaga bohatera frakcji %(faction)s."
+
+msgid "web.rewards.state.needs.class"
+msgstr "Zablokowane: wymaga bohatera klasy %(hero_class)s z frakcji %(faction)s, a konto takiego nie ma."
+
+msgid "web.rewards.state.slot"
+msgstr "Miejsce %(slot)s jest wolne."
+
+msgid "web.rewards.state.full"
+msgstr "Wszystkie miejsca (%(count)s) są zajęte; kolejne kosztuje %(price)s."
+
+msgid "web.rewards.state.claimed"
+msgstr "Odebrano %(date)s: %(given)s."
+
+msgid "web.rewards.state.claimed.hero"
+msgstr "Odebrano %(date)s dla bohatera %(hero)s: %(given)s."
+
+msgid "web.rewards.state.next"
+msgstr "Kolejny o %(time)s."
+
+msgid "web.rewards.state.funds"
+msgstr "%(currency)s trafiają na konto"
+
+msgid "web.rewards.row.all"
+msgstr "Wszyscy bohaterowie"
+
+msgid "web.rewards.row.claimed"
+msgstr "Odebrano %(date)s"
+
+msgid "web.rewards.row.ready"
+msgstr "Cel osiągnięty"
+
+msgid "web.rewards.signed_out"
+msgstr "Odbiór wymaga zalogowania"
+
+msgid "web.rewards.signed_out.text"
+msgstr "Nagrody trafiają do bohaterów i portfela konta, więc do odbioru potrzebne jest zalogowanie."
+
+msgid "web.rewards.no_hero"
+msgstr "Prezenty, misje i pakiety startowe trafiają do bohaterów."
+
+msgid "web.rewards.no_hero.first"
+msgstr "Pierwszy bohater konta daje też %(amount)s jako kamień milowy."
+
+msgid "web.rewards.none"
+msgstr "Teraz nie ma nic do odebrania"
+
+msgid "web.rewards.none.next"
+msgstr "Następne: %(event)s od %(date)s."
+
+msgid "web.rewards.none.counting"
+msgstr "Misje i kamienie milowe poniżej liczą się dalej."
+
+msgid "web.rewards.history"
+msgstr "Odebrane w tym roku · %(count)s"
+
+msgid "web.rewards.history.lapsed"
+msgstr "Nie odebrano"
+
+msgid "web.rewards.coming_up"
+msgstr "Wkrótce:"
+
+msgid "web.rewards.coming_up.event"
+msgstr "%(event)s od %(date)s"
+
+msgid "web.rewards.coming_up.events"
+msgstr "%(events)s."
+
+msgid "web.rewards.claimed_in"
+msgstr "Odebrane w %(year)s"
