@@ -9838,3 +9838,279 @@ msgstr "Wszystkie rankingi"
 
 msgid "web.heroes.profile"
 msgstr "Profil"
+
+msgid "web.admin.heroes.title"
+msgstr "Bohaterowie"
+
+msgid "web.admin.heroes.slots"
+msgstr "Miejsca na bohaterów"
+
+msgid "web.admin.heroes.slots.used"
+msgstr "Zajęte: %(used)s z %(total)s"
+
+msgid "web.admin.heroes.slots.parts"
+msgstr "bezpłatne: %(free)s, kupione: %(bought)s"
+
+msgid "web.admin.heroes.column.state"
+msgstr "Stan"
+
+msgid "web.admin.heroes.column.hero"
+msgstr "Bohater"
+
+msgid "web.admin.heroes.column.level"
+msgstr "Poziom"
+
+msgid "web.admin.heroes.column.items"
+msgstr "Przedmioty"
+
+msgid "web.admin.heroes.column.chests"
+msgstr "Skrzynie"
+
+msgid "web.admin.heroes.column.created"
+msgstr "Utworzenie"
+
+msgid "web.admin.heroes.column.page"
+msgstr "Strona bohatera"
+
+msgid "web.admin.heroes.state.active"
+msgstr "Aktywny"
+
+msgid "web.admin.heroes.state.disabled"
+msgstr "Wyłączony"
+
+msgid "web.admin.heroes.state.no_look"
+msgstr "Bez wyglądu"
+
+msgid "web.admin.heroes.line"
+msgstr "%(faction)s · %(hero_class)s · bohater %(id)s"
+
+msgid "web.admin.heroes.legacy"
+msgstr "Bohater %(id)s · utworzony %(date)s, zanim bohaterowie zapisywali wygląd: program uruchamiający go nie włącza i nie może on być domyślny."
+
+msgid "web.admin.heroes.default"
+msgstr "Bohater domyślny"
+
+msgid "web.admin.heroes.points.unspent"
+msgstr "niewydane: %(count)s"
+
+msgid "web.admin.heroes.points.earned"
+msgstr "zdobyte: %(count)s"
+
+msgid "web.admin.heroes.chests.none"
+msgstr "Brak"
+
+msgid "web.admin.heroes.created"
+msgstr "Utworzenie: %(date)s"
+
+msgid "web.admin.heroes.open"
+msgstr "Otwórz stronę bohatera %(hero)s"
+
+msgid "web.admin.heroes.note"
+msgstr "Bohaterów tworzy się na stronie i nigdy nie usuwa. Gra wczytuje nazwy, przedmioty i bohatera domyślnego przy następnym logowaniu."
+
+msgid "web.admin.heroes.other_games"
+msgstr "Gry bez bohaterów zachowują nazwy w grze; %(game)s pokazuje bohaterów poniżej."
+
+msgid "web.admin.heroes.none"
+msgstr "Brak bohaterów."
+
+msgid "web.admin.heroes.none.text"
+msgstr "Bohaterów tworzy się w kreatorze na stronie. Do tego czasu program uruchamiający nie włącza gry %(game)s dla tego konta."
+
+msgid "web.admin.chest_keys.title"
+msgstr "Klucze do skrzyń skarbów"
+
+msgid "web.admin.chest_keys.held.one"
+msgstr "Klucze na koncie: %(count)s"
+
+msgid "web.admin.chest_keys.held.few"
+msgstr "Klucze na koncie: %(count)s"
+
+msgid "web.admin.chest_keys.held.many"
+msgstr "Klucze na koncie: %(count)s"
+
+msgid "web.admin.chest_keys.held.other"
+msgstr "Klucze na koncie: %(count)s"
+
+msgid "web.admin.chest_keys.text"
+msgstr "Przedmiot %(item)s: kupiony, przyznany lub otrzymany w nagrodę; zużywany przy otwieraniu na stronie skrzyni dowolnego z bohaterów konta."
+
+msgid "web.admin.hero.title"
+msgstr "Bohater"
+
+msgid "web.admin.hero.heading"
+msgstr "Bohater %(id)s"
+
+msgid "web.admin.hero.fact.faction"
+msgstr "Frakcja"
+
+msgid "web.admin.hero.fact.class"
+msgstr "Klasa"
+
+msgid "web.admin.hero.fact.level"
+msgstr "Poziom"
+
+msgid "web.admin.hero.fact.default"
+msgstr "Bohater domyślny"
+
+msgid "web.admin.hero.fact.created"
+msgstr "Utworzenie"
+
+msgid "web.admin.hero.fact.look"
+msgstr "Wygląd"
+
+msgid "web.admin.hero.default.yes"
+msgstr "Tak"
+
+msgid "web.admin.hero.default.no"
+msgstr "Nie"
+
+msgid "web.admin.hero.xp"
+msgstr "XP do poziomu %(level)s"
+
+msgid "web.admin.hero.xp.of"
+msgstr "%(xp)s z %(needed)s XP"
+
+msgid "web.admin.hero.look"
+msgstr "Odcień skóry %(skin)s z %(skins)s · kolor włosów %(colour)s z %(colours)s"
+
+msgid "web.admin.hero.look.hair"
+msgstr "fryzura %(place)s (przedmiot %(id)s)"
+
+msgid "web.admin.hero.look.hair.none"
+msgstr "bez fryzury"
+
+msgid "web.admin.hero.look.facial"
+msgstr "zarost %(place)s (przedmiot %(id)s)"
+
+msgid "web.admin.hero.look.facial.none"
+msgstr "bez zarostu"
+
+msgid "web.admin.hero.look.none"
+msgstr "Brak: bohater sprzed zapisu wyglądu"
+
+msgid "web.admin.hero.portrait"
+msgstr "Portret"
+
+msgid "web.admin.hero.portrait.sent"
+msgstr "Przesłany przez grę %(time)s."
+
+msgid "web.admin.hero.portrait.none"
+msgstr "Gra nie przesłała jeszcze portretu; strony pokazują grafikę zastępczą."
+
+msgid "web.admin.hero.points.unspent"
+msgstr "niewydane z %(earned)s zdobytych"
+
+msgid "web.admin.hero.points.text"
+msgstr "Przybywają z poziomami bohatera i są wydawane w grze na umiejętności."
+
+msgid "web.admin.hero.chests"
+msgstr "Skrzynie skarbów"
+
+msgid "web.admin.hero.chests.count.one"
+msgstr "Skrzynie do otwarcia: %(count)s. Skrzynie pochodzą z rund na serwerach; klucz z konta otwiera skrzynię na stronie."
+
+msgid "web.admin.hero.chests.count.few"
+msgstr "Skrzynie do otwarcia: %(count)s. Skrzynie pochodzą z rund na serwerach; klucz z konta otwiera skrzynię na stronie."
+
+msgid "web.admin.hero.chests.count.many"
+msgstr "Skrzynie do otwarcia: %(count)s. Skrzynie pochodzą z rund na serwerach; klucz z konta otwiera skrzynię na stronie."
+
+msgid "web.admin.hero.chests.count.other"
+msgstr "Skrzynie do otwarcia: %(count)s. Skrzynie pochodzą z rund na serwerach; klucz z konta otwiera skrzynię na stronie."
+
+msgid "web.admin.items.title"
+msgstr "Ekwipunek"
+
+msgid "web.admin.items.no_catalogue"
+msgstr "Katalog gry %(game)s nie został zaimportowany, więc przedmioty mają tylko numery, bez nazw, rodzajów i ikon."
+
+msgid "web.admin.items.tabs"
+msgstr "Przedmioty według stanu"
+
+msgid "web.admin.items.tab.active"
+msgstr "Aktywne"
+
+msgid "web.admin.items.tab.ended"
+msgstr "Zakończone"
+
+msgid "web.admin.items.tab.all"
+msgstr "Wszystkie"
+
+msgid "web.admin.items.column.item"
+msgstr "Przedmiot"
+
+msgid "web.admin.items.column.kind"
+msgstr "Rodzaj"
+
+msgid "web.admin.items.column.ownership"
+msgstr "Posiadanie"
+
+msgid "web.admin.items.column.from"
+msgstr "Źródło"
+
+msgid "web.admin.items.column.state"
+msgstr "Stan"
+
+msgid "web.admin.items.number"
+msgstr "przedmiot %(id)s"
+
+msgid "web.admin.items.withheld"
+msgstr "przyznawany tylko ręcznie"
+
+msgid "web.admin.items.kind.unknown"
+msgstr "Rodzaj nieznany"
+
+msgid "web.admin.items.ends"
+msgstr "Do %(date)s"
+
+msgid "web.admin.items.low"
+msgstr "Kończy się"
+
+msgid "web.admin.items.from.starting_kit"
+msgstr "Zestaw startowy"
+
+msgid "web.admin.items.from.store"
+msgstr "Sklep"
+
+msgid "web.admin.items.from.hot_deal"
+msgstr "Gorąca oferta"
+
+msgid "web.admin.items.from.box"
+msgstr "Skrzynka losowa"
+
+msgid "web.admin.items.from.reward"
+msgstr "Nagroda"
+
+msgid "web.admin.items.from.admin"
+msgstr "Administracja"
+
+msgid "web.admin.items.state.active"
+msgstr "Aktywny"
+
+msgid "web.admin.items.state.expired"
+msgstr "Wygasły"
+
+msgid "web.admin.items.state.used_up"
+msgstr "Zużyty"
+
+msgid "web.admin.items.state.revoked"
+msgstr "Odebrany"
+
+msgid "web.admin.items.state.out_of_use"
+msgstr "Wyłączony z użycia"
+
+msgid "web.admin.items.none.active"
+msgstr "Bohater nie ma teraz żadnego przedmiotu."
+
+msgid "web.admin.items.none.ended"
+msgstr "Żaden przedmiot bohatera się nie zakończył."
+
+msgid "web.admin.items.none.all"
+msgstr "Bohater nie ma żadnego przedmiotu."
+
+msgid "web.admin.items.next_login"
+msgstr "Gra wczytuje przedmioty przy następnym logowaniu bohatera. Wypożyczenia kończą się same, a przedmioty liczone w użyciach po wyczerpaniu użyć."
+
+msgid "web.admin.items.unnamed"
+msgstr "Przedmiot %(id)s"

@@ -1,6 +1,8 @@
-{#def view, entitlements: list, active: int, changes, remembered: list, total: int, terms: str, manages: bool #}
-{# A player's account: what is kept about it, its in-game names and entitlements, beside the search,
-   the session it is logged in on and the logins its game remembers. #}
+{#def view, entitlements: list, active: int, changes, remembered: list, heroes: list, total: int, terms: str, manages: bool #}
+{# A player's account: what is kept about it, its in-game names, heroes in the games whose heroes
+   are made on their site, and entitlements, beside the search, the session it is logged in on and
+   the logins its game remembers. #}
+{% set names = view.personas|rejectattr("game.heroes")|list %}
 {% set record = view.record %}
 {% set account = record.account %}
 {% set title = _("web.admin.account") %}
@@ -82,10 +84,10 @@
         </section>
 
         <section aria-labelledby="account-names" class="account-part">
-          <Bar id="account-names" :extra="number(view.personas|length)">{{ _("web.admin.account.names") }}</Bar>
-          {% if view.personas %}
+          <Bar id="account-names" :extra="number(names|length)">{{ _("web.admin.account.names") }}</Bar>
+          {% if names %}
             <ul class="account-list">
-              {% for persona in view.personas %}
+              {% for persona in names %}
                 {% set entry = persona.record %}
                 <li>
                   {{ badge("tick" if persona.usable else "x") }}
@@ -142,8 +144,15 @@
           {% else %}
             <p class="bar-text body-text">{{ _("web.admin.account.names.none") }}</p>
           {% endif %}
-          <p class="body-text side-note">{{ _("web.admin.account.names.note") }} {{ _("web.admin.account.names.decide") }}</p>
+          <p class="body-text side-note">
+            {{ _("web.admin.account.names.note") }} {{ _("web.admin.account.names.decide") }}
+            {% for found in heroes %}{{ _("web.admin.heroes.other_games", game=found.game.name) }}{% endfor %}
+          </p>
         </section>
+
+        {% for found in heroes %}
+          <AdminHeroes :of="found" :base="base" :manages="manages" />
+        {% endfor %}
 
         <section aria-labelledby="account-entitlements" class="account-part">
           <Bar id="account-entitlements" :extra="_('web.admin.entitlements.summary', active=number(active), revoked=number(revoked)) if revoked else _n('web.admin.entitlements.active', active)">{{ _("web.admin.entitlements") }}</Bar>

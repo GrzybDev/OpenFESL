@@ -1,0 +1,106 @@
+{#def of, base: str, manages: bool #}
+{# An account's heroes in one game on its page in the admin panel: the slots they take, a
+   row of each hero that leads to its page, and the treasure chest keys the account holds. #}
+{% set game = of.game %}
+{% set roster = of.roster %}
+{% set rules = game.heroes %}
+{% set anchor = "heroes-" ~ game.id %}
+{% set used = roster.heroes|length %}
+<section aria-labelledby="{{ anchor }}" class="account-part">
+  <Bar :id="anchor" :extra="number(used)">
+  <span class="bar-chip">{{ _("web.admin.heroes.title") }}<GameChip :of="game" full /></span>
+  </Bar>
+  <p class="admin-hero-slots">
+    <span class="admin-hero-slots-label">{{ _("web.admin.heroes.slots") }}</span>
+    <span class="admin-hero-slots-used">{{ _("web.admin.heroes.slots.used", used=number(used), total=number(roster.slots)) }}</span>
+    <span>{{ _("web.admin.heroes.slots.parts", free=number(rules.slots), bought=number(roster.bought)) }}</span>
+  </p>
+  {% if of.cards %}
+    <div class="table-scroll">
+      <div role="table"
+           aria-labelledby="{{ anchor }}"
+           class="table admin-heroes">
+        <div role="rowgroup">
+          <div role="row" class="admin-hero-columns">
+            <div role="columnheader" class="column-head">{{ _("web.admin.heroes.column.state") }}</div>
+            <div role="columnheader" class="column-head column-name">{{ _("web.admin.heroes.column.hero") }}</div>
+            <div role="columnheader" class="column-head">{{ _("web.admin.heroes.column.level") }}</div>
+            <div role="columnheader" class="column-head">{{ _("games." ~ game.id ~ ".currency." ~ rules.points) }}</div>
+            <div role="columnheader" class="column-head">{{ _("web.admin.heroes.column.items") }}</div>
+            <div role="columnheader" class="column-head">{{ _("web.admin.heroes.column.chests") }}</div>
+            <div role="columnheader" class="column-head">{{ _("web.admin.heroes.column.created") }}</div>
+            <div role="columnheader"><span class="sr-only">{{ _("web.admin.heroes.column.page") }}</span></div>
+          </div>
+        </div>
+        <div role="rowgroup" class="enter-rows table-rows">
+          {% for card in of.cards %}
+            {% set hero = card.hero %}
+            {% set href = base ~ "/heroes/" ~ hero.persona.id %}
+            {% set state = "disabled" if hero.disabled else "active" if hero.playable else "no_look" %}
+            <div role="row" class="admin-hero-columns admin-hero-row">
+              <div role="cell" class="admin-cell admin-badges">
+                <span aria-hidden="true" class="badge"><Icon :name="{'active': 'tick', 'disabled': 'x', 'no_look': 'warn'}[state]" stroke="#0A0A0A" fill="#0A0A0A" /></span>
+                <span class="admin-hero-state">{{ _("web.admin.heroes.state." ~ state) }}</span>
+              </div>
+              <div role="cell" class="admin-cell cell-stack">
+                <a href="{{ href }}" class="admin-hero-link">{{ hero.persona.name }}</a>
+                <span class="cell-ago">
+                  {% if hero.faction and hero.hero_class %}
+                    {{ _("web.admin.heroes.line", faction=_("games." ~ game.id ~ ".faction." ~ hero.faction), hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class), id=hero.persona.id) }}
+                  {% else %}
+                    {{ _("web.admin.heroes.legacy", id=hero.persona.id, date=when(hero.created, "yMMMd")) }}
+                  {% endif %}
+                </span>
+                {% if card.default %}
+                  <span class="admin-hero-default"><Icon name="star" :size="12" stroke="currentColor" fill="currentColor" />{{ _("web.admin.heroes.default") }}</span>
+                {% endif %}
+              </div>
+              <div role="cell" class="admin-cell admin-hero-level">
+                <span aria-hidden="true"
+                      class="cell-label">{{ _("web.admin.heroes.column.level") }}</span>{{ number(hero.level) }}
+              </div>
+              <div role="cell" class="admin-cell cell-stack">
+                <span class="admin-hero-strong">{{ _("web.admin.heroes.points.unspent", count=number(card.points[0])) }}</span>
+                <span class="cell-ago">{{ _("web.admin.heroes.points.earned", count=number(card.points[1])) }}</span>
+              </div>
+              <div role="cell" class="admin-cell cell-stack">
+                <span class="admin-hero-strong">{{ _n("web.heroes.items.count", card.items) }}</span>
+                <span class="cell-ago">{{ _n("web.heroes.items.low", card.low) if card.low else _("web.heroes.items.none_low") }}</span>
+              </div>
+              <div role="cell" class="admin-cell admin-hero-strong">
+                <span aria-hidden="true" class="cell-label">{{ _("web.admin.heroes.column.chests") }}</span>
+                {%- if card.chests is none %}–{% elif card.chests %}{{ number(card.chests) }}{% else %}{{ _("web.admin.heroes.chests.none") }}{% endif -%}
+              </div>
+              <div role="cell" class="admin-cell">
+                <span class="cell-time">{{ _("web.admin.heroes.created", date=when(hero.created, "yMMMd")) }}</span>
+              </div>
+              <div role="cell" class="cell-end">
+                <EndSquare :href="href" :label="_('web.admin.heroes.open', hero=hero.persona.name)" />
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <p class="body-text side-note">{{ _("web.admin.heroes.note") }}</p>
+  {% else %}
+    <div class="bar-text admin-hero-none">
+      <p class="admin-hero-strong">{{ _("web.admin.heroes.none") }}</p>
+      <p class="body-text">{{ _("web.admin.heroes.none.text", game=game.name) }}</p>
+    </div>
+  {% endif %}
+</section>
+{% if of.keys is not none %}
+  <section aria-labelledby="{{ anchor }}-keys" class="account-part">
+    <Bar :id="anchor ~ '-keys'" :extra="number(of.keys)">
+    <span class="bar-chip">{{ _("web.admin.chest_keys.title") }}<GameChip :of="game" full /></span>
+    </Bar>
+    <div class="bar-text admin-hero-keys">
+      <span aria-hidden="true" class="badge"><Icon name="key" :size="14" stroke="#0A0A0A" /></span>
+      <p class="cell-stack">
+        <span class="admin-hero-strong">{{ _n("web.admin.chest_keys.held", of.keys) }}</span>
+        <span class="cell-ago">{{ _("web.admin.chest_keys.text", item=game.chests.key) }}</span>
+      </p>
+    </div>
+  </section>
+{% endif %}

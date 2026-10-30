@@ -1,6 +1,6 @@
 from dataclasses import dataclass, replace
 from math import ceil
-from typing import Any, Protocol, Self
+from typing import TYPE_CHECKING, Any, Protocol, Self
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
@@ -15,6 +15,10 @@ from openfesl.core.games import Game, Games
 from openfesl.core.personas import PersonaRecord, PersonaState
 from openfesl.core.session import GameSession, Players
 from openfesl.web.admin.auth import AdminSessions
+
+# For annotations only, as the heroes' pages build on the accounts'.
+if TYPE_CHECKING:
+    from openfesl.web.admin.heroes import HeroAdminViews
 
 PAGE_SIZE = 25
 
@@ -231,7 +235,11 @@ class AccountViews:
 
 
 def account_routes(
-    sessions: AdminSessions, views: AccountViews, entitlements: HeldEntitlements, terms: str
+    sessions: AdminSessions,
+    views: AccountViews,
+    entitlements: HeldEntitlements,
+    heroes: HeroAdminViews,
+    terms: str,
 ) -> APIRouter:
     """Return the accounts page, with its search, and each account's page.
 
@@ -239,6 +247,7 @@ def account_routes(
         sessions: Signs admins in and renders the panel's pages.
         views: Puts together what the panel shows about the accounts.
         entitlements: Where the accounts' entitlements are kept.
+        heroes: Puts together what the panel shows about the accounts' heroes.
         terms: The version of the service's terms that accounts accept now.
     """
     router = APIRouter()
@@ -281,6 +290,7 @@ def account_routes(
             active=sum(entitlement.status == ACTIVE for entitlement in held),
             changes=await entitlements.changes(number),
             remembered=await views.accounts.remembered(number),
+            heroes=await heroes.of_account(number, request.state.language),
             total=total,
             terms=terms,
             manages=admin.role is Role.ADMIN,

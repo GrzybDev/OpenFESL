@@ -9282,3 +9282,267 @@ msgstr "All leaderboards"
 
 msgid "web.heroes.profile"
 msgstr "Profile"
+
+msgid "web.admin.heroes.title"
+msgstr "Heroes"
+
+msgid "web.admin.heroes.slots"
+msgstr "Hero slots"
+
+msgid "web.admin.heroes.slots.used"
+msgstr "%(used)s of %(total)s used"
+
+msgid "web.admin.heroes.slots.parts"
+msgstr "%(free)s free + %(bought)s bought"
+
+msgid "web.admin.heroes.column.state"
+msgstr "State"
+
+msgid "web.admin.heroes.column.hero"
+msgstr "Hero"
+
+msgid "web.admin.heroes.column.level"
+msgstr "Level"
+
+msgid "web.admin.heroes.column.items"
+msgstr "Items"
+
+msgid "web.admin.heroes.column.chests"
+msgstr "Chests"
+
+msgid "web.admin.heroes.column.created"
+msgstr "Created"
+
+msgid "web.admin.heroes.column.page"
+msgstr "Hero page"
+
+msgid "web.admin.heroes.state.active"
+msgstr "Active"
+
+msgid "web.admin.heroes.state.disabled"
+msgstr "Disabled"
+
+msgid "web.admin.heroes.state.no_look"
+msgstr "No look"
+
+msgid "web.admin.heroes.line"
+msgstr "%(faction)s %(hero_class)s · hero %(id)s"
+
+msgid "web.admin.heroes.legacy"
+msgstr "Hero %(id)s · made %(date)s, before heroes kept their look: the launcher never starts it and it cannot be the default."
+
+msgid "web.admin.heroes.default"
+msgstr "Default hero"
+
+msgid "web.admin.heroes.points.unspent"
+msgstr "%(count)s unspent"
+
+msgid "web.admin.heroes.points.earned"
+msgstr "of %(count)s earned"
+
+msgid "web.admin.heroes.chests.none"
+msgstr "None"
+
+msgid "web.admin.heroes.created"
+msgstr "Created %(date)s"
+
+msgid "web.admin.heroes.open"
+msgstr "Open the page of %(hero)s"
+
+msgid "web.admin.heroes.note"
+msgstr "Heroes are made on the website and never deleted. The game reads names, items and the default hero at the next login."
+
+msgid "web.admin.heroes.other_games"
+msgstr "Games without hero rules keep their in-game names; %(game)s lists heroes below."
+
+msgid "web.admin.heroes.none"
+msgstr "No hero yet."
+
+msgid "web.admin.heroes.none.text"
+msgstr "Heroes are made in the hero creator on the website. Until then the launcher does not start %(game)s for this account."
+
+msgid "web.admin.chest_keys.title"
+msgstr "Treasure chest keys"
+
+msgid "web.admin.chest_keys.held.one"
+msgstr "%(count)s key held by the account"
+
+msgid "web.admin.chest_keys.held.other"
+msgstr "%(count)s keys held by the account"
+
+msgid "web.admin.chest_keys.text"
+msgstr "Item %(item)s: bought, granted or given as rewards, and spent when a chest of any of its heroes is opened on the website."
+
+msgid "web.admin.hero.title"
+msgstr "Hero"
+
+msgid "web.admin.hero.heading"
+msgstr "Hero %(id)s"
+
+msgid "web.admin.hero.fact.faction"
+msgstr "Faction"
+
+msgid "web.admin.hero.fact.class"
+msgstr "Class"
+
+msgid "web.admin.hero.fact.level"
+msgstr "Level"
+
+msgid "web.admin.hero.fact.default"
+msgstr "Default hero"
+
+msgid "web.admin.hero.fact.created"
+msgstr "Created"
+
+msgid "web.admin.hero.fact.look"
+msgstr "Look"
+
+msgid "web.admin.hero.default.yes"
+msgstr "Yes"
+
+msgid "web.admin.hero.default.no"
+msgstr "No"
+
+msgid "web.admin.hero.xp"
+msgstr "XP to level %(level)s"
+
+msgid "web.admin.hero.xp.of"
+msgstr "%(xp)s of %(needed)s XP"
+
+msgid "web.admin.hero.look"
+msgstr "Skin tone %(skin)s of %(skins)s · hair colour %(colour)s of %(colours)s"
+
+msgid "web.admin.hero.look.hair"
+msgstr "hair style %(place)s (item %(id)s)"
+
+msgid "web.admin.hero.look.hair.none"
+msgstr "no hair style"
+
+msgid "web.admin.hero.look.facial"
+msgstr "facial hair %(place)s (item %(id)s)"
+
+msgid "web.admin.hero.look.facial.none"
+msgstr "no facial hair"
+
+msgid "web.admin.hero.look.none"
+msgstr "None: made before heroes kept their look"
+
+msgid "web.admin.hero.portrait"
+msgstr "Portrait"
+
+msgid "web.admin.hero.portrait.sent"
+msgstr "Sent by the game on %(time)s."
+
+msgid "web.admin.hero.portrait.none"
+msgstr "No portrait from the game yet; pages show a placeholder."
+
+msgid "web.admin.hero.points.unspent"
+msgstr "unspent of %(earned)s earned"
+
+msgid "web.admin.hero.points.text"
+msgstr "Earned with the hero's levels and spent on abilities in the game."
+
+msgid "web.admin.hero.chests"
+msgstr "Treasure chests"
+
+msgid "web.admin.hero.chests.count.one"
+msgstr "%(count)s chest to open. Chests come from rounds on the servers; one of the account's keys opens a chest on the website."
+
+msgid "web.admin.hero.chests.count.other"
+msgstr "%(count)s chests to open. Chests come from rounds on the servers; one of the account's keys opens a chest on the website."
+
+msgid "web.admin.items.title"
+msgstr "Inventory"
+
+msgid "web.admin.items.no_catalogue"
+msgstr "The catalogue of %(game)s is not imported, so items show by number, without names, kinds or icons."
+
+msgid "web.admin.items.tabs"
+msgstr "Items by state"
+
+msgid "web.admin.items.tab.active"
+msgstr "Active"
+
+msgid "web.admin.items.tab.ended"
+msgstr "Ended"
+
+msgid "web.admin.items.tab.all"
+msgstr "All"
+
+msgid "web.admin.items.column.item"
+msgstr "Item"
+
+msgid "web.admin.items.column.kind"
+msgstr "Kind"
+
+msgid "web.admin.items.column.ownership"
+msgstr "Ownership"
+
+msgid "web.admin.items.column.from"
+msgstr "From"
+
+msgid "web.admin.items.column.state"
+msgstr "State"
+
+msgid "web.admin.items.number"
+msgstr "item %(id)s"
+
+msgid "web.admin.items.withheld"
+msgstr "granted by hand only"
+
+msgid "web.admin.items.kind.unknown"
+msgstr "Kind unknown"
+
+msgid "web.admin.items.ends"
+msgstr "Ends %(date)s"
+
+msgid "web.admin.items.low"
+msgstr "Running low"
+
+msgid "web.admin.items.from.starting_kit"
+msgstr "Starting kit"
+
+msgid "web.admin.items.from.store"
+msgstr "Store"
+
+msgid "web.admin.items.from.hot_deal"
+msgstr "Hot deal"
+
+msgid "web.admin.items.from.box"
+msgstr "Box"
+
+msgid "web.admin.items.from.reward"
+msgstr "Reward"
+
+msgid "web.admin.items.from.admin"
+msgstr "Admin"
+
+msgid "web.admin.items.state.active"
+msgstr "Active"
+
+msgid "web.admin.items.state.expired"
+msgstr "Expired"
+
+msgid "web.admin.items.state.used_up"
+msgstr "Used up"
+
+msgid "web.admin.items.state.revoked"
+msgstr "Revoked"
+
+msgid "web.admin.items.state.out_of_use"
+msgstr "Out of use"
+
+msgid "web.admin.items.none.active"
+msgstr "The hero holds no item now."
+
+msgid "web.admin.items.none.ended"
+msgstr "No item of the hero has ended."
+
+msgid "web.admin.items.none.all"
+msgstr "The hero holds no item."
+
+msgid "web.admin.items.next_login"
+msgstr "The game reads items at the hero's next login. Rentals end on their own and items counted in uses when their uses run out."
+
+msgid "web.admin.items.unnamed"
+msgstr "Item %(id)s"

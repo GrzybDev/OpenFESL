@@ -1,0 +1,207 @@
+{#def page, tab: str, manages: bool #}
+{# One hero of a player's account: its facts, look and inventory by tab, beside its mugshot,
+   Hero Points and treasure chests. Items show by number until the game's catalogue is imported. #}
+{% set game = page.game %}
+{% set rules = game.heroes %}
+{% set hero = page.card.hero %}
+{% set account = page.view.record.account %}
+{% set catalogue = page.catalogue %}
+{% set title = _("web.admin.hero.title") %}
+{% set base = url("/admin/accounts/" ~ account.id ~ "/heroes/" ~ hero.persona.id) %}
+{% set counts = page.counts %}
+{% set shown = page.items|selectattr("state", "eq", "active")|list if tab == "active" else page.items|rejectattr("state", "eq", "active")|list if tab == "ended" else page.items %}
+{% set icons = catalogue.contents.icons %}
+{% macro badge(glyph) %}
+  <span aria-hidden="true" class="badge"><Icon :name="glyph" stroke="#0A0A0A" fill="#0A0A0A" /></span>
+{% endmacro %}
+<AdminPage :title="title ~ ' · ' ~ hero.persona.name" current="accounts">
+  <PageHead labelledby="hero-title">
+    <div class="enter-title page-title page-title-wider">
+      <h1 id="hero-title" class="account-heading">
+        <span class="title-block">{{ title }}</span>
+        <span class="title-sub account-heading-name">{{ hero.persona.name }}</span>
+      </h1>
+    </div>
+    <Tab :href="url('/admin/accounts/' ~ account.id)" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.account.number", number=account.id) }}<span class="tab-count">{{ page.view.record.account.display_name or account.nuid }}</span></Tab>
+  </PageHead>
+  <Panel class="enter-panel">
+    <div class="list-layout admin-layout">
+      <div class="list-main account-main">
+        <section aria-labelledby="admin-hero-facts">
+          <div class="account-bar">
+            <h2 id="admin-hero-facts" class="bar-chip">
+              {{ _("web.admin.hero.heading", id=hero.persona.id) }}<GameChip :of="game" full />
+            </h2>
+            <p class="admin-hero-now">
+              <Icon :name="'x' if hero.disabled else 'tick'" :size="14" stroke="currentColor" />{{ _("web.admin.heroes.state." ~ ("disabled" if hero.disabled else "active" if hero.playable else "no_look")) }}
+            </p>
+          </div>
+          <dl class="facts admin-facts admin-hero-facts">
+            {% if hero.faction and hero.hero_class %}
+              <Fact :label="_('web.admin.hero.fact.faction')" plain>
+                {{ _("games." ~ game.id ~ ".faction." ~ hero.faction) }}
+              </Fact>
+              <Fact :label="_('web.admin.hero.fact.class')" plain>
+                {{ _("games." ~ game.id ~ ".class." ~ hero.hero_class) }}
+              </Fact>
+            {% endif %}
+            <Fact :label="_('web.admin.hero.fact.level')" plain>
+              {{ number(hero.level) }}
+            </Fact>
+            <Fact :label="_('web.admin.hero.fact.default')" plain>
+              {{ _("web.admin.hero.default.yes") if page.card.default else _("web.admin.hero.default.no") }}
+            </Fact>
+            <Fact :label="_('web.admin.hero.fact.created')" plain>
+              {{ _("web.server.time", time=moment(hero.created)) }}
+            </Fact>
+            {% if page.persona and page.persona.server %}
+              <Fact :label="_('web.admin.account.now')" plain>
+                {{ _("web.admin.account.on", server=page.persona.server.name) }}
+              </Fact>
+            {% elif page.persona and page.persona.playing %}
+              <Fact :label="_('web.admin.account.now')" plain>
+                {{ _("web.admin.account.menus") }}
+              </Fact>
+            {% endif %}
+            {% if page.card.xp_needed %}
+              <div class="fact fact-wide admin-hero-xp">
+                <dt>{{ _("web.admin.hero.xp", level=number(hero.level + 1)) }}</dt>
+                <dd>
+                  {{ _("web.admin.hero.xp.of", xp=number(hero.xp), needed=number(page.card.xp_needed)) }}
+                  <ProgressBar :share="hero.xp / page.card.xp_needed" :label="_('web.admin.hero.xp.of', xp=number(hero.xp), needed=number(page.card.xp_needed))" />
+                </dd>
+              </div>
+            {% endif %}
+            <Fact :label="_('web.admin.hero.fact.look')" plain wide>
+              {% if hero.look %}
+                {% set look = hero.look %}
+                {% set faction = rules.factions[look.faction] %}
+                {{ _("web.admin.hero.look", skin=number(look.skin_tone), skins=number(rules.skin_tones|length), colour=number(look.hair_colour), colours=number(rules.hair_colours|length)) }}
+                · {{ _("web.admin.hero.look.hair", place=number(faction.place(look.hair_style)), id=look.hair_style) if look.hair_style else _("web.admin.hero.look.hair.none") }}
+                · {{ _("web.admin.hero.look.facial", place=number(faction.place(look.facial_hair)), id=look.facial_hair) if look.facial_hair else _("web.admin.hero.look.facial.none") }}
+              {% else %}
+                {{ _("web.admin.hero.look.none") }}
+              {% endif %}
+            </Fact>
+          </dl>
+        </section>
+
+        <section aria-labelledby="hero-items" class="account-part">
+          <Bar id="hero-items" :extra="_n('web.heroes.items.count', page.card.items) ~ ' · ' ~ (_n('web.heroes.items.low', page.card.low) if page.card.low else _('web.heroes.items.none_low'))" wrap>{{ _("web.admin.items.title") }}</Bar>
+          {% if not catalogue.imported %}
+            <p class="bar-text admin-hero-notice">
+              {{ badge("warn") }}<span>{{ _("web.admin.items.no_catalogue", game=game.name) }}</span>
+              <a href="{{ url('/admin/catalogues') }}" class="list-button">{{ _("web.admin.menu.catalogues") }}</a>
+            </p>
+          {% endif %}
+          <nav aria-label="{{ _('web.admin.items.tabs') }}"
+               class="tabs admin-hero-tabs">
+            {% for name in ["active", "ended", "all"] %}
+              <Tab :href="base ~ ('?items=' ~ name if name != 'active' else '') ~ '#hero-items'" :label="_('web.admin.items.tab.' ~ name)" :count="counts[name]" :current="tab == name" />
+            {% endfor %}
+          </nav>
+          {% if shown %}
+            <div class="table-scroll">
+              <div role="table"
+                   aria-labelledby="hero-items"
+                   class="table admin-hero-inventory">
+                <div role="rowgroup">
+                  <div role="row" class="admin-item-columns">
+                    <div role="columnheader"
+                         class="column-head column-name">{{ _("web.admin.items.column.item") }}</div>
+                    <div role="columnheader" class="column-head">{{ _("web.admin.items.column.kind") }}</div>
+                    <div role="columnheader" class="column-head">{{ _("web.admin.items.column.ownership") }}</div>
+                    <div role="columnheader" class="column-head">{{ _("web.admin.items.column.from") }}</div>
+                    <div role="columnheader" class="column-head">{{ _("web.admin.items.column.state") }}</div>
+                  </div>
+                </div>
+                <div role="rowgroup" class="enter-rows table-rows">
+                  {% for row in shown %}
+                    {% set item = catalogue.item(row.item_id) %}
+                    {% set held = row.held %}
+                    <div role="row" class="admin-item-columns admin-item-row">
+                      <div role="cell" class="admin-cell admin-item-name">
+                        {% if icons and item and item.icon %}
+                          <img src="{{ url('/admin/icons/' ~ game.id ~ '/' ~ row.item_id) }}"
+                               alt=""
+                               loading="lazy"
+                               class="admin-item-icon">
+                        {% else %}
+                          <span aria-hidden="true"
+                                class="admin-item-icon admin-item-icon-none"><Icon name="doc" :size="18" stroke="currentColor" /></span>
+                        {% endif %}
+                        {% set name = catalogue.name(row.item_id) %}
+                        <span class="cell-stack">
+                          <span class="admin-hero-strong">{{ name or _("web.admin.items.unnamed", id=row.item_id) }}</span>
+                          {% if name or item and item.withheld %}
+                            <span class="cell-ago">{{ _("web.admin.items.number", id=row.item_id) if name }}{% if item and item.withheld %} · {{ _("web.admin.items.withheld") }}{% endif %}</span>
+                          {% endif %}
+                        </span>
+                      </div>
+                      <div role="cell" class="admin-cell admin-item-kind">
+                        <span aria-hidden="true" class="cell-label">{{ _("web.admin.items.column.kind") }}</span>
+                        {{ _("games." ~ game.id ~ ".item_kind." ~ item.kind) if item else _("web.admin.items.kind.unknown") }}
+                      </div>
+                      <div role="cell" class="admin-cell cell-stack">
+                        {% if held.type == "lmct" %}
+                          <span>{{ _n("web.store.tile.uses", held.uses or 0) }}</span>
+                        {% elif held.expires %}
+                          <span>{{ _("web.admin.items.ends", date=when(held.expires, "yMMMd")) }}</span>
+                        {% else %}
+                          <span>{{ _("web.store.price.permanent") }}</span>
+                        {% endif %}
+                        {% if row.low %}<span class="admin-item-low"><Icon name="warn" :size="12" fill="currentColor" />{{ _("web.admin.items.low") }}</span>{% endif %}
+                      </div>
+                      <div role="cell" class="admin-cell">
+                        <span aria-hidden="true" class="cell-label">{{ _("web.admin.items.column.from") }}</span>
+                        {{ _("web.admin.items.from." ~ row.source) if row.source else "–" }}
+                      </div>
+                      <div role="cell" class="admin-cell admin-badges cell-stack">
+                        <span class="admin-item-state">{{ badge("tick" if row.state == "active" else "x") }}{{ _("web.admin.items.state." ~ row.state) }}</span>
+                        {% if row.ended %}<span class="cell-ago">{{ when(row.ended, "yMMMd") }}</span>{% endif %}
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          {% else %}
+            <p class="bar-text body-text">{{ _("web.admin.items.none." ~ tab) }}</p>
+          {% endif %}
+          <p class="body-text side-note">{{ _("web.admin.items.next_login") }}</p>
+        </section>
+      </div>
+
+      <div class="list-side admin-side">
+        <section aria-labelledby="admin-hero-mugshot">
+          <Bar id="admin-hero-mugshot">{{ _("web.admin.hero.portrait") }}</Bar>
+          <div class="bar-text admin-hero-mugshot">
+            {% if hero.portrait %}
+              <img src="{{ url('/admin/mugshots/' ~ game.id ~ '/' ~ hero.persona.id ~ '/' ~ hero.portrait ~ '.png') }}"
+                   alt="{{ _('web.heroes.mugshot.game', name=hero.persona.name) }}"
+                   class="admin-hero-mugshot-image">
+              <p class="body-text">{{ _("web.admin.hero.portrait.sent", time=_("web.server.time", time=moment(page.history.mugshot))) if page.history.mugshot else "" }}</p>
+            {% else %}
+              <p class="body-text">{{ _("web.admin.hero.portrait.none") }}</p>
+            {% endif %}
+          </div>
+        </section>
+
+        <section aria-labelledby="admin-hero-points">
+          <Bar id="admin-hero-points">{{ _("games." ~ game.id ~ ".currency." ~ rules.points) }}</Bar>
+          <div class="bar-text">
+            <p class="admin-hero-points"><span>{{ number(page.card.points[0]) }}</span>{{ _("web.admin.hero.points.unspent", earned=number(page.card.points[1])) }}</p>
+            <p class="body-text">{{ _("web.admin.hero.points.text") }}</p>
+          </div>
+        </section>
+
+        {% if game.chests %}
+          <section aria-labelledby="hero-chests">
+            <Bar id="hero-chests" :extra="number(page.card.chests or 0)">{{ _("web.admin.hero.chests") }}</Bar>
+            <p class="bar-text body-text">{{ _n("web.admin.hero.chests.count", page.card.chests or 0) }}</p>
+          </section>
+        {% endif %}
+      </div>
+    </div>
+  </Panel>
+</AdminPage>

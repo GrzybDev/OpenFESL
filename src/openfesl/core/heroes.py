@@ -107,11 +107,13 @@ class Roster:
         heroes: The heroes.
         slots: The heroes the account may have.
         default_id: The persona of the hero the game is started as, once there is one.
+        bought: The slots the account bought on top of the game's free ones.
     """
 
     heroes: list[Hero]
     slots: int
     default_id: int | None
+    bought: int = 0
 
     @property
     def default(self) -> Hero | None:
@@ -288,7 +290,7 @@ class Heroes:
         records = await self._store.records(account_id, game.id, game.namespace)
         heroes = await self._heroes(game, records)
         slots = _rules(game).slots + records.bought
-        return Roster(heroes, slots, records.default_id)
+        return Roster(heroes, slots, records.default_id, records.bought)
 
     async def defaults(self, game: Game, account_ids: list[int]) -> dict[int, Hero]:
         """Return the default heroes of accounts in a game that other accounts see, by account.

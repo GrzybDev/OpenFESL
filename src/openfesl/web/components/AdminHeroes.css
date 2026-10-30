@@ -1,0 +1,191 @@
+/* An account's heroes in one game on its admin page: the slots, a row per hero and the keys. */
+@layer components {
+  /* A bar's label followed by the chip of its game. */
+  .bar-chip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+  }
+
+  .admin-hero-slots {
+    display: flex;
+    min-height: 56px;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 14px;
+    margin-top: 2px;
+    background: var(--row-light);
+    padding: 8px 14px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+
+    .form-button,
+    form {
+      margin-left: auto;
+    }
+  }
+
+  .admin-hero-slots-label {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .admin-hero-slots-used {
+    font-size: 19px;
+    font-weight: 700;
+  }
+
+  .admin-heroes {
+    min-width: 942px;
+  }
+
+  .admin-hero-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns: 128px minmax(200px, 1fr) 64px 120px 140px 80px 172px 44px;
+    gap: 2px;
+  }
+
+  .admin-hero-row:nth-child(even) {
+    --cell: var(--row-alt);
+  }
+
+  .admin-hero-state {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .admin-hero-link {
+    font-family: var(--font-sans);
+    font-size: 17px;
+    font-weight: 700;
+    text-decoration-line: underline;
+    text-underline-offset: 3px;
+    overflow-wrap: anywhere;
+
+    &:hover {
+      text-decoration-thickness: 2px;
+    }
+  }
+
+  .admin-hero-default {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    gap: 5px;
+    margin-top: 3px;
+    background: var(--ink);
+    padding: 3px 7px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--bright);
+    text-transform: uppercase;
+  }
+
+  .admin-hero-level {
+    font-size: 21px;
+    font-weight: 800;
+  }
+
+  .admin-hero-strong {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .admin-hero-none p + p {
+    margin-top: 4px;
+  }
+
+  .admin-hero-keys {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .badge {
+      flex: none;
+    }
+
+    > p {
+      display: grid;
+      gap: 3px;
+    }
+
+    .form-button {
+      margin-left: auto;
+    }
+  }
+
+  /* Where the table does not fit, each hero is a block: its name, then its state and numbers. */
+  @container (width < 962px) {
+    .admin-heroes {
+      min-width: 0;
+
+      [role="rowgroup"]:first-child {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
+
+      .cell-label {
+        display: block;
+      }
+    }
+
+    .admin-hero-row > .admin-cell {
+      gap: 8px;
+    }
+
+    .admin-hero-row.admin-hero-columns {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) 44px;
+      grid-template-areas:
+        "name name end"
+        "state level end"
+        "points items end"
+        "chests chests end"
+        "created created end";
+
+      > :nth-child(1) {
+        grid-area: state;
+      }
+
+      > :nth-child(2) {
+        grid-area: name;
+      }
+
+      > :nth-child(3) {
+        grid-area: level;
+      }
+
+      > :nth-child(4) {
+        grid-area: points;
+      }
+
+      > :nth-child(5) {
+        grid-area: items;
+      }
+
+      > :nth-child(6) {
+        grid-area: chests;
+      }
+
+      > :nth-child(7) {
+        grid-area: created;
+      }
+
+      > :nth-child(8) {
+        grid-area: end;
+      }
+    }
+  }
+}

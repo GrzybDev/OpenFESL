@@ -1,0 +1,208 @@
+/* The admin panel's page of a hero: its facts and inventory beside its mugshot, points, chests
+   and the actions on it. */
+@layer pages {
+  .admin-hero-now {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .admin-hero-facts {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+
+  .admin-hero-xp dd {
+    display: grid;
+    flex: 1 1 100%;
+    gap: 6px;
+    text-align: right;
+  }
+
+  .admin-hero-xp .progress-bar {
+    width: 100%;
+    height: 10px;
+    border: 2px solid var(--ink);
+    background: var(--ink);
+
+    .progress-fill {
+      fill: var(--accent);
+    }
+  }
+
+  .admin-hero-notice {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+
+    .badge {
+      flex: none;
+    }
+
+    .list-button {
+      margin-left: auto;
+    }
+  }
+
+  .admin-hero-tabs {
+    justify-content: flex-start;
+    margin-top: 12px;
+  }
+
+  .admin-hero-inventory {
+    min-width: 760px;
+  }
+
+  .admin-item-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) 120px 170px 130px 150px;
+    gap: 2px;
+  }
+
+  .admin-item-row:nth-child(even) {
+    --cell: var(--row-alt);
+  }
+
+  .admin-item-name {
+    gap: 10px;
+    padding-block: 6px;
+
+    > .cell-stack {
+      display: flex;
+    }
+  }
+
+  .admin-item-icon {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    place-items: center;
+    object-fit: contain;
+    background: var(--row-light);
+  }
+
+  .admin-item-icon-none {
+    border: 2px dashed var(--dim);
+    background: none;
+  }
+
+  .admin-item-kind {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .admin-item-low,
+  .admin-item-state {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .admin-item-state {
+    font-size: 13px;
+  }
+
+  .admin-hero-mugshot {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    align-items: center;
+    gap: 12px;
+
+    > p:only-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .admin-hero-mugshot-image {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    border: 2px solid var(--ink);
+  }
+
+  .admin-hero-points {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 700;
+
+    > span {
+      font-size: 30px;
+      font-weight: 800;
+    }
+  }
+
+  .admin-side > section + section {
+    margin-top: 14px;
+  }
+
+  /* Where the table does not fit, each item is a block: its name, then how it is held. */
+  @container (width < 760px) {
+    .admin-hero-inventory {
+      min-width: 0;
+
+      [role="rowgroup"]:first-child {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
+    }
+
+    /* The name, then kind, source and state on one line, then what is left and the actions. */
+    .admin-item-row.admin-item-columns {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-areas:
+        "name name name"
+        "kind from state"
+        "left left left";
+
+      > :nth-child(1) {
+        grid-area: name;
+      }
+
+      > :nth-child(2) {
+        grid-area: kind;
+      }
+
+      > :nth-child(3) {
+        grid-area: left;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 12px;
+      }
+
+      > :nth-child(4) {
+        grid-area: from;
+      }
+
+      > :nth-child(5) {
+        grid-area: state;
+      }
+
+      > :nth-child(n + 6) {
+        grid-column: 1 / -1;
+      }
+
+      .cell-label {
+        display: none;
+      }
+    }
+  }
+}

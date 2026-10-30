@@ -6,7 +6,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.exceptions import HTTPException
 
-from openfesl.core.catalogues import Catalogues
+from openfesl.core.catalogues import Catalogue, Catalogues
 from openfesl.core.chests import Chests
 from openfesl.core.entitlements import ACTIVE, EntitlementStore
 from openfesl.core.games import Game, Games
@@ -124,12 +124,15 @@ class HeroesPages:
                 notify(request, "needed", page="heroes")
                 back = localize(f"/{game.id}{HEROES}", request.state.language)
                 return open_page(request, "/sign-in", back)
+            catalogue = await self._catalogues.of(game, request.state.language)
             return self._pages.render(
                 request,
                 "heroes.Heroes",
                 game=game,
                 roster=bar.roster,
-                cards=await self._cards(game, bar.roster, request.state.language),
+                cards=await hero_cards(
+                    game, bar.roster, catalogue, self._wallets, self._entitlements
+                ),
                 funds=bar.funds,
                 key=await self._chests.key(game),
                 worth=await self._chests.worth(game),
@@ -287,30 +290,43 @@ class HeroesPages:
             "currency": currency,
         }
 
-    async def _cards(self, game: Game, roster: Roster, language: str) -> list[HeroCard]:
-        rules = game.heroes
-        assert rules is not None
-        catalogue = await self._catalogues.of(game, language)
-        personas = [hero.persona for hero in roster.heroes]
-        points = await self._wallets.of_personas(game, personas, rules.points)
-        cards = []
-        for slot, (hero, earned) in enumerate(zip(roster.heroes, points, strict=True), 1):
-            kept = await self._entitlements.of_persona(hero.persona.id)
-            owned = held(rules, hero.faction, hero.hero_class, kept)
-            chests = game.chests.tag if game.chests else None
-            stacks = [
-                item.uses or 0 for item in kept if item.tag == chests and item.status == ACTIVE
-            ]
-            cards.append(
-                HeroCard(
-                    hero=hero,
-                    slot=slot,
-                    default=hero.persona.id == roster.default_id,
-                    xp_needed=catalogue.xp_to_next(hero.level),
-                    points=earned,
-                    items=len(owned),
-                    low=running_low(rules, kept, datetime.now(UTC)),
-                    chests=sum(stacks) if chests else None,
-                )
+
+async def hero_cards(
+    game: Game,
+    roster: Roster,
+    catalogue: Catalogue,
+    wallets: Wallets,
+    entitlements: EntitlementStore,
+) -> list[HeroCard]:
+    """Return what the heroes' cards show of an account's heroes, in their slots' order.
+
+    Args:
+        game: The game, which has hero rules.
+        roster: The account's heroes.
+        catalogue: The game's catalogue, which gives the XP each level needs once imported.
+        wallets: Reads the heroes' Hero Points without opening their wallets.
+        entitlements: Lists the items and treasure chests kept for each hero.
+    """
+    rules = game.heroes
+    assert rules is not None
+    personas = [hero.persona for hero in roster.heroes]
+    points = await wallets.of_personas(game, personas, rules.points)
+    cards = []
+    for slot, (hero, earned) in enumerate(zip(roster.heroes, points, strict=True), 1):
+        kept = await entitlements.of_persona(hero.persona.id)
+        owned = held(rules, hero.faction, hero.hero_class, kept)
+        chests = game.chests.tag if game.chests else None
+        stacks = [item.uses or 0 for item in kept if item.tag == chests and item.status == ACTIVE]
+        cards.append(
+            HeroCard(
+                hero=hero,
+                slot=slot,
+                default=hero.persona.id == roster.default_id,
+                xp_needed=catalogue.xp_to_next(hero.level),
+                points=earned,
+                items=len(owned),
+                low=running_low(rules, kept, datetime.now(UTC)),
+                chests=sum(stacks) if chests else None,
             )
-        return cards
+        )
+    return cards

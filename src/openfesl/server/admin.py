@@ -11,6 +11,7 @@ from openfesl.web.admin.audit import audit_routes
 from openfesl.web.admin.auth import AdminSessions, NeedsRole, SignInNeeded, SignInProvider
 from openfesl.web.admin.catalogues import catalogue_routes
 from openfesl.web.admin.entitlements import entitlement_routes
+from openfesl.web.admin.heroes import HeroAdminViews, hero_routes
 from openfesl.web.admin.home import home_routes
 from openfesl.web.admin.key_edit import key_edit_routes
 from openfesl.web.admin.keys import key_routes
@@ -63,8 +64,28 @@ def include_admin_routes(
     app.include_router(official_routes(sign_in, server_views, apply))
     app.include_router(provider_routes(sign_in, games, server_views, apply))
     account_views = AccountViews(games, census, players, stores.accounts, stores.personas)
+    hero_views = HeroAdminViews(
+        games,
+        services.heroes,
+        services.wallets,
+        stores.entitlements,
+        services.catalogues,
+        stores.hero_admin,
+    )
     app.include_router(
-        account_routes(sign_in, account_views, stores.entitlements, services.terms.version)
+        account_routes(
+            sign_in, account_views, stores.entitlements, hero_views, services.terms.version
+        )
+    )
+    app.include_router(
+        hero_routes(
+            sign_in,
+            account_views,
+            hero_views,
+            services.catalogues,
+            services.catalogue_files,
+            services.mugshots,
+        )
     )
     app.include_router(
         entitlement_routes(sign_in, account_views, stores.entitlements, stores.keys, games)
