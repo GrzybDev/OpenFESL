@@ -8491,6 +8491,12 @@ msgstr "Back to rewards"
 msgid "web.dialog.cancel"
 msgstr "Cancel"
 
+msgid "web.chests.keys.reward_waits"
+msgstr "A first key for the account waits on the rewards page."
+
+msgid "web.deals.card.free"
+msgstr "One of these is free each day of the event on the rewards page."
+
 msgid "web.rewards.reveal.worth"
 msgstr "%(term)s · the gift gives an item worth at least %(worth)s."
 

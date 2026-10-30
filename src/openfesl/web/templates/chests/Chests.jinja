@@ -1,4 +1,4 @@
-{#def heroes: list | None, keys: int, key, funds: int, lists, imported: bool, next: str #}
+{#def heroes: list | None, keys: int, key, funds: int, waits: bool, lists, imported: bool, next: str #}
 {# The treasure chests of an account's heroes: its keys, each hero's chests and what a chest can
    give the heroes of each faction; signed out, the way to sign in in place of the chests. #}
 {% set title = _("web.chests.title") %}
@@ -21,6 +21,10 @@
     </div>
     {% if heroes is not none %}
       <KeysPanel :keys="keys" :price="price">
+      {% if waits %}
+        <a href="{{ url('/' ~ game.id ~ '/rewards') }}"
+           class="keys-waits"><Icon name="gift" :size="16" stroke="currentColor" />{{ _("web.chests.keys.reward_waits") }}</a>
+      {% endif %}
       {% if key %}
         <a href="{{ url('/' ~ game.id ~ '/treasure-chests/keys') }}"
            data-opens="buy-keys"

@@ -17,6 +17,7 @@ pytestmark = pytest.mark.anyio
 
 REWARDS = "/bfheroes/rewards"
 CLAIM = "/bfheroes/rewards/claim"
+CHESTS = "/bfheroes/treasure-chests"
 
 
 @pytest.fixture
@@ -96,6 +97,31 @@ async def test_visitors_see_the_running_events_and_an_account_without_a_hero_the
     assert "Sign in to claim" in shown
     assert 'name="key"' not in signed_out.text
     assert "No hero yet" in heroless and "brings 600 Funds as a milestone" in heroless
+
+
+async def test_the_first_chests_key_waits_on_the_chests_page_until_it_is_claimed(
+    base: str, database_url: str
+) -> None:
+    hero = await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    # A dedicated server stacks the account's first chest on its hero.
+    await execute(
+        database_url,
+        "INSERT INTO entitlement (account_id, persona_id, tag, use_count, status) SELECT"
+        " account_id, id, 'BFH_TREASURE_CHEST', 1, 'ACTIVE' FROM persona WHERE id = :hero",
+        hero=hero,
+    )
+    async with httpx2.AsyncClient() as client:
+        await post_sign_in(client, base, "ann@example.test", PASSWORD)
+        waiting = visible((await client.get(f"{base}{CHESTS}")).content)
+        page = await client.get(f"{base}{REWARDS}")
+        form = {"csrf": form_token(page.text), "key": "first-chest", "faction": ""}
+        await client.post(f"{base}{CLAIM}", data=form)
+        taken = visible((await client.get(f"{base}{CHESTS}")).content)
+
+    assert "A first key for the account waits on the rewards page." in waiting
+    assert "No keys" in waiting
+    assert "waits on the rewards page" not in taken
+    assert "1 key" in taken
 
 
 @pytest.mark.usefixtures("prompt_actions")

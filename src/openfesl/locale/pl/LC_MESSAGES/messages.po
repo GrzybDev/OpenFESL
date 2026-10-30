@@ -8999,6 +8999,12 @@ msgstr "Wróć do nagród"
 msgid "web.dialog.cancel"
 msgstr "Anuluj"
 
+msgid "web.chests.keys.reward_waits"
+msgstr "Pierwszy klucz dla konta czeka na stronie nagród."
+
+msgid "web.deals.card.free"
+msgstr "Jedna sztuka jest za darmo każdego dnia wydarzenia na stronie nagród."
+
 msgid "web.rewards.reveal.worth"
 msgstr "%(term)s · prezent daje przedmiot wart co najmniej %(worth)s."
 

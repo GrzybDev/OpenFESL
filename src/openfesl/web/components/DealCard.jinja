@@ -1,8 +1,9 @@
 {#def card, shelf: str #}
 {# A hot deal's card (the 2012 card): the shelf's ribbon, its name with a discount sticker, its
    items' icons or OpenFESL's tiles, or the tile of a random box, its price with the usual one
-   struck through, what it holds or may give, which heroes may have it, the time it has left and
-   the way to its page. With scripts the time counts down; once it runs out the card says
+   struck through, what it holds or may give, a link to the rewards page for a box that an event
+   gives free each day, which heroes may have it, the time it has left and the way to its page.
+   With scripts the time counts down; once it runs out the card says
    expired and leaves at the next page load. #}
 {% set texts_key = "games." ~ game.id ~ ".deals." %}
 {% set word = "leaves" if card.leaves else "ends" %}
@@ -53,6 +54,10 @@
     <ul role="list" class="deal-lines">
       {% for line in card.lines %}<li>{{ line }}</li>{% endfor %}
     </ul>
+    {% if card.free %}
+      <a href="{{ url('/' ~ game.id ~ '/rewards') }}"
+         class="deal-free"><Icon name="gift" :size="18" stroke="currentColor" />{{ _("web.deals.card.free") }}</a>
+    {% endif %}
     <dl class="deal-facts">
       <dt>{{ _("web.store.requires") }}</dt>
       <dd>

@@ -1,5 +1,6 @@
 /* The account's keys on the beige panel of the hero slots: a yellow key disc, beige while the
-   account has none, and the count beside it. */
+   account has none, and the count beside it; a first key that waits on the rewards page shows
+   in a green-edged link. */
 @layer components {
   .keys-panel {
     flex-basis: 400px;
@@ -25,6 +26,22 @@
 
   .keys-disc-none {
     background: #c5bba7;
+  }
+
+  .keys-waits {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 6px 12px;
+    border: 2px solid #3d6b1f;
+    border-radius: 6px;
+    background: #ecf0dc;
+    color: #1f1712;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration-line: underline;
   }
 
   .keys-number {

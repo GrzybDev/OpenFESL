@@ -125,6 +125,7 @@ def include_public_routes(
             stores.entitlements,
             services.catalogues,
             services.wallets,
+            services.rewards,
         ).routes()
     )
     app.include_router(
@@ -149,7 +150,9 @@ def include_public_routes(
         StoreFrontPages(pages, games, services.store_front, services.catalogues).routes()
     )
     app.include_router(
-        HotDealsPages(pages, games, services.deals, services.catalogues, stores.products).routes()
+        HotDealsPages(
+            pages, games, services.deals, services.catalogues, stores.products, services.rewards
+        ).routes()
     )
     app.include_router(FundsPages(pages, games, services.wallets).routes())
     app.include_router(

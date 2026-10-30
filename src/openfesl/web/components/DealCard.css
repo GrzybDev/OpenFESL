@@ -1,7 +1,7 @@
 /* A hot deal's card: a ribbon tab over its dark head with the name and a red discount burst, a
-   dark band of item icons or a box's tile, then the pale body with the price, its lines, dashed
-   facts, the time left in an outlined box and a black button. The card lifts and tilts under the
-   pointer; an expired one turns grey and keeps only its end. */
+   dark band of item icons or a box's tile, then the pale body with the price, its lines, a dashed
+   link to the day's free box, dashed facts, the time left in an outlined box and a black button.
+   The card lifts and tilts under the pointer; an expired one turns grey and keeps only its end. */
 @layer components {
   .deal-cards {
     display: grid;
@@ -150,6 +150,25 @@
   .deal-lines > li {
     padding-block: 5px;
     border-bottom: 1px dashed #a8977f;
+  }
+
+  .deal-free {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border: 2px dashed #3b2d23;
+    border-radius: 6px;
+    color: #1f1712;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.35;
+    text-decoration-line: underline;
+
+    > svg {
+      flex: 0 0 auto;
+    }
   }
 
   .deal-facts {

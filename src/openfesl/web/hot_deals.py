@@ -10,6 +10,7 @@ from openfesl.core.deal_rules import DealRules, ItemSection
 from openfesl.core.deals import Deal, HotDeals
 from openfesl.core.games import Game, Games
 from openfesl.core.heroes import Hero
+from openfesl.core.rewards import Rewards
 from openfesl.core.store import Offer as Listing
 from openfesl.core.store import ProductStore, discount
 from openfesl.core.texts import localize
@@ -63,6 +64,7 @@ class DealCard:
         left: The time it has left, as the countdown starts it.
         until: When it ends, as the page's language writes it.
         leaves: Whether it leaves the page for a while rather than end.
+        free: Whether it is a box that an event that runs gives free once a day.
     """
 
     number: int
@@ -82,6 +84,7 @@ class DealCard:
     left: str
     until: str
     leaves: bool
+    free: bool
 
 
 @dataclass(frozen=True, slots=True)
@@ -109,6 +112,7 @@ class HotDealsPages:
         deals: HotDeals,
         catalogues: Catalogues,
         products: ProductStore,
+        rewards: Rewards,
     ) -> None:
         """Prepare the hot deals page of each game that lists it.
 
@@ -118,12 +122,14 @@ class HotDealsPages:
             deals: Lists the deals sold now, making the rotation's as their periods start.
             catalogues: Name and draw the deals' items in the page's language.
             products: Hold the boxes that random boxes give from.
+            rewards: Tell which boxes the events that run give free each day.
         """
         self._pages = pages
         self._games = games
         self._deals = deals
         self._catalogues = catalogues
         self._products = products
+        self._rewards = rewards
 
     def routes(self) -> APIRouter:
         """Return the hot deals page of each game that lists it."""
@@ -149,8 +155,15 @@ class HotDealsPages:
             shelves: dict[str, list[DealCard]] = {
                 section.shelf or name: [] for name, section in sections
             }
+            free = {
+                gift.box
+                for run in await self._rewards.running(game)
+                if run.event.daily
+                for part in run.event.parts.values()
+                if (gift := part.on(run.day)).box
+            }
             for deal in await self._deals.hot_deals(game, language):
-                card = await self._card(texts, game, catalogue, deal, heroes, shown, rules)
+                card = await self._card(texts, game, catalogue, deal, heroes, shown, rules, free)
                 # The admin's offers that name no section of the rotation have a shelf of their
                 # own.
                 section = deal.listed.bundle.section
@@ -181,6 +194,7 @@ class HotDealsPages:
         heroes: list[Hero] | None,
         shown: bool,
         rules: DealRules | None,
+        free: set[str],
     ) -> DealCard:
         listed = deal.listed
         bundle = listed.bundle
@@ -232,6 +246,7 @@ class HotDealsPages:
             left=texts.countdown(ends) if ends else "",
             until=texts.moment(ends) if ends else "",
             leaves=bool(section and section.leaves),
+            free=box is not None and box.key in free,
         )
 
 
