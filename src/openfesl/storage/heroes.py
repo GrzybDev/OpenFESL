@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.heroes import HeroRecords, HeroRefused, NewHero, Refusal
-from openfesl.core.personas import Persona
+from openfesl.core.personas import Persona, PersonaState
 from openfesl.core.stats import PERSONA, bucket_of
 from openfesl.core.wallets import Wallet
 from openfesl.protocol.rank import Period
@@ -51,6 +51,7 @@ class SqlHeroStore:
             ).all()
             personas = [(persona_of(row), row.created_at) for row, _ in rows]
             portraits = {row.id: version for row, version in rows if version is not None}
+            disabled = frozenset(row.id for row, _ in rows if row.state == PersonaState.DISABLED)
             kept = (
                 await session.execute(
                     select(HeroAccountRow.default_persona_id, HeroAccountRow.bought_slots).where(
@@ -59,7 +60,37 @@ class SqlHeroStore:
                 )
             ).first()
         default_id, bought = kept if kept else (None, 0)
-        return HeroRecords(personas, default_id, bought, portraits)
+        return HeroRecords(personas, default_id, bought, portraits, disabled)
+
+    async def defaults(self, account_ids: list[int], game: str, namespace: str) -> HeroRecords:
+        """Return what is kept of accounts' default heroes in a game that other accounts see.
+
+        Heroes that the admin took out of play are left out, and no slots are counted.
+
+        Args:
+            account_ids: The accounts.
+            game: The game's data-file name.
+            namespace: The game's persona namespace.
+        """
+        async with self._sessions() as session:
+            rows = (
+                await session.execute(
+                    select(PersonaRow, MugshotRow.version)
+                    .join(HeroAccountRow, HeroAccountRow.default_persona_id == PersonaRow.id)
+                    .outerjoin(MugshotRow, MugshotRow.persona_id == PersonaRow.id)
+                    .where(
+                        HeroAccountRow.account_id.in_(account_ids),
+                        HeroAccountRow.game == game,
+                        PersonaRow.namespace == namespace,
+                        PersonaRow.disabled_at.is_(None),
+                        PersonaRow.state == PersonaState.ACTIVE,
+                    )
+                    .order_by(PersonaRow.id)
+                )
+            ).all()
+        personas = [(persona_of(row), row.created_at) for row, _ in rows]
+        portraits = {row.id: version for row, version in rows if version is not None}
+        return HeroRecords(personas, None, 0, portraits)
 
     async def taken(self, namespace: str, name: str) -> bool:
         """Tell whether a persona has a name, ignoring capitals, those taken out of use too.

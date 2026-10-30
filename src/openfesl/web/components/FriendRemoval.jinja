@@ -1,0 +1,28 @@
+{#def friend, account: str, dialog: bool = False #}
+{# The question before a friend is removed: both accounts stop being friends for all their
+   heroes, the other one is not told, a new request can follow, and the game shows the change at
+   its next refresh. The friends page asks it in a dialog; without scripts it is a page of its
+   own. #}
+{% set rel = friend.relationship %}
+{% set id = "remove-" ~ rel.member.account_id %}
+<div class="site-dialog-box">
+  {% if dialog %}
+    <button type="button"
+            data-close
+            class="site-dialog-close"
+            aria-label="{{ _('web.dialog.close') }}">
+      <Icon name="x" :size="18" stroke="currentColor" />
+    </button>
+  {% endif %}
+  <h2 id="{{ id }}-title" class="site-dialog-title">{{ _("web.friends.remove.title", name=rel.name) }}</h2>
+  <p class="friend-removal-text">{{ _("web.friends.remove.text", account=account, name=rel.name) }}</p>
+  <p class="friend-removal-text">{{ _("web.friends.refresh_note", game=game.name) }}</p>
+  <div class="site-dialog-actions">
+    <FriendForm action="remove" :member="rel.member" :name="rel.name" :label="_('web.friends.remove.confirm')" glyph="x" tone="" />
+    {% if dialog %}
+      <button type="button" data-close class="site-button site-button-ghost">{{ _("web.dialog.cancel") }}</button>
+    {% else %}
+      <a href="{{ url('/' ~ game.id ~ '/friends') }}" class="site-link">{{ _("web.friends.back") }}</a>
+    {% endif %}
+  </div>
+</div>

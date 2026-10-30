@@ -1,0 +1,69 @@
+{#def friend, kind: str #}
+{# Another account on one of the account's lists: its class disc in its default hero's faction
+   colours, or a star for a server, its name, its default hero, and what it is: a request that
+   came or was sent, a friend and where it plays, or a server's VIP list; then what can be done.
+   A friend's presence is said in words, which the dot only repeats. #}
+{% set rel = friend.relationship %}
+{% set hero = friend.hero %}
+{% set rules = game.heroes %}
+{% set place = "off" if friend.playing is none else ("match" if friend.playing else "menus") %}
+<li class="friend-row">
+  <span aria-hidden="true"
+        {% if hero and hero.faction %} data-faction="{{ hero.faction }}"{% endif %}
+        class="friend-disc{% if kind == 'vip' %} friend-disc-vip{% endif %}">
+    {% if kind == "vip" %}
+      <Icon name="star" :size="22" stroke="#0A0A0A" />
+    {% elif hero and hero.hero_class %}
+      <Icon :name="rules.classes[hero.hero_class].glyph" :size="22" stroke="currentColor" />
+    {% else %}
+      <Icon name="user" :size="22" stroke="currentColor" />
+    {% endif %}
+    {% if kind == "friend" %}<span class="friend-dot friend-dot-{{ place }}"></span>{% endif %}
+  </span>
+  <div class="friend-text">
+    <p class="friend-name">{{ rel.name }}</p>
+    {% if hero %}
+      <p>
+        {{ _("web.friends.default_hero", hero=hero.persona.name, faction=_("games." ~ game.id ~ ".faction." ~ hero.faction) if hero.faction else "", hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class) if hero.hero_class else "", level=hero.level) }}
+      </p>
+    {% endif %}
+    <p class="friend-state friend-state-{{ place if kind == 'friend' else kind }}">
+      {% if kind == "incoming" %}
+        <Icon name="user" :size="14" stroke="currentColor" />{{ _("web.friends.request.incoming", date=when(rel.modified, "MMMd")) }}
+      {% elif kind == "outgoing" %}
+        <Icon name="clock" :size="14" stroke="currentColor" />{{ _("web.friends.request.outgoing", date=when(rel.modified, "MMMd")) }}
+      {% elif kind == "vip" %}
+        {{ _("web.friends.vip.since", date=when(rel.modified, "yMMMd")) }}
+      {% elif friend.playing %}
+        {{ _("web.friends.presence.match", server=friend.playing) }}
+      {% elif friend.playing is not none %}
+        {{ _("web.friends.presence.menus") }}
+      {% else %}
+        {{ _("web.friends.presence.offline") }}
+      {% endif %}
+    </p>
+  </div>
+  <div class="friend-actions">
+    {% if kind == "incoming" %}
+      <FriendForm action="accept" :member="rel.member" :name="rel.name" :label="_('web.friends.accept')" glyph="tick" tone="go" />
+      <FriendForm action="decline" :member="rel.member" :name="rel.name" :label="_('web.friends.decline')" />
+    {% elif kind == "outgoing" %}
+      <span class="friend-chip"><Icon name="clock" :size="14" stroke="currentColor" />{{ _("web.friends.waiting") }}</span>
+      <FriendForm action="cancel" :member="rel.member" :name="rel.name" :label="_('web.friends.cancel')" />
+    {% elif kind == "vip" %}
+      <FriendForm action="leave" :member="rel.member" :name="rel.name" :label="_('web.friends.vip.leave')" />
+    {% else %}
+      {% set id = "remove-" ~ rel.member.account_id %}
+      <a href="{{ url('/' ~ game.id ~ '/friends/' ~ rel.member.account_id ~ '/remove') }}"
+         data-opens="{{ id }}"
+         aria-haspopup="dialog"
+         class="site-button friend-button site-button-ghost"><Icon name="x" :size="16" stroke="currentColor" />{{ _("web.friends.remove") }}<span class="sr-only">{{ rel.name }}</span></a>
+      <dialog id="{{ id }}"
+              aria-labelledby="{{ id }}-title"
+              data-modal
+              class="site-dialog">
+        <FriendRemoval :friend="friend" :account="player.name or ''" dialog />
+      </dialog>
+    {% endif %}
+  </div>
+</li>

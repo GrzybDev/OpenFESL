@@ -1,0 +1,22 @@
+{#def action: str, member, name: str, label: str, glyph: str = "", tone: str = "ghost", next: str = "" #}
+{# One change of a relationship as a small form: ask, accept, decline, cancel, remove or leave,
+   naming the other side for screen readers and the message that follows. #}
+<form method="post"
+      action="{{ url('/' ~ game.id ~ '/friends') }}"
+      data-once
+      class="friend-form">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <input type="hidden" name="action" value="{{ action }}">
+  <input type="hidden" name="name" value="{{ name }}">
+  {% if member.account_id %}
+    <input type="hidden" name="account" value="{{ member.account_id }}">
+  {% else %}
+    <input type="hidden" name="server" value="{{ member.server }}">
+  {% endif %}
+  {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+  <button type="submit"
+          class="site-button friend-button{% if tone %} site-button-{{ tone }}{% endif %}">
+    {% if glyph %}<Icon :name="glyph" :size="16" stroke="currentColor" />{% endif %}
+    {{ label }}<span class="sr-only">{{ name }}</span>
+  </button>
+</form>

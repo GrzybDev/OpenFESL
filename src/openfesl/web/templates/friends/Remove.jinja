@@ -1,0 +1,10 @@
+{#def friend #}
+{# The page that asks before a friend is removed, where the friends page has no scripts to open
+   its dialog. #}
+{% set title = _("web.friends.remove.page") %}
+<Layout :title="title">
+  <section aria-labelledby="remove-page-title" class="rename-page">
+    <Plaque id="remove-page-title">{{ title }}</Plaque>
+    <FriendRemoval :friend="friend" :account="player.name or ''" />
+  </section>
+</Layout>

@@ -8598,3 +8598,132 @@ msgstr "Best: %(hero)s, %(progress)s"
 
 msgid "games.bfheroes.funds.rewards.lead"
 msgstr "The administrators of this service set the rewards. The first hero and 100 matches count once for the account; each level counts once for every hero that reaches it. Claim adds the %(currency)s to the account at once."
+
+msgid "web.site.page.friends"
+msgstr "Friends"
+
+msgid "web.friends.lead"
+msgstr "Friends belong to the account, so every hero of the account shares them. %(game)s shows changes at its next friends-list refresh."
+
+msgid "web.friends.requests"
+msgstr "Requests · %(count)s"
+
+msgid "web.friends.request.incoming"
+msgstr "Sent a friend request on %(date)s"
+
+msgid "web.friends.request.outgoing"
+msgstr "Request sent on %(date)s"
+
+msgid "web.friends.accept"
+msgstr "Accept"
+
+msgid "web.friends.decline"
+msgstr "Decline"
+
+msgid "web.friends.waiting"
+msgstr "Waiting"
+
+msgid "web.friends.cancel"
+msgstr "Cancel"
+
+msgid "web.friends.list"
+msgstr "Friends · %(count)s"
+
+msgid "web.friends.default_hero"
+msgstr "Default hero %(hero)s · %(faction)s %(hero_class)s, level %(level)s"
+
+msgid "web.friends.presence.match"
+msgstr "In a match on %(server)s"
+
+msgid "web.friends.presence.menus"
+msgstr "In the game's menus"
+
+msgid "web.friends.presence.offline"
+msgstr "Offline"
+
+msgid "web.friends.remove"
+msgstr "Remove"
+
+msgid "web.friends.remove.page"
+msgstr "Remove a friend"
+
+msgid "web.friends.remove.title"
+msgstr "Remove %(name)s"
+
+msgid "web.friends.remove.text"
+msgstr "%(account)s and %(name)s stop being friends on both sides, for every hero of both accounts. %(name)s is not told; a new request can be sent at any time."
+
+msgid "web.friends.remove.confirm"
+msgstr "Remove from friends"
+
+msgid "web.friends.refresh_note"
+msgstr "%(game)s shows the change at its next friends-list refresh."
+
+msgid "web.friends.back"
+msgstr "Back to friends"
+
+msgid "web.friends.vip"
+msgstr "VIP on servers"
+
+msgid "web.friends.vip.lead"
+msgstr "Server hosts add VIP players in the game. This list only shows them; leaving takes the account off that server's VIP list."
+
+msgid "web.friends.vip.since"
+msgstr "VIP since %(date)s, added by the server's host"
+
+msgid "web.friends.vip.leave"
+msgstr "Leave"
+
+msgid "web.friends.none"
+msgstr "No friends yet"
+
+msgid "web.friends.none.text"
+msgstr "A request becomes a friendship once the other player accepts it."
+
+msgid "web.friends.signed_out"
+msgstr "Sign in to see friends"
+
+msgid "web.friends.signed_out.text"
+msgstr "Friends belong to an account."
+
+msgid "web.friends.done.ask"
+msgstr "Friend request sent to %(name)s. %(game)s shows it at its next friends-list refresh."
+
+msgid "web.friends.done.accept"
+msgstr "%(name)s is now a friend."
+
+msgid "web.friends.done.decline"
+msgstr "The request from %(name)s was declined. %(name)s is not told."
+
+msgid "web.friends.done.cancel"
+msgstr "The request to %(name)s was withdrawn."
+
+msgid "web.friends.done.remove"
+msgstr "%(name)s was removed from friends."
+
+msgid "web.friends.done.leave"
+msgstr "The account left the VIP list of %(name)s."
+
+msgid "web.friends.refused.form"
+msgstr "Nothing changed: the page was out of date. It is shown again."
+
+msgid "web.friends.refused.already"
+msgstr "No request was sent: %(name)s is already a friend."
+
+msgid "web.friends.refused.waiting"
+msgstr "No request was sent: the request to %(name)s waits already."
+
+msgid "web.friends.refused.self"
+msgstr "No request was sent: that is this account."
+
+msgid "web.friends.refused.unknown_user"
+msgstr "No request was sent: that account is no longer in use."
+
+msgid "web.friends.refused.nameless"
+msgstr "No request was sent: this account needs a display name first, which others see."
+
+msgid "web.friends.refused.list_full"
+msgstr "No request was sent: the game's friends list holds at most %(most)s."
+
+msgid "web.friends.refused.unknown_relationship"
+msgstr "Nothing changed: %(name)s is no longer on the list."

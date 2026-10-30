@@ -56,52 +56,6 @@
     font: 800 18px/1.25 var(--site-heading);
   }
 
-  .rewards-empty {
-    position: relative;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 16px 28px;
-    margin-top: 40px;
-    padding: 24px clamp(16px, 3vw, 36px);
-    border: 3px dashed #3b2d23;
-    border-radius: 8px;
-    background: rgb(241 233 222 / 0.6);
-    font-size: 15px;
-    line-height: 1.5;
-
-    > div {
-      flex: 1 1 260px;
-      min-width: 0;
-    }
-
-    p {
-      max-width: 62ch;
-      margin-top: 6px;
-    }
-
-    .site-actions {
-      margin-top: 14px;
-    }
-  }
-
-  .rewards-empty-disc {
-    display: grid;
-    flex: 0 0 auto;
-    width: 88px;
-    height: 88px;
-    place-items: center;
-    border: 3px dashed #3b2d23;
-    border-radius: 50%;
-    color: #3b2d23;
-  }
-
-  .rewards-empty-title {
-    font: 800 26px/1.15 var(--site-heading);
-    color: #fff;
-    text-shadow: var(--site-outline);
-  }
-
   .rewards-signed-out {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));

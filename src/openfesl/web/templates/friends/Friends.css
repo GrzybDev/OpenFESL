@@ -1,0 +1,27 @@
+/* The friends page: an outlined heading over each list, the lists as pale boxes of rows, and the
+   dashed panel when there is no friend yet or nobody is signed in, closer under its heading. */
+@layer pages {
+  .friends-section {
+    margin-top: 36px;
+  }
+
+  .friends-list {
+    margin-top: 12px;
+    padding: 4px 18px;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #f1e9de;
+    box-shadow:
+      inset 0 0 0 3px #f8f4ef,
+      0 4px 0 rgb(0 0 0 / 0.3);
+    color: #1f1712;
+  }
+
+  .friends-vip-lead {
+    margin-top: 6px;
+  }
+
+  .friends-empty-inline {
+    margin-top: 12px;
+  }
+}

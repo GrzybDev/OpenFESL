@@ -80,6 +80,7 @@ class Hero:
         look: The choices it was created with; none for a hero made before the creator.
         portrait: The version of the portrait that its game rendered of it and uploaded last;
             none before the first.
+        disabled: Whether the admin took it out of play, which other accounts are not shown.
     """
 
     persona: Persona
@@ -90,6 +91,7 @@ class Hero:
     xp: int
     look: Look | None
     portrait: int | None
+    disabled: bool = False
 
     @property
     def playable(self) -> bool:
@@ -137,12 +139,14 @@ class HeroRecords:
         default_id: The persona of the default hero, once there is one.
         bought: The slots the account bought on top of the game's free ones.
         portraits: The version of each hero's last portrait from its game, by persona.
+        disabled: The personas of the heroes that the admin took out of play.
     """
 
     personas: list[tuple[Persona, datetime]]
     default_id: int | None
     bought: int
     portraits: Mapping[int, int]
+    disabled: frozenset[int] = frozenset()
 
 
 @dataclass(frozen=True, slots=True)
@@ -178,6 +182,17 @@ class HeroStore(Protocol):
 
         Args:
             account_id: The account.
+            game: The game's data-file name.
+            namespace: The game's persona namespace.
+        """
+
+    async def defaults(self, account_ids: list[int], game: str, namespace: str) -> HeroRecords:
+        """Return what is kept of accounts' default heroes in a game that other accounts see.
+
+        Heroes that the admin took out of play are left out, and no slots are counted.
+
+        Args:
+            account_ids: The accounts.
             game: The game's data-file name.
             namespace: The game's persona namespace.
         """
@@ -270,8 +285,24 @@ class Heroes:
             game: The game, which has hero rules.
             account_id: The account.
         """
-        rules = _rules(game)
         records = await self._store.records(account_id, game.id, game.namespace)
+        heroes = await self._heroes(game, records)
+        slots = _rules(game).slots + records.bought
+        return Roster(heroes, slots, records.default_id)
+
+    async def defaults(self, game: Game, account_ids: list[int]) -> dict[int, Hero]:
+        """Return the default heroes of accounts in a game that other accounts see, by account.
+
+        Args:
+            game: The game, which has hero rules.
+            account_ids: The accounts.
+        """
+        records = await self._store.defaults(account_ids, game.id, game.namespace)
+        return {hero.persona.account_id: hero for hero in await self._heroes(game, records)}
+
+    async def _heroes(self, game: Game, records: HeroRecords) -> list[Hero]:
+        # The heroes of the kept personas, with the stats of all of them read at once.
+        rules = _rules(game)
         owners = [Owner(PERSONA, persona.id) for persona, _ in records.personas]
         stats = rules.stats
         chosen = [stats.faction, stats.hero_class, stats.skin_tone, stats.hair_colour]
@@ -298,9 +329,10 @@ class Heroes:
                     xp=stat(owner, stats.xp) or 0,
                     look=_created_look(faction, hero_class, look),
                     portrait=records.portraits.get(persona.id),
+                    disabled=persona.id in records.disabled,
                 )
             )
-        return Roster(heroes, rules.slots + records.bought, records.default_id)
+        return heroes
 
     async def check(self, game: Game, name: str) -> NameCheck:
         """Tell whether a name may be given to a new hero.

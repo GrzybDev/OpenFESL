@@ -19,6 +19,7 @@ from openfesl.web.catalogue_files import catalogue_file_routes
 from openfesl.web.chest_keys import KeyPages
 from openfesl.web.chests import ChestsPages
 from openfesl.web.creator import CreatorPages
+from openfesl.web.friends import FriendsPages
 from openfesl.web.front import front_routes
 from openfesl.web.funds import FundsPages
 from openfesl.web.game_icons import game_icon_routes
@@ -172,6 +173,16 @@ def include_public_routes(
             services.catalogues,
             stores.entitlements,
             stores.products,
+        ).routes()
+    )
+    app.include_router(
+        FriendsPages(
+            pages,
+            games,
+            services.relationships,
+            services.heroes,
+            services.players,
+            services.hosting,
         ).routes()
     )
     app.include_router(launcher_routes(lambda: app.state.launcher))

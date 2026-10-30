@@ -1,0 +1,72 @@
+{#def signed: bool, incoming: list, outgoing: list, friends: list, vip: list, next: str #}
+{# The friends page: requests that came and were sent, the friends with where they play, and the
+   servers whose VIP lists hold the account. Signed out it leads to the sign-in. Friends belong
+   to the account, so every hero of it shares them. #}
+{% set title = _("web.site.page.friends") %}
+<Layout :title="title">
+  <section aria-labelledby="friends-title" class="creator-head">
+    <div class="creator-intro">
+      <Plaque id="friends-title">{{ title }}</Plaque>
+      <p class="site-lead">{{ _("web.friends.lead", game=game.name) }}</p>
+    </div>
+  </section>
+  {% if not signed %}
+    <section aria-labelledby="friends-signed-out" class="site-empty enter-panel">
+      <span aria-hidden="true" class="site-empty-disc"><Icon name="people" :size="34" stroke="currentColor" /></span>
+      <div>
+        <h2 id="friends-signed-out" class="site-empty-title">{{ _("web.friends.signed_out") }}</h2>
+        <p>{{ _("web.friends.signed_out.text") }}</p>
+        <p class="site-actions">
+          <a href="{{ url('/sign-in') }}?{{ {'next': next}|urlencode }}"
+             class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+        </p>
+      </div>
+    </section>
+  {% else %}
+    {% if incoming or outgoing %}
+      <section aria-labelledby="friends-requests" class="friends-section">
+        <h2 id="friends-requests" class="site-heading">
+          {{ _("web.friends.requests", count=number(incoming|length + outgoing|length)) }}
+        </h2>
+        <ul role="list" class="friends-list enter-rows">
+          {% for friend in incoming %}
+            <FriendRow :friend="friend" kind="incoming" />
+          {% endfor %}
+          {% for friend in outgoing %}
+            <FriendRow :friend="friend" kind="outgoing" />
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+    <section aria-labelledby="friends-list" class="friends-section">
+      <h2 id="friends-list" class="site-heading">{{ _("web.friends.list", count=number(friends|length)) }}</h2>
+      {% if friends %}
+        <ul role="list" class="friends-list enter-rows">
+          {% for friend in friends %}
+            <FriendRow :friend="friend" kind="friend" />
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="site-empty friends-empty-inline">
+          <span aria-hidden="true"
+                class="site-empty-disc"><Icon name="people" :size="34" stroke="currentColor" /></span>
+          <div>
+            <p class="site-empty-title">{{ _("web.friends.none") }}</p>
+            <p>{{ _("web.friends.none.text") }}</p>
+          </div>
+        </div>
+      {% endif %}
+    </section>
+    {% if vip %}
+      <section aria-labelledby="friends-vip" class="friends-section">
+        <h2 id="friends-vip" class="site-heading">{{ _("web.friends.vip") }}</h2>
+        <p class="site-lead friends-vip-lead">{{ _("web.friends.vip.lead") }}</p>
+        <ul role="list" class="friends-list enter-rows">
+          {% for friend in vip %}
+            <FriendRow :friend="friend" kind="vip" />
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+  {% endif %}
+</Layout>

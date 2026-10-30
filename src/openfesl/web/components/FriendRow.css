@@ -1,0 +1,118 @@
+/* A row of the friends page: the class disc in the default hero's faction colours with a dot of
+   where a friend plays, the name and lines beside it, and its buttons on the right, which go
+   under it on phones. */
+@layer components {
+  .friend-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px 14px;
+    padding-block: 12px;
+
+    & + & {
+      border-top: 1px dashed #a8977f;
+    }
+  }
+
+  .friend-disc {
+    position: relative;
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border: 2px solid #000;
+    border-radius: 50%;
+    background: var(--faction, #2e2420);
+    color: var(--faction-ink, #f2c12e);
+  }
+
+  .friend-disc-vip {
+    background: #f2c12e;
+  }
+
+  .friend-dot {
+    position: absolute;
+    right: -3px;
+    bottom: -3px;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #000;
+    border-radius: 50%;
+    background: #8c8780;
+  }
+
+  .friend-dot-match {
+    background: #3d6b1f;
+  }
+
+  .friend-dot-menus {
+    background: #f2c12e;
+  }
+
+  .friend-text {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .friend-name {
+    font: 800 19px/1.2 var(--site-heading);
+    overflow-wrap: anywhere;
+  }
+
+  .friend-state {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    color: #5c4a3c;
+  }
+
+  .friend-state-match {
+    color: #2f5a14;
+  }
+
+  .friend-state-menus {
+    color: #1f1712;
+  }
+
+  .friend-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .friend-button {
+    min-height: 44px;
+    font-size: 15px;
+  }
+
+  .friend-chip {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    gap: 6px;
+    padding: 0 14px;
+    border: 2px solid #3b2d23;
+    border-radius: 22px;
+    font: 800 14px/1 var(--site-heading);
+  }
+
+  .friend-removal-text {
+    margin-top: 12px;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  @media (width < 40rem) {
+    .friend-row {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .friend-actions {
+      grid-column: 1 / -1;
+      justify-content: flex-start;
+    }
+  }
+}

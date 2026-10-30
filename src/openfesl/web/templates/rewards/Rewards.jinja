@@ -80,10 +80,10 @@
       </section>
     </div>
   {% elif not bar.roster.heroes %}
-    <section aria-labelledby="rewards-no-hero" class="rewards-empty enter-panel">
-      <span aria-hidden="true" class="rewards-empty-disc"><Icon name="plus" :size="34" stroke="currentColor" /></span>
+    <section aria-labelledby="rewards-no-hero" class="site-empty enter-panel">
+      <span aria-hidden="true" class="site-empty-disc"><Icon name="plus" :size="34" stroke="currentColor" /></span>
       <div>
-        <h2 id="rewards-no-hero" class="rewards-empty-title">{{ _("web.bar.no_hero") }}</h2>
+        <h2 id="rewards-no-hero" class="site-empty-title">{{ _("web.bar.no_hero") }}</h2>
         <p>
           {{ _("web.rewards.no_hero") }}
           {% if first_hero %}{{ _("web.rewards.no_hero.first", amount=first_hero) }}{% endif %}
@@ -96,10 +96,10 @@
     </section>
   {% else %}
     {% if not ready and not paused %}
-      <section aria-labelledby="rewards-none" class="rewards-empty enter-panel">
-        <span aria-hidden="true" class="rewards-empty-disc"><Icon name="gift" :size="34" stroke="currentColor" /></span>
+      <section aria-labelledby="rewards-none" class="site-empty enter-panel">
+        <span aria-hidden="true" class="site-empty-disc"><Icon name="gift" :size="34" stroke="currentColor" /></span>
         <div>
-          <h2 id="rewards-none" class="rewards-empty-title">{{ _("web.rewards.none") }}</h2>
+          <h2 id="rewards-none" class="site-empty-title">{{ _("web.rewards.none") }}</h2>
           {% for event in upcoming %}
             <p>{{ _("web.rewards.none.next", event=event.name, date=event.start) }} {{ event.summary }}</p>
           {% endfor %}

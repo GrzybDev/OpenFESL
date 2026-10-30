@@ -9112,3 +9112,132 @@ msgstr "Najlepszy wynik: %(hero)s, %(progress)s"
 
 msgid "games.bfheroes.funds.rewards.lead"
 msgstr "Nagrody ustala administracja tego serwisu. Pierwszy bohater i 100 meczów liczą się raz na konto; każdy poziom liczy się raz dla każdego bohatera, który go osiągnie. Odbiór od razu dodaje %(currency)s na konto."
+
+msgid "web.site.page.friends"
+msgstr "Znajomi"
+
+msgid "web.friends.lead"
+msgstr "Znajomi należą do konta, więc dzielą ich wszyscy bohaterowie konta. %(game)s pokazuje zmiany przy następnym odświeżeniu listy znajomych."
+
+msgid "web.friends.requests"
+msgstr "Zaproszenia · %(count)s"
+
+msgid "web.friends.request.incoming"
+msgstr "Zaproszenie otrzymane %(date)s"
+
+msgid "web.friends.request.outgoing"
+msgstr "Zaproszenie wysłane %(date)s"
+
+msgid "web.friends.accept"
+msgstr "Akceptuj"
+
+msgid "web.friends.decline"
+msgstr "Odrzuć"
+
+msgid "web.friends.waiting"
+msgstr "Oczekuje"
+
+msgid "web.friends.cancel"
+msgstr "Anuluj"
+
+msgid "web.friends.list"
+msgstr "Znajomi · %(count)s"
+
+msgid "web.friends.default_hero"
+msgstr "Domyślny bohater %(hero)s · %(hero_class)s, %(faction)s, poziom %(level)s"
+
+msgid "web.friends.presence.match"
+msgstr "W meczu na serwerze %(server)s"
+
+msgid "web.friends.presence.menus"
+msgstr "W menu gry"
+
+msgid "web.friends.presence.offline"
+msgstr "Poza grą"
+
+msgid "web.friends.remove"
+msgstr "Usuń"
+
+msgid "web.friends.remove.page"
+msgstr "Usuwanie ze znajomych"
+
+msgid "web.friends.remove.title"
+msgstr "Usuń: %(name)s"
+
+msgid "web.friends.remove.text"
+msgstr "%(account)s i %(name)s przestają być znajomymi po obu stronach, dla wszystkich bohaterów obu kont. %(name)s nie dostaje powiadomienia; nowe zaproszenie można wysłać w każdej chwili."
+
+msgid "web.friends.remove.confirm"
+msgstr "Usuń ze znajomych"
+
+msgid "web.friends.refresh_note"
+msgstr "%(game)s pokaże zmianę przy następnym odświeżeniu listy znajomych."
+
+msgid "web.friends.back"
+msgstr "Wróć do znajomych"
+
+msgid "web.friends.vip"
+msgstr "VIP na serwerach"
+
+msgid "web.friends.vip.lead"
+msgstr "Gospodarze serwerów dodają graczy VIP w grze. Ta lista tylko pokazuje te serwery; opuszczenie usuwa konto z listy VIP danego serwera."
+
+msgid "web.friends.vip.since"
+msgstr "Status VIP od %(date)s, nadany przez gospodarza serwera"
+
+msgid "web.friends.vip.leave"
+msgstr "Opuść"
+
+msgid "web.friends.none"
+msgstr "Brak znajomych"
+
+msgid "web.friends.none.text"
+msgstr "Zaproszenie staje się znajomością, gdy druga osoba je zaakceptuje."
+
+msgid "web.friends.signed_out"
+msgstr "Znajomi są widoczni po zalogowaniu"
+
+msgid "web.friends.signed_out.text"
+msgstr "Znajomi należą do konta."
+
+msgid "web.friends.done.ask"
+msgstr "Wysłano zaproszenie do: %(name)s. %(game)s pokaże je przy następnym odświeżeniu listy znajomych."
+
+msgid "web.friends.done.accept"
+msgstr "%(name)s jest teraz na liście znajomych."
+
+msgid "web.friends.done.decline"
+msgstr "Odrzucono zaproszenie od: %(name)s. %(name)s nie dostaje powiadomienia."
+
+msgid "web.friends.done.cancel"
+msgstr "Wycofano zaproszenie do: %(name)s."
+
+msgid "web.friends.done.remove"
+msgstr "Usunięto ze znajomych: %(name)s."
+
+msgid "web.friends.done.leave"
+msgstr "Konto nie jest już na liście VIP serwera %(name)s."
+
+msgid "web.friends.refused.form"
+msgstr "Nic nie zmieniono: strona była nieaktualna, więc została wczytana ponownie."
+
+msgid "web.friends.refused.already"
+msgstr "Nie wysłano zaproszenia: %(name)s już jest na liście znajomych."
+
+msgid "web.friends.refused.waiting"
+msgstr "Nie wysłano zaproszenia: zaproszenie dla %(name)s już czeka."
+
+msgid "web.friends.refused.self"
+msgstr "Nie wysłano zaproszenia: to jest to samo konto."
+
+msgid "web.friends.refused.unknown_user"
+msgstr "Nie wysłano zaproszenia: to konto nie jest już używane."
+
+msgid "web.friends.refused.nameless"
+msgstr "Nie wysłano zaproszenia: to konto potrzebuje najpierw nazwy wyświetlanej, którą widzą inni."
+
+msgid "web.friends.refused.list_full"
+msgstr "Nie wysłano zaproszenia: lista znajomych w grze mieści najwyżej %(most)s."
+
+msgid "web.friends.refused.unknown_relationship"
+msgstr "Nic nie zmieniono: %(name)s nie ma już na liście."
