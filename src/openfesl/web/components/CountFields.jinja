@@ -1,0 +1,44 @@
+{#def now: int, most: int, label: str, fewer: str, more: str, take: bool = True, chosen: str = "grant", amount: str = "" #}
+{# The fields of a grant or a take of a number that something holds, such as keys or a balance:
+   Grant and Take as tiles, the number, and what is held now and after, which says when the
+   change is not possible. A take of more than is held states the fewer text, a grant past the
+   most the more text, with %(after)s for the number after. Where scripts run, the line follows
+   the fields. #}
+{% set added = amount|int if amount.isdecimal() and amount|length <= 10 else 0 %}
+{% set taking = take and chosen == "take" %}
+{% set after = now - added if taking else now + added %}
+{% set possible = 0 <= after <= most %}
+{% if take %}
+  <fieldset class="choice-tiles admin-count-tiles">
+    <legend class="sr-only">{{ _("web.admin.count.direction") }}</legend>
+    <ChoiceTile name="direction" value="grant" :title="_('web.admin.count.grant')" glyph="plus" :checked="not taking">
+    <span class="choice-text">{{ _("web.admin.count.hint.grant") }}</span>
+    </ChoiceTile>
+    <ChoiceTile name="direction" value="take" :title="_('web.admin.count.take')" glyph="x" :checked="taking">
+    <span class="choice-text">{{ _("web.admin.count.hint.take") }}</span>
+    </ChoiceTile>
+  </fieldset>
+{% endif %}
+<label for="count-amount"
+       class="field-label field-label-joined admin-count-field">{{ label }}</label>
+<input id="count-amount"
+       name="amount"
+       type="number"
+       min="1"
+       max="{{ most }}"
+       value="{{ amount }}"
+       required
+       autofocus
+       data-needed="{{ _('web.admin.still_needed.amount') }}"
+       class="field-input">
+<p data-count
+   data-now="{{ now }}"
+   data-most="{{ most }}"
+   data-fewer="{{ fewer }}"
+   data-more="{{ more }}"
+   data-impossible="{{ _('web.admin.count.impossible') }}"
+   {% if not possible %} data-blocked="{{ fewer if taking else more|replace('%(after)s', number(after)) }}"{% endif %}
+   class="admin-count">
+  <span class="admin-count-label">{{ _("web.admin.count.now_after") }}</span>
+  <span data-count-after>{{ number(now) }} → {{ number(after) if possible else _("web.admin.count.impossible") }}</span>
+</p>

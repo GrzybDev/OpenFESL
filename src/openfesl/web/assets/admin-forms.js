@@ -126,6 +126,10 @@ document.addEventListener("submit", (event) => {
  * @returns {boolean} Whether something is still needed.
  */
 function update(form) {
+  const count = form.querySelector("[data-count]");
+  if (count) {
+    follow(count, form);
+  }
   const status = form.querySelector("[data-check]");
   const missing = [...form.querySelectorAll("[data-needed]")].find(
     (field) =>
@@ -142,4 +146,28 @@ function update(form) {
     .querySelector("button[type=submit]:not([form])")
     .setAttribute("aria-disabled", String(stopped));
   return stopped;
+}
+
+/**
+ * Shows what a count holds after a form's grant or take, and blocks one that is not possible.
+ *
+ * @param {HTMLElement} count - The line of the count now and after.
+ * @param {HTMLFormElement} form - The form.
+ */
+function follow(count, form) {
+  const amount = Number(form.querySelector("[name=amount]").value) || 0;
+  const taking = form.querySelector("[name=direction]:checked")?.value === "take";
+  const now = Number(count.dataset.now);
+  const after = taking ? now - amount : now + amount;
+  const format = new Intl.NumberFormat(document.documentElement.lang);
+  const possible = after >= 0 && after <= Number(count.dataset.most);
+  count.querySelector("[data-count-after]").textContent =
+    `${format.format(now)} → ${possible ? format.format(after) : count.dataset.impossible}`;
+  if (possible) {
+    delete count.dataset.blocked;
+  } else {
+    count.dataset.blocked = taking
+      ? count.dataset.fewer
+      : fill(count.dataset.more, { after: format.format(after) });
+  }
 }

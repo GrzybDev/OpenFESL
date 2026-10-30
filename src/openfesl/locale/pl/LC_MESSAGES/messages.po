@@ -10242,7 +10242,7 @@ msgid "web.admin.hero.portrait.confirm.text"
 msgstr "Ten obraz przesłała gra %(game)s. Usunięcie go kasuje; strony pokazują grafikę zastępczą, dopóki gra nie prześle nowego portretu."
 
 msgid "web.admin.hero.managed"
-msgstr "Ustawienie bohatera domyślnego, usunięcie portretu i zmiany przedmiotów wymagają roli administratora."
+msgstr "Ustawienie bohatera domyślnego, usunięcie portretu i zmiany przedmiotów, skrzyń, kluczy i miejsc wymagają roli administratora."
 
 msgid "web.admin.toast.hero.renamed"
 msgstr "Zmieniono nazwę z %(old)s na %(new)s. %(game)s pokazuje nową nazwę od następnego logowania bohatera."
@@ -10531,3 +10531,132 @@ msgstr "do %(time)s"
 
 msgid "web.admin.audit.changed"
 msgstr "%(before)s → %(after)s"
+
+msgid "web.admin.heroes.slots.granted"
+msgstr "bezpłatne: %(free)s, kupione: %(bought)s, przyznane: %(granted)s"
+
+msgid "web.admin.heroes.slots.grant"
+msgstr "Przyznaj miejsca na bohaterów"
+
+msgid "web.admin.chest_keys.change"
+msgstr "Przyznaj lub odbierz klucze"
+
+msgid "web.admin.hero.chests.change"
+msgstr "Przyznaj lub odbierz skrzynie"
+
+msgid "web.admin.count.direction"
+msgstr "Przyznanie lub odebranie"
+
+msgid "web.admin.count.grant"
+msgstr "Przyznaj"
+
+msgid "web.admin.count.take"
+msgstr "Odbierz"
+
+msgid "web.admin.count.hint.grant"
+msgstr "Zwiększa liczbę"
+
+msgid "web.admin.count.hint.take"
+msgstr "Zmniejsza ją"
+
+msgid "web.admin.still_needed.amount"
+msgstr "liczby równej co najmniej 1"
+
+msgid "web.admin.count.impossible"
+msgstr "niemożliwe"
+
+msgid "web.admin.count.now_after"
+msgstr "Teraz → po zmianie"
+
+msgid "web.admin.count.busy"
+msgstr "Zapisywanie…"
+
+msgid "web.admin.count.more"
+msgstr "Niemożliwe: byłoby %(after)s, więcej niż odczytuje gra."
+
+msgid "web.admin.count.slots.title"
+msgstr "Przyznanie miejsc na bohaterów"
+
+msgid "web.admin.count.slots.submit"
+msgstr "Przyznaj miejsca"
+
+msgid "web.admin.count.slots.amount"
+msgstr "Miejsca do przyznania"
+
+msgid "web.admin.count.slots.text"
+msgstr "Przyznane miejsca są bezpłatne i zostają przy koncie; bohaterów się nie usuwa, więc zajęte miejsce pozostaje zajęte."
+
+msgid "web.admin.count.slots.fewer"
+msgstr "Niemożliwe."
+
+msgid "web.admin.count.keys.title"
+msgstr "Przyznanie lub odebranie kluczy"
+
+msgid "web.admin.count.keys.submit"
+msgstr "Zmień liczbę kluczy"
+
+msgid "web.admin.count.keys.amount"
+msgstr "Liczba kluczy"
+
+msgid "web.admin.count.keys.text"
+msgstr "Klucze należą do konta; każdy otwiera na stronie jedną skrzynię skarbów dowolnego z bohaterów konta."
+
+msgid "web.admin.count.keys.fewer"
+msgstr "%(holder)s ma kluczy: %(count)s; można odebrać najwyżej tyle."
+
+msgid "web.admin.count.chests.title"
+msgstr "Przyznanie lub odebranie skrzyń"
+
+msgid "web.admin.count.chests.submit"
+msgstr "Zmień liczbę skrzyń"
+
+msgid "web.admin.count.chests.amount"
+msgstr "Liczba skrzyń"
+
+msgid "web.admin.count.chests.text"
+msgstr "Skrzynie pochodzą z rund na serwerach; klucz z konta otwiera skrzynię na stronie."
+
+msgid "web.admin.count.chests.fewer"
+msgstr "%(holder)s ma skrzyń do otwarcia: %(count)s; można odebrać najwyżej tyle."
+
+msgid "web.admin.toast.slots"
+msgstr "Przyznano miejsca na bohaterów dla %(account)s: %(count)s. Są bezpłatne i zostają przy koncie."
+
+msgid "web.admin.toast.keys.granted"
+msgstr "Przyznano klucze dla %(holder)s: %(held)s → %(after)s."
+
+msgid "web.admin.toast.keys.taken"
+msgstr "Odebrano klucze z konta %(holder)s: %(held)s → %(after)s."
+
+msgid "web.admin.toast.keys.fewer"
+msgstr "Nic nie odebrano: %(holder)s ma teraz kluczy: %(held)s, mniej niż żądane %(count)s."
+
+msgid "web.admin.toast.chests.granted"
+msgstr "Przyznano skrzynie bohaterowi %(holder)s: %(held)s → %(after)s."
+
+msgid "web.admin.toast.chests.taken"
+msgstr "Odebrano skrzynie bohaterowi %(holder)s: %(held)s → %(after)s."
+
+msgid "web.admin.toast.chests.fewer"
+msgstr "Nic nie odebrano: %(holder)s ma teraz skrzyń: %(held)s, mniej niż żądane %(count)s."
+
+msgid "web.admin.audit.action.hero_slots"
+msgstr "Przyznanie miejsc"
+
+msgid "web.admin.audit.action.chests.granted"
+msgstr "Przyznanie skrzyń"
+
+msgid "web.admin.audit.action.chests.taken"
+msgstr "Odebranie skrzyń"
+
+msgid "web.admin.audit.action.chest_keys.granted"
+msgstr "Przyznanie kluczy"
+
+msgid "web.admin.audit.action.chest_keys.taken"
+msgstr "Odebranie kluczy"
+
+msgid "web.admin.audit.slots"
+msgstr "%(count)s, przyznane łącznie: %(granted)s"
+
+msgid "web.admin.audit.counted"
+msgstr "%(count)s, %(before)s → %(after)s"

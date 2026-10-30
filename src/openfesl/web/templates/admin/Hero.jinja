@@ -154,7 +154,7 @@
                         <span class="cell-stack">
                           <span class="admin-hero-strong">{{ name or _("web.admin.items.unnamed", id=row.item_id) }}</span>
                           {% if name or item and item.withheld %}
-                            <span class="cell-ago">{{ _("web.admin.items.number", id=row.item_id) if name }}{% if item and item.withheld %} · {{ _("web.admin.items.withheld") }}{% endif %}</span>
+                            <span class="cell-ago">{{ _("web.admin.items.number", id=row.item_id) if name else "" }}{% if item and item.withheld %} · {{ _("web.admin.items.withheld") }}{% endif %}</span>
                           {% endif %}
                         </span>
                       </div>
@@ -254,6 +254,11 @@
           <section aria-labelledby="hero-chests">
             <Bar id="hero-chests" :extra="number(page.card.chests or 0)">{{ _("web.admin.hero.chests") }}</Bar>
             <p class="bar-text body-text">{{ _n("web.admin.hero.chests.count", page.card.chests or 0) }}</p>
+            {% if manages %}
+              <div class="account-end">
+                <FormButton icon="chest" :href="base ~ '/chests'" dialog>{{ _("web.admin.hero.chests.change") }}</FormButton>
+              </div>
+            {% endif %}
           </section>
         {% endif %}
 

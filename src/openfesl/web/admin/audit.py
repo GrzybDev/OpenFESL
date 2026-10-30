@@ -15,7 +15,7 @@ from openfesl.core.games import Games
 from openfesl.core.personas import Persona, PersonaRecord
 from openfesl.core.servers import GameServer, Provider
 from openfesl.core.texts import localize, translate
-from openfesl.web.admin.audit_heroes import hero_entry, item_entry
+from openfesl.web.admin.audit_heroes import count_entry, hero_entry, item_entry, slot_entry
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.settings import policy_views
 from openfesl.web.pages import moment
@@ -37,6 +37,7 @@ GLYPHS = {
     AdminAction.HERO_RENAME: "edit",
     AdminAction.HERO_DEFAULT: "star",
     AdminAction.MUGSHOT_REMOVE: "x",
+    AdminAction.HERO_SLOTS: "plus",
     AdminAction.ITEM_GRANT: "plus",
     AdminAction.ITEM_CHANGE: "edit",
     AdminAction.ITEM_REVOKE: "x",
@@ -44,6 +45,7 @@ GLYPHS = {
 # What the admin does to a hero's items, and to a hero, whose persona is the target.
 ITEM_ACTIONS = (AdminAction.ITEM_GRANT, AdminAction.ITEM_CHANGE, AdminAction.ITEM_REVOKE)
 HERO_ACTIONS = (
+    AdminAction.CHESTS,
     AdminAction.HERO_RENAME,
     AdminAction.HERO_DEFAULT,
     AdminAction.MUGSHOT_REMOVE,
@@ -285,6 +287,8 @@ async def _rows(
             AdminAction.LOGINS_FORGET,
             AdminAction.ENTITLEMENT_GRANT,
             AdminAction.ENTITLEMENT_STATE,
+            AdminAction.HERO_SLOTS,
+            AdminAction.CHEST_KEYS,
         ):
             number = int(target) if target.isdigit() else -1
             shown = account(number)
@@ -304,6 +308,10 @@ async def _rows(
                 taken = details.get("status") != "ACTIVE"
                 kind = f"entitlement_state.{'revoked' if taken else 'active'}"
                 said = str(details.get("tag", ""))
+            elif action is AdminAction.HERO_SLOTS:
+                said = slot_entry(details, language)
+            elif action is AdminAction.CHEST_KEYS:
+                kind, said = count_entry(action, details, language)
         elif action in (AdminAction.PERSONA_STATE, AdminAction.PLAYER_KICK, *HERO_ACTIONS):
             persona = persona_list.get(int(target)) if target.isdigit() else None
             hero = persona is not None and persona.namespace in heroes
@@ -318,6 +326,8 @@ async def _rows(
                     said = say("web.admin.audit.default_moved", hero=details["default"])
             elif action in (AdminAction.HERO_RENAME, AdminAction.HERO_DEFAULT):
                 said = hero_entry(action, details, said, language)
+            elif action is AdminAction.CHESTS:
+                kind, said = count_entry(action, details, language)
             elif action in ITEM_ACTIONS and persona is not None:
                 said = await item_entry(action, details, persona, games, catalogues, language)
         elif action in (AdminAction.PROVIDER_ADD, AdminAction.PROVIDER_REVOKE):
@@ -424,6 +434,8 @@ def _glyph(action: AdminAction, kind: str, details: dict[str, Any]) -> str:
         return "star" if details.get("official") else "star-off"
     if action is AdminAction.GAME_MARK:
         return "star" if details.get("shown") else "star-off"
+    if action in (AdminAction.CHESTS, AdminAction.CHEST_KEYS):
+        return "x" if details.get("count", 0) < 0 else "plus"
     state = kind.rpartition(".")[2]
     if action in (AdminAction.SETTING, AdminAction.KEY_GRANTS, AdminAction.KEY_LIMITS):
         return "edit"

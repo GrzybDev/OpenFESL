@@ -108,12 +108,14 @@ class Roster:
         slots: The heroes the account may have.
         default_id: The persona of the hero the game is started as, once there is one.
         bought: The slots the account bought on top of the game's free ones.
+        granted: The slots the admin granted the account on top of those, free.
     """
 
     heroes: list[Hero]
     slots: int
     default_id: int | None
     bought: int = 0
+    granted: int = 0
 
     @property
     def default(self) -> Hero | None:
@@ -142,6 +144,7 @@ class HeroRecords:
         bought: The slots the account bought on top of the game's free ones.
         portraits: The version of each hero's last portrait from its game, by persona.
         disabled: The personas of the heroes that the admin took out of play.
+        granted: The slots the admin granted the account on top of those, free.
     """
 
     personas: list[tuple[Persona, datetime]]
@@ -149,6 +152,7 @@ class HeroRecords:
     bought: int
     portraits: Mapping[int, int]
     disabled: frozenset[int] = frozenset()
+    granted: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -160,7 +164,8 @@ class NewHero:
         game: The game's data-file name.
         namespace: The namespace its name is unique in.
         name: Its name.
-        free_slots: The slots every account has in the game, to which those it bought add.
+        free_slots: The slots every account has in the game, to which those it bought and was
+            granted add.
         partition: Where the game's stats are kept.
         stats: The stats it starts with, by key: a number and a text.
         items: The items it is granted, by Magma tag, with their uses.
@@ -289,8 +294,8 @@ class Heroes:
         """
         records = await self._store.records(account_id, game.id, game.namespace)
         heroes = await self._heroes(game, records)
-        slots = _rules(game).slots + records.bought
-        return Roster(heroes, slots, records.default_id, records.bought)
+        slots = _rules(game).slots + records.bought + records.granted
+        return Roster(heroes, slots, records.default_id, records.bought, records.granted)
 
     async def defaults(self, game: Game, account_ids: list[int]) -> dict[int, Hero]:
         """Return the default heroes of accounts in a game that other accounts see, by account.

@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import func, select, update
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -18,6 +19,8 @@ from openfesl.storage.entitlements import REVOKED, add_item, locked_item
 from openfesl.storage.heroes import set_default
 from openfesl.storage.models import (
     AdminActionRow,
+    EntitlementRow,
+    HeroAccountRow,
     MugshotRow,
     PersonaRow,
     PurchaseRow,
@@ -253,6 +256,90 @@ class SqlHeroAdmin:
             details = {"item": item_id, "note": note}
             session.add(action_row(AdminAction.ITEM_REVOKE, str(persona.id), details, admin))
             return True
+
+    async def grant_slots(
+        self, account_id: int, game: str, count: int, note: str, admin: Admin
+    ) -> int:
+        """Grant an account further hero slots of a game, free; they stay with the account.
+
+        Args:
+            account_id: The account.
+            game: The game's data-file name.
+            count: How many.
+            note: Why, as the admin wrote it.
+            admin: The admin who granted them.
+
+        Returns:
+            The slots the admin granted the account in all.
+        """
+        async with self._sessions.begin() as session:
+            statement = insert(HeroAccountRow).values(
+                account_id=account_id, game=game, granted_slots=count
+            )
+            granted = await session.scalar(
+                statement.on_conflict_do_update(
+                    index_elements=[HeroAccountRow.account_id, HeroAccountRow.game],
+                    set_={"granted_slots": HeroAccountRow.granted_slots + count},
+                ).returning(HeroAccountRow.granted_slots)
+            )
+            assert isinstance(granted, int)
+            details = {"game": game, "count": count, "granted": granted, "note": note}
+            session.add(action_row(AdminAction.HERO_SLOTS, str(account_id), details, admin))
+            return granted
+
+    async def count(
+        self,
+        owner: Persona | int,
+        game: str,
+        tag: str,
+        change: int,
+        note: str,
+        admin: Admin,
+    ) -> tuple[int, bool]:
+        """Add to or take from the uses a hero or an account holds of a tag, such as its chests.
+
+        Nothing is taken that is not held; a take of more changes nothing.
+
+        Args:
+            owner: The hero's persona, or the number of the account that holds the tag itself.
+            game: The game's data-file name.
+            tag: The tag, such as that of a hero's treasure chests or an account's keys.
+            change: How many uses to add, below 0 to take.
+            note: Why, as the admin wrote it.
+            admin: The admin who changed them.
+
+        Returns:
+            The uses held before, and whether they changed.
+        """
+        hero = isinstance(owner, Persona)
+        account = owner.account_id if isinstance(owner, Persona) else owner
+        persona = owner.id if isinstance(owner, Persona) else None
+        async with self._sessions.begin() as session:
+            # The row is made first, so that changes at once wait for each other on its lock.
+            await session.execute(
+                insert(EntitlementRow)
+                .values(account_id=account, persona_id=persona, tag=tag, use_count=0)
+                .on_conflict_do_nothing()
+            )
+            row = await session.scalar(
+                select(EntitlementRow)
+                .where(
+                    EntitlementRow.account_id == account,
+                    EntitlementRow.persona_id.is_not_distinct_from(persona),
+                    EntitlementRow.tag == tag,
+                )
+                .with_for_update()
+            )
+            assert row is not None
+            before = row.use_count or 0
+            if before + change < 0:
+                return before, False
+            row.use_count = before + change
+            details = {"game": game, "count": change, "before": before, "note": note}
+            action = AdminAction.CHESTS if hero else AdminAction.CHEST_KEYS
+            target = str(persona if hero else account)
+            session.add(action_row(action, target, details, admin))
+            return before, True
 
     async def remove_mugshot(self, persona: Persona, note: str, admin: Admin) -> bool:
         """Remove the mugshot that the game sent of a hero, until it sends another.

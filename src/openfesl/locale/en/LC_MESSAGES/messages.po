@@ -9674,7 +9674,7 @@ msgid "web.admin.hero.portrait.confirm.text"
 msgstr "%(game)s uploaded this image. Removing it deletes it; pages show a placeholder until the game sends a new portrait."
 
 msgid "web.admin.hero.managed"
-msgstr "Making a hero the default, removing its portrait and changing items need the admin role."
+msgstr "Making a hero the default, removing its portrait and changing items, chests, keys and slots need the admin role."
 
 msgid "web.admin.toast.hero.renamed"
 msgstr "Renamed %(old)s to %(new)s. %(game)s shows the new name from the hero's next login."
@@ -9939,3 +9939,132 @@ msgstr "ends %(time)s"
 
 msgid "web.admin.audit.changed"
 msgstr "%(before)s → %(after)s"
+
+msgid "web.admin.heroes.slots.granted"
+msgstr "%(free)s free + %(bought)s bought + %(granted)s granted"
+
+msgid "web.admin.heroes.slots.grant"
+msgstr "Grant hero slots"
+
+msgid "web.admin.chest_keys.change"
+msgstr "Grant or take keys"
+
+msgid "web.admin.hero.chests.change"
+msgstr "Grant or take chests"
+
+msgid "web.admin.count.direction"
+msgstr "Grant or take"
+
+msgid "web.admin.count.grant"
+msgstr "Grant"
+
+msgid "web.admin.count.take"
+msgstr "Take"
+
+msgid "web.admin.count.hint.grant"
+msgstr "Adds to the count"
+
+msgid "web.admin.count.hint.take"
+msgstr "Removes from it"
+
+msgid "web.admin.still_needed.amount"
+msgstr "a number of 1 or more"
+
+msgid "web.admin.count.impossible"
+msgstr "not possible"
+
+msgid "web.admin.count.now_after"
+msgstr "Now → after"
+
+msgid "web.admin.count.busy"
+msgstr "Saving…"
+
+msgid "web.admin.count.more"
+msgstr "Not possible: there would be %(after)s, more than the game reads."
+
+msgid "web.admin.count.slots.title"
+msgstr "Grant hero slots"
+
+msgid "web.admin.count.slots.submit"
+msgstr "Grant slots"
+
+msgid "web.admin.count.slots.amount"
+msgstr "Slots to grant"
+
+msgid "web.admin.count.slots.text"
+msgstr "Granted slots are free and stay with the account; heroes are never deleted, so a slot stays used once a hero takes it."
+
+msgid "web.admin.count.slots.fewer"
+msgstr "Not possible."
+
+msgid "web.admin.count.keys.title"
+msgstr "Grant or take keys"
+
+msgid "web.admin.count.keys.submit"
+msgstr "Change keys"
+
+msgid "web.admin.count.keys.amount"
+msgstr "Number of keys"
+
+msgid "web.admin.count.keys.text"
+msgstr "Keys belong to the account; each opens one treasure chest of any of its heroes on the website."
+
+msgid "web.admin.count.keys.fewer"
+msgstr "%(holder)s holds %(count)s keys; at most %(count)s can be taken."
+
+msgid "web.admin.count.chests.title"
+msgstr "Grant or take chests"
+
+msgid "web.admin.count.chests.submit"
+msgstr "Change chests"
+
+msgid "web.admin.count.chests.amount"
+msgstr "Number of chests"
+
+msgid "web.admin.count.chests.text"
+msgstr "Chests come from rounds on the servers; one of the account's keys opens a chest on the website."
+
+msgid "web.admin.count.chests.fewer"
+msgstr "%(holder)s has %(count)s chests to open; at most %(count)s can be taken."
+
+msgid "web.admin.toast.slots"
+msgstr "Hero slots granted to %(account)s: %(count)s. They are free and stay with the account."
+
+msgid "web.admin.toast.keys.granted"
+msgstr "Granted keys to %(holder)s: %(held)s → %(after)s."
+
+msgid "web.admin.toast.keys.taken"
+msgstr "Took keys from %(holder)s: %(held)s → %(after)s."
+
+msgid "web.admin.toast.keys.fewer"
+msgstr "Nothing was taken: %(holder)s holds %(held)s keys by now, fewer than the %(count)s asked."
+
+msgid "web.admin.toast.chests.granted"
+msgstr "Granted chests to %(holder)s: %(held)s → %(after)s."
+
+msgid "web.admin.toast.chests.taken"
+msgstr "Took chests from %(holder)s: %(held)s → %(after)s."
+
+msgid "web.admin.toast.chests.fewer"
+msgstr "Nothing was taken: %(holder)s has %(held)s chests by now, fewer than the %(count)s asked."
+
+msgid "web.admin.audit.action.hero_slots"
+msgstr "Hero slots granted"
+
+msgid "web.admin.audit.action.chests.granted"
+msgstr "Chests granted"
+
+msgid "web.admin.audit.action.chests.taken"
+msgstr "Chests taken"
+
+msgid "web.admin.audit.action.chest_keys.granted"
+msgstr "Keys granted"
+
+msgid "web.admin.audit.action.chest_keys.taken"
+msgstr "Keys taken"
+
+msgid "web.admin.audit.slots"
+msgstr "%(count)s, granted in all: %(granted)s"
+
+msgid "web.admin.audit.counted"
+msgstr "%(count)s, %(before)s → %(after)s"

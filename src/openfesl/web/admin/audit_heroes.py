@@ -58,6 +58,38 @@ async def item_entry(
     return translate("web.admin.audit.item", language) % {"item": name, "held": held}
 
 
+def slot_entry(details: dict[str, Any], language: str) -> str:
+    """Return what the audit log says of hero slots that the admin granted an account.
+
+    Args:
+        details: The grant's details, as the admin's log keeps them.
+        language: The log's language.
+    """
+    count, granted = grouped(details["count"], language), grouped(details["granted"], language)
+    return translate("web.admin.audit.slots", language) % {"count": count, "granted": granted}
+
+
+def count_entry(action: AdminAction, details: dict[str, Any], language: str) -> tuple[str, str]:
+    """Return how the audit log shows a grant or take of a hero's chests or an account's keys.
+
+    Args:
+        action: What the admin changed: a hero's chests or an account's keys.
+        details: The change's details, as the admin's log keeps them; a take counts below 0.
+        language: The log's language.
+
+    Returns:
+        The kind of the action and what changed in words.
+    """
+    count, before = details["count"], details["before"]
+    counts = {
+        "count": grouped(abs(count), language),
+        "before": grouped(before, language),
+        "after": grouped(before + count, language),
+    }
+    kind = f"{action.value}.{'taken' if count < 0 else 'granted'}"
+    return kind, translate("web.admin.audit.counted", language) % counts
+
+
 def _held(values: dict[str, Any], language: str) -> str:
     # How a hero holds an item, as the log keeps it.
     if values.get("uses") is not None:

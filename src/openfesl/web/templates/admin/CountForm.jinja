@@ -1,0 +1,44 @@
+{#def shown, back: str, form #}
+{# Granting an account hero slots, or granting or taking its treasure chest keys or a hero's
+   chests, as a page of its own: who holds them, the number and what is held after, and
+   what they are. Where scripts run, it opens as a dialog over the account's or the hero's page. #}
+{% set account = shown.view.record.account %}
+{% set game = shown.found.game %}
+{% set card = shown.found.cards|selectattr("hero.persona.id", "eq", shown.hero)|first if shown.hero else none %}
+{% set title = _("web.admin.hero.title") if card else _("web.admin.account") %}
+{% set path = "/admin/accounts/" ~ account.id ~ ("/heroes/" ~ shown.hero ~ "/chests" if card else "/games/" ~ game.id ~ "/" ~ shown.kind) %}
+{% set holder = card.hero.persona.name if card else account.nuid %}
+{% set error = form.get("error", "") %}
+{% set fewer = _("web.admin.count." ~ shown.kind ~ ".fewer", holder=holder, count=number(shown.now)) %}
+{% if error == "amount" %}
+  {% set why = _("web.admin.still_needed", what=_("web.admin.still_needed.amount")) %}
+{% elif error == "fewer" %}
+  {% set why = fewer %}
+{% elif error == "more" %}
+  {% set why = _("web.admin.count.more", after=number(shown.now + form.get("amount")|int)) %}
+{% else %}
+  {% set why = "" %}
+{% endif %}
+<AdminPage :title="title ~ ' · ' ~ holder" current="accounts">
+  <PageHead labelledby="count-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="count-title">{{ holder }}</TitleBlock>
+    </div>
+  </PageHead>
+  <Panel class="enter-panel confirm-frame">
+    <AdminForm :question="_('web.admin.count.' ~ shown.kind ~ '.title')" :action="url(path)" :label="_('web.admin.count.' ~ shown.kind ~ '.submit')" :busy="_('web.admin.count.busy')" :back="back" glyph="go" :note="form.get('note', '')" :error="error" :why="why">
+    <p class="confirm-account">
+      <span>{{ holder }}</span>
+      <span>
+        {%- if card -%}
+          {{ _("web.admin.hero.heading", id=card.hero.persona.id) }}
+        {%- else -%}
+          {{ _("web.admin.account.number", number=account.id) }}{% if account.display_name %} · {{ account.display_name }}{% endif %}
+        {%- endif -%}
+      </span>
+    </p>
+    <CountFields :now="shown.now" :most="2147483647" :label="_('web.admin.count.' ~ shown.kind ~ '.amount')" :fewer="fewer" :more="_('web.admin.count.more')" :take="shown.kind != 'slots'" :chosen="form.get('direction', 'grant')" :amount="form.get('amount', '')" />
+    <p id="confirm-text" class="body-text">{{ _("web.admin.count." ~ shown.kind ~ ".text") }}</p>
+    </AdminForm>
+  </Panel>
+</AdminPage>

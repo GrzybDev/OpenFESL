@@ -55,13 +55,15 @@ class SqlHeroStore:
             disabled = frozenset(row.id for row, _ in rows if row.state == PersonaState.DISABLED)
             kept = (
                 await session.execute(
-                    select(HeroAccountRow.default_persona_id, HeroAccountRow.bought_slots).where(
-                        HeroAccountRow.account_id == account_id, HeroAccountRow.game == game
-                    )
+                    select(
+                        HeroAccountRow.default_persona_id,
+                        HeroAccountRow.bought_slots,
+                        HeroAccountRow.granted_slots,
+                    ).where(HeroAccountRow.account_id == account_id, HeroAccountRow.game == game)
                 )
             ).first()
-        default_id, bought = kept if kept else (None, 0)
-        return HeroRecords(personas, default_id, bought, portraits, disabled)
+        default_id, bought, granted = kept if kept else (None, 0, 0)
+        return HeroRecords(personas, default_id, bought, portraits, disabled, granted)
 
     async def defaults(self, account_ids: list[int], game: str, namespace: str) -> HeroRecords:
         """Return what is kept of accounts' default heroes in a game that other accounts see.
@@ -227,7 +229,7 @@ class SqlHeroStore:
                     PersonaRow.disabled_at.is_(None),
                 )
             )
-            if (heroes or 0) >= hero.free_slots + account.bought_slots:
+            if (heroes or 0) >= hero.free_slots + account.bought_slots + account.granted_slots:
                 raise HeroRefused(Refusal.NO_SLOT)
             # The unique name index decides between two requests for one name.
             row = await session.scalar(

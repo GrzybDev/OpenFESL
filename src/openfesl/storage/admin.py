@@ -144,6 +144,8 @@ class SqlAdminLog:
 # What the admin does to an account itself, and to its personas.
 _ACCOUNT_ACTIONS = [
     AdminAction.ACCOUNT_STATE,
+    AdminAction.HERO_SLOTS,
+    AdminAction.CHEST_KEYS,
     AdminAction.ACCOUNT_VERIFIED,
     AdminAction.DELETION_REQUEST,
     AdminAction.SESSION_END,
@@ -156,6 +158,7 @@ _PERSONA_ACTIONS = [
     AdminAction.PLAYER_KICK,
     AdminAction.HERO_RENAME,
     AdminAction.HERO_DEFAULT,
+    AdminAction.CHESTS,
     AdminAction.ITEM_GRANT,
     AdminAction.ITEM_CHANGE,
     AdminAction.ITEM_REVOKE,

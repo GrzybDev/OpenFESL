@@ -37,6 +37,16 @@ class AdminAction(StrEnum):
     HERO_DEFAULT = "hero_default"
     """Made the hero whose persona is numbered as the target its account's default hero; the
     details hold the name of the default hero before, if any, and the admin's note."""
+    HERO_SLOTS = "hero_slots"
+    """Granted the account numbered as the target further hero slots of a game; the details
+    hold the game, how many, the slots before and after and the admin's note."""
+    CHESTS = "chests"
+    """Granted the hero whose persona is numbered as the target treasure chests, or took some;
+    the details hold how many, below 0 for a take, the chests before and after and the note."""
+    CHEST_KEYS = "chest_keys"
+    """Granted the account numbered as the target treasure chest keys of a game, or took some;
+    the details hold the game, how many, below 0 for a take, the keys before and after and the
+    note."""
     ITEM_GRANT = "item_grant"
     """Granted the hero whose persona is numbered as the target an item; the details hold its
     number, how the hero gained it, how it holds the item then and the admin's note."""

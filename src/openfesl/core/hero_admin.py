@@ -159,6 +159,47 @@ class HeroAdminStore(Protocol):
             Whether the hero held it in use.
         """
 
+    async def grant_slots(
+        self, account_id: int, game: str, count: int, note: str, admin: Admin
+    ) -> int:
+        """Grant an account further hero slots of a game, free; they stay with the account.
+
+        Args:
+            account_id: The account.
+            game: The game's data-file name.
+            count: How many.
+            note: Why, as the admin wrote it.
+            admin: The admin who granted them.
+
+        Returns:
+            The slots the admin granted the account in all.
+        """
+
+    async def count(
+        self,
+        owner: Persona | int,
+        game: str,
+        tag: str,
+        change: int,
+        note: str,
+        admin: Admin,
+    ) -> tuple[int, bool]:
+        """Add to or take from the uses a hero or an account holds of a tag, such as its chests.
+
+        Nothing is taken that is not held; a take of more changes nothing.
+
+        Args:
+            owner: The hero's persona, or the number of the account that holds the tag itself.
+            game: The game's data-file name.
+            tag: The tag, such as that of a hero's treasure chests or an account's keys.
+            change: How many uses to add, below 0 to take.
+            note: Why, as the admin wrote it.
+            admin: The admin who changed them.
+
+        Returns:
+            The uses held before, and whether they changed.
+        """
+
     async def remove_mugshot(self, persona: Persona, note: str, admin: Admin) -> bool:
         """Remove the mugshot that the game sent of a hero, until it sends another.
 

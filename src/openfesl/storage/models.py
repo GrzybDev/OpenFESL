@@ -131,6 +131,8 @@ class HeroAccountRow(Base):
     )
     # The slots bought on top of the game's free ones, which stay with the account.
     bought_slots: Mapped[int] = mapped_column(server_default="0")
+    # The slots the admin granted on top of those, free, which stay with the account too.
+    granted_slots: Mapped[int] = mapped_column(server_default="0")
 
 
 class MugshotRow(Base):

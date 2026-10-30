@@ -268,3 +268,58 @@ async def test_admins_grant_change_and_revoke_items_that_fit_the_hero(
     await note.fill("Prize")
     assert await granting.get_attribute("aria-disabled") == "false"
     await context.close()
+
+
+@pytest.mark.usefixtures("prompt_actions")
+async def test_admins_grant_hero_slots_and_grant_or_take_keys_and_chests(
+    admin_provider: IdentityProvider,
+    base: str,
+    server_url: str,
+    database_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    await stock(server_url, tmp_path, capsys)
+    brass = await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    ann = await account_of(database_url, "ann@example.test")
+    account = f"{base}/admin/accounts/{ann}"
+    admin_provider.user = WARDEN
+    async with httpx2.AsyncClient() as client:
+        await sign_in(client, base, next=f"/admin/accounts/{ann}")
+        assert (await client.get(f"{account}/games/bfheroes/slots")).status_code == 403
+    admin_provider.user = KEEPER
+    async with httpx2.AsyncClient() as client:
+        await sign_in(client, base, next=f"/admin/accounts/{ann}")
+        slots = await changed(client, f"{account}/games/bfheroes/slots", amount="2", note="Prize")
+        assert "Hero slots granted to ann@example.test: 2." in slots
+        assert "1 of 6 used 4 free + 0 bought + 2 granted" in slots
+
+        # Keys belong to the account; a take of more than it holds changes nothing.
+        keys = f"{account}/games/bfheroes/keys"
+        granted = await changed(client, keys, direction="grant", amount="4", note="Contest")
+        assert "Granted keys to ann@example.test: 0 → 4." in granted
+        asked = await client.get(keys)
+        too_many = await client.post(
+            keys,
+            data={"csrf": form_token(asked.text), "direction": "take", "amount": "6", "note": "x"},
+        )
+        shown = visible(too_many.content)
+        assert too_many.status_code == 400 and "4 → not possible" in shown
+        assert "ann@example.test holds 4 keys; at most 4 can be taken." in shown
+        taken = await changed(client, keys, direction="take", amount="2", note="Granted twice")
+        assert "Took keys from ann@example.test: 4 → 2." in taken and "2 keys held" in taken
+
+        chests = f"{account}/heroes/{brass}/chests"
+        more = await changed(client, chests, direction="grant", amount="3", note="Round of 26 Oct")
+        assert "Granted chests to Brassbuckle: 0 → 3." in more
+        assert "3 chests to open." in more
+        log = visible((await client.get(f"{base}/admin/audit", params={"account": ann})).content)
+        for line in (
+            "Chests granted Brassbuckle",
+            "3, 0 → 3 · Round of 26 Oct",
+            "Keys taken",
+            "2, 4 → 2 · Granted twice",
+            "Hero slots granted",
+            "2, granted in all: 2 · Prize",
+        ):
+            assert line in log

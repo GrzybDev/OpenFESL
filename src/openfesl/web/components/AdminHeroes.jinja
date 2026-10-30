@@ -13,7 +13,16 @@
   <p class="admin-hero-slots">
     <span class="admin-hero-slots-label">{{ _("web.admin.heroes.slots") }}</span>
     <span class="admin-hero-slots-used">{{ _("web.admin.heroes.slots.used", used=number(used), total=number(roster.slots)) }}</span>
-    <span>{{ _("web.admin.heroes.slots.parts", free=number(rules.slots), bought=number(roster.bought)) }}</span>
+    <span>
+      {%- if roster.granted -%}
+        {{ _("web.admin.heroes.slots.granted", free=number(rules.slots), bought=number(roster.bought), granted=number(roster.granted)) }}
+      {%- else -%}
+        {{ _("web.admin.heroes.slots.parts", free=number(rules.slots), bought=number(roster.bought)) }}
+      {%- endif -%}
+    </span>
+    {% if manages %}
+      <FormButton icon="plus" :href="base ~ '/games/' ~ game.id ~ '/slots'" dialog>{{ _("web.admin.heroes.slots.grant") }}</FormButton>
+    {% endif %}
   </p>
   {% if of.cards %}
     <div class="table-scroll">
@@ -101,6 +110,9 @@
         <span class="admin-hero-strong">{{ _n("web.admin.chest_keys.held", of.keys) }}</span>
         <span class="cell-ago">{{ _("web.admin.chest_keys.text", item=game.chests.key) }}</span>
       </p>
+      {% if manages %}
+        <FormButton icon="key" :href="base ~ '/games/' ~ game.id ~ '/keys'" dialog>{{ _("web.admin.chest_keys.change") }}</FormButton>
+      {% endif %}
     </div>
   </section>
 {% endif %}
