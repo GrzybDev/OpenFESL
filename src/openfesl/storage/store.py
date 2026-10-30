@@ -271,31 +271,48 @@ class SqlProductStore:
     async def _box(self, *chosen: ColumnElement[bool]) -> Box | None:
         async with self._sessions() as session:
             row = await session.scalar(select(StoreBoxRow).where(*chosen))
-            if row is None:
-                return None
-            drops = await session.execute(
-                select(StoreDropRow.tier, StoreDropRow.weight, StoreProductRow)
-                .join(StoreProductRow, StoreProductRow.id == StoreDropRow.product_id)
-                .where(StoreDropRow.box_id == row.id)
-                .order_by(StoreDropRow.tier, StoreProductRow.sort, StoreProductRow.id)
-            )
-            fallback = (
-                await session.get(StoreProductRow, row.fallback_id) if row.fallback_id else None
-            )
-            return Box(
-                id=row.id,
-                key=row.key,
-                kind=row.kind,
-                value=row.value,
-                worth_rule=row.worth_rule,
-                faction=row.faction,
-                hero_class=row.hero_class,
-                currency=row.currency,
-                drops=tuple(
-                    Drop(tier, weight, product_of(product)) for tier, weight, product in drops
-                ),
-                fallback=product_of(fallback) if fallback else None,
-            )
+            found = await boxes_of(session, [row] if row else [])
+        return found[0] if found else None
+
+
+async def boxes_of(session: AsyncSession, rows: list[StoreBoxRow]) -> list[Box]:
+    """Return boxes as the store's rows keep them, each with its drops and fallback.
+
+    Args:
+        session: The session that read the rows.
+        rows: The boxes' rows.
+    """
+    drops = await session.execute(
+        select(StoreDropRow.box_id, StoreDropRow.tier, StoreDropRow.weight, StoreProductRow)
+        .join(StoreProductRow, StoreProductRow.id == StoreDropRow.product_id)
+        .where(StoreDropRow.box_id.in_([row.id for row in rows]))
+        .order_by(StoreDropRow.tier, StoreProductRow.sort, StoreProductRow.id)
+    )
+    held: dict[int, list[Drop]] = {}
+    for box_id, tier, weight, product in drops:
+        held.setdefault(box_id, []).append(Drop(tier, weight, product_of(product)))
+    numbers = [row.fallback_id for row in rows if row.fallback_id]
+    fallbacks = {
+        product.id: product_of(product)
+        for product in await session.scalars(
+            select(StoreProductRow).where(StoreProductRow.id.in_(numbers))
+        )
+    }
+    return [
+        Box(
+            id=row.id,
+            key=row.key,
+            kind=row.kind,
+            value=row.value,
+            worth_rule=row.worth_rule,
+            faction=row.faction,
+            hero_class=row.hero_class,
+            currency=row.currency,
+            drops=tuple(held.get(row.id, [])),
+            fallback=fallbacks.get(row.fallback_id) if row.fallback_id else None,
+        )
+        for row in rows
+    ]
 
 
 async def _with_members(session: AsyncSession, rows: list[StoreBundleRow]) -> list[ListedBundle]:

@@ -1,4 +1,6 @@
 from collections import Counter
+from dataclasses import replace
+from fractions import Fraction
 from pathlib import Path
 from random import Random
 from xml.etree import ElementTree
@@ -9,7 +11,8 @@ from heroes import MAGMA, wallets
 from store import ROYAL_SOLDIER, buy, items, listed, shopper, stock, without_rotation
 from support import fetch
 
-from openfesl.core.drops import Box, Drop, below_value, pick
+from openfesl.core.box_tables import expected
+from openfesl.core.drops import Box, Drop, below_value, odds, pick
 from openfesl.core.inventory import COUNTED, PERMANENT, RENTED, Ownership
 from openfesl.core.store import Bundle, Product
 from openfesl.storage.store import SqlProductStore
@@ -118,3 +121,26 @@ async def test_a_bought_box_gives_one_item_the_hero_may_use_and_never_one_it_own
         )
         == '{"items": [521]} {"items": [2153]}'
     )
+
+
+def test_a_box_that_promises_its_worth_skips_the_drops_below_its_price() -> None:
+    random = Random(20121019)
+    cheap = product(5, 14, Ownership(RENTED, days=1), 130)
+    box = replace(BOX, drops=(*BOX.drops, Drop(1, 40, cheap)))
+    # The rifle's tier left with the cheap rental alone, as a price cut below the box's leaves it.
+    cut = replace(BOX, drops=(*BOX.drops[:2], Drop(1, 40, cheap)))
+
+    given = {pick(box, lambda product: True, random) for _ in range(500)}
+    loose = {pick(replace(box, worth_rule=False), lambda product: True, random) for _ in range(500)}
+
+    assert cheap not in given and cheap not in odds(box, lambda product: True)
+    assert cheap in loose
+    # A tier of drops below the price keeps its weight and gives the fallback, so the rare
+    # tier does not become certain.
+    assert odds(cut, lambda product: True) == {
+        HAT: Fraction(3, 10),
+        COAT: Fraction(3, 10),
+        TONICS: Fraction(2, 5),
+    }
+    assert expected(cut) == Fraction(60 * 2600 + 40 * 770, 100 * 629)
+    assert pick(replace(box, drops=(Drop(0, 1, cheap),)), lambda product: True, random) == TONICS

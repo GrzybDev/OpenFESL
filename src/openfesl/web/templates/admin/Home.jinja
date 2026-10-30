@@ -1,4 +1,4 @@
-{#def online: int, logged_in: int, hosting: int, accounts: int, new_accounts: int, mode: str, waiting: list, warnings: list #}
+{#def online: int, logged_in: int, hosting: int, accounts: int, new_accounts: int, mode: str, waiting: list, warnings: list, flags: list #}
 {% set title = _("web.admin.home") %}
 <AdminPage :title="title" current="home">
   <div id="live"
@@ -135,6 +135,23 @@
                   {% endif %}
                 </dl>
                 <FormButton icon="go" :href="url('/admin/servers/' ~ view.server.ugid)">{{ _("web.admin.open", name=view.server.name) }}</FormButton>
+              {% endfor %}
+            </section>
+          {% endif %}
+          {% if flags %}
+            <section aria-labelledby="home-store">
+              <Bar id="home-store" :extra="number(flags|length)" large>{{ _("web.admin.home.store") }}</Bar>
+              {% for flag in flags %}
+                <div class="warning">
+                  <p class="alert-label">
+                    <span aria-hidden="true"
+                          class="alert-glyph"><Icon name="warn" fill="#0A0A0A" /></span>{{ _("web.admin.home.warning.boxes") }}
+                  </p>
+                  <p class="body-text">
+                    {{ _("web.admin.home.warning.boxes.text", box=flag.row.name, item=flag.item, value=number(flag.product.price), price=number(flag.row.box.value)) }}
+                  </p>
+                </div>
+                <FormButton icon="go" :href="url('/admin/store/' ~ flag.game.id ~ '/boxes/' ~ flag.row.box.id)">{{ _("web.admin.open", name=flag.row.name) }}</FormButton>
               {% endfor %}
             </section>
           {% endif %}

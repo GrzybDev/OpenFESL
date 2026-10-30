@@ -8,6 +8,7 @@ from openfesl.core.census import Census
 from openfesl.core.games import Games
 from openfesl.core.session import Players
 from openfesl.web.admin.auth import AdminSessions
+from openfesl.web.admin.boxes import BoxAdminViews
 from openfesl.web.admin.servers import ServerViews
 
 
@@ -29,6 +30,7 @@ def home_routes(
     players: Players,
     accounts: AccountTotals,
     views: ServerViews,
+    boxes: BoxAdminViews,
 ) -> APIRouter:
     """Return the admin panel's home: what needs a decision, the instance's numbers and its mode.
 
@@ -39,6 +41,7 @@ def home_routes(
         players: Who is logged in.
         accounts: Counts the players' accounts.
         views: Puts together what the panel shows about the dedicated servers.
+        boxes: Finds the drops of the stores' boxes that are worth less than their box's price.
     """
     router = APIRouter()
 
@@ -64,6 +67,7 @@ def home_routes(
             mode=mode.value,
             waiting=waiting,
             warnings=warnings,
+            flags=await boxes.flags(request.state.language),
         )
 
     return router

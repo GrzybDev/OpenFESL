@@ -1,0 +1,102 @@
+/* A box's drop table: each tier's drops with their value and whether rolls give them, the
+   skipped ones on a paler row, beside the meter of what the box gives on average. */
+@layer pages {
+  .box-table {
+    min-width: 640px;
+  }
+
+  .box-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns: minmax(220px, 1.4fr) 120px minmax(150px, 1fr) 170px;
+    gap: 2px;
+  }
+
+  .box-row:nth-child(even) {
+    --cell: var(--row-alt);
+  }
+
+  .box-row-skipped {
+    --cell: var(--row-pale);
+  }
+
+  .box-item {
+    gap: 10px;
+    padding-block: 6px;
+
+    > .cell-stack {
+      display: flex;
+    }
+  }
+
+  .box-fallback {
+    min-width: 0;
+
+    .box-columns {
+      grid-template-columns: minmax(0, 1fr) auto;
+
+      > :nth-child(n + 3) {
+        display: none;
+      }
+    }
+  }
+
+  .box-meter {
+    display: grid;
+    gap: 8px;
+  }
+
+  .box-meter-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    font-weight: 600;
+  }
+
+  .box-meter-times {
+    font-family: var(--font-sans);
+    font-size: 32px;
+    font-weight: 800;
+  }
+
+  .box-meter-track {
+    width: 100%;
+    height: 22px;
+    border: 3px solid var(--ink);
+    background: var(--ink);
+  }
+
+  .box-meter-fill {
+    fill: var(--accent);
+  }
+
+  .box-meter-target {
+    fill: var(--soft);
+    opacity: 0.5;
+  }
+
+  .box-meter-scale {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  @container (width < 640px) {
+    .box-table {
+      min-width: 0;
+    }
+
+    .box-row.box-columns {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+
+      > :first-child {
+        grid-column: 1 / -1;
+      }
+    }
+  }
+}

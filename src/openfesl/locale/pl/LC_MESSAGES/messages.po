@@ -11482,3 +11482,246 @@ msgstr "Wypożyczenia za %(currency)s są zaokrąglane w dół do ceny kończąc
 
 msgid "web.admin.store.rules.rounding.exact"
 msgstr "Pozostałe wypożyczenia mają dokładne ceny."
+
+msgid "games.bfheroes.deal_section.daily"
+msgstr "Okazja dnia"
+
+msgid "games.bfheroes.deal_section.new"
+msgstr "Nowe zestawy"
+
+msgid "games.bfheroes.deal_section.sale"
+msgstr "Wyprzedaż"
+
+msgid "games.bfheroes.deal_section.seasonal"
+msgstr "Zestawy sezonowe"
+
+msgid "games.bfheroes.deal_section.boxes"
+msgstr "Skrzynki losowe"
+
+msgid "games.bfheroes.deal_section.themed"
+msgstr "Skrzynki tematyczne"
+
+msgid "games.bfheroes.deal_section.events"
+msgstr "Skrzynki okolicznościowe"
+
+msgid "games.bfheroes.deal_section.popular"
+msgstr "Popularne"
+
+msgid "web.admin.store.tab.boxes"
+msgstr "Skrzynki i skrzynie"
+
+msgid "web.admin.boxes.subtitle"
+msgstr "Skrzynki i skrzynie: %(game)s"
+
+msgid "web.admin.boxes.value"
+msgstr "%(times)s× ceny"
+
+msgid "web.admin.boxes.value.none"
+msgstr "Brak wartości"
+
+msgid "web.admin.boxes.flag.one"
+msgstr "Wpisy poniżej ceny skrzynki: %(count)s"
+
+msgid "web.admin.boxes.flag.few"
+msgstr "Wpisy poniżej ceny skrzynki: %(count)s"
+
+msgid "web.admin.boxes.flag.many"
+msgstr "Wpisy poniżej ceny skrzynki: %(count)s"
+
+msgid "web.admin.boxes.flag.other"
+msgstr "Wpisy poniżej ceny skrzynki: %(count)s"
+
+msgid "web.admin.boxes.flag.title"
+msgstr "%(box)s: %(item)s, %(ownership)s, ma wartość %(value)s %(currency)s; skrzynka kosztuje %(price)s."
+
+msgid "web.admin.boxes.flag.text"
+msgstr "Losowania pomijają ten wpis, dopóki znów nie będzie wart ceny albo nie zostanie usunięty, więc obietnica skrzynki pozostaje prawdziwa; poziom złożony tylko z pomijanych wpisów daje wtedy zamiennik. Strona startowa panelu też to pokazuje."
+
+msgid "web.admin.boxes.edit"
+msgstr "Tabela losowania: %(box)s"
+
+msgid "web.admin.boxes.count.one"
+msgstr "%(count)s skrzynka"
+
+msgid "web.admin.boxes.count.few"
+msgstr "%(count)s skrzynki"
+
+msgid "web.admin.boxes.count.many"
+msgstr "%(count)s skrzynek"
+
+msgid "web.admin.boxes.count.other"
+msgstr "%(count)s skrzynki"
+
+msgid "web.admin.boxes.group.chest"
+msgstr "Skrzynia skarbów"
+
+msgid "web.admin.boxes.group.unlisted"
+msgstr "Pozostałe skrzynki"
+
+msgid "web.admin.boxes.column.box"
+msgstr "Skrzynka"
+
+msgid "web.admin.boxes.column.sold"
+msgstr "Sprzedaż"
+
+msgid "web.admin.boxes.column.price"
+msgstr "Cena"
+
+msgid "web.admin.boxes.column.value"
+msgstr "Wartość i wpisy"
+
+msgid "web.admin.boxes.column.table"
+msgstr "Tabela losowania"
+
+msgid "web.admin.boxes.sold.keys"
+msgstr "Otwierana kluczami"
+
+msgid "web.admin.boxes.sold.always"
+msgstr "Zawsze w sprzedaży"
+
+msgid "web.admin.boxes.sold.window"
+msgstr "%(first)s – %(last)s"
+
+msgid "web.admin.boxes.sold.now"
+msgstr "Teraz w sprzedaży"
+
+msgid "web.admin.boxes.sold.not_now"
+msgstr "Teraz poza sprzedażą"
+
+msgid "web.admin.boxes.sold.until"
+msgstr "W sprzedaży do %(day)s"
+
+msgid "web.admin.boxes.entries.one"
+msgstr "%(count)s wpis"
+
+msgid "web.admin.boxes.entries.few"
+msgstr "%(count)s wpisy"
+
+msgid "web.admin.boxes.entries.many"
+msgstr "%(count)s wpisów"
+
+msgid "web.admin.boxes.entries.other"
+msgstr "%(count)s wpisu"
+
+msgid "web.admin.boxes.entries.below.one"
+msgstr "poniżej ceny, pomijane: %(count)s"
+
+msgid "web.admin.boxes.entries.below.few"
+msgstr "poniżej ceny, pomijane: %(count)s"
+
+msgid "web.admin.boxes.entries.below.many"
+msgstr "poniżej ceny, pomijane: %(count)s"
+
+msgid "web.admin.boxes.entries.below.other"
+msgstr "poniżej ceny, pomijane: %(count)s"
+
+msgid "web.admin.boxes.none"
+msgstr "Sklep gry %(game)s nie ma jeszcze skrzynek."
+
+msgid "web.admin.boxes.none.text"
+msgstr "Sklep tworzy skrzynki z danych gry po imporcie katalogu."
+
+msgid "web.admin.boxes.themed"
+msgstr "Rotacja tematyczna"
+
+msgid "web.admin.boxes.themed.size"
+msgstr "Par jednocześnie"
+
+msgid "web.admin.boxes.themed.every"
+msgstr "Zmiana pary co"
+
+msgid "web.admin.boxes.themed.gap"
+msgstr "Przerwa przed powtórką"
+
+msgid "web.admin.boxes.themed.text"
+msgstr "Co %(days)s dni najstarsza para odchodzi, a wchodzi następna, więc para zostaje na %(stays)s; skrzynki okolicznościowe są sprzedawane obok w swoich terminach."
+
+msgid "web.admin.boxes.box"
+msgstr "Skrzynka losowa"
+
+msgid "web.admin.boxes.chest"
+msgstr "Skrzynia skarbów"
+
+msgid "web.admin.boxes.chest.key"
+msgstr "Cena klucza"
+
+msgid "web.admin.boxes.chest.most"
+msgstr "Skrzynie na rundę"
+
+msgid "web.admin.boxes.chest.text"
+msgstr "Klucze otwierają skrzynie na stronie według tabeli losowania skrzyni skarbów."
+
+msgid "web.admin.boxes.players"
+msgstr "Widoczne dla graczy"
+
+msgid "web.admin.boxes.players.text"
+msgstr "Strona skrzynki w sklepie pokazuje każdy wpis dostępny dla bohatera z jego szansą: wagą poziomu podzieloną równo między wpisy."
+
+msgid "web.admin.boxes.entry.other_currency"
+msgstr "Brak ceny w walucie skrzynki"
+
+msgid "web.admin.boxes.entry.counts"
+msgstr "Liczy się"
+
+msgid "web.admin.boxes.entry.skipped"
+msgstr "Poniżej ceny · pomijany"
+
+msgid "web.admin.boxes.worth"
+msgstr "Każdy wpis jest wart co najmniej tyle, ile kosztuje skrzynka"
+
+msgid "web.admin.boxes.worth.text"
+msgstr "Skrzynka to obiecuje; losowania pomijają wpisy poniżej %(price)s."
+
+msgid "web.admin.boxes.worth.off"
+msgstr "Bez obietnicy wartości"
+
+msgid "web.admin.boxes.worth.off.text"
+msgstr "Wpisy mogą być warte mniej niż jej cena."
+
+msgid "web.admin.boxes.tier"
+msgstr "Poziom %(number)s"
+
+msgid "web.admin.boxes.tier.share"
+msgstr "%(share)s%% losowań"
+
+msgid "web.admin.boxes.empty"
+msgstr "Skrzynka nie ma wpisów."
+
+msgid "web.admin.boxes.ev"
+msgstr "Wartość oczekiwana"
+
+msgid "web.admin.boxes.ev.times"
+msgstr "%(times)s×"
+
+msgid "web.admin.boxes.ev.of"
+msgstr "%(value)s z %(price)s %(currency)s"
+
+msgid "web.admin.boxes.ev.target"
+msgstr "Cel 1,5–2×"
+
+msgid "web.admin.boxes.ev.top"
+msgstr "4× ceny"
+
+msgid "web.admin.boxes.ev.text"
+msgstr "Waga każdego poziomu razy średnia wartość jego wpisów; pomijane wpisy się nie liczą, a poziom złożony tylko z pomijanych wpisów liczy się jako zamiennik. Wartości według dzisiejszych cen."
+
+msgid "web.admin.boxes.owned"
+msgstr "Gdy bohater już to ma"
+
+msgid "web.admin.boxes.owned.text"
+msgstr "Wypożyczenie zyskuje czas, a gadżet użycia. Przedmiot posiadany na stałe jest pomijany i losowanie powtarza się wśród reszty; gdy nic nie zostaje, skrzynka daje zamiennik:"
+
+msgid "web.admin.boxes.owned.none"
+msgstr "Skrzynka nie ma zamiennika, więc bohater, który ma wszystkie wpisy, nic nie dostaje."
+
+msgid "web.admin.menu.attention"
+msgstr "wymaga uwagi"
+
+msgid "web.admin.home.store"
+msgstr "Sklep"
+
+msgid "web.admin.home.warning.boxes"
+msgstr "Skrzynki · wpis poniżej ceny"
+
+msgid "web.admin.home.warning.boxes.text"
+msgstr "%(box)s: %(item)s, wartość %(value)s z %(price)s · pomijany w losowaniach"

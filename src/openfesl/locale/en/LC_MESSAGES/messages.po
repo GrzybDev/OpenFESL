@@ -10818,3 +10818,222 @@ msgstr "Rentals in %(currency)s round down to a price ending in %(ending)s."
 
 msgid "web.admin.store.rules.rounding.exact"
 msgstr "Other rentals stay exact."
+
+msgid "games.bfheroes.deal_section.daily"
+msgstr "Deal of the Day"
+
+msgid "games.bfheroes.deal_section.new"
+msgstr "New sets"
+
+msgid "games.bfheroes.deal_section.sale"
+msgstr "On sale"
+
+msgid "games.bfheroes.deal_section.seasonal"
+msgstr "Seasonal sets"
+
+msgid "games.bfheroes.deal_section.boxes"
+msgstr "Random boxes"
+
+msgid "games.bfheroes.deal_section.themed"
+msgstr "Themed boxes"
+
+msgid "games.bfheroes.deal_section.events"
+msgstr "Event boxes"
+
+msgid "games.bfheroes.deal_section.popular"
+msgstr "Popular"
+
+msgid "web.admin.store.tab.boxes"
+msgstr "Boxes and chests"
+
+msgid "web.admin.boxes.subtitle"
+msgstr "Boxes and chests of %(game)s"
+
+msgid "web.admin.boxes.value"
+msgstr "%(times)s× the price"
+
+msgid "web.admin.boxes.value.none"
+msgstr "Nothing of value"
+
+msgid "web.admin.boxes.flag.one"
+msgstr "%(count)s entry below its box's price"
+
+msgid "web.admin.boxes.flag.other"
+msgstr "%(count)s entries below their box's price"
+
+msgid "web.admin.boxes.flag.title"
+msgstr "%(box)s: %(item)s, %(ownership)s, is worth %(value)s %(currency)s; the box costs %(price)s."
+
+msgid "web.admin.boxes.flag.text"
+msgstr "Rolls skip the entry until it is worth the price again or is removed, so the box's promise stays true; a tier of only skipped entries gives the fallback instead. Admin Home lists it too."
+
+msgid "web.admin.boxes.edit"
+msgstr "Drop table of %(box)s"
+
+msgid "web.admin.boxes.count.one"
+msgstr "%(count)s box"
+
+msgid "web.admin.boxes.count.other"
+msgstr "%(count)s boxes"
+
+msgid "web.admin.boxes.group.chest"
+msgstr "Treasure chest"
+
+msgid "web.admin.boxes.group.unlisted"
+msgstr "Other boxes"
+
+msgid "web.admin.boxes.column.box"
+msgstr "Box"
+
+msgid "web.admin.boxes.column.sold"
+msgstr "Sold"
+
+msgid "web.admin.boxes.column.price"
+msgstr "Price"
+
+msgid "web.admin.boxes.column.value"
+msgstr "Value and entries"
+
+msgid "web.admin.boxes.column.table"
+msgstr "Drop table"
+
+msgid "web.admin.boxes.sold.keys"
+msgstr "Opened with keys"
+
+msgid "web.admin.boxes.sold.always"
+msgstr "Always on sale"
+
+msgid "web.admin.boxes.sold.window"
+msgstr "%(first)s – %(last)s"
+
+msgid "web.admin.boxes.sold.now"
+msgstr "On sale now"
+
+msgid "web.admin.boxes.sold.not_now"
+msgstr "Not on sale now"
+
+msgid "web.admin.boxes.sold.until"
+msgstr "On sale until %(day)s"
+
+msgid "web.admin.boxes.entries.one"
+msgstr "%(count)s entry"
+
+msgid "web.admin.boxes.entries.other"
+msgstr "%(count)s entries"
+
+msgid "web.admin.boxes.entries.below.one"
+msgstr "%(count)s below the price, skipped"
+
+msgid "web.admin.boxes.entries.below.other"
+msgstr "%(count)s below the price, skipped"
+
+msgid "web.admin.boxes.none"
+msgstr "The store of %(game)s has no boxes yet."
+
+msgid "web.admin.boxes.none.text"
+msgstr "The store fills its boxes from the game data once the catalogue is imported."
+
+msgid "web.admin.boxes.themed"
+msgstr "Themed rotation"
+
+msgid "web.admin.boxes.themed.size"
+msgstr "Pairs at once"
+
+msgid "web.admin.boxes.themed.every"
+msgstr "A pair changes every"
+
+msgid "web.admin.boxes.themed.gap"
+msgstr "Gap before a repeat"
+
+msgid "web.admin.boxes.themed.text"
+msgstr "Every %(days)s days the oldest pair leaves and the next one comes, so a pair stays for %(stays)s; event boxes are sold beside them in their windows."
+
+msgid "web.admin.boxes.box"
+msgstr "Random box"
+
+msgid "web.admin.boxes.chest"
+msgstr "Treasure chest"
+
+msgid "web.admin.boxes.chest.key"
+msgstr "Key price"
+
+msgid "web.admin.boxes.chest.most"
+msgstr "Chests per round"
+
+msgid "web.admin.boxes.chest.text"
+msgstr "Keys open chests on the website with the treasure chest's drop table."
+
+msgid "web.admin.boxes.players"
+msgstr "Shown to players"
+
+msgid "web.admin.boxes.players.text"
+msgstr "A box's store page lists every entry a hero can get with its chance: its tier's weight split evenly among them."
+
+msgid "web.admin.boxes.entry.other_currency"
+msgstr "No price in the box's currency"
+
+msgid "web.admin.boxes.entry.counts"
+msgstr "Counts"
+
+msgid "web.admin.boxes.entry.skipped"
+msgstr "Below the price · skipped"
+
+msgid "web.admin.boxes.worth"
+msgstr "Every entry is worth at least the price"
+
+msgid "web.admin.boxes.worth.text"
+msgstr "The box promises it; rolls skip entries below %(price)s."
+
+msgid "web.admin.boxes.worth.off"
+msgstr "No promise of worth"
+
+msgid "web.admin.boxes.worth.off.text"
+msgstr "Its entries may be worth less than its price."
+
+msgid "web.admin.boxes.tier"
+msgstr "Tier %(number)s"
+
+msgid "web.admin.boxes.tier.share"
+msgstr "%(share)s%% of rolls"
+
+msgid "web.admin.boxes.empty"
+msgstr "The box has no entries."
+
+msgid "web.admin.boxes.ev"
+msgstr "Expected value"
+
+msgid "web.admin.boxes.ev.times"
+msgstr "%(times)s×"
+
+msgid "web.admin.boxes.ev.of"
+msgstr "%(value)s of %(price)s %(currency)s"
+
+msgid "web.admin.boxes.ev.target"
+msgstr "Target 1.5–2×"
+
+msgid "web.admin.boxes.ev.top"
+msgstr "4× the price"
+
+msgid "web.admin.boxes.ev.text"
+msgstr "Each tier's weight times the average value of its entries; skipped entries do not count, and a tier of only skipped entries counts the fallback. Values use today's prices."
+
+msgid "web.admin.boxes.owned"
+msgstr "When the hero already has it"
+
+msgid "web.admin.boxes.owned.text"
+msgstr "A rental gains the time and a widget the uses. A permanent item the hero owns is skipped and the roll repeats among the rest; when nothing is left, the box gives its fallback:"
+
+msgid "web.admin.boxes.owned.none"
+msgstr "The box has no fallback, so it gives nothing to a hero that holds every entry."
+
+msgid "web.admin.menu.attention"
+msgstr "needing attention"
+
+msgid "web.admin.home.store"
+msgstr "Store"
+
+msgid "web.admin.home.warning.boxes"
+msgstr "Boxes · entry below the price"
+
+msgid "web.admin.home.warning.boxes.text"
+msgstr "%(box)s: %(item)s, worth %(value)s of %(price)s · skipped in rolls"

@@ -136,7 +136,9 @@ def pick(box: Box, may_get: Callable[[Product], bool], random: Random) -> Produc
     """Return the product a box gives a hero: a tier by its weight, then one of its drops.
 
     Only the drops the hero may get take part, so an item it owns for good is never given
-    twice; with none of them left the box gives its fallback.
+    twice, and with none of them left the box gives its fallback. A box that promises its worth
+    skips the drops worth less than its price, and a tier of only such drops gives the fallback,
+    so that the other tiers are no likelier than the box's weights make them.
 
     Args:
         box: The box.
@@ -176,16 +178,20 @@ def below_value(box: Box) -> list[Product]:
     Args:
         box: The box.
     """
-    if not box.worth_rule:
-        return []
     given = [drop.product for drop in box.drops]
     if box.fallback:
         given.append(box.fallback)
-    return [
-        product
-        for product in given
-        if product.currency != box.currency or product.price < box.value
-    ]
+    return [product for product in given if not worth(box, product)]
+
+
+def worth(box: Box, product: Product) -> bool:
+    """Tell whether a product keeps a box's promise: worth at least its price, if it makes one.
+
+    Args:
+        box: The box.
+        product: One of the products it may give.
+    """
+    return not box.worth_rule or (product.currency == box.currency and product.price >= box.value)
 
 
 def _tiers(box: Box, may_get: Callable[[Product], bool]) -> list[tuple[int, list[Product]]]:
@@ -193,8 +199,11 @@ def _tiers(box: Box, may_get: Callable[[Product], bool]) -> list[tuple[int, list
     tiers: dict[int, tuple[int, list[Product]]] = {}
     for drop in box.drops:
         if may_get(drop.product):
-            tiers.setdefault(drop.tier, (drop.weight, []))[1].append(drop.product)
-    return list(tiers.values())
+            kept = tiers.setdefault(drop.tier, (drop.weight, []))[1]
+            if worth(box, drop.product):
+                kept.append(drop.product)
+    fallback = [box.fallback] if box.fallback else []
+    return [(weight, kept or fallback) for weight, kept in tiers.values() if kept or fallback]
 
 
 def _owned(tag: str) -> bool:

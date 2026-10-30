@@ -1,0 +1,145 @@
+{#def of, catalogue, groups: dict, deals, manages: bool #}
+{# A game's boxes and chests: the drops worth less than their box's price,
+   which rolls skip, then each box by the hot deals' section that sells it with when it is sold,
+   its price, what it gives on average against the price and its drops, beside the themed
+   rotation and the treasure chest. #}
+{% set game = of %}
+{% set base = url("/admin/store/" ~ game.id ~ "/boxes") %}
+{% set flagged = groups.values()|sum(start=[])|selectattr("below")|list %}
+{% macro ratio(row) -%}
+  {%- if row.ratio is not none %}{{ _("web.admin.boxes.value", times=number(row.ratio|float, places=1)) }}{% else %}{{ _("web.admin.boxes.value.none") }}{% endif -%}
+{%- endmacro %}
+{% macro owned(ownership) -%}
+  {%- if ownership.type == "tlmd" %}{{ _n("web.store.price.days", ownership.days) }}{% elif ownership.type == "lmct" %}{{ _n("web.store.price.uses", ownership.uses) }}{% else %}{{ _("web.store.forever") }}{% endif -%}
+{%- endmacro %}
+<AdminPage :title="_('web.admin.store.tab.boxes') ~ ' · ' ~ _('web.admin.store.title')"
+           current="store">
+  <StoreHead :game="game" current="boxes" :subtitle="_('web.admin.boxes.subtitle', game=game.name)" />
+  <Panel class="enter-panel">
+    {% if flagged %}
+      <section aria-labelledby="boxes-flag" class="boxes-flag">
+        <p id="boxes-flag" class="prices-missing-head">
+          <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _n("web.admin.boxes.flag", flagged|map(attribute="below")|map("length")|sum) }}
+        </p>
+        {% for row in flagged %}
+          {% for product in row.below %}
+            <p class="boxes-flag-title">
+              {{ _("web.admin.boxes.flag.title", box=row.name, item=catalogue.name(product.item_id) or product.item_id, ownership=owned(product.ownership), value=number(product.price), currency=_("games." ~ game.id ~ ".currency." ~ product.currency), price=number(row.box.value)) }}
+            </p>
+          {% endfor %}
+        {% endfor %}
+        <p class="body-text">{{ _("web.admin.boxes.flag.text") }}</p>
+        <SmallAction :href="base ~ '/' ~ flagged[0].box.id" :label="_('web.admin.boxes.edit', box=flagged[0].name)" />
+      </section>
+    {% endif %}
+    <div class="list-layout admin-layout">
+      <div class="list-main boxes-main">
+        {% for key, rows in groups.items() %}
+          <section aria-labelledby="boxes-{{ key }}" class="admin-list">
+            <Bar :id="'boxes-' ~ key" :extra="_n('web.admin.boxes.count', rows|length)">{{ _("web.admin.boxes.group." ~ key) if key in ("chest", "unlisted") else _("games." ~ game.id ~ ".deal_section." ~ key) }}</Bar>
+            <div class="table-scroll table-scroll-flush">
+              <div role="table"
+                   aria-labelledby="boxes-{{ key }}"
+                   class="table boxes-table">
+                <div role="rowgroup" class="admin-list-head">
+                  <div role="row" class="boxes-columns">
+                    <div role="columnheader" class="column-head column-name">{{ _("web.admin.boxes.column.box") }}</div>
+                    <div role="columnheader" class="column-head">{{ _("web.admin.boxes.column.sold") }}</div>
+                    <div role="columnheader"
+                         class="column-head column-number">{{ _("web.admin.boxes.column.price") }}</div>
+                    <div role="columnheader" class="column-head">{{ _("web.admin.boxes.column.value") }}</div>
+                    <div role="columnheader"><span class="sr-only">{{ _("web.admin.boxes.column.table") }}</span></div>
+                  </div>
+                </div>
+                <div role="rowgroup" class="enter-rows table-rows">
+                  {% for row in rows %}
+                    {% set box = row.box %}
+                    {% set href = base ~ "/" ~ box.id %}
+                    <div role="row" class="boxes-columns boxes-row">
+                      <div role="cell" class="admin-cell boxes-name">
+                        <span aria-hidden="true" class="badge"><Icon :name="'chest' if box.kind != 'box' else 'box'" stroke="#0A0A0A" fill="#0A0A0A" /></span>
+                        <a href="{{ href }}" class="account-link"><span class="admin-hero-strong">{{ row.name }}</span><span class="admin-item-kind">{{ _("games." ~ game.id ~ ".faction." ~ box.faction) if box.faction else _("web.store.requires.any_faction") }} · {{ _("games." ~ game.id ~ ".class." ~ box.hero_class) if box.hero_class else _("web.store.requires.any_class") }}</span></a>
+                      </div>
+                      <div role="cell" class="admin-cell cell-stack">
+                        <span aria-hidden="true" class="cell-label">{{ _("web.admin.boxes.column.sold") }}</span>
+                        {% if box.kind != "box" %}
+                          <span>{{ _("web.admin.boxes.sold.keys") }}</span>
+                        {% elif row.always %}
+                          <span>{{ _("web.admin.boxes.sold.always") }}</span>
+                        {% elif row.days %}
+                          <span>{{ _("web.admin.boxes.sold.window", first=when(row.days[0], "MMMd"), last=when(row.days[1], "MMMd")) }}</span>
+                          <span class="cell-ago">{{ _("web.admin.boxes.sold.now") if row.selling else _("web.admin.boxes.sold.not_now") }}</span>
+                        {% elif row.selling and row.selling.bundle.ends %}
+                          <span>{{ _("web.admin.boxes.sold.until", day=when(row.selling.bundle.ends, "yMMMd")) }}</span>
+                        {% else %}
+                          <span>{{ _("web.admin.boxes.sold.not_now") }}</span>
+                        {% endif %}
+                      </div>
+                      <div role="cell" class="admin-cell boxes-price">{{ number(box.value) }}</div>
+                      <div role="cell" class="admin-cell cell-stack">
+                        <span class="prices-points">{{ ratio(row) }}</span>
+                        <span class="cell-ago">
+                          {%- if row.below %}<Icon name="warn" :size="12" fill="currentColor" />
+                          {% endif -%}
+                          {{ _n("web.admin.boxes.entries", box.drops|length) }}{% if row.below %} · {{ _n("web.admin.boxes.entries.below", row.below|length) }}{% endif %}
+                        </span>
+                      </div>
+                      <div role="cell" class="cell-end">
+                        <EndSquare :href="href" :label="_('web.admin.boxes.edit', box=row.name)" />
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </section>
+        {% else %}
+          <div class="prices-missing">
+            <p class="prices-missing-title">{{ _("web.admin.boxes.none", game=game.name) }}</p>
+            <p class="body-text">{{ _("web.admin.boxes.none.text") }}</p>
+            <SmallAction :href="url('/admin/catalogues')" :label="_('web.admin.menu.catalogues')" />
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="list-side admin-side">
+        {% set themed = deals.sections.get("themed") if deals else none %}
+        {% if themed and themed.schedule %}
+          <section aria-labelledby="boxes-rotation">
+            <Bar id="boxes-rotation">{{ _("web.admin.boxes.themed") }}</Bar>
+            <dl class="facts">
+              <Fact :label="_('web.admin.boxes.themed.size')" plain>
+                {{ number((themed.size or 1) * ((themed.schedule.lasts or themed.schedule.every) // themed.schedule.every)) }}
+              </Fact>
+              <Fact :label="_('web.admin.boxes.themed.every')" plain>
+                {{ _n("web.store.price.days", themed.schedule.every) }}
+              </Fact>
+              <Fact :label="_('web.admin.boxes.themed.gap')" plain>
+                {{ _n("web.store.price.days", themed.gap) }}
+              </Fact>
+            </dl>
+            <p class="bar-text body-text">{{ _("web.admin.boxes.themed.text", days=number(themed.schedule.every), stays=_n("web.store.price.days", themed.schedule.lasts or themed.schedule.every)) }}</p>
+          </section>
+        {% endif %}
+        {% if game.chests %}
+          <section aria-labelledby="boxes-chest-rules">
+            <Bar id="boxes-chest-rules">{{ _("web.admin.boxes.chest") }}</Bar>
+            <dl class="facts">
+              <Fact :label="_('web.admin.boxes.chest.key')" plain>
+                {{ number(game.chests.key_price) }} {{ _("games." ~ game.id ~ ".currency." ~ game.chests.currency) }}
+              </Fact>
+              <Fact :label="_('web.admin.boxes.chest.most')" plain>
+                {{ number(game.chests.most) }}
+              </Fact>
+            </dl>
+            <p class="bar-text body-text">{{ _("web.admin.boxes.chest.text") }}</p>
+          </section>
+        {% endif %}
+        <section aria-labelledby="boxes-players">
+          <Bar id="boxes-players">{{ _("web.admin.boxes.players") }}</Bar>
+          <p class="bar-text body-text">{{ _("web.admin.boxes.players.text") }}</p>
+        </section>
+      </div>
+    </div>
+  </Panel>
+</AdminPage>

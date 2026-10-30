@@ -9,6 +9,7 @@ from openfesl.web.admin.account_decisions import account_decision_routes
 from openfesl.web.admin.accounts import AccountViews, account_routes
 from openfesl.web.admin.audit import audit_routes
 from openfesl.web.admin.auth import AdminSessions, NeedsRole, SignInNeeded, SignInProvider
+from openfesl.web.admin.boxes import BoxAdminViews, box_routes
 from openfesl.web.admin.catalogues import catalogue_routes
 from openfesl.web.admin.entitlements import entitlement_routes
 from openfesl.web.admin.hero_actions import hero_action_routes
@@ -64,15 +65,24 @@ def include_admin_routes(
         )
         if served
     )
+    store_views = StoreAdminViews(
+        games, services.catalogues, stores.prices, stores.settings, services.feed.apply
+    )
+    box_views = BoxAdminViews(store_views, services.catalogues, services.deals, stores.boxes)
+
+    async def menu_counts() -> dict[str, int]:
+        counts = await server_views.menu_counts()
+        if flagged := await box_views.flagged():
+            counts["store"] = flagged
+        return counts
+
     sign_in = AdminSessions(
-        pages,
-        _sign_in_provider(settings),
-        settings.public_url,
-        server_views.menu_counts,
-        sections,
+        pages, _sign_in_provider(settings), settings.public_url, menu_counts, sections
     )
     app.include_router(sign_in.routes())
-    app.include_router(home_routes(sign_in, games, census, players, stores.accounts, server_views))
+    app.include_router(
+        home_routes(sign_in, games, census, players, stores.accounts, server_views, box_views)
+    )
     app.include_router(server_list_routes(sign_in, server_views))
     app.include_router(decision_routes(sign_in, server_views, apply))
     app.include_router(official_routes(sign_in, server_views, apply))
@@ -124,12 +134,10 @@ def include_admin_routes(
             services.mugshots,
         )
     )
-    store_views = StoreAdminViews(
-        games, services.catalogues, stores.prices, stores.settings, services.feed.apply
-    )
     app.include_router(store_routes(sign_in, store_views))
     app.include_router(store_item_routes(sign_in, store_views))
     app.include_router(store_rule_routes(sign_in, store_views))
+    app.include_router(box_routes(sign_in, box_views))
     app.include_router(
         audit_routes(
             sign_in,
