@@ -22,7 +22,7 @@ from openfesl.web.admin.audit_heroes import (
     slot_entry,
     wallet_entry,
 )
-from openfesl.web.admin.audit_store import box_entry, price_entry, rule_entry
+from openfesl.web.admin.audit_store import box_entry, deal_entry, price_entry, rule_entry
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.settings import policy_views
 from openfesl.web.pages import moment
@@ -51,6 +51,7 @@ GLYPHS = {
     AdminAction.STORE_PRICES: "edit",
     AdminAction.STORE_RULE: "retry",
     AdminAction.BOX_TABLE: "box",
+    AdminAction.DEAL_SECTION: "edit",
 }
 # What the admin does to a hero's items, and to a hero, whose persona is the target.
 ITEM_ACTIONS = (AdminAction.ITEM_GRANT, AdminAction.ITEM_CHANGE, AdminAction.ITEM_REVOKE)
@@ -398,6 +399,10 @@ async def _rows(
             shown, href, said = rule_entry(details, games, language)
         elif action is AdminAction.BOX_TABLE:
             shown, href, said = await box_entry(details, games, catalogues, language)
+        elif action in (AdminAction.DEAL_ROTATION, AdminAction.DEAL_SECTION):
+            shown, href, said = deal_entry(action, target, details, games, language)
+            if action is AdminAction.DEAL_ROTATION:
+                kind = f"deal_rotation.{'on' if details['enabled'] else 'off'}"
         elif action is AdminAction.CATALOGUE_IMPORT:
             game = games.by_id(target)
             shown = game.name if game else target

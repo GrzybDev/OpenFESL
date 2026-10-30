@@ -11797,3 +11797,234 @@ msgstr "obietnica wartości wyłączona"
 
 msgid "web.admin.toast.boxes.unchanged"
 msgstr "Tabela losowania bez zmian: %(box)s."
+
+msgid "web.admin.store.tab.deals"
+msgstr "Gorące oferty"
+
+msgid "web.admin.deals.subtitle"
+msgstr "Gorące oferty: %(game)s"
+
+msgid "web.admin.deals.short"
+msgstr "Rotacji brakuje ofert"
+
+msgid "web.admin.deals.short.title"
+msgstr "%(section)s · %(faction)s: %(count)s z %(size)s ofert w ostatnim kroku."
+
+msgid "web.admin.deals.short.text"
+msgstr "W puli było za mało ofert niesprzedawanych w czasie przerwy przed powtórką. Większa pula, mniejszy rozmiar albo krótsza przerwa pozwolą następnemu krokowi wybrać wszystkie. Strona startowa panelu też to pokazuje."
+
+msgid "web.admin.deals.rotation"
+msgstr "Rotacja gorących ofert"
+
+msgid "web.admin.deals.rotation.on"
+msgstr "Każda sekcja działa według swojego harmonogramu; zmiany obowiązują od następnego kroku sekcji."
+
+msgid "web.admin.deals.rotation.off"
+msgstr "Wyłączona: gorące oferty nie pokazują żadnej oferty, dopóki rotacja nie zostanie znów włączona."
+
+msgid "web.admin.deals.rotation.save"
+msgstr "Zapisz przełącznik"
+
+msgid "web.admin.deals.switch.on"
+msgstr "Włączona"
+
+msgid "web.admin.deals.switch.off"
+msgstr "Wyłączona"
+
+msgid "web.admin.deals.switch.runs"
+msgstr "Działa"
+
+msgid "web.admin.deals.switch.stopped"
+msgstr "Brakuje ofert"
+
+msgid "web.admin.deals.sections"
+msgstr "Sekcje"
+
+msgid "web.admin.deals.sections.running"
+msgstr "włączone: %(running)s z %(total)s"
+
+msgid "web.admin.deals.column.section"
+msgstr "Sekcja"
+
+msgid "web.admin.deals.column.runs"
+msgstr "Działa"
+
+msgid "web.admin.deals.column.size"
+msgstr "Rozmiar"
+
+msgid "web.admin.deals.column.next"
+msgstr "Następna zmiana"
+
+msgid "web.admin.deals.column.now"
+msgstr "Teraz w sprzedaży"
+
+msgid "web.admin.deals.daily"
+msgstr "Codziennie"
+
+msgid "web.admin.deals.every.one"
+msgstr "Co %(count)s dzień"
+
+msgid "web.admin.deals.every.few"
+msgstr "Co %(count)s dni"
+
+msgid "web.admin.deals.every.many"
+msgstr "Co %(count)s dni"
+
+msgid "web.admin.deals.every.other"
+msgstr "Co %(count)s dnia"
+
+msgid "web.admin.deals.lasts.one"
+msgstr "trwa %(count)s dzień"
+
+msgid "web.admin.deals.lasts.few"
+msgstr "trwa %(count)s dni"
+
+msgid "web.admin.deals.lasts.many"
+msgstr "trwa %(count)s dni"
+
+msgid "web.admin.deals.lasts.other"
+msgstr "trwa %(count)s dnia"
+
+msgid "web.admin.deals.windows"
+msgstr "W terminach swoich ofert"
+
+msgid "web.admin.deals.size.one"
+msgstr "%(count)s na frakcję"
+
+msgid "web.admin.deals.size.few"
+msgstr "%(count)s na frakcję"
+
+msgid "web.admin.deals.size.many"
+msgstr "%(count)s na frakcję"
+
+msgid "web.admin.deals.size.other"
+msgstr "%(count)s na frakcję"
+
+msgid "web.admin.deals.size.all"
+msgstr "Wszystkie oferty"
+
+msgid "web.admin.deals.discount.one"
+msgstr "%(percent)s%% taniej"
+
+msgid "web.admin.deals.discount"
+msgstr "%(low)s–%(high)s%% taniej"
+
+msgid "web.admin.deals.next.none"
+msgstr "Brak"
+
+msgid "web.admin.deals.edit"
+msgstr "Zmień: %(section)s"
+
+msgid "web.admin.deals.next_note"
+msgstr "Zmiany obowiązują od następnego kroku każdej sekcji; obecne oferty zostają do tego czasu. Czas: %(zone)s."
+
+msgid "web.admin.deals.seasons"
+msgstr "Okna sezonowe %(year)s"
+
+msgid "web.admin.deals.season.ended"
+msgstr "Zakończone"
+
+msgid "web.admin.deals.season.running"
+msgstr "Trwa"
+
+msgid "web.admin.deals.season.next"
+msgstr "Następne"
+
+msgid "web.admin.deals.season.later"
+msgstr "Później"
+
+msgid "web.admin.deals.season.offers.one"
+msgstr "%(count)s oferta"
+
+msgid "web.admin.deals.season.offers.few"
+msgstr "%(count)s oferty"
+
+msgid "web.admin.deals.season.offers.many"
+msgstr "%(count)s ofert"
+
+msgid "web.admin.deals.season.offers.other"
+msgstr "%(count)s oferty"
+
+msgid "web.admin.deals.section.edit"
+msgstr "Sekcja · %(section)s"
+
+msgid "web.admin.deals.section.runs"
+msgstr "Sekcja działa"
+
+msgid "web.admin.deals.section.size"
+msgstr "Oferty każdej frakcji"
+
+msgid "web.admin.deals.section.discount"
+msgstr "Rabat, %"
+
+msgid "web.admin.deals.section.from"
+msgstr "Rabat od, %"
+
+msgid "web.admin.deals.section.to"
+msgstr "Rabat do, %"
+
+msgid "web.admin.deals.section.gap"
+msgstr "Przerwa przed powtórką, dni"
+
+msgid "web.admin.deals.section.save"
+msgstr "Zapisz sekcję"
+
+msgid "web.admin.deals.managed"
+msgstr "Zmiana gorących ofert wymaga roli administratora."
+
+msgid "web.admin.deals.now"
+msgstr "Teraz w gorących ofertach"
+
+msgid "web.admin.deals.refused.size"
+msgstr "Ofert każdej frakcji może być od 1 do %(most)s."
+
+msgid "web.admin.deals.refused.discount"
+msgstr "Rabat to liczba całkowita od 0 do 99."
+
+msgid "web.admin.deals.refused.low"
+msgstr "Rabat to liczba całkowita od 0 do 99."
+
+msgid "web.admin.deals.refused.high"
+msgstr "Rabat to liczba całkowita od 0 do 99."
+
+msgid "web.admin.deals.refused.range"
+msgstr "Najniższy rabat jest wyższy niż najwyższy."
+
+msgid "web.admin.deals.refused.gap"
+msgstr "Przerwa przed powtórką to liczba dni do 365."
+
+msgid "web.admin.toast.deals.rotation.on"
+msgstr "Włączono rotację gorących ofert; sekcje zmienią się w swoich następnych krokach."
+
+msgid "web.admin.toast.deals.rotation.off"
+msgstr "Wyłączono rotację gorących ofert; gorące oferty nie pokazują żadnej oferty do jej ponownego włączenia."
+
+msgid "web.admin.toast.deals.section"
+msgstr "Zapisano: %(section)s; zmiana nastąpi w następnym kroku."
+
+msgid "web.admin.audit.action.deal_rotation.on"
+msgstr "Włączenie rotacji"
+
+msgid "web.admin.audit.action.deal_rotation.off"
+msgstr "Wyłączenie rotacji"
+
+msgid "web.admin.audit.action.deal_section"
+msgstr "Zmiana sekcji"
+
+msgid "web.admin.audit.deal.enabled"
+msgstr "%(before)s → %(after)s"
+
+msgid "web.admin.audit.deal.size"
+msgstr "rozmiar %(before)s → %(after)s"
+
+msgid "web.admin.audit.deal.discount"
+msgstr "rabat %(before)s → %(after)s"
+
+msgid "web.admin.audit.deal.gap"
+msgstr "przerwa przed powtórką %(before)s → %(after)s dni"
+
+msgid "web.admin.home.warning.deals"
+msgstr "Gorące oferty · sekcji brakuje ofert"
+
+msgid "web.admin.home.warning.deals.text"
+msgstr "%(section)s: w ostatnim kroku mniej niż %(size)s ofert jednej z frakcji."

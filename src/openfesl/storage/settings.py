@@ -1,3 +1,6 @@
+from collections.abc import Mapping
+from typing import Any
+
 from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
@@ -44,6 +47,28 @@ class SqlSettingStore:
         async with self._sessions.begin() as session:
             await put_setting(session, key, value)
             session.add(action_row(AdminAction.SETTING, key, {"value": value}, admin))
+
+    async def change_all(
+        self,
+        settings: Mapping[str, str | None],
+        action: AdminAction,
+        target: str,
+        details: dict[str, Any],
+        admin: Admin,
+    ) -> None:
+        """Set or remove settings together and record them as one action of the admin's.
+
+        Args:
+            settings: The settings' new values by key; None removes one.
+            action: What the admin did.
+            target: What it was done to.
+            details: What the admin's log keeps of it.
+            admin: The admin who changed them.
+        """
+        async with self._sessions.begin() as session:
+            for key, value in settings.items():
+                await put_setting(session, key, value)
+            session.add(action_row(action, target, details, admin))
 
 
 async def put_setting(session: AsyncSession, key: str, value: str | None) -> None:

@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 from typing import Any
 
+from openfesl.core.admin import AdminAction
 from openfesl.core.catalogues import Catalogues
 from openfesl.core.games import Games
 from openfesl.core.inventory import Ownership
@@ -135,3 +136,50 @@ async def box_entry(
         )
     href = localize(f"/admin/store/{game.id}/boxes", language)
     return details["box"], href, "; ".join(said)
+
+
+def deal_entry(
+    action: AdminAction, target: str, details: dict[str, Any], games: Games, language: str
+) -> tuple[str, str | None, str]:
+    """Return how the audit log shows a change of a game's hot-deal rotation.
+
+    Args:
+        action: What the admin did: switched the rotation or changed a section.
+        target: The game, or the game and the section as game:section.
+        details: The change's details, as the admin's log keeps them.
+        games: The games, whose rotations the change was made in.
+        language: The log's language.
+
+    Returns:
+        The rotation or section in words, the panel's page of it and what changed in words.
+    """
+    game = games.by_id(target.partition(":")[0])
+    if game is None:
+        return target, None, ""
+    texts = StoreTexts(game, language, datetime.now(UTC))
+    href = localize(f"/admin/store/{game.id}/deals", language)
+    if action is AdminAction.DEAL_ROTATION:
+        return texts.text("web.admin.deals.rotation"), href, ""
+    key = details["section"]
+    before, after = details["before"], details["after"]
+    said = []
+    for name in after:
+        if before[name] != after[name]:
+            said.append(
+                texts.text(
+                    f"web.admin.audit.deal.{name}",
+                    before=_deal_value(texts, before[name]),
+                    after=_deal_value(texts, after[name]),
+                )
+            )
+    name = texts.text(f"games.{game.id}.deal_section.{key}")
+    return name, localize(f"/admin/store/{game.id}/deals?section={key}", language), "; ".join(said)
+
+
+def _deal_value(texts: StoreTexts, value: Any) -> str:
+    # A section's value as the log says it: on or off, a number, or a range of discounts.
+    if isinstance(value, bool):
+        return texts.text(f"web.admin.deals.switch.{'runs' if value else 'off'}")
+    if isinstance(value, list):
+        return texts.text("web.admin.deals.discount", low=value[0], high=value[1])
+    return texts.amount(value) if value is not None else texts.text("web.admin.deals.size.all")

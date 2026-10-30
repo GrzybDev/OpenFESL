@@ -1,10 +1,12 @@
 import logging
 import re
+from collections.abc import Mapping
 from enum import StrEnum
 from typing import TYPE_CHECKING, Annotated, Any, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin
 
 # For annotations only, since a game's data holds its policies.
@@ -176,6 +178,24 @@ class SettingStore(Protocol):
             key: The setting's key.
             value: Its new value; None removes it.
             admin: The admin who changed it; None for the command line.
+        """
+
+    async def change_all(
+        self,
+        settings: Mapping[str, str | None],
+        action: AdminAction,
+        target: str,
+        details: dict[str, Any],
+        admin: Admin,
+    ) -> None:
+        """Set or remove settings together and record them as one action of the admin's.
+
+        Args:
+            settings: The settings' new values by key; None removes one.
+            action: What the admin did.
+            target: What it was done to.
+            details: What the admin's log keeps of it.
+            admin: The admin who changed them.
         """
 
 

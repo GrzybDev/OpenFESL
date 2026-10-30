@@ -12,6 +12,7 @@ from openfesl.web.admin.auth import AdminSessions, NeedsRole, SignInNeeded, Sign
 from openfesl.web.admin.box_tables import box_table_routes
 from openfesl.web.admin.boxes import BoxAdminViews, box_routes
 from openfesl.web.admin.catalogues import catalogue_routes
+from openfesl.web.admin.deals import DealAdminViews, deal_routes
 from openfesl.web.admin.entitlements import entitlement_routes
 from openfesl.web.admin.hero_actions import hero_action_routes
 from openfesl.web.admin.hero_counts import hero_count_routes
@@ -70,11 +71,12 @@ def include_admin_routes(
         games, services.catalogues, stores.prices, stores.settings, services.feed.apply
     )
     box_views = BoxAdminViews(store_views, services.catalogues, services.deals, stores.boxes)
+    deal_views = DealAdminViews(store_views, services.deals, stores.settings)
 
     async def menu_counts() -> dict[str, int]:
         counts = await server_views.menu_counts()
-        if flagged := await box_views.flagged():
-            counts["store"] = flagged
+        if attention := await box_views.flagged() + len(await deal_views.short()):
+            counts["store"] = attention
         return counts
 
     sign_in = AdminSessions(
@@ -82,7 +84,9 @@ def include_admin_routes(
     )
     app.include_router(sign_in.routes())
     app.include_router(
-        home_routes(sign_in, games, census, players, stores.accounts, server_views, box_views)
+        home_routes(
+            sign_in, games, census, players, stores.accounts, server_views, box_views, deal_views
+        )
     )
     app.include_router(server_list_routes(sign_in, server_views))
     app.include_router(decision_routes(sign_in, server_views, apply))
@@ -140,6 +144,7 @@ def include_admin_routes(
     app.include_router(store_rule_routes(sign_in, store_views))
     app.include_router(box_routes(sign_in, box_views))
     app.include_router(box_table_routes(sign_in, box_views))
+    app.include_router(deal_routes(sign_in, deal_views))
     app.include_router(
         audit_routes(
             sign_in,

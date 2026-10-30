@@ -118,6 +118,12 @@ class AdminAction(StrEnum):
     """Changed the drop table of a box of a game's store, the target naming both as game:box;
     the details hold the tiers' weights before and after, the entries removed and added, and
     whether the box promised its worth before and after."""
+    DEAL_ROTATION = "deal_rotation"
+    """Turned the hot-deal rotation of the game whose id is the target on or off; the details
+    say which."""
+    DEAL_SECTION = "deal_section"
+    """Changed a section of a game's hot-deal rotation, the target naming both as game:section;
+    the details hold the section's values before and after."""
     STORE_RULE = "store_rule"
     """Changed a price rule of a game's store and applied it, the target naming both as
     game:rule; the details hold the rule's values before and after, how many items took its

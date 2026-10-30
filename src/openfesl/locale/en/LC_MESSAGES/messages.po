@@ -11109,3 +11109,210 @@ msgstr "promise of worth off"
 
 msgid "web.admin.toast.boxes.unchanged"
 msgstr "Nothing changed in the drop table of %(box)s."
+
+msgid "web.admin.store.tab.deals"
+msgstr "Hot deals"
+
+msgid "web.admin.deals.subtitle"
+msgstr "Hot deals of %(game)s"
+
+msgid "web.admin.deals.short"
+msgstr "Rotation short of deals"
+
+msgid "web.admin.deals.short.title"
+msgstr "%(section)s · %(faction)s: %(count)s of %(size)s deals in its latest step."
+
+msgid "web.admin.deals.short.text"
+msgstr "The pool held too few offers that were not sold within the repeat gap. A larger pool, a smaller size or a shorter gap lets the next step pick them all. Admin Home lists it too."
+
+msgid "web.admin.deals.rotation"
+msgstr "Hot-deal rotation"
+
+msgid "web.admin.deals.rotation.on"
+msgstr "Every section runs on its schedule; changes apply from each section's next step."
+
+msgid "web.admin.deals.rotation.off"
+msgstr "Off: hot deals list no offers until the rotation is switched on again."
+
+msgid "web.admin.deals.rotation.save"
+msgstr "Save the switch"
+
+msgid "web.admin.deals.switch.on"
+msgstr "On"
+
+msgid "web.admin.deals.switch.off"
+msgstr "Off"
+
+msgid "web.admin.deals.switch.runs"
+msgstr "Runs"
+
+msgid "web.admin.deals.switch.stopped"
+msgstr "Short of deals"
+
+msgid "web.admin.deals.sections"
+msgstr "Sections"
+
+msgid "web.admin.deals.sections.running"
+msgstr "%(running)s of %(total)s on"
+
+msgid "web.admin.deals.column.section"
+msgstr "Section"
+
+msgid "web.admin.deals.column.runs"
+msgstr "Runs"
+
+msgid "web.admin.deals.column.size"
+msgstr "Size"
+
+msgid "web.admin.deals.column.next"
+msgstr "Next change"
+
+msgid "web.admin.deals.column.now"
+msgstr "On sale now"
+
+msgid "web.admin.deals.daily"
+msgstr "Every day"
+
+msgid "web.admin.deals.every.one"
+msgstr "Every %(count)s day"
+
+msgid "web.admin.deals.every.other"
+msgstr "Every %(count)s days"
+
+msgid "web.admin.deals.lasts.one"
+msgstr "lasts %(count)s day"
+
+msgid "web.admin.deals.lasts.other"
+msgstr "lasts %(count)s days"
+
+msgid "web.admin.deals.windows"
+msgstr "In its offers' windows"
+
+msgid "web.admin.deals.size.one"
+msgstr "%(count)s per faction"
+
+msgid "web.admin.deals.size.other"
+msgstr "%(count)s per faction"
+
+msgid "web.admin.deals.size.all"
+msgstr "All its offers"
+
+msgid "web.admin.deals.discount.one"
+msgstr "%(percent)s%% off"
+
+msgid "web.admin.deals.discount"
+msgstr "%(low)s–%(high)s%% off"
+
+msgid "web.admin.deals.next.none"
+msgstr "None"
+
+msgid "web.admin.deals.edit"
+msgstr "Change %(section)s"
+
+msgid "web.admin.deals.next_note"
+msgstr "Changes apply from each section's next step; what is on sale now stays until then. Times are in %(zone)s."
+
+msgid "web.admin.deals.seasons"
+msgstr "Seasonal windows %(year)s"
+
+msgid "web.admin.deals.season.ended"
+msgstr "Ended"
+
+msgid "web.admin.deals.season.running"
+msgstr "Running"
+
+msgid "web.admin.deals.season.next"
+msgstr "Next"
+
+msgid "web.admin.deals.season.later"
+msgstr "Later"
+
+msgid "web.admin.deals.season.offers.one"
+msgstr "%(count)s offer"
+
+msgid "web.admin.deals.season.offers.other"
+msgstr "%(count)s offers"
+
+msgid "web.admin.deals.section.edit"
+msgstr "Section · %(section)s"
+
+msgid "web.admin.deals.section.runs"
+msgstr "The section runs"
+
+msgid "web.admin.deals.section.size"
+msgstr "Deals of each faction"
+
+msgid "web.admin.deals.section.discount"
+msgstr "Discount, %"
+
+msgid "web.admin.deals.section.from"
+msgstr "Discount from, %"
+
+msgid "web.admin.deals.section.to"
+msgstr "Discount to, %"
+
+msgid "web.admin.deals.section.gap"
+msgstr "Repeat gap, days"
+
+msgid "web.admin.deals.section.save"
+msgstr "Save section"
+
+msgid "web.admin.deals.managed"
+msgstr "Hot deals are changed with the admin role."
+
+msgid "web.admin.deals.now"
+msgstr "On hot deals now"
+
+msgid "web.admin.deals.refused.size"
+msgstr "The deals of each faction are from 1 to %(most)s."
+
+msgid "web.admin.deals.refused.discount"
+msgstr "A discount is a whole number from 0 to 99."
+
+msgid "web.admin.deals.refused.low"
+msgstr "A discount is a whole number from 0 to 99."
+
+msgid "web.admin.deals.refused.high"
+msgstr "A discount is a whole number from 0 to 99."
+
+msgid "web.admin.deals.refused.range"
+msgstr "The lowest discount is above the highest."
+
+msgid "web.admin.deals.refused.gap"
+msgstr "The repeat gap is a whole number of days up to 365."
+
+msgid "web.admin.toast.deals.rotation.on"
+msgstr "Switched the hot-deal rotation on; sections change at their next step."
+
+msgid "web.admin.toast.deals.rotation.off"
+msgstr "Switched the hot-deal rotation off; hot deals list no offers until it is switched on again."
+
+msgid "web.admin.toast.deals.section"
+msgstr "Saved %(section)s; it changes at its next step."
+
+msgid "web.admin.audit.action.deal_rotation.on"
+msgstr "Rotation switched on"
+
+msgid "web.admin.audit.action.deal_rotation.off"
+msgstr "Rotation switched off"
+
+msgid "web.admin.audit.action.deal_section"
+msgstr "Section changed"
+
+msgid "web.admin.audit.deal.enabled"
+msgstr "%(before)s → %(after)s"
+
+msgid "web.admin.audit.deal.size"
+msgstr "size %(before)s → %(after)s"
+
+msgid "web.admin.audit.deal.discount"
+msgstr "discount %(before)s → %(after)s"
+
+msgid "web.admin.audit.deal.gap"
+msgstr "repeat gap %(before)s → %(after)s days"
+
+msgid "web.admin.home.warning.deals"
+msgstr "Hot deals · section short of deals"
+
+msgid "web.admin.home.warning.deals.text"
+msgstr "%(section)s sold fewer than %(size)s deals of a faction in its latest step."

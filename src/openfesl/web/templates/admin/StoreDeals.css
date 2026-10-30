@@ -1,0 +1,92 @@
+/* A game's hot-deal rotation: its switch, each section's row beside the chosen section's form,
+   and the seasonal windows of the year. Where the table does not fit, each section is a block of
+   its own. */
+@layer pages {
+  .deals-rotation {
+    display: grid;
+    gap: 2px;
+
+    > .form-button {
+      justify-self: end;
+    }
+  }
+
+  .admin-list .table.deals-table {
+    min-width: 820px;
+  }
+
+  .deals-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns: minmax(200px, 1.3fr) 150px minmax(140px, 1fr) 150px 110px 44px;
+    gap: 2px;
+  }
+
+  .deals-row:nth-child(even) {
+    --cell: var(--row-alt);
+  }
+
+  .deals-row[aria-current="true"] {
+    --cell: var(--accent);
+  }
+
+  .deals-seasons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 2px;
+    margin: 2px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .deals-season {
+    display: grid;
+    gap: 2px;
+    background: var(--row);
+    padding: 10px 12px;
+    color: var(--ink);
+  }
+
+  .deals-season-running {
+    background: var(--accent);
+  }
+
+  .deals-season-ended {
+    background: var(--row-pale);
+    color: var(--dim);
+  }
+
+  @container (width < 820px) {
+    .admin-list .table.deals-table {
+      min-width: 0;
+
+      [role="rowgroup"]:first-child {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
+    }
+
+    .deals-row.deals-columns {
+      grid-template-columns: minmax(0, 1fr) auto 44px;
+
+      > :nth-child(2) {
+        grid-row: 1;
+        grid-column: 2;
+      }
+
+      > :nth-child(3),
+      > :nth-child(4),
+      > :nth-child(5) {
+        grid-column: 1 / -1;
+      }
+
+      > :last-child {
+        grid-row: 1;
+        grid-column: 3;
+      }
+    }
+  }
+}

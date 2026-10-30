@@ -1,4 +1,4 @@
-{#def online: int, logged_in: int, hosting: int, accounts: int, new_accounts: int, mode: str, waiting: list, warnings: list, flags: list #}
+{#def online: int, logged_in: int, hosting: int, accounts: int, new_accounts: int, mode: str, waiting: list, warnings: list, flags: list, short: list #}
 {% set title = _("web.admin.home") %}
 <AdminPage :title="title" current="home">
   <div id="live"
@@ -138,9 +138,21 @@
               {% endfor %}
             </section>
           {% endif %}
-          {% if flags %}
+          {% if flags or short %}
             <section aria-labelledby="home-store">
-              <Bar id="home-store" :extra="number(flags|length)" large>{{ _("web.admin.home.store") }}</Bar>
+              <Bar id="home-store" :extra="number(flags|length + short|length)" large>{{ _("web.admin.home.store") }}</Bar>
+              {% for game, row in short %}
+                <div class="warning">
+                  <p class="alert-label">
+                    <span aria-hidden="true"
+                          class="alert-glyph"><Icon name="warn" fill="#0A0A0A" /></span>{{ _("web.admin.home.warning.deals") }}
+                  </p>
+                  <p class="body-text">
+                    {{ _("web.admin.home.warning.deals.text", section=_("games." ~ game.id ~ ".deal_section." ~ row.key), size=number(row.section.size)) }}
+                  </p>
+                </div>
+                <FormButton icon="go" :href="url('/admin/store/' ~ game.id ~ '/deals?section=' ~ row.key)">{{ _("web.admin.open", name=_("games." ~ game.id ~ ".deal_section." ~ row.key)) }}</FormButton>
+              {% endfor %}
               {% for flag in flags %}
                 <div class="warning">
                   <p class="alert-label">

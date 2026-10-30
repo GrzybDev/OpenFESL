@@ -183,6 +183,20 @@ def periods(schedule: Schedule, now: datetime, zone: str) -> list[Period]:
     return found
 
 
+def next_start(schedule: Schedule, now: datetime, zone: str) -> datetime:
+    """Return when the next period of a schedule starts after a moment.
+
+    Args:
+        schedule: The schedule.
+        now: The moment.
+        zone: The time zone whose midnights the periods start at.
+    """
+    number = (today(now, zone) - _EPOCH).days + 1
+    while number % schedule.every not in schedule.starts:
+        number += 1
+    return day_start(_EPOCH + timedelta(days=number), zone)
+
+
 def easter(year: int) -> date:
     """Return the Western Easter Sunday of a year, by the Gregorian computus.
 

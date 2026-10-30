@@ -1,6 +1,6 @@
 from datetime import UTC, date, datetime, timedelta
 
-from openfesl.core.calendar import Period, Schedule, Window, periods
+from openfesl.core.calendar import Period, Schedule, Window, next_start, periods
 from openfesl.core.calendar import easter as computed
 
 # A Monday at midnight in UTC.
@@ -26,6 +26,10 @@ def test_periods_start_on_their_days_at_the_zones_midnight_and_last_their_days()
     assert starts(sale, MONDAY + timedelta(days=3)) == [MONDAY + timedelta(3)]
     assert starts(sale, MONDAY + timedelta(days=6)) == []
     assert len(starts(pairs, MONDAY)) == 3
+    # The next period of each, as the admin panel says when a section changes next.
+    assert next_start(weekly, before, "UTC") == MONDAY
+    assert next_start(weekly, MONDAY, "UTC") == MONDAY + timedelta(7)
+    assert next_start(sale, MONDAY + timedelta(1), "UTC") == MONDAY + timedelta(3)
     # Midnight in Warsaw is an hour before UTC's in November, and two hours in July.
     warsaw = datetime(2026, 11, 1, 23, tzinfo=UTC)
     assert starts(weekly, warsaw, "Europe/Warsaw") == [warsaw]
