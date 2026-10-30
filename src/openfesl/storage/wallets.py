@@ -78,7 +78,7 @@ class SqlWalletStore:
                         WalletEntryRow.reason != REFUND,
                     ),
                 )
-                .where(_matching(wallets))
+                .where(matching(wallets))
                 .group_by(WalletRow.id)
             )
             found = {(row[0], row[1], row[2], row[3]): int(row[4]) for row in rows}
@@ -94,7 +94,7 @@ class SqlWalletStore:
             return await session.scalar(
                 select(WalletEntryRow.created_at)
                 .join(WalletRow, WalletRow.id == WalletEntryRow.wallet_id)
-                .where(_matching([wallet]), WalletEntryRow.reason == ALLOWANCE)
+                .where(matching([wallet]), WalletEntryRow.reason == ALLOWANCE)
             )
 
     async def credit_from_server(
@@ -179,7 +179,7 @@ async def spend(session: AsyncSession, wallet: Wallet, amount: int, reason: str)
     spent = (
         await session.execute(
             update(WalletRow)
-            .where(_matching([wallet]), WalletRow.balance >= amount)
+            .where(matching([wallet]), WalletRow.balance >= amount)
             .values(balance=WalletRow.balance - amount)
             .returning(WalletRow.id, WalletRow.balance)
         )
@@ -266,7 +266,7 @@ async def _locked(session: AsyncSession, wallet: Wallet) -> tuple[int, int]:
     # Opened first, so that there is a row to lock; returns its id and balance.
     await open_wallets(session, [wallet])
     locked = await session.execute(
-        select(WalletRow.id, WalletRow.balance).where(_matching([wallet])).with_for_update()
+        select(WalletRow.id, WalletRow.balance).where(matching([wallet])).with_for_update()
     )
     wallet_id, balance = locked.one()
     return wallet_id, balance
@@ -276,7 +276,12 @@ def _key(wallet: Wallet) -> tuple[str, str, int, int | None]:
     return (wallet.game, wallet.currency, wallet.account_id, wallet.persona_id)
 
 
-def _matching(wallets: Sequence[Wallet]) -> ColumnElement[bool]:
+def matching(wallets: Sequence[Wallet]) -> ColumnElement[bool]:
+    """Return the condition that picks the rows of some wallets.
+
+    Args:
+        wallets: The wallets.
+    """
     return or_(
         *(
             and_(
@@ -298,7 +303,7 @@ async def _held(session: AsyncSession, wallets: Sequence[Wallet]) -> list[int]:
             WalletRow.account_id,
             WalletRow.persona_id,
             WalletRow.balance,
-        ).where(_matching(wallets))
+        ).where(matching(wallets))
     )
     found = {(row[0], row[1], row[2], row[3]): row[4] for row in held}
     return [found.get(_key(wallet), wallet.allowance) for wallet in wallets]

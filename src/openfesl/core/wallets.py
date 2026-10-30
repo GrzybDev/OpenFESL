@@ -1,4 +1,4 @@
-from collections.abc import Sequence
+from collections.abc import Collection, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
@@ -76,6 +76,84 @@ class WalletStore(Protocol):
 
         Returns:
             The balance, or None when the ledger holds the transaction id already.
+        """
+
+
+@dataclass(frozen=True, slots=True)
+class LedgerEntry:
+    """A change of a wallet as its ledger keeps it, with what caused it where a record says.
+
+    Attributes:
+        id: Its number; later changes have higher ones.
+        at: When it was made.
+        change: What it added, below 0 for what it took.
+        balance: The wallet's balance after it.
+        reason: Why, as the ledger keeps it, such as purchase.
+        purchase: The number of the purchase that paid it, if one did.
+        items: The items that purchase gave, by number.
+        admin: The name of the admin who made it, for an admin's grant or take.
+        note: The admin's note.
+    """
+
+    id: int
+    at: datetime
+    change: int
+    balance: int
+    reason: str
+    purchase: int | None = None
+    items: tuple[int, ...] = ()
+    admin: str | None = None
+    note: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class Ledger:
+    """A page of a wallet's ledger, newest first.
+
+    Attributes:
+        total: How many changes the reasons chosen let through.
+        counts: How many changes each reason has in all.
+        entries: The changes of the page.
+    """
+
+    total: int
+    counts: Mapping[str, int]
+    entries: list[LedgerEntry]
+
+
+@dataclass(frozen=True, slots=True)
+class WalletHead:
+    """Whether a wallet was opened, and its latest change.
+
+    Attributes:
+        opened: Whether its first use opened it.
+        last: Its latest change, if it has any.
+    """
+
+    opened: bool
+    last: LedgerEntry | None
+
+
+class WalletLedgers(Protocol):
+    """Where the admin panel reads the wallets' ledgers."""
+
+    async def ledger(
+        self, wallet: Wallet, reasons: Collection[str], offset: int, limit: int
+    ) -> Ledger:
+        """Return a page of a wallet's ledger, newest first, without opening the wallet.
+
+        Args:
+            wallet: The wallet.
+            reasons: The reasons whose changes are listed; every one when empty.
+            offset: How many changes to skip.
+            limit: The most changes to return.
+        """
+
+    async def heads(self, wallets: Sequence[Wallet]) -> list[WalletHead]:
+        """Return whether each wallet was opened, with its latest change, opening none.
+
+        Args:
+            wallets: The wallets.
         """
 
 

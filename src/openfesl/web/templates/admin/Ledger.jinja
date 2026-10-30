@@ -1,0 +1,151 @@
+{#def view, found, line, listing, ledger, groups: dict, pages: int, size: int, catalogue, manages: bool #}
+{# A wallet's ledger: a tab of each wallet of the account, the changes newest first with the
+   balance after each and why it changed, beside the balance and the filter by reason. Read
+   without opening the wallet. #}
+{% set account = view.record.account %}
+{% set game = found.game %}
+{% set base = url("/admin/accounts/" ~ account.id) %}
+{% set list = base ~ "/ledger" %}
+{% set code = line.wallet.currency %}
+{% set currency = _("games." ~ game.id ~ ".currency." ~ code) %}
+{% set owner = line.hero.persona.name if line.hero else account.nuid %}
+{% set title = _("web.admin.ledger.title") %}
+<AdminPage :title="title ~ ' · ' ~ currency ~ ' · ' ~ owner" current="accounts">
+  <PageHead labelledby="ledger-title">
+    <div class="enter-title page-title page-title-wider">
+      <h1 id="ledger-title" class="account-heading">
+        <span class="title-block">{{ title }}</span>
+        <span class="title-sub account-heading-name">{{ currency }} · {{ owner }}</span>
+      </h1>
+    </div>
+    <Tab :href="base ~ '/wallets'" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.account.number", number=account.id) }}<span class="tab-count">{{ account.display_name or account.nuid }}</span></Tab>
+  </PageHead>
+  <Panel class="enter-panel">
+    <nav aria-label="{{ _('web.admin.wallets.title') }}"
+         class="tabs ledger-tabs">
+      {% for each in found.lines %}
+        <Tab :href="list ~ listing.changed(wallet=each.key, groups=(), page=1).query()" :current="each.key == line.key">
+        {{ each.hero.persona.name if each.hero else _("games." ~ game.id ~ ".currency." ~ each.wallet.currency) }}<span class="tab-count">{{ number(each.balance) }}</span>
+        </Tab>
+      {% endfor %}
+    </nav>
+    <div class="list-layout admin-layout">
+      <section aria-labelledby="ledger-list" class="list-main account-part">
+        <Bar id="ledger-list" :extra="_n('web.admin.ledger.count', ledger.total)">{{ _("web.admin.ledger.heading", currency=currency) }}</Bar>
+        {% if ledger.entries %}
+          <div class="table-scroll">
+            <div role="table" aria-labelledby="ledger-list" class="table admin-ledger">
+              <div role="rowgroup">
+                <div role="row" class="ledger-columns">
+                  <div role="columnheader"
+                       aria-sort="descending"
+                       class="column-head column-sorted">
+                    {{ _("web.admin.ledger.column.when") }}<Icon name="down" :size="14" stroke="currentColor" />
+                  </div>
+                  <div role="columnheader"
+                       class="column-head column-number">{{ _("web.admin.ledger.column.change") }}</div>
+                  <div role="columnheader"
+                       class="column-head column-number">{{ _("web.admin.ledger.column.after") }}</div>
+                  <div role="columnheader"
+                       class="column-head column-name">{{ _("web.admin.ledger.column.reason") }}</div>
+                  <div role="columnheader" class="column-head">{{ _("web.admin.ledger.column.by") }}</div>
+                </div>
+              </div>
+              <div role="rowgroup" class="enter-rows table-rows">
+                {% for entry in ledger.entries %}
+                  {% set reason = entry.reason %}
+                  {% if reason == "purchase" and line.hero %}
+                    {% set reason = "ability" %}
+                  {% endif %}
+                  {% if reason == "admin" %}
+                    {% set reason = "grant" if entry.change >= 0 else "take" %}
+                  {% endif %}
+                  <div role="row" class="ledger-columns ledger-row">
+                    <div role="cell" class="admin-cell cell-stack">
+                      <span class="cell-time">{{ when(entry.at, "yMMMd") }}</span>
+                      <span class="cell-ago">{{ _("web.server.time", time=when(entry.at, "Hm")) }}</span>
+                    </div>
+                    <div role="cell" class="admin-cell ledger-change">
+                      <Icon :name="'plus' if entry.change >= 0 else 'down'" :size="12" stroke="currentColor" />{{ "+" if entry.change > 0 else "" }}{{ number(entry.change) }}
+                    </div>
+                    <div role="cell" class="admin-cell ledger-balance">
+                      <span aria-hidden="true"
+                            class="cell-label">{{ _("web.admin.ledger.column.after") }}</span>{{ number(entry.balance) }}
+                    </div>
+                    <div role="cell" class="admin-cell cell-stack">
+                      <span class="admin-item-kind">{{ _("web.admin.ledger.reason." ~ reason) }}</span>
+                      {% if entry.purchase %}
+                        <span>
+                          {%- for item in entry.items -%}
+                            {{ catalogue.name(item) or _("web.admin.items.unnamed", id=item) }}{{ ", " if not loop.last else " · " }}
+                          {%- endfor -%}
+                          {{ _("web.admin.ledger.purchase", id=entry.purchase) }}
+                        </span>
+                      {% elif reason == "allowance" %}
+                        <span>{{ _("web.admin.ledger.first_use") }}</span>
+                      {% endif %}
+                    </div>
+                    <div role="cell" class="admin-cell cell-stack">
+                      {% if entry.admin %}
+                        <span class="admin-hero-strong">{{ entry.admin }}</span>
+                        {% if entry.note %}<span class="cell-ago">{{ entry.note }}</span>{% endif %}
+                      {% elif reason in ("allowance", "level") %}
+                        <span>OpenFESL</span>
+                      {% elif reason in ("grant", "take") %}
+                        <span>–</span>
+                      {% elif reason == "server" %}
+                        <span>{{ _("web.admin.ledger.by.server") }}</span>
+                      {% else %}
+                        <span>{{ account.display_name or account.nuid }}</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        {% elif listing.groups %}
+          <p class="bar-text body-text">{{ _("web.admin.ledger.none") }}</p>
+        {% else %}
+          <p class="bar-text body-text">{{ _("web.admin.ledger.empty") }}</p>
+        {% endif %}
+        <div class="list-foot">
+          <p class="body-text">{{ _("web.admin.ledger.note", count=number(size)) }}</p>
+          <Pager :base="list" :view="listing" :pages="pages" />
+        </div>
+      </section>
+
+      <div class="list-side admin-side">
+        <section aria-labelledby="ledger-balance">
+          <Bar id="ledger-balance">{{ _("web.admin.ledger.balance") }}</Bar>
+          <p class="bar-text ledger-total">
+            <span>{{ number(line.balance) }}</span><span>{{ currency }}</span>
+          </p>
+          {% if not line.head.opened %}
+            <p class="bar-text body-text">{{ _("web.admin.wallets.closed.text", amount=number(line.wallet.allowance), currency=currency) }}</p>
+          {% endif %}
+        </section>
+        {% if ledger.counts %}
+          <form method="get"
+                action="{{ list }}"
+                aria-labelledby="ledger-filter"
+                class="ledger-filter">
+            <input type="hidden" name="game" value="{{ game.id }}">
+            <input type="hidden" name="wallet" value="{{ line.key }}">
+            <h2 id="ledger-filter" class="bar bar-large">
+              <span>{{ _("web.admin.ledger.filter") }}</span><span class="bar-extra">{{ _("web.admin.ledger.filter.all") if not listing.groups else _("web.admin.ledger.filter.shown", shown=number(ledger.total), total=number(ledger.counts.values()|sum)) }}</span>
+            </h2>
+            {% for group, count in groups.items() %}
+              {% if count %}
+                <CheckRow :name="group" :label="_('web.admin.ledger.filter.' ~ group)" glyph="doc" :count="count" :checked="group in listing.groups" />
+              {% endif %}
+            {% endfor %}
+            <div class="find-button">
+              <FormButton icon="find">{{ _("web.admin.ledger.apply") }}</FormButton>
+            </div>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </Panel>
+</AdminPage>

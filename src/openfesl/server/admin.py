@@ -26,6 +26,7 @@ from openfesl.web.admin.servers import (
     server_list_routes,
 )
 from openfesl.web.admin.settings import settings_routes
+from openfesl.web.admin.wallets import WalletAdminViews, wallet_routes
 from openfesl.web.pages import Pages
 from openfesl.web.sessions import FormExpired
 
@@ -94,6 +95,8 @@ def include_admin_routes(
     app.include_router(hero_count_routes(sign_in, account_views, hero_views))
     app.include_router(hero_action_routes(sign_in, account_views, hero_views, services.feed.apply))
     app.include_router(hero_item_routes(sign_in, account_views, hero_views))
+    wallet_views = WalletAdminViews(games, services.heroes, services.wallets, stores.ledgers)
+    app.include_router(wallet_routes(sign_in, account_views, wallet_views, services.catalogues))
     app.include_router(
         entitlement_routes(sign_in, account_views, stores.entitlements, stores.keys, games)
     )

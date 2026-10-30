@@ -19,6 +19,7 @@ from openfesl.core.store_window import left_of, runs_low
 from openfesl.core.wallets import Wallets
 from openfesl.web.admin.accounts import AccountView, AccountViews, PersonaView
 from openfesl.web.admin.auth import AdminSessions
+from openfesl.web.admin.wallets import shared_currencies
 from openfesl.web.heroes import HeroCard, hero_cards
 from openfesl.web.profiles import seen_by_others
 
@@ -35,12 +36,14 @@ class GameHeroes:
         roster: The heroes, with the account's slots and default hero.
         cards: What each hero's row shows, in the roster's order.
         keys: The treasure chest keys the account holds; none in a game without chests.
+        balances: What the account holds in each currency that its heroes share, by code.
     """
 
     game: Game
     roster: Roster
     cards: list[HeroCard]
     keys: int | None
+    balances: list[tuple[str, int]]
 
 
 @dataclass(frozen=True, slots=True)
@@ -154,7 +157,10 @@ class HeroAdminViews:
                 query = EntitlementQuery(tag=key_tag(game.chests), status=ACTIVE)
                 held = await self._entitlements.of_account(account_id, query)
                 keys = sum(entry.uses or 0 for entry in held)
-            found.append(GameHeroes(game, roster, cards, keys))
+            shared = shared_currencies(game)
+            amounts = await self._wallets.of_account(game, account_id, shared)
+            balances = list(zip(shared, amounts, strict=True))
+            found.append(GameHeroes(game, roster, cards, keys, balances))
         return found
 
     async def page(self, view: AccountView, hero_id: int, language: str) -> HeroPage | None:

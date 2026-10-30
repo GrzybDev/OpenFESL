@@ -1,0 +1,127 @@
+{#def view, found: list, manages: bool #}
+{# An account's wallets: those of the currencies its heroes share and each hero's own,
+   with the balance, the latest change and the way to each ledger, beside the account, the limits
+   of a balance and the way back to its heroes. Read without opening a wallet. #}
+{% set account = view.record.account %}
+{% set title = _("web.admin.account") %}
+{% set base = url("/admin/accounts/" ~ account.id) %}
+<AdminPage :title="title ~ ' · ' ~ account.nuid" current="accounts">
+  <PageHead labelledby="wallets-title">
+    <div class="enter-title page-title page-title-wider">
+      <h1 id="wallets-title" class="account-heading">
+        <span class="title-block">{{ title }}</span>
+        <span class="title-sub account-heading-name">{{ account.nuid }}</span>
+      </h1>
+    </div>
+    <Tab :href="base" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.account.number", number=account.id) }}<span class="tab-count">{{ account.display_name or account.nuid }}</span></Tab>
+  </PageHead>
+  <Panel class="enter-panel">
+    <div class="list-layout admin-layout">
+      <div class="list-main account-main">
+        {% for game_wallets in found %}
+          {% set game = game_wallets.game %}
+          <section aria-labelledby="wallets-{{ game.id }}" class="account-part">
+            <Bar :id="'wallets-' ~ game.id" :extra="number(game_wallets.lines|length)">
+            <span class="bar-chip">{{ _("web.admin.wallets.title") }}<GameChip :of="game" full /></span>
+            </Bar>
+            <div class="table-scroll">
+              <div role="table"
+                   aria-labelledby="wallets-{{ game.id }}"
+                   class="table admin-wallets">
+                <div role="rowgroup">
+                  <div role="row" class="wallet-columns">
+                    <div role="columnheader"
+                         class="column-head column-name">{{ _("web.admin.wallets.column.wallet") }}</div>
+                    <div role="columnheader" class="column-head">{{ _("web.admin.wallets.column.owner") }}</div>
+                    <div role="columnheader"
+                         class="column-head column-number">{{ _("web.admin.wallets.column.balance") }}</div>
+                    <div role="columnheader" class="column-head">{{ _("web.admin.wallets.column.last_change") }}</div>
+                    <div role="columnheader"
+                         class="column-head"><span class="sr-only">{{ _("web.admin.decision") }}</span></div>
+                  </div>
+                </div>
+                <div role="rowgroup" class="enter-rows table-rows">
+                  {% for line in game_wallets.lines %}
+                    {% set code = line.wallet.currency %}
+                    {% set currency = _("games." ~ game.id ~ ".currency." ~ code) %}
+                    {% set owner = line.hero.persona.name if line.hero else _("web.admin.wallets.owner.account") %}
+                    {% set ledger = base ~ "/ledger?" ~ {"game": game.id, "wallet": line.key}|urlencode %}
+                    <div role="row" class="wallet-columns wallet-row">
+                      <div role="cell" class="admin-cell wallet-label">
+                        <span aria-hidden="true" class="badge"><Icon :name="'star' if line.hero else 'coin'" :size="14" stroke="#0A0A0A" fill="#0A0A0A" /></span>
+                        <span class="cell-stack">
+                          <span class="admin-hero-strong">{{ currency }}</span>
+                          <span class="admin-item-kind">{{ code }} · {{ owner }}{% if not line.head.opened %} · {{ _("web.admin.wallets.closed") }}{% endif %}</span>
+                        </span>
+                      </div>
+                      <div role="cell" class="admin-cell">
+                        <span aria-hidden="true"
+                              class="cell-label">{{ _("web.admin.wallets.column.owner") }}</span>{{ owner }}
+                      </div>
+                      <div role="cell" class="admin-cell wallet-balance">
+                        {%- if line.earned is not none -%}
+                          {{ _("web.admin.wallets.points.balance", unspent=number(line.balance), earned=number(line.earned)) }}
+                        {%- else -%}
+                          {{ number(line.balance) }}
+                        {%- endif -%}
+                      </div>
+                      <div role="cell" class="admin-cell cell-stack">
+                        {% set last = line.head.last %}
+                        {% if last %}
+                          <span class="cell-time">{{ when(last.at, "yMMMd") }}</span>
+                          <span class="cell-ago">{{ _("web.admin.ledger.reason." ~ (("grant" if last.change >= 0 else "take") if last.reason == "admin" else last.reason)) }} · {{ "+" if last.change > 0 else "" }}{{ number(last.change) }}</span>
+                        {% elif line.head.opened %}
+                          <span class="cell-ago">{{ _("web.admin.wallets.unchanged") }}</span>
+                        {% else %}
+                          <span class="cell-ago">{{ _("web.admin.wallets.closed") }}</span>
+                        {% endif %}
+                      </div>
+                      <div role="cell" class="wallet-decide">
+                        <a href="{{ ledger }}" class="form-button"><span aria-hidden="true" class="form-glyph"><Icon name="doc" :size="14" stroke="#F4F4EE" /></span>{{ _("web.admin.wallets.view_ledger") }}</a>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% set closed = game_wallets.lines|rejectattr("head.opened")|selectattr("wallet.allowance")|list %}
+            {% if closed %}
+              <p class="bar-text body-text">
+                {% for line in closed %}
+                  {{ _("web.admin.wallets.closed.text", amount=number(line.wallet.allowance), currency=_("games." ~ game.id ~ ".currency." ~ line.wallet.currency)) }}
+                {% endfor %}
+              </p>
+            {% endif %}
+            <p class="body-text side-note">{{ _("web.admin.wallets.note") }}</p>
+          </section>
+        {% endfor %}
+      </div>
+
+      <div class="list-side admin-side">
+        <section aria-labelledby="wallets-account">
+          <Bar id="wallets-account">{{ _("web.admin.account.number", number=account.id) }}</Bar>
+          <dl class="facts">
+            <Fact :label="_('web.admin.wallets.display_name')" plain>
+              {{ account.display_name or "–" }}
+            </Fact>
+            {% for game_wallets in found %}
+              <Fact :label="_('web.admin.heroes.title')" plain>
+                {% if game_wallets.default %}
+                  {{ _("web.admin.wallets.heroes.default", count=number(game_wallets.heroes|length), hero=game_wallets.default.persona.name) }}
+                {% else %}
+                  {{ number(game_wallets.heroes|length) }}
+                {% endif %}
+              </Fact>
+            {% endfor %}
+          </dl>
+          <RowLink :href="base" :label="_('web.admin.wallets.heroes')" />
+        </section>
+        <section aria-labelledby="wallets-limits">
+          <Bar id="wallets-limits">{{ _("web.admin.wallets.limits") }}</Bar>
+          <p class="bar-text body-text">{{ _("web.admin.wallets.limits.text", max=number(2147483647)) }}</p>
+          <RowLink :href="url('/admin/audit?account=' ~ account.id)" :label="_('web.admin.audit.of_account')" />
+        </section>
+      </div>
+    </div>
+  </Panel>
+</AdminPage>

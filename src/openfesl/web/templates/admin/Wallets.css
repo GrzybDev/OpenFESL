@@ -1,0 +1,162 @@
+/* The admin panel's wallets of an account and the ledger of each: the wallets with their latest
+   change, and a wallet's changes with the balance after each beside the filter by reason. */
+@layer pages {
+  .admin-balance {
+    font-family: var(--font-sans);
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: 0;
+  }
+
+  .admin-wallets {
+    min-width: 860px;
+  }
+
+  .wallet-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns: minmax(200px, 1fr) 150px 140px 190px 170px;
+    gap: 2px;
+  }
+
+  .wallet-row:nth-child(even),
+  .ledger-row:nth-child(even) {
+    --cell: var(--row-alt);
+  }
+
+  .wallet-label {
+    gap: 10px;
+
+    .badge {
+      flex: none;
+    }
+
+    > .cell-stack {
+      display: flex;
+    }
+  }
+
+  .wallet-balance {
+    justify-content: flex-end;
+    font-family: var(--font-sans);
+    font-size: 21px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wallet-decide {
+    display: grid;
+    background: var(--cell);
+  }
+
+  .ledger-tabs {
+    justify-content: flex-start;
+    margin-bottom: 12px;
+  }
+
+  .admin-ledger {
+    min-width: 760px;
+  }
+
+  .ledger-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns: 130px 120px 130px minmax(220px, 1fr) minmax(160px, 0.6fr);
+    gap: 2px;
+  }
+
+  .ledger-change,
+  .ledger-balance {
+    justify-content: flex-end;
+    gap: 6px;
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ledger-change {
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  .ledger-balance {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .ledger-total {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+
+    > span:first-child {
+      font-size: 32px;
+      letter-spacing: 0;
+    }
+  }
+
+  .ledger-filter {
+    margin-top: 14px;
+  }
+
+  /* Where a table does not fit, each wallet and each change is a block of its own. */
+  @container (width < 860px) {
+    .admin-wallets,
+    .admin-ledger {
+      min-width: 0;
+
+      [role="rowgroup"]:first-child {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
+    }
+
+    .wallet-row.wallet-columns {
+      grid-template-columns: minmax(0, 1fr) auto;
+
+      > :nth-child(2) {
+        display: none;
+      }
+
+      > :nth-child(n + 4) {
+        grid-column: 1 / -1;
+      }
+    }
+
+    .ledger-row.ledger-columns {
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas:
+        "reason change"
+        "when after"
+        "by by";
+
+      > :nth-child(1) {
+        grid-area: when;
+      }
+
+      > :nth-child(2) {
+        grid-area: change;
+      }
+
+      > :nth-child(3) {
+        grid-area: after;
+      }
+
+      > :nth-child(4) {
+        grid-area: reason;
+      }
+
+      > :nth-child(5) {
+        grid-area: by;
+      }
+    }
+  }
+}

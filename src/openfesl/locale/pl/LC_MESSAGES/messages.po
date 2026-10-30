@@ -10660,3 +10660,177 @@ msgstr "%(count)s, przyznane łącznie: %(granted)s"
 
 msgid "web.admin.audit.counted"
 msgstr "%(count)s, %(before)s → %(after)s"
+
+msgid "web.admin.wallets.title"
+msgstr "Portfele"
+
+msgid "web.admin.wallets.points"
+msgstr "Osobno dla każdego bohatera, na stronie portfeli"
+
+msgid "web.admin.wallets.link"
+msgstr "Portfele i historia"
+
+msgid "web.admin.wallets.column.wallet"
+msgstr "Portfel"
+
+msgid "web.admin.wallets.column.owner"
+msgstr "Należy do"
+
+msgid "web.admin.wallets.column.balance"
+msgstr "Saldo"
+
+msgid "web.admin.wallets.column.last_change"
+msgstr "Ostatnia zmiana"
+
+msgid "web.admin.wallets.owner.account"
+msgstr "Konto"
+
+msgid "web.admin.wallets.points.balance"
+msgstr "%(unspent)s z %(earned)s"
+
+msgid "web.admin.wallets.view_ledger"
+msgstr "Historia"
+
+msgid "web.admin.wallets.closed"
+msgstr "Jeszcze nieotwarty"
+
+msgid "web.admin.wallets.unchanged"
+msgstr "Bez zmian"
+
+msgid "web.admin.wallets.closed.text"
+msgstr "Przydział startowy %(amount)s %(currency)s zostaje dodany przy pierwszym użyciu. Do tego czasu portfel nie ma historii, a ta strona odczytuje go bez otwierania."
+
+msgid "web.admin.wallets.note"
+msgstr "Waluty wspólne dla bohaterów należą do konta, pozostałe do każdego bohatera osobno. Przeglądanie nie otwiera portfela; gra wczytuje salda przy następnym logowaniu i przy otwarciu sklepu."
+
+msgid "web.admin.wallets.display_name"
+msgstr "Nazwa wyświetlana"
+
+msgid "web.admin.wallets.heroes.default"
+msgstr "%(count)s · domyślny: %(hero)s"
+
+msgid "web.admin.wallets.heroes"
+msgstr "Bohaterowie i przedmioty"
+
+msgid "web.admin.wallets.limits"
+msgstr "Limity"
+
+msgid "web.admin.wallets.limits.text"
+msgstr "Saldo może wynosić najwyżej %(max)s, tyle ile odczytuje gra. Zarobki z meczów kończą się na limitach w czasie ustalonych w danych gry."
+
+msgid "web.admin.ledger.title"
+msgstr "Historia portfela"
+
+msgid "web.admin.ledger.heading"
+msgstr "%(currency)s · najnowsze na górze"
+
+msgid "web.admin.ledger.count.one"
+msgstr "Wpisy: %(count)s"
+
+msgid "web.admin.ledger.count.few"
+msgstr "Wpisy: %(count)s"
+
+msgid "web.admin.ledger.count.many"
+msgstr "Wpisy: %(count)s"
+
+msgid "web.admin.ledger.count.other"
+msgstr "Wpisy: %(count)s"
+
+msgid "web.admin.ledger.column.when"
+msgstr "Kiedy"
+
+msgid "web.admin.ledger.column.change"
+msgstr "Zmiana"
+
+msgid "web.admin.ledger.column.after"
+msgstr "Saldo po"
+
+msgid "web.admin.ledger.column.reason"
+msgstr "Powód"
+
+msgid "web.admin.ledger.column.by"
+msgstr "Kto · notatka"
+
+msgid "web.admin.ledger.note"
+msgstr "Najnowsze na górze · %(count)s na stronę · czas UTC · wpisów nie zmienia się ani nie usuwa; korekta to nowy wpis."
+
+msgid "web.admin.ledger.balance"
+msgstr "Saldo"
+
+msgid "web.admin.ledger.filter"
+msgstr "Filtr powodów"
+
+msgid "web.admin.ledger.filter.all"
+msgstr "Wszystkie powody"
+
+msgid "web.admin.ledger.filter.shown"
+msgstr "%(shown)s z %(total)s"
+
+msgid "web.admin.ledger.filter.purchases"
+msgstr "Zakupy"
+
+msgid "web.admin.ledger.filter.matches"
+msgstr "Zarobki z meczów"
+
+msgid "web.admin.ledger.filter.levels"
+msgstr "Poziomy i umiejętności"
+
+msgid "web.admin.ledger.filter.rewards"
+msgstr "Odebrane nagrody"
+
+msgid "web.admin.ledger.filter.admin"
+msgstr "Przyznania i odebrania"
+
+msgid "web.admin.ledger.filter.start"
+msgstr "Przydział startowy"
+
+msgid "web.admin.ledger.apply"
+msgstr "Pokaż wpisy"
+
+msgid "web.admin.ledger.none"
+msgstr "Żaden wpis nie ma wybranych powodów."
+
+msgid "web.admin.ledger.empty"
+msgstr "Portfel nie ma jeszcze zmian."
+
+msgid "web.admin.ledger.reason.allowance"
+msgstr "Przydział startowy"
+
+msgid "web.admin.ledger.reason.purchase"
+msgstr "Zakup w sklepie"
+
+msgid "web.admin.ledger.reason.ability"
+msgstr "Umiejętność kupiona w grze"
+
+msgid "web.admin.ledger.reason.rename"
+msgstr "Zmiana nazwy"
+
+msgid "web.admin.ledger.reason.hero-slot"
+msgstr "Miejsce na bohatera"
+
+msgid "web.admin.ledger.reason.server"
+msgstr "Zarobek z meczu"
+
+msgid "web.admin.ledger.reason.level"
+msgstr "Osiągnięty poziom"
+
+msgid "web.admin.ledger.reason.refund"
+msgstr "Umiejętności zwrócone w grze"
+
+msgid "web.admin.ledger.reason.reward"
+msgstr "Odebrana nagroda"
+
+msgid "web.admin.ledger.purchase"
+msgstr "zakup %(id)s"
+
+msgid "web.admin.ledger.first_use"
+msgstr "Dodany przy pierwszym użyciu portfela"
+
+msgid "web.admin.ledger.by.server"
+msgstr "Serwer dedykowany"
+
+msgid "web.admin.ledger.reason.grant"
+msgstr "Przyznanie"
+
+msgid "web.admin.ledger.reason.take"
+msgstr "Odebranie"

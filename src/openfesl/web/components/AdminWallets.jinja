@@ -1,0 +1,22 @@
+{#def of, base: str #}
+{# The balances an account's heroes share in one game, as its admin page's side shows them, with
+   each hero's own currency left to the wallets page, and the way there and to the ledgers. Read
+   without opening a wallet. #}
+{% set game = of.game %}
+{% set rules = game.heroes %}
+<section aria-labelledby="wallets-{{ game.id }}">
+  <Bar :id="'wallets-' ~ game.id">
+  <span class="bar-chip">{{ _("web.admin.wallets.title") }}<GameChip :of="game" full /></span>
+  </Bar>
+  <dl class="facts">
+    {% for code, balance in of.balances %}
+      <Fact :label="_('games.' ~ game.id ~ '.currency.' ~ code)">
+        <span class="admin-balance">{{ number(balance) }}</span>
+      </Fact>
+    {% endfor %}
+    <Fact :label="_('games.' ~ game.id ~ '.currency.' ~ rules.points)" plain>
+      {{ _("web.admin.wallets.points") }}
+    </Fact>
+  </dl>
+  <RowLink :href="base ~ '/wallets'" :label="_('web.admin.wallets.link')" />
+</section>

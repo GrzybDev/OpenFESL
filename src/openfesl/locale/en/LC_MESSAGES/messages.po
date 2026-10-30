@@ -10068,3 +10068,171 @@ msgstr "%(count)s, granted in all: %(granted)s"
 
 msgid "web.admin.audit.counted"
 msgstr "%(count)s, %(before)s → %(after)s"
+
+msgid "web.admin.wallets.title"
+msgstr "Wallets"
+
+msgid "web.admin.wallets.points"
+msgstr "Each hero's own, on the wallets page"
+
+msgid "web.admin.wallets.link"
+msgstr "Wallets and ledgers"
+
+msgid "web.admin.wallets.column.wallet"
+msgstr "Wallet"
+
+msgid "web.admin.wallets.column.owner"
+msgstr "Belongs to"
+
+msgid "web.admin.wallets.column.balance"
+msgstr "Balance"
+
+msgid "web.admin.wallets.column.last_change"
+msgstr "Last change"
+
+msgid "web.admin.wallets.owner.account"
+msgstr "Account"
+
+msgid "web.admin.wallets.points.balance"
+msgstr "%(unspent)s of %(earned)s"
+
+msgid "web.admin.wallets.view_ledger"
+msgstr "View ledger"
+
+msgid "web.admin.wallets.closed"
+msgstr "Not opened yet"
+
+msgid "web.admin.wallets.unchanged"
+msgstr "No change yet"
+
+msgid "web.admin.wallets.closed.text"
+msgstr "The starting allowance of %(amount)s %(currency)s is added at the first use. Until then the wallet has no ledger, and this page reads it without opening it."
+
+msgid "web.admin.wallets.note"
+msgstr "The currencies the heroes share belong to the account, the others to each hero. Looking never opens a wallet; the game reads balances at the next login and when its store opens."
+
+msgid "web.admin.wallets.display_name"
+msgstr "Display name"
+
+msgid "web.admin.wallets.heroes.default"
+msgstr "%(count)s · %(hero)s is the default"
+
+msgid "web.admin.wallets.heroes"
+msgstr "Heroes and items"
+
+msgid "web.admin.wallets.limits"
+msgstr "Limits"
+
+msgid "web.admin.wallets.limits.text"
+msgstr "A balance holds at most %(max)s, the largest the game reads. Match credits stop at the limits per time that the game's data sets."
+
+msgid "web.admin.ledger.title"
+msgstr "Ledger"
+
+msgid "web.admin.ledger.heading"
+msgstr "%(currency)s · newest first"
+
+msgid "web.admin.ledger.count.one"
+msgstr "%(count)s entry"
+
+msgid "web.admin.ledger.count.other"
+msgstr "%(count)s entries"
+
+msgid "web.admin.ledger.column.when"
+msgstr "When"
+
+msgid "web.admin.ledger.column.change"
+msgstr "Change"
+
+msgid "web.admin.ledger.column.after"
+msgstr "Balance after"
+
+msgid "web.admin.ledger.column.reason"
+msgstr "Reason"
+
+msgid "web.admin.ledger.column.by"
+msgstr "By · note"
+
+msgid "web.admin.ledger.note"
+msgstr "Newest first · %(count)s per page · times in UTC · an entry is never changed or removed; a correction is a new entry."
+
+msgid "web.admin.ledger.balance"
+msgstr "Balance"
+
+msgid "web.admin.ledger.filter"
+msgstr "Filter by reason"
+
+msgid "web.admin.ledger.filter.all"
+msgstr "All reasons"
+
+msgid "web.admin.ledger.filter.shown"
+msgstr "%(shown)s of %(total)s"
+
+msgid "web.admin.ledger.filter.purchases"
+msgstr "Purchases"
+
+msgid "web.admin.ledger.filter.matches"
+msgstr "Match credits"
+
+msgid "web.admin.ledger.filter.levels"
+msgstr "Levels and abilities"
+
+msgid "web.admin.ledger.filter.rewards"
+msgstr "Reward claims"
+
+msgid "web.admin.ledger.filter.admin"
+msgstr "Admin grants and takes"
+
+msgid "web.admin.ledger.filter.start"
+msgstr "Starting allowance"
+
+msgid "web.admin.ledger.apply"
+msgstr "Show entries"
+
+msgid "web.admin.ledger.none"
+msgstr "No entry has the reasons chosen."
+
+msgid "web.admin.ledger.empty"
+msgstr "The wallet has no change yet."
+
+msgid "web.admin.ledger.reason.allowance"
+msgstr "Starting allowance"
+
+msgid "web.admin.ledger.reason.purchase"
+msgstr "Store purchase"
+
+msgid "web.admin.ledger.reason.ability"
+msgstr "Ability bought in the game"
+
+msgid "web.admin.ledger.reason.rename"
+msgstr "Rename"
+
+msgid "web.admin.ledger.reason.hero-slot"
+msgstr "Hero slot"
+
+msgid "web.admin.ledger.reason.server"
+msgstr "Match credit"
+
+msgid "web.admin.ledger.reason.level"
+msgstr "Level reached"
+
+msgid "web.admin.ledger.reason.refund"
+msgstr "Abilities refunded in the game"
+
+msgid "web.admin.ledger.reason.reward"
+msgstr "Reward claim"
+
+msgid "web.admin.ledger.purchase"
+msgstr "purchase %(id)s"
+
+msgid "web.admin.ledger.first_use"
+msgstr "Added at the wallet's first use"
+
+msgid "web.admin.ledger.by.server"
+msgstr "A dedicated server"
+
+msgid "web.admin.ledger.reason.grant"
+msgstr "Admin grant"
+
+msgid "web.admin.ledger.reason.take"
+msgstr "Admin take"

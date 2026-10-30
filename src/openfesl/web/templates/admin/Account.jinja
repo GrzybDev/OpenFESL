@@ -250,6 +250,9 @@
       </div>
 
       <div class="list-side admin-side">
+        {% for found in heroes %}
+          <AdminWallets :of="found" :base="base" />
+        {% endfor %}
         <AccountSearch />
 
         <section aria-labelledby="account-sessions">
