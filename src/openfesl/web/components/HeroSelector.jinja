@@ -24,7 +24,13 @@
               {% endif %}
             </p>
             <span class="selector-mug"><HeroPicture :hero="hero" /></span>
-            <h3 id="selector-{{ hero.persona.id }}" class="selector-name">{{ hero.persona.name }}</h3>
+            <h3 id="selector-{{ hero.persona.id }}" class="selector-name">
+              {% if player.name and not hero.disabled %}
+                <HeroLink :hero_id="hero.persona.id" :name="hero.persona.name" />
+              {% else %}
+                {{ hero.persona.name }}
+              {% endif %}
+            </h3>
             <p class="selector-kind">
               {% if hero.hero_class %}
                 {{ _("web.heroes.kind", hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class), level=hero.level) }}

@@ -1,10 +1,12 @@
-{# The bar of a game's own site for a signed-in account: its default hero, or a way to create the
-   first, the toggle of the hero selector, and the balances it has to spend. #}
+{# The bar of a game's own site for a signed-in account: its default hero, which leads to its
+   profile once others see it and to the heroes page before, or a way to create the first, the
+   toggle of the hero selector, and the balances it has to spend. #}
 <div class="site-bar">
   {% if bar and bar.roster %}
     {% set hero = bar.roster.default %}
     {% if hero %}
-      <a href="{{ url('/' ~ game.id ~ '/heroes') }}"
+      {% set page = "/heroes/" ~ hero.persona.id if player.name and not hero.disabled else "/heroes" %}
+      <a href="{{ url('/' ~ game.id ~ page) }}"
          class="hero-pill{% if toast and toast.key == 'web.heroes.toast.default' %} hero-pill-changed{% endif %}">
         <span aria-hidden="true"
               {% if hero.faction %} data-faction="{{ hero.faction }}"{% endif %}

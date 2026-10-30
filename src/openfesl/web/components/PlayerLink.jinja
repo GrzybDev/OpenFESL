@@ -1,0 +1,4 @@
+{#def account_id: int, name: str #}
+{# A player's display name that leads to their public profile. #}
+<a href="{{ url('/' ~ game.id ~ '/player/' ~ account_id) }}"
+   class="profile-link">{{ name }}</a>

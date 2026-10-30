@@ -10,7 +10,7 @@ from identity import form_token
 from living import import_catalogue
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from store import ROYAL_SOLDIER
-from support import visible
+from support import markup, visible
 
 from openfesl.core.stats import PERSONA, Change, Owner, bucket_of
 from openfesl.protocol.rank import Period, UpdateType
@@ -253,7 +253,9 @@ async def test_a_players_profile_lists_their_heroes_totals_and_asks_them_as_a_fr
     assert f'href="/bfheroes/heroes/{brass}"' in signed_out.text
     assert "Totals Time played 2 h 0 min Rounds played 34" in shown
     # A hero's profile leads to its player's.
-    assert f'href="/bfheroes/player/{ann}">Quill_Invented</a>' in hero.text
+    assert f'href="/bfheroes/player/{ann}" class="profile-link">Quill_Invented</a>' in markup(
+        hero.content
+    )
     assert "Add as friend" in visible(page.content)
     assert asked.headers["location"] == f"/bfheroes/player/{ann}"
     assert "Request sent Manage friends" in visible(after.content)
@@ -261,3 +263,50 @@ async def test_a_players_profile_lists_their_heroes_totals_and_asks_them_as_a_fr
     # A deactivated account's profile answers as one that never existed.
     assert hidden.status_code == unknown.status_code == 404
     assert visible(hidden.content) == visible(unknown.content)
+
+
+async def test_the_sites_lists_lead_to_the_profiles_of_the_heroes_and_players_they_name(
+    base: str, database_url: str
+) -> None:
+    await name_players(database_url)
+    brass = await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_GUNNER)
+    kettle = await create_hero(base, "bob@example.test", "Kettlebrook", **ROYAL_SOLDIER)
+    await play(database_url, brass, {"rs": 500, "ct": 7200})
+    ids = "SELECT id FROM account WHERE nuid = :nuid"
+    ann = await select_value(database_url, ids, nuid="ann@example.test")
+    bob = await select_value(database_url, ids, nuid="bob@example.test")
+    hero, player = f'href="/bfheroes/heroes/{brass}"', f'href="/bfheroes/player/{ann}"'
+    async with httpx2.AsyncClient() as client:
+        await post_sign_in(client, base, "ann@example.test", PASSWORD)
+        token = form_token((await client.get(f"{base}/bfheroes/friends")).text)
+        asked = {"csrf": token, "action": "ask", "account": str(bob), "name": "Kettle_Inv"}
+        await client.post(f"{base}/bfheroes/friends", data=asked)
+        heroes = markup((await client.get(f"{base}/bfheroes/heroes")).content)
+    async with httpx2.AsyncClient() as client:
+        await post_sign_in(client, base, "bob@example.test", PASSWORD)
+        friends = markup((await client.get(f"{base}/bfheroes/friends")).content)
+        search = markup((await client.get(f"{base}/bfheroes/search", params={"q": "Bra"})).content)
+        front = markup((await client.get(f"{base}/bfheroes")).content)
+    async with httpx2.AsyncClient() as client:
+        await post_sign_in(client, base, "ann@example.test", PASSWORD)
+        # An account made in a game has no public pages until it picks a display name, and a
+        # hero the admin took out of play has none either.
+        unnamed = "UPDATE account SET display_name = NULL WHERE nuid = 'ann@example.test'"
+        await execute(database_url, unnamed)
+        nameless = markup((await client.get(f"{base}/bfheroes/heroes")).content)
+        await name_players(database_url)
+        disabled = "UPDATE persona SET state = 'disabled' WHERE id = :hero"
+        await execute(database_url, disabled, hero=brass)
+        out_of_play = markup((await client.get(f"{base}/bfheroes/heroes")).content)
+
+    # The request that came names its player, and the default hero's name its hero.
+    assert player in friends and hero in friends
+    assert hero in search and player in search
+    assert hero in front and player in front
+    # The account's own heroes lead to their profiles, the default one from the bar too.
+    assert heroes.count(hero) == 3
+    assert f'href="/bfheroes/heroes/{kettle}"' not in heroes
+    # No link leads to a profile that answers as unknown: the bar's hero leads to the heroes
+    # page instead.
+    assert hero not in nameless and hero not in out_of_play
+    assert 'href="/bfheroes/heroes" class="hero-pill' in nameless

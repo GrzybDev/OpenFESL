@@ -106,9 +106,10 @@
                   {% endif %}
                 </span>
                 <p class="front-top-name">
-                  <strong>{{ line.name }}</strong>
+                  <strong><HeroLink :hero_id="line.hero_id" :name="line.name" /></strong>
+                  {% set named %}<PlayerLink :account_id="line.account_id" :name="line.player" />{% endset %}
                   <span>
-                    {{ _("web.search.hero", faction=_("games." ~ game.id ~ ".faction." ~ line.faction) if line.faction else "", hero_class=_("games." ~ game.id ~ ".class." ~ line.hero_class) if line.hero_class else "", player=line.player) }}
+                    {{ _("web.search.hero", faction=_("games." ~ game.id ~ ".faction." ~ line.faction) if line.faction else "", hero_class=_("games." ~ game.id ~ ".class." ~ line.hero_class) if line.hero_class else "", player=named) }}
                   </span>
                 </p>
                 <span class="search-level"><span class="sr-only">{{ _("web.bar.level") }}</span>{{ line.level }}</span>

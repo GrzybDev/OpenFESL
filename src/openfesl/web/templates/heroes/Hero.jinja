@@ -30,7 +30,7 @@
         </p>
         <p class="profile-player">
           {% if title %}<span class="profile-title">{{ title }}</span> ·{% endif %}
-          {% set link %}<a href="{{ url('/' ~ game.id ~ '/player/' ~ player.id) }}">{{ player.display_name }}</a>{% endset %}
+          {% set link %}<PlayerLink :account_id="player.id" :name="player.display_name" />{% endset %}
           {{ _("web.hero.player", player=link) }}
         </p>
       </div>

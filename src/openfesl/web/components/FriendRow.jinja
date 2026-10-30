@@ -1,8 +1,9 @@
 {#def friend, kind: str #}
 {# Another account on one of the account's lists: its class disc in its default hero's faction
-   colours, or a star for a server, its name, its default hero, and what it is: a request that
-   came or was sent, a friend and where it plays, or a server's VIP list; then what can be done.
-   A friend's presence is said in words, which the dot only repeats. #}
+   colours, or a star for a server, its name and its default hero, which lead to their profiles,
+   and what it is: a request that came or was sent, a friend and where it plays, or a server's
+   VIP list; then what can be done. A friend's presence is said in words, which the dot only
+   repeats. #}
 {% set rel = friend.relationship %}
 {% set hero = friend.hero %}
 {% set rules = game.heroes %}
@@ -21,10 +22,17 @@
     {% if kind == "friend" %}<span class="friend-dot friend-dot-{{ place }}"></span>{% endif %}
   </span>
   <div class="friend-text">
-    <p class="friend-name">{{ rel.name }}</p>
+    <p class="friend-name">
+      {% if rel.member.account_id %}
+        <PlayerLink :account_id="rel.member.account_id" :name="rel.name" />
+      {% else %}
+        {{ rel.name }}
+      {% endif %}
+    </p>
     {% if hero %}
+      {% set named %}<HeroLink :hero_id="hero.persona.id" :name="hero.persona.name" />{% endset %}
       <p>
-        {{ _("web.friends.default_hero", hero=hero.persona.name, faction=_("games." ~ game.id ~ ".faction." ~ hero.faction) if hero.faction else "", hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class) if hero.hero_class else "", level=hero.level) }}
+        {{ _("web.friends.default_hero", hero=named, faction=_("games." ~ game.id ~ ".faction." ~ hero.faction) if hero.faction else "", hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class) if hero.hero_class else "", level=hero.level) }}
       </p>
     {% endif %}
     <p class="friend-state friend-state-{{ place if kind == 'friend' else kind }}">

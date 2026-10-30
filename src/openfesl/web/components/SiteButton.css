@@ -84,6 +84,13 @@
     text-decoration-line: underline;
   }
 
+  /* A hero's or player's name in a line of text, leading to their profile. */
+  .profile-link {
+    font-weight: 700;
+    color: #7a1d16;
+    text-decoration-line: underline;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .site-button {
       transition: none;

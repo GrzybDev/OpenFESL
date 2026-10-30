@@ -95,6 +95,11 @@
         </dd>
       </dl>
       <div class="hero-actions">
+        {# Others see the profile once the account has a display name and the hero is in play. #}
+        {% if player.name and not hero.disabled %}
+          <a href="{{ url('/' ~ game.id ~ '/heroes/' ~ id) }}"
+             class="site-button site-button-ghost"><Icon name="user" :size="17" stroke="currentColor" />{{ _("web.heroes.profile") }}<span class="sr-only">{{ hero.persona.name }}</span></a>
+        {% endif %}
         <a href="{{ url('/' ~ game.id ~ '/heroes/' ~ id ~ '/rename') }}"
            data-opens="rename-{{ id }}"
            class="site-button site-button-ghost hero-rename"><Icon name="edit" :size="17" stroke="currentColor" />{{ _("web.rename.action") }}<span class="sr-only">{{ hero.persona.name }}</span><span class="hero-price">· {{ _("web.rename.price.short", price=number(rules.rename_price), currency=_("games." ~ game.id ~ ".currency." ~ rules.currency)) }}</span></a>

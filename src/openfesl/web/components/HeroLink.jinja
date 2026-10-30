@@ -1,0 +1,4 @@
+{#def hero_id: int, name: str #}
+{# A hero's name that leads to its public profile. #}
+<a href="{{ url('/' ~ game.id ~ '/heroes/' ~ hero_id) }}"
+   class="profile-link">{{ name }}</a>

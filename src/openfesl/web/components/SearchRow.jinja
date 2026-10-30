@@ -1,8 +1,8 @@
 {#def result, query: str, self_id: int | None = None #}
 {# A hero or player that a search found: its class disc in its faction's colours or a player's
-   glyph, the name with the part that matched marked, its class and player or its heroes, a
-   hero's level, and, for a signed-in account, how it relates to it or the form that asks or
-   accepts it as a friend. #}
+   glyph, the name with the part that matched marked, its class and player or its heroes, each
+   leading to its profile, a hero's level, and, for a signed-in account, how it relates to it or
+   the form that asks or accepts it as a friend. #}
 {% set rules = game.heroes %}
 {% set hero = result.hero %}
 {% set rel = result.relationship %}
@@ -18,14 +18,19 @@
     {% endif %}
   </span>
   <div class="friend-text">
+    {% set profile = "/heroes/" ~ hero.persona.id if hero else "/player/" ~ result.member.account_id %}
     <p class="friend-name">
-      {%- if matched %}<mark class="search-match">{{ matched }}</mark>{{ result.name[matched|length:] }}{% else %}{{ result.name }}{% endif -%}
+      <a href="{{ url('/' ~ game.id ~ profile) }}" class="profile-link">
+        {%- if matched %}<mark class="search-match">{{ matched }}</mark>{{ result.name[matched|length:] }}{% else %}{{ result.name }}{% endif -%}
+      </a>
     </p>
     <p>
       {% if hero %}
-        {{ _("web.search.hero", faction=_("games." ~ game.id ~ ".faction." ~ hero.faction) if hero.faction else "", hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class) if hero.hero_class else "", player=result.player) }}
+        {% set named %}<PlayerLink :account_id="result.member.account_id" :name="result.player" />{% endset %}
+        {{ _("web.search.hero", faction=_("games." ~ game.id ~ ".faction." ~ hero.faction) if hero.faction else "", hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class) if hero.hero_class else "", player=named) }}
       {% elif result.default %}
-        {{ _n("web.search.player", result.heroes, hero=result.default.persona.name) }}
+        {% set named %}<HeroLink :hero_id="result.default.persona.id" :name="result.default.persona.name" />{% endset %}
+        {{ _n("web.search.player", result.heroes, hero=named) }}
       {% else %}
         {{ _("web.search.player.none") }}
       {% endif %}

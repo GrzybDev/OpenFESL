@@ -83,7 +83,7 @@
                      class="boards-name">{{ line.name }}</a>
                   <span>
                     <span class="boards-level">{{ _("web.heroes.level", level=line.level) }} ·</span>
-                    <a href="{{ url('/' ~ game.id ~ '/player/' ~ line.account_id) }}">{{ line.player }}</a>
+                    <PlayerLink :account_id="line.account_id" :name="line.player" />
                   </span>
                 </p>
               </div>

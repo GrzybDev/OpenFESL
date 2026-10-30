@@ -9835,3 +9835,6 @@ msgstr "jeszcze bez miejsca"
 
 msgid "web.front.top.all"
 msgstr "Wszystkie rankingi"
+
+msgid "web.heroes.profile"
+msgstr "Profil"

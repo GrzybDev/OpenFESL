@@ -9279,3 +9279,6 @@ msgstr "not ranked yet"
 
 msgid "web.front.top.all"
 msgstr "All leaderboards"
+
+msgid "web.heroes.profile"
+msgstr "Profile"

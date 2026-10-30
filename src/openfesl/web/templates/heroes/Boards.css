@@ -124,10 +124,6 @@
     p > span {
       color: #5c4a3c;
     }
-
-    a {
-      color: #7a1d16;
-    }
   }
 
   .boards-level {
@@ -136,6 +132,7 @@
 
   .boards-name {
     font: 800 16px/1.2 var(--site-heading);
+    color: #7a1d16;
     overflow-wrap: anywhere;
     text-decoration-line: underline;
   }

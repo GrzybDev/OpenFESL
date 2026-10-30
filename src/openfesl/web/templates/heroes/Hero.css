@@ -68,12 +68,6 @@
   .profile-player {
     font-size: 15px;
     color: #2b2018;
-
-    a {
-      font-weight: 700;
-      color: #7a1d16;
-      text-decoration-line: underline;
-    }
   }
 
   .profile-title {
