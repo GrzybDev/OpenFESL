@@ -8820,3 +8820,21 @@ msgstr "Anyone can search; friend requests need a signed-in account."
 
 msgid "web.friends.none.search"
 msgstr "Player search finds heroes and players by name."
+
+msgid "web.error.site.plaque.404"
+msgstr "Not found"
+
+msgid "web.error.site.plaque.500"
+msgstr "Server error"
+
+msgid "web.error.site.404.title"
+msgstr "This page does not exist on this site."
+
+msgid "web.error.site.404.text"
+msgstr "The address may be mistyped or from an older version of the site."
+
+msgid "web.error.site.500.title"
+msgstr "The server could not show this page."
+
+msgid "web.error.site.500.text"
+msgstr "Trying again in a moment usually works; the error is in the server's log."

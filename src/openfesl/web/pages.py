@@ -414,8 +414,9 @@ class Pages:
         state = request.scope.get("state", {})
         player: Player | None = state.get("player")
         # A game's own site offers its sign-in form on every page to a visitor not signed in,
-        # unless the sign-in asks for the check.
-        if game and game.site and not player and not csrf and not self._sign_in_check:
+        # unless the sign-in asks for the check or the request failed before its session was read.
+        form = "session" in request.scope and not self._sign_in_check
+        if game and game.site and not player and not csrf and form:
             csrf = form_token(request)
         query = f"?{request.url.query}" if request.url.query else ""
         shared = dict(
@@ -472,7 +473,7 @@ class Pages:
         """
         if error.status_code != 404:
             return await http_exception_handler(request, error)
-        return self.render(request, "Error", 404, code=404)
+        return self.render(request, "Error", 404, game=self._site_of(request), code=404)
 
     async def failure(self, request: Request, error: Exception) -> Response:
         """Answer a request that failed with the short error page, without the error's details.
@@ -482,7 +483,14 @@ class Pages:
             error: What went wrong; the server logs it.
         """
         # This page is drawn outside the middleware that adds the headers to every other one.
-        return self.render(request, "Error", 500, headers=HEADERS, code=500)
+        game = self._site_of(request)
+        return self.render(request, "Error", 500, game=game, headers=HEADERS, code=500)
+
+    def _site_of(self, request: Request) -> Game | None:
+        # The game with a site of its own whose pages the address lies under, if any.
+        _, path = _address(request)
+        first = path.split("/")[1]
+        return next((game for game in self._games if game.site and game.id == first), None)
 
 
 class StaticAssets(StaticFiles):

@@ -1,18 +1,40 @@
 {#def code: int #}
-{% set title = _("web.error.%d.title" % code) %}
-<Layout :title="title">
-  <Notice :title="title"
-          :subtitle="_('web.error.code', code=code)"
-          :text="_('web.error.%d.text' % code)"
-          :narrow="code == 404">
-    {% if code == 404 %}
-      <Action :href="url('/')" :label="_('web.home')" />
-      {% for entry in games if "servers" in entry.pages %}
-        <SmallAction :href="entry.href ~ '/servers'" :label="_('web.error.404.servers', game=entry.name)" />
-      {% endfor %}
-    {% else %}
-      <Action :href="here" :label="_('web.error.500.again')" />
-      <SmallAction :href="url('/')" :label="_('web.home')" />
-    {% endif %}
-  </Notice>
-</Layout>
+{# The page of an address without a page or of a request that failed. A game's own site keeps its
+   frame around it: a plaque, the dashed panel that says what happened, and the ways on. #}
+{% if game and game.site %}
+  {% set title = _("web.error.site.plaque.%d" % code) %}
+  <Layout :title="title">
+    <Plaque id="error-title">{{ title }}</Plaque>
+    <div class="site-empty enter-panel">
+      <span aria-hidden="true" class="site-empty-disc"><Icon name="warn" :size="30" stroke="currentColor" /></span>
+      <div>
+        <h2 class="site-empty-title">{{ _("web.error.site.%d.title" % code) }}</h2>
+        <p>{{ _("web.error.site.%d.text" % code) }}</p>
+        <p class="site-actions">
+          {% if code == 500 %}
+            <a href="{{ here }}" class="site-link">{{ _("web.error.500.again") }}</a>
+          {% endif %}
+          <a href="{{ url('/' ~ game.id) }}" class="site-link">{{ game.name }}</a>
+        </p>
+      </div>
+    </div>
+  </Layout>
+{% else %}
+  {% set title = _("web.error.%d.title" % code) %}
+  <Layout :title="title">
+    <Notice :title="title"
+            :subtitle="_('web.error.code', code=code)"
+            :text="_('web.error.%d.text' % code)"
+            :narrow="code == 404">
+      {% if code == 404 %}
+        <Action :href="url('/')" :label="_('web.home')" />
+        {% for entry in games if "servers" in entry.pages %}
+          <SmallAction :href="entry.href ~ '/servers'" :label="_('web.error.404.servers', game=entry.name)" />
+        {% endfor %}
+      {% else %}
+        <Action :href="here" :label="_('web.error.500.again')" />
+        <SmallAction :href="url('/')" :label="_('web.home')" />
+      {% endif %}
+    </Notice>
+  </Layout>
+{% endif %}

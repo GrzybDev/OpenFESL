@@ -1,8 +1,10 @@
 import httpx2
 import pytest
-from accounts import PASSWORD, execute, select_value
+from accounts import PASSWORD, execute, post_sign_in, select_value
 from identity import form_token
 from support import markup, visible
+
+from openfesl.core.history import OnlineHistory
 
 pytestmark = pytest.mark.anyio
 
@@ -64,3 +66,29 @@ async def test_the_games_own_addresses_open_its_pages_in_the_browsers_language(b
     assert redeem.headers["location"] == "/pl/bfheroes"
     assert english.headers["location"] == "/bfheroes/user/createHero?from=game"
     assert unknown.status_code == 404
+
+
+async def test_a_game_sites_missing_and_failing_pages_keep_its_frame(
+    base: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fail(*args: object) -> None:
+        raise RuntimeError("the stats are unreadable")
+
+    async with httpx2.AsyncClient() as client:
+        await post_sign_in(client, base, "ann@example.test", PASSWORD)
+        missing = await client.get(f"{base}/pl/bfheroes/invented-page")
+        monkeypatch.setattr(OnlineHistory, "overview", fail)
+        failing = await client.get(f"{base}/bfheroes?again=1")
+        elsewhere = await client.get(f"{base}/invented-page")
+
+    assert missing.status_code == 404
+    # The site's header, menus and bar stay around the page.
+    assert "Battlefield Heroes w OpenFESL" in visible(missing.content)
+    assert "2500 Funds" in visible(missing.content)
+    assert "Nie znaleziono Ta strona nie istnieje w tym serwisie." in visible(missing.content)
+    assert failing.status_code == 500
+    assert "unreadable" not in failing.text
+    assert "Server error The server could not show this page." in visible(failing.content)
+    assert 'href="/bfheroes?again=1"' in failing.text
+    # Addresses outside the game's site keep OpenFESL's own page.
+    assert elsewhere.status_code == 404 and "Page not found" in visible(elsewhere.content)

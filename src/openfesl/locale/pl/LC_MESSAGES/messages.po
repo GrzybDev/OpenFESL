@@ -9352,3 +9352,21 @@ msgstr "Wyszukiwać może każdy; zaproszenia do znajomych wymagają zalogowania
 
 msgid "web.friends.none.search"
 msgstr "Wyszukiwarka graczy znajduje bohaterów i graczy po nazwie."
+
+msgid "web.error.site.plaque.404"
+msgstr "Nie znaleziono"
+
+msgid "web.error.site.plaque.500"
+msgstr "Błąd serwera"
+
+msgid "web.error.site.404.title"
+msgstr "Ta strona nie istnieje w tym serwisie."
+
+msgid "web.error.site.404.text"
+msgstr "Adres może zawierać literówkę albo pochodzić ze starszej wersji serwisu."
+
+msgid "web.error.site.500.title"
+msgstr "Serwer nie mógł wyświetlić tej strony."
+
+msgid "web.error.site.500.text"
+msgstr "Ponowna próba za chwilę zwykle pomaga; błąd jest zapisany w dzienniku serwera."

@@ -1,9 +1,9 @@
 {# The bar of a game's own site for a visitor who is not signed in: the sign-in with an e-mail
    address and game password, which returns to this page, and the ways to sign in otherwise or
    to register. Where the sign-in asks for Cloudflare's check, whose script only the sign-in page
-   loads, it links to the sign-in page instead of the fields. #}
+   loads, or the page has no form token, it links to the sign-in page instead of the fields. #}
 {% set sign_in = url("/sign-in") ~ "?" ~ {"next": here}|urlencode %}
-{% if sign_in_check %}
+{% if sign_in_check or not csrf %}
   <div class="site-strip">
     <a href="{{ sign_in }}" class="strip-sign-in">
       <Icon name="sign-in" :size="18" stroke="currentColor" />
