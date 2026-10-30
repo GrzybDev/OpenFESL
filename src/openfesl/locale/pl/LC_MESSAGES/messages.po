@@ -8968,3 +8968,96 @@ msgstr "%(events)s."
 
 msgid "web.rewards.claimed_in"
 msgstr "Odebrane w %(year)s"
+
+msgid "web.rewards.claim"
+msgstr "Odbierz"
+
+msgid "web.rewards.claim.label"
+msgstr "%(reward)s, %(band)s"
+
+msgid "web.rewards.claim.title"
+msgstr "Odbiór: %(reward)s"
+
+msgid "web.rewards.claim.hero"
+msgstr "Bohater"
+
+msgid "web.rewards.claim.hint"
+msgstr "Mogą ją dostać tylko bohaterowie frakcji %(faction)s."
+
+msgid "web.rewards.claim.default"
+msgstr "Wybrany jest domyślny bohater."
+
+msgid "web.rewards.claim.stays"
+msgstr "Nagroda zostaje u bohatera, dla którego ją odebrano. %(game)s pokaże ją po następnym zalogowaniu."
+
+msgid "web.rewards.claim_page"
+msgstr "Odbiór nagrody"
+
+msgid "web.rewards.back"
+msgstr "Wróć do nagród"
+
+msgid "web.dialog.cancel"
+msgstr "Anuluj"
+
+msgid "web.rewards.reveal.worth"
+msgstr "%(term)s · prezent daje przedmiot wart co najmniej %(worth)s."
+
+msgid "web.rewards.reveal.added"
+msgstr "%(hero)s już to ma: dodano %(term)s, teraz zostało %(left)s."
+
+msgid "web.rewards.reveal.fallback"
+msgstr "Bohater %(hero)s ma już na stałe wszystkie przedmioty, które daje ten prezent, więc dostaje gadżety warte co najmniej %(worth)s."
+
+msgid "web.rewards.outcome.new"
+msgstr "%(item)s: nowy przedmiot, %(term)s"
+
+msgid "web.rewards.outcome.adds"
+msgstr "%(item)s: dodaje %(term)s"
+
+msgid "web.rewards.outcome.owned"
+msgstr "%(item)s: już na stałe, więc zamiast tego %(fallback)s"
+
+msgid "web.rewards.outcome.box"
+msgstr "Otwiera się od razu dla tego bohatera"
+
+msgid "web.rewards.given"
+msgstr "%(items)s dla bohatera %(hero)s"
+
+msgid "web.rewards.done"
+msgstr "Odebrano nagrodę %(reward)s: %(given)s."
+
+msgid "web.rewards.done.listed"
+msgstr "Odebrano nagrodę %(reward)s: %(given)s. %(game)s pokaże przedmioty po następnym zalogowaniu."
+
+msgid "web.rewards.refused.form"
+msgstr "Nic nie przyznano: strona była nieaktualna, więc została wczytana ponownie."
+
+msgid "web.rewards.refused.gone"
+msgstr "Nic nie przyznano: tej nagrody nie można już odebrać."
+
+msgid "web.rewards.refused.ended"
+msgstr "Nic nie przyznano: wydarzenie %(event)s skończyło się o %(time)s."
+
+msgid "web.rewards.refused.ended.day"
+msgstr "Nic nie przyznano: dzień %(day)s wydarzenia %(event)s skończył się o %(time)s."
+
+msgid "web.rewards.refused.paused"
+msgstr "Nic nie przyznano: odbieranie nagród jest teraz wstrzymane."
+
+msgid "web.rewards.refused.claimed"
+msgstr "Nic nie przyznano: nagrodę %(reward)s odebrano już %(date)s o %(time)s."
+
+msgid "web.rewards.refused.claimed.hero"
+msgstr "Nic nie przyznano: nagrodę %(reward)s odebrano już dla bohatera %(hero)s, %(date)s o %(time)s."
+
+msgid "web.rewards.refused.claimed.today"
+msgstr "Nic nie przyznano: dzisiejszy prezent (%(reward)s, %(faction)s) odebrano już dla: %(hero)s o %(time)s."
+
+msgid "web.rewards.refused.locked"
+msgstr "Nic nie przyznano: nagroda %(reward)s wciąż wymaga osiągnięcia celu albo bohatera swojej frakcji."
+
+msgid "web.rewards.refused.unfit"
+msgstr "Nic nie przyznano: nagroda %(reward)s nie może trafić do bohatera %(hero)s."
+
+msgid "web.rewards.refused.expired"
+msgstr "Nic nie przyznano: minął czas na odebranie nagrody %(reward)s."

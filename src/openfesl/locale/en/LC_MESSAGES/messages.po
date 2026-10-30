@@ -8460,3 +8460,96 @@ msgstr "%(events)s."
 
 msgid "web.rewards.claimed_in"
 msgstr "Claimed in %(year)s"
+
+msgid "web.rewards.claim"
+msgstr "Claim"
+
+msgid "web.rewards.claim.label"
+msgstr "%(reward)s, %(band)s"
+
+msgid "web.rewards.claim.title"
+msgstr "Claim: %(reward)s"
+
+msgid "web.rewards.claim.hero"
+msgstr "Hero"
+
+msgid "web.rewards.claim.hint"
+msgstr "Only %(faction)s heroes can take it."
+
+msgid "web.rewards.claim.default"
+msgstr "The default hero is picked."
+
+msgid "web.rewards.claim.stays"
+msgstr "The reward stays with the hero it is claimed for. %(game)s lists it from its next login."
+
+msgid "web.rewards.claim_page"
+msgstr "Claim a reward"
+
+msgid "web.rewards.back"
+msgstr "Back to rewards"
+
+msgid "web.dialog.cancel"
+msgstr "Cancel"
+
+msgid "web.rewards.reveal.worth"
+msgstr "%(term)s · the gift gives an item worth at least %(worth)s."
+
+msgid "web.rewards.reveal.added"
+msgstr "%(hero)s already had it: %(term)s added, %(left)s left now."
+
+msgid "web.rewards.reveal.fallback"
+msgstr "Every item this gift can give is already %(hero)s's for good, so it gave widgets worth at least %(worth)s."
+
+msgid "web.rewards.outcome.new"
+msgstr "%(item)s: new, %(term)s"
+
+msgid "web.rewards.outcome.adds"
+msgstr "%(item)s: adds %(term)s"
+
+msgid "web.rewards.outcome.owned"
+msgstr "%(item)s: already owned for good, so %(fallback)s instead"
+
+msgid "web.rewards.outcome.box"
+msgstr "Opens at once for this hero"
+
+msgid "web.rewards.given"
+msgstr "%(items)s for %(hero)s"
+
+msgid "web.rewards.done"
+msgstr "Claimed %(reward)s: %(given)s."
+
+msgid "web.rewards.done.listed"
+msgstr "Claimed %(reward)s: %(given)s. %(game)s lists the items from its next login."
+
+msgid "web.rewards.refused.form"
+msgstr "Nothing was given: the page was out of date. It is shown again."
+
+msgid "web.rewards.refused.gone"
+msgstr "Nothing was given: that reward can no longer be claimed."
+
+msgid "web.rewards.refused.ended"
+msgstr "Nothing was given: %(event)s ended at %(time)s."
+
+msgid "web.rewards.refused.ended.day"
+msgstr "Nothing was given: day %(day)s of %(event)s ended at %(time)s."
+
+msgid "web.rewards.refused.paused"
+msgstr "Nothing was given: claims are paused for now."
+
+msgid "web.rewards.refused.claimed"
+msgstr "Nothing was given: %(reward)s was already claimed on %(date)s at %(time)s."
+
+msgid "web.rewards.refused.claimed.hero"
+msgstr "Nothing was given: %(reward)s was already claimed for %(hero)s on %(date)s at %(time)s."
+
+msgid "web.rewards.refused.claimed.today"
+msgstr "Nothing was given: today's gift (%(reward)s, %(faction)s) was already claimed for %(hero)s at %(time)s."
+
+msgid "web.rewards.refused.locked"
+msgstr "Nothing was given: %(reward)s still needs its goal met or a hero of its faction."
+
+msgid "web.rewards.refused.unfit"
+msgstr "Nothing was given: %(reward)s cannot go to %(hero)s."
+
+msgid "web.rewards.refused.expired"
+msgstr "Nothing was given: the time to claim %(reward)s ran out."

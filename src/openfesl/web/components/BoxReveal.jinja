@@ -1,7 +1,7 @@
 {#def reveal: dict #}
-{# What a box just bought gave the hero: a burst rises and the item comes up into it. Scripts open
-   it over the page once; without them, and with reduced motion, it shows its final state at the
-   top of the page. #}
+{# What a box just bought or a gift's box gave the hero: a burst rises and the item comes up into
+   it. Scripts open it over the page once; without them, and with reduced motion, it shows its
+   final state at the top of the page. #}
 <dialog open
         id="box-reveal"
         aria-labelledby="reveal-title"
@@ -19,7 +19,8 @@
                  :size="36"
                  :recipient="_('web.store.reveal.for', hero=reveal['hero'])"
                  :item="reveal['item']"
-                 :line="reveal['line']" />
+                 :line="reveal['line']"
+                 :src="reveal.get('icon') or ''" />
     <p class="store-hint">{{ _("web.store.reveal.after", game=game.name) }}</p>
     <div class="site-dialog-actions js-only">
       <button type="button" data-close class="site-button site-button-ghost">{{ _("web.dialog.close") }}</button>

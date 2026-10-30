@@ -158,6 +158,7 @@ def include_public_routes(
             games,
             services.rewards,
             services.catalogues,
+            stores.entitlements,
             stores.products,
         ).routes()
     )

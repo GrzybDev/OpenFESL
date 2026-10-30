@@ -1,0 +1,11 @@
+{#def claiming, back: str #}
+{# The page that claims a reward for one of the account's heroes, where the rewards page has no
+   scripts to open its dialog. #}
+{% set title = _("web.rewards.claim_page") %}
+{% set id = "claim-" ~ claiming.key|replace(":", "-") ~ "-" ~ (claiming.faction or "account") %}
+<Layout :title="title">
+  <section aria-labelledby="claim-page-title" class="rename-page">
+    <Plaque id="claim-page-title">{{ title }}</Plaque>
+    <ClaimForm :claiming="claiming" :id="id" :back="back" />
+  </section>
+</Layout>

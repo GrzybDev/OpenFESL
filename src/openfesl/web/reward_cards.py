@@ -4,11 +4,13 @@ from starlette.requests import Request
 
 from openfesl.core.calendar import today
 from openfesl.core.catalogues import Catalogues, game_text, paragraphs
+from openfesl.core.entitlements import EntitlementStore
 from openfesl.core.games import Game
 from openfesl.core.reward_rules import Gift, Goal, RewardRules
 from openfesl.core.reward_runs import Run
 from openfesl.core.rewards import FIRST_CHEST, Reward, RewardState
 from openfesl.core.store import ProductStore
+from openfesl.web.reward_claims import Claiming, RewardClaims
 from openfesl.web.reward_texts import RewardTexts, reward_texts
 
 # The days before a starter pack's last one from which its card says in red that time runs out.
@@ -27,12 +29,14 @@ class Line:
         text: How far it got, or when it was claimed.
         done: Whether the row's reward was claimed.
         share: How far it got towards the goal, from 0 to 1, for its bar; none without a bar.
+        claim: How the row's own reward is claimed, once reached.
     """
 
     name: str
     text: str
     done: bool = False
     share: float | None = None
+    claim: Claiming | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -53,6 +57,7 @@ class Card:
         lines: The heroes' or the account's progress or claims, a row each.
         state: Whether and until when it may be claimed, or what came of its claim.
         tone: The state's kind, which picks its glyph and colour.
+        claim: How it is claimed now; none when it may not be, or its rows are claimed.
         needs: What gets it the hero it lacks: create a hero in a free slot, or buy a slot.
     """
 
@@ -68,6 +73,7 @@ class Card:
     lines: list[Line]
     state: str
     tone: str
+    claim: Claiming | None = None
     needs: str | None = None
 
 
@@ -89,14 +95,16 @@ class Section:
 class RewardCards:
     """The cards that pages show of a game's rewards."""
 
-    def __init__(self, words: RewardTexts, products: ProductStore) -> None:
+    def __init__(self, words: RewardTexts, claims: RewardClaims, products: ProductStore) -> None:
         """Show a game's rewards to an account, or to a visitor signed out.
 
         Args:
             words: What the page says of the rewards.
+            claims: How the rewards are claimed.
             products: Hold the boxes that gifts give from.
         """
         self.words = words
+        self.claims = claims
         self._products = products
 
     async def sections(self, available: list[Reward], running: list[Run]) -> list[Section]:
@@ -163,6 +171,9 @@ class RewardCards:
         if goal and reward.hero and (hero := words.hero(reward.hero)):
             lines.append(self._progress(hero.persona.name, reward, goal.progress))
         state, tone, needs = self._state(reward, goal)
+        claim = (
+            await self.claims.claiming(reward) if reward.state is RewardState.CLAIMABLE else None
+        )
         owner = words.hero(reward.hero) if reward.goal is None else None
         description = game_text(
             words.game, words.catalogue, reward.description or "", texts.language
@@ -187,6 +198,7 @@ class RewardCards:
             lines=lines,
             state=state,
             tone=tone,
+            claim=claim,
             needs=needs,
         )
 
@@ -291,7 +303,8 @@ class RewardCards:
                     day = words.day(reward.claim.at, "yMMMd")
                     lines.append(Line(name, texts.text("web.rewards.row.claimed", date=day), True))
                 elif reward.state is RewardState.CLAIMABLE:
-                    lines.append(Line(name, texts.text("web.rewards.row.ready"), True))
+                    ready = texts.text("web.rewards.row.ready")
+                    lines.append(Line(name, ready, claim=await self.claims.claiming(reward)))
                 else:
                     lines.append(self._progress(name, reward, milestone.progress))
             cards.append(
@@ -320,6 +333,7 @@ async def reward_cards(
     game: Game,
     rules: RewardRules,
     catalogues: Catalogues,
+    entitlements: EntitlementStore,
     products: ProductStore,
     art: bool,
 ) -> RewardCards:
@@ -330,11 +344,12 @@ async def reward_cards(
         game: The game.
         rules: How the game gives rewards, with the instance's settings.
         catalogues: Name and draw the items the rewards give, once imported.
+        entitlements: Hold what the heroes own, which says what each would get.
         products: Hold the boxes that gifts give from.
         art: Whether the page shows the game's art to its viewer.
     """
     words = await reward_texts(request, game, rules, catalogues, art)
-    return RewardCards(words, products)
+    return RewardCards(words, RewardClaims(words, entitlements, products), products)
 
 
 def _glyph(gift: Gift) -> str:

@@ -14,7 +14,7 @@ from openfesl.core.heroes import Hero, Heroes
 from openfesl.core.inventory import Ownership
 from openfesl.core.overrides import overridden
 from openfesl.core.policies import SettingStore
-from openfesl.core.reward_claims import Claim, Claimed, Grant, RewardStore
+from openfesl.core.reward_claims import Claim, Claimed, Given, Grant, RewardStore
 from openfesl.core.reward_rules import Event, Gift, Goal, Milestone, Part, RewardRules
 from openfesl.core.reward_runs import Run
 from openfesl.core.stats import (
@@ -246,7 +246,7 @@ class Rewards:
 
     async def claim(
         self, game: Game, account_id: int, key: str, faction: str | None, hero_id: int | None
-    ) -> list[tuple[int, Ownership]]:
+    ) -> Given:
         """Claim a reward for an account, its items going to one of its heroes.
 
         Everything is checked again at the moment of the claim, and the reward is given at
@@ -260,7 +260,7 @@ class Rewards:
             hero_id: The persona of the hero its items go to; none for a reward without items.
 
         Returns:
-            The items the hero got, each with its ownership.
+            What the hero got.
 
         Raises:
             RewardRefused: When claims are paused, no such reward runs now, the account claimed
@@ -279,7 +279,9 @@ class Rewards:
         gift = reward.gift
         if gift.for_hero != (hero_id is not None) or (hero_id and hero_id not in reward.heroes):
             raise RewardRefused(RewardRefusal.UNFIT)
-        items = await self._items(game, account_id, gift, hero_id) if hero_id else ()
+        items, rolled = (
+            await self._items(game, account_id, gift, hero_id) if hero_id else ((), False)
+        )
         funds = None
         if gift.funds:
             allowance = game.currencies[rules.currency].allowance
@@ -297,7 +299,7 @@ class Rewards:
             keys,
             self._clock(),
         )
-        return await self._store.grant(grant)
+        return Given(await self._store.grant(grant), rolled)
 
     async def _events(
         self, game: Game, rules: RewardRules, heroes: list[Hero], now: datetime
@@ -435,16 +437,31 @@ class Rewards:
 
     async def _items(
         self, game: Game, account_id: int, gift: Gift, hero_id: int
-    ) -> tuple[tuple[int, Ownership], ...]:
+    ) -> tuple[tuple[tuple[int, Ownership], ...], bool]:
+        # The gift's items, which fit the hero as its claim checked, or a roll of its box, and
+        # whether the box was rolled.
         roster = await self._heroes.roster(game, account_id)
         hero = next(hero for hero in roster.heroes if hero.persona.id == hero_id)
-        if gift.items and _usable(self._catalogues.contents(game), gift, hero):
-            return gift.items
+        if not gives_box(self._catalogues.contents(game), gift, hero):
+            return gift.items, False
         box = await self._products.box_by_key(game.id, gift.box) if gift.box else None
         won = await self._drops.roll(game, box, hero.persona, hero) if box else None
         if won is None:
             raise RewardRefused(RewardRefusal.UNFIT)
-        return ((won.item_id, won.ownership),)
+        return ((won.item_id, won.ownership),), True
+
+
+def gives_box(contents: Contents, gift: Gift, hero: Hero) -> bool:
+    """Return whether a gift gives a hero one item of its box, its own items not fitting it.
+
+    A gift without items of its own always gives from its box, if it has one.
+
+    Args:
+        contents: The game's imported catalogue, which tells what fits a hero.
+        gift: The gift.
+        hero: The hero.
+    """
+    return bool(gift.box) and not (gift.items and _usable(contents, gift, hero))
 
 
 def _usable(contents: Contents, gift: Gift, hero: Hero) -> bool:

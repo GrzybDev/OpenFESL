@@ -1,0 +1,32 @@
+{#def claiming, small: bool = False #}
+{# Claim on a reward's card. A reward for one of several heroes opens its claim dialog, where the
+   hero is picked, and without scripts leads to the claim page; any other is sent at once. #}
+{% set id = "claim-" ~ claiming.key|replace(":", "-") ~ "-" ~ (claiming.faction or "account") %}
+{% set classes = "site-button site-button-go" ~ ("" if small else " site-button-large") %}
+{% if claiming.choices %}
+  <p class="site-actions">
+    <a href="{{ url('/' ~ game.id ~ '/rewards/claim') }}?{{ {'key': claiming.key, 'faction': claiming.faction}|urlencode }}"
+       data-opens="{{ id }}"
+       aria-haspopup="dialog"
+       class="{{ classes }}"><Icon name="gift" :size="18" stroke="currentColor" />{{ _("web.rewards.claim") }}<span class="sr-only">{{ claiming.label }}</span></a>
+  </p>
+  <dialog id="{{ id }}"
+          aria-labelledby="{{ id }}-title"
+          data-modal
+          class="site-dialog">
+    <ClaimForm :claiming="claiming" :id="id" dialog />
+  </dialog>
+{% else %}
+  <form method="post"
+        action="{{ url('/' ~ game.id ~ '/rewards/claim') }}"
+        data-once
+        class="site-actions">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <input type="hidden" name="key" value="{{ claiming.key }}">
+    <input type="hidden" name="faction" value="{{ claiming.faction }}">
+    <button type="submit" class="{{ classes }}">
+      <Icon name="gift" :size="18" stroke="currentColor" />
+      {{ _("web.rewards.claim") }}<span class="sr-only">{{ claiming.label }}</span>
+    </button>
+  </form>
+{% endif %}

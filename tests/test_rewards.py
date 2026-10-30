@@ -100,7 +100,7 @@ class Site:
             given = await self.rewards.claim(self.game, account, key, faction, recipient)
         except RewardRefused as refused:
             return refused.refusal
-        return [item_id for item_id, _ in given]
+        return [item_id for item_id, _ in given.items]
 
     async def held(self, hero: int) -> dict[str, int | None]:
         """Return a hero's items by tag, with their uses."""

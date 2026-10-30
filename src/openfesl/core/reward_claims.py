@@ -49,6 +49,20 @@ class Claimed:
 
 
 @dataclass(frozen=True, slots=True)
+class Given:
+    """What a claim gave a hero.
+
+    Attributes:
+        items: The items the hero got, each with its ownership, one it owned for good
+            replaced by the fallback.
+        rolled: Whether they are the one item that the gift's box gave.
+    """
+
+    items: list[tuple[int, Ownership]]
+    rolled: bool
+
+
+@dataclass(frozen=True, slots=True)
 class Grant:
     """What a claim gives at once, all of it or none.
 

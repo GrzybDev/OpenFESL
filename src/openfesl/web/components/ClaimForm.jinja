@@ -1,0 +1,44 @@
+{#def claiming, id: str, dialog: bool = False, back: str = "" #}
+{# The form that claims a reward for one of the account's heroes: the heroes that may have it as
+   tiles saying what each would get, the default hero picked where it may, what the account gets
+   besides, and Claim. The rewards page opens it as a dialog; without scripts it is a page of its
+   own. #}
+<form method="post"
+      action="{{ url('/' ~ game.id ~ '/rewards/claim') }}"
+      data-once
+      class="site-dialog-box claim-form">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <input type="hidden" name="key" value="{{ claiming.key }}">
+  <input type="hidden" name="faction" value="{{ claiming.faction }}">
+  {% if dialog %}
+    <button type="button"
+            data-close
+            class="site-dialog-close"
+            aria-label="{{ _('web.dialog.close') }}">
+      <Icon name="x" :size="18" stroke="currentColor" />
+    </button>
+  {% endif %}
+  <h2 id="{{ id }}-title" class="site-dialog-title">{{ _("web.rewards.claim.title", reward=claiming.title) }}</h2>
+  <fieldset class="claim-heroes">
+    <legend class="claim-legend">{{ _("web.rewards.claim.hero") }}</legend>
+    {% if claiming.hint %}<p class="claim-hint">{{ claiming.hint }}</p>{% endif %}
+    <div class="claim-tiles">
+      {% for choice in claiming.choices %}
+        <StoreHero :hero="choice.hero" :checked="choice.checked" :status="choice.status" />
+      {% endfor %}
+    </div>
+  </fieldset>
+  {% for line in claiming.extra %}<p class="claim-extra">{{ line }}</p>{% endfor %}
+  <p class="claim-stays">{{ _("web.rewards.claim.stays", game=game.name) }}</p>
+  <div class="site-dialog-actions">
+    <button type="submit" class="site-button site-button-go site-button-large">
+      <Icon name="gift" :size="18" stroke="currentColor" />
+      {{ _("web.rewards.claim") }}
+    </button>
+    {% if dialog %}
+      <button type="button" data-close class="site-button site-button-ghost">{{ _("web.dialog.cancel") }}</button>
+    {% else %}
+      <a href="{{ back }}" class="site-link">{{ _("web.rewards.back") }}</a>
+    {% endif %}
+  </div>
+</form>

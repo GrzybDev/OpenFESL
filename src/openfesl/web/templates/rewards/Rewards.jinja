@@ -1,4 +1,4 @@
-{#def events: list, upcoming: list, coming: str, first_hero: str, sections: list, past: list, claimed: int, ready: int, daily: str, year: str, next: str #}
+{#def events: list, upcoming: list, coming: str, first_hero: str, sections: list, past: list, claimed: int, ready: int, daily: str, year: str, next: str, reveal: dict | None #}
 {# The rewards page: the account's counts beside the title, then each section under its plaque
    with its rewards' cards, the rewards claimed this year folded away, and the next events.
    Signed out it shows the running events alone with the way to sign in; an account without a
@@ -6,6 +6,7 @@
 {% set title = _("web.site.page.rewards") %}
 {% set signed = bar and bar.roster %}
 <Layout :title="title">
+  {% if reveal %}<BoxReveal :reveal="reveal" />{% endif %}
   <section aria-labelledby="rewards-title" class="creator-head">
     <div class="creator-intro">
       <Plaque id="rewards-title">{{ title }}</Plaque>

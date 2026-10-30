@@ -1,0 +1,39 @@
+/* The claim form of a reward: the heroes as tiles two across, the one picked in yellow, then
+   what the account gets besides and the note that the reward stays with its hero. */
+@layer components {
+  .claim-heroes {
+    margin-top: 14px;
+  }
+
+  .claim-legend {
+    font: 800 12px/1.3 var(--site-heading);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #5c4a3c;
+  }
+
+  .claim-hint {
+    margin-top: 4px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .claim-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .claim-extra {
+    margin-top: 12px;
+    font-weight: 700;
+  }
+
+  .claim-stays {
+    margin-top: 12px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #5c4a3c;
+  }
+}

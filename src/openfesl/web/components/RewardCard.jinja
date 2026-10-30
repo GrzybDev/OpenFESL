@@ -1,8 +1,10 @@
 {#def card #}
 {# A reward on its pale card: a band naming whom it is for, the icon of the first item it gives or
    the glyph of what it gives with its name and text, what it gives, its day or end, the heroes'
-   progress or claims, and a state line with its glyph. A gift that lacks a hero of its faction
-   offers to create one or to buy a slot for it. #}
+   progress or claims, a state line with its glyph, and Claim. A gift for one of several heroes
+   opens the claim dialog, without scripts the claim page; one that goes to the account or to one
+   hero is claimed at once. A gift that lacks a hero of its faction offers to create one or to
+   buy a slot for it. #}
 {% set rules = game.heroes %}
 {% set glyphs = {
   "claimed": "tick",
@@ -51,9 +53,11 @@
             <li class="reward-line">
               <p>
                 <strong>{{ line.name }}</strong>
-                <span{% if line.done %} class="reward-line-done"{% endif %}>{{ line.text }}</span>
+                <span{% if line.done or line.claim %} class="reward-line-done"{% endif %}>{{ line.text }}</span>
               </p>
-              {% if line.share is not none %}
+              {% if line.claim %}
+                <RewardClaim :claiming="line.claim" small />
+              {% elif line.share is not none %}
                 <ProgressBar :share="line.share" :label="line.name ~ ': ' ~ line.text" />
               {% endif %}
             </li>
@@ -64,7 +68,9 @@
         <Icon :name="glyphs.get(card.tone, 'gift')" :size="16" stroke="currentColor" />
         <span>{{ card.state }}</span>
       </p>
-      {% if card.needs == "create" %}
+      {% if card.claim %}
+        <RewardClaim :claiming="card.claim" />
+      {% elif card.needs == "create" %}
         <p class="site-actions">
           <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
              class="site-button site-button-go"><Icon name="plus" :size="16" stroke="currentColor" />{{ _("web.bar.create") }}</a>
