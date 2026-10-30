@@ -36,13 +36,8 @@
     {% if self_id is not none %}
       {% if result.member.account_id == self_id %}
         <span class="friend-chip">{{ _("web.search.self") }}</span>
-      {% elif rel and rel.mutual %}
-        <span class="friend-chip friend-chip-done"><Icon name="tick" :size="14" stroke="currentColor" />{{ _("web.search.friends") }}</span>
-      {% elif rel and rel.own %}
-        <span class="friend-chip"><Icon name="clock" :size="14" stroke="currentColor" />{{ _("web.search.sent") }}</span>
       {% else %}
-        {% set accepts = rel and rel.theirs %}
-        <FriendForm :action="'accept' if accepts else 'ask'" :member="result.member" :name="result.player" :label="_('web.search.accept' if accepts else 'web.search.add')" :glyph="'tick' if accepts else 'plus'" :tone="'go' if accepts else ''" :next="here" />
+        <FriendControl :member="result.member" :name="result.player" :relationship="rel" />
       {% endif %}
     {% endif %}
   </div>

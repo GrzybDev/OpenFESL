@@ -194,9 +194,10 @@ def include_public_routes(
             games,
             services.heroes,
             stores.personas,
-            stores.accounts.account,
+            stores.accounts.record,
             stores.stats,
             services.catalogues,
+            services.relationships,
         ).routes()
     )
     app.include_router(launcher_routes(lambda: app.state.launcher))

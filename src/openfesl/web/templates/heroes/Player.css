@@ -1,0 +1,108 @@
+/* A player's profile: the name on its plaque with the friend control beside it, the heroes as
+   pale cards with their picture, and the totals as dashed rows in a pale box. */
+@layer pages {
+  .player-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px 34px;
+  }
+
+  /* A display name keeps its capitals on the plaque. */
+  .player-head .plaque-title {
+    text-transform: none;
+  }
+
+  .player-friend {
+    margin-top: 0;
+  }
+
+  .player-section {
+    margin-top: 40px;
+  }
+
+  .player-heroes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: 14px 20px;
+    margin-top: 14px;
+  }
+
+  /* The whole card leads to the hero's profile, through its name's link. */
+  .player-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-right: 14px;
+    overflow: hidden;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #f1e9de;
+    box-shadow: 0 4px 0 rgb(0 0 0 / 0.3);
+    font-size: 14px;
+    transition: translate 160ms var(--ease-menu);
+
+    &:hover {
+      translate: 0 -2px;
+    }
+  }
+
+  .player-mug {
+    position: relative;
+    flex: 0 0 72px;
+    align-self: stretch;
+    min-height: 78px;
+    border-right: 3px solid #000;
+    background: #cdbfa6;
+  }
+
+  .player-hero-text {
+    flex: 1;
+    min-width: 0;
+    padding-block: 10px;
+  }
+
+  .player-hero-name {
+    font: 800 18px/1.2 var(--site-heading);
+    color: #7a1d16;
+    overflow-wrap: anywhere;
+    text-decoration-line: underline;
+
+    &::after {
+      position: absolute;
+      inset: 0;
+      content: "";
+    }
+  }
+
+  .player-totals {
+    max-width: 480px;
+    margin-top: 14px;
+    padding: 4px 18px;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #f1e9de;
+    box-shadow: 0 4px 0 rgb(0 0 0 / 0.3);
+    font-size: 15px;
+
+    > dd {
+      text-align: right;
+    }
+
+    > :nth-child(-n + 2) {
+      border-top: 0;
+    }
+
+    > :nth-last-child(-n + 2) {
+      border-bottom: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .player-hero {
+      transition: none;
+    }
+  }
+}

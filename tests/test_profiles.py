@@ -4,8 +4,9 @@ from pathlib import Path
 
 import httpx2
 import pytest
-from accounts import execute
+from accounts import PASSWORD, execute, post_sign_in, select_value
 from heroes import create_hero
+from identity import form_token
 from living import import_catalogue
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from store import ROYAL_SOLDIER
@@ -202,3 +203,55 @@ async def test_with_a_catalogue_a_profile_names_the_heros_items_maps_moments_and
     assert "Maps Invented Bay Time 1 h 0 min" in shown
     assert "Heroic Moments Invented Headshot · 96 Heroic moment 12 · 41" in shown
     assert "Missions Invented Mastery II · current Mission 6000 · completed 2 times" in shown
+
+
+async def test_a_players_profile_lists_their_heroes_totals_and_asks_them_as_a_friend(
+    base: str, database_url: str
+) -> None:
+    await name_players(database_url)
+    brass = await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_GUNNER)
+    pip = await create_hero(base, "ann@example.test", "Pip-Lantern", **ROYAL_SOLDIER)
+    await play(database_url, brass, ROUNDS | {"games": 30})
+    await play(database_url, pip, {"ct": 1800, "games": 4})
+    ann = await select_value(database_url, "SELECT id FROM account WHERE nuid = 'ann@example.test'")
+    profile = f"{base}/bfheroes/player/{ann}"
+    async with httpx2.AsyncClient() as client:
+        signed_out = await client.get(profile)
+        hero = await client.get(f"{base}/bfheroes/heroes/{brass}")
+        await post_sign_in(client, base, "bob@example.test", PASSWORD)
+        page = await client.get(profile)
+        form = {"csrf": form_token(page.text), "action": "ask", "account": str(ann)}
+        asked = await client.post(
+            f"{base}/bfheroes/friends",
+            data=form | {"name": "Quill_Invented", "next": f"/bfheroes/player/{ann}"},
+        )
+        after = await client.get(base + asked.headers["location"])
+    async with httpx2.AsyncClient() as client:
+        await post_sign_in(client, base, "ann@example.test", PASSWORD)
+        own = visible((await client.get(profile)).content)
+        await execute(
+            database_url, "UPDATE account SET state = 'deactivated' WHERE nuid = 'ann@example.test'"
+        )
+        hidden = await client.get(profile)
+        unknown = await client.get(f"{base}/bfheroes/player/999999")
+
+    shown = visible(signed_out.content)
+    today = datetime.now(UTC)
+    assert f"Quill_Invented On OpenFESL since {today.day} {today:%b %Y}" in shown
+    assert "Friend requests need a signed-in account. Sign in" in shown
+    assert f'href="/sign-in?next=%2Fbfheroes%2Fplayer%2F{ann}"' in signed_out.text
+    assert (
+        "Heroes · 2 Brassbuckle Gunner of the Royal Army level 1"
+        " Pip-Lantern Soldier of the Royal Army level 1"
+    ) in shown
+    assert f'href="/bfheroes/heroes/{brass}"' in signed_out.text
+    assert "Totals Time played 2 h 0 min Rounds played 34" in shown
+    # A hero's profile leads to its player's.
+    assert f'href="/bfheroes/player/{ann}">Quill_Invented</a>' in hero.text
+    assert "Add as friend" in visible(page.content)
+    assert asked.headers["location"] == f"/bfheroes/player/{ann}"
+    assert "Request sent Manage friends" in visible(after.content)
+    assert "Add as friend" not in own and "Friend requests need" not in own
+    # A deactivated account's profile answers as one that never existed.
+    assert hidden.status_code == unknown.status_code == 404
+    assert visible(hidden.content) == visible(unknown.content)

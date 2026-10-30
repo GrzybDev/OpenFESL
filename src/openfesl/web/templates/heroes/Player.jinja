@@ -1,0 +1,64 @@
+{#def account, heroes: list, time: str, games: int, member, relationship = None #}
+{# A player's public profile, as the 2012 site's: the display name with since when the account is
+   on this server and how the signed-in account relates to it as a friend, its heroes as cards
+   that lead to their profiles, and the totals of their rounds. #}
+{% set rules = game.heroes %}
+{% set name = account.account.display_name %}
+<Layout :title="name">
+  <section aria-labelledby="player-name" class="player-head">
+    <div class="creator-intro">
+      <Plaque id="player-name">{{ name }}</Plaque>
+      <p class="site-lead">{{ _("web.profile.since", date=when(account.created, "yMMMd")) }}</p>
+    </div>
+    {% if not player %}
+      <p class="site-actions player-friend">
+        {{ _("web.profile.signed_out") }}
+        <a href="{{ url('/sign-in') }}?{{ {'next': here}|urlencode }}"
+           class="site-link">{{ _("web.account.sign_in.action") }}</a>
+      </p>
+    {% elif player.account_id != account.account.id %}
+      <div class="site-actions player-friend">
+        <FriendControl :member="member" :name="name" :relationship="relationship" />
+        <a href="{{ url('/' ~ game.id ~ '/friends') }}" class="site-link">{{ _("web.profile.friends") }}</a>
+      </div>
+    {% endif %}
+  </section>
+  <section aria-labelledby="player-heroes" class="player-section">
+    <h2 id="player-heroes" class="site-heading">{{ _("web.profile.heroes", count=number(heroes|length)) }}</h2>
+    {% if heroes %}
+      <ul role="list" class="player-heroes enter-rows">
+        {% for hero in heroes %}
+          <li {% if hero.faction %}data-faction="{{ hero.faction }}"{% endif %}
+              class="player-hero">
+            <span class="player-mug hero-crop"><HeroPicture :hero="hero" /></span>
+            <div class="player-hero-text">
+              <a href="{{ url('/' ~ game.id ~ '/heroes/' ~ hero.persona.id) }}"
+                 class="player-hero-name">{{ hero.persona.name }}</a>
+              {% if hero.faction and hero.hero_class %}
+                <p>
+                  {{ _("web.creator.who", hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class) , faction=_("games." ~ game.id ~ ".faction." ~ hero.faction)) }}
+                </p>
+              {% endif %}
+            </div>
+            <span class="search-level"><span class="sr-only">{{ _("web.bar.level") }}</span>{{ hero.level }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="site-lead">{{ _("web.profile.no_heroes") }}</p>
+    {% endif %}
+  </section>
+  <section aria-labelledby="player-totals" class="player-section">
+    <h2 id="player-totals" class="site-heading">{{ _("web.profile.totals") }}</h2>
+    <dl class="site-facts player-totals">
+      <dt>{{ _("web.profile.time") }}</dt>
+      <dd>
+        {{ time }}
+      </dd>
+      <dt>{{ _("web.profile.games") }}</dt>
+      <dd>
+        {{ number(games) }}
+      </dd>
+    </dl>
+  </section>
+</Layout>

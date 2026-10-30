@@ -158,7 +158,7 @@ def facts(
     xp = number(hero.xp, language)
     if needed:
         xp = translate("web.hero.of", language) % {"xp": xp, "needed": number(needed, language)}
-    time = _duration(number_of(values, profile.time), language)
+    time = duration(number_of(values, profile.time), language)
     return [
         Fact("rating", count(profile.rating)),
         Fact("kills_deaths", pair(profile.kills, profile.deaths)),
@@ -212,7 +212,7 @@ def lists(
         profile.weapons.read(numbers), key=lambda found: -found[1]["time"]
     ):
         shown = [
-            (text("web.hero.stat.time"), _duration(stats["time"], language)),
+            (text("web.hero.stat.time"), duration(stats["time"], language)),
             (text("web.hero.stat.kills"), count(stats["kills"])),
             (text("web.hero.stat.deaths_using"), count(stats["deaths"])),
         ]
@@ -233,7 +233,7 @@ def lists(
         ratio = stats["wins"] / losses if losses else stats["wins"]
         name = (catalogue.text(named) if named else None) or text("web.hero.map", number=map_id)
         shown = [
-            (text("web.hero.stat.time"), _duration(stats["time"], language)),
+            (text("web.hero.stat.time"), duration(stats["time"], language)),
             (text("web.hero.stat.wins"), count(stats["wins"])),
             (text("web.hero.stat.losses"), count(losses)),
             (text("web.hero.stat.ratio"), number(ratio, language, 2)),
@@ -245,7 +245,7 @@ def lists(
         named = f"games.{game.id}.vehicle.{word}"
         name = text(named) if word else text("web.hero.vehicle", number=vehicle)
         shown = [
-            (text("web.hero.stat.time"), _duration(stats["time"], language)),
+            (text("web.hero.stat.time"), duration(stats["time"], language)),
             (text("web.hero.stat.kills"), count(stats["kills"])),
             (
                 text(f"{named}.collisions" if word else "web.hero.stat.collisions"),
@@ -282,6 +282,12 @@ def lists(
     return {"lists": lists, "moments": moments, "missions": missions}
 
 
-def _duration(seconds: float, language: str) -> str:
+def duration(seconds: float, language: str) -> str:
+    """Return a time in hours and minutes as a language writes it.
+
+    Args:
+        seconds: The time in seconds.
+        language: The language's code.
+    """
     hours, minutes = number(int(seconds) // 3600, language), int(seconds) // 60 % 60
     return translate("web.hero.time", language) % {"hours": hours, "minutes": minutes}

@@ -91,6 +91,7 @@ class ProfileRules(BaseModel):
         captures: The flags captured and neutralised.
         rocket_captures: The rockets captured.
         time: The time played, in seconds; a hero with none has played no round.
+        games: The rounds played.
         rank: The prestige rank, for a game whose heroes have one.
         current: The keys of the missions that the hero takes on now, one for each mission slot.
         weapons: Each weapon's time used in seconds, kills, deaths while using it, shots that hit
@@ -116,6 +117,7 @@ class ProfileRules(BaseModel):
     captures: str
     rocket_captures: str
     time: str
+    games: str
     rank: Rank | None = None
     current: list[str] = []
     weapons: Breakdown

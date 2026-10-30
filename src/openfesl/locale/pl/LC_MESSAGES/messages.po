@@ -9538,3 +9538,27 @@ msgstr "ukończona"
 
 msgid "web.hero.completed.times"
 msgstr "ukończona %(count)s razy"
+
+msgid "web.profile.since"
+msgstr "W OpenFESL od %(date)s"
+
+msgid "web.profile.signed_out"
+msgstr "Zaproszenia do znajomych wymagają zalogowania."
+
+msgid "web.profile.friends"
+msgstr "Zarządzaj znajomymi"
+
+msgid "web.profile.heroes"
+msgstr "Bohaterowie · %(count)s"
+
+msgid "web.profile.no_heroes"
+msgstr "Brak bohaterów."
+
+msgid "web.profile.totals"
+msgstr "Łącznie"
+
+msgid "web.profile.time"
+msgstr "Czas gry"
+
+msgid "web.profile.games"
+msgstr "Rozegrane rundy"

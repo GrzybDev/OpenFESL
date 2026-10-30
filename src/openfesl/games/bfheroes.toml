@@ -451,6 +451,7 @@ losses = "los"
 captures = "cpc"
 rocket_captures = "rc"
 time = "ct"
+games = "games"
 # The mission in each of the hero's three mission slots, 0 for none.
 current = ["mid0", "mid1", "mid2"]
 

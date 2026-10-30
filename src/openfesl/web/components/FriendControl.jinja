@@ -1,0 +1,11 @@
+{#def member, name: str, relationship = None #}
+{# How the signed-in account relates to another as a friend: friends already, a request it sent,
+   or the form that asks it or accepts its request. #}
+{% if relationship and relationship.mutual %}
+  <span class="friend-chip friend-chip-done"><Icon name="tick" :size="14" stroke="currentColor" />{{ _("web.search.friends") }}</span>
+{% elif relationship and relationship.own %}
+  <span class="friend-chip"><Icon name="clock" :size="14" stroke="currentColor" />{{ _("web.search.sent") }}</span>
+{% else %}
+  {% set accepts = relationship and relationship.theirs %}
+  <FriendForm :action="'accept' if accepts else 'ask'" :member="member" :name="name" :label="_('web.search.accept' if accepts else 'web.search.add')" :glyph="'tick' if accepts else 'plus'" :tone="'go' if accepts else ''" :next="here" />
+{% endif %}

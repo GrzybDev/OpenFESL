@@ -1,4 +1,4 @@
-{#def hero, player: str, title: str | None, equipped: list, facts: list, played: bool, imported: bool, lists: dict, moments: list, missions: list #}
+{#def hero, player, title: str | None, equipped: list, facts: list, played: bool, imported: bool, lists: dict, moments: list, missions: list #}
 {# A hero's public profile, as the 2012 site drew it: the head with the hero's picture, faction,
    class, level, prestige rank and player; what it wears and has on its equipment bar; and its
    Soldier Info, the stats of its rounds, which a hero without rounds shows empty with when they
@@ -29,7 +29,8 @@
         </p>
         <p class="profile-player">
           {% if title %}<span class="profile-title">{{ title }}</span> ·{% endif %}
-          {{ _("web.hero.player", player=player) }}
+          {% set link %}<a href="{{ url('/' ~ game.id ~ '/player/' ~ player.id) }}">{{ player.display_name }}</a>{% endset %}
+          {{ _("web.hero.player", player=link) }}
         </p>
       </div>
     </section>

@@ -9006,3 +9006,27 @@ msgstr "completed"
 
 msgid "web.hero.completed.times"
 msgstr "completed %(count)s times"
+
+msgid "web.profile.since"
+msgstr "On OpenFESL since %(date)s"
+
+msgid "web.profile.signed_out"
+msgstr "Friend requests need a signed-in account."
+
+msgid "web.profile.friends"
+msgstr "Manage friends"
+
+msgid "web.profile.heroes"
+msgstr "Heroes · %(count)s"
+
+msgid "web.profile.no_heroes"
+msgstr "No heroes yet."
+
+msgid "web.profile.totals"
+msgstr "Totals"
+
+msgid "web.profile.time"
+msgstr "Time played"
+
+msgid "web.profile.games"
+msgstr "Rounds played"
