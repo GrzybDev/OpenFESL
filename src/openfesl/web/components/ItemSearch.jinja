@@ -1,0 +1,15 @@
+{#def id: str, label: str, value: str, action: str #}
+{# The admin panel's search of a game's items by name or number, a form of its own that sends the
+   search to an editor's page. #}
+<form method="get" action="{{ action }}" class="prices-search">
+  <label for="{{ id }}" class="prices-search-label">{{ label }}</label>
+  <input id="{{ id }}"
+         name="q"
+         type="search"
+         value="{{ value }}"
+         maxlength="64"
+         autocomplete="off"
+         placeholder="{{ _('web.admin.boxes.add.hint') }}"
+         class="prices-search-input">
+  <FormButton icon="find">{{ _("web.admin.boxes.add.find") }}</FormButton>
+</form>

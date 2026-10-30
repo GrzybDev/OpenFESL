@@ -114,6 +114,10 @@ class AdminAction(StrEnum):
     game:item; the details hold each changed point's product number, currency, ownership, price
     before and after and whether it was and is sold, and whether the admin reset them to the
     rules."""
+    BOX_TABLE = "box_table"
+    """Changed the drop table of a box of a game's store, the target naming both as game:box;
+    the details hold the tiers' weights before and after, the entries removed and added, and
+    whether the box promised its worth before and after."""
     STORE_RULE = "store_rule"
     """Changed a price rule of a game's store and applied it, the target naming both as
     game:rule; the details hold the rule's values before and after, how many items took its

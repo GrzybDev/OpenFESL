@@ -88,3 +88,50 @@ def _owned(texts: StoreTexts, written: str) -> str:
     ownership = Ownership.read(written)
     assert isinstance(ownership, Ownership)
     return texts.ownership(ownership, inline=True)
+
+
+async def box_entry(
+    details: dict[str, Any], games: Games, catalogues: Catalogues, language: str
+) -> tuple[str, str | None, str]:
+    """Return how the audit log shows a box's drop table that the admin changed.
+
+    Args:
+        details: The change's details, as the admin's log keeps them.
+        games: The games, whose stores the box belongs to.
+        catalogues: Name the items.
+        language: The log's language.
+
+    Returns:
+        The box's key, the panel's page of the game's boxes and what changed in words.
+    """
+    game = games.by_id(details["game"])
+    if game is None:
+        return details["box"], None, ""
+    catalogue = await catalogues.of(game, language)
+    texts = StoreTexts(game, language, datetime.now(UTC))
+
+    def entries(listed: list[list[Any]]) -> str:
+        return ", ".join(
+            f"{catalogue.name(item) or item} ({_owned(texts, written)})" for item, written in listed
+        )
+
+    said = []
+    if details["removed"]:
+        said.append(texts.text("web.admin.audit.box.removed", entries=entries(details["removed"])))
+    if details["added"]:
+        said.append(texts.text("web.admin.audit.box.added", entries=entries(details["added"])))
+    before, after = details["weights"]
+    if before != after:
+        said.append(
+            texts.text(
+                "web.admin.audit.box.weights",
+                before=" / ".join(map(str, before)),
+                after=" / ".join(map(str, after)),
+            )
+        )
+    if details["worth"][0] != details["worth"][1]:
+        said.append(
+            texts.text(f"web.admin.audit.box.worth.{'on' if details['worth'][1] else 'off'}")
+        )
+    href = localize(f"/admin/store/{game.id}/boxes", language)
+    return details["box"], href, "; ".join(said)

@@ -11725,3 +11725,75 @@ msgstr "Skrzynki · wpis poniżej ceny"
 
 msgid "web.admin.home.warning.boxes.text"
 msgstr "%(box)s: %(item)s, wartość %(value)s z %(price)s · pomijany w losowaniach"
+
+msgid "web.admin.boxes.weight"
+msgstr "Waga"
+
+msgid "web.admin.boxes.entry.remove"
+msgstr "Usuń"
+
+msgid "web.admin.boxes.worth.promised"
+msgstr "Obiecuje to tekst skrzynki, więc obietnica zostaje; wpisy poniżej %(price)s są odrzucane."
+
+msgid "web.admin.boxes.save"
+msgstr "Zapisz tabelę losowania"
+
+msgid "web.admin.boxes.save.note"
+msgstr "Zmiany obowiązują od następnego losowania; otwarte skrzynki zachowują to, co dały."
+
+msgid "web.admin.boxes.add"
+msgstr "Dodaj wpis"
+
+msgid "web.admin.boxes.add.hint"
+msgstr "Nazwa albo numer przedmiotu"
+
+msgid "web.admin.boxes.add.find"
+msgstr "Szukaj"
+
+msgid "web.admin.boxes.add.submit"
+msgstr "Dodaj do poziomu"
+
+msgid "web.admin.boxes.add.none"
+msgstr "Żaden przedmiot, który mogą dawać skrzynki, nie pasuje do: %(query)s."
+
+msgid "web.admin.boxes.managed"
+msgstr "Zmiana tabel losowania wymaga roli administratora."
+
+msgid "web.admin.boxes.refused.weights"
+msgstr "Wagi sumują się do %(sum)s%%; muszą dawać 100%%, a każdy poziom z wpisami potrzebuje wagi."
+
+msgid "web.admin.boxes.refused.empty"
+msgstr "%(tier)s nie ma wpisów; trzeba ustawić jego wagę na 0 albo dodać wpis."
+
+msgid "web.admin.boxes.refused.below"
+msgstr "%(item)s, %(ownership)s, ma wartość %(value)s, mniej niż cena skrzynki %(price)s, gdy działa zasada."
+
+msgid "web.admin.boxes.refused.no_price"
+msgstr "%(item)s nie ma ceny w %(currency)s, więc nie da się sprawdzić jego wartości."
+
+msgid "web.admin.boxes.refused.promised"
+msgstr "Tekst skrzynki %(box)s z gry obiecuje przedmiot wart co najmniej jej cenę, więc obietnica zostaje włączona."
+
+msgid "web.admin.toast.boxes.saved"
+msgstr "Zapisano tabelę losowania: %(box)s."
+
+msgid "web.admin.audit.action.box_table"
+msgstr "Zmiana tabeli losowania"
+
+msgid "web.admin.audit.box.removed"
+msgstr "usunięto: %(entries)s"
+
+msgid "web.admin.audit.box.added"
+msgstr "dodano: %(entries)s"
+
+msgid "web.admin.audit.box.weights"
+msgstr "wagi %(before)s → %(after)s"
+
+msgid "web.admin.audit.box.worth.on"
+msgstr "obietnica wartości włączona"
+
+msgid "web.admin.audit.box.worth.off"
+msgstr "obietnica wartości wyłączona"
+
+msgid "web.admin.toast.boxes.unchanged"
+msgstr "Tabela losowania bez zmian: %(box)s."

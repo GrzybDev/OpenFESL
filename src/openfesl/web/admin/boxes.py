@@ -1,13 +1,13 @@
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from fractions import Fraction
+from typing import Any
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
-from starlette.exceptions import HTTPException
 
-from openfesl.core.admins import Role
-from openfesl.core.box_tables import BoxStore, expected
+from openfesl.core.admins import Admin, Role
+from openfesl.core.box_tables import BoxStore, TableEntry, expected
 from openfesl.core.calendar import Window, today
 from openfesl.core.catalogues import Catalogue, Catalogues, game_text
 from openfesl.core.deal_rules import DealRules, OfferSection
@@ -35,6 +35,8 @@ class BoxRow:
         days: The first and last days of this year on which its section sells it, if they are
             fixed.
         always: Whether its section sells it in every period.
+        promised: Whether the text of the offer that sells it promises its worth, which the
+            game's texts may; such a box keeps its promise.
         selling: Its hot deal on sale now, if one is.
         ratio: What it gives on average against its price, if it gives anything of value.
         below: Its drops worth less than its price, which rolls skip while it promises its worth.
@@ -45,6 +47,7 @@ class BoxRow:
     section: str | None
     days: tuple[datetime, datetime] | None
     always: bool
+    promised: bool
     selling: ListedBundle | None
     ratio: Fraction | None
     below: list[Product]
@@ -127,14 +130,15 @@ class BoxAdminViews:
         """
         catalogue = await self._catalogues.of(game, language)
         rules = await self._deals.rules(game)
-        offered: dict[str, tuple[str, str, Window | None, bool]] = {}
+        offered: dict[str, tuple[str, str, Window | None, bool, bool]] = {}
         for key, section in rules.sections.items() if rules else []:
             if isinstance(section, OfferSection):
                 every = section.size is None and section.schedule is not None
                 for offer in section.offers:
                     if offer.box and offer.box not in offered:
                         always = every and offer.window is None
-                        offered[offer.box] = (offer.name, key, offer.window, always)
+                        promised = offer.description is not None
+                        offered[offer.box] = (offer.name, key, offer.window, always, promised)
         selling = {
             listed.bundle.box: listed
             for listed in await self._deals.current(game)
@@ -145,7 +149,9 @@ class BoxAdminViews:
         year = today(datetime.now(UTC), zone).year
         rows = []
         for box in await self._boxes.boxes(game.id):
-            text, shelf, window, always = offered.get(box.key, ("", "", None, False))
+            text, shelf, window, always, promised = offered.get(
+                box.key, ("", "", None, False, False)
+            )
             name = (
                 game_text(game, catalogue, text, language)
                 if text
@@ -161,6 +167,7 @@ class BoxAdminViews:
                     shelf or None,
                     (period.start, period.end - timedelta(days=1)) if period else None,
                     always,
+                    promised,
                     selling.get(box.id),
                     expected(box),
                     below_value(box),
@@ -181,6 +188,27 @@ class BoxAdminViews:
             game: The game.
         """
         return await self._deals.rules(game)
+
+    async def save_table(
+        self,
+        box: Box,
+        weights: list[int],
+        entries: list[TableEntry],
+        worth_rule: bool,
+        details: dict[str, Any],
+        admin: Admin,
+    ) -> None:
+        """Replace a box's drop table and record the change among the admin's actions.
+
+        Args:
+            box: The box, as it was.
+            weights: The weight of each tier, by its number.
+            entries: Its entries; those without a product add one, unpublished, at their price.
+            worth_rule: Whether it promises that every entry is worth its price.
+            details: What the admin's log keeps of the change.
+            admin: The admin who saved it.
+        """
+        await self._boxes.save_table(box, weights, entries, worth_rule, details, admin)
 
     async def flags(self, language: str) -> list[BoxFlag]:
         """Return the drops of every store's boxes that are worth less than their box's price.
@@ -228,7 +256,7 @@ def tiers(box: Box, catalogue: Catalogue) -> list[TierView]:
 
 
 def box_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter:
-    """Return the boxes and chests of each game's store and each one's drop table.
+    """Return the boxes and chests of each game's store.
 
     Every role reads them.
 
@@ -255,31 +283,6 @@ def box_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter:
             catalogue=catalogue,
             groups=groups,
             deals=await views.deal_rules(game),
-            manages=admin.role is Role.ADMIN,
-        )
-
-    @router.get("/admin/store/{game_id}/boxes/{box_id}", response_class=HTMLResponse)
-    async def box(request: Request, game_id: str, box_id: int) -> HTMLResponse:
-        admin = sessions.admin(request)
-        game = views.stores.game(game_id)
-        catalogue, rows = await views.rows(game, request.state.language)
-        row = next((row for row in rows if row.box.id == box_id), None)
-        if row is None:
-            raise HTTPException(404)
-        fallback = row.box.fallback
-        return await sessions.render(
-            request,
-            "admin.StoreBox",
-            admin=admin,
-            of=game,
-            catalogue=catalogue,
-            row=row,
-            tiers=tiers(row.box, catalogue),
-            fallback=Entry(
-                fallback, catalogue.name(fallback.item_id) or str(fallback.item_id), True
-            )
-            if fallback
-            else None,
             manages=admin.role is Role.ADMIN,
         )
 

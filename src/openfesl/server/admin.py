@@ -9,6 +9,7 @@ from openfesl.web.admin.account_decisions import account_decision_routes
 from openfesl.web.admin.accounts import AccountViews, account_routes
 from openfesl.web.admin.audit import audit_routes
 from openfesl.web.admin.auth import AdminSessions, NeedsRole, SignInNeeded, SignInProvider
+from openfesl.web.admin.box_tables import box_table_routes
 from openfesl.web.admin.boxes import BoxAdminViews, box_routes
 from openfesl.web.admin.catalogues import catalogue_routes
 from openfesl.web.admin.entitlements import entitlement_routes
@@ -138,6 +139,7 @@ def include_admin_routes(
     app.include_router(store_item_routes(sign_in, store_views))
     app.include_router(store_rule_routes(sign_in, store_views))
     app.include_router(box_routes(sign_in, box_views))
+    app.include_router(box_table_routes(sign_in, box_views))
     app.include_router(
         audit_routes(
             sign_in,

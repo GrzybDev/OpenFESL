@@ -11037,3 +11037,75 @@ msgstr "Boxes · entry below the price"
 
 msgid "web.admin.home.warning.boxes.text"
 msgstr "%(box)s: %(item)s, worth %(value)s of %(price)s · skipped in rolls"
+
+msgid "web.admin.boxes.weight"
+msgstr "Weight"
+
+msgid "web.admin.boxes.entry.remove"
+msgstr "Remove"
+
+msgid "web.admin.boxes.worth.promised"
+msgstr "The box's own text promises it, so the promise stays; entries below %(price)s are refused."
+
+msgid "web.admin.boxes.save"
+msgstr "Save drop table"
+
+msgid "web.admin.boxes.save.note"
+msgstr "Changes apply from the next roll; boxes already opened keep what they gave."
+
+msgid "web.admin.boxes.add"
+msgstr "Add an entry"
+
+msgid "web.admin.boxes.add.hint"
+msgstr "A name or an item number"
+
+msgid "web.admin.boxes.add.find"
+msgstr "Find"
+
+msgid "web.admin.boxes.add.submit"
+msgstr "Add to the tier"
+
+msgid "web.admin.boxes.add.none"
+msgstr "No item that boxes may give matches %(query)s."
+
+msgid "web.admin.boxes.managed"
+msgstr "Drop tables are changed with the admin role."
+
+msgid "web.admin.boxes.refused.weights"
+msgstr "Weights add up to %(sum)s%%; they must add up to 100%%, and every tier with entries needs one."
+
+msgid "web.admin.boxes.refused.empty"
+msgstr "%(tier)s has no entry; set its weight to 0 or add an entry."
+
+msgid "web.admin.boxes.refused.below"
+msgstr "%(item)s, %(ownership)s, is worth %(value)s, below the box's price of %(price)s while the rule is on."
+
+msgid "web.admin.boxes.refused.no_price"
+msgstr "%(item)s has no price in %(currency)s, so its value cannot be checked."
+
+msgid "web.admin.boxes.refused.promised"
+msgstr "The imported text of %(box)s promises an item worth at least its price, so the promise stays on."
+
+msgid "web.admin.toast.boxes.saved"
+msgstr "Saved the drop table of %(box)s."
+
+msgid "web.admin.audit.action.box_table"
+msgstr "Drop table changed"
+
+msgid "web.admin.audit.box.removed"
+msgstr "removed %(entries)s"
+
+msgid "web.admin.audit.box.added"
+msgstr "added %(entries)s"
+
+msgid "web.admin.audit.box.weights"
+msgstr "weights %(before)s → %(after)s"
+
+msgid "web.admin.audit.box.worth.on"
+msgstr "promise of worth on"
+
+msgid "web.admin.audit.box.worth.off"
+msgstr "promise of worth off"
+
+msgid "web.admin.toast.boxes.unchanged"
+msgstr "Nothing changed in the drop table of %(box)s."

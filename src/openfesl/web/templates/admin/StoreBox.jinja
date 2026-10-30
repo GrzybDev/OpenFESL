@@ -1,20 +1,23 @@
-{#def of, catalogue, row, tiers: list, fallback, manages: bool #}
-{# A box's drop table: its price and whether it promises its worth, each tier with its
-   share of the rolls and its drops, each drop's value against the price and whether rolls give
-   it, beside what the box gives on average, what a hero that holds a drop gets instead and what
-   players are shown. #}
+{#def of, catalogue, row, tiers: list, fallback, manages: bool, query: str, candidates: list, form: dict, refused: str #}
+{# A box's drop table: its price and whether it promises its worth, each tier with
+   its share of the rolls and its drops, each drop's value against the price and whether rolls
+   give it, beside what the box gives on average, what a hero that holds a drop gets instead and
+   what players are shown. Admins change the weights and the promise, take entries out and add
+   entries found by name or number; a refusal stands above Save and nothing is saved. #}
 {% set game = of %}
 {% set box = row.box %}
 {% set currency = _("games." ~ game.id ~ ".currency." ~ box.currency) %}
 {% set icons = catalogue.contents.icons > 0 %}
+{% set here = url("/admin/store/" ~ game.id ~ "/boxes/" ~ box.id) %}
+{% set worth_rule = form.get("worth") if "weight-0" in form else box.worth_rule %}
 {% macro owned(ownership) -%}
   {%- if ownership.type == "tlmd" %}{{ _n("web.store.price.days", ownership.days) }}{% elif ownership.type == "lmct" %}{{ _n("web.store.price.uses", ownership.uses) }}{% else %}{{ _("web.store.price.permanent") }}{% endif -%}
 {%- endmacro %}
-{% macro entry(entry) %}
+{% macro entry(entry, editable=False) %}
   {% set product = entry.product %}
   {% set item = catalogue.item(product.item_id) %}
   <div role="row"
-       class="box-columns box-row{% if not entry.counts %} box-row-skipped{% endif %}">
+       class="box-columns box-row{% if editable %} box-columns-edit{% endif %}{% if not entry.counts %} box-row-skipped{% endif %}">
     <div role="cell" class="admin-cell box-item">
       <AdminItemIcon :game="game" :item="item" :shown="icons" />
       <span class="cell-stack">
@@ -34,6 +37,20 @@
     <div role="cell" class="admin-cell prices-state">
       <Badge :name="'tick' if entry.counts else 'x'" lines />{{ _("web.admin.boxes.entry.counts") if entry.counts else _("web.admin.boxes.entry.skipped") }}
     </div>
+    {% if editable %}
+      <div role="cell" class="admin-cell prices-state">
+        <label class="prices-sold">
+          <span class="check-place">
+            <input type="checkbox"
+                   name="remove-{{ product.id }}"
+                   value="1"
+                   {% if form.get("remove-" ~ product.id) %} checked{% endif %}
+                   class="check">
+            <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>
+          {{ _("web.admin.boxes.entry.remove") }}
+        </label>
+      </div>
+    {% endif %}
   </div>
 {% endmacro %}
 <AdminPage :title="row.name ~ ' · ' ~ _('web.admin.store.tab.boxes')"
@@ -46,34 +63,129 @@
     </nav>
     <div class="list-layout admin-layout">
       <div class="list-main prices-item-main">
+        {% if manages %}
+          <form method="post" action="{{ here }}" class="prices-form">
+            <CsrfField />
+        {% endif %}
         <section aria-labelledby="box-title" class="account-part">
           <h2 id="box-title" class="bar bar-wrap prices-item-bar">
             <span class="prices-item-title">{{ row.name }}<span class="prices-item-number">{{ box.key }}</span></span>
             <span class="bar-extra">{{ number(box.value) }} {{ currency }} · {{ _("games." ~ game.id ~ ".faction." ~ box.faction) if box.faction else _("web.store.requires.any_faction") }} · {{ _("games." ~ game.id ~ ".class." ~ box.hero_class) if box.hero_class else _("web.store.requires.any_class") }}</span>
           </h2>
-          <p class="bar-text prices-unsold">
-            <Badge :name="'tick' if box.worth_rule else 'x'" lines />
-            <span>
-              <strong>{{ _("web.admin.boxes.worth") if box.worth_rule else _("web.admin.boxes.worth.off") }}</strong>
-              {{ _("web.admin.boxes.worth.text", price=number(box.value)) if box.worth_rule else _("web.admin.boxes.worth.off.text") }}
-            </span>
-          </p>
+          {% if manages %}
+            <label class="check-row prices-off-row">
+              <span class="prices-off-text">
+                <span class="prices-off-title">{{ _("web.admin.boxes.worth") }}</span>
+                <span>{{ _("web.admin.boxes.worth.promised" if row.promised else "web.admin.boxes.worth.text", price=number(box.value)) }}</span>
+              </span>
+              <span class="check-place">
+                <input type="checkbox"
+                       name="worth"
+                       value="1"
+                       {% if worth_rule %} checked{% endif %}
+                       class="check">
+                <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>
+            </label>
+          {% else %}
+            <p class="bar-text prices-unsold">
+              <Badge :name="'tick' if box.worth_rule else 'x'" lines />
+              <span>
+                <strong>{{ _("web.admin.boxes.worth") if box.worth_rule else _("web.admin.boxes.worth.off") }}</strong>
+                {{ _("web.admin.boxes.worth.text", price=number(box.value)) if box.worth_rule else _("web.admin.boxes.worth.off.text") }}
+              </span>
+            </p>
+          {% endif %}
         </section>
         {% for tier in tiers %}
           <section aria-labelledby="tier-{{ tier.index }}" class="account-part">
-            <Bar :id="'tier-' ~ tier.index" :extra="_('web.admin.boxes.tier.share', share=number(tier.share|float, places=1))">{{ _("web.admin.boxes.tier", number=tier.index + 1) }} · {{ _n("web.admin.boxes.entries", tier.entries|length) }}</Bar>
+            <h3 id="tier-{{ tier.index }}" class="bar box-tier-bar">
+              <span>{{ _("web.admin.boxes.tier", number=tier.index + 1) }} · {{ _n("web.admin.boxes.entries", tier.entries|length) }}</span>
+              {% if manages %}
+                <label class="box-weight">
+                  <span>{{ _("web.admin.boxes.weight") }}</span>
+                  <input name="weight-{{ tier.index }}"
+                         type="text"
+                         inputmode="numeric"
+                         value="{{ form.get('weight-' ~ tier.index, tier.weight) }}"
+                         maxlength="3"
+                         class="field-input box-weight-input">
+                  <span>%</span>
+                </label>
+              {% else %}
+                <span class="bar-extra">{{ _("web.admin.boxes.tier.share", share=number(tier.share|float, places=1)) }}</span>
+              {% endif %}
+            </h3>
             <div class="table-scroll">
               <div role="table"
                    aria-labelledby="tier-{{ tier.index }}"
                    class="table box-table">
                 <div role="rowgroup"
-                     class="enter-rows table-rows">{% for each in tier.entries %}{{ entry(each) }}{% endfor %}</div>
+                     class="enter-rows table-rows">{% for each in tier.entries %}{{ entry(each, manages) }}{% endfor %}</div>
               </div>
             </div>
           </section>
         {% else %}
           <p class="bar-text body-text">{{ _("web.admin.boxes.empty") }}</p>
         {% endfor %}
+        {% if manages %}
+          {% if refused %}
+            <p role="alert" class="prices-refusal">
+              <span aria-hidden="true"
+                    class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span><span>{{ refused }}</span>
+            </p>
+          {% endif %}
+          <div class="prices-save">
+            <p class="body-text">{{ _("web.admin.boxes.save.note") }}</p>
+            <SmallAction :label="_('web.admin.boxes.save')" :busy="_('web.admin.store.save.busy')" />
+          </div>
+          </form>
+          <section aria-labelledby="box-add" class="account-part">
+            <Bar id="box-add">{{ _("web.admin.boxes.add") }}</Bar>
+            <ItemSearch id="box-search" :label="_('web.admin.store.search')" :value="query" :action="here ~ '#box-add'" />
+            {% for found in candidates %}
+              <form method="post" action="{{ here }}/add" class="box-candidate">
+                <CsrfField />
+                <input type="hidden" name="item" value="{{ found.item.id }}">
+                <p class="box-candidate-name">
+                  <AdminItemIcon :game="game" :item="found.item" :shown="icons" />
+                  <span class="cell-stack"><span class="admin-hero-strong">{{ found.name }}</span><span class="cell-ago">{{ _("web.admin.items.number", id=found.item.id) }}</span></span>
+                </p>
+                <div class="prices-picks">
+                  {% for option in found.options %}
+                    <label class="prices-filter-pick">
+                      <input type="radio"
+                             name="ownership"
+                             value="{{ option.written }}"
+                             {% if loop.first %} checked{% endif %}
+                             class="choice-input">
+                      <span>{{ option.label }}</span>
+                    </label>
+                  {% endfor %}
+                </div>
+                <div class="prices-picks">
+                  {% for tier in tiers %}
+                    <label class="prices-filter-pick">
+                      <input type="radio"
+                             name="tier"
+                             value="{{ tier.index }}"
+                             {% if loop.last %} checked{% endif %}
+                             class="choice-input">
+                      <span>{{ _("web.admin.boxes.tier", number=tier.index + 1) }}</span>
+                    </label>
+                  {% endfor %}
+                </div>
+                <FormButton icon="plus">{{ _("web.admin.boxes.add.submit") }}</FormButton>
+              </form>
+            {% else %}
+              {% if query %}<p class="bar-text body-text">{{ _("web.admin.boxes.add.none", query=query) }}</p>{% endif %}
+            {% endfor %}
+          </section>
+        {% else %}
+          <p class="bar-text account-role-note">
+            <span aria-hidden="true"
+                  class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.boxes.managed") }}
+          </p>
+        {% endif %}
       </div>
       <div class="list-side admin-side">
         <section aria-labelledby="box-value">
