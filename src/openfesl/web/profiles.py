@@ -6,12 +6,15 @@ from fastapi.responses import HTMLResponse, Response
 from openfesl.core.accounts import AccountRecord
 from openfesl.core.catalogues import Catalogues
 from openfesl.core.games import Game, Games
+from openfesl.core.hero_boards import HeroBoards
 from openfesl.core.heroes import Hero, Heroes
 from openfesl.core.personas import PersonaStore
 from openfesl.core.relationships import Party, Relationships
 from openfesl.core.stats import PERSONA, Owner, StatStore, bucket_of, partition_of
+from openfesl.core.texts import localize
 from openfesl.protocol.rank import Period
 from openfesl.web.account.session import signed_in
+from openfesl.web.boards import HISTORIC, LEADERBOARDS, PAGE_SIZE, Board, standings
 from openfesl.web.hero_stats import duration, equipped, facts, lists, number_of
 from openfesl.web.pages import Pages
 from openfesl.web.sessions import form_token
@@ -37,6 +40,7 @@ class ProfilePages:
         stats: StatStore,
         catalogues: Catalogues,
         relationships: Relationships,
+        boards: HeroBoards,
     ) -> None:
         """Prepare the profiles of each game whose heroes have them.
 
@@ -50,6 +54,7 @@ class ProfilePages:
             stats: Hold the heroes' stats.
             catalogues: Name the items, with their icons, once imported.
             relationships: Tell how the signed-in account relates to a player as a friend.
+            boards: Tell a hero's place on the all-time score board.
         """
         self._pages = pages
         self._games = games
@@ -59,6 +64,7 @@ class ProfilePages:
         self._stats = stats
         self._catalogues = catalogues
         self._relationships = relationships
+        self._boards = boards
 
     def routes(self) -> APIRouter:
         """Return the profile of each hero and player of the games whose heroes have one."""
@@ -98,11 +104,23 @@ class ProfilePages:
                 partition_of(game), owner, bucket_of(Period.ALL_TIME, 0)
             )
             title = None
-            if profile.rank and (rank := profile.rank.of(number_of(values, profile.rank.key))):
+            if profile.rank and (named := profile.rank.of(number_of(values, profile.rank.key))):
                 # The game's texts of the levels hold brackets and spaces that the site left out.
-                names = [(catalogue.text(name) or "").strip("[] ") for name in rank if name]
+                names = [(catalogue.text(name) or "").strip("[] ") for name in named if name]
                 title = " ".join(names) if all(names) else None
             art = self._pages.shows_art(request, game)
+            # The hero's place on the all-time score board, the board's page that lists it and when
+            # it was ranked; like the 2012 site, none for a hero beyond the board's places.
+            rank = None
+            if "leaderboards" in game.pages:
+                board = Board(period=HISTORIC)
+                ranked = await standings(self._boards, game, board)
+                for line in ranked.lines:
+                    if line.hero_id == hero.persona.id:
+                        page = (line.place - 1) // PAGE_SIZE + 1
+                        path = f"/{game.id}{LEADERBOARDS}{board.changed(page=page).query()}"
+                        address = f"{localize(path, language)}#hero-{hero.persona.id}"
+                        rank = (line.place, address, ranked.ranked)
             return self._pages.render(
                 request,
                 "heroes.Hero",
@@ -110,6 +128,8 @@ class ProfilePages:
                 hero=hero,
                 player=record.account,
                 title=title,
+                rank=rank,
+                unranked=number_of(values, profile.time) < profile.listed_after,
                 equipped=equipped(game, values, catalogue, art),
                 facts=facts(rules, hero, values, catalogue, language),
                 played=number_of(values, profile.time) > 0,

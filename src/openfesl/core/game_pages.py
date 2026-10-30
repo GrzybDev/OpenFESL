@@ -7,11 +7,13 @@ from pydantic import BaseModel, ConfigDict, PositiveInt, StringConstraints
 type Colour = Annotated[str, StringConstraints(pattern=r"^(#[0-9A-Fa-f]{6}|rgba\([0-9., ]+\))$")]
 # The kinds of web pages a game may list; the server list brings the servers' pages with it and
 # the leaderboard the players' pages. The store, hot deals, treasure chests, Funds and rewards
-# pages belong to a game with heroes made on its own site, the friends page and the player search
-# to one whose accounts keep relationships.
+# pages belong to a game with heroes made on its own site, and the leaderboards of heroes to one
+# whose heroes have public profiles; the friends page and the player search to one whose accounts
+# keep relationships.
 type PageKind = Literal[
     "servers",
     "leaderboard",
+    "leaderboards",
     "activity",
     "play",
     "host",

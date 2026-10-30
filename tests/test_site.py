@@ -19,7 +19,8 @@ async def test_a_game_site_signs_in_on_its_pages_and_shows_balances_without_open
         shown = markup(page.content)
         # The site's menus list only the pages the game has.
         assert 'href="/bfheroes/play" aria-current="page"' in shown
-        assert "/bfheroes/leaderboard" not in shown and "/bfheroes/host" not in shown
+        assert 'href="/bfheroes/leaderboards"' in shown
+        assert 'href="/bfheroes/leaderboard"' not in shown and "/bfheroes/host" not in shown
         assert 'name="next" value="/bfheroes/play"' in shown
 
         form = {"csrf": form_token(page.text), "next": "/bfheroes/play"}

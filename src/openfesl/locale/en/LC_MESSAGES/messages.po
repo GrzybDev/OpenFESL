@@ -659,6 +659,15 @@ msgstr "All-round, with healing. SMGs and shotguns."
 msgid "games.bfheroes.class.gunner.role"
 msgstr "Most health, slowest. Machine guns and shotguns."
 
+msgid "games.bfheroes.class.commando.plural"
+msgstr "Commandos"
+
+msgid "games.bfheroes.class.soldier.plural"
+msgstr "Soldiers"
+
+msgid "games.bfheroes.class.gunner.plural"
+msgstr "Gunners"
+
 msgid "games.bfheroes.menu.game"
 msgstr "The game"
 
@@ -8821,6 +8830,9 @@ msgstr "Anyone can search; friend requests need a signed-in account."
 msgid "web.friends.none.search"
 msgstr "Player search finds heroes and players by name."
 
+msgid "web.front.top.place"
+msgstr "Place"
+
 msgid "web.error.site.plaque.404"
 msgstr "Not found"
 
@@ -9030,3 +9042,117 @@ msgstr "Time played"
 
 msgid "web.profile.games"
 msgstr "Rounds played"
+
+msgid "web.site.page.leaderboards"
+msgstr "Leaderboards"
+
+msgid "web.boards.board"
+msgstr "Board"
+
+msgid "web.boards.heroes"
+msgstr "Heroes"
+
+msgid "web.boards.everyone"
+msgstr "All heroes"
+
+msgid "web.boards.show"
+msgstr "Show"
+
+msgid "web.boards.periods"
+msgstr "Periods"
+
+msgid "web.boards.period.weekly.0"
+msgstr "Current week"
+
+msgid "web.boards.period.weekly.1"
+msgstr "Last week"
+
+msgid "web.boards.period.weekly.2"
+msgstr "2 weeks ago"
+
+msgid "web.boards.period.weekly.3"
+msgstr "3 weeks ago"
+
+msgid "web.boards.period.indefinite"
+msgstr "Historic"
+
+msgid "web.boards.board.score"
+msgstr "Score"
+
+msgid "web.boards.board.kills-deaths"
+msgstr "Kills and deaths"
+
+msgid "web.boards.board.wins-losses"
+msgstr "Wins and losses"
+
+msgid "web.boards.board.time-played"
+msgstr "Time played"
+
+msgid "web.boards.board.hit-fired"
+msgstr "Accuracy"
+
+msgid "web.boards.board.capture-points"
+msgstr "Flag master"
+
+msgid "web.boards.share"
+msgstr "%(faction)s %(share)s%%"
+
+msgid "web.boards.caption"
+msgstr "%(board)s, places %(first)s to %(last)s of %(total)s"
+
+msgid "web.boards.hero"
+msgstr "Hero"
+
+msgid "web.boards.value.score"
+msgstr "Score"
+
+msgid "web.boards.value.kills-deaths"
+msgstr "Kills per death"
+
+msgid "web.boards.value.wins-losses"
+msgstr "Wins per loss"
+
+msgid "web.boards.value.time-played"
+msgstr "Time played"
+
+msgid "web.boards.value.hit-fired"
+msgstr "Accuracy"
+
+msgid "web.boards.value.capture-points"
+msgstr "Flag points"
+
+msgid "web.boards.ranked"
+msgstr "Ranked at %(time)s; rankings are at most an hour old."
+
+msgid "web.boards.empty.week"
+msgstr "No hero on this board yet this week"
+
+msgid "web.boards.empty.past"
+msgstr "No hero was on this board that week"
+
+msgid "web.boards.empty.all"
+msgstr "No hero on this board yet"
+
+msgid "web.boards.rule.week.one"
+msgstr "A hero shows once it has played %(count)s hour of rounds in the week."
+
+msgid "web.boards.rule.week.other"
+msgstr "A hero shows once it has played %(count)s hours of rounds in the week."
+
+msgid "web.boards.rule.all.one"
+msgstr "A board lists its best %(places)s heroes that have played %(count)s hour of rounds in its period."
+
+msgid "web.boards.rule.all.other"
+msgstr "A board lists its best %(places)s heroes that have played %(count)s hours of rounds in its period."
+
+msgid "web.boards.started"
+msgstr "The week started %(start)s."
+
+msgid "web.hero.rank"
+msgstr "rank %(place)s"
+
+msgid "web.hero.rank.ranked"
+msgstr "The rank is the all-time score board's, ranked at %(time)s."
+
+msgid "web.hero.unranked"
+msgstr "not ranked yet"

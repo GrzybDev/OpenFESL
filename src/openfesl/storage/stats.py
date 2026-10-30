@@ -392,9 +392,14 @@ def _personas(partition: str, keys: Sequence[str], bucket: Bucket) -> list[Colum
     ]
 
 
-def _placed(
-    partition: str, sums: Mapping[str, Sequence[str]], order: str, bucket: Bucket
-) -> Subquery:
+def summed(partition: str, sums: Mapping[str, Sequence[str]], bucket: Bucket) -> Subquery:
+    """Return the sums of the stats of each enabled persona that holds any of them in a period.
+
+    Args:
+        partition: The game's partition.
+        sums: The sums by their names, each with the keys whose values it adds up.
+        bucket: The period.
+    """
     every = sorted({key for keys in sums.values() for key in keys})
     totals = [
         func.coalesce(
@@ -403,20 +408,32 @@ def _placed(
         ).label(name)
         for name, keys in sums.items()
     ]
-    summed = (
+    return (
         select(StatRow.owner_id, *totals)
         .where(*_personas(partition, every, bucket))
         .group_by(StatRow.owner_id)
         .subquery()
     )
-    value: ColumnElement[float] = (
-        case((summed.c.deaths > 0, summed.c.kills / summed.c.deaths), else_=summed.c.kills)
-        if order == KD
-        else summed.c[order]
-    )
+
+
+def per(over: ColumnElement[float], under: ColumnElement[float]) -> ColumnElement[float]:
+    """Return one sum per another, or the first alone where the other is 0.
+
+    Args:
+        over: The sum divided, such as kills.
+        under: The sum it is divided by, such as deaths, without which kills count alone.
+    """
+    return case((under > 0, over / under), else_=over)
+
+
+def _placed(
+    partition: str, sums: Mapping[str, Sequence[str]], order: str, bucket: Bucket
+) -> Subquery:
+    totals = summed(partition, sums, bucket)
+    value = per(totals.c.kills, totals.c.deaths) if order == KD else totals.c[order]
     # Every player has a place of their own, as on the game's own leaderboards.
-    place = func.row_number().over(order_by=(value.desc(), summed.c.owner_id))
-    return select(summed, place.label("place")).subquery()
+    place = func.row_number().over(order_by=(value.desc(), totals.c.owner_id))
+    return select(totals, place.label("place")).subquery()
 
 
 def _line(row: Row[Any], sums: Mapping[str, Sequence[str]]) -> Line:

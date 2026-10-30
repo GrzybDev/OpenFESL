@@ -1,0 +1,127 @@
+{#def board, boards: list, lines: list, total: int, shares: list, pages: int, first: int, hours: int, places: int, ranked, week, base: str #}
+{# The leaderboards of heroes, as the 2012 site's: the two choices of stat and heroes, the periods
+   as tabs, the factions' shares of the heroes listed unless they are of one faction, the heroes'
+   lines with their place, class, level, player and value, the pages, and when the board was
+   ranked; a board without heroes says why and offers the week before. #}
+{% set rules = game.heroes %}
+{% set title = _("web.site.page.leaderboards") %}
+{% set weeks = [0, 1, 2, 3] %}
+{% set ranked_at = _("web.boards.ranked", time=when(ranked, "Hm") ~ " UTC") %}
+<Layout :title="title">
+  <section aria-labelledby="boards-title" class="boards-head">
+    <Plaque id="boards-title">{{ title }}</Plaque>
+    <form method="get" action="{{ base }}" class="boards-choice">
+      <input type="hidden" name="period" value="{{ board.period }}">
+      <input type="hidden" name="past" value="{{ board.past }}">
+      <label class="boards-field">
+        <span>{{ _("web.boards.board") }}</span>
+        <select name="board">
+          {% for name in boards %}
+            <option value="{{ name }}"
+                    {% if name == board.name %}selected{% endif %}>{{ _("web.boards.board." ~ name) }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="boards-field">
+        <span>{{ _("web.boards.heroes") }}</span>
+        <select name="heroes">
+          <option value="" {% if not board.heroes %}selected{% endif %}>{{ _("web.boards.everyone") }}</option>
+          {% for name in rules.factions %}
+            <option value="{{ name }}"
+                    {% if name == board.heroes %}selected{% endif %}>{{ _("games." ~ game.id ~ ".faction." ~ name) }}</option>
+          {% endfor %}
+          {% for name in rules.classes %}
+            <option value="{{ name }}"
+                    {% if name == board.heroes %}selected{% endif %}>{{ _("games." ~ game.id ~ ".class." ~ name ~ ".plural") }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button type="submit" class="site-button">{{ _("web.boards.show") }}</button>
+    </form>
+  </section>
+  <nav aria-label="{{ _('web.boards.periods') }}"
+       data-scroll-current
+       class="boards-periods">
+    {% for past in weeks %}
+      {% set shown = board.changed(period="weekly", past=past, page=1) %}
+      <a href="{{ base ~ shown.query() }}"
+         {% if board.period == "weekly" and board.past == past %} aria-current="page"{% endif %}
+         class="boards-period">{{ _("web.boards.period.weekly.%d" % past) }}</a>
+    {% endfor %}
+    <a href="{{ base ~ board.changed(period='indefinite', past=0, page=1).query() }}"
+       {% if board.period == "indefinite" %} aria-current="page"{% endif %}
+       class="boards-period">{{ _("web.boards.period.indefinite") }}</a>
+  </nav>
+  {% if lines %}
+    {% if shares and board.heroes not in rules.factions %}<FactionSplit :shares="shares" />{% endif %}
+    <table class="boards-table">
+      <caption class="sr-only">
+        {{ _("web.boards.caption", board=_("web.boards.value." ~ board.name), first=number(first), last=number(first + lines|length - 1), total=number(total)) }}
+      </caption>
+      <thead class="phone-sr-only">
+        <tr>
+          <th scope="col">{{ _("web.front.top.place") }}</th>
+          <th scope="col">{{ _("web.boards.hero") }}</th>
+          <th scope="col" class="boards-value">{{ _("web.boards.value." ~ board.name) }}</th>
+        </tr>
+      </thead>
+      <tbody class="enter-rows">
+        {% for line in lines %}
+          <tr id="hero-{{ line.hero_id }}">
+            <td class="boards-place">{{ number(line.place) }}</td>
+            <td>
+              <div class="boards-hero">
+                <span aria-hidden="true"
+                      {% if line.faction %}data-faction="{{ line.faction }}"{% endif %}
+                      class="friend-disc">
+                  {% if line.hero_class %}
+                    <Icon :name="rules.classes[line.hero_class].glyph" :size="20" stroke="currentColor" />
+                  {% endif %}
+                </span>
+                <p>
+                  <a href="{{ url('/' ~ game.id ~ '/heroes/' ~ line.hero_id) }}"
+                     class="boards-name">{{ line.name }}</a>
+                  <span>
+                    <span class="boards-level">{{ _("web.heroes.level", level=line.level) }} ·</span>
+                    <a href="{{ url('/' ~ game.id ~ '/player/' ~ line.account_id) }}">{{ line.player }}</a>
+                  </span>
+                </p>
+              </div>
+            </td>
+            <td class="boards-value">{{ line.value }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="boards-pages">
+      <Pager :base="base" :view="board" :pages="pages" />
+    </div>
+    <p class="site-lead">
+      {{ _n("web.boards.rule.all", hours, places=number(places)) }}
+      {{ ranked_at }}
+    </p>
+  {% else %}
+    <div class="site-empty">
+      <span aria-hidden="true" class="site-empty-disc"><Icon name="bars" :size="30" stroke="currentColor" /></span>
+      <div>
+        {% if board.period == "weekly" %}
+          <h2 class="site-empty-title">{{ _("web.boards.empty.week" if board.past == 0 else "web.boards.empty.past") }}</h2>
+          <p>
+            {{ _n("web.boards.rule.week", hours) }}
+            {{ _("web.boards.started", start=when(week, "EEEEdMMM") ~ ", 00:00 UTC") }}
+            {{ ranked_at }}
+          </p>
+          {% if board.past < 3 %}
+            <p class="site-actions">
+              <a href="{{ base ~ board.changed(past=board.past + 1, page=1).query() }}"
+                 class="site-link">{{ _("web.boards.period.weekly.%d" % (board.past + 1)) }}</a>
+            </p>
+          {% endif %}
+        {% else %}
+          <h2 class="site-empty-title">{{ _("web.boards.empty.all") }}</h2>
+          <p>{{ _n("web.boards.rule.all", hours, places=number(places)) }} {{ ranked_at }}</p>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+</Layout>

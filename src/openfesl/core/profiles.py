@@ -1,7 +1,8 @@
 import re
 from collections.abc import Mapping
+from typing import Self
 
-from pydantic import BaseModel, ConfigDict, PositiveInt
+from pydantic import BaseModel, ConfigDict, PositiveInt, model_validator
 
 # How the {id} of a pattern reads once escaped.
 _BRACED = re.escape("{id}")
@@ -101,6 +102,9 @@ class ProfileRules(BaseModel):
         vehicles: Each vehicle's time in seconds, kills, kills by running into foes, vehicles
             destroyed, deaths from it and deaths inside it.
         moments: How often the hero had each heroic moment.
+        boards: The leaderboards of heroes, by the last part of their address: each ranks heroes
+            by one of these stats, by its name, or by one per another.
+        listed_after: The time played in a board's period, in seconds, before a hero is listed.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -125,6 +129,16 @@ class ProfileRules(BaseModel):
     maps: Breakdown
     vehicles: Breakdown
     moments: Breakdown
+    boards: dict[str, list[str]] = {}
+    listed_after: int = 0
+
+    @model_validator(mode="after")
+    def _check_boards(self) -> Self:
+        named = {name for name, kind in type(self).model_fields.items() if kind.annotation is str}
+        for board, names in self.boards.items():
+            if not 1 <= len(names) <= 2 or not set(names) <= named:
+                raise ValueError(f"the board {board} ranks by one stat, or one per another")
+        return self
 
     @property
     def texts(self) -> set[str]:

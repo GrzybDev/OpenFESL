@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from store import ROYAL_SOLDIER
 from support import visible
 
-from openfesl.core.stats import PERSONA, Bucket, Change, Owner, bucket_of, period_start
+from openfesl.core.stats import PERSONA, Change, Owner, bucket_of
 from openfesl.protocol.rank import Period, UpdateType
 from openfesl.storage.stats import SqlStatStore
 
@@ -66,11 +66,16 @@ PLAYED = {
 }
 
 
-async def play(database_url: str, hero: int, stats: Mapping[str, float]) -> None:
-    """Add a hero's rounds to its stats, for all time and this week, as its server writes them."""
+async def play(
+    database_url: str, hero: int, stats: Mapping[str, float], weeks_ago: int = 0
+) -> None:
+    """Add a hero's rounds to its stats, for all time and a week, as its server writes them.
+
+    The week is the bucket the game reads through FESL with that many periods past.
+    """
     engine = create_async_engine(database_url)
     store = SqlStatStore(async_sessionmaker(engine))
-    week = Bucket(Period.WEEKLY, period_start(Period.WEEKLY, datetime.now(UTC).date()))
+    week = bucket_of(Period.WEEKLY, weeks_ago)
     owner = Owner(PERSONA, hero)
     changes = [
         Change(owner, key, bucket, UpdateType.ADD, value, None)
@@ -132,7 +137,8 @@ async def test_a_heros_profile_shows_its_stats_as_its_game_keeps_them_to_anyone(
     assert "Names and icons of items show once this service imports the game's catalogue." in shown
     assert (
         "Soldier Info Skill rating 1,412 Kills · deaths 9,214 · 6,880 Ratio 1.34 Accuracy 0.241"
-        " Suicides 37 Experience 0 Score 1,284,560 Wins · losses 612 · 488 Ratio 1.25"
+        " Suicides 37 Experience 0 Score 1,284,560 · not ranked yet Wins · losses 612 · 488"
+        " Ratio 1.25"
         " Flag points 1,906 Rocket captures 44 Time 1 h 30 min"
     ) in shown
     day = f"{today.day} {today:%b %Y}"

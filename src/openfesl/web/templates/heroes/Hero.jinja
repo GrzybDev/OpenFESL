@@ -1,9 +1,10 @@
-{#def hero, player, title: str | None, equipped: list, facts: list, played: bool, imported: bool, lists: dict, moments: list, missions: list #}
+{#def hero, player, title: str | None, rank: tuple | None, unranked: bool, equipped: list, facts: list, played: bool, imported: bool, lists: dict, moments: list, missions: list #}
 {# A hero's public profile, as the 2012 site drew it: the head with the hero's picture, faction,
    class, level, prestige rank and player; what it wears and has on its equipment bar; and its
-   Soldier Info, the stats of its rounds, which a hero without rounds shows empty with when they
-   fill; then the weapons it used and those that defeated it, its maps and vehicles, its heroic
-   moments and its missions, which come with its rounds. #}
+   Soldier Info, the stats of its rounds with its place on the all-time score board, or that it
+   has yet to play the time the board asks for, which a hero without rounds shows empty with when
+   they fill; then the weapons it used and those that defeated it, its maps and vehicles, its
+   heroic moments and its missions, which come with its rounds. #}
 {% set rules = game.heroes %}
 {% set name = hero.persona.name %}
 <Layout :title="name">
@@ -76,11 +77,19 @@
               <dt>{{ _("web.hero.fact." ~ fact.name) }}</dt>
               <dd>
                 {%- if fact.value is none %}–{% elif fact.value is string %}{{ fact.value }}{% else %}{{ when(fact.value, "yMMMd") }}{% endif -%}
+                {%- if fact.name == "score" and rank %}
+                  · <a href="{{ rank[1] }}">{{ _("web.hero.rank", place=number(rank[0])) }}</a>
+                {% elif fact.name == "score" and unranked %}
+                  · {{ _("web.hero.unranked") }}
+                {% endif -%}
               </dd>
             </div>
           {% endfor %}
         </dl>
-        <p class="info-box-note">{{ _("web.player.reported") }}</p>
+        <p class="info-box-note">
+          {{ _("web.player.reported") }}
+          {% if rank %}{{ _("web.hero.rank.ranked", time=when(rank[2], "Hm") ~ " UTC") }}{% endif %}
+        </p>
       </section>
     </div>
     {% if played and lists.values()|select|list %}

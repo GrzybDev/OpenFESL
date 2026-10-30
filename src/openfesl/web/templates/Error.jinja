@@ -16,8 +16,11 @@
         <p class="site-actions">
           {% if code == 500 %}
             <a href="{{ here }}" class="site-link">{{ _("web.error.500.again") }}</a>
-          {% elif kind == "profile" and "search" in game.pages %}
-            <a href="{{ url('/' ~ game.id ~ '/search') }}" class="site-link">{{ _("web.site.page.search") }}</a>
+          {% elif kind == "profile" %}
+            {% for listed in ("search", "leaderboards") if listed in game.pages %}
+              <a href="{{ url('/' ~ game.id ~ game.site.path(listed)) }}"
+                 class="site-link">{{ _("web.site.page." ~ listed) }}</a>
+            {% endfor %}
           {% endif %}
           <a href="{{ url('/' ~ game.id) }}" class="site-link">{{ game.name }}</a>
         </p>

@@ -7,12 +7,22 @@ executable = "BFHeroes.exe"
 # played with live on OpenFESL.
 partition = "/eagames/bfwest"
 namespace = "bfwest"
-# The web pages the game's menu shows beside its front page: the guide to playing, the store and
-# its hot deals, the treasure chests of an account's heroes, the Funds page, the rewards that
-# accounts claim, their friends and the player search. The server list is drawn for games with
-# squads and a server browser that finds servers by name, and the leaderboard for other stats than
-# this game's, so neither is listed.
-pages = ["play", "store", "hot-deals", "treasure-chests", "funds", "rewards", "friends", "search"]
+# The web pages the game's menu shows beside its front page: the guide to playing, the leaderboards
+# of its heroes, the store and its hot deals, the treasure chests of an account's heroes, the Funds
+# page, the rewards that accounts claim, their friends and the player search. The server list is
+# drawn for games with squads and a server browser that finds servers by name, and the leaderboard
+# of players for other stats than this game's, so neither is listed.
+pages = [
+    "play",
+    "leaderboards",
+    "store",
+    "hot-deals",
+    "treasure-chests",
+    "funds",
+    "rewards",
+    "friends",
+    "search",
+]
 # The stats of the player's account rather than of a hero: the tutorial, the last session and its
 # length, the daily missions and the pop-item counts. The game's stats dictionary gives each key its
 # owner, yet it names a hero and an account by the same owner type, telling them apart by the id
@@ -362,7 +372,7 @@ start_links = true
 
 [[site.menus]]
 name = "game"
-pages = ["play", "leaderboard", "host"]
+pages = ["play", "leaderboards", "host"]
 
 # The players' community: the player search, the accounts' friends and the rewards they claim.
 [[site.menus]]
@@ -454,6 +464,9 @@ time = "ct"
 games = "games"
 # The mission in each of the hero's three mission slots, 0 for none.
 current = ["mid0", "mid1", "mid2"]
+# The time a hero plays in a leaderboard's period before the board lists it: 2 hours, as the 2012
+# site said.
+listed_after = 7200
 
 # The prestige rank, which the servers pack as the rotation times 256 plus the level, from level 10
 # on (Settings/RankSettings.con); the site named the level and wrote the rotation as a numeral.
@@ -490,6 +503,17 @@ names = { 0 = "jeep", 1 = "tank", 2 = "plane" }
 [heroes.profile.moments]
 keys = { count = "ige{id}" }
 names = { 1 = "HEROIC_MOMENT_AIRBORNE_ASSAULT", 2 = "HEROIC_MOMENT_BIG_BANG", 3 = "HEROIC_MOMENT_BLIND_FIRE", 5 = "HEROIC_MOMENT_DAREDEVIL", 6 = "HEROIC_MOMENT_DUCK_HUNT", 7 = "HEROIC_MOMENT_FLIP_TRICK", 8 = "HEROIC_MOMENT_FULL_HOUSE", 9 = "HEROIC_MOMENT_JOINT_OPERATION", 10 = "HEROIC_MOMENT_SMASH_DOWN", 11 = "HEROIC_MOMENT_POST_MORTEM", 12 = "HEROIC_MOMENT_ROAD_KILL", 13 = "HEROIC_MOMENT_CLOSE_SHAVE", 14 = "HEROIC_MOMENT_TANK_SMASH", 15 = "HEROIC_MOMENT_TOWER_DEFENSE", 16 = "HEROIC_MOMENT_WINGCLIP", 17 = "HEROIC_MOMENT_WINGMAN", 18 = "HEROIC_MOMENT_VOLLEY_SHOT", 19 = "HEROIC_MOMENT_HEADSHOT", 20 = "HEROIC_MOMENT_BALLISTIC", 21 = "HEROIC_MOMENT_SUCKER_PUNCH", 22 = "HEROIC_MOMENT_FIRST_STRIKE", 23 = "HEROIC_MOMENT_LAST_KILL" }
+
+# The 2012 site's leaderboards by their addresses, each with the stat it ranks heroes by, or the
+# stat that it divides by another: score, kills per death, wins per loss, time played, accuracy and
+# flags. Each also comes for one faction or class, as royal-score.
+[heroes.profile.boards]
+score = ["score"]
+kills-deaths = ["kills", "deaths"]
+wins-losses = ["wins", "losses"]
+time-played = ["time"]
+hit-fired = ["hits", "shots"]
+capture-points = ["captures"]
 
 # Royal Army first, as the 2012 creator listed them. The base items are the clothes that Items.xml
 # marks default for the faction, alike in 1.46 and 1.89.

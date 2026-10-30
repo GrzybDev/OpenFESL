@@ -1,0 +1,25 @@
+{#def shares: list #}
+{# The factions' shares of the heroes a list holds, as a bar in their colours with each faction's
+   emblem and share written on it, so that colour is not the only cue. #}
+{% set rules = game.heroes %}
+<div class="faction-split">
+  <svg aria-hidden="true"
+       viewBox="0 0 100 1"
+       preserveAspectRatio="none"
+       class="faction-bar">
+    {% set ns = namespace(at=0) %}
+    {% for faction, share in shares %}
+      <rect x="{{ ns.at }}" width="{{ share }}" height="1" data-faction="{{ faction }}" />
+      {% set ns.at = ns.at + share %}
+      {% if 0 < ns.at < 100 %}<line x1="{{ ns.at }}" x2="{{ ns.at }}" y1="0" y2="1" />{% endif %}
+    {% endfor %}
+  </svg>
+  <p class="faction-shares">
+    {% for faction, share in shares %}
+      <span data-faction="{{ faction }}">
+        <Icon :name="rules.factions[faction].glyph" :size="16" stroke="currentColor" />
+        {{ _("web.boards.share", faction=_("games." ~ game.id ~ ".faction." ~ faction), share=share) }}
+      </span>
+    {% endfor %}
+  </p>
+</div>

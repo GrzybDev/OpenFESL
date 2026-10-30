@@ -122,10 +122,17 @@ document.addEventListener("change", (event) => {
   }
 });
 
-// A chart wider than the screen starts scrolled to its latest values.
+// A chart wider than the screen starts scrolled to its latest values, and a row of tabs wider than
+// the screen to its current tab.
 document.addEventListener("DOMContentLoaded", () => {
   for (const box of document.querySelectorAll("[data-scroll-end]")) {
     box.scrollLeft = box.scrollWidth;
+  }
+  for (const row of document.querySelectorAll("[data-scroll-current]")) {
+    const current = row.querySelector("[aria-current]");
+    if (current) {
+      row.scrollLeft += current.getBoundingClientRect().right - row.getBoundingClientRect().right;
+    }
   }
 });
 

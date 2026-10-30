@@ -197,6 +197,11 @@
     dd {
       font-variant-numeric: tabular-nums;
       text-align: right;
+
+      a {
+        color: #fede01;
+        text-decoration-line: underline;
+      }
     }
   }
 

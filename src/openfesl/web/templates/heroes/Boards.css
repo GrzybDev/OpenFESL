@@ -1,0 +1,206 @@
+/* The leaderboards: the plaque with the two choices beside it, the periods as a row of tabs that
+   scrolls on phones, the factions' shares as a bar in their colours, and the heroes as table
+   rows that become cards on phones; the line that an address names is marked. */
+@layer pages {
+  .boards-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px 34px;
+  }
+
+  .boards-choice {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px 16px;
+  }
+
+  .boards-field {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+
+    > span {
+      font: 800 12px/1.2 var(--site-heading);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #5c4a3c;
+    }
+
+    > select {
+      min-width: 210px;
+      min-height: 48px;
+      padding: 0 14px;
+      border: 3px solid #000;
+      border-radius: 6px;
+      background: #fff;
+      font: 800 16px/1.2 var(--site-heading);
+      color: #1f1712;
+    }
+  }
+
+  .boards-periods {
+    display: flex;
+    gap: 8px;
+    margin-top: 28px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .boards-period {
+    display: inline-flex;
+    flex: 0 0 auto;
+    min-height: 44px;
+    align-items: center;
+    padding: 0 16px;
+    border: 2px solid #000;
+    border-radius: 6px;
+    background: #f1e9de;
+    font: 800 15px/1 var(--site-heading);
+    color: #1f1712;
+    transition: background 120ms var(--ease-menu);
+
+    &:hover {
+      background: #f8f4ef;
+    }
+
+    &[aria-current] {
+      background: #521f1c;
+      color: #fff;
+    }
+  }
+
+  .boards-table {
+    width: 100%;
+    margin-top: 18px;
+    border: 3px solid #000;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f1e9de;
+    box-shadow: 0 4px 0 rgb(0 0 0 / 0.3);
+    font-size: 14px;
+
+    th {
+      padding: 10px 14px;
+      background: #2e2420;
+      color: #c9bfb3;
+      font: 800 12px/1.2 var(--site-heading);
+      letter-spacing: 0.07em;
+      text-align: left;
+      text-transform: uppercase;
+    }
+
+    td {
+      padding: 8px 14px;
+      border-top: 1px dashed #a8977f;
+      vertical-align: middle;
+    }
+
+    tbody tr:target {
+      background: #f2d98a;
+    }
+  }
+
+  .boards-place {
+    width: 4em;
+    font: 800 18px/1 var(--site-heading);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .boards-hero {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    p {
+      display: grid;
+      min-width: 0;
+    }
+
+    p > span {
+      color: #5c4a3c;
+    }
+
+    a {
+      color: #7a1d16;
+    }
+  }
+
+  .boards-level {
+    white-space: nowrap;
+  }
+
+  .boards-name {
+    font: 800 16px/1.2 var(--site-heading);
+    overflow-wrap: anywhere;
+    text-decoration-line: underline;
+  }
+
+  .boards-table .boards-value {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  .boards-pages {
+    margin-top: 18px;
+  }
+
+  @media (width < 40rem) {
+    .boards-choice,
+    .boards-field,
+    .boards-field > select {
+      width: 100%;
+    }
+
+    /* The table's rows become cards: the place, the hero, and the value at the end. */
+    .boards-table {
+      border: 0;
+      background: none;
+      box-shadow: none;
+
+      tbody {
+        display: grid;
+        gap: 10px;
+      }
+
+      tr {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        border: 3px solid #000;
+        border-radius: 8px;
+        background: #f1e9de;
+      }
+
+      td {
+        padding: 10px 8px;
+        border: 0;
+      }
+    }
+
+    /* The place in a dark disc, as the front page's best heroes have it. */
+    .boards-table .boards-place {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      margin-left: 8px;
+      padding: 0;
+      place-items: center;
+      border-radius: 50%;
+      background: #1a1412;
+      color: #fff;
+      font-size: 16px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .boards-period {
+      transition: none;
+    }
+  }
+}

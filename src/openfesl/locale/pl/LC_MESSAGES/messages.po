@@ -722,6 +722,15 @@ msgstr "Wszechstronna klasa z leczeniem. Pistolety maszynowe i strzelby."
 msgid "games.bfheroes.class.gunner.role"
 msgstr "Najwięcej zdrowia, najwolniejsza klasa. Karabiny maszynowe i strzelby."
 
+msgid "games.bfheroes.class.commando.plural"
+msgstr "Komandosi"
+
+msgid "games.bfheroes.class.soldier.plural"
+msgstr "Żołnierze"
+
+msgid "games.bfheroes.class.gunner.plural"
+msgstr "Strzelcy"
+
 msgid "games.bfheroes.menu.game"
 msgstr "Gra"
 
@@ -9353,6 +9362,9 @@ msgstr "Wyszukiwać może każdy; zaproszenia do znajomych wymagają zalogowania
 msgid "web.friends.none.search"
 msgstr "Wyszukiwarka graczy znajduje bohaterów i graczy po nazwie."
 
+msgid "web.front.top.place"
+msgstr "Miejsce"
+
 msgid "web.error.site.plaque.404"
 msgstr "Nie znaleziono"
 
@@ -9562,3 +9574,129 @@ msgstr "Czas gry"
 
 msgid "web.profile.games"
 msgstr "Rozegrane rundy"
+
+msgid "web.site.page.leaderboards"
+msgstr "Rankingi"
+
+msgid "web.boards.board"
+msgstr "Lista"
+
+msgid "web.boards.heroes"
+msgstr "Bohaterowie"
+
+msgid "web.boards.everyone"
+msgstr "Wszyscy bohaterowie"
+
+msgid "web.boards.show"
+msgstr "Pokaż"
+
+msgid "web.boards.periods"
+msgstr "Okresy"
+
+msgid "web.boards.period.weekly.0"
+msgstr "Bieżący tydzień"
+
+msgid "web.boards.period.weekly.1"
+msgstr "Poprzedni tydzień"
+
+msgid "web.boards.period.weekly.2"
+msgstr "2 tygodnie temu"
+
+msgid "web.boards.period.weekly.3"
+msgstr "3 tygodnie temu"
+
+msgid "web.boards.period.indefinite"
+msgstr "Od początku"
+
+msgid "web.boards.board.score"
+msgstr "Wynik"
+
+msgid "web.boards.board.kills-deaths"
+msgstr "Zabójstwa i zgony"
+
+msgid "web.boards.board.wins-losses"
+msgstr "Wygrane i przegrane"
+
+msgid "web.boards.board.time-played"
+msgstr "Czas gry"
+
+msgid "web.boards.board.hit-fired"
+msgstr "Celność"
+
+msgid "web.boards.board.capture-points"
+msgstr "Mistrz flag"
+
+msgid "web.boards.share"
+msgstr "%(faction)s %(share)s%%"
+
+msgid "web.boards.caption"
+msgstr "%(board)s, miejsca od %(first)s do %(last)s z %(total)s"
+
+msgid "web.boards.hero"
+msgstr "Bohater"
+
+msgid "web.boards.value.score"
+msgstr "Wynik"
+
+msgid "web.boards.value.kills-deaths"
+msgstr "Zabójstwa na zgon"
+
+msgid "web.boards.value.wins-losses"
+msgstr "Wygrane na przegraną"
+
+msgid "web.boards.value.time-played"
+msgstr "Czas gry"
+
+msgid "web.boards.value.hit-fired"
+msgstr "Celność"
+
+msgid "web.boards.value.capture-points"
+msgstr "Punkty za flagi"
+
+msgid "web.boards.ranked"
+msgstr "Stan na %(time)s; rankingi są sprzed najwyżej godziny."
+
+msgid "web.boards.empty.week"
+msgstr "W tym tygodniu na tej liście nie ma jeszcze bohaterów"
+
+msgid "web.boards.empty.past"
+msgstr "W tamtym tygodniu na tej liście nie było bohaterów"
+
+msgid "web.boards.empty.all"
+msgstr "Na tej liście nie ma jeszcze bohaterów"
+
+msgid "web.boards.rule.week.one"
+msgstr "Bohater pojawia się po %(count)s godz. gry w rundach w danym tygodniu."
+
+msgid "web.boards.rule.week.few"
+msgstr "Bohater pojawia się po %(count)s godz. gry w rundach w danym tygodniu."
+
+msgid "web.boards.rule.week.many"
+msgstr "Bohater pojawia się po %(count)s godz. gry w rundach w danym tygodniu."
+
+msgid "web.boards.rule.week.other"
+msgstr "Bohater pojawia się po %(count)s godz. gry w rundach w danym tygodniu."
+
+msgid "web.boards.rule.all.one"
+msgstr "Lista obejmuje %(places)s najlepszych bohaterów, którzy w jej okresie grali w rundach co najmniej %(count)s godz."
+
+msgid "web.boards.rule.all.few"
+msgstr "Lista obejmuje %(places)s najlepszych bohaterów, którzy w jej okresie grali w rundach co najmniej %(count)s godz."
+
+msgid "web.boards.rule.all.many"
+msgstr "Lista obejmuje %(places)s najlepszych bohaterów, którzy w jej okresie grali w rundach co najmniej %(count)s godz."
+
+msgid "web.boards.rule.all.other"
+msgstr "Lista obejmuje %(places)s najlepszych bohaterów, którzy w jej okresie grali w rundach co najmniej %(count)s godz."
+
+msgid "web.boards.started"
+msgstr "Początek tygodnia: %(start)s."
+
+msgid "web.hero.rank"
+msgstr "miejsce %(place)s"
+
+msgid "web.hero.rank.ranked"
+msgstr "Miejsce według rankingu wyniku od początku, stan na %(time)s."
+
+msgid "web.hero.unranked"
+msgstr "jeszcze bez miejsca"

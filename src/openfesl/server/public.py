@@ -15,6 +15,7 @@ from openfesl.web.account.services import SignInServices
 from openfesl.web.account.sign_in import SignInPages
 from openfesl.web.account.terms import TermsPages
 from openfesl.web.activity import activity_routes
+from openfesl.web.boards import BoardPages
 from openfesl.web.catalogue_files import catalogue_file_routes
 from openfesl.web.chest_keys import KeyPages
 from openfesl.web.chests import ChestsPages
@@ -198,8 +199,10 @@ def include_public_routes(
             stores.stats,
             services.catalogues,
             services.relationships,
+            services.hero_boards,
         ).routes()
     )
+    app.include_router(BoardPages(pages, games, services.hero_boards).routes())
     app.include_router(launcher_routes(lambda: app.state.launcher))
     turnstile = settings.turnstile
     sign_in_services = SignInServices(

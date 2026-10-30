@@ -168,7 +168,7 @@ class SqlRelationshipStore:
         async with self._sessions() as session:
             accounts = await session.execute(
                 select(AccountRow.id, AccountRow.display_name)
-                .where(AccountRow.display_name.ilike(start, escape="\\"), *_askable())
+                .where(AccountRow.display_name.ilike(start, escape="\\"), *askable_accounts())
                 .order_by(func.lower(AccountRow.display_name))
                 .limit(limit)
             )
@@ -180,7 +180,7 @@ class SqlRelationshipStore:
                     PersonaRow.name.ilike(start, escape="\\"),
                     PersonaRow.disabled_at.is_(None),
                     PersonaRow.state == PersonaState.ACTIVE,
-                    *_askable(),
+                    *askable_accounts(),
                 )
                 .order_by(func.lower(PersonaRow.name))
                 .limit(limit)
@@ -206,7 +206,7 @@ class SqlRelationshipStore:
         partition, key = level
         bucket = bucket_of(Period.ALL_TIME, 0)
         named = select(AccountRow.id, AccountRow.display_name).where(
-            AccountRow.display_name.ilike(start, escape="\\"), *_askable()
+            AccountRow.display_name.ilike(start, escape="\\"), *askable_accounts()
         )
         hero = (
             select(PersonaRow.account_id, PersonaRow.name, AccountRow.display_name)
@@ -227,7 +227,7 @@ class SqlRelationshipStore:
                 PersonaRow.name.ilike(start, escape="\\"),
                 PersonaRow.disabled_at.is_(None),
                 PersonaRow.state == PersonaState.ACTIVE,
-                *_askable(),
+                *askable_accounts(),
             )
         )
         async with self._sessions() as session:
@@ -257,7 +257,7 @@ async def _lock(session: AsyncSession, *parties: Party) -> set[int]:
     # for rows that refer to the accounts. Returns the accounts that others may ask.
     account_ids = [party.account_id for party in parties if party.account_id is not None]
     rows = await session.execute(
-        select(AccountRow.id, and_(*_askable()))
+        select(AccountRow.id, and_(*askable_accounts()))
         .where(AccountRow.id.in_(account_ids))
         .order_by(AccountRow.id)
         .with_for_update(key_share=True)
@@ -305,7 +305,7 @@ async def _sides(session: AsyncSession, *where: ColumnElement[bool]) -> list[Rel
             RelationshipRow.modified_at,
         )
         .select_from(_MEMBERS)
-        .where(*where, or_(RelationshipRow.member_server.is_not(None), and_(*_askable())))
+        .where(*where, or_(RelationshipRow.member_server.is_not(None), and_(*askable_accounts())))
         .order_by(RelationshipRow.created_at, RelationshipRow.id)
     )
     return [
@@ -314,9 +314,11 @@ async def _sides(session: AsyncSession, *where: ColumnElement[bool]) -> list[Rel
     ]
 
 
-def _askable() -> tuple[ColumnElement[bool], ...]:
-    # The accounts that others see and may ask: in use, as logins also take one whose state has
-    # ended; named; and players' own.
+def askable_accounts() -> tuple[ColumnElement[bool], ...]:
+    """Return the conditions of the accounts that others see and may ask as friends.
+
+    They are in use, as logins also take one whose state has ended; named; and players' own.
+    """
     return (
         or_(AccountRow.state == AccountState.ACTIVE, AccountRow.state_until <= func.now()),
         AccountRow.display_name.is_not(None),

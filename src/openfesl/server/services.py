@@ -25,6 +25,7 @@ from openfesl.core.game_art import GameArt
 from openfesl.core.game_http import GameHttp
 from openfesl.core.game_marks import GameMarks
 from openfesl.core.games import Games
+from openfesl.core.hero_boards import HeroBoards
 from openfesl.core.hero_items import OwnWrites
 from openfesl.core.heroes import Heroes
 from openfesl.core.history import OnlineHistory
@@ -103,6 +104,7 @@ class GameServices:
         self.trust = ServerTrust(self.hosting, self.approval)
         self.wallets = Wallets(stores.wallets)
         self.heroes = Heroes(stores.heroes, stores.stats)
+        self.hero_boards = HeroBoards(stores.hero_boards)
         self._relay_tokens = RelayTokens()
         self.magma = Magma(
             self._launcher_sessions,
@@ -262,6 +264,7 @@ class GameServices:
         routes.update(PlayNow(hosting).routes())
         players.follow(feed)
         joining.follow(feed)
+        self.hero_boards.follow(feed)
         self.catalogues.follow(feed)
         self.game_art.follow(feed)
         self.game_marks.follow(feed)
