@@ -4,6 +4,10 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.storage.models import MugshotRow, PersonaRow
 
+# A mugshot that an admin removed keeps its row, empty, so that the next one the game sends takes a
+# version that no copy of the removed one was ever kept under.
+SHOWN = MugshotRow.image != b""
+
 
 class SqlMugshotStore:
     """Mugshots of heroes in PostgreSQL."""
@@ -58,7 +62,11 @@ class SqlMugshotStore:
                 await session.execute(
                     select(MugshotRow.image, MugshotRow.version)
                     .join(PersonaRow, PersonaRow.id == MugshotRow.persona_id)
-                    .where(MugshotRow.persona_id == persona_id, PersonaRow.namespace == namespace)
+                    .where(
+                        MugshotRow.persona_id == persona_id,
+                        PersonaRow.namespace == namespace,
+                        SHOWN,
+                    )
                 )
             ).first()
         return (found.image, found.version) if found else None
@@ -74,6 +82,6 @@ class SqlMugshotStore:
                 select(func.count())
                 .select_from(MugshotRow)
                 .join(PersonaRow, PersonaRow.id == MugshotRow.persona_id)
-                .where(PersonaRow.namespace == namespace)
+                .where(PersonaRow.namespace == namespace, SHOWN)
             )
         return found or 0

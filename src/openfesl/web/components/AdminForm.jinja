@@ -1,0 +1,52 @@
+{#def question: str, action: str, label: str, busy: str, back: str, glyph: str = "go", note: str = "", error: str = "", why: str = "" #}
+{# The black-headed panel of a change to a player's account or hero that asks for a note, as the
+   account state's form: the content holds the change's fields and what it does, then the note that
+   the audit log keeps with the change, what is still needed, and the buttons that go back or send
+   it. Where scripts run, a link with data-dialog opens it over its page. #}
+<section aria-labelledby="confirm-question"
+         aria-describedby="confirm-text"
+         data-confirm
+         class="confirm">
+  <div class="confirm-head">
+    <h2 id="confirm-question">{{ question }}</h2>
+    <button type="button"
+            data-close
+            class="confirm-close"
+            aria-label="{{ _('web.admin.close') }}">
+      <span><Icon name="x" :size="14" stroke="currentColor" /></span>
+    </button>
+  </div>
+  <form method="post"
+        action="{{ action }}"
+        data-admin-form
+        data-still="{{ _('web.admin.still_needed') }}">
+    <CsrfField />
+    <input type="hidden" name="back" value="{{ back }}">
+    <div class="confirm-body">
+      {{ content }}
+      <label for="admin-note" class="field-label field-label-joined admin-note">{{ _("web.admin.note") }}</label>
+      <input id="admin-note"
+             name="note"
+             type="text"
+             value="{{ note }}"
+             required
+             maxlength="300"
+             autocomplete="off"
+             data-needed="{{ _('web.admin.still_needed.note') }}"
+             aria-describedby="admin-note-hint"
+             {% if error == "note" %} aria-invalid="true"{% endif %}
+             class="field-input{% if error == 'note' %} field-invalid{% endif %}">
+      <p id="admin-note-hint" class="field-note">{{ _("web.admin.note.hint") }}</p>
+    </div>
+    <p aria-live="polite" class="admin-form-why">
+      <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>
+      <span data-why>
+        {%- if error == "note" %}{{ _("web.admin.still_needed", what=_("web.admin.still_needed.note")) }}{% else %}{{ why }}{% endif -%}
+      </span>
+    </p>
+    <div class="confirm-buttons">
+      <FormButton icon="x" :href="back">{{ _("web.admin.cancel") }}</FormButton>
+      <SmallAction :label="label" :busy="busy" :glyph="glyph" />
+    </div>
+  </form>
+</section>

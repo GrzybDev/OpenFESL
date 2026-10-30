@@ -36,6 +36,22 @@
               <Icon :name="'x' if hero.disabled else 'tick'" :size="14" stroke="currentColor" />{{ _("web.admin.heroes.state." ~ ("disabled" if hero.disabled else "active" if hero.playable else "no_look")) }}
             </p>
           </div>
+          {% set changed = page.history.state %}
+          {% if hero.disabled %}
+            <div class="bar-text admin-hero-banner">
+              {{ badge("x") }}
+              <p class="cell-stack">
+                <span class="admin-hero-strong">
+                  {%- if changed -%}
+                    {{ _("web.admin.hero.disabled", time=_("web.server.time", time=moment(changed.at)), admin=changed.name or _("web.admin.command_line"), note=changed.details.get("note") or "–") }}
+                  {%- else -%}
+                    {{ _("web.admin.heroes.state.disabled") }}
+                  {%- endif -%}
+                </span>
+                <span>{{ _("web.admin.hero.disabled.text") }}</span>
+              </p>
+            </div>
+          {% endif %}
           <dl class="facts admin-facts admin-hero-facts">
             {% if hero.faction and hero.hero_class %}
               <Fact :label="_('web.admin.hero.fact.faction')" plain>
@@ -185,6 +201,11 @@
               <p class="body-text">{{ _("web.admin.hero.portrait.none") }}</p>
             {% endif %}
           </div>
+          {% if hero.portrait and manages %}
+            <div class="account-end">
+              <FormButton icon="x" :href="base ~ '/portrait'" dialog>{{ _("web.admin.hero.portrait.remove") }}</FormButton>
+            </div>
+          {% endif %}
         </section>
 
         <section aria-labelledby="admin-hero-points">
@@ -201,6 +222,41 @@
             <p class="bar-text body-text">{{ _n("web.admin.hero.chests.count", page.card.chests or 0) }}</p>
           </section>
         {% endif %}
+
+        <section aria-labelledby="hero-actions">
+          <Bar id="hero-actions">{{ _("web.admin.hero.actions") }}</Bar>
+          <div class="admin-hero-actions">
+            <FormButton icon="edit" :href="base ~ '/rename'" dialog>{{ _("web.admin.hero.rename") }}<span class="admin-hero-free">{{ _("web.admin.hero.rename.free") }}</span></FormButton>
+            {% if page.card.default %}
+              <p class="bar-text admin-hero-line">{{ badge("star") }}{{ _("web.admin.hero.default.now", hero=hero.persona.name) }}</p>
+            {% elif hero.disabled %}
+              <p class="bar-text admin-hero-line">{{ badge("x") }}{{ _("web.admin.hero.default.disabled") }}</p>
+            {% elif not hero.playable %}
+              <p class="bar-text admin-hero-line">{{ badge("warn") }}{{ _("web.admin.hero.default.no_look") }}</p>
+            {% elif manages %}
+              <FormButton icon="star" :href="base ~ '/default'" dialog>{{ _("web.admin.hero.make_default") }}</FormButton>
+            {% endif %}
+            {% if hero.disabled %}
+              <FormButton icon="tick" :href="base ~ '/enable'" dialog>{{ _("web.admin.hero.enable") }}</FormButton>
+            {% else %}
+              <FormButton icon="lock" :href="base ~ '/disable'" dialog>{{ _("web.admin.hero.disable") }}</FormButton>
+            {% endif %}
+            {% if page.persona and page.persona.server %}
+              <FormButton icon="x" :href="url('/admin/accounts/' ~ account.id ~ '/names/' ~ hero.persona.id ~ '/kick') ~ '?back=' ~ here|urlencode" dialog>{{ _("web.admin.account.kick") }}</FormButton>
+            {% endif %}
+            {% if page.public %}
+              <FormButton icon="go" :href="url('/' ~ game.id ~ '/heroes/' ~ hero.persona.id)">{{ _("web.admin.hero.profile") }}</FormButton>
+            {% else %}
+              <p class="bar-text admin-hero-line">{{ badge("x") }}{{ _("web.admin.hero.profile.none") }}</p>
+            {% endif %}
+          </div>
+          {% if not manages %}
+            <p class="bar-text account-role-note">
+              <span aria-hidden="true"
+                    class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.hero.managed") }}
+            </p>
+          {% endif %}
+        </section>
       </div>
     </div>
   </Panel>

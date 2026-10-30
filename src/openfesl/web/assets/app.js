@@ -21,6 +21,7 @@ import "./play-now.js";
 import "./store.js";
 import "./chests.js";
 import "./catalogue.js";
+import "./admin-forms.js";
 import "./settings.js";
 import "./store-front.js";
 import "./hot-deals.js";

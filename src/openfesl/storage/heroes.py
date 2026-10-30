@@ -9,6 +9,7 @@ from openfesl.core.stats import PERSONA, bucket_of
 from openfesl.core.wallets import Wallet
 from openfesl.protocol.rank import Period
 from openfesl.storage.models import EntitlementRow, HeroAccountRow, MugshotRow, PersonaRow, StatRow
+from openfesl.storage.mugshots import SHOWN
 from openfesl.storage.personas import persona_of
 from openfesl.storage.wallets import spend
 
@@ -40,7 +41,7 @@ class SqlHeroStore:
             rows = (
                 await session.execute(
                     select(PersonaRow, MugshotRow.version)
-                    .outerjoin(MugshotRow, MugshotRow.persona_id == PersonaRow.id)
+                    .outerjoin(MugshotRow, (MugshotRow.persona_id == PersonaRow.id) & SHOWN)
                     .where(
                         PersonaRow.account_id == account_id,
                         PersonaRow.namespace == namespace,
@@ -77,7 +78,7 @@ class SqlHeroStore:
                 await session.execute(
                     select(PersonaRow, MugshotRow.version)
                     .join(HeroAccountRow, HeroAccountRow.default_persona_id == PersonaRow.id)
-                    .outerjoin(MugshotRow, MugshotRow.persona_id == PersonaRow.id)
+                    .outerjoin(MugshotRow, (MugshotRow.persona_id == PersonaRow.id) & SHOWN)
                     .where(
                         HeroAccountRow.account_id.in_(account_ids),
                         HeroAccountRow.game == game,
@@ -188,14 +189,7 @@ class SqlHeroStore:
             )
             if owned is None:
                 return False
-            chosen = {"account_id": account_id, "game": game, "default_persona_id": persona_id}
-            statement = insert(HeroAccountRow).values(chosen)
-            await session.execute(
-                statement.on_conflict_do_update(
-                    index_elements=[HeroAccountRow.account_id, HeroAccountRow.game],
-                    set_={"default_persona_id": statement.excluded.default_persona_id},
-                )
-            )
+            await set_default(session, account_id, game, persona_id)
             return True
 
     async def create(self, hero: NewHero) -> Persona:
@@ -286,3 +280,22 @@ class SqlHeroStore:
                     .values(default_persona_id=row.id)
                 )
             return persona_of(row)
+
+
+async def set_default(session: AsyncSession, account_id: int, game: str, persona_id: int) -> None:
+    """Make one of an account's heroes its default hero, in a transaction.
+
+    Args:
+        session: The transaction.
+        account_id: The account.
+        game: The game's data-file name.
+        persona_id: The hero's persona.
+    """
+    chosen = {"account_id": account_id, "game": game, "default_persona_id": persona_id}
+    statement = insert(HeroAccountRow).values(chosen)
+    await session.execute(
+        statement.on_conflict_do_update(
+            index_elements=[HeroAccountRow.account_id, HeroAccountRow.game],
+            set_={"default_persona_id": statement.excluded.default_persona_id},
+        )
+    )

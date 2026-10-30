@@ -10,9 +10,9 @@ from openfesl.core.catalogues import Catalogue, CatalogueFiles, Catalogues, file
 from openfesl.core.chests import key_tag
 from openfesl.core.entitlements import ACTIVE, Entitlement, EntitlementQuery, EntitlementStore
 from openfesl.core.games import Game, Games
-from openfesl.core.hero_admin import HeroAdminStore, HeroHistory, ItemSource
+from openfesl.core.hero_admin import HeroAdminStore, HeroHistory, ItemSource, next_default
 from openfesl.core.hero_items import granted, holding
-from openfesl.core.heroes import Heroes, Roster
+from openfesl.core.heroes import Hero, Heroes, Roster
 from openfesl.core.inventory import COUNTED, PERMANENT, Held
 from openfesl.core.mugshots import Mugshots
 from openfesl.core.store_window import left_of, runs_low
@@ -20,6 +20,7 @@ from openfesl.core.wallets import Wallets
 from openfesl.web.admin.accounts import AccountView, AccountViews, PersonaView
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.heroes import HeroCard, hero_cards
+from openfesl.web.profiles import seen_by_others
 
 # The inventory's tabs: the items a hero holds now, those it held, and both.
 TABS = ("active", "ended", "all")
@@ -89,6 +90,16 @@ class HeroPage:
     history: HeroHistory
     items: list[InventoryRow]
     persona: PersonaView | None
+
+    @property
+    def public(self) -> bool:
+        """Whether others see the hero's public profile on its game's site."""
+        return seen_by_others(self.view.record.account) and not self.card.hero.disabled
+
+    @property
+    def next_default(self) -> Hero | None:
+        """The hero that becomes the account's default once this one, the default, is disabled."""
+        return next_default(self.roster, self.card.hero)
 
     @property
     def counts(self) -> dict[str, int]:

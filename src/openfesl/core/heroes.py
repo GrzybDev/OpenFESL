@@ -95,8 +95,8 @@ class Hero:
 
     @property
     def playable(self) -> bool:
-        """Whether the game can play the hero: it has the faction and class it was created with."""
-        return self.faction is not None and self.hero_class is not None
+        """Whether the game may play the hero: it has its faction and class and is not disabled."""
+        return self.faction is not None and self.hero_class is not None and not self.disabled
 
 
 @dataclass(frozen=True, slots=True)

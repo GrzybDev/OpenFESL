@@ -23,6 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import aliased
 
 from openfesl.core.leaderboards import Ranked, Standing
+from openfesl.core.personas import PersonaState
 from openfesl.core.rankings import KD, Line
 from openfesl.core.stats import (
     PERSONA,
@@ -445,8 +446,13 @@ def _ids(ids: Collection[int]) -> ColumnElement[list[int]]:
 
 
 def _ranked(row: type[StatRow]) -> ColumnElement[bool]:
-    # A disabled persona keeps its stats but leaves the leaderboards, so it takes no one's place.
-    in_use = exists().where(PersonaRow.id == row.owner_id, PersonaRow.disabled_at.is_(None))
+    # A persona that its player removed or the admin disabled keeps its stats but leaves the
+    # leaderboards, so it takes no one's place.
+    in_use = exists().where(
+        PersonaRow.id == row.owner_id,
+        PersonaRow.disabled_at.is_(None),
+        PersonaRow.state != PersonaState.DISABLED,
+    )
     return (row.owner_type != PERSONA) | in_use
 
 

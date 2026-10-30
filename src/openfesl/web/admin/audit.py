@@ -14,6 +14,7 @@ from openfesl.core.games import Games
 from openfesl.core.personas import Persona, PersonaRecord
 from openfesl.core.servers import GameServer, Provider
 from openfesl.core.texts import localize, translate
+from openfesl.web.admin.audit_heroes import hero_entry
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.settings import policy_views
 from openfesl.web.pages import moment
@@ -32,7 +33,12 @@ GLYPHS = {
     AdminAction.ENTITLEMENT_GRANT: "plus",
     AdminAction.KEY_ADD: "plus",
     AdminAction.CATALOGUE_IMPORT: "doc",
+    AdminAction.HERO_RENAME: "edit",
+    AdminAction.HERO_DEFAULT: "star",
+    AdminAction.MUGSHOT_REMOVE: "x",
 }
+# What the admin does to a hero, whose persona is the target.
+HERO_ACTIONS = (AdminAction.HERO_RENAME, AdminAction.HERO_DEFAULT, AdminAction.MUGSHOT_REMOVE)
 # The glyph of each choice of who sees a game's art, as its tile on the catalogues page wears it.
 ART_GLYPHS = {"everyone": "eye", "signed_in": "key", "nobody": "edit"}
 _TAKEN = {"disabled", "banned", "deactivated", "revoked", "DISABLED", "off", "removed"}
@@ -249,6 +255,7 @@ async def _rows(
     names = await accounts.names(
         numbers | {persona.account_id for persona in persona_list.values()}
     )
+    heroes = {game.namespace for game in games if game.heroes}
     providers = {provider.id.hex(): provider.name for provider in await servers.providers()}
     hosted = {server.ugid: server for server in await servers.all()}
     rows = []
@@ -283,14 +290,20 @@ async def _rows(
                 taken = details.get("status") != "ACTIVE"
                 kind = f"entitlement_state.{'revoked' if taken else 'active'}"
                 said = str(details.get("tag", ""))
-        elif action in (AdminAction.PERSONA_STATE, AdminAction.PLAYER_KICK):
+        elif action in (AdminAction.PERSONA_STATE, AdminAction.PLAYER_KICK, *HERO_ACTIONS):
             persona = persona_list.get(int(target)) if target.isdigit() else None
+            hero = persona is not None and persona.namespace in heroes
             if persona is not None:
                 shown = persona.name
-                href = page(f"/admin/accounts/{persona.account_id}")
+                hero_page = f"/heroes/{persona.id}" if hero else ""
+                href = page(f"/admin/accounts/{persona.account_id}{hero_page}")
                 said = account(persona.account_id)
             if action is AdminAction.PERSONA_STATE:
-                kind = f"persona_state.{details.get('state')}"
+                kind = f"{'hero' if hero else 'persona'}_state.{details.get('state')}"
+                if details.get("default"):
+                    said = say("web.admin.audit.default_moved", hero=details["default"])
+            elif action in (AdminAction.HERO_RENAME, AdminAction.HERO_DEFAULT):
+                said = hero_entry(action, details, said, language)
         elif action in (AdminAction.PROVIDER_ADD, AdminAction.PROVIDER_REVOKE):
             shown = providers.get(target, str(details.get("name", target)))
             href = page(f"/admin/providers/{target}")
@@ -370,6 +383,8 @@ async def _rows(
                     for name in ("icons", "models", "textures", "portraits")
                 },
             )
+        if note := details.get("note"):
+            said = f"{said} · {note}" if said else note
         rows.append(
             AuditRow(
                 entry,

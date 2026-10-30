@@ -10114,3 +10114,192 @@ msgstr "Gra wczytuje przedmioty przy następnym logowaniu bohatera. Wypożyczeni
 
 msgid "web.admin.items.unnamed"
 msgstr "Przedmiot %(id)s"
+
+msgid "web.admin.still_needed"
+msgstr "Brakuje jeszcze: %(what)s."
+
+msgid "web.admin.still_needed.note"
+msgstr "notatki"
+
+msgid "web.admin.still_needed.name"
+msgstr "wolnej nazwy"
+
+msgid "web.admin.note"
+msgstr "Notatka · wymagana"
+
+msgid "web.admin.note.hint"
+msgstr "Dziennik zmian przechowuje notatkę razem ze zmianą."
+
+msgid "web.admin.hero.line"
+msgstr "%(faction)s · %(hero_class)s · poziom %(level)s · bohater %(id)s"
+
+msgid "web.admin.hero.actions"
+msgstr "Działania"
+
+msgid "web.admin.hero.rename"
+msgstr "Zmień nazwę"
+
+msgid "web.admin.hero.rename.busy"
+msgstr "Zmienianie nazwy…"
+
+msgid "web.admin.hero.rename.free"
+msgstr "tutaj bez opłat"
+
+msgid "web.admin.hero.rename.title"
+msgstr "Zmiana nazwy bohatera"
+
+msgid "web.admin.hero.rename.name"
+msgstr "Nowa nazwa"
+
+msgid "web.admin.hero.rename.hint"
+msgstr "Od %(shortest)s do %(longest)s liter, cyfr, _ lub -, jak przy tworzeniu bohatera. Wielkość liter nie ma znaczenia."
+
+msgid "web.admin.hero.rename.text"
+msgstr "W panelu bez opłat, według zasad tworzenia bohatera. %(game)s pokazuje nową nazwę od następnego logowania bohatera."
+
+msgid "web.admin.hero.disable"
+msgstr "Wyłącz"
+
+msgid "web.admin.hero.disable.busy"
+msgstr "Wyłączanie…"
+
+msgid "web.admin.hero.enable"
+msgstr "Włącz"
+
+msgid "web.admin.hero.enable.busy"
+msgstr "Włączanie…"
+
+msgid "web.admin.hero.profile"
+msgstr "Profil publiczny"
+
+msgid "web.admin.hero.profile.none"
+msgstr "Brak profilu publicznego: profile pokazują bohaterów w grze z kont z nazwą wyświetlaną, które mogą się logować."
+
+msgid "web.admin.hero.disable.confirm"
+msgstr "Wyłączyć tego bohatera?"
+
+msgid "web.admin.hero.enable.confirm"
+msgstr "Włączyć tego bohatera?"
+
+msgid "web.admin.hero.enable.text"
+msgstr "Bohater znów może grać i pojawia się na stronach publicznych oraz w wyszukiwaniu graczy; bohater domyślny pozostaje bez zmian."
+
+msgid "web.admin.hero.disable.hidden"
+msgstr "Znika ze stron publicznych i z wyszukiwania graczy."
+
+msgid "web.admin.hero.disable.login"
+msgstr "Nie może się logować: program uruchamiający i gra go odrzucają."
+
+msgid "web.admin.hero.disable.slot"
+msgstr "Zachowuje miejsce: zajętych pozostaje %(used)s z %(total)s."
+
+msgid "web.admin.hero.disable.default"
+msgstr "Domyślnym bohaterem zostaje %(hero)s."
+
+msgid "web.admin.hero.disable.no_default"
+msgstr "Żaden inny bohater nie może być domyślny, więc program uruchamiający nie włącza gry %(game)s dla tego konta, dopóki któryś nie będzie mógł."
+
+msgid "web.admin.hero.disable.kept"
+msgstr "Przedmioty, portfele i statystyki pozostają bez zmian; włączenie przywraca bohatera."
+
+msgid "web.admin.hero.disabled"
+msgstr "Wyłączony %(time)s przez %(admin)s: %(note)s"
+
+msgid "web.admin.hero.disabled.text"
+msgstr "Ukryty na stronach publicznych i w wyszukiwaniu; program uruchamiający i gra go odrzucają. Zachowuje miejsce, przedmioty, portfele i statystyki."
+
+msgid "web.admin.hero.make_default"
+msgstr "Ustaw jako domyślnego"
+
+msgid "web.admin.hero.make_default.busy"
+msgstr "Zapisywanie…"
+
+msgid "web.admin.hero.default.confirm"
+msgstr "Ustawić tego bohatera jako domyślnego?"
+
+msgid "web.admin.hero.default.text"
+msgstr "Program uruchamiający włącza od teraz grę %(game)s jako %(hero)s."
+
+msgid "web.admin.hero.default.now"
+msgstr "Bohater domyślny: program uruchamiający włącza grę jako %(hero)s."
+
+msgid "web.admin.hero.default.disabled"
+msgstr "Wyłączony bohater nie może być domyślny."
+
+msgid "web.admin.hero.default.no_look"
+msgstr "Utworzony, zanim bohaterowie zapisywali wygląd, więc nie może być domyślny."
+
+msgid "web.admin.hero.portrait.remove"
+msgstr "Usuń portret"
+
+msgid "web.admin.hero.portrait.remove.busy"
+msgstr "Usuwanie…"
+
+msgid "web.admin.hero.portrait.confirm"
+msgstr "Usunąć ten portret?"
+
+msgid "web.admin.hero.portrait.confirm.text"
+msgstr "Ten obraz przesłała gra %(game)s. Usunięcie go kasuje; strony pokazują grafikę zastępczą, dopóki gra nie prześle nowego portretu."
+
+msgid "web.admin.hero.managed"
+msgstr "Ustawienie bohatera domyślnego i usunięcie portretu wymagają roli administratora."
+
+msgid "web.admin.toast.hero.renamed"
+msgstr "Zmieniono nazwę z %(old)s na %(new)s. %(game)s pokazuje nową nazwę od następnego logowania bohatera."
+
+msgid "web.admin.toast.hero.not_renamed"
+msgstr "Nazwa bohatera %(hero)s nie została zmieniona: nazwę %(name)s zajęto przed chwilą."
+
+msgid "web.admin.toast.hero.disabled"
+msgstr "Bohater %(hero)s jest wyłączony."
+
+msgid "web.admin.toast.hero.disabled.default"
+msgstr "Bohater %(hero)s jest wyłączony. Domyślnym bohaterem jest teraz %(default)s."
+
+msgid "web.admin.toast.hero.enabled"
+msgstr "Bohater %(hero)s jest ponownie włączony."
+
+msgid "web.admin.toast.hero.enabled.default"
+msgstr "Bohater %(hero)s jest ponownie włączony. Domyślnym bohaterem pozostaje %(default)s."
+
+msgid "web.admin.toast.hero.disabled_already"
+msgstr "Nic się nie zmieniło: bohater %(hero)s był już wyłączony."
+
+msgid "web.admin.toast.hero.enabled_already"
+msgstr "Nic się nie zmieniło: bohater %(hero)s był już włączony."
+
+msgid "web.admin.toast.hero.default"
+msgstr "Bohaterem domyślnym jest teraz %(hero)s. Program uruchamiający włącza grę %(game)s jako %(hero)s."
+
+msgid "web.admin.toast.hero.default_refused"
+msgstr "Nic się nie zmieniło: %(hero)s nie może być bohaterem domyślnym."
+
+msgid "web.admin.toast.hero.portrait"
+msgstr "Usunięto portret bohatera %(hero)s. Strony pokazują grafikę zastępczą."
+
+msgid "web.admin.toast.hero.portrait_none"
+msgstr "Nic się nie zmieniło: bohater %(hero)s nie ma portretu."
+
+msgid "web.admin.audit.action.hero_state.disabled"
+msgstr "Wyłączenie bohatera"
+
+msgid "web.admin.audit.action.hero_state.active"
+msgstr "Włączenie bohatera"
+
+msgid "web.admin.audit.action.hero_rename"
+msgstr "Zmiana nazwy bohatera"
+
+msgid "web.admin.audit.action.hero_default"
+msgstr "Ustawienie domyślnego"
+
+msgid "web.admin.audit.action.mugshot_remove"
+msgstr "Usunięcie portretu"
+
+msgid "web.admin.audit.renamed"
+msgstr "%(old)s → %(new)s"
+
+msgid "web.admin.audit.default_moved"
+msgstr "domyślny teraz: %(hero)s"
+
+msgid "web.admin.audit.default_was"
+msgstr "wcześniej: %(hero)s"

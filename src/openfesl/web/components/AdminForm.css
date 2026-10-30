@@ -1,0 +1,64 @@
+/* The admin panel's forms that ask for a note: the note's field, the line that says what is still
+   needed, and the list of what a change does. */
+@layer components {
+  .admin-note {
+    margin-top: 14px;
+  }
+
+  .admin-form-why {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 2px;
+    background: var(--row-light);
+    padding: 10px 14px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+
+    &:has([data-why]:empty) {
+      display: none;
+    }
+
+    .badge {
+      flex: none;
+    }
+
+    &.flash {
+      animation: site-flash 600ms linear;
+    }
+  }
+
+  .admin-effects {
+    display: grid;
+    gap: 2px;
+    margin-top: 12px;
+
+    > li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--row);
+      padding: 9px 12px;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+
+      &::before {
+        flex: none;
+        width: 8px;
+        height: 8px;
+        border-top: 2px solid currentColor;
+        border-right: 2px solid currentColor;
+        content: "";
+        rotate: 45deg;
+      }
+    }
+
+    + .body-text {
+      margin-top: 12px;
+    }
+  }
+}

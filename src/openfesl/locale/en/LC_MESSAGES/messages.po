@@ -9546,3 +9546,192 @@ msgstr "The game reads items at the hero's next login. Rentals end on their own 
 
 msgid "web.admin.items.unnamed"
 msgstr "Item %(id)s"
+
+msgid "web.admin.still_needed"
+msgstr "Still needed: %(what)s."
+
+msgid "web.admin.still_needed.note"
+msgstr "a note"
+
+msgid "web.admin.still_needed.name"
+msgstr "a free name"
+
+msgid "web.admin.note"
+msgstr "Note · required"
+
+msgid "web.admin.note.hint"
+msgstr "The audit log keeps the note with the change."
+
+msgid "web.admin.hero.line"
+msgstr "%(faction)s %(hero_class)s · level %(level)s · hero %(id)s"
+
+msgid "web.admin.hero.actions"
+msgstr "Hero actions"
+
+msgid "web.admin.hero.rename"
+msgstr "Rename"
+
+msgid "web.admin.hero.rename.busy"
+msgstr "Renaming…"
+
+msgid "web.admin.hero.rename.free"
+msgstr "free here"
+
+msgid "web.admin.hero.rename.title"
+msgstr "Rename a hero"
+
+msgid "web.admin.hero.rename.name"
+msgstr "New name"
+
+msgid "web.admin.hero.rename.hint"
+msgstr "%(shortest)s to %(longest)s letters, digits, _ or -, as when a hero is created. Names ignore capitals."
+
+msgid "web.admin.hero.rename.text"
+msgstr "Free in this panel, with the rule of hero creation. %(game)s shows the new name from the hero's next login."
+
+msgid "web.admin.hero.disable"
+msgstr "Disable"
+
+msgid "web.admin.hero.disable.busy"
+msgstr "Disabling…"
+
+msgid "web.admin.hero.enable"
+msgstr "Enable"
+
+msgid "web.admin.hero.enable.busy"
+msgstr "Enabling…"
+
+msgid "web.admin.hero.profile"
+msgstr "Public profile"
+
+msgid "web.admin.hero.profile.none"
+msgstr "No public profile: profiles show the heroes in play of named accounts that can sign in."
+
+msgid "web.admin.hero.disable.confirm"
+msgstr "Disable this hero?"
+
+msgid "web.admin.hero.enable.confirm"
+msgstr "Enable this hero?"
+
+msgid "web.admin.hero.enable.text"
+msgstr "The hero can play again and shows on public pages and in player search; the default hero stays as it is."
+
+msgid "web.admin.hero.disable.hidden"
+msgstr "Hidden from public pages and player search."
+
+msgid "web.admin.hero.disable.login"
+msgstr "Cannot log in: the launcher and the game refuse it."
+
+msgid "web.admin.hero.disable.slot"
+msgstr "Keeps its slot: %(used)s of %(total)s slots stay used."
+
+msgid "web.admin.hero.disable.default"
+msgstr "The default moves to %(hero)s."
+
+msgid "web.admin.hero.disable.no_default"
+msgstr "No other hero can be the default, so the launcher does not start %(game)s for this account until one can."
+
+msgid "web.admin.hero.disable.kept"
+msgstr "Its items, wallets and statistics stay as they are; Enable brings the hero back."
+
+msgid "web.admin.hero.disabled"
+msgstr "Disabled %(time)s by %(admin)s: %(note)s"
+
+msgid "web.admin.hero.disabled.text"
+msgstr "Hidden from public pages and player search; the launcher and the game refuse it. It keeps its slot, items, wallets and statistics."
+
+msgid "web.admin.hero.make_default"
+msgstr "Make default"
+
+msgid "web.admin.hero.make_default.busy"
+msgstr "Saving…"
+
+msgid "web.admin.hero.default.confirm"
+msgstr "Make this hero the default?"
+
+msgid "web.admin.hero.default.text"
+msgstr "The launcher starts %(game)s as %(hero)s from now on."
+
+msgid "web.admin.hero.default.now"
+msgstr "Default hero: the launcher starts the game as %(hero)s."
+
+msgid "web.admin.hero.default.disabled"
+msgstr "A disabled hero cannot be the default."
+
+msgid "web.admin.hero.default.no_look"
+msgstr "Made before heroes kept their look, so it cannot be the default."
+
+msgid "web.admin.hero.portrait.remove"
+msgstr "Remove portrait"
+
+msgid "web.admin.hero.portrait.remove.busy"
+msgstr "Removing…"
+
+msgid "web.admin.hero.portrait.confirm"
+msgstr "Remove this portrait?"
+
+msgid "web.admin.hero.portrait.confirm.text"
+msgstr "%(game)s uploaded this image. Removing it deletes it; pages show a placeholder until the game sends a new portrait."
+
+msgid "web.admin.hero.managed"
+msgstr "Making a hero the default and removing its portrait need the admin role."
+
+msgid "web.admin.toast.hero.renamed"
+msgstr "Renamed %(old)s to %(new)s. %(game)s shows the new name from the hero's next login."
+
+msgid "web.admin.toast.hero.not_renamed"
+msgstr "%(hero)s was not renamed: %(name)s was taken a moment earlier."
+
+msgid "web.admin.toast.hero.disabled"
+msgstr "%(hero)s is disabled."
+
+msgid "web.admin.toast.hero.disabled.default"
+msgstr "%(hero)s is disabled. %(default)s is now the default hero."
+
+msgid "web.admin.toast.hero.enabled"
+msgstr "%(hero)s is enabled again."
+
+msgid "web.admin.toast.hero.enabled.default"
+msgstr "%(hero)s is enabled again. The default hero stays %(default)s."
+
+msgid "web.admin.toast.hero.disabled_already"
+msgstr "Nothing changed: %(hero)s was disabled already."
+
+msgid "web.admin.toast.hero.enabled_already"
+msgstr "Nothing changed: %(hero)s was enabled already."
+
+msgid "web.admin.toast.hero.default"
+msgstr "%(hero)s is now the default hero. The launcher starts %(game)s as %(hero)s."
+
+msgid "web.admin.toast.hero.default_refused"
+msgstr "Nothing changed: %(hero)s cannot be the default."
+
+msgid "web.admin.toast.hero.portrait"
+msgstr "Removed the portrait of %(hero)s. Pages show a placeholder."
+
+msgid "web.admin.toast.hero.portrait_none"
+msgstr "Nothing changed: %(hero)s has no portrait."
+
+msgid "web.admin.audit.action.hero_state.disabled"
+msgstr "Hero disabled"
+
+msgid "web.admin.audit.action.hero_state.active"
+msgstr "Hero enabled"
+
+msgid "web.admin.audit.action.hero_rename"
+msgstr "Hero renamed"
+
+msgid "web.admin.audit.action.hero_default"
+msgstr "Made default"
+
+msgid "web.admin.audit.action.mugshot_remove"
+msgstr "Portrait removed"
+
+msgid "web.admin.audit.renamed"
+msgstr "%(old)s → %(new)s"
+
+msgid "web.admin.audit.default_moved"
+msgstr "default moved to %(hero)s"
+
+msgid "web.admin.audit.default_was"
+msgstr "was %(hero)s"

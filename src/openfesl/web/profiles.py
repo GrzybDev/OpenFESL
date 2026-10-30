@@ -3,7 +3,7 @@ from collections.abc import Awaitable, Callable
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, Response
 
-from openfesl.core.accounts import AccountRecord
+from openfesl.core.accounts import Account, AccountRecord
 from openfesl.core.catalogues import Catalogues
 from openfesl.core.games import Game, Games
 from openfesl.core.hero_boards import HeroBoards
@@ -179,16 +179,23 @@ class ProfilePages:
         return show_player
 
     async def _public(self, game: Game, account_id: int) -> tuple[AccountRecord, list[Hero]] | None:
-        # A player's account that others see, as the player search finds them: in use, as
-        # logins also take one whose state has ended, and named; with its heroes in play.
+        # A player's account that others see, with its heroes in play.
         record = await self._accounts(account_id)
-        if record is None:
-            return None
-        account = record.account
-        if account.login_error() is not None or not account.display_name:
+        if record is None or not seen_by_others(record.account):
             return None
         roster = await self._heroes.roster(game, account_id)
         return record, [hero for hero in roster.heroes if not hero.disabled]
 
     def _missing(self, request: Request, game: Game) -> Response:
         return self._pages.render(request, "Error", 404, game=game, code=404, kind="profile")
+
+
+def seen_by_others(account: Account) -> bool:
+    """Tell whether others see an account's profile, as the player search finds it.
+
+    It is in use, as logins also take one whose state has ended, and named.
+
+    Args:
+        account: The account.
+    """
+    return account.login_error() is None and bool(account.display_name)

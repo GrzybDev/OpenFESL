@@ -150,6 +150,46 @@
     margin-top: 14px;
   }
 
+  .admin-hero-actions {
+    display: grid;
+    gap: 2px;
+    margin-top: 2px;
+
+    > .bar-text {
+      margin-top: 0;
+    }
+  }
+
+  .admin-hero-free {
+    margin-left: auto;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .admin-hero-line,
+  .admin-hero-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+
+    .badge {
+      flex: none;
+    }
+  }
+
+  .admin-hero-banner {
+    margin-bottom: 2px;
+
+    .cell-stack {
+      display: flex;
+    }
+  }
+
   /* Where the table does not fit, each item is a block: its name, then how it is held. */
   @container (width < 760px) {
     .admin-hero-inventory {

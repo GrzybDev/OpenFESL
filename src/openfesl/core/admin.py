@@ -29,7 +29,17 @@ class AdminAction(StrEnum):
     """Not the admin's: the player of the account numbered as the target asked on the site for
     its deletion, which deactivated it; the details hold its new state as for account_state."""
     PERSONA_STATE = "persona_state"
-    """Changed the state of the persona numbered as the target; the details hold the state."""
+    """Changed the state of the persona numbered as the target; the details hold the state, and
+    for a hero the admin's note and the hero that became the default instead, if one did."""
+    HERO_RENAME = "hero_rename"
+    """Gave the hero whose persona is numbered as the target a new name; the details hold the
+    names before and after and the admin's note."""
+    HERO_DEFAULT = "hero_default"
+    """Made the hero whose persona is numbered as the target its account's default hero; the
+    details hold the name of the default hero before, if any, and the admin's note."""
+    MUGSHOT_REMOVE = "mugshot_remove"
+    """Removed the portrait that the game sent of the hero whose persona is numbered as the
+    target; the details hold the admin's note."""
     PLAYER_KICK = "player_kick"
     """Kicked the persona numbered as the target from the games it joins, plays or waits for."""
     SESSION_END = "session_end"

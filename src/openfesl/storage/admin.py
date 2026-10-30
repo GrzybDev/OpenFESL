@@ -74,7 +74,7 @@ class SqlAdminLog:
                 .offset(offset)
                 .limit(limit)
             )
-            return total or 0, [_entry(row) for row in rows]
+            return total or 0, [audit_entry(row) for row in rows]
 
     async def latest(self, action: AdminAction, target: str) -> AuditEntry | None:
         """Return the latest action of a kind done to a target, if any was.
@@ -90,7 +90,7 @@ class SqlAdminLog:
                 .order_by(AdminActionRow.id.desc())
                 .limit(1)
             )
-            return _entry(row) if row else None
+            return audit_entry(row) if row else None
 
     async def auditors(self, chosen: AuditFilter) -> list[Auditor]:
         """Return who acted among the actions a filter lets through by anyone, most first.
@@ -151,7 +151,13 @@ _ACCOUNT_ACTIONS = [
     AdminAction.ENTITLEMENT_GRANT,
     AdminAction.ENTITLEMENT_STATE,
 ]
-_PERSONA_ACTIONS = [AdminAction.PERSONA_STATE, AdminAction.PLAYER_KICK]
+_PERSONA_ACTIONS = [
+    AdminAction.PERSONA_STATE,
+    AdminAction.PLAYER_KICK,
+    AdminAction.HERO_RENAME,
+    AdminAction.HERO_DEFAULT,
+    AdminAction.MUGSHOT_REMOVE,
+]
 
 
 def _conditions(chosen: AuditFilter) -> list[ColumnElement[bool]]:
@@ -182,7 +188,12 @@ def _texts(numbers: Collection[int]) -> list[str]:
     return [str(number) for number in numbers]
 
 
-def _entry(row: AdminActionRow) -> AuditEntry:
+def audit_entry(row: AdminActionRow) -> AuditEntry:
+    """Return one of the admin's actions as the audit log lists it, from its row.
+
+    Args:
+        row: The row of the log.
+    """
     role = Role(row.admin_role) if row.admin_role else None
     return AuditEntry(
         row.id,
