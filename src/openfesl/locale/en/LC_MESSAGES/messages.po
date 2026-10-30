@@ -8197,3 +8197,71 @@ msgstr "Every item stays in the store at its usual price."
 msgid "web.deals.card.more"
 msgstr "%(names)s and %(count)s more"
 
+msgid "games.bfheroes.rewards.valentine"
+msgstr "Valentine's Day"
+
+msgid "games.bfheroes.rewards.valentine.summary"
+msgstr "A Valentine's gift for a hero of each faction, once."
+
+msgid "games.bfheroes.rewards.easter"
+msgstr "Easter"
+
+msgid "games.bfheroes.rewards.easter.summary"
+msgstr "An Easter basket for a hero of each faction, once."
+
+msgid "games.bfheroes.rewards.birthday"
+msgstr "The game's birthday"
+
+msgid "games.bfheroes.rewards.birthday.summary"
+msgstr "A party pack for a hero of each faction, with Funds and treasure chest keys for the account, once."
+
+msgid "games.bfheroes.rewards.halloween"
+msgstr "Halloween trick-or-treat"
+
+msgid "games.bfheroes.rewards.halloween.summary"
+msgstr "One free trick-or-treat bag a day for each faction."
+
+msgid "games.bfheroes.rewards.halloween-machete"
+msgstr "Halloween machete mission"
+
+msgid "games.bfheroes.rewards.halloween-machete.summary"
+msgstr "Machete kills with one Commando of a faction bring a golden machete."
+
+msgid "games.bfheroes.rewards.halloween-map"
+msgstr "Halloween map mission"
+
+msgid "games.bfheroes.rewards.halloween-map.summary"
+msgstr "Faction wins on one map bring a Halloween shirt."
+
+msgid "games.bfheroes.rewards.bento"
+msgstr "Bento week"
+
+msgid "games.bfheroes.rewards.bento.summary"
+msgstr "One free Bento Box a day for each faction."
+
+msgid "games.bfheroes.rewards.rising-sun"
+msgstr "Rising Sun mission"
+
+msgid "games.bfheroes.rewards.rising-sun.summary"
+msgstr "Flamethrower kills with one Gunner of a faction bring a rarer flamethrower."
+
+msgid "games.bfheroes.rewards.christmas"
+msgstr "Christmas gifts"
+
+msgid "games.bfheroes.rewards.christmas.summary"
+msgstr "One free gift a day for each faction until Christmas Eve."
+
+msgid "web.rewards.progress"
+msgstr "%(count)s of %(goal)s"
+
+msgid "web.rewards.progress.level"
+msgstr "Level %(count)s of %(goal)s"
+
+msgid "web.rewards.progress.matches"
+msgstr "%(count)s of %(goal)s ranked matches"
+
+msgid "web.rewards.progress.kills"
+msgstr "%(count)s of %(goal)s kills"
+
+msgid "web.rewards.progress.wins"
+msgstr "%(count)s of %(goal)s wins"

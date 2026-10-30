@@ -1,10 +1,51 @@
 from collections.abc import Collection
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Protocol
 
 from openfesl.core.inventory import Ownership
 from openfesl.core.stats import Bucket
 from openfesl.core.wallets import Wallet
+
+
+@dataclass(frozen=True, slots=True)
+class Claim:
+    """A reward an account claimed, as it was given.
+
+    Attributes:
+        key: What it was claimed by.
+        faction: The faction of its part; none for the account's own.
+        hero: The persona of the hero its items went to; none when they went to no hero, or the
+            hero is gone.
+        items: The items the hero got, each with its ownership.
+        funds: The Funds the account got.
+        keys: The treasure chest keys the account got.
+        at: When it was claimed.
+    """
+
+    key: str
+    faction: str | None
+    hero: int | None
+    items: tuple[tuple[int, Ownership], ...]
+    funds: int
+    keys: int
+    at: datetime
+
+
+@dataclass(frozen=True, slots=True)
+class Claimed:
+    """A reward an account claimed, with what names it.
+
+    Attributes:
+        claim: The claim.
+        name: The id of the reward's name in the game's texts or the server's own; the key
+            itself for a reward that the rules no longer give.
+        goal: The goal of a milestone, which its name states; none for anything else.
+    """
+
+    claim: Claim
+    name: str
+    goal: int | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -21,6 +62,7 @@ class Grant:
         fallback: What the hero gets instead of an item it owns for good.
         funds: The account's wallet the Funds go to, and how many.
         keys: The tag of the account's keys, and how many it gets.
+        at: When it is claimed.
     """
 
     game: str
@@ -32,15 +74,14 @@ class Grant:
     fallback: tuple[int, Ownership]
     funds: tuple[Wallet, int] | None
     keys: tuple[str, int] | None
+    at: datetime
 
 
 class RewardStore(Protocol):
     """Where claims are recorded and their rewards given."""
 
-    async def claimed(
-        self, game: str, account_id: int, keys: Collection[str]
-    ) -> set[tuple[str, str | None]]:
-        """Return which rewards an account claimed, each by its key and faction.
+    async def claimed(self, game: str, account_id: int, keys: Collection[str]) -> list[Claim]:
+        """Return the claims an account made of rewards, whenever it made them.
 
         Args:
             game: The game's data-file name.
@@ -74,15 +115,25 @@ class RewardStore(Protocol):
             The values the heroes had, by persona; a hero without one had none.
         """
 
-    async def grant(self, grant: Grant) -> list[int]:
+    async def grant(self, grant: Grant) -> list[tuple[int, Ownership]]:
         """Record a claim and give what it grants, all of it or none.
 
         Args:
             grant: What the claim gives.
 
         Returns:
-            The items the hero got, an owned one replaced by the fallback.
+            The items the hero got, each with its ownership, an owned one replaced by the
+            fallback.
 
         Raises:
             RewardRefused: When the account claimed the reward already, also at the same time.
+        """
+
+    async def claims(self, game: str, account_id: int, since: datetime) -> list[Claim]:
+        """Return the rewards an account claimed since a moment, the latest first.
+
+        Args:
+            game: The game's data-file name.
+            account_id: The account.
+            since: The moment.
         """

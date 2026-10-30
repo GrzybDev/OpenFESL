@@ -55,6 +55,13 @@ class Ownership:
             return cls(COUNTED, uses=int(uses))
         return cls(PERMANENT)
 
+    @property
+    def written(self) -> str:
+        """The ownership as game data writes it: perm, days such as 7d, or uses such as x75."""
+        if self.type == RENTED:
+            return f"{self.days}d"
+        return f"x{self.uses}" if self.type == COUNTED else "perm"
+
     def tag(self, item_id: int) -> str:
         """Return the Magma tag of an item owned this way.
 

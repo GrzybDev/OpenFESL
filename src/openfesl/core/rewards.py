@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from dataclasses import dataclass, replace
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from enum import StrEnum
 
 from openfesl.core.calendar import day_start, today
@@ -14,8 +14,9 @@ from openfesl.core.heroes import Hero, Heroes
 from openfesl.core.inventory import Ownership
 from openfesl.core.overrides import overridden
 from openfesl.core.policies import SettingStore
-from openfesl.core.reward_claims import Grant, RewardStore
-from openfesl.core.reward_rules import Gift, Goal, Milestone, Part, RewardRules
+from openfesl.core.reward_claims import Claim, Claimed, Grant, RewardStore
+from openfesl.core.reward_rules import Event, Gift, Goal, Milestone, Part, RewardRules
+from openfesl.core.reward_runs import Run
 from openfesl.core.stats import (
     PERSONA,
     Owner,
@@ -25,7 +26,10 @@ from openfesl.core.stats import (
 )
 from openfesl.core.store import ProductStore
 from openfesl.core.wallets import Wallet
-from openfesl.protocol.rank import Period
+from openfesl.protocol.rank import Period as StatPeriod
+
+# The key of the reward that a first treasure chest brings.
+FIRST_CHEST = "first-chest"
 
 
 class RewardState(StrEnum):
@@ -35,6 +39,8 @@ class RewardState(StrEnum):
     CLAIMED = "claimed"
     LOCKED = "locked"
     """It needs a hero, or a goal reached, that the account lacks."""
+    EXPIRED = "expired"
+    """Its time to be claimed ran out a short while ago; it is shown until the day after."""
 
 
 class RewardRefusal(StrEnum):
@@ -48,6 +54,8 @@ class RewardRefusal(StrEnum):
     """The account lacks the hero or the goal that the reward needs."""
     UNFIT = "unfit"
     """The hero chosen is not one the reward may go to."""
+    EXPIRED = "expired"
+    """Its time to be claimed ran out."""
 
 
 class RewardRefused(Exception):
@@ -82,6 +90,9 @@ class Reward:
             any.
         progress: How far towards its goal the account or its hero is, for a goal.
         goal: What it needs reached, for a goal.
+        claim: The account's claim of it, once claimed, whenever that was: a milestone is
+            claimed once, in whichever year its goal is reached.
+        event: The key of the event that brings it; none for a reward that no event brings.
     """
 
     key: str
@@ -96,6 +107,8 @@ class Reward:
     hero: int | None = None
     progress: int | None = None
     goal: int | None = None
+    claim: Claim | None = None
+    event: str | None = None
 
 
 class Rewards:
@@ -166,16 +179,74 @@ class Rewards:
             *await self._first_chest(game, rules, heroes),
         ]
         claimed = await self._store.claimed(game.id, account_id, {r.key for r in found})
+        claims = {(claim.key, claim.faction): claim for claim in claimed}
         return [
-            replace(reward, state=RewardState.CLAIMED)
-            if (reward.key, reward.faction) in claimed
+            replace(reward, state=RewardState.CLAIMED, claim=claims[reward.key, reward.faction])
+            if (reward.key, reward.faction) in claims
             else reward
             for reward in found
         ]
 
+    async def running(self, game: Game) -> list[Run]:
+        """Return the events of a game's calendar that run now.
+
+        Args:
+            game: The game.
+        """
+        rules = await self.rules(game)
+        return _running(rules, self._clock()) if rules else []
+
+    async def upcoming(self, game: Game) -> list[Run]:
+        """Return the events of a game's calendar that start later, the soonest first.
+
+        Args:
+            game: The game.
+        """
+        rules = await self.rules(game)
+        if rules is None:
+            return []
+        now = self._clock()
+        year = today(now, rules.zone).year
+        found = []
+        for key, event in rules.events.items():
+            if event.enabled:
+                runs = (_run(key, event, year + ahead, rules.zone) for ahead in (0, 1))
+                found.append(next(run for run in runs if run.period.start > now))
+        return sorted(found, key=lambda run: run.period.start)
+
+    async def history(self, game: Game, account_id: int) -> list[Claimed]:
+        """Return the rewards an account claimed this year, the latest first, with their names.
+
+        Args:
+            game: The game.
+            account_id: The account.
+        """
+        rules = await self.rules(game)
+        if rules is None:
+            return []
+        year = date(today(self._clock(), rules.zone).year, 1, 1)
+        found = []
+        for claim in await self._store.claims(game.id, account_id, day_start(year, rules.zone)):
+            # What its key stands for names it; a milestone's name states its goal.
+            kind, _, rest = claim.key.partition(":")
+            name, goal = claim.key, None
+            if kind == "milestone" and (milestone := rules.milestones.get(rest.partition(":")[0])):
+                name, goal = milestone.name, milestone.goal
+            elif kind == "starter" and rules.starter:
+                name = rules.starter.name
+            elif kind == FIRST_CHEST and rules.first_chest:
+                name = rules.first_chest.name
+            elif event := rules.events.get(kind):
+                parts = (part for part in event.parts.values() if part.faction == claim.faction)
+                if part := next(parts, None):
+                    day = rest.partition(":")[2]
+                    name = _dated(part.name, int(day) if day else None)
+            found.append(Claimed(claim, name, goal))
+        return found
+
     async def claim(
         self, game: Game, account_id: int, key: str, faction: str | None, hero_id: int | None
-    ) -> list[int]:
+    ) -> list[tuple[int, Ownership]]:
         """Claim a reward for an account, its items going to one of its heroes.
 
         Everything is checked again at the moment of the claim, and the reward is given at
@@ -189,11 +260,12 @@ class Rewards:
             hero_id: The persona of the hero its items go to; none for a reward without items.
 
         Returns:
-            The items the hero got.
+            The items the hero got, each with its ownership.
 
         Raises:
             RewardRefused: When claims are paused, no such reward runs now, the account claimed
-                it already, or the hero is not one it may go to or may get nothing of it.
+                it already, its time ran out, or the hero is not one it may go to or may get
+                nothing of it.
         """
         rules = await self.rules(game)
         if rules is not None and rules.paused:
@@ -214,7 +286,16 @@ class Rewards:
             funds = Wallet(game.id, rules.currency, account_id, None, allowance), gift.funds
         keys = (key_tag(game.chests), gift.keys) if gift.keys and game.chests else None
         grant = Grant(
-            game.id, account_id, key, faction, hero_id, items, rules.fallback, funds, keys
+            game.id,
+            account_id,
+            key,
+            faction,
+            hero_id,
+            items,
+            rules.fallback,
+            funds,
+            keys,
+            self._clock(),
         )
         return await self._store.grant(grant)
 
@@ -222,7 +303,7 @@ class Rewards:
         self, game: Game, rules: RewardRules, heroes: list[Hero], now: datetime
     ) -> list[Reward]:
         found = []
-        for key, part, ends, day in _running(rules, now):
+        for key, event, part, ends, day in _parts(rules, now):
             gift, goal = part.on(day), part.goal
             counting = [h for h in heroes if not goal or goal.hero_class in (None, h.hero_class)]
             fitting = tuple(
@@ -239,6 +320,7 @@ class Rewards:
                 fitting,
                 ends,
                 day,
+                event=event,
             )
             if goal:
                 hero, progress = await self._best(game, key, goal, part.faction, counting)
@@ -254,7 +336,7 @@ class Rewards:
     ) -> tuple[int | None, int]:
         # The hero of the faction that came furthest since the event began, and how far.
         counted = [hero.persona.id for hero in heroes if hero.faction == faction]
-        bucket = bucket_of(Period.ALL_TIME, 0)
+        bucket = bucket_of(StatPeriod.ALL_TIME, 0)
         partition = partition_of(game)
         before = await self._store.baselines(game.id, partition, key, goal.stat, bucket, counted)
         owners = [Owner(PERSONA, persona) for persona in counted]
@@ -278,8 +360,10 @@ class Rewards:
         found = []
         for hero in heroes:
             gift = packs.packs.get(hero.faction or "", {}).get(hero.hero_class or "")
-            ends = hero.created + timedelta(days=packs.days)
-            if gift is None or now >= ends:
+            # Claimable to the end of its last day, then shown as expired for a day more.
+            last = packs.last_day(hero.created, rules.zone)
+            ends = day_start(last + timedelta(1), rules.zone)
+            if gift is None or now >= day_start(last + timedelta(2), rules.zone):
                 continue
             fits_hero = self._fits(game, hero.faction, gift, hero)
             found.append(
@@ -289,7 +373,7 @@ class Rewards:
                     packs.name,
                     packs.description,
                     gift,
-                    _state(fits_hero),
+                    RewardState.EXPIRED if now >= ends else _state(fits_hero),
                     (hero.persona.id,) if fits_hero else (),
                     ends,
                     hero=hero.persona.id,
@@ -301,7 +385,7 @@ class Rewards:
         shown = {key: goal for key, goal in rules.milestones.items() if goal.enabled}
         keys = sorted({stat for goal in shown.values() for stat in goal.stats})
         owners = [Owner(PERSONA, hero.persona.id) for hero in heroes]
-        bucket = bucket_of(Period.ALL_TIME, 0)
+        bucket = bucket_of(StatPeriod.ALL_TIME, 0)
         values = await self._stats.values(partition_of(game), owners, keys, bucket)
 
         def count(goal: Milestone, hero: Hero) -> int:
@@ -338,7 +422,7 @@ class Rewards:
             return []
         arrived = [await self._entitlements.of_persona(h.persona.id, chests.tag) for h in heroes]
         state = _state(any(arrived))
-        return [Reward("first-chest", None, reward.name, reward.description, reward.gift, state)]
+        return [Reward(FIRST_CHEST, None, reward.name, reward.description, reward.gift, state)]
 
     def _fits(self, game: Game, faction: str | None, gift: Gift, hero: Hero) -> bool:
         # A hero of the faction, whom the gift's items fit or who gets a drop of its box.
@@ -372,19 +456,32 @@ def _usable(contents: Contents, gift: Gift, hero: Hero) -> bool:
     )
 
 
-def _running(rules: RewardRules, now: datetime) -> list[tuple[str, Part, datetime, int | None]]:
-    # Each part of the events that run, with its key, when it can no longer be claimed and its
-    # day; a daily gift is claimed on its day alone.
+def _running(rules: RewardRules, now: datetime) -> list[Run]:
+    year = today(now, rules.zone).year
+    runs = [_run(key, event, year, rules.zone) for key, event in rules.events.items()]
+    return [
+        replace(run, day=run.event.window.day(now, rules.zone))
+        for run in runs
+        if run.event.enabled and run.period.start <= now < run.period.end
+    ]
+
+
+def _run(key: str, event: Event, year: int, zone: str) -> Run:
+    first, last = event.window.days(year)
+    return Run(key, event, event.window.period(year, zone), (last - first).days + 1, None)
+
+
+def _parts(rules: RewardRules, now: datetime) -> list[tuple[str, str, Part, datetime, int | None]]:
+    # Each part of the events that run, with its key, its event's, when it can no longer be
+    # claimed and its day; a daily gift is claimed on its day alone.
     found = []
-    for name, event in rules.events.items():
-        period = event.window.running(now, rules.zone) if event.enabled else None
-        if period is None:
-            continue
+    for run in _running(rules, now):
         day = today(now, rules.zone)
-        number = event.window.day(now, rules.zone) if event.daily else None
-        key = f"{name}:{day.year}" + (f":{number}" if number else "")
-        ends = day_start(day + timedelta(1), rules.zone) if number else period.end
-        found += [(key, part, ends, number) for part in event.parts.values() if part.enabled]
+        number = run.day if run.event.daily else None
+        key = f"{run.key}:{day.year}" + (f":{number}" if number else "")
+        ends = day_start(day + timedelta(1), rules.zone) if number else run.period.end
+        parts = [part for part in run.event.parts.values() if part.enabled]
+        found += [(key, run.key, part, ends, number) for part in parts]
     return found
 
 

@@ -97,6 +97,16 @@ class Window(BaseModel):
         first, last = self.dates
         return date.fromisoformat(f"{year}-{first}"), date.fromisoformat(f"{year}-{last}")
 
+    def period(self, year: int, zone: str) -> Period:
+        """Return the window's period in a year, from its first day's start to its last's end.
+
+        Args:
+            year: The year.
+            zone: The time zone whose midnights its days start at.
+        """
+        first, last = self.days(year)
+        return Period(day_start(first, zone), day_start(last + timedelta(1), zone))
+
     def running(self, now: datetime, zone: str) -> Period | None:
         """Return the window's period that runs at a moment, if one does.
 
@@ -104,8 +114,7 @@ class Window(BaseModel):
             now: The moment.
             zone: The time zone whose midnights its days start at.
         """
-        first, last = self.days(today(now, zone).year)
-        period = Period(day_start(first, zone), day_start(last + timedelta(1), zone))
+        period = self.period(today(now, zone).year, zone)
         return period if period.start <= now < period.end else None
 
     def day(self, now: datetime, zone: str) -> int | None:

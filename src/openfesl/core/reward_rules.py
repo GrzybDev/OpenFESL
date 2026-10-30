@@ -1,8 +1,9 @@
+from datetime import date, datetime, timedelta
 from typing import Self
 
 from pydantic import BaseModel, ConfigDict, NonNegativeInt, PositiveInt, model_validator
 
-from openfesl.core.calendar import Window, Zone
+from openfesl.core.calendar import Window, Zone, today
 from openfesl.core.store_rules import DropEntry
 
 
@@ -37,6 +38,8 @@ class Goal(BaseModel):
         stat: The hero's stat that counts, from the event's start.
         count: What the hero's count must reach.
         hero_class: The class of the heroes that count and that the gift goes to; any when none.
+        progress: The id of the server's text that says how far a hero got, with %(count)s and
+            %(goal)s, such as 112 of 700 kills.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -44,6 +47,7 @@ class Goal(BaseModel):
     stat: str
     count: PositiveInt
     hero_class: str | None = None
+    progress: str = "web.rewards.progress"
 
 
 class Part(BaseModel):
@@ -84,6 +88,8 @@ class Event(BaseModel):
 
     Attributes:
         enabled: Whether it runs.
+        title: The id of the server's text that names it, such as Halloween trick-or-treat.
+        summary: The id of the server's text that says in a sentence what it gives.
         window: The days of each year it runs on.
         daily: Whether each of its days gives a gift of its own, claimed on that day, rather
             than one gift for all of them.
@@ -93,6 +99,8 @@ class Event(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     enabled: bool = True
+    title: str
+    summary: str
     window: Window
     daily: bool = False
     parts: dict[str, Part]
@@ -103,7 +111,8 @@ class StarterPacks(BaseModel):
 
     Attributes:
         enabled: Whether they are given.
-        days: How many days after its creation a hero may claim its pack.
+        days: How many days after the day of its creation a hero may claim its pack, until the
+            last one's end.
         name: The id of their name in the game's texts or the server's own.
         description: The id of the text about them, likewise.
         packs: What each faction's heroes get, by class.
@@ -116,6 +125,15 @@ class StarterPacks(BaseModel):
     name: str
     description: str | None = None
     packs: dict[str, dict[str, Gift]]
+
+    def last_day(self, created: datetime, zone: str) -> date:
+        """Return the last day on which a hero may claim its pack.
+
+        Args:
+            created: When the hero was created.
+            zone: The time zone whose midnights the days start at.
+        """
+        return today(created, zone) + timedelta(days=self.days)
 
 
 class Milestone(BaseModel):
@@ -130,6 +148,8 @@ class Milestone(BaseModel):
             reaches the goal, rather than once for the account's heroes together.
         goal: What the count reaches it at.
         gift: What it gives, which goes to the account.
+        progress: The id of the server's text that says how far the count got, with %(count)s
+            and %(goal)s, such as Level 3 of 10.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -141,6 +161,7 @@ class Milestone(BaseModel):
     each: bool = False
     goal: PositiveInt
     gift: Gift
+    progress: str = "web.rewards.progress"
 
     @model_validator(mode="after")
     def _check_gift(self) -> Self:

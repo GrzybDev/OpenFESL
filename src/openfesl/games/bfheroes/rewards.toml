@@ -5,7 +5,8 @@
 # default that the setting bfheroes.rewards.<path> overrides, such as bfheroes.rewards.paused =
 # on or bfheroes.rewards.events.halloween.enabled = off; days start at the zone's midnight.
 # Names and descriptions are the game's REWARDS_* texts where the data matches what they state,
-# else the server's own (archived forum threads as tid N).
+# else the server's own (archived forum threads as tid N); each event's title and summary, and how
+# a goal's progress reads, are the server's own.
 [rewards]
 zone = "UTC"
 currency = "_PF"
@@ -15,6 +16,8 @@ fallback = "2153 x150"
 # Valentine's Day: the faction's rose for a week and ten gift-package traps, 13 to 15 February
 # (Love Letters, keys captured from 2012-02-16; the Bundle of Love ran 14-15 February 2012).
 [rewards.events.valentine]
+title = "games.bfheroes.rewards.valentine"
+summary = "games.bfheroes.rewards.valentine.summary"
 window = { dates = ["02-13", "02-15"] }
 
 [rewards.events.valentine.parts.royal]
@@ -32,6 +35,8 @@ gift = { items = ["1128 7d", "2171 x10"] }
 # Easter, Good Friday to Easter Monday: a basket of 25 Festive Eggs and a rabbit's or bunny's
 # head for three days (a basket of free eggs in 2012, tid 332474).
 [rewards.events.easter]
+title = "games.bfheroes.rewards.easter"
+summary = "games.bfheroes.rewards.easter.summary"
 window = { easter = [-2, 1] }
 
 [rewards.events.easter.parts.royal]
@@ -51,6 +56,8 @@ gift = { items = ["2175 x25", "1372 3d"] }
 # 2012 tricycle for three days, and two treasure chest keys for the account (tid 356286). The
 # game's texts name the year, so the server's own name the pack.
 [rewards.events.birthday]
+title = "games.bfheroes.rewards.birthday"
+summary = "games.bfheroes.rewards.birthday.summary"
 window = { dates = ["06-25", "07-01"] }
 
 [rewards.events.birthday.parts.royal]
@@ -74,6 +81,8 @@ gift = { keys = 2 }
 # Trick-or-Treat bag, which the hot deals sell through the same days (daily keys 1 to 13
 # captured from 21 October 2011).
 [rewards.events.halloween]
+title = "games.bfheroes.rewards.halloween"
+summary = "games.bfheroes.rewards.halloween.summary"
 window = { dates = ["10-19", "10-31"] }
 daily = true
 
@@ -96,42 +105,48 @@ gift = { box = "national-trick-or-treat" }
 # hero's kills and wins count from the event's start, on ranked servers, which alone submit
 # stats.
 [rewards.events.halloween-machete]
+title = "games.bfheroes.rewards.halloween-machete"
+summary = "games.bfheroes.rewards.halloween-machete.summary"
 window = { dates = ["10-19", "10-31"] }
 
 [rewards.events.halloween-machete.parts.royal]
 faction = "royal"
 name = "REWARDS_HALLOWEEN_MACHETE_MISSION_ROYAL_NAME"
 description = "REWARDS_HALLOWEEN_MACHETE_MISSION_ROYAL_DESCRIPTION"
-goal = { stat = "kw106", count = 700, hero_class = "commando" }
+goal = { stat = "kw106", count = 700, hero_class = "commando", progress = "web.rewards.progress.kills" }
 gift = { items = [3206] }
 
 [rewards.events.halloween-machete.parts.national]
 faction = "national"
 name = "REWARDS_HALLOWEEN_MACHETE_MISSION_NATIONAL_NAME"
 description = "REWARDS_HALLOWEEN_MACHETE_MISSION_NATIONAL_DESCRIPTION"
-goal = { stat = "kw64", count = 700, hero_class = "commando" }
+goal = { stat = "kw64", count = 700, hero_class = "commando", progress = "web.rewards.progress.kills" }
 gift = { items = [3205] }
 
 [rewards.events.halloween-map]
+title = "games.bfheroes.rewards.halloween-map"
+summary = "games.bfheroes.rewards.halloween-map.summary"
 window = { dates = ["10-19", "10-31"] }
 
 [rewards.events.halloween-map.parts.royal]
 faction = "royal"
 name = "REWARDS_HALLOWEEN_MAP_MISSION_ROYAL_NAME"
 description = "REWARDS_HALLOWEEN_MAP_MISSION_ROYAL_DESCRIPTION"
-goal = { stat = "m_win12", count = 10 }
+goal = { stat = "m_win12", count = 10, progress = "web.rewards.progress.wins" }
 gift = { items = [1512] }
 
 [rewards.events.halloween-map.parts.national]
 faction = "national"
 name = "REWARDS_HALLOWEEN_MAP_MISSION_NATIONAL_NAME"
 description = "REWARDS_HALLOWEEN_MAP_MISSION_NATIONAL_DESCRIPTION"
-goal = { stat = "m_win12", count = 10 }
+goal = { stat = "m_win12", count = 10, progress = "web.rewards.progress.wins" }
 gift = { items = [1511] }
 
 # The Bento week of the Rising Sun, 21 to 27 November: each day one free Bento Box of the
 # faction ("one free ... each day until November 27", the 2011-11-21 update, tid 284786).
 [rewards.events.bento]
+title = "games.bfheroes.rewards.bento"
+summary = "games.bfheroes.rewards.bento.summary"
 window = { dates = ["11-21", "11-27"] }
 daily = true
 
@@ -151,6 +166,8 @@ gift = { box = "national-bento-box" }
 # faction's Dragon's or Drake's Fire on one Gunner bring its blue or crimson version for any of
 # the account's Gunners of that faction (the 2011-11-21 update, tid 284786).
 [rewards.events.rising-sun]
+title = "games.bfheroes.rewards.rising-sun"
+summary = "games.bfheroes.rewards.rising-sun.summary"
 enabled = false
 window = { dates = ["11-21", "11-30"] }
 
@@ -158,14 +175,14 @@ window = { dates = ["11-21", "11-30"] }
 faction = "royal"
 name = "REWARDS_RISING_SUN_DRAGONS_FIRE_NAME"
 description = "REWARDS_RISING_SUN_DRAGONS_FIRE_DESCRIPTION"
-goal = { stat = "kw110", count = 400, hero_class = "gunner" }
+goal = { stat = "kw110", count = 400, hero_class = "gunner", progress = "web.rewards.progress.kills" }
 gift = { items = [3209] }
 
 [rewards.events.rising-sun.parts.national]
 faction = "national"
 name = "REWARDS_RISING_SUN_DRAKES_FIRE_NAME"
 description = "REWARDS_RISING_SUN_DRAKES_FIRE_DESCRIPTION"
-goal = { stat = "kw35", count = 400, hero_class = "gunner" }
+goal = { stat = "kw35", count = 400, hero_class = "gunner", progress = "web.rewards.progress.kills" }
 gift = { items = [3211] }
 
 # Christmas, 1 to 24 December: Santa's Gift for Royal heroes and Nikolaus' Gift for National
@@ -173,6 +190,8 @@ gift = { items = [3211] }
 # calendar's free one-day trials instead: the holiday set without its hat, the battle rifle,
 # for a Soldier, else the day's Visit, and the pet (tid 288573, 288927).
 [rewards.events.christmas]
+title = "games.bfheroes.rewards.christmas"
+summary = "games.bfheroes.rewards.christmas.summary"
 window = { dates = ["12-01", "12-24"] }
 daily = true
 
@@ -233,6 +252,7 @@ name = "web.rewards.milestone.level.name"
 description = "web.rewards.milestone.level.description"
 stats = ["level"]
 each = true
+progress = "web.rewards.progress.level"
 goal = 10
 gift = { funds = 500 }
 
@@ -241,6 +261,7 @@ name = "web.rewards.milestone.level.name"
 description = "web.rewards.milestone.level.description"
 stats = ["level"]
 each = true
+progress = "web.rewards.progress.level"
 goal = 20
 gift = { funds = 1500 }
 
@@ -249,6 +270,7 @@ name = "web.rewards.milestone.level.name"
 description = "web.rewards.milestone.level.description"
 stats = ["level"]
 each = true
+progress = "web.rewards.progress.level"
 goal = 30
 gift = { funds = 3000 }
 
@@ -257,6 +279,7 @@ name = "web.rewards.milestone.matches.name"
 description = "web.rewards.milestone.matches.description"
 stats = ["win", "los"]
 goal = 100
+progress = "web.rewards.progress.matches"
 gift = { funds = 1000 }
 
 # The treasure chest key: one, once, after a dedicated server stacked the account's first chest

@@ -8687,3 +8687,71 @@ msgstr "Wszystkie przedmioty są w sklepie w zwykłej cenie."
 msgid "web.deals.card.more"
 msgstr "%(names)s i jeszcze %(count)s"
 
+msgid "games.bfheroes.rewards.valentine"
+msgstr "Walentynki"
+
+msgid "games.bfheroes.rewards.valentine.summary"
+msgstr "Walentynkowy prezent dla bohatera każdej frakcji, jednorazowo."
+
+msgid "games.bfheroes.rewards.easter"
+msgstr "Wielkanoc"
+
+msgid "games.bfheroes.rewards.easter.summary"
+msgstr "Wielkanocny koszyk dla bohatera każdej frakcji, jednorazowo."
+
+msgid "games.bfheroes.rewards.birthday"
+msgstr "Urodziny gry"
+
+msgid "games.bfheroes.rewards.birthday.summary"
+msgstr "Zestaw imprezowy dla bohatera każdej frakcji oraz Funds i klucze do skrzyń dla konta, jednorazowo."
+
+msgid "games.bfheroes.rewards.halloween"
+msgstr "Halloween: cukierek albo psikus"
+
+msgid "games.bfheroes.rewards.halloween.summary"
+msgstr "Codziennie jedna darmowa torba „cukierek albo psikus” dla każdej frakcji."
+
+msgid "games.bfheroes.rewards.halloween-machete"
+msgstr "Halloweenowa misja z maczetą"
+
+msgid "games.bfheroes.rewards.halloween-machete.summary"
+msgstr "Zabójstwa maczetą jednym komandosem frakcji dają złotą maczetę."
+
+msgid "games.bfheroes.rewards.halloween-map"
+msgstr "Halloweenowa misja na mapie"
+
+msgid "games.bfheroes.rewards.halloween-map.summary"
+msgstr "Zwycięstwa frakcji na jednej mapie dają halloweenową koszulkę."
+
+msgid "games.bfheroes.rewards.bento"
+msgstr "Tydzień bento"
+
+msgid "games.bfheroes.rewards.bento.summary"
+msgstr "Codziennie jedno darmowe pudełko bento dla każdej frakcji."
+
+msgid "games.bfheroes.rewards.rising-sun"
+msgstr "Misja Wschodzącego Słońca"
+
+msgid "games.bfheroes.rewards.rising-sun.summary"
+msgstr "Zabójstwa miotaczem ognia jednym strzelcem frakcji dają rzadszy miotacz ognia."
+
+msgid "games.bfheroes.rewards.christmas"
+msgstr "Świąteczne prezenty"
+
+msgid "games.bfheroes.rewards.christmas.summary"
+msgstr "Codziennie jeden darmowy prezent dla każdej frakcji aż do Wigilii."
+
+msgid "web.rewards.progress"
+msgstr "%(count)s z %(goal)s"
+
+msgid "web.rewards.progress.level"
+msgstr "Poziom %(count)s z %(goal)s"
+
+msgid "web.rewards.progress.matches"
+msgstr "Mecze rankingowe: %(count)s z %(goal)s"
+
+msgid "web.rewards.progress.kills"
+msgstr "Zabójstwa: %(count)s z %(goal)s"
+
+msgid "web.rewards.progress.wins"
+msgstr "Zwycięstwa: %(count)s z %(goal)s"

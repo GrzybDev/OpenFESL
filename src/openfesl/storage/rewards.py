@@ -1,10 +1,12 @@
 from collections.abc import Collection
+from datetime import datetime
 
 from sqlalchemy import String, cast, func, literal, select, update
 from sqlalchemy.dialects.postgresql import JSONB, insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from openfesl.core.reward_claims import Grant
+from openfesl.core.inventory import Ownership
+from openfesl.core.reward_claims import Claim, Grant
 from openfesl.core.rewards import RewardRefusal, RewardRefused
 from openfesl.core.stats import PERSONA, Bucket
 from openfesl.storage.entitlements import add_account_item, add_item
@@ -26,10 +28,8 @@ class SqlRewardStore:
         """
         self._sessions = sessions
 
-    async def claimed(
-        self, game: str, account_id: int, keys: Collection[str]
-    ) -> set[tuple[str, str | None]]:
-        """Return which rewards an account claimed, each by its key and faction.
+    async def claimed(self, game: str, account_id: int, keys: Collection[str]) -> list[Claim]:
+        """Return the claims an account made of rewards, whenever it made them.
 
         Args:
             game: The game's data-file name.
@@ -37,14 +37,14 @@ class SqlRewardStore:
             keys: The keys of the rewards to look at.
         """
         async with self._sessions() as session:
-            rows = await session.execute(
-                select(RewardClaimRow.key, RewardClaimRow.faction).where(
+            rows = await session.scalars(
+                select(RewardClaimRow).where(
                     RewardClaimRow.game == game,
                     RewardClaimRow.account_id == account_id,
                     RewardClaimRow.key.in_(keys),
                 )
             )
-            return {(key, faction) for key, faction in rows}
+            return [_claim(row) for row in rows]
 
     async def baselines(
         self,
@@ -103,14 +103,15 @@ class SqlRewardStore:
         held = values or {}
         return {persona: int(held[str(persona)]) for persona in personas if str(persona) in held}
 
-    async def grant(self, grant: Grant) -> list[int]:
+    async def grant(self, grant: Grant) -> list[tuple[int, Ownership]]:
         """Record a claim and give what it grants, all of it or none.
 
         Args:
             grant: What the claim gives.
 
         Returns:
-            The items the hero got, an owned one replaced by the fallback.
+            The items the hero got, each with its ownership, an owned one replaced by the
+            fallback.
 
         Raises:
             RewardRefused: When the account claimed the reward already, also at the same time.
@@ -127,6 +128,7 @@ class SqlRewardStore:
                     faction=grant.faction,
                     persona_id=grant.hero,
                     outcome={},
+                    claimed_at=grant.at,
                 )
                 .on_conflict_do_nothing()
                 .returning(RewardClaimRow.id)
@@ -141,7 +143,7 @@ class SqlRewardStore:
             if grant.funds:
                 await credit(session, *grant.funds, REWARD)
             outcome = {
-                "items": given,
+                "items": [[item_id, ownership.written] for item_id, ownership in given],
                 "funds": grant.funds[1] if grant.funds else 0,
                 "keys": grant.keys[1] if grant.keys else 0,
             }
@@ -150,8 +152,28 @@ class SqlRewardStore:
             )
             return given
 
+    async def claims(self, game: str, account_id: int, since: datetime) -> list[Claim]:
+        """Return the rewards an account claimed since a moment, the latest first.
 
-async def _give(session: AsyncSession, grant: Grant) -> list[int]:
+        Args:
+            game: The game's data-file name.
+            account_id: The account.
+            since: The moment.
+        """
+        async with self._sessions() as session:
+            rows = await session.scalars(
+                select(RewardClaimRow)
+                .where(
+                    RewardClaimRow.game == game,
+                    RewardClaimRow.account_id == account_id,
+                    RewardClaimRow.claimed_at >= since,
+                )
+                .order_by(RewardClaimRow.claimed_at.desc(), RewardClaimRow.id.desc())
+            )
+            return [_claim(row) for row in rows]
+
+
+async def _give(session: AsyncSession, grant: Grant) -> list[tuple[int, Ownership]]:
     assert grant.hero is not None
     given = []
     # In the items' order, as purchases lock them, so that both wait in turn.
@@ -159,5 +181,23 @@ async def _give(session: AsyncSession, grant: Grant) -> list[int]:
         held = await add_item(session, grant.account_id, grant.hero, item_id, ownership)
         if held is None:
             await add_item(session, grant.account_id, grant.hero, *grant.fallback)
-        given.append(item_id if held else grant.fallback[0])
+        given.append((item_id, ownership) if held else grant.fallback)
     return given
+
+
+def _claim(row: RewardClaimRow) -> Claim:
+    items = []
+    for item_id, text in row.outcome["items"]:
+        ownership = Ownership.read(text)
+        assert isinstance(ownership, Ownership)
+        items.append((item_id, ownership))
+    outcome = row.outcome
+    return Claim(
+        row.key,
+        row.faction,
+        row.persona_id,
+        tuple(items),
+        outcome["funds"],
+        outcome["keys"],
+        row.claimed_at,
+    )

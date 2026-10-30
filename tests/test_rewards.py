@@ -97,9 +97,10 @@ class Site:
         account = await self.account(hero)
         recipient = hero if faction else None
         try:
-            return await self.rewards.claim(self.game, account, key, faction, recipient)
+            given = await self.rewards.claim(self.game, account, key, faction, recipient)
         except RewardRefused as refused:
             return refused.refusal
+        return [item_id for item_id, _ in given]
 
     async def held(self, hero: int) -> dict[str, int | None]:
         """Return a hero's items by tag, with their uses."""
@@ -156,6 +157,7 @@ async def test_a_claim_and_a_key_purchase_for_one_account_at_once_both_go_throug
         fallback=(2153, Ownership(COUNTED, uses=150)),
         funds=(wallet, 100),
         keys=(keys, 1),
+        at=CHRISTMAS,
     )
     key = Product(1, game.chests.key, Ownership(COUNTED, uses=1), "_PF", 300, None, 0)
     # The claim adds its keys only once the purchase has added its own, so that a claim holding
@@ -202,6 +204,9 @@ async def test_each_day_of_christmas_gives_each_faction_one_roll_of_its_visit_fo
     racing = await asyncio.gather(
         *(site.claim(national, "christmas:2026:5", "national") for _ in range(2))
     )
+    history = await site.rewards.history(site.game, await site.account(royal))
+    running = await site.rewards.running(site.game)
+    upcoming = await site.rewards.upcoming(site.game)
     site.now = datetime(2026, 12, 6, tzinfo=UTC)
     missed = await site.claim(other, "christmas:2026:5", "national")
     tomorrow = [reward for reward in await site.available(royal) if reward.day]
@@ -220,6 +225,17 @@ async def test_each_day_of_christmas_gives_each_faction_one_roll_of_its_visit_fo
     # Two claims at once give once.
     assert RewardRefusal.CLAIMED in racing
     assert sum(isinstance(result, list) for result in racing) == 1
+    # The account's claims of the year name what they were and whose they are, the latest first.
+    assert [(c.name, c.claim.hero, c.claim.at) for c in history] == [
+        ("REWARDS_NIKOLAUS_GIFT_DAY_5_NAME", national, CHRISTMAS),
+        ("REWARDS_SANTAS_GIFT_DAY_5_NAME", royal, CHRISTMAS),
+    ]
+    assert [(run.key, run.day, run.days) for run in running] == [("christmas", 5, 24)]
+    # The next event is the next year's Valentine's Day.
+    assert (upcoming[0].key, upcoming[0].period.start) == (
+        "valentine",
+        datetime(2027, 2, 13, tzinfo=UTC),
+    )
     # A day missed is gone, while the next day's gifts wait for each account.
     assert missed is RewardRefusal.UNKNOWN
     assert [(r.key, r.state) for r in tomorrow] == [
@@ -297,6 +313,8 @@ async def test_a_new_hero_and_goals_bring_their_gifts_once_and_a_first_chest_bri
     ]
     site.now += timedelta(days=30)
     a_month_on = await site.available(hero)
+    site.now += timedelta(days=2)
+    days_later = await site.available(hero)
 
     assert always(before) == {
         f"starter:{hero}": (RewardState.CLAIMABLE, None),
@@ -319,8 +337,9 @@ async def test_a_new_hero_and_goals_bring_their_gifts_once_and_a_first_chest_bri
         2100,
         1,
     )
-    # The starter pack is gone a month after the hero's creation.
-    assert f"starter:{hero}" not in always(a_month_on)
+    # The starter pack stays a day after its last one, then goes.
+    assert always(a_month_on)[f"starter:{hero}"] == (RewardState.CLAIMED, None)
+    assert f"starter:{hero}" not in always(days_later)
     assert always(a_month_on)[level] == (RewardState.CLAIMED, 10)
 
 
