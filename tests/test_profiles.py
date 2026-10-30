@@ -36,6 +36,33 @@ ROUNDS = {
     "elo": 1412,
     "prs": 51 * 256 + 9,
 }
+# The weapons it used and one that killed it, two maps, the jeep, two heroic moments, a mission
+# it takes on and one it completed twice.
+PLAYED = {
+    "tw3003": 7260,
+    "kw3003": 4210,
+    "dww3003": 618,
+    "hw3003": 1210,
+    "sw3003": 4800,
+    "tw2026": 1800,
+    "kw2026": 64,
+    "dfw3015": 95,
+    "m_ct3": 3600,
+    "m_win3": 9,
+    "m_los3": 3,
+    "m_ct8": 1200,
+    "m_win8": 2,
+    "tv0": 600,
+    "kv0": 31,
+    "kvr0": 9,
+    "dstrv0": 4,
+    "dfv0": 2,
+    "div0": 3,
+    "ige19": 96,
+    "ige12": 41,
+    "mid0": 6001,
+    "aw6000": 2,
+}
 
 
 async def play(database_url: str, hero: int, stats: Mapping[str, float]) -> None:
@@ -69,7 +96,7 @@ async def test_a_heros_profile_shows_its_stats_as_its_game_keeps_them_to_anyone(
     brass = await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_GUNNER)
     pip = await create_hero(base, "ann@example.test", "Pip-Lantern", **ROYAL_SOLDIER)
     kettle = await create_hero(base, "bob@example.test", "Kettlebrook", **ROYAL_SOLDIER)
-    await play(database_url, brass, ROUNDS)
+    await play(database_url, brass, ROUNDS | PLAYED)
     await execute(
         database_url,
         "UPDATE stat SET value = 24 WHERE key = 'level' AND owner_id = :hero",
@@ -111,7 +138,20 @@ async def test_a_heros_profile_shows_its_stats_as_its_game_keeps_them_to_anyone(
     assert f"Enlisted {day}" in shown
     assert "Stats as the game reports them at the end of each round." in shown
     assert "Wynik 1\u00a0284\u00a0560" in visible(polish.content)
+    # The weapons used, the longest first, and those that killed the hero, each by number, as
+    # are maps without names; the vehicles go by OpenFESL's own words.
+    assert (
+        "Maps, weapons and vehicles Weapons used Item 3003 Time 2 h 1 min Kills 4,210"
+        " Deaths using it 618 Accuracy 0.252 Item 2026 Time 0 h 30 min Kills 64"
+        " Deaths using it 0 Weapons that defeated this hero Item 3015 Deaths 95"
+        " Maps Map 3 Time 1 h 0 min Wins 9 Losses 3 Ratio 3.00 Map 8 Time 0 h 20 min Wins 2"
+        " Losses 0 Ratio 2.00 Vehicles Jeep Time 0 h 10 min Kills 31 Road kills 9 Destroyed 4"
+        " Deaths from it 2 Deaths inside 3"
+    ) in shown
+    assert "Heroic Moments Heroic moment 19 · 96 Heroic moment 12 · 41" in shown
+    assert "Missions Mission 6001 · current Mission 6000 · completed 2 times" in shown
     # A hero without rounds keeps its rows, empty until its first round.
+    assert "Maps, weapons and vehicles" not in visible(unplayed.content)
     assert (
         "No rounds yet. These numbers fill after Pip-Lantern's first round. Skill rating \u2013"
         " Kills · deaths \u2013 Ratio \u2013"
@@ -125,7 +165,7 @@ async def test_a_heros_profile_shows_its_stats_as_its_game_keeps_them_to_anyone(
 
 
 @pytest.mark.usefixtures("prompt_actions")
-async def test_with_a_catalogue_a_profile_names_the_heros_items_and_rank(
+async def test_with_a_catalogue_a_profile_names_the_heros_items_maps_moments_and_rank(
     base: str,
     server_url: str,
     database_url: str,
@@ -139,10 +179,17 @@ async def test_with_a_catalogue_a_profile_names_the_heros_items_and_rank(
         2027: ("Invented Shield", "ability", {"faction": "3", "kits": "36"}),
         3003: ("Invented Repeater", "weapon", {"faction": "1", "kits": "36"}),
     }
-    ranks = {"Player_Prestige_Level_9": "[Invented Colonel ]", "Player_Prestige_Rotation_51": "LI"}
-    await import_catalogue(server_url, tmp_path, capsys, invented, ranks)
+    invented[6001] = ("", "mission", {"teamPrereq": "0", "kits": "63"})
+    texts = {
+        "Player_Prestige_Level_9": "[Invented Colonel ]",
+        "Player_Prestige_Rotation_51": "LI",
+        "WEST_LEVELNAME_LAKE": "Invented Bay",
+        "HEROIC_MOMENT_HEADSHOT": "Invented Headshot",
+        "AUTO_RULES_MISSION_6001": "Invented Mastery II",
+    }
+    await import_catalogue(server_url, tmp_path, capsys, invented, texts)
     brass = await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_GUNNER)
-    await play(database_url, brass, ROUNDS)
+    await play(database_url, brass, ROUNDS | PLAYED)
     async with httpx2.AsyncClient() as client:
         shown = visible((await client.get(f"{base}/bfheroes/heroes/{brass}")).content)
 
@@ -151,3 +198,7 @@ async def test_with_a_catalogue_a_profile_names_the_heros_items_and_rank(
     # know the question mark.
     assert "Equipped Invented Cap ? Item 36 ? Item 444 Invented Repeater" in shown
     assert "Names and icons" not in shown
+    assert "Weapons used Invented Repeater Time 2 h 1 min" in shown
+    assert "Maps Invented Bay Time 1 h 0 min" in shown
+    assert "Heroic Moments Invented Headshot · 96 Heroic moment 12 · 41" in shown
+    assert "Missions Invented Mastery II · current Mission 6000 · completed 2 times" in shown

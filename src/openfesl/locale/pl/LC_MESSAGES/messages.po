@@ -9442,3 +9442,99 @@ msgstr "Czas gry"
 
 msgid "web.hero.fact.enlisted"
 msgstr "W służbie od"
+
+msgid "web.hero.played"
+msgstr "Mapy, bronie i pojazdy"
+
+msgid "web.hero.list.weapons"
+msgstr "Używane bronie"
+
+msgid "web.hero.list.foes"
+msgstr "Bronie, które pokonały tego bohatera"
+
+msgid "web.hero.list.maps"
+msgstr "Mapy"
+
+msgid "web.hero.list.vehicles"
+msgstr "Pojazdy"
+
+msgid "web.hero.stat.time"
+msgstr "Czas"
+
+msgid "web.hero.stat.kills"
+msgstr "Zabójstwa"
+
+msgid "web.hero.stat.deaths_using"
+msgstr "Zgony podczas używania"
+
+msgid "web.hero.stat.deaths"
+msgstr "Zgony"
+
+msgid "web.hero.stat.accuracy"
+msgstr "Celność"
+
+msgid "web.hero.stat.wins"
+msgstr "Wygrane"
+
+msgid "web.hero.stat.losses"
+msgstr "Przegrane"
+
+msgid "web.hero.stat.ratio"
+msgstr "Stosunek"
+
+msgid "web.hero.stat.collisions"
+msgstr "Staranowani"
+
+msgid "web.hero.stat.destroyed"
+msgstr "Zniszczone"
+
+msgid "web.hero.stat.deaths_by"
+msgstr "Zgony od pojazdu"
+
+msgid "web.hero.stat.deaths_inside"
+msgstr "Zgony w środku"
+
+msgid "web.hero.map"
+msgstr "Mapa %(number)s"
+
+msgid "web.hero.vehicle"
+msgstr "Pojazd %(number)s"
+
+msgid "web.hero.moment"
+msgstr "Heroiczny moment %(number)s"
+
+msgid "web.hero.mission"
+msgstr "Misja %(number)s"
+
+msgid "web.hero.moments"
+msgstr "Heroiczne momenty"
+
+msgid "web.hero.missions"
+msgstr "Misje"
+
+msgid "web.hero.current"
+msgstr "bieżąca"
+
+msgid "games.bfheroes.vehicle.jeep"
+msgstr "Jeep"
+
+msgid "games.bfheroes.vehicle.jeep.collisions"
+msgstr "Rozjechania"
+
+msgid "games.bfheroes.vehicle.tank"
+msgstr "Czołg"
+
+msgid "games.bfheroes.vehicle.tank.collisions"
+msgstr "Zmiażdżenia"
+
+msgid "games.bfheroes.vehicle.plane"
+msgstr "Samolot"
+
+msgid "games.bfheroes.vehicle.plane.collisions"
+msgstr "Podcięcia skrzydłem"
+
+msgid "web.hero.completed"
+msgstr "ukończona"
+
+msgid "web.hero.completed.times"
+msgstr "ukończona %(count)s razy"

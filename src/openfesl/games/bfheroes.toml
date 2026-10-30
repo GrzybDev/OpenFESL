@@ -451,6 +451,8 @@ losses = "los"
 captures = "cpc"
 rocket_captures = "rc"
 time = "ct"
+# The mission in each of the hero's three mission slots, 0 for none.
+current = ["mid0", "mid1", "mid2"]
 
 # The prestige rank, which the servers pack as the rotation times 256 plus the level, from level 10
 # on (Settings/RankSettings.con); the site named the level and wrote the rotation as a numeral.
@@ -460,6 +462,33 @@ level = "Player_Prestige_Level_{n}"
 rotation = "Player_Prestige_Rotation_{n}"
 levels = 13
 rotations = 100
+
+# Each weapon or ability that the hero used, by its item number: the time used, kills, deaths
+# while using it, and shots that hit of those fired.
+[heroes.profile.weapons]
+keys = { time = "tw{id}", kills = "kw{id}", deaths = "dww{id}", hits = "hw{id}", shots = "sw{id}" }
+
+# The weapons that killed the hero, by item number.
+[heroes.profile.foes]
+keys = { deaths = "dfw{id}" }
+
+# Each map by the number the servers count it under (python/bf2/stats/constants.py, levelsTypeMap),
+# its night variant under the same one, with the name of its main level.
+[heroes.profile.maps]
+keys = { time = "m_ct{id}", wins = "m_win{id}", losses = "m_los{id}" }
+names = { 0 = "WEST_LEVELNAME_VILLAGE", 1 = "WEST_LEVELNAME_SEASIDE_SKIRMISH", 2 = "WEST_LEVELNAME_river", 3 = "WEST_LEVELNAME_LAKE", 4 = "WEST_LEVELNAME_Mayhem", 5 = "WEST_LEVELNAME_Smack2", 6 = "WEST_LEVELNAME_HEAT", 9 = "WEST_LEVELNAME_ruin", 10 = "WEST_LEVELNAME_woodlands", 11 = "WEST_LEVELNAME_wicked_wake", 12 = "WEST_LEVELNAME_Royal_Rumble", 13 = "WEST_LEVELNAME_Lunar" }
+
+# The jeep, tank and plane: time inside, kills, kills by running into foes (road kills, tank
+# smashes and wing clips), vehicles destroyed, deaths from it and deaths inside it.
+[heroes.profile.vehicles]
+keys = { time = "tv{id}", kills = "kv{id}", collisions = "kvr{id}", destroyed = "dstrv{id}", deaths = "dfv{id}", inside = "div{id}" }
+names = { 0 = "jeep", 1 = "tank", 2 = "plane" }
+
+# The heroic moments by their in-game event ids (BFHeroes.exe 1.89 0x004842a1), each named by the
+# text the site showed; 4, 24 and 25 have none.
+[heroes.profile.moments]
+keys = { count = "ige{id}" }
+names = { 1 = "HEROIC_MOMENT_AIRBORNE_ASSAULT", 2 = "HEROIC_MOMENT_BIG_BANG", 3 = "HEROIC_MOMENT_BLIND_FIRE", 5 = "HEROIC_MOMENT_DAREDEVIL", 6 = "HEROIC_MOMENT_DUCK_HUNT", 7 = "HEROIC_MOMENT_FLIP_TRICK", 8 = "HEROIC_MOMENT_FULL_HOUSE", 9 = "HEROIC_MOMENT_JOINT_OPERATION", 10 = "HEROIC_MOMENT_SMASH_DOWN", 11 = "HEROIC_MOMENT_POST_MORTEM", 12 = "HEROIC_MOMENT_ROAD_KILL", 13 = "HEROIC_MOMENT_CLOSE_SHAVE", 14 = "HEROIC_MOMENT_TANK_SMASH", 15 = "HEROIC_MOMENT_TOWER_DEFENSE", 16 = "HEROIC_MOMENT_WINGCLIP", 17 = "HEROIC_MOMENT_WINGMAN", 18 = "HEROIC_MOMENT_VOLLEY_SHOT", 19 = "HEROIC_MOMENT_HEADSHOT", 20 = "HEROIC_MOMENT_BALLISTIC", 21 = "HEROIC_MOMENT_SUCKER_PUNCH", 22 = "HEROIC_MOMENT_FIRST_STRIKE", 23 = "HEROIC_MOMENT_LAST_KILL" }
 
 # Royal Army first, as the 2012 creator listed them. The base items are the clothes that Items.xml
 # marks default for the faction, alike in 1.46 and 1.89.

@@ -1,8 +1,9 @@
-{#def hero, player: str, title: str | None, equipped: list, facts: list, played: bool, imported: bool #}
+{#def hero, player: str, title: str | None, equipped: list, facts: list, played: bool, imported: bool, lists: dict, moments: list, missions: list #}
 {# A hero's public profile, as the 2012 site drew it: the head with the hero's picture, faction,
    class, level, prestige rank and player; what it wears and has on its equipment bar; and its
    Soldier Info, the stats of its rounds, which a hero without rounds shows empty with when they
-   fill. #}
+   fill; then the weapons it used and those that defeated it, its maps and vehicles, its heroic
+   moments and its missions, which come with its rounds. #}
 {% set rules = game.heroes %}
 {% set name = hero.persona.name %}
 <Layout :title="name">
@@ -81,5 +82,79 @@
         <p class="info-box-note">{{ _("web.player.reported") }}</p>
       </section>
     </div>
+    {% if played and lists.values()|select|list %}
+      {% set glyphs = {"weapons": "weapon", "foes": "weapon", "maps": "compass", "vehicles": "wheel"} %}
+      <section aria-labelledby="profile-played"
+               class="info-box info-box-green profile-played enter-panel">
+        <h2 id="profile-played" class="info-box-title">{{ _("web.hero.played") }}</h2>
+        {% for kind, rows in lists.items() if rows %}
+          <h3 class="profile-list-title">{{ _("web.hero.list." ~ kind) }}</h3>
+          <ul role="list" class="profile-rows">
+            {% for row in rows %}
+              <li class="profile-row">
+                <span aria-hidden="true" class="profile-icon">
+                  {% if row.icon %}
+                    <img src="{{ row.icon }}" alt="" loading="lazy" decoding="async">
+                  {% else %}
+                    <Icon :name="glyphs[kind]" :size="26" stroke="#3B2D23" />
+                  {% endif %}
+                </span>
+                <div class="profile-row-text">
+                  <p class="profile-row-name">{{ row.name }}</p>
+                  <dl class="profile-row-stats">
+                    {% for label, value in row.stats %}
+                      <div>
+                        <dt>{{ label }}</dt>
+                        <dd>
+                          {{ value }}
+                        </dd>
+                      </div>
+                    {% endfor %}
+                  </dl>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endfor %}
+      </section>
+    {% endif %}
+    {% if played %}
+      <div class="profile-columns">
+        {% if moments %}
+          <section aria-labelledby="profile-moments">
+            <h2 id="profile-moments" class="site-heading">{{ _("web.hero.moments") }}</h2>
+            <ul role="list" class="profile-moments enter-rows">
+              {% for moment in moments %}
+                <li class="profile-moment">
+                  <span aria-hidden="true" class="profile-star"><Icon name="star" :size="14" stroke="#0A0A0A" /></span>
+                  {{ moment.name }} · <strong>{{ moment.stats[0][1] }}</strong>
+                </li>
+              {% endfor %}
+            </ul>
+          </section>
+        {% endif %}
+        {% if missions %}
+          <section aria-labelledby="profile-missions">
+            <h2 id="profile-missions" class="site-heading">{{ _("web.hero.missions") }}</h2>
+            <ul role="list" class="profile-missions">
+              {% for mission in missions %}
+                <li class="profile-mission">
+                  <span aria-hidden="true" class="profile-mission-icon">
+                    {% if mission.icon %}
+                      <img src="{{ mission.icon }}" alt="" loading="lazy" decoding="async">
+                    {% else %}
+                      <Icon name="flag" :size="18" stroke="currentColor" />
+                    {% endif %}
+                  </span>
+                  <p>
+                    <strong>{{ mission.name }}</strong> · {{ mission.stats[0][1] }}
+                  </p>
+                </li>
+              {% endfor %}
+            </ul>
+          </section>
+        {% endif %}
+      </div>
+    {% endif %}
   </div>
 </Layout>

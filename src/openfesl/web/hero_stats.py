@@ -1,11 +1,13 @@
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any
 
 from openfesl.core.catalogues import Catalogue
 from openfesl.core.games import Game
 from openfesl.core.hero_rules import HeroRules
 from openfesl.core.heroes import Hero
+from openfesl.core.profiles import Breakdown
 from openfesl.core.stats import Value
 from openfesl.core.texts import translate
 from openfesl.web.catalogue_files import icon_url
@@ -45,6 +47,23 @@ class Equipped:
     icon: str | None
     glyph: str | None
     level: int | None
+
+
+@dataclass(frozen=True, slots=True)
+class Played:
+    """A weapon, map, vehicle, heroic moment or mission in the lists of a hero's profile.
+
+    Attributes:
+        id: Its number.
+        name: Its name, or its number where the server has no name for it.
+        icon: The address of its icon, for an item where the page shows the game's art.
+        stats: Its stats, each a label and a value as the page's language writes them.
+    """
+
+    id: int
+    name: str
+    icon: str | None
+    stats: list[tuple[str, str]]
 
 
 def number_of(values: Mapping[str, Value], key: str) -> float:
@@ -139,9 +158,7 @@ def facts(
     xp = number(hero.xp, language)
     if needed:
         xp = translate("web.hero.of", language) % {"xp": xp, "needed": number(needed, language)}
-    seconds = int(number_of(values, profile.time))
-    hours, minutes = number(seconds // 3600, language), seconds // 60 % 60
-    time = translate("web.hero.time", language) % {"hours": hours, "minutes": minutes}
+    time = _duration(number_of(values, profile.time), language)
     return [
         Fact("rating", count(profile.rating)),
         Fact("kills_deaths", pair(profile.kills, profile.deaths)),
@@ -157,3 +174,114 @@ def facts(
         Fact("time", time if played else None),
         Fact("enlisted", hero.created),
     ]
+
+
+def lists(
+    game: Game, values: Mapping[str, Value], catalogue: Catalogue, art: bool, language: str
+) -> dict[str, Any]:
+    """Return the lists of a hero's profile as the page's values: lists, moments and missions.
+
+    The lists are the weapons the hero used and those that killed it, its maps and its vehicles,
+    as the 2012 site listed them; then come its heroic moments and its current and completed
+    missions.
+
+    Args:
+        game: The game, which has profile rules.
+        values: The hero's stats by key.
+        catalogue: Names the items, maps and moments, once imported.
+        art: Whether the page shows the game's art to its viewer.
+        language: The page's language.
+    """
+    rules = game.heroes
+    assert rules is not None and rules.profile is not None
+    profile = rules.profile
+    numbers = {key: found.value for key, found in values.items()}
+
+    def text(key: str, **filled: object) -> str:
+        return translate(key, language) % filled if filled else translate(key, language)
+
+    def count(value: float) -> str:
+        return number(value, language)
+
+    def item(item_id: int, stats: list[tuple[str, str]]) -> Played:
+        name = catalogue.name(item_id) or text("web.hero.item", number=item_id)
+        return Played(item_id, name, icon_url(game.id, catalogue, item_id, art), stats)
+
+    weapons = []
+    for item_id, stats in sorted(
+        profile.weapons.read(numbers), key=lambda found: -found[1]["time"]
+    ):
+        shown = [
+            (text("web.hero.stat.time"), _duration(stats["time"], language)),
+            (text("web.hero.stat.kills"), count(stats["kills"])),
+            (text("web.hero.stat.deaths_using"), count(stats["deaths"])),
+        ]
+        if stats["shots"]:
+            accuracy = number(stats["hits"] / stats["shots"], language, 3)
+            shown.append((text("web.hero.stat.accuracy"), accuracy))
+        weapons.append(item(item_id, shown))
+    foes = [
+        item(item_id, [(text("web.hero.stat.deaths"), count(stats["deaths"]))])
+        for item_id, stats in sorted(
+            profile.foes.read(numbers), key=lambda found: -found[1]["deaths"]
+        )
+    ]
+    maps = []
+    for map_id, stats in sorted(profile.maps.read(numbers), key=lambda found: -found[1]["time"]):
+        named = profile.maps.names.get(map_id)
+        losses = stats["losses"]
+        ratio = stats["wins"] / losses if losses else stats["wins"]
+        name = (catalogue.text(named) if named else None) or text("web.hero.map", number=map_id)
+        shown = [
+            (text("web.hero.stat.time"), _duration(stats["time"], language)),
+            (text("web.hero.stat.wins"), count(stats["wins"])),
+            (text("web.hero.stat.losses"), count(losses)),
+            (text("web.hero.stat.ratio"), number(ratio, language, 2)),
+        ]
+        maps.append(Played(map_id, name, None, shown))
+    vehicles = []
+    for vehicle, stats in profile.vehicles.read(numbers):
+        word = profile.vehicles.names.get(vehicle)
+        named = f"games.{game.id}.vehicle.{word}"
+        name = text(named) if word else text("web.hero.vehicle", number=vehicle)
+        shown = [
+            (text("web.hero.stat.time"), _duration(stats["time"], language)),
+            (text("web.hero.stat.kills"), count(stats["kills"])),
+            (
+                text(f"{named}.collisions" if word else "web.hero.stat.collisions"),
+                count(stats["collisions"]),
+            ),
+            (text("web.hero.stat.destroyed"), count(stats["destroyed"])),
+            (text("web.hero.stat.deaths_by"), count(stats["deaths"])),
+            (text("web.hero.stat.deaths_inside"), count(stats["inside"])),
+        ]
+        vehicles.append(Played(vehicle, name, None, shown))
+    moments = []
+    for moment, stats in sorted(
+        profile.moments.read(numbers), key=lambda found: -found[1]["count"]
+    ):
+        named = profile.moments.names.get(moment)
+        name = (catalogue.text(named) if named else None) or text("web.hero.moment", number=moment)
+        if stats["count"] > 0:
+            moments.append(Played(moment, name, None, [("", count(stats["count"]))]))
+    missions = []
+    for key in profile.current:
+        if mission := int(numbers.get(key, 0)):
+            name = catalogue.name(mission) or text("web.hero.mission", number=mission)
+            icon = icon_url(game.id, catalogue, mission, art)
+            missions.append(Played(mission, name, icon, [("", text("web.hero.current"))]))
+    done = Breakdown(keys={"count": rules.stats.completed})
+    for mission, stats in done.read(numbers):
+        if times := int(stats["count"]):
+            name = catalogue.name(mission) or text("web.hero.mission", number=mission)
+            icon = icon_url(game.id, catalogue, mission, art)
+            state = text("web.hero.completed.times", count=count(times))
+            state = text("web.hero.completed") if times == 1 else state
+            missions.append(Played(mission, name, icon, [("", state)]))
+    lists = {"weapons": weapons, "foes": foes, "maps": maps, "vehicles": vehicles}
+    return {"lists": lists, "moments": moments, "missions": missions}
+
+
+def _duration(seconds: float, language: str) -> str:
+    hours, minutes = number(int(seconds) // 3600, language), int(seconds) // 60 % 60
+    return translate("web.hero.time", language) % {"hours": hours, "minutes": minutes}

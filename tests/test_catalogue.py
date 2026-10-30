@@ -77,7 +77,8 @@ async def test_a_copy_of_the_game_gives_a_file_of_its_items_texts_icons_and_tabl
     assert all(icon[8:12] == b"WEBP" for icon in extracted.icons.values())
     assert document.tables["Colors.xml"].children[0].children[0].text == "30 20 15"
     assert document.tables["DefaultCustomization.xml"].tag == "customizations"
-    # Only the texts that the game's data names, of items the catalogue holds.
+    # Only the texts that the game's data names, of items the catalogue holds, and those that
+    # heroes' profiles show.
     assert extracted.texts["pl"] == {
         "WEST_Custom_Item_1": "Wymyślony kapelusz",
         "WEST_Custom_Item_2000": "Wymyślony zryw",
@@ -86,6 +87,9 @@ async def test_a_copy_of_the_game_gives_a_file_of_its_items_texts_icons_and_tabl
         "WEST_Custom_Bundle_NewRoyalEmoteBundle": "Wymyślona para gestów",
         "REWARDS_HALLOWEEN_DAY_3_ROYAL_NAME": "Wymyślony smakołyk",
         "WEST_Custom_Item_Info_1": "Kapelusz z piórkiem.",
+        "WEST_LEVELNAME_LAKE": "Wymyślona zatoka",
+        "HEROIC_MOMENT_HEADSHOT": "Wymyślony strzał",
+        "Player_Prestige_Level_9": "[Wymyślony pułkownik ]",
     }
     assert extracted.texts["en"]["WEST_Custom_Item_3000"] == "Practice Rifle"
     assert document.daily_missions == tuple(DAILY)

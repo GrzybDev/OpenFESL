@@ -10,7 +10,7 @@ from openfesl.core.heroes import Hero, Heroes
 from openfesl.core.personas import PersonaStore
 from openfesl.core.stats import PERSONA, Owner, StatStore, bucket_of, partition_of
 from openfesl.protocol.rank import Period
-from openfesl.web.hero_stats import equipped, facts, number_of
+from openfesl.web.hero_stats import equipped, facts, lists, number_of
 from openfesl.web.pages import Pages
 
 HEROES = "/heroes"
@@ -94,6 +94,7 @@ class ProfilePages:
                 facts=facts(rules, hero, values, catalogue, language),
                 played=number_of(values, profile.time) > 0,
                 imported=catalogue.imported,
+                **lists(game, values, catalogue, self._pages.shows_art(request, game), language),
             )
 
         return show_hero
