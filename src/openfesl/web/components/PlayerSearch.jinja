@@ -1,0 +1,30 @@
+{#def query: str = "", compact: bool = False #}
+{# The player search's form on the beige panel: a hero or display name, sent to the search page
+   as an address, so that it works without scripts and a search can be linked. #}
+<form method="get"
+      action="{{ url('/' ~ game.id ~ '/search') }}"
+      role="search"
+      class="slot-panel player-search">
+  <label for="search-{{ 'box' if compact else 'page' }}"
+         class="{{ 'slot-panel-title' if compact else 'player-search-label' }}">
+    {{ _("web.search.find" if compact else "web.search.field") }}
+  </label>
+  <div class="player-search-row">
+    <input id="search-{{ 'box' if compact else 'page' }}"
+           type="search"
+           name="q"
+           value="{{ query }}"
+           maxlength="64"
+           autocomplete="off"
+           {% if compact %} placeholder="{{ _('web.search.field.short') }}"{% endif %}
+           {% if not compact %} aria-describedby="search-hint"{% endif %}
+           class="player-search-input">
+    <button type="submit" class="site-button">
+      <Icon name="find" :size="16" stroke="#FEDE01" />{{ _("web.search.submit") }}
+    </button>
+  </div>
+  {% if not compact %}
+    <p id="search-hint"
+       class="player-search-hint">{{ _("web.search.hint", count=game.relationships.search_minimum) }}</p>
+  {% endif %}
+</form>

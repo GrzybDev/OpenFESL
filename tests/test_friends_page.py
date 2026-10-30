@@ -12,6 +12,7 @@ from openfesl.storage.relationships import SqlRelationshipStore
 pytestmark = pytest.mark.anyio
 
 FRIENDS = "/bfheroes/friends"
+SEARCH = "/bfheroes/search"
 
 
 async def change(client: httpx2.AsyncClient, base: str, action: str, **member: str) -> str:
@@ -69,6 +70,36 @@ async def test_a_request_becomes_a_friendship_that_either_side_ends_and_a_vip_li
     assert "VIP on servers" not in left
 
 
+async def test_the_player_search_finds_heroes_and_players_and_asks_one_from_its_results(
+    base: str, database_url: str
+) -> None:
+    await name_accounts(base, database_url, ANN, BOB)
+    bob = str(await select_value(database_url, "SELECT id FROM account WHERE nuid = :a", a=BOB))
+    async with httpx2.AsyncClient() as client:
+        public = visible((await client.get(f"{base}{SEARCH}", params={"q": "bob"})).content)
+        short = visible((await client.get(f"{base}{SEARCH}", params={"q": "b"})).content)
+        await post_sign_in(client, base, ANN, PASSWORD)
+        found = await client.get(f"{base}{SEARCH}", params={"q": "inv"})
+        back = f"{SEARCH}?q=inv"
+        form = {"csrf": form_token(found.text), "action": "ask", "account": bob, "next": back}
+        asked = await client.post(f"{base}{FRIENDS}", data=form | {"name": "Invented_Bob"})
+        after = visible((await client.get(f"{base}{back}")).content)
+
+    # Anyone may search; only a signed-in account sends requests. The start that matched is
+    # marked, which the page's text shows apart.
+    assert "1 hero and 0 players start with “bob”." in public
+    assert "_hero National Army Commando · player Invented_Bob level 1" in public
+    assert "Add as friend" not in public
+    assert "Type 2 or more characters" in short
+    shown = visible(found.content)
+    assert "ented_Ann 1 hero · default ann_hero This account" in shown
+    assert "ented_Bob 1 hero · default bob_hero Add as friend" in shown
+    assert '<mark class="search-match">Inv</mark>ented_Bob' in found.text
+    assert asked.headers["location"] == back
+    assert "Friend request sent to Invented_Bob." in after
+    assert "ented_Bob 1 hero · default bob_hero Request sent" in after
+
+
 async def test_a_friend_action_from_a_page_out_of_date_changes_nothing(
     base: str, database_url: str
 ) -> None:
@@ -96,3 +127,40 @@ async def test_a_friend_action_from_a_page_out_of_date_changes_nothing(
     assert "Nothing changed: the page was out of date." in cancelled
     assert "Friends · 1 Invented_Ann" in cancelled
     assert "Invented is now a friend." in asked and "Friends · 1 Invented_Bob" in asked
+
+
+async def test_the_player_search_counts_all_it_finds_and_pages_heroes_by_level(
+    base: str, database_url: str
+) -> None:
+    await name_accounts(base, database_url, ANN, BOB)
+    # 45 more heroes of ann's whose names start as bob's display name does, the last of them at
+    # level 30; bob's own hero is taken out of play by the admin.
+    for number in range(45):
+        await execute(
+            database_url,
+            "INSERT INTO persona (account_id, namespace, name)"
+            " SELECT account_id, namespace, :name FROM persona WHERE name = 'ann_hero'",
+            name=f"Invented_B{number:02}",
+        )
+    await execute(
+        database_url,
+        "INSERT INTO stat SELECT partition, owner_type, p.id, period, period_start, 'level', 30,"
+        " '' FROM stat, persona p WHERE owner_id = (SELECT id FROM persona WHERE name ="
+        " 'ann_hero') AND key = 'level' AND p.name = 'Invented_B44'",
+    )
+    await execute(database_url, "UPDATE persona SET state = 'disabled' WHERE name = 'bob_hero'")
+    async with httpx2.AsyncClient() as client:
+        first = await client.get(f"{base}{SEARCH}", params={"q": "invented_b"})
+        second = visible(
+            (await client.get(f"{base}{SEARCH}", params={"q": "invented_b", "heroes": 2})).content
+        )
+
+    shown = visible(first.content)
+    assert "45 heroes and 1 player start with “invented_b”." in shown
+    assert "Heroes · 45 1\u201340 of 45, by level" in shown
+    assert "Players · 1 1\u20131 of 1, by name" in shown
+    # The highest level first; the admin's disabling hides bob's hero also as his default.
+    assert first.text.index("</mark>44") < first.text.index("</mark>00")
+    assert "</mark>ob" in first.text and "No hero yet" in shown and "bob_hero" not in shown
+    assert 'href="/bfheroes/search?q=invented_b&amp;heroes=2"' in first.text
+    assert "Heroes · 45 41\u201345 of 45, by level" in second

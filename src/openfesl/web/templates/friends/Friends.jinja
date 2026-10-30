@@ -9,6 +9,7 @@
       <Plaque id="friends-title">{{ title }}</Plaque>
       <p class="site-lead">{{ _("web.friends.lead", game=game.name) }}</p>
     </div>
+    <PlayerSearch compact />
   </section>
   {% if not signed %}
     <section aria-labelledby="friends-signed-out" class="site-empty enter-panel">
@@ -19,6 +20,7 @@
         <p class="site-actions">
           <a href="{{ url('/sign-in') }}?{{ {'next': next}|urlencode }}"
              class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+          <a href="{{ url('/' ~ game.id ~ '/search') }}" class="site-link">{{ _("web.site.page.search") }}</a>
         </p>
       </div>
     </section>
@@ -52,7 +54,11 @@
                 class="site-empty-disc"><Icon name="people" :size="34" stroke="currentColor" /></span>
           <div>
             <p class="site-empty-title">{{ _("web.friends.none") }}</p>
-            <p>{{ _("web.friends.none.text") }}</p>
+            <p>{{ _("web.friends.none.search") }} {{ _("web.friends.none.text") }}</p>
+            <p class="site-actions">
+              <a href="{{ url('/' ~ game.id ~ '/search') }}"
+                 class="site-button"><Icon name="find" :size="16" stroke="#FEDE01" />{{ _("web.site.page.search") }}</a>
+            </p>
           </div>
         </div>
       {% endif %}

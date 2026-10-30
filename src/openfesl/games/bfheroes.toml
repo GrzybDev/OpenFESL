@@ -9,10 +9,10 @@ partition = "/eagames/bfwest"
 namespace = "bfwest"
 # The web pages the game's menu shows beside its front page: the guide to playing, the store and
 # its hot deals, the treasure chests of an account's heroes, the Funds page, the rewards that
-# accounts claim and their friends. The server list is drawn for games with squads and a server
-# browser that finds servers by name, and the leaderboard for other stats than this game's, so
-# neither is listed.
-pages = ["play", "store", "hot-deals", "treasure-chests", "funds", "rewards", "friends"]
+# accounts claim, their friends and the player search. The server list is drawn for games with
+# squads and a server browser that finds servers by name, and the leaderboard for other stats than
+# this game's, so neither is listed.
+pages = ["play", "store", "hot-deals", "treasure-chests", "funds", "rewards", "friends", "search"]
 # The stats of the player's account rather than of a hero: the tutorial, the last session and its
 # length, the daily missions and the pop-item counts. The game's stats dictionary gives each key its
 # owner, yet it names a hero and an account by the same owner type, telling them apart by the id
@@ -364,10 +364,10 @@ start_links = true
 name = "game"
 pages = ["play", "leaderboard", "host"]
 
-# The players' community: the accounts' friends and the rewards that they claim.
+# The players' community: the player search, the accounts' friends and the rewards they claim.
 [[site.menus]]
 name = "community"
-pages = ["friends", "rewards"]
+pages = ["search", "friends", "rewards"]
 
 # The store, its hot deals, the treasure chests and the Funds; the store's item pages lie under its
 # address.

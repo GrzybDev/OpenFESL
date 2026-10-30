@@ -8727,3 +8727,96 @@ msgstr "No request was sent: the game's friends list holds at most %(most)s."
 
 msgid "web.friends.refused.unknown_relationship"
 msgstr "Nothing changed: %(name)s is no longer on the list."
+
+msgid "web.site.page.search"
+msgstr "Player search"
+
+msgid "web.search.find"
+msgstr "Find players"
+
+msgid "web.search.lead"
+msgstr "Finds heroes and players by the start of their name."
+
+msgid "web.search.field"
+msgstr "Hero or display name"
+
+msgid "web.search.field.short"
+msgstr "Hero or player"
+
+msgid "web.search.submit"
+msgstr "Search"
+
+msgid "web.search.hint"
+msgstr "%(count)s or more characters. Names match from their start and ignore capitals."
+
+msgid "web.search.too_short"
+msgstr "Type %(count)s or more characters; fewer match too many names."
+
+msgid "web.search.none"
+msgstr "No hero or display name starts with “%(query)s”."
+
+msgid "web.search.none.heroes"
+msgstr "No hero name starts with “%(query)s”."
+
+msgid "web.search.none.players"
+msgstr "No display name starts with “%(query)s”."
+
+msgid "web.search.found"
+msgstr "%(heroes)s and %(players)s start with “%(query)s”."
+
+msgid "web.search.heroes.one"
+msgstr "%(count)s hero"
+
+msgid "web.search.heroes.other"
+msgstr "%(count)s heroes"
+
+msgid "web.search.players.one"
+msgstr "%(count)s player"
+
+msgid "web.search.players.other"
+msgstr "%(count)s players"
+
+msgid "web.search.list.heroes"
+msgstr "Heroes · %(count)s"
+
+msgid "web.search.list.players"
+msgstr "Players · %(count)s"
+
+msgid "web.search.range.heroes"
+msgstr "%(first)s–%(last)s of %(total)s, by level"
+
+msgid "web.search.range.players"
+msgstr "%(first)s–%(last)s of %(total)s, by name"
+
+msgid "web.search.hero"
+msgstr "%(faction)s %(hero_class)s · player %(player)s"
+
+msgid "web.search.player.one"
+msgstr "%(count)s hero · default %(hero)s"
+
+msgid "web.search.player.other"
+msgstr "%(count)s heroes · default %(hero)s"
+
+msgid "web.search.player.none"
+msgstr "No hero yet"
+
+msgid "web.search.add"
+msgstr "Add as friend"
+
+msgid "web.search.accept"
+msgstr "Accept request"
+
+msgid "web.search.friends"
+msgstr "Friends"
+
+msgid "web.search.sent"
+msgstr "Request sent"
+
+msgid "web.search.self"
+msgstr "This account"
+
+msgid "web.search.signed_out"
+msgstr "Anyone can search; friend requests need a signed-in account."
+
+msgid "web.friends.none.search"
+msgstr "Player search finds heroes and players by name."

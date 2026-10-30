@@ -99,6 +99,12 @@
     font: 800 14px/1 var(--site-heading);
   }
 
+  .friend-chip-done {
+    border-color: #2f5a14;
+    background: #dfe8c8;
+    color: #2f5a14;
+  }
+
   .friend-removal-text {
     margin-top: 12px;
     font-size: 15px;

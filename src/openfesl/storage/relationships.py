@@ -5,8 +5,17 @@ from sqlalchemy.orm import InstrumentedAttribute, outerjoin
 
 from openfesl.core.accounts import AccountState
 from openfesl.core.personas import PersonaState
-from openfesl.core.relationships import Found, Party, Refusal, Relationship, RelationshipRefused
-from openfesl.storage.models import AccountRow, GameServerRow, PersonaRow, RelationshipRow
+from openfesl.core.relationships import (
+    Found,
+    Matches,
+    Party,
+    Refusal,
+    Relationship,
+    RelationshipRefused,
+)
+from openfesl.core.stats import PERSONA, bucket_of
+from openfesl.protocol.rank import Period
+from openfesl.storage.models import AccountRow, GameServerRow, PersonaRow, RelationshipRow, StatRow
 from openfesl.storage.personas import like
 
 _SIDE = ("game", "tag", "owner_id", "owner_server", "member_id", "member_server")
@@ -179,6 +188,67 @@ class SqlRelationshipStore:
             found = [Found(account_id, name or "", False) for account_id, name in accounts]
             found += [Found(account_id, name, True) for account_id, name in heroes]
         return sorted(found, key=lambda each: each.name.casefold())[:limit]
+
+    async def matches(
+        self, namespace: str, pattern: str, level: tuple[str, str], heroes: slice, players: slice
+    ) -> Matches:
+        """Return a page of the heroes, by level, and of the accounts that may be asked, by name.
+
+        Args:
+            namespace: The namespace of the game's heroes.
+            pattern: The start of the names, where * stands for any run of characters; capitals
+                do not matter.
+            level: The partition of the game's stats and the stat of a hero's level.
+            heroes: Which of the heroes to return, the highest level first.
+            players: Which of the accounts to return, by display name.
+        """
+        start = like(f"{pattern}*")
+        partition, key = level
+        bucket = bucket_of(Period.ALL_TIME, 0)
+        named = select(AccountRow.id, AccountRow.display_name).where(
+            AccountRow.display_name.ilike(start, escape="\\"), *_askable()
+        )
+        hero = (
+            select(PersonaRow.account_id, PersonaRow.name, AccountRow.display_name)
+            .join(AccountRow, AccountRow.id == PersonaRow.account_id)
+            .outerjoin(
+                StatRow,
+                and_(
+                    StatRow.partition == partition,
+                    StatRow.owner_type == PERSONA,
+                    StatRow.owner_id == PersonaRow.id,
+                    StatRow.period == bucket.period,
+                    StatRow.period_start == bucket.start,
+                    StatRow.key == key,
+                ),
+            )
+            .where(
+                PersonaRow.namespace == namespace,
+                PersonaRow.name.ilike(start, escape="\\"),
+                PersonaRow.disabled_at.is_(None),
+                PersonaRow.state == PersonaState.ACTIVE,
+                *_askable(),
+            )
+        )
+        async with self._sessions() as session:
+            hero_count = await session.scalar(select(func.count()).select_from(hero.subquery()))
+            player_count = await session.scalar(select(func.count()).select_from(named.subquery()))
+            found_heroes = await session.execute(
+                hero.order_by(func.coalesce(StatRow.value, 1).desc(), func.lower(PersonaRow.name))
+                .offset(heroes.start)
+                .limit(heroes.stop - heroes.start)
+            )
+            found_players = await session.execute(
+                named.order_by(func.lower(AccountRow.display_name))
+                .offset(players.start)
+                .limit(players.stop - players.start)
+            )
+        return Matches(
+            [Found(account, name, True, player or "") for account, name, player in found_heroes],
+            hero_count or 0,
+            [Found(account, name or "", False, name or "") for account, name in found_players],
+            player_count or 0,
+        )
 
 
 async def _lock(session: AsyncSession, *parties: Party) -> set[int]:

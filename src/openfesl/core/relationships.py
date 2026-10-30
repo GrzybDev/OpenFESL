@@ -11,6 +11,7 @@ from openfesl.core.hosted_games import HostedGame
 from openfesl.core.hosting import GAME, Hosting
 from openfesl.core.relationship_rules import RelationshipRules
 from openfesl.core.session import GameSession, Players
+from openfesl.core.stats import partition_of
 from openfesl.core.trust import ServerTrust
 
 logger = logging.getLogger(__name__)
@@ -114,11 +115,30 @@ class Found:
         account_id: The player's account.
         name: The name that matched.
         hero: Whether the name is one of its heroes' rather than its account's display name.
+        player: The account's display name.
     """
 
     account_id: int
     name: str
     hero: bool
+    player: str = ""
+
+
+@dataclass(frozen=True, slots=True)
+class Matches:
+    """A page of each list of what a search found: heroes by level, players by name.
+
+    Attributes:
+        heroes: The heroes on the page of theirs.
+        hero_count: How many heroes the search found.
+        players: The players on the page of theirs, found by their display names.
+        player_count: How many players the search found.
+    """
+
+    heroes: list[Found]
+    hero_count: int
+    players: list[Found]
+    player_count: int
 
 
 class RelationshipStore(Protocol):
@@ -194,6 +214,20 @@ class RelationshipStore(Protocol):
             pattern: The start of the names, where * stands for any run of characters; capitals
                 do not matter.
             limit: The most names to return, by name.
+        """
+
+    async def matches(
+        self, namespace: str, pattern: str, level: tuple[str, str], heroes: slice, players: slice
+    ) -> Matches:
+        """Return a page of the heroes, by level, and of the accounts that may be asked, by name.
+
+        Args:
+            namespace: The namespace of the game's heroes.
+            pattern: The start of the names, where * stands for any run of characters; capitals
+                do not matter.
+            level: The partition of the game's stats and the stat of a hero's level.
+            heroes: Which of the heroes to return, the highest level first.
+            players: Which of the accounts to return, by display name.
         """
 
 
@@ -307,10 +341,28 @@ class Relationships:
         Raises:
             RelationshipRefused: When the search names too few characters besides wildcards.
         """
-        rules = _rules(game)
-        if len(pattern.replace("*", "")) < rules.search_minimum:
-            raise RelationshipRefused(Refusal.SEARCH_TOO_SHORT)
-        return await self._store.search(game.namespace, pattern, rules.search_limit)
+        limit = _searched(game, pattern).search_limit
+        return await self._store.search(game.namespace, pattern, limit)
+
+    async def matches(self, game: Game, pattern: str, heroes: slice, players: slice) -> Matches:
+        """Return a page of each list of what a search finds, for the site's player search.
+
+        Only players that may be asked for a relationship are found, and only heroes in play.
+
+        Args:
+            game: The game, whose heroes are searched and which has hero rules.
+            pattern: The start of the names, where * stands for any run of characters; capitals
+                do not matter.
+            heroes: Which of the heroes to return, the highest level first.
+            players: Which of the players to return, by display name.
+
+        Raises:
+            RelationshipRefused: When the search names too few characters besides wildcards.
+        """
+        _searched(game, pattern)
+        assert game.heroes is not None
+        level = partition_of(game), game.heroes.stats.level
+        return await self._store.matches(game.namespace, pattern, level, heroes, players)
 
     def report(self, account_id: int, text: str) -> None:
         """Keep the status line that a game reports while it is logged in with an account.
@@ -389,6 +441,14 @@ def _names(hosted: HostedGame) -> set[str]:
     # whether a 1.89 server sends that or its hero's name is not known yet, so either is taken.
     persona = hosted.host.session.persona
     return {hosted.ugid, persona.name} if persona is not None else {hosted.ugid}
+
+
+def _searched(game: Game, pattern: str) -> RelationshipRules:
+    # The game's rules, once a search names enough characters besides wildcards.
+    rules = _rules(game)
+    if len(pattern.replace("*", "")) < rules.search_minimum:
+        raise RelationshipRefused(Refusal.SEARCH_TOO_SHORT)
+    return rules
 
 
 def _rules(game: Game) -> RelationshipRules:

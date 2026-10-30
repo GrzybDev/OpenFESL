@@ -1,0 +1,20 @@
+/* What a search found, on the friends page's rows: the matched start of a name in yellow and a
+   hero's level in a yellow disc. */
+@layer components {
+  .search-match {
+    padding-inline: 1px;
+    background: #ffe27a;
+    color: inherit;
+  }
+
+  .search-level {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border: 2px solid #000;
+    border-radius: 50%;
+    background: #f2c12e;
+    font: 800 16px/1 var(--site-heading);
+  }
+}

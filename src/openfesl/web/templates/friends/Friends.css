@@ -1,5 +1,6 @@
-/* The friends page: an outlined heading over each list, the lists as pale boxes of rows, and the
-   dashed panel when there is no friend yet or nobody is signed in, closer under its heading. */
+/* The friends page and the player search: the line that says what a search found, each list
+   under its heading with where its page stands, the lists as pale boxes of rows, and the dashed
+   panel when there is no friend yet or nobody is signed in, closer under its heading. */
 @layer pages {
   .friends-section {
     margin-top: 36px;
@@ -23,5 +24,39 @@
 
   .friends-empty-inline {
     margin-top: 12px;
+  }
+
+  .search-summary {
+    margin-top: 22px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .search-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 16px;
+  }
+
+  .search-range {
+    font-size: 14px;
+    font-weight: 700;
+    color: #3b2d23;
+  }
+
+  .search-none {
+    margin-top: 10px;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .search-pages {
+    margin-top: 18px;
+
+    .pager {
+      justify-content: center;
+    }
   }
 }

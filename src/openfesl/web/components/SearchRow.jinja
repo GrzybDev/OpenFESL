@@ -1,0 +1,49 @@
+{#def result, query: str, self_id: int | None = None #}
+{# A hero or player that a search found: its class disc in its faction's colours or a player's
+   glyph, the name with the part that matched marked, its class and player or its heroes, a
+   hero's level, and, for a signed-in account, how it relates to it or the form that asks or
+   accepts it as a friend. #}
+{% set rules = game.heroes %}
+{% set hero = result.hero %}
+{% set rel = result.relationship %}
+{% set matched = result.name[:query|length] if result.name.lower().startswith(query.lower()) and "*" not in query else "" %}
+<li class="friend-row">
+  <span aria-hidden="true"
+        {% if hero and hero.faction %} data-faction="{{ hero.faction }}"{% endif %}
+        class="friend-disc">
+    {% if hero and hero.hero_class %}
+      <Icon :name="rules.classes[hero.hero_class].glyph" :size="22" stroke="currentColor" />
+    {% else %}
+      <Icon name="user" :size="22" stroke="currentColor" />
+    {% endif %}
+  </span>
+  <div class="friend-text">
+    <p class="friend-name">
+      {%- if matched %}<mark class="search-match">{{ matched }}</mark>{{ result.name[matched|length:] }}{% else %}{{ result.name }}{% endif -%}
+    </p>
+    <p>
+      {% if hero %}
+        {{ _("web.search.hero", faction=_("games." ~ game.id ~ ".faction." ~ hero.faction) if hero.faction else "", hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class) if hero.hero_class else "", player=result.player) }}
+      {% elif result.default %}
+        {{ _n("web.search.player", result.heroes, hero=result.default.persona.name) }}
+      {% else %}
+        {{ _("web.search.player.none") }}
+      {% endif %}
+    </p>
+  </div>
+  <div class="friend-actions">
+    {% if hero %}<span class="search-level"><span class="sr-only">{{ _("web.bar.level") }}</span>{{ hero.level }}</span>{% endif %}
+    {% if self_id is not none %}
+      {% if result.member.account_id == self_id %}
+        <span class="friend-chip">{{ _("web.search.self") }}</span>
+      {% elif rel and rel.mutual %}
+        <span class="friend-chip friend-chip-done"><Icon name="tick" :size="14" stroke="currentColor" />{{ _("web.search.friends") }}</span>
+      {% elif rel and rel.own %}
+        <span class="friend-chip"><Icon name="clock" :size="14" stroke="currentColor" />{{ _("web.search.sent") }}</span>
+      {% else %}
+        {% set accepts = rel and rel.theirs %}
+        <FriendForm :action="'accept' if accepts else 'ask'" :member="result.member" :name="result.player" :label="_('web.search.accept' if accepts else 'web.search.add')" :glyph="'tick' if accepts else 'plus'" :tone="'go' if accepts else ''" :next="here" />
+      {% endif %}
+    {% endif %}
+  </div>
+</li>

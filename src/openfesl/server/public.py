@@ -36,6 +36,7 @@ from openfesl.web.play import play_routes, relay_address
 from openfesl.web.play_now import PlayNowPages
 from openfesl.web.players import player_routes
 from openfesl.web.rewards import RewardsPages
+from openfesl.web.search import SearchPages
 from openfesl.web.servers import server_routes
 from openfesl.web.sessions import SentForms
 from openfesl.web.shell import shell_routes
@@ -185,6 +186,7 @@ def include_public_routes(
             services.hosting,
         ).routes()
     )
+    app.include_router(SearchPages(pages, games, services.relationships, services.heroes).routes())
     app.include_router(launcher_routes(lambda: app.state.launcher))
     turnstile = settings.turnstile
     sign_in_services = SignInServices(

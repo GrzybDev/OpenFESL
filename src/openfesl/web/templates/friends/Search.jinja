@@ -1,0 +1,60 @@
+{#def query: str, short: bool, listed: list, address: str, self_id: int | None #}
+{# The player search: the field, then what a search found, heroes by level and players by name
+   apart, a page of each with where it stands in its list and the links to the others, each with
+   the friend request a signed-in account may send; too short a search or one that matches nobody
+   says so, and a list that found nobody says that by itself. #}
+{% set title = _("web.site.page.search") %}
+{% set heroes, players = listed if listed else (none, none) %}
+<Layout :title="title">
+  <section aria-labelledby="search-title" class="creator-head">
+    <div class="creator-intro">
+      <Plaque id="search-title">{{ title }}</Plaque>
+      <p class="site-lead">{{ _("web.search.lead") }}</p>
+    </div>
+  </section>
+  <PlayerSearch :query="query" />
+  {% if short %}
+    <p role="status" class="search-summary">{{ _("web.search.too_short", count=game.relationships.search_minimum) }}</p>
+  {% elif query %}
+    <p role="status" class="search-summary">
+      {% if heroes.total or players.total %}
+        {{ _("web.search.found", heroes=_n("web.search.heroes", heroes.total), players=_n("web.search.players", players.total), query=query) }}
+      {% else %}
+        {{ _("web.search.none", query=query) }}
+      {% endif %}
+    </p>
+    {% if self_id is none and (heroes.total or players.total) %}
+      <p class="site-lead">
+        {{ _("web.search.signed_out") }}
+        <a href="{{ url('/sign-in') }}?{{ {'next': here}|urlencode }}"
+           class="site-link">{{ _("web.account.sign_in.action") }}</a>
+      </p>
+    {% endif %}
+    {% set paged = heroes.pages > 1 or players.pages > 1 %}
+    {% for found in listed if heroes.total or players.total %}
+      <section aria-labelledby="search-{{ found.kind }}" class="friends-section">
+        <div class="search-head">
+          <h2 id="search-{{ found.kind }}"
+              class="site-heading">{{ _("web.search.list." ~ found.kind, count=number(found.total)) }}</h2>
+          {% if paged and found.results %}
+            <p class="search-range">
+              {{ _("web.search.range." ~ found.kind, first=number(found.first), last=number(found.first + found.results|length - 1), total=number(found.total)) }}
+            </p>
+          {% endif %}
+        </div>
+        {% if found.results %}
+          <ul role="list" class="friends-list enter-rows">
+            {% for result in found.results %}
+              <SearchRow :result="result" :query="query" :self_id="self_id" />
+            {% endfor %}
+          </ul>
+          <div class="search-pages">
+            <Pager :base="address" :view="found" :pages="found.pages" />
+          </div>
+        {% else %}
+          <p class="search-none">{{ _("web.search.none." ~ found.kind, query=query) }}</p>
+        {% endif %}
+      </section>
+    {% endfor %}
+  {% endif %}
+</Layout>

@@ -9241,3 +9241,114 @@ msgstr "Nie wysłano zaproszenia: lista znajomych w grze mieści najwyżej %(mos
 
 msgid "web.friends.refused.unknown_relationship"
 msgstr "Nic nie zmieniono: %(name)s nie ma już na liście."
+
+msgid "web.site.page.search"
+msgstr "Wyszukiwarka graczy"
+
+msgid "web.search.find"
+msgstr "Znajdź graczy"
+
+msgid "web.search.lead"
+msgstr "Znajduje bohaterów i graczy po początku nazwy."
+
+msgid "web.search.field"
+msgstr "Bohater lub nazwa wyświetlana"
+
+msgid "web.search.field.short"
+msgstr "Bohater lub gracz"
+
+msgid "web.search.submit"
+msgstr "Szukaj"
+
+msgid "web.search.hint"
+msgstr "Minimalna liczba znaków: %(count)s. Nazwy są dopasowywane od początku, bez rozróżniania wielkości liter."
+
+msgid "web.search.too_short"
+msgstr "Za mało znaków: potrzeba co najmniej %(count)s, bo mniej pasuje do zbyt wielu nazw."
+
+msgid "web.search.none"
+msgstr "Żaden bohater ani nazwa wyświetlana nie zaczyna się od „%(query)s”."
+
+msgid "web.search.none.heroes"
+msgstr "Żadna nazwa bohatera nie zaczyna się od „%(query)s”."
+
+msgid "web.search.none.players"
+msgstr "Żadna nazwa wyświetlana nie zaczyna się od „%(query)s”."
+
+msgid "web.search.found"
+msgstr "Od „%(query)s” zaczynają się: %(heroes)s i %(players)s."
+
+msgid "web.search.heroes.one"
+msgstr "%(count)s bohater"
+
+msgid "web.search.heroes.few"
+msgstr "%(count)s bohaterowie"
+
+msgid "web.search.heroes.many"
+msgstr "%(count)s bohaterów"
+
+msgid "web.search.heroes.other"
+msgstr "%(count)s bohatera"
+
+msgid "web.search.players.one"
+msgstr "%(count)s gracz"
+
+msgid "web.search.players.few"
+msgstr "%(count)s gracze"
+
+msgid "web.search.players.many"
+msgstr "%(count)s graczy"
+
+msgid "web.search.players.other"
+msgstr "%(count)s gracza"
+
+msgid "web.search.list.heroes"
+msgstr "Bohaterowie · %(count)s"
+
+msgid "web.search.list.players"
+msgstr "Gracze · %(count)s"
+
+msgid "web.search.range.heroes"
+msgstr "%(first)s–%(last)s z %(total)s, według poziomu"
+
+msgid "web.search.range.players"
+msgstr "%(first)s–%(last)s z %(total)s, według nazwy"
+
+msgid "web.search.hero"
+msgstr "%(hero_class)s, %(faction)s · gracz %(player)s"
+
+msgid "web.search.player.one"
+msgstr "%(count)s bohater · domyślny %(hero)s"
+
+msgid "web.search.player.few"
+msgstr "%(count)s bohaterów · domyślny %(hero)s"
+
+msgid "web.search.player.many"
+msgstr "%(count)s bohaterów · domyślny %(hero)s"
+
+msgid "web.search.player.other"
+msgstr "%(count)s bohatera · domyślny %(hero)s"
+
+msgid "web.search.player.none"
+msgstr "Brak bohatera"
+
+msgid "web.search.add"
+msgstr "Dodaj do znajomych"
+
+msgid "web.search.accept"
+msgstr "Akceptuj zaproszenie"
+
+msgid "web.search.friends"
+msgstr "Znajomi"
+
+msgid "web.search.sent"
+msgstr "Zaproszenie wysłane"
+
+msgid "web.search.self"
+msgstr "To konto"
+
+msgid "web.search.signed_out"
+msgstr "Wyszukiwać może każdy; zaproszenia do znajomych wymagają zalogowania."
+
+msgid "web.friends.none.search"
+msgstr "Wyszukiwarka graczy znajduje bohaterów i graczy po nazwie."
