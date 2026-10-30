@@ -66,14 +66,7 @@
             <span>{{ _("web.heroes.xp.to", level=hero.level + 1) }}</span>
             <span class="hero-xp-numbers">{{ number(hero.xp) }} / {{ number(card.xp_needed) }}</span>
           </p>
-          {% set share = [hero.xp / card.xp_needed, 1]|min %}
-          <svg role="img"
-               aria-label="{{ _('web.heroes.xp.label', xp=number(hero.xp), needed=number(card.xp_needed), level=hero.level + 1) }}"
-               viewBox="0 0 100 1"
-               preserveAspectRatio="none"
-               class="hero-xp-bar">
-            <rect width="{{ (share * 100)|round(2) }}" height="1" class="hero-xp-fill" />
-          </svg>
+          <ProgressBar :share="hero.xp / card.xp_needed" :label="_('web.heroes.xp.label', xp=number(hero.xp), needed=number(card.xp_needed), level=hero.level + 1)" />
         </div>
       {% endif %}
       <dl class="hero-facts">

@@ -1,0 +1,40 @@
+/* A section's plaque with its lead beside it, or under it on phones. */
+@layer components {
+  .section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 24px;
+  }
+
+  .section-plaque .plaque-title {
+    font-size: 28px;
+  }
+
+  .section-plaque-flip .plaque {
+    rotate: 1deg;
+  }
+
+  .section-lead {
+    flex: 1 1 320px;
+    max-width: 70ch;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #2b2018;
+  }
+
+  @media (width < 40rem) {
+    .section-plaque .plaque-title {
+      font-size: 26px;
+    }
+
+    .section-head {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .section-lead {
+      flex: none;
+    }
+  }
+}

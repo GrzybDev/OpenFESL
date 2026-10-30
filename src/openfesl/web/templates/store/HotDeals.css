@@ -1,6 +1,5 @@
 /* The hot deals page: the pale box of how deals work beside the title, then each shelf's plaque,
-   tilted the other way every second shelf, with its lead beside it, over its cards. On phones the
-   lead goes under the plaque. */
+   tilted the other way every second shelf, with its lead beside it, over its cards. */
 @layer pages {
   .deals-rules {
     flex: 0 1 400px;
@@ -28,50 +27,12 @@
     margin-top: 44px;
   }
 
-  .deals-shelf-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px 24px;
-  }
-
-  .deals-shelf-plaque .plaque-title {
-    font-size: 28px;
-  }
-
-  .deals-shelf-plaque-right .plaque {
-    rotate: 1deg;
-  }
-
-  .deals-shelf-lead {
-    flex: 1 1 320px;
-    max-width: 70ch;
-    font-size: 15px;
-    line-height: 1.5;
-    color: #2b2018;
-  }
-
   .deals-none {
     margin-top: 40px;
 
     h2 strong {
       display: block;
       font: 800 18px/1.25 var(--site-heading);
-    }
-  }
-
-  @media (width < 40rem) {
-    .deals-shelf-plaque .plaque-title {
-      font-size: 26px;
-    }
-
-    .deals-shelf-head {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .deals-shelf-lead {
-      flex: none;
     }
   }
 }

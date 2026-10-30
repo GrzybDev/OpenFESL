@@ -1,0 +1,9 @@
+{#def id: str, title: str, flip: bool = False #}
+{# A section's title on a smaller wooden plaque, tilted the other way when flipped, with its lead
+   beside it, or under it on phones. #}
+<div class="section-head">
+  <div class="section-plaque{% if flip %} section-plaque-flip{% endif %}">
+    <Plaque :id="id" :level="2">{{ title }}</Plaque>
+  </div>
+  <p class="section-lead">{{ content }}</p>
+</div>

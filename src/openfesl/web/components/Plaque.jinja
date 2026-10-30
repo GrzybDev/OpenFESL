@@ -1,5 +1,6 @@
-{#def id: str #}
-{# A page's title on a wooden plaque with two nails, tilted as the 2012 site hung them. #}
+{#def id: str, level: int = 1 #}
+{# A page's title, or a section's at a lower level, on a wooden plaque with two nails, tilted as
+   the 2012 site hung them. #}
 <div class="plaque enter-title">
   <svg aria-hidden="true"
        focusable="false"
@@ -8,5 +9,5 @@
        class="plaque-grain">
     <path d="M0 18c60-5 120 5 180 0s90-5 120 2M0 42c70 4 140-4 200 0s70 3 100-2" />
   </svg>
-  <h1 id="{{ id }}" class="plaque-title">{{ content }}</h1>
+  <h{{ level }} id="{{ id }}" class="plaque-title">{{ content }}</h{{ level }}>
 </div>

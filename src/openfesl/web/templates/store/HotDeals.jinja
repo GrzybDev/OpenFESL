@@ -29,18 +29,13 @@
   </section>
   {% for shelf in shelves %}
     <section aria-labelledby="shelf-{{ shelf.key }}" class="deals-shelf">
-      <div class="deals-shelf-head">
-        <div class="deals-shelf-plaque{% if loop.index is even %} deals-shelf-plaque-right{% endif %}">
-          <Plaque :id="'shelf-' ~ shelf.key">{{ _(texts_key ~ "section." ~ shelf.key) }}</Plaque>
-        </div>
-        <p class="deals-shelf-lead">
-          {% if rotation %}
-            {{ _(texts_key ~ "section." ~ shelf.key ~ ".lead", percent=number(shelf.discount or 0), time=midnight) }}
-          {% else %}
-            {{ _(texts_key ~ "section.offers.lead") }}
-          {% endif %}
-        </p>
-      </div>
+      <SectionHead :id="'shelf-' ~ shelf.key" :title="_(texts_key ~ 'section.' ~ shelf.key)" :flip="loop.index is even">
+      {% if rotation %}
+        {{ _(texts_key ~ "section." ~ shelf.key ~ ".lead", percent=number(shelf.discount or 0), time=midnight) }}
+      {% else %}
+        {{ _(texts_key ~ "section.offers.lead") }}
+      {% endif %}
+      </SectionHead>
       <ul role="list" class="deal-cards enter-rows">
         {% for card in shelf.cards %}
           <li>

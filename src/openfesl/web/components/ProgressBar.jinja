@@ -1,0 +1,9 @@
+{#def share: float, label: str #}
+{# How far something got towards its goal, as a green bar on beige, named for screen readers. #}
+<svg role="img"
+     aria-label="{{ label }}"
+     viewBox="0 0 100 1"
+     preserveAspectRatio="none"
+     class="progress-bar">
+  <rect width="{{ ([share, 1]|min * 100)|round(2) }}" height="1" class="progress-fill" />
+</svg>
