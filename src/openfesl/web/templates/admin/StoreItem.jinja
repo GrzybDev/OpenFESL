@@ -1,14 +1,26 @@
-{#def of, catalogue, row, lines: list, rule: str, manages: bool #}
-{# An item's prices in a game's store: its kind, which heroes may have it and its rule,
-   then each price point with its product's id, currency, ownership, price, whether the price is
-   the rule's or the item's own, and whether it is sold. An ability's levels are its steps, at the
-   fixed price of the heroes' points. #}
+{#def of, catalogue, row, lines: list, rule: str, manages: bool, adding, form: dict = {}, refused: str = "", refused_point: int | None = None, why: str = "" #}
+{# An item's prices in a game's store: its kind, which heroes may have it and its
+   rule, then each price point with its product's id, currency, ownership, price, whether the price
+   is the rule's or the item's own, and whether it is sold. Admins change the prices and what is
+   sold, switch the item off, add a price point or reset the points to the rule; a refusal stands
+   beside its row or the add panel and nothing is saved. The add panel's fields belong to a form of
+   their own, so that Enter in them adds the point. An ability's levels are its steps, at the fixed
+   price of the heroes' points. #}
 {% set game = of %}
 {% set item = row.prices.item %}
 {% set state = row.prices.state.value %}
 {% set fixed = row.prices.fixed %}
 {% set list = url("/admin/store/" ~ game.id) %}
+{% set here = list ~ "/items/" ~ item.id %}
 {% set levels = item.levels or [item.id] %}
+{% set editable = manages and not fixed and not row.prices.unsold %}
+{% set saving = form if refused_point is not none else {} %}
+{% set unsold = saving.get("unsold") if saving else state == "off" and lines %}
+{% macro refusal(text) %}
+  <p role="alert" class="prices-refusal">
+    <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span><span>{{ text }}</span>
+  </p>
+{% endmacro %}
 <AdminPage :title="row.name ~ ' · ' ~ _('web.admin.store.title')"
            current="store">
   <StoreHead :game="game" current="prices" :subtitle="_('web.admin.store.subtitle', game=game.name)" />
@@ -42,7 +54,26 @@
           {% endif %}
         </section>
 
+        {% if editable %}
+          <form method="post" action="{{ here }}" class="prices-form">
+            <CsrfField />
+        {% endif %}
         <section aria-labelledby="prices-points" class="account-part">
+          {% if editable %}
+            <label class="check-row prices-off-row">
+              <span class="prices-off-text">
+                <span class="prices-off-title">{{ _("web.admin.store.not_sold") }}</span>
+                <span>{{ _("web.admin.store.not_sold.text" if row.prices.alone else "web.admin.store.not_sold.text.drops") }}</span>
+              </span>
+              <span class="check-place">
+                <input type="checkbox"
+                       name="unsold"
+                       value="1"
+                       {% if unsold %} checked{% endif %}
+                       class="check">
+                <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>
+            </label>
+          {% endif %}
           <Bar id="prices-points" :extra="_n('web.admin.store.points.own', lines|selectattr('own')|list|length, total=number(lines|length))">{{ _("web.admin.store.points") }}</Bar>
           {% if lines %}
             <div class="table-scroll">
@@ -64,6 +95,9 @@
                   {% for line in lines %}
                     {% set product = line.product %}
                     {% set ownership = product.ownership %}
+                    {% set field = "price-" ~ product.id %}
+                    {% set sold = saving.get("sold-" ~ product.id) if saving else product.published %}
+                    {% set wrong = refused_point == product.id %}
                     <div role="row" class="prices-point-columns prices-point-row">
                       <div role="cell" class="admin-cell prices-product">{{ game.store.product_id(product.id) }}</div>
                       <div role="cell" class="admin-cell prices-currency">
@@ -84,7 +118,22 @@
                           {{ _("web.store.price.permanent") }}
                         {% endif %}
                       </div>
-                      <div role="cell" class="admin-cell prices-price">{{ number(product.price) }}</div>
+                      <div role="cell" class="admin-cell prices-price">
+                        {% if editable %}
+                          <input id="{{ field }}"
+                                 name="{{ field }}"
+                                 type="text"
+                                 inputmode="numeric"
+                                 value="{{ saving.get(field, product.price) }}"
+                                 maxlength="13"
+                                 required
+                                 aria-label="{{ _('web.admin.store.point.price_of', currency=_('games.' ~ game.id ~ '.currency.' ~ product.currency), point=game.store.product_id(product.id)) }}"
+                                 {% if wrong %} aria-invalid="true" aria-describedby="prices-why"{% endif %}
+                                 class="field-input prices-price-input{% if wrong %} field-invalid{% endif %}">
+                        {% else %}
+                          {{ number(product.price) }}
+                        {% endif %}
+                      </div>
                       <div role="cell" class="admin-cell cell-stack">
                         <span aria-hidden="true" class="cell-label">{{ _("web.admin.store.point.column.from") }}</span>
                         {% if fixed %}
@@ -96,10 +145,31 @@
                           <span class="prices-from">{{ _("web.admin.store.point.rule") }}</span>
                         {% endif %}
                       </div>
-                      <div role="cell" class="admin-cell prices-state">
-                        <Badge :name="'tick' if product.published else 'x'" lines />{{ _("web.admin.store.point.on" if product.published else "web.admin.store.point.off") }}
-                      </div>
+                      {% if editable %}
+                        <div role="cell" class="admin-cell prices-state">
+                          <label class="prices-sold">
+                            <span class="check-place">
+                              <input type="checkbox"
+                                     name="sold-{{ product.id }}"
+                                     value="1"
+                                     {% if sold %} checked{% endif %}
+                                     class="check">
+                              <span aria-hidden="true"
+                                    class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>
+                            {{ _("web.admin.store.point.on") }}
+                          </label>
+                        </div>
+                      {% else %}
+                        <div role="cell" class="admin-cell prices-state">
+                          <Badge :name="'tick' if product.published else 'x'" lines />{{ _("web.admin.store.point.on" if product.published else "web.admin.store.point.off") }}
+                        </div>
+                      {% endif %}
                     </div>
+                    {% if wrong %}
+                      <div role="row">
+                        <div role="cell" aria-colspan="6" id="prices-why">{{ refusal(why) }}</div>
+                      </div>
+                    {% endif %}
                   {% endfor %}
                 </div>
               </div>
@@ -116,6 +186,84 @@
             </p>
           {% endif %}
         </section>
+        {% if editable %}
+          <div class="prices-actions">
+            <div class="prices-save">
+              <p class="body-text">{{ _("web.admin.store.save.note") }}</p>
+              <SmallAction :label="_('web.admin.store.save')" :busy="_('web.admin.store.save.busy')" />
+            </div>
+            <details class="prices-add"
+                     {% if refused and refused_point is none %} open{% endif %}>
+              <summary class="form-button">
+                <span aria-hidden="true"
+                      class="form-glyph"><Icon name="plus" :size="14" stroke="#F4F4EE" /></span>{{ _("web.admin.store.point.add") }}
+              </summary>
+              <div class="prices-add-panel">
+                <fieldset class="prices-add-part">
+                  <legend class="field-label">{{ _("web.admin.store.point.column.currency") }}</legend>
+                  <div class="prices-picks">
+                    {% for code in adding.currencies %}
+                      <label class="prices-filter-pick">
+                        <input type="radio"
+                               name="add-currency"
+                               form="prices-add"
+                               value="{{ code }}"
+                               {% if form.get("add-currency", adding.currencies[0]) == code %} checked{% endif %}
+                               class="choice-input">
+                        <span>{{ _("games." ~ game.id ~ ".currency." ~ code) }}</span>
+                      </label>
+                    {% endfor %}
+                  </div>
+                </fieldset>
+                <fieldset class="prices-add-part">
+                  <legend class="field-label">{{ _("web.admin.store.point.column.ownership") }}</legend>
+                  {% if adding.uses %}
+                    <input name="add-uses"
+                           form="prices-add"
+                           type="text"
+                           inputmode="numeric"
+                           value="{{ form.get('add-uses', '') }}"
+                           maxlength="10"
+                           aria-label="{{ _('web.admin.store.point.uses') }}"
+                           placeholder="{{ _('web.admin.store.point.uses') }}"
+                           class="field-input">
+                  {% else %}
+                    <div class="prices-picks">
+                      {% for written in adding.ownerships %}
+                        <label class="prices-filter-pick">
+                          <input type="radio"
+                                 name="add-ownership"
+                                 form="prices-add"
+                                 value="{{ written }}"
+                                 {% if form.get("add-ownership", adding.ownerships[0]) == written %} checked{% endif %}
+                                 class="choice-input">
+                          <span>{{ _("web.store.price.permanent") if written == "perm" else _n("web.store.price.days", written[:-1]|int) }}</span>
+                        </label>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </fieldset>
+                <label for="add-price" class="field-label">{{ _("web.admin.store.point.column.price") }}</label>
+                <input id="add-price"
+                       name="add-price"
+                       form="prices-add"
+                       type="text"
+                       inputmode="numeric"
+                       value="{{ form.get('add-price', '') }}"
+                       maxlength="13"
+                       placeholder="{{ _('web.admin.store.point.add.rule') }}"
+                       class="field-input">
+                {% if refused and refused_point is none %}{{ refusal(why) }}{% endif %}
+                <FormButton icon="plus" form="prices-add">{{ _("web.admin.store.point.add.submit") }}</FormButton>
+              </div>
+            </details>
+            <FormButton icon="retry" :formaction="here ~ '/reset'">{{ _("web.admin.store.reset") }}</FormButton>
+          </div>
+          </form>
+          <form id="prices-add" method="post" action="{{ here }}/add">
+            <CsrfField />
+          </form>
+        {% endif %}
       </div>
       <div class="list-side admin-side">
         <section aria-labelledby="prices-item-note">

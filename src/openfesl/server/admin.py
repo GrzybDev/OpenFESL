@@ -123,7 +123,7 @@ def include_admin_routes(
             services.mugshots,
         )
     )
-    store_views = StoreAdminViews(games, services.catalogues, stores.prices)
+    store_views = StoreAdminViews(games, services.catalogues, stores.prices, services.feed.apply)
     app.include_router(store_routes(sign_in, store_views))
     app.include_router(store_item_routes(sign_in, store_views))
     app.include_router(

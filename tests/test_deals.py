@@ -7,7 +7,7 @@ from random import Random
 from xml.etree import ElementTree
 
 import pytest
-from accounts import select_value
+from accounts import execute, select_value
 from heroes import MAGMA, wallets
 from living import NATIONAL, ROYAL, Invented, import_catalogue, setting, worn
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -30,8 +30,9 @@ pytestmark = pytest.mark.anyio
 HAT, NECK, JACKET, LEGS = "0", "2", "4", "6"
 
 # An invented catalogue: a cap, a scarf and a coat of each faction, which the Deal of the Day
-# puts together; seven pairs of Royal trousers, each a set of its own; two boosts; and the tonic
-# that the store's boxes give a hero who owns all their drops, which makes the store keep them.
+# puts together; seven pairs of Royal trousers, each a set of its own; two boosts; a claw attack,
+# which only boxes and sets give; and the tonic that the store's boxes give a hero who owns all
+# their drops, which makes the store keep them.
 INVENTED: Invented = {
     101: worn("Invented Cap", ROYAL, HAT),
     102: worn("Invented Scarf", ROYAL, NECK),
@@ -42,6 +43,7 @@ INVENTED: Invented = {
     **{310 + n: worn(f"Invented Trousers {n}", ROYAL, LEGS) for n in range(1, 8)},
     9000: ("Invented XP Boost", "convenience", {}),
     9005: ("Invented Valor Boost", "convenience", {}),
+    9100: ("Invented Claw", "ability", {"widget": "true"}),
     2153: ("Invented Tonic", "ability", {"consumable": "true"}),
 }
 # The game's own name of the boost pair, which the game data lists among the popular deals.
@@ -235,6 +237,25 @@ async def test_a_set_comes_back_no_sooner_than_six_weeks_after_it_left(
     # Seven sets, each new for a week: the first may come back in the eighth.
     assert len(set(picked[:7])) == 7
     assert picked[7] == picked[0]
+
+
+async def test_the_rotation_leaves_out_the_sets_of_items_marked_not_sold(
+    rotation: Rotation, database_url: str
+) -> None:
+    sets = [
+        {"name": "Trousers One", "members": [311]},
+        {"name": "Trousers Two", "members": [312]},
+        {"name": "Claw", "members": ["9100 30d"]},
+    ]
+    every = {"kind": "offers", "schedule": {"every": 7}, "discount": [50, 50], "offers": sets}
+    deals = DealRules.model_validate({"currency": "_PF", "sections": {"sale": every}})
+    rotation.game = rotation.game.model_copy(update={"deals": deals})
+    # Not sold switches every price point of an item off.
+    await execute(database_url, "UPDATE store_product SET published = false WHERE item_id = 311")
+
+    listed = [name for _, name, _, _ in await rotation.listed()]
+
+    assert listed == ["Trousers Two", "Claw"]
 
 
 async def test_switched_off_sections_are_left_out_and_without_the_rotation_admin_offers_stay(

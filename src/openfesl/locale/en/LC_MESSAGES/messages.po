@@ -10539,3 +10539,90 @@ msgstr "%(numbers)s uses"
 
 msgid "web.admin.store.ways.permanent"
 msgstr "permanent"
+
+msgid "web.admin.store.not_sold"
+msgstr "Not sold"
+
+msgid "web.admin.store.not_sold.text"
+msgstr "Hidden from the store pages and the game's store, and left out of the hot-deal sets of the rotation's next steps; heroes keep what they hold, and boxes and rewards may still give it."
+
+msgid "web.admin.store.not_sold.text.drops"
+msgstr "Its kind's rules sell it alone in no way: boxes, rewards and hot-deal sets may give it, and heroes keep what they hold. A price point sold here sells it alone."
+
+msgid "web.admin.store.point.price_of"
+msgstr "Price of %(point)s, %(currency)s"
+
+msgid "web.admin.store.save"
+msgstr "Save prices"
+
+msgid "web.admin.store.save.busy"
+msgstr "Saving…"
+
+msgid "web.admin.store.save.note"
+msgstr "Saving writes every price point at once; the game reads products when its store opens."
+
+msgid "web.admin.store.point.add"
+msgstr "Add a price point"
+
+msgid "web.admin.store.point.uses"
+msgstr "Uses"
+
+msgid "web.admin.store.point.add.rule"
+msgstr "Empty: the rule's price"
+
+msgid "web.admin.store.point.add.submit"
+msgstr "Add"
+
+msgid "web.admin.store.reset"
+msgstr "Reset to the kind's rule"
+
+msgid "web.admin.store.point.named"
+msgstr "%(currency)s, %(ownership)s"
+
+msgid "web.admin.store.refused.price"
+msgstr "A price is from 1 to %(most)s; %(price)s is not."
+
+msgid "web.admin.store.refused.twice"
+msgstr "%(point)s is already a price point of %(item)s."
+
+msgid "web.admin.store.refused.duration"
+msgstr "Not saved: %(duration)s is not a duration of the rules; they know %(days)s days and permanent."
+
+msgid "web.admin.store.refused.uses"
+msgstr "Not saved: %(uses)s is no number of uses."
+
+msgid "web.admin.toast.store.saved"
+msgstr "Saved the prices of %(item)s."
+
+msgid "web.admin.toast.store.added"
+msgstr "Added a price point to %(item)s: %(point)s."
+
+msgid "web.admin.toast.store.reset"
+msgstr "Reset the prices of %(item)s to its kind's rule."
+
+msgid "web.admin.toast.store.unchanged"
+msgstr "Nothing changed in the prices of %(item)s."
+
+msgid "web.admin.audit.action.store_prices"
+msgstr "Prices changed"
+
+msgid "web.admin.audit.action.store_prices.reset"
+msgstr "Prices reset to the rule"
+
+msgid "web.admin.audit.price"
+msgstr "%(point)s: %(change)s"
+
+msgid "web.admin.audit.price.added"
+msgstr "added at %(price)s"
+
+msgid "web.admin.audit.price.changed"
+msgstr "%(before)s → %(after)s"
+
+msgid "web.admin.audit.price.on"
+msgstr "sold again"
+
+msgid "web.admin.audit.price.off"
+msgstr "switched off"
+
+msgid "web.admin.refused.role.store"
+msgstr "The store is changed with the admin role."

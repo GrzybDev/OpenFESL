@@ -109,6 +109,11 @@ class AdminAction(StrEnum):
     GAME_MARK = "game_mark"
     """Turned the own server mark of the game whose id is the target on or off at its official
     servers; the details say which and how many official servers it had then."""
+    STORE_PRICES = "store_prices"
+    """Changed the price points of an item of a game's store, the target naming both as
+    game:item; the details hold each changed point's product number, currency, ownership, price
+    before and after and whether it was and is sold, and whether the admin reset them to the
+    rules."""
 
 
 @dataclass(frozen=True, slots=True)

@@ -267,6 +267,14 @@ class StoreRules(BaseModel):
             and not item.withheld
         )
 
+    def sells_alone(self, item: Item) -> bool:
+        """Tell whether the rules sell an item alone, rather than let only boxes and sets give it.
+
+        Args:
+            item: The item, from the game's catalogue.
+        """
+        return any(rule.sold for rule in self.rules(item))
+
     def rules(self, item: Item) -> list[PriceRule]:
         """Return the rule that prices an item in each currency, in the rules' order.
 

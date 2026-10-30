@@ -1,4 +1,5 @@
 from collections import Counter
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from math import ceil
@@ -10,11 +11,19 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.datastructures import QueryParams
 from starlette.exceptions import HTTPException
 
+from openfesl.core.admins import Admin
 from openfesl.core.catalogues import Catalogue, Catalogues
 from openfesl.core.games import Game, Games
 from openfesl.core.inventory import COUNTED, PERMANENT, RENTED
 from openfesl.core.store_items import requirement
-from openfesl.core.store_prices import ItemPrices, PriceLine, PriceState, PriceStore, item_prices
+from openfesl.core.store_prices import (
+    ItemPrices,
+    PointChange,
+    PriceLine,
+    PriceState,
+    PriceStore,
+    item_prices,
+)
 from openfesl.core.store_rules import StoreRules
 from openfesl.core.texts import localize, translate_count
 from openfesl.web.admin.auth import AdminSessions
@@ -129,17 +138,26 @@ class PriceList:
 class StoreAdminViews:
     """Puts together what the admin panel shows of the games' stores."""
 
-    def __init__(self, games: Games, catalogues: Catalogues, prices: PriceStore) -> None:
+    def __init__(
+        self,
+        games: Games,
+        catalogues: Catalogues,
+        prices: PriceStore,
+        apply_actions: Callable[[], Awaitable[None]],
+    ) -> None:
         """Read the stores' price points and the catalogues whose items they sell.
 
         Args:
             games: The games, of which those with store rules have a store.
             catalogues: The games' imported catalogues.
             prices: Where the stores' price points are kept.
+            apply_actions: Hands the admin's recorded actions to the running server, whose
+                games' lists of products then show the new prices at once.
         """
         self.games = [game for game in games if game.store and game.heroes]
         self._catalogues = catalogues
         self._prices = prices
+        self._apply_actions = apply_actions
 
     def game(self, game_id: str) -> tuple[Game, StoreRules]:
         """Return a game with a store, and its store's rules.
@@ -166,6 +184,28 @@ class StoreAdminViews:
         catalogue = await self._catalogues.of(game, language)
         products = await self._prices.every(game.id)
         return catalogue, item_prices(game, rules, catalogue, products)
+
+    async def save(
+        self, game: Game, item_id: int, points: list[PointChange], reset: bool, admin: Admin
+    ) -> bool:
+        """Save an item's price points as the admin changed them, and record the change.
+
+        Args:
+            game: The game, which has a store.
+            item_id: The item's number, an ability's first level for all of its levels.
+            points: Its price points, those to add among them.
+            reset: Whether they are its rule's, as the admin reset them.
+            admin: The admin who saved them.
+
+        Returns:
+            Whether anything changed.
+
+        Raises:
+            PriceRefused: When a point to add is one the store has, also at the same time.
+        """
+        changed = await self._prices.save_points(game.id, item_id, points, reset, admin)
+        await self._apply_actions()
+        return changed
 
     async def item(self, game: Game, item_id: int, language: str) -> tuple[Catalogue, ItemPrices]:
         """Return a game's catalogue and one item its store prices, with its price points.

@@ -82,7 +82,8 @@ def pick_offers(
 
     Offers picked together, such as a family's boxes of both factions, count as one. An offer
     that the section sold within its gap, or another section sells, is left out, as is one with
-    an item the catalogue lacks or the store does not price, or a box the store lacks.
+    an item the catalogue lacks, the store does not price or the admin marked not sold, or a
+    box the store lacks.
 
     Args:
         game: The game.
@@ -95,11 +96,12 @@ def pick_offers(
     """
     used = history.recent | history.live
     taken = {given.picked for given in offers if given.name in used}
+    sold = {item_id for (item_id, _, _), product in history.products.items() if product.published}
     pools: dict[str, list[NewDeal]] = {}
     for given in offers:
         if given.picked in taken:
             continue
-        deal = _offer_deal(game, rules, section, catalogue, history, given, random)
+        deal = _offer_deal(game, rules, section, catalogue, history, given, sold, random)
         if deal is not None:
             pools.setdefault(given.picked, []).append(deal)
     groups: dict[str | None, list[list[NewDeal]]] = {}
@@ -189,13 +191,22 @@ def _offer_deal(
     catalogue: Catalogue,
     history: History,
     given: Offer,
+    sold: set[int],
     random: Random,
 ) -> NewDeal | None:
     assert game.store is not None and game.heroes is not None
     if given.box is not None:
         return _box_deal(history, given)
     items = [catalogue.item(item_id) for item_id, _ in given.members]
-    found = [item for item in items if item is not None and game.store.sellable(item)]
+    # An item that its rules sell alone but the store sells in no way was marked not sold; one
+    # that its rules let only boxes and sets give, such as a claw attack, stays in its sets.
+    found = [
+        item
+        for item in items
+        if item is not None
+        and game.store.sellable(item)
+        and (item.id in sold or not game.store.sells_alone(item))
+    ]
     fit = _fit(found, list(game.heroes.factions), list(game.heroes.classes))
     products = [
         _product(game, catalogue, history, member, rules.currency) for member in given.members

@@ -297,13 +297,14 @@ class Store:
     def follow(self, feed: AdminFeed) -> None:
         """Fill a game's store once the admin imported its first catalogue elsewhere.
 
-        Each import counts as a change of the stores' products. Follow the feed after the
-        catalogues do, so that the store reads the new one.
+        Each import and each change of an item's prices counts as a change of the stores'
+        products. Follow the feed after the catalogues do, so that the store reads the new one.
 
         Args:
             feed: The admin's actions as the log records them.
         """
         feed.on(AdminAction.CATALOGUE_IMPORT, self._imported)
+        feed.on(AdminAction.STORE_PRICES, self._changed)
 
     async def offers(self, game: Game) -> list[Offer]:
         """Return the products a game's store lists, with their items' names and kinds.
@@ -333,6 +334,9 @@ class Store:
         if game is not None:
             await self._stock(game)
         # The import renames the items, withdraws those withheld and may stock a store.
+        self._changes += 1
+
+    def _changed(self, _: LoggedAction) -> None:
         self._changes += 1
 
     async def _stock(self, game: Game) -> None:

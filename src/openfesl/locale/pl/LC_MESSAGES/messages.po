@@ -11167,3 +11167,90 @@ msgstr "%(numbers)s użycia"
 
 msgid "web.admin.store.ways.permanent"
 msgstr "na stałe"
+
+msgid "web.admin.store.not_sold"
+msgstr "Niesprzedawany"
+
+msgid "web.admin.store.not_sold.text"
+msgstr "Ukryty na stronach sklepu i w sklepie gry, a w kolejnych krokach rotacji pomijany w zestawach gorących ofert; bohaterowie zachowują to, co mają, a skrzynki i nagrody nadal mogą go dawać."
+
+msgid "web.admin.store.not_sold.text.drops"
+msgstr "Zasady rodzaju nie sprzedają go osobno: mogą go dawać skrzynki, nagrody i zestawy gorących ofert, a bohaterowie zachowują to, co mają. Punkt cenowy sprzedawany tutaj sprzedaje go osobno."
+
+msgid "web.admin.store.point.price_of"
+msgstr "Cena %(point)s, %(currency)s"
+
+msgid "web.admin.store.save"
+msgstr "Zapisz ceny"
+
+msgid "web.admin.store.save.busy"
+msgstr "Zapisywanie…"
+
+msgid "web.admin.store.save.note"
+msgstr "Zapis obejmuje wszystkie punkty cenowe naraz; gra wczytuje produkty przy otwarciu sklepu."
+
+msgid "web.admin.store.point.add"
+msgstr "Dodaj punkt cenowy"
+
+msgid "web.admin.store.point.uses"
+msgstr "Użycia"
+
+msgid "web.admin.store.point.add.rule"
+msgstr "Puste: cena z zasady"
+
+msgid "web.admin.store.point.add.submit"
+msgstr "Dodaj"
+
+msgid "web.admin.store.reset"
+msgstr "Przywróć zasadę rodzaju"
+
+msgid "web.admin.store.point.named"
+msgstr "%(currency)s, %(ownership)s"
+
+msgid "web.admin.store.refused.price"
+msgstr "Cena wynosi od 1 do %(most)s; %(price)s się nie nadaje."
+
+msgid "web.admin.store.refused.twice"
+msgstr "%(point)s to już punkt cenowy przedmiotu %(item)s."
+
+msgid "web.admin.store.refused.duration"
+msgstr "Nie zapisano: %(duration)s nie jest okresem z zasad; zasady znają %(days)s dni oraz posiadanie na stałe."
+
+msgid "web.admin.store.refused.uses"
+msgstr "Nie zapisano: %(uses)s nie jest liczbą użyć."
+
+msgid "web.admin.toast.store.saved"
+msgstr "Zapisano ceny przedmiotu %(item)s."
+
+msgid "web.admin.toast.store.added"
+msgstr "Dodano punkt cenowy przedmiotu %(item)s: %(point)s."
+
+msgid "web.admin.toast.store.reset"
+msgstr "Przywrócono ceny przedmiotu %(item)s według zasady rodzaju."
+
+msgid "web.admin.toast.store.unchanged"
+msgstr "Ceny przedmiotu %(item)s się nie zmieniły."
+
+msgid "web.admin.audit.action.store_prices"
+msgstr "Zmiana cen"
+
+msgid "web.admin.audit.action.store_prices.reset"
+msgstr "Przywrócenie cen z zasady"
+
+msgid "web.admin.audit.price"
+msgstr "%(point)s: %(change)s"
+
+msgid "web.admin.audit.price.added"
+msgstr "dodany za %(price)s"
+
+msgid "web.admin.audit.price.changed"
+msgstr "%(before)s → %(after)s"
+
+msgid "web.admin.audit.price.on"
+msgstr "znów sprzedawany"
+
+msgid "web.admin.audit.price.off"
+msgstr "wyłączony"
+
+msgid "web.admin.refused.role.store"
+msgstr "Zmiany w sklepie wymagają roli administratora."
