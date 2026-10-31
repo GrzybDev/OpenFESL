@@ -11823,3 +11823,57 @@ msgstr "When the account's first treasure chest arrives."
 
 msgid "web.admin.rewards.preview.note"
 msgstr "The preview shows the page as an eligible account with heroes of both factions sees it; nothing is claimed and nothing is written."
+
+msgid "web.admin.rewards.tab.claims"
+msgstr "Claims"
+
+msgid "web.admin.rewards.claims"
+msgstr "Claims · newest first"
+
+msgid "web.admin.rewards.claims.year.one"
+msgstr "%(count)s this year"
+
+msgid "web.admin.rewards.claims.year.other"
+msgstr "%(count)s this year"
+
+msgid "web.admin.rewards.claims.when"
+msgstr "When"
+
+msgid "web.admin.rewards.claims.account"
+msgstr "Account"
+
+msgid "web.admin.rewards.claims.hero"
+msgstr "Hero"
+
+msgid "web.admin.rewards.claims.reward"
+msgstr "Reward"
+
+msgid "web.admin.rewards.claims.given"
+msgstr "Given"
+
+msgid "web.admin.rewards.claims.no_hero"
+msgstr "No hero"
+
+msgid "web.admin.rewards.claims.none"
+msgstr "No reward of this kind was claimed this year."
+
+msgid "web.admin.rewards.claims.count"
+msgstr "Claims: %(count)s"
+
+msgid "web.admin.rewards.claims.note"
+msgstr "Newest first · times in UTC · %(count)s per page · a box's roll shows the item it gave; what goes to the account's wallet also shows in its ledger."
+
+msgid "web.admin.rewards.claims.filter"
+msgstr "Filter by reward"
+
+msgid "web.admin.rewards.claims.every"
+msgstr "Every reward"
+
+msgid "web.admin.rewards.claims.kind.starter"
+msgstr "Starter packs"
+
+msgid "web.admin.rewards.claims.kind.milestone"
+msgstr "Milestones"
+
+msgid "web.admin.rewards.claims.kind.first-chest"
+msgstr "First chest key"

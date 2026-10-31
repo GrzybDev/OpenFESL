@@ -49,6 +49,24 @@ class Claimed:
 
 
 @dataclass(frozen=True, slots=True)
+class ListedClaim:
+    """A claim of a reward by any account, as the admin's list of claims shows it.
+
+    Attributes:
+        claim: The claim.
+        account_id: The account that made it.
+        account: The account's login name.
+        hero: The name of the hero its items went to; none when they went to no hero, or the
+            hero is gone.
+    """
+
+    claim: Claim
+    account_id: int
+    account: str
+    hero: str | None
+
+
+@dataclass(frozen=True, slots=True)
 class Given:
     """What a claim gave a hero.
 

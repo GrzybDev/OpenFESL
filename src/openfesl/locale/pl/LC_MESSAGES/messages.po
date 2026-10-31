@@ -12577,3 +12577,63 @@ msgstr "Gdy pojawi się pierwsza skrzynia skarbów konta."
 
 msgid "web.admin.rewards.preview.note"
 msgstr "Podgląd pokazuje stronę tak, jak widzi ją uprawnione konto z bohaterami obu frakcji; nic nie jest odbierane ani zapisywane."
+
+msgid "web.admin.rewards.tab.claims"
+msgstr "Odebrane"
+
+msgid "web.admin.rewards.claims"
+msgstr "Odebrane nagrody · najnowsze na górze"
+
+msgid "web.admin.rewards.claims.year.one"
+msgstr "w tym roku: %(count)s"
+
+msgid "web.admin.rewards.claims.year.few"
+msgstr "w tym roku: %(count)s"
+
+msgid "web.admin.rewards.claims.year.many"
+msgstr "w tym roku: %(count)s"
+
+msgid "web.admin.rewards.claims.year.other"
+msgstr "w tym roku: %(count)s"
+
+msgid "web.admin.rewards.claims.when"
+msgstr "Kiedy"
+
+msgid "web.admin.rewards.claims.account"
+msgstr "Konto"
+
+msgid "web.admin.rewards.claims.hero"
+msgstr "Bohater"
+
+msgid "web.admin.rewards.claims.reward"
+msgstr "Nagroda"
+
+msgid "web.admin.rewards.claims.given"
+msgstr "Przyznano"
+
+msgid "web.admin.rewards.claims.no_hero"
+msgstr "Bez bohatera"
+
+msgid "web.admin.rewards.claims.none"
+msgstr "W tym roku nie odebrano żadnej takiej nagrody."
+
+msgid "web.admin.rewards.claims.count"
+msgstr "Odebrane: %(count)s"
+
+msgid "web.admin.rewards.claims.note"
+msgstr "Najnowsze na górze · czas UTC · %(count)s na stronę · losowanie skrzynki pokazuje przyznany przedmiot; to, co trafia do portfela konta, widać też w jego historii."
+
+msgid "web.admin.rewards.claims.filter"
+msgstr "Filtr nagród"
+
+msgid "web.admin.rewards.claims.every"
+msgstr "Wszystkie nagrody"
+
+msgid "web.admin.rewards.claims.kind.starter"
+msgstr "Pakiety startowe"
+
+msgid "web.admin.rewards.claims.kind.milestone"
+msgstr "Kamienie milowe"
+
+msgid "web.admin.rewards.claims.kind.first-chest"
+msgstr "Klucz za pierwszą skrzynię"

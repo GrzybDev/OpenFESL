@@ -1,0 +1,42 @@
+/* This year's claims of a game's rewards, beside the filter by the kind of reward. Where the
+   table does not fit, each claim is a block of its own. */
+@layer pages {
+  .admin-list .table.claims-table {
+    min-width: 820px;
+  }
+
+  .claims-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns:
+      130px minmax(160px, 1fr) minmax(120px, 0.8fr) minmax(200px, 1.3fr)
+      minmax(200px, 1.3fr);
+    gap: 2px;
+  }
+
+  .claims-row:nth-child(even) {
+    --cell: var(--row-alt);
+  }
+
+  @container (width < 820px) {
+    .admin-list .table.claims-table {
+      min-width: 0;
+
+      [role="rowgroup"]:first-child {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
+    }
+
+    .claims-row.claims-columns {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+
+      > :nth-child(n + 3) {
+        grid-column: 1 / -1;
+      }
+    }
+  }
+}

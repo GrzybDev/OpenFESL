@@ -6,11 +6,18 @@ from sqlalchemy.dialects.postgresql import JSONB, insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.inventory import Ownership
-from openfesl.core.reward_claims import Claim, Grant
+from openfesl.core.reward_claims import Claim, Grant, ListedClaim
 from openfesl.core.rewards import RewardRefusal, RewardRefused
 from openfesl.core.stats import PERSONA, Bucket
 from openfesl.storage.entitlements import add_account_item, add_item
-from openfesl.storage.models import RewardBaselineRow, RewardClaimRow, RewardPauseRow, StatRow
+from openfesl.storage.models import (
+    AccountRow,
+    PersonaRow,
+    RewardBaselineRow,
+    RewardClaimRow,
+    RewardPauseRow,
+    StatRow,
+)
 from openfesl.storage.wallets import credit
 
 # The ledger's reason for the Funds that rewards give.
@@ -198,6 +205,63 @@ class SqlRewardStore:
                 .order_by(RewardClaimRow.claimed_at.desc(), RewardClaimRow.id.desc())
             )
             return [_claim(row) for row in rows]
+
+    async def kinds(self, game: str, since: datetime) -> dict[str, int]:
+        """Return how many rewards of each kind accounts claimed since a moment.
+
+        Args:
+            game: The game's data-file name.
+            since: The moment.
+
+        Returns:
+            The counts by the start of the rewards' keys, such as an event's key, starter,
+            milestone or first-chest.
+        """
+        kind = func.split_part(RewardClaimRow.key, ":", 1)
+        async with self._sessions() as session:
+            rows = await session.execute(
+                select(kind, func.count())
+                .where(RewardClaimRow.game == game, RewardClaimRow.claimed_at >= since)
+                .group_by(kind)
+            )
+            return {found: count for found, count in rows}
+
+    async def listed(
+        self, game: str, since: datetime, kind: str, offset: int, limit: int
+    ) -> tuple[int, list[ListedClaim]]:
+        """Return the rewards that accounts claimed since a moment, the latest first.
+
+        Args:
+            game: The game's data-file name.
+            since: The moment.
+            kind: The start of the rewards' keys, as kinds counts them; every reward when empty.
+            offset: How many claims to skip.
+            limit: The most to return.
+
+        Returns:
+            How many claims there are, and those of the page.
+        """
+        conditions = [RewardClaimRow.game == game, RewardClaimRow.claimed_at >= since]
+        if kind:
+            conditions.append(func.split_part(RewardClaimRow.key, ":", 1) == kind)
+        async with self._sessions() as session:
+            total = await session.scalar(
+                select(func.count()).select_from(RewardClaimRow).where(*conditions)
+            )
+            rows = await session.execute(
+                select(RewardClaimRow, AccountRow.nuid, PersonaRow.name)
+                .join(AccountRow, AccountRow.id == RewardClaimRow.account_id)
+                .outerjoin(PersonaRow, PersonaRow.id == RewardClaimRow.persona_id)
+                .where(*conditions)
+                .order_by(RewardClaimRow.claimed_at.desc(), RewardClaimRow.id.desc())
+                .offset(offset)
+                .limit(limit)
+            )
+            found = [
+                ListedClaim(_claim(row), row.account_id, account, hero)
+                for row, account, hero in rows
+            ]
+            return total or 0, found
 
 
 async def _give(session: AsyncSession, grant: Grant) -> list[tuple[int, Ownership]]:

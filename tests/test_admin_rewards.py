@@ -3,10 +3,12 @@ from pathlib import Path
 
 import httpx2
 import pytest
-from accounts import execute, select_value
+from accounts import PASSWORD, execute, post_sign_in, select_value
+from heroes import create_hero
 from identity import IdentityProvider, form_token, sign_in
 from living import freeze, import_catalogue
 from living import setting as change
+from store import ROYAL_SOLDIER
 from support import visible
 from test_admin_deals import setting
 from test_admin_heroes import KEEPER, WARDEN
@@ -260,3 +262,39 @@ async def test_the_preview_shows_the_players_page_on_a_date_with_the_switches_ap
     assert "E9 Claimable that day · day 9 of 24 Christmas gifts" in christmas
     assert "No calendar reward on this date" in quiet
     assert "The players' rewards page on 28 Oct 2026" in wrong
+
+
+@pytest.mark.usefixtures("halloween", "prompt_actions")
+async def test_this_years_claims_list_who_claimed_what_for_which_hero_by_kind(
+    admin_provider: IdentityProvider,
+    base: str,
+    server_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    await import_catalogue(server_url, tmp_path, capsys, INVENTED)
+    hero = await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    async with httpx2.AsyncClient() as client:
+        await post_sign_in(client, base, "ann@example.test", PASSWORD)
+        token = form_token((await client.get(f"{base}/bfheroes/rewards")).text)
+        for key, faction, chosen in (
+            ("milestone:first-hero", "", ""),
+            (f"starter:{hero}", "royal", str(hero)),
+        ):
+            form = {"csrf": token, "key": key, "faction": faction, "hero": chosen}
+            await client.post(f"{base}/bfheroes/rewards/claim", data=form)
+    admin_provider.user = WARDEN
+    async with httpx2.AsyncClient() as client:
+        every = visible((await sign_in(client, base, next=f"{REWARDS}/claims")).content)
+        packs = visible((await client.get(f"{base}{REWARDS}/claims?reward=starter")).content)
+        bento = visible((await client.get(f"{base}{REWARDS}/claims?reward=bento")).content)
+
+    assert "Claims · newest first 2 this year" in every
+    assert (
+        "28 Oct 2026 12:00 UTC Account ann@example.test Hero Brassbuckle Starter pack Given"
+        " Invented Tonic · 25 uses, Invented Rifle · 7 days"
+    ) in every
+    assert "Hero \u2013 No hero M1 First hero Given 600 Funds for the account" in every
+    assert "Every reward 2 Starter packs 1 Milestones 1" in every
+    assert "Claims: 1" in packs and "First hero" not in packs
+    assert "No reward of this kind was claimed this year." in bento

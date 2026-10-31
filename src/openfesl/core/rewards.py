@@ -261,24 +261,8 @@ class Rewards:
         if rules is None:
             return []
         year = date(today(self._clock(), rules.zone).year, 1, 1)
-        found = []
-        for claim in await self._store.claims(game.id, account_id, day_start(year, rules.zone)):
-            # What its key stands for names it; a milestone's name states its goal.
-            kind, _, rest = claim.key.partition(":")
-            name, goal = claim.key, None
-            if kind == "milestone" and (milestone := rules.milestones.get(rest.partition(":")[0])):
-                name, goal = milestone.name, milestone.goal
-            elif kind == "starter" and rules.starter:
-                name = rules.starter.name
-            elif kind == FIRST_CHEST and rules.first_chest:
-                name = rules.first_chest.name
-            elif event := rules.events.get(kind):
-                parts = (part for part in event.parts.values() if part.faction == claim.faction)
-                if part := next(parts, None):
-                    day = rest.partition(":")[2]
-                    name = _dated(part.name, int(day) if day else None)
-            found.append(Claimed(claim, name, goal))
-        return found
+        claims = await self._store.claims(game.id, account_id, day_start(year, rules.zone))
+        return [claimed(rules, claim) for claim in claims]
 
     async def claim(
         self, game: Game, account_id: int, key: str, faction: str | None, hero_id: int | None
@@ -489,6 +473,30 @@ class Rewards:
         if won is None:
             raise RewardRefused(RewardRefusal.UNFIT)
         return ((won.item_id, won.ownership),), True
+
+
+def claimed(rules: RewardRules, claim: Claim) -> Claimed:
+    """Return a claim with what names it: the reward that its key stands for.
+
+    Args:
+        rules: The rewards, which name the reward.
+        claim: The claim.
+    """
+    # A milestone's name states its goal.
+    kind, _, rest = claim.key.partition(":")
+    name, goal = claim.key, None
+    if kind == "milestone" and (milestone := rules.milestones.get(rest.partition(":")[0])):
+        name, goal = milestone.name, milestone.goal
+    elif kind == "starter" and rules.starter:
+        name = rules.starter.name
+    elif kind == FIRST_CHEST and rules.first_chest:
+        name = rules.first_chest.name
+    elif event := rules.events.get(kind):
+        parts = (part for part in event.parts.values() if part.faction == claim.faction)
+        if part := next(parts, None):
+            day = rest.partition(":")[2]
+            name = _dated(part.name, int(day) if day else None)
+    return Claimed(claim, name, goal)
 
 
 def gives_box(contents: Contents, gift: Gift, hero: Hero) -> bool:

@@ -1,0 +1,100 @@
+{#def of, listing, rows: list, total: int, year: int, filters: list, pages: int, size: int, pause, paused: bool, manages: bool #}
+{# This year's claims of a game's rewards, newest first: when, which account, which hero,
+   which reward and what it gave, a box's roll by the item it gave, beside the filter by the kind
+   of reward with how many claims each has. Claims are not the admin's actions, so the audit log
+   leaves them out; Funds also show in the account's ledger. #}
+{% set game = of %}
+{% set list = url("/admin/rewards/" ~ game.id ~ "/claims") %}
+<AdminPage :title="_('web.admin.rewards.tab.claims') ~ ' · ' ~ _('web.admin.rewards.title')"
+           current="rewards">
+  <RewardsHead :game="game" current="claims" :subtitle="_('web.admin.rewards.subtitle', game=game.name)" />
+  <Panel class="enter-panel rewards-page">
+    <PauseBar :game="game" :paused="paused" :entry="pause" :manages="manages" />
+    <div class="list-layout admin-layout">
+      <section aria-labelledby="claims-list" class="list-main admin-list">
+        <Bar id="claims-list" :extra="_n('web.admin.rewards.claims.year', year)" wrap>{{ _("web.admin.rewards.claims") }}</Bar>
+        <div class="table-scroll table-scroll-flush">
+          <div role="table" aria-labelledby="claims-list" class="table claims-table">
+            <div role="rowgroup" class="admin-list-head">
+              <div role="row" class="claims-columns">
+                <div role="columnheader"
+                     aria-sort="descending"
+                     class="column-head column-sorted">
+                  {{ _("web.admin.rewards.claims.when") }}<Icon name="down" :size="14" stroke="currentColor" />
+                </div>
+                <div role="columnheader" class="column-head">{{ _("web.admin.rewards.claims.account") }}</div>
+                <div role="columnheader" class="column-head">{{ _("web.admin.rewards.claims.hero") }}</div>
+                <div role="columnheader"
+                     class="column-head column-name">{{ _("web.admin.rewards.claims.reward") }}</div>
+                <div role="columnheader" class="column-head">{{ _("web.admin.rewards.claims.given") }}</div>
+              </div>
+            </div>
+            <div role="rowgroup" class="enter-rows table-rows">
+              {% for row in rows %}
+                {% set claim = row.listed.claim %}
+                <div role="row" class="claims-columns claims-row">
+                  <div role="cell" class="admin-cell cell-stack">
+                    <span class="cell-time">{{ when(claim.at, "yMMMd") }}</span>
+                    <span class="cell-ago">{{ _("web.server.time", time=when(claim.at, "Hm")) }}</span>
+                  </div>
+                  <div role="cell" class="admin-cell cell-stack">
+                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.rewards.claims.account") }}</span>
+                    <a href="{{ url('/admin/accounts/' ~ row.listed.account_id) }}"
+                       class="bar-link">{{ row.listed.account }}</a>
+                  </div>
+                  <div role="cell" class="admin-cell cell-stack">
+                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.rewards.claims.hero") }}</span>
+                    {% if row.listed.hero %}
+                      {{ row.listed.hero }}
+                    {% else %}
+                      <span aria-hidden="true">–</span><span class="sr-only">{{ _("web.admin.rewards.claims.no_hero") }}</span>
+                    {% endif %}
+                  </div>
+                  <div role="cell" class="admin-cell rewards-event">
+                    {% if row.chip %}<span class="rewards-number">{{ row.chip }}</span>{% endif %}
+                    <span>{{ row.name }}</span>
+                  </div>
+                  <div role="cell" class="admin-cell cell-stack">
+                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.rewards.claims.given") }}</span>
+                    {{ row.given or "–" }}
+                  </div>
+                </div>
+              {% else %}
+                <div role="row">
+                  <div role="cell" aria-colspan="5" class="row-details list-empty">
+                    <div>
+                      <p class="list-empty-title">{{ _("web.admin.rewards.claims.none") }}</p>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <div class="list-foot">
+          <p>
+            <span class="list-count">{{ _("web.admin.rewards.claims.count", count=number(total)) }}</span><span class="list-range">{{ _("web.admin.rewards.claims.note", count=number(size)) }}</span>
+          </p>
+          <Pager :base="list" :view="listing" :pages="pages" />
+        </div>
+      </section>
+      <div class="list-side admin-side">
+        <nav aria-labelledby="claims-filter" class="audit-filter">
+          <h2 id="claims-filter" class="bar bar-large">
+            <span>{{ _("web.admin.rewards.claims.filter") }}</span>
+          </h2>
+          <ul>
+            <li>
+              <Toggle :href="list" :label="_('web.admin.rewards.claims.every')" :current="not listing.reward" :count="year" />
+            </li>
+            {% for kind, label, count in filters %}
+              <li>
+                <Toggle :href="list ~ listing.changed(reward=kind, page=1).query()" :label="label" :current="listing.reward == kind" :count="count" />
+              </li>
+            {% endfor %}
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </Panel>
+</AdminPage>

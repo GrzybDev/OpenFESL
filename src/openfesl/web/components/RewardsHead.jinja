@@ -7,7 +7,7 @@
     <TitleBlock :title="_('web.admin.rewards.title')" id="rewards-title">{{ subtitle }}</TitleBlock>
   </div>
   <nav aria-label="{{ _('web.admin.rewards.tabs') }}" class="tabs">
-    {% for tab, path in [("rules", ""), ("preview", "/preview")] %}
+    {% for tab, path in [("rules", ""), ("preview", "/preview"), ("claims", "/claims")] %}
       <Tab :href="base ~ path" :label="_('web.admin.rewards.tab.' ~ tab)" :current="tab == current" />
     {% endfor %}
   </nav>
