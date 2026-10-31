@@ -11792,6 +11792,9 @@ msgstr "The texts of this event name what it gives; other contents need own text
 msgid "web.admin.rewards.refused.amount"
 msgstr "Funds and keys are whole numbers from 0 to %(most)s."
 
+msgid "web.admin.rewards.refused.goal"
+msgstr "A goal is a whole number from 1 to %(most)s."
+
 msgid "web.admin.rewards.refused.empty"
 msgstr "The %(faction)s half of %(event)s has no contents; switch the faction off or add an item."
 
@@ -11827,6 +11830,9 @@ msgstr "The game's texts of this event cover days 1 to %(days)s; a day %(day)s n
 
 msgid "web.admin.rewards.text_rule.end"
 msgstr "The game's texts of this event state its last day, %(date)s; a last day of %(new)s needs own text."
+
+msgid "web.admin.rewards.text_rule.goal"
+msgstr "The game's texts of this event state a goal of %(goal)s; a goal of %(new_goal)s needs own text."
 
 msgid "web.admin.rewards.text_rule.english"
 msgstr "English is required."
@@ -12076,6 +12082,9 @@ msgstr "%(part)s: switched off"
 
 msgid "web.admin.audit.reward_part.contents"
 msgstr "%(part)s: other contents"
+
+msgid "web.admin.audit.reward_part.goal"
+msgstr "%(part)s: goal %(before)s → %(after)s"
 
 msgid "web.admin.rewards.tabs"
 msgstr "Views of the rewards"

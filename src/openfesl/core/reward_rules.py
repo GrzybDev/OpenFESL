@@ -95,7 +95,8 @@ class Event(BaseModel):
             than one gift for all of them.
         parts: Its parts, by name.
         stated: What the texts of its parts state, so that changing it needs own text: days (a
-            text for each of the data's days), end (its last day) or gift (what the parts give).
+            text for each of the data's days), end (its last day), goal (the goals' counts) or
+            gift (what the parts give).
         own_text: The admin's own text of what it gives, by language, in place of the texts
             of its parts, which its title then names; English stands in for a language without
             one. None keeps the parts' texts.
@@ -109,7 +110,7 @@ class Event(BaseModel):
     window: Window
     daily: bool = False
     parts: dict[str, Part]
-    stated: frozenset[Literal["days", "end", "gift"]] = frozenset()
+    stated: frozenset[Literal["days", "end", "goal", "gift"]] = frozenset()
     own_text: dict[str, str] = {}
 
     def text(self, language: str) -> str:
@@ -134,6 +135,11 @@ class Event(BaseModel):
             found.append("days")
         if "end" in self.stated and new_last != last:
             found.append("end")
+        goals = [part.goal and part.goal.count for part in self.parts.values()]
+        if "goal" in self.stated and goals != [
+            part.goal and part.goal.count for part in edited.parts.values()
+        ]:
+            found.append("goal")
         gifts = [(part.gift, part.days) for part in self.parts.values()]
         if "gift" in self.stated and gifts != [
             (part.gift, part.days) for part in edited.parts.values()

@@ -426,3 +426,17 @@
     }
   }
 }
+
+/* A mission's goal, the one fact of its goal that the editor changes, on white with the ink
+   outline. */
+@layer pages {
+  .reward-goal .reward-goal-input {
+    width: 100%;
+    max-width: 160px;
+    margin-left: auto;
+    border: 3px solid var(--ink);
+    background: #ffffff;
+    padding: 4px 8px;
+    text-align: right;
+  }
+}

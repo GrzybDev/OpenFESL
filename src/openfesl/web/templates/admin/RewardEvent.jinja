@@ -188,14 +188,30 @@
                   <FieldError :id="'part-' ~ view.key ~ '-note'">{{ refusal }}</FieldError>
                 {% endif %}
                 {% if view.goal %}
-                  <dl class="facts">
+                  {% set goal_name = "goal-" ~ view.key %}
+                  {% set wrong_goal = refusing and goal_name in editor.refused %}
+                  <dl class="facts reward-goal">
                     {% for label, value in view.goal %}
                       <Fact :label="_('web.admin.rewards.goal.' ~ label)"
                             :plain="label == 'stat'">
-                        {{ value }}
+                        {% if label == "goal" %}
+                          <input name="{{ goal_name }}"
+                                 type="text"
+                                 inputmode="numeric"
+                                 value="{{ draft_part.goal }}"
+                                 autocomplete="off"
+                                 aria-label="{{ _('web.admin.rewards.goal.goal') }} · {{ who(view.part) }}"
+                                 {% if wrong_goal %} aria-invalid="true" aria-describedby="{{ goal_name }}-note"{% endif %}
+                                 class="field-input reward-goal-input{% if wrong_goal %} field-invalid{% endif %}">
+                        {% else %}
+                          {{ value }}
+                        {% endif %}
                       </Fact>
                     {% endfor %}
                   </dl>
+                  {% if wrong_goal %}
+                    <FieldError :id="goal_name ~ '-note'">{{ editor.refused[goal_name] }}</FieldError>
+                  {% endif %}
                 {% endif %}
               </div>
             {% endfor %}

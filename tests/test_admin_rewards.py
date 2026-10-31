@@ -13,7 +13,7 @@ from store import ROYAL_SOLDIER
 from support import form_fields, visible
 from test_admin_deals import setting
 from test_admin_heroes import KEEPER, WARDEN
-from test_rewards import INVENTED
+from test_rewards import INVENTED, kills
 
 pytestmark = pytest.mark.anyio
 
@@ -110,7 +110,7 @@ async def test_an_events_page_shows_its_days_gifts_goals_texts_and_paused_days(
     assert "Days with other gifts In place of that day's gift Royal Army National Army" in christmas
     assert "Day 17" in christmas and "Claims were not paused during this event" in christmas
     assert "Royal Army Royal Army: On Invented Golden Machete · permanent" in mission
-    assert "Goal 700 Counted stat kw106 Class Commando Counted from 19 Oct Before 1 Nov" in mission
+    assert "Goal Counted stat kw106 Class Commando Counted from 19 Oct Before 1 Nov" in mission
     assert (
         "Each hero counts from 19 Oct; a goal reached can be claimed until the end of 31 Oct"
         in (mission)
@@ -338,6 +338,60 @@ async def test_admins_change_what_each_part_gives_and_the_days_of_other_gifts(
     assert "Invented Mask · 7 days" in page
     assert saving == ["false", "true"]
     assert "Added Invented Visor to the National Army half" in answered
+
+
+@pytest.mark.usefixtures("halloween", "prompt_actions")
+async def test_admins_change_a_missions_goal_with_own_text_as_the_games_states_the_goal(
+    admin_provider: IdentityProvider,
+    base: str,
+    server_url: str,
+    database_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    await import_catalogue(server_url, tmp_path, capsys, INVENTED)
+    commando = await create_hero(
+        base, "ann@example.test", "Cutthroat", faction="royal", **{"class": "commando"}
+    )
+    async with httpx2.AsyncClient() as player:
+        # The first look takes the heroes' counts when the mission began.
+        await post_sign_in(player, base, "ann@example.test", PASSWORD)
+        await player.get(f"{base}/bfheroes/rewards")
+    machete = f"{base}{REWARDS}/events/halloween-machete"
+    goal = "bfheroes.rewards.events.halloween-machete.parts.royal.goal.count"
+    admin_provider.user = KEEPER
+    async with httpx2.AsyncClient() as client:
+        fields = form_fields(
+            (await sign_in(client, base, next=f"{REWARDS}/events/halloween-machete")).text
+        )
+        lower = fields | {"goal-royal": ["500"]}
+        untexted = await client.post(machete, data=lower)
+        zero = await client.post(machete, data=fields | {"goal-royal": ["0"]})
+        texted = lower | {"text-en": ["500 machete kills on one Commando bring a golden machete."]}
+        await client.post(machete, data=texted)
+        saved = await setting(database_url, goal)
+        overview = visible((await client.get(f"{base}{REWARDS}")).content)
+        log = visible((await client.get(f"{base}/admin/audit")).content)
+    await kills(database_url, commando, "kw106", 120)
+    async with httpx2.AsyncClient() as player:
+        await post_sign_in(player, base, "ann@example.test", PASSWORD)
+        page = visible((await player.get(f"{base}/bfheroes/rewards")).content)
+
+    assert untexted.status_code == zero.status_code == 400
+    assert (
+        "The game's texts of this event state a goal of 700; a goal of 500 needs own text."
+        " English is required."
+    ) in visible(untexted.content)
+    assert "A goal is a whole number from 1 to 2,147,483,647." in visible(zero.content)
+    assert saved == "500"
+    assert "Goal 500 · stat kw106 · Commando · Royal Army" in overview
+    assert (
+        "Event changed Halloween machete mission Details Royal Army: goal 700 → 500; own text:"
+        " English"
+    ) in log
+    # The players' page counts the hero's kills against the new goal, with the own text.
+    assert "500 machete kills on one Commando bring a golden machete." in page
+    assert "Cutthroat 120 of 500 kills" in page
 
 
 @pytest.mark.usefixtures("halloween", "prompt_actions")

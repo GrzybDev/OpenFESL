@@ -22,6 +22,7 @@ from openfesl.web.admin.reward_contents import (
     written_adding,
     written_parts,
 )
+from openfesl.web.pages import number
 from openfesl.web.reward_texts import RewardTexts
 
 # The most characters of an own text, which a reward's card shows in full.
@@ -181,6 +182,13 @@ def editor_of(
         else:
             line = texts.text("web.admin.rewards.event.once", **dates)
         data_first, data_last = seed.window.days(run.year)
+        # The first goal that the edit changed, as the data and the edit set it.
+        goals = [
+            (part.goal.count, edited.parts[key].goal)
+            for key, part in seed.parts.items()
+            if part.goal and edited.parts[key].goal != part.goal
+        ]
+        goal, new_goal = goals[0] if goals else (0, None)
         needs = [
             texts.text(
                 f"web.admin.rewards.text_rule.{reason}",
@@ -188,6 +196,8 @@ def editor_of(
                 day=texts.amount(shown.days),
                 date=words.dated(data_last),
                 new=dates["last"],
+                goal=texts.amount(goal),
+                new_goal=texts.amount(new_goal.count if new_goal else 0),
             )
             for reason in seed.outdated(edited, run.year)
         ]
@@ -291,6 +301,13 @@ def event_entry(game: Game, details: dict[str, Any], language: str) -> tuple[str
         ]
         values = {"before": written[0], "after": written[1]}
         said.append(translate("web.admin.audit.reward_dates", language) % values)
+    for name, change, *goals in details.get("parts", []):
+        faction = event.parts[name].faction if event and name in event.parts else None
+        who = f"games.{game.id}.faction.{faction}" if faction else "web.admin.rewards.part.account"
+        values = {"part": translate(who, language)}
+        if goals:
+            values |= {"before": number(goals[0], language), "after": number(goals[1], language)}
+        said.append(translate(f"web.admin.audit.reward_part.{change}", language) % values)
     own_before, own_after = details["own_text"]
     if own_after and not own_before:
         named = ", ".join(str(locale.languages.get(code, code)) for code in own_after)
@@ -299,10 +316,5 @@ def event_entry(game: Game, details: dict[str, Any], language: str) -> tuple[str
         said.append(translate("web.admin.audit.reward_text.removed", language))
     elif own_before != own_after:
         said.append(translate("web.admin.audit.reward_text.changed", language))
-    for name, change in details.get("parts", []):
-        faction = event.parts[name].faction if event and name in event.parts else None
-        who = f"games.{game.id}.faction.{faction}" if faction else "web.admin.rewards.part.account"
-        values = {"part": translate(who, language)}
-        said.append(translate(f"web.admin.audit.reward_part.{change}", language) % values)
     href = localize(f"/admin/rewards/{game.id}/events/{key}", language)
     return shown, href, "; ".join(said)

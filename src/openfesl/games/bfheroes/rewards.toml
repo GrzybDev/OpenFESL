@@ -112,7 +112,7 @@ gift = { box = "national-trick-or-treat" }
 title = "games.bfheroes.rewards.halloween-machete"
 summary = "games.bfheroes.rewards.halloween-machete.summary"
 window = { dates = ["10-19", "10-31"] }
-stated = ["end", "gift"]
+stated = ["end", "goal", "gift"]
 
 [rewards.events.halloween-machete.parts.royal]
 faction = "royal"
@@ -132,7 +132,7 @@ gift = { items = [3205] }
 title = "games.bfheroes.rewards.halloween-map"
 summary = "games.bfheroes.rewards.halloween-map.summary"
 window = { dates = ["10-19", "10-31"] }
-stated = ["end", "gift"]
+stated = ["end", "goal", "gift"]
 
 [rewards.events.halloween-map.parts.royal]
 faction = "royal"
@@ -177,7 +177,7 @@ title = "games.bfheroes.rewards.rising-sun"
 summary = "games.bfheroes.rewards.rising-sun.summary"
 enabled = false
 window = { dates = ["11-21", "11-30"] }
-stated = ["end", "gift"]
+stated = ["end", "goal", "gift"]
 
 [rewards.events.rising-sun.parts.royal]
 faction = "royal"

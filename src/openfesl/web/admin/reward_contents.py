@@ -26,6 +26,7 @@ class PartDraft:
         funds: The Funds it gives, as written.
         keys: The treasure chest keys it gives, as written.
         days: The items and the box it gives instead on some days, by the day from 1.
+        goal: What one hero's count must reach first, as written; empty for no goal.
     """
 
     key: str
@@ -35,6 +36,7 @@ class PartDraft:
     funds: str
     keys: str
     days: dict[int, tuple[tuple[str, ...], str]]
+    goal: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -88,6 +90,7 @@ def drafted_parts(event: Event) -> tuple[PartDraft, ...]:
             str(part.gift.funds),
             str(part.gift.keys),
             {day: (_written(gift), gift.box or "") for day, gift in part.days.items()},
+            str(part.goal.count) if part.goal else "",
         )
         for key, part in event.parts.items()
     )
@@ -124,6 +127,7 @@ def written_parts(fields: ImmutableMultiDict[str, Any], event: Event) -> tuple[P
                 str(fields.get(f"funds-{key}", "")).strip(),
                 str(fields.get(f"keys-{key}", "")).strip(),
                 days,
+                str(fields.get(f"goal-{key}", "")).strip(),
             )
         )
     return tuple(found)
@@ -205,6 +209,14 @@ def contents_of(
             }
         except ValidationError:
             raise HTTPException(400) from None
+        goal = part.goal
+        if goal:
+            count = _amount(draft.goal)
+            if not count:
+                refused[f"goal-{draft.key}"] = texts.text(
+                    "web.admin.rewards.refused.goal", most=texts.amount(MOST_BALANCE)
+                )
+            goal = goal.model_copy(update={"count": count or goal.count})
         if draft.on and not (gift.for_hero or gift.funds or gift.keys):
             key = "empty" if part.faction else "empty.account"
             faction = texts.factions(frozenset({part.faction})) if part.faction else ""
@@ -212,7 +224,7 @@ def contents_of(
                 f"web.admin.rewards.refused.{key}", faction=faction, event=title
             )
         parts[draft.key] = part.model_copy(
-            update={"enabled": draft.on, "gift": gift, "days": others}
+            update={"enabled": draft.on, "gift": gift, "days": others, "goal": goal}
         )
     return Contents(drafts, parts, refused, added)
 

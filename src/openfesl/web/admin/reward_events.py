@@ -326,7 +326,7 @@ def reward_event_routes(sessions: AdminSessions, views: RewardEventViews) -> API
             else json.dumps(window.model_dump(exclude_none=True)),
             f"events.{key}.own_text": json.dumps(own) if own else None,
         }
-        changes = []
+        changes: list[list[str | int]] = []
         for name, part in edited.parts.items():
             before, data = event.parts[name], seed.parts[name]
             prefix = f"events.{key}.parts.{name}"
@@ -341,6 +341,12 @@ def reward_event_routes(sessions: AdminSessions, views: RewardEventViews) -> API
                 changes.append([name, "on" if on else "off"])
             if (part.gift, part.days) != (before.gift, before.days):
                 changes.append([name, "contents"])
+            if part.goal and before.goal and part.goal.count != before.goal.count:
+                changes.append([name, "goal", before.goal.count, part.goal.count])
+                count = part.goal.count
+                settings[f"{prefix}.goal.count"] = (
+                    None if data.goal and count == data.goal.count else str(count)
+                )
         details = {
             "event": key,
             "dates": [run_days(event.window, run.year), run_days(window, run.year)],

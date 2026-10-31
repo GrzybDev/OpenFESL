@@ -12540,6 +12540,9 @@ msgstr "Teksty tego wydarzenia podają, co ono daje; inna zawartość wymaga wł
 msgid "web.admin.rewards.refused.amount"
 msgstr "Funds i klucze to liczby całkowite od 0 do %(most)s."
 
+msgid "web.admin.rewards.refused.goal"
+msgstr "Cel to liczba całkowita od 1 do %(most)s."
+
 msgid "web.admin.rewards.refused.empty"
 msgstr "Część %(faction)s w wydarzeniu %(event)s nie ma zawartości; należy wyłączyć frakcję albo dodać przedmiot."
 
@@ -12575,6 +12578,9 @@ msgstr "Teksty gry dla tego wydarzenia obejmują dni od 1 do %(days)s; dzień %(
 
 msgid "web.admin.rewards.text_rule.end"
 msgstr "Teksty gry dla tego wydarzenia podają jego ostatni dzień, %(date)s; ostatni dzień %(new)s wymaga własnego tekstu."
+
+msgid "web.admin.rewards.text_rule.goal"
+msgstr "Teksty gry dla tego wydarzenia podają cel %(goal)s; cel %(new_goal)s wymaga własnego tekstu."
 
 msgid "web.admin.rewards.text_rule.english"
 msgstr "Angielski jest wymagany."
@@ -12824,6 +12830,9 @@ msgstr "%(part)s: wyłączenie"
 
 msgid "web.admin.audit.reward_part.contents"
 msgstr "%(part)s: inna zawartość"
+
+msgid "web.admin.audit.reward_part.goal"
+msgstr "%(part)s: cel %(before)s → %(after)s"
 
 msgid "web.admin.rewards.tabs"
 msgstr "Widoki nagród"
