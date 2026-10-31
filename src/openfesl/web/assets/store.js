@@ -116,19 +116,24 @@ function closes(dialog, opener) {
 }
 
 /**
- * Counts a hot deal's time left down each second while the page is shown, under a day as a clock
- * alone, and says so once it runs out.
+ * Counts a time left down each second while the page is shown, under a day as a clock alone, and
+ * says so once it runs out; it stops once its element leaves the page.
  *
  * @param {HTMLElement} timer - The time left, with the server's seconds to its end and its wording.
- * @param {() => void} ended - Shows that the deal has ended.
+ * @param {() => void} ended - Shows what its end changes.
  */
 export function countDown(timer, ended) {
   const ends = Date.now() + Number(timer.dataset.left) * 1000;
   const tick = () => {
+    if (!timer.isConnected) {
+      clearInterval(interval);
+      return;
+    }
     if (document.hidden) {
       return;
     }
-    const left = Math.max(Math.floor((ends - Date.now()) / 1000), 0);
+    // Rounded up, so that it runs out no sooner than its end.
+    const left = Math.max(Math.ceil((ends - Date.now()) / 1000), 0);
     const clock = [Math.floor((left % 86400) / 3600), Math.floor((left % 3600) / 60), left % 60]
       .map((part) => String(part).padStart(2, "0"))
       .join(":");

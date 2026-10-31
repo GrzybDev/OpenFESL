@@ -20,8 +20,15 @@ from openfesl.core.wallets import Wallets
 from openfesl.web.account.session import open_page, signed_in
 from openfesl.web.catalogue_files import icon_url
 from openfesl.web.pages import Pages
-from openfesl.web.sessions import SentForms, form_token, purchase_matches, toast
-from openfesl.web.site import CLAW, SiteBar, site_bar
+from openfesl.web.sessions import (
+    SentForms,
+    form_matches,
+    form_token,
+    inside,
+    purchase_matches,
+    toast,
+)
+from openfesl.web.site import CLAW, CLAW_CLOSED, SiteBar, site_bar
 from openfesl.web.store_texts import StoreTexts
 
 # What the last grab gave, which the next page of the Claw shows once.
@@ -111,7 +118,7 @@ class FeedLine:
 
 
 class ClawPages:
-    """The Daily Claw of each game that has one: its page and its grabs."""
+    """The Daily Claw of each game that has one: its page, its grabs and closing its overlay."""
 
     def __init__(
         self,
@@ -140,12 +147,13 @@ class ClawPages:
         self._wallets = wallets
 
     def routes(self) -> APIRouter:
-        """Return each game's Claw page and its grab form."""
+        """Return each game's Claw page, its grab form and the form that closes its overlay."""
         router = APIRouter()
         for game in self._games.with_page("claw"):
             base = f"/{game.id}{CLAW}"
             router.add_api_route(base, self._page(game), response_class=HTMLResponse)
             router.add_api_route(base, self._grab(game), methods=["POST"])
+            router.add_api_route(base + "/close", self._close(game), methods=["POST"])
             # The website's own address of the Claw in 2012.
             router.add_api_route(f"/{game.id}/spinner", self._moved(game))
         return router
@@ -228,6 +236,20 @@ class ClawPages:
             return RedirectResponse(page, 303)
 
         return grab
+
+    def _close(self, game: Game) -> Callable[[Request], Awaitable[Response]]:
+        async def close_claw(request: Request) -> Response:
+            form = await request.form()
+            language = request.state.language
+            places = (f"/{game.id}", f"/{language}/{game.id}")
+            back = inside(str(form.get("next", "")), places) or localize(f"/{game.id}", language)
+            bar = await site_bar(request)
+            day = bar.claw.day if bar and bar.claw else None
+            if day and form_matches(request, form):
+                request.session[CLAW_CLOSED] = day.isoformat()
+            return RedirectResponse(back, 303)
+
+        return close_claw
 
     def _moved(self, game: Game) -> Callable[[Request], Awaitable[Response]]:
         async def moved(request: Request) -> Response:

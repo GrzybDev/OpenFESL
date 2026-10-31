@@ -14958,14 +14958,53 @@ msgstr "Dziś czeka darmowa próba. Nagroda trafi do bohatera wybranego tutaj."
 msgid "web.claw.pick"
 msgstr "Wybierz bohatera"
 
+msgid "web.claw.chosen"
+msgstr "%(what)s · nagroda trafi do tego bohatera"
+
+msgid "web.claw.change"
+msgstr "Zmień bohatera"
+
+msgid "web.claw.machine"
+msgstr "Automat z chwytakiem"
+
+msgid "web.claw.belts_empty"
+msgstr "Taśmy wypełnią się nagrodami wybranego bohatera."
+
+msgid "web.claw.slot"
+msgstr "Odbiór nagrody"
+
 msgid "web.claw.rare"
 msgstr "Rzadka"
 
 msgid "web.claw.grab_free"
 msgstr "Chwyć · za darmo"
 
+msgid "web.claw.skip"
+msgstr "Przejdź do nagrody"
+
 msgid "web.claw.next_free"
 msgstr "Następna darmowa próba za"
+
+msgid "web.claw.paid.title"
+msgstr "Chwyć ponownie"
+
+msgid "web.claw.paid.price"
+msgstr "Cena"
+
+msgid "web.claw.paid.now"
+msgstr "%(currency)s teraz"
+
+msgid "web.claw.paid.after"
+msgstr "%(currency)s potem"
+
+msgid "web.claw.paid.hero"
+msgstr "Nagroda dla"
+
+msgid "web.claw.paid.same"
+msgstr "Płatne próby mają te same nagrody i szanse co darmowe."
+
+msgid "web.claw.paid.confirm"
+msgstr "Chwyć za %(price)s %(currency)s"
 
 msgid "web.claw.paid.short"
 msgstr "Konto ma %(have)s; próba kosztuje %(price)s (brakuje %(short)s)."
@@ -14984,6 +15023,15 @@ msgstr "%(count)s darmowych prób dziennie; płatne próby są w tym serwisie wy
 
 msgid "web.claw.paid.off.other"
 msgstr "%(count)s darmowej próby dziennie; płatne próby są w tym serwisie wyłączone."
+
+msgid "web.claw.speed"
+msgstr "Szybki chwytak"
+
+msgid "web.claw.speed.note"
+msgstr "Od razu pokazuje nagrodę."
+
+msgid "web.claw.speed.reduced"
+msgstr "Włączony, bo system prosi o ograniczenie ruchu."
 
 msgid "web.claw.rule.one"
 msgstr "%(count)s darmowa próba dziennie, od %(time)s. Nagroda jest losowana na początku próby; automat tylko pokazuje, jak jest wyjmowana."
@@ -15057,6 +15105,9 @@ msgstr "Następna darmowa próba o %(time)s."
 msgid "web.claw.result.paid_button"
 msgstr "Chwyć ponownie za %(price)s %(currency)s"
 
+msgid "web.claw.ok"
+msgstr "OK"
+
 msgid "web.claw.kind.weapons"
 msgstr "Broń"
 
@@ -15101,6 +15152,24 @@ msgstr "Serwer nie mógł dokończyć próby, więc nic nie przyznano i nic nie 
 
 msgid "web.claw.refused.form"
 msgstr "Nic nie pobrano: formularz wygasł. Automat jest znów widoczny."
+
+msgid "web.claw.error.server"
+msgstr "Serwer nie mógł dokończyć próby, więc nic nie przyznano i nic nie pobrano."
+
+msgid "web.claw.error.connection"
+msgstr "Połączenie zerwało się przed odpowiedzią. Po odświeżeniu strony widać, czy próba się udała."
+
+msgid "web.claw.close"
+msgstr "Zamknij automat"
+
+msgid "web.claw.loading"
+msgstr "Wczytywanie automatu…"
+
+msgid "web.claw.closed"
+msgstr "Automat jest zamknięty i w tej przeglądarce nie otworzy się już sam przed %(time)s."
+
+msgid "web.claw.open_menu"
+msgstr "Można go otworzyć z menu"
 
 msgid "games.bfheroes.claw.tier.common"
 msgstr "Zwykłe"

@@ -1,0 +1,433 @@
+/* The scripted Claw: the picked hero's row, then a wooden frame round a glass case with a rail,
+   three belts of prizes, the claw on its puck and the chute with its prize slot; Speed Claw, and
+   the paid grab's confirmation in the grab row's place. claw.js moves the machine with transforms
+   and opacity only; the picked row and the confirmation fold in (200 ms) and the belts fade in,
+   a fade alone with reduced motion. On phones the case is lower and the tiles smaller, without
+   names. */
+@layer components {
+  .claw-chosen {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    padding: 8px 10px;
+    border: 2px solid #000;
+    border-radius: 8px;
+    background: rgb(0 0 0 / 0.35);
+    animation: claw-fold 200ms var(--ease-menu);
+
+    p {
+      flex: 1 1 200px;
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+  }
+
+  .claw-chosen-disc {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border: 2px solid #000;
+    border-radius: 50%;
+    background: #f2c12e;
+    color: #0a0a0a;
+  }
+
+  .claw-chosen-name {
+    display: block;
+    font: 800 18px/1.2 var(--site-heading);
+  }
+
+  .claw-chosen-what {
+    color: #d9cfc4;
+  }
+
+  .claw-machine {
+    position: relative;
+    margin-top: 16px;
+    padding: 12px;
+    border: 3px solid #000;
+    border-radius: 10px;
+    background: #7b4a22;
+    box-shadow:
+      inset 0 3px 0 #9c6532,
+      inset 0 -4px 0 #5b3415;
+  }
+
+  .claw-glass {
+    position: relative;
+    height: 380px;
+    overflow: hidden;
+    border: 3px solid #000;
+    border-radius: 6px;
+    background: linear-gradient(180deg, #22405c 0%, #16283a 60%, #0f1c29 100%);
+
+    &::before {
+      position: absolute;
+      inset: 0 0 auto;
+      height: 14px;
+      border-bottom: 3px solid #000;
+      background: #8e949c;
+      content: "";
+    }
+  }
+
+  .claw-empty {
+    position: absolute;
+    inset: 0 16% 0 0;
+    display: grid;
+    margin: 0;
+    padding: 20px;
+    place-items: center;
+    color: #c9d6e2;
+    font: 800 20px/1.3 var(--site-heading);
+    text-align: center;
+
+    [data-claw-form][data-hero] & {
+      display: none;
+    }
+  }
+
+  .claw-belts {
+    position: absolute;
+    top: 122px;
+    bottom: 0;
+    left: 0;
+    width: 84%;
+  }
+
+  .claw-rows {
+    animation: claw-fill 200ms var(--ease-menu);
+  }
+
+  .claw-row {
+    position: relative;
+    height: 80px;
+    margin-bottom: 2px;
+    overflow: hidden;
+
+    &::after {
+      position: absolute;
+      inset: auto 0 6px;
+      height: 14px;
+      border-block: 2px solid #000;
+      background: repeating-linear-gradient(90deg, #2b2b2b 0 18px, #3e3e3e 18px 22px);
+      content: "";
+    }
+  }
+
+  .claw-belt {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .claw-tile {
+    display: grid;
+    flex: 0 0 var(--claw-tile, 105px);
+    justify-items: center;
+    align-content: start;
+    gap: 2px;
+    padding-top: 4px;
+  }
+
+  .claw-tile-art {
+    position: relative;
+    rotate: -3deg;
+
+    .claw-tile:nth-child(3n + 2) & {
+      rotate: 2deg;
+    }
+
+    .claw-tile:nth-child(3n) & {
+      rotate: 4deg;
+    }
+  }
+
+  .claw-tile-name {
+    max-width: 96%;
+    overflow: hidden;
+    color: #e9eef3;
+    font: 700 10px/1.1 var(--font-sans);
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .claw-arm {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .claw-puck {
+    position: absolute;
+    top: 2px;
+    left: 0;
+    width: 68px;
+    height: 22px;
+    border: 3px solid #000;
+    border-radius: 6px;
+    background: #c9ced4;
+  }
+
+  .claw-cable {
+    position: absolute;
+    top: 24px;
+    left: 32px;
+    width: 4px;
+    height: 12px;
+    background: #c9ced4;
+    transform-origin: top;
+  }
+
+  .claw-head {
+    position: absolute;
+    top: 34px;
+    left: 0;
+    width: 68px;
+  }
+
+  .claw-prongs {
+    display: block;
+    width: 68px;
+    height: 64px;
+    overflow: visible;
+  }
+
+  .claw-steel {
+    fill: #c9ced4;
+    stroke: #000;
+    stroke-width: 3;
+  }
+
+  .claw-prong {
+    transform-box: fill-box;
+    transition: rotate 200ms var(--ease-menu);
+  }
+
+  .claw-prong-left {
+    transform-origin: 100% 0;
+  }
+
+  .claw-prong-right {
+    transform-origin: 0 0;
+  }
+
+  .claw-closed-prongs .claw-prong-left {
+    rotate: 22deg;
+  }
+
+  .claw-closed-prongs .claw-prong-right {
+    rotate: -22deg;
+  }
+
+  .claw-prong-edge,
+  .claw-prong-face {
+    fill: none;
+    stroke-linecap: round;
+  }
+
+  .claw-prong-edge {
+    stroke: #000;
+    stroke-width: 9;
+  }
+
+  .claw-prong-face {
+    stroke: #c9ced4;
+    stroke-width: 4;
+  }
+
+  .claw-held {
+    position: absolute;
+    top: 30px;
+    left: 10px;
+  }
+
+  .claw-chute {
+    position: absolute;
+    top: 14px;
+    right: 0;
+    bottom: 0;
+    width: 16%;
+    border-left: 3px solid #000;
+    background: #2a1a0e;
+  }
+
+  .claw-funnel {
+    position: absolute;
+    top: 70px;
+    right: 12%;
+    left: 12%;
+    height: 70px;
+    border-top: 3px solid #000;
+    background: #5b3415;
+    clip-path: polygon(0 0, 100% 0, 72% 100%, 28% 100%);
+  }
+
+  .claw-slot {
+    position: absolute;
+    right: 18%;
+    bottom: 26px;
+    left: 18%;
+    display: grid;
+    height: 64px;
+    place-items: center;
+    border: 3px solid #000;
+    border-radius: 6px;
+    background: #0a0a0a;
+  }
+
+  .claw-slot-label {
+    position: absolute;
+    right: 0;
+    bottom: 4px;
+    left: 0;
+    color: #c9bfb3;
+    font: 800 10px/1 var(--site-heading);
+    letter-spacing: 0.06em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .claw-skip {
+    position: absolute;
+    top: 22px;
+    right: 22px;
+    z-index: 3;
+  }
+
+  @keyframes claw-fill {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @media (width < 40rem) {
+    .claw-glass {
+      height: 300px;
+    }
+
+    .claw-belts {
+      top: 96px;
+    }
+
+    .claw-row {
+      height: 62px;
+    }
+
+    .claw-tile {
+      --claw-tile: 58px;
+    }
+
+    .claw-tile-art .claw-icon {
+      width: 40px;
+      height: 40px;
+    }
+
+    .claw-tile-name {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .claw-chosen,
+    .claw-rows {
+      animation: site-fade-in 100ms linear;
+    }
+  }
+
+  /* With scripts the picked hero's row stands in for the picker. */
+  .js [data-claw-form][data-hero] .claw-picker {
+    display: none;
+  }
+
+  .claw-speed {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    cursor: pointer;
+
+    strong {
+      display: block;
+      font: 800 17px/1.1 var(--site-heading);
+    }
+  }
+
+  .claw-speed-box {
+    width: 22px;
+    height: 22px;
+    accent-color: #3d6b1f;
+  }
+
+  .claw-speed-note {
+    display: block;
+    color: #d9cfc4;
+    font-size: 13px;
+  }
+
+  .claw-confirm {
+    margin-top: 12px;
+    padding: 0 16px 16px;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #f1e9de;
+    color: #1f1712;
+    font-family: Arial, Helvetica, sans-serif;
+    animation: claw-fold 200ms var(--ease-menu);
+
+    .site-dialog-title {
+      margin-left: -16px;
+    }
+  }
+
+  .claw-facts {
+    margin: 12px 0 0;
+
+    div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 6px 0;
+      border-bottom: 1px dashed #a8977f;
+    }
+
+    dd {
+      margin: 0;
+      font-weight: 700;
+    }
+  }
+
+  .claw-confirm .claw-note {
+    color: #3b2d23;
+  }
+
+  @keyframes claw-fold {
+    from {
+      opacity: 0;
+      translate: 0 -6px;
+    }
+  }
+
+  @media (width < 40rem) {
+    .claw-speed {
+      margin-left: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .claw-confirm {
+      animation: site-fade-in 100ms linear;
+    }
+  }
+}

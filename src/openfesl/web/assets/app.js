@@ -20,6 +20,7 @@ import "./rename.js";
 import "./play-now.js";
 import "./store.js";
 import "./chests.js";
+import "./claw.js";
 import "./catalogue.js";
 import "./admin-forms.js";
 import "./settings.js";

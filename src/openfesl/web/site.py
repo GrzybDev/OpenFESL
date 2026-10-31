@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from datetime import date, datetime
 from functools import partial
 
 from starlette.requests import Request
@@ -22,8 +23,15 @@ NAME_CHECK = "/heroes/name"
 LINK_STATUS = "/play-now/status"
 # The game's model of a hero with a look, which the creator's stage asks for; it shows no page.
 FIGURE = "/heroes/figure"
-# The Daily Claw's page.
+# The page that hands the game over to the launcher, the hero creator and the Daily Claw.
+PLAY_NOW = "/play-now"
+CREATOR = "/user/createHero"
 CLAW = "/claw"
+# The session's record of the rewards' day on which the account closed the Claw.
+CLAW_CLOSED = "claw_closed"
+# The pages that the Claw never opens by itself over: the launcher's hand-off, the creator, which
+# the Claw sends an account without heroes to, and the Claw's own.
+QUIET = (PLAY_NOW, CREATOR, CLAW)
 
 
 @dataclass(frozen=True, slots=True)
@@ -33,10 +41,17 @@ class ClawEntry:
     Attributes:
         name: Its name in the page's language: the game's own where the catalogue has it.
         waiting: How many of the day's free grabs the account has left; 0 for a visitor.
+        opens: Whether it opens by itself over the page: a free grab waits, the account did not
+            close it on this day, and the page is one it covers.
+        day: The rewards' day, on which closing it keeps it closed.
+        next_free: When the next day's free grabs come.
     """
 
     name: str
     waiting: int = 0
+    opens: bool = False
+    day: date | None = None
+    next_free: datetime | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -155,7 +170,10 @@ class SiteBarMiddleware:
         if player is None:
             return ClawEntry(name)
         day = await self._claw.day(game, rules, player.account_id)
-        return ClawEntry(name, day.waiting)
+        closed = scope.get("session", {}).get(CLAW_CLOSED) == day.day.isoformat()
+        quiet = scope["path"].startswith(tuple(f"/{game.id}{path}" for path in QUIET))
+        opens = bool(day.waiting) and not closed and not quiet
+        return ClawEntry(name, day.waiting, opens, day.day, day.next_free)
 
     async def _bar(self, game: Game, player: Player, scope: Scope) -> SiteBar:
         assert game.site is not None

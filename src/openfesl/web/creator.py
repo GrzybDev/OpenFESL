@@ -22,9 +22,7 @@ from openfesl.web.account.session import signed_in
 from openfesl.web.catalogue_files import catalogue_file_url
 from openfesl.web.pages import Pages, listed
 from openfesl.web.sessions import form_matches, form_token
-from openfesl.web.site import FIGURE, NAME_CHECK, site_bar
-
-CREATOR = "/user/createHero"
+from openfesl.web.site import CREATOR, FIGURE, NAME_CHECK, site_bar
 
 
 class CreatorPages:

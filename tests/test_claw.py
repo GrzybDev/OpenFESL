@@ -1,8 +1,10 @@
 import asyncio
 import re
 from collections.abc import Callable
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from random import Random
+from typing import Literal
 
 import httpx2
 import pytest
@@ -10,6 +12,7 @@ from accounts import PASSWORD, execute, post_sign_in, select_value
 from heroes import create_hero
 from identity import form_token
 from living import ROYAL, import_catalogue, setting
+from playwright.async_api import Browser, Page, Request
 from store import ROYAL_SOLDIER
 from support import once_token, visible
 
@@ -36,6 +39,24 @@ def rarest(box: Box, may_get: Callable[[Product], bool], random: Random) -> Prod
         if found:
             return found[0]
     return None
+
+
+async def focused(page: Page, selector: str) -> bool:
+    """Return whether the element with the focus matches a selector."""
+    return bool(await page.evaluate("s => document.activeElement.matches(s)", selector))
+
+
+async def over_rewards(
+    edge: Browser, base: str, client: httpx2.AsyncClient, motion: Literal["reduce", "no-preference"]
+) -> Page:
+    """Open the rewards page, which the Claw opens over, in a browser signed in as a client."""
+    context = await edge.new_context(locale="en-GB", reduced_motion=motion)
+    for name, value in client.cookies.items():
+        await context.add_cookies([{"name": name, "value": value, "url": base}])
+    page = await context.new_page()
+    await page.goto(f"{base}/bfheroes/rewards")
+    await page.locator("#claw-overlay .store-hero input").first.wait_for(state="attached")
+    return page
 
 
 async def claw_form(
@@ -74,7 +95,11 @@ async def test_a_day_at_the_claw_gives_the_free_grab_once_and_sells_the_next(
         await post_sign_in(ann, base, "ann@example.test", PASSWORD)
         await post_sign_in(window, base, "ann@example.test", PASSWORD)
         front = (await ann.get(f"{base}/bfheroes")).text
+        launcher = (await ann.get(f"{base}/bfheroes/play-now")).text
         page = visible((await ann.get(f"{base}{CLAW}")).content)
+        # The close of the overlay keeps it from opening by itself again that day.
+        await ann.post(f"{base}{CLAW}/close", data={"csrf": form_token(front), "next": "/bfheroes"})
+        closed = (await ann.get(f"{base}/bfheroes")).text
         # A grab without its one-time token takes nothing.
         sent = await claw_form(ann, base, royal)
         del sent["once"]
@@ -103,7 +128,10 @@ async def test_a_day_at_the_claw_gives_the_free_grab_once_and_sells_the_next(
         await setting(database_url, "bfheroes.claw.paid.price", "50")
         repriced = await grab(ann, base, stale)
 
+    assert "data-claw-overlay" in front and "data-opens-now" in front
     assert "Invented Claw" in visible(front.encode()) and "1 free grab waits" in front
+    assert "data-claw-overlay" in launcher and "data-opens-now" not in launcher
+    assert "data-opens-now" not in closed and "1 free grab waits" in closed
     assert "Nothing was taken: the form expired. The Claw is shown again." in tokenless
     assert "A free grab waits today. The prize goes to the hero picked here." in page
     assert "Chances for Brassbuckle" in page and "Chances for Tin_Tankard" in page
@@ -150,6 +178,7 @@ async def test_the_claw_says_why_it_takes_no_grab(
         signed_out = visible((await visitor.get(f"{base}{CLAW}")).content)
         listed = visible((await visitor.get(f"{base}/bfheroes")).content)
         await post_sign_in(bob, base, "bob@example.test", PASSWORD)
+        no_hero = (await bob.get(f"{base}/bfheroes")).text
         empty = visible((await bob.get(f"{base}{CLAW}")).content)
         moved = await bob.get(f"{base}/bfheroes/spinner")
     async with httpx2.AsyncClient() as ann:
@@ -178,6 +207,7 @@ async def test_the_claw_says_why_it_takes_no_grab(
     assert "Daily claw machine" not in menu
     assert "Sign in to grab" in signed_out and "Create an account" in signed_out
     assert "Daily claw machine" in listed and "No rare prizes yet." in signed_out
+    assert "data-opens-now" in no_hero
     assert "The Claw needs a hero" in empty and "Create a hero" in empty
     assert moved.status_code == 301 and moved.headers["location"] == CLAW
     assert "Nothing was taken: the Claw holds no prize for this hero now." in shown
@@ -188,3 +218,72 @@ async def test_the_claw_says_why_it_takes_no_grab(
     assert "Nothing was taken: the Claw was switched off a moment ago." in said
     grabs = "SELECT count(*) FROM claw_grab WHERE persona_id = :hero"
     assert await select_value(database_url, grabs, hero=hero) == 1
+
+
+async def test_the_claw_over_a_page_keeps_its_hero_and_the_focus_through_grabs_and_closes(
+    base: str,
+    server_url: str,
+    database_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    edge: Browser,
+) -> None:
+    await import_catalogue(server_url, tmp_path, capsys, ITEMS, TEXTS)
+    await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    await create_hero(base, "ann@example.test", "Tin_Tankard", faction="national")
+    async with httpx2.AsyncClient() as ann:
+        await post_sign_in(ann, base, "ann@example.test", PASSWORD)
+        # Reduced motion starts with Speed Claw, which shows the prize at once.
+        page = await over_rewards(edge, base, ann, "reduce")
+        await page.keyboard.press("Space")
+        picked = await focused(page, "[data-claw-grab]")
+        await page.locator("#claw-overlay [data-claw-change]").click()
+        await page.keyboard.press("Space")
+        kept_by_space = await focused(page, "[data-claw-grab]")
+        await page.keyboard.press("Enter")
+        await page.locator("dialog[data-claw-prize][open]").wait_for()
+        await page.keyboard.press("Escape")
+        await page.locator("dialog[data-claw-prize]").wait_for(state="detached")
+        kept = await page.locator("#claw-overlay [data-claw-form]").get_attribute("data-hero")
+        belts = await page.locator("#claw-overlay [data-belts]:not([hidden])").count()
+        after_prize = await focused(page, "[data-claw-paid]")
+        await page.keyboard.press("Escape")
+        closed = await page.locator(".claw-closed").inner_text()
+        await page.locator("summary.site-tab", has_text="store").click()
+        await page.locator(".site-entry[data-claw-open]").click()
+        await page.locator("#claw-overlay[open]").wait_for()
+        await page.keyboard.press("Escape")
+        await page.locator("#claw-overlay:not([open])").wait_for(state="attached")
+        back = await focused(page, "summary.site-tab")
+        await page.goto(f"{base}{CLAW}")
+        await page.locator("summary.site-tab", has_text="store").click()
+        async with page.expect_navigation():
+            await page.locator(".site-entry[aria-current=page]").click()
+        claws = await page.locator("[data-claw-form]").count()
+        await page.context.close()
+
+        await execute(database_url, "DELETE FROM claw_grab")
+        page = await over_rewards(edge, base, ann, "no-preference")
+        # A browser's clock a day ahead of the server's leaves the countdown to the next free grab
+        # running, rather than loading the Claw again and again.
+        await page.clock.set_system_time(datetime.now(UTC) + timedelta(days=1))
+        sent: list[Request] = []
+        # Playwright marks its handlers, which a list's bound append cannot be.
+        page.on("request", lambda request: sent.append(request))
+        await page.locator("#claw-overlay .store-hero").first.click()
+        await page.locator("#claw-overlay [data-claw-grab]").click()
+        # Closed while the machine plays, the Claw takes the answer in without its prize card.
+        await page.keyboard.press("Escape")
+        answered = page.locator("#claw-overlay [data-claw-form]:not([data-sent])")
+        await answered.wait_for(state="attached")
+        modal = await page.evaluate("!!document.querySelector(':modal')")
+        await page.wait_for_timeout(500)
+        await page.context.close()
+
+    assert picked and kept_by_space
+    assert kept and belts == 1 and after_prize
+    assert "does not open by itself again in this browser before 00:00 UTC" in closed
+    assert back and claws == 1
+    assert not modal
+    # The page that answers the grab is the one load of the Claw.
+    assert [request.method for request in sent if request.url.endswith(CLAW)] == ["POST", "GET"]

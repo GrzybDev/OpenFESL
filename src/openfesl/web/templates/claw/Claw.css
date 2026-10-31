@@ -15,6 +15,15 @@
     color: #fff;
   }
 
+  /* Inside the overlay, the overlay is the box. */
+  .claw-overlay .claw-body {
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
   .claw-heading {
     margin: 0 0 10px;
     padding: 0;
@@ -110,6 +119,11 @@
   .claw-heroes {
     margin: 0;
     color: #1f1712;
+  }
+
+  /* The paid grab's confirmation takes the grab row's place while it is open. */
+  .claw-form:has([data-claw-confirm]:not([hidden])) .claw-actions {
+    display: none;
   }
 
   .claw-actions {

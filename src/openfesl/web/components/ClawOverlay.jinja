@@ -1,0 +1,69 @@
+{# The Daily Claw over a game's own site's page: its mark and name, the account's wallets
+   and Close, then the Claw's page as scripts fetch it. It opens by itself on the first pages of
+   the day while a free grab waits, until it is closed, and from the menu; closing keeps it from
+   opening by itself in this browser session until the next day, which the page then says.
+   Without scripts it never shows, and the menu leads to the Claw's page. #}
+<dialog id="claw-overlay"
+        aria-labelledby="claw-overlay-title"
+        data-claw-overlay
+        data-src="{{ url('/' ~ game.id ~ '/claw') }}"
+        {% if claw.opens %} data-opens-now{% endif %}
+        class="claw-overlay">
+  <div class="claw-overlay-head">
+    <p class="claw-mark">
+      <span aria-hidden="true" class="claw-mark-disc"><Icon name="claw" :size="32" stroke="#0A0A0A" /></span>
+      <span id="claw-overlay-title" class="claw-mark-name">{{ claw.name }}</span>
+    </p>
+    {% if bar and bar.wallets %}
+      <ul aria-label="{{ _('web.site.wallets') }}" class="claw-wallets">
+        {% for wallet, balance in bar.wallets %}
+          <li data-wallet="{{ wallet.currency }}" class="claw-wallet">
+            <span aria-hidden="true"
+                  class="wallet-coin"><Icon :name="wallet.glyph" :size="18" stroke="currentColor" /></span>
+            <span class="claw-wallet-amount">{{ number(balance) }}</span>
+            <span class="claw-wallet-name">{{ _("games." ~ game.id ~ ".currency." ~ wallet.currency) }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    <form method="post"
+          action="{{ url('/' ~ game.id ~ '/claw/close') }}"
+          data-claw-close
+          class="claw-close-form">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="hidden" name="next" value="{{ here }}">
+      <button type="submit"
+              aria-label="{{ _('web.claw.close') }}"
+              class="claw-close">
+        <Icon name="x" :size="20" stroke="#FFFFFF" />
+      </button>
+    </form>
+  </div>
+  <div data-claw-message class="claw-message"></div>
+  <div data-claw-slot class="claw-overlay-body">
+    <p class="claw-loading">{{ _("web.claw.loading") }}</p>
+  </div>
+  <template data-claw-closed>
+    <div role="status" data-site-message class="site-message claw-closed">
+      <span aria-hidden="true" class="site-message-disc"><Icon name="claw" :size="22" stroke="#0A0A0A" /></span>
+      <p>
+        {{ _("web.claw.closed", time=_("web.store.utc", time=when(claw.next_free, "Hm"))) }}
+        <a href="{{ url('/' ~ game.id ~ '/claw') }}"
+           data-claw-open
+           class="claw-reopen">{{ _("web.claw.open_menu") }}</a>
+      </p>
+      <button type="button"
+              data-site-dismiss
+              class="site-message-close"
+              aria-label="{{ _('web.toast.dismiss') }}">
+        <Icon name="x" :size="16" stroke="currentColor" />
+      </button>
+    </div>
+  </template>
+  <template data-claw-failed="server">
+    <SiteMessage :shown="{'error': True, 'key': 'web.claw.error.server', 'values': {}}" />
+  </template>
+  <template data-claw-failed="connection">
+    <SiteMessage :shown="{'error': True, 'key': 'web.claw.error.connection', 'values': {}}" />
+  </template>
+</dialog>

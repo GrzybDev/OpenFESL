@@ -1,9 +1,10 @@
 {#def rules, running, imported: bool, name: str, feed: list = [], day = None, heroes: list = [], picked = None, funds: int = 0, grabbed = None, left: str = "" #}
 {# The Daily Claw: the prize of the last grab, the free grab that waits, the hero the
-   prize goes to, the grab with the time to the next free one and the paid grab, the chances, and
-   the latest rare
-   prizes. It is a form whose hero is a radio group, and the next page shows the prize. Signed out
-   it asks for a sign-in; off or without the catalogue it says why. #}
+   prize goes to, the machine with that hero's prizes on its belts, the grab with the countdown
+   to the next free one and the paid grab with its confirmation, the chances, and the latest rare
+   prizes. Without scripts it is a form whose hero is a radio group; with them the menus open it
+   over the page, where the machine plays the grab that the server already drew. Signed out it
+   asks for a sign-in; off or without the catalogue it says why. #}
 {% set base = url("/" ~ game.id ~ "/claw") %}
 <Layout :title="name">
   <section aria-labelledby="claw-title" class="store-head">
@@ -65,9 +66,17 @@
             </span>
             <p class="claw-prize-name">{{ grabbed.prize.name }}</p>
             <p class="claw-prize-held">
-              {% if not grabbed.prize.icon and grabbed.prize.kind %}{{ grabbed.prize.kind }} · {% endif %}{{ grabbed.prize.held }}{% if grabbed.rare %} · {{ _("web.claw.result.rare") }}{% endif %}
+              {% if not grabbed.prize.icon and grabbed.prize.kind %}{{ grabbed.prize.kind }} · {% endif %}{{ grabbed.prize.held }}
+              {%- if grabbed.rare %}<span class="no-js-only"> · {{ _("web.claw.result.rare") }}</span>{% endif %}
             </p>
             <p class="claw-prize-line">{{ grabbed.line }}</p>
+            <p class="site-actions js-only">
+              <button type="button"
+                      data-claw-ok
+                      class="site-button site-button-go site-button-large">
+                <Icon name="tick" :size="18" stroke="currentColor" />{{ _("web.claw.ok") }}
+              </button>
+            </p>
           </div>
         </dialog>
       {% endif %}
@@ -83,6 +92,8 @@
                 action="{{ base }}"
                 data-claw-form
                 data-once
+                data-chosen-text="{{ _('web.claw.chosen') }}"
+                data-chances-text="{{ _('web.claw.chances') }}"
                 class="claw-form">
             <input type="hidden" name="csrf" value="{{ csrf }}">
             <input type="hidden" name="once" value="{{ once_token() }}">
@@ -96,6 +107,7 @@
                 {% endfor %}
               </div>
             </fieldset>
+            <ClawMachine :heroes="heroes" />
             <div class="claw-actions">
               {% if day.waiting %}
                 <button type="submit" data-claw-grab class="claw-grab">
@@ -108,7 +120,8 @@
                   <span>
                     <span class="claw-next-label">{{ _("web.claw.next_free") }}</span>
                     <time datetime="{{ day.next_free.isoformat() }}"
-                          data-countdown
+                          data-left="{{ seconds_left(day.next_free) }}"
+                          data-format="{{ _('web.store.countdown') }}"
                           class="claw-next-time">{{ left }}</time>
                   </span>
                 </p>
@@ -119,12 +132,16 @@
                           data-claw-paid
                           {% if short %} aria-disabled="true" aria-describedby="claw-short"{% endif %}
                           class="claw-grab claw-grab-paid">
-                    <Icon name="claw" :size="20" stroke="#FEDE01" />{{ _("web.claw.result.paid_button", price=price, currency=currency) }}
+                  <Icon name="claw" :size="20" stroke="#FEDE01" /><span class="js-only">{{ _("web.claw.paid.title") }}<span class="claw-price">{{ price }} {{ currency }}</span></span><span class="no-js-only">{{ _("web.claw.result.paid_button", price=price, currency=currency) }}</span>
                   </button>
                 {% else %}
                   <p class="claw-note">{{ _n("web.claw.paid.off", running.free) }}</p>
                 {% endif %}
               {% endif %}
+              <label class="claw-speed js-only">
+                <input type="checkbox" data-claw-speed class="claw-speed-box">
+                <span><strong>{{ _("web.claw.speed") }}</strong><span data-speed-note class="claw-speed-note">{{ _("web.claw.speed.note") }}</span><span data-speed-reduced hidden class="claw-speed-note">{{ _("web.claw.speed.reduced") }}</span></span>
+              </label>
             </div>
             {% if not day.waiting and paid.enabled %}
               {% if short %}
@@ -135,10 +152,51 @@
    class="claw-short-link">{{ _("web.claw.paid.earned") }}</a>{% endif %}
                   </span>
                 </p>
+              {% else %}
+                <div data-claw-confirm hidden class="claw-confirm js-only">
+                  <h3 class="site-dialog-title">{{ _("web.claw.paid.title") }}</h3>
+                  <dl class="claw-facts">
+                    <div>
+                      <dt>{{ _("web.claw.paid.price") }}</dt>
+                      <dd>
+                        {{ price }} {{ currency }}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>{{ _("web.claw.paid.now", currency=currency) }}</dt>
+                      <dd>
+                        {{ number(funds) }}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>{{ _("web.claw.paid.after", currency=currency) }}</dt>
+                      <dd>
+                        {{ number(funds - paid.price) }}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>{{ _("web.claw.paid.hero") }}</dt>
+                      <dd data-chosen-name>
+                      </dd>
+                    </div>
+                  </dl>
+                  <p class="claw-note">{{ _("web.claw.paid.same") }}</p>
+                  <p class="site-actions">
+                    <button type="submit"
+                            name="paid"
+                            value="1"
+                            class="site-button site-button-go">
+                      <Icon name="claw" :size="18" stroke="currentColor" />{{ _("web.claw.paid.confirm", price=price, currency=currency) }}
+                    </button>
+                    <button type="button"
+                            data-claw-cancel
+                            class="site-button site-button-ghost">{{ _("web.admin.cancel") }}</button>
+                  </p>
+                </div>
               {% endif %}
             {% endif %}
             {% if not day.waiting %}
-              <p class="claw-rule">{{ _("web.claw.result.next", time=next_time) }}</p>
+              <p class="claw-rule no-js-only">{{ _("web.claw.result.next", time=next_time) }}</p>
             {% endif %}
           </form>
           <p class="claw-rule">{{ _n("web.claw.rule", running.free, time=_("web.store.utc", time=when(day.next_free, "Hm"))) }}</p>

@@ -8,9 +8,8 @@ from openfesl.core.games import Game, Games
 from openfesl.core.start_links import LIFETIME, LinkState, StartLink, StartLinks
 from openfesl.web.account.session import PLAYER, signed_in
 from openfesl.web.pages import Pages
-from openfesl.web.site import LINK_STATUS, site_bar
+from openfesl.web.site import LINK_STATUS, PLAY_NOW, site_bar
 
-PLAY_NOW = "/play-now"
 # How long the page waits for the launcher to take its link before it says what to do when
 # nothing starts.
 PATIENCE = timedelta(seconds=10)

@@ -444,4 +444,7 @@
   <symbol id="claw" viewBox="0 0 24 24">
     <path d="M12 2.5v5M8 7.5h8M12 7.5v3M12 10.5c-3 0-5.5 2-5.5 5l2.5 4M12 10.5c3 0 5.5 2 5.5 5l-2.5 4M12 10.5v8" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
   </symbol>
+  <symbol id="fast" viewBox="0 0 24 24">
+    <path d="M4 6l7 6-7 6zM12 6l7 6-7 6" fill="none" stroke-width="2.2" stroke-linejoin="round"/>
+  </symbol>
 </svg>

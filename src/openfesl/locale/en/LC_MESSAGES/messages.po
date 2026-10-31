@@ -14108,14 +14108,53 @@ msgstr "A free grab waits today. The prize goes to the hero picked here."
 msgid "web.claw.pick"
 msgstr "Pick a hero"
 
+msgid "web.claw.chosen"
+msgstr "%(what)s · the prize goes to this hero"
+
+msgid "web.claw.change"
+msgstr "Change hero"
+
+msgid "web.claw.machine"
+msgstr "Claw machine"
+
+msgid "web.claw.belts_empty"
+msgstr "The belts fill with the picked hero's prizes."
+
+msgid "web.claw.slot"
+msgstr "Prize slot"
+
 msgid "web.claw.rare"
 msgstr "Rare"
 
 msgid "web.claw.grab_free"
 msgstr "Grab · free"
 
+msgid "web.claw.skip"
+msgstr "Skip to the prize"
+
 msgid "web.claw.next_free"
 msgstr "Next free grab in"
+
+msgid "web.claw.paid.title"
+msgstr "Grab again"
+
+msgid "web.claw.paid.price"
+msgstr "Price"
+
+msgid "web.claw.paid.now"
+msgstr "%(currency)s now"
+
+msgid "web.claw.paid.after"
+msgstr "%(currency)s after"
+
+msgid "web.claw.paid.hero"
+msgstr "Prize goes to"
+
+msgid "web.claw.paid.same"
+msgstr "Paid grabs use the same prizes and chances as free ones."
+
+msgid "web.claw.paid.confirm"
+msgstr "Grab for %(price)s %(currency)s"
 
 msgid "web.claw.paid.short"
 msgstr "The account has %(have)s; a grab costs %(price)s (%(short)s short)."
@@ -14128,6 +14167,15 @@ msgstr "%(count)s free grab a day; paid grabs are switched off on this service."
 
 msgid "web.claw.paid.off.other"
 msgstr "%(count)s free grabs a day; paid grabs are switched off on this service."
+
+msgid "web.claw.speed"
+msgstr "Speed Claw"
+
+msgid "web.claw.speed.note"
+msgstr "Shows the prize at once."
+
+msgid "web.claw.speed.reduced"
+msgstr "On, because the system asks for reduced motion."
 
 msgid "web.claw.rule.one"
 msgstr "%(count)s free grab a day, from %(time)s. The prize is drawn when the grab starts; the machine then shows it being taken."
@@ -14195,6 +14243,9 @@ msgstr "The next free grab comes at %(time)s."
 msgid "web.claw.result.paid_button"
 msgstr "Grab again for %(price)s %(currency)s"
 
+msgid "web.claw.ok"
+msgstr "OK"
+
 msgid "web.claw.kind.weapons"
 msgstr "Weapon"
 
@@ -14239,6 +14290,24 @@ msgstr "The server could not finish the grab, so nothing was given and nothing w
 
 msgid "web.claw.refused.form"
 msgstr "Nothing was taken: the form expired. The Claw is shown again."
+
+msgid "web.claw.error.server"
+msgstr "The server could not finish the grab, so nothing was given and nothing was paid."
+
+msgid "web.claw.error.connection"
+msgstr "The connection broke before the answer arrived. Reloading the page shows whether the grab went through."
+
+msgid "web.claw.close"
+msgstr "Close the Claw"
+
+msgid "web.claw.loading"
+msgstr "Loading the Claw…"
+
+msgid "web.claw.closed"
+msgstr "The Claw is closed and does not open by itself again in this browser before %(time)s."
+
+msgid "web.claw.open_menu"
+msgstr "Open it from the menu"
 
 msgid "games.bfheroes.claw.tier.common"
 msgstr "Common"

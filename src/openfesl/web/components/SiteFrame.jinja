@@ -1,7 +1,8 @@
 {#def page: str = "" #}
 {# A game's own website around a page: the painted sky, and the site's container with its header
    and menus, the bar with the account's wallets or a sign-in form, the page on parchment under
-   the message of the last change, and the footer. #}
+   the message of the last change, and the footer; for an account, the Daily Claw's overlay,
+   which scripts open by itself or from the menu and fill from the Claw's page. #}
 <div aria-hidden="true" class="site-sky">
   <svg focusable="false">
     <filter id="site-clouds" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
@@ -74,4 +75,5 @@
   <footer class="site-footer">
     <FooterLinks :page="page" />
   </footer>
+  {% if player and claw %}<ClawOverlay />{% endif %}
 </div>

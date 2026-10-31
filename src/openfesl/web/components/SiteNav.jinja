@@ -2,7 +2,7 @@
    scripts as a disclosure, and a signed-in account's heroes; the tab of the current page's menu
    wears the menus' colour. The rewards to claim and the Daily Claw's free grabs that wait are
    counted in green on their entries and the tab of their menu, as the 2012 site counted rewards;
-   the Claw is listed while it runs, by its own name. #}
+   the Claw is listed while it runs, by its own name, and scripts open it over the page. #}
 {% set glyphs = {
   "play": "book",
   "leaderboard": "bars",
@@ -53,6 +53,7 @@
                 <li>
                   <a href="{{ url(base) }}"
                      {% if path == base %} aria-current="page"{% endif %}
+                     {% if kind == "claw" and player and path != base %} data-claw-open{% endif %}
                      class="site-entry"><Icon :name="glyphs[kind]" :size="16" stroke="#F2C12E" />{{ claw.name if kind == "claw" else _("web.site.page." ~ kind) }}
                     {%- if counts.get(kind) %}<SiteCount :count="counts[kind]" :key="'web.site.rewards_count' if kind == 'rewards' else 'web.site.claw_count'" />
                     {% endif -%}

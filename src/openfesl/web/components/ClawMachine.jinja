@@ -1,0 +1,68 @@
+{#def heroes: list #}
+{# The Claw's machine and the row of the hero picked: a glass case with the picked
+   hero's prizes on three belts, rare ones marked, the claw on its rail and the chute with its
+   prize slot, and Skip while a grab plays. Scripts fill and play it; without them the page's form
+   stands alone. #}
+{% macro belt_row(belt) %}
+  <div class="claw-row">
+    <ul class="claw-belt">
+      {% for prize in belt + belt %}
+        <li data-item="{{ prize.item_id }}"
+            {% if prize.rare %} data-rare{% endif %}
+            class="claw-tile">
+          <span class="claw-tile-art">
+            <ClawIcon :prize="prize" :size="44" />
+            {% if prize.rare %}<span class="claw-rare">{{ _("web.claw.rare") }}</span>{% endif %}
+          </span>
+          <span class="claw-tile-name">{{ prize.name }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endmacro %}
+<div data-claw-chosen hidden class="claw-chosen js-only">
+  <span aria-hidden="true" data-chosen-disc class="claw-chosen-disc"></span>
+  <p>
+    <strong data-chosen-name class="claw-chosen-name"></strong>
+    <span data-chosen-what class="claw-chosen-what"></span>
+  </p>
+  <button type="button" data-claw-change class="site-button">{{ _("web.claw.change") }}</button>
+</div>
+<div class="claw-machine js-only">
+  <h2 class="sr-only">{{ _("web.claw.machine") }}</h2>
+  <div aria-hidden="true" data-claw-glass class="claw-glass">
+    <p data-claw-empty class="claw-empty">{{ _("web.claw.belts_empty") }}</p>
+    <div class="claw-belts">
+      {% for each in heroes %}
+        <div data-belts="{{ each.hero.persona.id }}" hidden class="claw-rows">
+          {% for belt in each.belts %}{{ belt_row(belt) }}{% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+    <div data-claw-arm class="claw-arm">
+      <span class="claw-puck"></span>
+      <span data-claw-cable class="claw-cable"></span>
+      <span data-claw-head class="claw-head">
+        <svg viewBox="0 0 68 64" class="claw-prongs">
+          <rect x="20" y="0" width="28" height="16" rx="4" class="claw-steel" />
+          <g class="claw-prong claw-prong-left">
+          <path d="M24 14C10 22 8 40 18 58" class="claw-prong-edge" />
+          <path d="M24 14C10 22 8 40 18 58" class="claw-prong-face" />
+          </g>
+          <g class="claw-prong claw-prong-right">
+          <path d="M44 14C58 22 60 40 50 58" class="claw-prong-edge" />
+          <path d="M44 14C58 22 60 40 50 58" class="claw-prong-face" />
+          </g>
+        </svg>
+      </span>
+    </div>
+    <div class="claw-chute">
+      <span class="claw-funnel"></span>
+      <span data-claw-slot class="claw-slot"></span>
+      <span class="claw-slot-label">{{ _("web.claw.slot") }}</span>
+    </div>
+  </div>
+  <button type="button" data-claw-skip hidden class="site-button claw-skip">
+    <Icon name="fast" :size="16" stroke="#FEDE01" />{{ _("web.claw.skip") }}
+  </button>
+</div>
