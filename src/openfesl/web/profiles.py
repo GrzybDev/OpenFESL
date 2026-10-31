@@ -17,6 +17,7 @@ from openfesl.web.account.session import signed_in
 from openfesl.web.boards import HISTORIC, LEADERBOARDS, PAGE_SIZE, Board, standings
 from openfesl.web.hero_stats import duration, equipped, facts, lists, number_of
 from openfesl.web.pages import Pages
+from openfesl.web.referral import ReferralLinks
 from openfesl.web.sessions import form_token
 
 HEROES = "/heroes"
@@ -41,6 +42,7 @@ class ProfilePages:
         catalogues: Catalogues,
         relationships: Relationships,
         boards: HeroBoards,
+        links: ReferralLinks,
     ) -> None:
         """Prepare the profiles of each game whose heroes have them.
 
@@ -55,6 +57,7 @@ class ProfilePages:
             catalogues: Name the items, with their icons, once imported.
             relationships: Tell how the signed-in account relates to a player as a friend.
             boards: Tell a hero's place on the all-time score board.
+            links: Recruit a Friend, whose box and the player's own link a player's page shows.
         """
         self._pages = pages
         self._games = games
@@ -65,6 +68,7 @@ class ProfilePages:
         self._catalogues = catalogues
         self._relationships = relationships
         self._boards = boards
+        self._links = links
 
     def routes(self) -> APIRouter:
         """Return the profile of each hero and player of the games whose heroes have one."""
@@ -174,6 +178,7 @@ class ProfilePages:
                 member=Party(account_id),
                 relationship=relationship,
                 csrf=form_token(request) if viewer else "",
+                referral=await self._links.box(request, game),
             )
 
         return show_player

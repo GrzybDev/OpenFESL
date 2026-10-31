@@ -1,0 +1,159 @@
+{#def running: bool, steps: list, link: str, recruits: list, hero = None #}
+{# Recruit a Friend: the header with what it is, then while it runs its steps with what each
+   account gets, the personal link with Copy (signed out, the way to sign in; without a display
+   name, the way to choose one) and when rewards appear, and for a signed-in account its recruits
+   with where each step stands, as a table that turns to cards on phones. While it is off, a panel
+   says so and leads to the rewards page. #}
+{% set rules = game.heroes %}
+{% set title = _("web.referral.title") %}
+{% set signed = player is not none %}
+<Layout :title="title">
+  <Plaque id="referral-title">{{ title }}</Plaque>
+  <section aria-labelledby="referral-header" class="referral-header enter-panel">
+    <div aria-hidden="true" class="referral-header-art">
+      <span {% if hero and hero.faction %}data-faction="{{ hero.faction }}"{% endif %}
+            class="referral-header-disc">
+        <Icon :name="rules.classes[hero.hero_class].glyph if hero and hero.hero_class else 'user'" :size="40" stroke="currentColor" />
+      </span>
+      <svg viewBox="0 0 70 24" class="referral-header-arrow">
+        <path d="M2 12h60M52 4l10 8-10 8" />
+      </svg>
+      <span class="referral-header-disc referral-header-friend"><Icon name="user-plus" :size="40" stroke="currentColor" /></span>
+    </div>
+    <div>
+      <h2 id="referral-header" class="referral-header-title">{{ _("web.referral.header", game=game.name) }}</h2>
+      <p class="referral-header-text">{{ _("web.referral.header.text") }}</p>
+    </div>
+  </section>
+  {% if running %}
+    <ol class="referral-steps enter-rows">
+      <li class="referral-step">
+        <span aria-hidden="true" class="referral-step-number">1</span>
+        <h2 class="referral-step-title">{{ _("web.referral.step.signup") }}</h2>
+        <p class="referral-step-text">{{ _("web.referral.step.signup.text") }}</p>
+      </li>
+      {% for step in steps %}
+        <li class="referral-step">
+          <span aria-hidden="true" class="referral-step-number">{{ step.number }}</span>
+          <h2 class="referral-step-title">
+            <span class="sr-only">{{ _("web.referral.step", n=step.number) }}</span>{{ step.title }}
+          </h2>
+          <p class="referral-step-text">{{ step.text }}</p>
+          {% for side, gift, glyph in (("recruiter", step.recruiter, step.glyphs[0]), ("recruit", step.recruit, step.glyphs[1])) %}
+            <p class="referral-gift">
+              <span aria-hidden="true"
+                    class="referral-gift-disc referral-gift-{{ glyph }}"><Icon :name="glyph" :size="18" stroke="currentColor" /></span>
+              <span><span class="referral-gift-who">{{ _("web.referral.side." ~ side) }}</span><strong>{{ gift }}</strong></span>
+            </p>
+          {% endfor %}
+        </li>
+      {% endfor %}
+    </ol>
+    <section aria-labelledby="referral-link"
+             class="info-box info-box-green referral-link enter-panel">
+      <h2 id="referral-link" class="info-box-title">{{ _("web.referral.link") }}</h2>
+      <span aria-hidden="true" class="info-box-disc"><Icon name="link" :size="22" stroke="#0A0A0A" /></span>
+      {% if link %}
+        <label for="referral-field" class="referral-link-label">
+          {{ _("web.referral.link.text", name=player.name) }}
+          <span class="no-js-only">{{ _("web.referral.copy.manual") }}</span>
+        </label>
+        <div class="referral-link-row">
+          <input id="referral-field"
+                 type="text"
+                 readonly
+                 value="{{ link }}"
+                 data-select
+                 class="referral-field">
+          <ReferralCopy :link="link" line="referral-copied" />
+        </div>
+        <p id="referral-copied" aria-hidden="true" class="referral-copied"></p>
+      {% elif signed %}
+        <p class="referral-link-label">{{ _("web.referral.needs_name") }}</p>
+        <p class="site-actions">
+          <a href="{{ url('/account/display-name') }}?{{ {'next': here}|urlencode }}"
+             class="site-button site-button-go"><Icon name="user" :size="16" stroke="currentColor" />{{ _("web.referral.needs_name.action") }}</a>
+        </p>
+      {% else %}
+        <p class="referral-link-label">{{ _("web.referral.widget.signed_out") }}</p>
+        <p class="site-actions">
+          <a href="{{ url('/sign-in') }}?{{ {'next': here}|urlencode }}"
+             class="site-button site-button-go"><Icon name="sign-in" :size="16" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+        </p>
+      {% endif %}
+      <p class="referral-timing">
+        <Icon name="gift" :size="18" stroke="currentColor" />
+        <span>{{ _("web.referral.timing") }}</span>
+      </p>
+    </section>
+    {% if signed %}
+      <section aria-labelledby="referral-recruits" class="referral-recruits">
+        <div class="referral-recruits-head">
+          <h2 id="referral-recruits"
+              class="site-heading">{{ _("web.referral.recruits", count=number(recruits|length)) }}</h2>
+          <a href="{{ url('/' ~ game.id ~ '/rewards') }}"
+             class="site-link">{{ _("web.site.page.rewards") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+        </div>
+        {% if recruits %}
+          <div role="table"
+               aria-labelledby="referral-recruits"
+               class="referral-table enter-rows">
+            <div role="row" class="referral-row referral-row-head">
+              <span role="columnheader">{{ _("web.referral.column.recruit") }}</span>
+              <span role="columnheader">{{ _("web.referral.column.joined") }}</span>
+              <span role="columnheader">{{ _("web.referral.column.best") }}</span>
+              {% for step in steps %}
+                <span role="columnheader">{{ _("web.referral.column.step", n=step.number, goal=step.goal) }}</span>
+              {% endfor %}
+            </div>
+            {% for row in recruits %}
+              <div role="row"
+                   class="referral-row{% if row.ready %} referral-row-ready{% endif %}">
+                <span role="rowheader" class="referral-name">
+                  <a href="{{ url('/' ~ game.id ~ '/player/' ~ row.account_id) }}"
+                     class="profile-link">{{ row.name }}</a>
+                </span>
+                <span role="cell"
+                      class="referral-joined"><span class="referral-phone">{{ _("web.referral.joined") }}</span>{{ row.joined }}</span>
+                <span role="cell" class="referral-best">
+                  {% if row.leader %}
+                    <span aria-hidden="true"
+                          class="referral-level">{{ row.leader.level }}</span>{{ _("web.heroes.level", level=row.leader.level) }}
+                  {% else %}
+                    {{ _("web.bar.no_hero") }}
+                  {% endif %}
+                </span>
+                {% for chip in row.chips %}
+                  <span role="cell" class="referral-step-cell">
+                    <span class="referral-phone">{{ _("web.referral.step", n=steps[loop.index0].number) }}:</span>
+                    <span class="referral-chip referral-chip-{{ chip.tone }}"><Icon :name="{'claimed': 'tick', 'ready': 'gift', 'ended': 'x'}.get(chip.tone, 'clock')" :size="14" stroke="currentColor" />{{ chip.text }}</span>
+                    {% if chip.until %}<span class="referral-until">{{ chip.until }}</span>{% endif %}
+                  </span>
+                {% endfor %}
+              </div>
+            {% endfor %}
+          </div>
+          <p class="referral-note">
+            {% for step in steps %}{{ _("web.referral.table.window" if step.days else "web.referral.table.open", n=step.number, days=step.days) }} {% endfor %}{{ _("web.referral.table.public") }}
+          </p>
+        {% else %}
+          <p class="site-empty referral-none">
+            <span aria-hidden="true"
+                  class="site-empty-disc"><Icon name="user-plus" :size="30" stroke="currentColor" /></span>
+            <span>{{ _("web.referral.none") }}</span>
+          </p>
+        {% endif %}
+      </section>
+    {% endif %}
+  {% else %}
+    <section aria-labelledby="referral-off" class="site-empty enter-panel">
+      <span aria-hidden="true" class="site-empty-disc"><Icon name="pause" :size="34" stroke="currentColor" /></span>
+      <div>
+        <h2 id="referral-off" class="site-empty-title">{{ _("web.referral.off") }}</h2>
+        <p>{{ _("web.referral.off.text") }}</p>
+        <a href="{{ url('/' ~ game.id ~ '/rewards') }}"
+           class="site-link">{{ _("web.site.page.rewards") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+      </div>
+    </section>
+  {% endif %}
+</Layout>

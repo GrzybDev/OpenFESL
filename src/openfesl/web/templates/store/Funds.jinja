@@ -1,8 +1,8 @@
-{#def from_game: bool, points: list, allowance: int, milestones: list, given = None #}
+{#def from_game: bool, points: list, allowance: int, milestones: list, given = None, recruited: int = 0 #}
 {# The Funds page: why the game opened it, the account's balances or the way to see them, and the
    rule that Funds are not sold, with the sources they come from on this server: the starting
-   allowance, the codes where the site redeems them and the rewards that give Funds with what each
-   gives. A reward of the account says
+   allowance, the codes where the site redeems them, Recruit a Friend while it runs and the
+   rewards that give Funds with what each gives. A reward of the account says
    where it stands in its own row; one that each hero gets lists the heroes with how far each got
    and Claim once one reached it, or, while none did, the hero that came closest. #}
 {% set rules = game.heroes %}
@@ -91,9 +91,10 @@
   <section aria-labelledby="sources-title" class="funds-sources">
     <h2 id="sources-title" class="funds-title">{{ _("web.funds.not_sold", currency=funds) }}</h2>
     <p class="site-lead">
-      {{ _("web.funds.no_payments") }} {{ _("web.funds.sources" if allowance and codes else "web.funds.source" if allowance or codes else "web.funds.no_source", currency=funds) }}
+      {% set sources = [allowance, codes, recruited]|select|list|length %}
+      {{ _("web.funds.no_payments") }} {{ _("web.funds.sources" if sources > 1 else "web.funds.source" if sources else "web.funds.no_source", currency=funds) }}
     </p>
-    {% if allowance or codes %}
+    {% if sources %}
       <div class="funds-source-grid enter-rows">
         {% if allowance %}
           <section aria-labelledby="source-allowance" class="funds-source">
@@ -118,6 +119,18 @@
               <p class="funds-source-text">{{ _("web.funds.codes.text", currency=funds) }}</p>
               <a href="{{ url('/' ~ game.id ~ game.site.path('redeem')) }}"
                  class="site-link">{{ _("web.site.page.redeem") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+            </div>
+          </section>
+        {% endif %}
+        {% if recruited %}
+          <section aria-labelledby="source-referral" class="funds-source">
+            <Splash />
+            <div class="store-box store-box-pale">
+              <span aria-hidden="true" class="store-disc"><Icon name="user-plus" :size="22" stroke="#0A0A0A" /></span>
+              <h3 id="source-referral" class="site-dialog-title">{{ _("web.referral.title") }}</h3>
+              <p class="funds-source-text">{{ _("web.funds.referral.text", amount=number(recruited), currency=funds) }}</p>
+              <a href="{{ url('/' ~ game.id ~ '/recruit-a-friend') }}"
+                 class="site-link">{{ _("web.referral.title") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
             </div>
           </section>
         {% endif %}

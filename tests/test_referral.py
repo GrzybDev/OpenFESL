@@ -257,3 +257,55 @@ async def test_links_record_nobody_signed_in_off_or_unknown_and_a_window_ends_a_
     assert "None of the account's heroes can take it." in ended
     assert "The 60 days after this account's sign-up ended on" in ended
     assert "at level 9; this step can no longer be met." in ended
+
+
+async def test_the_page_and_boxes_show_the_link_steps_and_where_each_recruit_stands(
+    base: str, database_url: str
+) -> None:
+    await setting(database_url, UNCONFIRMED, "off")
+    await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    named = "UPDATE account SET display_name = 'Quillfuse' WHERE nuid = 'ann@example.test'"
+    await execute(database_url, named)
+    ann = await account_id(database_url, "ann@example.test")
+    async with httpx2.AsyncClient() as visitor:
+        signed_out = visible((await visitor.get(f"{base}/bfheroes/recruit-a-friend")).content)
+        profile = await visitor.get(f"{base}/bfheroes/player/{ann}")
+        await visitor.get(f"{base}/bfheroes/ref/{ann}")
+        await post_registration(visitor, base, email="cat@example.test")
+        await create(visitor, base, "Hollyhock", faction="national", **{"class": "soldier"})
+    await level(database_url, "Hollyhock", 9)
+    async with httpx2.AsyncClient() as client:
+        await post_sign_in(client, base, "ann@example.test", PASSWORD)
+        answer = await client.get(f"{base}/bfheroes/recruit-a-friend")
+        page = visible(answer.content)
+        polish = visible((await client.get(f"{base}/pl/bfheroes/recruit-a-friend")).content)
+        front = visible((await client.get(f"{base}/bfheroes")).content)
+        funds = visible((await client.get(f"{base}/bfheroes/store/purchaseFunds")).content)
+    async with httpx2.AsyncClient() as unnamed:
+        await post_sign_in(unnamed, base, "bob@example.test", PASSWORD)
+        nameless = await unnamed.get(f"{base}/bfheroes/recruit-a-friend")
+        no_box = (await unnamed.get(f"{base}/bfheroes")).text
+    async with httpx2.AsyncClient() as client:
+        await post_sign_in(client, base, "ann@example.test", PASSWORD)
+        await setting(database_url, "bfheroes.rewards.referral.enabled", "off")
+        off = visible((await client.get(f"{base}/bfheroes/recruit-a-friend")).content)
+        quiet = visible((await client.get(f"{base}/bfheroes")).content)
+
+    assert "Sign in to see the personal link." in signed_out
+    assert f'href="/bfheroes/ref/{ann}"' in profile.text
+    # The link starts with the address the pages are reached at, the request's own here.
+    assert f'value="{base}/bfheroes/ref/{ann}"' in answer.text
+    assert "becomes Quillfuse's recruit" in page and "Select the link and copy it." in page
+    assert "Level 15 within 60 days" in page
+    assert "Recruits · 1 Rewards Recruit Joined Best hero Step 2 · level 7" in page
+    assert "Invented_Cat" in page and "Ready on the rewards page" in page
+    assert "Level 9 of 15 until" in page
+    assert "Krok 3 · poziom 15 w 60 dni" in polish
+    assert "and again at level 15 within 60 days" in front
+    assert "brings the account the link belongs to up to 3,500 Funds" in funds
+    # An account without a display name gets no link, which would recruit nobody.
+    assert "Choose a display name" in visible(nameless.content)
+    assert "/bfheroes/ref/" not in nameless.text and "front-referral" not in no_box
+    assert "Recruit a Friend is not running on this service" in off
+    assert "becomes Quillfuse's recruit" not in off
+    assert "Recruit a Friend" not in quiet

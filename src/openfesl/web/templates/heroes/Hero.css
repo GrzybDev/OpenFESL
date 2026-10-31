@@ -8,12 +8,6 @@
     --box-ink: #fff;
   }
 
-  .info-box-green {
-    --box: #4f5627;
-    --box-edge: #77813b;
-    --box-ink: #fff;
-  }
-
   .profile-head {
     display: flex;
     flex-wrap: wrap;

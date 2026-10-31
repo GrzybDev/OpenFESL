@@ -1,0 +1,70 @@
+/* Recruit a Friend's green box beside a page and its personal link: the read-only field in the
+   monospaced face with the dark round Copy, whose glyph fades to a tick, the line that says
+   it copied, and yellow links on the green. */
+@layer components {
+  .referral-box {
+    padding-bottom: 12px;
+  }
+
+  .referral-box-text {
+    margin-top: 10px;
+  }
+
+  .referral-box-link {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .referral-field {
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 10px;
+    border: 2px solid #000;
+    border-radius: 6px;
+    background: #fff;
+    color: #1f1712;
+    font: 500 13px/1 var(--font-mono);
+  }
+
+  .referral-copy {
+    min-height: 48px;
+    color: #fff;
+
+    .copy-icons > * {
+      transition: opacity 150ms var(--ease-menu);
+    }
+
+    .copy-icons .copy-idle,
+    .copy-icons .copy-done {
+      color: #fede01;
+    }
+  }
+
+  .referral-copy-icon {
+    width: 44px;
+    min-height: 44px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .referral-copied {
+    min-height: 20px;
+    margin-top: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
+  .referral-box-link-text {
+    margin-right: 18px;
+    color: #fede01;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .referral-copy .copy-icons > * {
+      transition: none;
+    }
+  }
+}

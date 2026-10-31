@@ -7183,6 +7183,9 @@ msgstr "Kody"
 msgid "web.funds.codes.text"
 msgstr "Kody od administracji tego serwisu mogą dawać %(currency)s, raz każdemu kontu, które je zrealizuje."
 
+msgid "web.funds.referral.text"
+msgstr "Każde konto założone przez osobisty link daje kontu, do którego link należy, do %(amount)s %(currency)s, gdy jego bohaterowie osiągają kolejne kroki zapraszania znajomych."
+
 msgid "web.funds.no_source"
 msgstr "Nic w tym serwisie nie daje %(currency)s."
 
@@ -9958,6 +9961,138 @@ msgstr "%(game)s pokazuje nowe przedmioty przy następnym logowaniu bohatera."
 
 msgid "web.referral.title"
 msgstr "Zaproś znajomych"
+
+msgid "web.referral.header"
+msgstr "%(game)s ze znajomymi"
+
+msgid "web.referral.header.text"
+msgstr "Osoba, która założy konto przez osobisty link, staje się zaproszonym kontem. Gdy bohater tego konta osiągnie cele poniżej, oba konta dostają nagrodę."
+
+msgid "web.referral.step"
+msgstr "Krok %(n)s"
+
+msgid "web.referral.step.signup"
+msgstr "Rejestracja przez link"
+
+msgid "web.referral.step.signup.text"
+msgstr "Osoba zaproszona otwiera osobisty link i zakłada nowe konto. Istniejące konta nigdy się nie liczą."
+
+msgid "web.referral.step.level"
+msgstr "Bohater osiąga poziom %(level)s"
+
+msgid "web.referral.step.level.window"
+msgstr "Poziom %(level)s w ciągu %(days)s dni"
+
+msgid "web.referral.step.any_hero"
+msgstr "Dowolny bohater zaproszonego konta, bez terminu."
+
+msgid "web.referral.step.any_hero.window"
+msgstr "Dowolny bohater zaproszonego konta, w ciągu %(days)s dni od jego rejestracji."
+
+msgid "web.referral.goal"
+msgstr "poziom %(level)s"
+
+msgid "web.referral.goal.window"
+msgstr "poziom %(level)s w %(days)s dni"
+
+msgid "web.referral.side.recruiter"
+msgstr "Konto zapraszające"
+
+msgid "web.referral.side.recruit"
+msgstr "Konto zaproszone"
+
+msgid "web.referral.item_on_hero"
+msgstr "%(item)s, dla bohatera na poziomie %(level)s lub wyższym"
+
+msgid "web.referral.link"
+msgstr "Osobisty link"
+
+msgid "web.referral.link.text"
+msgstr "Osoba, która otworzy ten link i założy konto, zostanie zaproszona przez: %(name)s."
+
+msgid "web.referral.copy"
+msgstr "Kopiuj"
+
+msgid "web.referral.copy.name"
+msgstr "Skopiuj osobisty link"
+
+msgid "web.referral.copied"
+msgstr "Skopiowano: %(link)s"
+
+msgid "web.referral.copy.manual"
+msgstr "Zaznacz link i skopiuj go."
+
+msgid "web.referral.timing"
+msgstr "Nagrody pojawiają się na stronie nagród obu kont, gdy tylko bohater zaproszonego konta osiągnie cel; każde konto odbiera tam swoją. Liczą się tylko konta założone przez link, każde raz."
+
+msgid "web.referral.recruits"
+msgstr "Zaproszone konta · %(count)s"
+
+msgid "web.referral.column.recruit"
+msgstr "Konto"
+
+msgid "web.referral.column.joined"
+msgstr "Dołączyło"
+
+msgid "web.referral.column.best"
+msgstr "Najlepszy bohater"
+
+msgid "web.referral.column.step"
+msgstr "Krok %(n)s · %(goal)s"
+
+msgid "web.referral.joined"
+msgstr "Dołączyło"
+
+msgid "web.referral.state.claimed"
+msgstr "Odebrano %(date)s"
+
+msgid "web.referral.state.ready"
+msgstr "Do odebrania na stronie nagród"
+
+msgid "web.referral.state.until"
+msgstr "do %(date)s"
+
+msgid "web.referral.state.ended"
+msgstr "Zakończono %(date)s"
+
+msgid "web.referral.state.ended.level"
+msgstr "Zakończono %(date)s na poziomie %(level)s"
+
+msgid "web.referral.table.open"
+msgstr "Krok %(n)s nie ma terminu."
+
+msgid "web.referral.table.window"
+msgstr "Krok %(n)s liczy %(days)s dni od rejestracji zaproszonego konta."
+
+msgid "web.referral.table.public"
+msgstr "Konta niepubliczne nie są pokazywane na tej liście."
+
+msgid "web.referral.none"
+msgstr "Brak zaproszonych kont. Konta założone przez link powyżej pojawią się tutaj razem z postępem."
+
+msgid "web.referral.off"
+msgstr "Zapraszanie znajomych nie działa w tym serwisie"
+
+msgid "web.referral.off.text"
+msgstr "Gdy jest wyłączone, osobiste linki nie rejestrują nowych kont. Nagrody widoczne już na stronie nagród można nadal tam odebrać."
+
+msgid "web.referral.more"
+msgstr "Jak działa zapraszanie"
+
+msgid "web.referral.widget.signed_in"
+msgstr "Ten link można wysłać znajomym; konta założone przez niego stają się zaproszonymi kontami."
+
+msgid "web.referral.widget.signed_out"
+msgstr "Osobisty link widać po zalogowaniu."
+
+msgid "web.referral.front.signed_in"
+msgstr "Konta założone przez ten link stają się zaproszonymi kontami. Oba konta dostają nagrody, gdy bohater zaproszonego konta osiągnie poziom %(first)s, i ponownie przy poziomie %(second)s w ciągu %(days)s dni."
+
+msgid "web.referral.front.signed_out"
+msgstr "Osoby, które zarejestrują się przez czyjś osobisty link, grają jako zaproszone konta, a oba konta dostają nagrody. Osobisty link widać po zalogowaniu."
+
+msgid "web.referral.profile.through"
+msgstr " przez osobisty link konta %(name)s"
 
 msgid "web.referral.landing.title"
 msgstr "Dołącz do walki"

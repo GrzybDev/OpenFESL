@@ -64,8 +64,13 @@ class FundsPages:
             points = await self._wallets.of_personas(
                 game, [hero.persona for hero in heroes], rules.points
             )
-            milestones = []
+            milestones, recruited = [], 0
             if rewards := await self._rewards.rules(game):
+                # Recruit a Friend while it runs: what each recruit may bring its recruiter.
+                referral = rewards.referral if "recruit-a-friend" in game.pages else None
+                if referral and referral.enabled:
+                    steps = referral.steps.values()
+                    recruited = sum(step.recruiter.gift.funds for step in steps)
                 art = self._pages.shows_art(request, game)
                 cards = await reward_cards(request, game, rewards, *self._stores, art)
                 milestones = await cards.milestones(bar.rewards if bar and player else [])
@@ -81,6 +86,7 @@ class FundsPages:
                 if bar and player
                 else None,
                 milestones=milestones,
+                recruited=recruited,
             )
 
         return show_funds

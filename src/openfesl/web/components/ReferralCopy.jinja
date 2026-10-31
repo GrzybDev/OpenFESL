@@ -1,0 +1,14 @@
+{#def link: str, line: str, icon: bool = False #}
+{# Copy of a personal link of Recruit a Friend, which needs scripts and so only shows with them: it
+   copies the link, its glyph turns to a tick and its label says it copied for a moment, and the
+   line under the field says so while the shell announces it. As an icon its label is left to
+   screen readers. #}
+<button type="button"
+        data-copy="{{ link }}"
+        data-copied="{{ _('web.copy.done') }}"
+        data-note="{{ _('web.referral.copied', link=link) }}"
+        data-line="{{ line }}"
+        {% if icon %} aria-label="{{ _('web.referral.copy.name') }}"{% endif %}
+        class="copy site-button referral-copy js-only{% if icon %} referral-copy-icon{% endif %}">
+  <span aria-hidden="true" class="copy-icons"><Icon name="copy" :size="18" stroke="currentColor" class="copy-idle" /><Icon name="tick" :size="18" stroke="currentColor" class="copy-done" /></span><span data-label{% if icon %} class="sr-only"{% endif %}>{{ _("web.referral.copy") }}</span>
+</button>

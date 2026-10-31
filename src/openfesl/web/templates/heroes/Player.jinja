@@ -1,13 +1,20 @@
-{#def account, heroes: list, time: str, games: int, member, relationship = None #}
+{#def account, heroes: list, time: str, games: int, member, relationship = None, referral = None #}
 {# A player's public profile, as the 2012 site's: the display name with since when the account is
    on this server and how the signed-in account relates to it as a friend, its heroes as cards
-   that lead to their profiles, and the totals of their rounds. #}
+   that lead to their profiles, and the totals of their rounds. While Recruit a Friend runs, a
+   visitor signed out may sign up through the player's link, and its box follows. #}
 {% set rules = game.heroes %}
 {% set name = account.account.display_name %}
 <Layout :title="name">
   <section aria-labelledby="player-name" class="player-head">
     <div class="creator-intro">
-      <Plaque id="player-name">{{ name }}</Plaque>
+      <div class="player-title">
+        <Plaque id="player-name">{{ name }}</Plaque>
+        {% if referral and not player %}
+          <a href="{{ url('/' ~ game.id ~ '/ref/' ~ account.account.id) }}"
+             class="site-button site-button-go"><Icon name="user-plus" :size="16" stroke="currentColor" />{{ _("web.referral.landing.sign_up") }}<span class="sr-only">{{ _("web.referral.profile.through", name=name) }}</span></a>
+        {% endif %}
+      </div>
       <p class="site-lead">{{ _("web.profile.since", date=when(account.created, "yMMMd")) }}</p>
     </div>
     {% if not player %}
@@ -61,4 +68,9 @@
       </dd>
     </dl>
   </section>
+  {% if referral %}
+    <div class="player-referral">
+      <ReferralBox :box="referral" :text="_('web.referral.widget.signed_in' if referral.link else 'web.referral.widget.signed_out')" id="player-referral" />
+    </div>
+  {% endif %}
 </Layout>

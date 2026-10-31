@@ -6907,6 +6907,9 @@ msgstr "Codes"
 msgid "web.funds.codes.text"
 msgstr "Codes from the administrators of this service may give %(currency)s, once to each account that redeems them."
 
+msgid "web.funds.referral.text"
+msgstr "Each account created through a personal link brings the account the link belongs to up to %(amount)s %(currency)s as its heroes reach the steps of Recruit a Friend."
+
 msgid "web.funds.no_source"
 msgstr "Nothing on this service gives %(currency)s."
 
@@ -9408,6 +9411,138 @@ msgstr "%(game)s shows new items at the hero's next login."
 
 msgid "web.referral.title"
 msgstr "Recruit a Friend"
+
+msgid "web.referral.header"
+msgstr "%(game)s with friends"
+
+msgid "web.referral.header.text"
+msgstr "A friend who creates an account through the personal link becomes a recruit. When a hero of the recruit reaches the goals below, both accounts get a reward."
+
+msgid "web.referral.step"
+msgstr "Step %(n)s"
+
+msgid "web.referral.step.signup"
+msgstr "Sign up through the link"
+
+msgid "web.referral.step.signup.text"
+msgstr "The friend opens the personal link and creates a new account. Accounts that already exist never count."
+
+msgid "web.referral.step.level"
+msgstr "A hero reaches level %(level)s"
+
+msgid "web.referral.step.level.window"
+msgstr "Level %(level)s within %(days)s days"
+
+msgid "web.referral.step.any_hero"
+msgstr "Any hero of the recruit, with no deadline."
+
+msgid "web.referral.step.any_hero.window"
+msgstr "Any hero of the recruit, within %(days)s days of the recruit's sign-up."
+
+msgid "web.referral.goal"
+msgstr "level %(level)s"
+
+msgid "web.referral.goal.window"
+msgstr "level %(level)s in %(days)s days"
+
+msgid "web.referral.side.recruiter"
+msgstr "Recruiter"
+
+msgid "web.referral.side.recruit"
+msgstr "Recruit"
+
+msgid "web.referral.item_on_hero"
+msgstr "%(item)s, on a hero of level %(level)s or higher"
+
+msgid "web.referral.link"
+msgstr "Personal link"
+
+msgid "web.referral.link.text"
+msgstr "A friend who opens this link and creates an account becomes %(name)s's recruit."
+
+msgid "web.referral.copy"
+msgstr "Copy"
+
+msgid "web.referral.copy.name"
+msgstr "Copy the personal link"
+
+msgid "web.referral.copied"
+msgstr "Copied: %(link)s"
+
+msgid "web.referral.copy.manual"
+msgstr "Select the link and copy it."
+
+msgid "web.referral.timing"
+msgstr "Rewards appear on the rewards page of both accounts as soon as a recruit's hero reaches a goal; each account claims its own there. Only accounts created through the link count, each once."
+
+msgid "web.referral.recruits"
+msgstr "Recruits · %(count)s"
+
+msgid "web.referral.column.recruit"
+msgstr "Recruit"
+
+msgid "web.referral.column.joined"
+msgstr "Joined"
+
+msgid "web.referral.column.best"
+msgstr "Best hero"
+
+msgid "web.referral.column.step"
+msgstr "Step %(n)s · %(goal)s"
+
+msgid "web.referral.joined"
+msgstr "Joined"
+
+msgid "web.referral.state.claimed"
+msgstr "Claimed %(date)s"
+
+msgid "web.referral.state.ready"
+msgstr "Ready on the rewards page"
+
+msgid "web.referral.state.until"
+msgstr "until %(date)s"
+
+msgid "web.referral.state.ended"
+msgstr "Ended %(date)s"
+
+msgid "web.referral.state.ended.level"
+msgstr "Ended %(date)s at level %(level)s"
+
+msgid "web.referral.table.open"
+msgstr "Step %(n)s has no deadline."
+
+msgid "web.referral.table.window"
+msgstr "Step %(n)s counts %(days)s days from the recruit's sign-up."
+
+msgid "web.referral.table.public"
+msgstr "Accounts that are not public are left out of this list."
+
+msgid "web.referral.none"
+msgstr "No recruits yet. Accounts created through the link above show here with their progress."
+
+msgid "web.referral.off"
+msgstr "Recruit a Friend is not running on this service"
+
+msgid "web.referral.off.text"
+msgstr "Personal links record no new recruits while it is off. Rewards that already show on the rewards page can still be claimed there."
+
+msgid "web.referral.more"
+msgstr "How recruiting works"
+
+msgid "web.referral.widget.signed_in"
+msgstr "Send this link to friends; accounts created through it become recruits."
+
+msgid "web.referral.widget.signed_out"
+msgstr "Sign in to see the personal link."
+
+msgid "web.referral.front.signed_in"
+msgstr "Accounts created through this link become recruits. Both accounts get rewards when a recruit's hero reaches level %(first)s, and again at level %(second)s within %(days)s days."
+
+msgid "web.referral.front.signed_out"
+msgstr "Friends who sign up through a player's personal link play as recruits, and both accounts get rewards. Sign in to see the personal link."
+
+msgid "web.referral.profile.through"
+msgstr " through %(name)s's personal link"
 
 msgid "web.referral.landing.title"
 msgstr "Join the fight"

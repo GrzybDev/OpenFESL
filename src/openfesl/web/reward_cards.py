@@ -208,7 +208,7 @@ class RewardCards:
             id=f"reward-{reward.key}-{reward.faction or 'account'}".replace(":", "-"),
             band=words.band(reward),
             faction=reward.faction or (owner.faction if owner else None),
-            glyph=_glyph(gift),
+            glyph=gift_glyph(gift),
             icon=words.icon(gift.items[0][0]) if gift.items else None,
             title=words.title(reward),
             text=words.description(reward),
@@ -244,7 +244,7 @@ class RewardCards:
             id=f"reward-{reward.key}".replace(":", "-"),
             band=referral_texts.band(words, reward),
             faction=None,
-            glyph="valor" if gift.points else _glyph(gift),
+            glyph=gift_glyph(gift),
             icon=None,
             title=words.title(reward),
             text=referral_texts.story(words, reward),
@@ -430,10 +430,16 @@ async def reward_cards(
     return RewardCards(words, RewardClaims(words, entitlements, products), products)
 
 
-def _glyph(gift: Gift) -> str:
-    # The glyph of what a reward gives: a box's drop, a hero's items, keys or Funds.
+def gift_glyph(gift: Gift) -> str:
+    """Return the glyph of what a gift gives: a box's drop, a hero's items, keys, points or Funds.
+
+    Args:
+        gift: The gift.
+    """
     if gift.box and not gift.items:
         return "box"
     if gift.items:
         return "gift"
-    return "key" if gift.keys else "coin"
+    if gift.keys:
+        return "key"
+    return "valor" if gift.points else "coin"

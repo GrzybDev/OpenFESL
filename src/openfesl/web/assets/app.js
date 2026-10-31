@@ -309,8 +309,8 @@ setInterval(() => {
   }
 }, 1000);
 
-// A copy button copies its text, says so for 1.5 s and has the page announce it. Without
-// clipboard access it stays as it was; the text it copies is on the page.
+// A copy button copies its text, says so for 1.5 s, in the line it names too, and has the page
+// announce it. Without clipboard access it stays as it was; the text it copies is on the page.
 document.addEventListener("click", async (event) => {
   const button = event.target instanceof Element ? event.target.closest("[data-copy]") : null;
   if (!button) {
@@ -322,15 +322,29 @@ document.addEventListener("click", async (event) => {
     return;
   }
   const label = button.querySelector("[data-label]");
+  const line = button.dataset.line ? document.getElementById(button.dataset.line) : null;
   label.dataset.rest ??= label.textContent;
   label.textContent = button.dataset.copied;
   button.classList.add("copied");
+  if (line) {
+    line.textContent = button.dataset.note;
+  }
   announce(button.dataset.note);
   clearTimeout(button.copiedTimer);
   button.copiedTimer = setTimeout(() => {
     label.textContent = label.dataset.rest;
     button.classList.remove("copied");
+    if (line) {
+      line.textContent = "";
+    }
   }, 1500);
+});
+
+// A read-only field of a text to copy, such as a personal link, selects all of it on focus.
+document.addEventListener("focusin", (event) => {
+  if (event.target instanceof HTMLInputElement && event.target.matches("[data-select]")) {
+    event.target.select();
+  }
 });
 
 // A toast that says a change was saved leaves after 4 s; one that says it failed stays until

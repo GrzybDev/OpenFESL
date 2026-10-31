@@ -1,0 +1,34 @@
+{#def box, text: str, id: str, button: bool = False #}
+{# Recruit a Friend's box beside a page, the 2012 widget: signed in, the viewer's personal
+   link in a field to select, with an icon Copy where scripts run and the line that says it copied;
+   signed out, the way to sign in, a button where the box asks for it; and the page that explains
+   recruiting. #}
+<section aria-labelledby="{{ id }}-title"
+         class="info-box info-box-green referral-box">
+  <h2 id="{{ id }}-title" class="info-box-title">{{ _("web.referral.title") }}</h2>
+  <span aria-hidden="true" class="info-box-disc"><Icon name="link" :size="20" stroke="#0A0A0A" /></span>
+  <p class="referral-box-text">{{ text }}</p>
+  {% if box.link %}
+    <div class="referral-box-link">
+      <input id="{{ id }}-link"
+             type="text"
+             readonly
+             value="{{ box.link }}"
+             aria-label="{{ _('web.referral.link') }}"
+             data-select
+             class="referral-field">
+      <ReferralCopy :link="box.link" :line="id ~ '-copied'" icon />
+    </div>
+    <p id="{{ id }}-copied" aria-hidden="true" class="referral-copied"></p>
+  {% elif button %}
+    <p class="site-actions">
+      <a href="{{ url('/sign-in') }}?{{ {'next': here}|urlencode }}"
+         class="site-button site-button-go"><Icon name="sign-in" :size="16" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+    </p>
+  {% else %}
+    <a href="{{ url('/sign-in') }}?{{ {'next': here}|urlencode }}"
+       class="info-box-link referral-box-link-text"><Icon name="sign-in" :size="16" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+  {% endif %}
+  <a href="{{ url('/' ~ game.id ~ '/recruit-a-friend') }}"
+     class="info-box-link referral-box-link-text">{{ _("web.referral.more") }}</a>
+</section>

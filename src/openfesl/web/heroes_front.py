@@ -19,6 +19,7 @@ from openfesl.web.account.session import signed_in
 from openfesl.web.boards import Board, lines, shares, standings
 from openfesl.web.hot_deals import deal_card
 from openfesl.web.pages import Pages
+from openfesl.web.referral import ReferralLinks
 from openfesl.web.reward_texts import RewardTexts, reward_texts
 from openfesl.web.site import site_bar
 from openfesl.web.store_texts import StoreTexts
@@ -54,6 +55,7 @@ class HeroesFrontPages:
         deals: HotDeals,
         boards: HeroBoards,
         stores: tuple[Catalogues, EntitlementStore, ProductStore],
+        links: ReferralLinks,
     ) -> None:
         """Prepare the front page of each game with heroes and a site of its own.
 
@@ -66,6 +68,7 @@ class HeroesFrontPages:
             boards: Rank the heroes by this week's score, as the leaderboards do.
             stores: The imported catalogues, the heroes' items and the store's boxes, which
                 name the event's gifts and the deals' items.
+            links: Recruit a Friend, whose box with the account's personal link the page shows.
         """
         self._pages = pages
         self._games = games
@@ -74,6 +77,7 @@ class HeroesFrontPages:
         self._deals = deals
         self._boards = boards
         self._stores = stores
+        self._links = links
 
     def routes(self) -> APIRouter:
         """Return the front page of each game with heroes and a site of its own."""
@@ -129,6 +133,7 @@ class HeroesFrontPages:
                 activity=self._census.activity(game),
                 counted=datetime.now(UTC),
                 roster=roster,
+                referral=await self._links.box(request, game),
             )
 
         return show_front

@@ -243,7 +243,9 @@ async def test_a_players_profile_lists_their_heroes_totals_and_asks_them_as_a_fr
 
     shown = visible(signed_out.content)
     today = datetime.now(UTC)
-    assert f"Quill_Invented On OpenFESL since {today.day} {today:%b %Y}" in shown
+    # A visitor may sign up through the player's link of Recruit a Friend.
+    joined = "Sign up through Quill_Invented's personal link On OpenFESL since"
+    assert f"Quill_Invented {joined} {today.day} {today:%b %Y}" in shown
     assert "Friend requests need a signed-in account. Sign in" in shown
     assert f'href="/sign-in?next=%2Fbfheroes%2Fplayer%2F{ann}"' in signed_out.text
     assert (

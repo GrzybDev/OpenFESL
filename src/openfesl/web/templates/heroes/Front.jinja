@@ -1,10 +1,10 @@
-{#def event, next_event, top: list, shares: list, ranked, deals: list, ends, left: str, activity, counted, roster #}
+{#def event, next_event, top: list, shares: list, ranked, deals: list, ends, left: str, activity, counted, roster, referral = None #}
 {# The front page of a game with heroes on its own site: in the main column the event that runs
    with where its gifts, today's for a daily event, stand for the account, the week's best heroes
    and how to start; beside it Play Now, each faction's deal of the day with its discount, items
    and price, and who plays now. The week's best are the first of its score board, with the
    factions' shares of it and when it was ranked. Claims happen on the rewards page, which the
-   event's lines lead to. #}
+   event's lines lead to. While Recruit a Friend runs, its box closes the side column. #}
 {% set rules = game.heroes %}
 {% set signed = player and roster %}
 {% set has_hero = signed and roster.heroes %}
@@ -261,6 +261,11 @@
           {{ _("web.front.online.none" if not activity.online else "web.front.online.counted", time=when(counted, "Hm") ~ " UTC") }}
         </p>
       </section>
+      {% if referral %}
+        {% set steps = referral.rules %}
+        {% set said = _("web.referral.front.signed_in", first=steps.first.level, second=steps.second.level, days=steps.second.days or 0) if referral.link else _("web.referral.front.signed_out") %}
+        <ReferralBox :box="referral" :text="said" id="front-referral" button />
+      {% endif %}
     </div>
   </div>
 </Layout>

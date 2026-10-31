@@ -1,5 +1,6 @@
 /* A player's profile: the name on its plaque with the friend control beside it, the heroes as
-   pale cards with their picture, and the totals as dashed rows in a pale box. */
+   pale cards with their picture, the totals as dashed rows in a pale box, and Recruit a Friend's
+   box. */
 @layer pages {
   .player-head {
     display: flex;
@@ -16,6 +17,19 @@
 
   .player-friend {
     margin-top: 0;
+  }
+
+  /* The name's plaque with the way to sign up through the player's link beside it. */
+  .player-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 18px;
+  }
+
+  .player-referral {
+    max-width: 420px;
+    margin-top: 48px;
   }
 
   .player-section {

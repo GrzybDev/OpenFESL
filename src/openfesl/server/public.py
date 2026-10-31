@@ -83,6 +83,16 @@ def include_public_routes(
     app.include_router(shell_routes(pages, services.terms))
     app.include_router(menu_routes(pages, games, census))
     app.include_router(front_routes(pages, games, census, history, stores.keys))
+    links = ReferralLinks(
+        pages,
+        games,
+        services.rewards,
+        services.heroes,
+        services.catalogues,
+        stores.accounts.account,
+        settings.public_url,
+    )
+    app.include_router(links.routes())
     app.include_router(
         HeroesFrontPages(
             pages,
@@ -92,6 +102,7 @@ def include_public_routes(
             services.deals,
             services.hero_boards,
             (services.catalogues, stores.entitlements, stores.products),
+            links,
         ).routes()
     )
     app.include_router(activity_routes(pages, games, census, history))
@@ -219,6 +230,7 @@ def include_public_routes(
             services.catalogues,
             services.relationships,
             services.hero_boards,
+            links,
         ).routes()
     )
     app.include_router(BoardPages(pages, games, services.hero_boards).routes())
@@ -252,8 +264,6 @@ def include_public_routes(
         turnstile,
         services.terms,
     )
-    links = ReferralLinks(pages, games, services.rewards, services.heroes, stores.accounts.account)
-    app.include_router(links.routes())
     register = RegisterPages(
         pages,
         games,

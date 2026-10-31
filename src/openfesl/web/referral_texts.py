@@ -1,9 +1,26 @@
+from dataclasses import dataclass
+
 from openfesl.core.reward_rules import ReferralStep
 from openfesl.core.rewards import Referred, Reward, RewardState
 from openfesl.web.reward_texts import RewardTexts
 
 # The number players see each step by; the sign-up is step 1.
 NUMBERS = {"first": 2, "second": 3}
+
+
+@dataclass(frozen=True, slots=True)
+class Chip:
+    """Where a step of a recruit stands, as the recruiter's table shows it.
+
+    Attributes:
+        tone: claimed, ready, waiting, locked or ended, which picks its glyph and colour.
+        text: Where it stands.
+        until: Until when it may still be reached; empty without an end.
+    """
+
+    tone: str
+    text: str
+    until: str
 
 
 def band(words: RewardTexts, reward: Reward) -> str:
@@ -79,6 +96,33 @@ def standing(words: RewardTexts, reward: Reward) -> tuple[str, str]:
     if ends:
         return texts.text("web.rewards.referral.locked.until", date=words.day(ends)), "locked"
     return texts.text("web.rewards.referral.locked"), "locked"
+
+
+def chip(words: RewardTexts, reward: Reward) -> Chip:
+    """Return where a recruit's step stands for its recruiter, in a word or two.
+
+    Args:
+        words: What the page says of the rewards.
+        reward: The recruiter's reward of the step.
+    """
+    referral, step = _step(words, reward)
+    texts, recruit = words.texts, referral.recruit
+    ends = step.ends(recruit.joined)
+    level = recruit.leader.level if recruit.leader else 0
+    if reward.claim:
+        return Chip(
+            "claimed", texts.text("web.referral.state.claimed", date=words.day(reward.claim.at)), ""
+        )
+    if reward.state is RewardState.CLAIMABLE:
+        return Chip("ready", texts.text("web.referral.state.ready"), "")
+    if referral.step in recruit.reached:
+        return Chip("locked", texts.text("web.rewards.state.unfit"), "")
+    if ends and reward.state is RewardState.EXPIRED:
+        key = "web.referral.state.ended" + (".level" if level < step.level else "")
+        return Chip("ended", texts.text(key, date=words.day(ends), level=level), "")
+    until = texts.text("web.referral.state.until", date=words.day(ends)) if ends else ""
+    shown = texts.text("web.rewards.progress.level", count=level, goal=step.level)
+    return Chip("waiting", shown, until)
 
 
 def lead(words: RewardTexts, rewards: list[Reward]) -> str:

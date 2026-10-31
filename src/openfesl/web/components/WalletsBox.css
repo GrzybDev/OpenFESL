@@ -1,5 +1,6 @@
 /* The info boxes under the heroes (the 2012 bfhBox): a coloured box with a dark title tab, a yellow
-   corner disc and a splatter under it; the brown one holds the wallets. */
+   corner disc and a splatter under it; the brown one holds the wallets, the green one what the
+   profiles and Recruit a Friend add. */
 @layer components {
   .info-boxes {
     display: grid;
@@ -26,6 +27,12 @@
     --box: #938166;
     --box-edge: #c9c099;
     --box-ink: #0f0b08;
+  }
+
+  .info-box-green {
+    --box: #4f5627;
+    --box-edge: #77813b;
+    --box-ink: #fff;
   }
 
   .info-box-title {
