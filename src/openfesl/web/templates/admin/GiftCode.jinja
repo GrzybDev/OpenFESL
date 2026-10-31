@@ -1,0 +1,59 @@
+{#def of, entry, state, contents: list, made, manages: bool #}
+{# A code that gives a gift on a game's site: its contents, accounts, end, labels and who
+   made it. Moderators read it in full. #}
+{% set game = of %}
+{% set title = _("web.admin.keys") %}
+{% set label = entry.label(language) %}
+{% set others = entry.labels.items()|rejectattr(0, "equalto", "en")|map(attribute=1)|list %}
+{% set end = _("web.store.utc", time=moment(entry.expires)) if entry.expires else "" %}
+{% set glyphs = {"enabled": "tick", "used_up": "full", "expired": "clock", "disabled": "x"} %}
+<AdminPage :title="(label or entry.code) ~ ' · ' ~ title" current="keys">
+  <PageHead labelledby="code-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="code-title">{{ _("web.admin.keys.subtitle.code", game=game.name) }}</TitleBlock>
+    </div>
+  </PageHead>
+  <Panel class="enter-panel">
+    <nav aria-label="{{ _('web.admin.keys.all_codes') }}"
+         class="tabs prices-back">
+      <Tab :href="url('/admin/keys') ~ '?game=' ~ game.id" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.keys.all_codes") }}</Tab>
+    </nav>
+    <h2 class="bar bar-wrap code-head">
+      <span class="code-head-name">
+        <code class="code-head-code">{{ entry.code }}</code>
+        {{ label }}
+      </span>
+      <span class="code-state code-state-{{ state }}"><Icon :name="glyphs[state]" :size="14" stroke="currentColor" />{{ _("web.admin.keys.state." ~ state) }}</span>
+    </h2>
+    <div class="code-layout">
+      <dl class="facts code-facts">
+        <Fact :label="_('web.admin.keys.col.contents')" plain>
+          {{ contents|join(" · ") or _("web.admin.audit.nothing") }}
+        </Fact>
+        <Fact :label="_('web.admin.keys.fact.accounts')" plain>
+          {%- set kind = "most" if entry.max_uses is not none else "any" -%}
+          {{ _("web.admin.keys.fact.used." ~ kind, used=number(entry.uses), most=number(entry.max_uses or 0)) }}
+        </Fact>
+        <Fact :label="_('web.admin.keys.col.ends')" plain>
+          {%- if not end %}{{ _("web.admin.keys.no_end") }}{% elif state == "expired" %}{{ _("web.admin.keys.ended", time=end) }}{% else %}{{ end }}{% endif -%}
+        </Fact>
+        <Fact :label="_('web.admin.keys.labels')" plain>
+          {{ ([entry.labels.get('en', '')] + others)|join(" · ") }}
+        </Fact>
+        {% if made %}
+          <Fact :label="_('web.admin.keys.made')" plain>
+            {{ _("web.admin.keys.made.by", date=when(made.at, "yMMMd"), name=made.by or _("web.admin.command_line"), note=made.note) }}
+          </Fact>
+        {% endif %}
+      </dl>
+      {% if not manages %}
+        <div class="code-actions">
+          <p class="bar-text account-role-note">
+            <span aria-hidden="true"
+                  class="badge"><Icon name="lock" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.keys.moderator") }}
+          </p>
+        </div>
+      {% endif %}
+    </div>
+  </Panel>
+</AdminPage>

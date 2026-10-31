@@ -19,7 +19,7 @@ from openfesl.core.reward_runs import run_now, run_of
 from openfesl.core.texts import localize, translate
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.boxes import BoxAdminViews
-from openfesl.web.admin.reward_contents import PartDraft, gift_json
+from openfesl.web.admin.reward_contents import PartDraft
 from openfesl.web.admin.reward_editor import Editor, drafted, editor_of, run_days, written
 from openfesl.web.admin.rewards import SECTION, EventRow, RewardAdminViews, event_row
 from openfesl.web.reward_texts import RewardTexts
@@ -333,9 +333,9 @@ def reward_event_routes(sessions: AdminSessions, views: RewardEventViews) -> API
             on = part.enabled
             settings[f"{prefix}.enabled"] = None if on == data.enabled else "on" if on else "off"
             settings[f"{prefix}.gift"] = (
-                None if part.gift == data.gift else json.dumps(gift_json(part.gift))
+                None if part.gift == data.gift else json.dumps(part.gift.written)
             )
-            days = {str(day): gift_json(gift) for day, gift in part.days.items()}
+            days = {str(day): gift.written for day, gift in part.days.items()}
             settings[f"{prefix}.days"] = None if part.days == data.days else json.dumps(days)
             if on != before.enabled:
                 changes.append([name, "on" if on else "off"])

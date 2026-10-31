@@ -430,4 +430,8 @@
   <symbol id="unplugged" viewBox="0 0 24 24">
     <path d="M9 3v4.5M15 3v4.5M6.5 7.5h11V11a5.5 5.5 0 0 1-11 0zM12 16.5V21M3.5 3.5l17 17" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
   </symbol>
+  <symbol id="ticket" viewBox="0 0 24 24">
+    <path d="M3.5 7h17v3a2 2 0 0 0 0 4v3h-17v-3a2 2 0 0 0 0-4z" fill="none" stroke-width="2.2" stroke-linejoin="round"/>
+    <path d="M14.5 7.5v1.5M14.5 11.3v1.4M14.5 15v1.5" fill="none" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
 </svg>

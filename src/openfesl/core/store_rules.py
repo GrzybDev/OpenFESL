@@ -275,6 +275,19 @@ class StoreRules(BaseModel):
         """
         return any(rule.sold for rule in self.rules(item))
 
+    def counted(self, item: Item) -> bool:
+        """Tell whether the store sells an item as uses, so that heroes hold it as uses.
+
+        Args:
+            item: The item, from the game's catalogue.
+        """
+        return any(
+            sold.type == COUNTED
+            for rule in self.prices.values()
+            if rule.covers(item)
+            for sold in rule.sold
+        )
+
     def rules(self, item: Item) -> list[PriceRule]:
         """Return the rule that prices an item in each currency, in the rules' order.
 

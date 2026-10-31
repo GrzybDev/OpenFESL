@@ -8,6 +8,7 @@ from starlette.exceptions import HTTPException
 
 from openfesl.core.catalogues import Catalogue
 from openfesl.core.drops import Box
+from openfesl.core.inventory import COUNTED, PERMANENT, RENTED, Ownership
 from openfesl.core.reward_rules import Event, Gift, Part
 from openfesl.core.wallets import MOST_BALANCE
 from openfesl.web.pages import whole_number
@@ -188,7 +189,7 @@ def contents_of(
         allowed = {key for key, box in fitting if box.faction in (None, part.faction)}
         if rolled - allowed:
             raise HTTPException(400)
-        amounts = [_amount(draft.funds), _amount(draft.keys)]
+        amounts = [written_amount(draft.funds), written_amount(draft.keys)]
         for name, amount in zip(("funds", "keys"), amounts, strict=True):
             if amount is None:
                 refused[f"{name}-{draft.key}"] = texts.text(
@@ -211,7 +212,7 @@ def contents_of(
             raise HTTPException(400) from None
         goal = part.goal
         if goal:
-            count = _amount(draft.goal)
+            count = written_amount(draft.goal)
             if not count:
                 refused[f"goal-{draft.key}"] = texts.text(
                     "web.admin.rewards.refused.goal", most=texts.amount(MOST_BALANCE)
@@ -289,21 +290,35 @@ def _add(
     return tuple(found), added
 
 
-def gift_json(gift: Gift) -> dict[str, Any]:
-    """Return a gift as the setting that overrides it holds it, its items written such as 1127 7d.
-
-    Args:
-        gift: The gift.
-    """
-    found = {"items": _written(gift), "box": gift.box, "funds": gift.funds, "keys": gift.keys}
-    return {name: value for name, value in found.items() if value}
-
-
 def _written(gift: Gift) -> tuple[str, ...]:
     # A gift's items as the editor writes them, such as 1127 7d.
     return tuple(f"{item_id} {ownership.written}" for item_id, ownership in gift.items)
 
 
-def _amount(text: str) -> int | None:
-    # A number of Funds or keys from 0 as the form writes it; any other text counts as none.
+def written_ownership(own: str, count: str, most_days: int) -> Ownership | None:
+    """Return how a form gives an item: for good, or for its days or uses as written.
+
+    Args:
+        own: perm, days or uses.
+        count: The days or uses as written.
+        most_days: The longest rental that the form gives.
+
+    Returns:
+        The ownership, or None while the days or uses are no whole number from 1 to their most.
+    """
+    if own == "perm":
+        return Ownership(PERMANENT)
+    number = whole_number(count, most_days if own == "days" else MOST_BALANCE)
+    if number is None:
+        return None
+    return Ownership(RENTED, days=number) if own == "days" else Ownership(COUNTED, uses=number)
+
+
+def written_amount(text: str) -> int | None:
+    """Return a number of Funds or keys from 0 as a form writes it, digits grouped or not.
+
+    Args:
+        text: The field's text; empty counts as 0, and any other text that is no such number as
+            none.
+    """
     return whole_number(text or "0", MOST_BALANCE, 0)

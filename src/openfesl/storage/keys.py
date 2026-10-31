@@ -95,9 +95,18 @@ class SqlKeyStore:
             return grants
 
     async def keys(self) -> list[StoredKey]:
-        """Return every product key with what it grants, in the order they were added."""
+        """Return every product key that grants entitlements, in the order they were added.
+
+        The codes that give gifts on the games' sites are left out.
+        """
         async with self._sessions() as session:
-            keys = list(await session.scalars(select(ProductKeyRow).order_by(ProductKeyRow.id)))
+            keys = list(
+                await session.scalars(
+                    select(ProductKeyRow)
+                    .where(ProductKeyRow.gift.is_(None))
+                    .order_by(ProductKeyRow.id)
+                )
+            )
             grants: dict[int, list[Grant]] = {key.id: [] for key in keys}
             for row in await session.scalars(select(ProductKeyGrantRow)):
                 grants[row.key_id].append(
@@ -314,7 +323,8 @@ def _named(code: str) -> ColumnElement[bool]:
 
 
 def _enabled(code: str) -> ColumnElement[bool]:
-    return _named(code) & ProductKeyRow.enabled
+    # A game redeems its keys alone, never the codes that give gifts on its site.
+    return _named(code) & ProductKeyRow.enabled & ProductKeyRow.gift.is_(None)
 
 
 async def _uses(session: AsyncSession, key_id: int) -> int:

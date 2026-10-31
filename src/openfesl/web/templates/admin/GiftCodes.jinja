@@ -1,0 +1,96 @@
+{#def of, games: list, tab: str, rows: list, counts, manages: bool #}
+{# The codes that a game's site redeems for gifts: the game tiles, the tabs of the codes'
+   states and a row per code with its label, what it gives, its uses, its end and its
+   state, each opening its page. Making and changing codes needs the admin role. #}
+{% set game = of %}
+{% set title = _("web.admin.keys") %}
+{% set list = url("/admin/keys") ~ "?game=" ~ game.id %}
+{% set glyphs = {"enabled": "tick", "used_up": "full", "expired": "clock", "disabled": "x"} %}
+{% macro uses(entry) %}
+  {%- if entry.max_uses is none %}{{ number(entry.uses) }}{% else %}{{ _("web.admin.keys.uses.of", used=number(entry.uses), most=number(entry.max_uses)) }}{% endif -%}
+{% endmacro %}
+{% macro ends(entry, state) %}
+  {%- set end = _("web.store.utc", time=moment(entry.expires)) if entry.expires else "" -%}
+  {%- if not end %}{{ _("web.admin.keys.no_end") }}{% elif state == "expired" %}{{ _("web.admin.keys.ended", time=end) }}{% else %}{{ end }}{% endif -%}
+{% endmacro %}
+<AdminPage :title="title" current="keys">
+  <PageHead labelledby="keys-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="keys-title">{{ _("web.admin.keys.subtitle.gifts", game=game.name) }}</TitleBlock>
+    </div>
+    {% if manages %}
+      <Action :href="url('/admin/keys/codes/new') ~ '?game=' ~ game.id" :label="_('web.admin.keys.new')" glyph="plus" />
+    {% endif %}
+  </PageHead>
+  <Panel class="enter-panel">
+    <KeyGames :current="game" :games="games" />
+    <nav aria-label="{{ _('web.admin.keys.states') }}" class="tabs code-tabs">
+      {% for name in ["all", "enabled", "expired"] %}
+        <Tab :href="list ~ ('&state=' ~ name if name != 'all' else '')" :label="_('web.admin.keys.tab.' ~ name)" :count="counts[name]" :current="tab == name" />
+      {% endfor %}
+    </nav>
+    <section aria-labelledby="codes-title" class="admin-list">
+      <h2 id="codes-title" class="sr-only">{{ _("web.admin.keys.codes_of", game=game.name) }}</h2>
+      {% if rows %}
+        <div class="table-scroll table-scroll-flush">
+          <div role="table" aria-labelledby="codes-title" class="table codes-table">
+            <div role="rowgroup" class="admin-list-head">
+              <div role="row" class="codes-columns">
+                {% for column in ("code", "contents", "uses", "ends", "state") %}
+                  <div role="columnheader" class="column-head">{{ _("web.admin.keys.col." ~ column) }}</div>
+                {% endfor %}
+                <div role="columnheader"><span class="sr-only">{{ _("web.admin.keys.col.open") }}</span></div>
+              </div>
+            </div>
+            <div role="rowgroup" class="enter-rows table-rows">
+              {% for row in rows %}
+                {% set entry = row.entry %}
+                <div role="row" class="codes-columns codes-row codes-{{ row.state }}">
+                  <div role="cell" class="admin-cell cell-stack">
+                    <code class="code-text">{{ entry.code }}</code>
+                    <span class="admin-hero-strong">{{ entry.label(language) }}</span>
+                  </div>
+                  <div role="cell" class="admin-cell cell-stack code-contents">
+                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.keys.col.contents") }}</span>
+                    <span>{{ row.contents }}</span>
+                  </div>
+                  <div role="cell" class="admin-cell cell-stack code-used">
+                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.keys.col.uses") }}</span>
+                    <span>{{ uses(entry) }}</span>
+                  </div>
+                  <div role="cell" class="admin-cell cell-stack">
+                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.keys.col.ends") }}</span>
+                    <span>{{ ends(entry, row.state) }}</span>
+                  </div>
+                  <div role="cell" class="admin-cell prices-state">
+                    <Badge :name="glyphs[row.state]" lines />{{ _("web.admin.keys.state." ~ row.state) }}
+                  </div>
+                  <div role="cell" class="cell-end">
+                    <EndSquare :href="url('/admin/keys/codes/' ~ entry.code)" :label="_('web.admin.keys.open', label=entry.label(language) or entry.code)" />
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      {% elif counts.all %}
+        <p class="bar-text body-text">{{ _("web.admin.keys.codes.none." ~ tab) }}</p>
+      {% else %}
+        <div class="codes-empty">
+          <span aria-hidden="true" class="badge"><Icon name="gift" :size="22" stroke="#0A0A0A" /></span>
+          <p>{{ _("web.admin.keys.empty", game=game.name) }}</p>
+          {% if manages %}
+            <FormButton icon="plus" :href="url('/admin/keys/codes/new') ~ '?game=' ~ game.id">{{ _("web.admin.keys.new") }}</FormButton>
+          {% endif %}
+        </div>
+      {% endif %}
+      <p class="bar-text body-text codes-rule">{{ _("web.admin.keys.rule") }}</p>
+      {% if not manages %}
+        <p class="bar-text account-role-note">
+          <span aria-hidden="true"
+                class="badge"><Icon name="lock" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.keys.moderator") }}
+        </p>
+      {% endif %}
+    </section>
+  </Panel>
+</AdminPage>

@@ -1,0 +1,329 @@
+/* The codes that give gifts on a game's site: their list, a code's page and the editor, whose
+   number of accounts and way of giving an item show only the fields they need, also without
+   scripts. Where the list does not fit, each code is a block of its own. */
+@layer pages {
+  .code-tabs {
+    margin-bottom: 12px;
+  }
+
+  .admin-list .table.codes-table {
+    min-width: 1000px;
+  }
+
+  .codes-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns: 230px minmax(240px, 1fr) 120px 210px 140px 44px;
+    gap: 2px;
+  }
+
+  .codes-row:nth-child(even) {
+    --cell: var(--row-alt);
+  }
+
+  .codes-row.codes-disabled,
+  .codes-row.codes-expired {
+    --cell: var(--row-pale);
+  }
+
+  .code-text {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+  }
+
+  .code-contents {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.35;
+    font-weight: 600;
+  }
+
+  .code-used {
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .codes-empty {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    background: var(--row-light);
+    padding: 16px;
+    color: var(--ink);
+
+    > p {
+      flex: 1 1 220px;
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.4;
+      font-weight: 600;
+    }
+
+    > .badge {
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  .codes-rule {
+    margin-top: 12px;
+  }
+
+  /* A code's page: its head with the state and the facts beside the actions. */
+  .code-head {
+    justify-content: space-between;
+  }
+
+  .code-head-name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+    font-size: 22px;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .code-head-code {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  .code-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    padding: 4px 10px;
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .code-state-disabled,
+  .code-state-expired {
+    background: var(--soft);
+  }
+
+  .code-layout {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px;
+    margin-top: 2px;
+
+    > .code-facts {
+      flex: 1 1 420px;
+      margin: 0;
+    }
+  }
+
+  /* Each fact a label beside its value, as a list of terms. */
+  .code-facts .fact {
+    display: grid;
+    grid-template-columns: 140px minmax(0, 1fr);
+    align-items: center;
+    justify-content: stretch;
+    padding: 0;
+    background: var(--row-light);
+
+    dt {
+      align-self: stretch;
+      display: flex;
+      align-items: center;
+      background: var(--row);
+      padding: 8px 12px;
+    }
+
+    dd {
+      padding: 8px 12px;
+      line-height: 1.4;
+    }
+  }
+
+  .code-actions {
+    display: grid;
+    flex: 1 1 300px;
+    gap: 2px;
+
+    > .form-button {
+      min-height: 52px;
+    }
+  }
+
+  /* The editor: the drawn code beside Generate again, the item search's choices, the ways of
+     giving the chosen item, the contents so far, and the side column's limits, end and labels. */
+  .code-form-head .game-chip {
+    margin-right: 4px;
+  }
+
+  .code-generated,
+  .code-ends {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2px;
+  }
+
+  .code-generated .code-text {
+    font-size: 20px;
+    letter-spacing: 0.06em;
+  }
+
+  .code-add {
+    display: grid;
+    gap: 2px;
+  }
+
+  .code-candidates {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    border: 0;
+    padding: 0;
+    min-width: 0;
+  }
+
+  .code-candidate {
+    position: relative;
+    cursor: pointer;
+
+    &:has(:focus-visible) {
+      outline: 3px solid #ffffff;
+      outline-offset: 2px;
+    }
+  }
+
+  .code-owns {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .code-add-button {
+    justify-content: center;
+    min-height: 48px;
+  }
+
+  .code-lines {
+    display: grid;
+    gap: 2px;
+    margin-top: 10px;
+  }
+
+  .code-line {
+    grid-template-columns: minmax(0, 1fr) 120px 150px 44px;
+
+    > .box-candidate-name {
+      margin: 0;
+      background: var(--row);
+      padding: 2px 10px 2px 2px;
+    }
+  }
+
+  .code-wallet {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px;
+    margin-top: 10px;
+  }
+
+  .code-side {
+    display: grid;
+    align-content: start;
+    gap: 2px;
+  }
+
+  .code-summary {
+    margin-top: 10px;
+  }
+
+  .code-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .code-form:has([name="limit"][value="any"]:checked) .code-most,
+  .code-form:not(:has([name="own"][value="days"]:checked)) .code-days,
+  .code-form:not(:has([name="own"][value="uses"]:checked)) .code-uses {
+    display: none;
+  }
+
+  @container (width < 1000px) {
+    .admin-list .table.codes-table {
+      min-width: 0;
+
+      [role="rowgroup"]:first-child {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
+    }
+
+    .codes-row.codes-columns {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) 44px;
+      grid-template-areas:
+        "code code end"
+        "contents contents contents"
+        "uses ends ends"
+        "state state state";
+
+      > :nth-child(1) {
+        grid-area: code;
+      }
+
+      > :nth-child(2) {
+        grid-area: contents;
+      }
+
+      > :nth-child(3) {
+        grid-area: uses;
+      }
+
+      > :nth-child(4) {
+        grid-area: ends;
+      }
+
+      > :nth-child(5) {
+        grid-area: state;
+      }
+
+      > :nth-child(6) {
+        grid-area: end;
+        background: var(--cell);
+      }
+    }
+  }
+
+  @media (width < 40rem) {
+    .code-generated,
+    .code-facts .fact {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .code-owns {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .code-line {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px;
+
+      > .box-candidate-name {
+        grid-column: 1 / 3;
+      }
+
+      > .offer-drop {
+        grid-row: 1 / 3;
+        grid-column: 3;
+      }
+    }
+  }
+}

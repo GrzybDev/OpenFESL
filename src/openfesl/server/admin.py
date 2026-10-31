@@ -19,6 +19,7 @@ from openfesl.web.admin.deal_offers import DealOfferViews, offer_routes
 from openfesl.web.admin.deal_sections import DealSectionViews, section_routes
 from openfesl.web.admin.deals import DealAdminViews, deal_routes
 from openfesl.web.admin.entitlements import entitlement_routes
+from openfesl.web.admin.gift_codes import GiftCodeViews, gift_code_routes
 from openfesl.web.admin.hero_actions import hero_action_routes
 from openfesl.web.admin.hero_counts import hero_count_routes
 from openfesl.web.admin.hero_items import hero_item_routes
@@ -159,8 +160,11 @@ def include_admin_routes(
     app.include_router(
         entitlement_routes(sign_in, account_views, stores.entitlements, stores.keys, games)
     )
-    app.include_router(key_routes(sign_in, games, stores.keys))
+    code_views = GiftCodeViews(sign_in, games, stores.gift_codes, services.catalogues)
+    app.include_router(key_routes(sign_in, games, stores.keys, code_views))
     app.include_router(key_edit_routes(sign_in, games, stores.keys))
+    # After the keys' own pages, whose paths take any code, among them a key named codes.
+    app.include_router(gift_code_routes(code_views))
     app.include_router(
         catalogue_routes(
             sign_in,

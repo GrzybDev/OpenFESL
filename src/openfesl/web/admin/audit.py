@@ -15,6 +15,7 @@ from openfesl.core.games import Games
 from openfesl.core.personas import Persona, PersonaRecord
 from openfesl.core.servers import GameServer, Provider
 from openfesl.core.texts import localize, translate
+from openfesl.web.admin.audit_codes import code_entry
 from openfesl.web.admin.audit_heroes import (
     count_entry,
     hero_entry,
@@ -376,6 +377,12 @@ async def _rows(
                 kind = f"server_state.{details.get('state')}"
             else:
                 kind = f"server_official.{'on' if details.get('official') else 'off'}"
+        elif action is AdminAction.KEY_ADD and "game" in details:
+            # A code that gives a gift on a game's site, whose actions name their game.
+            kind, shown, href, said = await code_entry(
+                action, target, details, games, catalogues, language
+            )
+            code = True
         elif action in (
             AdminAction.KEY_ADD,
             AdminAction.KEY_STATE,

@@ -4138,6 +4138,285 @@ msgstr "Add starting keys again"
 msgid "web.admin.keys.managed"
 msgstr "Product keys are added, edited, enabled and disabled with the admin role."
 
+msgid "web.admin.keys.games"
+msgstr "Games"
+
+msgid "web.admin.keys.game.gifts"
+msgstr "Gifts: items, Funds, chest keys"
+
+msgid "web.admin.keys.game.tags"
+msgstr "Grants: entitlement tags"
+
+msgid "web.admin.keys.subtitle.gifts"
+msgstr "Codes of %(game)s: gifts for heroes and accounts"
+
+msgid "web.admin.keys.subtitle.code"
+msgstr "Code of %(game)s"
+
+msgid "web.admin.keys.subtitle.new"
+msgstr "New code for %(game)s"
+
+msgid "web.admin.keys.tab.expired"
+msgstr "Expired"
+
+msgid "web.admin.keys.codes_of"
+msgstr "Codes of %(game)s"
+
+msgid "web.admin.keys.col.code"
+msgstr "Code"
+
+msgid "web.admin.keys.col.contents"
+msgstr "Contents"
+
+msgid "web.admin.keys.col.uses"
+msgstr "Uses"
+
+msgid "web.admin.keys.col.ends"
+msgstr "Ends"
+
+msgid "web.admin.keys.col.state"
+msgstr "State"
+
+msgid "web.admin.keys.col.open"
+msgstr "Open"
+
+msgid "web.admin.keys.uses.of"
+msgstr "%(used)s of %(most)s"
+
+msgid "web.admin.keys.no_end"
+msgstr "No end"
+
+msgid "web.admin.keys.ended"
+msgstr "Ended %(time)s"
+
+msgid "web.admin.keys.state.enabled"
+msgstr "Enabled"
+
+msgid "web.admin.keys.state.used_up"
+msgstr "Used up"
+
+msgid "web.admin.keys.state.expired"
+msgstr "Expired"
+
+msgid "web.admin.keys.state.disabled"
+msgstr "Disabled"
+
+msgid "web.admin.keys.open"
+msgstr "Open %(label)s"
+
+msgid "web.admin.keys.codes.none.enabled"
+msgstr "No code is enabled now."
+
+msgid "web.admin.keys.codes.none.expired"
+msgstr "No code has expired."
+
+msgid "web.admin.keys.empty"
+msgstr "No codes for %(game)s yet. A code gives items, Funds or keys once to each account that enters it."
+
+msgid "web.admin.keys.rule"
+msgstr "Every code works once for an account. A redeemed gift stays given when a code ends. Items go to one hero the account picks; Funds and keys to the account."
+
+msgid "web.admin.keys.moderator"
+msgstr "Codes are made with the admin role."
+
+msgid "web.admin.keys.all_codes"
+msgstr "All codes"
+
+msgid "web.admin.keys.fact.accounts"
+msgstr "Accounts"
+
+msgid "web.admin.keys.fact.used.most"
+msgstr "Each account once · %(used)s of %(most)s used"
+
+msgid "web.admin.keys.fact.used.any"
+msgstr "Each account once · %(used)s so far, no limit"
+
+msgid "web.admin.keys.labels"
+msgstr "Labels"
+
+msgid "web.admin.keys.made"
+msgstr "Made"
+
+msgid "web.admin.keys.made.by"
+msgstr "%(date)s by %(name)s: %(note)s"
+
+msgid "web.admin.keys.new"
+msgstr "New code"
+
+msgid "web.admin.keys.code_generated"
+msgstr "Code · generated"
+
+msgid "web.admin.keys.generate_again"
+msgstr "Generate again"
+
+msgid "web.admin.keys.format"
+msgstr "Four groups of four from 1-9 and A-Z without I and O. Codes are drawn at random, never typed, so no word or pattern gives them away."
+
+msgid "web.admin.keys.contents"
+msgstr "Contents"
+
+msgid "web.admin.keys.matches"
+msgstr "Items found"
+
+msgid "web.admin.keys.choose"
+msgstr "Choose"
+
+msgid "web.admin.keys.any_hero"
+msgstr "Any hero"
+
+msgid "web.admin.keys.fits"
+msgstr "%(item)s fits: %(rule)s."
+
+msgid "web.admin.keys.own.perm.title"
+msgstr "Permanent"
+
+msgid "web.admin.keys.own.days.title"
+msgstr "Days"
+
+msgid "web.admin.keys.own.uses.title"
+msgstr "Uses"
+
+msgid "web.admin.keys.own.perm"
+msgstr "For good"
+
+msgid "web.admin.keys.own.days"
+msgstr "A rental"
+
+msgid "web.admin.keys.own.uses"
+msgstr "A number of uses"
+
+msgid "web.admin.keys.days"
+msgstr "Days"
+
+msgid "web.admin.keys.uses"
+msgstr "Uses"
+
+msgid "web.admin.keys.add"
+msgstr "Add the item"
+
+msgid "web.admin.keys.add_item"
+msgstr "Add %(item)s, %(what)s"
+
+msgid "web.admin.keys.contents_so_far"
+msgstr "Contents so far"
+
+msgid "web.admin.keys.item_missing"
+msgstr "not in the imported catalogue"
+
+msgid "web.admin.keys.drop"
+msgstr "Remove %(item)s"
+
+msgid "web.admin.keys.funds"
+msgstr "Funds to the account"
+
+msgid "web.admin.keys.keys"
+msgstr "Treasure chest keys"
+
+msgid "web.admin.keys.contents.note"
+msgstr "Items go to one hero that fits all of them; Funds and keys go to the account."
+
+msgid "web.admin.keys.no_catalogue"
+msgstr "Items need the game's catalogue, which is not imported yet; codes of Funds and keys can be made without it."
+
+msgid "web.admin.keys.accounts"
+msgstr "How many accounts"
+
+msgid "web.admin.keys.accounts.any"
+msgstr "Any number"
+
+msgid "web.admin.keys.accounts.limit"
+msgstr "A limit"
+
+msgid "web.admin.keys.accounts.max"
+msgstr "Accounts at most"
+
+msgid "web.admin.keys.ends"
+msgstr "Ends · UTC · optional"
+
+msgid "web.admin.keys.ends.day"
+msgstr "Day it ends, UTC"
+
+msgid "web.admin.keys.ends.time"
+msgstr "Time it ends, UTC"
+
+msgid "web.admin.keys.label.base"
+msgstr "Label · English · shown to players"
+
+msgid "web.admin.keys.label.in"
+msgstr "Label · %(language)s · optional"
+
+msgid "web.admin.keys.note"
+msgstr "Note · required, kept in the audit log"
+
+msgid "web.admin.keys.still_needed.label"
+msgstr "an English label"
+
+msgid "web.admin.keys.refused"
+msgstr "Nothing was saved; the fields marked say why."
+
+msgid "web.admin.keys.create.single"
+msgstr "Create code"
+
+msgid "web.admin.keys.gift.keys.one"
+msgstr "%(count)s treasure chest key"
+
+msgid "web.admin.keys.gift.keys.other"
+msgstr "%(count)s treasure chest keys"
+
+msgid "web.admin.keys.summary"
+msgstr "%(whom)s, %(until)s. Gives %(gift)s."
+
+msgid "web.admin.keys.summary.nothing"
+msgstr "%(whom)s, %(until)s. Gives nothing yet."
+
+msgid "web.admin.keys.summary.most.one"
+msgstr "Each account once, %(count)s account at most"
+
+msgid "web.admin.keys.summary.most.other"
+msgstr "Each account once, %(count)s accounts at most"
+
+msgid "web.admin.keys.summary.any"
+msgstr "Each account once, any number of accounts"
+
+msgid "web.admin.keys.summary.until"
+msgstr "until %(end)s"
+
+msgid "web.admin.keys.summary.no_end"
+msgstr "with no end"
+
+msgid "web.admin.keys.refused.withheld"
+msgstr "Item %(id)s is withheld on this service: codes and rewards never give it."
+
+msgid "web.admin.keys.refused.unknown_item"
+msgstr "The imported catalogue has no item %(id)s."
+
+msgid "web.admin.keys.refused.counted"
+msgstr "%(item)s is counted in uses; it cannot be given for days or for good."
+
+msgid "web.admin.keys.refused.not_counted"
+msgstr "%(item)s is not counted in uses; it is given for days or for good."
+
+msgid "web.admin.keys.refused.days"
+msgstr "A rental lasts 1 to %(most)s days."
+
+msgid "web.admin.keys.refused.no_single_hero"
+msgstr "%(a)s is for %(fa)s and %(b)s for %(fb)s: no hero could take both."
+
+msgid "web.admin.keys.refused.empty"
+msgstr "A code needs at least one item, Funds or keys."
+
+msgid "web.admin.keys.refused.when"
+msgstr "The end needs a day, and a time such as 08:00 if not midnight."
+
+msgid "web.admin.keys.refused.past"
+msgstr "The end, %(end)s, is in the past."
+
+msgid "web.admin.keys.refused.label"
+msgstr "The English label is required; players see it on the redeem page."
+
+msgid "web.admin.keys.refused.note"
+msgstr "A note is required; it goes into the audit log."
+
 msgid "web.admin.key.code"
 msgstr "Code"
 
@@ -4365,6 +4644,12 @@ msgstr "Choose the game whose players the key is for."
 
 msgid "web.admin.toast.key_saved"
 msgstr "Saved %(code)s."
+
+msgid "web.admin.toast.code.made"
+msgstr "Code %(code)s made."
+
+msgid "web.admin.toast.code.taken"
+msgstr "Nothing was made: a key has the drawn code already. Another code is drawn."
 
 msgid "web.admin.menu.settings"
 msgstr "Settings"
@@ -4838,6 +5123,9 @@ msgstr "Changed key grants and labels"
 
 msgid "web.admin.audit.action.key_limits"
 msgstr "Changed key limits"
+
+msgid "web.admin.audit.action.key_add.code"
+msgstr "Code made"
 
 msgid "web.admin.audit.action.catalogue_import"
 msgstr "Imported catalogue"

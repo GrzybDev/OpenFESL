@@ -6,8 +6,10 @@ from babel.dates import format_skeleton
 from babel.lists import format_list
 from babel.numbers import format_percent
 
+from openfesl.core.catalogues import Catalogue
 from openfesl.core.games import Game
 from openfesl.core.inventory import COUNTED, PERMANENT, RENTED, Ownership
+from openfesl.core.reward_rules import Gift
 from openfesl.core.store import discount
 from openfesl.core.store_items import HeroChoice, Kind, PricePoint, Requirement, StoreItem, Unfit
 from openfesl.core.texts import translate, translate_count
@@ -135,6 +137,29 @@ class StoreTexts:
         if ownership.type == COUNTED:
             return self.count("web.store.price.uses", ownership.uses or 0)
         return self.text("web.store.forever" if inline else "web.store.price.permanent")
+
+    def gift_words(self, catalogue: Catalogue, gift: Gift) -> list[str]:
+        """Return what a gift gives in words, such as M95 · 7 days or 500 Funds.
+
+        Args:
+            catalogue: The game's imported catalogue, which names the items.
+            gift: The gift, of the game's rewards.
+        """
+        rules = self.game.rewards
+        assert rules is not None
+        words = [
+            self.text(
+                "web.deals.card.item",
+                item=catalogue.name(item_id) or str(item_id),
+                ownership=self.ownership(ownership, inline=True),
+            )
+            for item_id, ownership in gift.items
+        ]
+        if gift.funds:
+            words.append(self.priced(gift.funds, rules.currency))
+        if gift.keys:
+            words.append(self.count("web.rewards.gift.keys", gift.keys))
+        return words
 
     def price_label(self, sold: StoreItem, price: PricePoint) -> str:
         """Return the title of a price's tile.

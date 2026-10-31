@@ -446,6 +446,13 @@ class ProductKeyRow(Base):
     labels: Mapped[dict[str, str]] = mapped_column(JSONB, server_default="{}")
     # The game a key added by the admin is for; starting keys belong to their game data's.
     game: Mapped[str | None]
+    # When it can no longer be redeemed; never when None.
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # What a code of a game's site gives, as the rewards write a gift; None for a key that grants
+    # entitlement tags.
+    gift: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    # The first key of the batch it was made in, one account each; None for a key of its own.
+    batch: Mapped[int | None] = mapped_column(BigInteger, index=True)
 
 
 Index("product_key_code_key", func.upper(ProductKeyRow.code), unique=True)
@@ -461,6 +468,10 @@ class ProductKeyUseRow(Base):
         ForeignKey("account.id", ondelete="CASCADE"), primary_key=True, index=True
     )
     used_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    # The hero a code's items went to.
+    persona_id: Mapped[int | None] = mapped_column(ForeignKey("persona.id", ondelete="SET NULL"))
+    # What a code gave the account and the hero; None for a key that grants entitlement tags.
+    outcome: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
 
 
 class ProductKeyGrantRow(Base):

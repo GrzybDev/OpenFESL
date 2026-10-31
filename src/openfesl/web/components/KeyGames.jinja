@@ -1,0 +1,17 @@
+{#def current, games: list #}
+{# The games whose keys the product keys page lists one at a time, as tiles: each game's name, under
+   a stripe of its colour, and what its keys give, entitlement tags or gifts on its site. The
+   current game's tile wears the accent. A server of one game shows none. #}
+{% if games|length > 1 %}
+  <nav aria-label="{{ _('web.admin.keys.games') }}" class="key-game-tiles">
+    {% for game in games %}
+      <a href="{{ url('/admin/keys') }}?game={{ game.id }}"
+         {% if game.id == current.id %} aria-current="true"{% endif %}
+         class="key-game-tile">
+        <span aria-hidden="true" data-game="{{ game.id }}" class="key-game-stripe"></span>
+        <span class="choice-title">{{ game.name }}</span>
+        <span class="choice-text">{{ _("web.admin.keys.game.gifts" if game.codes else "web.admin.keys.game.tags") }}</span>
+      </a>
+    {% endfor %}
+  </nav>
+{% endif %}

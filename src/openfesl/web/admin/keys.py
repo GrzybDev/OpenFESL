@@ -1,6 +1,6 @@
 import re
 from collections.abc import Awaitable, Callable, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Protocol, Self
 from urllib.parse import quote, urlencode
 
@@ -10,10 +10,11 @@ from starlette.datastructures import QueryParams
 from starlette.exceptions import HTTPException
 
 from openfesl.core.admins import Admin, Role
-from openfesl.core.games import Games, ProductKey
+from openfesl.core.games import Game, Games, ProductKey
 from openfesl.core.keys import KeyHistory, StoredKey
 from openfesl.core.texts import languages, localize
 from openfesl.web.admin.auth import AdminSessions, back_to
+from openfesl.web.admin.gift_codes import GiftCodeViews
 from openfesl.web.keys import KeyView, key_views
 from openfesl.web.sessions import check_form, toast
 
@@ -74,12 +75,14 @@ class KeyList:
     """Which product keys the keys page lists, as its address says.
 
     Attributes:
-        tab: The tab: all, enabled or disabled.
+        tab: The tab: all, enabled or disabled, or expired for a game's codes.
         open: The key whose details are open, by its code.
+        game: The id of the game whose keys are listed; the first game's when empty.
     """
 
     tab: str = "all"
     open: str | None = None
+    game: str = ""
 
     @classmethod
     def read(cls, query: QueryParams) -> Self:
@@ -89,33 +92,48 @@ class KeyList:
             query: The address's query.
         """
         tab = query.get("state", "")
-        return cls(tab=tab if tab in TABS else "all", open=query.get("open") or None)
+        return cls(
+            tab=tab if tab in (*TABS, "expired") else "all",
+            open=query.get("open") or None,
+            game=query.get("game", ""),
+        )
 
-    def link(self, tab: str | None = None, open: str | None = None) -> str:
+    def link(self, tab: str | None = None, open: str | None = None, game: str = "") -> str:
         """Return the query of the list's address in a tab with a key open, with a leading ?.
 
         Args:
             tab: The tab; this list's when None.
             open: The key whose details are open, if any.
+            game: The game whose keys are listed; this list's when empty.
         """
         shown = tab or self.tab
-        fields = [("state", "" if shown == "all" else shown), ("open", open or "")]
+        fields = [
+            ("game", game or self.game),
+            ("state", "" if shown == "all" else shown),
+            ("open", open or ""),
+        ]
         query = urlencode([(key, value) for key, value in fields if value])
         return f"?{query}" if query else ""
 
 
-def key_routes(sessions: AdminSessions, games: Games, store: KeyAdmin) -> APIRouter:
+def key_routes(
+    sessions: AdminSessions, games: Games, store: KeyAdmin, codes: GiftCodeViews
+) -> APIRouter:
     """Return the product keys page with adding, enabling and disabling keys.
 
-    Moderators see the keys; changing them needs the admin role. Disabling asks first, which
-    without scripts is a page of its own.
+    The page lists one game's keys at a time, a game whose site redeems codes for gifts its
+    codes. Moderators see the keys; changing them needs the admin role. Disabling asks first,
+    which without scripts is a page of its own.
 
     Args:
         sessions: Signs admins in and renders the panel's pages.
         games: The games, whose data lists their starting keys.
         store: Where the product keys are kept.
+        codes: Shows the codes of the games whose sites redeem them.
     """
     router = APIRouter()
+    # The games whose keys grant entitlements, to which the admin adds keys here.
+    granting = [game for game in games if game.codes is None]
 
     async def views() -> list[KeyView]:
         return key_views(games, await store.keys(), await store.key_history())
@@ -126,33 +144,42 @@ def key_routes(sessions: AdminSessions, games: Games, store: KeyAdmin) -> APIRou
             raise HTTPException(404)
         return view
 
-    async def page(request: Request, admin: Admin, status: int = 200, **form: str) -> HTMLResponse:
+    async def page(
+        request: Request, admin: Admin, shown: Game, status: int = 200, **form: str
+    ) -> HTMLResponse:
         listing = KeyList.read(request.query_params)
-        every = await views()
+        # Keys that grant entitlements never expire, so their page has no such tab.
+        tab = listing.tab if listing.tab in TABS else "all"
+        listing = replace(listing, game=shown.id, tab=tab)
+        every = [view for view in await views() if view.game in (shown, None)]
         known = {view.key.code.upper() for view in every}
+        here = sum(key.code.upper() in known for key in shown.keys)
         return await sessions.render(
             request,
             "admin.Keys",
             status,
             admin=admin,
             listing=listing,
+            of=shown,
             keys=[view for view in every if listing.tab in ("all", view.tab)],
             counts={tab: sum(tab in ("all", view.tab) for view in every) for tab in TABS},
-            starting=[
-                (game, sum(key.code.upper() in known for key in game.keys))
-                for game in games
-                if game.keys
-            ],
+            starting=[(shown, here)] if shown.keys else [],
             manages=admin.role is Role.ADMIN,
             longest=MAXIMUM_CODE,
             games=list(games),
+            granting=granting,
             codes=languages(),
             form=form,
         )
 
     @router.get("/admin/keys", response_class=HTMLResponse)
-    async def keys(request: Request) -> HTMLResponse:
-        return await page(request, sessions.admin(request))
+    async def keys(request: Request) -> Response:
+        admin = sessions.admin(request)
+        listing = KeyList.read(request.query_params)
+        game = games.by_id(listing.game) or next(iter(games))
+        if game.codes:
+            return await codes.list_page(request, admin, game, listing.tab)
+        return await page(request, admin, game)
 
     @router.post("/admin/keys")
     async def add(request: Request) -> Response:
@@ -168,14 +195,15 @@ def key_routes(sessions: AdminSessions, games: Games, store: KeyAdmin) -> APIRou
             return RedirectResponse(_listed(request), 303)
         code = str(form.get("code", "")).strip()
         chosen = str(form.get("game", ""))
-        every = list(games)
-        game = games.by_id(chosen) or (every[0] if len(every) == 1 else None)
+        game = next((game for game in granting if game.id == chosen), None)
+        game = game or (granting[0] if len(granting) == 1 else None)
+        shown = game or granting[0]
         if len(code) > MAXIMUM_CODE or not _CODE.fullmatch(code):
-            return await page(request, admin, 400, code=code, game=chosen, error="code")
+            return await page(request, admin, shown, 400, code=code, game=chosen, error="code")
         if game is None:
-            return await page(request, admin, 400, code=code, error="game")
+            return await page(request, admin, shown, 400, code=code, error="game")
         if not await store.add_key(code, game.id, admin):
-            return await page(request, admin, 400, code=code, game=chosen, error="taken")
+            return await page(request, admin, shown, 400, code=code, game=chosen, error="taken")
         toast(request, "web.admin.toast.key_added", code=code)
         target = localize(f"/admin/keys/{quote(code)}", request.state.language)
         return RedirectResponse(target, 303)

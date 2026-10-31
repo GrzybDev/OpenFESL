@@ -88,7 +88,8 @@ class AdminAction(StrEnum):
     details hold its tag and new status."""
     KEY_ADD = "key_add"
     """Added the product key named as the target; the details say whether it is a starting key
-    of the game data."""
+    of the game data, and for a code that gives a gift hold its game, gift, label, most
+    accounts, end and the note."""
     KEY_STATE = "key_state"
     """Enabled or disabled the product key named as the target; the details say which."""
     KEY_GRANTS = "key_grants"

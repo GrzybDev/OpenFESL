@@ -93,6 +93,13 @@ contents = "treasure-chest"
 # The numbers of keys the site sells at once, at the key's price each.
 packs = [1, 3, 5]
 
+# The codes that the website redeemed for gifts, which the admin makes: four groups of four from
+# the digits 1-9 and the letters A-Z without I and O, as every code of 2010-2014 was written.
+[codes]
+alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZ"
+groups = 4
+size = 4
+
 # The game's catalogue: its items, their names and icons, the daily missions and the XP of each
 # level, which `openfesl catalogue extract` reads from a player's copy and the server imports;
 # none of it ships with the server. The game loads every definition file below in one go, and

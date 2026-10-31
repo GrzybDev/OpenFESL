@@ -1,7 +1,7 @@
-{#def listing, keys: list, counts, starting: list, manages: bool, longest: int, games: list, codes: list, form #}
-{# The product keys entered in the game: the keys of a tab, whose rows open their grants and
-   their limits in place with enable and disable, beside adding a key and adding the games'
-   starting keys again. Changing keys needs the admin role. #}
+{#def listing, of, keys: list, counts, starting: list, manages: bool, longest: int, games: list, granting: list, codes: list, form #}
+{# The product keys entered in a game: the keys of a tab, whose rows open their grants and
+   their limits in place with enable and disable, beside adding a key and adding the game's
+   starting keys again, under the tiles of the games. Changing keys needs the admin role. #}
 {% set title = _("web.admin.keys") %}
 {% set list = url("/admin/keys") %}
 {% set tab = listing.tab %}
@@ -23,6 +23,7 @@
   </PageHead>
 
   <Panel class="enter-panel">
+    <KeyGames :current="of" :games="games" />
     <div class="list-layout admin-layout">
       <section aria-labelledby="keys-list" class="list-main admin-list">
         <h2 id="keys-list" class="sr-only">{{ _("web.admin.keys.list." ~ tab) }}</h2>
@@ -225,11 +226,11 @@
             {% else %}
               <p id="add-code-note" class="field-note">{{ _("web.admin.key.code.note") }}</p>
             {% endif %}
-            {% if games|length > 1 %}
+            {% if granting|length > 1 %}
               <fieldset class="choice-tiles key-games">
                 <legend class="bar">{{ _("web.admin.key.for") }}</legend>
-                {% for game in games %}
-                  <ChoiceTile name="game" :value="game.id" :title="game.name" glyph="key" :checked="form.get('game') == game.id">
+                {% for game in granting %}
+                  <ChoiceTile name="game" :value="game.id" :title="game.name" glyph="key" :checked="form.get('game', of.id) == game.id">
                   </ChoiceTile>
                 {% endfor %}
               </fieldset>

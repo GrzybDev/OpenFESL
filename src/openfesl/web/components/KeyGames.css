@@ -1,0 +1,53 @@
+/* The game tiles over the product keys page: black, the current game's in the accent, the colour
+   changing in 150 ms. */
+@layer components {
+  .key-game-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    gap: 2px;
+    margin-bottom: 12px;
+  }
+
+  .key-game-tile {
+    display: flex;
+    min-height: 88px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--ink);
+    padding: 8px;
+    color: var(--bright);
+    text-align: center;
+    text-decoration-line: none;
+    transition: background-color 150ms var(--ease-menu);
+
+    &:hover {
+      background: var(--menu-hover);
+      text-decoration-line: none;
+    }
+
+    &[aria-current] {
+      background: var(--accent);
+      color: var(--ink);
+
+      .choice-text {
+        color: var(--dim);
+      }
+    }
+  }
+
+  /* The game's own accent, as its chips wear it. */
+  .key-game-stripe {
+    width: 44px;
+    height: 6px;
+    border: 1px solid var(--ink);
+    background: var(--accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .key-game-tile {
+      transition: none;
+    }
+  }
+}

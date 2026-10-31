@@ -1,0 +1,273 @@
+{#def of, found #}
+{# A new code that gives a gift: the code drawn at random, the items found in the
+   catalogue with which heroes they fit and how each is given, Funds and keys, how many accounts,
+   the end in UTC, the labels players see and the note. Finding,
+   choosing, adding and dropping items and drawing another code answer the form without saving
+   it, as Enter does; a refused field says why beside it. #}
+{% set game = of %}
+{% set draft = found.draft %}
+{% set refused = found.refused %}
+{% set path = url("/admin/keys/codes/new") %}
+{% set back = url("/admin/keys") ~ "?game=" ~ game.id %}
+{% set title = _("web.admin.keys.new") %}
+{% macro refusal(name) %}
+  {% if name in refused %}<FieldError :id="'code-' ~ name ~ '-note'">{{ refused[name] }}</FieldError>{% endif %}
+{% endmacro %}
+{% macro invalid(name) %}
+  {%- if name in refused %} aria-invalid="true" aria-describedby="code-{{ name }}-note"{% endif -%}
+{% endmacro %}
+<AdminPage :title="title ~ ' · ' ~ _('web.admin.keys')" current="keys">
+  <PageHead labelledby="form-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="_('web.admin.keys')" id="form-title">{{ _("web.admin.keys.subtitle.new", game=game.name) }}</TitleBlock>
+    </div>
+  </PageHead>
+  <Panel class="enter-panel">
+    <form method="post"
+          action="{{ path }}"
+          data-admin-form
+          data-still="{{ _('web.admin.still_needed') }}"
+          class="list-layout admin-layout code-form">
+      <CsrfField />
+      {# The form's default button, so that Enter answers the fields without saving them. #}
+      <button type="submit" name="find" value="1" hidden formnovalidate></button>
+      <div data-refresh class="list-main offer-main">
+        <input type="hidden" name="game" value="{{ game.id }}">
+        <h2 class="bar bar-wrap code-form-head">
+          <span class="code-head-name"><GameChip :of="game" />{{ title }}</span>
+        </h2>
+        <div>
+          <label for="code-code" class="field-label field-label-joined">{{ _("web.admin.keys.code_generated") }}</label>
+          <div class="code-generated">
+            <input id="code-code"
+                   name="code"
+                   type="text"
+                   value="{{ draft.code }}"
+                   readonly
+                   class="field-input code-text">
+            <FormButton icon="retry" name="again" value="1" formnovalidate>{{ _("web.admin.keys.generate_again") }}</FormButton>
+          </div>
+          <p class="field-note">{{ _("web.admin.keys.format") }}</p>
+        </div>
+        <p class="bar offer-legend">{{ _("web.admin.keys.contents") }}</p>
+        {% if found.imported %}
+          <ItemSearch id="code-q" :label="_('web.admin.items.search')" :value="draft.query" />
+          <div data-live="{{ path }}" class="code-add">
+            {% if found.candidates %}
+              <fieldset class="code-candidates">
+                <legend class="sr-only">{{ _("web.admin.keys.matches") }}</legend>
+                {% for item, name, whom in found.candidates %}
+                  <label {% if found.picked and found.picked.id == item.id %}aria-current="true"{% endif %}
+                         class="admin-match code-candidate">
+                    <input type="radio"
+                           name="pick"
+                           value="{{ item.id }}"
+                           {% if found.picked and found.picked.id == item.id %} checked{% endif %}
+                           class="choice-input">
+                    <AdminItemIcon :game="game" :item="item" :shown="found.icons" />
+                    <span class="cell-stack">
+                      <span class="admin-hero-strong">{{ name }}</span>
+                      <span class="admin-item-kind">{{ _("games." ~ game.id ~ ".item_kind." ~ item.kind) }} · {{ _("web.admin.items.number", id=item.id) }}
+                        {%- if item.withheld %} · {{ _("web.admin.items.withheld") }}{% endif -%}
+                      </span>
+                    </span>
+                    <span class="admin-match-fit">{{ whom or _("web.admin.keys.any_hero") }}</span>
+                  </label>
+                {% endfor %}
+              </fieldset>
+              <FormButton icon="tick" name="find" value="1" formnovalidate class="no-js-only">{{ _("web.admin.keys.choose") }}</FormButton>
+            {% elif draft.query %}
+              <p class="bar-text body-text">
+                {{ _("web.admin.keys.refused.unknown_item", id=draft.query) if draft.query.isdigit() else _("web.admin.items.search.none", query=draft.query) }}
+              </p>
+            {% else %}
+              <p class="bar-text body-text">{{ _("web.admin.items.search.hint") }}</p>
+            {% endif %}
+            {% if found.fit %}
+              <p class="admin-fit{% if not found.tiles %} admin-fit-no{% endif %}">
+                <span aria-hidden="true" class="badge"><Icon :name="'tick' if found.tiles else 'warn'" :size="14" stroke="#0A0A0A" fill="#0A0A0A" /></span>
+                {{ found.fit }}
+              </p>
+            {% endif %}
+            {% if found.tiles %}
+              <fieldset class="choice-tiles admin-tiles code-owns">
+                <legend class="sr-only">{{ _("web.admin.items.ownership") }}</legend>
+                {% for tile in found.tiles %}
+                  <ChoiceTile name="own" :value="tile.key" :title="_('web.admin.keys.own.' ~ tile.key ~ '.title')" :glyph="tile.glyph" :checked="tile.key == found.own" :disabled="tile.disabled">
+                  <span class="choice-text">{{ tile.hint }}</span>
+                  </ChoiceTile>
+                {% endfor %}
+              </fieldset>
+              <div class="code-amount code-days">
+                <label for="code-days" class="field-label field-label-joined">{{ _("web.admin.keys.days") }}</label>
+                <input id="code-days"
+                       name="days"
+                       type="text"
+                       inputmode="numeric"
+                       value="{{ draft.days }}"
+                       maxlength="3"
+                       autocomplete="off"
+                       data-refresh
+                       class="field-input">
+              </div>
+              <div class="code-amount code-uses">
+                <label for="code-uses" class="field-label field-label-joined">{{ _("web.admin.keys.uses") }}</label>
+                <input id="code-uses"
+                       name="uses"
+                       type="text"
+                       inputmode="numeric"
+                       value="{{ draft.uses }}"
+                       maxlength="10"
+                       autocomplete="off"
+                       data-refresh
+                       class="field-input">
+              </div>
+              <FormButton icon="plus" name="add" value="1" formnovalidate class="code-add-button">{{ found.add or _("web.admin.keys.add") }}</FormButton>
+            {% endif %}
+            {{ refusal("add") }}
+          </div>
+        {% else %}
+          <p class="key-edit-alert">
+            <span aria-hidden="true" class="badge"><Icon name="lock" :size="14" stroke="#0A0A0A" /></span>
+            <span>{{ _("web.admin.keys.no_catalogue") }} <a href="{{ url('/admin/catalogues') }}">{{ _("web.admin.menu.catalogues") }}</a></span>
+          </p>
+        {% endif %}
+        <div role="list"
+             aria-label="{{ _('web.admin.keys.contents_so_far') }}"
+             class="code-lines">
+          {% for line in found.lines %}
+            <div role="listitem" class="offer-item code-line">
+              <input type="hidden"
+                     name="item"
+                     value="{{ line.item_id }} {{ line.ownership.written }}">
+              <p class="box-candidate-name">
+                <AdminItemIcon :game="game" :item="line.item" :shown="found.icons" />
+                <span class="cell-stack"><span class="admin-hero-strong">{{ line.name }}</span><span class="cell-ago">{{ _("web.admin.items.number", id=line.item_id) }}
+                  {%- if not line.item %} · {{ _("web.admin.keys.item_missing") }}{% endif -%}
+                </span></span>
+              </p>
+              <span class="offer-own">{{ _n("web.store.price.days", line.ownership.days) if line.ownership.days else (_n("web.store.price.uses", line.ownership.uses) if line.ownership.uses else _("web.store.price.permanent")) }}</span>
+              <span class="offer-own">{{ line.whom or _("web.admin.keys.any_hero") }}</span>
+              <button type="submit"
+                      name="drop"
+                      formnovalidate
+                      value="{{ loop.index0 }}"
+                      aria-label="{{ _('web.admin.keys.drop', item=line.name) }}"
+                      class="offer-drop">
+                <Icon name="x" :size="14" stroke="currentColor" />
+              </button>
+            </div>
+          {% endfor %}
+        </div>
+        {{ refusal("items") }}
+        <div class="code-wallet">
+          <div>
+            <label for="code-funds" class="field-label field-label-joined">{{ _("web.admin.keys.funds") }}</label>
+            <input id="code-funds"
+                   name="funds"
+                   type="text"
+                   inputmode="numeric"
+                   value="{{ draft.funds }}"
+                   maxlength="13"
+                   autocomplete="off"
+                   {{ invalid("amounts") }}
+                   class="field-input{% if 'amounts' in refused %} field-invalid{% endif %}">
+          </div>
+          <div>
+            <label for="code-keys" class="field-label field-label-joined">{{ _("web.admin.keys.keys") }}</label>
+            <input id="code-keys"
+                   name="keys"
+                   type="text"
+                   inputmode="numeric"
+                   value="{{ draft.keys }}"
+                   maxlength="13"
+                   autocomplete="off"
+                   class="field-input{% if 'amounts' in refused %} field-invalid{% endif %}">
+          </div>
+        </div>
+        {{ refusal("amounts") }}
+        <p class="bar-text body-text">{{ _("web.admin.keys.contents.note") }}</p>
+      </div>
+      <div data-refresh class="list-side admin-side code-side">
+        <p class="bar offer-legend">{{ _("web.admin.keys.accounts") }}</p>
+        <fieldset class="choice-tiles offer-tiles code-limits">
+          <legend class="sr-only">{{ _("web.admin.keys.accounts") }}</legend>
+          {% for limit, glyph in (("any", "infinity"), ("limit", "lock")) %}
+            <ChoiceTile name="limit" :value="limit" :title="_('web.admin.keys.accounts.' ~ limit)" :glyph="glyph" :checked="draft.limit == limit">
+            </ChoiceTile>
+          {% endfor %}
+        </fieldset>
+        <div class="code-most">
+          <label for="code-most" class="field-label field-label-joined">{{ _("web.admin.keys.accounts.max") }}</label>
+          <input id="code-most"
+                 name="most"
+                 type="text"
+                 inputmode="numeric"
+                 value="{{ draft.most }}"
+                 maxlength="10"
+                 autocomplete="off"
+                 {{ invalid("most") }}
+                 class="field-input{% if 'most' in refused %} field-invalid{% endif %}">
+          {{ refusal("most") }}
+        </div>
+        <p class="bar offer-legend">{{ _("web.admin.keys.ends") }}</p>
+        <div class="code-ends">
+          <label for="code-ends-day" class="sr-only">{{ _("web.admin.keys.ends.day") }}</label>
+          <input id="code-ends-day"
+                 name="ends_day"
+                 type="date"
+                 value="{{ draft.ends_day }}"
+                 {{ invalid("ends") }}
+                 class="field-input{% if 'ends' in refused %} field-invalid{% endif %}">
+          <label for="code-ends-time" class="sr-only">{{ _("web.admin.keys.ends.time") }}</label>
+          <input id="code-ends-time"
+                 name="ends_time"
+                 type="time"
+                 value="{{ draft.ends_time }}"
+                 class="field-input">
+        </div>
+        {{ refusal("ends") }}
+        {% for code, name in found.languages %}
+          {% set english = loop.first %}
+          <label for="code-label-{{ code }}"
+                 class="field-label field-label-joined">{{ _("web.admin.keys.label.base" if english else "web.admin.keys.label.in", language=name) }}</label>
+          <input id="code-label-{{ code }}"
+                 name="label-{{ code }}"
+                 lang="{{ code }}"
+                 type="text"
+                 value="{{ draft.labels.get(code, '') }}"
+                 maxlength="80"
+                 autocomplete="off"
+                 {% if english %} required data-needed="{{ _('web.admin.keys.still_needed.label') }}" {{ invalid("label") }}{% endif %}
+                 class="field-input{% if english and 'label' in refused %} field-invalid{% endif %}">
+          {% if english %}{{ refusal("label") }}{% endif %}
+        {% endfor %}
+        <label for="code-note" class="field-label field-label-joined">{{ _("web.admin.keys.note") }}</label>
+        <input id="code-note"
+               name="note"
+               type="text"
+               value="{{ draft.note }}"
+               required
+               maxlength="300"
+               autocomplete="off"
+               data-needed="{{ _('web.admin.still_needed.note') }}"
+               {{ invalid("note") }}
+               class="field-input{% if 'note' in refused %} field-invalid{% endif %}">
+        {{ refusal("note") }}
+        <p aria-live="polite"
+           data-live="{{ path }}"
+           class="offer-line code-summary">{{ found.summary }}</p>
+        <div class="reward-save code-save">
+          <p aria-live="polite" class="admin-form-why">
+            <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>
+            <span data-why>{{ _("web.admin.keys.refused") if refused else "" }}</span>
+          </p>
+          <div data-live="{{ path }}" class="code-buttons">
+            <ActionButton :label="_('web.admin.keys.create.single')" :busy="_('web.admin.store.save.busy')" />
+            <FormButton icon="x" :href="back">{{ _("web.admin.cancel") }}</FormButton>
+          </div>
+        </div>
+      </div>
+    </form>
+  </Panel>
+</AdminPage>

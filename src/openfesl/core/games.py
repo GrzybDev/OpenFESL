@@ -17,6 +17,7 @@ from pydantic import (
 
 from openfesl.core.catalogue import CatalogueRules
 from openfesl.core.chests import ChestRules
+from openfesl.core.code_rules import CodeRules
 from openfesl.core.deal_rules import DealRules, OfferSection
 from openfesl.core.game_pages import Listing, PageKind, Site, Stats, Theme
 from openfesl.core.hero_rules import HeroRules
@@ -236,6 +237,8 @@ class Game(BaseModel):
         namespace: The persona namespace; persona names are unique within it.
         clients: The game's client strings.
         keys: The product keys the database starts with; the admin manages them from there.
+        codes: How the game's site writes the codes that give the rewards' gifts, which the
+            admin makes; none for a game whose keys grant entitlements alone.
         automatic_grants: The entitlements that the game's dedicated servers may grant the
             players in their games, by tag.
         http: What the game fetches over HTTP.
@@ -290,6 +293,7 @@ class Game(BaseModel):
     namespace: str
     clients: dict[str, Client]
     keys: list[ProductKey] = []
+    codes: CodeRules | None = None
     automatic_grants: list[Grant] = []
     http: Http = Http()
     currencies: dict[str, Currency] = {}
@@ -491,6 +495,13 @@ class Game(BaseModel):
         withheld = self.catalogue.withheld if self.catalogue else frozenset()
         if given := sorted(rewards.given_items & withheld):
             raise ValueError(f"rewards give withheld items: {given}")
+        return self
+
+    @model_validator(mode="after")
+    def _check_codes(self) -> Self:
+        # A code gives what a reward gives, in the rewards' Funds and with their fallback.
+        if self.codes and not (self.rewards and self.site):
+            raise ValueError("codes need rewards and a site")
         return self
 
     @model_validator(mode="after")

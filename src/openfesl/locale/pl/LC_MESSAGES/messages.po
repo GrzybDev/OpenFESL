@@ -4324,6 +4324,297 @@ msgstr "Dodaj ponownie klucze startowe"
 msgid "web.admin.keys.managed"
 msgstr "Klucze produktów dodaje, zmienia, włącza i wyłącza rola administratora."
 
+msgid "web.admin.keys.games"
+msgstr "Gry"
+
+msgid "web.admin.keys.game.gifts"
+msgstr "Prezenty: przedmioty, Funds, klucze do skrzyń"
+
+msgid "web.admin.keys.game.tags"
+msgstr "Uprawnienia: znaczniki"
+
+msgid "web.admin.keys.subtitle.gifts"
+msgstr "Kody gry %(game)s: prezenty dla bohaterów i kont"
+
+msgid "web.admin.keys.subtitle.code"
+msgstr "Kod gry %(game)s"
+
+msgid "web.admin.keys.subtitle.new"
+msgstr "Nowy kod gry %(game)s"
+
+msgid "web.admin.keys.tab.expired"
+msgstr "Wygasłe"
+
+msgid "web.admin.keys.codes_of"
+msgstr "Kody gry %(game)s"
+
+msgid "web.admin.keys.col.code"
+msgstr "Kod"
+
+msgid "web.admin.keys.col.contents"
+msgstr "Zawartość"
+
+msgid "web.admin.keys.col.uses"
+msgstr "Użycia"
+
+msgid "web.admin.keys.col.ends"
+msgstr "Koniec"
+
+msgid "web.admin.keys.col.state"
+msgstr "Stan"
+
+msgid "web.admin.keys.col.open"
+msgstr "Otwórz"
+
+msgid "web.admin.keys.uses.of"
+msgstr "%(used)s z %(most)s"
+
+msgid "web.admin.keys.no_end"
+msgstr "Bez końca"
+
+msgid "web.admin.keys.ended"
+msgstr "Wygasł %(time)s"
+
+msgid "web.admin.keys.state.enabled"
+msgstr "Włączony"
+
+msgid "web.admin.keys.state.used_up"
+msgstr "Wykorzystany"
+
+msgid "web.admin.keys.state.expired"
+msgstr "Wygasły"
+
+msgid "web.admin.keys.state.disabled"
+msgstr "Wyłączony"
+
+msgid "web.admin.keys.open"
+msgstr "Otwórz: %(label)s"
+
+msgid "web.admin.keys.codes.none.enabled"
+msgstr "Żaden kod nie jest teraz włączony."
+
+msgid "web.admin.keys.codes.none.expired"
+msgstr "Żaden kod nie wygasł."
+
+msgid "web.admin.keys.empty"
+msgstr "Brak kodów gry %(game)s. Kod daje przedmioty, Funds lub klucze jeden raz każdemu kontu, które go wpisze."
+
+msgid "web.admin.keys.rule"
+msgstr "Każdy kod działa raz na konto. Przyznany prezent zostaje, gdy kod wygaśnie. Przedmioty trafiają do jednego bohatera wybranego przez konto, Funds i klucze na konto."
+
+msgid "web.admin.keys.moderator"
+msgstr "Tworzenie kodów wymaga roli administratora."
+
+msgid "web.admin.keys.all_codes"
+msgstr "Wszystkie kody"
+
+msgid "web.admin.keys.fact.accounts"
+msgstr "Konta"
+
+msgid "web.admin.keys.fact.used.most"
+msgstr "Każde konto raz · wykorzystano %(used)s z %(most)s"
+
+msgid "web.admin.keys.fact.used.any"
+msgstr "Każde konto raz · dotąd %(used)s, bez limitu"
+
+msgid "web.admin.keys.labels"
+msgstr "Etykiety"
+
+msgid "web.admin.keys.made"
+msgstr "Utworzenie"
+
+msgid "web.admin.keys.made.by"
+msgstr "%(date)s, %(name)s: %(note)s"
+
+msgid "web.admin.keys.new"
+msgstr "Nowy kod"
+
+msgid "web.admin.keys.code_generated"
+msgstr "Kod · wygenerowany"
+
+msgid "web.admin.keys.generate_again"
+msgstr "Wygeneruj ponownie"
+
+msgid "web.admin.keys.format"
+msgstr "Cztery grupy po cztery znaki z 1-9 i A-Z bez I oraz O. Kody są losowane, a nie wpisywane ręcznie, więc żadne słowo ani wzór ich nie zdradza."
+
+msgid "web.admin.keys.contents"
+msgstr "Zawartość"
+
+msgid "web.admin.keys.matches"
+msgstr "Znalezione przedmioty"
+
+msgid "web.admin.keys.choose"
+msgstr "Wybierz"
+
+msgid "web.admin.keys.any_hero"
+msgstr "Każdy bohater"
+
+msgid "web.admin.keys.fits"
+msgstr "%(item)s pasuje do: %(rule)s."
+
+msgid "web.admin.keys.own.perm.title"
+msgstr "Na stałe"
+
+msgid "web.admin.keys.own.days.title"
+msgstr "Dni"
+
+msgid "web.admin.keys.own.uses.title"
+msgstr "Użycia"
+
+msgid "web.admin.keys.own.perm"
+msgstr "Na zawsze"
+
+msgid "web.admin.keys.own.days"
+msgstr "Wypożyczenie"
+
+msgid "web.admin.keys.own.uses"
+msgstr "Liczba użyć"
+
+msgid "web.admin.keys.days"
+msgstr "Dni"
+
+msgid "web.admin.keys.uses"
+msgstr "Użycia"
+
+msgid "web.admin.keys.add"
+msgstr "Dodaj przedmiot"
+
+msgid "web.admin.keys.add_item"
+msgstr "Dodaj %(item)s: %(what)s"
+
+msgid "web.admin.keys.contents_so_far"
+msgstr "Dotychczasowa zawartość"
+
+msgid "web.admin.keys.item_missing"
+msgstr "brak w zaimportowanym katalogu"
+
+msgid "web.admin.keys.drop"
+msgstr "Usuń %(item)s"
+
+msgid "web.admin.keys.funds"
+msgstr "Funds na konto"
+
+msgid "web.admin.keys.keys"
+msgstr "Klucze do skrzyń"
+
+msgid "web.admin.keys.contents.note"
+msgstr "Przedmioty trafiają do jednego bohatera, do którego pasują wszystkie; Funds i klucze na konto."
+
+msgid "web.admin.keys.no_catalogue"
+msgstr "Przedmioty wymagają katalogu gry, który nie jest jeszcze zaimportowany; kody z Funds i kluczami można tworzyć bez niego."
+
+msgid "web.admin.keys.accounts"
+msgstr "Ile kont"
+
+msgid "web.admin.keys.accounts.any"
+msgstr "Dowolnie wiele"
+
+msgid "web.admin.keys.accounts.limit"
+msgstr "Limit"
+
+msgid "web.admin.keys.accounts.max"
+msgstr "Najwyżej kont"
+
+msgid "web.admin.keys.ends"
+msgstr "Koniec · UTC · opcjonalnie"
+
+msgid "web.admin.keys.ends.day"
+msgstr "Dzień końca, UTC"
+
+msgid "web.admin.keys.ends.time"
+msgstr "Godzina końca, UTC"
+
+msgid "web.admin.keys.label.base"
+msgstr "Etykieta · angielski · widoczna dla graczy"
+
+msgid "web.admin.keys.label.in"
+msgstr "Etykieta · %(language)s · opcjonalnie"
+
+msgid "web.admin.keys.note"
+msgstr "Notatka · wymagana, zapisywana w dzienniku zmian"
+
+msgid "web.admin.keys.still_needed.label"
+msgstr "etykieta w języku angielskim"
+
+msgid "web.admin.keys.refused"
+msgstr "Nic nie zostało zapisane; oznaczone pola podają powód."
+
+msgid "web.admin.keys.create.single"
+msgstr "Utwórz kod"
+
+msgid "web.admin.keys.gift.keys.one"
+msgstr "%(count)s klucz do skrzyni"
+
+msgid "web.admin.keys.gift.keys.few"
+msgstr "%(count)s klucze do skrzyń"
+
+msgid "web.admin.keys.gift.keys.many"
+msgstr "%(count)s kluczy do skrzyń"
+
+msgid "web.admin.keys.gift.keys.other"
+msgstr "%(count)s klucza do skrzyń"
+
+msgid "web.admin.keys.summary"
+msgstr "%(whom)s, %(until)s. Daje: %(gift)s."
+
+msgid "web.admin.keys.summary.nothing"
+msgstr "%(whom)s, %(until)s. Na razie nic nie daje."
+
+msgid "web.admin.keys.summary.most.one"
+msgstr "Każde konto raz, najwyżej %(count)s konto"
+
+msgid "web.admin.keys.summary.most.few"
+msgstr "Każde konto raz, najwyżej %(count)s konta"
+
+msgid "web.admin.keys.summary.most.many"
+msgstr "Każde konto raz, najwyżej %(count)s kont"
+
+msgid "web.admin.keys.summary.most.other"
+msgstr "Każde konto raz, najwyżej %(count)s konta"
+
+msgid "web.admin.keys.summary.any"
+msgstr "Każde konto raz, dowolnie wiele kont"
+
+msgid "web.admin.keys.summary.until"
+msgstr "do %(end)s"
+
+msgid "web.admin.keys.summary.no_end"
+msgstr "bez końca"
+
+msgid "web.admin.keys.refused.withheld"
+msgstr "Przedmiot %(id)s jest wstrzymany w tym serwisie: nie dają go ani kody, ani nagrody."
+
+msgid "web.admin.keys.refused.unknown_item"
+msgstr "Zaimportowany katalog nie ma przedmiotu %(id)s."
+
+msgid "web.admin.keys.refused.counted"
+msgstr "%(item)s liczy się w użyciach; nie można go dać na dni ani na stałe."
+
+msgid "web.admin.keys.refused.not_counted"
+msgstr "%(item)s nie liczy się w użyciach; daje się go na dni albo na stałe."
+
+msgid "web.admin.keys.refused.days"
+msgstr "Wypożyczenie trwa od 1 do %(most)s dni."
+
+msgid "web.admin.keys.refused.no_single_hero"
+msgstr "%(a)s jest dla: %(fa)s, a %(b)s dla: %(fb)s; żaden bohater nie dostałby obu."
+
+msgid "web.admin.keys.refused.empty"
+msgstr "Kod musi zawierać co najmniej jeden przedmiot, Funds lub klucze."
+
+msgid "web.admin.keys.refused.when"
+msgstr "Koniec wymaga dnia, a jeśli nie o północy, także godziny, np. 08:00."
+
+msgid "web.admin.keys.refused.past"
+msgstr "Koniec, %(end)s, już minął."
+
+msgid "web.admin.keys.refused.label"
+msgstr "Etykieta w języku angielskim jest wymagana; gracze widzą ją na stronie realizacji kodów."
+
+msgid "web.admin.keys.refused.note"
+msgstr "Notatka jest wymagana; trafia do dziennika zmian."
+
 msgid "web.admin.key.code"
 msgstr "Kod"
 
@@ -4557,6 +4848,12 @@ msgstr "Wybierz grę, dla której graczy jest klucz."
 
 msgid "web.admin.toast.key_saved"
 msgstr "Zapisano %(code)s."
+
+msgid "web.admin.toast.code.made"
+msgstr "Utworzono kod %(code)s."
+
+msgid "web.admin.toast.code.taken"
+msgstr "Nic nie zostało utworzone: wylosowany kod ma już inny klucz. Wylosowano nowy kod."
 
 msgid "web.admin.menu.settings"
 msgstr "Ustawienia"
@@ -5030,6 +5327,9 @@ msgstr "Zmieniono uprawnienia i nazwy klucza"
 
 msgid "web.admin.audit.action.key_limits"
 msgstr "Zmieniono limity klucza"
+
+msgid "web.admin.audit.action.key_add.code"
+msgstr "Utworzenie kodu"
 
 msgid "web.admin.audit.action.catalogue_import"
 msgstr "Zaimportowano katalog"

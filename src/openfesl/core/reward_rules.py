@@ -1,5 +1,5 @@
 from datetime import date, datetime, timedelta
-from typing import Literal, Self
+from typing import Any, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, NonNegativeInt, PositiveInt, model_validator
 
@@ -29,6 +29,13 @@ class Gift(BaseModel):
     def for_hero(self) -> bool:
         """Whether a hero gets part of the gift, who is chosen when it is claimed."""
         return bool(self.items or self.box)
+
+    @property
+    def written(self) -> dict[str, Any]:
+        """The gift as game data and the settings write it, without its empty parts."""
+        items = [f"{item_id} {ownership.written}" for item_id, ownership in self.items]
+        found = {"items": items, "box": self.box, "funds": self.funds, "keys": self.keys}
+        return {name: value for name, value in found.items() if value}
 
 
 class Goal(BaseModel):

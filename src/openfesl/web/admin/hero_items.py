@@ -128,16 +128,7 @@ def grant_form(page: HeroPage, chosen: Mapping[str, object], language: str) -> G
             rule=rule,
         )
     # The store sells it as uses, so it is held as uses too.
-    sold_in_uses = (
-        item is not None
-        and game.store is not None
-        and any(
-            sold.type == COUNTED
-            for rule in game.store.prices.values()
-            if rule.covers(item)
-            for sold in rule.sold
-        )
-    )
+    sold_in_uses = item is not None and game.store is not None and game.store.counted(item)
     counted = (held is not None and held.type == COUNTED) or sold_in_uses
     days = sorted(game.store.rentals) if game.store else []
     keys = ["perm", *(f"{count}d" for count in days), "uses"]
