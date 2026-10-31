@@ -1,0 +1,301 @@
+/* A game's rewards: the calendar strip, the events' table, and beside each other the missions
+   and starter packs, the chest key and the milestones. The strip scrolls sideways inside its
+   box on narrow screens; where the table does not fit, each event is a block of its own. */
+@layer pages {
+  .rewards-page {
+    display: grid;
+    gap: 14px;
+  }
+
+  .rewards-strip-scroll {
+    overflow-x: auto;
+    background: var(--row-light);
+  }
+
+  .rewards-strip {
+    display: block;
+    width: 100%;
+    min-width: 900px;
+    height: auto;
+  }
+
+  .rewards-strip-month {
+    stroke: var(--row);
+    stroke-width: 2;
+  }
+
+  .rewards-strip-name {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    fill: var(--ink);
+  }
+
+  .rewards-strip-event {
+    fill: var(--accent);
+    stroke: var(--ink);
+    stroke-width: 2;
+  }
+
+  .rewards-strip-off {
+    fill: var(--row-light);
+  }
+
+  .rewards-strip-label {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 800;
+    text-anchor: middle;
+    fill: var(--ink);
+  }
+
+  .rewards-strip-today {
+    stroke: var(--ink);
+    stroke-width: 3;
+  }
+
+  .rewards-strip-now {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-anchor: end;
+    text-transform: uppercase;
+    fill: var(--ink);
+  }
+
+  .rewards-stack {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 3px;
+    padding-block: 6px;
+  }
+
+  .rewards-switch {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .admin-list .table.rewards-table {
+    min-width: 980px;
+  }
+
+  .rewards-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns:
+      minmax(240px, 1.6fr) 100px minmax(180px, 1fr) minmax(130px, 0.8fr)
+      minmax(150px, 0.9fr) 120px;
+    gap: 2px;
+  }
+
+  .rewards-row:nth-child(even) {
+    --cell: var(--row-alt);
+  }
+
+  .rewards-row:target {
+    --cell: var(--accent);
+  }
+
+  .rewards-event {
+    gap: 10px;
+  }
+
+  .rewards-number {
+    display: inline-grid;
+    min-width: 30px;
+    height: 24px;
+    flex: none;
+    place-items: center;
+    background: var(--ink);
+    padding-inline: 4px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--accent);
+  }
+
+  .rewards-parts {
+    flex-wrap: wrap;
+    gap: 4px;
+    padding-block: 6px;
+  }
+
+  .rewards-part {
+    display: inline-flex;
+    min-height: 32px;
+    align-items: center;
+    gap: 4px;
+    background: var(--accent);
+    padding-inline: 8px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .rewards-part-off {
+    background: var(--ink);
+    color: var(--row-light);
+  }
+
+  .rewards-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(280px, 1fr);
+    align-items: start;
+    gap: 14px;
+  }
+
+  .rewards-side-main,
+  .rewards-side {
+    display: grid;
+    gap: 14px;
+  }
+
+  .rewards-missions,
+  .rewards-milestones {
+    display: grid;
+    gap: 2px;
+    margin: 2px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .rewards-mission,
+  .rewards-milestone {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    background: var(--row);
+    padding: 6px 10px;
+    color: var(--ink);
+  }
+
+  .rewards-milestone {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+  }
+
+  .rewards-mission:nth-child(even),
+  .rewards-milestone:nth-child(even) {
+    background: var(--row-alt);
+  }
+
+  .rewards-mission-off {
+    background: var(--row-pale);
+    color: var(--dim);
+  }
+
+  .rewards-mission-state {
+    max-width: 180px;
+  }
+
+  .rewards-funds {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rewards-switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 2px;
+    background: var(--row-light);
+    padding: 8px 10px;
+    color: var(--ink);
+  }
+
+  .rewards-packs {
+    width: 100%;
+    min-width: 560px;
+    margin-top: 2px;
+    border-spacing: 2px 2px;
+    border-collapse: separate;
+    color: var(--ink);
+
+    th {
+      padding: 8px 10px;
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-align: left;
+      text-transform: uppercase;
+    }
+
+    thead th {
+      background: var(--ink);
+      color: var(--row-light);
+    }
+
+    tbody th {
+      background: var(--row-light);
+    }
+
+    td {
+      background: var(--row);
+      padding: 8px 10px;
+      vertical-align: top;
+    }
+
+    td > span {
+      display: block;
+    }
+
+    thead td {
+      background: none;
+    }
+  }
+
+  .rewards-key {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 2px;
+    background: var(--row-light);
+    padding: 10px 12px;
+    color: var(--ink);
+  }
+
+  @container (width < 980px) {
+    .admin-list .table.rewards-table {
+      min-width: 0;
+
+      [role="rowgroup"]:first-child {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
+    }
+
+    .rewards-row.rewards-columns {
+      grid-template-columns: minmax(0, 1fr) auto;
+
+      > :nth-child(2) {
+        grid-row: 1;
+        grid-column: 2;
+      }
+
+      > :nth-child(3),
+      > :nth-child(6) {
+        grid-column: 1 / -1;
+      }
+    }
+  }
+
+  @media (width < 900px) {
+    .rewards-split {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}

@@ -23,6 +23,7 @@ from openfesl.web.admin.home import home_routes
 from openfesl.web.admin.key_edit import key_edit_routes
 from openfesl.web.admin.keys import key_routes
 from openfesl.web.admin.providers import provider_routes
+from openfesl.web.admin.rewards import RewardAdminViews, reward_routes
 from openfesl.web.admin.servers import (
     ServerViews,
     decision_routes,
@@ -68,6 +69,7 @@ def include_admin_routes(
         for name, served in (
             ("catalogues", any(game.catalogue for game in games)),
             ("store", any(game.store and game.heroes for game in games)),
+            ("rewards", any(game.rewards for game in games)),
         )
         if served
     )
@@ -152,6 +154,8 @@ def include_admin_routes(
     app.include_router(box_table_routes(sign_in, box_views))
     app.include_router(deal_routes(sign_in, deal_views))
     app.include_router(deal_picture_routes(sign_in, deal_views))
+    reward_views = RewardAdminViews(games, services.rewards, services.catalogues)
+    app.include_router(reward_routes(sign_in, reward_views))
     app.include_router(
         audit_routes(
             sign_in,

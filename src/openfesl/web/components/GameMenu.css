@@ -13,7 +13,7 @@
     li {
       display: flex;
 
-      &:last-child {
+      &:last-child:nth-child(odd) {
         grid-column: 1 / -1;
       }
     }

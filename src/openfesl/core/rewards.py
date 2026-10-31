@@ -17,8 +17,8 @@ from openfesl.core.inventory import Ownership
 from openfesl.core.overrides import overridden
 from openfesl.core.policies import SettingStore
 from openfesl.core.reward_claims import Claim, Claimed, Given, Grant, RewardStore
-from openfesl.core.reward_rules import Event, Gift, Goal, Milestone, Part, RewardRules
-from openfesl.core.reward_runs import Run
+from openfesl.core.reward_rules import Gift, Goal, Milestone, Part, RewardRules
+from openfesl.core.reward_runs import Run, run_of
 from openfesl.core.stats import (
     PERSONA,
     Owner,
@@ -246,7 +246,7 @@ class Rewards:
         found = []
         for key, event in rules.events.items():
             if event.enabled:
-                runs = (_run(key, event, year + ahead, rules.zone) for ahead in (0, 1))
+                runs = (run_of(key, event, year + ahead, rules.zone) for ahead in (0, 1))
                 found.append(next(run for run in runs if run.period.start > now))
         return sorted(found, key=lambda run: run.period.start)
 
@@ -515,17 +515,12 @@ def _usable(contents: Contents, gift: Gift, hero: Hero) -> bool:
 
 def _running(rules: RewardRules, now: datetime) -> list[Run]:
     year = today(now, rules.zone).year
-    runs = [_run(key, event, year, rules.zone) for key, event in rules.events.items()]
+    runs = [run_of(key, event, year, rules.zone) for key, event in rules.events.items()]
     return [
         replace(run, day=run.event.window.day(now, rules.zone))
         for run in runs
         if run.event.enabled and run.period.start <= now < run.period.end
     ]
-
-
-def _run(key: str, event: Event, year: int, zone: str) -> Run:
-    first, last = event.window.days(year)
-    return Run(key, event, event.window.period(year, zone), (last - first).days + 1, None)
 
 
 def _parts(

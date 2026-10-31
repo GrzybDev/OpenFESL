@@ -12088,3 +12088,165 @@ msgstr "duży obraz"
 
 msgid "web.admin.audit.deal_art.small"
 msgstr "mały obraz"
+
+msgid "web.admin.menu.rewards"
+msgstr "Nagrody"
+
+msgid "web.admin.rewards.title"
+msgstr "Nagrody"
+
+msgid "web.admin.rewards.subtitle"
+msgstr "Strona nagród: %(game)s"
+
+msgid "web.admin.rewards.calendar"
+msgstr "Kalendarz %(year)s"
+
+msgid "web.admin.rewards.calendar.today"
+msgstr "Dziś %(date)s · dzień zaczyna się o %(time)s"
+
+msgid "web.admin.rewards.calendar.note"
+msgstr "Wypełnione: włączone · obrys: wyłączone · daty w %(year)s wyliczone z zasady każdego wydarzenia."
+
+msgid "web.admin.rewards.events"
+msgstr "Wydarzenia kalendarza"
+
+msgid "web.admin.rewards.events.on"
+msgstr "włączone: %(on)s z %(total)s"
+
+msgid "web.admin.rewards.column.event"
+msgstr "Wydarzenie"
+
+msgid "web.admin.rewards.column.runs"
+msgstr "Działa"
+
+msgid "web.admin.rewards.column.parts"
+msgstr "Dla kogo"
+
+msgid "web.admin.rewards.column.state"
+msgstr "Stan"
+
+msgid "web.admin.rewards.column.text"
+msgstr "Teksty"
+
+msgid "web.admin.rewards.on"
+msgstr "Włączone"
+
+msgid "web.admin.rewards.off"
+msgstr "Wyłączone"
+
+msgid "web.admin.rewards.part.account"
+msgstr "Konto"
+
+msgid "web.admin.rewards.state.off"
+msgstr "Wyłączone"
+
+msgid "web.admin.rewards.state.ended"
+msgstr "Zakończone"
+
+msgid "web.admin.rewards.state.next"
+msgstr "Następne · %(date)s"
+
+msgid "web.admin.rewards.state.running.day"
+msgstr "Trwa · dzień %(day)s z %(days)s"
+
+msgid "web.admin.rewards.state.running.until"
+msgstr "Trwa · do %(date)s"
+
+msgid "web.admin.rewards.state.paused.day"
+msgstr "Wstrzymane · dzień %(day)s z %(days)s"
+
+msgid "web.admin.rewards.state.paused.until"
+msgstr "Wstrzymane · do %(date)s"
+
+msgid "web.admin.rewards.rule.goals"
+msgstr "Cele przed %(date)s"
+
+msgid "web.admin.rewards.rule.daily.one"
+msgstr "%(count)s dzienny prezent od %(date)s"
+
+msgid "web.admin.rewards.rule.daily.few"
+msgstr "%(count)s dzienne prezenty od %(date)s"
+
+msgid "web.admin.rewards.rule.daily.many"
+msgstr "%(count)s dziennych prezentów od %(date)s"
+
+msgid "web.admin.rewards.rule.daily.other"
+msgstr "%(count)s dziennego prezentu od %(date)s"
+
+msgid "web.admin.rewards.rule.easter"
+msgstr "Względem Wielkanocy"
+
+msgid "web.admin.rewards.rule.fixed"
+msgstr "Stałe dni"
+
+msgid "web.admin.rewards.text.own"
+msgstr "Własne OpenFESL"
+
+msgid "web.admin.rewards.text.game"
+msgstr "Z gry"
+
+msgid "web.admin.rewards.missions"
+msgstr "Misje"
+
+msgid "web.admin.rewards.missions.running"
+msgstr "trwające: %(running)s z %(total)s"
+
+msgid "web.admin.rewards.mission.line"
+msgstr "Cel %(goal)s · statystyka %(stat)s · %(hero_class)s · %(faction)s · przed %(date)s · daje: %(gift)s"
+
+msgid "web.admin.rewards.mission.any_class"
+msgstr "dowolna klasa"
+
+msgid "web.admin.rewards.packs"
+msgstr "Pakiety startowe"
+
+msgid "web.admin.rewards.packs.days.one"
+msgstr "Każdy nowy bohater może odebrać swój przez %(count)s dzień"
+
+msgid "web.admin.rewards.packs.days.few"
+msgstr "Każdy nowy bohater może odebrać swój przez %(count)s dni"
+
+msgid "web.admin.rewards.packs.days.many"
+msgstr "Każdy nowy bohater może odebrać swój przez %(count)s dni"
+
+msgid "web.admin.rewards.packs.days.other"
+msgstr "Każdy nowy bohater może odebrać swój przez %(count)s dnia"
+
+msgid "web.admin.rewards.packs.plus"
+msgstr "+ wspólne przedmioty"
+
+msgid "web.admin.rewards.packs.shared"
+msgstr "Wspólne przedmioty każdego pakietu: %(items)s."
+
+msgid "web.admin.rewards.keys"
+msgstr "Klucz w nagrodę"
+
+msgid "web.admin.rewards.keys.first"
+msgstr "Klucz za pierwszą skrzynię"
+
+msgid "web.admin.rewards.keys.first.text.one"
+msgstr "%(count)s klucz, raz na konto, gdy pojawi się jego pierwsza skrzynia skarbów."
+
+msgid "web.admin.rewards.keys.first.text.few"
+msgstr "%(count)s klucze, raz na konto, gdy pojawi się jego pierwsza skrzynia skarbów."
+
+msgid "web.admin.rewards.keys.first.text.many"
+msgstr "%(count)s kluczy, raz na konto, gdy pojawi się jego pierwsza skrzynia skarbów."
+
+msgid "web.admin.rewards.keys.first.text.other"
+msgstr "%(count)s klucza, raz na konto, gdy pojawi się jego pierwsza skrzynia skarbów."
+
+msgid "web.admin.rewards.milestones"
+msgstr "Kamienie milowe"
+
+msgid "web.admin.rewards.milestone.hero"
+msgstr "Dla każdego bohatera"
+
+msgid "web.admin.rewards.milestone.account"
+msgstr "Raz na konto"
+
+msgid "web.admin.rewards.milestones.note"
+msgstr "To, co daje kamień milowy, trafia na konto. Poziomy liczą się dla każdego bohatera, pozostałe cele raz dla całego konta."
+
+msgid "web.admin.rewards.today"
+msgstr "Dziś"

@@ -11376,3 +11376,147 @@ msgstr "big picture"
 
 msgid "web.admin.audit.deal_art.small"
 msgstr "small picture"
+
+msgid "web.admin.menu.rewards"
+msgstr "Rewards"
+
+msgid "web.admin.rewards.title"
+msgstr "Rewards"
+
+msgid "web.admin.rewards.subtitle"
+msgstr "Rewards page of %(game)s"
+
+msgid "web.admin.rewards.calendar"
+msgstr "Calendar %(year)s"
+
+msgid "web.admin.rewards.calendar.today"
+msgstr "Today %(date)s · days start %(time)s"
+
+msgid "web.admin.rewards.calendar.note"
+msgstr "Filled: on · outlined: off · the dates of %(year)s, computed from each event's rule."
+
+msgid "web.admin.rewards.events"
+msgstr "Calendar events"
+
+msgid "web.admin.rewards.events.on"
+msgstr "%(on)s of %(total)s on"
+
+msgid "web.admin.rewards.column.event"
+msgstr "Event"
+
+msgid "web.admin.rewards.column.runs"
+msgstr "Runs"
+
+msgid "web.admin.rewards.column.parts"
+msgstr "Given to"
+
+msgid "web.admin.rewards.column.state"
+msgstr "State"
+
+msgid "web.admin.rewards.column.text"
+msgstr "Texts"
+
+msgid "web.admin.rewards.on"
+msgstr "On"
+
+msgid "web.admin.rewards.off"
+msgstr "Off"
+
+msgid "web.admin.rewards.part.account"
+msgstr "Account"
+
+msgid "web.admin.rewards.state.off"
+msgstr "Off"
+
+msgid "web.admin.rewards.state.ended"
+msgstr "Ended"
+
+msgid "web.admin.rewards.state.next"
+msgstr "Next · %(date)s"
+
+msgid "web.admin.rewards.state.running.day"
+msgstr "Running · day %(day)s of %(days)s"
+
+msgid "web.admin.rewards.state.running.until"
+msgstr "Running · until %(date)s"
+
+msgid "web.admin.rewards.state.paused.day"
+msgstr "Paused · day %(day)s of %(days)s"
+
+msgid "web.admin.rewards.state.paused.until"
+msgstr "Paused · until %(date)s"
+
+msgid "web.admin.rewards.rule.goals"
+msgstr "Goals before %(date)s"
+
+msgid "web.admin.rewards.rule.daily.one"
+msgstr "%(count)s daily gift from %(date)s"
+
+msgid "web.admin.rewards.rule.daily.other"
+msgstr "%(count)s daily gifts from %(date)s"
+
+msgid "web.admin.rewards.rule.easter"
+msgstr "Relative to Easter"
+
+msgid "web.admin.rewards.rule.fixed"
+msgstr "Fixed days"
+
+msgid "web.admin.rewards.text.own"
+msgstr "OpenFESL's own"
+
+msgid "web.admin.rewards.text.game"
+msgstr "The game's"
+
+msgid "web.admin.rewards.missions"
+msgstr "Missions"
+
+msgid "web.admin.rewards.missions.running"
+msgstr "%(running)s of %(total)s running"
+
+msgid "web.admin.rewards.mission.line"
+msgstr "Goal %(goal)s · stat %(stat)s · %(hero_class)s · %(faction)s · before %(date)s · gives %(gift)s"
+
+msgid "web.admin.rewards.mission.any_class"
+msgstr "any class"
+
+msgid "web.admin.rewards.packs"
+msgstr "Starter packs"
+
+msgid "web.admin.rewards.packs.days.one"
+msgstr "Each new hero may claim one for %(count)s day"
+
+msgid "web.admin.rewards.packs.days.other"
+msgstr "Each new hero may claim one for %(count)s days"
+
+msgid "web.admin.rewards.packs.plus"
+msgstr "+ the shared items"
+
+msgid "web.admin.rewards.packs.shared"
+msgstr "Shared items in every pack: %(items)s."
+
+msgid "web.admin.rewards.keys"
+msgstr "Chest-key reward"
+
+msgid "web.admin.rewards.keys.first"
+msgstr "First chest key"
+
+msgid "web.admin.rewards.keys.first.text.one"
+msgstr "%(count)s key, once per account, when its first treasure chest arrives."
+
+msgid "web.admin.rewards.keys.first.text.other"
+msgstr "%(count)s keys, once per account, when its first treasure chest arrives."
+
+msgid "web.admin.rewards.milestones"
+msgstr "Milestones"
+
+msgid "web.admin.rewards.milestone.hero"
+msgstr "Per hero"
+
+msgid "web.admin.rewards.milestone.account"
+msgstr "Once per account"
+
+msgid "web.admin.rewards.milestones.note"
+msgstr "What a milestone gives goes to the account. Levels count for each hero; the other goals count once for the account."
+
+msgid "web.admin.rewards.today"
+msgstr "Today"
