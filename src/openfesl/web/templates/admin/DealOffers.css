@@ -2,13 +2,13 @@
    button that ends one that runs. Where the table does not fit, each offer is a block of its own. */
 @layer pages {
   .admin-list .table.offers-table {
-    min-width: 900px;
+    min-width: 1100px;
   }
 
   .offers-columns {
     --cell: var(--row);
     display: grid;
-    grid-template-columns: minmax(200px, 1.5fr) 130px 170px minmax(200px, 1fr) 140px 160px;
+    grid-template-columns: minmax(170px, 1.3fr) 120px 150px minmax(180px, 1fr) 120px 130px 270px;
     gap: 2px;
   }
 
@@ -42,7 +42,7 @@
     margin-top: 12px;
   }
 
-  @container (width < 900px) {
+  @container (width < 1100px) {
     .admin-list .table.offers-table {
       min-width: 0;
 

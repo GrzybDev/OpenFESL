@@ -20,13 +20,15 @@ from openfesl.core.wallets import Wallet, wallet_of
 
 # The code of a refused purchase and its causes, which the game only logs: a product it does
 # not sell, an item the hero may not use, an ability level before the one below it, an item the
-# hero owns for good or that was taken from it, and too little to pay with.
+# hero owns for good or that was taken from it, too little to pay with, and a hot deal whose
+# stock another purchase sold at the same time.
 PURCHASE_REFUSED = "PURCHASE_REFUSED"
 UNKNOWN_PRODUCT = "UNKNOWN_PRODUCT"
 NOT_FOR_HERO = "NOT_FOR_HERO"
 LEVEL_MISSING = "LEVEL_MISSING"
 ALREADY_OWNED = "ALREADY_OWNED"
 INSUFFICIENT_FUNDS = "INSUFFICIENT_FUNDS"
+SOLD_OUT = "SOLD_OUT"
 
 
 class PurchaseRefused(MagmaError):
@@ -54,6 +56,8 @@ class Purchase:
         price: The price.
         items: The items the hero gains, by number, with how it owns each; those it owns for
             good are left out, and a purchase that gains it none is refused.
+        bundle: The number of the hot deal's bundle it buys, whose sales it counts; none for a
+            product or a box.
     """
 
     game: str
@@ -63,6 +67,7 @@ class Purchase:
     wallet: Wallet
     price: int
     items: tuple[tuple[int, Ownership], ...]
+    bundle: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -126,8 +131,8 @@ class PurchaseStore(Protocol):
 
         Raises:
             PurchaseRefused: When the hero gains no item, as it owns them for good or they were
-                taken away, or the wallet holds less than the price, also after another
-                purchase at the same time.
+                taken away, the wallet holds less than the price, or a bundle's stock is sold,
+                also after another purchase at the same time.
         """
 
     async def buy_for_account(
@@ -236,7 +241,9 @@ class Purchases:
             )
             wallet = wallet_of(game, persona, bundle.currency)
             await self._store.buy(
-                Purchase(game.id, persona, product_id, "bundle", wallet, bundle.price, items)
+                Purchase(
+                    game.id, persona, product_id, "bundle", wallet, bundle.price, items, listed.id
+                )
             )
             return None
         if product is None:

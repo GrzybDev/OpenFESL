@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import ColumnElement, delete, func, select, update
+from sqlalchemy import ColumnElement, delete, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.chests import ChestRefusal, ChestRefused
@@ -8,6 +8,7 @@ from openfesl.core.personas import Persona
 from openfesl.core.purchases import (
     ALREADY_OWNED,
     INSUFFICIENT_FUNDS,
+    SOLD_OUT,
     ListedPurchase,
     Purchase,
     PurchaseRefused,
@@ -16,7 +17,13 @@ from openfesl.core.purchases import (
 from openfesl.core.store import Product
 from openfesl.core.wallets import Wallet
 from openfesl.storage.entitlements import add_account_item, add_item, use_one
-from openfesl.storage.models import AccountRow, EntitlementRow, PersonaRow, PurchaseRow
+from openfesl.storage.models import (
+    AccountRow,
+    EntitlementRow,
+    PersonaRow,
+    PurchaseRow,
+    StoreBundleRow,
+)
 from openfesl.storage.wallets import REFUND, credit, spend
 
 # The ledger's reason for what a purchase took from a wallet.
@@ -41,11 +48,28 @@ class SqlPurchaseStore:
             purchase: The purchase.
 
         Raises:
-            PurchaseRefused: When the hero owns an item for good or it was taken away, or the
-                wallet holds less than the price, also after another purchase at the same time.
+            PurchaseRefused: When the hero owns an item for good or it was taken away, the
+                wallet holds less than the price, or a bundle's stock is sold, also after
+                another purchase at the same time.
         """
         persona = purchase.persona
         async with self._sessions.begin() as session:
+            if purchase.bundle is not None:
+                # The bundle's row stays locked until the purchase ends, so its last one sells once.
+                counted = await session.scalar(
+                    update(StoreBundleRow)
+                    .where(
+                        StoreBundleRow.id == purchase.bundle,
+                        or_(
+                            StoreBundleRow.stock.is_(None),
+                            StoreBundleRow.sold < StoreBundleRow.stock,
+                        ),
+                    )
+                    .values(sold=StoreBundleRow.sold + 1)
+                    .returning(StoreBundleRow.id)
+                )
+                if counted is None:
+                    raise PurchaseRefused(SOLD_OUT)
             # The items' rows are locked in one order, so that purchases at once wait in turn.
             added = [
                 item_id

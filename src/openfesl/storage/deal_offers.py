@@ -110,3 +110,39 @@ class SqlOfferStore:
             await add_members(session, number, bundle)
             session.add(action_row(action, f"{game}:{number}", details, admin))
             return int(number)
+
+    async def restock(
+        self, game: str, number: int, count: int, details: dict[str, Any], admin: Admin
+    ) -> bool:
+        """Add to the stock of an admin offer that has one, and record it with what was left.
+
+        Args:
+            game: The game's data-file name.
+            number: The offer's bundle number.
+            count: How many to add.
+            details: What the admin's log keeps of it, to which the number left before and
+                after is added.
+            admin: The admin who restocked it.
+
+        Returns:
+            Whether the offer has a stock.
+        """
+        async with self._sessions.begin() as session:
+            # Counted in one statement, so that purchases meanwhile cannot skew what was left.
+            found = await session.execute(
+                update(StoreBundleRow)
+                .where(
+                    StoreBundleRow.id == number,
+                    StoreBundleRow.game == game,
+                    StoreBundleRow.source == ADMIN,
+                    StoreBundleRow.stock.is_not(None),
+                )
+                .values(stock=StoreBundleRow.stock + count)
+                .returning(StoreBundleRow.stock - StoreBundleRow.sold)
+            )
+            left = found.scalar_one_or_none()
+            if left is None:
+                return False
+            details = details | {"before": left - count, "after": left}
+            session.add(action_row(AdminAction.DEAL_RESTOCKED, f"{game}:{number}", details, admin))
+            return True

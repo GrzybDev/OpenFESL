@@ -14,10 +14,12 @@ from openfesl.core.deal_offers import STATES, OfferStore, offer_state
 from openfesl.core.games import Game
 from openfesl.core.store import Bundle, ListedBundle
 from openfesl.core.store_prices import PriceStore
+from openfesl.core.wallets import MOST_BALANCE
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.deals import DealAdminViews
 from openfesl.web.admin.offer_editor import CLOCK, OfferEditor, editor_of, game_named
 from openfesl.web.admin.store import SECTION, store_url
+from openfesl.web.pages import whole_number
 from openfesl.web.sessions import check_form, toast
 from openfesl.web.store_texts import StoreTexts
 
@@ -32,7 +34,8 @@ class OfferRow:
     Attributes:
         listed: Its bundle.
         name: Its name in the page's language.
-        state: scheduled, live, ended, or off while its section is switched off.
+        state: scheduled, live, sold for sold out, ended, or off while its section is switched
+            off.
         share: How much its price takes off its items' list prices in percent; 0 for none.
         imported: Whether it takes the texts of the game's bundle with its items.
     """
@@ -138,9 +141,9 @@ def offer_name(game: Game, catalogue: Catalogue, bundle: Bundle, language: str) 
 def offer_routes(sessions: AdminSessions, views: DealOfferViews) -> APIRouter:
     """Return the admin's own offers among each game's hot deals, with their editor.
 
-    Every role reads them; adding, changing and ending them needs the admin role. An offer is
-    sold from its start to its end beside the rotation's deals while its section is on, also
-    while the rotation is off.
+    Every role reads them; adding, changing, restocking and ending them needs the admin role.
+    An offer is sold from its start to its end beside the rotation's deals while its section is
+    on, also while the rotation is off, and while its stock lasts.
     The add panel and the dropping of items answer the form without saving it.
 
     Args:
@@ -240,6 +243,51 @@ def offer_routes(sessions: AdminSessions, views: DealOfferViews) -> APIRouter:
     @router.post(path + "/{number}")
     async def change(request: Request, game_id: str, number: int) -> Response:
         return await save(request, game_id, number)
+
+    async def stocked(request: Request, game: Game, number: int) -> OfferRow:
+        row = await _row(views, game, number, request.state.language)
+        if row.listed.bundle.stock is None or row.state == "ended":
+            raise HTTPException(404)
+        return row
+
+    @router.get(path + "/{number}/restock", response_class=HTMLResponse)
+    async def restocking(request: Request, game_id: str, number: int) -> HTMLResponse:
+        admin = sessions.admin(request, Role.ADMIN, SECTION)
+        game = views.deals.stores.game(game_id)
+        row = await stocked(request, game, number)
+        return await sessions.render(
+            request, "admin.DealOfferRestock", admin=admin, of=game, row=row, count="", why=""
+        )
+
+    @router.post(path + "/{number}/restock")
+    async def restock(request: Request, game_id: str, number: int) -> Response:
+        admin = sessions.admin(request, Role.ADMIN, SECTION)
+        form = await request.form()
+        check_form(request, form)
+        game = views.deals.stores.game(game_id)
+        row = await stocked(request, game, number)
+        bundle = row.listed.bundle
+        assert bundle.stock is not None
+        texts = StoreTexts(game, request.state.language, datetime.now(UTC))
+        written = str(form.get("count", "")).strip()
+        most = MOST_BALANCE - bundle.stock
+        count = whole_number(written, most)
+        if count is None:
+            why = texts.text("web.admin.deals.offer.refused.restock", most=texts.amount(most))
+            return await sessions.render(
+                request,
+                "admin.DealOfferRestock",
+                400,
+                admin=admin,
+                of=game,
+                row=row,
+                count=written,
+                why=why,
+            )
+        details = {"game": game.id, "name": bundle.name, "faction": bundle.faction, "count": count}
+        await views.offers.restock(game.id, number, count, details, admin)
+        toast(request, "web.admin.toast.deals.restocked", offer=row.name, count=texts.amount(count))
+        return RedirectResponse(store_url(request, game, "/deals/offers"), 303)
 
     @router.get(path + "/{number}/end", response_class=HTMLResponse)
     async def ending(request: Request, game_id: str, number: int) -> HTMLResponse:

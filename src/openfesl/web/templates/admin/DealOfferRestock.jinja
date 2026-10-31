@@ -1,0 +1,44 @@
+{#def of, row, count: str, why: str #}
+{# The question before an admin offer's stock grows, as a page of its own: the offer, what is
+   left of its stock, the number to add and what restocking does; a refused number says why.
+   Where scripts run, it opens as a dialog over the offers' list. #}
+{% set game = of %}
+{% set bundle = row.listed.bundle %}
+{% set base = url("/admin/store/" ~ game.id ~ "/deals/offers") %}
+<AdminPage :title="_('web.admin.deals.view.offers') ~ ' · ' ~ _('web.admin.store.title')"
+           current="store">
+  <StoreHead :game="game" current="deals" :subtitle="_('web.admin.deals.subtitle', game=game.name)" />
+  <Panel class="enter-panel confirm-frame">
+    <Confirmation :question="_('web.admin.deals.offer.restock.confirm')"
+                  :action="base ~ '/' ~ row.listed.id ~ '/restock'"
+                  :label="_('web.admin.deals.offer.restock')"
+                  :busy="_('web.admin.deals.offer.restock.busy')"
+                  :back="base"
+                  glyph="plus"
+                  form="restock-form">
+      <dl class="facts">
+        <Fact :label="_('web.admin.deals.offers.column.offer')" plain>
+          {{ row.name }}
+        </Fact>
+        <Fact :label="_('web.admin.deals.offers.column.stock')" plain>
+          {{ _("web.admin.deals.offers.left", left=number(bundle.stock - bundle.sold), total=number(bundle.stock)) }}
+        </Fact>
+      </dl>
+      <label for="restock-count"
+             class="field-label field-label-joined">{{ _("web.admin.deals.offer.restock.count") }}</label>
+      <input id="restock-count"
+             name="count"
+             form="restock-form"
+             type="text"
+             inputmode="numeric"
+             value="{{ count }}"
+             maxlength="10"
+             autocomplete="off"
+             autofocus
+             {% if why %} aria-invalid="true" aria-describedby="restock-note"{% endif %}
+             class="field-input{% if why %} field-invalid{% endif %}">
+      {% if why %}<FieldError id="restock-note">{{ why }}</FieldError>{% endif %}
+      <p id="confirm-text" class="body-text">{{ _("web.admin.deals.offer.restock.text") }}</p>
+    </Confirmation>
+  </Panel>
+</AdminPage>

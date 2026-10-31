@@ -136,6 +136,10 @@ class AdminAction(StrEnum):
     """Added or changed an admin offer among a game's hot deals, the target naming both as
     game:bundle number; the details hold the offer's name, section, price, start, end and how
     many items it holds, and whether it is new."""
+    DEAL_RESTOCKED = "deal_restocked"
+    """Added to the stock of an admin offer among a game's hot deals, the target naming both as
+    game:bundle number; the details hold the offer's name, how many were added and how many
+    were left before and after."""
     DEAL_ENDED = "deal_ended"
     """Ended an admin offer among a game's hot deals at once, the target naming both as
     game:bundle number; the details hold the offer's name and the end it had before."""

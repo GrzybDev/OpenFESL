@@ -8741,6 +8741,33 @@ msgstr "Wszystkie przedmioty są w sklepie w zwykłej cenie."
 msgid "web.deals.card.more"
 msgstr "%(names)s i jeszcze %(count)s"
 
+msgid "web.deals.card.only_left.one"
+msgstr "Został tylko %(count)s"
+
+msgid "web.deals.card.only_left.few"
+msgstr "Zostały tylko %(count)s"
+
+msgid "web.deals.card.only_left.many"
+msgstr "Zostało tylko %(count)s"
+
+msgid "web.deals.card.only_left.other"
+msgstr "Zostało tylko %(count)s"
+
+msgid "web.deals.card.sold_out.one"
+msgstr "Wyprzedane: sprzedano %(count)s sztukę z oferty. Oferta zniknie z listy po jej zakończeniu."
+
+msgid "web.deals.card.sold_out.few"
+msgstr "Wyprzedane: sprzedano wszystkie %(count)s sztuki. Oferta zniknie z listy po jej zakończeniu."
+
+msgid "web.deals.card.sold_out.many"
+msgstr "Wyprzedane: sprzedano wszystkie %(count)s sztuk. Oferta zniknie z listy po jej zakończeniu."
+
+msgid "web.deals.card.sold_out.other"
+msgstr "Wyprzedane: sprzedano wszystkie %(count)s sztuki. Oferta zniknie z listy po jej zakończeniu."
+
+msgid "web.deals.card.ribbon.sold_out"
+msgstr "wyprzedane"
+
 msgid "games.bfheroes.rewards.valentine"
 msgstr "Walentynki"
 
@@ -12180,6 +12207,9 @@ msgstr "Cena"
 msgid "web.admin.deals.offers.column.runs"
 msgstr "Czas · UTC"
 
+msgid "web.admin.deals.offers.column.stock"
+msgstr "Zapas"
+
 msgid "web.admin.deals.offers.column.state"
 msgstr "Stan"
 
@@ -12216,6 +12246,12 @@ msgstr "Od %(time)s"
 msgid "web.admin.deals.offers.to"
 msgstr "Do %(time)s"
 
+msgid "web.admin.deals.offers.left"
+msgstr "Zostało %(left)s z %(total)s"
+
+msgid "web.admin.deals.offers.no_limit"
+msgstr "Bez limitu"
+
 msgid "web.admin.deals.offers.none"
 msgstr "Brak ofert administracji. Gorące oferty zawierają tylko oferty z rotacji."
 
@@ -12230,6 +12266,9 @@ msgstr "Zaplanowana"
 
 msgid "web.admin.deals.offer.state.off"
 msgstr "Ukryta · sekcja wyłączona"
+
+msgid "web.admin.deals.offer.state.sold"
+msgstr "Wyprzedana"
 
 msgid "web.admin.deals.offer.state.ended"
 msgstr "Zakończona"
@@ -12251,6 +12290,27 @@ msgstr "Kończenie…"
 
 msgid "web.admin.deals.offer.end.text"
 msgstr "Od razu znika z gorących ofert i ekranu głównego gry; kupione przedmioty zostają u bohaterów. Oferta pozostaje na liście jako zakończona."
+
+msgid "web.admin.deals.offer.restock"
+msgstr "Uzupełnij"
+
+msgid "web.admin.deals.offer.restock.of"
+msgstr "Uzupełnij zapas: %(offer)s"
+
+msgid "web.admin.deals.offer.restock.confirm"
+msgstr "Uzupełnić zapas tej oferty?"
+
+msgid "web.admin.deals.offer.restock.count"
+msgstr "Dodaj do zapasu"
+
+msgid "web.admin.deals.offer.restock.busy"
+msgstr "Uzupełnianie…"
+
+msgid "web.admin.deals.offer.restock.text"
+msgstr "Zapas rośnie o tę liczbę, a wyprzedana oferta znów się pojawia; daty się nie zmieniają."
+
+msgid "web.admin.deals.offer.refused.restock"
+msgstr "Uzupełnienie to liczba całkowita od 1 do %(most)s."
 
 msgid "web.admin.deals.offer.waits"
 msgstr "Zapis czeka na %(what)s."
@@ -12308,6 +12368,9 @@ msgstr "Początek · UTC"
 
 msgid "web.admin.deals.offer.ends"
 msgstr "Koniec · UTC"
+
+msgid "web.admin.deals.offer.stock"
+msgstr "Zapas · puste bez limitu"
 
 msgid "web.admin.deals.offer.section"
 msgstr "Sekcja"
@@ -12371,6 +12434,9 @@ msgstr "Potrzebna jest data i godzina w UTC."
 
 msgid "web.admin.deals.offer.refused.dates"
 msgstr "Oferta kończy się przed rozpoczęciem: %(ends)s to wcześniej niż %(starts)s."
+
+msgid "web.admin.deals.offer.refused.stock"
+msgstr "Zapas to liczba całkowita od już sprzedanych (%(sold)s) do %(most)s albo puste pole bez limitu."
 
 msgid "web.admin.deals.offer.refused.fit"
 msgstr "Żaden bohater nie może mieć wszystkich tych przedmiotów: %(items)s."
@@ -12612,6 +12678,9 @@ msgstr "Zapisano: %(offer)s; sekcja jest wyłączona, więc gorące oferty jej n
 msgid "web.admin.toast.deals.ended"
 msgstr "Zakończono teraz: %(offer)s."
 
+msgid "web.admin.toast.deals.restocked"
+msgstr "Uzupełniono zapas: %(offer)s, o %(count)s."
+
 msgid "web.admin.audit.action.deal_rotation.on"
 msgstr "Włączenie rotacji"
 
@@ -12647,6 +12716,12 @@ msgstr "Zakończenie oferty"
 
 msgid "web.admin.audit.deal.ended"
 msgstr "Zakończona teraz; miała trwać do %(ends)s UTC"
+
+msgid "web.admin.audit.action.deal_restocked"
+msgstr "Uzupełnienie zapasu"
+
+msgid "web.admin.audit.deal.restocked"
+msgstr "+%(count)s: zostało %(before)s → %(after)s"
 
 msgid "web.admin.home.warning.deals"
 msgstr "Gorące oferty · sekcji brakuje ofert"

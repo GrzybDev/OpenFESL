@@ -37,6 +37,7 @@ class OfferDraft:
         amount: The price or the share, as written.
         starts: When it starts, as written, in UTC.
         ends: When it ends, as written, in UTC.
+        stock: How many of it are sold in all, as written; empty for no limit.
         section: The key of the section that lists it.
         text: imported for the game's text of a bundle with its items, own for the admin's.
         names: Its own name by language code.
@@ -49,6 +50,7 @@ class OfferDraft:
     amount: str
     starts: str
     ends: str
+    stock: str
     section: str
     text: str
     names: dict[str, str]
@@ -93,8 +95,8 @@ class OfferEditor:
         game: The game.
         rules: How the game's hot deals change, whose sections list the offer.
         number: The offer's bundle number; none for a new offer.
-        state: scheduled, live, ended, or off while its section is switched off; empty for a new
-            offer.
+        state: scheduled, live, sold for sold out, ended, or off while its section is switched
+            off; empty for a new offer.
         name: The offer's name in the page's language, as it would be saved.
         draft: The fields as written.
         items: The offer's items.
@@ -180,6 +182,14 @@ def editor_of(
             ends=texts.moment(ends),
             starts=texts.moment(starts),
         )
+    sold = listed.bundle.sold if listed else 0
+    stock = whole_number(draft.stock, MOST_BALANCE) if draft.stock else None
+    if draft.stock and (stock is None or stock < sold):
+        refused["stock"] = texts.text(
+            "web.admin.deals.offer.refused.stock",
+            sold=texts.amount(sold),
+            most=texts.amount(MOST_BALANCE),
+        )
     found = fit(
         [found.item for found in items],
         list(game.heroes.factions) if game.heroes else [],
@@ -215,6 +225,7 @@ def editor_of(
             hero_class=found[1],
             starts=starts,
             ends=ends,
+            stock=stock,
             members=draft.items,
             section=draft.section,
             source=ADMIN,
@@ -271,6 +282,7 @@ def drafted(
             "",
             f"{start:{CLOCK}}",
             f"{week:{CLOCK}}",
+            "",
             sections[0],
             "own",
             {},
@@ -289,6 +301,7 @@ def drafted(
         str(bundle.discount or bundle.price),
         f"{bundle.starts:{CLOCK}}" if bundle.starts else "",
         f"{bundle.ends:{CLOCK}}" if bundle.ends else "",
+        str(bundle.stock) if bundle.stock is not None else "",
         bundle.section if bundle.section in sections else sections[0],
         "imported" if imported else "own",
         {} if imported else names,
@@ -335,6 +348,7 @@ def written(fields: ImmutableMultiDict[str, Any]) -> OfferDraft:
         field("amount").removesuffix("%").strip(),
         field("starts"),
         field("ends"),
+        field("stock"),
         field("section"),
         field("text") or "own",
         {code: field(f"name-{code}")[:NAME_LONGEST] for code in languages()},

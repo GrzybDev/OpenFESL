@@ -1,8 +1,9 @@
 {#def of, rows: list, manages: bool #}
 {# The admin's own offers among a game's hot deals: each with its section, price, the days it
-   runs in UTC and its state, live ones first, those ended in the last 90 days at the end; an offer
-   of a section switched off is hidden until its end. A live, scheduled or hidden offer ends at
-   once after a question. #}
+   runs in UTC, what is left of its stock and its state, live ones first, those ended in the last
+   90 days at the end; an offer of a section switched off is hidden until its end. A live,
+   scheduled or hidden offer ends at once and one with a stock is restocked, each after a
+   question. #}
 {% set game = of %}
 {% set base = url("/admin/store/" ~ game.id ~ "/deals/offers") %}
 <AdminPage :title="_('web.admin.deals.view.offers') ~ ' · ' ~ _('web.admin.store.title')"
@@ -19,7 +20,7 @@
                class="table offers-table">
             <div role="rowgroup" class="admin-list-head">
               <div role="row" class="offers-columns">
-                {% for column in ("offer", "section", "price", "runs", "state") %}
+                {% for column in ("offer", "section", "price", "runs", "stock", "state") %}
                   <div role="columnheader" class="column-head">{{ _("web.admin.deals.offers.column." ~ column) }}</div>
                 {% endfor %}
                 <div role="columnheader"><span class="sr-only">{{ _("web.admin.deals.offers.column.actions") }}</span></div>
@@ -49,11 +50,24 @@
                     <span>{{ _("web.admin.deals.offers.from", time=moment(bundle.starts)) }}</span>
                     <span>{{ _("web.admin.deals.offers.to", time=moment(bundle.ends)) }}</span>
                   </div>
+                  <div role="cell" class="admin-cell cell-stack">
+                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.offers.column.stock") }}</span>
+                    <span>
+                      {%- if bundle.stock is none %}{{ _("web.admin.deals.offers.no_limit") }}{% else %}{{ _("web.admin.deals.offers.left", left=number(bundle.stock - bundle.sold), total=number(bundle.stock)) }}{% endif -%}
+                    </span>
+                  </div>
                   <div role="cell" class="admin-cell prices-state">
-                    <Badge :name="{'live': 'tick', 'scheduled': 'clock', 'off': 'hide', 'ended': 'x'}[row.state]" lines />{{ _("web.admin.deals.offer.state." ~ row.state) }}
+                    <Badge :name="{'live': 'tick', 'scheduled': 'clock', 'off': 'hide', 'sold': 'box', 'ended': 'x'}[row.state]" lines />{{ _("web.admin.deals.offer.state." ~ row.state) }}
                   </div>
                   <div role="cell" class="offers-actions">
-                    {% if manages and row.state != "ended" %}
+                    {% if manages and bundle.stock is not none and row.state != "ended" %}
+                      <a href="{{ base }}/{{ row.listed.id }}/restock"
+                         data-dialog
+                         aria-haspopup="dialog"
+                         aria-label="{{ _('web.admin.deals.offer.restock.of', offer=row.name) }}"
+                         class="form-button"><span aria-hidden="true" class="form-glyph"><Icon name="plus" :size="14" stroke="#F4F4EE" /></span>{{ _("web.admin.deals.offer.restock") }}</a>
+                    {% endif %}
+                    {% if manages and row.state in ("live", "scheduled", "off") %}
                       <a href="{{ base }}/{{ row.listed.id }}/end"
                          data-dialog
                          aria-haspopup="dialog"

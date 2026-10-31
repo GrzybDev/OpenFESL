@@ -7,7 +7,18 @@ from accounts import select_value
 from identity import IdentityProvider, form_token, sign_in
 from living import setting
 from playwright.async_api import Browser
-from store import ITEMS, attribute, deals, item, stock, without_rotation
+from store import (
+    ITEMS,
+    ROYAL_SOLDIER,
+    attribute,
+    buy,
+    deals,
+    grant,
+    item,
+    shopper,
+    stock,
+    without_rotation,
+)
 from support import form_fields, visible
 from test_admin_heroes import KEEPER, WARDEN
 
@@ -194,6 +205,73 @@ async def test_an_offer_of_a_game_bundles_items_may_take_the_bundles_texts(
     assert [attribute(deal, "Product Name") for deal in polish] == ["Wymyślona para dopalaczy"]
     assert [attribute(deal, "Product Name") for deal in german] == ["Invented Boost Pair"]
     assert "Invented Boost Pair 2 items · imported text Section Popular Price 9,999" in listed
+
+
+@pytest.mark.usefixtures("prompt_actions")
+async def test_an_offer_sells_its_stock_once_and_restocked_comes_back(
+    admin_provider: IdentityProvider,
+    base: str,
+    server_url: str,
+    database_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    await stock(server_url, tmp_path, capsys)
+    await without_rotation(database_url)
+    coat = await product(database_url, 3)
+    cookie, hero = await shopper(server_url, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    other, second = await shopper(server_url, "ann@example.test", "Gearwright", **ROYAL_SOLDIER)
+    await grant(database_url, hero, "_PF", 5000)
+    new = f"{base}{OFFERS}/new"
+    admin_provider.user = KEEPER
+    async with httpx2.AsyncClient() as client:
+        await sign_in(client, base, next=OFFERS)
+        added = await client.post(
+            new, data=form_fields((await client.get(new)).text) | {"add": [str(coat)]}
+        )
+        coat_deal = form_fields(added.text) | {
+            "name-en": ["Invented Coat Deal"],
+            "amount": ["30"],
+            "section": ["popular"],
+        }
+        many = await client.post(new, data=coat_deal | {"stock": ["many"]})
+        await client.post(new, data=coat_deal | {"stock": ["1"]})
+        number = await select_value(
+            database_url, "SELECT id FROM store_bundle WHERE name = 'Invented Coat Deal'"
+        )
+        assert isinstance(number, int)
+        offer = f"{base}{OFFERS}/{number}"
+        bought = await buy(server_url, cookie, hero, number)
+        late = await buy(server_url, other, second, number)
+        listed = visible((await client.get(f"{base}{OFFERS}")).content)
+        gone = await deals(server_url, "en")
+        page = visible((await client.get(f"{base}/bfheroes/store/hot-deals")).content)
+        below = await client.post(
+            offer, data=form_fields((await client.get(offer)).text) | {"stock": ["0"]}
+        )
+        token = form_token((await client.get(f"{offer}/restock")).text)
+        none = await client.post(f"{offer}/restock", data={"csrf": token, "count": "0"})
+        restocked = await client.post(
+            f"{offer}/restock", data={"csrf": token, "count": "2"}, follow_redirects=True
+        )
+        back = await deals(server_url, "en")
+        again = visible((await client.get(f"{base}/bfheroes/store/hot-deals")).content)
+        log = visible((await client.get(f"{base}/admin/audit")).content)
+
+    assert "A stock is a whole number from the 0 already sold" in visible(many.content)
+    assert bought == ("success", None) and late == ("error", "UNKNOWN_PRODUCT")
+    assert "Invented Coat Deal 1 item" in listed and "0 of 1 left Sold out" in listed
+    # The game no longer lists it, while the hot deals page says it sold out until its end.
+    assert not gone
+    assert "sold out" in page and "Sold out: the 1 on offer was sold." in page
+    assert below.status_code == none.status_code == 400
+    assert "A stock is a whole number from the 1 already sold" in visible(below.content)
+    assert "A restock is a whole number from 1 to" in visible(none.content)
+    assert "Restocked Invented Coat Deal with 2." in visible(restocked.content)
+    assert "2 of 3 left Live" in visible(restocked.content)
+    assert [attribute(deal, "Product Name") for deal in back] == ["Invented Coat Deal"]
+    assert "Only 2 left" in again
+    assert "Offer restocked Invented Coat Deal Details +2: 0 → 2 left" in log
 
 
 @pytest.mark.usefixtures("prompt_actions")

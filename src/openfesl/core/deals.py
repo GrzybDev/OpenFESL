@@ -116,7 +116,7 @@ class HotDeals:
         prefix = f"{game.id}.deals."
         return overridden(game.deals, prefix, await self._settings.settings(prefix))
 
-    async def current(self, game: Game) -> list[ListedBundle]:
+    async def current(self, game: Game, sold_out: bool = False) -> list[ListedBundle]:
         """Return the bundles a game's store sells now, in the order its hot deals list them.
 
         The rotation's bundles come first, by section, and the admin's after those of their
@@ -125,6 +125,7 @@ class HotDeals:
 
         Args:
             game: The game.
+            sold_out: Whether bundles whose stock is sold are listed too, as no longer sold.
         """
         now = self._clock()
         rules = await self.rules(game)
@@ -135,6 +136,8 @@ class HotDeals:
         def shown(bundle: Bundle) -> bool:
             section = rules.sections.get(bundle.section) if rules and bundle.section else None
             if section is not None and not section.enabled:
+                return False
+            if bundle.sold_out and not sold_out:
                 return False
             return bundle.source != AUTO or bool(rules and rules.enabled and section)
 
@@ -155,7 +158,7 @@ class HotDeals:
         """
         return next((listed for listed in await self.current(game) if listed.id == number), None)
 
-    async def hot_deals(self, game: Game, language: str) -> list[Deal]:
+    async def hot_deals(self, game: Game, language: str, sold_out: bool = False) -> list[Deal]:
         """Return the bundles a game's store sells now, named in a language.
 
         A name or description is a text of the game's language table, else one of the
@@ -164,13 +167,14 @@ class HotDeals:
         Args:
             game: The game.
             language: The language code; English where the texts lack it.
+            sold_out: Whether bundles whose stock is sold are listed too, as no longer sold.
         """
         if game.store is None:
             return []
         catalogue = await self._catalogues.of(game, language)
         return [
             _deal(game, catalogue, listed, order, language)
-            for order, listed in enumerate(await self.current(game), 1)
+            for order, listed in enumerate(await self.current(game, sold_out), 1)
         ]
 
     async def deal(self, game: Game, listed: ListedBundle, language: str) -> Deal:

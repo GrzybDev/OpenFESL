@@ -2,19 +2,19 @@
 {# A hot deal's card (the 2012 card): the shelf's ribbon, its name with a discount sticker, its
    items' icons or OpenFESL's tiles, or the tile of a random box, its price with the usual one
    struck through, what it holds or may give, a link to the rewards page for a box that an event
-   gives free each day, which heroes may have it, the time it has left and the way to its page.
-   With scripts the time counts down; once it runs out the card says
-   expired and leaves at the next page load. #}
+   gives free each day, which heroes may have it, how many of a stock are left, the time it has
+   left and the way to its page; a deal whose stock is sold says so in place of the way to its
+   page. With scripts the time counts down; once it runs out the card says expired and leaves at
+   the next page load. #}
 {% set texts_key = "games." ~ game.id ~ ".deals." %}
 {% set word = "leaves" if card.leaves else "ends" %}
 <article aria-labelledby="deal-{{ card.number }}" data-deal class="deal-card">
   <p class="deal-ribbon">
-    <span data-live>{{ _(texts_key ~ "ribbon." ~ shelf) }}</span><span data-gone
-      hidden>{{ _("web.deals.card.expired") }}</span>
+    <span data-live>{{ _("web.deals.card.ribbon.sold_out") if card.sold_out else _(texts_key ~ "ribbon." ~ shelf) }}</span><span data-gone hidden>{{ _("web.deals.card.expired") }}</span>
   </p>
   <div class="deal-head">
     <h3 id="deal-{{ card.number }}" class="deal-name">{{ card.name }}</h3>
-    {% if card.off %}<DealSticker :off="card.off" />{% endif %}
+    {% if card.off and not card.sold_out %}<DealSticker :off="card.off" />{% endif %}
   </div>
   <div aria-hidden="true" class="deal-art">
     {% if card.box %}
@@ -33,6 +33,7 @@
       {% endif %}
       <strong>{{ card.price }}</strong> {{ _("games." ~ game.id ~ ".currency." ~ card.currency) }}
     </p>
+    {% if card.stock %}<p class="deal-stock">{{ card.stock }}</p>{% endif %}
     <ul role="list" class="deal-lines">
       {% for line in card.lines %}<li>{{ line }}</li>{% endfor %}
     </ul>
@@ -75,9 +76,15 @@
         <Icon name="clock" :size="18" stroke="currentColor" />{{ _("web.deals.card.no_end") }}
       </p>
     {% endif %}
-    <a data-live href="{{ card.href }}" class="site-button deal-buy">
-      <Icon :name="'box' if card.box else 'bag'" :size="16" stroke="#FEDE01" />
-      {{ _("web.deals.card.contents" if card.box else "web.deals.card.choose") }}
-    </a>
+    {% if card.sold_out %}
+      <p class="deal-sold">
+        <Icon name="warn" :size="18" fill="currentColor" />{{ card.sold_out }}
+      </p>
+    {% else %}
+      <a data-live href="{{ card.href }}" class="site-button deal-buy">
+        <Icon :name="'box' if card.box else 'bag'" :size="16" stroke="#FEDE01" />
+        {{ _("web.deals.card.contents" if card.box else "web.deals.card.choose") }}
+      </a>
+    {% endif %}
   </div>
 </article>

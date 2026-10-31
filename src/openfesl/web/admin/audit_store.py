@@ -230,10 +230,10 @@ async def offer_entry(
     catalogues: Catalogues,
     language: str,
 ) -> tuple[str, str, str | None, str]:
-    """Return how the audit log shows an admin offer that the admin saved or ended.
+    """Return how the audit log shows an admin offer that the admin saved, restocked or ended.
 
     Args:
-        action: What the admin did: saved or ended the offer.
+        action: What the admin did: saved, restocked or ended the offer.
         target: The game and the offer's bundle number, as game:number.
         details: The change's details, as the admin's log keeps them.
         games: The games, whose hot deals list the offer.
@@ -242,7 +242,7 @@ async def offer_entry(
 
     Returns:
         The kind of the action, the offer in words, the panel's page of the offer and what it
-        sells for and when, or the end it had, in words.
+        sells for and when, how many were added, or the end it had, in words.
     """
     game = games.by_id(details["game"])
     if game is None:
@@ -258,6 +258,14 @@ async def offer_entry(
     if action is AdminAction.DEAL_ENDED:
         ends = details["ends"]
         said = texts.text("web.admin.audit.deal.ended", ends=written(ends)) if ends else ""
+        return action.value, shown, href, said
+    if action is AdminAction.DEAL_RESTOCKED:
+        said = texts.text(
+            "web.admin.audit.deal.restocked",
+            count=texts.amount(details["count"]),
+            before=texts.amount(details["before"]),
+            after=texts.amount(details["after"]),
+        )
         return action.value, shown, href, said
     said = texts.text(
         "web.admin.audit.deal.offer",

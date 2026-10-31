@@ -345,13 +345,15 @@ def _listed(row: StoreBundleRow, members: list[Product]) -> ListedBundle:
             pool=row.pool,
             source=row.source,
             texts={language: (texts[0] or "", texts[1]) for language, texts in row.texts.items()},
+            stock=row.stock,
+            sold=row.sold,
         ),
         members,
     )
 
 
 def bundle_values(bundle: Bundle) -> dict[str, Any]:
-    """Return a bundle's fields as its row keeps them, but for its game and members.
+    """Return a bundle's fields as its row keeps them, but for its game, members and sales.
 
     Args:
         bundle: The bundle.
@@ -373,6 +375,7 @@ def bundle_values(bundle: Bundle) -> dict[str, Any]:
         "pool": bundle.pool,
         "source": bundle.source,
         "texts": {language: list(texts) for language, texts in bundle.texts.items()},
+        "stock": bundle.stock,
     }
 
 

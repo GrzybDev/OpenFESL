@@ -297,6 +297,9 @@ class StoreBundleRow(Base):
     source: Mapped[str] = mapped_column(server_default="admin")
     # The admin's own name and description by language other than English, as two-item lists.
     texts: Mapped[dict[str, list[str | None]]] = mapped_column(JSONB, server_default="{}")
+    # How many are sold in all, without a limit where none, and how many were sold.
+    stock: Mapped[int | None]
+    sold: Mapped[int] = mapped_column(server_default="0")
 
 
 class StoreBundleMemberRow(Base):

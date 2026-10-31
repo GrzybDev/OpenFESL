@@ -102,13 +102,14 @@
           {{ refusal("amount") }}
           <p aria-live="polite" data-live="{{ path }}" class="offer-line">{{- found.line -}}</p>
           <div class="offer-when">
-            {% for name in ("starts", "ends") %}
+            {% for name in ("starts", "ends", "stock") %}
               <div class="offer-day">
                 <label for="offer-{{ name }}"
                        class="field-label field-label-joined">{{ _("web.admin.deals.offer." ~ name) }}</label>
                 <input id="offer-{{ name }}"
                        name="{{ name }}"
-                       type="datetime-local"
+                       type="{{ 'text' if name == 'stock' else 'datetime-local' }}"
+                       {% if name == "stock" %} inputmode="numeric" maxlength="10" autocomplete="off"{% endif %}
                        value="{{ draft[name] }}"
                        {% if name in refused %} aria-invalid="true" aria-describedby="offer-{{ name }}-note"{% endif %}
                        class="field-input{% if name in refused %} field-invalid{% endif %}">

@@ -8251,6 +8251,21 @@ msgstr "Every item stays in the store at its usual price."
 msgid "web.deals.card.more"
 msgstr "%(names)s and %(count)s more"
 
+msgid "web.deals.card.only_left.one"
+msgstr "Only %(count)s left"
+
+msgid "web.deals.card.only_left.other"
+msgstr "Only %(count)s left"
+
+msgid "web.deals.card.sold_out.one"
+msgstr "Sold out: the %(count)s on offer was sold. The deal leaves the list at its end."
+
+msgid "web.deals.card.sold_out.other"
+msgstr "Sold out: all %(count)s were sold. The deal leaves the list at its end."
+
+msgid "web.deals.card.ribbon.sold_out"
+msgstr "sold out"
+
 msgid "games.bfheroes.rewards.valentine"
 msgstr "Valentine's Day"
 
@@ -11468,6 +11483,9 @@ msgstr "Price"
 msgid "web.admin.deals.offers.column.runs"
 msgstr "Runs · UTC"
 
+msgid "web.admin.deals.offers.column.stock"
+msgstr "Stock"
+
 msgid "web.admin.deals.offers.column.state"
 msgstr "State"
 
@@ -11498,6 +11516,12 @@ msgstr "From %(time)s"
 msgid "web.admin.deals.offers.to"
 msgstr "To %(time)s"
 
+msgid "web.admin.deals.offers.left"
+msgstr "%(left)s of %(total)s left"
+
+msgid "web.admin.deals.offers.no_limit"
+msgstr "No limit"
+
 msgid "web.admin.deals.offers.none"
 msgstr "No admin offers. Hot deals list only the rotation's deals."
 
@@ -11512,6 +11536,9 @@ msgstr "Scheduled"
 
 msgid "web.admin.deals.offer.state.off"
 msgstr "Hidden · section off"
+
+msgid "web.admin.deals.offer.state.sold"
+msgstr "Sold out"
 
 msgid "web.admin.deals.offer.state.ended"
 msgstr "Ended"
@@ -11533,6 +11560,27 @@ msgstr "Ending…"
 
 msgid "web.admin.deals.offer.end.text"
 msgstr "It leaves hot deals and the game's home screen at once; bought items stay with their heroes. The offer stays listed as Ended."
+
+msgid "web.admin.deals.offer.restock"
+msgstr "Restock"
+
+msgid "web.admin.deals.offer.restock.of"
+msgstr "Restock %(offer)s"
+
+msgid "web.admin.deals.offer.restock.confirm"
+msgstr "Restock this offer?"
+
+msgid "web.admin.deals.offer.restock.count"
+msgstr "Add to the stock"
+
+msgid "web.admin.deals.offer.restock.busy"
+msgstr "Restocking…"
+
+msgid "web.admin.deals.offer.restock.text"
+msgstr "The stock grows by this number and the offer shows again if it was sold out; its dates stay as they are."
+
+msgid "web.admin.deals.offer.refused.restock"
+msgstr "A restock is a whole number from 1 to %(most)s."
 
 msgid "web.admin.deals.offer.waits"
 msgstr "Saving waits for %(what)s."
@@ -11590,6 +11638,9 @@ msgstr "Starts · UTC"
 
 msgid "web.admin.deals.offer.ends"
 msgstr "Ends · UTC"
+
+msgid "web.admin.deals.offer.stock"
+msgstr "Stock · empty for no limit"
 
 msgid "web.admin.deals.offer.section"
 msgstr "Section"
@@ -11653,6 +11704,9 @@ msgstr "A day and time in UTC is needed."
 
 msgid "web.admin.deals.offer.refused.dates"
 msgstr "The offer ends before it starts: %(ends)s is earlier than %(starts)s."
+
+msgid "web.admin.deals.offer.refused.stock"
+msgstr "A stock is a whole number from the %(sold)s already sold to %(most)s, or empty for no limit."
 
 msgid "web.admin.deals.offer.refused.fit"
 msgstr "No hero may have all these items: %(items)s."
@@ -11864,6 +11918,9 @@ msgstr "Saved %(offer)s; its section is off, so hot deals do not list it."
 msgid "web.admin.toast.deals.ended"
 msgstr "Ended %(offer)s now."
 
+msgid "web.admin.toast.deals.restocked"
+msgstr "Restocked %(offer)s with %(count)s."
+
 msgid "web.admin.audit.action.deal_rotation.on"
 msgstr "Rotation switched on"
 
@@ -11899,6 +11956,12 @@ msgstr "Offer ended"
 
 msgid "web.admin.audit.deal.ended"
 msgstr "Ended now; was to run until %(ends)s UTC"
+
+msgid "web.admin.audit.action.deal_restocked"
+msgstr "Offer restocked"
+
+msgid "web.admin.audit.deal.restocked"
+msgstr "+%(count)s: %(before)s → %(after)s left"
 
 msgid "web.admin.home.warning.deals"
 msgstr "Hot deals · section short of deals"

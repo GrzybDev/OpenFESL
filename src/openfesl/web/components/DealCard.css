@@ -244,6 +244,29 @@
     margin-top: auto;
   }
 
+  .deal-stock {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #8c1e18;
+  }
+
+  .deal-sold {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: auto 0 0;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: #5c4a3c;
+
+    svg {
+      flex: none;
+      margin-top: 1px;
+    }
+  }
+
   .deal-expired {
     background: #e4dccf;
     box-shadow:

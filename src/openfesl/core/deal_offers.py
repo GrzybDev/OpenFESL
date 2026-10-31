@@ -7,11 +7,11 @@ from openfesl.core.deal_rules import DealRules
 from openfesl.core.store import Bundle, ListedBundle
 
 # The states of the admin's offers in the order the panel lists them.
-STATES = ("live", "scheduled", "off", "ended")
+STATES = ("live", "scheduled", "off", "sold", "ended")
 
 
 def offer_state(bundle: Bundle, now: datetime, rules: DealRules) -> str:
-    """Return whether an admin's offer is scheduled, live, ended or off at a moment.
+    """Return whether an admin's offer is scheduled, live, sold out, ended or off at a moment.
 
     An offer that has not ended is off while its section is switched off, which hides it.
 
@@ -27,7 +27,7 @@ def offer_state(bundle: Bundle, now: datetime, rules: DealRules) -> str:
         return "off"
     if bundle.starts is not None and bundle.starts > now:
         return "scheduled"
-    return "live"
+    return "sold" if bundle.sold_out else "live"
 
 
 class OfferStore(Protocol):
@@ -70,4 +70,21 @@ class OfferStore(Protocol):
 
         Returns:
             The offer's bundle number; none for a number that is no admin offer of the game.
+        """
+
+    async def restock(
+        self, game: str, number: int, count: int, details: dict[str, Any], admin: Admin
+    ) -> bool:
+        """Add to the stock of an admin offer that has one, and record it with what was left.
+
+        Args:
+            game: The game's data-file name.
+            number: The offer's bundle number.
+            count: How many to add.
+            details: What the admin's log keeps of it, to which the number left before and
+                after is added.
+            admin: The admin who restocked it.
+
+        Returns:
+            Whether the offer has a stock.
         """

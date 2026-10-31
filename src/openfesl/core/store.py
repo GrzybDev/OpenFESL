@@ -109,6 +109,8 @@ class Bundle:
         texts: The admin's own name and description in languages other than English, which
             its name and description give, by language code; a language without one shows
             the English.
+        stock: How many of it are sold in all, after which it is sold out; no limit when none.
+        sold: How many of it were sold.
     """
 
     name: str
@@ -128,6 +130,13 @@ class Bundle:
     pool: str | None = None
     source: str = ADMIN
     texts: Mapping[str, tuple[str, str | None]] = field(default_factory=dict)
+    stock: int | None = None
+    sold: int = 0
+
+    @property
+    def sold_out(self) -> bool:
+        """Whether its stock is sold."""
+        return self.stock is not None and self.sold >= self.stock
 
 
 @dataclass(frozen=True, slots=True)

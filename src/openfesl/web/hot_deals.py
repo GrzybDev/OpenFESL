@@ -60,6 +60,9 @@ class DealCard:
         lines: What it holds or may give, a line each.
         requires: Which heroes may have it.
         heroes: The names of the account's heroes who may; none when nobody is signed in.
+        stock: How many are left of a stock, while some are; empty without a stock.
+        sold_out: That its stock is sold, while it stays on the page until its end; empty
+            while some are left.
         ends: When it ends or leaves the page; none when it stays.
         soon: Whether that is a day away at most, which its countdown says in red.
         left: The time it has left, as the countdown starts it.
@@ -81,6 +84,8 @@ class DealCard:
     lines: list[str]
     requires: str
     heroes: list[str] | None
+    stock: str
+    sold_out: str
     ends: datetime | None
     soon: bool
     left: str
@@ -164,7 +169,7 @@ class HotDealsPages:
                 for part in run.event.parts.values()
                 if (gift := part.on(run.day)).box
             }
-            for deal in await self._deals.hot_deals(game, language):
+            for deal in await self._deals.hot_deals(game, language, sold_out=True):
                 card = await deal_card(
                     texts, catalogue, self._products, deal, heroes, shown, rules, free
                 )
@@ -242,6 +247,7 @@ async def deal_card(
     ]
     section = rules.sections.get(bundle.section) if rules and bundle.section else None
     original = bundle.original_price
+    left = bundle.stock - bundle.sold if bundle.stock is not None else 0
     ends = bundle.ends
     return DealCard(
         number=listed.id,
@@ -259,6 +265,10 @@ async def deal_card(
         lines=lines,
         requires=_requires(texts, faction, hero_class),
         heroes=fit if heroes is not None else None,
+        stock=texts.count("web.deals.card.only_left", left) if left > 0 else "",
+        sold_out=texts.count("web.deals.card.sold_out", bundle.stock or 0)
+        if bundle.sold_out
+        else "",
         ends=ends,
         soon=bool(ends and texts.days_left(ends) <= 1),
         left=texts.countdown(ends) if ends else "",
