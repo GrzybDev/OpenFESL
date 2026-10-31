@@ -1,4 +1,6 @@
-from sqlalchemy import delete, func, select, update
+from datetime import datetime
+
+from sqlalchemy import ColumnElement, delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.chests import ChestRefusal, ChestRefused
@@ -6,6 +8,7 @@ from openfesl.core.personas import Persona
 from openfesl.core.purchases import (
     ALREADY_OWNED,
     INSUFFICIENT_FUNDS,
+    ListedPurchase,
     Purchase,
     PurchaseRefused,
     Refund,
@@ -13,7 +16,7 @@ from openfesl.core.purchases import (
 from openfesl.core.store import Product
 from openfesl.core.wallets import Wallet
 from openfesl.storage.entitlements import add_account_item, add_item, use_one
-from openfesl.storage.models import EntitlementRow, PurchaseRow
+from openfesl.storage.models import AccountRow, EntitlementRow, PersonaRow, PurchaseRow
 from openfesl.storage.wallets import REFUND, credit, spend
 
 # The ledger's reason for what a purchase took from a wallet.
@@ -99,6 +102,85 @@ class SqlPurchaseStore:
                     outcome={"items": [product.item_id], "count": count},
                 )
             )
+
+    async def listed(
+        self,
+        game: str,
+        account_id: int | None,
+        currency: str,
+        since: datetime | None,
+        until: datetime | None,
+        who: str,
+        offset: int,
+        limit: int,
+    ) -> tuple[dict[str, tuple[int, int]], list[ListedPurchase]]:
+        """Return a game's purchases that the choices let through, the latest first.
+
+        Args:
+            game: The game's data-file name.
+            account_id: The account that made them; any when none.
+            currency: The currency they were paid in; any when empty.
+            since: The moment from which they were made; any when none.
+            until: The moment before which they were made; any when none.
+            who: The start of the login name of the account or of the hero's name; any when
+                empty.
+            offset: How many purchases to skip.
+            limit: The most to return.
+
+        Returns:
+            How many purchases each currency has and what they cost together, and those of the
+            page.
+        """
+        chosen: list[ColumnElement[bool]] = [PurchaseRow.game == game]
+        if account_id is not None:
+            chosen.append(PurchaseRow.account_id == account_id)
+        if currency:
+            chosen.append(PurchaseRow.currency == currency)
+        if since:
+            chosen.append(PurchaseRow.created_at >= since)
+        if until:
+            chosen.append(PurchaseRow.created_at < until)
+        if who:
+            named = PersonaRow.name.istartswith(who, autoescape=True)
+            chosen.append(AccountRow.nuid.istartswith(who, autoescape=True) | named)
+        account = (AccountRow, AccountRow.id == PurchaseRow.account_id)
+        hero = (PersonaRow, PersonaRow.id == PurchaseRow.persona_id)
+        async with self._sessions() as session:
+            totals = await session.execute(
+                select(PurchaseRow.currency, func.count(), func.sum(PurchaseRow.price))
+                .join(*account)
+                .outerjoin(*hero)
+                .where(*chosen)
+                .group_by(PurchaseRow.currency)
+            )
+            rows = await session.execute(
+                select(PurchaseRow, AccountRow.nuid, PersonaRow.name)
+                .join(*account)
+                .outerjoin(*hero)
+                .where(*chosen)
+                .order_by(PurchaseRow.created_at.desc(), PurchaseRow.id.desc())
+                .offset(offset)
+                .limit(limit)
+            )
+            found = [
+                ListedPurchase(
+                    row.id,
+                    row.created_at,
+                    row.account_id,
+                    nuid,
+                    name,
+                    row.persona_id,
+                    row.product_id,
+                    row.kind,
+                    row.currency,
+                    row.price,
+                    tuple(row.outcome["items"]),
+                    row.outcome.get("count", 1),
+                    row.refunded_at,
+                )
+                for row, nuid, name in rows
+            ]
+        return {code: (count, spent) for code, count, spent in totals}, found
 
     async def refund(self, persona: Persona, wallet: Wallet) -> Refund | None:
         """Take back what a hero bought from a wallet and credit what it paid, all or nothing.

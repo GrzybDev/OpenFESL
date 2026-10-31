@@ -1,0 +1,88 @@
+{#def game, catalogue, lines: list, labelledby: str, accounts: bool = False, empty: str = "" #}
+{# Purchases of a game's store, newest first: when, by which hero or the account
+   itself, with the account where the list holds several, what was bought by its kind and id, the
+   price, and the items it gave, a box's roll among them, with whether it was refunded, and the
+   square that opens the ledger of the wallet that paid it. Where the table does not fit, each
+   purchase is a block of its own. #}
+<div class="table-scroll table-scroll-flush">
+  <div role="table"
+       aria-labelledby="{{ labelledby }}"
+       class="table purchases-table">
+    <div role="rowgroup" class="admin-list-head">
+      <div role="row" class="purchase-columns">
+        <div role="columnheader"
+             aria-sort="descending"
+             class="column-head column-sorted">
+          {{ _("web.admin.purchases.column.when") }}<Icon name="down" :size="14" stroke="currentColor" />
+        </div>
+        <div role="columnheader" class="column-head">
+          {{ _("web.admin.purchases.column.account") if accounts else _("web.admin.purchases.column.hero") }}
+        </div>
+        <div role="columnheader" class="column-head column-name">{{ _("web.admin.purchases.column.what") }}</div>
+        <div role="columnheader" class="column-head column-number">{{ _("web.admin.purchases.column.price") }}</div>
+        <div role="columnheader" class="column-head">{{ _("web.admin.purchases.column.result") }}</div>
+        <div role="columnheader">
+          <span class="sr-only">{{ _("web.admin.purchases.ledger") }}</span>
+        </div>
+      </div>
+    </div>
+    <div role="rowgroup" class="enter-rows table-rows">
+      {% for line in lines %}
+        {% set bought = line.listed %}
+        {% set at = when(bought.at, "yMMMd") ~ " " ~ _("web.server.time", time=when(bought.at, "Hm")) %}
+        <div role="row" class="purchase-columns purchase-row">
+          <div role="cell" class="admin-cell cell-stack">
+            <span class="cell-time">{{ when(bought.at, "yMMMd") }}</span>
+            <span class="cell-ago">{{ _("web.server.time", time=when(bought.at, "Hm")) }}</span>
+          </div>
+          <div role="cell" class="admin-cell cell-stack">
+            {% if accounts %}
+              <a href="{{ url('/admin/accounts/' ~ bought.account_id) }}"
+                 class="bar-link">{{ bought.account }}</a>
+            {% endif %}
+            <span{% if accounts %} class="cell-ago"{% endif %}>
+              {%- if bought.hero -%}
+                {{ bought.hero }}
+              {%- else -%}
+                <span aria-hidden="true">–</span><span class="sr-only">{{ _("web.admin.purchases.by_account") }}</span>
+              {%- endif -%}
+            </span>
+          </div>
+          <div role="cell" class="admin-cell cell-stack">
+            <span class="admin-hero-strong">{{ _("web.admin.purchases.kind." ~ bought.kind) }}</span>
+            <span class="admin-item-kind">
+              {{ bought.product_id }}
+              {%- if bought.count > 1 %} · {{ _("web.admin.purchases.count", count=number(bought.count)) }}{% endif -%}
+            </span>
+          </div>
+          <div role="cell" class="admin-cell cell-stack purchase-price">
+            <span class="purchase-amount">{{ number(bought.price) }}</span>
+            <span class="admin-item-kind">{{ _("games." ~ game.id ~ ".currency." ~ bought.currency) }}</span>
+          </div>
+          <div role="cell" class="admin-cell cell-stack">
+            {% set given = [] %}
+            {% for item in bought.items %}
+              {% set skip = given.append(catalogue.name(item) or _("web.admin.items.unnamed", id=item)) %}
+            {% endfor %}
+            <span>{{ _("web.admin.purchases.gave", items=given|join(", ")) }}</span>
+            {% if bought.refunded %}
+              <span class="cell-ago">{{ _("web.admin.purchases.refunded", date=when(bought.refunded, "yMMMd")) }}</span>
+            {% endif %}
+          </div>
+          <div role="cell" class="purchase-ledger">
+            <EndSquare :href="url(line.ledger)" :label="_('web.admin.purchases.ledger.of', time=at)" />
+          </div>
+        </div>
+      {% else %}
+        <div role="row">
+          <div role="cell" aria-colspan="6" class="row-details list-empty">
+            <div>
+              <p class="list-empty-title">{{ empty or _("web.admin.purchases.none") }}</p>
+              {% if not empty %}<p>{{ _("web.admin.purchases.none.text") }}</p>{% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,68 @@
+/* A list of purchases, each row ending in the square that opens its wallet's ledger. Where the
+   table does not fit, each purchase is a block of its own, its cells two to a line in the
+   table's order. */
+@layer components {
+  .admin-list .table.purchases-table,
+  .table.purchases-table {
+    min-width: 860px;
+  }
+
+  .purchase-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns:
+      130px minmax(150px, 0.9fr) minmax(170px, 1fr) 130px
+      minmax(200px, 1.4fr) 44px;
+    gap: 2px;
+  }
+
+  .purchase-row:nth-child(even) {
+    --cell: var(--row-alt);
+  }
+
+  .purchase-price {
+    align-items: flex-end;
+  }
+
+  .purchase-amount {
+    font-size: 17px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .purchase-ledger {
+    display: grid;
+    place-items: center;
+  }
+
+  @container (width < 860px) {
+    .admin-list .table.purchases-table,
+    .table.purchases-table {
+      min-width: 0;
+
+      [role="rowgroup"]:first-child {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
+    }
+
+    .purchase-row.purchase-columns {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+
+      & + & {
+        margin-top: 8px;
+      }
+    }
+
+    .purchase-price {
+      align-items: flex-start;
+    }
+
+    .purchase-ledger {
+      justify-items: end;
+    }
+  }
+}

@@ -23,6 +23,7 @@ from openfesl.web.admin.home import home_routes
 from openfesl.web.admin.key_edit import key_edit_routes
 from openfesl.web.admin.keys import key_routes
 from openfesl.web.admin.providers import provider_routes
+from openfesl.web.admin.purchases import purchase_routes
 from openfesl.web.admin.reward_changes import reward_change_routes
 from openfesl.web.admin.reward_claims import reward_claim_routes
 from openfesl.web.admin.reward_events import RewardEventViews, reward_event_routes
@@ -146,7 +147,9 @@ def include_admin_routes(
     app.include_router(hero_action_routes(sign_in, account_views, hero_views, services.feed.apply))
     app.include_router(hero_item_routes(sign_in, account_views, hero_views))
     wallet_views = WalletAdminViews(games, services.heroes, services.wallets, stores.ledgers)
-    app.include_router(wallet_routes(sign_in, account_views, wallet_views, services.catalogues))
+    app.include_router(
+        wallet_routes(sign_in, account_views, wallet_views, services.catalogues, stores.purchases)
+    )
     app.include_router(
         entitlement_routes(sign_in, account_views, stores.entitlements, stores.keys, games)
     )
@@ -168,6 +171,7 @@ def include_admin_routes(
     app.include_router(store_item_routes(sign_in, store_views))
     app.include_router(store_rule_routes(sign_in, store_views))
     app.include_router(box_routes(sign_in, box_views))
+    app.include_router(purchase_routes(sign_in, store_views, services.catalogues, stores.purchases))
     app.include_router(box_table_routes(sign_in, box_views))
     app.include_router(deal_routes(sign_in, deal_views))
     app.include_router(deal_picture_routes(sign_in, deal_views))

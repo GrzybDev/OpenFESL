@@ -102,3 +102,53 @@ async def test_admins_grant_and_take_within_the_balance_a_game_reads(
         assert "Wallet take Brassbuckle" in log
         assert "1 Hero Points, 2 → 1 · ledger entry" in log and "Counted twice" in log
         assert "Wallet grant" in log and "1,000 Funds, 2,500 → 3,500 · ledger entry" in log
+
+
+@pytest.mark.usefixtures("prompt_actions")
+async def test_the_panel_lists_each_accounts_purchases_and_the_stores_with_a_filter(
+    admin_provider: IdentityProvider,
+    base: str,
+    server_url: str,
+    database_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    await stock(server_url, tmp_path, capsys)
+    cookie, hero = await shopper(server_url, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    other, mudlark = await shopper(server_url, "bob@example.test", "Mudlark", **ROYAL_SOLDIER)
+    for currency, amount in (("_PF", 5000), ("_DV", 1000), ("_DH", 2)):
+        await grant(database_url, hero, currency, amount)
+    ann = await account_of(database_url, "ann@example.test")
+    bob = await account_of(database_url, "bob@example.test")
+    admin_provider.user = WARDEN
+    async with httpx2.AsyncClient() as client:
+        await sign_in(client, base, next=f"/admin/accounts/{bob}")
+        none = visible((await client.get(f"{base}/admin/accounts/{bob}/wallets")).content)
+        assert "Purchases Battlefield Heroes 0" in none and "No purchases yet." in none
+        # The coat for good, the rifle for a day and the dash's first level for a Hero Point;
+        # a refused purchase is no purchase.
+        for product in (1, 14, 8):
+            assert await buy(server_url, cookie, hero, product) == ("success", None)
+        assert await buy(server_url, cookie, hero, 1) == ("error", "ALREADY_OWNED")
+        assert await buy(server_url, other, mudlark, 5) == ("success", None)
+
+        wallets = await client.get(f"{base}/admin/accounts/{ann}/wallets")
+        shown = visible(wallets.content)
+        assert "Purchases Battlefield Heroes 3" in shown
+        assert "Brassbuckle Item OFB-DBFH:8 1 Hero Points Gave Invented Dash" in shown
+        assert "Brassbuckle Item OFB-DBFH:1 2,600 Funds Gave Invented Coat" in shown
+        assert f"wallet=_DH-{hero}&amp;purchases=1" in wallets.text
+
+        store = f"{base}/admin/store/bfheroes/purchases"
+        listed = visible((await client.get(store)).content)
+        assert "Purchases of Battlefield Heroes" in listed and "4 purchases" in listed
+        assert "ann@example.test Brassbuckle Item OFB-DBFH:14 250 Valor Points" in listed
+        assert "Hero Points spent 1 Valor Points spent 250 Funds spent 3,500" in listed
+        named = visible((await client.get(store, params={"who": "mud"})).content)
+        assert "1 purchase" in named and "bob@example.test Mudlark Item OFB-DBFH:5" in named
+        valor = visible((await client.get(store, params={"currency": "_DV"})).content)
+        assert "1 purchase" in valor and "Gave Invented Rifle" in valor
+        later = visible((await client.get(store, params={"from": "2099-01-01"})).content)
+        assert "No purchase matches the filter." in later
+        account = visible((await client.get(store, params={"account": str(bob)})).content)
+        assert "1 purchase" in account and "Brassbuckle" not in account

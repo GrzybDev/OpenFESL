@@ -1,0 +1,17 @@
+/* The totals of the purchases above their list, and the days of the filter side by side where
+   they fit. */
+@layer pages {
+  .purchases-totals {
+    margin-bottom: 2px;
+  }
+
+  .purchases-days {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 2px;
+  }
+
+  .purchases-day {
+    display: grid;
+  }
+}

@@ -1,7 +1,8 @@
-{#def view, found: list, manages: bool #}
+{#def view, found: list, bought: dict, size: int, manages: bool #}
 {# An account's wallets: those of the currencies its heroes share and each hero's own,
-   with the balance, the latest change and the way to each ledger, beside the account, the limits
-   of a balance and the way back to its heroes. Read without opening a wallet. #}
+   with the balance, the latest change and the way to each ledger, and its latest purchases in
+   each game's store, beside the account, the limits of a balance and the ways back to its
+   heroes and on to every purchase of the server. Read without opening a wallet. #}
 {% set account = view.record.account %}
 {% set title = _("web.admin.account") %}
 {% set base = url("/admin/accounts/" ~ account.id) %}
@@ -107,6 +108,19 @@
               </p>
             {% endif %}
           </section>
+          {% if game.id in bought %}
+            {% set count, lines, catalogue = bought[game.id] %}
+            <section aria-labelledby="purchases-{{ game.id }}" class="account-part">
+              <Bar :id="'purchases-' ~ game.id" :extra="number(count)">
+              <span class="bar-chip">{{ _("web.admin.purchases.title") }}<GameChip :of="game" full /></span>
+              </Bar>
+              <AdminPurchases :game="game" :catalogue="catalogue" :lines="lines" :labelledby="'purchases-' ~ game.id" />
+              {% if lines %}<p class="body-text side-note">{{ _("web.admin.purchases.note") }}</p>{% endif %}
+              {% if count > size %}
+                <RowLink :href="url('/admin/store/' ~ game.id ~ '/purchases?account=' ~ account.id)" :label="_('web.admin.purchases.of_account')" />
+              {% endif %}
+            </section>
+          {% endif %}
         {% endfor %}
       </div>
 
@@ -132,6 +146,9 @@
         <section aria-labelledby="wallets-limits">
           <Bar id="wallets-limits">{{ _("web.admin.wallets.limits") }}</Bar>
           <p class="bar-text body-text">{{ _("web.admin.wallets.limits.text", max=number(2147483647)) }}</p>
+          {% for game_id in bought %}
+            <RowLink :href="url('/admin/store/' ~ game_id ~ '/purchases')" :label="_('web.admin.purchases.all')" />
+          {% endfor %}
           <RowLink :href="url('/admin/audit?account=' ~ account.id)" :label="_('web.admin.audit.of_account')" />
         </section>
       </div>

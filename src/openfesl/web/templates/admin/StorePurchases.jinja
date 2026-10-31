@@ -1,0 +1,92 @@
+{#def of, catalogue, listing, lines: list, totals: dict, total: int, pages: int, size: int #}
+{# Every purchase of a game's store, newest first, 50 a page, under how many purchases the
+   filter lets through and what they cost in each currency, beside the filter by currency, days in
+   UTC and the start of an account's or a hero's name. Where scripts run, a change of the filter
+   puts the new list in place. A link from an account's wallets narrows the list to that account. #}
+{% set game = of %}
+{% set list = url("/admin/store/" ~ game.id ~ "/purchases") %}
+{% set filtered = listing.currency or listing.start or listing.end or listing.who or listing.account %}
+<AdminPage :title="_('web.admin.store.tab.purchases') ~ ' · ' ~ _('web.admin.store.title')"
+           current="store">
+  <StoreHead :game="game" current="purchases" :subtitle="_('web.admin.purchases.subtitle', game=game.name)" />
+  <Panel class="enter-panel">
+    <div class="list-layout admin-layout" data-store-front>
+      <section aria-labelledby="store-results" class="list-main admin-list">
+        <Bar id="store-results" :extra="number(total)" wrap>{{ _("web.admin.purchases.title") }}</Bar>
+        <dl class="stats purchases-totals">
+          <Stat :label="_('web.admin.purchases.title')">
+            <span class="count">{{ number(total) }}</span>
+          </Stat>
+          {% for code in game.currencies if code in totals %}
+            <Stat :label="_('web.admin.purchases.spent', currency=_('games.' ~ game.id ~ '.currency.' ~ code))">
+              <span class="count">{{ number(totals[code][1]) }}</span>
+            </Stat>
+          {% endfor %}
+        </dl>
+        <AdminPurchases :game="game" :catalogue="catalogue" :lines="lines" labelledby="store-results" :accounts="true" :empty="_('web.admin.purchases.filter.none') if filtered else ''" />
+        <div class="list-foot">
+          <p>
+            <span class="list-count">{{ _n("web.admin.purchases.total", total) }}</span><span class="list-range">{{ _("web.admin.purchases.list.note", count=number(size)) }}</span>
+          </p>
+          <Pager :base="list" :view="listing" :pages="pages" />
+        </div>
+      </section>
+      <div class="list-side admin-side">
+        <form method="get"
+              action="{{ list }}"
+              aria-labelledby="purchases-filter"
+              data-store-filter
+              class="prices-filter">
+          <h2 id="purchases-filter" class="bar bar-large">
+            <span>{{ _("web.admin.purchases.filter") }}</span>
+            {% if filtered %}<a href="{{ list }}"
+   class="bar-extra bar-link">{{ _("web.admin.store.filter.clear") }}</a>{% endif %}
+          </h2>
+          {% if listing.account %}<input type="hidden" name="account" value="{{ listing.account }}">{% endif %}
+          <fieldset class="prices-filter-part">
+            <legend class="bar prices-filter-legend">{{ _("web.admin.purchases.filter.currency") }}</legend>
+            <div class="prices-filter-row">
+              {% for code in [""] + game.currencies|list %}
+                <label class="prices-filter-pick">
+                  <input type="radio"
+                         name="currency"
+                         value="{{ code }}"
+                         {% if listing.currency == code %} checked{% endif %}
+                         class="choice-input">
+                  <span>{{ _("games." ~ game.id ~ ".currency." ~ code) if code else _("web.admin.store.filter.any") }}</span>
+                </label>
+              {% endfor %}
+            </div>
+          </fieldset>
+          <div class="purchases-days">
+            {% for name, value in [("from", listing.start), ("to", listing.end)] %}
+              <div class="purchases-day">
+                <label for="purchases-{{ name }}"
+                       class="field-label field-label-joined">{{ _("web.admin.purchases.filter." ~ name) }}</label>
+                <input id="purchases-{{ name }}"
+                       name="{{ name }}"
+                       type="date"
+                       value="{{ value }}"
+                       class="field-input">
+              </div>
+            {% endfor %}
+          </div>
+          <label for="purchases-who"
+                 class="field-label field-label-joined">{{ _("web.admin.purchases.filter.who") }}</label>
+          <input id="purchases-who"
+                 name="who"
+                 type="search"
+                 value="{{ listing.who }}"
+                 maxlength="64"
+                 autocomplete="off"
+                 placeholder="{{ _('web.admin.purchases.filter.who.hint') }}"
+                 class="field-input">
+          <p class="bar-text body-text">{{ _("web.admin.purchases.filter.note") }}</p>
+          <div class="find-button">
+            <FormButton icon="find">{{ _("web.admin.purchases.filter.apply") }}</FormButton>
+          </div>
+        </form>
+      </div>
+    </div>
+  </Panel>
+</AdminPage>

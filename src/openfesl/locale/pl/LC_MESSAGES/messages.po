@@ -10844,6 +10844,118 @@ msgstr "Przyznaj lub odbierz %(currency)s: %(owner)s"
 msgid "web.admin.wallets.managed"
 msgstr "Zmiana sald wymaga roli administratora."
 
+msgid "web.admin.purchases.title"
+msgstr "Zakupy"
+
+msgid "web.admin.purchases.subtitle"
+msgstr "Zakupy: %(game)s"
+
+msgid "web.admin.purchases.column.when"
+msgstr "Kiedy"
+
+msgid "web.admin.purchases.column.account"
+msgstr "Konto · bohater"
+
+msgid "web.admin.purchases.column.hero"
+msgstr "Bohater"
+
+msgid "web.admin.purchases.column.what"
+msgstr "Co"
+
+msgid "web.admin.purchases.column.price"
+msgstr "Cena"
+
+msgid "web.admin.purchases.column.result"
+msgstr "Wynik"
+
+msgid "web.admin.purchases.by_account"
+msgstr "Konto"
+
+msgid "web.admin.purchases.kind.product"
+msgstr "Przedmiot"
+
+msgid "web.admin.purchases.kind.bundle"
+msgstr "Gorąca oferta"
+
+msgid "web.admin.purchases.kind.box"
+msgstr "Skrzynka losowa"
+
+msgid "web.admin.purchases.count"
+msgstr "%(count)s naraz"
+
+msgid "web.admin.purchases.gave"
+msgstr "Dało: %(items)s"
+
+msgid "web.admin.purchases.refunded"
+msgstr "Zwrócono %(date)s"
+
+msgid "web.admin.purchases.ledger"
+msgstr "Historia portfela"
+
+msgid "web.admin.purchases.ledger.of"
+msgstr "Historia portfela zakupu z %(time)s"
+
+msgid "web.admin.purchases.filter.who.hint"
+msgstr "Wystarczy początek nazwy"
+
+msgid "web.admin.purchases.note"
+msgstr "Najnowsze na górze. Skrzynka pokazuje przedmiot, który dała; każdy zakup jest też wpisem w historii portfela."
+
+msgid "web.admin.purchases.none"
+msgstr "Brak zakupów."
+
+msgid "web.admin.purchases.none.text"
+msgstr "Tutaj pojawiają się zakupy na stronie, w menu gry i w sklepie w grze."
+
+msgid "web.admin.purchases.all"
+msgstr "Wszystkie zakupy w tym serwisie"
+
+msgid "web.admin.purchases.of_account"
+msgstr "Wszystkie zakupy tego konta"
+
+msgid "web.admin.purchases.filter"
+msgstr "Filtr"
+
+msgid "web.admin.purchases.filter.currency"
+msgstr "Waluta"
+
+msgid "web.admin.purchases.filter.from"
+msgstr "Od"
+
+msgid "web.admin.purchases.filter.to"
+msgstr "Do"
+
+msgid "web.admin.purchases.filter.who"
+msgstr "Konto lub bohater"
+
+msgid "web.admin.purchases.filter.note"
+msgstr "Gdy działają skrypty, zmiana działa od razu; bez nich wszystkie pola wysyła Zastosuj. Dni według UTC."
+
+msgid "web.admin.purchases.filter.apply"
+msgstr "Zastosuj"
+
+msgid "web.admin.purchases.filter.none"
+msgstr "Żaden zakup nie pasuje do filtra."
+
+msgid "web.admin.purchases.list.note"
+msgstr "Najnowsze na górze · czas UTC · %(count)s na stronę · skrzynka pokazuje przyznany przedmiot, więc losowania nie potrzebują osobnego dziennika."
+
+msgid "web.admin.purchases.total.one"
+msgstr "%(count)s zakup"
+
+msgid "web.admin.purchases.total.few"
+msgstr "%(count)s zakupy"
+
+msgid "web.admin.purchases.total.many"
+msgstr "%(count)s zakupów"
+
+msgid "web.admin.purchases.total.other"
+msgstr "%(count)s zakupu"
+
+
+msgid "web.admin.purchases.spent"
+msgstr "Wydano: %(currency)s"
+
 msgid "web.admin.wallets.dialog"
 msgstr "Przyznanie lub odebranie: %(currency)s"
 
@@ -11509,6 +11621,9 @@ msgstr "Popularne"
 
 msgid "web.admin.store.tab.boxes"
 msgstr "Skrzynki i skrzynie"
+
+msgid "web.admin.store.tab.purchases"
+msgstr "Zakupy"
 
 msgid "web.admin.boxes.subtitle"
 msgstr "Skrzynki i skrzynie: %(game)s"

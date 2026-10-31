@@ -16,6 +16,7 @@ from openfesl.core.texts import translate
 from openfesl.core.wallets import MOST_BALANCE, Ledger, Wallet, WalletHead, WalletLedgers, Wallets
 from openfesl.web.admin.accounts import AccountView, AccountViews
 from openfesl.web.admin.auth import AdminSessions, back_to
+from openfesl.web.admin.purchases import PurchaseLog, purchase_lines
 from openfesl.web.pages import number, whole_number
 from openfesl.web.sessions import check_form, toast
 
@@ -203,17 +204,20 @@ def wallet_routes(
     accounts: AccountViews,
     views: WalletAdminViews,
     catalogues: Catalogues,
+    purchases: PurchaseLog,
 ) -> APIRouter:
     """Return an account's wallets and its heroes', the ledger of each, and grants and takes.
 
-    Every role reads them, and looking never opens a wallet. A grant or a take needs the admin
-    role and a note, and stays within what a game's balance holds.
+    Every role reads them, with the account's latest purchases in each game's store, and
+    looking never opens a wallet. A grant or a take needs the admin role and a note, and stays
+    within what a game's balance holds.
 
     Args:
         sessions: Signs admins in and renders the panel's pages.
         accounts: Puts together what the panel shows about the accounts.
         views: Puts together what the panel shows about the wallets.
         catalogues: Name the items that purchases gave.
+        purchases: Lists the purchases.
     """
     router = APIRouter()
 
@@ -227,12 +231,24 @@ def wallet_routes(
     async def wallets(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request)
         view = await account(account_id)
+        number = view.record.account.id
+        found = await views.of_account(number)
+        bought = {}
+        for game in (each.game for each in found if each.game.store):
+            totals, listed = await purchases.listed(
+                game.id, number, "", None, None, "", 0, PAGE_SIZE
+            )
+            catalogue = await catalogues.of(game, request.state.language)
+            count = sum(count for count, _ in totals.values())
+            bought[game.id] = (count, purchase_lines(game, listed), catalogue)
         return await sessions.render(
             request,
             "admin.Wallets",
             admin=admin,
             view=view,
-            found=await views.of_account(view.record.account.id),
+            found=found,
+            bought=bought,
+            size=PAGE_SIZE,
             manages=admin.role is Role.ADMIN,
         )
 

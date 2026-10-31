@@ -10246,6 +10246,112 @@ msgstr "Grant or take %(currency)s of %(owner)s"
 msgid "web.admin.wallets.managed"
 msgstr "Balances are changed with the admin role."
 
+msgid "web.admin.purchases.title"
+msgstr "Purchases"
+
+msgid "web.admin.purchases.subtitle"
+msgstr "Purchases of %(game)s"
+
+msgid "web.admin.purchases.column.when"
+msgstr "When"
+
+msgid "web.admin.purchases.column.account"
+msgstr "Account · hero"
+
+msgid "web.admin.purchases.column.hero"
+msgstr "Hero"
+
+msgid "web.admin.purchases.column.what"
+msgstr "What"
+
+msgid "web.admin.purchases.column.price"
+msgstr "Price"
+
+msgid "web.admin.purchases.column.result"
+msgstr "Result"
+
+msgid "web.admin.purchases.by_account"
+msgstr "The account"
+
+msgid "web.admin.purchases.kind.product"
+msgstr "Item"
+
+msgid "web.admin.purchases.kind.bundle"
+msgstr "Hot deal"
+
+msgid "web.admin.purchases.kind.box"
+msgstr "Box"
+
+msgid "web.admin.purchases.count"
+msgstr "%(count)s at once"
+
+msgid "web.admin.purchases.gave"
+msgstr "Gave %(items)s"
+
+msgid "web.admin.purchases.refunded"
+msgstr "Refunded %(date)s"
+
+msgid "web.admin.purchases.ledger"
+msgstr "Ledger"
+
+msgid "web.admin.purchases.ledger.of"
+msgstr "Ledger of the purchase of %(time)s"
+
+msgid "web.admin.purchases.filter.who.hint"
+msgstr "The start of a name is enough"
+
+msgid "web.admin.purchases.note"
+msgstr "Newest first. A box shows the item it gave; every purchase is also a ledger entry of its wallet."
+
+msgid "web.admin.purchases.none"
+msgstr "No purchases yet."
+
+msgid "web.admin.purchases.none.text"
+msgstr "Purchases on the website, in the game menus and in the in-game store are listed here."
+
+msgid "web.admin.purchases.all"
+msgstr "All purchases on this service"
+
+msgid "web.admin.purchases.of_account"
+msgstr "All purchases of this account"
+
+msgid "web.admin.purchases.filter"
+msgstr "Filter"
+
+msgid "web.admin.purchases.filter.currency"
+msgstr "Currency"
+
+msgid "web.admin.purchases.filter.from"
+msgstr "From"
+
+msgid "web.admin.purchases.filter.to"
+msgstr "To"
+
+msgid "web.admin.purchases.filter.who"
+msgstr "Account or hero"
+
+msgid "web.admin.purchases.filter.note"
+msgstr "Where scripts run, a change applies at once; otherwise Apply sends every field. Days are in UTC."
+
+msgid "web.admin.purchases.filter.apply"
+msgstr "Apply"
+
+msgid "web.admin.purchases.filter.none"
+msgstr "No purchase matches the filter."
+
+msgid "web.admin.purchases.list.note"
+msgstr "Newest first · times in UTC · %(count)s per page · a box shows the item it gave, so rolls need no log of their own."
+
+msgid "web.admin.purchases.total.one"
+msgstr "%(count)s purchase"
+
+msgid "web.admin.purchases.total.other"
+msgstr "%(count)s purchases"
+
+
+msgid "web.admin.purchases.spent"
+msgstr "%(currency)s spent"
+
 msgid "web.admin.wallets.dialog"
 msgstr "Grant or take %(currency)s"
 
@@ -10845,6 +10951,9 @@ msgstr "Popular"
 
 msgid "web.admin.store.tab.boxes"
 msgstr "Boxes and chests"
+
+msgid "web.admin.store.tab.purchases"
+msgstr "Purchases"
 
 msgid "web.admin.boxes.subtitle"
 msgstr "Boxes and chests of %(game)s"

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Protocol, TypeGuard
 
 from openfesl.core.catalogues import Catalogues, Item
@@ -75,6 +76,41 @@ class Refund:
     currency: str
     balance: int
     items: list[int]
+
+
+@dataclass(frozen=True, slots=True)
+class ListedPurchase:
+    """A purchase as the admin panel lists it.
+
+    Attributes:
+        id: Its number.
+        at: When it was made.
+        account_id: The account that paid.
+        account: The account's login name.
+        hero: The name of the hero who bought it; none for what the account bought itself.
+        persona_id: The hero's persona; none for what the account bought itself.
+        product_id: The id the game bought it by.
+        kind: What was bought: a product, a bundle or a box.
+        currency: The currency it was paid in.
+        price: What it cost.
+        items: The items it gave, by number; for a box, the one it rolled.
+        count: How many of the product were bought at once.
+        refunded: When it was refunded, if it was.
+    """
+
+    id: int
+    at: datetime
+    account_id: int
+    account: str
+    hero: str | None
+    persona_id: int | None
+    product_id: str
+    kind: str
+    currency: str
+    price: int
+    items: tuple[int, ...]
+    count: int
+    refunded: datetime | None
 
 
 class PurchaseStore(Protocol):
