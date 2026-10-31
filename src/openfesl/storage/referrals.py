@@ -8,11 +8,12 @@ from sqlalchemy.orm import aliased
 
 from openfesl.core.games import Game
 from openfesl.core.personas import PersonaState
-from openfesl.core.referrals import Leader, Reach, Recruit
+from openfesl.core.referrals import Leader, Reach, Recruit, ReferralCounts
+from openfesl.core.rewards import REFERRAL
 from openfesl.core.stats import PERSONA, bucket_of, partition_of
 from openfesl.protocol.rank import Period
 from openfesl.storage.accounts import account_from
-from openfesl.storage.models import AccountRow, PersonaRow, ReferralRow, StatRow
+from openfesl.storage.models import AccountRow, PersonaRow, ReferralRow, RewardClaimRow, StatRow
 
 _RECRUITER = aliased(AccountRow)
 
@@ -68,6 +69,47 @@ class SqlReferralStore:
                 )
                 .values(reached=ReferralRow.reached.concat(literal({step: written}, JSONB)))
             )
+
+    async def counts(self, game: str, since: datetime) -> ReferralCounts:
+        """Return how many recruits signed up and how many rewards were claimed and wait.
+
+        Args:
+            game: The game's data-file name.
+            since: The start of the month.
+        """
+        async with self._sessions() as session:
+            rows = (
+                await session.execute(
+                    select(
+                        ReferralRow.recruit_id,
+                        ReferralRow.recruiter_id,
+                        ReferralRow.created_at,
+                        ReferralRow.reached,
+                    ).where(ReferralRow.game == game)
+                )
+            ).all()
+            claims = (
+                await session.execute(
+                    select(RewardClaimRow.account_id, RewardClaimRow.key, RewardClaimRow.claimed_at)
+                    .where(RewardClaimRow.game == game)
+                    .where(RewardClaimRow.key.like(f"{REFERRAL}:%"))
+                )
+            ).all()
+        claimed = {(account, key) for account, key, _ in claims}
+        # Each step reached waits for both accounts' claims: the recruiter's, which names the
+        # recruit, and the recruit's own.
+        waiting = sum(
+            ((recruiter, f"{REFERRAL}:{recruit}:{step}") not in claimed)
+            + ((recruit, f"{REFERRAL}:{step}") not in claimed)
+            for recruit, recruiter, _, reached in rows
+            for step in reached
+        )
+        return ReferralCounts(
+            sum(created >= since for _, _, created, _ in rows),
+            len(rows),
+            sum(at >= since for _, _, at in claims),
+            waiting,
+        )
 
     async def _read(
         self, game: Game, chosen: Select[ReferralRow, AccountRow, AccountRow]

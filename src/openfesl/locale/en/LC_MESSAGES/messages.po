@@ -13676,6 +13676,15 @@ msgstr "Day start changed"
 msgid "web.admin.audit.action.reward_event"
 msgstr "Event changed"
 
+msgid "web.admin.audit.action.referral_settings"
+msgstr "Recruit a Friend changed"
+
+msgid "web.admin.audit.action.referral_settings.on"
+msgstr "Recruit a Friend switched on"
+
+msgid "web.admin.audit.action.referral_settings.off"
+msgstr "Recruit a Friend switched off"
+
 msgid "web.admin.audit.reward_zone"
 msgstr "%(before)s → %(after)s"
 
@@ -13837,6 +13846,195 @@ msgstr "Milestones"
 
 msgid "web.admin.rewards.claims.kind.referral"
 msgstr "Recruit a Friend"
+
+msgid "web.admin.rewards.referral.title"
+msgstr "Recruit a Friend"
+
+msgid "web.admin.rewards.referral.on"
+msgstr "Runs: personal links record new recruits and steps give rewards."
+
+msgid "web.admin.rewards.referral.off"
+msgstr "Off: links record nothing new; rewards already ready stay claimable."
+
+msgid "web.admin.rewards.referral.runs"
+msgstr "Runs"
+
+msgid "web.admin.rewards.referral.col.step"
+msgstr "Step"
+
+msgid "web.admin.rewards.referral.col.goal"
+msgstr "Goal"
+
+msgid "web.admin.rewards.referral.col.recruiter"
+msgstr "Recruiter gets"
+
+msgid "web.admin.rewards.referral.col.recruit"
+msgstr "Recruit gets"
+
+msgid "web.admin.rewards.referral.col.open"
+msgstr "Step page"
+
+msgid "web.admin.rewards.referral.goal.signup"
+msgstr "Signs up through a personal link"
+
+msgid "web.admin.rewards.referral.goal"
+msgstr "A hero at level %(level)s, no deadline"
+
+msgid "web.admin.rewards.referral.goal.window"
+msgstr "A hero at level %(level)s within %(days)s days of sign-up"
+
+msgid "web.admin.rewards.referral.no_gift"
+msgstr "No gift"
+
+msgid "web.admin.rewards.referral.edit"
+msgstr "Open step %(n)s"
+
+msgid "web.admin.rewards.referral.counts.month"
+msgstr "Recruits this month"
+
+msgid "web.admin.rewards.referral.counts.all"
+msgstr "Recruits in all"
+
+msgid "web.admin.rewards.referral.counts.claimed"
+msgstr "Rewards claimed this month"
+
+msgid "web.admin.rewards.referral.counts.waiting"
+msgstr "Rewards waiting"
+
+msgid "web.admin.rewards.referral.note"
+msgstr "Only accounts created through a personal link become recruits; each step counts once per recruit. Rewards wait as claims on the rewards pages of both accounts; %(points)s from here are not limited by the per-round cap."
+
+msgid "web.admin.rewards.referral.switch.off"
+msgstr "Switch off"
+
+msgid "web.admin.rewards.referral.switch.off.question"
+msgstr "Switch Recruit a Friend off?"
+
+msgid "web.admin.rewards.referral.switch.off.busy"
+msgstr "Switching off…"
+
+msgid "web.admin.rewards.referral.switch.on"
+msgstr "Switch on"
+
+msgid "web.admin.rewards.referral.switch.on.question"
+msgstr "Switch Recruit a Friend on?"
+
+msgid "web.admin.rewards.referral.switch.on.busy"
+msgstr "Switching on…"
+
+msgid "web.admin.rewards.referral.order.first"
+msgstr "Step %(n)s's goal is level %(level)s; this goal must be below it."
+
+msgid "web.admin.rewards.referral.order.second"
+msgstr "Step %(n)s's goal is level %(level)s with no deadline; this goal must be above it."
+
+msgid "web.admin.rewards.referral.level"
+msgstr "Hero level"
+
+msgid "web.admin.rewards.referral.window"
+msgstr "Within days of sign-up"
+
+msgid "web.admin.rewards.referral.item_kind"
+msgstr "An item"
+
+msgid "web.admin.rewards.referral.amount"
+msgstr "Amount"
+
+msgid "web.admin.rewards.referral.item"
+msgstr "Item number"
+
+msgid "web.admin.rewards.referral.count"
+msgstr "Days or uses of the item"
+
+msgid "web.admin.rewards.referral.name"
+msgstr "Name shown to players"
+
+msgid "web.admin.rewards.referral.name.imported"
+msgstr "Imported name"
+
+msgid "web.admin.rewards.referral.name.imported.text"
+msgstr "'%(name)s' · %(id)s"
+
+msgid "web.admin.rewards.referral.name.words"
+msgstr "The gift's own words until the game's texts are imported"
+
+msgid "web.admin.rewards.referral.name.own"
+msgstr "Own text"
+
+msgid "web.admin.rewards.referral.name.own.text"
+msgstr "English required, other languages optional"
+
+msgid "web.admin.rewards.referral.text"
+msgstr "Own text · %(language)s"
+
+msgid "web.admin.rewards.referral.moderator"
+msgstr "Recruit a Friend is changed with the admin role."
+
+msgid "web.admin.rewards.referral.refused"
+msgstr "Nothing was saved; the fields marked say why."
+
+msgid "web.admin.rewards.referral.save"
+msgstr "Save step %(n)s"
+
+msgid "web.admin.rewards.referral.back"
+msgstr "Back to the rewards"
+
+msgid "web.admin.rewards.referral.refused.level"
+msgstr "The level is a whole number from 1 to %(most)s."
+
+msgid "web.admin.rewards.referral.refused.order"
+msgstr "The second goal must be above the first, level %(level)s."
+
+msgid "web.admin.rewards.referral.refused.below"
+msgstr "The first goal must be below the second, level %(level)s."
+
+msgid "web.admin.rewards.referral.refused.window"
+msgstr "The window is a whole number of days from 1 to 3,650."
+
+msgid "web.admin.rewards.referral.refused.empty"
+msgstr "A gift needs an amount or an item."
+
+msgid "web.admin.rewards.referral.refused.item"
+msgstr "The imported catalogue has no item %(id)s."
+
+msgid "web.admin.rewards.referral.refused.count"
+msgstr "The days or uses of the item are a whole number from 1."
+
+msgid "web.admin.rewards.referral.refused.uses"
+msgstr "Heroes hold %(item)s as uses, so it is given as uses."
+
+msgid "web.admin.rewards.referral.refused.kept"
+msgstr "Heroes do not hold %(item)s as uses: it is given for good or for days."
+
+msgid "web.admin.rewards.referral.refused.english"
+msgstr "Own text needs English."
+
+msgid "web.admin.rewards.referral.name.mismatch"
+msgstr "The imported name '%(name)s' states %(stated)s; a gift of %(gift)s needs own text. English is required."
+
+msgid "web.admin.toast.referral.on"
+msgstr "Recruit a Friend switched on."
+
+msgid "web.admin.toast.referral.off"
+msgstr "Recruit a Friend switched off."
+
+msgid "web.admin.toast.referral.step"
+msgstr "Step %(n)s saved: %(goal)s; %(recruiter)s and %(recruit)s."
+
+msgid "web.admin.audit.referral.level"
+msgstr "Goal level %(before)s → %(after)s"
+
+msgid "web.admin.audit.referral.days"
+msgstr "Window %(before)s → %(after)s days"
+
+msgid "web.admin.audit.referral.recruiter_gift"
+msgstr "Recruiter: %(before)s → %(after)s"
+
+msgid "web.admin.audit.referral.recruit_gift"
+msgstr "Recruit: %(before)s → %(after)s"
+
+msgid "web.admin.audit.referral.own"
+msgstr "own text “%(text)s”"
 
 msgid "web.admin.rewards.claims.kind.first-chest"
 msgstr "First chest key"

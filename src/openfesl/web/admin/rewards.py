@@ -12,11 +12,13 @@ from openfesl.core.calendar import day_start, today
 from openfesl.core.catalogues import Catalogues, game_text
 from openfesl.core.games import Game, Games
 from openfesl.core.policies import SettingStore
+from openfesl.core.referrals import ReferralStore
 from openfesl.core.reward_rules import Milestone, Part, RewardRules, StarterPacks
 from openfesl.core.reward_runs import Run, run_now, run_of
 from openfesl.core.rewards import Rewards
 from openfesl.core.texts import localize
 from openfesl.web.admin.auth import AdminSessions
+from openfesl.web.admin.referral_view import ReferralView, overview
 from openfesl.web.reward_texts import RewardTexts
 from openfesl.web.store_texts import StoreTexts
 
@@ -140,6 +142,7 @@ class RewardsView:
         milestones: The milestones by key, each with its name, which states its goal.
         chest: The name of the reward of a first treasure chest; empty for a game without one.
         pause: Who paused the claims, when and why, while they are paused through the panel.
+        referral: Recruit a Friend; none for a game without it.
     """
 
     game: Game
@@ -155,6 +158,7 @@ class RewardsView:
     milestones: list[tuple[str, Milestone, str]]
     chest: str
     pause: AuditEntry | None
+    referral: ReferralView | None
 
 
 class RewardAdminViews:
@@ -167,6 +171,7 @@ class RewardAdminViews:
         catalogues: Catalogues,
         settings: SettingStore,
         history: ActionHistory,
+        referrals: ReferralStore,
     ) -> None:
         """Read the rewards of the games that give them, and change them through the settings.
 
@@ -176,12 +181,14 @@ class RewardAdminViews:
             catalogues: The games' imported catalogues, which name the items.
             settings: The instance's settings, which override the rewards' game data.
             history: Tells who paused the claims of a game's rewards, when and why.
+            referrals: Where Recruit a Friend's recruits are kept, which the page counts.
         """
         self.games = [game for game in games if game.rewards]
         self.rewards = rewards
         self._catalogues = catalogues
         self._settings = settings
         self._history = history
+        self._referrals = referrals
 
     def game(self, game_id: str) -> Game:
         """Return a game that gives rewards by its id.
@@ -335,6 +342,7 @@ class RewardAdminViews:
             milestones,
             texts.text("web.admin.rewards.keys.first") if chest and named == chest.name else named,
             await self.pause(game),
+            await overview(game, words, self._referrals),
         )
 
 

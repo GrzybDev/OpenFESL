@@ -1,12 +1,15 @@
-{#def id: str, label: str, value: str, action: str = "", refresh: bool = False #}
+{#def id: str, label: str, value: str, name: str = "q", action: str = "", refresh: bool = False, joined: bool = False #}
 {# The admin panel's search of a game's items by name or number. With an action it is a form of
    its own that sends the search there; otherwise it is part of an editor's form, whose Find
    button sends it without scripts and checks none of the form's fields, and whose live part
-   scripts refresh as the search is typed where it asks for that. #}
+   scripts refresh as the search is typed where it asks for that. A joined label stands above
+   the search, as the labels of the form's other fields do. #}
 {% set field %}
-  <label for="{{ id }}" class="prices-search-label">{{ label }}</label>
+  {% if not joined %}
+    <label for="{{ id }}" class="prices-search-label">{{ label }}</label>
+  {% endif %}
   <input id="{{ id }}"
-         name="q"
+         name="{{ name }}"
          type="search"
          value="{{ value }}"
          maxlength="64"
@@ -20,6 +23,9 @@
     <FormButton icon="find">{{ _("web.admin.boxes.add.find") }}</FormButton>
   </form>
 {% else %}
+  {% if joined %}
+    <label for="{{ id }}" class="field-label field-label-joined">{{ label }}</label>
+  {% endif %}
   <div {% if refresh %}data-refresh{% endif %} class="prices-search">
     {{ field }}
     <FormButton icon="find" name="find" value="1" formnovalidate class="no-js-only">{{ _("web.admin.boxes.add.find") }}</FormButton>

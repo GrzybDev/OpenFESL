@@ -56,6 +56,23 @@ class Recruit:
     leader: Leader | None
 
 
+@dataclass(frozen=True, slots=True)
+class ReferralCounts:
+    """How Recruit a Friend of a game goes, as the admin panel counts it.
+
+    Attributes:
+        month: The recruits that signed up this month.
+        all: Every recruit.
+        claimed: The steps' rewards claimed this month, by recruiters and recruits.
+        waiting: The rewards of steps reached that their accounts have not claimed yet.
+    """
+
+    month: int
+    all: int
+    claimed: int
+    waiting: int
+
+
 class ReferralStore(Protocol):
     """Where the recruits of personal links are kept, with the steps they reached."""
 
@@ -83,4 +100,12 @@ class ReferralStore(Protocol):
             recruit_id: The recruit's account.
             step: The step's name.
             reach: When, by which hero and at which level.
+        """
+
+    async def counts(self, game: str, since: datetime) -> ReferralCounts:
+        """Return how many recruits signed up and how many rewards were claimed and wait.
+
+        Args:
+            game: The game's data-file name.
+            since: The start of the month.
         """

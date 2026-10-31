@@ -29,6 +29,7 @@ from openfesl.web.admin.key_edit import key_edit_routes
 from openfesl.web.admin.keys import key_routes
 from openfesl.web.admin.providers import provider_routes
 from openfesl.web.admin.purchases import purchase_routes
+from openfesl.web.admin.referral import ReferralAdminViews, referral_routes
 from openfesl.web.admin.reward_changes import reward_change_routes
 from openfesl.web.admin.reward_claims import reward_claim_routes
 from openfesl.web.admin.reward_events import RewardEventViews, reward_event_routes
@@ -93,8 +94,14 @@ def include_admin_routes(
         store_views, services.deals, deal_steps, stores.settings, services.catalogues
     )
     reward_views = RewardAdminViews(
-        games, services.rewards, services.catalogues, stores.settings, stores.admin_log
+        games,
+        services.rewards,
+        services.catalogues,
+        stores.settings,
+        stores.admin_log,
+        stores.referrals,
     )
+    referral_views = ReferralAdminViews(reward_views, games)
 
     async def menu_counts() -> dict[str, int]:
         counts = await server_views.menu_counts()
@@ -203,6 +210,7 @@ def include_admin_routes(
     app.include_router(offer_routes(sign_in, offer_views))
     app.include_router(reward_routes(sign_in, reward_views))
     app.include_router(reward_change_routes(sign_in, reward_views, stores.rewards))
+    app.include_router(referral_routes(sign_in, referral_views))
     event_views = RewardEventViews(reward_views, box_views, stores.rewards)
     app.include_router(reward_event_routes(sign_in, event_views))
     app.include_router(reward_preview_routes(sign_in, reward_views))

@@ -23,6 +23,7 @@ from openfesl.web.admin.audit_heroes import (
     slot_entry,
     wallet_entry,
 )
+from openfesl.web.admin.audit_referral import referral_entry
 from openfesl.web.admin.audit_store import (
     account_entry,
     art_entry,
@@ -464,6 +465,10 @@ async def _rows(
             AdminAction.REWARD_EVENT,
         ):
             kind, shown, href, said = reward_entry(action, target, details, games, language)
+        elif action is AdminAction.REFERRAL_SETTINGS:
+            kind, shown, href, said = await referral_entry(
+                action, target, details, games, catalogues, language
+            )
         elif action is AdminAction.CATALOGUE_IMPORT:
             game = games.by_id(target)
             shown = game.name if game else target
@@ -524,6 +529,8 @@ def _glyph(action: AdminAction, kind: str, details: dict[str, Any]) -> str:
     if action is AdminAction.REWARD_PAUSE:
         return "pause" if details.get("paused") else "play"
     if action in (AdminAction.REWARD_MILESTONE, AdminAction.REWARD_ZONE, AdminAction.REWARD_EVENT):
+        return "edit"
+    if action is AdminAction.REFERRAL_SETTINGS and "enabled" not in details:
         return "edit"
     if action in (AdminAction.CHESTS, AdminAction.CHEST_KEYS):
         return "x" if details.get("count", 0) < 0 else "plus"

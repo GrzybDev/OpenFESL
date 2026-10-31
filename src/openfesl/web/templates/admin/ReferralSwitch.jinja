@@ -1,0 +1,18 @@
+{#def of, running: bool, back: str, error: str #}
+{# Switching Recruit a Friend of a game off, or on again, after a note that the audit log
+   keeps, as a page of its own; where scripts run, its panel opens as a dialog over the rewards'
+   page. What the change does is said before it is sent. #}
+{% set game = of %}
+{% set label = "web.admin.rewards.referral.switch.off" if running else "web.admin.rewards.referral.switch.on" %}
+<AdminPage :title="_(label) ~ ' · ' ~ _('web.admin.rewards.title')"
+           current="rewards">
+  <RewardsHead :game="game" :subtitle="_('web.admin.rewards.subtitle', game=game.name)" />
+  <Panel class="enter-panel confirm-frame">
+    <AdminForm :question="_(label ~ '.question')" :action="url('/admin/rewards/' ~ game.id ~ '/referral/switch')" :label="_(label)" :busy="_(label ~ '.busy')" :back="back" :glyph="'pause' if running else 'play'" :error="error">
+    <input type="hidden" name="enabled" value="{{ 0 if running else 1 }}">
+    <ul id="confirm-text" class="admin-effects">
+      <li>{{ _("web.admin.rewards.referral.off" if running else "web.admin.rewards.referral.on") }}</li>
+    </ul>
+    </AdminForm>
+  </Panel>
+</AdminPage>

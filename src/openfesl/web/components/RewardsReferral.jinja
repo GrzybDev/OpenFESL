@@ -1,0 +1,82 @@
+{#def found, game, manages: bool #}
+{# Recruit a Friend on a game's rewards page: whether it runs, which admins switch after a
+   note in a dialog where scripts run, each step with its goal and what both accounts get, where
+   each name comes from, Edit for admins, and how many recruits joined and rewards wait. Phones
+   stack each step as a card and the counts two by two. #}
+{% set base = url("/admin/rewards/" ~ game.id ~ "/referral") %}
+<section aria-labelledby="rewards-referral"
+         class="admin-list rewards-referral">
+  <div class="referral-admin-head">
+    <div>
+      <h2 id="rewards-referral" class="referral-admin-title">{{ _("web.admin.rewards.referral.title") }}</h2>
+      <p>{{ _("web.admin.rewards.referral.on" if found.running else "web.admin.rewards.referral.off") }}</p>
+    </div>
+    {% if manages %}
+      <a href="{{ base }}/switch?back={{ (here ~ '#rewards-referral')|urlencode }}"
+         data-dialog
+         aria-haspopup="dialog"
+         class="admin-switch{% if not found.running %} admin-switch-off{% endif %}">
+        <span aria-hidden="true" class="admin-switch-box"><Icon :name="'tick' if found.running else 'x'" :size="14" stroke="currentColor" /></span><span class="sr-only">{{ _("web.admin.rewards.referral.title") }}: </span>{{ _("web.admin.rewards.referral.runs" if found.running else "web.admin.rewards.off") }}
+      </a>
+    {% else %}
+      <span class="prices-state rewards-switch"><Badge :name="'tick' if found.running else 'x'" lines />{{ _("web.admin.rewards.referral.runs" if found.running else "web.admin.rewards.off") }}</span>
+    {% endif %}
+  </div>
+  <div role="table"
+       aria-labelledby="rewards-referral"
+       class="table referral-admin-table">
+    <div role="rowgroup" class="admin-list-head">
+      <div role="row" class="referral-admin-columns">
+        <div role="columnheader" class="column-head">{{ _("web.admin.rewards.referral.col.step") }}</div>
+        <div role="columnheader" class="column-head">{{ _("web.admin.rewards.referral.col.goal") }}</div>
+        <div role="columnheader" class="column-head">{{ _("web.admin.rewards.referral.col.recruiter") }}</div>
+        <div role="columnheader" class="column-head">{{ _("web.admin.rewards.referral.col.recruit") }}</div>
+        <div role="columnheader">
+          <span class="sr-only">{{ _("web.admin.rewards.referral.col.open") }}</span>
+        </div>
+      </div>
+    </div>
+    <div role="rowgroup" class="enter-rows table-rows">
+      <div role="row" class="referral-admin-columns referral-admin-row">
+        <div role="cell" class="referral-admin-number">1</div>
+        <div role="cell" class="admin-cell">{{ _("web.admin.rewards.referral.goal.signup") }}</div>
+        {% for side in ("recruiter", "recruit") %}
+          <div role="cell" class="admin-cell cell-stack">
+            <span class="cell-label">{{ _("web.admin.rewards.referral.col." ~ side) }}</span>
+            <span class="admin-hero-strong">{{ _("web.admin.rewards.referral.no_gift") }}</span>
+          </div>
+        {% endfor %}
+        <div role="cell"></div>
+      </div>
+      {% for step in found.steps %}
+        <div role="row"
+             id="referral-{{ step.name }}"
+             class="referral-admin-columns referral-admin-row">
+          <div role="cell" class="referral-admin-number">{{ step.number }}</div>
+          <div role="cell" class="admin-cell">{{ step.goal }}</div>
+          {% for side in ("recruiter", "recruit") %}
+            {% set named, source = step.gifts[loop.index0] %}
+            <div role="cell" class="admin-cell cell-stack">
+              <span class="cell-label">{{ _("web.admin.rewards.referral.col." ~ side) }}</span>
+              <span class="admin-hero-strong">{{ named }}</span>
+              {% if source %}<span class="cell-ago referral-admin-source">{{ source }}</span>{% endif %}
+            </div>
+          {% endfor %}
+          <div role="cell" class="cell-end">
+            <EndSquare :href="base ~ '/' ~ step.name" :label="_('web.admin.rewards.referral.edit', n=step.number)" />
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  <dl class="stats referral-admin-counts">
+    {% for key, value in (("month", found.counts.month), ("all", found.counts.all), ("claimed", found.counts.claimed), ("waiting", found.counts.waiting)) %}
+      <Stat :label="_('web.admin.rewards.referral.counts.' ~ key)">
+        <span class="count">{{ number(value) }}</span>
+      </Stat>
+    {% endfor %}
+  </dl>
+  <p class="bar-text body-text">
+    {{ _("web.admin.rewards.referral.note", points=_("games." ~ game.id ~ ".currency." ~ game.rewards.points) if game.rewards.points else "") }}
+  </p>
+</section>

@@ -1,0 +1,96 @@
+/* Recruit a Friend on the admin's rewards page: a black head with what the switch does and the
+   switch, the steps as rows of goal and both gifts with where each name comes from, and the
+   counts; on narrow panels each step stacks into a card under its number. */
+@layer components {
+  .rewards-referral {
+    margin-top: 28px;
+  }
+
+  .referral-admin-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 18px;
+    background: var(--ink);
+    padding: 12px 14px;
+    color: var(--bright);
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  .referral-admin-title {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .referral-admin-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns:
+      52px minmax(180px, 1fr) minmax(200px, 1.1fr) minmax(220px, 1.2fr)
+      44px;
+    gap: 2px;
+  }
+
+  .referral-admin-row:nth-child(even) {
+    --cell: var(--row-alt);
+  }
+
+  .referral-admin-row:target {
+    --cell: var(--accent);
+  }
+
+  .referral-admin-number {
+    display: grid;
+    place-items: center;
+    background: var(--ink);
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--accent);
+  }
+
+  .referral-admin-source {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+
+  .referral-admin-counts {
+    margin-top: 2px;
+  }
+
+  @container (width < 760px) {
+    .admin-list .referral-admin-table [role="rowgroup"]:first-child {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+
+    .referral-admin-row.referral-admin-columns {
+      grid-template-columns: 44px minmax(0, 1fr) 44px;
+
+      > :nth-child(3),
+      > :nth-child(4) {
+        grid-column: 2 / 3;
+      }
+
+      > :first-child {
+        grid-row: 1 / 4;
+      }
+
+      > :last-child {
+        grid-row: 1;
+        grid-column: 3;
+      }
+
+      .cell-label {
+        display: block;
+      }
+    }
+  }
+}

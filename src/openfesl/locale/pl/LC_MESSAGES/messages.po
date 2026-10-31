@@ -14496,6 +14496,15 @@ msgstr "Zmiana początku dnia"
 msgid "web.admin.audit.action.reward_event"
 msgstr "Zmiana wydarzenia"
 
+msgid "web.admin.audit.action.referral_settings"
+msgstr "Zmiana zapraszania znajomych"
+
+msgid "web.admin.audit.action.referral_settings.on"
+msgstr "Włączenie zapraszania znajomych"
+
+msgid "web.admin.audit.action.referral_settings.off"
+msgstr "Wyłączenie zapraszania znajomych"
+
 msgid "web.admin.audit.reward_zone"
 msgstr "%(before)s → %(after)s"
 
@@ -14681,6 +14690,195 @@ msgstr "Kamienie milowe"
 
 msgid "web.admin.rewards.claims.kind.referral"
 msgstr "Zapraszanie znajomych"
+
+msgid "web.admin.rewards.referral.title"
+msgstr "Zapraszanie znajomych"
+
+msgid "web.admin.rewards.referral.on"
+msgstr "Działa: osobiste linki rejestrują nowe konta, a kroki dają nagrody."
+
+msgid "web.admin.rewards.referral.off"
+msgstr "Wyłączone: linki nic nie rejestrują; gotowe nagrody można nadal odebrać."
+
+msgid "web.admin.rewards.referral.runs"
+msgstr "Działa"
+
+msgid "web.admin.rewards.referral.col.step"
+msgstr "Krok"
+
+msgid "web.admin.rewards.referral.col.goal"
+msgstr "Cel"
+
+msgid "web.admin.rewards.referral.col.recruiter"
+msgstr "Konto zapraszające dostaje"
+
+msgid "web.admin.rewards.referral.col.recruit"
+msgstr "Konto zaproszone dostaje"
+
+msgid "web.admin.rewards.referral.col.open"
+msgstr "Strona kroku"
+
+msgid "web.admin.rewards.referral.goal.signup"
+msgstr "Rejestracja przez osobisty link"
+
+msgid "web.admin.rewards.referral.goal"
+msgstr "Bohater na poziomie %(level)s, bez terminu"
+
+msgid "web.admin.rewards.referral.goal.window"
+msgstr "Bohater na poziomie %(level)s w ciągu %(days)s dni od rejestracji"
+
+msgid "web.admin.rewards.referral.no_gift"
+msgstr "Bez prezentu"
+
+msgid "web.admin.rewards.referral.edit"
+msgstr "Otwórz krok %(n)s"
+
+msgid "web.admin.rewards.referral.counts.month"
+msgstr "Zaproszone konta w tym miesiącu"
+
+msgid "web.admin.rewards.referral.counts.all"
+msgstr "Zaproszone konta łącznie"
+
+msgid "web.admin.rewards.referral.counts.claimed"
+msgstr "Nagrody odebrane w tym miesiącu"
+
+msgid "web.admin.rewards.referral.counts.waiting"
+msgstr "Nagrody czekające"
+
+msgid "web.admin.rewards.referral.note"
+msgstr "Zaproszonymi kontami zostają tylko konta założone przez osobisty link; każdy krok liczy się raz na konto. Nagrody czekają do odebrania na stronach nagród obu kont; %(points)s stąd nie podlegają limitowi na rundę."
+
+msgid "web.admin.rewards.referral.switch.off"
+msgstr "Wyłącz"
+
+msgid "web.admin.rewards.referral.switch.off.question"
+msgstr "Wyłączyć zapraszanie znajomych?"
+
+msgid "web.admin.rewards.referral.switch.off.busy"
+msgstr "Wyłączanie…"
+
+msgid "web.admin.rewards.referral.switch.on"
+msgstr "Włącz"
+
+msgid "web.admin.rewards.referral.switch.on.question"
+msgstr "Włączyć zapraszanie znajomych?"
+
+msgid "web.admin.rewards.referral.switch.on.busy"
+msgstr "Włączanie…"
+
+msgid "web.admin.rewards.referral.order.first"
+msgstr "Cel kroku %(n)s to poziom %(level)s; ten cel musi być niższy."
+
+msgid "web.admin.rewards.referral.order.second"
+msgstr "Cel kroku %(n)s to poziom %(level)s bez terminu; ten cel musi być wyższy."
+
+msgid "web.admin.rewards.referral.level"
+msgstr "Poziom bohatera"
+
+msgid "web.admin.rewards.referral.window"
+msgstr "W ciągu dni od rejestracji"
+
+msgid "web.admin.rewards.referral.item_kind"
+msgstr "Przedmiot"
+
+msgid "web.admin.rewards.referral.amount"
+msgstr "Kwota"
+
+msgid "web.admin.rewards.referral.item"
+msgstr "Numer przedmiotu"
+
+msgid "web.admin.rewards.referral.count"
+msgstr "Dni lub użycia przedmiotu"
+
+msgid "web.admin.rewards.referral.name"
+msgstr "Nazwa widoczna dla graczy"
+
+msgid "web.admin.rewards.referral.name.imported"
+msgstr "Nazwa z gry"
+
+msgid "web.admin.rewards.referral.name.imported.text"
+msgstr "„%(name)s” · %(id)s"
+
+msgid "web.admin.rewards.referral.name.words"
+msgstr "Słowa opisujące prezent, dopóki teksty gry nie są zaimportowane"
+
+msgid "web.admin.rewards.referral.name.own"
+msgstr "Własny tekst"
+
+msgid "web.admin.rewards.referral.name.own.text"
+msgstr "Angielski wymagany, inne języki opcjonalne"
+
+msgid "web.admin.rewards.referral.text"
+msgstr "Własny tekst · %(language)s"
+
+msgid "web.admin.rewards.referral.moderator"
+msgstr "Zmiana zapraszania znajomych wymaga roli administratora."
+
+msgid "web.admin.rewards.referral.refused"
+msgstr "Nic nie zapisano; zaznaczone pola mówią dlaczego."
+
+msgid "web.admin.rewards.referral.save"
+msgstr "Zapisz krok %(n)s"
+
+msgid "web.admin.rewards.referral.back"
+msgstr "Wróć do nagród"
+
+msgid "web.admin.rewards.referral.refused.level"
+msgstr "Poziom to liczba całkowita od 1 do %(most)s."
+
+msgid "web.admin.rewards.referral.refused.order"
+msgstr "Drugi cel musi być wyższy niż pierwszy, poziom %(level)s."
+
+msgid "web.admin.rewards.referral.refused.below"
+msgstr "Pierwszy cel musi być niższy niż drugi, poziom %(level)s."
+
+msgid "web.admin.rewards.referral.refused.window"
+msgstr "Okno to liczba całkowita dni od 1 do 3650."
+
+msgid "web.admin.rewards.referral.refused.empty"
+msgstr "Prezent wymaga kwoty albo przedmiotu."
+
+msgid "web.admin.rewards.referral.refused.item"
+msgstr "Zaimportowany katalog nie ma przedmiotu %(id)s."
+
+msgid "web.admin.rewards.referral.refused.count"
+msgstr "Dni lub użycia przedmiotu to liczba całkowita od 1."
+
+msgid "web.admin.rewards.referral.refused.uses"
+msgstr "Bohaterowie mają %(item)s jako użycia, więc przyznaje się go jako użycia."
+
+msgid "web.admin.rewards.referral.refused.kept"
+msgstr "Bohaterowie nie mają %(item)s jako użyć: przyznaje się go na stałe albo na dni."
+
+msgid "web.admin.rewards.referral.refused.english"
+msgstr "Własny tekst wymaga wersji angielskiej."
+
+msgid "web.admin.rewards.referral.name.mismatch"
+msgstr "Nazwa z gry „%(name)s” podaje %(stated)s; prezent %(gift)s wymaga własnego tekstu. Angielski jest wymagany."
+
+msgid "web.admin.toast.referral.on"
+msgstr "Zapraszanie znajomych włączone."
+
+msgid "web.admin.toast.referral.off"
+msgstr "Zapraszanie znajomych wyłączone."
+
+msgid "web.admin.toast.referral.step"
+msgstr "Zapisano krok %(n)s: %(goal)s; %(recruiter)s i %(recruit)s."
+
+msgid "web.admin.audit.referral.level"
+msgstr "Poziom celu %(before)s → %(after)s"
+
+msgid "web.admin.audit.referral.days"
+msgstr "Okno %(before)s → %(after)s dni"
+
+msgid "web.admin.audit.referral.recruiter_gift"
+msgstr "Konto zapraszające: %(before)s → %(after)s"
+
+msgid "web.admin.audit.referral.recruit_gift"
+msgstr "Konto zaproszone: %(before)s → %(after)s"
+
+msgid "web.admin.audit.referral.own"
+msgstr "własny tekst „%(text)s”"
 
 msgid "web.admin.rewards.claims.kind.first-chest"
 msgstr "Klucz za pierwszą skrzynię"

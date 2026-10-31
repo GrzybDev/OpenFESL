@@ -1,10 +1,10 @@
 {#def found, manages: bool, form: dict = {}, why: str = "" #}
 {# A game's rewards: this year's calendar strip with today marked, each event
    of the game data's calendar with its switch, its factions, its days this year and its state,
-   the missions that one hero reaches a goal for, the starter packs, the Funds milestones and the
-   key that a first treasure chest brings, under the pause of every claim. Admins flip each
-   switch at once and save the milestones' Funds and switches together; a refused amount
-   stands above Save and nothing is saved. #}
+   the missions that one hero reaches a goal for, the starter packs, the Funds milestones, the
+   key that a first treasure chest brings and Recruit a Friend, under the pause of every
+   claim. Admins flip each switch at once and save the milestones' Funds and switches together;
+   a refused amount stands above Save and nothing is saved. #}
 {% set game = found.game %}
 {% set switch = url("/admin/rewards/" ~ game.id ~ "/switch") %}
 {% set rules = found.rules %}
@@ -262,5 +262,6 @@
         {% endif %}
       </div>
     </div>
+    {% if found.referral %}<RewardsReferral :found="found.referral" :game="game" :manages="manages" />{% endif %}
   </Panel>
 </AdminPage>

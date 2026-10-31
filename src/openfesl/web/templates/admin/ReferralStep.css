@@ -1,0 +1,58 @@
+/* A step of Recruit a Friend in the admin panel: pairs of short fields, each side under its bar
+   with its gift's tiles and its name's tiles, then the note and Save. */
+@layer pages {
+  .referral-step-form {
+    display: grid;
+    gap: 2px;
+    max-width: 880px;
+  }
+
+  .referral-step-fields,
+  .referral-side {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .referral-side {
+    margin-top: 16px;
+
+    > legend {
+      width: 100%;
+      margin-bottom: 2px;
+    }
+  }
+
+  .referral-pair {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    gap: 2px;
+  }
+
+  .referral-step-field {
+    display: grid;
+    align-content: start;
+  }
+
+  .referral-kinds,
+  .referral-owns,
+  .referral-names {
+    margin: 0;
+  }
+
+  /* The imported name and its text's id need the room of a longer tile. */
+  .referral-names {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+
+    .choice-text {
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .referral-back {
+    margin-top: 16px;
+  }
+}
