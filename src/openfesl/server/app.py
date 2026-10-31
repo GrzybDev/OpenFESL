@@ -105,6 +105,8 @@ def _add_middleware(
         wallets=services.wallets,
         heroes=services.heroes,
         rewards=services.rewards,
+        claw=services.claw,
+        catalogues=services.catalogues,
     )
     app.add_middleware(PlayerSessionMiddleware, accounts=stores.accounts.account)
     app.add_middleware(

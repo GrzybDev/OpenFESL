@@ -444,6 +444,8 @@ class Pages:
             path=path,
             bar=state.get("site_bar"),
             sign_in_check=self._sign_in_check,
+            # The Daily Claw that a game's own site lists, for a visitor as for an account.
+            claw=state["site_bar"].claw if state.get("site_bar") else state.get("claw"),
             assets=built_assets(),
             themes=self._themes_url,
             game=game,

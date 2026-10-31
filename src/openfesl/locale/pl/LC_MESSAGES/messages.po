@@ -14912,3 +14912,204 @@ msgstr "własny tekst „%(text)s”"
 
 msgid "web.admin.rewards.claims.kind.first-chest"
 msgstr "Klucz za pierwszą skrzynię"
+
+msgid "web.claw.name"
+msgstr "Codzienny automat z chwytakiem"
+
+msgid "web.claw.page.lead.one"
+msgstr "Automat z chwytakiem: %(count)s darmowa próba dziennie dla bohatera konta. Każda próba daje wybranemu bohaterowi przedmiot na określoną liczbę użyć, na określoną liczbę dni albo na stałe."
+
+msgid "web.claw.page.lead.few"
+msgstr "Automat z chwytakiem: %(count)s darmowe próby dziennie dla bohaterów konta. Każda próba daje wybranemu bohaterowi przedmiot na określoną liczbę użyć, na określoną liczbę dni albo na stałe."
+
+msgid "web.claw.page.lead.many"
+msgstr "Automat z chwytakiem: %(count)s darmowych prób dziennie dla bohaterów konta. Każda próba daje wybranemu bohaterowi przedmiot na określoną liczbę użyć, na określoną liczbę dni albo na stałe."
+
+msgid "web.claw.page.lead.other"
+msgstr "Automat z chwytakiem: %(count)s darmowej próby dziennie dla bohaterów konta. Każda próba daje wybranemu bohaterowi przedmiot na określoną liczbę użyć, na określoną liczbę dni albo na stałe."
+
+msgid "web.claw.off"
+msgstr "Automat nie działa w tym serwisie."
+
+msgid "web.claw.off.text"
+msgstr "Administracja tego serwisu go wyłączyła."
+
+msgid "web.claw.no_catalogue"
+msgstr "Automat wymaga katalogu gry."
+
+msgid "web.claw.no_catalogue.text"
+msgstr "Nagrodami są przedmioty, a katalogu nie zaimportowano jeszcze w tym serwisie."
+
+msgid "web.claw.signed_out"
+msgstr "Gra w automacie wymaga zalogowania"
+
+msgid "web.claw.signed_out.text"
+msgstr "Nagrody trafiają do bohaterów konta, więc gra w automacie wymaga zalogowania."
+
+msgid "web.claw.no_hero"
+msgstr "Automat wymaga bohatera"
+
+msgid "web.claw.no_hero.text"
+msgstr "Nagrody trafiają do bohatera, a konto nie ma jeszcze żadnego. Darmowa próba czeka do %(time)s."
+
+msgid "web.claw.welcome"
+msgstr "Dziś czeka darmowa próba. Nagroda trafi do bohatera wybranego tutaj."
+
+msgid "web.claw.pick"
+msgstr "Wybierz bohatera"
+
+msgid "web.claw.rare"
+msgstr "Rzadka"
+
+msgid "web.claw.grab_free"
+msgstr "Chwyć · za darmo"
+
+msgid "web.claw.next_free"
+msgstr "Następna darmowa próba za"
+
+msgid "web.claw.paid.short"
+msgstr "Konto ma %(have)s; próba kosztuje %(price)s (brakuje %(short)s)."
+
+msgid "web.claw.paid.earned"
+msgstr "Jak zdobywa się Funds"
+
+msgid "web.claw.paid.off.one"
+msgstr "%(count)s darmowa próba dziennie; płatne próby są w tym serwisie wyłączone."
+
+msgid "web.claw.paid.off.few"
+msgstr "%(count)s darmowe próby dziennie; płatne próby są w tym serwisie wyłączone."
+
+msgid "web.claw.paid.off.many"
+msgstr "%(count)s darmowych prób dziennie; płatne próby są w tym serwisie wyłączone."
+
+msgid "web.claw.paid.off.other"
+msgstr "%(count)s darmowej próby dziennie; płatne próby są w tym serwisie wyłączone."
+
+msgid "web.claw.rule.one"
+msgstr "%(count)s darmowa próba dziennie, od %(time)s. Nagroda jest losowana na początku próby; automat tylko pokazuje, jak jest wyjmowana."
+
+msgid "web.claw.rule.few"
+msgstr "%(count)s darmowe próby dziennie, od %(time)s. Nagroda jest losowana na początku próby; automat tylko pokazuje, jak jest wyjmowana."
+
+msgid "web.claw.rule.many"
+msgstr "%(count)s darmowych prób dziennie, od %(time)s. Nagroda jest losowana na początku próby; automat tylko pokazuje, jak jest wyjmowana."
+
+msgid "web.claw.rule.other"
+msgstr "%(count)s darmowej próby dziennie, od %(time)s. Nagroda jest losowana na początku próby; automat tylko pokazuje, jak jest wyjmowana."
+
+msgid "web.claw.form.chances"
+msgstr "Szanse dla każdego bohatera"
+
+msgid "web.claw.chances"
+msgstr "Szanse dla: %(hero)s"
+
+msgid "web.claw.chances.tier"
+msgstr "łącznie %(share)s"
+
+msgid "web.claw.chances.same"
+msgstr "Darmowe i płatne próby mają te same szanse."
+
+msgid "web.claw.chances.owned"
+msgstr "Pominięto: %(item)s. %(hero)s ma to na stałe, więc udział przechodzi na pozostałe nagrody z tej grupy."
+
+msgid "web.claw.chances.added"
+msgstr "Posiadane wypożyczenia i użycia są przedłużane."
+
+msgid "web.claw.prize"
+msgstr "Nagroda dla: %(hero)s"
+
+msgid "web.claw.prize.permanent"
+msgstr "%(hero)s ma ją na stałe."
+
+msgid "web.claw.prize.added"
+msgstr "%(hero)s: przed próbą zostało użyć %(before)s, teraz %(after)s."
+
+msgid "web.claw.prize.uses"
+msgstr "%(hero)s: %(uses)s."
+
+msgid "web.claw.prize.days"
+msgstr "%(hero)s: ważna przez %(days)s."
+
+msgid "web.claw.prize.login"
+msgstr "%(game)s pokaże ją przy następnym logowaniu bohatera %(hero)s."
+
+msgid "web.claw.result.rare"
+msgstr "rzadka nagroda"
+
+msgid "web.claw.result.next"
+msgstr "Następna darmowa próba o %(time)s."
+
+msgid "web.claw.result.paid_button"
+msgstr "Chwyć ponownie za %(price)s %(currency)s"
+
+msgid "web.claw.kind.weapons"
+msgstr "Broń"
+
+msgid "web.claw.kind.clothing"
+msgstr "Ubranie"
+
+msgid "web.claw.kind.widgets"
+msgstr "Gadżet"
+
+msgid "web.claw.kind.emotes"
+msgstr "Emotka"
+
+msgid "web.claw.kind.boosts"
+msgstr "Wzmocnienie"
+
+msgid "web.claw.done.again"
+msgstr "Ta próba została już wykonana; ponowne wysłanie nie dało kolejnej nagrody. Nic więcej nie zostało zapłacone."
+
+msgid "web.claw.refused.used"
+msgstr "Nic nie pobrano: dzisiejszą darmową próbę wykorzystano o %(time)s w innym oknie dla: %(hero)s."
+
+msgid "web.claw.refused.off"
+msgstr "Nic nie pobrano: automat został przed chwilą wyłączony."
+
+msgid "web.claw.refused.paid-off"
+msgstr "Nic nie pobrano: płatne próby zostały przed chwilą wyłączone."
+
+msgid "web.claw.refused.unfit"
+msgstr "Nic nie pobrano: wybrany bohater nie może teraz dostać nagrody."
+
+msgid "web.claw.refused.price"
+msgstr "Nic nie pobrano: cena próby zmieniła się na %(price)s, a strona pokazuje już nową cenę."
+
+msgid "web.claw.refused.funds"
+msgstr "Nic nie pobrano: konto ma %(have)s; próba kosztuje %(price)s (brakuje %(short)s)."
+
+msgid "web.claw.refused.nothing"
+msgstr "Nic nie pobrano: automat nie ma teraz nagrody dla tego bohatera."
+
+msgid "web.claw.refused.owned"
+msgstr "Serwer nie mógł dokończyć próby, więc nic nie przyznano i nic nie pobrano."
+
+msgid "web.claw.refused.form"
+msgstr "Nic nie pobrano: formularz wygasł. Automat jest znów widoczny."
+
+msgid "games.bfheroes.claw.tier.common"
+msgstr "Zwykłe"
+
+msgid "games.bfheroes.claw.tier.uncommon"
+msgstr "Mniej zwykłe"
+
+msgid "games.bfheroes.claw.tier.rare"
+msgstr "Rzadkie"
+
+msgid "web.admin.items.from.claw"
+msgstr "Automat"
+
+msgid "web.admin.purchases.kind.claw"
+msgstr "Próba w automacie"
+
+msgid "web.site.claw_count.one"
+msgstr "Czeka %(count)s darmowa próba"
+
+msgid "web.site.claw_count.few"
+msgstr "Czekają %(count)s darmowe próby"
+
+msgid "web.site.claw_count.many"
+msgstr "Czeka %(count)s darmowych prób"
+
+msgid "web.site.claw_count.other"
+msgstr "Czeka %(count)s darmowej próby"

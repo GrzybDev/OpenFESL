@@ -14068,3 +14068,180 @@ msgstr "own text “%(text)s”"
 
 msgid "web.admin.rewards.claims.kind.first-chest"
 msgstr "First chest key"
+
+msgid "web.claw.name"
+msgstr "Daily claw machine"
+
+msgid "web.claw.page.lead.one"
+msgstr "A claw machine with %(count)s free grab a day for a hero of the account. Every grab wins the chosen hero an item for a set number of uses, for a set number of days or for good."
+
+msgid "web.claw.page.lead.other"
+msgstr "A claw machine with %(count)s free grabs a day for the account's heroes. Every grab wins the chosen hero an item for a set number of uses, for a set number of days or for good."
+
+msgid "web.claw.off"
+msgstr "The Daily Claw is not running on this service."
+
+msgid "web.claw.off.text"
+msgstr "The administrators of this service have switched it off."
+
+msgid "web.claw.no_catalogue"
+msgstr "The Daily Claw needs the game's catalogue."
+
+msgid "web.claw.no_catalogue.text"
+msgstr "Its prizes are items, and this service has not imported the catalogue yet."
+
+msgid "web.claw.signed_out"
+msgstr "Sign in to grab"
+
+msgid "web.claw.signed_out.text"
+msgstr "Prizes go to an account's heroes, so grabbing needs a signed-in account."
+
+msgid "web.claw.no_hero"
+msgstr "The Claw needs a hero"
+
+msgid "web.claw.no_hero.text"
+msgstr "Prizes go to a hero, and the account has none yet. A free grab waits until %(time)s."
+
+msgid "web.claw.welcome"
+msgstr "A free grab waits today. The prize goes to the hero picked here."
+
+msgid "web.claw.pick"
+msgstr "Pick a hero"
+
+msgid "web.claw.rare"
+msgstr "Rare"
+
+msgid "web.claw.grab_free"
+msgstr "Grab · free"
+
+msgid "web.claw.next_free"
+msgstr "Next free grab in"
+
+msgid "web.claw.paid.short"
+msgstr "The account has %(have)s; a grab costs %(price)s (%(short)s short)."
+
+msgid "web.claw.paid.earned"
+msgstr "How Funds are earned"
+
+msgid "web.claw.paid.off.one"
+msgstr "%(count)s free grab a day; paid grabs are switched off on this service."
+
+msgid "web.claw.paid.off.other"
+msgstr "%(count)s free grabs a day; paid grabs are switched off on this service."
+
+msgid "web.claw.rule.one"
+msgstr "%(count)s free grab a day, from %(time)s. The prize is drawn when the grab starts; the machine then shows it being taken."
+
+msgid "web.claw.rule.other"
+msgstr "%(count)s free grabs a day, from %(time)s. The prize is drawn when the grab starts; the machine then shows it being taken."
+
+msgid "web.claw.form.chances"
+msgstr "Chances per hero"
+
+msgid "web.claw.chances"
+msgstr "Chances for %(hero)s"
+
+msgid "web.claw.chances.tier"
+msgstr "%(share)s in all"
+
+msgid "web.claw.chances.same"
+msgstr "Free and paid grabs share these chances."
+
+msgid "web.claw.chances.owned"
+msgstr "%(item)s is left out: %(hero)s owns it for good, so its share goes to the other prizes of its tier."
+
+msgid "web.claw.chances.added"
+msgstr "Rentals and uses already owned are added to."
+
+msgid "web.claw.prize"
+msgstr "Prize for %(hero)s"
+
+msgid "web.claw.prize.permanent"
+msgstr "%(hero)s owns it for good."
+
+msgid "web.claw.prize.added"
+msgstr "%(hero)s had %(before)s uses left: %(after)s now."
+
+msgid "web.claw.prize.uses"
+msgstr "%(hero)s has %(uses)s."
+
+msgid "web.claw.prize.days"
+msgstr "%(hero)s has it for %(days)s."
+
+msgid "web.claw.prize.login"
+msgstr "%(game)s shows it at %(hero)s's next login."
+
+msgid "web.claw.result.rare"
+msgstr "a rare prize"
+
+msgid "web.claw.result.next"
+msgstr "The next free grab comes at %(time)s."
+
+msgid "web.claw.result.paid_button"
+msgstr "Grab again for %(price)s %(currency)s"
+
+msgid "web.claw.kind.weapons"
+msgstr "Weapon"
+
+msgid "web.claw.kind.clothing"
+msgstr "Clothing"
+
+msgid "web.claw.kind.widgets"
+msgstr "Widget"
+
+msgid "web.claw.kind.emotes"
+msgstr "Emote"
+
+msgid "web.claw.kind.boosts"
+msgstr "Boost"
+
+msgid "web.claw.done.again"
+msgstr "This grab was made already; sending it again took no further prize. Nothing more was paid."
+
+msgid "web.claw.refused.used"
+msgstr "Nothing was taken: today's free grab was used at %(time)s in another window, for %(hero)s."
+
+msgid "web.claw.refused.off"
+msgstr "Nothing was taken: the Claw was switched off a moment ago."
+
+msgid "web.claw.refused.paid-off"
+msgstr "Nothing was taken: paid grabs were switched off a moment ago."
+
+msgid "web.claw.refused.unfit"
+msgstr "Nothing was taken: the hero chosen cannot get prizes now."
+
+msgid "web.claw.refused.price"
+msgstr "Nothing was taken: the price of a grab changed to %(price)s. Nothing was paid; the page shows the new price."
+
+msgid "web.claw.refused.funds"
+msgstr "Nothing was taken: the account has %(have)s; a grab costs %(price)s (%(short)s short)."
+
+msgid "web.claw.refused.nothing"
+msgstr "Nothing was taken: the Claw holds no prize for this hero now."
+
+msgid "web.claw.refused.owned"
+msgstr "The server could not finish the grab, so nothing was given and nothing was paid."
+
+msgid "web.claw.refused.form"
+msgstr "Nothing was taken: the form expired. The Claw is shown again."
+
+msgid "games.bfheroes.claw.tier.common"
+msgstr "Common"
+
+msgid "games.bfheroes.claw.tier.uncommon"
+msgstr "Uncommon"
+
+msgid "games.bfheroes.claw.tier.rare"
+msgstr "Rare"
+
+msgid "web.admin.items.from.claw"
+msgstr "Daily Claw"
+
+msgid "web.admin.purchases.kind.claw"
+msgstr "Claw grab"
+
+msgid "web.site.claw_count.one"
+msgstr "%(count)s free grab waits"
+
+msgid "web.site.claw_count.other"
+msgstr "%(count)s free grabs wait"

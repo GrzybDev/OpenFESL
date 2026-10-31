@@ -1,7 +1,8 @@
 {# The menus of a game's own site: a tab per menu that lists one of the game's pages, open without
    scripts as a disclosure, and a signed-in account's heroes; the tab of the current page's menu
-   wears the menus' colour. The rewards to claim are counted in green on their entry and the tab
-   of its menu, as the 2012 site counted them. #}
+   wears the menus' colour. The rewards to claim and the Daily Claw's free grabs that wait are
+   counted in green on their entries and the tab of their menu, as the 2012 site counted rewards;
+   the Claw is listed while it runs, by its own name. #}
 {% set glyphs = {
   "play": "book",
   "leaderboard": "bars",
@@ -15,13 +16,15 @@
   "funds": "coin",
   "rewards": "gift",
   "redeem": "ticket",
+  "claw": "claw",
   "friends": "people",
   "search": "find"
 } %}
 <nav aria-label="{{ game.name }}" class="site-nav">
   <ul class="site-tabs">
     {% for menu in game.site.menus %}
-      {% set entries = menu.pages|select("in", game.pages)|list %}
+      {% set entries = menu.pages|select("in", game.pages)|reject("equalto", "" if claw else "claw")|list %}
+      {% set counts = {"rewards": bar.ready if bar else 0, "claw": claw.waiting if claw else 0} %}
       {% if entries %}
         {% set ns = namespace(current=menu.section and path.startswith("/" ~ game.id ~ menu.section ~ "/")) %}
         {% for kind in entries %}
@@ -30,12 +33,17 @@
             {% set ns.current = True %}
           {% endif %}
         {% endfor %}
-        {% set ready = bar.ready if bar and "rewards" in entries else 0 %}
+        {% set tally = namespace(ready=0) %}
+        {% for kind in entries %}
+          {% set tally.ready = tally.ready + counts.get(kind, 0) %}
+        {% endfor %}
+        {% set ready = tally.ready %}
+        {% set counted = "web.site.rewards_count" if "rewards" in entries else "web.site.claw_count" %}
         <li>
           <details data-site-menu class="site-menu">
             <summary class="site-tab{% if ns.current %} site-tab-current{% endif %}">
               {{ _("games." ~ game.id ~ ".menu." ~ menu.name) }}
-              {%- if ready %}<SiteCount :count="ready" />
+              {%- if ready %}<SiteCount :count="ready" :key="counted" />
               {% endif -%}
               <Icon name="down" :size="12" stroke="#FEDE01" class="site-turn" />
             </summary>
@@ -45,8 +53,8 @@
                 <li>
                   <a href="{{ url(base) }}"
                      {% if path == base %} aria-current="page"{% endif %}
-                     class="site-entry"><Icon :name="glyphs[kind]" :size="16" stroke="#F2C12E" />{{ _("web.site.page." ~ kind) }}
-                    {%- if kind == "rewards" and ready %}<SiteCount :count="ready" />
+                     class="site-entry"><Icon :name="glyphs[kind]" :size="16" stroke="#F2C12E" />{{ claw.name if kind == "claw" else _("web.site.page." ~ kind) }}
+                    {%- if counts.get(kind) %}<SiteCount :count="counts[kind]" :key="'web.site.rewards_count' if kind == 'rewards' else 'web.site.claw_count'" />
                     {% endif -%}
                   </a>
                 </li>

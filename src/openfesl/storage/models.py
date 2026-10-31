@@ -346,9 +346,33 @@ class StoreDropRow(Base):
     product_id: Mapped[int] = mapped_column(
         ForeignKey("store_product.id", ondelete="CASCADE"), primary_key=True, index=True
     )
-    # A tier's drops are equally likely, the tiers as likely as their weights.
+    # A tier's drops are equally likely, the tiers as likely as their weights; a rare tier's
+    # drops are marked rare.
     tier: Mapped[int]
     weight: Mapped[int]
+    rare: Mapped[bool] = mapped_column(server_default="false")
+
+
+class ClawGrabRow(Base):
+    __tablename__ = "claw_grab"
+    # Each free grab of an account's day once by its number; paid grabs have none.
+    __table_args__ = (UniqueConstraint("game", "account_id", "day", "free"),)
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    game: Mapped[str]
+    account_id: Mapped[int] = mapped_column(ForeignKey("account.id", ondelete="CASCADE"))
+    persona_id: Mapped[int] = mapped_column(
+        ForeignKey("persona.id", ondelete="CASCADE"), index=True
+    )
+    # The rewards' day it was made on, and which of the day's free grabs it was.
+    day: Mapped[date]
+    free: Mapped[int | None]
+    item_id: Mapped[int]
+    ownership: Mapped[str]
+    rare: Mapped[bool]
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), index=True
+    )
 
 
 class DealArtRow(Base):

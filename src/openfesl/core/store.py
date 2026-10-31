@@ -398,7 +398,8 @@ class Store:
             return NewProduct(item_id, ownership, currency, price, published)
 
         boxes = []
-        for box in rules.boxes:
+        # The Claw's prizes are a box of the store, which the admin changes as the others.
+        for box in [*rules.boxes, *([game.claw.box] if game.claw else [])]:
             drops = tuple(
                 (tier, found)
                 for tier, rule in enumerate(box.tiers)

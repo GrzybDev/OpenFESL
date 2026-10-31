@@ -154,13 +154,13 @@ class BoxAdminViews:
             text, shelf, window, always, promised = offered.get(
                 box.key, ("", "", None, False, False)
             )
-            name = (
-                game_text(game, catalogue, text, language)
-                if text
-                else StoreTexts(game, language, datetime.now(UTC)).text(
-                    f"web.admin.boxes.{box.kind}"
-                )
-            )
+            texts = StoreTexts(game, language, datetime.now(UTC))
+            if text:
+                name = game_text(game, catalogue, text, language)
+            elif box.kind == "claw" and game.claw:
+                name = catalogue.text(game.claw.name) or texts.text("web.claw.name")
+            else:
+                name = texts.text(f"web.admin.boxes.{box.kind}")
             period = window.period(year, zone) if window else None
             rows.append(
                 BoxRow(
@@ -286,7 +286,8 @@ def box_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter:
         game = views.stores.game(game_id)
         catalogue, rows = await views.rows(game, request.state.language)
         groups: dict[str, list[BoxRow]] = {}
-        for row in rows:
+        # The Claw's prizes are no box players buy or open.
+        for row in (row for row in rows if row.box.kind != "claw"):
             key = CHEST if row.box.kind != "box" else row.section or OTHER
             groups.setdefault(key, []).append(row)
         return await sessions.render(

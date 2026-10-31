@@ -25,11 +25,13 @@ class Drop:
         tier: The tier it is in; a tier's drops are equally likely.
         weight: How likely its tier is against the box's others.
         product: The product, which need not be sold alone.
+        rare: Whether its tier is marked rare.
     """
 
     tier: int
     weight: int
     product: Product
+    rare: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,7 +41,7 @@ class Box:
     Attributes:
         id: Its number.
         key: The name its game's data knows it by.
-        kind: box, sold as a hot deal, or chest, opened with a key.
+        kind: box, sold as a hot deal, chest, opened with a key, or claw, the Claw's prizes.
         value: What every product it gives is worth at least, in its currency.
         worth_rule: Whether it promises that worth.
         faction: The faction whose heroes may open it; any when none.
@@ -95,10 +97,26 @@ class Drops:
         Returns:
             The product, or None when the hero may get no drop and the box has no fallback.
         """
-        kept = await self._entitlements.of_persona(persona.id)
-        owned = {int(entry.tag.partition("-")[0]) for entry in kept if _owned(entry.tag)}
-        may_get = self._fitting(game, hero.faction, hero.hero_class, hero.level, owned)
-        return pick(box, may_get, self._random)
+        return pick(box, await self._may_get(game, persona, hero), self._random)
+
+    async def chances(
+        self, game: Game, box: Box, persona: Persona, hero: Hero
+    ) -> tuple[dict[Product, Fraction], list[Product]]:
+        """Return what a box gives a hero with the chance of each, as roll gives them.
+
+        Args:
+            game: The hero's game.
+            box: The box.
+            persona: The hero's persona.
+            hero: The hero, with its faction, class and level.
+
+        Returns:
+            The chances, and the drops that fit the hero but are left out as it owns them.
+        """
+        may_get = await self._may_get(game, persona, hero)
+        fits_hero = self._fitting(game, hero.faction, hero.hero_class, hero.level, set())
+        owned = [d.product for d in box.drops if fits_hero(d.product) and not may_get(d.product)]
+        return odds(box, may_get), owned
 
     def odds(self, game: Game, box: Box, faction: str, hero_class: str) -> dict[Product, Fraction]:
         """Return what a box gives a hero of a faction and class, with the chance of each.
@@ -113,6 +131,12 @@ class Drops:
         """
         level = game.heroes.highest_level if game.heroes else 0
         return odds(box, self._fitting(game, faction, hero_class, level, set()))
+
+    async def _may_get(self, game: Game, persona: Persona, hero: Hero) -> Callable[[Product], bool]:
+        # Whether the hero may get a product, by what fits it and what it owns for good.
+        kept = await self._entitlements.of_persona(persona.id)
+        owned = {int(entry.tag.partition("-")[0]) for entry in kept if _owned(entry.tag)}
+        return self._fitting(game, hero.faction, hero.hero_class, hero.level, owned)
 
     def _fitting(
         self, game: Game, faction: str | None, hero_class: str | None, level: int, owned: set[int]

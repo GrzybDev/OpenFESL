@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Any
 
 from sqlalchemy import ColumnElement, delete, exists, func, insert, or_, select
+from sqlalchemy.dialects.postgresql import insert as upsert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.drops import Box, Drop
@@ -39,7 +40,8 @@ class SqlProductStore:
     ) -> bool:
         """Store a game's starting products and boxes, unless the game has products already.
 
-        Stores on other servers take turns, so a game is stocked once.
+        Stores on other servers take turns, so a game is stocked once. A box that the game's data
+        adds later joins a stocked store once, with the products its drops need, unpublished.
 
         Args:
             game: The game's data-file name.
@@ -52,6 +54,7 @@ class SqlProductStore:
         async with self._sessions.begin() as session:
             await _lock(session, game)
             if await session.scalar(select(exists().where(StoreProductRow.game == game))):
+                await _add_boxes(session, game, boxes)
                 return False
             await session.execute(
                 insert(StoreProductRow),
@@ -271,14 +274,20 @@ async def boxes_of(session: AsyncSession, rows: list[StoreBoxRow]) -> list[Box]:
         rows: The boxes' rows.
     """
     drops = await session.execute(
-        select(StoreDropRow.box_id, StoreDropRow.tier, StoreDropRow.weight, StoreProductRow)
+        select(
+            StoreDropRow.box_id,
+            StoreDropRow.tier,
+            StoreDropRow.weight,
+            StoreDropRow.rare,
+            StoreProductRow,
+        )
         .join(StoreProductRow, StoreProductRow.id == StoreDropRow.product_id)
         .where(StoreDropRow.box_id.in_([row.id for row in rows]))
         .order_by(StoreDropRow.tier, StoreProductRow.sort, StoreProductRow.id)
     )
     held: dict[int, list[Drop]] = {}
-    for box_id, tier, weight, product in drops:
-        held.setdefault(box_id, []).append(Drop(tier, weight, product_of(product)))
+    for box_id, tier, weight, rare, product in drops:
+        held.setdefault(box_id, []).append(Drop(tier, weight, product_of(product), rare))
     numbers = [row.fallback_id for row in rows if row.fallback_id]
     fallbacks = {
         product.id: product_of(product)
@@ -441,10 +450,39 @@ async def _stock_boxes(session: AsyncSession, game: str, boxes: Sequence[NewBox]
                         "product_id": product_id,
                         "tier": tier,
                         "weight": rule.tiers[tier].weight,
+                        "rare": rule.tiers[tier].rare,
                     }
                     for product_id, tier in drops.items()
                 ],
             )
+
+
+async def _add_boxes(session: AsyncSession, game: str, boxes: Sequence[NewBox]) -> None:
+    # The boxes that a stocked store lacks by key, with the products of their drops that it
+    # lacks, which only the boxes give.
+    held = set(await session.scalars(select(StoreBoxRow.key).where(StoreBoxRow.game == game)))
+    new = [box for box in boxes if box.rule.key not in held]
+    needed = {product for box in new for _, product in box.drops}
+    needed |= {box.fallback for box in new if box.fallback}
+    if not needed:
+        return
+    await session.execute(
+        upsert(StoreProductRow).on_conflict_do_nothing(),
+        [
+            {
+                "game": game,
+                "item_id": product.item_id,
+                "type": product.ownership.type,
+                "days": product.ownership.days,
+                "uses": product.ownership.uses,
+                "currency": product.currency,
+                "price": product.price,
+                "published": False,
+            }
+            for product in needed
+        ],
+    )
+    await _stock_boxes(session, game, new)
 
 
 async def _lock(session: AsyncSession, game: str) -> None:

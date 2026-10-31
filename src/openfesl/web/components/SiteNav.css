@@ -22,8 +22,8 @@
     min-height: 48px;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding-inline: 16px;
+    gap: 4px;
+    padding-inline: 8px;
     border: 2px solid #3a2a24;
     border-radius: 7px;
     font: 800 19px/1 var(--site-heading);
@@ -158,6 +158,8 @@
     }
 
     .site-tab {
+      gap: 6px;
+      padding-inline: 16px;
       border-width: 2px 2px 0;
       border-color: transparent;
       border-radius: 7px 7px 0 0;

@@ -17,6 +17,7 @@ from pydantic import (
 
 from openfesl.core.catalogue import CatalogueRules
 from openfesl.core.chests import ChestRules
+from openfesl.core.claw_rules import ClawRules
 from openfesl.core.code_rules import CodeRules
 from openfesl.core.deal_rules import DealRules, OfferSection
 from openfesl.core.game_pages import Listing, PageKind, Site, Stats, Theme
@@ -281,6 +282,7 @@ class Game(BaseModel):
             personas are made in the game.
         chests: How the game's servers stack treasure chests on heroes and keys open them;
             none for a game without them.
+        claw: The Daily Claw of the game's site; none for a game without one.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -318,6 +320,7 @@ class Game(BaseModel):
     catalogue: CatalogueRules | None = None
     heroes: HeroRules | None = None
     chests: ChestRules | None = None
+    claw: ClawRules | None = None
 
     @property
     def play_key(self) -> ProductKey | None:
@@ -522,6 +525,17 @@ class Game(BaseModel):
         boxes = {box.key for box in self.store.boxes} if self.store else set()
         if self.chests.contents not in boxes:
             raise ValueError(f"the chests' contents name no box: {self.chests.contents}")
+        return self
+
+    @model_validator(mode="after")
+    def _check_claw(self) -> Self:
+        # Its prizes are a box of the store, its grabs go to heroes, and its day is the rewards'.
+        if self.claw and not (self.store and self.heroes and self.rewards and self.site):
+            raise ValueError("the Claw needs a store, heroes, rewards and a site")
+        if self.claw and self.claw.paid.currency not in self.currencies:
+            raise ValueError(f"paid grabs need a currency of the game: {self.claw.paid.currency}")
+        if ("claw" in self.pages) != (self.claw is not None):
+            raise ValueError("the Claw and its page come together")
         return self
 
     @model_validator(mode="after")

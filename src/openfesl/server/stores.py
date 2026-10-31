@@ -5,6 +5,7 @@ from openfesl.storage.admin import SqlAdminLog
 from openfesl.storage.associations import SqlAssociationStore
 from openfesl.storage.boxes import SqlBoxStore
 from openfesl.storage.catalogues import SqlCatalogueStore
+from openfesl.storage.claw import SqlClawStore
 from openfesl.storage.deal_offers import SqlOfferStore
 from openfesl.storage.deal_uploads import SqlDealUploads
 from openfesl.storage.deals import SqlDealStore
@@ -49,6 +50,7 @@ class Stores:
         self.admin_log = SqlAdminLog(sessions)
         self.associations = SqlAssociationStore(sessions)
         self.catalogues = SqlCatalogueStore(sessions)
+        self.claw = SqlClawStore(sessions)
         self.entitlements = SqlEntitlementStore(sessions)
         self.game_art = SqlArtStore(sessions)
         self.game_icons = SqlGameIconStore(sessions)

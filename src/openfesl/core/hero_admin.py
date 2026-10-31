@@ -16,13 +16,14 @@ class TooManyUses(Exception):
 
 
 class ItemSource(StrEnum):
-    """Where a hero's item came from: starting kit, store, hot deal, box, reward or an admin."""
+    """Where a hero's item came from: starting kit, store, hot deal, box, reward, Claw or admin."""
 
     STARTING_KIT = "starting_kit"
     STORE = "store"
     HOT_DEAL = "hot_deal"
     BOX = "box"
     REWARD = "reward"
+    CLAW = "claw"
     ADMIN = "admin"
 
 
@@ -31,8 +32,8 @@ class HeroHistory:
     """What the records keep of a hero's items and mugshot.
 
     Attributes:
-        sources: Where each item came from last, by number, where a purchase, a reward claim or
-            an admin's grant records it.
+        sources: Where each item came from last, by number, where a purchase, a reward claim, a
+            grab of the Claw or an admin's grant records it.
         revoked: When an admin last revoked each item, by number.
         mugshot: When its game sent the mugshot it has, if it has one.
         state: The admin's last change of its state, if any.

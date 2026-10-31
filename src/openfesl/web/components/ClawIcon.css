@@ -1,0 +1,36 @@
+/* A prize's icon on a parchment card, dashed where the kind's glyph stands in for it, yellow
+   for a rare prize, with the yellow Rare badge. */
+@layer components {
+  .claw-icon {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    border: 2px solid #000;
+    border-radius: 5px;
+    background: #e8dcc6;
+    color: #3b2d23;
+    object-fit: contain;
+  }
+
+  .claw-icon-glyph {
+    border-style: dashed;
+  }
+
+  .claw-tile[data-rare] .claw-icon {
+    background: #f2d98a;
+  }
+
+  .claw-rare {
+    position: absolute;
+    top: -8px;
+    right: -12px;
+    padding: 2px 4px;
+    border: 2px solid #000;
+    border-radius: 4px;
+    background: #f2c12e;
+    color: #0a0a0a;
+    font: 800 9px/1 var(--site-heading);
+    text-transform: uppercase;
+  }
+}

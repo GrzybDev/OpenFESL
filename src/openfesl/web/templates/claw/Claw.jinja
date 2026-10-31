@@ -1,0 +1,171 @@
+{#def rules, running, imported: bool, name: str, day = None, heroes: list = [], picked = None, funds: int = 0, grabbed = None, left: str = "" #}
+{# The Daily Claw: the prize of the last grab, the free grab that waits, the hero the
+   prize goes to, the grab with the time to the next free one and the paid grab, and the chances.
+   It is a form whose hero is a radio group, and the next page shows the prize. Signed out it
+   asks for a sign-in; off or without the catalogue it says why. #}
+{% set base = url("/" ~ game.id ~ "/claw") %}
+<Layout :title="name">
+  <section aria-labelledby="claw-title" class="store-head">
+    <Plaque id="claw-title">{{ name }}</Plaque>
+    <p class="site-lead">{{ _n("web.claw.page.lead", rules.free) }}</p>
+  </section>
+  <div data-claw-body class="claw-body enter-panel">
+    {% if not running %}
+      {% set off = rules and not rules.enabled %}
+      <div class="claw-off">
+        <span aria-hidden="true"
+              class="claw-off-disc"><Icon name="window-closed" :size="24" stroke="currentColor" /></span>
+        <p>
+          <strong>{{ _("web.claw.off" if off or not rules else "web.claw.no_catalogue") }}</strong>
+          {{ _("web.claw.off.text" if off or not rules else "web.claw.no_catalogue.text") }}
+        </p>
+      </div>
+    {% elif not player %}
+      <div class="store-box store-box-red claw-signed-out">
+        <h2 class="store-tab">{{ _("web.claw.signed_out") }}</h2>
+        <p class="store-signed-out">{{ _("web.claw.signed_out.text") }}</p>
+        <p class="site-actions">
+          <a href="{{ url('/sign-in') }}?{{ {'next': here}|urlencode }}"
+             class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+          <a href="{{ url('/register') }}" class="store-link-yellow">{{ _("web.account.sign_in.create") }}</a>
+        </p>
+      </div>
+    {% elif not heroes %}
+      <div class="claw-no-hero">
+        <span aria-hidden="true" class="claw-no-hero-disc"><Icon name="plus" :size="26" stroke="currentColor" /></span>
+        <div>
+          <h2 class="claw-heading">{{ _("web.claw.no_hero") }}</h2>
+          <p>{{ _("web.claw.no_hero.text", time=_("web.store.utc", time=when(day.next_free, "Hm"))) }}</p>
+          <p class="site-actions">
+            <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
+               class="site-button site-button-go"><Icon name="plus" :size="16" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+          </p>
+        </div>
+      </div>
+    {% else %}
+      {% set paid = running.paid %}
+      {% set currency = _("games." ~ game.id ~ ".currency." ~ paid.currency) %}
+      {% set price = number(paid.price) %}
+      {% set short = paid.price - funds if funds < paid.price else 0 %}
+      {% set next_time = _("web.store.utc", time=when(day.next_free, "Hm")) %}
+      {% if grabbed %}
+        <dialog open
+                id="claw-prize"
+                aria-labelledby="claw-prize-title"
+                data-claw-prize
+                data-item="{{ grabbed.item }}"
+                data-hero="{{ grabbed.hero_id }}"
+                class="claw-prize">
+          <h2 id="claw-prize-title" class="claw-prize-title">{{ _("web.claw.prize", hero=grabbed.hero) }}</h2>
+          <div class="claw-prize-body">
+            <span class="claw-prize-art">
+              <ClawIcon :prize="grabbed.prize" :size="96" />
+              {% if grabbed.rare %}<span class="claw-rare claw-prize-rare">{{ _("web.claw.rare") }}</span>{% endif %}
+            </span>
+            <p class="claw-prize-name">{{ grabbed.prize.name }}</p>
+            <p class="claw-prize-held">
+              {% if not grabbed.prize.icon and grabbed.prize.kind %}{{ grabbed.prize.kind }} · {% endif %}{{ grabbed.prize.held }}{% if grabbed.rare %} · {{ _("web.claw.result.rare") }}{% endif %}
+            </p>
+            <p class="claw-prize-line">{{ grabbed.line }}</p>
+          </div>
+        </dialog>
+      {% endif %}
+      {% if day.waiting %}
+        <p class="claw-welcome">
+          <span aria-hidden="true"
+                class="claw-welcome-disc"><Icon name="star" :size="17" stroke="#0A0A0A" /></span>{{ _("web.claw.welcome") }}
+        </p>
+      {% endif %}
+      <div class="claw-layout">
+        <div class="claw-main">
+          <form method="post"
+                action="{{ base }}"
+                data-claw-form
+                data-once
+                class="claw-form">
+            <input type="hidden" name="csrf" value="{{ csrf }}">
+            <input type="hidden" name="once" value="{{ once_token() }}">
+            <input type="hidden" name="price" value="{{ paid.price }}">
+            <input type="hidden" name="currency" value="{{ paid.currency }}">
+            <fieldset class="claw-picker" data-claw-picker>
+              <legend class="claw-heading">{{ _("web.claw.pick") }}</legend>
+              <div class="store-heroes claw-heroes">
+                {% for each in heroes %}
+                  <StoreHero :hero="each.hero" :checked="each.hero.persona.id == picked or (not picked and loop.first)" />
+                {% endfor %}
+              </div>
+            </fieldset>
+            <div class="claw-actions">
+              {% if day.waiting %}
+                <button type="submit" data-claw-grab class="claw-grab">
+                  <Icon name="claw" :size="24" stroke="currentColor" />{{ _("web.claw.grab_free") }}
+                </button>
+              {% else %}
+                <p class="claw-next">
+                  <span aria-hidden="true"
+                        class="claw-next-disc"><Icon name="clock" :size="22" stroke="#0A0A0A" /></span>
+                  <span>
+                    <span class="claw-next-label">{{ _("web.claw.next_free") }}</span>
+                    <time datetime="{{ day.next_free.isoformat() }}"
+                          data-countdown
+                          class="claw-next-time">{{ left }}</time>
+                  </span>
+                </p>
+                {% if paid.enabled %}
+                  <button type="submit"
+                          name="paid"
+                          value="1"
+                          data-claw-paid
+                          {% if short %} aria-disabled="true" aria-describedby="claw-short"{% endif %}
+                          class="claw-grab claw-grab-paid">
+                    <Icon name="claw" :size="20" stroke="#FEDE01" />{{ _("web.claw.result.paid_button", price=price, currency=currency) }}
+                  </button>
+                {% else %}
+                  <p class="claw-note">{{ _n("web.claw.paid.off", running.free) }}</p>
+                {% endif %}
+              {% endif %}
+            </div>
+            {% if not day.waiting and paid.enabled %}
+              {% if short %}
+                <p id="claw-short" data-why class="claw-short">
+                  <Icon name="warn" :size="18" fill="currentColor" />
+                  <span>{{ _("web.claw.paid.short", have=number(funds) ~ " " ~ currency, price=price ~ " " ~ currency, short=number(short) ~ " " ~ currency) }}
+                    {% if "funds" in game.pages and paid.currency == game.heroes.currency %}<a href="{{ url('/' ~ game.id ~ game.site.path('funds')) }}"
+   class="claw-short-link">{{ _("web.claw.paid.earned") }}</a>{% endif %}
+                  </span>
+                </p>
+              {% endif %}
+            {% endif %}
+            {% if not day.waiting %}
+              <p class="claw-rule">{{ _("web.claw.result.next", time=next_time) }}</p>
+            {% endif %}
+          </form>
+          <p class="claw-rule">{{ _n("web.claw.rule", running.free, time=_("web.store.utc", time=when(day.next_free, "Hm"))) }}</p>
+          <details class="claw-chances">
+            <summary class="claw-chances-toggle">
+            <Icon name="items" :size="16" stroke="currentColor" /><span data-chances-label>{{ _("web.claw.form.chances") }}</span>
+          </summary>
+          {% for each in heroes %}
+            <div data-chances="{{ each.hero.persona.id }}" class="claw-odds">
+              <h3 class="claw-odds-hero">{{ _("web.claw.chances", hero=each.hero.persona.name) }}</h3>
+              {% for tier in each.tiers %}
+                <h4 class="claw-odds-tier"><span>{{ tier.name }}</span><span>{{ _("web.claw.chances.tier", share=tier.share) }}</span></h4>
+                <ul role="list" class="claw-odds-list">
+                  {% for prize in tier.prizes %}
+                    <li><span>{{ prize.name }} · {{ prize.held }}</span><strong>{{ prize.chance }}</strong></li>
+                  {% endfor %}
+                </ul>
+              {% endfor %}
+              <p class="claw-note">
+                {{ _("web.claw.chances.same") }}
+                {% for owned in each.owned %}{{ _("web.claw.chances.owned", item=owned, hero=each.hero.persona.name) }}{% endfor %}
+                {{ _("web.claw.chances.added") }}
+              </p>
+            </div>
+          {% endfor %}
+        </details>
+      </div>
+      </div>
+    {% endif %}
+  </div>
+</Layout>

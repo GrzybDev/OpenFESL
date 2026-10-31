@@ -49,7 +49,9 @@ async def test_the_store_data_names_the_copys_items_and_every_box_is_worth_its_p
     rules = game.store
     assert rules
     named = {item for rule in rules.prices.values() for item in rule.items}
-    for box in rules.boxes:
+    # The Claw's prizes are a box of the store too.
+    seeded = [*rules.boxes, *([game.claw.box] if game.claw else [])]
+    for box in seeded:
         named |= {item for tier in box.tiers for item, _ in tier.drops}
         named |= {box.fallback[0]} if box.fallback else set()
     missing = named - {item.id for item in catalogue.document.items}
@@ -62,5 +64,5 @@ async def test_the_store_data_names_the_copys_items_and_every_box_is_worth_its_p
     # The store's data is that of the game that sells hot deals, as 1.89 does and 1.46 not.
     if b"game/hotDeals" in (folder / game.executable).read_bytes():
         assert missing == set()
-        assert len(boxes) == len(rules.boxes) and all(box and box.drops for box in boxes)
+        assert len(boxes) == len(seeded) and all(box and box.drops for box in boxes)
     assert all(box and not below_value(box) for box in boxes)

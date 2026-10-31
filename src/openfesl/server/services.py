@@ -14,6 +14,7 @@ from openfesl.core.browsing import Browsing
 from openfesl.core.catalogues import Catalogues
 from openfesl.core.census import Census
 from openfesl.core.chests import Chests
+from openfesl.core.claw import Claw
 from openfesl.core.connect import connect_routes
 from openfesl.core.deals import HotDeals
 from openfesl.core.display_names import DisplayNames
@@ -157,6 +158,15 @@ class GameServices:
         )
         self.gift_codes = GiftCodes(
             stores.gift_codes, self.rewards, self.heroes, self.catalogues, stores.settings
+        )
+        self.claw = Claw(
+            stores.claw,
+            stores.settings,
+            stores.products,
+            drops,
+            self.heroes,
+            self.catalogues,
+            self.rewards,
         )
         self.item_writes = ItemWrites(stores.entitlements)
         self.windows = StoreWindows(

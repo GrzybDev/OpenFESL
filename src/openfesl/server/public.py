@@ -19,6 +19,7 @@ from openfesl.web.boards import BoardPages
 from openfesl.web.catalogue_files import catalogue_file_routes
 from openfesl.web.chest_keys import KeyPages
 from openfesl.web.chests import ChestsPages
+from openfesl.web.claw import ClawPages
 from openfesl.web.creator import CreatorPages
 from openfesl.web.friends import FriendsPages
 from openfesl.web.front import front_routes
@@ -207,6 +208,9 @@ def include_public_routes(
         RedeemPages(
             pages, games, services.gift_codes, services.catalogues, stores.entitlements
         ).routes()
+    )
+    app.include_router(
+        ClawPages(pages, games, services.claw, sent, services.catalogues, services.wallets).routes()
     )
     app.include_router(
         FriendsPages(

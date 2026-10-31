@@ -1,0 +1,390 @@
+/* The Daily Claw: a dark wooden box with the prize card, the welcome, the hero picker, the
+   machine (its own component), the grab row with the countdown and the paid grab's confirmation,
+   and the chances. The prize card scales in and its rare badge lands (180 ms), a fade alone with reduced motion. */
+@layer pages {
+  .claw-body {
+    position: relative;
+    isolation: isolate;
+    margin-top: 18px;
+    padding: 16px 18px 18px;
+    border: 3px solid #000;
+    border-radius: 10px;
+    background: #1e1815;
+    box-shadow: 0 6px 0 rgb(0 0 0 / 0.4);
+    color: #fff;
+  }
+
+  .claw-heading {
+    margin: 0 0 10px;
+    padding: 0;
+    font: 800 21px/1.2 var(--site-heading);
+    text-shadow: var(--site-outline-thin);
+  }
+
+  .claw-off,
+  .claw-no-hero {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+    border: 3px dashed #000;
+    border-radius: 8px;
+    background: #e8dcc6;
+    color: #1f1712;
+    font-size: 15px;
+    line-height: 1.45;
+
+    strong {
+      display: block;
+      font: 800 19px/1.3 var(--site-heading);
+    }
+  }
+
+  .claw-no-hero {
+    border-color: #c9bfb3;
+    background: none;
+    color: #fff;
+  }
+
+  .claw-off-disc,
+  .claw-no-hero-disc {
+    display: grid;
+    flex: 0 0 auto;
+    width: 52px;
+    height: 52px;
+    place-items: center;
+    border: 3px dashed currentColor;
+    border-radius: 50%;
+  }
+
+  .claw-welcome {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #4f5627;
+    box-shadow: inset 0 0 0 2px #77813b;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .claw-welcome-disc,
+  .claw-next-disc {
+    display: grid;
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    border: 2px solid #000;
+    border-radius: 50%;
+    background: #f2c12e;
+  }
+
+  .claw-layout {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .claw-main {
+    flex: 999 1 560px;
+    min-width: 0;
+  }
+
+  .claw-form {
+    margin: 0;
+  }
+
+  .claw-picker {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .claw-heroes {
+    margin: 0;
+    color: #1f1712;
+  }
+
+  .claw-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+    margin-top: 12px;
+  }
+
+  .claw-grab {
+    display: inline-flex;
+    min-height: 56px;
+    align-items: center;
+    gap: 10px;
+    padding: 0 26px 0 20px;
+    border: 3px solid #000;
+    border-radius: 30px;
+    background: #3d6b1f;
+    box-shadow:
+      inset 0 3px 0 #6e9b3f,
+      0 4px 0 #000;
+    color: #fff;
+    font: italic 800 24px/1 var(--site-comic);
+    text-transform: lowercase;
+    text-shadow: var(--site-outline-thin);
+    cursor: pointer;
+    transition: scale 100ms var(--ease-menu);
+
+    &:active {
+      scale: 0.96;
+    }
+
+    &[aria-disabled="true"] {
+      background: #6e6a63;
+      box-shadow:
+        inset 0 3px 0 #8c8780,
+        0 4px 0 #000;
+      cursor: not-allowed;
+    }
+  }
+
+  .claw-grab-paid {
+    background: #1a1412;
+    box-shadow:
+      inset 0 3px 0 #4a3f3a,
+      0 4px 0 #000;
+    font: 800 19px/1.1 var(--site-heading);
+    text-transform: none;
+  }
+
+  .claw-price {
+    margin-left: 8px;
+    color: #fede01;
+  }
+
+  .claw-next {
+    display: flex;
+    min-height: 56px;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 4px 18px 4px 8px;
+    border: 3px solid #000;
+    border-radius: 30px;
+    background: #2e2420;
+  }
+
+  .claw-next-label {
+    display: block;
+    font: 700 14px/1.1 var(--site-heading);
+  }
+
+  .claw-next-time {
+    font: 800 24px/1.1 var(--site-heading);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .claw-short {
+    display: flex;
+    gap: 10px;
+    margin: 12px 0 0;
+    padding: 10px 12px;
+    border: 2px solid #f2c12e;
+    border-radius: 8px;
+    color: #fede01;
+    font-weight: 700;
+    line-height: 1.4;
+
+    &.flash {
+      animation: site-flash 600ms linear;
+    }
+  }
+
+  .claw-short-link {
+    color: inherit;
+    text-decoration-line: underline;
+  }
+
+  .claw-note,
+  .claw-rule {
+    margin: 10px 0 0;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .claw-chances {
+    margin-top: 10px;
+  }
+
+  .claw-chances-toggle {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 8px;
+    color: #fede01;
+    font: 800 15px/1.1 var(--site-heading);
+    text-decoration-line: underline;
+    cursor: pointer;
+  }
+
+  .claw-odds {
+    margin-top: 8px;
+    padding: 12px 14px;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #f1e9de;
+    color: #1f1712;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+  }
+
+  .claw-odds-hero {
+    margin: 0 0 6px;
+    font: 800 16px/1.2 var(--site-heading);
+  }
+
+  .claw-odds-tier {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0 4px;
+    font: 800 13px/1.2 var(--site-heading);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .claw-odds-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0 18px;
+    margin: 0;
+    padding: 0;
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 4px 0;
+      border-top: 1px dashed #a8977f;
+    }
+  }
+
+  .claw-prize {
+    position: static;
+    width: auto;
+    margin: 0 0 16px;
+    padding: 0;
+    overflow: hidden;
+    border: 3px solid #000;
+    border-radius: 8px;
+    background: #f1e9de;
+    color: #1f1712;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+
+    &:modal {
+      position: fixed;
+      inset: 0;
+      width: min(460px, calc(100% - 16px));
+      margin: auto;
+      animation: site-dialog-in 160ms var(--ease-menu);
+    }
+
+    &::backdrop {
+      background: rgb(0 0 0 / 0.4);
+    }
+  }
+
+  .claw-prize-title {
+    margin: 0;
+    padding: 12px 16px;
+    background: #893531;
+    color: #fff;
+    font: 800 19px/1.2 var(--site-heading);
+    text-shadow: var(--site-outline-thin);
+  }
+
+  .claw-prize-body {
+    padding: 16px 20px 20px;
+  }
+
+  .claw-prize-art {
+    position: relative;
+    display: inline-block;
+
+    .claw-icon {
+      width: 104px;
+      height: 104px;
+      border-width: 3px;
+      box-shadow: 0 4px 0 #000;
+    }
+  }
+
+  .claw-prize-rare {
+    top: -12px;
+    right: -18px;
+    padding: 4px 8px;
+    font-size: 13px;
+    rotate: 8deg;
+    animation: claw-badge 180ms var(--ease-menu) 120ms both;
+  }
+
+  .claw-prize-name {
+    margin: 12px 0 0;
+    font: 800 26px/1.15 var(--site-heading);
+  }
+
+  .claw-prize-held {
+    margin: 4px 0 0;
+    font-weight: 700;
+  }
+
+  .claw-prize-line {
+    margin: 10px 0 0;
+    line-height: 1.45;
+  }
+
+  .claw-prize .site-actions {
+    justify-content: center;
+  }
+
+  @keyframes claw-badge {
+    from {
+      scale: 1.3;
+      opacity: 0;
+    }
+  }
+
+  @media (width < 40rem) {
+    .claw-body {
+      padding: 12px;
+    }
+
+    .claw-heroes {
+      display: flex;
+      overflow-x: auto;
+
+      > * {
+        flex: 0 0 150px;
+      }
+    }
+
+    .claw-grab,
+    .claw-next {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .claw-prize-rare {
+      animation: site-fade-in 100ms linear;
+    }
+
+    .claw-prize:modal {
+      animation: site-fade-in 100ms linear;
+    }
+  }
+}

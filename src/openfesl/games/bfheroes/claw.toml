@@ -1,0 +1,33 @@
+# The Daily Claw of the website (December 2011 to 2015): a claw machine with one free grab a day
+# for one of the account's heroes and grabs bought after it, 599 Funds each, which have the same
+# prizes and chances (the forum's FAQ, tid 298604). The free grab here comes at the start of the
+# rewards' day, not 08:00 UTC. The setting bfheroes.claw.<path> overrides each value, such as
+# bfheroes.claw.enabled = off or bfheroes.claw.paid.price = 499; its name is the game's offer.
+[claw]
+name = "WEST_Custom_DailySpinner"
+free = 1
+paid = { price = 599, currency = "_PF" }
+# The prizes are valued in Funds, as the store prices them.
+currency = "_PF"
+
+# The 2012 prizes and odds were never published; the starting prizes follow the FAQ and the
+# winnings players reported (tid 298612): 50 uses of a consumable or a day of a boost, a week of
+# a class weapon or a month of clothing or an emote, and rarely clothing, an emote or the
+# faction's pet for good. A hero is offered those that fit its faction and class; 1.46 lacks the
+# Mark II pieces, which its heroes are not offered.
+[[claw.tiers]]
+name = "common"
+weight = 70
+drops = ["2005 x50", "2150 x50", "2153 x50", "9000 1d", "9005 1d"]
+
+[[claw.tiers]]
+name = "uncommon"
+weight = 25
+drops = ["3025 7d", "3015 7d", "3038 7d", "3042 7d", "3041 7d", "3043 7d", "1712 30d",
+    "1708 30d", "5036 30d", "5037 30d"]
+
+[[claw.tiers]]
+name = "rare"
+weight = 5
+rare = true
+drops = ["1711 perm", "1707 perm", "521 perm", "362 perm", "5030 perm", "5040 perm"]

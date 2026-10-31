@@ -9,10 +9,10 @@ partition = "/eagames/bfwest"
 namespace = "bfwest"
 # The web pages the game's menu shows beside its front page: the guide to playing, the leaderboards
 # of its heroes, the store and its hot deals, the treasure chests of an account's heroes, the Funds
-# page, the rewards that accounts claim, the page that redeems codes, Recruit a Friend, their
-# friends and the player search. The server list is drawn for games with squads and a server
-# browser that finds servers by name, and the leaderboard of players for other stats than this
-# game's, so neither is listed.
+# page, the rewards that accounts claim, the page that redeems codes, Recruit a Friend, the Daily
+# Claw, their friends and the player search. The server list is drawn for games with squads and a
+# server browser that finds servers by name, and the leaderboard of players for other stats than
+# this game's, so neither is listed.
 pages = [
     "play",
     "leaderboards",
@@ -23,6 +23,7 @@ pages = [
     "rewards",
     "redeem",
     "recruit-a-friend",
+    "claw",
     "friends",
     "search",
 ]
@@ -32,8 +33,13 @@ pages = [
 # alone (BFHeroes.exe 1.89 0x006aa1fb).
 account_stats = ["c_tut", "c_ltm", "c_slm", "cdm", "edm", "dmc", "pi[0-9]+"]
 # The parts of the game's data kept in files of their own: the store's starting set, the hot
-# deals' rotation and the site's rewards.
-include = ["bfheroes/store.toml", "bfheroes/deals.toml", "bfheroes/rewards.toml"]
+# deals' rotation, the site's rewards and the Daily Claw.
+include = [
+    "bfheroes/store.toml",
+    "bfheroes/deals.toml",
+    "bfheroes/rewards.toml",
+    "bfheroes/claw.toml",
+]
 
 # The one client string of versions 1.46 and 1.89, which their dedicated servers greet FESL with
 # too. The game takes its Theater address from the Hello answer; the port is the one that its
@@ -391,11 +397,11 @@ pages = ["play", "leaderboards", "host"]
 name = "community"
 pages = ["search", "friends", "rewards"]
 
-# The store, its hot deals, the treasure chests, the Funds and the redeeming of codes, which every
-# visitor sees; the store's item pages lie under its address.
+# The store, its hot deals, the treasure chests, the Daily Claw, the redeeming of codes and the
+# Funds, which every visitor sees; the store's item pages lie under its address.
 [[site.menus]]
 name = "store"
-pages = ["store", "hot-deals", "treasure-chests", "funds", "redeem"]
+pages = ["store", "hot-deals", "treasure-chests", "claw", "redeem", "funds"]
 section = "/store"
 
 # Heroes, which the game creates none of: with no hero it opens the website's creator and quits.

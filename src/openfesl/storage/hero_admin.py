@@ -19,6 +19,7 @@ from openfesl.storage.entitlements import REVOKED, add_item, locked_item
 from openfesl.storage.heroes import set_default
 from openfesl.storage.models import (
     AdminActionRow,
+    ClawGrabRow,
     EntitlementRow,
     HeroAccountRow,
     MugshotRow,
@@ -29,7 +30,12 @@ from openfesl.storage.models import (
 from openfesl.storage.mugshots import SHOWN
 
 # What each kind of purchase that a hero makes gave it the items through.
-_PURCHASES = {"product": ItemSource.STORE, "bundle": ItemSource.HOT_DEAL, "box": ItemSource.BOX}
+_PURCHASES = {
+    "product": ItemSource.STORE,
+    "bundle": ItemSource.HOT_DEAL,
+    "box": ItemSource.BOX,
+    "claw": ItemSource.CLAW,
+}
 # The admin's actions that a hero's history reads.
 _RECORDED = [AdminAction.PERSONA_STATE, AdminAction.ITEM_GRANT, AdminAction.ITEM_REVOKE]
 
@@ -67,6 +73,12 @@ class SqlHeroAdmin:
             )
             for at, outcome in claims:
                 found += [(at, item, ItemSource.REWARD) for item, _ in outcome.get("items", [])]
+            grabs = await session.execute(
+                select(ClawGrabRow.created_at, ClawGrabRow.item_id).where(
+                    ClawGrabRow.persona_id == persona_id
+                )
+            )
+            found += [(at, item, ItemSource.CLAW) for at, item in grabs]
             mugshot = await session.scalar(
                 select(MugshotRow.updated_at).where(MugshotRow.persona_id == persona_id, SHOWN)
             )

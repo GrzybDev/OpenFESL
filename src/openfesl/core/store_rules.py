@@ -98,12 +98,16 @@ class Tier(BaseModel):
     Attributes:
         weight: How likely the tier is against the box's others.
         drops: The items it gives, each with its ownership, written such as 3025 7d.
+        name: The end of the key of its name in the catalogues, for a box that names its tiers.
+        rare: Whether its drops are rare, which the Claw marks and lists.
     """
 
     model_config = ConfigDict(frozen=True)
 
     weight: PositiveInt
     drops: tuple[DropEntry, ...]
+    name: str = ""
+    rare: bool = False
 
 
 class BoxRule(BaseModel):
@@ -111,7 +115,7 @@ class BoxRule(BaseModel):
 
     Attributes:
         key: The name the box is known by.
-        kind: box, which hot deals sell, or chest, which a key opens.
+        kind: box, which hot deals sell, chest, which a key opens, or claw, the Claw's prizes.
         currency: The currency of its value and of the prices its drops are worth.
         value: What each of its drops is worth at least, which is its price.
         worth_rule: Whether it promises that worth; a box that does not may give less.
@@ -124,7 +128,7 @@ class BoxRule(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     key: str
-    kind: Literal["box", "chest"] = "box"
+    kind: Literal["box", "chest", "claw"] = "box"
     currency: str
     value: PositiveInt
     worth_rule: bool = True
