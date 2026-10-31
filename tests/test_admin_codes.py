@@ -173,6 +173,6 @@ async def test_a_codes_items_come_from_the_catalogue_and_one_hero_takes_them_all
     assert not re.search(r'name="item"\s+value="1084 perm"', clash.text)
     uses = "Invented Tonic is counted in uses; it cannot be given for days or for good."
     assert uses in visible(counted.content)
-    withheld = "Item 257 is withheld on this service: codes and rewards never give it."
+    withheld = "Item 257 is withheld on this service: codes, the Claw and rewards never give it."
     assert withheld in visible(shirt.content)
     assert "Add Invented Tonic, 10 uses" in visible(live.content)

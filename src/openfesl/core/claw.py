@@ -195,6 +195,18 @@ class ClawStore(Protocol):
             limit: The most to return.
         """
 
+    async def counts(
+        self, game: str, day: date, since: datetime, currency: str
+    ) -> tuple[int, int, int]:
+        """Return how many free and paid grabs were made on a day, and what the paid ones cost.
+
+        Args:
+            game: The game's data-file name.
+            day: The rewards' day.
+            since: When the day started.
+            currency: The currency whose spending is counted.
+        """
+
 
 class Claw:
     """The Daily Claw of the games' sites: a free grab a day, paid grabs, and their prizes."""
@@ -268,7 +280,7 @@ class Claw:
             rules: The Claw's rules as the instance sets them.
             account_id: The account.
         """
-        zone = await self._zone(game)
+        zone = await self.zone(game)
         day = today(self._clock(), zone)
         used = await self._store.free_grabs(game.id, account_id, day)
         return ClawDay(rules, day, used, day_start(day + timedelta(days=1), zone))
@@ -293,6 +305,24 @@ class Claw:
             if drop.product in chances
         ]
         return prizes, owned
+
+    async def preview(self, game: Game, faction: str, hero_class: str) -> list[Prize]:
+        """Return the prizes a hero of a faction and class that owns none of them may win.
+
+        Args:
+            game: The game.
+            faction: The hero's faction.
+            hero_class: The hero's class.
+        """
+        box = await self.box(game)
+        if box is None:
+            return []
+        chances = self._drops.odds(game, box, faction, hero_class)
+        return [
+            Prize(drop.product, chances[drop.product], drop.tier, drop.rare)
+            for drop in box.drops
+            if drop.product in chances
+        ]
 
     async def grab(self, game: Game, account_id: int, hero_id: int, paid: bool) -> Grabbed:
         """Grab a prize for one of an account's heroes, drawn as the grab starts.
@@ -324,7 +354,7 @@ class Claw:
         if won is None:
             raise ClawRefused(ClawRefusal.NOTHING)
         rare = any(drop.rare for drop in box.drops if drop.product == won)
-        day = today(self._clock(), await self._zone(game))
+        day = today(self._clock(), await self.zone(game))
         wallet, price = None, 0
         if paid:
             currencies = (await account_rules(game, self._settings)).currencies
@@ -345,6 +375,18 @@ class Claw:
         before, after = await self._store.grab(grab)
         return Grabbed(hero, won, rare, before, after, price)
 
+    async def today(self, game: Game, rules: ClawRules) -> tuple[int, int, int]:
+        """Return how many free and paid grabs the rewards' day so far has, and what they cost.
+
+        Args:
+            game: The game.
+            rules: The Claw's rules as the instance sets them, whose paid grabs' currency counts.
+        """
+        zone = await self.zone(game)
+        day = today(self._clock(), zone)
+        since = day_start(day, zone)
+        return await self._store.counts(game.id, day, since, rules.paid.currency)
+
     async def feed(self, game: Game, rules: ClawRules) -> list[Grab]:
         """Return the latest rare prizes of the heroes that others see, while the feed is on.
 
@@ -354,6 +396,11 @@ class Claw:
         """
         return await self._store.feed(game.id, rules.feed.length) if rules.feed.enabled else []
 
-    async def _zone(self, game: Game) -> str:
+    async def zone(self, game: Game) -> str:
+        """Return the time zone at whose midnight the free grabs' days start: the rewards'.
+
+        Args:
+            game: The game.
+        """
         rules = await self._rewards.rules(game)
         return rules.zone if rules else "UTC"

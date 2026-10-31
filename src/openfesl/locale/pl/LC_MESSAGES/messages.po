@@ -4721,7 +4721,7 @@ msgid "web.admin.keys.summary.no_end"
 msgstr "bez końca"
 
 msgid "web.admin.keys.refused.withheld"
-msgstr "Przedmiot %(id)s jest wstrzymany w tym serwisie: nie dają go ani kody, ani nagrody."
+msgstr "Przedmiot %(id)s jest wstrzymany w tym serwisie: nie dają go ani kody, ani automat, ani nagrody."
 
 msgid "web.admin.keys.refused.unknown_item"
 msgstr "Zaimportowany katalog nie ma przedmiotu %(id)s."
@@ -15197,3 +15197,162 @@ msgstr "Czeka %(count)s darmowych prób"
 
 msgid "web.site.claw_count.other"
 msgstr "Czeka %(count)s darmowej próby"
+
+msgid "web.admin.boxes.claw.off"
+msgstr "Wyłączony: automat się nie otwiera, pozycja menu znika, a jego strona informuje, że nie działa. Nagrody i ustawienia zostają zachowane."
+
+msgid "web.admin.boxes.claw.run"
+msgstr "Automat działa"
+
+msgid "web.admin.boxes.claw.run.text"
+msgstr "Włączony: nakładka się otwiera, a pozycja menu jest widoczna; wyłączony: strony gry informują, że nie działa."
+
+msgid "web.admin.boxes.claw.free"
+msgstr "Darmowe próby dziennie"
+
+msgid "web.admin.boxes.claw.free.from"
+msgstr "%(count)s · od %(time)s"
+
+msgid "web.admin.boxes.claw.day"
+msgstr "Dzień zaczyna się"
+
+msgid "web.admin.boxes.claw.day.link"
+msgstr "dzień nagród"
+
+msgid "web.admin.boxes.claw.paid"
+msgstr "Płatne próby"
+
+msgid "web.admin.boxes.claw.paid.text"
+msgstr "Dodatkowe próby po darmowych, w cenie poniżej."
+
+msgid "web.admin.boxes.claw.currency"
+msgstr "Waluta"
+
+msgid "web.admin.boxes.claw.currency.data"
+msgstr "Dane gry: %(price)s"
+
+msgid "web.admin.boxes.claw.price"
+msgstr "Cena płatnej próby"
+
+msgid "web.admin.boxes.claw.price.note"
+msgstr "Wystarczy saldo równe cenie. Płatne próby widać wśród zakupów w sklepie."
+
+msgid "web.admin.boxes.claw.feed"
+msgstr "Lista rzadkich nagród"
+
+msgid "web.admin.boxes.claw.feed.text"
+msgstr "Ostatnie rzadkie nagrody publicznych bohaterów wewnątrz automatu."
+
+msgid "web.admin.boxes.claw.feed.length"
+msgstr "Liczba rzadkich nagród na liście"
+
+msgid "web.admin.boxes.claw.save"
+msgstr "Zapisz automat"
+
+msgid "web.admin.boxes.claw.yes"
+msgstr "Tak"
+
+msgid "web.admin.boxes.claw.no"
+msgstr "Nie"
+
+msgid "web.admin.boxes.claw.moderator"
+msgstr "Zmiana automatu wymaga roli administratora."
+
+msgid "web.admin.boxes.claw.pool"
+msgstr "Pula nagród · grupy: %(tiers)s, pozycje: %(entries)s"
+
+msgid "web.admin.boxes.claw.pool.title"
+msgstr "%(name)s · pula nagród"
+
+msgid "web.admin.boxes.claw.rare_mark"
+msgstr "Oznaczenie rzadkie"
+
+msgid "web.admin.boxes.claw.sum.ok"
+msgstr "Wagi sumują się do 100."
+
+msgid "web.admin.boxes.claw.pool.rule"
+msgstr "Bohater dostaje pozycje pasujące do jego frakcji i klasy; posiadane na stałe przedmioty są pomijane, a ich udział przechodzi na resztę grupy; posiadane wypożyczenia i użycia są przedłużane. Wstrzymane przedmioty nigdy nie są oferowane."
+
+msgid "web.admin.boxes.claw.pool.save"
+msgstr "Zapisz pulę"
+
+msgid "web.admin.boxes.claw.chances_for"
+msgstr "Szanse dla bohatera"
+
+msgid "web.admin.boxes.claw.chances.none"
+msgstr "Bohater tej frakcji i klasy nie może wygrać żadnej nagrody."
+
+msgid "web.admin.boxes.claw.chances.note"
+msgstr "Dla bohatera: %(faction)s, %(hero_class)s, który nie ma żadnej stałej nagrody. Darmowe i płatne próby mają te same szanse."
+
+msgid "web.admin.boxes.claw.today.free"
+msgstr "Darmowe próby dziś"
+
+msgid "web.admin.boxes.claw.today.paid"
+msgstr "Płatne próby dziś"
+
+msgid "web.admin.boxes.claw.today.spent"
+msgstr "Wydane dziś: %(currency)s"
+
+msgid "web.admin.boxes.claw.refused.price"
+msgstr "Cena wynosi co najmniej 1."
+
+msgid "web.admin.boxes.claw.refused.number"
+msgstr "To pole przyjmuje liczbę całkowitą równą 1 lub większą."
+
+msgid "web.admin.boxes.claw.refused.currency"
+msgstr "Płatne próby kosztują walutę konta."
+
+msgid "web.admin.boxes.claw.refused.no_rare"
+msgstr "Co najmniej jedna grupa musi mieć oznaczenie rzadkie, inaczej lista będzie pusta; można zamiast tego wyłączyć listę."
+
+msgid "web.admin.toast.claw.on"
+msgstr "Automat włączony."
+
+msgid "web.admin.toast.claw.off"
+msgstr "Automat wyłączony."
+
+msgid "web.admin.toast.claw.price"
+msgstr "Płatne próby kosztują teraz %(price)s."
+
+msgid "web.admin.toast.claw.saved"
+msgstr "Ustawienia automatu zapisane."
+
+msgid "web.admin.toast.claw.unchanged"
+msgstr "Ustawienia automatu bez zmian."
+
+msgid "web.admin.toast.claw.pool"
+msgstr "Pula automatu zapisana: grupy: %(tiers)s, pozycje: %(entries)s."
+
+msgid "web.admin.audit.action.claw_settings"
+msgstr "Zmiana ustawień automatu"
+
+msgid "web.admin.audit.action.claw_settings.on"
+msgstr "Automat włączony"
+
+msgid "web.admin.audit.action.claw_settings.off"
+msgstr "Automat wyłączony"
+
+msgid "web.admin.audit.action.claw_table"
+msgstr "Zmiana puli automatu"
+
+msgid "web.admin.audit.claw.free"
+msgstr "Darmowe próby dziennie %(before)s → %(after)s"
+
+msgid "web.admin.audit.claw.paid"
+msgstr "Płatne próby %(before)s → %(after)s"
+
+msgid "web.admin.audit.claw.currency"
+msgstr "Waluta płatnej próby %(before)s → %(after)s"
+
+msgid "web.admin.audit.claw.price"
+msgstr "Płatna próba %(before)s → %(after)s"
+
+msgid "web.admin.audit.claw.feed"
+msgstr "Lista %(before)s → %(after)s"
+
+msgid "web.admin.audit.claw.length"
+msgstr "Rzadkie nagrody na liście %(before)s → %(after)s"
+
+msgid "web.admin.audit.claw.rare"
+msgstr "Rzadkie grupy %(before)s → %(after)s"

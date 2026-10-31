@@ -175,6 +175,14 @@ class AdminAction(StrEnum):
     REWARD_ZONE = "reward_zone"
     """Changed the time zone at whose midnight the days of the rewards of the game whose id is
     the target start; the details hold the zone before and after."""
+    CLAW_SETTINGS = "claw_settings"
+    """Changed the Daily Claw of the game whose id is the target: whether it runs, its free grabs
+    a day, its paid grabs and its feed; the details hold each changed value before and after and
+    the admin's note."""
+    CLAW_TABLE = "claw_table"
+    """Changed the prizes of the Daily Claw of a game, the target naming the game and the Claw's
+    box as game:box; the details hold what a box's drop table change holds, the rare tiers before
+    and after, and the admin's note."""
     REFERRAL_SETTINGS = "referral_settings"
     """Switched Recruit a Friend of the game whose id is the target on or off, or changed a step
     of it; the details hold whether it runs, or the step with its goal, window and gifts before

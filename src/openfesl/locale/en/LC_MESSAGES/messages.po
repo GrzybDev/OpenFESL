@@ -4511,7 +4511,7 @@ msgid "web.admin.keys.summary.no_end"
 msgstr "with no end"
 
 msgid "web.admin.keys.refused.withheld"
-msgstr "Item %(id)s is withheld on this service: codes and rewards never give it."
+msgstr "Item %(id)s is withheld on this service: codes, the Claw and rewards never give it."
 
 msgid "web.admin.keys.refused.unknown_item"
 msgstr "The imported catalogue has no item %(id)s."
@@ -14329,3 +14329,162 @@ msgstr "%(count)s free grab waits"
 
 msgid "web.site.claw_count.other"
 msgstr "%(count)s free grabs wait"
+
+msgid "web.admin.boxes.claw.off"
+msgstr "Off: the Claw does not open, its menu entry is left out and its page says it is not running. The prizes and settings are kept."
+
+msgid "web.admin.boxes.claw.run"
+msgstr "The Claw runs"
+
+msgid "web.admin.boxes.claw.run.text"
+msgstr "On: the overlay opens and the menu entry shows; off: players see that it is not running."
+
+msgid "web.admin.boxes.claw.free"
+msgstr "Free grabs a day"
+
+msgid "web.admin.boxes.claw.free.from"
+msgstr "%(count)s · from %(time)s"
+
+msgid "web.admin.boxes.claw.day"
+msgstr "The day starts"
+
+msgid "web.admin.boxes.claw.day.link"
+msgstr "the rewards' day"
+
+msgid "web.admin.boxes.claw.paid"
+msgstr "Paid grabs"
+
+msgid "web.admin.boxes.claw.paid.text"
+msgstr "Extra grabs after the free ones, at the price below."
+
+msgid "web.admin.boxes.claw.currency"
+msgstr "Currency"
+
+msgid "web.admin.boxes.claw.currency.data"
+msgstr "Game data: %(price)s"
+
+msgid "web.admin.boxes.claw.price"
+msgstr "Price of a paid grab"
+
+msgid "web.admin.boxes.claw.price.note"
+msgstr "A balance equal to the price is enough. Paid grabs are listed among the store's purchases."
+
+msgid "web.admin.boxes.claw.feed"
+msgstr "Feed of rare prizes"
+
+msgid "web.admin.boxes.claw.feed.text"
+msgstr "The latest rare wins of public heroes inside the Claw."
+
+msgid "web.admin.boxes.claw.feed.length"
+msgstr "Rare prizes listed"
+
+msgid "web.admin.boxes.claw.save"
+msgstr "Save the Claw"
+
+msgid "web.admin.boxes.claw.yes"
+msgstr "Yes"
+
+msgid "web.admin.boxes.claw.no"
+msgstr "No"
+
+msgid "web.admin.boxes.claw.moderator"
+msgstr "The Claw is changed with the admin role."
+
+msgid "web.admin.boxes.claw.pool"
+msgstr "Prize pool · %(tiers)s tiers, %(entries)s entries"
+
+msgid "web.admin.boxes.claw.pool.title"
+msgstr "%(name)s · prize pool"
+
+msgid "web.admin.boxes.claw.rare_mark"
+msgstr "Rare mark"
+
+msgid "web.admin.boxes.claw.sum.ok"
+msgstr "Weights add up to 100."
+
+msgid "web.admin.boxes.claw.pool.rule"
+msgstr "A hero is offered the entries that fit its faction and class; permanent items it owns are left out and their share goes to the rest of the tier; rentals and uses it owns are added to. Withheld items are never offered."
+
+msgid "web.admin.boxes.claw.pool.save"
+msgstr "Save the pool"
+
+msgid "web.admin.boxes.claw.chances_for"
+msgstr "Chances for a hero of"
+
+msgid "web.admin.boxes.claw.chances.none"
+msgstr "A hero of this faction and class can win no prize."
+
+msgid "web.admin.boxes.claw.chances.note"
+msgstr "For a hero of %(faction)s, %(hero_class)s, that owns none of the permanent prizes. Free and paid grabs share these chances."
+
+msgid "web.admin.boxes.claw.today.free"
+msgstr "Free grabs today"
+
+msgid "web.admin.boxes.claw.today.paid"
+msgstr "Paid grabs today"
+
+msgid "web.admin.boxes.claw.today.spent"
+msgstr "%(currency)s spent today"
+
+msgid "web.admin.boxes.claw.refused.price"
+msgstr "A price is at least 1."
+
+msgid "web.admin.boxes.claw.refused.number"
+msgstr "This is a whole number of 1 or more."
+
+msgid "web.admin.boxes.claw.refused.currency"
+msgstr "Paid grabs cost a currency that the account holds."
+
+msgid "web.admin.boxes.claw.refused.no_rare"
+msgstr "At least one tier carries the rare mark, or the feed stays empty; switch the feed off instead."
+
+msgid "web.admin.toast.claw.on"
+msgstr "The Daily Claw switched on."
+
+msgid "web.admin.toast.claw.off"
+msgstr "The Daily Claw switched off."
+
+msgid "web.admin.toast.claw.price"
+msgstr "Paid grabs now cost %(price)s."
+
+msgid "web.admin.toast.claw.saved"
+msgstr "Claw settings saved."
+
+msgid "web.admin.toast.claw.unchanged"
+msgstr "Nothing changed in the Claw's settings."
+
+msgid "web.admin.toast.claw.pool"
+msgstr "Claw pool saved: %(tiers)s tiers, %(entries)s entries."
+
+msgid "web.admin.audit.action.claw_settings"
+msgstr "Claw settings changed"
+
+msgid "web.admin.audit.action.claw_settings.on"
+msgstr "Claw switched on"
+
+msgid "web.admin.audit.action.claw_settings.off"
+msgstr "Claw switched off"
+
+msgid "web.admin.audit.action.claw_table"
+msgstr "Claw pool changed"
+
+msgid "web.admin.audit.claw.free"
+msgstr "Free grabs a day %(before)s → %(after)s"
+
+msgid "web.admin.audit.claw.paid"
+msgstr "Paid grabs %(before)s → %(after)s"
+
+msgid "web.admin.audit.claw.currency"
+msgstr "Paid grab currency %(before)s → %(after)s"
+
+msgid "web.admin.audit.claw.price"
+msgstr "Paid grab %(before)s → %(after)s"
+
+msgid "web.admin.audit.claw.feed"
+msgstr "Feed %(before)s → %(after)s"
+
+msgid "web.admin.audit.claw.length"
+msgstr "Rare prizes listed %(before)s → %(after)s"
+
+msgid "web.admin.audit.claw.rare"
+msgstr "Rare tiers %(before)s → %(after)s"

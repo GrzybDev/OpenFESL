@@ -1,4 +1,4 @@
-from collections.abc import Sequence
+from collections.abc import Collection, Sequence
 from typing import Any
 
 from sqlalchemy import delete, select, update
@@ -47,6 +47,7 @@ class SqlBoxStore:
         worth_rule: bool,
         details: dict[str, Any],
         admin: Admin,
+        rare: Collection[int] = (),
     ) -> None:
         """Replace a box's drop table and record the change among the admin's actions.
 
@@ -57,6 +58,7 @@ class SqlBoxStore:
             worth_rule: Whether it promises that every entry is worth its price.
             details: What the admin's log keeps of the change.
             admin: The admin who saved it.
+            rare: The numbers of the tiers whose drops are rare, as the Claw marks them.
         """
         async with self._sessions.begin() as session:
             game = await session.scalar(select(StoreBoxRow.game).where(StoreBoxRow.id == box.id))
@@ -82,6 +84,7 @@ class SqlBoxStore:
                             "product_id": number,
                             "tier": tier,
                             "weight": weights[tier],
+                            "rare": tier in rare,
                         }
                         for number, tier in drops.items()
                     ],
@@ -89,7 +92,8 @@ class SqlBoxStore:
             await session.execute(
                 update(StoreBoxRow).where(StoreBoxRow.id == box.id).values(worth_rule=worth_rule)
             )
-            session.add(action_row(AdminAction.BOX_TABLE, f"{game}:{box.key}", details, admin))
+            action = AdminAction.CLAW_TABLE if box.kind == "claw" else AdminAction.BOX_TABLE
+            session.add(action_row(action, f"{game}:{box.key}", details, admin))
 
     async def switch(self, game: str, box: Box, enabled: bool, admin: Admin) -> None:
         """Put a box on sale or take it off, or let keys open a chest or not, and record it.

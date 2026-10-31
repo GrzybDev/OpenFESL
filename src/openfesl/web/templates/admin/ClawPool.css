@@ -1,0 +1,109 @@
+/* The Daily Claw's prizes: each tier's bar with its rare mark and weight, entries with how they
+   are owned and whom they fit, the sum of the weights, and beside them the chances of a hero of
+   the faction and class picked from two rows of tiles. */
+@layer pages {
+  .claw-tier-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+  }
+
+  .claw-rare-mark {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    text-transform: uppercase;
+  }
+
+  .claw-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns: minmax(220px, 1.4fr) 120px minmax(170px, 1fr);
+    gap: 2px;
+
+    &:nth-child(even) {
+      --cell: var(--row-alt);
+    }
+  }
+
+  .claw-columns-edit {
+    grid-template-columns: minmax(220px, 1.4fr) 120px minmax(170px, 1fr) 120px;
+  }
+
+  .claw-fits {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .claw-sum {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+  }
+
+  .claw-sum-off {
+    color: #8c1e18;
+  }
+
+  .claw-picks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 2px;
+    margin-top: 2px;
+  }
+
+  .claw-pick {
+    display: grid;
+    min-height: 48px;
+    place-items: center;
+    background: var(--ink);
+    color: #fff;
+    font-weight: 800;
+    text-transform: uppercase;
+
+    &[aria-current="true"] {
+      background: var(--accent);
+      color: var(--ink);
+    }
+  }
+
+  .claw-odds-table {
+    margin-top: 10px;
+  }
+
+  .claw-odds-row {
+    display: grid;
+    grid-template-columns: 100px 1fr auto;
+    gap: 2px;
+    margin-bottom: 2px;
+
+    > div {
+      padding: 6px 10px;
+      background: var(--row);
+      color: var(--ink);
+    }
+  }
+
+  .claw-odds-tier {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .claw-odds-share {
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (width < 40rem) {
+    .claw-columns,
+    .claw-columns-edit {
+      grid-template-columns: 1fr;
+    }
+  }
+}

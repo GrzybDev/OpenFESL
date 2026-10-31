@@ -1,0 +1,23 @@
+{#def of, claw #}
+{# The Claw's grabs of the rewards' day so far: free, paid, and what the paid ones cost. #}
+{% set free, paid, spent = claw.counts %}
+<dl class="claw-today">
+  <div>
+    <dt>{{ _("web.admin.boxes.claw.today.free") }}</dt>
+    <dd>
+      {{ number(free) }}
+    </dd>
+  </div>
+  <div>
+    <dt>{{ _("web.admin.boxes.claw.today.paid") }}</dt>
+    <dd>
+      {{ number(paid) }}
+    </dd>
+  </div>
+  <div>
+    <dt>{{ _("web.admin.boxes.claw.today.spent", currency=_("games." ~ of.id ~ ".currency." ~ claw.rules.paid.currency)) }}</dt>
+    <dd>
+      {{ number(spent) }}
+    </dd>
+  </div>
+</dl>

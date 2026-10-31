@@ -13,6 +13,7 @@ from openfesl.web.admin.auth import AdminSessions, NeedsRole, SignInNeeded, Sign
 from openfesl.web.admin.box_tables import box_table_routes
 from openfesl.web.admin.boxes import BoxAdminViews, box_routes
 from openfesl.web.admin.catalogues import catalogue_routes
+from openfesl.web.admin.claw import claw_routes
 from openfesl.web.admin.deal_home import DealHomeViews, deal_home_routes
 from openfesl.web.admin.deal_log import log_routes
 from openfesl.web.admin.deal_offers import DealOfferViews, offer_routes
@@ -88,7 +89,14 @@ def include_admin_routes(
     store_views = StoreAdminViews(
         games, services.catalogues, stores.prices, stores.settings, services.feed.apply
     )
-    box_views = BoxAdminViews(store_views, services.catalogues, services.deals, stores.boxes)
+    box_views = BoxAdminViews(
+        store_views,
+        services.catalogues,
+        services.deals,
+        stores.boxes,
+        services.claw,
+        stores.settings,
+    )
     deal_steps = DealSteps(services.deals, stores.deals)
     deal_views = DealAdminViews(
         store_views, services.deals, deal_steps, stores.settings, services.catalogues
@@ -195,6 +203,7 @@ def include_admin_routes(
     app.include_router(store_rule_routes(sign_in, store_views))
     app.include_router(store_account_routes(sign_in, store_views))
     app.include_router(box_routes(sign_in, box_views))
+    app.include_router(claw_routes(sign_in, box_views))
     app.include_router(purchase_routes(sign_in, store_views, services.catalogues, stores.purchases))
     app.include_router(box_table_routes(sign_in, box_views))
     app.include_router(deal_routes(sign_in, deal_views))

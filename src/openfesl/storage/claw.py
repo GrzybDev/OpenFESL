@@ -136,6 +136,36 @@ class SqlClawStore:
             )
             return [_grab(row, name) for row, name in rows]
 
+    async def counts(
+        self, game: str, day: date, since: datetime, currency: str
+    ) -> tuple[int, int, int]:
+        """Return how many free and paid grabs were made on a day, and what the paid ones cost.
+
+        Args:
+            game: The game's data-file name.
+            day: The rewards' day.
+            since: When the day started.
+            currency: The currency whose spending is counted.
+        """
+        async with self._sessions() as session:
+            free, paid = (
+                await session.execute(
+                    select(
+                        func.count().filter(ClawGrabRow.free.is_not(None)),
+                        func.count().filter(ClawGrabRow.free.is_(None)),
+                    ).where(ClawGrabRow.game == game, ClawGrabRow.day == day)
+                )
+            ).one()
+            spent = await session.scalar(
+                select(func.coalesce(func.sum(PurchaseRow.price), 0)).where(
+                    PurchaseRow.game == game,
+                    PurchaseRow.kind == "claw",
+                    PurchaseRow.currency == currency,
+                    PurchaseRow.created_at >= since,
+                )
+            )
+            return int(free), int(paid), int(spent or 0)
+
 
 async def _free_count(session: AsyncSession, grab: NewGrab) -> int:
     count = await session.scalar(

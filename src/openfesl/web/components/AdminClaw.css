@@ -1,0 +1,115 @@
+/* The Daily Claw's entry on a game's boxes page: its switches as rows that end in a check box,
+   two fields side by side, the currencies as tiles, today's grabs as three numbers and the link
+   to its prizes as a black row. On phones the fields and numbers stack. */
+@layer components {
+  .admin-claw .bar > span:first-child {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* The game's id of the Claw's name, as the game's texts write it. */
+  .admin-claw .bar-extra {
+    font-family: var(--font-mono);
+    text-transform: none;
+  }
+
+  .claw-admin-form,
+  .claw-admin-off {
+    display: grid;
+    gap: 2px;
+  }
+
+  .claw-admin-off-note {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .claw-admin-shown {
+    display: grid;
+    gap: 2px;
+    margin: 0 10px 10px;
+    padding: 10px 12px;
+    border: 3px dashed #000;
+    border-radius: 6px;
+    background: #e8dcc6;
+    color: #1f1712;
+    font-size: 14px;
+
+    strong {
+      font-size: 16px;
+    }
+  }
+
+  .claw-admin-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+  }
+
+  .claw-field {
+    display: grid;
+    align-content: start;
+  }
+
+  .claw-admin-day {
+    min-height: 44px;
+    margin: 0;
+    padding: 10px 12px;
+    background: var(--row-light);
+    color: var(--ink);
+  }
+
+  .claw-currencies {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .claw-today {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin: 2px 0;
+
+    div {
+      display: flex;
+      flex-direction: column-reverse;
+      padding: 8px 12px;
+      background: var(--row);
+      color: var(--ink);
+    }
+
+    dd {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    dt {
+      font-size: 13px;
+      font-weight: 600;
+    }
+  }
+
+  .claw-admin-pool {
+    display: flex;
+    min-height: 52px;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 2px;
+    padding: 0 14px;
+    background: var(--ink);
+    color: #fff;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  @media (width < 40rem) {
+    .claw-admin-pair,
+    .claw-today {
+      grid-template-columns: 1fr;
+    }
+  }
+}

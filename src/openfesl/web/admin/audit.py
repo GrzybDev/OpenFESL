@@ -15,6 +15,7 @@ from openfesl.core.games import Games
 from openfesl.core.personas import Persona, PersonaRecord
 from openfesl.core.servers import GameServer, Provider
 from openfesl.core.texts import localize, translate
+from openfesl.web.admin.audit_claw import claw_entry
 from openfesl.web.admin.audit_codes import code_entry
 from openfesl.web.admin.audit_heroes import (
     count_entry,
@@ -66,6 +67,8 @@ GLYPHS = {
     AdminAction.STORE_RULE: "retry",
     AdminAction.STORE_ACCOUNT: "edit",
     AdminAction.BOX_TABLE: "box",
+    AdminAction.CLAW_SETTINGS: "claw",
+    AdminAction.CLAW_TABLE: "claw",
     AdminAction.DEAL_SECTION: "edit",
     AdminAction.DEAL_ART: "edit",
     AdminAction.DEAL_OFFER: "deal",
@@ -466,6 +469,10 @@ async def _rows(
             AdminAction.REWARD_EVENT,
         ):
             kind, shown, href, said = reward_entry(action, target, details, games, language)
+        elif action in (AdminAction.CLAW_SETTINGS, AdminAction.CLAW_TABLE):
+            kind, shown, href, said = await claw_entry(
+                action, target, details, games, catalogues, language
+            )
         elif action in (AdminAction.REFERRAL_SETTINGS, AdminAction.REFERRAL_REMOVED):
             kind, shown, href, said = await referral_entry(
                 action, target, details, games, catalogues, language

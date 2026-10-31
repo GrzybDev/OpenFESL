@@ -1,3 +1,4 @@
+from collections.abc import Collection
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from fractions import Fraction
@@ -7,16 +8,20 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.exceptions import HTTPException
 
+from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin, Role
 from openfesl.core.box_tables import BoxStore, TableEntry, expected
 from openfesl.core.calendar import Window, today
 from openfesl.core.catalogues import Catalogue, Catalogues, game_text
+from openfesl.core.claw import Claw
 from openfesl.core.deal_rules import DealRules, OfferSection
 from openfesl.core.deals import HotDeals
 from openfesl.core.drops import Box, below_value, worth
 from openfesl.core.games import Game
+from openfesl.core.policies import SettingStore
 from openfesl.core.store import ListedBundle, Product
 from openfesl.web.admin.auth import AdminSessions, back_to
+from openfesl.web.admin.claw_panel import ClawForm, claw_panel
 from openfesl.web.admin.store import SECTION, StoreAdminViews, store_url
 from openfesl.web.sessions import check_form, toast
 from openfesl.web.store_texts import StoreTexts
@@ -108,7 +113,13 @@ class BoxAdminViews:
     """Puts together what the admin panel shows of the boxes and chests of the games' stores."""
 
     def __init__(
-        self, stores: StoreAdminViews, catalogues: Catalogues, deals: HotDeals, boxes: BoxStore
+        self,
+        stores: StoreAdminViews,
+        catalogues: Catalogues,
+        deals: HotDeals,
+        boxes: BoxStore,
+        claw: Claw,
+        settings: SettingStore,
     ) -> None:
         """Read the boxes, the hot deals that sell them and the catalogues that name them.
 
@@ -117,11 +128,15 @@ class BoxAdminViews:
             catalogues: The games' imported catalogues.
             deals: The hot deals, whose offers name and sell the boxes.
             boxes: Where the boxes and their drop tables are kept.
+            claw: Runs the games' Daily Claws, whose prizes are a box.
+            settings: The instance's settings, which change the Claws.
         """
         self.stores = stores
+        self.claw = claw
         self._catalogues = catalogues
         self._deals = deals
         self._boxes = boxes
+        self._settings = settings
 
     async def rows(self, game: Game, language: str) -> tuple[Catalogue, list[BoxRow]]:
         """Return a game's catalogue and its store's boxes, those the hot deals sell first.
@@ -199,6 +214,7 @@ class BoxAdminViews:
         worth_rule: bool,
         details: dict[str, Any],
         admin: Admin,
+        rare: Collection[int] = (),
     ) -> None:
         """Replace a box's drop table and record the change among the admin's actions.
 
@@ -209,8 +225,23 @@ class BoxAdminViews:
             worth_rule: Whether it promises that every entry is worth its price.
             details: What the admin's log keeps of the change.
             admin: The admin who saved it.
+            rare: The numbers of the tiers whose drops are rare, as the Claw marks them.
         """
-        await self._boxes.save_table(box, weights, entries, worth_rule, details, admin)
+        await self._boxes.save_table(box, weights, entries, worth_rule, details, admin, rare)
+
+    async def change_claw(
+        self, game: Game, settings: dict[str, str | None], details: dict[str, Any], admin: Admin
+    ) -> None:
+        """Change a game's Claw's settings together and record them as one action.
+
+        Args:
+            game: The game, which is the action's target.
+            settings: The settings' new values by key below the game's Claw; None removes one.
+            details: What the admin's log keeps of the change.
+            admin: The admin who changed them.
+        """
+        keyed = {f"{game.id}.claw.{key}": value for key, value in settings.items()}
+        await self._settings.change_all(keyed, AdminAction.CLAW_SETTINGS, game.id, details, admin)
 
     async def switch(self, game: Game, box: Box, enabled: bool, admin: Admin) -> None:
         """Put a box on sale or take it off, or let keys open a chest or not, and record it.
@@ -268,6 +299,46 @@ def tiers(box: Box, catalogue: Catalogue) -> list[TierView]:
     ]
 
 
+async def boxes_page(
+    sessions: AdminSessions,
+    views: BoxAdminViews,
+    request: Request,
+    admin: Admin,
+    game: Game,
+    claw: ClawForm | None = None,
+) -> HTMLResponse:
+    """Return a game's boxes and chests page, with its Claw as saved or as a refused save sent it.
+
+    Args:
+        sessions: Signs admins in and renders the panel's pages.
+        views: Put together what the page shows.
+        request: The request the page answers.
+        admin: The admin who reads it.
+        game: The game, which has a store.
+        claw: The Claw's settings' form of a refused save; the saved settings when none.
+    """
+    language = request.state.language
+    catalogue, rows = await views.rows(game, language)
+    groups: dict[str, list[BoxRow]] = {}
+    # The Claw's prizes are no box players buy or open; the Claw has its own entry.
+    for row in (row for row in rows if row.box.kind != "claw"):
+        key = CHEST if row.box.kind != "box" else row.section or OTHER
+        groups.setdefault(key, []).append(row)
+    return await sessions.render(
+        request,
+        "admin.StoreBoxes",
+        400 if claw else 200,
+        admin=admin,
+        of=game,
+        catalogue=catalogue,
+        groups=groups,
+        deals=await views.deal_rules(game),
+        chests=(await views.stores.account_rules(game)).chests,
+        claw=await claw_panel(views.claw, game, catalogue, language, claw),
+        manages=admin.role is Role.ADMIN,
+    )
+
+
 def box_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter:
     """Return the boxes and chests of each game's store, and their switches.
 
@@ -282,25 +353,8 @@ def box_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter:
 
     @router.get("/admin/store/{game_id}/boxes", response_class=HTMLResponse)
     async def boxes(request: Request, game_id: str) -> HTMLResponse:
-        admin = sessions.admin(request)
         game = views.stores.game(game_id)
-        catalogue, rows = await views.rows(game, request.state.language)
-        groups: dict[str, list[BoxRow]] = {}
-        # The Claw's prizes are no box players buy or open.
-        for row in (row for row in rows if row.box.kind != "claw"):
-            key = CHEST if row.box.kind != "box" else row.section or OTHER
-            groups.setdefault(key, []).append(row)
-        return await sessions.render(
-            request,
-            "admin.StoreBoxes",
-            admin=admin,
-            of=game,
-            catalogue=catalogue,
-            groups=groups,
-            deals=await views.deal_rules(game),
-            chests=(await views.stores.account_rules(game)).chests,
-            manages=admin.role is Role.ADMIN,
-        )
+        return await boxes_page(sessions, views, request, sessions.admin(request), game)
 
     @router.post("/admin/store/{game_id}/boxes/{box_id}/switch")
     async def switch(request: Request, game_id: str, box_id: int) -> Response:

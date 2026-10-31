@@ -1,4 +1,4 @@
-from collections.abc import Sequence
+from collections.abc import Collection, Sequence
 from dataclasses import dataclass
 from enum import StrEnum
 from fractions import Fraction
@@ -80,6 +80,7 @@ class BoxStore(Protocol):
         worth_rule: bool,
         details: dict[str, Any],
         admin: Admin,
+        rare: Collection[int] = (),
     ) -> None:
         """Replace a box's drop table and record the change among the admin's actions.
 
@@ -90,6 +91,7 @@ class BoxStore(Protocol):
             worth_rule: Whether it promises that every entry is worth its price.
             details: What the admin's log keeps of the change.
             admin: The admin who saved it.
+            rare: The numbers of the tiers whose drops are rare, as the Claw marks them.
         """
 
     async def switch(self, game: str, box: Box, enabled: bool, admin: Admin) -> None:

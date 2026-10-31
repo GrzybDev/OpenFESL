@@ -1,0 +1,144 @@
+{#def of, claw, manages: bool #}
+{# The Daily Claw on a game's boxes page: whether it runs, its free grabs a day
+   from the rewards' day start, its paid grabs with their currency and price, its feed of rare
+   prizes, today's grabs and the link to its prizes. Admins change it with a note; a refusal
+   stands under its field and nothing is saved. Moderators read it. #}
+{% set game = of %}
+{% set values = claw.form.values %}
+{% set refused = claw.form.refused %}
+{% set base = url("/admin/store/" ~ game.id) %}
+{% set pool = base ~ "/boxes/" ~ claw.box.id if claw.box else "" %}
+{% set rules = claw.rules %}
+{% macro error(name) %}
+  {% if name in refused %}<FieldError :id="'claw-' ~ name ~ '-why'">{{ refused[name] }}</FieldError>{% endif %}
+{% endmacro %}
+{% macro invalid(name) %}
+  {%- if name in refused %} aria-invalid="true" aria-describedby="claw-{{ name }}-why"{% endif -%}
+{% endmacro %}
+{% macro check(name, title, text) %}
+  <label class="check-row prices-off-row">
+    <span class="prices-off-text">
+      <span class="prices-off-title">{{ title }}</span>
+      <span>{{ text }}</span>
+    </span>
+    <span class="check-place">
+      <input type="checkbox"
+             name="{{ name }}"
+             value="1"
+             {% if values[name] %} checked{% endif %}
+             class="check">
+      <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>
+  </label>
+{% endmacro %}
+{% macro number_field(name, label) %}
+  <div class="claw-field">
+    <label for="claw-{{ name }}" class="field-label field-label-joined">{{ label }}</label>
+    <input id="claw-{{ name }}"
+           name="{{ name }}"
+           type="text"
+           inputmode="numeric"
+           value="{{ values[name] }}"
+           maxlength="10"
+           required
+           {{ invalid(name) }}
+           class="field-input{% if name in refused %} field-invalid{% endif %}">
+    {{ error(name) }}
+  </div>
+{% endmacro %}
+<section aria-labelledby="boxes-claw" class="admin-claw">
+  <Bar id="boxes-claw" :extra="rules.name" wrap>
+  <Icon name="claw" :size="16" stroke="currentColor" />{{ claw.name }}</Bar>
+  {% if not rules.enabled %}
+    <div class="claw-admin-off">
+      <p class="bar-text claw-admin-off-note">
+        <span aria-hidden="true"
+              class="badge"><Icon name="window-closed" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.boxes.claw.off") }}
+      </p>
+      <p class="claw-admin-shown">
+        <strong>{{ _("web.claw.off") }}</strong><span>{{ _("web.claw.off.text") }}</span>
+      </p>
+    </div>
+  {% endif %}
+  {% if manages %}
+    <form method="post" action="{{ base }}/claw" class="claw-admin-form">
+      <CsrfField />
+      {{ check("runs", _("web.admin.boxes.claw.run"), _("web.admin.boxes.claw.run.text")) }}
+      <div class="claw-admin-pair">
+        {{ number_field("free", _("web.admin.boxes.claw.free")) }}
+        <div class="claw-field">
+          <span class="field-label field-label-joined">{{ _("web.admin.boxes.claw.day") }}</span>
+          <p class="claw-admin-day">
+            {{ claw.day }} · <a href="{{ url('/admin/settings') }}#zone-{{ game.id }}"
+    class="bar-link">{{ _("web.admin.boxes.claw.day.link") }}</a>
+          </p>
+        </div>
+      </div>
+      {{ check("paid", _("web.admin.boxes.claw.paid"), _("web.admin.boxes.claw.paid.text")) }}
+      <p id="claw-currency" class="field-label field-label-joined">{{ _("web.admin.boxes.claw.currency") }}</p>
+      <div role="radiogroup"
+           aria-labelledby="claw-currency"
+           {{ invalid("currency") }}
+           class="choice-tiles claw-currencies">
+        {% for code in claw.currencies %}
+          <ChoiceTile name="currency" :value="code" :title="_('games.' ~ game.id ~ '.currency.' ~ code)" :glyph="'coin' if loop.first else 'valor'" :checked="values.currency == code">
+          {% if game.claw and code == game.claw.paid.currency %}
+            <span class="choice-text">{{ _("web.admin.boxes.claw.currency.data", price=number(game.claw.paid.price)) }}</span>
+          {% endif %}
+          </ChoiceTile>
+        {% endfor %}
+      </div>
+      {{ error("currency") }}
+      {{ number_field("price", _("web.admin.boxes.claw.price")) }}
+      <p class="bar-text body-text">{{ _("web.admin.boxes.claw.price.note") }}</p>
+      {{ check("feed", _("web.admin.boxes.claw.feed"), _("web.admin.boxes.claw.feed.text")) }}
+      {{ error("feed") }}
+      {{ number_field("length", _("web.admin.boxes.claw.feed.length")) }}
+      <ClawToday :of="game" :claw="claw" />
+      <div class="claw-field">
+        <label for="claw-note" class="field-label field-label-joined">{{ _("web.admin.note") }}</label>
+        <input id="claw-note"
+               name="note"
+               type="text"
+               value="{{ values.get('note', '') }}"
+               required
+               maxlength="300"
+               autocomplete="off"
+               {{ invalid("note") }}
+               class="field-input{% if 'note' in refused %} field-invalid{% endif %}">
+        {{ error("note") }}
+      </div>
+      <div class="prices-save">
+        <SmallAction :label="_('web.admin.boxes.claw.save')" :busy="_('web.admin.store.save.busy')" />
+      </div>
+    </form>
+  {% else %}
+    <dl class="facts">
+      <Fact :label="_('web.admin.boxes.claw.run')" plain>
+        {{ _("web.admin.boxes.claw.yes" if rules.enabled else "web.admin.boxes.claw.no") }}
+      </Fact>
+      <Fact :label="_('web.admin.boxes.claw.free')" plain>
+        {{ _("web.admin.boxes.claw.free.from", count=number(rules.free), time=claw.day) }}
+      </Fact>
+      <Fact :label="_('web.admin.boxes.claw.paid')" plain>
+        {% if rules.paid.enabled %}
+          {{ _("web.admin.boxes.claw.yes") }} · {{ number(rules.paid.price) }} {{ _("games." ~ game.id ~ ".currency." ~ rules.paid.currency) }}
+        {% else %}
+          {{ _("web.admin.boxes.claw.no") }}
+        {% endif %}
+      </Fact>
+      <Fact :label="_('web.admin.boxes.claw.feed')" plain>
+        {{ _("web.admin.boxes.claw.yes") ~ " · " ~ number(rules.feed.length) if rules.feed.enabled else _("web.admin.boxes.claw.no") }}
+      </Fact>
+    </dl>
+    <ClawToday :of="game" :claw="claw" />
+    <p class="bar-text account-role-note">
+      <span aria-hidden="true"
+            class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.boxes.claw.moderator") }}
+    </p>
+  {% endif %}
+  {% if pool %}
+    <a href="{{ pool }}" class="claw-admin-pool">
+      <span>{{ _("web.admin.boxes.claw.pool", tiers=number(claw.tiers), entries=number(claw.box.drops|length)) }}</span><Icon name="go" :size="16" stroke="currentColor" />
+      </a>
+  {% endif %}
+</section>

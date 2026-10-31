@@ -1,8 +1,9 @@
-{#def of, catalogue, groups: dict, deals, chests, manages: bool #}
+{#def of, catalogue, groups: dict, deals, chests, claw, manages: bool #}
 {# A game's boxes and chests: the drops worth less than their box's price,
    which rolls skip, then each box by the hot deals' section that sells it with when it is sold,
    its price, its sale switch, what it gives on average against the price and its drops, beside
-   the themed rotation and the treasure chest with the switch that lets keys open it. #}
+   the themed rotation, the treasure chest with the switch that lets keys open it, and the Daily
+   Claw. #}
 {% set game = of %}
 {% set base = url("/admin/store/" ~ game.id ~ "/boxes") %}
 {% set flagged = groups.values()|sum(start=[])|selectattr("below")|list %}
@@ -166,6 +167,7 @@
             </dl>
           </section>
         {% endif %}
+        {% if claw %}<AdminClaw :of="game" :claw="claw" :manages="manages" />{% endif %}
         <section aria-labelledby="boxes-players">
           <Bar id="boxes-players">{{ _("web.admin.boxes.players") }}</Bar>
           <p class="bar-text body-text">{{ _("web.admin.boxes.players.text") }}</p>

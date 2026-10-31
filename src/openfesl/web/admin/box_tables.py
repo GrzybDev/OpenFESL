@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
+from babel import Locale
+from babel.numbers import format_percent
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.exceptions import HTTPException
@@ -14,7 +16,9 @@ from openfesl.core.drops import Box
 from openfesl.core.games import Game
 from openfesl.core.inventory import Ownership
 from openfesl.core.store import Product
+from openfesl.core.store_items import requirement
 from openfesl.core.store_prices import ItemPrices
+from openfesl.core.texts import translate
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.boxes import BoxAdminViews, BoxRow, Entry, tiers
 from openfesl.web.admin.store import SECTION, store_url
@@ -84,6 +88,8 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
         game, catalogue, row = await found(request, game_id, box_id)
         fallback = row.box.fallback
         query = request.query_params.get("q", "").strip()[:64]
+        if row.box.kind == "claw":
+            return await claw_page(request, admin, game, catalogue, row, query, form, refused)
         return await sessions.render(
             request,
             "admin.StoreBox",
@@ -107,6 +113,58 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
             refused=refused,
         )
 
+    async def claw_page(
+        request: Request,
+        admin: Admin,
+        game: Game,
+        catalogue: Catalogue,
+        row: BoxRow,
+        query: str,
+        form: Mapping[str, str] | None,
+        refused: str,
+    ) -> HTMLResponse:
+        # The Claw's prizes: its tiers with their names and rare marks, each entry
+        # with whom it fits, and the chances of a hero of the faction and class chosen.
+        assert game.heroes is not None and game.claw is not None
+        texts = StoreTexts(game, request.state.language, datetime.now(UTC))
+        faction = request.query_params.get("faction", "")
+        faction = faction if faction in game.heroes.factions else next(iter(game.heroes.factions))
+        kind = request.query_params.get("class", "")
+        kind = kind if kind in game.heroes.classes else next(iter(game.heroes.classes))
+        fits = {}
+        for drop in row.box.drops:
+            item = catalogue.item(drop.product.item_id)
+            fits[drop.product.id] = texts.requires(requirement(game, item)) if item else ""
+        withheld = catalogue.item(int(query)) if query.isascii() and query.isdecimal() else None
+        locale = Locale.parse(translate("web.locale", texts.language))
+        return await sessions.render(
+            request,
+            "admin.ClawPool",
+            400 if refused else 200,
+            admin=admin,
+            of=game,
+            catalogue=catalogue,
+            row=row,
+            tiers=tiers(row.box, catalogue),
+            names=[tier.name for tier in game.claw.tiers],
+            rare={drop.tier for drop in row.box.drops if drop.rare},
+            fits=fits,
+            faction=faction,
+            hero_class=kind,
+            preview=[
+                (prize, str(format_percent(float(prize.chance), "#,##0.##%", locale=locale)))
+                for prize in await views.claw.preview(game, faction, kind)
+            ],
+            manages=admin.role is Role.ADMIN,
+            query=query,
+            candidates=await _candidates(views, game, catalogue, row, query, request)
+            if query
+            else [],
+            withheld=withheld.id if withheld and withheld.withheld else None,
+            form=dict(form or {}),
+            refused=refused,
+        )
+
     async def saved(
         request: Request,
         admin: Admin,
@@ -120,10 +178,20 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
     ) -> Response:
         box = row.box
         texts = StoreTexts(game, request.state.language, datetime.now(UTC))
+        claw = box.kind == "claw"
+        rare = {tier for tier in range(len(weights)) if form.get(f"rare-{tier}")} if claw else set()
         try:
             check_table(box, weights, entries, worth_rule, row.promised)
         except TableRefused as refused:
             why = _why(texts, catalogue, row, weights, refused)
+            return await page(request, admin, game.id, box.id, form, why)
+        rules = await views.claw.rules(game) if claw else None
+        if rules and rules.feed.enabled and not rare & {entry.tier for entry in entries}:
+            why = texts.text("web.admin.boxes.claw.refused.no_rare")
+            return await page(request, admin, game.id, box.id, form, why)
+        note = form.get("note", "").strip()
+        if claw and "weight-0" in form and not note:
+            why = texts.text("web.admin.keys.refused.note")
             return await page(request, admin, game.id, box.id, form, why)
         before = {(drop.product.item_id, drop.product.ownership.written) for drop in box.drops}
         after = {(entry.item_id, entry.ownership.written) for entry in entries}
@@ -135,14 +203,22 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
             "added": sorted(after - before),
             "worth": [box.worth_rule, worth_rule],
         }
+        was = sorted({drop.tier for drop in box.drops if drop.rare})
+        if claw:
+            details |= {"rare": [was, sorted(rare)], "note": note}
         if (
             details["removed"]
             or details["added"]
             or _weights(box) != weights
             or (box.worth_rule != worth_rule)
+            or (claw and was != sorted(rare))
         ):
-            await views.save_table(box, weights, entries, worth_rule, details, admin)
-            toast(request, "web.admin.toast.boxes.saved", box=row.name)
+            await views.save_table(box, weights, entries, worth_rule, details, admin, rare)
+            if claw:
+                tiers = str(sum(1 for weight in weights if weight))
+                toast(request, "web.admin.toast.claw.pool", tiers=tiers, entries=str(len(entries)))
+            else:
+                toast(request, "web.admin.toast.boxes.saved", box=row.name)
         else:
             toast(request, "web.admin.toast.boxes.unchanged", box=row.name)
         return RedirectResponse(store_url(request, game, f"/boxes/{box.id}"), 303)
@@ -198,6 +274,8 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
         assert isinstance(ownership, Ownership)
         entries = [_entry(drop.tier, drop.product, box.currency) for drop in box.drops]
         entries.append(TableEntry(int(tier), chosen.item.id, ownership, option.price, None))
+        # An entry added keeps the tiers' rare marks.
+        fields |= {f"rare-{drop.tier}": "1" for drop in box.drops if drop.rare}
         return await saved(
             request, admin, game, catalogue, row, _weights(box), entries, box.worth_rule, fields
         )
