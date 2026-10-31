@@ -11831,6 +11831,33 @@ msgstr "Change %(section)s"
 msgid "web.admin.deals.next_note"
 msgstr "Changes apply from each section's next step; what is on sale now stays until then. Times are in %(zone)s."
 
+msgid "web.admin.deals.preview"
+msgstr "Preview the next step"
+
+msgid "web.admin.deals.preview.hide"
+msgstr "Hide the preview"
+
+msgid "web.admin.deals.preview.comes"
+msgstr "Comes in"
+
+msgid "web.admin.deals.preview.leaves"
+msgstr "Leaves"
+
+msgid "web.admin.deals.preview.nothing"
+msgstr "Nothing"
+
+msgid "web.admin.deals.preview.none"
+msgstr "No step ahead: the section is off or has none to come."
+
+msgid "web.admin.deals.preview.line"
+msgstr "%(name)s · %(whom)s · %(price)s"
+
+msgid "web.admin.deals.preview.short"
+msgstr "%(faction)s: only %(count)s of %(size)s, as too few are left to pick from."
+
+msgid "web.admin.deals.preview.note"
+msgstr "What each section's next step brings and ends as things stand now; a change to a section, its pool, a price or another section's step before then can change it."
+
 msgid "web.admin.deals.seasons"
 msgstr "Seasonal windows %(year)s"
 

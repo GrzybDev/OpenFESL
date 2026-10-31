@@ -8,17 +8,20 @@ from starlette.exceptions import HTTPException
 
 from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin, Role
-from openfesl.core.calendar import Window, next_start, today
-from openfesl.core.deal_rules import DealRules, DealSection, OfferSection
+from openfesl.core.calendar import Window, today
+from openfesl.core.catalogues import Catalogues, game_text
+from openfesl.core.deal_rules import DealRules, DealSection, ItemSection, OfferSection
+from openfesl.core.deal_steps import DealSteps, next_change, short
 from openfesl.core.deal_uploads import DealUploads, offer_of
 from openfesl.core.deals import Deal, HotDeals
 from openfesl.core.games import Game
 from openfesl.core.policies import SettingStore
-from openfesl.core.store import AUTO, ListedBundle
+from openfesl.core.store import AUTO, Bundle, ListedBundle
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.store import SECTION, StoreAdminViews, store_url
 from openfesl.web.deal_art import DealArt
 from openfesl.web.sessions import check_form, toast
+from openfesl.web.store_texts import StoreTexts
 
 # How many deals the game's home screen shows, of which the first ones big.
 HOME = 5
@@ -82,6 +85,21 @@ class SeasonView:
 
 
 @dataclass(frozen=True, slots=True)
+class StepView:
+    """A section's next step as the rotation page previews it, a line for each deal.
+
+    Attributes:
+        comes: The deals it brings that are not on sale now.
+        leaves: The deals on sale now that it ends and does not bring again.
+        short: The factions it brings fewer deals of than the section's size.
+    """
+
+    comes: list[str]
+    leaves: list[str]
+    short: list[str]
+
+
+@dataclass(frozen=True, slots=True)
 class Rotation:
     """A game's hot-deal rotation as its page in the panel shows it.
 
@@ -107,20 +125,26 @@ class DealAdminViews:
         self,
         stores: StoreAdminViews,
         deals: HotDeals,
+        steps: DealSteps,
         settings: SettingStore,
         art: DealArt,
         uploads: DealUploads,
+        catalogues: Catalogues,
     ) -> None:
         """Read the rotations and change them through the instance's settings.
 
         Args:
             stores: Name the games with stores.
             deals: The hot deals, which run the rotations.
+            steps: The rotations' steps, of which the page previews the next.
             settings: The instance's settings, which override the rotations' game data.
             art: Draws the deals' pictures, or gives the uploaded ones.
             uploads: Where the pictures that the admin uploaded are kept.
+            catalogues: The games' imported catalogues, which name the deals of a preview.
         """
         self.stores = stores
+        self.steps = steps
+        self._catalogues = catalogues
         self._deals = deals
         self._settings = settings
         self.art = art
@@ -172,23 +196,85 @@ class DealAdminViews:
         assert game.deals is not None
         listed = await self._deals.current(game)
         now = datetime.now(UTC)
-        factions = list(game.heroes.factions) if game.heroes else []
         rows = []
         for key, section in rules.sections.items():
             mine = [found for found in listed if found.bundle.section == key]
-            schedule = section.schedule
-            upcoming = next_start(schedule, now, rules.zone) if schedule else None
+            own = [found.bundle for found in mine if found.bundle.source == AUTO]
+            latest = max((bundle.starts for bundle in own if bundle.starts), default=None)
+            runs = rules.enabled and section.enabled and latest is not None
+            fewer = short(game, section, [b for b in own if b.starts == latest]) if runs else {}
             rows.append(
                 SectionRow(
                     key,
                     section,
                     game.deals.sections[key],
                     len(mine),
-                    upcoming,
-                    _short(section, mine, factions) if rules.enabled and section.enabled else {},
+                    next_change(rules, section, now),
+                    fewer,
                 )
             )
         return Rotation(rules, game.deals, rows, _seasons(rules, now), listed)
+
+    async def preview(self, game: Game, language: str) -> dict[str, StepView]:
+        """Return what each running section's next step brings and ends, by section.
+
+        A deal that the step ends and brings again is neither.
+
+        Args:
+            game: The game, which has hot deals.
+            language: The language of the deals' names.
+        """
+        rules = await self.rules(game)
+        now = datetime.now(UTC)
+        texts = StoreTexts(game, language, now)
+        catalogue = await self._catalogues.of(game, language)
+        whose = {
+            faction: texts.factions(frozenset({faction}))
+            for faction in (game.heroes.factions if game.heroes else ())
+        }
+
+        def line(
+            section: DealSection, bundle: Bundle, items: list[int]
+        ) -> tuple[tuple[object, ...], str]:
+            # A deal by what tells it from others and in words.
+            if isinstance(section, ItemSection):
+                name = ", ".join(catalogue.name(item) or str(item) for item in items)
+            else:
+                name = game_text(game, catalogue, bundle.name, language, bundle.faction)
+            said = texts.text(
+                "web.admin.deals.preview.line",
+                name=name,
+                whom=whose.get(bundle.faction or "", texts.text("web.admin.deals.pool.any")),
+                price=texts.priced(bundle.price, bundle.currency),
+            )
+            return (bundle.pool, bundle.faction, tuple(sorted(items))), said
+
+        found = {}
+        for key, step in (await self.steps.preview(game)).items():
+            section = rules.sections[key]
+            new = [
+                line(section, deal.bundle, [product.item_id for product in deal.products])
+                for deal in step.deals
+            ]
+            old = [
+                line(section, ending.bundle, [member.item_id for member in ending.members])
+                for ending in step.ending
+            ]
+            made, kept = {deal for deal, _ in new}, {deal for deal, _ in old}
+            found[key] = StepView(
+                [said for deal, said in new if deal not in kept],
+                [said for deal, said in old if deal not in made],
+                [
+                    texts.text(
+                        "web.admin.deals.preview.short",
+                        faction=whose[faction],
+                        count=texts.amount(count),
+                        size=texts.amount(section.size or 0),
+                    )
+                    for faction, count in step.short.items()
+                ],
+            )
+        return found
 
     async def shown(self, game: Game, section: str) -> dict[str, datetime]:
         """Return when the rotation last brought each offer of a section, by its picked name.
@@ -246,10 +332,10 @@ def deal_routes(sessions: AdminSessions, views: DealAdminViews) -> APIRouter:
     router = APIRouter()
 
     @router.get("/admin/store/{game_id}/deals", response_class=HTMLResponse)
-    async def deals(request: Request, game_id: str) -> HTMLResponse:
+    async def deals(request: Request, game_id: str, preview: bool = False) -> HTMLResponse:
         admin = sessions.admin(request)
         game = views.stores.game(game_id)
-        return await deal_page(sessions, views, request, admin, game)
+        return await deal_page(sessions, views, request, admin, game, preview=preview)
 
     @router.post("/admin/store/{game_id}/deals/rotation")
     async def switch(request: Request, game_id: str) -> Response:
@@ -278,6 +364,7 @@ async def deal_page(
     admin: Admin,
     game: Game,
     art: tuple[int, str] | None = None,
+    preview: bool = False,
 ) -> HTMLResponse:
     """Render a game's hot-deal rotation page, with a refused picture if there is one.
 
@@ -288,7 +375,9 @@ async def deal_page(
         admin: The signed-in admin.
         game: The game, which has hot deals.
         art: The deal whose uploaded picture was refused, by its bundle's number, and why.
+        preview: Whether the page shows what each section's next step brings and ends.
     """
+    language = request.state.language
     return await sessions.render(
         request,
         "admin.StoreDeals",
@@ -296,26 +385,11 @@ async def deal_page(
         admin=admin,
         of=game,
         rotation=await views.rotation(game),
-        home=await views.home(game, request.state.language),
+        steps=await views.preview(game, language) if preview else None,
+        home=await views.home(game, language),
         art=art,
         manages=admin.role is Role.ADMIN,
     )
-
-
-def _short(section: DealSection, listed: list[ListedBundle], factions: list[str]) -> dict[str, int]:
-    # The factions that the section's latest period sells fewer of its own deals to than its
-    # size asks, where it picks a few of each faction's.
-    if section.size is None or (isinstance(section, OfferSection) and not section.sets):
-        return {}
-    own = [found for found in listed if found.bundle.source == AUTO]
-    if not own:
-        return {}
-    latest = max(found.bundle.starts or datetime.min.replace(tzinfo=UTC) for found in own)
-    counts = {faction: 0 for faction in factions}
-    for found in own:
-        if found.bundle.starts == latest and found.bundle.faction in counts:
-            counts[found.bundle.faction] += 1
-    return {faction: count for faction, count in counts.items() if count < section.size}
 
 
 def _seasons(rules: DealRules, now: datetime) -> list[SeasonView]:

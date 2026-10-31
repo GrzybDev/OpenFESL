@@ -1,8 +1,8 @@
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from functools import partial
-from random import Random, SystemRandom
+from random import Random
 from typing import Protocol
 
 from babel import Locale
@@ -47,6 +47,19 @@ class DealStore(Protocol):
             make: Makes the bundles from what the section must not repeat.
         """
 
+    async def preview(
+        self, game: str, section: str, period: Period, gap: int, make: Maker
+    ) -> list[NewDeal]:
+        """Return the bundles of a period of a section as they would be made now, keeping none.
+
+        Args:
+            game: The game's data-file name.
+            section: The section's name.
+            period: The period, which has not started.
+            gap: The days after a pick left the section before it may come back.
+            make: Makes the bundles from what the section must not repeat.
+        """
+
     async def shown(self, game: str, section: str) -> dict[str, datetime]:
         """Return when the rotation last brought each offer of a section, by its picked name.
 
@@ -82,7 +95,8 @@ class HotDeals:
 
     The rotation has no scheduler: the first look after a section's period starts makes its
     bundles, which the store keeps, so their prices hold for the period and later periods know
-    what came before.
+    what came before. A period's picks are drawn by chance seeded with the game, the section and
+    the period's start, so that a preview of a step shows what the step then brings.
     """
 
     def __init__(
@@ -91,7 +105,6 @@ class HotDeals:
         store: DealStore,
         settings: SettingStore,
         catalogues: Catalogues,
-        random: Random | None = None,
         clock: Callable[[], datetime] | None = None,
     ) -> None:
         """Run the rotation over what stores keep.
@@ -101,14 +114,12 @@ class HotDeals:
             store: Where the rotation keeps the bundles it made.
             settings: The instance's settings, which override the rotation's game data.
             catalogues: The games' imported catalogues, whose items the deals sell.
-            random: The source of chance; the system's own when none.
             clock: Tells the time; the system's own when none.
         """
         self._products = products
         self._store = store
         self._settings = settings
         self._catalogues = catalogues
-        self._random = random or SystemRandom()
         self._clock = clock or (lambda: datetime.now(UTC))
         # The periods made or found made, which later looks need not ask the store about.
         self._made: set[tuple[str, str, datetime, datetime]] = set()
@@ -204,6 +215,38 @@ class HotDeals:
         """
         return await self._store.shown(game.id, section)
 
+    async def draw(
+        self, game: Game, rules: DealRules, starts: Mapping[str, datetime]
+    ) -> dict[str, list[NewDeal]]:
+        """Return the deals that sections' periods starting at a moment bring, as made now.
+
+        The draws are those that making the periods then gives, while what they read stays as
+        it is now; nothing is kept.
+
+        Args:
+            game: The game.
+            rules: How the game's hot deals change.
+            starts: The moment of each section's periods, by section.
+
+        Returns:
+            The deals of each section; none before the game's catalogue is imported.
+        """
+        catalogue = await self._catalogues.of(game, BASE_LANGUAGE)
+        if not catalogue.imported:
+            return {}
+        priced = game.model_copy(update={"store": await store_rules(game, self._settings)})
+        drawn: dict[str, list[NewDeal]] = {}
+        for name, at in starts.items():
+            section = rules.sections[name]
+            gap = section.gap if isinstance(section, OfferSection) else 0
+            drawn[name] = []
+            for period, offers in _steps(rules, section, at):
+                if period.start == at:
+                    chance = _chance(game, name, period)
+                    make = partial(_picked, priced, rules, section, offers, catalogue, chance)
+                    drawn[name] += await self._store.preview(game.id, name, period, gap, make)
+        return drawn
+
     async def _rotate(self, game: Game, rules: DealRules, now: datetime) -> None:
         catalogue = await self._catalogues.of(game, BASE_LANGUAGE)
         if not catalogue.imported:
@@ -220,7 +263,8 @@ class HotDeals:
                 if made in self._made:
                     continue
                 gap = section.gap if isinstance(section, OfferSection) else 0
-                make = partial(_picked, game, rules, section, offers, catalogue, self._random)
+                chance = _chance(game, name, period)
+                make = partial(_picked, game, rules, section, offers, catalogue, chance)
                 await self._store.generate(game.id, name, period, gap, make)
                 self._made.add(made)
 
@@ -247,6 +291,11 @@ def _steps(
         if running := window.running(now, rules.zone):
             steps.append((running, sold))
     return steps
+
+
+def _chance(game: Game, section: str, period: Period) -> Random:
+    # The same draw for a period of a section wherever and whenever it is made.
+    return Random(f"{game.id}:{section}:{period.start.isoformat()}")
 
 
 def _picked(

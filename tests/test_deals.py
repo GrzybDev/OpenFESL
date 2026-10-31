@@ -1,10 +1,10 @@
 import asyncio
 import json
 from collections.abc import AsyncIterator
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from itertools import pairwise
 from pathlib import Path
-from random import Random
 from xml.etree import ElementTree
 
 import pytest
@@ -18,6 +18,7 @@ from support import fetch
 from openfesl.core.calendar import Schedule, periods
 from openfesl.core.catalogues import Catalogues
 from openfesl.core.deal_rules import DealRules
+from openfesl.core.deal_steps import DealSteps
 from openfesl.core.deal_uploads import offer_of
 from openfesl.core.deals import HotDeals
 from openfesl.core.games import Game, load_games
@@ -136,13 +137,13 @@ class Rotation:
         self.catalogues = Catalogues(SqlCatalogueStore(sessions), None, load_games())
         self.products = SqlProductStore(sessions)
         self.now = SUNDAY
-        # The same picks on every run.
-        self.deals = self.server(Random(20121019))
+        self.deals = self.server()
+        self.steps = DealSteps(self.deals, lambda: self.now)
 
-    def server(self, random: Random) -> HotDeals:
+    def server(self) -> HotDeals:
         """Return the hot deals as a server keeps them, which has made nothing yet."""
         store, settings = SqlDealStore(self.sessions), SqlSettingStore(self.sessions)
-        return HotDeals(self.products, store, settings, self.catalogues, random, lambda: self.now)
+        return HotDeals(self.products, store, settings, self.catalogues, lambda: self.now)
 
     async def listed(self) -> list[Line]:
         """Return the hot deals as section, name, price and original price, in order."""
@@ -167,6 +168,37 @@ async def rotation(
     await found.catalogues.load()
     yield found
     await engine.dispose()
+
+
+async def test_the_preview_of_each_sections_next_step_shows_what_the_step_brings(
+    rotation: Rotation,
+) -> None:
+    before = await rotation.listed()
+    steps = await rotation.steps.preview(rotation.game)
+    rotation.now = MONDAY
+    after = await rotation.listed()
+
+    def lines(found: list[Bundle]) -> list[Line]:
+        return [
+            (bundle.section, bundle.name, bundle.price, bundle.original_price) for bundle in found
+        ]
+
+    # The step draws what the preview drew, and ends every deal of Sunday's periods.
+    assert {key: step.at for key, step in steps.items()} == dict.fromkeys(
+        ("daily", "new", "popular"), MONDAY
+    )
+    previewed = [
+        replace(deal.bundle, section=key) for key, step in steps.items() for deal in step.deals
+    ]
+    assert sorted(lines(previewed), key=str) == sorted(after, key=str)
+    ending = [listed.bundle for step in steps.values() for listed in step.ending]
+    assert sorted(lines(ending), key=str) == sorted(before, key=str)
+    # The invented sets are all Royal, so the step of new sets falls short of National ones.
+    assert {key: step.short for key, step in steps.items()} == {
+        "daily": {},
+        "new": {"national": 0},
+        "popular": {},
+    }
 
 
 async def test_the_pool_brings_a_pinned_set_at_every_step_and_never_an_excluded_one(
@@ -312,7 +344,7 @@ async def test_switched_off_sections_are_left_out_and_without_the_rotation_admin
 async def test_two_servers_looking_at_once_make_a_period_once(
     rotation: Rotation, database_url: str
 ) -> None:
-    first, second = rotation.deals, rotation.server(Random(1))
+    first, second = rotation.deals, rotation.server()
 
     listed = await asyncio.gather(first.current(rotation.game), second.current(rotation.game))
 

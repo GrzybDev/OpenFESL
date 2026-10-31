@@ -42,6 +42,9 @@ async def test_admins_switch_the_rotation_and_change_its_sections_from_their_nex
         token = form_token((await client.get(deals)).text)
         refused = await client.post(f"{deals}/sections/sale", data={"csrf": token})
         assert refused.status_code == 403
+        previewed = visible((await client.get(deals, params={"preview": "1"})).content)
+        assert "Deal of the Day Every day Runs" in previewed and "Comes in" in previewed
+        assert "Hide the preview" in previewed and "Preview the next step" in shown
     admin_provider.user = KEEPER
     async with httpx2.AsyncClient() as client:
         token = form_token((await sign_in(client, base, next="/admin/store/bfheroes/deals")).text)

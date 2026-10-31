@@ -12585,6 +12585,33 @@ msgstr "Zmień: %(section)s"
 msgid "web.admin.deals.next_note"
 msgstr "Zmiany obowiązują od następnego kroku każdej sekcji; obecne oferty zostają do tego czasu. Czas: %(zone)s."
 
+msgid "web.admin.deals.preview"
+msgstr "Podgląd następnego kroku"
+
+msgid "web.admin.deals.preview.hide"
+msgstr "Ukryj podgląd"
+
+msgid "web.admin.deals.preview.comes"
+msgstr "Wchodzi"
+
+msgid "web.admin.deals.preview.leaves"
+msgstr "Schodzi"
+
+msgid "web.admin.deals.preview.nothing"
+msgstr "Nic"
+
+msgid "web.admin.deals.preview.none"
+msgstr "Brak następnego kroku: sekcja jest wyłączona albo żaden nie nadchodzi."
+
+msgid "web.admin.deals.preview.line"
+msgstr "%(name)s · %(whom)s · %(price)s"
+
+msgid "web.admin.deals.preview.short"
+msgstr "%(faction)s: tylko %(count)s z %(size)s, bo zostało za mało do wyboru."
+
+msgid "web.admin.deals.preview.note"
+msgstr "Co następny krok każdej sekcji wprowadzi i zakończy według obecnego stanu; zmiana sekcji, jej puli, ceny lub krok innej sekcji przed tym czasem może to zmienić."
+
 msgid "web.admin.deals.seasons"
 msgstr "Okna sezonowe %(year)s"
 

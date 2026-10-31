@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from openfesl.core.admins import GroupRoles
+from openfesl.core.deal_steps import DealSteps
 from openfesl.core.games import Games
 from openfesl.server.services import GameServices
 from openfesl.server.settings import Settings
@@ -85,8 +86,15 @@ def include_admin_routes(
         games, services.catalogues, stores.prices, stores.settings, services.feed.apply
     )
     box_views = BoxAdminViews(store_views, services.catalogues, services.deals, stores.boxes)
+    deal_steps = DealSteps(services.deals)
     deal_views = DealAdminViews(
-        store_views, services.deals, stores.settings, deal_art, stores.deal_uploads
+        store_views,
+        services.deals,
+        deal_steps,
+        stores.settings,
+        deal_art,
+        stores.deal_uploads,
+        services.catalogues,
     )
     reward_views = RewardAdminViews(
         games, services.rewards, services.catalogues, stores.settings, stores.admin_log

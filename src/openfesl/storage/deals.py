@@ -65,6 +65,22 @@ class SqlDealStore:
             for deal in deals:
                 await _add(session, game, section, period, deal, numbers)
 
+    async def preview(
+        self, game: str, section: str, period: Period, gap: int, make: Maker
+    ) -> list[NewDeal]:
+        """Return the bundles of a period of a section as they would be made now, keeping none.
+
+        Args:
+            game: The game's data-file name.
+            section: The section's name.
+            period: The period, which has not started.
+            gap: The days after a pick left the section before it may come back.
+            make: Makes the bundles from what the section must not repeat.
+        """
+        async with self._sessions() as session:
+            history = await _history(session, game, section, period.start, gap)
+        return make(history)
+
     async def shown(self, game: str, section: str) -> dict[str, datetime]:
         """Return when the rotation last brought each offer of a section, by its picked name.
 

@@ -1,7 +1,8 @@
-{#def of, rotation, home: list, art, manages: bool #}
+{#def of, rotation, steps, home: list, art, manages: bool #}
 {# A game's hot-deal rotation: its switch, each section with whether it runs,
    how many deals of each faction it picks, its schedule, its next change and how many of its
-   deals are on sale, each leading to the section's page; the sections whose latest period sold
+   deals are on sale, each leading to the section's page, and with the preview what each one's
+   next step brings and ends as things stand; the sections whose latest period sold
    fewer deals than asked, and beside them what hot deals sell now and the windows of the year
    that sections sell in. Changes apply from each section's next period. The deals of the game's
    home screen show the pictures the game downloads, drawn from the items' icons or uploaded in
@@ -91,7 +92,8 @@
                 {% for row in rotation.rows %}
                   {% set each = row.section %}
                   {% set state = "off" if not rules.enabled or not each.enabled else "stopped" if row.short else "runs" %}
-                  <div role="row" class="deals-columns deals-row">
+                  <div role="row"
+                       class="deals-columns deals-row{% if loop.index is even %} deals-row-alt{% endif %}">
                     <div role="cell" class="admin-cell cell-stack">
                       <span class="admin-hero-strong">{{ name(row.key) }}</span>
                       <span class="cell-ago">
@@ -124,11 +126,42 @@
                       <EndSquare :href="base ~ '/sections/' ~ row.key" :label="_('web.admin.deals.edit', section=name(row.key))" />
                     </div>
                   </div>
+                  {% if steps is not none %}
+                    {% set step = steps.get(row.key) %}
+                    <div role="row" class="deals-step">
+                      {% for part, lines in (("comes", step.comes if step else []), ("leaves", step.leaves if step else [])) %}
+                        <div role="cell" class="deals-step-part">
+                          <p class="deals-step-head">
+                            <Icon :name="'plus' if part == 'comes' else 'x'" :size="12" stroke="currentColor" />{{ _("web.admin.deals.preview." ~ part) }}
+                          </p>
+                          {% if lines %}
+                            <ul class="deals-step-lines">
+                              {% for line in lines %}<li>{{ line }}</li>{% endfor %}
+                            </ul>
+                          {% else %}
+                            <p class="deals-step-none">{{ _("web.admin.deals.preview.nothing" if step else "web.admin.deals.preview.none") }}</p>
+                          {% endif %}
+                          {% if part == "comes" and step %}
+                            {% for line in step.short %}<p class="deals-step-short"><Badge name="warn" />{{ line }}</p>{% endfor %}
+                          {% endif %}
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
                 {% endfor %}
               </div>
             </div>
           </div>
-          <p class="bar-text body-text">{{ _("web.admin.deals.next_note", zone=rules.zone) }}</p>
+          <div class="deals-preview">
+            <p class="body-text">
+              {{ _("web.admin.deals.preview.note") if steps is not none else _("web.admin.deals.next_note", zone=rules.zone) }}
+            </p>
+            {% if steps is not none %}
+              <FormButton icon="x" :href="base">{{ _("web.admin.deals.preview.hide") }}</FormButton>
+            {% else %}
+              <FormButton icon="clock" :href="base ~ '?preview=1'">{{ _("web.admin.deals.preview") }}</FormButton>
+            {% endif %}
+          </div>
         </section>
         <section id="home" aria-labelledby="deals-home" class="admin-list">
           <Bar id="deals-home" :extra="number(home|length)">{{ _("web.admin.deals.home") }}</Bar>
