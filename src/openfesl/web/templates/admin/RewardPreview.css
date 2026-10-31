@@ -1,0 +1,68 @@
+/* The players' rewards page on a date: the date's field and the next events' first days, then a
+   card for each reward that the page shows, the calendar's first. */
+@layer pages {
+  .preview-dates {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 14px;
+  }
+
+  .preview-date {
+    display: grid;
+    grid-template-columns: minmax(0, 220px) auto;
+    align-items: end;
+    gap: 2px;
+
+    > .field-label {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .preview-jumps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+
+    .toggle {
+      width: auto;
+      min-width: 96px;
+      flex: 0 0 auto;
+    }
+  }
+
+  .preview-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 2px;
+    margin: 2px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .preview-card {
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    background: var(--row-light);
+    padding: 10px 12px;
+    color: var(--ink);
+  }
+
+  .preview-card-always {
+    background: var(--row);
+  }
+
+  .preview-card-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+
+    .prices-state {
+      display: inline-flex;
+      align-items: center;
+    }
+  }
+}

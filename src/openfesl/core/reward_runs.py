@@ -1,7 +1,8 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+from datetime import datetime
 
-from openfesl.core.calendar import Period
-from openfesl.core.reward_rules import Event
+from openfesl.core.calendar import Period, today
+from openfesl.core.reward_rules import Event, RewardRules
 
 
 @dataclass(frozen=True, slots=True)
@@ -21,6 +22,22 @@ class Run:
     period: Period
     days: int
     day: int | None
+
+
+def running_at(rules: RewardRules, now: datetime) -> list[Run]:
+    """Return the events of a calendar that run at a moment and are switched on.
+
+    Args:
+        rules: The rewards with their calendar.
+        now: The moment.
+    """
+    year = today(now, rules.zone).year
+    runs = [run_of(key, event, year, rules.zone) for key, event in rules.events.items()]
+    return [
+        replace(run, day=run.event.window.day(now, rules.zone))
+        for run in runs
+        if run.event.enabled and run.period.start <= now < run.period.end
+    ]
 
 
 def run_of(key: str, event: Event, year: int, zone: str) -> Run:

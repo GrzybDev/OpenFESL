@@ -6,6 +6,7 @@ import pytest
 from accounts import execute, select_value
 from identity import IdentityProvider, form_token, sign_in
 from living import freeze, import_catalogue
+from living import setting as change
 from support import visible
 from test_admin_deals import setting
 from test_admin_heroes import KEEPER, WARDEN
@@ -231,3 +232,31 @@ async def test_admins_switch_events_parts_packs_and_the_key_and_change_milestone
     assert "Reward switched off Halloween trick-or-treat · National Army" in log
     assert "Milestone changed Level 20 Details 1,500 → 1,200 Funds" in log
     assert "Milestone changed Ranked matches: 100 Details On → Off" in log
+
+
+@pytest.mark.usefixtures("halloween")
+async def test_the_preview_shows_the_players_page_on_a_date_with_the_switches_applied(
+    admin_provider: IdentityProvider, base: str, database_url: str
+) -> None:
+    preview = f"{base}{REWARDS}/preview"
+    await change(database_url, "bfheroes.rewards.events.halloween-map.enabled", "off")
+    admin_provider.user = WARDEN
+    async with httpx2.AsyncClient() as client:
+        today = visible((await sign_in(client, base, next=f"{REWARDS}/preview")).content)
+        christmas = visible((await client.get(preview, params={"date": "2026-12-09"})).content)
+        quiet = visible((await client.get(preview, params={"date": "2026-03-02"})).content)
+        wrong = visible((await client.get(preview, params={"date": "yesterday"})).content)
+
+    assert "The players' rewards page on 28 Oct 2026 2 calendar rewards + the others" in today
+    assert "E4 Claimable that day · day 10 of 13 Halloween trick-or-treat" in today
+    assert "E5 Locked until the goal Halloween machete mission" in today
+    # A switched-off event leaves the page.
+    assert "Halloween map mission" not in today
+    assert "Any time When it applies Starter pack For each hero made within the last 30 days." in (
+        today
+    )
+    assert "Milestones 5 milestones, each given once it is met." in today
+    assert "Today 21 Nov 1 Dec 13 Feb" in today
+    assert "E9 Claimable that day · day 9 of 24 Christmas gifts" in christmas
+    assert "No calendar reward on this date" in quiet
+    assert "The players' rewards page on 28 Oct 2026" in wrong

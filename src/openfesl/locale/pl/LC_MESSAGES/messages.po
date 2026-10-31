@@ -12487,3 +12487,93 @@ msgstr "Wyłączone → Włączone"
 
 msgid "web.admin.audit.reward_switch.off"
 msgstr "Włączone → Wyłączone"
+
+msgid "web.admin.rewards.tabs"
+msgstr "Widoki nagród"
+
+msgid "web.admin.rewards.tab.rules"
+msgstr "Kalendarz i zasady"
+
+msgid "web.admin.rewards.tab.preview"
+msgstr "Podgląd"
+
+msgid "web.admin.rewards.preview.date"
+msgstr "Data"
+
+msgid "web.admin.rewards.preview.show"
+msgstr "Pokaż"
+
+msgid "web.admin.rewards.preview.jumps"
+msgstr "Daty do podglądu"
+
+msgid "web.admin.rewards.preview.today_link"
+msgstr "Dziś"
+
+msgid "web.admin.rewards.preview.title"
+msgstr "Strona nagród dla graczy w dniu %(date)s"
+
+msgid "web.admin.rewards.preview.count.one"
+msgstr "%(count)s nagroda z kalendarza + pozostałe"
+
+msgid "web.admin.rewards.preview.count.few"
+msgstr "%(count)s nagrody z kalendarza + pozostałe"
+
+msgid "web.admin.rewards.preview.count.many"
+msgstr "%(count)s nagród z kalendarza + pozostałe"
+
+msgid "web.admin.rewards.preview.count.other"
+msgstr "%(count)s nagrody z kalendarza + pozostałe"
+
+msgid "web.admin.rewards.preview.paused"
+msgstr "Odbiór jest teraz wstrzymany, więc strona graczy o tym informuje, zamiast oferować odbiór."
+
+msgid "web.admin.rewards.preview.none"
+msgstr "Tego dnia nie ma nagród z kalendarza; pozostałe nagrody widzą gracze, których dotyczą."
+
+msgid "web.admin.rewards.preview.locked"
+msgstr "Zablokowane do osiągnięcia celu"
+
+msgid "web.admin.rewards.preview.today"
+msgstr "Do odebrania tego dnia · dzień %(day)s z %(days)s"
+
+msgid "web.admin.rewards.preview.claimable"
+msgstr "Do odebrania"
+
+msgid "web.admin.rewards.preview.applies"
+msgstr "Gdy dotyczy"
+
+msgid "web.admin.rewards.preview.met"
+msgstr "Po osiągnięciu"
+
+msgid "web.admin.rewards.preview.always"
+msgstr "Zawsze"
+
+msgid "web.admin.rewards.preview.packs.one"
+msgstr "Dla każdego bohatera utworzonego w ciągu %(count)s dnia."
+
+msgid "web.admin.rewards.preview.packs.few"
+msgstr "Dla każdego bohatera utworzonego w ciągu %(count)s dni."
+
+msgid "web.admin.rewards.preview.packs.many"
+msgstr "Dla każdego bohatera utworzonego w ciągu %(count)s dni."
+
+msgid "web.admin.rewards.preview.packs.other"
+msgstr "Dla każdego bohatera utworzonego w ciągu %(count)s dnia."
+
+msgid "web.admin.rewards.preview.milestones.one"
+msgstr "%(count)s kamień milowy, przyznawany po osiągnięciu."
+
+msgid "web.admin.rewards.preview.milestones.few"
+msgstr "%(count)s kamienie milowe, każdy przyznawany po osiągnięciu."
+
+msgid "web.admin.rewards.preview.milestones.many"
+msgstr "%(count)s kamieni milowych, każdy przyznawany po osiągnięciu."
+
+msgid "web.admin.rewards.preview.milestones.other"
+msgstr "%(count)s kamienia milowego, każdy przyznawany po osiągnięciu."
+
+msgid "web.admin.rewards.preview.key"
+msgstr "Gdy pojawi się pierwsza skrzynia skarbów konta."
+
+msgid "web.admin.rewards.preview.note"
+msgstr "Podgląd pokazuje stronę tak, jak widzi ją uprawnione konto z bohaterami obu frakcji; nic nie jest odbierane ani zapisywane."

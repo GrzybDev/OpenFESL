@@ -18,7 +18,7 @@ from openfesl.core.overrides import overridden
 from openfesl.core.policies import SettingStore
 from openfesl.core.reward_claims import Claim, Claimed, Given, Grant, RewardStore
 from openfesl.core.reward_rules import Gift, Goal, Milestone, Part, RewardRules
-from openfesl.core.reward_runs import Run, run_of
+from openfesl.core.reward_runs import Run, run_of, running_at
 from openfesl.core.stats import (
     PERSONA,
     Owner,
@@ -230,7 +230,7 @@ class Rewards:
             game: The game.
         """
         rules = await self.rules(game)
-        return _running(rules, self._clock()) if rules else []
+        return running_at(rules, self._clock()) if rules else []
 
     async def upcoming(self, game: Game) -> list[Run]:
         """Return the events of a game's calendar that start later, the soonest first.
@@ -340,7 +340,7 @@ class Rewards:
     async def _events(
         self, game: Game, rules: RewardRules, heroes: list[Hero], now: datetime
     ) -> list[Reward]:
-        runs = _running(rules, now)
+        runs = running_at(rules, now)
         firsts = [today(run.period.start, rules.zone) for run in runs if run.event.daily]
         paused = await self._store.paused(game.id, min(firsts)) if firsts else set()
         found = []
@@ -511,16 +511,6 @@ def _usable(contents: Contents, gift: Gift, hero: Hero) -> bool:
         item is not None and fits(item, {item.kind}, hero.faction, hero.hero_class, hero.level)
         for item in found
     )
-
-
-def _running(rules: RewardRules, now: datetime) -> list[Run]:
-    year = today(now, rules.zone).year
-    runs = [run_of(key, event, year, rules.zone) for key, event in rules.events.items()]
-    return [
-        replace(run, day=run.event.window.day(now, rules.zone))
-        for run in runs
-        if run.event.enabled and run.period.start <= now < run.period.end
-    ]
 
 
 def _parts(

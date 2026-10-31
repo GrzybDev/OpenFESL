@@ -17,7 +17,7 @@
   {{ _("games." ~ game.id ~ ".faction." ~ part.faction) if part.faction else _("web.admin.rewards.part.account") }}
 {%- endmacro %}
 <AdminPage :title="_('web.admin.rewards.title')" current="rewards">
-  <RewardsHead :game="game" :subtitle="_('web.admin.rewards.subtitle', game=game.name)" />
+  <RewardsHead :game="game" current="rules" :subtitle="_('web.admin.rewards.subtitle', game=game.name)" />
   <Panel class="enter-panel rewards-page">
     <PauseBar :game="game" :paused="rules.paused" :entry="found.pause" :manages="manages" />
     {% if not manages %}

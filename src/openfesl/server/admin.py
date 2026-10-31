@@ -25,6 +25,7 @@ from openfesl.web.admin.keys import key_routes
 from openfesl.web.admin.providers import provider_routes
 from openfesl.web.admin.reward_changes import reward_change_routes
 from openfesl.web.admin.reward_events import RewardEventViews, reward_event_routes
+from openfesl.web.admin.reward_preview import reward_preview_routes
 from openfesl.web.admin.rewards import RewardAdminViews, reward_routes
 from openfesl.web.admin.servers import (
     ServerViews,
@@ -173,6 +174,7 @@ def include_admin_routes(
     app.include_router(reward_change_routes(sign_in, reward_views, stores.rewards))
     event_views = RewardEventViews(reward_views, box_views, stores.rewards)
     app.include_router(reward_event_routes(sign_in, event_views))
+    app.include_router(reward_preview_routes(sign_in, reward_views))
     app.include_router(
         audit_routes(
             sign_in,

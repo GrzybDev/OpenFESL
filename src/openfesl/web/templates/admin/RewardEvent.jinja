@@ -21,7 +21,7 @@
 {% endmacro %}
 <AdminPage :title="title ~ ' · ' ~ _('web.admin.rewards.title')"
            current="rewards">
-  <RewardsHead :game="game" :subtitle="_('web.admin.rewards.subtitle', game=game.name)" />
+  <RewardsHead :game="game" current="rules" :subtitle="_('web.admin.rewards.subtitle', game=game.name)" />
   <Panel class="enter-panel">
     <nav aria-label="{{ _('web.admin.rewards.title') }}"
          class="tabs prices-back">

@@ -1,0 +1,58 @@
+{#def found, pause, manages: bool #}
+{# The players' rewards page of a game on a date, as an account with heroes of both
+   factions sees it: the calendar's rewards of that day with whether they are claimed that day or
+   wait for a goal, and the rewards that show whenever they apply. A date is chosen in its field
+   or by the first days of the next events; nothing is claimed or written. #}
+{% set game = found.game %}
+{% set base = url("/admin/rewards/" ~ game.id ~ "/preview") %}
+<AdminPage :title="_('web.admin.rewards.tab.preview') ~ ' · ' ~ _('web.admin.rewards.title')"
+           current="rewards">
+  <RewardsHead :game="game" current="preview" :subtitle="_('web.admin.rewards.subtitle', game=game.name)" />
+  <Panel class="enter-panel rewards-page">
+    <PauseBar :game="game" :paused="found.paused" :entry="pause" :manages="manages" />
+    <div class="preview-dates">
+      <form method="get" action="{{ base }}" class="preview-date">
+        <label for="preview-date"
+               class="field-label field-label-joined">{{ _("web.admin.rewards.preview.date") }}</label>
+        <input id="preview-date"
+               name="date"
+               type="date"
+               value="{{ found.day.isoformat() }}"
+               required
+               class="field-input">
+        <FormButton icon="go">{{ _("web.admin.rewards.preview.show") }}</FormButton>
+      </form>
+      <nav aria-label="{{ _('web.admin.rewards.preview.jumps') }}"
+           class="preview-jumps">
+        <Toggle :href="base" :label="_('web.admin.rewards.preview.today_link')" :current="found.day == found.today" />
+        {% for day, shown in found.jumps %}
+          <Toggle :href="base ~ '?date=' ~ day.isoformat()" :label="shown" :current="found.day == day" />
+        {% endfor %}
+      </nav>
+    </div>
+    <section aria-labelledby="preview-title" class="admin-list">
+      <Bar id="preview-title" :extra="_n('web.admin.rewards.preview.count', found.events)" wrap>{{ _("web.admin.rewards.preview.title", date=found.shown) }}</Bar>
+      {% if found.paused %}
+        <p class="bar-text body-text">{{ _("web.admin.rewards.preview.paused") }}</p>
+      {% endif %}
+      {% if not found.events %}
+        <p class="bar-text body-text">{{ _("web.admin.rewards.preview.none") }}</p>
+      {% endif %}
+      <ul class="preview-cards">
+        {% for card in found.cards %}
+          <li class="preview-card preview-card-{{ card.state }}">
+            <p class="preview-card-head">
+              <span class="rewards-number">
+                {%- if card.number %}E{{ card.number }}{% else %}{{ _("web.admin.rewards.preview.always") }}{% endif -%}
+              </span>
+              <span class="prices-state"><Badge :name="{'today': 'gift', 'claimable': 'gift', 'locked': 'lock'}.get(card.state, 'time')" lines />{{ card.said }}</span>
+            </p>
+            <p class="admin-hero-strong">{{ card.title }}</p>
+            <p class="cell-ago">{{ card.text }}</p>
+          </li>
+        {% endfor %}
+      </ul>
+      <p class="bar-text body-text">{{ _("web.admin.rewards.preview.note") }}</p>
+    </section>
+  </Panel>
+</AdminPage>

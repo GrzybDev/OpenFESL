@@ -1,7 +1,14 @@
-{#def game, subtitle: str #}
-{# The head of a game's rewards in the admin panel: the title with whose rewards page they are. #}
+{#def game, subtitle: str, current: str = "" #}
+{# The head of a game's rewards in the admin panel: the title with whose rewards page they are, and
+   the tabs of their views. #}
+{% set base = url("/admin/rewards/" ~ game.id) %}
 <PageHead labelledby="rewards-title">
   <div class="enter-title page-title">
     <TitleBlock :title="_('web.admin.rewards.title')" id="rewards-title">{{ subtitle }}</TitleBlock>
   </div>
+  <nav aria-label="{{ _('web.admin.rewards.tabs') }}" class="tabs">
+    {% for tab, path in [("rules", ""), ("preview", "/preview")] %}
+      <Tab :href="base ~ path" :label="_('web.admin.rewards.tab.' ~ tab)" :current="tab == current" />
+    {% endfor %}
+  </nav>
 </PageHead>

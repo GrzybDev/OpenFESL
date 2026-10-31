@@ -11751,3 +11751,75 @@ msgstr "Off → On"
 
 msgid "web.admin.audit.reward_switch.off"
 msgstr "On → Off"
+
+msgid "web.admin.rewards.tabs"
+msgstr "Views of the rewards"
+
+msgid "web.admin.rewards.tab.rules"
+msgstr "Calendar and rules"
+
+msgid "web.admin.rewards.tab.preview"
+msgstr "Preview"
+
+msgid "web.admin.rewards.preview.date"
+msgstr "Date"
+
+msgid "web.admin.rewards.preview.show"
+msgstr "Show"
+
+msgid "web.admin.rewards.preview.jumps"
+msgstr "Dates to preview"
+
+msgid "web.admin.rewards.preview.today_link"
+msgstr "Today"
+
+msgid "web.admin.rewards.preview.title"
+msgstr "The players' rewards page on %(date)s"
+
+msgid "web.admin.rewards.preview.count.one"
+msgstr "%(count)s calendar reward + the others"
+
+msgid "web.admin.rewards.preview.count.other"
+msgstr "%(count)s calendar rewards + the others"
+
+msgid "web.admin.rewards.preview.paused"
+msgstr "Claims are paused now, so the players' page says so instead of offering them."
+
+msgid "web.admin.rewards.preview.none"
+msgstr "No calendar reward on this date; the other rewards show to the players they apply to."
+
+msgid "web.admin.rewards.preview.locked"
+msgstr "Locked until the goal"
+
+msgid "web.admin.rewards.preview.today"
+msgstr "Claimable that day · day %(day)s of %(days)s"
+
+msgid "web.admin.rewards.preview.claimable"
+msgstr "Claimable"
+
+msgid "web.admin.rewards.preview.applies"
+msgstr "When it applies"
+
+msgid "web.admin.rewards.preview.met"
+msgstr "When met"
+
+msgid "web.admin.rewards.preview.always"
+msgstr "Any time"
+
+msgid "web.admin.rewards.preview.packs.one"
+msgstr "For each hero made within the last %(count)s day."
+
+msgid "web.admin.rewards.preview.packs.other"
+msgstr "For each hero made within the last %(count)s days."
+
+msgid "web.admin.rewards.preview.milestones.one"
+msgstr "%(count)s milestone, given once it is met."
+
+msgid "web.admin.rewards.preview.milestones.other"
+msgstr "%(count)s milestones, each given once it is met."
+
+msgid "web.admin.rewards.preview.key"
+msgstr "When the account's first treasure chest arrives."
+
+msgid "web.admin.rewards.preview.note"
+msgstr "The preview shows the page as an eligible account with heroes of both factions sees it; nothing is claimed and nothing is written."
