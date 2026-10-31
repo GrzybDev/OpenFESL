@@ -1,4 +1,3 @@
-import json
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -10,7 +9,7 @@ from starlette.exceptions import HTTPException
 from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin, Role
 from openfesl.core.calendar import Window, next_start, today
-from openfesl.core.deal_rules import DealRules, DealSection, ItemSection, OfferSection
+from openfesl.core.deal_rules import DealRules, DealSection, OfferSection
 from openfesl.core.deal_uploads import DealUploads, offer_of
 from openfesl.core.deals import Deal, HotDeals
 from openfesl.core.games import Game
@@ -20,11 +19,7 @@ from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.store import SECTION, StoreAdminViews, store_url
 from openfesl.web.deal_art import DealArt
 from openfesl.web.sessions import check_form, toast
-from openfesl.web.store_texts import StoreTexts
 
-# The most deals of each faction, and the longest repeat gap in days, that a section takes.
-MOST_SIZE = 50
-MOST_GAP = 365
 # How many deals the game's home screen shows, of which the first ones big.
 HOME = 5
 BIG = 2
@@ -195,6 +190,15 @@ class DealAdminViews:
             )
         return Rotation(rules, game.deals, rows, _seasons(rules, now), listed)
 
+    async def shown(self, game: Game, section: str) -> dict[str, datetime]:
+        """Return when the rotation last brought each offer of a section, by its picked name.
+
+        Args:
+            game: The game.
+            section: The section's name.
+        """
+        return await self._deals.shown(game, section)
+
     async def short(self) -> list[tuple[Game, SectionRow]]:
         """Return the sections of the rotations whose latest period sells fewer deals than asked."""
         found = []
@@ -242,10 +246,10 @@ def deal_routes(sessions: AdminSessions, views: DealAdminViews) -> APIRouter:
     router = APIRouter()
 
     @router.get("/admin/store/{game_id}/deals", response_class=HTMLResponse)
-    async def deals(request: Request, game_id: str, section: str = "") -> HTMLResponse:
+    async def deals(request: Request, game_id: str) -> HTMLResponse:
         admin = sessions.admin(request)
         game = views.stores.game(game_id)
-        return await deal_page(sessions, views, request, admin, game, section, {}, "")
+        return await deal_page(sessions, views, request, admin, game)
 
     @router.post("/admin/store/{game_id}/deals/rotation")
     async def switch(request: Request, game_id: str) -> Response:
@@ -264,37 +268,6 @@ def deal_routes(sessions: AdminSessions, views: DealAdminViews) -> APIRouter:
         toast(request, f"web.admin.toast.deals.rotation.{'on' if on else 'off'}")
         return RedirectResponse(store_url(request, game, "/deals"), 303)
 
-    @router.post("/admin/store/{game_id}/deals/sections/{key}")
-    async def change(request: Request, game_id: str, key: str) -> Response:
-        admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
-        fields = {name: str(value).strip() for name, value in form.items()}
-        game = views.stores.game(game_id)
-        rotation = await views.rotation(game)
-        row = next((row for row in rotation.rows if row.key == key), None)
-        if row is None:
-            raise HTTPException(404)
-        texts = StoreTexts(game, request.state.language, datetime.now(UTC))
-        try:
-            values = _values(row.section, fields)
-        except ValueError as refused:
-            why = texts.text(f"web.admin.deals.refused.{refused}", most=texts.amount(MOST_SIZE))
-            return await deal_page(sessions, views, request, admin, game, key, fields, why)
-        before, seed = _fields(row.section), _fields(row.seed)
-        settings = {
-            f"sections.{key}.{name}": None if value == seed[name] else _written(value)
-            for name, value in values.items()
-            if value != before[name]
-        }
-        if settings:
-            details = {"game": game.id, "section": key, "before": before, "after": values}
-            target = f"{game.id}:{key}"
-            await views.change(game, settings, AdminAction.DEAL_SECTION, target, details, admin)
-        name = texts.text(f"games.{game.id}.deal_section.{key}")
-        toast(request, "web.admin.toast.deals.section", section=name)
-        return RedirectResponse(store_url(request, game, f"/deals?section={key}"), 303)
-
     return router
 
 
@@ -304,12 +277,9 @@ async def deal_page(
     request: Request,
     admin: Admin,
     game: Game,
-    key: str,
-    form: dict[str, str],
-    why: str,
     art: tuple[int, str] | None = None,
 ) -> HTMLResponse:
-    """Render a game's hot-deal rotation page, with a refused change if there is one.
+    """Render a game's hot-deal rotation page, with a refused picture if there is one.
 
     Args:
         sessions: Signs admins in and renders the panel's pages.
@@ -317,67 +287,19 @@ async def deal_page(
         request: The request the page answers.
         admin: The signed-in admin.
         game: The game, which has hot deals.
-        key: The section whose form the page shows; the first one when no section has the name.
-        form: The section form's fields as they were sent, to show again with a refusal.
-        why: Why the section's change was refused; empty when it was not.
         art: The deal whose uploaded picture was refused, by its bundle's number, and why.
     """
-    rotation = await views.rotation(game)
-    chosen = next((row for row in rotation.rows if row.key == key), rotation.rows[0])
     return await sessions.render(
         request,
         "admin.StoreDeals",
-        400 if why or art else 200,
+        400 if art else 200,
         admin=admin,
         of=game,
-        rotation=rotation,
-        chosen=chosen,
-        form=form,
-        why=why,
+        rotation=await views.rotation(game),
         home=await views.home(game, request.state.language),
         art=art,
         manages=admin.role is Role.ADMIN,
     )
-
-
-def _fields(section: DealSection) -> dict[str, Any]:
-    # The fields of a section that the panel changes, as the admin's log keeps them.
-    fields: dict[str, Any] = {"enabled": section.enabled, "size": section.size}
-    if isinstance(section, OfferSection):
-        fields |= {"discount": list(section.discount), "gap": section.gap}
-    else:
-        fields["discount"] = section.discount
-    return fields
-
-
-def _values(section: DealSection, form: dict[str, str]) -> dict[str, Any]:
-    # The section's fields as the form sets them; a refusal raises ValueError with its name.
-    def number(name: str, most: int) -> int:
-        text = form.get(name, "").removesuffix("%").strip()
-        if not (text.isascii() and text.isdecimal()) or int(text) > most:
-            raise ValueError(name)
-        return int(text)
-
-    values: dict[str, Any] = {"enabled": bool(form.get("enabled"))}
-    values["size"] = number("size", MOST_SIZE) if section.size is not None else None
-    if values["size"] == 0:
-        raise ValueError("size")
-    if isinstance(section, ItemSection):
-        values["discount"] = number("discount", 99)
-        return values
-    low, high = number("low", 99), number("high", 99)
-    if low > high:
-        raise ValueError("range")
-    values["discount"] = [low, high]
-    values["gap"] = number("gap", MOST_GAP)
-    return values
-
-
-def _written(value: Any) -> str:
-    # A field's value as the settings write it: on or off, a number, or a list as JSON.
-    if isinstance(value, bool):
-        return "on" if value else "off"
-    return json.dumps(value) if isinstance(value, list) else str(value)
 
 
 def _short(section: DealSection, listed: list[ListedBundle], factions: list[str]) -> dict[str, int]:

@@ -1,0 +1,153 @@
+{#def of, found, form: dict, why: str, manages: bool #}
+{# A section of a game's hot-deal rotation: whether it runs, how many deals of each faction
+   it picks, its discount and repeat gap, beside its pool, where each offer is in it, pinned to
+   come first at each step or excluded, with its faction and when the rotation last brought it.
+   A section that sells all its offers has no pins; one that puts items together has no pool.
+   Save section applies from the section's next step, and a refused field says why. #}
+{% set game = of %}
+{% set row = found.row %}
+{% set section = row.section %}
+{% set base = url("/admin/store/" ~ game.id ~ "/deals") %}
+{% set name = _("games." ~ game.id ~ ".deal_section." ~ row.key) %}
+{% set states = (("in", "tick"), ("out", "x"), ("pin", "star")) if found.pins else (("in", "tick"), ("out", "x")) %}
+<AdminPage :title="name ~ ' · ' ~ _('web.admin.store.title')" current="store">
+  <StoreHead :game="game" current="deals" :subtitle="_('web.admin.deals.subtitle', game=game.name)" />
+  <Panel class="enter-panel">
+    <DealsTabs :game="game" current="rotation" />
+    <nav aria-label="{{ _('web.admin.deals.view.rotation') }}"
+         class="tabs prices-back">
+      <Tab :href="base" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.deals.view.rotation") }}</Tab>
+    </nav>
+    <form method="post"
+          action="{{ base }}/sections/{{ row.key }}"
+          aria-labelledby="section-title"
+          class="deal-section{% if found.pool %} deal-section-pool{% endif %}">
+      <CsrfField />
+      <div class="rules-form deal-section-fields">
+        <h2 id="section-title" class="bar bar-large">
+          <span>{{ _("web.admin.deals.section.edit", section=name) }}</span>
+        </h2>
+        <fieldset class="rules-fields"{% if not manages %} disabled{% endif %}>
+          <label class="check-row prices-off-row">
+            <span class="prices-off-text"><span class="prices-off-title">{{ _("web.admin.deals.section.runs") }}</span></span>
+            <span class="check-place">
+              <input type="checkbox"
+                     name="enabled"
+                     value="1"
+                     {% if (form.get("enabled") if form else section.enabled) %} checked{% endif %}
+                     class="check">
+              <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>
+          </label>
+          {% if section.size is not none %}
+            <label for="section-size" class="field-label">{{ _("web.admin.deals.section.size") }}</label>
+            <input id="section-size"
+                   name="size"
+                   type="text"
+                   inputmode="numeric"
+                   value="{{ form.get('size', section.size) }}"
+                   maxlength="3"
+                   class="field-input rules-input">
+          {% endif %}
+          {% if section.kind == "items" %}
+            <label for="section-discount" class="field-label">{{ _("web.admin.deals.section.discount") }}</label>
+            <input id="section-discount"
+                   name="discount"
+                   type="text"
+                   inputmode="numeric"
+                   value="{{ form.get('discount', section.discount) }}"
+                   maxlength="3"
+                   class="field-input rules-input">
+          {% else %}
+            {% for field, value in (("low", section.discount[0]), ("high", section.discount[1]), ("gap", section.gap)) %}
+              <label for="section-{{ field }}"
+                     class="field-label">{{ _("web.admin.deals.section." ~ {'low': 'from', 'high': 'to', 'gap': 'gap'}[field]) }}</label>
+              <input id="section-{{ field }}"
+                     name="{{ field }}"
+                     type="text"
+                     inputmode="numeric"
+                     value="{{ form.get(field, value) }}"
+                     maxlength="3"
+                     class="field-input rules-input">
+            {% endfor %}
+          {% endif %}
+        </fieldset>
+        {% if why %}
+          <p role="alert" class="prices-refusal">
+            <span aria-hidden="true"
+                  class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span><span>{{ why }}</span>
+          </p>
+        {% endif %}
+        <p class="bar-text body-text">{{ _("web.admin.deals.next_note", zone=found.zone) }}</p>
+        {% if not found.pool %}
+          <p class="bar-text body-text">{{ _("web.admin.deals.pool.items") }}</p>
+        {% endif %}
+      </div>
+      {% if found.pool %}
+        {% set pinned = found.pool|selectattr("state", "eq", "pin")|list|length %}
+        {% set excluded = found.pool|selectattr("state", "eq", "out")|list|length %}
+        <section aria-labelledby="section-pool" class="admin-list deal-section-list">
+          <Bar id="section-pool" :extra="_('web.admin.deals.pool.counts', included=number(found.pool|length - pinned - excluded), pinned=number(pinned), excluded=number(excluded))" wrap>{{ _("web.admin.deals.pool") }}</Bar>
+          <div class="table-scroll table-scroll-flush">
+            <div role="table" aria-labelledby="section-pool" class="table pool-table">
+              <div role="rowgroup" class="admin-list-head">
+                <div role="row" class="pool-columns">
+                  {% for column in ("offer", "faction", "last", "state") %}
+                    <div role="columnheader" class="column-head">{{ _("web.admin.deals.pool.column." ~ column) }}</div>
+                  {% endfor %}
+                </div>
+              </div>
+              <div role="rowgroup" class="table-rows">
+                {% for entry in found.pool %}
+                  {% set field = "pool-" ~ loop.index0 %}
+                  {% set chosen = form.get(field, entry.state) %}
+                  <div role="row" class="pool-columns pool-row">
+                    <div role="cell" class="admin-cell cell-stack">
+                      <span class="admin-hero-strong">{{ entry.name }}</span>
+                      <span class="cell-ago">{{ _n("web.admin.deals.pool.boxes" if entry.boxes else "web.admin.deals.offers.items", entry.count) }}</span>
+                    </div>
+                    <div role="cell" class="admin-cell cell-stack">
+                      <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.pool.column.faction") }}</span>
+                      <span>
+                        {%- if entry.faction %}{{ _("games." ~ game.id ~ ".faction." ~ entry.faction) }}{% elif entry.faction is none %}{{ _("web.admin.deals.pool.any") }}{% else %}{{ _("web.admin.deals.pool.unknown") }}{% endif -%}
+                      </span>
+                    </div>
+                    <div role="cell" class="admin-cell cell-stack">
+                      <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.pool.column.last") }}</span>
+                      <span>{{ when(entry.last, "yMMMd") if entry.last else _("web.admin.deals.pool.never") }}</span>
+                    </div>
+                    <div role="cell" class="pool-cell">
+                      <fieldset class="pool-states" {% if not manages %} disabled{% endif %}>
+                        <legend class="sr-only">{{ _("web.admin.deals.pool.state.of", offer=entry.name) }}</legend>
+                        {% for state, glyph in states %}
+                          <label class="prices-filter-pick pool-pick">
+                            <input type="radio"
+                                   name="{{ field }}"
+                                   value="{{ state }}"
+                                   {% if chosen == state %} checked{% endif %}
+                                   class="choice-input">
+                            <span><Icon :name="glyph" :size="12" stroke="currentColor" />{{ _("web.admin.deals.pool." ~ state) }}</span>
+                          </label>
+                        {% endfor %}
+                      </fieldset>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          <p class="bar-text body-text">{{ _("web.admin.deals.pool.note" if found.pins else "web.admin.deals.pool.note.all") }}</p>
+        </section>
+      {% endif %}
+      <div class="deal-section-save">
+        {% if manages %}
+          <ActionButton :label="_('web.admin.deals.section.save')" :busy="_('web.admin.store.save.busy')" />
+        {% else %}
+          <p class="bar-text account-role-note">
+            <span aria-hidden="true"
+                  class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.deals.managed") }}
+          </p>
+        {% endif %}
+      </div>
+    </form>
+  </Panel>
+</AdminPage>

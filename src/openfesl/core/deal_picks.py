@@ -80,10 +80,11 @@ def pick_offers(
 ) -> list[NewDeal]:
     """Return the deals of a period of a section of offers: every offer, or a few of each faction.
 
-    Offers picked together, such as a family's boxes of both factions, count as one. An offer
-    that the section sold within its gap, or another section sells, is left out, as is one with
-    an item the catalogue lacks, the store does not price or the admin marked not sold, or a
-    box the store lacks.
+    Offers picked together, such as a family's boxes of both factions, count as one. The
+    offers the admin pinned come first, also within the section's gap. An offer that the admin
+    excluded, the section sold within its gap or another section sells is left out, as is one
+    with an item the catalogue lacks, the store does not price or the admin marked not sold, or
+    a box the store lacks.
 
     Args:
         game: The game.
@@ -94,8 +95,14 @@ def pick_offers(
         history: What the section must not repeat, and what the products cost.
         random: The source of chance.
     """
-    used = history.recent | history.live
-    taken = {given.picked for given in offers if given.name in used}
+    pinned = set(section.pinned)
+    taken = {
+        given.picked
+        for given in offers
+        if given.name in history.live
+        or (given.name in history.recent and given.picked not in pinned)
+        or given.picked in section.excluded
+    }
     sold = {item_id for (item_id, _, _), product in history.products.items() if product.published}
     pools: dict[str, list[NewDeal]] = {}
     for given in offers:
@@ -104,14 +111,17 @@ def pick_offers(
         deal = _offer_deal(game, rules, section, catalogue, history, given, sold, random)
         if deal is not None:
             pools.setdefault(given.picked, []).append(deal)
-    groups: dict[str | None, list[list[NewDeal]]] = {}
-    for deals in pools.values():
+    groups: dict[str | None, list[tuple[str, list[NewDeal]]]] = {}
+    for name, deals in pools.items():
         factions = {deal.bundle.faction for deal in deals}
-        groups.setdefault(factions.pop() if len(factions) == 1 else None, []).append(deals)
+        groups.setdefault(factions.pop() if len(factions) == 1 else None, []).append((name, deals))
     picked = []
     for found in groups.values():
-        chosen = random.sample(found, min(section.size, len(found))) if section.size else found
-        picked += [deal for deals in chosen for deal in deals]
+        first = [deals for name, deals in found if name in pinned][: section.size]
+        rest = [deals for name, deals in found if name not in pinned]
+        if section.size:
+            rest = random.sample(rest, min(section.size - len(first), len(rest)))
+        picked += [deal for deals in first + rest for deal in deals]
     return _ordered(game, picked)
 
 

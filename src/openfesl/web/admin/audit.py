@@ -431,7 +431,9 @@ async def _rows(
                 action, target, details, games, catalogues, language
             )
         elif action in (AdminAction.DEAL_ROTATION, AdminAction.DEAL_SECTION):
-            shown, href, said = deal_entry(action, target, details, games, language)
+            shown, href, said = await deal_entry(
+                action, target, details, games, catalogues, language
+            )
             if action is AdminAction.DEAL_ROTATION:
                 kind = f"deal_rotation.{'on' if details['enabled'] else 'off'}"
         elif action in (

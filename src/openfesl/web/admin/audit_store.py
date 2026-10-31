@@ -3,6 +3,7 @@ from typing import Any
 
 from openfesl.core.admin import AdminAction
 from openfesl.core.catalogues import Catalogues, game_text
+from openfesl.core.deal_rules import OfferSection
 from openfesl.core.games import Games
 from openfesl.core.inventory import Ownership
 from openfesl.core.texts import localize
@@ -175,8 +176,13 @@ async def box_entry(
     return details["box"], href, "; ".join(said)
 
 
-def deal_entry(
-    action: AdminAction, target: str, details: dict[str, Any], games: Games, language: str
+async def deal_entry(
+    action: AdminAction,
+    target: str,
+    details: dict[str, Any],
+    games: Games,
+    catalogues: Catalogues,
+    language: str,
 ) -> tuple[str, str | None, str]:
     """Return how the audit log shows a change of a game's hot-deal rotation.
 
@@ -185,13 +191,14 @@ def deal_entry(
         target: The game, or the game and the section as game:section.
         details: The change's details, as the admin's log keeps them.
         games: The games, whose rotations the change was made in.
+        catalogues: Name the offers that a section's pool pinned or excluded.
         language: The log's language.
 
     Returns:
         The rotation or section in words, the panel's page of it and what changed in words.
     """
     game = games.by_id(target.partition(":")[0])
-    if game is None:
+    if game is None or game.deals is None:
         return target, None, ""
     texts = StoreTexts(game, language, datetime.now(UTC))
     href = localize(f"/admin/store/{game.id}/deals", language)
@@ -200,8 +207,29 @@ def deal_entry(
     key = details["section"]
     before, after = details["before"], details["after"]
     said = []
+    catalogue = await catalogues.of(game, language)
+    rules = game.deals
+    pooled = [section for section in rules.sections.values() if isinstance(section, OfferSection)]
+    named = {offer.picked: offer.name for section in pooled for offer in rules.offers(section)}
     for name in after:
-        if before[name] != after[name]:
+        if name in ("pinned", "excluded"):
+            # The offers that joined and left the list, by the name of the first picked.
+            for joined, offers in (
+                (True, set(after[name]) - set(before[name])),
+                (False, set(before[name]) - set(after[name])),
+            ):
+                if offers:
+                    listed = sorted(
+                        game_text(game, catalogue, named.get(offer, offer), language)
+                        for offer in offers
+                    )
+                    said.append(
+                        texts.text(
+                            f"web.admin.audit.deal.{name}.{'on' if joined else 'off'}",
+                            offers=", ".join(listed),
+                        )
+                    )
+        elif before[name] != after[name]:
             said.append(
                 texts.text(
                     f"web.admin.audit.deal.{name}",
@@ -210,7 +238,7 @@ def deal_entry(
                 )
             )
     name = texts.text(f"games.{game.id}.deal_section.{key}")
-    return name, localize(f"/admin/store/{game.id}/deals?section={key}", language), "; ".join(said)
+    return name, localize(f"/admin/store/{game.id}/deals/sections/{key}", language), "; ".join(said)
 
 
 def _deal_value(texts: StoreTexts, value: Any) -> str:

@@ -11876,6 +11876,63 @@ msgstr "Repeat gap, days"
 msgid "web.admin.deals.section.save"
 msgstr "Save section"
 
+msgid "web.admin.deals.pool"
+msgstr "Pool"
+
+msgid "web.admin.deals.pool.counts"
+msgstr "%(included)s included · %(pinned)s pinned · %(excluded)s excluded"
+
+msgid "web.admin.deals.pool.column.offer"
+msgstr "Offer"
+
+msgid "web.admin.deals.pool.column.faction"
+msgstr "Faction"
+
+msgid "web.admin.deals.pool.column.last"
+msgstr "Last shown"
+
+msgid "web.admin.deals.pool.column.state"
+msgstr "In the pool"
+
+msgid "web.admin.deals.pool.boxes.one"
+msgstr "%(count)s random box"
+
+msgid "web.admin.deals.pool.boxes.other"
+msgstr "%(count)s random boxes"
+
+msgid "web.admin.deals.pool.any"
+msgstr "Any faction"
+
+msgid "web.admin.deals.pool.unknown"
+msgstr "Not in the catalogue"
+
+msgid "web.admin.deals.pool.never"
+msgstr "Never"
+
+msgid "web.admin.deals.pool.state.of"
+msgstr "In the pool: %(offer)s"
+
+msgid "web.admin.deals.pool.in"
+msgstr "Included"
+
+msgid "web.admin.deals.pool.out"
+msgstr "Excluded"
+
+msgid "web.admin.deals.pool.pin"
+msgstr "Pinned"
+
+msgid "web.admin.deals.pool.note"
+msgstr "Pinned offers come first at each step, also within the repeat gap; excluded ones never come. Offers with windows are sold only in them."
+
+msgid "web.admin.deals.pool.note.all"
+msgstr "The section sells every offer of its pool; excluded ones never come. Offers with windows are sold only in them."
+
+msgid "web.admin.deals.pool.items"
+msgstr "This section puts items together by their slots, so it has no pool of offers."
+
+msgid "web.admin.deals.players_page"
+msgstr "The players' hot deals page"
+
 msgid "web.admin.deals.managed"
 msgstr "Hot deals are changed with the admin role."
 
@@ -11941,6 +11998,18 @@ msgstr "discount %(before)s → %(after)s"
 
 msgid "web.admin.audit.deal.gap"
 msgstr "repeat gap %(before)s → %(after)s days"
+
+msgid "web.admin.audit.deal.pinned.on"
+msgstr "pinned %(offers)s"
+
+msgid "web.admin.audit.deal.pinned.off"
+msgstr "unpinned %(offers)s"
+
+msgid "web.admin.audit.deal.excluded.on"
+msgstr "excluded %(offers)s"
+
+msgid "web.admin.audit.deal.excluded.off"
+msgstr "included %(offers)s again"
 
 msgid "web.admin.audit.action.deal_offer"
 msgstr "Offer saved"

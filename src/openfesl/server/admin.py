@@ -14,6 +14,7 @@ from openfesl.web.admin.boxes import BoxAdminViews, box_routes
 from openfesl.web.admin.catalogues import catalogue_routes
 from openfesl.web.admin.deal_offers import DealOfferViews, offer_routes
 from openfesl.web.admin.deal_pictures import deal_picture_routes
+from openfesl.web.admin.deal_sections import DealSectionViews, section_routes
 from openfesl.web.admin.deals import DealAdminViews, deal_routes
 from openfesl.web.admin.entitlements import entitlement_routes
 from openfesl.web.admin.hero_actions import hero_action_routes
@@ -178,6 +179,8 @@ def include_admin_routes(
     app.include_router(box_table_routes(sign_in, box_views))
     app.include_router(deal_routes(sign_in, deal_views))
     app.include_router(deal_picture_routes(sign_in, deal_views))
+    section_views = DealSectionViews(deal_views, services.catalogues, stores.boxes)
+    app.include_router(section_routes(sign_in, section_views))
     offer_views = DealOfferViews(deal_views, stores.offers, stores.prices, services.catalogues)
     app.include_router(offer_routes(sign_in, offer_views))
     app.include_router(reward_routes(sign_in, reward_views))

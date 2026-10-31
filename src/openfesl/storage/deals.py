@@ -65,6 +65,25 @@ class SqlDealStore:
             for deal in deals:
                 await _add(session, game, section, period, deal, numbers)
 
+    async def shown(self, game: str, section: str) -> dict[str, datetime]:
+        """Return when the rotation last brought each offer of a section, by its picked name.
+
+        Args:
+            game: The game's data-file name.
+            section: The section's name.
+        """
+        async with self._sessions() as session:
+            found = await session.execute(
+                select(StoreBundleRow.pool, func.max(StoreBundleRow.starts_at))
+                .where(
+                    StoreBundleRow.game == game,
+                    StoreBundleRow.section == section,
+                    StoreBundleRow.source == AUTO,
+                )
+                .group_by(StoreBundleRow.pool)
+            )
+            return {pool: start for pool, start in found if pool and start}
+
 
 async def _history(
     session: AsyncSession, game: str, section: str, start: datetime, gap: int

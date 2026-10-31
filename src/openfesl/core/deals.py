@@ -47,6 +47,14 @@ class DealStore(Protocol):
             make: Makes the bundles from what the section must not repeat.
         """
 
+    async def shown(self, game: str, section: str) -> dict[str, datetime]:
+        """Return when the rotation last brought each offer of a section, by its picked name.
+
+        Args:
+            game: The game's data-file name.
+            section: The section's name.
+        """
+
 
 @dataclass(frozen=True, slots=True)
 class Deal:
@@ -186,6 +194,15 @@ class HotDeals:
             language: The language code; English where the texts lack it.
         """
         return _deal(game, await self._catalogues.of(game, language), listed, 0, language)
+
+    async def shown(self, game: Game, section: str) -> dict[str, datetime]:
+        """Return when the rotation last brought each offer of a section, by its picked name.
+
+        Args:
+            game: The game.
+            section: The section's name.
+        """
+        return await self._store.shown(game.id, section)
 
     async def _rotate(self, game: Game, rules: DealRules, now: datetime) -> None:
         catalogue = await self._catalogues.of(game, BASE_LANGUAGE)

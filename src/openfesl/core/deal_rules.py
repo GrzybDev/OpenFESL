@@ -92,6 +92,8 @@ class OfferSection(BaseModel):
         offers: Its own offers.
         shelf: The section of the hot deals page that lists its deals; its own name when none.
         leaves: Whether its deals leave the hot deals for a while rather than end.
+        pinned: The offers it picks first, within its gap too, by the name they are picked by.
+        excluded: The offers it never picks, by the name they are picked by.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -106,6 +108,8 @@ class OfferSection(BaseModel):
     offers: tuple[Offer, ...] = ()
     shelf: str | None = None
     leaves: bool = False
+    pinned: tuple[str, ...] = ()
+    excluded: tuple[str, ...] = ()
 
     @model_validator(mode="after")
     def _check_discount(self) -> Self:

@@ -12636,6 +12636,69 @@ msgstr "Przerwa przed powtórką, dni"
 msgid "web.admin.deals.section.save"
 msgstr "Zapisz sekcję"
 
+msgid "web.admin.deals.pool"
+msgstr "Pula"
+
+msgid "web.admin.deals.pool.counts"
+msgstr "uwzględnione: %(included)s · przypięte: %(pinned)s · wykluczone: %(excluded)s"
+
+msgid "web.admin.deals.pool.column.offer"
+msgstr "Oferta"
+
+msgid "web.admin.deals.pool.column.faction"
+msgstr "Frakcja"
+
+msgid "web.admin.deals.pool.column.last"
+msgstr "Ostatnio widoczna"
+
+msgid "web.admin.deals.pool.column.state"
+msgstr "W puli"
+
+msgid "web.admin.deals.pool.boxes.one"
+msgstr "%(count)s skrzynka losowa"
+
+msgid "web.admin.deals.pool.boxes.few"
+msgstr "%(count)s skrzynki losowe"
+
+msgid "web.admin.deals.pool.boxes.many"
+msgstr "%(count)s skrzynek losowych"
+
+msgid "web.admin.deals.pool.boxes.other"
+msgstr "%(count)s skrzynki losowej"
+
+msgid "web.admin.deals.pool.any"
+msgstr "Każda frakcja"
+
+msgid "web.admin.deals.pool.unknown"
+msgstr "Brak w katalogu"
+
+msgid "web.admin.deals.pool.never"
+msgstr "Nigdy"
+
+msgid "web.admin.deals.pool.state.of"
+msgstr "W puli: %(offer)s"
+
+msgid "web.admin.deals.pool.in"
+msgstr "Uwzględniona"
+
+msgid "web.admin.deals.pool.out"
+msgstr "Wykluczona"
+
+msgid "web.admin.deals.pool.pin"
+msgstr "Przypięta"
+
+msgid "web.admin.deals.pool.note"
+msgstr "Przypięte oferty wchodzą jako pierwsze w każdym kroku, także w przerwie przed powtórką; wykluczone nigdy. Oferty z oknami są sprzedawane tylko w nich."
+
+msgid "web.admin.deals.pool.note.all"
+msgstr "Sekcja sprzedaje każdą ofertę ze swojej puli; wykluczone nigdy. Oferty z oknami są sprzedawane tylko w nich."
+
+msgid "web.admin.deals.pool.items"
+msgstr "Ta sekcja łączy przedmioty według miejsc na postaci, więc nie ma puli ofert."
+
+msgid "web.admin.deals.players_page"
+msgstr "Strona gorących ofert dla graczy"
+
 msgid "web.admin.deals.managed"
 msgstr "Zmiana gorących ofert wymaga roli administratora."
 
@@ -12701,6 +12764,18 @@ msgstr "rabat %(before)s → %(after)s"
 
 msgid "web.admin.audit.deal.gap"
 msgstr "przerwa przed powtórką %(before)s → %(after)s dni"
+
+msgid "web.admin.audit.deal.pinned.on"
+msgstr "przypięto: %(offers)s"
+
+msgid "web.admin.audit.deal.pinned.off"
+msgstr "odpięto: %(offers)s"
+
+msgid "web.admin.audit.deal.excluded.on"
+msgstr "wykluczono: %(offers)s"
+
+msgid "web.admin.audit.deal.excluded.off"
+msgstr "ponownie uwzględniono: %(offers)s"
 
 msgid "web.admin.audit.action.deal_offer"
 msgstr "Zapis oferty"

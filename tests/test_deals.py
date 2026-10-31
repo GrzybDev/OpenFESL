@@ -1,4 +1,5 @@
 import asyncio
+import json
 from collections.abc import AsyncIterator
 from datetime import UTC, datetime, timedelta
 from itertools import pairwise
@@ -166,6 +167,27 @@ async def rotation(
     await found.catalogues.load()
     yield found
     await engine.dispose()
+
+
+async def test_the_pool_brings_a_pinned_set_at_every_step_and_never_an_excluded_one(
+    rotation: Rotation, database_url: str
+) -> None:
+    left = [f"Invented Set {n}" for n in (1, 2, 4, 5, 6)]
+    await setting(database_url, "bfheroes.deals.sections.new.pinned", '["Invented Set 3"]')
+    await setting(database_url, "bfheroes.deals.sections.new.excluded", json.dumps(left))
+
+    async def new_sets(day: int) -> list[str]:
+        rotation.now = MONDAY + timedelta(days=day)
+        return [name for section, name, _, _ in await rotation.listed() if section == "new"]
+
+    pinned = [await new_sets(7 * week) for week in range(3)]
+    await setting(database_url, "bfheroes.deals.sections.new.pinned", "[]")
+    unpinned = await new_sets(21)
+
+    # Pinned, it comes again within the gap; unpinned, the gap keeps it out, and the one set
+    # the pool still holds comes.
+    assert pinned == [["Invented Set 3"]] * 3
+    assert unpinned == ["Invented Set 7"]
 
 
 async def test_deals_change_at_midnight_and_sets_on_mondays_at_prices_ending_in_99(

@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import httpx2
@@ -6,8 +7,10 @@ from accounts import select_value
 from identity import IdentityProvider, form_token, sign_in
 from store import deals as offered
 from store import stock
-from support import visible
+from support import form_fields, visible
 from test_admin_heroes import KEEPER, WARDEN
+
+from openfesl.core.games import Game
 
 pytestmark = pytest.mark.anyio
 
@@ -73,3 +76,42 @@ async def test_admins_switch_the_rotation_and_change_its_sections_from_their_nex
             "Section changed On sale Details Runs → Off; discount 25\u201350% off → 20\u201340% off"
             in log
         )
+
+
+@pytest.mark.usefixtures("prompt_actions")
+async def test_admins_pin_and_exclude_the_offers_of_a_sections_pool(
+    admin_provider: IdentityProvider,
+    base: str,
+    server_url: str,
+    database_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    bfheroes: Game,
+) -> None:
+    await stock(server_url, tmp_path, capsys)
+    sections = f"{base}/admin/store/bfheroes/deals/sections"
+    admin_provider.user = KEEPER
+    async with httpx2.AsyncClient() as client:
+        fields = form_fields(
+            (await sign_in(client, base, next=f"{sections[len(base) :]}/new")).text
+        )
+        changed = {"pool-0": ["pin"], "pool-1": ["out"]}
+        saved = await client.post(f"{sections}/new", data=fields | changed, follow_redirects=True)
+        shown = visible((await client.get(f"{sections}/new")).content)
+        daily = visible((await client.get(f"{sections}/daily")).content)
+        popular = visible((await client.get(f"{sections}/popular")).content)
+        log = visible((await client.get(f"{base}/admin/audit")).content)
+
+    assert bfheroes.deals is not None
+    first, second = (offer.name for offer in bfheroes.deals.sets[:2])
+    assert "Saved New sets; it changes at its next step." in visible(saved.content)
+    pinned = await setting(database_url, "bfheroes.deals.sections.new.pinned")
+    excluded = await setting(database_url, "bfheroes.deals.sections.new.excluded")
+    assert (pinned, excluded) == (json.dumps([first]), json.dumps([second]))
+    count = len(bfheroes.deals.sets)
+    assert f"Pool {count - 2} included · 1 pinned · 1 excluded" in shown
+    assert "Pinned offers come first at each step, also within the repeat gap" in shown
+    # A section of items has no pool, and one that sells all its offers no pins.
+    assert "This section puts items together by their slots, so it has no pool of offers." in daily
+    assert "The section sells every offer of its pool" in popular
+    assert f"Section changed New sets Details pinned {first}; excluded {second}" in log

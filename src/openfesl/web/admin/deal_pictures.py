@@ -69,7 +69,7 @@ def deal_picture_routes(sessions: AdminSessions, views: DealAdminViews) -> APIRo
             if len(data) > MOST_PICTURE or not fits(data, big):
                 key = f"web.admin.deals.art.refused.{'big' if big else 'small'}"
                 why = (number, texts.text(key, file=name))
-                return await deal_page(sessions, views, request, admin, game, "", {}, "", why)
+                return await deal_page(sessions, views, request, admin, game, why)
         for big, (_, data) in files.items():
             await views.uploads.put(game.id, shown.offer, big, data, admin)
         if files:
