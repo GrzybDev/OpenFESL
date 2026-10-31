@@ -62,3 +62,23 @@ def test_windows_run_on_their_days_of_each_year_and_easter_moves_with_the_comput
     assert halloween.day(datetime(2026, 10, 31, 22, 59, tzinfo=UTC), "UTC") == 13
     assert halloween.day(datetime(2026, 10, 31, 23, tzinfo=UTC), "Europe/Warsaw") is None
     assert halloween.day(datetime(2026, 10, 18, 22, tzinfo=UTC), "Europe/Warsaw") == 1
+
+
+def test_a_run_may_cross_the_year_end_and_never_reaches_the_next_years() -> None:
+    winter = Window(dates=("12-20", "01-06"))
+    counted = Window(first="12-20", count=18)
+    long_before_easter = Window(easter=(-130, 0))
+
+    # Both reach into January, where the run of the year before still runs.
+    assert winter.days(2026) == counted.days(2026) == (date(2026, 12, 20), date(2027, 1, 6))
+    january = datetime(2027, 1, 3, tzinfo=UTC)
+    assert winter.year_at(january, "UTC") == counted.year_at(january, "UTC") == 2026
+    assert counted.day(january, "UTC") == 15
+    assert winter.running(datetime(2027, 1, 7, tzinfo=UTC), "UTC") is None
+    # A run before Easter 2027 already runs in November 2026.
+    assert long_before_easter.year_at(datetime(2026, 11, 20, tzinfo=UTC), "UTC") == 2027
+    # A year's run may not reach the next one, which starts 365 days or 50 weeks later at the
+    # earliest.
+    assert not counted.overlaps and not Window(first="03-01", count=365).overlaps
+    assert Window(first="03-01", count=366).overlaps
+    assert not Window(easter=(-100, 249)).overlaps and Window(easter=(-100, 250)).overlaps

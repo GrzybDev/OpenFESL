@@ -7,7 +7,7 @@ from babel.dates import format_interval, format_skeleton, format_timedelta
 from starlette.requests import Request
 
 from openfesl.core.calendar import day_start, today
-from openfesl.core.catalogues import Catalogue, Catalogues, game_text
+from openfesl.core.catalogues import Catalogue, Catalogues, game_text, paragraphs
 from openfesl.core.games import Game
 from openfesl.core.heroes import Hero, Roster
 from openfesl.core.inventory import Ownership
@@ -189,6 +189,18 @@ class RewardTexts:
             # Before the game's texts are imported, the event's own name stands in.
             return self.texts.text(self.rules.events[reward.event].title)
         return found
+
+    def description(self, reward: Reward) -> str:
+        """Return a reward's text: its event's own text, else its own, if there is one to show.
+
+        Args:
+            reward: The reward.
+        """
+        if reward.event and (event := self.rules.events[reward.event]).own_text:
+            return event.text(self.texts.language)
+        text = reward.description or ""
+        found = game_text(self.game, self.catalogue, text, self.texts.language)
+        return " ".join(paragraphs(found)) if found != text else ""
 
     def milestone_title(self, milestone: Milestone) -> str:
         """Return a milestone's name, which states its goal, and the Funds it gives.

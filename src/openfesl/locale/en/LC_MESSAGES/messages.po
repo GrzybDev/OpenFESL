@@ -8288,7 +8288,7 @@ msgid "games.bfheroes.rewards.christmas"
 msgstr "Christmas gifts"
 
 msgid "games.bfheroes.rewards.christmas.summary"
-msgstr "One free gift a day for each faction until Christmas Eve."
+msgstr "One free gift a day for each faction."
 
 msgid "web.rewards.progress"
 msgstr "%(count)s of %(goal)s"
@@ -11594,11 +11594,35 @@ msgstr "%(count)s daily gift from %(date)s"
 msgid "web.admin.rewards.rule.daily.other"
 msgstr "%(count)s daily gifts from %(date)s"
 
+msgid "web.admin.rewards.rule.count.one"
+msgstr "%(count)s day from %(date)s"
+
+msgid "web.admin.rewards.rule.count.other"
+msgstr "%(count)s days from %(date)s"
+
 msgid "web.admin.rewards.rule.easter"
 msgstr "Relative to Easter"
 
 msgid "web.admin.rewards.rule.fixed"
 msgstr "Fixed days"
+
+msgid "web.admin.rewards.rule.fixed.title"
+msgstr "Fixed days"
+
+msgid "web.admin.rewards.rule.fixed.text"
+msgstr "From one date to another"
+
+msgid "web.admin.rewards.rule.easter.title"
+msgstr "Relative to Easter"
+
+msgid "web.admin.rewards.rule.easter.text"
+msgstr "Days before and after"
+
+msgid "web.admin.rewards.rule.count.title"
+msgstr "Daily count"
+
+msgid "web.admin.rewards.rule.count.text"
+msgstr "A first day and a number of days"
 
 msgid "web.admin.rewards.text.own"
 msgstr "OpenFESL's own"
@@ -11687,6 +11711,9 @@ msgstr "Day starts"
 msgid "web.admin.rewards.event.starts.value"
 msgstr "%(time)s · every event"
 
+msgid "web.admin.rewards.event.easter.note"
+msgstr "Days from Easter Sunday: -2 is Good Friday, 1 is Easter Monday."
+
 msgid "web.admin.rewards.event.daily.one"
 msgstr "%(count)s daily gift, %(first)s to %(last)s; each can be claimed only on its day, unless claims were paused that day."
 
@@ -11719,6 +11746,69 @@ msgstr "Texts"
 
 msgid "web.admin.rewards.event.text.missing"
 msgstr "Comes with the game's texts in the catalogue import"
+
+msgid "web.admin.rewards.event.save"
+msgstr "Save event"
+
+msgid "web.admin.rewards.event.waits"
+msgstr "Saving waits for %(what)s."
+
+msgid "web.admin.rewards.event.waits.english"
+msgstr "the English own text"
+
+msgid "web.admin.rewards.edits"
+msgstr "Edits"
+
+msgid "web.admin.rewards.edits.text"
+msgstr "Apply from the next claim. Rewards already granted are never taken back."
+
+msgid "web.admin.rewards.text_rule.days"
+msgstr "The game's texts of this event cover days 1 to %(days)s; a day %(day)s needs own text."
+
+msgid "web.admin.rewards.text_rule.end"
+msgstr "The game's texts of this event state its last day, %(date)s; a last day of %(new)s needs own text."
+
+msgid "web.admin.rewards.text_rule.english"
+msgstr "English is required."
+
+msgid "web.admin.rewards.text_rule.own"
+msgstr "Own text in place of the texts of this event's rewards; emptied, theirs return."
+
+msgid "web.admin.rewards.own.required"
+msgstr "Required"
+
+msgid "web.admin.rewards.own.optional"
+msgstr "Optional"
+
+msgid "web.admin.rewards.own.placeholder"
+msgstr "Shown on each reward of this event"
+
+msgid "web.admin.rewards.own.fallback"
+msgstr "Empty: shows the English text"
+
+msgid "web.admin.rewards.refused.overlap"
+msgstr "%(event)s would run for %(days)s days, so a year's run would reach the next one; the runs of one event cannot overlap."
+
+msgid "web.admin.rewards.refused.day"
+msgstr "A day such as 1 Dec is needed."
+
+msgid "web.admin.rewards.refused.leap"
+msgstr "29 Feb is not a day of every year; an event runs on the same days each year."
+
+msgid "web.admin.rewards.refused.easter"
+msgstr "Days from Easter Sunday are whole numbers from -%(most)s to %(most)s, such as -2 for Good Friday."
+
+msgid "web.admin.rewards.refused.order"
+msgstr "The first day comes after the last."
+
+msgid "web.admin.rewards.refused.count"
+msgstr "Days are a whole number from 1."
+
+msgid "web.admin.rewards.refused.own"
+msgstr "Saving waits for the English own text."
+
+msgid "web.admin.rewards.refused.long"
+msgstr "An own text has at most %(most)s characters."
 
 msgid "web.admin.rewards.goal.goal"
 msgstr "Goal"
@@ -11873,6 +11963,12 @@ msgstr "Switched off %(name)s; it applies from the next claim, and rewards alrea
 msgid "web.admin.toast.rewards.milestones"
 msgstr "Saved the milestones; changes apply from the next claim."
 
+msgid "web.admin.toast.rewards.event"
+msgstr "Saved %(event)s, %(dates)s; changes apply from the next claim."
+
+msgid "web.admin.toast.rewards.event.unchanged"
+msgstr "Nothing changed in %(event)s."
+
 msgid "web.admin.audit.action.reward_switch.on"
 msgstr "Reward switched on"
 
@@ -11885,6 +11981,9 @@ msgstr "Milestone changed"
 msgid "web.admin.audit.action.reward_zone"
 msgstr "Day start changed"
 
+msgid "web.admin.audit.action.reward_event"
+msgstr "Event changed"
+
 msgid "web.admin.audit.reward_zone"
 msgstr "%(before)s → %(after)s"
 
@@ -11896,6 +11995,18 @@ msgstr "Off → On"
 
 msgid "web.admin.audit.reward_switch.off"
 msgstr "On → Off"
+
+msgid "web.admin.audit.reward_dates"
+msgstr "%(before)s → %(after)s"
+
+msgid "web.admin.audit.reward_text"
+msgstr "own text: %(languages)s"
+
+msgid "web.admin.audit.reward_text.removed"
+msgstr "own text removed"
+
+msgid "web.admin.audit.reward_text.changed"
+msgstr "own text changed"
 
 msgid "web.admin.rewards.tabs"
 msgstr "Views of the rewards"

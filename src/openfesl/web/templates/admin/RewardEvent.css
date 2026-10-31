@@ -79,3 +79,189 @@
     overflow-wrap: anywhere;
   }
 }
+
+/* The event's editor: its date rule as tiles over the fields of that rule alone, what they set or
+   why they are refused, the own text that the game's texts need once an edit outgrows them, and
+   Save event. The fields of the other rules stay in the form for browsers without :has(). */
+@layer pages {
+  .reward-dating {
+    display: grid;
+    gap: 2px;
+    margin: 2px 0 0;
+    border: 0;
+    padding: 0;
+    min-width: 0;
+  }
+
+  .reward-legend {
+    float: left;
+    width: 100%;
+  }
+
+  .reward-rules {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    .choice-tile {
+      min-height: 112px;
+    }
+  }
+
+  .reward-dates {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 2px;
+  }
+
+  .reward-date {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    min-width: 0;
+
+    .field-input {
+      min-width: 0;
+    }
+  }
+
+  .reward-starts {
+    display: flex;
+    align-items: center;
+    background: var(--row-light);
+    padding: 10px 14px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .reward-dating:has([name="rule"][value="fixed"]:checked)
+    :is(.reward-when-count, .reward-when-easter),
+  .reward-dating:has([name="rule"][value="count"]:checked)
+    :is(.reward-when-last, .reward-when-easter),
+  .reward-dating:has([name="rule"][value="easter"]:checked)
+    :is(.reward-when-first, .reward-when-last, .reward-when-count) {
+    display: none;
+  }
+
+  .reward-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--row);
+    padding: 10px 14px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+
+    &[data-blocked] {
+      background: var(--row-light);
+    }
+
+    .badge {
+      flex: none;
+    }
+  }
+
+  .reward-own-live:not(:empty) {
+    margin-top: 2px;
+  }
+
+  .reward-own {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    border: 0;
+    background: #ffffff;
+    padding: 12px 14px 14px;
+    color: var(--ink);
+    animation: reward-own-in 200ms var(--ease-menu);
+  }
+
+  .reward-own-why {
+    display: flex;
+    float: left;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 0;
+    font-weight: 700;
+
+    .badge {
+      flex: none;
+    }
+  }
+
+  .reward-own-row {
+    display: grid;
+    grid-template-columns: minmax(110px, 150px) minmax(0, 1fr);
+    gap: 2px;
+  }
+
+  .reward-own-label {
+    display: grid;
+    align-content: center;
+    background: var(--row);
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .reward-own-tag {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .reward-save {
+    display: grid;
+    justify-items: end;
+    gap: 10px;
+
+    .admin-form-why {
+      justify-self: stretch;
+    }
+
+    .action-button {
+      width: auto;
+      min-width: 260px;
+    }
+  }
+
+  @keyframes reward-own-in {
+    from {
+      opacity: 0;
+      translate: 0 -6px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .reward-rules .choice-tile {
+      min-height: 0;
+      padding-inline: 4px;
+    }
+
+    .reward-rules .choice-square {
+      display: none;
+    }
+
+    .reward-own-row {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .reward-save {
+      justify-items: stretch;
+    }
+
+    .reward-save .action-button {
+      width: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reward-own {
+      animation-duration: 1ms;
+    }
+  }
+}

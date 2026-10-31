@@ -73,40 +73,63 @@ class Schedule(BaseModel):
 class Window(BaseModel):
     """The days of each year on which something runs, from its first day to its last.
 
+    Each year has one run, which may end in the next year, as one from 20 December to 6 January
+    does, or start in the year before, as one long before Easter does.
+
     Attributes:
-        dates: Its first and last days, written MM-DD.
+        dates: Its first and last days, written MM-DD; a last day before the first falls in the
+            next year.
         easter: Its first and last days as days after Western Easter Sunday, before it below 0.
+        first: Its first day, written MM-DD, of a run of a number of days.
+        count: How many days that run lasts.
     """
 
     model_config = ConfigDict(frozen=True)
 
     dates: tuple[MonthDay, MonthDay] | None = None
     easter: tuple[int, int] | None = None
+    first: MonthDay | None = None
+    count: PositiveInt | None = None
 
     @model_validator(mode="after")
     def _check_days(self) -> Self:
-        if (self.dates is None) == (self.easter is None):
-            raise ValueError("a window has either dates or days after Easter")
-        dates, offsets = self.dates or ("", ""), self.easter or (0, 0)
-        if dates[0] > dates[1] or offsets[0] > offsets[1]:
+        rules = [self.dates, self.easter, self.first]
+        if sum(rule is not None for rule in rules) != 1 or (self.first is None) != (
+            self.count is None
+        ):
+            raise ValueError("a window has dates, days after Easter, or a first day and a count")
+        if self.easter and self.easter[0] > self.easter[1]:
             raise ValueError("a window's first day is after its last")
         return self
 
+    @property
+    def overlaps(self) -> bool:
+        """Whether a year's run would reach the next year's, which the runs of events must not."""
+        if self.count:
+            return self.count > 365
+        if self.easter:
+            # Two Easter Sundays are at least 50 weeks apart.
+            return self.easter[1] - self.easter[0] >= 350
+        return False
+
     def days(self, year: int) -> tuple[date, date]:
-        """Return the window's first and last days in a year.
+        """Return the first and last days of the window's run of a year.
 
         Args:
-            year: The year.
+            year: The year, which the run's Easter or its first day belongs to.
         """
         if self.easter:
             sunday = easter(year)
             return sunday + timedelta(self.easter[0]), sunday + timedelta(self.easter[1])
+        if self.first and self.count:
+            first = date.fromisoformat(f"{year}-{self.first}")
+            return first, first + timedelta(self.count - 1)
         assert self.dates
-        first, last = self.dates
-        return date.fromisoformat(f"{year}-{first}"), date.fromisoformat(f"{year}-{last}")
+        first, last = (date.fromisoformat(f"{year}-{day}") for day in self.dates)
+        return first, last if last >= first else last.replace(year=year + 1)
 
     def period(self, year: int, zone: str) -> Period:
-        """Return the window's period in a year, from its first day's start to its last's end.
+        """Return the window's run of a year, from its first day's start to its last's end.
 
         Args:
             year: The year.
@@ -115,15 +138,29 @@ class Window(BaseModel):
         first, last = self.days(year)
         return Period(day_start(first, zone), day_start(last + timedelta(1), zone))
 
-    def running(self, now: datetime, zone: str) -> Period | None:
-        """Return the window's period that runs at a moment, if one does.
+    def year_at(self, now: datetime, zone: str) -> int | None:
+        """Return the year of the window's run that runs at a moment, if one does.
 
         Args:
             now: The moment.
             zone: The time zone whose midnights its days start at.
         """
-        period = self.period(today(now, zone).year, zone)
-        return period if period.start <= now < period.end else None
+        year = today(now, zone).year
+        for found in (year - 1, year, year + 1):
+            period = self.period(found, zone)
+            if period.start <= now < period.end:
+                return found
+        return None
+
+    def running(self, now: datetime, zone: str) -> Period | None:
+        """Return the window's run at a moment, if one runs.
+
+        Args:
+            now: The moment.
+            zone: The time zone whose midnights its days start at.
+        """
+        year = self.year_at(now, zone)
+        return None if year is None else self.period(year, zone)
 
     def day(self, now: datetime, zone: str) -> int | None:
         """Return which of the window's days a moment falls on, from 1, if it falls on one.
@@ -132,10 +169,10 @@ class Window(BaseModel):
             now: The moment.
             zone: The time zone whose midnights its days start at.
         """
-        if self.running(now, zone) is None:
+        year = self.year_at(now, zone)
+        if year is None:
             return None
-        day = today(now, zone)
-        return (day - self.days(day.year)[0]).days + 1
+        return (today(now, zone) - self.days(year)[0]).days + 1
 
 
 @dataclass(frozen=True, slots=True)

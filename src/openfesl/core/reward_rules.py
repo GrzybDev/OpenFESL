@@ -1,5 +1,5 @@
 from datetime import date, datetime, timedelta
-from typing import Self
+from typing import Literal, Self
 
 from pydantic import BaseModel, ConfigDict, NonNegativeInt, PositiveInt, model_validator
 
@@ -94,6 +94,11 @@ class Event(BaseModel):
         daily: Whether each of its days gives a gift of its own, claimed on that day, rather
             than one gift for all of them.
         parts: Its parts, by name.
+        stated: What the texts of its parts state, so that changing it needs own text: days (a
+            text for each of the data's days) or end (its last day).
+        own_text: The admin's own text of what it gives, by language, in place of the texts
+            of its parts, which its title then names; English stands in for a language without
+            one. None keeps the parts' texts.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -104,6 +109,32 @@ class Event(BaseModel):
     window: Window
     daily: bool = False
     parts: dict[str, Part]
+    stated: frozenset[Literal["days", "end"]] = frozenset()
+    own_text: dict[str, str] = {}
+
+    def text(self, language: str) -> str:
+        """Return the admin's own text of the event in a language, else in English.
+
+        Args:
+            language: The language's code.
+        """
+        return self.own_text.get(language) or self.own_text.get("en", "")
+
+    def outdated(self, edited: Event, year: int) -> list[str]:
+        """Return what the texts of the event's parts state that an edit of it changes.
+
+        Args:
+            edited: The event as edited.
+            year: The year whose runs are compared.
+        """
+        first, last = self.window.days(year)
+        new_first, new_last = edited.window.days(year)
+        found = []
+        if "days" in self.stated and new_last - new_first > last - first:
+            found.append("days")
+        if "end" in self.stated and new_last != last:
+            found.append("end")
+        return found
 
 
 class StarterPacks(BaseModel):
@@ -251,4 +282,8 @@ class RewardRules(BaseModel):
                 raise ValueError(f"the event {key} has two parts for one faction")
             if event.daily and any(part.goal for part in event.parts.values()):
                 raise ValueError(f"the event {key} has goals on its days")
+            if event.window.overlaps:
+                raise ValueError(f"the runs of the event {key} in two years overlap")
+            if event.own_text and not event.own_text.get("en"):
+                raise ValueError(f"the own text of the event {key} lacks English")
         return self

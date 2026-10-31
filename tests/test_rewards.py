@@ -250,6 +250,33 @@ async def test_each_day_of_christmas_gives_each_faction_one_roll_of_its_visit_fo
     assert isinstance(next_day, list)
 
 
+async def test_an_event_run_past_the_year_end_keeps_its_days_and_claims_under_its_own_year(
+    site: Site, base: str, database_url: str
+) -> None:
+    royal = await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    # As the admin panel saves Christmas run to 9 January, with the admin's own text.
+    await setting(
+        database_url, "bfheroes.rewards.events.christmas.window", '{"first": "12-01", "count": 40}'
+    )
+    await setting(
+        database_url, "bfheroes.rewards.events.christmas.own_text", '{"en": "A gift a day."}'
+    )
+    site.now = datetime(2027, 1, 3, 12, tzinfo=UTC)
+
+    today = [reward for reward in await site.available(royal) if reward.day]
+    given = await site.claim(royal, "christmas:2026:34", "royal")
+    again = await site.claim(royal, "christmas:2026:34", "royal")
+    history = await site.rewards.history(site.game, await site.account(royal))
+
+    # The 34th day of the run that began in 2026, named by the event's title with its own text.
+    assert [(r.key, r.name, r.day, r.state) for r in today] == [
+        ("christmas:2026:34", "games.bfheroes.rewards.christmas", 34, RewardState.CLAIMABLE),
+        ("christmas:2026:34", "games.bfheroes.rewards.christmas", 34, RewardState.LOCKED),
+    ]
+    assert isinstance(given, list) and again is RewardRefusal.CLAIMED
+    assert [claimed.name for claimed in history] == ["games.bfheroes.rewards.christmas"]
+
+
 async def test_a_yearly_pack_goes_once_to_each_faction_and_an_item_owned_for_good_turns_to_tonics(
     site: Site, base: str, database_url: str
 ) -> None:

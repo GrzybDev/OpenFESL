@@ -144,6 +144,10 @@ class AdminAction(StrEnum):
     REWARD_ZONE = "reward_zone"
     """Changed the time zone at whose midnight the days of the rewards of the game whose id is
     the target start; the details hold the zone before and after."""
+    REWARD_EVENT = "reward_event"
+    """Changed an event of the rewards of the game whose id is the target; the details hold its
+    key, the first and last days of its run before and after, and its own text before and
+    after."""
 
 
 @dataclass(frozen=True, slots=True)

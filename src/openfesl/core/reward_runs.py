@@ -15,6 +15,8 @@ class Run:
         period: When it runs.
         days: How many days it runs.
         day: Which of its days today is, from 1; none when it does not run today.
+        year: The year of the run, which its Easter or its first day belongs to and which
+            names its claims.
     """
 
     key: str
@@ -22,6 +24,7 @@ class Run:
     period: Period
     days: int
     day: int | None
+    year: int
 
 
 def running_at(rules: RewardRules, now: datetime) -> list[Run]:
@@ -31,13 +34,13 @@ def running_at(rules: RewardRules, now: datetime) -> list[Run]:
         rules: The rewards with their calendar.
         now: The moment.
     """
-    year = today(now, rules.zone).year
-    runs = [run_of(key, event, year, rules.zone) for key, event in rules.events.items()]
-    return [
-        replace(run, day=run.event.window.day(now, rules.zone))
-        for run in runs
-        if run.event.enabled and run.period.start <= now < run.period.end
-    ]
+    found = []
+    for key, event in rules.events.items():
+        year = event.window.year_at(now, rules.zone)
+        if event.enabled and year is not None:
+            run = run_of(key, event, year, rules.zone)
+            found.append(replace(run, day=event.window.day(now, rules.zone)))
+    return found
 
 
 def run_of(key: str, event: Event, year: int, zone: str) -> Run:
@@ -46,8 +49,20 @@ def run_of(key: str, event: Event, year: int, zone: str) -> Run:
     Args:
         key: The event's key.
         event: The event.
-        year: The year.
+        year: The year, which the run's Easter or its first day belongs to.
         zone: The time zone whose midnights its days start at.
     """
     first, last = event.window.days(year)
-    return Run(key, event, event.window.period(year, zone), (last - first).days + 1, None)
+    return Run(key, event, event.window.period(year, zone), (last - first).days + 1, None, year)
+
+
+def run_now(key: str, event: Event, now: datetime, zone: str) -> Run:
+    """Return the run of an event that runs at a moment, else its run of the moment's year.
+
+    Args:
+        key: The event's key.
+        event: The event.
+        now: The moment.
+        zone: The time zone whose midnights its days start at.
+    """
+    return run_of(key, event, event.window.year_at(now, zone) or today(now, zone).year, zone)

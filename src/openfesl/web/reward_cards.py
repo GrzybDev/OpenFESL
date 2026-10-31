@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from starlette.requests import Request
 
 from openfesl.core.calendar import today
-from openfesl.core.catalogues import Catalogues, game_text, paragraphs
+from openfesl.core.catalogues import Catalogues
 from openfesl.core.entitlements import EntitlementStore
 from openfesl.core.games import Game
 from openfesl.core.reward_rules import Gift, Goal, RewardRules
@@ -188,9 +188,6 @@ class RewardCards:
             await self.claims.claiming(reward) if reward.state is RewardState.CLAIMABLE else None
         )
         owner = words.hero(reward.hero) if reward.goal is None else None
-        description = game_text(
-            words.game, words.catalogue, reward.description or "", texts.language
-        )
         gifts = [words.item(item_id, ownership) for item_id, ownership in gift.items]
         box = await self._products.box_by_key(words.game.id, gift.box) if gift.box else None
         if box and box.worth_rule:
@@ -205,7 +202,7 @@ class RewardCards:
             glyph=_glyph(gift),
             icon=words.icon(gift.items[0][0]) if gift.items else None,
             title=words.title(reward),
-            text=" ".join(paragraphs(description)) if description != reward.description else "",
+            text=words.description(reward),
             gifts=gifts + words.extra(gift),
             when=when,
             lines=lines,

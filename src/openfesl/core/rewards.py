@@ -246,7 +246,7 @@ class Rewards:
         found = []
         for key, event in rules.events.items():
             if event.enabled:
-                runs = (run_of(key, event, year + ahead, rules.zone) for ahead in (0, 1))
+                runs = (run_of(key, event, year + ahead, rules.zone) for ahead in (0, 1, 2))
                 found.append(next(run for run in runs if run.period.start > now))
         return sorted(found, key=lambda run: run.period.start)
 
@@ -334,11 +334,13 @@ class Rewards:
             fitting = tuple(
                 h.persona.id for h in counting if self._fits(game, part.faction, gift, h)
             )
+            # The event's own text names its parts by the event's title.
+            name = rules.events[event].title if rules.events[event].own_text else part.name
             description = _dated(part.description, day) if part.description else None
             reward = Reward(
                 key,
                 part.faction,
-                _dated(part.name, day),
+                _dated(name, day),
                 description,
                 gift,
                 _state(not gift.for_hero or bool(fitting)),
@@ -491,7 +493,9 @@ def claimed(rules: RewardRules, claim: Claim) -> Claimed:
         name = rules.starter.name
     elif kind == FIRST_CHEST and rules.first_chest:
         name = rules.first_chest.name
-    elif event := rules.events.get(kind):
+    elif (event := rules.events.get(kind)) and event.own_text:
+        name = event.title
+    elif event:
         parts = (part for part in event.parts.values() if part.faction == claim.faction)
         if part := next(parts, None):
             day = rest.partition(":")[2]
@@ -542,7 +546,7 @@ def _parts(
             ]
         found += [
             (
-                f"{run.key}:{day.year}" + (f":{number}" if number else ""),
+                f"{run.key}:{run.year}" + (f":{number}" if number else ""),
                 run.key,
                 part,
                 ends,

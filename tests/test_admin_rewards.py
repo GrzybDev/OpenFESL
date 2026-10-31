@@ -94,9 +94,15 @@ async def test_an_events_page_shows_its_days_gifts_goals_texts_and_paused_days(
         unknown = await client.get(f"{base}{REWARDS}/events/harvest")
 
     assert "E4 Halloween trick-or-treat Running · day 10 of 13" in daily
-    assert "Date rule 13 daily gifts from 19 Oct First day 19 Oct Last day 31 Oct Days 13" in daily
+    assert "Rewards are paused and changed with the admin role." in daily
+    assert "Date rule Fixed days From one date to another Relative to Easter" in daily
+    assert "Daily count A first day and a number of days" in daily
     assert "Day starts 00:00 UTC · every event" in daily
-    assert "each can be claimed only on its day, unless claims were paused that day" in daily
+    assert (
+        "13 daily gifts, 19 Oct to 31 Oct; each can be claimed only on its day, unless claims"
+        " were paused that day."
+    ) in daily
+    assert "Save event" not in daily
     assert "One roll of" in daily and "worth at least 999 Funds" in daily
     assert "Claims were paused on 21 Oct and 22 Oct." in daily
     assert "REWARDS_HALLOWEEN_DAY_{day}_ROYAL_NAME Comes with the game's texts" in daily
@@ -109,6 +115,124 @@ async def test_an_events_page_shows_its_days_gifts_goals_texts_and_paused_days(
         in (mission)
     )
     assert unknown.status_code == 404
+
+
+@pytest.mark.usefixtures("halloween", "prompt_actions")
+async def test_admins_change_an_events_days_with_own_text_where_the_games_texts_end(
+    admin_provider: IdentityProvider,
+    base: str,
+    server_url: str,
+    database_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    await import_catalogue(server_url, tmp_path, capsys, INVENTED)
+    hero = await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    christmas, events = f"{base}{REWARDS}/events/christmas", f"{base}{REWARDS}/events"
+    longer = {"rule": "count", "first": "2026-12-01", "count": "25"}
+    window, text = (
+        "bfheroes.rewards.events.christmas.window",
+        "bfheroes.rewards.events.christmas.own_text",
+    )
+    admin_provider.user = WARDEN
+    async with httpx2.AsyncClient() as client:
+        token = form_token((await sign_in(client, base, next=f"{REWARDS}/events/christmas")).text)
+        refused = await client.post(christmas, data={"csrf": token, **longer})
+    assert refused.status_code == 403
+
+    admin_provider.user = KEEPER
+    async with httpx2.AsyncClient() as client:
+        token = form_token((await sign_in(client, base, next=f"{REWARDS}/events/christmas")).text)
+        # As the fields are typed, the page says what they set and what the texts need.
+        typed = visible((await client.get(christmas, params=longer)).content)
+        untexted = await client.post(christmas, data={"csrf": token, **longer})
+        kept = await setting(database_url, window)
+        too_long = await client.post(
+            f"{events}/halloween",
+            data={"csrf": token, "rule": "count", "first": "2026-10-19", "count": "400"},
+        )
+        backwards = await client.post(
+            f"{events}/easter", data={"csrf": token, "rule": "easter", "before": "2", "after": "-1"}
+        )
+        # A run further from Easter could fall outside the years around today that are looked in.
+        far = await client.post(
+            f"{events}/easter",
+            data={"csrf": token, "rule": "easter", "before": "-500", "after": "-400"},
+        )
+        leap = await client.post(
+            f"{events}/valentine",
+            data={"csrf": token, "rule": "fixed", "first": "2028-02-29", "last": "2028-03-01"},
+        )
+        texted = {"csrf": token, **longer, "text-en": "A gift a day until Christmas Day."}
+        saved = visible(
+            (
+                await client.post(christmas, data=texted | {"text-pl": ""}, follow_redirects=True)
+            ).content
+        )
+        saved_window, saved_text = (
+            await setting(database_url, window),
+            await setting(database_url, text),
+        )
+        overview = visible((await client.get(f"{base}{REWARDS}")).content)
+        freeze(monkeypatch, datetime(2026, 12, 25, 12, tzinfo=UTC))
+        async with httpx2.AsyncClient() as player:
+            await post_sign_in(player, base, "ann@example.test", PASSWORD)
+            page = visible((await player.get(f"{base}/bfheroes/rewards")).content)
+            polish = visible((await player.get(f"{base}/pl/bfheroes/rewards")).content)
+            claim = {"csrf": form_token((await player.get(f"{base}/bfheroes/rewards")).text)}
+            claim |= {"key": "christmas:2026:25", "faction": "royal", "hero": str(hero)}
+            claimed = await player.post(f"{base}/bfheroes/rewards/claim", data=claim)
+        # Back at the game data's days, the own text may go, and with it the settings.
+        back = {
+            "csrf": token,
+            "rule": "count",
+            "first": "2026-12-01",
+            "count": "24",
+            "text-en": "",
+            "text-pl": "",
+        }
+        await client.post(christmas, data=back)
+        log = visible((await client.get(f"{base}/admin/audit")).content)
+
+    assert "25 daily gifts, 1 Dec to 25 Dec" in typed
+    assert (
+        "The game's texts of this event cover days 1 to 24; a day 25 needs own text. English is"
+        " required."
+    ) in typed
+    assert untexted.status_code == 400 and kept is None
+    assert "Saving waits for the English own text." in visible(untexted.content)
+    assert (
+        too_long.status_code == backwards.status_code == far.status_code == leap.status_code == 400
+    )
+    assert (
+        "Halloween trick-or-treat would run for 400 days, so a year's run would reach the next"
+        " one; the runs of one event cannot overlap."
+    ) in visible(too_long.content)
+    assert "The first day comes after the last." in visible(backwards.content)
+    assert "Days from Easter Sunday are whole numbers from -365 to 365" in visible(far.content)
+    assert "29 Feb is not a day of every year" in visible(leap.content)
+    assert "Saved Christmas gifts, 1\u201325 Dec; changes apply from the next claim." in saved
+    assert saved_window == '{"first": "12-01", "count": 25}'
+    assert saved_text == '{"en": "A gift a day until Christmas Day."}'
+    assert "1\u201325 Dec 25 daily gifts from 1 Dec" in overview
+    # The players' page and claims follow at once, the English text standing in for Polish.
+    assert "Christmas gifts A gift a day until Christmas Day." in page
+    assert "A gift a day until Christmas Day." in polish
+    assert claimed.status_code == 303
+    assert (
+        await select_value(
+            database_url, "SELECT count(*) FROM reward_claim WHERE key = 'christmas:2026:25'"
+        )
+        == 1
+    )
+    assert await setting(database_url, window) is None and await setting(database_url, text) is None
+    assert (
+        "Event changed Christmas gifts Details 1\u201324 Dec → 1\u201325 Dec; own text: English"
+    ) in log
+    assert (
+        "Event changed Christmas gifts Details 1\u201325 Dec → 1\u201324 Dec; own text removed"
+    ) in log
 
 
 @pytest.mark.usefixtures("halloween", "prompt_actions")

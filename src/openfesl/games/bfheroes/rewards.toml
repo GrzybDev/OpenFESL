@@ -6,7 +6,8 @@
 # on or bfheroes.rewards.events.halloween.enabled = off; days start at the zone's midnight.
 # Names and descriptions are the game's REWARDS_* texts where the data matches what they state,
 # else the server's own (archived forum threads as tid N); each event's title and summary, and how
-# a goal's progress reads, are the server's own.
+# a goal's progress reads, are the server's own. An event's stated lists what its parts' texts
+# state, so that the admin panel asks for own text once an edit changes it.
 [rewards]
 zone = "UTC"
 currency = "_PF"
@@ -83,8 +84,9 @@ gift = { keys = 2 }
 [rewards.events.halloween]
 title = "games.bfheroes.rewards.halloween"
 summary = "games.bfheroes.rewards.halloween.summary"
-window = { dates = ["10-19", "10-31"] }
+window = { first = "10-19", count = 13 }
 daily = true
+stated = ["days"]
 
 [rewards.events.halloween.parts.royal]
 faction = "royal"
@@ -108,6 +110,7 @@ gift = { box = "national-trick-or-treat" }
 title = "games.bfheroes.rewards.halloween-machete"
 summary = "games.bfheroes.rewards.halloween-machete.summary"
 window = { dates = ["10-19", "10-31"] }
+stated = ["end"]
 
 [rewards.events.halloween-machete.parts.royal]
 faction = "royal"
@@ -127,6 +130,7 @@ gift = { items = [3205] }
 title = "games.bfheroes.rewards.halloween-map"
 summary = "games.bfheroes.rewards.halloween-map.summary"
 window = { dates = ["10-19", "10-31"] }
+stated = ["end"]
 
 [rewards.events.halloween-map.parts.royal]
 faction = "royal"
@@ -147,8 +151,9 @@ gift = { items = [1511] }
 [rewards.events.bento]
 title = "games.bfheroes.rewards.bento"
 summary = "games.bfheroes.rewards.bento.summary"
-window = { dates = ["11-21", "11-27"] }
+window = { first = "11-21", count = 7 }
 daily = true
+stated = ["days", "end"]
 
 [rewards.events.bento.parts.royal]
 faction = "royal"
@@ -170,6 +175,7 @@ title = "games.bfheroes.rewards.rising-sun"
 summary = "games.bfheroes.rewards.rising-sun.summary"
 enabled = false
 window = { dates = ["11-21", "11-30"] }
+stated = ["end"]
 
 [rewards.events.rising-sun.parts.royal]
 faction = "royal"
@@ -192,8 +198,9 @@ gift = { items = [3211] }
 [rewards.events.christmas]
 title = "games.bfheroes.rewards.christmas"
 summary = "games.bfheroes.rewards.christmas.summary"
-window = { dates = ["12-01", "12-24"] }
+window = { first = "12-01", count = 24 }
 daily = true
+stated = ["days"]
 
 [rewards.events.christmas.parts.royal]
 faction = "royal"

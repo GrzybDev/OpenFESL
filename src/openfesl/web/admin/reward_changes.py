@@ -14,6 +14,7 @@ from openfesl.core.reward_rules import RewardRules
 from openfesl.core.texts import localize, translate
 from openfesl.core.wallets import MOST_BALANCE
 from openfesl.web.admin.auth import AdminSessions, back_to
+from openfesl.web.admin.reward_editor import event_entry
 from openfesl.web.admin.rewards import SECTION, RewardAdminViews, rewards_page, rewards_url
 from openfesl.web.pages import number, whole_number
 from openfesl.web.sessions import check_form, toast
@@ -166,7 +167,7 @@ def reward_entry(
 
     Args:
         action: What the admin did: paused or resumed the claims, flipped a switch, changed a
-            milestone or the zone of the days.
+            milestone, an event or the zone of the days.
         target: The game's id.
         details: The change's details, as the admin's log keeps them.
         games: The games, whose rewards the change was made to.
@@ -190,6 +191,8 @@ def reward_entry(
         shown = translate("web.admin.rewards.subtitle", language) % {"game": game.name}
         zones = translate("web.admin.audit.reward_zone", language) % details
         return action.value, shown, localize(f"/admin/settings#zone-{target}", language), zones
+    if action is AdminAction.REWARD_EVENT:
+        return action.value, *event_entry(game, details, language)
     before, after = details["before"], details["after"]
     said = []
     if before["funds"] != after["funds"]:

@@ -418,6 +418,7 @@ async def _rows(
             AdminAction.REWARD_SWITCH,
             AdminAction.REWARD_MILESTONE,
             AdminAction.REWARD_ZONE,
+            AdminAction.REWARD_EVENT,
         ):
             kind, shown, href, said = reward_entry(action, target, details, games, language)
         elif action is AdminAction.CATALOGUE_IMPORT:
@@ -479,7 +480,7 @@ def _glyph(action: AdminAction, kind: str, details: dict[str, Any]) -> str:
         return "star" if details.get("shown") else "star-off"
     if action is AdminAction.REWARD_PAUSE:
         return "pause" if details.get("paused") else "play"
-    if action in (AdminAction.REWARD_MILESTONE, AdminAction.REWARD_ZONE):
+    if action in (AdminAction.REWARD_MILESTONE, AdminAction.REWARD_ZONE, AdminAction.REWARD_EVENT):
         return "edit"
     if action in (AdminAction.CHESTS, AdminAction.CHEST_KEYS):
         return "x" if details.get("count", 0) < 0 else "plus"

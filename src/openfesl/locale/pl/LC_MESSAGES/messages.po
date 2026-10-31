@@ -8778,7 +8778,7 @@ msgid "games.bfheroes.rewards.christmas"
 msgstr "Świąteczne prezenty"
 
 msgid "games.bfheroes.rewards.christmas.summary"
-msgstr "Codziennie jeden darmowy prezent dla każdej frakcji aż do Wigilii."
+msgstr "Codziennie jeden darmowy prezent dla każdej frakcji."
 
 msgid "web.rewards.progress"
 msgstr "%(count)s z %(goal)s"
@@ -12318,11 +12318,41 @@ msgstr "%(count)s dziennych prezentów od %(date)s"
 msgid "web.admin.rewards.rule.daily.other"
 msgstr "%(count)s dziennego prezentu od %(date)s"
 
+msgid "web.admin.rewards.rule.count.one"
+msgstr "%(count)s dzień od %(date)s"
+
+msgid "web.admin.rewards.rule.count.few"
+msgstr "%(count)s dni od %(date)s"
+
+msgid "web.admin.rewards.rule.count.many"
+msgstr "%(count)s dni od %(date)s"
+
+msgid "web.admin.rewards.rule.count.other"
+msgstr "%(count)s dnia od %(date)s"
+
 msgid "web.admin.rewards.rule.easter"
 msgstr "Względem Wielkanocy"
 
 msgid "web.admin.rewards.rule.fixed"
 msgstr "Stałe dni"
+
+msgid "web.admin.rewards.rule.fixed.title"
+msgstr "Stałe dni"
+
+msgid "web.admin.rewards.rule.fixed.text"
+msgstr "Od jednej daty do drugiej"
+
+msgid "web.admin.rewards.rule.easter.title"
+msgstr "Względem Wielkanocy"
+
+msgid "web.admin.rewards.rule.easter.text"
+msgstr "Dni przed i po"
+
+msgid "web.admin.rewards.rule.count.title"
+msgstr "Liczba dni"
+
+msgid "web.admin.rewards.rule.count.text"
+msgstr "Pierwszy dzień i liczba dni"
 
 msgid "web.admin.rewards.text.own"
 msgstr "Własne OpenFESL"
@@ -12423,6 +12453,9 @@ msgstr "Początek dnia"
 msgid "web.admin.rewards.event.starts.value"
 msgstr "%(time)s · każde wydarzenie"
 
+msgid "web.admin.rewards.event.easter.note"
+msgstr "Dni od Niedzieli Wielkanocnej: -2 to Wielki Piątek, 1 to Poniedziałek Wielkanocny."
+
 msgid "web.admin.rewards.event.daily.one"
 msgstr "%(count)s dzienny prezent, od %(first)s do %(last)s; każdy można odebrać tylko w jego dniu, chyba że tego dnia odbiór był wstrzymany."
 
@@ -12461,6 +12494,69 @@ msgstr "Teksty"
 
 msgid "web.admin.rewards.event.text.missing"
 msgstr "Pojawi się z tekstami gry przy imporcie katalogu"
+
+msgid "web.admin.rewards.event.save"
+msgstr "Zapisz wydarzenie"
+
+msgid "web.admin.rewards.event.waits"
+msgstr "Zapis czeka na %(what)s."
+
+msgid "web.admin.rewards.event.waits.english"
+msgstr "własny tekst po angielsku"
+
+msgid "web.admin.rewards.edits"
+msgstr "Zmiany"
+
+msgid "web.admin.rewards.edits.text"
+msgstr "Obowiązują od następnego odbioru. Przyznanych nagród nigdy się nie odbiera."
+
+msgid "web.admin.rewards.text_rule.days"
+msgstr "Teksty gry dla tego wydarzenia obejmują dni od 1 do %(days)s; dzień %(day)s wymaga własnego tekstu."
+
+msgid "web.admin.rewards.text_rule.end"
+msgstr "Teksty gry dla tego wydarzenia podają jego ostatni dzień, %(date)s; ostatni dzień %(new)s wymaga własnego tekstu."
+
+msgid "web.admin.rewards.text_rule.english"
+msgstr "Angielski jest wymagany."
+
+msgid "web.admin.rewards.text_rule.own"
+msgstr "Własny tekst zamiast tekstów nagród tego wydarzenia; po usunięciu wracają ich teksty."
+
+msgid "web.admin.rewards.own.required"
+msgstr "Wymagany"
+
+msgid "web.admin.rewards.own.optional"
+msgstr "Opcjonalny"
+
+msgid "web.admin.rewards.own.placeholder"
+msgstr "Widoczny przy każdej nagrodzie tego wydarzenia"
+
+msgid "web.admin.rewards.own.fallback"
+msgstr "Pusty: pokazuje tekst angielski"
+
+msgid "web.admin.rewards.refused.overlap"
+msgstr "%(event)s trwałoby %(days)s dni, więc tegoroczne dni sięgnęłyby następnego roku; okresy jednego wydarzenia nie mogą się nakładać."
+
+msgid "web.admin.rewards.refused.day"
+msgstr "Potrzebny jest dzień, na przykład 1 gru."
+
+msgid "web.admin.rewards.refused.leap"
+msgstr "29 lutego nie wypada co roku; wydarzenie trwa co roku w te same dni."
+
+msgid "web.admin.rewards.refused.easter"
+msgstr "Dni od Niedzieli Wielkanocnej to liczby całkowite od -%(most)s do %(most)s, na przykład -2 dla Wielkiego Piątku."
+
+msgid "web.admin.rewards.refused.order"
+msgstr "Pierwszy dzień wypada po ostatnim."
+
+msgid "web.admin.rewards.refused.count"
+msgstr "Liczba dni to liczba całkowita od 1."
+
+msgid "web.admin.rewards.refused.own"
+msgstr "Zapis czeka na własny tekst po angielsku."
+
+msgid "web.admin.rewards.refused.long"
+msgstr "Własny tekst ma najwyżej %(most)s znaków."
 
 msgid "web.admin.rewards.goal.goal"
 msgstr "Cel"
@@ -12615,6 +12711,12 @@ msgstr "Wyłączono: %(name)s; obowiązuje od następnego odbioru, a przyznane n
 msgid "web.admin.toast.rewards.milestones"
 msgstr "Zapisano kamienie milowe; zmiany obowiązują od następnego odbioru."
 
+msgid "web.admin.toast.rewards.event"
+msgstr "Zapisano %(event)s, %(dates)s; zmiany obowiązują od następnego odbioru."
+
+msgid "web.admin.toast.rewards.event.unchanged"
+msgstr "W wydarzeniu %(event)s nic się nie zmieniło."
+
 msgid "web.admin.audit.action.reward_switch.on"
 msgstr "Włączenie nagrody"
 
@@ -12627,6 +12729,9 @@ msgstr "Zmiana kamienia milowego"
 msgid "web.admin.audit.action.reward_zone"
 msgstr "Zmiana początku dnia"
 
+msgid "web.admin.audit.action.reward_event"
+msgstr "Zmiana wydarzenia"
+
 msgid "web.admin.audit.reward_zone"
 msgstr "%(before)s → %(after)s"
 
@@ -12638,6 +12743,18 @@ msgstr "Wyłączone → Włączone"
 
 msgid "web.admin.audit.reward_switch.off"
 msgstr "Włączone → Wyłączone"
+
+msgid "web.admin.audit.reward_dates"
+msgstr "%(before)s → %(after)s"
+
+msgid "web.admin.audit.reward_text"
+msgstr "własny tekst: %(languages)s"
+
+msgid "web.admin.audit.reward_text.removed"
+msgstr "własny tekst usunięty"
+
+msgid "web.admin.audit.reward_text.changed"
+msgstr "własny tekst zmieniony"
 
 msgid "web.admin.rewards.tabs"
 msgstr "Widoki nagród"

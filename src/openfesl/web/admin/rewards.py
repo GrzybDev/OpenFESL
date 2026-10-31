@@ -13,7 +13,7 @@ from openfesl.core.catalogues import Catalogues, game_text
 from openfesl.core.games import Game, Games
 from openfesl.core.policies import SettingStore
 from openfesl.core.reward_rules import Milestone, Part, RewardRules, StarterPacks
-from openfesl.core.reward_runs import Run, run_of
+from openfesl.core.reward_runs import Run, run_now, run_of
 from openfesl.core.rewards import Rewards
 from openfesl.core.texts import localize
 from openfesl.web.admin.auth import AdminSessions
@@ -266,7 +266,7 @@ class RewardAdminViews:
         texts, rules, zone = words.texts, words.rules, words.rules.zone
         year = today(words.now, zone).year
         events = [
-            event_row(words, number, run_of(key, event, year, zone))
+            event_row(words, number, run_now(key, event, words.now, zone))
             for number, (key, event) in enumerate(rules.events.items(), 1)
         ]
         missions = []
@@ -287,8 +287,9 @@ class RewardAdminViews:
                         gift=", ".join(given + words.extra(part.gift)),
                     )
                     name = game_text(game, words.catalogue, part.name, language)
-                    if name == part.name:
-                        # Before the game's texts are imported, the event's own name stands in.
+                    if name == part.name or row.run.event.own_text:
+                        # The event's own text, or before the game's texts are imported its
+                        # own name, stands in.
                         name = texts.text(row.run.event.title)
                     missions.append(Mission(row, part, name, line))
         packs = None
@@ -364,33 +365,42 @@ def event_row(words: RewardTexts, number: int, run: Run) -> EventRow:
     first_day = words.dated(today(run.period.start, rules.zone))
     if any(part.goal for part in event.parts.values()):
         rule = texts.text("web.admin.rewards.rule.goals", date=words.dated(last + timedelta(1)))
-    elif event.daily:
-        rule = texts.count("web.admin.rewards.rule.daily", run.days, date=first_day)
+    elif event.window.count:
+        counts = "web.admin.rewards.rule.daily" if event.daily else "web.admin.rewards.rule.count"
+        rule = texts.count(counts, run.days, date=first_day)
     elif event.window.easter:
         rule = texts.text("web.admin.rewards.rule.easter")
     else:
         rule = texts.text("web.admin.rewards.rule.fixed")
-    own = all(part.name.startswith("web.") for part in event.parts.values())
+    own = bool(event.own_text) or all(part.name.startswith("web.") for part in event.parts.values())
     return EventRow(run.key, number, run, state, said, words.event(run).dates, rule, own)
 
 
 def _strip(words: RewardTexts, events: list[EventRow], year: int) -> Strip:
-    # Each event on the first line where it fits after the events before it.
+    # Each event's days of the year, of its runs that start or end in it, on the first line where
+    # they fit after the events before them.
     zone = words.rules.zone
     january = date(year, 1, 1)
+    width = (date(year + 1, 1, 1) - january).days * DAY
+    shown = []
+    for row in events:
+        for run_year in (year - 1, year, year + 1):
+            run = run_of(row.key, row.run.event, run_year, zone)
+            first = (today(run.period.start, zone) - january).days * DAY
+            last = (today(run.period.end, zone) - january).days * DAY
+            if last > 0 and first < width:
+                shown.append((row, max(first, 0), min(last, width)))
     ends: list[int] = []
     chips = []
-    for row in sorted(events, key=lambda row: row.run.period.start):
-        x = (today(row.run.period.start, zone) - january).days * DAY
-        width = max(row.run.days * DAY, NARROWEST)
+    for row, x, stop in sorted(shown, key=lambda chip: chip[1]):
+        size = max(stop - x, NARROWEST)
         line = next((index for index, end in enumerate(ends) if end < x), len(ends))
-        ends[line : line + 1] = [x + width]
-        chips.append(Chip(row, x, width, line))
+        ends[line : line + 1] = [x + size]
+        chips.append(Chip(row, x, size, line))
     starts = [date(year, month, 1) for month in range(1, 13)]
     months = [
         ((first - january).days * DAY, words.day(day_start(first, zone), "MMM")) for first in starts
     ]
-    width = (date(year + 1, 1, 1) - january).days * DAY
     now = (today(words.now, zone) - january).days * DAY + DAY // 2
     return Strip(width, max(len(ends), 1), months, chips, now)
 
