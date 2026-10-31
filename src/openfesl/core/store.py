@@ -1,6 +1,6 @@
 import logging
-from collections.abc import Collection, Sequence
-from dataclasses import dataclass
+from collections.abc import Collection, Mapping, Sequence
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Protocol
 
@@ -96,6 +96,8 @@ class Bundle:
         faction: The faction whose heroes may buy it; any when none.
         hero_class: The class whose heroes may buy it; any when none.
         game_order: Its place among the hot deals.
+        discount: The share off its products' prices in percent that the admin priced it by;
+            none for a price of its own.
         starts: Since when it is sold; from its making when none.
         ends: Until when it is sold; for good when none.
         members: The numbers of the products it holds, which need not be sold alone.
@@ -104,6 +106,9 @@ class Bundle:
         pool: What the rotation made it of, such as a set's name, which a later period of
             its section does not pick again for a while.
         source: Who made it: the admin, or the rotation by itself.
+        texts: The admin's own name and description in languages other than English, which
+            its name and description give, by language code; a language without one shows
+            the English.
     """
 
     name: str
@@ -114,6 +119,7 @@ class Bundle:
     faction: str | None = None
     hero_class: str | None = None
     game_order: int = 0
+    discount: int | None = None
     starts: datetime | None = None
     ends: datetime | None = None
     members: tuple[int, ...] = ()
@@ -121,6 +127,7 @@ class Bundle:
     section: str | None = None
     pool: str | None = None
     source: str = ADMIN
+    texts: Mapping[str, tuple[str, str | None]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)

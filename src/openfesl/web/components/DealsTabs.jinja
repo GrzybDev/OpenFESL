@@ -1,0 +1,9 @@
+{#def game, current: str #}
+{# The views of a game's hot deals: the rotation and the admin's own offers. #}
+{% set base = url("/admin/store/" ~ game.id ~ "/deals") %}
+<nav aria-label="{{ _('web.admin.deals.views') }}"
+     class="tabs prices-tabs">
+  {% for view, path in [("rotation", ""), ("offers", "/offers")] %}
+    <Tab :href="base ~ path" :label="_('web.admin.deals.view.' ~ view)" :current="current == view" />
+  {% endfor %}
+</nav>

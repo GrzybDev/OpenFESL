@@ -150,6 +150,20 @@ class DealAdminViews:
             for index, deal in enumerate(shown)
         ]
 
+    async def rules(self, game: Game) -> DealRules:
+        """Return how a game's hot deals change, with the instance's settings over its data.
+
+        Args:
+            game: The game.
+
+        Raises:
+            HTTPException: 404 for a game without hot deals.
+        """
+        rules = await self._deals.rules(game)
+        if rules is None:
+            raise HTTPException(404)
+        return rules
+
     async def rotation(self, game: Game) -> Rotation:
         """Return a game's hot-deal rotation with its sections and what they sell now.
 
@@ -159,9 +173,8 @@ class DealAdminViews:
         Raises:
             HTTPException: 404 for a game without hot deals.
         """
-        rules = await self._deals.rules(game)
-        if rules is None or game.deals is None:
-            raise HTTPException(404)
+        rules = await self.rules(game)
+        assert game.deals is not None
         listed = await self._deals.current(game)
         now = datetime.now(UTC)
         factions = list(game.heroes.factions) if game.heroes else []

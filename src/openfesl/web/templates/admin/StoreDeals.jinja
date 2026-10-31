@@ -17,6 +17,7 @@
            current="store">
   <StoreHead :game="game" current="deals" :subtitle="_('web.admin.deals.subtitle', game=game.name)" />
   <Panel class="enter-panel">
+    <DealsTabs :game="game" current="rotation" />
     {% if short %}
       <section aria-labelledby="deals-short" class="boxes-flag">
         <p id="deals-short" class="prices-missing-head">
@@ -61,6 +62,11 @@
             <FormButton icon="tick">{{ _("web.admin.deals.rotation.save") }}</FormButton>
           {% endif %}
         </form>
+        {% if not rules.enabled %}
+          <p role="status" class="bar-text body-text deals-off">
+            <span aria-hidden="true" class="badge"><Icon name="x" :size="14" stroke="#0A0A0A" /></span>{{ _n("web.admin.deals.rotation.off.text", rotation.listed|rejectattr("bundle.source", "eq", "auto")|list|length) }}
+          </p>
+        {% endif %}
         <section aria-labelledby="deals-sections" class="admin-list">
           <Bar id="deals-sections" :extra="_('web.admin.deals.sections.running', running=number(rotation.rows|selectattr('section.enabled')|list|length), total=number(rotation.rows|length))">{{ _("web.admin.deals.sections") }}</Bar>
           <div class="table-scroll table-scroll-flush">

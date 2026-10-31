@@ -208,12 +208,12 @@ def _offer_deal(
         and game.store.sellable(item)
         and (item.id in sold or not game.store.sells_alone(item))
     ]
-    fit = _fit(found, list(game.heroes.factions), list(game.heroes.classes))
+    fitting = fit(found, list(game.heroes.factions), list(game.heroes.classes))
     products = [
         _product(game, catalogue, history, member, rules.currency) for member in given.members
     ]
     members = tuple(product for product in products if product)
-    if len(found) < len(items) or fit is None or len(members) < len(products):
+    if len(found) < len(items) or fitting is None or len(members) < len(products):
         logger.debug("Leaving out the offer %s, whose items are not all sold", given.name)
         return None
     worth = sum(product.price for product in members)
@@ -226,8 +226,8 @@ def _offer_deal(
         currency=rules.currency,
         price=price,
         original_price=worth if worth > price else None,
-        faction=fit[0],
-        hero_class=fit[1],
+        faction=fitting[0],
+        hero_class=fitting[1],
         pool=given.name,
         source=AUTO,
     )
@@ -277,11 +277,20 @@ def _price(history: History, item_id: int, rules: DealRules) -> int:
     return history.products[(item_id, FOR_GOOD, rules.currency)].price
 
 
-def _fit(
+def fit(
     items: Sequence[Item], factions: Sequence[str], classes: Sequence[str]
 ) -> tuple[str | None, str | None] | None:
-    # The one faction and class that every item fits, none where they fit all; nothing when
-    # they fit none, or more than one but not all.
+    """Return the one faction and class that every item of a deal fits, or none for all.
+
+    Args:
+        items: The deal's items.
+        factions: The game's factions.
+        classes: The game's classes.
+
+    Returns:
+        The faction and the class, each none where the items fit them all; nothing when the
+        items fit none, or more than one but not all.
+    """
     shared_factions = frozenset(factions).intersection(*(item.factions for item in items))
     shared_classes = frozenset(classes).intersection(*(item.classes for item in items))
     if len(shared_factions) not in (1, len(factions)) or len(shared_classes) not in (

@@ -248,12 +248,11 @@ def _deal(
     assert game.store is not None
     bundle = listed.bundle
     members = [offer(game, catalogue, product) for product in listed.members]
-    name = game_text(game, catalogue, bundle.name, language, bundle.faction)
+    own, about = bundle.texts.get(language, (None, None))
+    name = own or game_text(game, catalogue, bundle.name, language, bundle.faction)
+    if not about and bundle.description:
+        about = game_text(game, catalogue, bundle.description, language, bundle.faction)
     names = [member.name for member in members]
-    description = (
-        game_text(game, catalogue, bundle.description, language, bundle.faction)
-        if bundle.description
-        else format_list(names, locale=Locale.parse(language, sep="-"))
-    )
+    description = about or format_list(names, locale=Locale.parse(language, sep="-"))
     product_id = game.store.product_id(listed.id)
     return Deal(listed, product_id, order, name, description, members)

@@ -12153,6 +12153,207 @@ msgstr "Gorące oferty"
 msgid "web.admin.deals.subtitle"
 msgstr "Gorące oferty: %(game)s"
 
+msgid "web.admin.deals.views"
+msgstr "Widoki gorących ofert"
+
+msgid "web.admin.deals.view.rotation"
+msgstr "Rotacja"
+
+msgid "web.admin.deals.view.offers"
+msgstr "Oferty administracji"
+
+msgid "web.admin.deals.offers"
+msgstr "Oferty administracji"
+
+msgid "web.admin.deals.offers.count"
+msgstr "aktywne: %(live)s · na liście: %(listed)s"
+
+msgid "web.admin.deals.offers.column.offer"
+msgstr "Oferta"
+
+msgid "web.admin.deals.offers.column.section"
+msgstr "Sekcja"
+
+msgid "web.admin.deals.offers.column.price"
+msgstr "Cena"
+
+msgid "web.admin.deals.offers.column.runs"
+msgstr "Czas · UTC"
+
+msgid "web.admin.deals.offers.column.state"
+msgstr "Stan"
+
+msgid "web.admin.deals.offers.items.one"
+msgstr "%(count)s przedmiot"
+
+msgid "web.admin.deals.offers.items.few"
+msgstr "%(count)s przedmioty"
+
+msgid "web.admin.deals.offers.items.many"
+msgstr "%(count)s przedmiotów"
+
+msgid "web.admin.deals.offers.items.other"
+msgstr "%(count)s przedmiotu"
+
+msgid "web.admin.deals.offers.off"
+msgstr "%(share)s%% mniej niż %(sum)s"
+
+msgid "web.admin.deals.offers.list_price"
+msgstr "Cena katalogowa"
+
+msgid "web.admin.deals.offers.from"
+msgstr "Od %(time)s"
+
+msgid "web.admin.deals.offers.to"
+msgstr "Do %(time)s"
+
+msgid "web.admin.deals.offers.none"
+msgstr "Brak ofert administracji. Gorące oferty zawierają tylko oferty z rotacji."
+
+msgid "web.admin.deals.offers.note"
+msgstr "Oferty administracji są ponad rotacją od początku do końca, gdy ich sekcja działa, także gdy rotacja jest wyłączona. Zakończone oferty pozostają na liście przez 90 dni."
+
+msgid "web.admin.deals.offer.state.live"
+msgstr "Aktywna"
+
+msgid "web.admin.deals.offer.state.scheduled"
+msgstr "Zaplanowana"
+
+msgid "web.admin.deals.offer.state.off"
+msgstr "Ukryta · sekcja wyłączona"
+
+msgid "web.admin.deals.offer.state.ended"
+msgstr "Zakończona"
+
+msgid "web.admin.deals.offer.new"
+msgstr "Nowa oferta"
+
+msgid "web.admin.deals.offer.waits"
+msgstr "Zapis czeka na %(what)s."
+
+msgid "web.admin.deals.offer.waits.name"
+msgstr "nazwę angielską"
+
+msgid "web.admin.deals.offer.number"
+msgstr "zestaw %(number)s"
+
+msgid "web.admin.deals.offer.items"
+msgstr "Przedmioty"
+
+msgid "web.admin.deals.offer.drop"
+msgstr "Usuń: %(item)s"
+
+msgid "web.admin.deals.offer.items.none"
+msgstr "Brak przedmiotów: wyszukiwarka obok je dodaje."
+
+msgid "web.admin.deals.offer.sum"
+msgstr "Suma cen katalogowych"
+
+msgid "web.admin.deals.offer.price"
+msgstr "Cena"
+
+msgid "web.admin.deals.offer.pricing.price"
+msgstr "Cena"
+
+msgid "web.admin.deals.offer.pricing.price.text"
+msgstr "Stała kwota w %(currency)s"
+
+msgid "web.admin.deals.offer.pricing.discount"
+msgstr "Rabat"
+
+msgid "web.admin.deals.offer.pricing.discount.text"
+msgstr "Część odliczona od sumy"
+
+msgid "web.admin.deals.offer.amount.price"
+msgstr "Cena · %(currency)s"
+
+msgid "web.admin.deals.offer.amount.discount"
+msgstr "Rabat · %%"
+
+msgid "web.admin.deals.offer.price.below"
+msgstr "%(price)s · %(share)s poniżej sumy przedmiotów (%(sum)s)."
+
+msgid "web.admin.deals.offer.discount.rounded"
+msgstr "%(share)s%% mniej niż %(sum)s → %(price)s, zaokrąglone w dół do końcówki %(ending)s."
+
+msgid "web.admin.deals.offer.discount.result"
+msgstr "%(share)s%% mniej niż %(sum)s → %(price)s."
+
+msgid "web.admin.deals.offer.starts"
+msgstr "Początek · UTC"
+
+msgid "web.admin.deals.offer.ends"
+msgstr "Koniec · UTC"
+
+msgid "web.admin.deals.offer.section"
+msgstr "Sekcja"
+
+msgid "web.admin.deals.offer.text"
+msgstr "Tekst"
+
+msgid "web.admin.deals.offer.text.fallback"
+msgstr "Inne języki mogą zostać puste; ich strony pokażą wtedy tekst angielski."
+
+msgid "web.admin.deals.offer.name"
+msgstr "Nazwa, %(language)s"
+
+msgid "web.admin.deals.offer.name.hint"
+msgstr "Nazwa"
+
+msgid "web.admin.deals.offer.about"
+msgstr "Opis, %(language)s"
+
+msgid "web.admin.deals.offer.about.hint"
+msgstr "Opis; pusty pokazuje nazwy przedmiotów"
+
+msgid "web.admin.deals.offer.refused"
+msgstr "Nic nie zapisano: pole powyżej podaje przyczynę."
+
+msgid "web.admin.deals.offer.save"
+msgstr "Zapisz ofertę"
+
+msgid "web.admin.deals.offer.add"
+msgstr "Dodawanie przedmiotów"
+
+msgid "web.admin.deals.offer.add.text"
+msgstr "Wyszukiwanie przedmiotu po nazwie lub numerze; każda z jego cen dodaje go z takim posiadaniem."
+
+msgid "web.admin.deals.offer.add.none"
+msgstr "Żaden przedmiot nie pasuje do: %(query)s."
+
+msgid "web.admin.deals.offer.add.submit"
+msgstr "Dodaj · %(ownership)s · %(price)s"
+
+msgid "web.admin.deals.offer.refused.unpriced"
+msgstr "%(item)s nie ma punktu cenowego w %(currency)s, więc nie da się obliczyć sumy przedmiotów."
+
+msgid "web.admin.deals.offer.refused.when"
+msgstr "Potrzebna jest data i godzina w UTC."
+
+msgid "web.admin.deals.offer.refused.dates"
+msgstr "Oferta kończy się przed rozpoczęciem: %(ends)s to wcześniej niż %(starts)s."
+
+msgid "web.admin.deals.offer.refused.fit"
+msgstr "Żaden bohater nie może mieć wszystkich tych przedmiotów: %(items)s."
+
+msgid "web.admin.deals.offer.refused.fit.item"
+msgstr "%(item)s: %(factions)s, %(classes)s"
+
+msgid "web.admin.deals.offer.refused.items"
+msgstr "Oferta zawiera co najmniej jeden przedmiot."
+
+msgid "web.admin.deals.offer.refused.price"
+msgstr "Cena to liczba całkowita od 1 do %(most)s."
+
+msgid "web.admin.deals.offer.refused.share"
+msgstr "Rabat to liczba całkowita od 1 do %(most)s."
+
+msgid "web.admin.deals.offer.refused.discount"
+msgstr "%(section)s przyjmuje rabaty od %(low)s do %(high)s%%; %(share)s%% jest poza tym zakresem."
+
+msgid "web.admin.deals.offer.refused.name"
+msgstr "Potrzebna jest nazwa angielska."
+
 msgid "web.admin.deals.short"
 msgstr "Rotacji brakuje ofert"
 
@@ -12169,7 +12370,19 @@ msgid "web.admin.deals.rotation.on"
 msgstr "Każda sekcja działa według swojego harmonogramu; zmiany obowiązują od następnego kroku sekcji."
 
 msgid "web.admin.deals.rotation.off"
-msgstr "Wyłączona: gorące oferty nie pokazują żadnej oferty, dopóki rotacja nie zostanie znów włączona."
+msgstr "Wyłączona: gorące oferty pokazują tylko oferty administracji."
+
+msgid "web.admin.deals.rotation.off.text.one"
+msgstr "Rotacja wyłączona: gorące oferty pokazują tylko oferty administracji (aktywne: %(count)s); skrzynki losowe wrócą razem z rotacją."
+
+msgid "web.admin.deals.rotation.off.text.few"
+msgstr "Rotacja wyłączona: gorące oferty pokazują tylko oferty administracji (aktywne: %(count)s); skrzynki losowe wrócą razem z rotacją."
+
+msgid "web.admin.deals.rotation.off.text.many"
+msgstr "Rotacja wyłączona: gorące oferty pokazują tylko oferty administracji (aktywne: %(count)s); skrzynki losowe wrócą razem z rotacją."
+
+msgid "web.admin.deals.rotation.off.text.other"
+msgstr "Rotacja wyłączona: gorące oferty pokazują tylko oferty administracji (aktywne: %(count)s); skrzynki losowe wrócą razem z rotacją."
 
 msgid "web.admin.deals.rotation.save"
 msgstr "Zapisz przełącznik"
@@ -12346,10 +12559,16 @@ msgid "web.admin.toast.deals.rotation.on"
 msgstr "Włączono rotację gorących ofert; sekcje zmienią się w swoich następnych krokach."
 
 msgid "web.admin.toast.deals.rotation.off"
-msgstr "Wyłączono rotację gorących ofert; gorące oferty nie pokazują żadnej oferty do jej ponownego włączenia."
+msgstr "Wyłączono rotację gorących ofert; gorące oferty pokazują tylko oferty administracji."
 
 msgid "web.admin.toast.deals.section"
 msgstr "Zapisano: %(section)s; zmiana nastąpi w następnym kroku."
+
+msgid "web.admin.toast.deals.offer"
+msgstr "Zapisano: %(offer)s; gorące oferty zawierają ją od początku do %(ends)s."
+
+msgid "web.admin.toast.deals.offer.off"
+msgstr "Zapisano: %(offer)s; sekcja jest wyłączona, więc gorące oferty jej nie pokazują."
 
 msgid "web.admin.audit.action.deal_rotation.on"
 msgstr "Włączenie rotacji"
@@ -12371,6 +12590,15 @@ msgstr "rabat %(before)s → %(after)s"
 
 msgid "web.admin.audit.deal.gap"
 msgstr "przerwa przed powtórką %(before)s → %(after)s dni"
+
+msgid "web.admin.audit.action.deal_offer"
+msgstr "Zapis oferty"
+
+msgid "web.admin.audit.action.deal_offer.new"
+msgstr "Dodanie oferty"
+
+msgid "web.admin.audit.deal.offer"
+msgstr "%(section)s · %(price)s · %(starts)s – %(ends)s UTC"
 
 msgid "web.admin.home.warning.deals"
 msgstr "Gorące oferty · sekcji brakuje ofert"

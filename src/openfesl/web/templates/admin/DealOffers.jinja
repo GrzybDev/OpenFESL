@@ -1,0 +1,74 @@
+{#def of, rows: list, manages: bool #}
+{# The admin's own offers among a game's hot deals: each with its section, price, the days it
+   runs in UTC and its state, live ones first, those ended in the last 90 days at the end; an offer
+   of a section switched off is hidden until its end. #}
+{% set game = of %}
+{% set base = url("/admin/store/" ~ game.id ~ "/deals/offers") %}
+<AdminPage :title="_('web.admin.deals.view.offers') ~ ' · ' ~ _('web.admin.store.title')"
+           current="store">
+  <StoreHead :game="game" current="deals" :subtitle="_('web.admin.deals.subtitle', game=game.name)" />
+  <Panel class="enter-panel">
+    <DealsTabs :game="game" current="offers" />
+    <section aria-labelledby="offers-title" class="admin-list">
+      <Bar id="offers-title" :extra="_('web.admin.deals.offers.count', live=number(rows|selectattr('state', 'eq', 'live')|list|length), listed=number(rows|length))">{{ _("web.admin.deals.offers") }}</Bar>
+      {% if rows %}
+        <div class="table-scroll table-scroll-flush">
+          <div role="table"
+               aria-labelledby="offers-title"
+               class="table offers-table">
+            <div role="rowgroup" class="admin-list-head">
+              <div role="row" class="offers-columns">
+                {% for column in ("offer", "section", "price", "runs", "state") %}
+                  <div role="columnheader" class="column-head">{{ _("web.admin.deals.offers.column." ~ column) }}</div>
+                {% endfor %}
+              </div>
+            </div>
+            <div role="rowgroup" class="enter-rows table-rows">
+              {% for row in rows %}
+                {% set bundle = row.listed.bundle %}
+                <div role="row" class="offers-columns offers-row offers-{{ row.state }}">
+                  <div role="cell" class="admin-cell cell-stack">
+                    <a href="{{ base }}/{{ row.listed.id }}" class="admin-hero-strong">{{ row.name }}</a>
+                    <span class="cell-ago">{{ _n("web.admin.deals.offers.items", row.listed.members|length) }}</span>
+                  </div>
+                  <div role="cell" class="admin-cell cell-stack">
+                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.offers.column.section") }}</span>
+                    <span>{{ _("games." ~ game.id ~ ".deal_section." ~ bundle.section) if bundle.section else "" }}</span>
+                  </div>
+                  <div role="cell" class="admin-cell cell-stack">
+                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.offers.column.price") }}</span>
+                    <span class="admin-hero-strong">{{ number(bundle.price) }} {{ _("games." ~ game.id ~ ".currency." ~ bundle.currency) }}</span>
+                    <span class="cell-ago">
+                      {%- if row.share %}{{ _("web.admin.deals.offers.off", share=row.share, sum=number(bundle.original_price)) }}{% else %}{{ _("web.admin.deals.offers.list_price") }}{% endif -%}
+                    </span>
+                  </div>
+                  <div role="cell" class="admin-cell cell-stack">
+                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.offers.column.runs") }}</span>
+                    <span>{{ _("web.admin.deals.offers.from", time=moment(bundle.starts)) }}</span>
+                    <span>{{ _("web.admin.deals.offers.to", time=moment(bundle.ends)) }}</span>
+                  </div>
+                  <div role="cell" class="admin-cell prices-state">
+                    <Badge :name="{'live': 'tick', 'scheduled': 'clock', 'off': 'hide', 'ended': 'x'}[row.state]" lines />{{ _("web.admin.deals.offer.state." ~ row.state) }}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <p class="bar-text body-text">{{ _("web.admin.deals.offers.none") }}</p>
+      {% endif %}
+      <div class="offers-foot">
+        <p class="body-text">{{ _("web.admin.deals.offers.note") }}</p>
+        {% if manages %}
+          <Action :href="base ~ '/new'" :label="_('web.admin.deals.offer.new')" glyph="plus" />
+        {% else %}
+          <p class="bar-text account-role-note">
+            <span aria-hidden="true"
+                  class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.deals.managed") }}
+          </p>
+        {% endif %}
+      </div>
+    </section>
+  </Panel>
+</AdminPage>

@@ -132,6 +132,10 @@ class AdminAction(StrEnum):
     """Uploaded a picture of a hot deal's offer of the game whose id is the target, or removed
     the offer's uploaded pictures; the details hold the offer, whether the picture is the big
     one, and whether the pictures were removed."""
+    DEAL_OFFER = "deal_offer"
+    """Added or changed an admin offer among a game's hot deals, the target naming both as
+    game:bundle number; the details hold the offer's name, section, price, start, end and how
+    many items it holds, and whether it is new."""
     STORE_ACCOUNT = "store_account"
     """Changed an account price, allowance or per-round cap of a game, the target naming both
     as game:value, such as bfheroes:slot; the details hold the value's name and the value before

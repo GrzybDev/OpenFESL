@@ -1,0 +1,207 @@
+{#def found, refusing: bool, manages: bool #}
+{# An admin offer's editor: its items with how each is owned and its list price, the price as
+   a fixed amount or a share off their sum, when it runs in UTC, the section that lists it and its
+   texts, the game's of a bundle with the same items or the admin's own with English first; beside
+   it the add panel that finds items with their prices in the deals' currency. Adding, dropping
+   and finding answer the form without saving it, as Enter does; Save offer saves it, and a
+   refused field says why beside it. Moderators see the offer read-only. #}
+{% set game = found.game %}
+{% set draft = found.draft %}
+{% set refused = found.refused if refusing else {} %}
+{% set base = url("/admin/store/" ~ game.id ~ "/deals/offers") %}
+{% set path = base ~ "/" ~ (found.number if found.number is not none else "new") %}
+{% set currency = _("games." ~ game.id ~ ".currency." ~ found.rules.currency) %}
+{% set icons = found.icons %}
+{% set title = found.name or _("web.admin.deals.offer.new") %}
+{% macro owned(ownership) -%}
+  {%- if ownership.type == "tlmd" %}{{ _n("web.store.price.days", ownership.days) }}{% elif ownership.type == "lmct" %}{{ _n("web.store.price.uses", ownership.uses) }}{% else %}{{ _("web.store.price.permanent") }}{% endif -%}
+{%- endmacro %}
+{% macro schedule(section) %}
+  {%- if section.schedule %}{{ _("web.admin.deals.daily") if section.schedule.every == 1 else _n("web.admin.deals.every", section.schedule.every) }}{% else %}{{ _("web.admin.deals.windows") }}{% endif -%}
+{% endmacro %}
+{% macro refusal(name) %}
+  {% if name in refused %}<FieldError :id="'offer-' ~ name ~ '-note'">{{ refused[name] }}</FieldError>{% endif %}
+{% endmacro %}
+<AdminPage :title="title ~ ' · ' ~ _('web.admin.store.title')" current="store">
+  <StoreHead :game="game" current="deals" :subtitle="_('web.admin.deals.subtitle', game=game.name)" />
+  <Panel class="enter-panel">
+    <DealsTabs :game="game" current="offers" />
+    <nav aria-label="{{ _('web.admin.deals.view.offers') }}"
+         class="tabs prices-back">
+      <Tab :href="base" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.deals.view.offers") }}</Tab>
+    </nav>
+    {% if not manages %}
+      <p class="bar-text account-role-note">
+        <span aria-hidden="true"
+              class="badge"><Icon name="lock" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.deals.managed") }}
+      </p>
+    {% endif %}
+    <form method="post"
+          action="{{ path }}"
+          {% if manages %} data-admin-form data-still="{{ _('web.admin.deals.offer.waits') }}"{% endif %}
+          class="list-layout admin-layout">
+      <CsrfField />
+      {# The form's default button, so that Enter answers the fields without saving them. #}
+      <button type="submit" name="find" value="1" hidden></button>
+      <div class="list-main offer-main">
+        <h2 class="bar bar-wrap offer-bar">
+          <span class="offer-title">{{ title }}{% if found.number is not none %}<span class="offer-number">{{ _("web.admin.deals.offer.number", number=found.number) }}</span>{% endif %}</span>
+          {% if found.state %}<span class="bar-extra">{{ _("web.admin.deals.offer.state." ~ found.state) }}</span>{% endif %}
+        </h2>
+        <fieldset data-refresh
+                  {% if not manages %} disabled{% endif %}
+                  class="offer-fields">
+          <legend class="bar offer-legend">{{ _("web.admin.deals.offer.items") }}</legend>
+          {% for line in found.items %}
+            {% set product = line.product %}
+            <div class="offer-item">
+              <input type="hidden" name="item" value="{{ product.id }}">
+              <p class="box-candidate-name">
+                <AdminItemIcon :game="game" :item="line.item" :shown="icons" />
+                <span class="cell-stack"><span class="admin-hero-strong">{{ line.name }}</span><span class="cell-ago">{{ _("web.admin.items.number", id=line.item.id) }} · {{ _("games." ~ game.id ~ ".item_kind." ~ line.item.kind) }}</span></span>
+              </p>
+              <span class="offer-own">{{ owned(product.ownership) }}</span>
+              <span class="offer-price">{{ number(product.price) }} {{ currency }}</span>
+              {% if manages %}
+                <button type="submit"
+                        name="drop"
+                        value="{{ loop.index0 }}"
+                        aria-label="{{ _('web.admin.deals.offer.drop', item=line.name) }}"
+                        class="offer-drop">
+                  <Icon name="x" :size="14" stroke="currentColor" />
+                </button>
+              {% endif %}
+            </div>
+          {% else %}
+            <p class="bar-text body-text">{{ _("web.admin.deals.offer.items.none") }}</p>
+          {% endfor %}
+          <p class="offer-sum">
+            <span>{{ _("web.admin.deals.offer.sum") }}</span><span class="admin-hero-strong">{{ number(found.worth) }} {{ currency }}</span>
+          </p>
+          {{ refusal("items") }}
+          <p class="bar offer-legend">{{ _("web.admin.deals.offer.price") }}</p>
+          <div class="choice-tiles offer-tiles">
+            {% for pricing, glyph in (("price", "coin"), ("discount", "tag")) %}
+              <ChoiceTile name="pricing" :value="pricing" :title="_('web.admin.deals.offer.pricing.' ~ pricing)" :glyph="glyph" :checked="draft.pricing == pricing">
+              <span class="choice-text">{{ _("web.admin.deals.offer.pricing." ~ pricing ~ ".text", currency=currency) }}</span>
+              </ChoiceTile>
+            {% endfor %}
+          </div>
+          <div class="offer-amount">
+            <label for="offer-amount" class="field-label offer-amount-label"><span data-live="{{ path }}">{{ _("web.admin.deals.offer.amount." ~ draft.pricing, currency=currency) }}</span></label>
+            <input id="offer-amount"
+                   name="amount"
+                   type="text"
+                   inputmode="numeric"
+                   value="{{ draft.amount }}"
+                   maxlength="10"
+                   autocomplete="off"
+                   {% if "amount" in refused %} aria-invalid="true" aria-describedby="offer-amount-note"{% endif %}
+                   class="field-input{% if 'amount' in refused %} field-invalid{% endif %}">
+          </div>
+          {{ refusal("amount") }}
+          <p aria-live="polite" data-live="{{ path }}" class="offer-line">{{- found.line -}}</p>
+          <div class="offer-when">
+            {% for name in ("starts", "ends") %}
+              <div class="offer-day">
+                <label for="offer-{{ name }}"
+                       class="field-label field-label-joined">{{ _("web.admin.deals.offer." ~ name) }}</label>
+                <input id="offer-{{ name }}"
+                       name="{{ name }}"
+                       type="datetime-local"
+                       value="{{ draft[name] }}"
+                       {% if name in refused %} aria-invalid="true" aria-describedby="offer-{{ name }}-note"{% endif %}
+                       class="field-input{% if name in refused %} field-invalid{% endif %}">
+                {{ refusal(name) }}
+              </div>
+            {% endfor %}
+          </div>
+          <p class="bar offer-legend">{{ _("web.admin.deals.offer.section") }}</p>
+          <div class="choice-tiles offer-tiles">
+            {% for key in found.sections %}
+              <ChoiceTile name="section" :value="key" :title="_('games.' ~ game.id ~ '.deal_section.' ~ key)" glyph="deal" :checked="draft.section == key">
+              <span class="choice-text">{{ schedule(found.rules.sections[key]) }}{% if not found.rules.sections[key].enabled %} · {{ _("web.admin.deals.switch.off") }}{% endif %}</span>
+              </ChoiceTile>
+            {% endfor %}
+          </div>
+        </fieldset>
+        <div class="offer-texts">
+          <fieldset {% if not manages %} disabled{% endif %} class="offer-own-texts">
+            <legend class="bar offer-legend">{{ _("web.admin.deals.offer.text") }}</legend>
+            {% for code, language in found.languages %}
+              {% set english = loop.first %}
+              <div class="reward-own-row offer-own-row">
+                <p class="reward-own-label">
+                  <span>{{ language }}</span>
+                  <span class="reward-own-tag">{{ _("web.admin.rewards.own.required" if english else "web.admin.rewards.own.optional") }}</span>
+                </p>
+                <div class="offer-own-fields">
+                  <label for="offer-name-{{ code }}"
+                         class="sr-only">{{ _("web.admin.deals.offer.name", language=language) }}</label>
+                  <input id="offer-name-{{ code }}"
+                         name="name-{{ code }}"
+                         lang="{{ code }}"
+                         type="text"
+                         value="{{ draft.names.get(code, '') }}"
+                         maxlength="64"
+                         autocomplete="off"
+                         placeholder="{{ _('web.admin.deals.offer.name.hint') if english else _('web.admin.rewards.own.fallback') }}"
+                         {% if english %} data-needed="{{ _('web.admin.deals.offer.waits.name') }}"{% endif %}
+                         {% if english and "name-en" in refused %} aria-invalid="true" aria-describedby="offer-name-en-note"{% endif %}
+                         class="field-input reward-own-input{% if english and 'name-en' in refused %} field-invalid{% endif %}">
+                  <label for="offer-about-{{ code }}"
+                         class="sr-only">{{ _("web.admin.deals.offer.about", language=language) }}</label>
+                  <input id="offer-about-{{ code }}"
+                         name="about-{{ code }}"
+                         lang="{{ code }}"
+                         type="text"
+                         value="{{ draft.abouts.get(code, '') }}"
+                         maxlength="300"
+                         autocomplete="off"
+                         placeholder="{{ _('web.admin.deals.offer.about.hint') if english else _('web.admin.rewards.own.fallback') }}"
+                         class="field-input reward-own-input">
+                </div>
+              </div>
+              {% if english %}{{ refusal("name-en") }}{% endif %}
+            {% endfor %}
+          </fieldset>
+          <p class="bar-text body-text">{{ _("web.admin.deals.offer.text.fallback") }}</p>
+        </div>
+        {% if manages %}
+          <div class="reward-save">
+            <p aria-live="polite" class="admin-form-why">
+              <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>
+              <span data-why>{{ _("web.admin.deals.offer.refused") if refused else "" }}</span>
+            </p>
+            <ActionButton :label="_('web.admin.deals.offer.save')" :busy="_('web.admin.store.save.busy')" />
+          </div>
+        {% endif %}
+      </div>
+      {% if manages %}
+        <section aria-labelledby="offer-add" class="list-side admin-side offer-side">
+          <Bar id="offer-add">{{ _("web.admin.deals.offer.add") }}</Bar>
+          <ItemSearch id="offer-q" :label="_('web.admin.store.search')" :value="draft.query" refresh />
+          <div data-live="{{ path }}" class="offer-candidates">
+            {% for candidate in found.candidates %}
+              <div class="box-candidate">
+                <p class="box-candidate-name">
+                  <AdminItemIcon :game="game" :item="candidate.item" :shown="icons" />
+                  <span class="cell-stack"><span class="admin-hero-strong">{{ candidate.name }}</span><span class="cell-ago">{{ _("web.admin.items.number", id=candidate.item.id) }} · {{ _("games." ~ game.id ~ ".item_kind." ~ candidate.item.kind) }}</span></span>
+                </p>
+                {% for product in candidate.products %}
+                  <FormButton icon="plus" name="add" :value="product.id">{{ _("web.admin.deals.offer.add.submit", ownership=owned(product.ownership), price=number(product.price) ~ " " ~ currency) }}</FormButton>
+                {% else %}
+                  <p class="field-note">{{ _("web.admin.deals.offer.refused.unpriced", item=candidate.name, currency=currency) }}</p>
+                {% endfor %}
+              </div>
+            {% else %}
+              <p class="bar-text body-text">
+                {{ _("web.admin.deals.offer.add.none", query=draft.query) if draft.query else _("web.admin.deals.offer.add.text") }}
+              </p>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+    </form>
+  </Panel>
+</AdminPage>

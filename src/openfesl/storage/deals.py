@@ -1,3 +1,4 @@
+from dataclasses import replace
 from datetime import datetime, timedelta
 
 from sqlalchemy import exists, func, insert, select
@@ -15,7 +16,7 @@ from openfesl.storage.models import (
     StoreBundleRow,
     StoreProductRow,
 )
-from openfesl.storage.store import product_of
+from openfesl.storage.store import add_members, bundle_values, product_of
 
 type Key = tuple[int, Ownership, str]
 
@@ -157,33 +158,21 @@ async def _add(
     deal: NewDeal,
     numbers: dict[Key, int],
 ) -> None:
-    bundle = deal.bundle
-    number = await session.scalar(
-        insert(StoreBundleRow)
-        .values(
-            game=game,
-            name=bundle.name,
-            description=bundle.description,
-            currency=bundle.currency,
-            price=bundle.price,
-            original_price=bundle.original_price,
-            faction=bundle.faction,
-            hero_class=bundle.hero_class,
-            game_order=bundle.game_order,
-            starts_at=period.start,
-            ends_at=period.end,
-            section=section,
-            pool=bundle.pool,
-            source=AUTO,
-            box_id=bundle.box,
-        )
-        .returning(StoreBundleRow.id)
-    )
     members = {
         numbers[(product.item_id, product.ownership, product.currency)] for product in deal.products
     }
-    if members:
-        await session.execute(
-            insert(StoreBundleMemberRow),
-            [{"bundle_id": number, "product_id": member} for member in sorted(members)],
-        )
+    bundle = replace(
+        deal.bundle,
+        starts=period.start,
+        ends=period.end,
+        section=section,
+        source=AUTO,
+        members=tuple(sorted(members)),
+    )
+    number = await session.scalar(
+        insert(StoreBundleRow)
+        .values(game=game, **bundle_values(bundle))
+        .returning(StoreBundleRow.id)
+    )
+    assert number is not None
+    await add_members(session, number, bundle)

@@ -7,6 +7,7 @@ from openfesl.core.games import Games
 from openfesl.core.inventory import Ownership
 from openfesl.core.texts import localize
 from openfesl.web.admin.store_account import CHESTS
+from openfesl.web.pages import moment
 from openfesl.web.store_texts import StoreTexts
 
 
@@ -219,6 +220,47 @@ def _deal_value(texts: StoreTexts, value: Any) -> str:
     if isinstance(value, list):
         return texts.text("web.admin.deals.discount", low=value[0], high=value[1])
     return texts.amount(value) if value is not None else texts.text("web.admin.deals.size.all")
+
+
+async def offer_entry(
+    target: str,
+    details: dict[str, Any],
+    games: Games,
+    catalogues: Catalogues,
+    language: str,
+) -> tuple[str, str, str | None, str]:
+    """Return how the audit log shows an admin offer that the admin saved.
+
+    Args:
+        target: The game and the offer's bundle number, as game:number.
+        details: The change's details, as the admin's log keeps them.
+        games: The games, whose hot deals list the offer.
+        catalogues: Name the offers that take the game's texts.
+        language: The log's language.
+
+    Returns:
+        The kind of the action, the offer in words, the panel's page of the offer and what it
+        sells for and when in words.
+    """
+    game = games.by_id(details["game"])
+    if game is None:
+        return AdminAction.DEAL_OFFER.value, details["name"], None, ""
+    catalogue = await catalogues.of(game, language)
+    shown = game_text(game, catalogue, details["name"], language, details["faction"])
+    href = localize(f"/admin/store/{target.replace(':', '/deals/offers/', 1)}", language)
+    texts = StoreTexts(game, language, datetime.now(UTC))
+
+    def written(at: str) -> str:
+        return moment(datetime.fromisoformat(at).replace(tzinfo=UTC), language)
+
+    said = texts.text(
+        "web.admin.audit.deal.offer",
+        section=texts.text(f"games.{game.id}.deal_section.{details['section']}"),
+        price=texts.priced(details["price"], details["currency"]),
+        starts=written(details["starts"]),
+        ends=written(details["ends"]),
+    )
+    return f"deal_offer{'.new' if details['new'] else ''}", shown, href, said
 
 
 async def art_entry(

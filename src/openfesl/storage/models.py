@@ -280,6 +280,8 @@ class StoreBundleRow(Base):
     faction: Mapped[str | None]
     hero_class: Mapped[str | None]
     game_order: Mapped[int] = mapped_column(server_default="0")
+    # The share off its products' prices that the admin priced it by, in percent.
+    discount: Mapped[int | None] = mapped_column(SmallInteger)
     starts_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     published: Mapped[bool] = mapped_column(server_default="true")
@@ -293,6 +295,8 @@ class StoreBundleRow(Base):
     pool: Mapped[str | None]
     # admin or auto, for the rotation's own.
     source: Mapped[str] = mapped_column(server_default="admin")
+    # The admin's own name and description by language other than English, as two-item lists.
+    texts: Mapped[dict[str, list[str | None]]] = mapped_column(JSONB, server_default="{}")
 
 
 class StoreBundleMemberRow(Base):

@@ -163,7 +163,7 @@ async def history_store(database_url: str) -> AsyncIterator[SqlHistoryStore]:
 
 @pytest.fixture
 async def products(database_url: str) -> AsyncIterator[SqlProductStore]:
-    # Bundles are added through the store's service; no page adds them yet.
+    # Bundles added straight to the store, as the admin panel adds its offers.
     engine = create_async_engine(database_url)
     yield SqlProductStore(async_sessionmaker(engine))
     await engine.dispose()

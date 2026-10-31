@@ -1,0 +1,186 @@
+/* An admin offer's editor: its items as rows with the square that drops one, the sum of their list
+   prices, the price, the days it runs, the section and the texts, beside the add panel. On phones
+   the columns stack and each item is a block. */
+@layer pages {
+  .offer-main {
+    container-type: inline-size;
+    display: grid;
+    align-content: start;
+    gap: 2px;
+  }
+
+  .offer-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 12px;
+  }
+
+  .offer-number {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--accent);
+  }
+
+  .offer-fields {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    border: 0;
+    padding: 0;
+    min-width: 0;
+  }
+
+  .offer-legend {
+    float: left;
+    width: 100%;
+    margin: 10px 0 0;
+    background: var(--accent);
+    color: var(--ink);
+  }
+
+  .offer-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 130px 130px 44px;
+    gap: 2px;
+    color: var(--ink);
+
+    > span {
+      display: flex;
+      align-items: center;
+      background: var(--row);
+      padding: 0 12px;
+    }
+  }
+
+  .offer-price {
+    justify-content: flex-end;
+    font-weight: 700;
+  }
+
+  .offer-drop {
+    display: grid;
+    place-items: center;
+    border: 0;
+    background: var(--ink);
+    color: var(--bright);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--bar-dark);
+    }
+  }
+
+  .offer-sum {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0;
+    background: var(--row-light);
+    padding: 10px 12px;
+    color: var(--ink);
+  }
+
+  .offer-tiles {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+
+    .choice-tile {
+      min-height: 104px;
+    }
+  }
+
+  .offer-amount {
+    display: grid;
+    grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+    gap: 2px;
+  }
+
+  .offer-amount-label {
+    display: flex;
+    align-items: center;
+    margin: 0;
+  }
+
+  .offer-line:not(:empty) {
+    margin: 0;
+    background: var(--row);
+    padding: 10px 12px;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .offer-when {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2px;
+    margin-top: 10px;
+  }
+
+  .offer-day {
+    display: grid;
+    align-content: start;
+  }
+
+  .offer-texts {
+    display: grid;
+    gap: 2px;
+  }
+
+  .offer-own-texts {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    border: 0;
+    padding: 0;
+    min-width: 0;
+    color: var(--ink);
+  }
+
+  .offer-own-fields {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+    gap: 2px;
+  }
+
+  .offer-main .reward-save {
+    margin-top: 12px;
+  }
+
+  .list-side.offer-side {
+    flex-basis: 380px;
+  }
+
+  .offer-candidates .form-button {
+    justify-content: flex-start;
+    white-space: normal;
+    text-align: start;
+  }
+
+  @container (width < 700px) {
+    .offer-item {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px;
+
+      > .box-candidate-name {
+        grid-column: 1 / 3;
+      }
+
+      > .offer-own,
+      > .offer-price {
+        min-height: 40px;
+      }
+
+      > .offer-drop {
+        grid-row: 1 / 3;
+        grid-column: 3;
+      }
+    }
+
+    .offer-own-fields,
+    .offer-amount {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}

@@ -5,6 +5,7 @@ from openfesl.storage.admin import SqlAdminLog
 from openfesl.storage.associations import SqlAssociationStore
 from openfesl.storage.boxes import SqlBoxStore
 from openfesl.storage.catalogues import SqlCatalogueStore
+from openfesl.storage.deal_offers import SqlOfferStore
 from openfesl.storage.deal_uploads import SqlDealUploads
 from openfesl.storage.deals import SqlDealStore
 from openfesl.storage.entitlements import SqlEntitlementStore
@@ -73,3 +74,4 @@ class Stores:
         self.deal_uploads = SqlDealUploads(sessions)
         self.purchases = SqlPurchaseStore(sessions)
         self.deals = SqlDealStore(sessions)
+        self.offers = SqlOfferStore(sessions)

@@ -11,6 +11,13 @@
     }
   }
 
+  .deals-off {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 2px 0 0;
+  }
+
   .admin-list .table.deals-table {
     min-width: 820px;
   }

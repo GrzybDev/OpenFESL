@@ -11441,6 +11441,201 @@ msgstr "Hot deals"
 msgid "web.admin.deals.subtitle"
 msgstr "Hot deals of %(game)s"
 
+msgid "web.admin.deals.views"
+msgstr "Views of the hot deals"
+
+msgid "web.admin.deals.view.rotation"
+msgstr "Rotation"
+
+msgid "web.admin.deals.view.offers"
+msgstr "Admin offers"
+
+msgid "web.admin.deals.offers"
+msgstr "Admin offers"
+
+msgid "web.admin.deals.offers.count"
+msgstr "%(live)s live · %(listed)s listed"
+
+msgid "web.admin.deals.offers.column.offer"
+msgstr "Offer"
+
+msgid "web.admin.deals.offers.column.section"
+msgstr "Section"
+
+msgid "web.admin.deals.offers.column.price"
+msgstr "Price"
+
+msgid "web.admin.deals.offers.column.runs"
+msgstr "Runs · UTC"
+
+msgid "web.admin.deals.offers.column.state"
+msgstr "State"
+
+msgid "web.admin.deals.offers.items.one"
+msgstr "%(count)s item"
+
+msgid "web.admin.deals.offers.items.other"
+msgstr "%(count)s items"
+
+msgid "web.admin.deals.offers.off"
+msgstr "%(share)s%% off %(sum)s"
+
+msgid "web.admin.deals.offers.list_price"
+msgstr "List price"
+
+msgid "web.admin.deals.offers.from"
+msgstr "From %(time)s"
+
+msgid "web.admin.deals.offers.to"
+msgstr "To %(time)s"
+
+msgid "web.admin.deals.offers.none"
+msgstr "No admin offers. Hot deals list only the rotation's deals."
+
+msgid "web.admin.deals.offers.note"
+msgstr "Admin offers sit on top of the rotation from their start to their end while their section runs, also while the rotation is off. Ended offers stay listed for 90 days."
+
+msgid "web.admin.deals.offer.state.live"
+msgstr "Live"
+
+msgid "web.admin.deals.offer.state.scheduled"
+msgstr "Scheduled"
+
+msgid "web.admin.deals.offer.state.off"
+msgstr "Hidden · section off"
+
+msgid "web.admin.deals.offer.state.ended"
+msgstr "Ended"
+
+msgid "web.admin.deals.offer.new"
+msgstr "New offer"
+
+msgid "web.admin.deals.offer.waits"
+msgstr "Saving waits for %(what)s."
+
+msgid "web.admin.deals.offer.waits.name"
+msgstr "the English name"
+
+msgid "web.admin.deals.offer.number"
+msgstr "bundle %(number)s"
+
+msgid "web.admin.deals.offer.items"
+msgstr "Items"
+
+msgid "web.admin.deals.offer.drop"
+msgstr "Remove %(item)s"
+
+msgid "web.admin.deals.offer.items.none"
+msgstr "No items: the search beside adds them."
+
+msgid "web.admin.deals.offer.sum"
+msgstr "Sum of list prices"
+
+msgid "web.admin.deals.offer.price"
+msgstr "Price"
+
+msgid "web.admin.deals.offer.pricing.price"
+msgstr "Price"
+
+msgid "web.admin.deals.offer.pricing.price.text"
+msgstr "A fixed amount in %(currency)s"
+
+msgid "web.admin.deals.offer.pricing.discount"
+msgstr "Discount"
+
+msgid "web.admin.deals.offer.pricing.discount.text"
+msgstr "A share off the items' sum"
+
+msgid "web.admin.deals.offer.amount.price"
+msgstr "Price · %(currency)s"
+
+msgid "web.admin.deals.offer.amount.discount"
+msgstr "Discount · %%"
+
+msgid "web.admin.deals.offer.price.below"
+msgstr "%(price)s · %(share)s below the items' sum of %(sum)s."
+
+msgid "web.admin.deals.offer.discount.rounded"
+msgstr "%(share)s%% off %(sum)s → %(price)s, rounded down to end in %(ending)s."
+
+msgid "web.admin.deals.offer.discount.result"
+msgstr "%(share)s%% off %(sum)s → %(price)s."
+
+msgid "web.admin.deals.offer.starts"
+msgstr "Starts · UTC"
+
+msgid "web.admin.deals.offer.ends"
+msgstr "Ends · UTC"
+
+msgid "web.admin.deals.offer.section"
+msgstr "Section"
+
+msgid "web.admin.deals.offer.text"
+msgstr "Text"
+
+msgid "web.admin.deals.offer.text.fallback"
+msgstr "Other languages may stay empty; their pages then show the English text."
+
+msgid "web.admin.deals.offer.name"
+msgstr "Name in %(language)s"
+
+msgid "web.admin.deals.offer.name.hint"
+msgstr "Name"
+
+msgid "web.admin.deals.offer.about"
+msgstr "Description in %(language)s"
+
+msgid "web.admin.deals.offer.about.hint"
+msgstr "Description; the items' names when empty"
+
+msgid "web.admin.deals.offer.refused"
+msgstr "Nothing was saved: a field above says why."
+
+msgid "web.admin.deals.offer.save"
+msgstr "Save offer"
+
+msgid "web.admin.deals.offer.add"
+msgstr "Add items"
+
+msgid "web.admin.deals.offer.add.text"
+msgstr "Search for an item by its name or number; each of its prices adds it owned that way."
+
+msgid "web.admin.deals.offer.add.none"
+msgstr "No item matches %(query)s."
+
+msgid "web.admin.deals.offer.add.submit"
+msgstr "Add · %(ownership)s · %(price)s"
+
+msgid "web.admin.deals.offer.refused.unpriced"
+msgstr "%(item)s has no price point in %(currency)s, so the items' sum cannot be worked out."
+
+msgid "web.admin.deals.offer.refused.when"
+msgstr "A day and time in UTC is needed."
+
+msgid "web.admin.deals.offer.refused.dates"
+msgstr "The offer ends before it starts: %(ends)s is earlier than %(starts)s."
+
+msgid "web.admin.deals.offer.refused.fit"
+msgstr "No hero may have all these items: %(items)s."
+
+msgid "web.admin.deals.offer.refused.fit.item"
+msgstr "%(item)s is for %(factions)s, %(classes)s"
+
+msgid "web.admin.deals.offer.refused.items"
+msgstr "An offer holds at least one item."
+
+msgid "web.admin.deals.offer.refused.price"
+msgstr "A price is a whole number from 1 to %(most)s."
+
+msgid "web.admin.deals.offer.refused.share"
+msgstr "A discount is a whole number from 1 to %(most)s."
+
+msgid "web.admin.deals.offer.refused.discount"
+msgstr "%(section)s takes discounts from %(low)s to %(high)s%%; %(share)s%% is outside that range."
+
+msgid "web.admin.deals.offer.refused.name"
+msgstr "The English name is needed."
+
 msgid "web.admin.deals.short"
 msgstr "Rotation short of deals"
 
@@ -11457,7 +11652,13 @@ msgid "web.admin.deals.rotation.on"
 msgstr "Every section runs on its schedule; changes apply from each section's next step."
 
 msgid "web.admin.deals.rotation.off"
-msgstr "Off: hot deals list no offers until the rotation is switched on again."
+msgstr "Off: hot deals show only admin offers."
+
+msgid "web.admin.deals.rotation.off.text.one"
+msgstr "Rotation off: hot deals show only admin offers (%(count)s live now); random boxes come back with the rotation."
+
+msgid "web.admin.deals.rotation.off.text.other"
+msgstr "Rotation off: hot deals show only admin offers (%(count)s live now); random boxes come back with the rotation."
 
 msgid "web.admin.deals.rotation.save"
 msgstr "Save the switch"
@@ -11610,10 +11811,16 @@ msgid "web.admin.toast.deals.rotation.on"
 msgstr "Switched the hot-deal rotation on; sections change at their next step."
 
 msgid "web.admin.toast.deals.rotation.off"
-msgstr "Switched the hot-deal rotation off; hot deals list no offers until it is switched on again."
+msgstr "Switched the hot-deal rotation off; hot deals show only admin offers."
 
 msgid "web.admin.toast.deals.section"
 msgstr "Saved %(section)s; it changes at its next step."
+
+msgid "web.admin.toast.deals.offer"
+msgstr "Saved %(offer)s; hot deals list it from its start until %(ends)s."
+
+msgid "web.admin.toast.deals.offer.off"
+msgstr "Saved %(offer)s; its section is off, so hot deals do not list it."
 
 msgid "web.admin.audit.action.deal_rotation.on"
 msgstr "Rotation switched on"
@@ -11635,6 +11842,15 @@ msgstr "discount %(before)s → %(after)s"
 
 msgid "web.admin.audit.deal.gap"
 msgstr "repeat gap %(before)s → %(after)s days"
+
+msgid "web.admin.audit.action.deal_offer"
+msgstr "Offer saved"
+
+msgid "web.admin.audit.action.deal_offer.new"
+msgstr "Offer added"
+
+msgid "web.admin.audit.deal.offer"
+msgstr "%(section)s · %(price)s · %(starts)s – %(ends)s UTC"
 
 msgid "web.admin.home.warning.deals"
 msgstr "Hot deals · section short of deals"

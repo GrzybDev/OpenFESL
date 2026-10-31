@@ -1,5 +1,6 @@
 from collections.abc import Collection, Sequence
 from datetime import datetime
+from typing import Any
 
 from sqlalchemy import ColumnElement, delete, exists, func, insert, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
@@ -163,31 +164,11 @@ class SqlProductStore:
         async with self._sessions.begin() as session:
             number: int | None = await session.scalar(
                 insert(StoreBundleRow)
-                .values(
-                    game=game,
-                    name=bundle.name,
-                    description=bundle.description,
-                    currency=bundle.currency,
-                    price=bundle.price,
-                    original_price=bundle.original_price,
-                    faction=bundle.faction,
-                    hero_class=bundle.hero_class,
-                    game_order=bundle.game_order,
-                    starts_at=bundle.starts,
-                    ends_at=bundle.ends,
-                    box_id=bundle.box,
-                    section=bundle.section,
-                    pool=bundle.pool,
-                    source=bundle.source,
-                )
+                .values(game=game, **bundle_values(bundle))
                 .returning(StoreBundleRow.id)
             )
             assert number is not None
-            if bundle.members:
-                await session.execute(
-                    insert(StoreBundleMemberRow),
-                    [{"bundle_id": number, "product_id": member} for member in bundle.members],
-                )
+            await add_members(session, number, bundle)
             return number
 
     async def bundles(self, game: str, now: datetime) -> list[ListedBundle]:
@@ -217,7 +198,7 @@ class SqlProductStore:
                     .order_by(StoreBundleRow.game_order, StoreBundleRow.id)
                 )
             )
-            return await _with_members(session, rows)
+            return await with_members(session, rows)
 
     async def box(self, game: str, number: int) -> Box | None:
         """Return a box of a game's store with its drops, if it has one by a number.
@@ -272,7 +253,7 @@ class SqlProductStore:
                     StoreBundleRow.published,
                 )
             )
-            found = await _with_members(session, [row] if row else [])
+            found = await with_members(session, [row] if row else [])
         return found[0] if found else None
 
     async def _box(self, *chosen: ColumnElement[bool]) -> Box | None:
@@ -323,7 +304,13 @@ async def boxes_of(session: AsyncSession, rows: list[StoreBoxRow]) -> list[Box]:
     ]
 
 
-async def _with_members(session: AsyncSession, rows: list[StoreBundleRow]) -> list[ListedBundle]:
+async def with_members(session: AsyncSession, rows: list[StoreBundleRow]) -> list[ListedBundle]:
+    """Return bundles as their rows keep them, each with its products.
+
+    Args:
+        session: The session that read the rows.
+        rows: The bundles' rows.
+    """
     members = await session.execute(
         select(StoreBundleMemberRow.bundle_id, StoreProductRow)
         .join(StoreProductRow, StoreProductRow.id == StoreBundleMemberRow.product_id)
@@ -349,6 +336,7 @@ def _listed(row: StoreBundleRow, members: list[Product]) -> ListedBundle:
             faction=row.faction,
             hero_class=row.hero_class,
             game_order=row.game_order,
+            discount=row.discount,
             starts=row.starts_at,
             ends=row.ends_at,
             members=tuple(product.id for product in members),
@@ -356,9 +344,51 @@ def _listed(row: StoreBundleRow, members: list[Product]) -> ListedBundle:
             section=row.section,
             pool=row.pool,
             source=row.source,
+            texts={language: (texts[0] or "", texts[1]) for language, texts in row.texts.items()},
         ),
         members,
     )
+
+
+def bundle_values(bundle: Bundle) -> dict[str, Any]:
+    """Return a bundle's fields as its row keeps them, but for its game and members.
+
+    Args:
+        bundle: The bundle.
+    """
+    return {
+        "name": bundle.name,
+        "description": bundle.description,
+        "currency": bundle.currency,
+        "price": bundle.price,
+        "original_price": bundle.original_price,
+        "faction": bundle.faction,
+        "hero_class": bundle.hero_class,
+        "game_order": bundle.game_order,
+        "discount": bundle.discount,
+        "starts_at": bundle.starts,
+        "ends_at": bundle.ends,
+        "box_id": bundle.box,
+        "section": bundle.section,
+        "pool": bundle.pool,
+        "source": bundle.source,
+        "texts": {language: list(texts) for language, texts in bundle.texts.items()},
+    }
+
+
+async def add_members(session: AsyncSession, number: int, bundle: Bundle) -> None:
+    """Add a bundle's products to its row.
+
+    Args:
+        session: The session that writes the bundle.
+        number: The bundle's number.
+        bundle: The bundle.
+    """
+    if bundle.members:
+        await session.execute(
+            insert(StoreBundleMemberRow),
+            [{"bundle_id": number, "product_id": member} for member in bundle.members],
+        )
 
 
 async def _stock_boxes(session: AsyncSession, game: str, boxes: Sequence[NewBox]) -> None:
