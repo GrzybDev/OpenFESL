@@ -74,7 +74,13 @@ def freeze(monkeypatch: pytest.MonkeyPatch, moment: datetime) -> None:
             shown = ticked.astimezone(tz) if tz else ticked.replace(tzinfo=None)
             return cls.combine(shown.date(), shown.timetz())
 
-    modules = ("core.rewards", "web.reward_texts", "web.reward_claims", "storage.entitlements")
+    modules = (
+        "core.rewards",
+        "web.reward_texts",
+        "web.reward_claims",
+        "web.admin.reward_changes",
+        "storage.entitlements",
+    )
     for module in modules:
         monkeypatch.setattr(f"openfesl.{module}.datetime", Clock)
 

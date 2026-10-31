@@ -13,7 +13,7 @@
            {% if item == current %} aria-current="page"{% endif %}
            class="menu-item">
           {%- if item == current %}<span aria-hidden="true" class="menu-current"></span>{% endif %}<span class="menu-label">{{ _("web.admin.menu." ~ item) }}</span>
-          {%- if waiting %}<span class="menu-count">{{ number(waiting) }}<span class="sr-only"> {{ _("web.admin.menu.attention") if item == "store" else _("web.admin.menu.waiting") }}</span></span>{% endif -%}
+          {%- if waiting %}<span class="menu-count">{{ number(waiting) }}<span class="sr-only"> {{ _("web.admin.menu.attention") if item in ("store", "rewards") else _("web.admin.menu.waiting") }}</span></span>{% endif -%}
         </a>
       </li>
     {% endfor %}

@@ -12373,3 +12373,81 @@ msgstr "Odbiór był wstrzymany: %(days)s. Dzienne prezenty z tych dni można od
 
 msgid "web.admin.rewards.paused_days.none"
 msgstr "W tym roku odbiór nie był wstrzymany podczas tego wydarzenia."
+
+msgid "web.admin.rewards.pause"
+msgstr "Nagrody wstrzymane"
+
+msgid "web.admin.rewards.pause.title"
+msgstr "Wstrzymanie odbioru"
+
+msgid "web.admin.rewards.pause.off"
+msgstr "Każdą włączoną nagrodę można odebrać. Wstrzymanie zatrzymuje na pewien czas wszystkie odbiory, na przykład przy dużym obciążeniu strony."
+
+msgid "web.admin.rewards.pause.on"
+msgstr "Wstrzymane: żadnej nagrody nie można odebrać. Misje i kamienie milowe liczą się dalej, a dzienne prezenty z dni wstrzymania czekają do końca wydarzeń."
+
+msgid "web.admin.rewards.pause.since"
+msgstr "Wstrzymane od %(time)s UTC (%(admin)s): %(note)s. Żadnej nagrody nie można odebrać; misje i kamienie milowe liczą się dalej, a dzienne prezenty z dni wstrzymania czekają do końca wydarzeń."
+
+msgid "web.admin.rewards.pause.pause"
+msgstr "Wstrzymaj odbiór"
+
+msgid "web.admin.rewards.pause.pause.busy"
+msgstr "Wstrzymywanie…"
+
+msgid "web.admin.rewards.pause.resume"
+msgstr "Wznów odbiór"
+
+msgid "web.admin.rewards.pause.resume.busy"
+msgstr "Wznawianie…"
+
+msgid "web.admin.rewards.pause.no"
+msgstr "Niewstrzymany"
+
+msgid "web.admin.rewards.pause.paused"
+msgstr "Wstrzymany"
+
+msgid "web.admin.rewards.pause.question"
+msgstr "Wstrzymać odbiór wszystkich nagród?"
+
+msgid "web.admin.rewards.resume.question"
+msgstr "Wznowić odbiór nagród?"
+
+msgid "web.admin.rewards.pause.effect.claims"
+msgstr "Do wznowienia nie można odebrać żadnej nagrody; strona nagród informuje graczy o wstrzymaniu."
+
+msgid "web.admin.rewards.pause.effect.counting"
+msgstr "Misje i kamienie milowe liczą się dalej."
+
+msgid "web.admin.rewards.pause.effect.days"
+msgstr "Dzienne prezenty z dni wstrzymania można odebrać do końca ich wydarzeń."
+
+msgid "web.admin.rewards.resume.effect.claims"
+msgstr "Każdą włączoną nagrodę znów można odebrać."
+
+msgid "web.admin.toast.rewards.paused"
+msgstr "Wstrzymano odbiór nagród; strona graczy o tym informuje, a dzienne prezenty z dni wstrzymania można odebrać do końca wydarzeń."
+
+msgid "web.admin.toast.rewards.resumed"
+msgstr "Wznowiono odbiór nagród."
+
+msgid "web.admin.toast.rewards.paused.already"
+msgstr "Odbiór nagród był już wstrzymany."
+
+msgid "web.admin.toast.rewards.resumed.already"
+msgstr "Odbiór nagród był już wznowiony."
+
+msgid "web.admin.home.warning.rewards"
+msgstr "%(page)s: wstrzymane od %(time)s UTC (%(admin)s): %(note)s"
+
+msgid "web.admin.home.warning.rewards.settings"
+msgstr "%(page)s: wstrzymane ustawieniem spoza panelu."
+
+msgid "web.admin.audit.action.reward_pause.on"
+msgstr "Wstrzymanie nagród"
+
+msgid "web.admin.audit.action.reward_pause.off"
+msgstr "Wznowienie nagród"
+
+msgid "web.admin.refused.role.rewards"
+msgstr "Wstrzymanie i zmiany nagród wymagają roli administratora."

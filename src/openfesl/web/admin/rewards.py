@@ -1,13 +1,17 @@
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
+from typing import Any
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.exceptions import HTTPException
 
+from openfesl.core.admin import ActionHistory, AdminAction, AuditEntry
+from openfesl.core.admins import Admin, Role
 from openfesl.core.calendar import day_start, today
 from openfesl.core.catalogues import Catalogues, game_text
 from openfesl.core.games import Game, Games
+from openfesl.core.policies import SettingStore
 from openfesl.core.reward_rules import Milestone, Part, RewardRules, StarterPacks
 from openfesl.core.reward_runs import Run, run_of
 from openfesl.core.rewards import Rewards
@@ -135,6 +139,7 @@ class RewardsView:
         packs: The starter packs; none for a game without them.
         milestones: The milestones by key, each with its name, which states its goal.
         chest: The name of the reward of a first treasure chest; empty for a game without one.
+        pause: Who paused the claims, when and why, while they are paused through the panel.
     """
 
     game: Game
@@ -149,22 +154,34 @@ class RewardsView:
     packs: Packs | None
     milestones: list[tuple[str, Milestone, str]]
     chest: str
+    pause: AuditEntry | None
 
 
 class RewardAdminViews:
     """Puts together what the admin panel shows of the games' rewards."""
 
-    def __init__(self, games: Games, rewards: Rewards, catalogues: Catalogues) -> None:
-        """Read the rewards of the games that give them.
+    def __init__(
+        self,
+        games: Games,
+        rewards: Rewards,
+        catalogues: Catalogues,
+        settings: SettingStore,
+        history: ActionHistory,
+    ) -> None:
+        """Read the rewards of the games that give them, and change them through the settings.
 
         Args:
             games: The games, of which those with reward rules give rewards.
             rewards: The rewards, with the instance's settings over the games' data.
             catalogues: The games' imported catalogues, which name the items.
+            settings: The instance's settings, which override the rewards' game data.
+            history: Tells who paused the claims of a game's rewards, when and why.
         """
         self.games = [game for game in games if game.rewards]
         self.rewards = rewards
         self._catalogues = catalogues
+        self._settings = settings
+        self._history = history
 
     def game(self, game_id: str) -> Game:
         """Return a game that gives rewards by its id.
@@ -179,6 +196,51 @@ class RewardAdminViews:
         if game is None:
             raise HTTPException(404)
         return game
+
+    async def pause(self, game: Game) -> AuditEntry | None:
+        """Return who paused the claims of a game's rewards, when and why, while they are paused.
+
+        Args:
+            game: The game, which gives rewards.
+
+        Returns:
+            The admin's action that paused them; none while they are not paused, or were paused
+            outside the panel, such as by the command line's settings.
+        """
+        rules = await self.rewards.rules(game)
+        found = await self._history.latest(AdminAction.REWARD_PAUSE, game.id)
+        paused = rules is not None and rules.paused
+        return found if paused and found and found.details.get("paused") else None
+
+    async def paused(self) -> list[tuple[Game, AuditEntry | None]]:
+        """Return the games whose rewards' claims are paused, with who paused them if known."""
+        found = []
+        for game in self.games:
+            rules = await self.rewards.rules(game)
+            if rules and rules.paused:
+                found.append((game, await self.pause(game)))
+        return found
+
+    async def change(
+        self,
+        game: Game,
+        settings: dict[str, str | None],
+        action: AdminAction,
+        details: dict[str, Any],
+        admin: Admin,
+    ) -> None:
+        """Change a game's rewards' settings together and record them as one action.
+
+        Args:
+            game: The game, which is the action's target.
+            settings: The settings' new values by key below the game's rewards; None removes one.
+            action: What the admin did.
+            details: What the admin's log keeps of it.
+            admin: The admin who changed them.
+        """
+        prefix = f"{game.id}.rewards."
+        keyed = {prefix + key: value for key, value in settings.items()}
+        await self._settings.change_all(keyed, action, game.id, details, admin)
 
     async def words(self, game: Game, language: str) -> RewardTexts:
         """Return what the panel says of a game's rewards, in a language.
@@ -271,6 +333,7 @@ class RewardAdminViews:
             packs,
             milestones,
             texts.text("web.admin.rewards.keys.first") if chest and named == chest.name else named,
+            await self.pause(game),
         )
 
 
@@ -335,7 +398,7 @@ def _strip(words: RewardTexts, events: list[EventRow], year: int) -> Strip:
 def reward_routes(sessions: AdminSessions, views: RewardAdminViews) -> APIRouter:
     """Return the rewards of each game's site: its calendar, missions, packs and milestones.
 
-    Every role reads them.
+    Every role reads them; changing them needs the admin role.
 
     Args:
         sessions: Signs admins in and renders the panel's pages.
@@ -355,7 +418,10 @@ def reward_routes(sessions: AdminSessions, views: RewardAdminViews) -> APIRouter
         admin = sessions.admin(request)
         game = views.game(game_id)
         found = await views.view(game, request.state.language)
-        return await sessions.render(request, "admin.Rewards", admin=admin, found=found)
+        manages = admin.role is Role.ADMIN
+        return await sessions.render(
+            request, "admin.Rewards", admin=admin, found=found, manages=manages
+        )
 
     return router
 

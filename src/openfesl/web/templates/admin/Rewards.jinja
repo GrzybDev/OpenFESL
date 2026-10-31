@@ -1,8 +1,8 @@
-{#def found #}
+{#def found, manages: bool #}
 {# A game's rewards: this year's calendar strip with today marked, each event
    of the game data's calendar with its switch, its factions, its days this year and its state,
    the missions that one hero reaches a goal for, the starter packs, the Funds milestones and the
-   key that a first treasure chest brings. #}
+   key that a first treasure chest brings, under the pause of every claim. #}
 {% set game = found.game %}
 {% set rules = found.rules %}
 {% set words = found.words %}
@@ -17,6 +17,7 @@
 <AdminPage :title="_('web.admin.rewards.title')" current="rewards">
   <RewardsHead :game="game" :subtitle="_('web.admin.rewards.subtitle', game=game.name)" />
   <Panel class="enter-panel rewards-page">
+    <PauseBar :game="game" :paused="rules.paused" :entry="found.pause" :manages="manages" />
     <section aria-labelledby="rewards-calendar" class="admin-list">
       <Bar id="rewards-calendar" :extra="_('web.admin.rewards.calendar.today', date=found.today, time=found.starts)" wrap>{{ _("web.admin.rewards.calendar", year=found.year) }}</Bar>
       <div class="rewards-strip-scroll">

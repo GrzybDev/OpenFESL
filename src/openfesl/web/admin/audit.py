@@ -30,6 +30,7 @@ from openfesl.web.admin.audit_store import (
     rule_entry,
 )
 from openfesl.web.admin.auth import AdminSessions
+from openfesl.web.admin.reward_changes import reward_entry
 from openfesl.web.admin.settings import policy_views
 from openfesl.web.pages import moment
 from openfesl.web.pages import number as grouped
@@ -412,6 +413,8 @@ async def _rows(
             shown, href, said = deal_entry(action, target, details, games, language)
             if action is AdminAction.DEAL_ROTATION:
                 kind = f"deal_rotation.{'on' if details['enabled'] else 'off'}"
+        elif action is AdminAction.REWARD_PAUSE:
+            kind, shown, href = reward_entry(action, target, details, games, language)
         elif action is AdminAction.CATALOGUE_IMPORT:
             game = games.by_id(target)
             shown = game.name if game else target
@@ -469,6 +472,8 @@ def _glyph(action: AdminAction, kind: str, details: dict[str, Any]) -> str:
         return "star" if details.get("official") else "star-off"
     if action is AdminAction.GAME_MARK:
         return "star" if details.get("shown") else "star-off"
+    if action is AdminAction.REWARD_PAUSE:
+        return "pause" if details.get("paused") else "play"
     if action in (AdminAction.CHESTS, AdminAction.CHEST_KEYS):
         return "x" if details.get("count", 0) < 0 else "plus"
     if action is AdminAction.WALLET_CHANGE:

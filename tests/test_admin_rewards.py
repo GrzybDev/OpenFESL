@@ -3,11 +3,11 @@ from pathlib import Path
 
 import httpx2
 import pytest
-from accounts import execute
-from identity import IdentityProvider, sign_in
+from accounts import execute, select_value
+from identity import IdentityProvider, form_token, sign_in
 from living import freeze, import_catalogue
 from support import visible
-from test_admin_heroes import WARDEN
+from test_admin_heroes import KEEPER, WARDEN
 from test_rewards import INVENTED
 
 pytestmark = pytest.mark.anyio
@@ -105,3 +105,52 @@ async def test_an_events_page_shows_its_days_gifts_goals_texts_and_paused_days(
         in (mission)
     )
     assert unknown.status_code == 404
+
+
+@pytest.mark.usefixtures("halloween", "prompt_actions")
+async def test_admins_pause_and_resume_every_claim_with_a_note_that_home_and_the_log_show(
+    admin_provider: IdentityProvider, base: str, database_url: str
+) -> None:
+    pause = f"{base}{REWARDS}/pause"
+    admin_provider.user = WARDEN
+    async with httpx2.AsyncClient() as client:
+        shown = visible((await sign_in(client, base, next=REWARDS)).content)
+        assert "Pause of claims Every switched-on reward can be claimed." in shown
+        assert "Not paused" in shown and "Pause claims" not in shown
+        assert (await client.get(pause)).status_code == 403
+        token = form_token((await client.get(f"{base}{REWARDS}")).text)
+        refused = await client.post(pause, data={"csrf": token, "paused": "1", "note": "busy"})
+        assert refused.status_code == 403
+    admin_provider.user = KEEPER
+    async with httpx2.AsyncClient() as client:
+        token = form_token((await sign_in(client, base, next=REWARDS)).text)
+        asked = visible((await client.get(pause)).content)
+        assert "Pause every claim of the rewards?" in asked
+        assert "Missions and milestones keep counting." in asked
+        wanted = {"csrf": token, "paused": "1"}
+        unnoted = await client.post(pause, data=wanted)
+        assert unnoted.status_code == 400
+        assert "Still needed: a note." in visible(unnoted.content)
+        noted = wanted | {"note": "site load during the event"}
+        paused = visible((await client.post(pause, data=noted, follow_redirects=True)).content)
+        twice = visible((await client.post(pause, data=noted, follow_redirects=True)).content)
+        home = visible((await client.get(f"{base}/admin/")).content)
+        resumed = await client.post(
+            pause, data={"csrf": token, "paused": "0", "note": "load back to normal"}
+        )
+        log = visible((await client.get(f"{base}/admin/audit")).content)
+
+    assert "Paused the claims of the rewards; the players' page says so" in paused
+    assert "by invented-keeper: site load during the event. No reward can be claimed" in paused
+    assert "Running · day 10 of 13" not in paused and "Paused · day 10 of 13" in paused
+    assert "Rewards 1 needing attention" in paused
+    assert "The claims of the rewards were paused already." in twice
+    assert "Rewards 1 Rewards paused Rewards page of Battlefield Heroes: paused since" in home
+    # The day is recorded at once, so that its daily gifts wait however soon claims resume.
+    day = "SELECT count(*) FROM reward_pause WHERE day = '2026-10-28'"
+    assert await select_value(database_url, day) == 1
+    assert resumed.status_code == 303
+    key = "SELECT count(*) FROM setting WHERE key = 'bfheroes.rewards.paused'"
+    assert await select_value(database_url, key) == 0
+    assert "Rewards resumed Rewards page of Battlefield Heroes Details load back to normal" in log
+    assert "Rewards paused Rewards page of Battlefield Heroes Details site load" in log

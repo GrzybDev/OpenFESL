@@ -23,6 +23,7 @@ from openfesl.web.admin.home import home_routes
 from openfesl.web.admin.key_edit import key_edit_routes
 from openfesl.web.admin.keys import key_routes
 from openfesl.web.admin.providers import provider_routes
+from openfesl.web.admin.reward_changes import reward_change_routes
 from openfesl.web.admin.reward_events import RewardEventViews, reward_event_routes
 from openfesl.web.admin.rewards import RewardAdminViews, reward_routes
 from openfesl.web.admin.servers import (
@@ -81,11 +82,16 @@ def include_admin_routes(
     deal_views = DealAdminViews(
         store_views, services.deals, stores.settings, deal_art, stores.deal_uploads
     )
+    reward_views = RewardAdminViews(
+        games, services.rewards, services.catalogues, stores.settings, stores.admin_log
+    )
 
     async def menu_counts() -> dict[str, int]:
         counts = await server_views.menu_counts()
         if attention := await box_views.flagged() + len(await deal_views.short()):
             counts["store"] = attention
+        if paused := await reward_views.paused():
+            counts["rewards"] = len(paused)
         return counts
 
     sign_in = AdminSessions(
@@ -94,7 +100,15 @@ def include_admin_routes(
     app.include_router(sign_in.routes())
     app.include_router(
         home_routes(
-            sign_in, games, census, players, stores.accounts, server_views, box_views, deal_views
+            sign_in,
+            games,
+            census,
+            players,
+            stores.accounts,
+            server_views,
+            box_views,
+            deal_views,
+            reward_views,
         )
     )
     app.include_router(server_list_routes(sign_in, server_views))
@@ -155,8 +169,8 @@ def include_admin_routes(
     app.include_router(box_table_routes(sign_in, box_views))
     app.include_router(deal_routes(sign_in, deal_views))
     app.include_router(deal_picture_routes(sign_in, deal_views))
-    reward_views = RewardAdminViews(games, services.rewards, services.catalogues)
     app.include_router(reward_routes(sign_in, reward_views))
+    app.include_router(reward_change_routes(sign_in, reward_views, stores.rewards))
     event_views = RewardEventViews(reward_views, box_views, stores.rewards)
     app.include_router(reward_event_routes(sign_in, event_views))
     app.include_router(

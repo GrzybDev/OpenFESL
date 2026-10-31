@@ -1,0 +1,52 @@
+/* The pause of a game's reward claims: a light bar while claims go on, in the accent while they
+   are paused, with the action that changes it at its end. */
+@layer components {
+  .pause-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 16px;
+    background: var(--row-light);
+    padding: 10px 12px 10px 14px;
+    color: var(--ink);
+    transition: background-color 160ms var(--ease-menu);
+  }
+
+  .pause-bar-on {
+    background: var(--accent);
+  }
+
+  .pause-bar-text {
+    display: grid;
+    min-width: min(100%, 280px);
+    flex: 1 1 0;
+    gap: 2px;
+    font-size: 15px;
+    line-height: 1.35;
+    font-weight: 600;
+  }
+
+  .pause-bar-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .pause-bar-state {
+    background: var(--ink);
+    padding: 10px 14px;
+    color: var(--row-light);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pause-bar {
+      transition: none;
+    }
+  }
+}

@@ -132,6 +132,9 @@ class AdminAction(StrEnum):
     """Changed a price rule of a game's store and applied it, the target naming both as
     game:rule; the details hold the rule's values before and after, how many items took its
     prices and how many kept their own."""
+    REWARD_PAUSE = "reward_pause"
+    """Paused the claims of the rewards of the game whose id is the target, or let them go on;
+    the details say which and hold the admin's note."""
 
 
 @dataclass(frozen=True, slots=True)

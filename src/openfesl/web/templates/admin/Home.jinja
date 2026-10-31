@@ -1,4 +1,4 @@
-{#def online: int, logged_in: int, hosting: int, accounts: int, new_accounts: int, mode: str, waiting: list, warnings: list, flags: list, short: list #}
+{#def online: int, logged_in: int, hosting: int, accounts: int, new_accounts: int, mode: str, waiting: list, warnings: list, flags: list, short: list, paused: list #}
 {% set title = _("web.admin.home") %}
 <AdminPage :title="title" current="home">
   <div id="live"
@@ -99,7 +99,7 @@
                    class="home-more">{{ _("web.admin.details_link") }}<Icon name="go" :size="14" stroke="currentColor" /></a>
               </div>
             </section>
-          {% elif not warnings %}
+          {% elif not (warnings or flags or short or paused) %}
             <div class="home-calm">
               <Alert :label="_('web.admin.calm.label', count=number(0))" :title="_('web.admin.calm.title')">{{ _("web.admin.calm.text") }}</Alert>
               <div class="row-actions">
@@ -164,6 +164,24 @@
                   </p>
                 </div>
                 <FormButton icon="go" :href="url('/admin/store/' ~ flag.game.id ~ '/boxes/' ~ flag.row.box.id)">{{ _("web.admin.open", name=flag.row.name) }}</FormButton>
+              {% endfor %}
+            </section>
+          {% endif %}
+          {% if paused %}
+            <section aria-labelledby="home-rewards">
+              <Bar id="home-rewards" :extra="number(paused|length)" large>{{ _("web.admin.menu.rewards") }}</Bar>
+              {% for game, entry in paused %}
+                {% set page = _("web.admin.rewards.subtitle", game=game.name) %}
+                <div class="warning">
+                  <p class="alert-label">
+                    <span aria-hidden="true"
+                          class="alert-glyph"><Icon name="pause" stroke="#0A0A0A" /></span>{{ _("web.admin.rewards.pause") }}
+                  </p>
+                  <p class="body-text">
+                    {{ _("web.admin.home.warning.rewards", page=page, time=moment(entry.at), admin=entry.name or _("web.admin.command_line"), note=entry.details.note) if entry else _("web.admin.home.warning.rewards.settings", page=page) }}
+                  </p>
+                </div>
+                <FormButton icon="go" :href="url('/admin/rewards/' ~ game.id)">{{ _("web.admin.open", name=_("web.admin.menu.rewards")) }}</FormButton>
               {% endfor %}
             </section>
           {% endif %}

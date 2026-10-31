@@ -1,0 +1,19 @@
+{#def game, paused: bool, entry = None, manages: bool = False #}
+{# The pause of every claim of a game's rewards, above each of their pages: whether claims
+   go on or since when, by whom and why they are paused, and for admins the action that pauses or
+   resumes them after a note, which opens as a dialog where scripts run. #}
+<section aria-labelledby="rewards-pause"
+         class="pause-bar{% if paused %} pause-bar-on{% endif %}">
+  <p class="pause-bar-text">
+    <span id="rewards-pause"
+          class="pause-bar-title"><Icon name="pause" :size="16" stroke="currentColor" />{{ _("web.admin.rewards.pause.title") }}</span>
+    <span>
+      {%- if paused and entry %}{{ _("web.admin.rewards.pause.since", time=moment(entry.at), admin=entry.name or _("web.admin.command_line"), note=entry.details.note) }}{% elif paused %}{{ _("web.admin.rewards.pause.on") }}{% else %}{{ _("web.admin.rewards.pause.off") }}{% endif -%}
+    </span>
+  </p>
+  {% if manages %}
+    <SmallAction :href="url('/admin/rewards/' ~ game.id ~ '/pause') ~ '?back=' ~ here|urlencode" :label="_('web.admin.rewards.pause.resume' if paused else 'web.admin.rewards.pause.pause')" :glyph="'play' if paused else 'pause'" dialog />
+  {% else %}
+    <span class="prices-state pause-bar-state">{{ _("web.admin.rewards.pause.paused" if paused else "web.admin.rewards.pause.no") }}</span>
+  {% endif %}
+</section>

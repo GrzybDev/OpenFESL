@@ -11637,3 +11637,81 @@ msgstr "Claims were paused on %(days)s. The daily gifts of those days stay claim
 
 msgid "web.admin.rewards.paused_days.none"
 msgstr "Claims were not paused during this event this year."
+
+msgid "web.admin.rewards.pause"
+msgstr "Rewards paused"
+
+msgid "web.admin.rewards.pause.title"
+msgstr "Pause of claims"
+
+msgid "web.admin.rewards.pause.off"
+msgstr "Every switched-on reward can be claimed. Pausing stops every claim for a while, for example under heavy site load."
+
+msgid "web.admin.rewards.pause.on"
+msgstr "Paused: no reward can be claimed. Missions and milestones keep counting, and the daily gifts of paused days wait until their events end."
+
+msgid "web.admin.rewards.pause.since"
+msgstr "Paused since %(time)s UTC by %(admin)s: %(note)s. No reward can be claimed; missions and milestones keep counting, and the daily gifts of paused days wait until their events end."
+
+msgid "web.admin.rewards.pause.pause"
+msgstr "Pause claims"
+
+msgid "web.admin.rewards.pause.pause.busy"
+msgstr "Pausing…"
+
+msgid "web.admin.rewards.pause.resume"
+msgstr "Resume claims"
+
+msgid "web.admin.rewards.pause.resume.busy"
+msgstr "Resuming…"
+
+msgid "web.admin.rewards.pause.no"
+msgstr "Not paused"
+
+msgid "web.admin.rewards.pause.paused"
+msgstr "Paused"
+
+msgid "web.admin.rewards.pause.question"
+msgstr "Pause every claim of the rewards?"
+
+msgid "web.admin.rewards.resume.question"
+msgstr "Resume the claims?"
+
+msgid "web.admin.rewards.pause.effect.claims"
+msgstr "No reward can be claimed until claims resume; the players' rewards page says that claims are paused."
+
+msgid "web.admin.rewards.pause.effect.counting"
+msgstr "Missions and milestones keep counting."
+
+msgid "web.admin.rewards.pause.effect.days"
+msgstr "The daily gifts of the paused days stay claimable until their events end."
+
+msgid "web.admin.rewards.resume.effect.claims"
+msgstr "Every switched-on reward can be claimed again."
+
+msgid "web.admin.toast.rewards.paused"
+msgstr "Paused the claims of the rewards; the players' page says so, and the daily gifts of paused days stay claimable until their events end."
+
+msgid "web.admin.toast.rewards.resumed"
+msgstr "Resumed the claims of the rewards."
+
+msgid "web.admin.toast.rewards.paused.already"
+msgstr "The claims of the rewards were paused already."
+
+msgid "web.admin.toast.rewards.resumed.already"
+msgstr "The claims of the rewards were resumed already."
+
+msgid "web.admin.home.warning.rewards"
+msgstr "%(page)s: paused since %(time)s UTC by %(admin)s: %(note)s"
+
+msgid "web.admin.home.warning.rewards.settings"
+msgstr "%(page)s: paused by a setting outside the panel."
+
+msgid "web.admin.audit.action.reward_pause.on"
+msgstr "Rewards paused"
+
+msgid "web.admin.audit.action.reward_pause.off"
+msgstr "Rewards resumed"
+
+msgid "web.admin.refused.role.rewards"
+msgstr "Rewards are paused and changed with the admin role."
