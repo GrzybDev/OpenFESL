@@ -11715,3 +11715,39 @@ msgstr "Rewards resumed"
 
 msgid "web.admin.refused.role.rewards"
 msgstr "Rewards are paused and changed with the admin role."
+
+msgid "web.admin.rewards.switch.event"
+msgstr "%(event)s runs"
+
+msgid "web.admin.rewards.milestones.save"
+msgstr "Save milestones"
+
+msgid "web.admin.rewards.refused.funds"
+msgstr "What %(milestone)s gives is a whole number of %(currency)s from 1 to %(most)s."
+
+msgid "web.admin.toast.rewards.switched.on"
+msgstr "Switched on %(name)s; it applies from the next claim."
+
+msgid "web.admin.toast.rewards.switched.off"
+msgstr "Switched off %(name)s; it applies from the next claim, and rewards already given stay."
+
+msgid "web.admin.toast.rewards.milestones"
+msgstr "Saved the milestones; changes apply from the next claim."
+
+msgid "web.admin.audit.action.reward_switch.on"
+msgstr "Reward switched on"
+
+msgid "web.admin.audit.action.reward_switch.off"
+msgstr "Reward switched off"
+
+msgid "web.admin.audit.action.reward_milestone"
+msgstr "Milestone changed"
+
+msgid "web.admin.audit.reward_funds"
+msgstr "%(before)s → %(after)s %(currency)s"
+
+msgid "web.admin.audit.reward_switch.on"
+msgstr "Off → On"
+
+msgid "web.admin.audit.reward_switch.off"
+msgstr "On → Off"

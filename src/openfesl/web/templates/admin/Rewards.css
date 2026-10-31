@@ -201,6 +201,31 @@
     font-variant-numeric: tabular-nums;
   }
 
+  .rewards-milestones-form {
+    display: grid;
+    gap: 2px;
+
+    > .form-button {
+      justify-self: end;
+    }
+  }
+
+  .rewards-funds-field {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .field-input.rewards-funds-input {
+    width: 110px;
+    min-height: 40px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
   .rewards-switch-row {
     display: flex;
     align-items: center;

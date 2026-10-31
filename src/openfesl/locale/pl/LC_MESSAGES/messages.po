@@ -12451,3 +12451,39 @@ msgstr "Wznowienie nagród"
 
 msgid "web.admin.refused.role.rewards"
 msgstr "Wstrzymanie i zmiany nagród wymagają roli administratora."
+
+msgid "web.admin.rewards.switch.event"
+msgstr "%(event)s działa"
+
+msgid "web.admin.rewards.milestones.save"
+msgstr "Zapisz kamienie milowe"
+
+msgid "web.admin.rewards.refused.funds"
+msgstr "Kamień milowy %(milestone)s daje liczbę całkowitą od 1 do %(most)s (%(currency)s)."
+
+msgid "web.admin.toast.rewards.switched.on"
+msgstr "Włączono: %(name)s; obowiązuje od następnego odbioru."
+
+msgid "web.admin.toast.rewards.switched.off"
+msgstr "Wyłączono: %(name)s; obowiązuje od następnego odbioru, a przyznane nagrody zostają."
+
+msgid "web.admin.toast.rewards.milestones"
+msgstr "Zapisano kamienie milowe; zmiany obowiązują od następnego odbioru."
+
+msgid "web.admin.audit.action.reward_switch.on"
+msgstr "Włączenie nagrody"
+
+msgid "web.admin.audit.action.reward_switch.off"
+msgstr "Wyłączenie nagrody"
+
+msgid "web.admin.audit.action.reward_milestone"
+msgstr "Zmiana kamienia milowego"
+
+msgid "web.admin.audit.reward_funds"
+msgstr "%(before)s → %(after)s %(currency)s"
+
+msgid "web.admin.audit.reward_switch.on"
+msgstr "Wyłączone → Włączone"
+
+msgid "web.admin.audit.reward_switch.off"
+msgstr "Włączone → Wyłączone"

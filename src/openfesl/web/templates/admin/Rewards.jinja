@@ -1,8 +1,10 @@
-{#def found, manages: bool #}
+{#def found, manages: bool, form: dict = {}, why: str = "" #}
 {# A game's rewards: this year's calendar strip with today marked, each event
    of the game data's calendar with its switch, its factions, its days this year and its state,
    the missions that one hero reaches a goal for, the starter packs, the Funds milestones and the
-   key that a first treasure chest brings, under the pause of every claim. #}
+   key that a first treasure chest brings, under the pause of every claim. Admins flip each
+   switch at once and save the milestones' Funds and switches together; a refused amount
+   stands above Save and nothing is saved. #}
 {% set game = found.game %}
 {% set rules = found.rules %}
 {% set words = found.words %}
@@ -18,6 +20,12 @@
   <RewardsHead :game="game" :subtitle="_('web.admin.rewards.subtitle', game=game.name)" />
   <Panel class="enter-panel rewards-page">
     <PauseBar :game="game" :paused="rules.paused" :entry="found.pause" :manages="manages" />
+    {% if not manages %}
+      <p class="bar-text account-role-note">
+        <span aria-hidden="true"
+              class="badge"><Icon name="lock" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.refused.role.rewards") }}
+      </p>
+    {% endif %}
     <section aria-labelledby="rewards-calendar" class="admin-list">
       <Bar id="rewards-calendar" :extra="_('web.admin.rewards.calendar.today', date=found.today, time=found.starts)" wrap>{{ _("web.admin.rewards.calendar", year=found.year) }}</Bar>
       <div class="rewards-strip-scroll">
@@ -69,13 +77,23 @@
                     <span class="cell-ago">{{ _(event.summary) }}</span>
                   </span>
                 </div>
-                <div role="cell" class="admin-cell">{{ switch(event.enabled) }}</div>
+                <div role="cell" class="admin-cell">
+                  {% if manages %}
+                    <RewardSwitch :game="game" :path="'events.' ~ row.key" :on="event.enabled" :name="_('web.admin.rewards.switch.event', event=_(event.title))" :back="here ~ '#event-' ~ row.key" />
+                  {% else %}
+                    {{ switch(event.enabled) }}
+                  {% endif %}
+                </div>
                 <div role="cell" class="admin-cell rewards-parts">
                   <span aria-hidden="true" class="cell-label">{{ _("web.admin.rewards.column.parts") }}</span>
                   {% for key, part in event.parts.items() %}
-                    <span class="rewards-part{% if not part.enabled or not event.enabled %} rewards-part-off{% endif %}">
-                    <Icon :name="'tick' if part.enabled else 'x'" :size="12" stroke="currentColor" />{{ part_name(key, part) }}<span class="sr-only">: {{ _("web.admin.rewards.on" if part.enabled else "web.admin.rewards.off") }}</span>
-                    </span>
+                    {% if manages %}
+                      <RewardSwitch :game="game" :path="'events.' ~ row.key ~ '.parts.' ~ key" :on="part.enabled" :name="_(event.title)" :back="here ~ '#event-' ~ row.key" :label="part_name(key, part)" />
+                    {% else %}
+                      <span class="rewards-part{% if not part.enabled or not event.enabled %} rewards-part-off{% endif %}">
+                      <Icon :name="'tick' if part.enabled else 'x'" :size="12" stroke="currentColor" />{{ part_name(key, part) }}<span class="sr-only">: {{ _("web.admin.rewards.on" if part.enabled else "web.admin.rewards.off") }}</span>
+                      </span>
+                    {% endif %}
                   {% endfor %}
                 </div>
                 <div role="cell" class="admin-cell cell-stack">
@@ -121,9 +139,14 @@
           {% set packs = found.packs %}
           <section aria-labelledby="rewards-packs" class="admin-list">
             <Bar id="rewards-packs">{{ _("web.admin.rewards.packs") }}</Bar>
-            <p class="rewards-switch-row">
-              <span>{{ _n("web.admin.rewards.packs.days", packs.rules.days) }}</span>{{ switch(packs.rules.enabled) }}
-            </p>
+            <div class="rewards-switch-row">
+              <span>{{ _n("web.admin.rewards.packs.days", packs.rules.days) }}</span>
+              {% if manages %}
+                <RewardSwitch :game="game" path="starter" :on="packs.rules.enabled" :name="_('web.admin.rewards.packs')" :back="here ~ '#rewards-packs'" />
+              {% else %}
+                {{ switch(packs.rules.enabled) }}
+              {% endif %}
+            </div>
             <div class="table-scroll table-scroll-flush">
               <table class="rewards-packs">
                 <thead>
@@ -165,26 +188,74 @@
                 <span class="admin-hero-strong">K1 · {{ found.chest }}</span>
                 <span class="cell-ago">{{ _n("web.admin.rewards.keys.first.text", chest.gift.keys) }}</span>
               </p>
-              {{ switch(chest.enabled) }}
+              {% if manages %}
+                <RewardSwitch :game="game" path="first_chest" :on="chest.enabled" :name="found.chest" :back="here ~ '#rewards-key'" />
+              {% else %}
+                {{ switch(chest.enabled) }}
+              {% endif %}
             </div>
           </section>
         {% endif %}
         {% if found.milestones %}
           <section aria-labelledby="rewards-milestones" class="admin-list">
             <Bar id="rewards-milestones" :extra="_('web.admin.rewards.events.on', on=number(found.milestones|selectattr('1.enabled')|list|length), total=number(found.milestones|length))">{{ _("web.admin.rewards.milestones") }}</Bar>
+            {% if manages %}
+              <form method="post"
+                    action="{{ url('/admin/rewards/' ~ game.id ~ '/milestones') }}"
+                    class="rewards-milestones-form">
+                <CsrfField />
+            {% endif %}
             <ul class="rewards-milestones">
               {% for key, milestone, name in found.milestones %}
+                {% set funds = form.get("funds-" ~ key, milestone.gift.funds) %}
+                {% set on = form.get("on-" ~ key) if form else milestone.enabled %}
                 <li class="rewards-milestone{% if not milestone.enabled %} rewards-mission-off{% endif %}">
                   <span class="rewards-number">M{{ loop.index }}</span>
                   <span class="rewards-stack">
                     <span class="admin-hero-strong">{{ name }}</span>
                     <span class="cell-ago">{{ _("web.admin.rewards.milestone.hero" if milestone.each else "web.admin.rewards.milestone.account") }}</span>
                   </span>
-                  <span class="rewards-funds">{{ words.funds(milestone.gift.funds) }}</span>
-                  {{ switch(milestone.enabled) }}
+                  {% if manages %}
+                    <label class="rewards-funds-field">
+                      <span class="sr-only">{{ name }}</span>
+                      <input name="funds-{{ key }}"
+                             type="text"
+                             inputmode="numeric"
+                             pattern="[0-9]+"
+                             value="{{ funds }}"
+                             required
+                             {% if form.get("refused") == key %} aria-invalid="true"{% endif %}
+                             class="field-input rewards-funds-input{% if form.get('refused') == key %} field-invalid{% endif %}">
+                      <span class="rewards-currency">{{ _("games." ~ game.id ~ ".currency." ~ rules.currency) }}</span>
+                    </label>
+                    <label class="prices-sold">
+                      <span class="check-place">
+                        <input type="checkbox"
+                               name="on-{{ key }}"
+                               value="1"
+                               {% if on %} checked{% endif %}
+                               class="check">
+                        <span aria-hidden="true"
+                              class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>
+                      <span class="sr-only">{{ name }}: </span>{{ _("web.admin.rewards.on") }}
+                    </label>
+                  {% else %}
+                    <span class="rewards-funds">{{ words.funds(milestone.gift.funds) }}</span>
+                    {{ switch(milestone.enabled) }}
+                  {% endif %}
                 </li>
               {% endfor %}
             </ul>
+            {% if manages %}
+              {% if why %}
+                <p role="alert" class="prices-refusal">
+                  <span aria-hidden="true"
+                        class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span><span>{{ why }}</span>
+                </p>
+              {% endif %}
+              <FormButton icon="tick">{{ _("web.admin.rewards.milestones.save") }}</FormButton>
+              </form>
+            {% endif %}
             <p class="bar-text body-text">{{ _("web.admin.rewards.milestones.note") }}</p>
           </section>
         {% endif %}

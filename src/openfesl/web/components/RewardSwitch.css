@@ -1,0 +1,54 @@
+/* A switch of a game's rewards: its box ticked in the accent while on, crossed on black while
+   off; pressing it flips it. */
+@layer components {
+  .reward-switch-form {
+    display: inline-flex;
+  }
+
+  .reward-switch {
+    display: inline-flex;
+    min-height: 36px;
+    align-items: center;
+    gap: 6px;
+    border: 0;
+    background: var(--accent);
+    padding: 0 10px 0 4px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    text-transform: uppercase;
+    cursor: pointer;
+    transition:
+      background-color 120ms var(--ease-menu),
+      color 120ms var(--ease-menu);
+
+    &:hover {
+      background: var(--accent-hover);
+    }
+  }
+
+  .reward-switch-box {
+    display: grid;
+    width: 26px;
+    height: 26px;
+    place-items: center;
+    border: 2px solid currentColor;
+  }
+
+  .reward-switch-off {
+    background: var(--ink);
+    color: var(--row-light);
+
+    &:hover {
+      background: var(--dim);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reward-switch {
+      transition: none;
+    }
+  }
+}

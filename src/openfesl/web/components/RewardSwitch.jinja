@@ -1,0 +1,17 @@
+{#def game, path: str, on: bool, name: str, back: str, label: str = "" #}
+{# A switch of a game's rewards that admins flip, such as an event or a faction's part of it: a
+   button that sends its form with the state it turns to and says its state by being pressed. The
+   label, such as a faction's name, stands in place of On and Off. #}
+<form method="post"
+      action="{{ url('/admin/rewards/' ~ game.id ~ '/switch') }}"
+      class="reward-switch-form">
+  <CsrfField />
+  <input type="hidden" name="path" value="{{ path }}">
+  <input type="hidden" name="back" value="{{ back }}">
+  {% if not on %}<input type="hidden" name="enabled" value="1">{% endif %}
+  <button type="submit"
+          aria-pressed="{{ 'true' if on else 'false' }}"
+          class="reward-switch{% if not on %} reward-switch-off{% endif %}">
+    <span aria-hidden="true" class="reward-switch-box"><Icon :name="'tick' if on else 'x'" :size="14" stroke="currentColor" /></span><span class="sr-only">{{ name }}: </span>{{ label or (_("web.admin.rewards.on") if on else _("web.admin.rewards.off")) }}
+  </button>
+</form>

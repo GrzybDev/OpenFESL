@@ -135,6 +135,12 @@ class AdminAction(StrEnum):
     REWARD_PAUSE = "reward_pause"
     """Paused the claims of the rewards of the game whose id is the target, or let them go on;
     the details say which and hold the admin's note."""
+    REWARD_SWITCH = "reward_switch"
+    """Switched a reward of the game whose id is the target on or off: an event, a part of one,
+    the starter packs or the first chest's key; the details hold its path and the new state."""
+    REWARD_MILESTONE = "reward_milestone"
+    """Changed a milestone of the rewards of the game whose id is the target; the details hold
+    its key and its Funds and switch before and after."""
 
 
 @dataclass(frozen=True, slots=True)

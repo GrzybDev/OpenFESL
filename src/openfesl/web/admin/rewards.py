@@ -416,14 +416,41 @@ def reward_routes(sessions: AdminSessions, views: RewardAdminViews) -> APIRouter
     @router.get("/admin/rewards/{game_id}", response_class=HTMLResponse)
     async def rewards(request: Request, game_id: str) -> HTMLResponse:
         admin = sessions.admin(request)
-        game = views.game(game_id)
-        found = await views.view(game, request.state.language)
-        manages = admin.role is Role.ADMIN
-        return await sessions.render(
-            request, "admin.Rewards", admin=admin, found=found, manages=manages
-        )
+        return await rewards_page(sessions, views, request, admin, views.game(game_id))
 
     return router
+
+
+async def rewards_page(
+    sessions: AdminSessions,
+    views: RewardAdminViews,
+    request: Request,
+    admin: Admin,
+    game: Game,
+    form: dict[str, str] | None = None,
+    why: str = "",
+) -> HTMLResponse:
+    """Render a game's rewards page, with a refused change of its milestones if there is one.
+
+    Args:
+        sessions: Signs admins in and renders the panel's pages.
+        views: Put together what the page shows.
+        request: The request the page answers.
+        admin: The signed-in admin.
+        game: The game, which gives rewards.
+        form: The milestones form's fields as they were sent, to show again with a refusal.
+        why: Why the change was refused; empty when it was not.
+    """
+    return await sessions.render(
+        request,
+        "admin.Rewards",
+        400 if why else 200,
+        admin=admin,
+        found=await views.view(game, request.state.language),
+        manages=admin.role is Role.ADMIN,
+        form=form or {},
+        why=why,
+    )
 
 
 def rewards_url(request: Request, game: Game) -> str:

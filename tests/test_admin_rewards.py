@@ -7,6 +7,7 @@ from accounts import execute, select_value
 from identity import IdentityProvider, form_token, sign_in
 from living import freeze, import_catalogue
 from support import visible
+from test_admin_deals import setting
 from test_admin_heroes import KEEPER, WARDEN
 from test_rewards import INVENTED
 
@@ -154,3 +155,79 @@ async def test_admins_pause_and_resume_every_claim_with_a_note_that_home_and_the
     assert await select_value(database_url, key) == 0
     assert "Rewards resumed Rewards page of Battlefield Heroes Details load back to normal" in log
     assert "Rewards paused Rewards page of Battlefield Heroes Details site load" in log
+
+
+@pytest.mark.usefixtures("halloween", "prompt_actions")
+async def test_admins_switch_events_parts_packs_and_the_key_and_change_milestones(
+    admin_provider: IdentityProvider, base: str, database_url: str
+) -> None:
+    switch, milestones = f"{base}{REWARDS}/switch", f"{base}{REWARDS}/milestones"
+    funds = {
+        "funds-first-hero": "600",
+        "funds-level-10": "500",
+        "funds-level-20": "1200",
+        "funds-level-30": "3000",
+        "funds-matches": "1000",
+    }
+    on = {f"on-{key}": "1" for key in ("first-hero", "level-10", "level-20", "level-30")}
+    admin_provider.user = WARDEN
+    async with httpx2.AsyncClient() as client:
+        shown = visible((await sign_in(client, base, next=REWARDS)).content)
+        token = form_token((await client.get(f"{base}{REWARDS}")).text)
+        flipped = await client.post(switch, data={"csrf": token, "path": "events.bento"})
+        saved = await client.post(milestones, data={"csrf": token, **funds})
+    assert "Rewards are paused and changed with the admin role." in shown
+    assert "Save milestones" not in shown
+    assert flipped.status_code == saved.status_code == 403
+
+    admin_provider.user = KEEPER
+    async with httpx2.AsyncClient() as client:
+        token = form_token((await sign_in(client, base, next=REWARDS)).text)
+
+        async def flip(path: str, enabled: str = "") -> str:
+            form = {"csrf": token, "path": path, "enabled": enabled, "back": REWARDS}
+            return visible((await client.post(switch, data=form, follow_redirects=True)).content)
+
+        off = await flip("events.bento")
+        half = await flip("events.halloween.parts.national")
+        await flip("starter")
+        await flip("first_chest")
+        unknown = await client.post(switch, data={"csrf": token, "path": "events.harvest"})
+        refused = await client.post(
+            milestones, data={"csrf": token, **funds, "funds-level-10": "0", **on}
+        )
+        changed = visible(
+            (
+                await client.post(
+                    milestones, data={"csrf": token, **funds, **on}, follow_redirects=True
+                )
+            ).content
+        )
+        back = await flip("events.bento", "1")
+        log = visible((await client.get(f"{base}/admin/audit")).content)
+
+    assert "Switched off Bento week; it applies from the next claim" in off
+    assert "Calendar events 7 of 9 on" in off
+    assert "Switched off Halloween trick-or-treat · National Army" in half
+    assert (
+        await setting(database_url, "bfheroes.rewards.events.halloween.parts.national.enabled")
+        == "off"
+    )
+    assert await setting(database_url, "bfheroes.rewards.starter.enabled") == "off"
+    assert await setting(database_url, "bfheroes.rewards.first_chest.enabled") == "off"
+    assert unknown.status_code == 404
+    assert refused.status_code == 400
+    assert "What Level 10 gives is a whole number of Funds from 1 to 2,147,483,647." in visible(
+        refused.content
+    )
+    assert "Saved the milestones; changes apply from the next claim." in changed
+    assert "Milestones 4 of 5 on" in changed
+    assert await setting(database_url, "bfheroes.rewards.milestones.level-20.gift.funds") == "1200"
+    assert await setting(database_url, "bfheroes.rewards.milestones.matches.enabled") == "off"
+    # Back at the game data's value, a switch leaves the settings.
+    assert "Switched on Bento week" in back
+    assert await setting(database_url, "bfheroes.rewards.events.bento.enabled") is None
+    assert "Reward switched on Bento week" in log and "Reward switched off Bento week" in log
+    assert "Reward switched off Halloween trick-or-treat · National Army" in log
+    assert "Milestone changed Level 20 Details 1,500 → 1,200 Funds" in log
+    assert "Milestone changed Ranked matches: 100 Details On → Off" in log
