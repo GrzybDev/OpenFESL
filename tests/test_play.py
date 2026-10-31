@@ -17,7 +17,7 @@ async def test_the_guide_names_the_hook_this_server_and_the_enabled_keys(
         assert shown in page
     # This server is not the hook's default, so the guide tells the hook where it is.
     relay = server_url.rstrip("/")
-    assert "Point the hook at this server" in page
+    assert "Point the hook at this service" in page
     assert f"[Server]\nUrl={relay}</pre>" in page
     assert ">4</span>Create an account" in page
 
@@ -31,7 +31,7 @@ async def test_the_guide_names_the_hook_this_server_and_the_enabled_keys(
     _, _, body = await fetch(server_url, "/pl/bfbc2/play")
     page = body.decode()
     assert "Status weterana" not in page
-    for shown in ("5 kluczy", "Gra sieciowa", "Wskaż hookowi ten serwer"):
+    for shown in ("5 kluczy", "Gra sieciowa", "Wskaż hookowi ten serwis"):
         assert shown in page
 
 

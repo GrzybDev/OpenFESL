@@ -694,7 +694,7 @@ msgid "web.error.404.title"
 msgstr "Page not found"
 
 msgid "web.error.404.text"
-msgstr "No page of this server matches this address."
+msgstr "No page of this service matches this address."
 
 #, python-format
 msgid "web.error.404.servers"
@@ -704,7 +704,7 @@ msgid "web.error.500.title"
 msgstr "The page could not be shown"
 
 msgid "web.error.500.text"
-msgstr "An error occurred on this server. Try again in a moment."
+msgstr "An error occurred on this service. Try again in a moment."
 
 msgid "web.error.500.again"
 msgstr "Try again"
@@ -2201,7 +2201,7 @@ msgid "web.play.instructions"
 msgstr "Full installation instructions"
 
 msgid "web.play.server"
-msgstr "Point the hook at this server"
+msgstr "Point the hook at this service"
 
 #, python-format
 msgid "web.play.server.where"
@@ -2329,7 +2329,7 @@ msgid "web.host.subtitle"
 msgstr "%(game)s dedicated server"
 
 msgid "web.host.mode"
-msgstr "Hosting on this server"
+msgstr "Hosting on this service"
 
 msgid "web.host.mode.approved"
 msgstr "Approved servers only"
@@ -2339,9 +2339,9 @@ msgstr "Any server"
 
 msgid "web.host.mode.approved.text"
 msgstr ""
-"A new dedicated server waits for approval by this server's "
-"administrators. Until it is approved it is not listed, players cannot "
-"join it and its rounds do not count toward stats."
+"A new dedicated server waits for approval by the administrators of this "
+"service. Until it is approved it is not listed, players cannot join it "
+"and its rounds do not count toward stats."
 
 msgid "web.host.mode.open.text"
 msgstr ""
@@ -2373,13 +2373,13 @@ msgstr ""
 #, python-format
 msgid "web.host.hook.default"
 msgstr ""
-"The hook connects to this OpenFESL server by default, so no %(file)s is "
+"The hook connects to this OpenFESL service by default, so no %(file)s is "
 "needed."
 
 #, python-format
 msgid "web.host.hook.elsewhere"
 msgstr ""
-"To connect to this OpenFESL server, save %(file)s next to it with these "
+"To connect to this OpenFESL service, save %(file)s next to it with these "
 "lines."
 
 msgid "web.host.provider"
@@ -2388,7 +2388,7 @@ msgstr "Add the provider file"
 #, python-format
 msgid "web.host.provider.text"
 msgstr ""
-"Put the %(file)s issued by this server's administrators next to "
+"Put the %(file)s issued by the administrators of this service next to "
 "%(config)s, in place of the one the server release ships. It tells "
 "OpenFESL which operator runs the server; keep it private."
 

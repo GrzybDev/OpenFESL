@@ -757,7 +757,7 @@ msgid "web.error.404.title"
 msgstr "Nie znaleziono strony"
 
 msgid "web.error.404.text"
-msgstr "Żadna strona tego serwera nie ma takiego adresu."
+msgstr "Żadna strona tego serwisu nie ma takiego adresu."
 
 #, python-format
 msgid "web.error.404.servers"
@@ -767,7 +767,7 @@ msgid "web.error.500.title"
 msgstr "Nie udało się wyświetlić strony"
 
 msgid "web.error.500.text"
-msgstr "Na tym serwerze wystąpił błąd. Spróbuj ponownie za chwilę."
+msgstr "W tym serwisie wystąpił błąd. Spróbuj ponownie za chwilę."
 
 msgid "web.error.500.again"
 msgstr "Spróbuj ponownie"
@@ -2277,7 +2277,7 @@ msgid "web.play.instructions"
 msgstr "Pełna instrukcja instalacji"
 
 msgid "web.play.server"
-msgstr "Wskaż hookowi ten serwer"
+msgstr "Wskaż hookowi ten serwis"
 
 #, python-format
 msgid "web.play.server.where"
@@ -2432,7 +2432,7 @@ msgstr "Dowolny serwer"
 msgid "web.host.mode.approved.text"
 msgstr ""
 "Nowy serwer dedykowany czeka na zatwierdzenie przez administrację tego "
-"serwera. Do tego czasu nie ma go na liście, nie można do niego dołączyć, "
+"serwisu. Do tego czasu nie ma go na liście, nie można do niego dołączyć, "
 "a jego rundy nie liczą się do statystyk."
 
 msgid "web.host.mode.open.text"
@@ -2465,14 +2465,14 @@ msgstr ""
 #, python-format
 msgid "web.host.hook.default"
 msgstr ""
-"Hook domyślnie łączy się z tym serwerem OpenFESL, więc %(file)s nie jest "
+"Hook domyślnie łączy się z tym serwisem OpenFESL, więc %(file)s nie jest "
 "potrzebny."
 
 #, python-format
 msgid "web.host.hook.elsewhere"
 msgstr ""
-"Aby hook łączył się z tym serwerem OpenFESL, zapisz obok niego %(file)s z"
-" tymi wierszami."
+"Aby hook łączył się z tym serwisem OpenFESL, zapisz obok niego %(file)s z "
+"tymi wierszami."
 
 msgid "web.host.provider"
 msgstr "Dodaj plik operatora"
@@ -2480,9 +2480,9 @@ msgstr "Dodaj plik operatora"
 #, python-format
 msgid "web.host.provider.text"
 msgstr ""
-"Umieść %(file)s wydany przez administrację tego serwera obok %(config)s, "
-"w miejsce pliku z wydania serwera. Mówi on OpenFESL, kto prowadzi serwer;"
-" nie udostępniaj go."
+"Umieść %(file)s wydany przez administrację tego serwisu obok %(config)s, "
+"w miejsce pliku z wydania serwera. Mówi on OpenFESL, kto prowadzi serwer; "
+"nie udostępniaj go."
 
 msgid "web.host.provider.request"
 msgstr "Poproś o plik"
@@ -2813,13 +2813,13 @@ msgid "web.admin.sign_in.through"
 msgstr "Zaloguj się przez"
 
 msgid "web.admin.sign_in.none"
-msgstr "Na tym serwerze nie skonfigurowano logowania do panelu."
+msgstr "W tym serwisie nie skonfigurowano logowania do panelu."
 
 msgid "web.admin.sign_in.kept"
 msgstr "Panel przechowuje tylko identyfikator konta, nazwę wyświetlaną i rolę."
 
 msgid "web.admin.access"
-msgstr "Dostęp wymaga roli administratora lub moderatora na tym serwerze."
+msgstr "Dostęp wymaga roli administratora lub moderatora w tym serwisie."
 
 msgid "web.admin.signed_in.admin"
 msgstr "Rola administratora · zalogowano przez %(provider)s"
@@ -3011,7 +3011,7 @@ msgid "web.admin.confirm.approve.known"
 msgstr "Zatwierdzenie wystawia grę serwera na liście serwerów, a przesyłane przez niego statystyki są od tej chwili zapisywane. Zatwierdzenie można później cofnąć."
 
 msgid "web.admin.confirm.approve.unknown"
-msgstr "Identyfikator dostawcy nie pasuje do żadnego dostawcy na tym serwerze. Zatwierdzenie wystawia grę serwera na liście serwerów, a przesyłane przez niego statystyki są od tej chwili zapisywane. Zatwierdzenie można później cofnąć."
+msgstr "Identyfikator dostawcy nie pasuje do żadnego dostawcy w tym serwisie. Zatwierdzenie wystawia grę serwera na liście serwerów, a przesyłane przez niego statystyki są od tej chwili zapisywane. Zatwierdzenie można później cofnąć."
 
 msgid "web.admin.warnings"
 msgstr "Ostrzeżenia"
@@ -3224,7 +3224,7 @@ msgid "web.admin.provider.matches.none"
 msgstr "Identyfikator dostawcy pasuje do dostawcy %(provider)s, który nie ma jeszcze zatwierdzonych serwerów."
 
 msgid "web.admin.provider.unknown"
-msgstr "Identyfikator dostawcy nie pasuje do żadnego dostawcy na tym serwerze."
+msgstr "Identyfikator dostawcy nie pasuje do żadnego dostawcy w tym serwisie."
 
 msgid "web.admin.provider.none"
 msgstr "Serwer nie przesłał jeszcze identyfikatora dostawcy."
