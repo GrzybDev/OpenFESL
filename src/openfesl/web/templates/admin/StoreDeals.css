@@ -11,6 +11,13 @@
     }
   }
 
+  .deals-short-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin: 8px 0 0;
+  }
+
   .deals-off {
     display: flex;
     align-items: center;

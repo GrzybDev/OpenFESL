@@ -8,29 +8,13 @@
 {% set game = of %}
 {% set base = url("/admin/store/" ~ game.id ~ "/deals") %}
 {% set rules = rotation.rules %}
-{% set short = rotation.rows|selectattr("short")|list %}
 {% macro name(key) %}{{ _("games." ~ game.id ~ ".deal_section." ~ key) }}{% endmacro %}
 <AdminPage :title="_('web.admin.store.tab.deals') ~ ' · ' ~ _('web.admin.store.title')"
            current="store">
   <StoreHead :game="game" current="deals" :subtitle="_('web.admin.deals.subtitle', game=game.name)" />
   <Panel class="enter-panel">
     <DealsTabs :game="game" current="rotation" />
-    {% if short %}
-      <section aria-labelledby="deals-short" class="boxes-flag">
-        <p id="deals-short" class="prices-missing-head">
-          <span aria-hidden="true"
-                class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.deals.short") }}
-        </p>
-        {% for row in short %}
-          {% for faction, count in row.short.items() %}
-            <p class="boxes-flag-title">
-              {{ _("web.admin.deals.short.title", section=name(row.key), faction=_("games." ~ game.id ~ ".faction." ~ faction), count=number(count), size=number(row.section.size)) }}
-            </p>
-          {% endfor %}
-        {% endfor %}
-        <p class="body-text">{{ _("web.admin.deals.short.text") }}</p>
-      </section>
-    {% endif %}
+    <DealsShort :game="game" :rows="rotation.rows|selectattr('short')|list" />
     <div class="list-layout admin-layout">
       <div class="list-main boxes-main">
         <form method="post"

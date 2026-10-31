@@ -1,0 +1,27 @@
+{#def game, rows: list #}
+{# The sections of a game's hot-deal rotation whose latest step sold fewer deals of a faction than
+   their size asks: each faction's count, what lets the next step pick them all, and the way
+   to each section's page. #}
+{% set base = url("/admin/store/" ~ game.id ~ "/deals") %}
+{% if rows %}
+  <section aria-labelledby="deals-short" class="boxes-flag deals-short">
+    <p id="deals-short" class="prices-missing-head">
+      <span aria-hidden="true"
+            class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.deals.short") }}
+    </p>
+    {% for row in rows %}
+      {% set name = _("games." ~ game.id ~ ".deal_section." ~ row.key) %}
+      {% for faction, count in row.short.items() %}
+        <p class="boxes-flag-title">
+          {{ _("web.admin.deals.short.title", section=name, faction=_("games." ~ game.id ~ ".faction." ~ faction), count=number(count), size=number(row.section.size)) }}
+        </p>
+      {% endfor %}
+    {% endfor %}
+    <p class="body-text">{{ _("web.admin.deals.short.text") }}</p>
+    <p class="deals-short-links">
+      {% for row in rows %}
+        <FormButton icon="go" :href="base ~ '/sections/' ~ row.key">{{ _("web.admin.deals.edit", section=_("games." ~ game.id ~ ".deal_section." ~ row.key)) }}</FormButton>
+      {% endfor %}
+    </p>
+  </section>
+{% endif %}

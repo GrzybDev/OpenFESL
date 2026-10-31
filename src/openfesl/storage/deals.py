@@ -9,14 +9,14 @@ from openfesl.core.calendar import Period
 from openfesl.core.deal_picks import History, NewDeal, SoldBox
 from openfesl.core.deals import Maker
 from openfesl.core.inventory import Ownership
-from openfesl.core.store import AUTO
+from openfesl.core.store import AUTO, ListedBundle
 from openfesl.storage.models import (
     StoreBoxRow,
     StoreBundleMemberRow,
     StoreBundleRow,
     StoreProductRow,
 )
-from openfesl.storage.store import add_members, bundle_values, product_of
+from openfesl.storage.store import add_members, bundle_values, product_of, with_members
 
 type Key = tuple[int, Ownership, str]
 
@@ -80,6 +80,25 @@ class SqlDealStore:
         async with self._sessions() as session:
             history = await _history(session, game, section, period.start, gap)
         return make(history)
+
+    async def made(self, game: str, since: datetime) -> list[ListedBundle]:
+        """Return the bundles the rotation made of a game that ran after a moment, by start.
+
+        Args:
+            game: The game's data-file name.
+            since: The moment.
+        """
+        async with self._sessions() as session:
+            rows = await session.scalars(
+                select(StoreBundleRow)
+                .where(
+                    StoreBundleRow.game == game,
+                    StoreBundleRow.source == AUTO,
+                    StoreBundleRow.ends_at > since,
+                )
+                .order_by(StoreBundleRow.starts_at, StoreBundleRow.game_order, StoreBundleRow.id)
+            )
+            return await with_members(session, list(rows))
 
     async def shown(self, game: str, section: str) -> dict[str, datetime]:
         """Return when the rotation last brought each offer of a section, by its picked name.

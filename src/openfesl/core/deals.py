@@ -53,6 +53,14 @@ class DealStore(Protocol):
             make: Makes the bundles from what the section must not repeat.
         """
 
+    async def made(self, game: str, since: datetime) -> list[ListedBundle]:
+        """Return the bundles the rotation made of a game that ran after a moment, by start.
+
+        Args:
+            game: The game's data-file name.
+            since: The moment.
+        """
+
     async def preview(
         self, game: str, section: str, period: Period, gap: int, make: Maker
     ) -> list[NewDeal]:

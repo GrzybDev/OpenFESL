@@ -45,6 +45,10 @@ async def test_admins_switch_the_rotation_and_change_its_sections_from_their_nex
         previewed = visible((await client.get(deals, params={"preview": "1"})).content)
         assert "Deal of the Day Every day Runs" in previewed and "Comes in" in previewed
         assert "Hide the preview" in previewed and "Preview the next step" in shown
+        # The steps the rotation made as the pages looked are in its log, beside the audit log.
+        log = visible((await client.get(f"{deals}/log")).content)
+        assert "Rotation log · newest first Kept 90 days" in log
+        assert "Random boxes Done Came in WEST_Custom_Bundle_RoyalCommandoSupplyDrop" in log
     admin_provider.user = KEEPER
     async with httpx2.AsyncClient() as client:
         token = form_token((await sign_in(client, base, next="/admin/store/bfheroes/deals")).text)

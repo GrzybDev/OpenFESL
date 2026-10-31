@@ -1,10 +1,10 @@
 {#def game, current: str #}
-{# The views of a game's hot deals: the rotation, the admin's own offers and the game's home
-   screen. #}
+{# The views of a game's hot deals: the rotation, the admin's own offers, the game's home screen
+   and the rotation's log. #}
 {% set base = url("/admin/store/" ~ game.id ~ "/deals") %}
 <nav aria-label="{{ _('web.admin.deals.views') }}"
      class="tabs prices-tabs">
-  {% for view, path in [("rotation", ""), ("offers", "/offers"), ("home", "/home")] %}
+  {% for view, path in [("rotation", ""), ("offers", "/offers"), ("home", "/home"), ("log", "/log")] %}
     <Tab :href="base ~ path" :label="_('web.admin.deals.view.' ~ view)" :current="current == view" />
   {% endfor %}
 </nav>

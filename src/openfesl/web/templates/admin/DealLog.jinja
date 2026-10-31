@@ -1,0 +1,56 @@
+{#def of, rotation, rows: list #}
+{# The log of a game's hot-deal rotation, newest first, kept 90 days: each step with
+   when its period started, its section, whether it brought as many deals of each faction as
+   the section asks, what came in and what left; above it, the sections whose latest step fell
+   short, with the way to each one's page. #}
+{% set game = of %}
+<AdminPage :title="_('web.admin.deals.view.log') ~ ' · ' ~ _('web.admin.store.title')"
+           current="store">
+  <StoreHead :game="game" current="deals" :subtitle="_('web.admin.deals.subtitle', game=game.name)" />
+  <Panel class="enter-panel">
+    <DealsTabs :game="game" current="log" />
+    <DealsShort :game="game" :rows="rotation.rows|selectattr('short')|list" />
+    <section aria-labelledby="deals-log" class="admin-list">
+      <Bar id="deals-log" :extra="_('web.admin.deals.log.kept')">{{ _("web.admin.deals.log") }}</Bar>
+      {% if rows %}
+        <div class="table-scroll table-scroll-flush">
+          <div role="table" aria-labelledby="deals-log" class="table log-table">
+            <div role="rowgroup" class="admin-list-head">
+              <div role="row" class="log-columns">
+                {% for column in ("when", "section", "result", "came", "left") %}
+                  <div role="columnheader" class="column-head">{{ _("web.admin.deals.log.column." ~ column) }}</div>
+                {% endfor %}
+              </div>
+            </div>
+            <div role="rowgroup" class="table-rows">
+              {% for row in rows %}
+                {% set step = row.step %}
+                <div role="row"
+                     class="log-columns log-row{% if step.short %} log-stopped{% endif %}">
+                  <div role="cell" class="admin-cell cell-stack">
+                    <span class="cell-time">{{ when(step.at, "yMMMd") }}</span>
+                    <span class="cell-ago">{{ _("web.server.time", time=when(step.at, "Hm")) }}</span>
+                  </div>
+                  <div role="cell"
+                       class="admin-cell admin-hero-strong">{{ _("games." ~ game.id ~ ".deal_section." ~ step.section) }}</div>
+                  <div role="cell" class="admin-cell prices-state">
+                    <Badge :name="'warn' if step.short else 'tick'" :lines="not step.short" />{{ _("web.admin.deals.log.result." ~ ("stopped" if step.short else "done")) }}
+                  </div>
+                  {% for column, lines in (("came", row.came), ("left", row.left)) %}
+                    <div role="cell" class="admin-cell cell-stack log-deals">
+                      <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.log.column." ~ column) }}</span>
+                      <span>{{ lines|join(", ") if lines else _("web.admin.deals.preview.nothing") }}</span>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <p class="bar-text body-text">{{ _("web.admin.deals.log.none") }}</p>
+      {% endif %}
+      <p class="bar-text body-text">{{ _("web.admin.deals.log.note") }}</p>
+    </section>
+  </Panel>
+</AdminPage>

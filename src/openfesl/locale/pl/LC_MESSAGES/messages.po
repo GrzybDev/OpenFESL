@@ -12192,6 +12192,9 @@ msgstr "Oferty administracji"
 msgid "web.admin.deals.view.home"
 msgstr "Ekran główny gry"
 
+msgid "web.admin.deals.view.log"
+msgstr "Dziennik rotacji"
+
 msgid "web.admin.deals.offers"
 msgstr "Oferty administracji"
 
@@ -12887,6 +12890,42 @@ msgstr "Przypnij: %(deal)s"
 
 msgid "web.admin.deals.home.none"
 msgstr "Brak gorących ofert, więc ekran główny gry ich nie pokazuje."
+
+msgid "web.admin.deals.log"
+msgstr "Dziennik rotacji · najnowsze na górze"
+
+msgid "web.admin.deals.log.kept"
+msgstr "Przechowywany 90 dni"
+
+msgid "web.admin.deals.log.column.when"
+msgstr "Kiedy · UTC"
+
+msgid "web.admin.deals.log.column.section"
+msgstr "Sekcja"
+
+msgid "web.admin.deals.log.column.result"
+msgstr "Wynik"
+
+msgid "web.admin.deals.log.column.came"
+msgstr "Weszło"
+
+msgid "web.admin.deals.log.column.left"
+msgstr "Zeszło"
+
+msgid "web.admin.deals.log.result.done"
+msgstr "Wykonano"
+
+msgid "web.admin.deals.log.result.stopped"
+msgstr "Brakuje ofert"
+
+msgid "web.admin.deals.log.deal"
+msgstr "%(name)s (%(faction)s)"
+
+msgid "web.admin.deals.log.none"
+msgstr "Żaden krok z ostatnich 90 dni nie wprowadził ofert."
+
+msgid "web.admin.deals.log.note"
+msgstr "Kroki rotacji nie są działaniami administracji, więc nie trafiają do dziennika zmian. Dziennik czyta oferty utworzone przez rotację: krok bez ofert nie ma wiersza, a „Brakuje ofert” porównuje z obecnym rozmiarem sekcji."
 
 msgid "web.admin.deals.home.big"
 msgstr "Duży obraz"

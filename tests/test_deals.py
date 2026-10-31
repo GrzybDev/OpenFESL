@@ -138,7 +138,7 @@ class Rotation:
         self.products = SqlProductStore(sessions)
         self.now = SUNDAY
         self.deals = self.server()
-        self.steps = DealSteps(self.deals, lambda: self.now)
+        self.steps = DealSteps(self.deals, SqlDealStore(sessions), lambda: self.now)
 
     def server(self) -> HotDeals:
         """Return the hot deals as a server keeps them, which has made nothing yet."""
@@ -199,6 +199,33 @@ async def test_the_preview_of_each_sections_next_step_shows_what_the_step_brings
         "new": {"national": 0},
         "popular": {},
     }
+
+
+async def test_the_log_shows_each_step_with_what_came_in_and_left_and_short_factions(
+    rotation: Rotation,
+) -> None:
+    sunday = await rotation.listed()
+    rotation.now = MONDAY
+    monday = await rotation.listed()
+    steps = await rotation.steps.log(rotation.game)
+
+    def names(listed: list[Line], section: str) -> list[str]:
+        return [name for found, name, _, _ in listed if found == section]
+
+    # Newest first, Monday's sections in their order, each with what Sunday's ended.
+    assert [(step.section, step.at) for step in steps][:3] == [
+        ("daily", MONDAY),
+        ("new", MONDAY),
+        ("popular", MONDAY),
+    ]
+    daily, new, popular = steps[:3]
+    assert [deal.name for deal in new.came] == names(monday, "new")
+    assert [deal.name for deal in new.left] == names(sunday, "new")
+    assert [deal.name for deal in popular.left] == [BOOST_PAIR]
+    assert len(daily.came) == len(daily.left) == 2
+    assert all(len(deal.items) == 3 for deal in daily.came + daily.left)
+    # The invented sets are all Royal, so each step of new sets falls short of National ones.
+    assert (daily.short, new.short, popular.short) == ({}, {"national": 0}, {})
 
 
 async def test_the_pool_brings_a_pinned_set_at_every_step_and_never_an_excluded_one(
