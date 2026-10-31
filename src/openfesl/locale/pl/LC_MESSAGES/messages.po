@@ -4339,6 +4339,9 @@ msgstr "Kody gry %(game)s: prezenty dla bohaterów i kont"
 msgid "web.admin.keys.subtitle.code"
 msgstr "Kod gry %(game)s"
 
+msgid "web.admin.keys.subtitle.batch"
+msgstr "Seria kodów gry %(game)s"
+
 msgid "web.admin.keys.subtitle.new"
 msgstr "Nowy kod gry %(game)s"
 
@@ -4368,6 +4371,9 @@ msgstr "Stan"
 
 msgid "web.admin.keys.col.open"
 msgstr "Otwórz"
+
+msgid "web.admin.keys.batch_row"
+msgstr "Seria · kodów: %(count)s"
 
 msgid "web.admin.keys.uses.of"
 msgstr "%(used)s z %(most)s"
@@ -4423,6 +4429,9 @@ msgstr "Każde konto raz · wykorzystano %(used)s z %(most)s"
 msgid "web.admin.keys.fact.used.any"
 msgstr "Każde konto raz · dotąd %(used)s, bez limitu"
 
+msgid "web.admin.keys.fact.used.batch"
+msgstr "Jedno konto na kod · wykorzystano %(used)s z %(most)s"
+
 msgid "web.admin.keys.labels"
 msgstr "Etykiety"
 
@@ -4462,11 +4471,38 @@ msgstr "Zmień zawartość, limit, koniec i etykiety"
 msgid "web.admin.keys.edit.rule"
 msgstr "Zmiany dotyczą kolejnych realizacji; przyznane prezenty zostają. Wyłączony kod odpowiada tak jak nieznany."
 
+msgid "web.admin.keys.batch_codes"
+msgstr "Kody"
+
+msgid "web.admin.keys.batch.text"
+msgstr "Każdy kod z serii działa raz, dla jednego konta. Seria pozostaje na liście, a pobrany plik zawiera wszystkie jej kody, po jednym w wierszu."
+
+msgid "web.admin.keys.batch.more"
+msgstr "… i jeszcze %(count)s"
+
+msgid "web.admin.keys.download"
+msgstr "Pobierz kody"
+
 msgid "web.admin.keys.new"
 msgstr "Nowy kod"
 
 msgid "web.admin.keys.edit_title"
 msgstr "Zmiana kodu"
+
+msgid "web.admin.keys.kind"
+msgstr "Rodzaj"
+
+msgid "web.admin.keys.kind.single"
+msgstr "Pojedynczy kod"
+
+msgid "web.admin.keys.kind.single.text"
+msgstr "Jeden kod dla wielu kont, każde raz"
+
+msgid "web.admin.keys.kind.batch"
+msgstr "Seria"
+
+msgid "web.admin.keys.kind.batch.text"
+msgstr "Wiele kodów osobistych, każdy dla jednego konta"
 
 msgid "web.admin.keys.code_generated"
 msgstr "Kod · wygenerowany"
@@ -4476,6 +4512,12 @@ msgstr "Wygeneruj ponownie"
 
 msgid "web.admin.keys.format"
 msgstr "Cztery grupy po cztery znaki z 1-9 i A-Z bez I oraz O. Kody są losowane, a nie wpisywane ręcznie, więc żadne słowo ani wzór ich nie zdradza."
+
+msgid "web.admin.keys.batch_count"
+msgstr "Liczba kodów"
+
+msgid "web.admin.keys.batch_count.text"
+msgstr "Od 1 do 1000 kodów osobistych, każdy do jednorazowego użycia przez jedno konto."
 
 msgid "web.admin.keys.contents"
 msgstr "Zawartość"
@@ -4555,6 +4597,9 @@ msgstr "Limit"
 msgid "web.admin.keys.accounts.max"
 msgstr "Najwyżej kont"
 
+msgid "web.admin.keys.accounts.batch"
+msgstr "Każdy kod z serii działa dla jednego konta."
+
 msgid "web.admin.keys.ends"
 msgstr "Koniec · UTC · opcjonalnie"
 
@@ -4585,6 +4630,18 @@ msgstr "Zapisz zmiany"
 msgid "web.admin.keys.create.single"
 msgstr "Utwórz kod"
 
+msgid "web.admin.keys.create.batch.one"
+msgstr "Utwórz %(count)s kod"
+
+msgid "web.admin.keys.create.batch.few"
+msgstr "Utwórz %(count)s kody"
+
+msgid "web.admin.keys.create.batch.many"
+msgstr "Utwórz %(count)s kodów"
+
+msgid "web.admin.keys.create.batch.other"
+msgstr "Utwórz %(count)s kodu"
+
 msgid "web.admin.keys.gift.keys.one"
 msgstr "%(count)s klucz do skrzyni"
 
@@ -4602,6 +4659,18 @@ msgstr "%(whom)s, %(until)s. Daje: %(gift)s."
 
 msgid "web.admin.keys.summary.nothing"
 msgstr "%(whom)s, %(until)s. Na razie nic nie daje."
+
+msgid "web.admin.keys.summary.batch.one"
+msgstr "%(count)s kod dla jednego konta, jeden raz"
+
+msgid "web.admin.keys.summary.batch.few"
+msgstr "%(count)s kody, każdy dla jednego konta, jeden raz"
+
+msgid "web.admin.keys.summary.batch.many"
+msgstr "%(count)s kodów, każdy dla jednego konta, jeden raz"
+
+msgid "web.admin.keys.summary.batch.other"
+msgstr "%(count)s kodu, każdy dla jednego konta, jeden raz"
 
 msgid "web.admin.keys.summary.most.one"
 msgstr "Każde konto raz, najwyżej %(count)s konto"
@@ -4644,6 +4713,9 @@ msgstr "%(a)s jest dla: %(fa)s, a %(b)s dla: %(fb)s; żaden bohater nie dostałb
 
 msgid "web.admin.keys.refused.empty"
 msgstr "Kod musi zawierać co najmniej jeden przedmiot, Funds lub klucze."
+
+msgid "web.admin.keys.refused.count"
+msgstr "Seria zawiera od 1 do %(most)s kodów."
 
 msgid "web.admin.keys.refused.when"
 msgstr "Koniec wymaga dnia, a jeśli nie o północy, także godziny, np. 08:00."
@@ -4893,6 +4965,9 @@ msgstr "Zapisano %(code)s."
 
 msgid "web.admin.toast.code.made"
 msgstr "Utworzono kod %(code)s."
+
+msgid "web.admin.toast.code.batch"
+msgstr "Utworzono kody: %(count)s."
 
 msgid "web.admin.toast.code.saved"
 msgstr "Zapisano zmiany kodu %(code)s; dotyczą kolejnych realizacji."
@@ -5381,6 +5456,9 @@ msgstr "Zmieniono limity klucza"
 
 msgid "web.admin.audit.action.key_add.code"
 msgstr "Utworzenie kodu"
+
+msgid "web.admin.audit.action.key_batch"
+msgstr "Utworzenie serii kodów"
 
 msgid "web.admin.audit.action.key_changed"
 msgstr "Zmiana kodu"

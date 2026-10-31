@@ -90,9 +90,12 @@ class AdminAction(StrEnum):
     """Added the product key named as the target; the details say whether it is a starting key
     of the game data, and for a code that gives a gift hold its game, gift, label, most
     accounts, end and the note."""
+    KEY_BATCH = "key_batch"
+    """Made a batch of personal codes that give a gift, the first of them named as the target;
+    the details hold the game, how many, the gift, the label, the end and the note."""
     KEY_CHANGED = "key_changed"
-    """Changed what the code named as the target gives; the details hold the game, what
-    changed before and after, and the note."""
+    """Changed what the code named as the target gives, or a batch's codes, the first of them
+    named; the details hold the game, what changed before and after, and the note."""
     KEY_STATE = "key_state"
     """Enabled or disabled the product key named as the target; the details say which, and for
     a code that gives a gift hold the game and the note."""

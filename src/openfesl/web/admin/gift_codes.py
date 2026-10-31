@@ -1,20 +1,29 @@
+import re
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from typing import Any
 from urllib.parse import quote
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse, Response
 from starlette.datastructures import ImmutableMultiDict
 from starlette.exceptions import HTTPException
 
 from openfesl.core.admins import Admin, Role
 from openfesl.core.catalogues import Catalogue, Catalogues
 from openfesl.core.games import Game, Games
-from openfesl.core.gift_codes import CodeChange, CodeState, CodeTerms, GiftCode, GiftCodeStore
+from openfesl.core.gift_codes import (
+    MOST_BATCH,
+    CodeChange,
+    CodeState,
+    CodeTerms,
+    GiftCode,
+    GiftCodeStore,
+)
 from openfesl.core.texts import localize
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.code_editor import CodeEditor, drafted, editor_of, written
+from openfesl.web.pages import whole_number
 from openfesl.web.sessions import check_form, toast
 from openfesl.web.store_texts import StoreTexts
 
@@ -28,14 +37,16 @@ TABS = {
 }
 # The buttons that answer the editor's form without saving it.
 ANSWERS = ("find", "add", "drop", "again")
+# How many of a batch's codes its page shows; the download holds them all.
+SHOWN = 5
 
 
 @dataclass(frozen=True, slots=True)
 class CodeRow:
-    """A code as the panel shows it.
+    """A code or batch as the panel shows it.
 
     Attributes:
-        entry: The code.
+        entry: The code or batch.
         contents: What it gives, in words.
         state: Whether it gives its gift now.
     """
@@ -65,7 +76,7 @@ class GiftCodeViews:
         self._catalogues = catalogues
 
     async def list_page(self, request: Request, admin: Admin, game: Game, tab: str) -> Response:
-        """Return the page of a game's codes in a tab.
+        """Return the page of a game's codes in a tab, a batch as one row.
 
         Args:
             request: The page's request.
@@ -88,7 +99,7 @@ class GiftCodeViews:
         )
 
     async def rows(self, game: Game, language: str) -> list[CodeRow]:
-        """Return a game's codes, the newest first.
+        """Return a game's codes, a batch as one, the newest first.
 
         Args:
             game: The game, which has codes.
@@ -102,7 +113,7 @@ class GiftCodeViews:
         ]
 
     async def found(self, code: str) -> tuple[Game, GiftCode]:
-        """Return a code with its game.
+        """Return a code or the batch it belongs to, with its game.
 
         Args:
             code: The code, in any case.
@@ -140,11 +151,11 @@ class GiftCodeViews:
     ) -> CodeEditor:
         """Return a code's editor, with its fields as written where a form sent them.
 
-        A new code is drawn at first and again when the form asks for another.
+        A new single code is drawn at first and again when the form asks for another.
 
         Args:
             game: The game, which has codes.
-            entry: The code being changed; none for a new one.
+            entry: The code or batch being changed; none for a new one.
             language: The page's language.
             fields: The form's fields; none for the code as it is saved, or a new one.
             saving: Whether the form is saved, which checks every field.
@@ -177,7 +188,7 @@ def code_url(request: Request, code: str) -> str:
 
     Args:
         request: The request.
-        code: The code.
+        code: The code, or a batch's first code.
     """
     return localize(f"{CODES}/{quote(code)}", request.state.language)
 
@@ -185,8 +196,8 @@ def code_url(request: Request, code: str) -> str:
 def gift_code_routes(views: GiftCodeViews) -> APIRouter:
     """Return the pages that make, show, change, enable and disable the codes that give gifts.
 
-    Every role reads the codes in full; making and changing them needs the admin role and a
-    note, which the audit log keeps. The item search, adding and dropping
+    Every role reads the codes in full and downloads a batch's; making and changing them needs
+    the admin role and a note, which the audit log keeps. The item search, adding and dropping
     items and drawing another code answer the editor's form without saving it.
 
     Args:
@@ -228,18 +239,25 @@ def gift_code_routes(views: GiftCodeViews) -> APIRouter:
         terms = found.terms
         if terms is None:
             return await editor_page(request, admin, game, None, 400)
-        code = found.draft.code
-        if not await views.store.make(game.id, code, terms, CodeChange(admin, found.draft.note)):
+        assert game.codes is not None
+        count = whole_number(found.draft.count, MOST_BATCH) if found.batch else 1
+        assert count is not None
+        codes = [game.codes.generate() for _ in range(count)] if found.batch else [found.draft.code]
+        if not await views.store.make(game.id, codes, terms, CodeChange(admin, found.draft.note)):
             toast(request, "web.admin.toast.code.taken", error=True)
             return await editor_page(request, admin, game, None)
-        toast(request, "web.admin.toast.code.made", code=code)
-        return RedirectResponse(code_url(request, code), 303)
+        if found.batch:
+            toast(request, "web.admin.toast.code.batch", count=str(count))
+        else:
+            toast(request, "web.admin.toast.code.made", code=codes[0])
+        return RedirectResponse(code_url(request, codes[0]), 303)
 
     @router.get(CODES + "/{code}", response_class=HTMLResponse)
     async def code_page(request: Request, code: str) -> HTMLResponse:
         admin = sessions.admin(request)
         game, entry = await views.found(code)
         texts, catalogue = await views.words(game, request.state.language)
+        codes = await views.store.batch_codes(entry.id) if entry.batch else []
         return await sessions.render(
             request,
             "admin.GiftCode",
@@ -249,7 +267,22 @@ def gift_code_routes(views: GiftCodeViews) -> APIRouter:
             state=entry.state(datetime.now(UTC)),
             contents=texts.gift_words(catalogue, entry.gift),
             made=await views.store.made(entry.code),
+            codes=codes[:SHOWN],
+            more=max(len(codes) - SHOWN, 0),
             manages=admin.role is Role.ADMIN,
+        )
+
+    @router.get(CODES + "/{code}/codes.txt")
+    async def download(request: Request, code: str) -> Response:
+        sessions.admin(request)
+        _, entry = await views.found(code)
+        if not entry.batch:
+            raise HTTPException(404)
+        codes = await views.store.batch_codes(entry.id)
+        name = re.sub(r"[^a-z0-9]+", "-", entry.label("en").lower()).strip("-") or "codes"
+        return PlainTextResponse(
+            "".join(f"{found}\n" for found in codes),
+            headers={"Content-Disposition": f'attachment; filename="{name}.txt"'},
         )
 
     @router.get(CODES + "/{code}/edit", response_class=HTMLResponse)
@@ -316,13 +349,13 @@ def changes(entry: GiftCode, terms: CodeTerms) -> dict[str, list[Any]]:
     """Return what an edit changes of a code, each as its value before and after.
 
     Args:
-        entry: The code as it is.
+        entry: The code or batch as it is.
         terms: What it gives and on what terms after the edit.
     """
     expires = [entry.expires, terms.expires]
-    found: dict[str, list[Any]] = {
+    found = {
         "gift": [entry.gift.written, terms.gift.written],
-        "max_uses": [entry.max_uses, terms.max_uses],
+        "max_uses": [entry.max_uses, terms.max_uses] if not entry.batch else [None, None],
         "expires": [moment.isoformat() if moment else None for moment in expires],
         "labels": [dict(entry.labels), dict(terms.labels)],
     }

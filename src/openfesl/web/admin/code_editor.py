@@ -8,14 +8,14 @@ from starlette.datastructures import ImmutableMultiDict
 from starlette.exceptions import HTTPException
 
 from openfesl.core.catalogues import Catalogue, Item
-from openfesl.core.gift_codes import CodeTerms, GiftCode
+from openfesl.core.gift_codes import MOST_BATCH, CodeTerms, GiftCode
 from openfesl.core.inventory import Ownership
 from openfesl.core.reward_rules import Gift
 from openfesl.core.store_items import requirement
 from openfesl.core.texts import BASE_LANGUAGE, languages
 from openfesl.core.wallets import MOST_BALANCE
 from openfesl.web.admin.reward_contents import written_amount, written_ownership
-from openfesl.web.pages import listed
+from openfesl.web.pages import listed, whole_number
 from openfesl.web.store_texts import StoreTexts
 
 # The longest rental in days and the longest label.
@@ -32,7 +32,9 @@ class CodeDraft:
     """A code's editor as written.
 
     Attributes:
-        code: The code drawn for a new code.
+        kind: single for one code that many accounts redeem, batch for personal codes.
+        code: The code drawn for a new single code.
+        count: How many codes a batch makes, as written.
         items: The items it gives, each written such as 1127 7d.
         query: What the item search looks for.
         pick: The number of the item the search chose.
@@ -49,7 +51,9 @@ class CodeDraft:
         note: Why it is made or changed, for the audit log.
     """
 
+    kind: str
     code: str
+    count: str
     items: tuple[str, ...]
     query: str
     pick: str
@@ -107,7 +111,8 @@ class CodeEditor:
     """A code's editor: its fields as written and what they come to.
 
     Attributes:
-        entry: The code being changed; none for a new one.
+        entry: The code or batch being changed; none for a new one.
+        batch: Whether it is a batch of personal codes.
         draft: The fields as written.
         lines: The items it gives.
         candidates: The items the search found, each with its name and the heroes it is for.
@@ -126,6 +131,7 @@ class CodeEditor:
     """
 
     entry: GiftCode | None
+    batch: bool
     draft: CodeDraft
     lines: list[ContentLine]
     candidates: list[tuple[Item, str, str]]
@@ -143,17 +149,21 @@ class CodeEditor:
 
 
 def drafted(entry: GiftCode | None, code: str) -> CodeDraft:
-    """Return a code's editor fields as it is saved, or those of a new code.
+    """Return a code's editor fields as it is saved, or those of a new single code.
 
     Args:
-        entry: The code; none for a new one.
-        code: The code drawn for a new code.
+        entry: The code or batch; none for a new one.
+        code: The code drawn for a new single code.
     """
     if entry is None:
-        return CodeDraft(code, (), "", "", "", DAYS, USES, "0", "0", "any", "", "", "", {}, "")
+        return CodeDraft(
+            "single", code, "100", (), "", "", "", DAYS, USES, "0", "0", "any", "", "", "", {}, ""
+        )
     ends = entry.expires
     return CodeDraft(
+        "batch" if entry.batch else "single",
         entry.code,
+        str(entry.count),
         tuple(f"{item_id} {ownership.written}" for item_id, ownership in entry.gift.items),
         "",
         "",
@@ -162,7 +172,7 @@ def drafted(entry: GiftCode | None, code: str) -> CodeDraft:
         USES,
         str(entry.gift.funds),
         str(entry.gift.keys),
-        "limit" if entry.max_uses is not None else "any",
+        "limit" if entry.max_uses is not None and not entry.batch else "any",
         str(entry.max_uses or ""),
         f"{ends:%Y-%m-%d}" if ends else "",
         f"{ends:%H:%M}" if ends else "",
@@ -186,7 +196,9 @@ def written(fields: ImmutableMultiDict[str, Any]) -> CodeDraft:
     if dropped.isascii() and dropped.isdecimal() and int(dropped) < len(items):
         del items[int(dropped)]
     return CodeDraft(
+        field("kind") or "single",
         field("code"),
+        field("count"),
         tuple(items),
         field("q"),
         field("pick"),
@@ -219,7 +231,7 @@ def editor_of(
     Args:
         texts: Writes the page's language for the code's game.
         catalogue: The game's imported catalogue in the page's language.
-        entry: The code being changed; none for a new one.
+        entry: The code or batch being changed; none for a new one.
         draft: The fields as written.
         adding: Whether the add button sent the form, which adds the chosen item.
         saving: Whether the form is saved, which checks every field.
@@ -227,8 +239,9 @@ def editor_of(
     Raises:
         HTTPException: 400 for fields that no form of the editor sends.
     """
-    if draft.limit not in ("any", "limit"):
+    if draft.kind not in ("single", "batch") or draft.limit not in ("any", "limit"):
         raise HTTPException(400)
+    batch = entry.batch if entry else draft.kind == "batch"
     refused: dict[str, str] = {}
     lines = _lines(texts, catalogue, draft.items)
     picked = _item(catalogue, draft.pick)
@@ -254,9 +267,13 @@ def editor_of(
     ends = _ends(draft)
     terms = None
     if saving:
-        _check(texts, draft, gift, ends, refused)
+        _check(texts, entry is None, batch, draft, gift, ends, refused)
         if not refused:
-            most = int(draft.most) if draft.limit == "limit" else None
+            most = (
+                whole_number(draft.most, MOST_BALANCE)
+                if draft.limit == "limit" and not batch
+                else None
+            )
             labels = {code: label for code, label in draft.labels.items() if label}
             terms = CodeTerms(gift, labels, most, ends if isinstance(ends, datetime) else None)
     locale = Locale.parse(texts.language, sep="-")
@@ -266,6 +283,7 @@ def editor_of(
     found = catalogue.search(draft.query, lambda item: item.kind not in granted)
     return CodeEditor(
         entry,
+        batch,
         draft,
         lines,
         [(item, name, _whom(texts, item)) for item, name in found],
@@ -274,7 +292,7 @@ def editor_of(
         fit,
         tiles,
         add,
-        _summary(texts, catalogue, draft, gift, ends),
+        _summary(texts, catalogue, entry, batch, draft, gift, ends),
         refused,
         terms,
         [(code, str(locale.languages.get(code, code))) for code in languages()],
@@ -425,13 +443,18 @@ def _ends(draft: CodeDraft) -> datetime | bool | None:
 def _summary(
     texts: StoreTexts,
     catalogue: Catalogue,
+    entry: GiftCode | None,
+    batch: bool,
     draft: CodeDraft,
     gift: Gift,
     ends: datetime | bool | None,
 ) -> str:
     # What the code gives and on what terms, in a sentence.
-    if draft.limit == "limit" and draft.most.isdecimal() and int(draft.most):
-        whom = texts.count("web.admin.keys.summary.most", int(draft.most))
+    if batch:
+        count = entry.count if entry else whole_number(draft.count, MOST_BATCH) or 0
+        whom = texts.count("web.admin.keys.summary.batch", count)
+    elif draft.limit == "limit" and (most := whole_number(draft.most, MOST_BALANCE)):
+        whom = texts.count("web.admin.keys.summary.most", most)
     else:
         whom = texts.text("web.admin.keys.summary.any")
     until = (
@@ -449,6 +472,8 @@ def _summary(
 
 def _check(
     texts: StoreTexts,
+    new: bool,
+    batch: bool,
     draft: CodeDraft,
     gift: Gift,
     ends: datetime | bool | None,
@@ -457,10 +482,11 @@ def _check(
     # The refusals of a code as it is saved, beside the fields they concern.
     if not (gift.items or gift.funds or gift.keys) and "amounts" not in refused:
         refused["items"] = texts.text("web.admin.keys.refused.empty")
-    if draft.limit == "limit":
-        most = draft.most
-        if not (most.isascii() and most.isdecimal() and 0 < int(most) <= MOST_BALANCE):
-            refused["most"] = texts.text("web.admin.key.limits.wrong")
+    if new and batch and whole_number(draft.count, MOST_BATCH) is None:
+        most = texts.amount(MOST_BATCH)
+        refused["count"] = texts.text("web.admin.keys.refused.count", most=most)
+    elif draft.limit == "limit" and not batch and whole_number(draft.most, MOST_BALANCE) is None:
+        refused["most"] = texts.text("web.admin.key.limits.wrong")
     if ends is False:
         refused["ends"] = texts.text("web.admin.keys.refused.when")
     elif isinstance(ends, datetime) and ends <= datetime.now(UTC):

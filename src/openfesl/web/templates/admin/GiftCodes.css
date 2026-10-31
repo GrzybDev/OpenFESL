@@ -1,6 +1,6 @@
-/* The codes that give gifts on a game's site: their list, a code's page and the editor, whose
-   number of accounts and way of giving an item show only the fields they need, also without
-   scripts. Where the list does not fit, each code is a block of its own. */
+/* The codes that give gifts on a game's site: their list, a code's or batch's page and the editor,
+   whose kind, number of accounts and way of giving an item show only the fields they need, also
+   without scripts. Where the list does not fit, each code is a block of its own. */
 @layer pages {
   .code-tabs {
     margin-bottom: 12px;
@@ -26,7 +26,8 @@
     --cell: var(--row-pale);
   }
 
-  .code-text {
+  .code-text,
+  .code-batch {
     font-family: var(--font-mono);
     font-size: 14px;
     font-weight: 500;
@@ -72,7 +73,7 @@
     margin-top: 12px;
   }
 
-  /* A code's page: its head with the state and the facts beside the actions. */
+  /* A code's page: its head with the state, the facts beside the actions, and a batch's codes. */
   .code-head {
     justify-content: space-between;
   }
@@ -156,6 +157,32 @@
     > .form-button {
       min-height: 52px;
     }
+  }
+
+  .code-batch-part {
+    margin-top: 14px;
+
+    > .action {
+      width: fit-content;
+      margin-top: 12px;
+    }
+  }
+
+  .code-list {
+    margin: 2px 0 0;
+    background: var(--row-light);
+    padding: 10px 14px 10px 40px;
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .code-list-more {
+    margin-left: -26px;
+    list-style: none;
+    font-family: var(--font-sans);
+    font-weight: 600;
   }
 
   /* The editor: the drawn code beside Generate again, the item search's choices, the ways of
@@ -249,6 +276,8 @@
     gap: 8px;
   }
 
+  .code-form:has([name="kind"][value="batch"]:checked) :is(.code-single, .code-limits, .code-most),
+  .code-form:has([name="kind"][value="single"]:checked) :is(.code-count, .code-batch-note),
   .code-form:has([name="limit"][value="any"]:checked) .code-most,
   .code-form:not(:has([name="own"][value="days"]:checked)) .code-days,
   .code-form:not(:has([name="own"][value="uses"]:checked)) .code-uses {

@@ -23,7 +23,7 @@ async def code_entry(
 
     Args:
         action: What the admin did.
-        target: The code.
+        target: The code, or a batch's first code.
         details: What the action records.
         games: The games, whose codes they are.
         catalogues: The games' imported catalogues, which name the items.
@@ -74,6 +74,10 @@ async def code_entry(
             if values
         ]
         return action.value, target, href, " · ".join(said)
+    if action is AdminAction.KEY_BATCH:
+        count = texts.count("web.admin.keys.summary.batch", details["count"])
+        said = [count, gift(details["gift"]), until(details["expires"])]
+        return action.value, details["label"], href, " · ".join(said)
     said = [
         details["label"],
         gift(details["gift"]),

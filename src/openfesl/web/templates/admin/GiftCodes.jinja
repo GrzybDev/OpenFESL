@@ -1,13 +1,14 @@
 {#def of, games: list, tab: str, rows: list, counts, manages: bool #}
 {# The codes that a game's site redeems for gifts: the game tiles, the tabs of the codes'
-   states and a row per code with its label, what it gives, its uses, its end and its
+   states and a row per code or batch with its label, what it gives, its uses, its end and its
    state, each opening its page. Making and changing codes needs the admin role. #}
 {% set game = of %}
 {% set title = _("web.admin.keys") %}
 {% set list = url("/admin/keys") ~ "?game=" ~ game.id %}
 {% set glyphs = {"enabled": "tick", "used_up": "full", "expired": "clock", "disabled": "x"} %}
 {% macro uses(entry) %}
-  {%- if entry.max_uses is none %}{{ number(entry.uses) }}{% else %}{{ _("web.admin.keys.uses.of", used=number(entry.uses), most=number(entry.max_uses)) }}{% endif -%}
+  {%- set most = entry.count if entry.batch else entry.max_uses -%}
+  {%- if most is none %}{{ number(entry.uses) }}{% else %}{{ _("web.admin.keys.uses.of", used=number(entry.uses), most=number(most)) }}{% endif -%}
 {% endmacro %}
 {% macro ends(entry, state) %}
   {%- set end = _("web.store.utc", time=moment(entry.expires)) if entry.expires else "" -%}
@@ -47,7 +48,11 @@
                 {% set entry = row.entry %}
                 <div role="row" class="codes-columns codes-row codes-{{ row.state }}">
                   <div role="cell" class="admin-cell cell-stack">
-                    <code class="code-text">{{ entry.code }}</code>
+                    {% if entry.batch %}
+                      <span class="code-batch">{{ _("web.admin.keys.batch_row", count=number(entry.count)) }}</span>
+                    {% else %}
+                      <code class="code-text">{{ entry.code }}</code>
+                    {% endif %}
                     <span class="admin-hero-strong">{{ entry.label(language) }}</span>
                   </div>
                   <div role="cell" class="admin-cell cell-stack code-contents">

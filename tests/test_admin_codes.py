@@ -40,6 +40,7 @@ async def test_admins_make_change_and_switch_codes_that_moderators_read_in_full(
         form = {
             "csrf": token,
             "game": "bfheroes",
+            "kind": "single",
             "code": code,
             "funds": "500",
             "keys": "2",
@@ -72,6 +73,20 @@ async def test_admins_make_change_and_switch_codes_that_moderators_read_in_full(
                 await client.get(f"{base}{KEYS}", params={"game": "bfheroes", "state": "disabled"})
             ).content
         )
+
+        batch = {
+            "csrf": token,
+            "game": "bfheroes",
+            "kind": "batch",
+            "count": "3",
+            "keys": "3",
+            "label-en": "Invented newsletter keys",
+            "note": "Invented newsletter",
+        }
+        counted = await client.post(f"{base}{NEW}", data=batch | {"count": "1001"})
+        batch_page = (await client.post(f"{base}{NEW}", data=batch)).headers["location"]
+        batch_shown = visible((await client.get(base + batch_page)).content)
+        download = await client.get(f"{base}{batch_page}/codes.txt")
         audit = visible((await client.get(f"{base}/admin/audit")).content)
         tags = visible((await client.get(f"{base}{KEYS}", params={"game": "bfbc2"})).content)
 
@@ -94,7 +109,13 @@ async def test_admins_make_change_and_switch_codes_that_moderators_read_in_full(
     assert "Changes to" in changed and "0 so far, no limit" in changed and "No end" in changed
     assert unnoted.status_code == 400 and "Disable this code?" in unnoted.text
     assert code in disabled and "Disabled 1" in disabled
-    assert "Code made" in audit and "Code changed" in audit
+    assert counted.status_code == 400 and "A batch makes 1 to 1,000 codes." in counted.text
+    assert "3 codes made." in batch_shown and "Batch · 3 codes" in batch_shown
+    assert "One account per code · 0 of 3 used" in batch_shown
+    codes = download.text.splitlines()
+    assert len(set(codes)) == 3 and all(FORMAT.fullmatch(found) for found in codes)
+    assert 'filename="invented-newsletter-keys.txt"' in download.headers["content-disposition"]
+    assert "Code made" in audit and "Batch made" in audit and "Code changed" in audit
     assert "Accounts: At most 300 accounts → Any number of accounts" in audit
     assert "Code disabled" in audit and "Test finished" in audit
     # The codes are the site's alone: Bad Company 2's keys leave them out, and the game's own
@@ -102,18 +123,20 @@ async def test_admins_make_change_and_switch_codes_that_moderators_read_in_full(
     assert code not in tags and "ACTIVATE-VETERAN" in tags
     async with game(server_url) as ann:
         await log_in_player(ann, FESL, "ann@example.test")
-        redeem = [("TXN", "NuEntitleUser"), ("key", code)]
+        redeem = [("TXN", "NuEntitleUser"), ("key", codes[0])]
         assert (await ann.request(FESL, "acct", redeem))["errorCode"] == "181"
 
     admin_provider.user = WARDEN
     async with httpx2.AsyncClient() as client:
         read = await sign_in(client, base, next=f"{KEYS}?game=bfheroes")
         seen = visible((await client.get(base + page)).content)
+        moderator_download = await client.get(f"{base}{batch_page}/codes.txt")
         new = await client.get(f"{base}{NEW}", params={"game": "bfheroes"})
         switch = await client.post(state, data={"csrf": form_token(read.text), "note": "No"})
 
     assert code in visible(read.content) and "New code" not in visible(read.content)
     assert "Codes are made and changed with the admin role." in seen and code in seen
+    assert moderator_download.text.splitlines() == codes
     assert new.status_code == 403 and switch.status_code == 403
 
 
@@ -128,7 +151,7 @@ async def test_a_codes_items_come_from_the_catalogue_and_one_hero_takes_them_all
     admin_provider.user = KEEPER
     async with httpx2.AsyncClient() as client:
         token = form_token((await sign_in(client, base, next=f"{NEW}?game=bfheroes")).text)
-        fields = {"csrf": token, "game": "bfheroes", "funds": "0", "keys": "0"}
+        fields = {"csrf": token, "game": "bfheroes", "kind": "single", "funds": "0", "keys": "0"}
         found = await client.post(f"{base}{NEW}", data=fields | {"q": "mask", "find": "1"})
         mask = {"q": "mask", "pick": "1081", "own": "days", "days": "7", "add": "1"}
         added = await client.post(f"{base}{NEW}", data=fields | mask)

@@ -1,9 +1,10 @@
 {#def of, found #}
-{# A new code that gives a gift, or a code being changed: the code drawn at random,
-   the items found in the catalogue with which heroes they fit and how each is given, Funds and
-   keys, how many accounts, the end in UTC, the labels players see and the note. Finding,
-   choosing, adding and dropping items and drawing another code answer the form without saving
-   it, as Enter does; a refused field says why beside it. #}
+{# A new code that gives a gift, or a code or batch being changed: one code for many
+   accounts or a batch of personal codes, the code drawn at random, the items found in the
+   catalogue with which heroes they fit and how each is given, Funds and keys, how many accounts,
+   the end in UTC, the labels players see and the note. Finding, choosing, adding and dropping
+   items and drawing another code answer the form without saving it, as Enter does; a refused
+   field says why beside it. #}
 {% set game = of %}
 {% set draft = found.draft %}
 {% set refused = found.refused %}
@@ -36,11 +37,21 @@
         <input type="hidden" name="game" value="{{ game.id }}">
         <h2 class="bar bar-wrap code-form-head">
           <span class="code-head-name"><GameChip :of="game" />{{ title }}
-            {%- if entry %}<code class="code-head-code">{{ entry.code }}</code>{% endif -%}
+            {%- if entry %}<code class="code-head-code">{{ _("web.admin.keys.batch_row", count=number(entry.count)) if entry.batch else entry.code }}</code>{% endif -%}
           </span>
         </h2>
         {% if not entry %}
-          <div>
+          <p id="code-kind" class="bar offer-legend">{{ _("web.admin.keys.kind") }}</p>
+          <div role="radiogroup"
+               aria-labelledby="code-kind"
+               class="choice-tiles offer-tiles code-kinds">
+            {% for kind, glyph in (("single", "ticket"), ("batch", "copy")) %}
+              <ChoiceTile name="kind" :value="kind" :title="_('web.admin.keys.kind.' ~ kind)" :glyph="glyph" :checked="draft.kind == kind">
+              <span class="choice-text">{{ _("web.admin.keys.kind." ~ kind ~ ".text") }}</span>
+              </ChoiceTile>
+            {% endfor %}
+          </div>
+          <div class="code-single">
             <label for="code-code"
                    class="field-label field-label-joined">{{ _("web.admin.keys.code_generated") }}</label>
             <div class="code-generated">
@@ -53,6 +64,23 @@
               <FormButton icon="retry" name="again" value="1" formnovalidate>{{ _("web.admin.keys.generate_again") }}</FormButton>
             </div>
             <p class="field-note">{{ _("web.admin.keys.format") }}</p>
+          </div>
+          <div class="code-count">
+            <label for="code-count" class="field-label field-label-joined">{{ _("web.admin.keys.batch_count") }}</label>
+            <input id="code-count"
+                   name="count"
+                   type="text"
+                   inputmode="numeric"
+                   value="{{ draft.count }}"
+                   maxlength="5"
+                   autocomplete="off"
+                   {{ invalid("count") }}
+                   class="field-input{% if 'count' in refused %} field-invalid{% endif %}">
+            {% if "count" in refused %}
+              {{ refusal("count") }}
+            {% else %}
+              <p class="field-note">{{ _("web.admin.keys.batch_count.text") }}</p>
+            {% endif %}
           </div>
         {% endif %}
         <p class="bar offer-legend">{{ _("web.admin.keys.contents") }}</p>
@@ -196,26 +224,31 @@
       </div>
       <div data-refresh class="list-side admin-side code-side">
         <p class="bar offer-legend">{{ _("web.admin.keys.accounts") }}</p>
-        <fieldset class="choice-tiles offer-tiles code-limits">
-          <legend class="sr-only">{{ _("web.admin.keys.accounts") }}</legend>
-          {% for limit, glyph in (("any", "infinity"), ("limit", "lock")) %}
-            <ChoiceTile name="limit" :value="limit" :title="_('web.admin.keys.accounts.' ~ limit)" :glyph="glyph" :checked="draft.limit == limit">
-            </ChoiceTile>
-          {% endfor %}
-        </fieldset>
-        <div class="code-most">
-          <label for="code-most" class="field-label field-label-joined">{{ _("web.admin.keys.accounts.max") }}</label>
-          <input id="code-most"
-                 name="most"
-                 type="text"
-                 inputmode="numeric"
-                 value="{{ draft.most }}"
-                 maxlength="10"
-                 autocomplete="off"
-                 {{ invalid("most") }}
-                 class="field-input{% if 'most' in refused %} field-invalid{% endif %}">
-          {{ refusal("most") }}
-        </div>
+        {% if not (entry and entry.batch) %}
+          <fieldset class="choice-tiles offer-tiles code-limits">
+            <legend class="sr-only">{{ _("web.admin.keys.accounts") }}</legend>
+            {% for limit, glyph in (("any", "infinity"), ("limit", "lock")) %}
+              <ChoiceTile name="limit" :value="limit" :title="_('web.admin.keys.accounts.' ~ limit)" :glyph="glyph" :checked="draft.limit == limit">
+              </ChoiceTile>
+            {% endfor %}
+          </fieldset>
+          <div class="code-most">
+            <label for="code-most" class="field-label field-label-joined">{{ _("web.admin.keys.accounts.max") }}</label>
+            <input id="code-most"
+                   name="most"
+                   type="text"
+                   inputmode="numeric"
+                   value="{{ draft.most }}"
+                   maxlength="10"
+                   autocomplete="off"
+                   {{ invalid("most") }}
+                   class="field-input{% if 'most' in refused %} field-invalid{% endif %}">
+            {{ refusal("most") }}
+          </div>
+        {% endif %}
+        {% if not entry or entry.batch %}
+          <p class="bar-text body-text code-batch-note">{{ _("web.admin.keys.accounts.batch") }}</p>
+        {% endif %}
         <p class="bar offer-legend">{{ _("web.admin.keys.ends") }}</p>
         <div class="code-ends">
           <label for="code-ends-day" class="sr-only">{{ _("web.admin.keys.ends.day") }}</label>
@@ -269,7 +302,7 @@
             <span data-why>{{ _("web.admin.keys.refused") if refused else "" }}</span>
           </p>
           <div data-live="{{ path }}" class="code-buttons">
-            <ActionButton :label="_('web.admin.keys.save') if entry else _('web.admin.keys.create.single')" :busy="_('web.admin.store.save.busy')" />
+            <ActionButton :label="_('web.admin.keys.save') if entry else (_n('web.admin.keys.create.batch', draft.count|int) if draft.kind == 'batch' else _('web.admin.keys.create.single'))" :busy="_('web.admin.store.save.busy')" />
             <FormButton icon="x" :href="back">{{ _("web.admin.cancel") }}</FormButton>
           </div>
         </div>

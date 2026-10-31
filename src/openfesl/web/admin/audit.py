@@ -51,6 +51,7 @@ GLYPHS = {
     AdminAction.PROVIDER_REVOKE: "x",
     AdminAction.ENTITLEMENT_GRANT: "plus",
     AdminAction.KEY_ADD: "plus",
+    AdminAction.KEY_BATCH: "plus",
     AdminAction.KEY_CHANGED: "edit",
     AdminAction.CATALOGUE_IMPORT: "doc",
     AdminAction.HERO_RENAME: "edit",
@@ -83,6 +84,7 @@ HERO_ACTIONS = (
 # What the admin does to the codes that give gifts on the games' sites.
 CODE_ACTIONS = (
     AdminAction.KEY_ADD,
+    AdminAction.KEY_BATCH,
     AdminAction.KEY_CHANGED,
     AdminAction.KEY_STATE,
 )
@@ -389,7 +391,7 @@ async def _rows(
             kind, shown, href, said = await code_entry(
                 action, target, details, games, catalogues, language
             )
-            code = True
+            code = action is not AdminAction.KEY_BATCH
         elif action in (
             AdminAction.KEY_ADD,
             AdminAction.KEY_STATE,
