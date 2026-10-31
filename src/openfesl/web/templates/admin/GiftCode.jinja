@@ -1,8 +1,9 @@
 {#def of, entry, state, contents: list, made, manages: bool #}
 {# A code that gives a gift on a game's site: its contents, accounts, end, labels and who
-   made it. Moderators read it in full. #}
+   made it, Disable or Enable and Edit for admins. Moderators read it in full. #}
 {% set game = of %}
 {% set title = _("web.admin.keys") %}
+{% set base = url("/admin/keys/codes/" ~ entry.code) %}
 {% set label = entry.label(language) %}
 {% set others = entry.labels.items()|rejectattr(0, "equalto", "en")|map(attribute=1)|list %}
 {% set end = _("web.store.utc", time=moment(entry.expires)) if entry.expires else "" %}
@@ -46,14 +47,18 @@
           </Fact>
         {% endif %}
       </dl>
-      {% if not manages %}
-        <div class="code-actions">
+      <div class="code-actions">
+        {% if manages %}
+          <FormButton :icon="'tick' if not entry.enabled else 'x'" :href="base ~ '/state'" dialog>{{ _("web.admin.keys.enable" if not entry.enabled else "web.admin.keys.disable") }}</FormButton>
+          <FormButton icon="edit" :href="base ~ '/edit'">{{ _("web.admin.keys.edit") }}</FormButton>
+          <p class="bar-text body-text">{{ _("web.admin.keys.edit.rule") }}</p>
+        {% else %}
           <p class="bar-text account-role-note">
             <span aria-hidden="true"
                   class="badge"><Icon name="lock" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.keys.moderator") }}
           </p>
-        </div>
-      {% endif %}
+        {% endif %}
+      </div>
     </div>
   </Panel>
 </AdminPage>

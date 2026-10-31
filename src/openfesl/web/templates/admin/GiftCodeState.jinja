@@ -1,0 +1,25 @@
+{#def of, entry, note: str, error: str #}
+{# Disabling or enabling a code that gives a gift, with a note for the audit log, as a page of its
+   own; where scripts run, its panel opens as a dialog over the code's page. #}
+{% set title = _("web.admin.keys") %}
+{% set base = url("/admin/keys/codes/" ~ entry.code) %}
+{% set turn = "enable" if not entry.enabled else "disable" %}
+<AdminPage :title="title" current="keys">
+  <PageHead labelledby="state-title">
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" id="state-title">{{ _("web.admin.keys.subtitle.code", game=of.name) }}</TitleBlock>
+    </div>
+  </PageHead>
+  <Panel class="enter-panel confirm-frame">
+    <AdminForm :question="_('web.admin.keys.' ~ turn ~ '.question')" :action="base ~ '/state'" :label="_('web.admin.keys.' ~ turn)" :busy="_('web.admin.keys.' ~ turn ~ '.busy')" :back="base" :note="note" :error="error" :glyph="'tick' if turn == 'enable' else 'x'">
+    <input type="hidden"
+           name="enabled"
+           value="{{ '1' if turn == 'enable' else '0' }}">
+    <p class="confirm-account">
+      <span>{{ entry.label(language) }}</span>
+      <span>{{ entry.code }}</span>
+    </p>
+    <p id="confirm-text" class="body-text">{{ _("web.admin.keys." ~ turn ~ ".text") }}</p>
+    </AdminForm>
+  </Panel>
+</AdminPage>

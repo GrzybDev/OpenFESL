@@ -25,7 +25,7 @@
   <Panel class="enter-panel">
     <KeyGames :current="game" :games="games" />
     <nav aria-label="{{ _('web.admin.keys.states') }}" class="tabs code-tabs">
-      {% for name in ["all", "enabled", "expired"] %}
+      {% for name in ["all", "enabled", "disabled", "expired"] %}
         <Tab :href="list ~ ('&state=' ~ name if name != 'all' else '')" :label="_('web.admin.keys.tab.' ~ name)" :count="counts[name]" :current="tab == name" />
       {% endfor %}
     </nav>

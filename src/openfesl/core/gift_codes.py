@@ -1,8 +1,8 @@
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import StrEnum
-from typing import Protocol
+from typing import Any, Protocol
 
 from openfesl.core.admins import Admin
 from openfesl.core.reward_rules import Gift
@@ -86,7 +86,7 @@ class Made:
 
 @dataclass(frozen=True, slots=True)
 class CodeTerms:
-    """What a code gives and on what terms, as the admin makes it.
+    """What a code gives and on what terms, as the admin makes or changes it.
 
     Attributes:
         gift: What it gives.
@@ -103,15 +103,17 @@ class CodeTerms:
 
 @dataclass(frozen=True, slots=True)
 class CodeChange:
-    """Who makes a code and why.
+    """Who changes a code and why, with what the audit log keeps of it.
 
     Attributes:
         admin: The admin.
         note: Why, as they wrote it.
+        details: What changed, as the audit log keeps it besides the note.
     """
 
     admin: Admin
     note: str
+    details: Mapping[str, Any] = field(default_factory=dict)
 
 
 class GiftCodeStore(Protocol):
@@ -149,4 +151,25 @@ class GiftCodeStore(Protocol):
 
         Returns:
             Whether it was made, which it is not when a key has the code already.
+        """
+
+    async def change(self, entry: GiftCode, terms: CodeTerms, change: CodeChange) -> None:
+        """Change what a code gives from now on, and record it.
+
+        Args:
+            entry: The code.
+            terms: What it gives and on what terms from now on.
+            change: Who changes it and why, with what changed.
+        """
+
+    async def switch(self, entry: GiftCode, enabled: bool, change: CodeChange) -> bool:
+        """Enable or disable a code, and record it.
+
+        Args:
+            entry: The code.
+            enabled: Whether it may be redeemed from now on.
+            change: Who switches it and why.
+
+        Returns:
+            Whether it changed, which it does not when it was so already.
         """

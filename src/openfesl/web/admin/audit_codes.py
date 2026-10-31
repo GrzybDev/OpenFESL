@@ -53,6 +53,27 @@ async def code_entry(
             return texts.text("web.admin.audit.limits.any")
         return texts.text("web.admin.audit.limits.most", most=texts.amount(value))
 
+    if action is AdminAction.KEY_STATE:
+        return f"key_state.code.{'enabled' if details['enabled'] else 'disabled'}", target, href, ""
+    if action is AdminAction.KEY_CHANGED:
+        changed = details["changed"]
+        shown = {
+            "gift": [gift(value) for value in changed.get("gift", ())],
+            "max_uses": [most(value) for value in changed.get("max_uses", ())],
+            "expires": [until(value) for value in changed.get("expires", ())],
+            "labels": [value.get("en", "") for value in changed.get("labels", ())],
+        }
+        said = [
+            texts.text(
+                "web.admin.audit.code.changed",
+                what=texts.text(f"web.admin.audit.code.{name}"),
+                before=values[0],
+                after=values[1],
+            )
+            for name, values in shown.items()
+            if values
+        ]
+        return action.value, target, href, " · ".join(said)
     said = [
         details["label"],
         gift(details["gift"]),

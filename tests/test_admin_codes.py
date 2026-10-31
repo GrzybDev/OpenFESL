@@ -28,7 +28,7 @@ def drawn(page: str) -> str:
     return found.group(1)
 
 
-async def test_admins_make_codes_that_moderators_read_in_full(
+async def test_admins_make_change_and_switch_codes_that_moderators_read_in_full(
     admin_provider: IdentityProvider, base: str, server_url: str
 ) -> None:
     admin_provider.user = KEEPER
@@ -59,6 +59,19 @@ async def test_admins_make_codes_that_moderators_read_in_full(
         page = made.headers["location"]
         shown = visible((await client.get(base + page)).content)
         listed = visible((await client.get(f"{base}{KEYS}", params={"game": "bfheroes"})).content)
+
+        # A change applies to later redemptions; disabling asks for a note.
+        edited = form | {"limit": "any", "ends_day": "", "note": "More players than planned"}
+        await client.post(f"{base}{page}/edit", data=edited)
+        changed = visible((await client.get(base + page)).content)
+        state = f"{base}{page}/state"
+        unnoted = await client.post(state, data={"csrf": token, "enabled": "0", "note": ""})
+        await client.post(state, data={"csrf": token, "enabled": "0", "note": "Test finished"})
+        disabled = visible(
+            (
+                await client.get(f"{base}{KEYS}", params={"game": "bfheroes", "state": "disabled"})
+            ).content
+        )
         audit = visible((await client.get(f"{base}/admin/audit")).content)
         tags = visible((await client.get(f"{base}{KEYS}", params={"game": "bfbc2"})).content)
 
@@ -78,7 +91,12 @@ async def test_admins_make_codes_that_moderators_read_in_full(
     assert "by invented-keeper: Gift of an invented announcement" in shown
     contents = "Contents 500 Funds · 2 treasure chest keys for the account"
     assert f"{code} Invented crate {contents} Uses 0 of 300" in listed
-    assert "Code made" in audit and "Gift of an invented announcement" in audit
+    assert "Changes to" in changed and "0 so far, no limit" in changed and "No end" in changed
+    assert unnoted.status_code == 400 and "Disable this code?" in unnoted.text
+    assert code in disabled and "Disabled 1" in disabled
+    assert "Code made" in audit and "Code changed" in audit
+    assert "Accounts: At most 300 accounts → Any number of accounts" in audit
+    assert "Code disabled" in audit and "Test finished" in audit
     # The codes are the site's alone: Bad Company 2's keys leave them out, and the game's own
     # key prompt refuses them as unknown.
     assert code not in tags and "ACTIVATE-VETERAN" in tags
@@ -92,10 +110,11 @@ async def test_admins_make_codes_that_moderators_read_in_full(
         read = await sign_in(client, base, next=f"{KEYS}?game=bfheroes")
         seen = visible((await client.get(base + page)).content)
         new = await client.get(f"{base}{NEW}", params={"game": "bfheroes"})
+        switch = await client.post(state, data={"csrf": form_token(read.text), "note": "No"})
 
     assert code in visible(read.content) and "New code" not in visible(read.content)
-    assert "Codes are made with the admin role." in seen and code in seen
-    assert new.status_code == 403
+    assert "Codes are made and changed with the admin role." in seen and code in seen
+    assert new.status_code == 403 and switch.status_code == 403
 
 
 async def test_a_codes_items_come_from_the_catalogue_and_one_hero_takes_them_all(

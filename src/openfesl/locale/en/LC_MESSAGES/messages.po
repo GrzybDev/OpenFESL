@@ -4156,6 +4156,9 @@ msgstr "Code of %(game)s"
 msgid "web.admin.keys.subtitle.new"
 msgstr "New code for %(game)s"
 
+msgid "web.admin.keys.subtitle.edit"
+msgstr "Changing a code of %(game)s"
+
 msgid "web.admin.keys.tab.expired"
 msgstr "Expired"
 
@@ -4207,6 +4210,9 @@ msgstr "Open %(label)s"
 msgid "web.admin.keys.codes.none.enabled"
 msgstr "No code is enabled now."
 
+msgid "web.admin.keys.codes.none.disabled"
+msgstr "No code is disabled."
+
 msgid "web.admin.keys.codes.none.expired"
 msgstr "No code has expired."
 
@@ -4214,10 +4220,10 @@ msgid "web.admin.keys.empty"
 msgstr "No codes for %(game)s yet. A code gives items, Funds or keys once to each account that enters it."
 
 msgid "web.admin.keys.rule"
-msgstr "Every code works once for an account. A redeemed gift stays given when a code ends. Items go to one hero the account picks; Funds and keys to the account."
+msgstr "Every code works once for an account. A redeemed gift stays given when a code is edited, disabled or ends. Items go to one hero the account picks; Funds and keys to the account."
 
 msgid "web.admin.keys.moderator"
-msgstr "Codes are made with the admin role."
+msgstr "Codes are made and changed with the admin role."
 
 msgid "web.admin.keys.all_codes"
 msgstr "All codes"
@@ -4240,8 +4246,41 @@ msgstr "Made"
 msgid "web.admin.keys.made.by"
 msgstr "%(date)s by %(name)s: %(note)s"
 
+msgid "web.admin.keys.enable"
+msgstr "Enable"
+
+msgid "web.admin.keys.enable.busy"
+msgstr "Enabling…"
+
+msgid "web.admin.keys.enable.question"
+msgstr "Enable this code?"
+
+msgid "web.admin.keys.enable.text"
+msgstr "Accounts can redeem it again within its limit and end."
+
+msgid "web.admin.keys.disable"
+msgstr "Disable"
+
+msgid "web.admin.keys.disable.busy"
+msgstr "Disabling…"
+
+msgid "web.admin.keys.disable.question"
+msgstr "Disable this code?"
+
+msgid "web.admin.keys.disable.text"
+msgstr "Players then get the same answer as for an unknown code. Gifts already given stay."
+
+msgid "web.admin.keys.edit"
+msgstr "Edit contents, limit, end and labels"
+
+msgid "web.admin.keys.edit.rule"
+msgstr "Changes apply to later redemptions; gifts already given stay. Disabling answers like an unknown code."
+
 msgid "web.admin.keys.new"
 msgstr "New code"
+
+msgid "web.admin.keys.edit_title"
+msgstr "Change code"
 
 msgid "web.admin.keys.code_generated"
 msgstr "Code · generated"
@@ -4353,6 +4392,9 @@ msgstr "an English label"
 
 msgid "web.admin.keys.refused"
 msgstr "Nothing was saved; the fields marked say why."
+
+msgid "web.admin.keys.save"
+msgstr "Save changes"
 
 msgid "web.admin.keys.create.single"
 msgstr "Create code"
@@ -4647,6 +4689,15 @@ msgstr "Saved %(code)s."
 
 msgid "web.admin.toast.code.made"
 msgstr "Code %(code)s made."
+
+msgid "web.admin.toast.code.saved"
+msgstr "Changes to %(code)s saved; they apply to later redemptions."
+
+msgid "web.admin.toast.code.enabled"
+msgstr "%(code)s enabled."
+
+msgid "web.admin.toast.code.disabled"
+msgstr "%(code)s disabled."
 
 msgid "web.admin.toast.code.taken"
 msgstr "Nothing was made: a key has the drawn code already. Another code is drawn."
@@ -5126,6 +5177,30 @@ msgstr "Changed key limits"
 
 msgid "web.admin.audit.action.key_add.code"
 msgstr "Code made"
+
+msgid "web.admin.audit.action.key_changed"
+msgstr "Code changed"
+
+msgid "web.admin.audit.action.key_state.code.enabled"
+msgstr "Code enabled"
+
+msgid "web.admin.audit.action.key_state.code.disabled"
+msgstr "Code disabled"
+
+msgid "web.admin.audit.code.changed"
+msgstr "%(what)s: %(before)s → %(after)s"
+
+msgid "web.admin.audit.code.gift"
+msgstr "Contents"
+
+msgid "web.admin.audit.code.max_uses"
+msgstr "Accounts"
+
+msgid "web.admin.audit.code.expires"
+msgstr "End"
+
+msgid "web.admin.audit.code.labels"
+msgstr "Label"
 
 msgid "web.admin.audit.action.catalogue_import"
 msgstr "Imported catalogue"

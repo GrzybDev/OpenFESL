@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -111,6 +111,53 @@ class SqlGiftCodeStore:
             }
             session.add(action_row(AdminAction.KEY_ADD, code, details, change.admin))
         return True
+
+    async def change(self, entry: GiftCode, terms: CodeTerms, change: CodeChange) -> None:
+        """Change what a code gives from now on, and record it.
+
+        Args:
+            entry: The code.
+            terms: What it gives and on what terms from now on.
+            change: Who changes it and why, with what changed.
+        """
+        async with self._sessions.begin() as session:
+            await session.execute(
+                update(ProductKeyRow)
+                .where(ProductKeyRow.id == entry.id)
+                .values(
+                    gift=terms.gift.written,
+                    labels=dict(terms.labels),
+                    max_uses=terms.max_uses,
+                    expires_at=terms.expires,
+                )
+            )
+            details = {**change.details, "game": entry.game, "note": change.note}
+            session.add(action_row(AdminAction.KEY_CHANGED, entry.code, details, change.admin))
+
+    async def switch(self, entry: GiftCode, enabled: bool, change: CodeChange) -> bool:
+        """Enable or disable a code, and record it.
+
+        Args:
+            entry: The code.
+            enabled: Whether it may be redeemed from now on.
+            change: Who switches it and why.
+
+        Returns:
+            Whether it changed, which it does not when it was so already.
+        """
+        async with self._sessions.begin() as session:
+            changed = list(
+                await session.scalars(
+                    update(ProductKeyRow)
+                    .where(ProductKeyRow.id == entry.id, ProductKeyRow.enabled != enabled)
+                    .values(enabled=enabled)
+                    .returning(ProductKeyRow.id)
+                )
+            )
+            if changed:
+                details = {"enabled": enabled, "game": entry.game, "note": change.note}
+                session.add(action_row(AdminAction.KEY_STATE, entry.code, details, change.admin))
+            return bool(changed)
 
 
 async def _uses(session: AsyncSession, keys: Sequence[int]) -> dict[int, int]:

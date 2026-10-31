@@ -4342,6 +4342,9 @@ msgstr "Kod gry %(game)s"
 msgid "web.admin.keys.subtitle.new"
 msgstr "Nowy kod gry %(game)s"
 
+msgid "web.admin.keys.subtitle.edit"
+msgstr "Zmiana kodu gry %(game)s"
+
 msgid "web.admin.keys.tab.expired"
 msgstr "Wygasłe"
 
@@ -4393,6 +4396,9 @@ msgstr "Otwórz: %(label)s"
 msgid "web.admin.keys.codes.none.enabled"
 msgstr "Żaden kod nie jest teraz włączony."
 
+msgid "web.admin.keys.codes.none.disabled"
+msgstr "Żaden kod nie jest wyłączony."
+
 msgid "web.admin.keys.codes.none.expired"
 msgstr "Żaden kod nie wygasł."
 
@@ -4400,10 +4406,10 @@ msgid "web.admin.keys.empty"
 msgstr "Brak kodów gry %(game)s. Kod daje przedmioty, Funds lub klucze jeden raz każdemu kontu, które go wpisze."
 
 msgid "web.admin.keys.rule"
-msgstr "Każdy kod działa raz na konto. Przyznany prezent zostaje, gdy kod wygaśnie. Przedmioty trafiają do jednego bohatera wybranego przez konto, Funds i klucze na konto."
+msgstr "Każdy kod działa raz na konto. Przyznany prezent zostaje, gdy kod zostanie zmieniony, wyłączony albo wygaśnie. Przedmioty trafiają do jednego bohatera wybranego przez konto, Funds i klucze na konto."
 
 msgid "web.admin.keys.moderator"
-msgstr "Tworzenie kodów wymaga roli administratora."
+msgstr "Tworzenie i zmiana kodów wymaga roli administratora."
 
 msgid "web.admin.keys.all_codes"
 msgstr "Wszystkie kody"
@@ -4426,8 +4432,41 @@ msgstr "Utworzenie"
 msgid "web.admin.keys.made.by"
 msgstr "%(date)s, %(name)s: %(note)s"
 
+msgid "web.admin.keys.enable"
+msgstr "Włącz"
+
+msgid "web.admin.keys.enable.busy"
+msgstr "Włączanie…"
+
+msgid "web.admin.keys.enable.question"
+msgstr "Włączyć ten kod?"
+
+msgid "web.admin.keys.enable.text"
+msgstr "Konta znów mogą go zrealizować w ramach limitu i terminu."
+
+msgid "web.admin.keys.disable"
+msgstr "Wyłącz"
+
+msgid "web.admin.keys.disable.busy"
+msgstr "Wyłączanie…"
+
+msgid "web.admin.keys.disable.question"
+msgstr "Wyłączyć ten kod?"
+
+msgid "web.admin.keys.disable.text"
+msgstr "Gracze dostaną wtedy taką samą odpowiedź jak przy nieznanym kodzie. Przyznane prezenty zostają."
+
+msgid "web.admin.keys.edit"
+msgstr "Zmień zawartość, limit, koniec i etykiety"
+
+msgid "web.admin.keys.edit.rule"
+msgstr "Zmiany dotyczą kolejnych realizacji; przyznane prezenty zostają. Wyłączony kod odpowiada tak jak nieznany."
+
 msgid "web.admin.keys.new"
 msgstr "Nowy kod"
+
+msgid "web.admin.keys.edit_title"
+msgstr "Zmiana kodu"
 
 msgid "web.admin.keys.code_generated"
 msgstr "Kod · wygenerowany"
@@ -4539,6 +4578,9 @@ msgstr "etykieta w języku angielskim"
 
 msgid "web.admin.keys.refused"
 msgstr "Nic nie zostało zapisane; oznaczone pola podają powód."
+
+msgid "web.admin.keys.save"
+msgstr "Zapisz zmiany"
 
 msgid "web.admin.keys.create.single"
 msgstr "Utwórz kod"
@@ -4851,6 +4893,15 @@ msgstr "Zapisano %(code)s."
 
 msgid "web.admin.toast.code.made"
 msgstr "Utworzono kod %(code)s."
+
+msgid "web.admin.toast.code.saved"
+msgstr "Zapisano zmiany kodu %(code)s; dotyczą kolejnych realizacji."
+
+msgid "web.admin.toast.code.enabled"
+msgstr "Włączono %(code)s."
+
+msgid "web.admin.toast.code.disabled"
+msgstr "Wyłączono %(code)s."
 
 msgid "web.admin.toast.code.taken"
 msgstr "Nic nie zostało utworzone: wylosowany kod ma już inny klucz. Wylosowano nowy kod."
@@ -5330,6 +5381,30 @@ msgstr "Zmieniono limity klucza"
 
 msgid "web.admin.audit.action.key_add.code"
 msgstr "Utworzenie kodu"
+
+msgid "web.admin.audit.action.key_changed"
+msgstr "Zmiana kodu"
+
+msgid "web.admin.audit.action.key_state.code.enabled"
+msgstr "Włączenie kodu"
+
+msgid "web.admin.audit.action.key_state.code.disabled"
+msgstr "Wyłączenie kodu"
+
+msgid "web.admin.audit.code.changed"
+msgstr "%(what)s: %(before)s → %(after)s"
+
+msgid "web.admin.audit.code.gift"
+msgstr "Zawartość"
+
+msgid "web.admin.audit.code.max_uses"
+msgstr "Konta"
+
+msgid "web.admin.audit.code.expires"
+msgstr "Koniec"
+
+msgid "web.admin.audit.code.labels"
+msgstr "Etykieta"
 
 msgid "web.admin.audit.action.catalogue_import"
 msgstr "Zaimportowano katalog"

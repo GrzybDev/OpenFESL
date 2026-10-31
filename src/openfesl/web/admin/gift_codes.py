@@ -11,7 +11,7 @@ from starlette.exceptions import HTTPException
 from openfesl.core.admins import Admin, Role
 from openfesl.core.catalogues import Catalogue, Catalogues
 from openfesl.core.games import Game, Games
-from openfesl.core.gift_codes import CodeChange, CodeState, GiftCode, GiftCodeStore
+from openfesl.core.gift_codes import CodeChange, CodeState, CodeTerms, GiftCode, GiftCodeStore
 from openfesl.core.texts import localize
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.code_editor import CodeEditor, drafted, editor_of, written
@@ -21,7 +21,11 @@ from openfesl.web.store_texts import StoreTexts
 SECTION = "keys"
 CODES = "/admin/keys/codes"
 # The tabs of a game's codes besides all, each with the states it lists.
-TABS = {"enabled": (CodeState.ENABLED, CodeState.USED_UP), "expired": (CodeState.EXPIRED,)}
+TABS = {
+    "enabled": (CodeState.ENABLED, CodeState.USED_UP),
+    "disabled": (CodeState.DISABLED,),
+    "expired": (CodeState.EXPIRED,),
+}
 # The buttons that answer the editor's form without saving it.
 ANSWERS = ("find", "add", "drop", "again")
 
@@ -129,31 +133,33 @@ class GiftCodeViews:
     async def editor(
         self,
         game: Game,
+        entry: GiftCode | None,
         language: str,
         fields: ImmutableMultiDict[str, Any] | None,
         saving: bool = False,
     ) -> CodeEditor:
-        """Return a new code's editor, with its fields as written where a form sent them.
+        """Return a code's editor, with its fields as written where a form sent them.
 
-        The code is drawn at first and again when the form asks for another.
+        A new code is drawn at first and again when the form asks for another.
 
         Args:
             game: The game, which has codes.
+            entry: The code being changed; none for a new one.
             language: The page's language.
-            fields: The form's fields; none for a new editor.
+            fields: The form's fields; none for the code as it is saved, or a new one.
             saving: Whether the form is saved, which checks every field.
         """
         rules = game.codes
         assert rules is not None
         texts, catalogue = await self.words(game, language)
         if fields is None:
-            draft = drafted(rules.generate())
+            draft = drafted(entry, rules.generate())
         else:
             draft = written(fields)
-            if "again" in fields or rules.read(draft.code) != draft.code:
+            if entry is None and ("again" in fields or rules.read(draft.code) != draft.code):
                 draft = replace(draft, code=rules.generate())
         adding = fields is not None and "add" in fields
-        return editor_of(texts, catalogue, draft, adding, saving)
+        return editor_of(texts, catalogue, entry, draft, adding, saving)
 
     async def words(self, game: Game, language: str) -> tuple[StoreTexts, Catalogue]:
         """Return what writes a game's codes in a language, and its catalogue in that language.
@@ -177,10 +183,10 @@ def code_url(request: Request, code: str) -> str:
 
 
 def gift_code_routes(views: GiftCodeViews) -> APIRouter:
-    """Return the pages that make and show the codes that give gifts.
+    """Return the pages that make, show, change, enable and disable the codes that give gifts.
 
-    Every role reads the codes in full; making them needs the admin role and a note, which the
-    audit log keeps. The item search, adding and dropping
+    Every role reads the codes in full; making and changing them needs the admin role and a
+    note, which the audit log keeps. The item search, adding and dropping
     items and drawing another code answer the editor's form without saving it.
 
     Args:
@@ -190,7 +196,7 @@ def gift_code_routes(views: GiftCodeViews) -> APIRouter:
     sessions = views.sessions
 
     async def editor_page(
-        request: Request, admin: Admin, game: Game, status: int = 200
+        request: Request, admin: Admin, game: Game, entry: GiftCode | None, status: int = 200
     ) -> HTMLResponse:
         # Live answers to the fields as they are typed leave out the buttons that change items.
         query = request.query_params.multi_items()
@@ -200,7 +206,7 @@ def gift_code_routes(views: GiftCodeViews) -> APIRouter:
         )
         if request.method != "POST" and not [name for name, _ in typed if name != "game"]:
             fields = None
-        found = await views.editor(game, request.state.language, fields, status == 400)
+        found = await views.editor(game, entry, request.state.language, fields, status == 400)
         return await sessions.render(
             request, "admin.GiftCodeForm", status, admin=admin, of=game, found=found
         )
@@ -208,7 +214,7 @@ def gift_code_routes(views: GiftCodeViews) -> APIRouter:
     @router.get(CODES + "/new", response_class=HTMLResponse)
     async def new(request: Request, game: str = "") -> HTMLResponse:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        return await editor_page(request, admin, views.game(game))
+        return await editor_page(request, admin, views.game(game), None)
 
     @router.post(CODES + "/new")
     async def make(request: Request) -> Response:
@@ -217,15 +223,15 @@ def gift_code_routes(views: GiftCodeViews) -> APIRouter:
         check_form(request, form)
         game = views.game(str(form.get("game", "")))
         if any(name in form for name in ANSWERS):
-            return await editor_page(request, admin, game)
-        found = await views.editor(game, request.state.language, form, saving=True)
+            return await editor_page(request, admin, game, None)
+        found = await views.editor(game, None, request.state.language, form, saving=True)
         terms = found.terms
         if terms is None:
-            return await editor_page(request, admin, game, 400)
+            return await editor_page(request, admin, game, None, 400)
         code = found.draft.code
         if not await views.store.make(game.id, code, terms, CodeChange(admin, found.draft.note)):
             toast(request, "web.admin.toast.code.taken", error=True)
-            return await editor_page(request, admin, game)
+            return await editor_page(request, admin, game, None)
         toast(request, "web.admin.toast.code.made", code=code)
         return RedirectResponse(code_url(request, code), 303)
 
@@ -246,4 +252,78 @@ def gift_code_routes(views: GiftCodeViews) -> APIRouter:
             manages=admin.role is Role.ADMIN,
         )
 
+    @router.get(CODES + "/{code}/edit", response_class=HTMLResponse)
+    async def edit(request: Request, code: str) -> HTMLResponse:
+        admin = sessions.admin(request, Role.ADMIN, SECTION)
+        game, entry = await views.found(code)
+        return await editor_page(request, admin, game, entry)
+
+    @router.post(CODES + "/{code}/edit")
+    async def save(request: Request, code: str) -> Response:
+        admin = sessions.admin(request, Role.ADMIN, SECTION)
+        form = await request.form()
+        check_form(request, form)
+        game, entry = await views.found(code)
+        if any(name in form for name in ANSWERS):
+            return await editor_page(request, admin, game, entry)
+        found = await views.editor(game, entry, request.state.language, form, saving=True)
+        if found.terms is None:
+            return await editor_page(request, admin, game, entry, 400)
+        change = CodeChange(admin, found.draft.note, {"changed": changes(entry, found.terms)})
+        await views.store.change(entry, found.terms, change)
+        toast(request, "web.admin.toast.code.saved", code=entry.code)
+        return RedirectResponse(code_url(request, entry.code), 303)
+
+    @router.get(CODES + "/{code}/state", response_class=HTMLResponse)
+    async def ask_state(request: Request, code: str) -> HTMLResponse:
+        admin = sessions.admin(request, Role.ADMIN, SECTION)
+        game, entry = await views.found(code)
+        return await sessions.render(
+            request, "admin.GiftCodeState", admin=admin, of=game, entry=entry, note="", error=""
+        )
+
+    @router.post(CODES + "/{code}/state")
+    async def switch(request: Request, code: str) -> Response:
+        admin = sessions.admin(request, Role.ADMIN, SECTION)
+        form = await request.form()
+        check_form(request, form)
+        game, entry = await views.found(code)
+        note = str(form.get("note", "")).strip()
+        if not note:
+            return await sessions.render(
+                request,
+                "admin.GiftCodeState",
+                400,
+                admin=admin,
+                of=game,
+                entry=entry,
+                note=note,
+                error="note",
+            )
+        # The state the page asked for, so that a page left open changes nothing twice.
+        enabled = form.get("enabled") == "1"
+        if await views.store.switch(entry, enabled, CodeChange(admin, note)):
+            done = "enabled" if enabled else "disabled"
+            toast(request, f"web.admin.toast.code.{done}", code=entry.code)
+        else:
+            toast(request, "web.admin.toast.key_unchanged", error=True, code=entry.code)
+        return RedirectResponse(code_url(request, entry.code), 303)
+
     return router
+
+
+def changes(entry: GiftCode, terms: CodeTerms) -> dict[str, list[Any]]:
+    """Return what an edit changes of a code, each as its value before and after.
+
+    Args:
+        entry: The code as it is.
+        terms: What it gives and on what terms after the edit.
+    """
+    expires = [entry.expires, terms.expires]
+    found: dict[str, list[Any]] = {
+        "gift": [entry.gift.written, terms.gift.written],
+        "max_uses": [entry.max_uses, terms.max_uses],
+        "expires": [moment.isoformat() if moment else None for moment in expires],
+        "labels": [dict(entry.labels), dict(terms.labels)],
+    }
+    return {name: values for name, values in found.items() if values[0] != values[1]}

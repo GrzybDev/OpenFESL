@@ -1,15 +1,16 @@
 {#def of, found #}
-{# A new code that gives a gift: the code drawn at random, the items found in the
-   catalogue with which heroes they fit and how each is given, Funds and keys, how many accounts,
-   the end in UTC, the labels players see and the note. Finding,
+{# A new code that gives a gift, or a code being changed: the code drawn at random,
+   the items found in the catalogue with which heroes they fit and how each is given, Funds and
+   keys, how many accounts, the end in UTC, the labels players see and the note. Finding,
    choosing, adding and dropping items and drawing another code answer the form without saving
    it, as Enter does; a refused field says why beside it. #}
 {% set game = of %}
 {% set draft = found.draft %}
 {% set refused = found.refused %}
-{% set path = url("/admin/keys/codes/new") %}
-{% set back = url("/admin/keys") ~ "?game=" ~ game.id %}
-{% set title = _("web.admin.keys.new") %}
+{% set entry = found.entry %}
+{% set path = url("/admin/keys/codes/" ~ (entry.code ~ "/edit" if entry else "new")) %}
+{% set back = url("/admin/keys/codes/" ~ entry.code) if entry else url("/admin/keys") ~ "?game=" ~ game.id %}
+{% set title = _("web.admin.keys.edit_title") if entry else _("web.admin.keys.new") %}
 {% macro refusal(name) %}
   {% if name in refused %}<FieldError :id="'code-' ~ name ~ '-note'">{{ refused[name] }}</FieldError>{% endif %}
 {% endmacro %}
@@ -19,7 +20,7 @@
 <AdminPage :title="title ~ ' · ' ~ _('web.admin.keys')" current="keys">
   <PageHead labelledby="form-title">
     <div class="enter-title page-title">
-      <TitleBlock :title="_('web.admin.keys')" id="form-title">{{ _("web.admin.keys.subtitle.new", game=game.name) }}</TitleBlock>
+      <TitleBlock :title="_('web.admin.keys')" id="form-title">{{ _("web.admin.keys.subtitle.edit" if entry else "web.admin.keys.subtitle.new", game=game.name) }}</TitleBlock>
     </div>
   </PageHead>
   <Panel class="enter-panel">
@@ -34,21 +35,26 @@
       <div data-refresh class="list-main offer-main">
         <input type="hidden" name="game" value="{{ game.id }}">
         <h2 class="bar bar-wrap code-form-head">
-          <span class="code-head-name"><GameChip :of="game" />{{ title }}</span>
+          <span class="code-head-name"><GameChip :of="game" />{{ title }}
+            {%- if entry %}<code class="code-head-code">{{ entry.code }}</code>{% endif -%}
+          </span>
         </h2>
-        <div>
-          <label for="code-code" class="field-label field-label-joined">{{ _("web.admin.keys.code_generated") }}</label>
-          <div class="code-generated">
-            <input id="code-code"
-                   name="code"
-                   type="text"
-                   value="{{ draft.code }}"
-                   readonly
-                   class="field-input code-text">
-            <FormButton icon="retry" name="again" value="1" formnovalidate>{{ _("web.admin.keys.generate_again") }}</FormButton>
+        {% if not entry %}
+          <div>
+            <label for="code-code"
+                   class="field-label field-label-joined">{{ _("web.admin.keys.code_generated") }}</label>
+            <div class="code-generated">
+              <input id="code-code"
+                     name="code"
+                     type="text"
+                     value="{{ draft.code }}"
+                     readonly
+                     class="field-input code-text">
+              <FormButton icon="retry" name="again" value="1" formnovalidate>{{ _("web.admin.keys.generate_again") }}</FormButton>
+            </div>
+            <p class="field-note">{{ _("web.admin.keys.format") }}</p>
           </div>
-          <p class="field-note">{{ _("web.admin.keys.format") }}</p>
-        </div>
+        {% endif %}
         <p class="bar offer-legend">{{ _("web.admin.keys.contents") }}</p>
         {% if found.imported %}
           <ItemSearch id="code-q" :label="_('web.admin.items.search')" :value="draft.query" />
@@ -263,7 +269,7 @@
             <span data-why>{{ _("web.admin.keys.refused") if refused else "" }}</span>
           </p>
           <div data-live="{{ path }}" class="code-buttons">
-            <ActionButton :label="_('web.admin.keys.create.single')" :busy="_('web.admin.store.save.busy')" />
+            <ActionButton :label="_('web.admin.keys.save') if entry else _('web.admin.keys.create.single')" :busy="_('web.admin.store.save.busy')" />
             <FormButton icon="x" :href="back">{{ _("web.admin.cancel") }}</FormButton>
           </div>
         </div>

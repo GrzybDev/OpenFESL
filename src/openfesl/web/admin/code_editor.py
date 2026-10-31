@@ -8,7 +8,7 @@ from starlette.datastructures import ImmutableMultiDict
 from starlette.exceptions import HTTPException
 
 from openfesl.core.catalogues import Catalogue, Item
-from openfesl.core.gift_codes import CodeTerms
+from openfesl.core.gift_codes import CodeTerms, GiftCode
 from openfesl.core.inventory import Ownership
 from openfesl.core.reward_rules import Gift
 from openfesl.core.store_items import requirement
@@ -107,6 +107,7 @@ class CodeEditor:
     """A code's editor: its fields as written and what they come to.
 
     Attributes:
+        entry: The code being changed; none for a new one.
         draft: The fields as written.
         lines: The items it gives.
         candidates: The items the search found, each with its name and the heroes it is for.
@@ -124,6 +125,7 @@ class CodeEditor:
         icons: Whether the catalogue holds the items' icons.
     """
 
+    entry: GiftCode | None
     draft: CodeDraft
     lines: list[ContentLine]
     candidates: list[tuple[Item, str, str]]
@@ -140,13 +142,33 @@ class CodeEditor:
     icons: bool
 
 
-def drafted(code: str) -> CodeDraft:
-    """Return the editor fields of a new code.
+def drafted(entry: GiftCode | None, code: str) -> CodeDraft:
+    """Return a code's editor fields as it is saved, or those of a new code.
 
     Args:
-        code: The code drawn for it.
+        entry: The code; none for a new one.
+        code: The code drawn for a new code.
     """
-    return CodeDraft(code, (), "", "", "", DAYS, USES, "0", "0", "any", "", "", "", {}, "")
+    if entry is None:
+        return CodeDraft(code, (), "", "", "", DAYS, USES, "0", "0", "any", "", "", "", {}, "")
+    ends = entry.expires
+    return CodeDraft(
+        entry.code,
+        tuple(f"{item_id} {ownership.written}" for item_id, ownership in entry.gift.items),
+        "",
+        "",
+        "",
+        DAYS,
+        USES,
+        str(entry.gift.funds),
+        str(entry.gift.keys),
+        "limit" if entry.max_uses is not None else "any",
+        str(entry.max_uses or ""),
+        f"{ends:%Y-%m-%d}" if ends else "",
+        f"{ends:%H:%M}" if ends else "",
+        dict(entry.labels),
+        "",
+    )
 
 
 def written(fields: ImmutableMultiDict[str, Any]) -> CodeDraft:
@@ -187,6 +209,7 @@ def written(fields: ImmutableMultiDict[str, Any]) -> CodeDraft:
 def editor_of(
     texts: StoreTexts,
     catalogue: Catalogue,
+    entry: GiftCode | None,
     draft: CodeDraft,
     adding: bool = False,
     saving: bool = False,
@@ -196,6 +219,7 @@ def editor_of(
     Args:
         texts: Writes the page's language for the code's game.
         catalogue: The game's imported catalogue in the page's language.
+        entry: The code being changed; none for a new one.
         draft: The fields as written.
         adding: Whether the add button sent the form, which adds the chosen item.
         saving: Whether the form is saved, which checks every field.
@@ -241,6 +265,7 @@ def editor_of(
     granted = heroes.granted if heroes else frozenset()
     found = catalogue.search(draft.query, lambda item: item.kind not in granted)
     return CodeEditor(
+        entry,
         draft,
         lines,
         [(item, name, _whom(texts, item)) for item, name in found],

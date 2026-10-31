@@ -51,6 +51,7 @@ GLYPHS = {
     AdminAction.PROVIDER_REVOKE: "x",
     AdminAction.ENTITLEMENT_GRANT: "plus",
     AdminAction.KEY_ADD: "plus",
+    AdminAction.KEY_CHANGED: "edit",
     AdminAction.CATALOGUE_IMPORT: "doc",
     AdminAction.HERO_RENAME: "edit",
     AdminAction.HERO_DEFAULT: "star",
@@ -78,6 +79,12 @@ HERO_ACTIONS = (
     AdminAction.HERO_DEFAULT,
     AdminAction.MUGSHOT_REMOVE,
     *ITEM_ACTIONS,
+)
+# What the admin does to the codes that give gifts on the games' sites.
+CODE_ACTIONS = (
+    AdminAction.KEY_ADD,
+    AdminAction.KEY_CHANGED,
+    AdminAction.KEY_STATE,
 )
 # The glyph of each choice of who sees a game's art, as its tile on the catalogues page wears it.
 ART_GLYPHS = {"everyone": "eye", "signed_in": "key", "nobody": "edit"}
@@ -377,7 +384,7 @@ async def _rows(
                 kind = f"server_state.{details.get('state')}"
             else:
                 kind = f"server_official.{'on' if details.get('official') else 'off'}"
-        elif action is AdminAction.KEY_ADD and "game" in details:
+        elif action in CODE_ACTIONS and "game" in details:
             # A code that gives a gift on a game's site, whose actions name their game.
             kind, shown, href, said = await code_entry(
                 action, target, details, games, catalogues, language
