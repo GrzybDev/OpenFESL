@@ -1,8 +1,8 @@
-{#def of, entry, state, contents: list, made, codes: list, more: int, link: str, manages: bool #}
+{#def of, entry, state, contents: list, made, codes: list, more: int, redemptions: list, link: str, manages: bool #}
 {# A code that gives a gift on a game's site, or a batch of personal codes: its contents,
    accounts, end, labels, who made it and its one-click link, Disable or Enable and Edit for
-   admins, and for a batch its first codes with the download of them all. Moderators read it in
-   full. #}
+   admins, for a batch its first codes with the download of them all, and the redemptions with
+   what each gave. Moderators read it in full. #}
 {% set game = of %}
 {% set title = _("web.admin.keys") %}
 {% set base = url("/admin/keys/codes/" ~ entry.code) %}
@@ -83,5 +83,30 @@
         <Action :href="base ~ '/codes.txt'" :label="_('web.admin.keys.download')" glyph="download" download />
       </section>
     {% endif %}
+    <section aria-labelledby="code-redemptions" class="code-batch-part">
+      <Bar id="code-redemptions" :extra="_('web.admin.keys.redemptions.count', used=number(entry.uses))">{{ _("web.admin.keys.redemptions") }}</Bar>
+      {% if redemptions %}
+        <div class="table-scroll table-scroll-flush">
+          <div role="table"
+               aria-labelledby="code-redemptions"
+               class="table code-redemptions">
+            {% for done, given in redemptions %}
+              <div role="row" class="code-redemption">
+                <a role="cell"
+                   href="{{ url('/admin/accounts/' ~ done.account_id) }}"
+                   class="code-account">{{ done.account }}</a>
+                <span role="cell">{{ done.hero or "–" }}</span>
+                <span role="cell">{{ _("web.store.utc", time=moment(done.at)) }}</span>
+                <span role="cell">
+                  {%- if entry.batch %}<code class="code-text">{{ done.code }}</code> · {% endif %}{{ given -}}
+                </span>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% else %}
+        <p class="bar-text body-text">{{ _("web.admin.keys.redemptions.none") }}</p>
+      {% endif %}
+    </section>
   </Panel>
 </AdminPage>

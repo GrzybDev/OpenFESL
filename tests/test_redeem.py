@@ -134,8 +134,15 @@ async def test_a_linked_code_survives_the_sign_in_and_gives_its_gift_once_to_a_h
     async with httpx2.AsyncClient() as client:
         await sign_in(client, base, next="/admin/")
         page = visible((await client.get(f"{base}/admin/keys/codes/{CRATE}")).content)
+        account = await select_value(
+            database_url, "SELECT account_id FROM persona WHERE id = :hero", hero=royal
+        )
+        listed = visible((await client.get(f"{base}/admin/accounts/{account}")).content)
 
     assert "Each account once · 1 so far, no limit" in page
+    assert "ann@example.test Brassbuckle" in page
+    assert "Invented Mask · 7 days (7 days left) · Invented Tonic · 25 uses (25 uses left)" in page
+    assert f"Codes redeemed 1 {CRATE} Invented crate · for Brassbuckle" in listed
 
 
 async def test_codes_that_give_an_account_nothing_say_why_in_place(

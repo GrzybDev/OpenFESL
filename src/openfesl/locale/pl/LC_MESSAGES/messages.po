@@ -4165,6 +4165,15 @@ msgstr "Przyznaj uprawnienia"
 msgid "web.admin.entitlements.managed"
 msgstr "Uprawnienia zmienia rola administratora."
 
+msgid "web.admin.account.codes"
+msgstr "Zrealizowane kody"
+
+msgid "web.admin.account.codes.for"
+msgstr "dla: %(hero)s"
+
+msgid "web.admin.account.codes.none"
+msgstr "Konto nie zrealizowało żadnego kodu."
+
 msgid "web.admin.grant.what"
 msgstr "Co przyznać"
 
@@ -4437,6 +4446,21 @@ msgstr "Etykiety"
 
 msgid "web.admin.keys.link"
 msgstr "Link"
+
+msgid "web.admin.keys.redemptions"
+msgstr "Realizacje"
+
+msgid "web.admin.keys.redemptions.count"
+msgstr "%(used)s · od najnowszych"
+
+msgid "web.admin.keys.redemptions.none"
+msgstr "Żadne konto jeszcze go nie zrealizowało."
+
+msgid "web.admin.keys.given.fallback"
+msgstr "%(item)s w miejsce przedmiotu posiadanego na stałe"
+
+msgid "web.admin.keys.given.left"
+msgstr "%(item)s (zostało: %(left)s)"
 
 msgid "web.admin.keys.made"
 msgstr "Utworzenie"

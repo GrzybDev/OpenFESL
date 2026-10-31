@@ -1,7 +1,7 @@
-{#def view, entitlements: list, active: int, changes, remembered: list, heroes: list, total: int, terms: str, manages: bool #}
+{#def view, entitlements: list, active: int, changes, remembered: list, heroes: list, codes, total: int, terms: str, manages: bool #}
 {# A player's account: what is kept about it, its in-game names, heroes in the games whose heroes
-   are made on their site, and entitlements, beside the search, the session it is logged in on and
-   the logins its game remembers. #}
+   are made on their site, entitlements and the codes it redeemed where a game's site redeems
+   codes, beside the search, the session it is logged in on and the logins its game remembers. #}
 {% set names = view.personas|rejectattr("game.heroes")|list %}
 {% set record = view.record %}
 {% set account = record.account %}
@@ -247,6 +247,21 @@
             </p>
           {% endif %}
         </section>
+        {% if codes is not none %}
+          <section aria-labelledby="account-codes" class="account-part">
+            <Bar id="account-codes" :extra="number(codes|length)">{{ _("web.admin.account.codes") }}</Bar>
+            {% for done, given in codes %}
+              <a href="{{ url('/admin/keys/codes/' ~ done.code) }}"
+                 class="account-code">
+                <code class="code-text">{{ done.code }}</code>
+                <span>{{ done.labels.get(language) or done.labels.get("en", "") }} · {{ _("web.admin.account.codes.for", hero=done.hero) if done.hero else given }}</span>
+                <span>{{ when(done.at, "yMMMd") }}</span>
+              </a>
+            {% else %}
+              <p class="bar-text body-text">{{ _("web.admin.account.codes.none") }}</p>
+            {% endfor %}
+          </section>
+        {% endif %}
       </div>
 
       <div class="list-side admin-side">

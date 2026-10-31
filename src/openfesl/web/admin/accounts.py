@@ -15,6 +15,7 @@ from openfesl.core.games import Game, Games
 from openfesl.core.personas import PersonaRecord, PersonaState
 from openfesl.core.session import GameSession, Players
 from openfesl.web.admin.auth import AdminSessions
+from openfesl.web.admin.gift_codes import GiftCodeViews
 
 # For annotations only, as the heroes' pages build on the accounts'.
 if TYPE_CHECKING:
@@ -240,6 +241,7 @@ def account_routes(
     entitlements: HeldEntitlements,
     heroes: HeroAdminViews,
     terms: str,
+    codes: GiftCodeViews,
 ) -> APIRouter:
     """Return the accounts page, with its search, and each account's page.
 
@@ -249,6 +251,7 @@ def account_routes(
         entitlements: Where the accounts' entitlements are kept.
         heroes: Puts together what the panel shows about the accounts' heroes.
         terms: The version of the service's terms that accounts accept now.
+        codes: The codes that the games' sites redeem, which the accounts redeemed.
     """
     router = APIRouter()
 
@@ -291,6 +294,7 @@ def account_routes(
             changes=await entitlements.changes(number),
             remembered=await views.accounts.remembered(number),
             heroes=await heroes.of_account(number, request.state.language),
+            codes=await codes.redeemed(number, request.state.language),
             total=total,
             terms=terms,
             manages=admin.role is Role.ADMIN,

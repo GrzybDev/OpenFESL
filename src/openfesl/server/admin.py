@@ -134,9 +134,15 @@ def include_admin_routes(
         services.catalogues,
         stores.hero_admin,
     )
+    code_views = GiftCodeViews(sign_in, games, stores.gift_codes, services.catalogues)
     app.include_router(
         account_routes(
-            sign_in, account_views, stores.entitlements, hero_views, services.terms.version
+            sign_in,
+            account_views,
+            stores.entitlements,
+            hero_views,
+            services.terms.version,
+            code_views,
         )
     )
     app.include_router(
@@ -160,7 +166,6 @@ def include_admin_routes(
     app.include_router(
         entitlement_routes(sign_in, account_views, stores.entitlements, stores.keys, games)
     )
-    code_views = GiftCodeViews(sign_in, games, stores.gift_codes, services.catalogues)
     app.include_router(key_routes(sign_in, games, stores.keys, code_views))
     app.include_router(key_edit_routes(sign_in, games, stores.keys))
     # After the keys' own pages, whose paths take any code, among them a key named codes.

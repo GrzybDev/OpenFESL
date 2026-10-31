@@ -192,6 +192,64 @@
     text-decoration-line: underline;
   }
 
+  /* The redemptions of a code: the account, the hero, when, and what it gave. */
+  .code-redemptions {
+    display: grid;
+    gap: 2px;
+    min-width: 900px;
+    margin-top: 2px;
+  }
+
+  .code-redemption {
+    display: grid;
+    grid-template-columns: 200px 170px 190px minmax(0, 1fr);
+    gap: 2px;
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+
+    > * {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0 6px;
+      min-height: 48px;
+      background: var(--row);
+      padding: 6px 12px;
+      line-height: 1.35;
+    }
+
+    &:nth-child(even) > * {
+      background: var(--row-alt);
+    }
+  }
+
+  .code-account {
+    font-weight: 700;
+    text-decoration-line: underline;
+  }
+
+  /* The codes an account redeemed, on its page in the panel. */
+  .account-code {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    margin-top: 2px;
+    background: var(--row);
+    padding: 6px 12px;
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+
+    &:nth-of-type(even) {
+      background: var(--row-alt);
+    }
+  }
+
   /* The editor: the drawn code beside Generate again, the item search's choices, the ways of
      giving the chosen item, the contents so far, and the side column's limits, end and labels. */
   .code-form-head .game-chip {
@@ -289,6 +347,29 @@
   .code-form:not(:has([name="own"][value="days"]:checked)) .code-days,
   .code-form:not(:has([name="own"][value="uses"]:checked)) .code-uses {
     display: none;
+  }
+
+  @container (width < 900px) {
+    .code-redemptions {
+      min-width: 0;
+    }
+
+    .code-redemption {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+
+      > :last-child {
+        grid-column: 1 / -1;
+      }
+    }
+
+    .account-code {
+      grid-template-columns: minmax(0, 1fr) auto;
+
+      > :nth-child(2) {
+        grid-column: 1 / -1;
+        grid-row: 2;
+      }
+    }
   }
 
   @container (width < 1000px) {

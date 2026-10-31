@@ -19,7 +19,9 @@ from openfesl.core.gift_codes import (
     CodeTerms,
     GiftCode,
     GiftCodeStore,
+    Redemption,
 )
+from openfesl.core.reward_rules import Gift
 from openfesl.core.texts import localize
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.code_editor import CodeEditor, drafted, editor_of, written
@@ -182,6 +184,53 @@ class GiftCodeViews:
         texts = StoreTexts(game, language, datetime.now(UTC))
         return texts, await self._catalogues.of(game, language)
 
+    async def redeemed(self, account_id: int, language: str) -> list[tuple[Redemption, str]] | None:
+        """Return the codes an account redeemed, the newest first, with what each gave.
+
+        Args:
+            account_id: The account.
+            language: The language of the words.
+
+        Returns:
+            The redemptions, or None where no game's site redeems codes.
+        """
+        games = [game for game in self._games if game.codes]
+        if not games:
+            return None
+        found = []
+        for game in games:
+            texts, catalogue = await self.words(game, language)
+            found += [
+                (done, given(texts, catalogue, done))
+                for done in await self.store.redeemed_by(game.id, account_id)
+            ]
+        return sorted(found, key=lambda pair: pair[0].at, reverse=True)
+
+
+def given(texts: StoreTexts, catalogue: Catalogue, done: Redemption) -> str:
+    """Return what a redemption gave in words: items with what the hero held after, Funds, keys.
+
+    Args:
+        texts: Writes the page's language for the code's game.
+        catalogue: The game's imported catalogue, which names the items.
+        done: The redemption.
+    """
+    words = []
+    for item in done.items:
+        name = catalogue.name(item.item_id) or texts.text(
+            "web.admin.items.unnamed", id=item.item_id
+        )
+        what = texts.text(
+            "web.deals.card.item", item=name, ownership=texts.ownership(item.ownership, inline=True)
+        )
+        if item.fallback:
+            what = texts.text("web.admin.keys.given.fallback", item=what)
+        elif left := texts.left(item.held):
+            what = texts.text("web.admin.keys.given.left", item=what, left=left)
+        words.append(what)
+    gift = Gift(funds=done.funds[0] if done.funds else 0, keys=done.keys[0] if done.keys else 0)
+    return " · ".join(words + texts.gift_words(catalogue, gift))
+
 
 def code_url(request: Request, code: str) -> str:
     """Return the address of a code's page in the request's language.
@@ -258,6 +307,7 @@ def gift_code_routes(views: GiftCodeViews) -> APIRouter:
         game, entry = await views.found(code)
         texts, catalogue = await views.words(game, request.state.language)
         codes = await views.store.batch_codes(entry.id) if entry.batch else []
+        redemptions = await views.store.redemptions(entry)
         assert game.site is not None
         return await sessions.render(
             request,
@@ -270,6 +320,7 @@ def gift_code_routes(views: GiftCodeViews) -> APIRouter:
             made=await views.store.made(entry.code),
             codes=codes[:SHOWN],
             more=max(len(codes) - SHOWN, 0),
+            redemptions=[(done, given(texts, catalogue, done)) for done in redemptions],
             link=f"/{game.id}{game.site.path('redeem')}?{urlencode({'key': entry.code})}",
             manages=admin.role is Role.ADMIN,
         )

@@ -4003,6 +4003,15 @@ msgstr "Grant entitlements"
 msgid "web.admin.entitlements.managed"
 msgstr "Entitlements are changed by the admin role."
 
+msgid "web.admin.account.codes"
+msgstr "Codes redeemed"
+
+msgid "web.admin.account.codes.for"
+msgstr "for %(hero)s"
+
+msgid "web.admin.account.codes.none"
+msgstr "The account has redeemed no code."
+
 msgid "web.admin.grant.what"
 msgstr "What to grant"
 
@@ -4251,6 +4260,21 @@ msgstr "Labels"
 
 msgid "web.admin.keys.link"
 msgstr "Link"
+
+msgid "web.admin.keys.redemptions"
+msgstr "Redemptions"
+
+msgid "web.admin.keys.redemptions.count"
+msgstr "%(used)s · newest first"
+
+msgid "web.admin.keys.redemptions.none"
+msgstr "No account has redeemed it yet."
+
+msgid "web.admin.keys.given.fallback"
+msgstr "%(item)s in place of an item owned for good"
+
+msgid "web.admin.keys.given.left"
+msgstr "%(item)s (%(left)s left)"
 
 msgid "web.admin.keys.made"
 msgstr "Made"

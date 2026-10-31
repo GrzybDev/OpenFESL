@@ -178,6 +178,21 @@ class GiftCodeStore(Protocol):
             account_id: The account.
         """
 
+    async def redemptions(self, entry: GiftCode) -> list[Redemption]:
+        """Return the redemptions of a code or of a batch's codes, the newest first.
+
+        Args:
+            entry: The code or batch.
+        """
+
+    async def redeemed_by(self, game: str, account_id: int) -> list[Redemption]:
+        """Return the codes of a game that an account redeemed, the newest first.
+
+        Args:
+            game: The game's id.
+            account_id: The account.
+        """
+
     async def redeem(self, grant: CodeGrant) -> Redemption:
         """Redeem a code for an account and give what it gives, all of it or none.
 
