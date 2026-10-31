@@ -65,8 +65,8 @@ function chosen(field) {
   for (const input of form.querySelectorAll(
     "[name=q], [data-live] [name], [data-refresh] [name]",
   )) {
-    if (input.name !== "csrf" && (input.type !== "radio" || input.checked)) {
-      fields.set(input.name, input.value);
+    if (input.name !== "csrf" && (!["radio", "checkbox"].includes(input.type) || input.checked)) {
+      fields.append(input.name, input.value);
     }
   }
   return fields;
@@ -122,9 +122,16 @@ document.addEventListener(
   true,
 );
 
+// A button with a name, such as an editor's Add, answers the form without saving it, so only the
+// nameless button that saves is held back.
 document.addEventListener("submit", (event) => {
   const form = event.target;
-  if (form instanceof HTMLFormElement && form.matches("[data-admin-form]") && update(form)) {
+  if (
+    form instanceof HTMLFormElement &&
+    form.matches("[data-admin-form]") &&
+    !event.submitter?.name &&
+    update(form)
+  ) {
     event.preventDefault();
     flash(form.querySelector(".admin-form-why"));
   }
@@ -152,9 +159,9 @@ function update(form) {
   form.querySelector("[data-why]").textContent =
     blocked ?? (missing ? fill(form.dataset.still, { what: missing.dataset.needed }) : "");
   const stopped = !!missing || !!blocked;
-  // Not the button of a search form whose fields sit inside this one.
+  // The button that saves: not a named one, nor that of a search form inside this one.
   form
-    .querySelector("button[type=submit]:not([form])")
+    .querySelector("button[type=submit]:not([name], [form])")
     .setAttribute("aria-disabled", String(stopped));
   return stopped;
 }

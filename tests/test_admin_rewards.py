@@ -8,8 +8,9 @@ from heroes import create_hero
 from identity import IdentityProvider, form_token, sign_in
 from living import freeze, import_catalogue
 from living import setting as change
+from playwright.async_api import Browser
 from store import ROYAL_SOLDIER
-from support import visible
+from support import form_fields, visible
 from test_admin_deals import setting
 from test_admin_heroes import KEEPER, WARDEN
 from test_rewards import INVENTED
@@ -108,8 +109,8 @@ async def test_an_events_page_shows_its_days_gifts_goals_texts_and_paused_days(
     assert "REWARDS_HALLOWEEN_DAY_{day}_ROYAL_NAME Comes with the game's texts" in daily
     assert "Days with other gifts In place of that day's gift Royal Army National Army" in christmas
     assert "Day 17" in christmas and "Claims were not paused during this event" in christmas
-    assert "Royal Army On Invented Golden Machete · permanent Goal 700" in mission
-    assert "Counted stat kw106 Class Commando Counted from 19 Oct Before 1 Nov" in mission
+    assert "Royal Army Royal Army: On Invented Golden Machete · permanent" in mission
+    assert "Goal 700 Counted stat kw106 Class Commando Counted from 19 Oct Before 1 Nov" in mission
     assert (
         "Each hero counts from 19 Oct; a goal reached can be claimed until the end of 31 Oct"
         in (mission)
@@ -233,6 +234,110 @@ async def test_admins_change_an_events_days_with_own_text_where_the_games_texts_
     assert (
         "Event changed Christmas gifts Details 1\u201325 Dec → 1\u201324 Dec; own text removed"
     ) in log
+
+
+@pytest.mark.usefixtures("halloween", "prompt_actions")
+async def test_admins_change_what_each_part_gives_and_the_days_of_other_gifts(
+    admin_provider: IdentityProvider,
+    base: str,
+    server_url: str,
+    database_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+    edge: Browser,
+) -> None:
+    await import_catalogue(server_url, tmp_path, capsys, INVENTED)
+    await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    valentine, birthday, christmas = (
+        f"{base}{REWARDS}/events/{key}" for key in ("valentine", "birthday", "christmas")
+    )
+    royal = "bfheroes.rewards.events.valentine.parts.royal.gift"
+    admin_provider.user = KEEPER
+    async with httpx2.AsyncClient() as client:
+        await sign_in(client, base, next=f"{REWARDS}/events/valentine")
+        # Without scripts, Find and Add answer the form as written and save nothing.
+        fields = form_fields((await client.get(valentine)).text)
+        found = visible(
+            (await client.post(valentine, data=fields | {"q": ["Invented"], "find": ["1"]})).content
+        )
+        mask = {"to-1081": ["royal"], "own-1081": ["7d"]}
+        unfit = await client.post(
+            valentine, data=fields | {"add": ["1084"], "to-1084": ["royal"], "own-1084": ["perm"]}
+        )
+        added = await client.post(valentine, data=fields | {"add": ["1081"], **mask})
+        unsaved = await setting(database_url, royal)
+        await client.post(valentine, data=form_fields(added.text))
+        saved = await setting(database_url, royal)
+        fields = form_fields((await client.get(birthday)).text)
+        emptied = fields | {
+            "drop-national": [str(index) for index in range(len(fields["item-national"]))],
+            "funds-national": ["0"],
+            "keys-account": ["many"],
+        }
+        refused = await client.post(birthday, data=emptied)
+        fields = form_fields((await client.get(christmas)).text)
+        mask = {"to-1081": ["royal"], "own-1081": ["perm"], "add-day-1081": ["5"]}
+        fifth = await client.post(christmas, data=fields | {"add": ["1081"], **mask})
+        await client.post(christmas, data=form_fields(fifth.text) | {"drop-day": ["17"]})
+        days = await setting(database_url, "bfheroes.rewards.events.christmas.parts.royal.days")
+        log = visible((await client.get(f"{base}/admin/audit")).content)
+        context = await edge.new_context(locale="en-GB")
+        for name, value in client.cookies.items():
+            await context.add_cookies([{"name": name, "value": value, "url": base}])
+    # With scripts, Add answers the form while saving waits for the own text the first add needs.
+    scripted = await context.new_page()
+    await scripted.goto(birthday)
+    saving = []
+    for number in ("1081", "1084"):
+        await scripted.locator("#event-q").fill(number)
+        add = scripted.locator(f"button[name=add][value='{number}']")
+        await add.wait_for()
+        saving.append(
+            await scripted.locator(".reward-save button[type=submit]").get_attribute(
+                "aria-disabled"
+            )
+        )
+        async with scripted.expect_navigation():
+            await add.click()
+    answered = await scripted.get_by_role("status").inner_text()
+    await context.close()
+    freeze(monkeypatch, datetime(2027, 2, 14, 12, tzinfo=UTC))
+    async with httpx2.AsyncClient() as player:
+        await post_sign_in(player, base, "ann@example.test", PASSWORD)
+        page = visible((await player.get(f"{base}/bfheroes/rewards")).content)
+
+    assert "Invented Mask item 1081" in found and "Invented Visor item 1084" in found
+    assert unfit.status_code == 400
+    assert (
+        "Invented Visor is for the National Army, so it cannot be in the Royal Army half of"
+        " Valentine's Day."
+    ) in visible(unfit.content)
+    assert added.status_code == 200 and unsaved is None
+    assert "Added Invented Mask to the Royal Army half; Save event keeps it." in visible(
+        added.content
+    )
+    assert saved == '{"items": ["1127 7d", "2172 x10", "1081 7d"]}'
+    assert refused.status_code == 400
+    shown = visible(refused.content)
+    assert (
+        "The National Army half of The game's birthday has no contents; switch the faction off"
+        " or add an item."
+    ) in shown
+    assert "Funds and keys are whole numbers from 0 to 2,147,483,647." in shown
+    assert "The texts of this event name what it gives; other contents need own text." in shown
+    # A new day keeps the part's box for heroes whom its item does not fit; day 17 is gone.
+    assert isinstance(days, str) and '"17"' not in days
+    assert '"5": {"items": ["1081 perm"], "box": "royal-santas-visit"}' in days
+    assert "Event changed Valentine's Day Details Royal Army: other contents" in log
+    assert (
+        "Event changed Christmas gifts Details Royal Army: other contents; National Army: other"
+        " contents"
+    ) in log
+    # The players' page gives the new item at once.
+    assert "Invented Mask · 7 days" in page
+    assert saving == ["false", "true"]
+    assert "Added Invented Visor to the National Army half" in answered
 
 
 @pytest.mark.usefixtures("halloween", "prompt_actions")

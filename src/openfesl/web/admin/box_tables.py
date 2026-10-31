@@ -21,9 +21,6 @@ from openfesl.web.admin.store import SECTION, store_url
 from openfesl.web.sessions import check_form, toast
 from openfesl.web.store_texts import StoreTexts
 
-# How many items a search of the add panel lists at most.
-MATCHES = 8
-
 
 @dataclass(frozen=True, slots=True)
 class Option:
@@ -245,14 +242,8 @@ async def _candidates(
     for item_prices in prices:
         for number in item_prices.item.levels or (item_prices.item.id,):
             held[number] = item_prices
-    folded = query.casefold()
-    found = []
-    for item in sorted(catalogue.contents.items.values(), key=lambda item: item.id):
-        name = catalogue.name(item.id)
-        if not name or not rules.sellable(item) or item.kind not in kinds:
-            continue
-        if str(item.id) != query and folded not in name.casefold():
-            continue
+
+    def offered(item: Item) -> list[Option]:
         options: dict[Ownership, int] = {}
         for line in held[item.id].lines if item.id in held else ():
             product = line.product
@@ -263,15 +254,15 @@ async def _candidates(
                 for ownership in rule.sold:
                     if (price := rules.price(rule, ownership)) and ownership not in options:
                         options[ownership] = price
-        offered = [
+        return [
             Option(owned.written, price, f"{texts.ownership(owned)} · {texts.amount(price)}")
             for owned, price in sorted(options.items(), key=lambda pair: pair[0].written)
         ]
-        if offered:
-            found.append(Candidate(item, name, offered))
-        if len(found) == MATCHES:
-            break
-    return found
+
+    found = catalogue.search(
+        query, lambda item: rules.sellable(item) and item.kind in kinds and bool(offered(item))
+    )
+    return [Candidate(item, name, offered(item)) for item, name in found]
 
 
 def _why(

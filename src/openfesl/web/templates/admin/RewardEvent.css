@@ -265,3 +265,164 @@
     }
   }
 }
+
+/* The editor's contents: each part's items with a square that takes one out, struck through once
+   ticked, its box, Funds and keys, the square that drops a day of other gifts, and the add panel,
+   whose uses field shows while uses are chosen. */
+@layer pages {
+  .reward-parts {
+    margin: 2px 0 0;
+    border: 0;
+    padding: 0;
+    min-width: 0;
+  }
+
+  .reward-items {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .reward-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--row);
+    padding: 4px 4px 4px 6px;
+    font-weight: 600;
+    transition: opacity 150ms var(--ease-menu);
+
+    .admin-item-icon {
+      width: 36px;
+      height: 36px;
+    }
+
+    &:has(.reward-drop-input:checked) {
+      opacity: 0.55;
+
+      .reward-item-name {
+        text-decoration: line-through;
+      }
+    }
+  }
+
+  .reward-item-name {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .reward-drop {
+    position: relative;
+    display: grid;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    place-items: center;
+    cursor: pointer;
+  }
+
+  .reward-drop-input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: inherit;
+  }
+
+  .reward-drop-mark {
+    display: grid;
+    width: 24px;
+    height: 24px;
+    place-items: center;
+    background: var(--ink);
+    color: var(--bright);
+    transition: background-color 150ms var(--ease-menu);
+
+    .reward-drop:hover & {
+      background: var(--menu-current);
+    }
+
+    :checked + & {
+      background: var(--accent);
+      color: var(--ink);
+    }
+
+    :focus-visible + & {
+      outline: 3px solid #ffffff;
+      outline-offset: 2px;
+    }
+  }
+
+  .reward-amounts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 2px;
+  }
+
+  .reward-amount {
+    display: grid;
+    gap: 0;
+    min-width: 0;
+  }
+
+  .reward-amount-wide {
+    grid-column: 1 / -1;
+  }
+
+  .reward-amount-label {
+    background: var(--accent);
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    text-transform: uppercase;
+  }
+
+  .reward-amount-input {
+    min-width: 0;
+  }
+
+  .reward-day-drop {
+    width: 44px;
+    vertical-align: middle;
+  }
+
+  /* On phones the days fit the screen with their remove squares, their gifts wrapping. */
+  @media (max-width: 600px) {
+    .rewards-packs.reward-days {
+      min-width: 0;
+    }
+  }
+
+  .reward-candidates {
+    display: grid;
+    gap: 2px;
+    margin-top: 2px;
+
+    > .body-text {
+      margin: 0;
+    }
+  }
+
+  .reward-candidate .form-button {
+    justify-self: end;
+  }
+
+  .reward-ownerships .reward-uses {
+    display: none;
+  }
+
+  .reward-ownerships:has([value="uses"]:checked) .reward-uses {
+    display: grid;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reward-item,
+    .reward-drop-mark {
+      transition: none;
+    }
+  }
+}

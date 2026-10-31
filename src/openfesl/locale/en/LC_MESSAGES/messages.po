@@ -11747,6 +11747,66 @@ msgstr "Texts"
 msgid "web.admin.rewards.event.text.missing"
 msgstr "Comes with the game's texts in the catalogue import"
 
+msgid "web.admin.rewards.item.remove"
+msgstr "Remove %(item)s"
+
+msgid "web.admin.rewards.box"
+msgstr "Box roll"
+
+msgid "web.admin.rewards.box.none"
+msgstr "No box"
+
+msgid "web.admin.rewards.keys.count"
+msgstr "Keys"
+
+msgid "web.admin.rewards.event.day.remove"
+msgstr "Remove day %(day)s"
+
+msgid "web.admin.rewards.event.day.drop"
+msgstr "Remove"
+
+msgid "web.admin.rewards.add"
+msgstr "Add an item"
+
+msgid "web.admin.rewards.add.submit"
+msgstr "Add"
+
+msgid "web.admin.rewards.add.none"
+msgstr "No item that rewards may give matches %(query)s."
+
+msgid "web.admin.rewards.add.day"
+msgstr "Day"
+
+msgid "web.admin.rewards.add.every"
+msgstr "Every day"
+
+msgid "web.admin.rewards.added"
+msgstr "Added %(item)s to the %(faction)s half; Save event keeps it."
+
+msgid "web.admin.rewards.added.day"
+msgstr "Added %(item)s to %(day)s of the %(faction)s half; Save event keeps it."
+
+msgid "web.admin.rewards.text_rule.gift"
+msgstr "The texts of this event name what it gives; other contents need own text."
+
+msgid "web.admin.rewards.refused.amount"
+msgstr "Funds and keys are whole numbers from 0 to %(most)s."
+
+msgid "web.admin.rewards.refused.empty"
+msgstr "The %(faction)s half of %(event)s has no contents; switch the faction off or add an item."
+
+msgid "web.admin.rewards.refused.empty.account"
+msgstr "The account's part of %(event)s has no contents; switch it off or give Funds or keys."
+
+msgid "web.admin.rewards.refused.faction"
+msgstr "%(item)s is for the %(others)s, so it cannot be in the %(faction)s half of %(event)s."
+
+msgid "web.admin.rewards.refused.uses"
+msgstr "Uses are a whole number from 1 to %(most)s."
+
+msgid "web.admin.rewards.refused.add_day"
+msgstr "Day %(day)s is not one of the %(days)s days of the event."
+
 msgid "web.admin.rewards.event.save"
 msgstr "Save event"
 
@@ -12007,6 +12067,15 @@ msgstr "own text removed"
 
 msgid "web.admin.audit.reward_text.changed"
 msgstr "own text changed"
+
+msgid "web.admin.audit.reward_part.on"
+msgstr "%(part)s: switched on"
+
+msgid "web.admin.audit.reward_part.off"
+msgstr "%(part)s: switched off"
+
+msgid "web.admin.audit.reward_part.contents"
+msgstr "%(part)s: other contents"
 
 msgid "web.admin.rewards.tabs"
 msgstr "Views of the rewards"

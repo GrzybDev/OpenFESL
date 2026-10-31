@@ -5,12 +5,23 @@ from typing import Any
 
 from babel import Locale
 from babel.dates import format_interval
+from starlette.datastructures import ImmutableMultiDict
 
 from openfesl.core.calendar import Window, today
+from openfesl.core.drops import Box
 from openfesl.core.games import Game
 from openfesl.core.reward_rules import Event
 from openfesl.core.reward_runs import Run, run_of
 from openfesl.core.texts import languages, localize, translate
+from openfesl.web.admin.reward_contents import (
+    Adding,
+    Contents,
+    PartDraft,
+    contents_of,
+    drafted_parts,
+    written_adding,
+    written_parts,
+)
 from openfesl.web.reward_texts import RewardTexts
 
 # The most characters of an own text, which a reward's card shows in full.
@@ -24,7 +35,7 @@ DATE_FIELDS = ("first", "last", "count", "before", "after")
 
 @dataclass(frozen=True, slots=True)
 class Draft:
-    """The fields of an event's editor as written: its date rule, days and own text.
+    """The fields of an event's editor as written: its date rule, days, parts and own text.
 
     Attributes:
         rule: fixed, easter or count.
@@ -34,6 +45,9 @@ class Draft:
         before: The first day of a run around Easter, in days from Easter Sunday.
         after: The last day of such a run, likewise.
         texts: The own text by language.
+        parts: The fields of its parts.
+        adding: The item that the add panel adds, if it sent the form.
+        query: What the add panel searches the catalogue for.
     """
 
     rule: str
@@ -43,6 +57,9 @@ class Draft:
     before: str
     after: str
     texts: dict[str, str] = field(default_factory=dict)
+    parts: tuple[PartDraft, ...] = ()
+    adding: Adding | None = None
+    query: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,7 +68,8 @@ class Editor:
 
     Attributes:
         draft: The fields as written.
-        window: The days they set; none while one is refused.
+        contents: What the event's parts give as the fields set them.
+        edited: The event as the fields set it; none while one is refused.
         refused: Why a field is refused, by its name.
         line: What the days set, in words, or why they are refused.
         needs: Why the event needs own text, a sentence each; empty while its texts still
@@ -60,7 +78,8 @@ class Editor:
     """
 
     draft: Draft
-    window: Window | None
+    contents: Contents
+    edited: Event | None
     refused: dict[str, str]
     line: str
     needs: list[str]
@@ -91,30 +110,37 @@ def drafted(event: Event, run: Run) -> Draft:
     rule = "easter" if window.easter else "count" if window.count else "fixed"
     before, after = window.easter or (0, 0)
     texts = dict(event.own_text)
-    return Draft(rule, str(first), str(last), str(run.days), str(before), str(after), texts)
+    days, parts = str(run.days), drafted_parts(event)
+    return Draft(rule, str(first), str(last), days, str(before), str(after), texts, parts)
 
 
-def written(fields: Mapping[str, str], event: Event) -> Draft:
+def written(fields: ImmutableMultiDict[str, Any], event: Event) -> Draft:
     """Return the editor's fields as a form wrote them.
 
     Args:
         fields: The form's fields.
-        event: The event, whose own text stays as it is where the form does not show it.
+        event: The event, whose own text and parts stay as they are where the form does not
+            show them.
     """
     names = [f"text-{code}" for code in languages()]
-    texts = {name.removeprefix("text-"): fields.get(name, "").strip() for name in names}
+    texts = {name.removeprefix("text-"): str(fields.get(name, "")).strip() for name in names}
     return Draft(
-        fields.get("rule", ""),
-        fields.get("first", "").strip(),
-        fields.get("last", "").strip(),
-        fields.get("count", "").strip(),
-        fields.get("before", "").strip(),
-        fields.get("after", "").strip(),
+        str(fields.get("rule", "")),
+        str(fields.get("first", "")).strip(),
+        str(fields.get("last", "")).strip(),
+        str(fields.get("count", "")).strip(),
+        str(fields.get("before", "")).strip(),
+        str(fields.get("after", "")).strip(),
         texts if any(name in fields for name in names) else dict(event.own_text),
+        written_parts(fields, event),
+        written_adding(fields),
+        str(fields.get("q", "")).strip()[:64],
     )
 
 
-def editor_of(words: RewardTexts, seed: Event, run: Run, draft: Draft) -> Editor:
+def editor_of(
+    words: RewardTexts, seed: Event, run: Run, draft: Draft, boxes: Mapping[str, Box]
+) -> Editor:
     """Return an event's editor: what its fields set, which is refused and why own text is due.
 
     Args:
@@ -122,6 +148,7 @@ def editor_of(words: RewardTexts, seed: Event, run: Run, draft: Draft) -> Editor
         seed: The event as the game's data sets it, whose texts state what they state.
         run: The event's run that the editor shows, as the instance sets it.
         draft: The editor's fields.
+        boxes: The boxes that the store may roll for a reward, by key.
     """
     texts, zone = words.texts, words.rules.zone
     refused: dict[str, str] = {}
@@ -135,9 +162,15 @@ def editor_of(words: RewardTexts, seed: Event, run: Run, draft: Draft) -> Editor
         )
         window = None
     line = next(iter(refused.values()), "")
+    edited = run.event.model_copy(update={"window": window or run.event.window})
+    days = run_of(run.key, edited, run.year, zone).days if window else 0
+    contents = contents_of(
+        texts, words.catalogue, run.event, draft.parts, draft.adding, boxes, days
+    )
+    refused |= contents.refused
+    edited = edited.model_copy(update={"parts": contents.parts})
     needs = []
     if window:
-        edited = run.event.model_copy(update={"window": window})
         shown = run_of(run.key, edited, run.year, zone)
         first, last = today(shown.period.start, zone), today(shown.period.end, zone)
         dates = {"first": words.dated(first), "last": words.dated(last - timedelta(1))}
@@ -164,7 +197,8 @@ def editor_of(words: RewardTexts, seed: Event, run: Run, draft: Draft) -> Editor
         most = texts.amount(LONGEST_TEXT)
         refused["text-en"] = texts.text("web.admin.rewards.refused.long", most=most)
     named = [(code, str(words.locale.languages.get(code, code))) for code in languages()]
-    return Editor(draft, window, refused, line, needs, named)
+    saved = edited if window and not refused else None
+    return Editor(draft, contents, saved, refused, line, needs, named)
 
 
 def _window(draft: Draft, refused: dict[str, str], say: Callable[..., str]) -> Window | None:
@@ -229,7 +263,7 @@ def run_days(window: Window, year: int) -> list[str]:
 
 
 def event_entry(game: Game, details: dict[str, Any], language: str) -> tuple[str, str, str]:
-    """Return how the audit log shows a change of an event's days or own text.
+    """Return how the audit log shows a change of an event's days, parts or own text.
 
     Args:
         game: The game, whose rewards hold the event.
@@ -265,5 +299,10 @@ def event_entry(game: Game, details: dict[str, Any], language: str) -> tuple[str
         said.append(translate("web.admin.audit.reward_text.removed", language))
     elif own_before != own_after:
         said.append(translate("web.admin.audit.reward_text.changed", language))
+    for name, change in details.get("parts", []):
+        faction = event.parts[name].faction if event and name in event.parts else None
+        who = f"games.{game.id}.faction.{faction}" if faction else "web.admin.rewards.part.account"
+        values = {"part": translate(who, language)}
+        said.append(translate(f"web.admin.audit.reward_part.{change}", language) % values)
     href = localize(f"/admin/rewards/{game.id}/events/{key}", language)
     return shown, href, "; ".join(said)

@@ -39,6 +39,7 @@ gift = { items = ["1128 7d", "2171 x10"] }
 title = "games.bfheroes.rewards.easter"
 summary = "games.bfheroes.rewards.easter.summary"
 window = { easter = [-2, 1] }
+stated = ["gift"]
 
 [rewards.events.easter.parts.royal]
 faction = "royal"
@@ -60,6 +61,7 @@ gift = { items = ["2175 x25", "1372 3d"] }
 title = "games.bfheroes.rewards.birthday"
 summary = "games.bfheroes.rewards.birthday.summary"
 window = { dates = ["06-25", "07-01"] }
+stated = ["gift"]
 
 [rewards.events.birthday.parts.royal]
 faction = "royal"
@@ -86,7 +88,7 @@ title = "games.bfheroes.rewards.halloween"
 summary = "games.bfheroes.rewards.halloween.summary"
 window = { first = "10-19", count = 13 }
 daily = true
-stated = ["days"]
+stated = ["days", "gift"]
 
 [rewards.events.halloween.parts.royal]
 faction = "royal"
@@ -110,7 +112,7 @@ gift = { box = "national-trick-or-treat" }
 title = "games.bfheroes.rewards.halloween-machete"
 summary = "games.bfheroes.rewards.halloween-machete.summary"
 window = { dates = ["10-19", "10-31"] }
-stated = ["end"]
+stated = ["end", "gift"]
 
 [rewards.events.halloween-machete.parts.royal]
 faction = "royal"
@@ -130,7 +132,7 @@ gift = { items = [3205] }
 title = "games.bfheroes.rewards.halloween-map"
 summary = "games.bfheroes.rewards.halloween-map.summary"
 window = { dates = ["10-19", "10-31"] }
-stated = ["end"]
+stated = ["end", "gift"]
 
 [rewards.events.halloween-map.parts.royal]
 faction = "royal"
@@ -153,7 +155,7 @@ title = "games.bfheroes.rewards.bento"
 summary = "games.bfheroes.rewards.bento.summary"
 window = { first = "11-21", count = 7 }
 daily = true
-stated = ["days", "end"]
+stated = ["days", "end", "gift"]
 
 [rewards.events.bento.parts.royal]
 faction = "royal"
@@ -175,7 +177,7 @@ title = "games.bfheroes.rewards.rising-sun"
 summary = "games.bfheroes.rewards.rising-sun.summary"
 enabled = false
 window = { dates = ["11-21", "11-30"] }
-stated = ["end"]
+stated = ["end", "gift"]
 
 [rewards.events.rising-sun.parts.royal]
 faction = "royal"

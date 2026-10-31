@@ -4,7 +4,7 @@ import logging
 import re
 import secrets
 from collections import ChainMap
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Collection, Iterable, Mapping
 from contextlib import AbstractAsyncContextManager
 from dataclasses import dataclass, field
 from datetime import date
@@ -35,6 +35,8 @@ REVISION: Final = re.compile(r"[0-9a-f]{16}")
 KEPT_FILE: Final = re.compile(
     r"(?:icons|textures)/[a-z0-9_-]{1,64}\.webp|models/[a-z0-9_-]{1,64}\.glb"
 )
+# How many items a search lists at most.
+MATCHES: Final = 8
 
 
 @dataclass(frozen=True, slots=True)
@@ -263,6 +265,40 @@ class Catalogue:
         item = self.item(item_id)
         names = item.names if item else ()
         return next((self.texts[name] for name in names if name in self.texts), None)
+
+    def search(self, query: str, keep: Callable[[Item], bool]) -> list[tuple[Item, str]]:
+        """Return the first named items, by number, whose number is a search or whose name holds it.
+
+        Args:
+            query: An item's number, or a part of its name in any case; empty finds nothing.
+            keep: Whether an item may be listed.
+
+        Returns:
+            Each item with its name, at most MATCHES of them.
+        """
+        if not query:
+            return []
+        folded = query.casefold()
+        found: list[tuple[Item, str]] = []
+        for item in sorted(self.contents.items.values(), key=lambda item: item.id):
+            name = self.name(item.id)
+            if name and (str(item.id) == query or folded in name.casefold()) and keep(item):
+                found.append((item, name))
+                if len(found) == MATCHES:
+                    break
+        return found
+
+    def givable(self, query: str, granted: Collection[str]) -> list[tuple[Item, str]]:
+        """Return the first named items that a search finds and that heroes may be given by hand.
+
+        The game data withholds some items, and the game grants its heroes those of some kinds
+        itself.
+
+        Args:
+            query: An item's number, or a part of its name in any case; empty finds nothing.
+            granted: The kinds of items that the game grants its heroes itself.
+        """
+        return self.search(query, lambda item: not item.withheld and item.kind not in granted)
 
     def text(self, name: str) -> str | None:
         """Return a text of the game's language table, if the catalogue holds it.

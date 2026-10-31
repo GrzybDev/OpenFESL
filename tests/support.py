@@ -11,6 +11,7 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from email import message_from_bytes, policy
 from email.message import EmailMessage, Message
+from html.parser import HTMLParser
 
 import anyio
 import httpx2
@@ -451,6 +452,49 @@ def links(page: str) -> list[tuple[str, str]]:
     """
     found = re.findall(r'<a href="([^"]*)"[^>]*>(.*?)</a>', page, flags=re.DOTALL)
     return [(href, re.sub(r"<[^>]*>", "", text).strip()) for href, text in found]
+
+
+class _Fields(HTMLParser):
+    # The fields that a page's forms send without scripts: named inputs that are not disabled,
+    # ticked boxes and choices, and each list's chosen option or else its first.
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.fields: dict[str, list[str]] = {}
+        self.listing: tuple[str, list[str]] | None = None
+        self.chosen = ""
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        found = dict(attrs)
+        name, value = found.get("name"), found.get("value") or ""
+        if not name or "disabled" in found:
+            if tag == "option" and self.listing is not None:
+                self.listing[1].append(value)
+                self.chosen = value if "selected" in found else self.chosen
+            return
+        if tag == "input" and (
+            found.get("type") not in ("checkbox", "radio") or "checked" in found
+        ):
+            self.fields.setdefault(name, []).append(value)
+        elif tag == "select":
+            self.listing, self.chosen = (name, []), ""
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "select" and self.listing is not None:
+            name, options = self.listing
+            self.fields.setdefault(name, []).append(self.chosen or (options or [""])[0])
+            self.listing = None
+
+
+def form_fields(page: str) -> dict[str, list[str]]:
+    """Return the fields that a page's forms send without scripts, by name.
+
+    Args:
+        page: The page's markup.
+    """
+    parser = _Fields()
+    parser.feed(page)
+    return parser.fields
 
 
 def visible(body: bytes) -> str:

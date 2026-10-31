@@ -12495,6 +12495,66 @@ msgstr "Teksty"
 msgid "web.admin.rewards.event.text.missing"
 msgstr "Pojawi się z tekstami gry przy imporcie katalogu"
 
+msgid "web.admin.rewards.item.remove"
+msgstr "Usuń: %(item)s"
+
+msgid "web.admin.rewards.box"
+msgstr "Losowanie ze skrzynki"
+
+msgid "web.admin.rewards.box.none"
+msgstr "Bez skrzynki"
+
+msgid "web.admin.rewards.keys.count"
+msgstr "Klucze"
+
+msgid "web.admin.rewards.event.day.remove"
+msgstr "Usuń dzień %(day)s"
+
+msgid "web.admin.rewards.event.day.drop"
+msgstr "Usuń"
+
+msgid "web.admin.rewards.add"
+msgstr "Dodaj przedmiot"
+
+msgid "web.admin.rewards.add.submit"
+msgstr "Dodaj"
+
+msgid "web.admin.rewards.add.none"
+msgstr "Żaden przedmiot, który mogą dawać nagrody, nie pasuje do: %(query)s."
+
+msgid "web.admin.rewards.add.day"
+msgstr "Dzień"
+
+msgid "web.admin.rewards.add.every"
+msgstr "Każdy dzień"
+
+msgid "web.admin.rewards.added"
+msgstr "Dodano %(item)s do części %(faction)s; Zapisz wydarzenie zachowuje zmianę."
+
+msgid "web.admin.rewards.added.day"
+msgstr "Dodano %(item)s do części %(faction)s, %(day)s; Zapisz wydarzenie zachowuje zmianę."
+
+msgid "web.admin.rewards.text_rule.gift"
+msgstr "Teksty tego wydarzenia podają, co ono daje; inna zawartość wymaga własnego tekstu."
+
+msgid "web.admin.rewards.refused.amount"
+msgstr "Funds i klucze to liczby całkowite od 0 do %(most)s."
+
+msgid "web.admin.rewards.refused.empty"
+msgstr "Część %(faction)s w wydarzeniu %(event)s nie ma zawartości; należy wyłączyć frakcję albo dodać przedmiot."
+
+msgid "web.admin.rewards.refused.empty.account"
+msgstr "Część konta w wydarzeniu %(event)s nie ma zawartości; należy ją wyłączyć albo dodać Funds lub klucze."
+
+msgid "web.admin.rewards.refused.faction"
+msgstr "%(item)s jest dla frakcji %(others)s, więc nie może trafić do części %(faction)s w wydarzeniu %(event)s."
+
+msgid "web.admin.rewards.refused.uses"
+msgstr "Liczba użyć to liczba całkowita od 1 do %(most)s."
+
+msgid "web.admin.rewards.refused.add_day"
+msgstr "Dnia %(day)s nie ma wśród dni wydarzenia (liczba dni: %(days)s)."
+
 msgid "web.admin.rewards.event.save"
 msgstr "Zapisz wydarzenie"
 
@@ -12755,6 +12815,15 @@ msgstr "własny tekst usunięty"
 
 msgid "web.admin.audit.reward_text.changed"
 msgstr "własny tekst zmieniony"
+
+msgid "web.admin.audit.reward_part.on"
+msgstr "%(part)s: włączenie"
+
+msgid "web.admin.audit.reward_part.off"
+msgstr "%(part)s: wyłączenie"
+
+msgid "web.admin.audit.reward_part.contents"
+msgstr "%(part)s: inna zawartość"
 
 msgid "web.admin.rewards.tabs"
 msgstr "Widoki nagród"

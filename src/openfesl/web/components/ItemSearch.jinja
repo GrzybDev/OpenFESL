@@ -1,7 +1,9 @@
-{#def id: str, label: str, value: str, action: str #}
-{# The admin panel's search of a game's items by name or number, a form of its own that sends the
-   search to an editor's page. #}
-<form method="get" action="{{ action }}" class="prices-search">
+{#def id: str, label: str, value: str, action: str = "", refresh: bool = False #}
+{# The admin panel's search of a game's items by name or number. With an action it is a form of
+   its own that sends the search there; otherwise it is part of an editor's form, whose Find
+   button sends it without scripts and checks none of the form's fields, and whose live part
+   scripts refresh as the search is typed where it asks for that. #}
+{% set field %}
   <label for="{{ id }}" class="prices-search-label">{{ label }}</label>
   <input id="{{ id }}"
          name="q"
@@ -11,5 +13,15 @@
          autocomplete="off"
          placeholder="{{ _('web.admin.boxes.add.hint') }}"
          class="prices-search-input">
-  <FormButton icon="find">{{ _("web.admin.boxes.add.find") }}</FormButton>
-</form>
+{% endset %}
+{% if action %}
+  <form method="get" action="{{ action }}" class="prices-search">
+    {{ field }}
+    <FormButton icon="find">{{ _("web.admin.boxes.add.find") }}</FormButton>
+  </form>
+{% else %}
+  <div {% if refresh %}data-refresh{% endif %} class="prices-search">
+    {{ field }}
+    <FormButton icon="find" name="find" value="1" formnovalidate class="no-js-only">{{ _("web.admin.boxes.add.find") }}</FormButton>
+  </div>
+{% endif %}
