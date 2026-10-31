@@ -11277,6 +11277,15 @@ msgstr "Zmiana cen wymaga roli administratora."
 msgid "web.admin.store.keep.title"
 msgstr "Jak działają zmiany"
 
+msgid "web.admin.store.preview"
+msgstr "Podgląd kafelka w sklepie"
+
+msgid "web.admin.store.preview.note"
+msgstr "Tak wygląda na stronie sklepu gry; nazwa i ikona pochodzą z zaimportowanego katalogu."
+
+msgid "web.admin.store.preview.hidden"
+msgstr "Niesprzedawany · ukryty na stronach sklepu"
+
 msgid "web.admin.store.keep_products"
 msgstr "Zmieniona cena obowiązuje od następnego zakupu. Punkt cenowy na stałe zachowuje numer produktu, bo gra kupuje według niego, więc punkt, który nie jest już sprzedawany, zostaje wyłączony, a nie usunięty."
 

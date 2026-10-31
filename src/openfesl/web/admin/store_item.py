@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 
 from babel import Locale
@@ -12,6 +12,7 @@ from openfesl.core.admins import Admin, Role
 from openfesl.core.catalogues import Catalogue
 from openfesl.core.games import Game
 from openfesl.core.inventory import COUNTED, PERMANENT, RENTED, Ownership
+from openfesl.core.store_front import front_item
 from openfesl.core.store_prices import (
     ItemPrices,
     PointChange,
@@ -28,6 +29,7 @@ from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.store import SECTION, StoreAdminViews, ordered_lines, price_row, store_url
 from openfesl.web.pages import whole_number
 from openfesl.web.sessions import check_form, toast
+from openfesl.web.store_front import Tile, kind_glyphs, tile
 from openfesl.web.store_texts import StoreTexts
 
 
@@ -98,6 +100,8 @@ def store_item_routes(sessions: AdminSessions, views: StoreAdminViews) -> APIRou
         catalogue, prices = await views.item(game, item_id, language)
         texts = StoreTexts(game, language, datetime.now(UTC))
         name = catalogue.name(item_id) or str(item_id)
+        # The preview follows the prices that a script sends as they are typed, or a refused form.
+        drafted = form or request.query_params
         return await sessions.render(
             request,
             "admin.StoreItem",
@@ -114,6 +118,8 @@ def store_item_routes(sessions: AdminSessions, views: StoreAdminViews) -> APIRou
             refused=refused.refusal.value if refused else "",
             refused_point=refused.product if refused else None,
             why=_why(texts, rules, name, form or {}, refused) if refused else "",
+            preview=None if prices.fixed else _preview(texts, catalogue, prices, drafted),
+            glyph=kind_glyphs(game).get(prices.item.kind, "bag"),
         )
 
     async def change(request: Request, game_id: str, item_id: int) -> Change:
@@ -207,6 +213,38 @@ def _number(text: str, product: int | None = None) -> int:
     if not (digits.isascii() and digits.isdecimal()) or len(digits) > 12:
         raise PriceRefused(PriceRefusal.PRICE, product)
     return int(digits)
+
+
+def _preview(
+    texts: StoreTexts, catalogue: Catalogue, prices: ItemPrices, form: Mapping[str, str]
+) -> Tile:
+    # The item's tile as the store front lists it, at the prices a form holds where it sends
+    # them, else at those saved; prices in the heroes' points are the game's menu's alone.
+    heroes = texts.game.heroes
+    drafted = any(key.startswith("price-") for key in form)
+    sold = []
+    for line in prices.lines:
+        product = line.product
+        if drafted:
+            try:
+                price = _number(form.get(f"price-{product.id}", ""))
+            except PriceRefused:
+                continue
+            if form.get("unsold") or not form.get(f"sold-{product.id}") or not price:
+                continue
+            product = replace(product, price=price)
+        if (drafted or product.published) and (not heroes or product.currency != heroes.points):
+            sold.append(product)
+    item = prices.item
+    icon = (
+        f"/admin/icons/{texts.game.id}/{item.id}"
+        if item.icon and catalogue.contents.icons
+        else None
+    )
+    if not sold:
+        hidden = tile(texts, catalogue, None, item, None, None, None, icon)
+        return replace(hidden, unsold=texts.text("web.admin.store.preview.hidden"))
+    return tile(texts, catalogue, front_item(texts.game, item, sold), item, None, None, None, icon)
 
 
 def _ownership(written: str) -> Ownership:

@@ -105,7 +105,10 @@ async function refresh(field, fields) {
       live.querySelector(`#${CSS.escape(focused)}`).focus();
     }
   });
-  update(lives[0].closest("form"));
+  const form = lives[0].closest("form");
+  if (form.matches("[data-admin-form]")) {
+    update(form);
+  }
 }
 
 // A field the browser finds missing is named beside the button instead of in its own bubble.

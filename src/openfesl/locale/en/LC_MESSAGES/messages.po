@@ -10655,6 +10655,15 @@ msgstr "Prices are changed with the admin role."
 msgid "web.admin.store.keep.title"
 msgstr "How changes apply"
 
+msgid "web.admin.store.preview"
+msgstr "Store tile preview"
+
+msgid "web.admin.store.preview.note"
+msgstr "Drawn as the game's store page lists it; the name and icon come from the imported catalogue."
+
+msgid "web.admin.store.preview.hidden"
+msgstr "Not sold · hidden from the store pages"
+
 msgid "web.admin.store.keep_products"
 msgstr "A changed price applies to the next purchase. A price point keeps its product's id for good, as the game buys by it, so one that is no longer sold is switched off rather than deleted."
 

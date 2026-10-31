@@ -1,4 +1,4 @@
-from collections.abc import Callable, Collection
+from collections.abc import Callable, Collection, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
@@ -50,6 +50,26 @@ class Owned:
     granted: bool
 
 
+def front_item(game: Game, item: Item, products: Sequence[Product]) -> FrontItem:
+    """Return an item as a store front lists it, sold alone by products.
+
+    Args:
+        game: The item's game.
+        item: The item, from the game's catalogue.
+        products: The products that sell it alone, at least one.
+    """
+    lowest: dict[str, int] = {}
+    for product in products:
+        lowest[product.currency] = min(lowest.get(product.currency, product.price), product.price)
+    currencies = list(game.currencies)
+    wallets = [wallet.currency for wallet in game.site.wallets] if game.site else []
+    listed = wallets + [code for code in currencies if code not in wallets]
+    first = min(products, key=lambda product: price_order(currencies, product))
+    prices = tuple(sorted(lowest.items(), key=lambda price: listed.index(price[0])))
+    uses = any(product.ownership.type == COUNTED for product in products)
+    return FrontItem(item, first.id, prices, requirement(game, item), uses)
+
+
 class StoreFront:
     """What a game's store sells alone, and what each hero holds of it, for its store front."""
 
@@ -89,22 +109,11 @@ class StoreFront:
             item = catalogue.item(product.item_id)
             if item is not None and not item.withheld and product.currency != points:
                 sold.setdefault(item.id, []).append(product)
-        currencies = list(game.currencies)
-        wallets = [wallet.currency for wallet in game.site.wallets] if game.site else []
-        listed = wallets + [code for code in currencies if code not in wallets]
         found = []
         for item_id, products in sold.items():
             item = catalogue.item(item_id)
             assert item is not None
-            lowest: dict[str, int] = {}
-            for product in products:
-                lowest[product.currency] = min(
-                    lowest.get(product.currency, product.price), product.price
-                )
-            first = min(products, key=lambda product: price_order(currencies, product))
-            prices = tuple(sorted(lowest.items(), key=lambda price: listed.index(price[0])))
-            uses = any(product.ownership.type == COUNTED for product in products)
-            found.append(FrontItem(item, first.id, prices, requirement(game, item), uses))
+            found.append(front_item(game, item, products))
         return found
 
     async def matching(self, game: Game, query: str) -> set[int]:

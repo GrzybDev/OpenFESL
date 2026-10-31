@@ -148,7 +148,7 @@
         <ul role="list" class="store-tiles enter-rows">
           {% for tile in tiles %}
             <li>
-              <StoreTile :tile="tile" :glyph="glyphs.get(tile.kind, 'bag')" />
+              <StoreTile :game="game" :tile="tile" :glyph="glyphs.get(tile.kind, 'bag')" />
             </li>
           {% endfor %}
         </ul>

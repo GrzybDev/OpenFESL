@@ -1,11 +1,12 @@
-{#def of, catalogue, row, lines: list, rule: str, manages: bool, adding, form: dict = {}, refused: str = "", refused_point: int | None = None, why: str = "" #}
+{#def of, catalogue, row, lines: list, rule: str, manages: bool, adding, form: dict = {}, refused: str = "", refused_point: int | None = None, why: str = "", preview = None, glyph: str = "bag" #}
 {# An item's prices in a game's store: its kind, which heroes may have it and its
    rule, then each price point with its product's id, currency, ownership, price, whether the price
    is the rule's or the item's own, and whether it is sold. Admins change the prices and what is
    sold, switch the item off, add a price point or reset the points to the rule; a refusal stands
    beside its row or the add panel and nothing is saved. The add panel's fields belong to a form of
    their own, so that Enter in them adds the point. An ability's levels are its steps, at the fixed
-   price of the heroes' points. #}
+   price of the heroes' points. Beside them the item's tile shows how the store page lists it,
+   following the prices as they are typed where scripts run. #}
 {% set game = of %}
 {% set item = row.prices.item %}
 {% set state = row.prices.state.value %}
@@ -30,6 +31,10 @@
          class="tabs prices-back">
       <Tab :href="list" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.store.all_items") }}</Tab>
     </nav>
+    {% if editable %}
+      <form method="post" action="{{ here }}" class="prices-form">
+        <CsrfField />
+    {% endif %}
     <div class="list-layout admin-layout">
       <div class="list-main prices-item-main">
         <section aria-labelledby="prices-item" class="account-part">
@@ -55,11 +60,9 @@
           {% endif %}
         </section>
 
-        {% if editable %}
-          <form method="post" action="{{ here }}" class="prices-form">
-            <CsrfField />
-        {% endif %}
-        <section aria-labelledby="prices-points" class="account-part">
+        <section aria-labelledby="prices-points"
+                 {% if editable %} data-refresh{% endif %}
+                 class="account-part">
           {% if editable %}
             <label class="check-row prices-off-row">
               <span class="prices-off-text">
@@ -260,18 +263,36 @@
             </details>
             <FormButton icon="retry" :formaction="here ~ '/reset'">{{ _("web.admin.store.reset") }}</FormButton>
           </div>
-          </form>
-          <form id="prices-add" method="post" action="{{ here }}/add">
-            <CsrfField />
-          </form>
         {% endif %}
       </div>
       <div class="list-side admin-side">
+        {% if preview %}
+          <section aria-labelledby="prices-preview">
+            <Bar id="prices-preview">{{ _("web.admin.store.preview") }}</Bar>
+            <div class="prices-preview">
+              <div data-live="{{ here }}"
+                   data-game="{{ game.id }}"
+                   class="prices-preview-tile">
+                {# Inside the live part, so that a refresh dims the tile as it hides it. #}
+                <div{% if not preview.prices %} class="prices-preview-off"{% endif %}>
+                  <StoreTile :game="game" :tile="preview" :glyph="glyph" />
+                </div>
+              </div>
+              <p class="prices-preview-note">{{ _("web.admin.store.preview.note") }}</p>
+            </div>
+          </section>
+        {% endif %}
         <section aria-labelledby="prices-item-note">
           <Bar id="prices-item-note">{{ _("web.admin.store.keep.title") }}</Bar>
           <p class="bar-text body-text">{{ _("web.admin.store.keep_products") }}</p>
         </section>
       </div>
     </div>
+    {% if editable %}
+      </form>
+      <form id="prices-add" method="post" action="{{ here }}/add">
+        <CsrfField />
+      </form>
+    {% endif %}
   </Panel>
 </AdminPage>

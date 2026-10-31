@@ -1,6 +1,7 @@
 /* An item's prices in a game's store: its name and facts, then its price points with their
-   product, currency, ownership, price, where the price comes from and whether it is sold. Where
-   the table does not fit, each price point is a block of its own. */
+   product, currency, ownership, price, where the price comes from and whether it is sold, beside
+   the item's tile as the store lists it. Where the table does not fit, each price point is a
+   block of its own. */
 @layer pages {
   .prices-back {
     justify-content: flex-start;
@@ -71,11 +72,6 @@
     text-transform: uppercase;
   }
 
-  .prices-form {
-    display: grid;
-    gap: 14px;
-  }
-
   .check-row.prices-off-row {
     grid-template-columns: minmax(0, 1fr) 44px;
     margin-bottom: 2px;
@@ -130,6 +126,34 @@
     .badge {
       flex: none;
     }
+  }
+
+  /* The item's tile as the store front draws it, on the field of the game's site; dimmed while
+     the store does not sell it. */
+  .prices-preview {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    background: #23251a;
+    padding: 18px 16px 14px;
+  }
+
+  .prices-preview-tile {
+    /* The store front's heading face, which its tiles take from the site's frame. */
+    --site-heading: "Urbanist", "Barlow", system-ui, sans-serif;
+    width: min(100%, 240px);
+  }
+
+  .prices-preview-off .store-tile {
+    opacity: 0.55;
+  }
+
+  .prices-preview-note {
+    justify-self: stretch;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--soft);
   }
 
   /* Save comes first in the form, so that Enter in a price saves, and last on the screen. */

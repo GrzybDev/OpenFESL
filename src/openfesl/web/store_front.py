@@ -193,7 +193,7 @@ class StoreFrontPages:
             art = self._pages.shows_art(request, game)
             buy = localize(f"/{game.id}{ITEM.format(number='')}", language)
             tiles = [
-                _tile(
+                tile(
                     texts,
                     catalogue,
                     found,
@@ -359,18 +359,32 @@ def _inventory(
     return [(sold.get(item.id), item) for item in kept]
 
 
-def _tile(
+def tile(
     texts: StoreTexts,
     catalogue: Catalogue,
     found: FrontItem | None,
     item: Item,
     hero: Hero | None,
     owned: Owned | None,
-    buy: str,
+    buy: str | None,
     icon: str | None,
 ) -> Tile:
-    # An item's tile: its name, which heroes may have it, its lowest prices and what the chosen
-    # hero holds of it.
+    """Return an item's tile on a store front, for a hero or for none.
+
+    It holds the item's name, which heroes may have it, its lowest prices and what the hero
+    holds of it.
+
+    Args:
+        texts: Write in the page's language.
+        catalogue: The game's catalogue, which names the item.
+        found: The item as the store front lists it; none for an item the store does not sell.
+        item: The item.
+        hero: The chosen hero; none without one.
+        owned: What the hero holds of the item; none when it holds none.
+        buy: The address of the store's item pages, without the item's number; none for a tile
+            that leads nowhere.
+        icon: The address of the item's icon; none where the page shows OpenFESL's tile.
+    """
     name = catalogue.name(item.id) or str(item.id)
     needs = requirement(texts.game, item) if found is None else found.requirement
     parts = [
@@ -394,7 +408,9 @@ def _tile(
         Price(code, texts.amount(price), texts.currency(code), texts.coin(code))
         for code, price in found.prices
     ]
-    href = f"{buy}{found.number}" + (f"?hero={hero.persona.id}" if hero else "")
+    href = None
+    if buy is not None:
+        href = f"{buy}{found.number}" + (f"?hero={hero.persona.id}" if hero else "")
     return Tile(name, item.kind, href, icon, requires, prices, line, state)
 
 

@@ -102,6 +102,49 @@ async def test_enter_in_the_add_panel_adds_the_price_point_without_scripts(
 
 
 @pytest.mark.usefixtures("prompt_actions")
+async def test_the_item_page_previews_the_store_tile_as_its_prices_are_typed(
+    admin_provider: IdentityProvider,
+    base: str,
+    server_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    edge: Browser,
+) -> None:
+    await stock(server_url, tmp_path, capsys)
+    coat = f"{base}/admin/store/bfheroes/items/3"
+    admin_provider.user = WARDEN
+    async with httpx2.AsyncClient() as client:
+        shown = visible((await sign_in(client, base, next="/admin/store/bfheroes/items/3")).content)
+        assert "Store tile preview Appearance Invented Coat Royal Army from 1,300 Funds" in shown
+        # What a script sends as the prices are typed: the month switched off, then the item.
+        typed = {"price-1": "2,400", "sold-1": "1", "price-2": "1300"}
+        drafted = visible((await client.get(coat, params=typed)).content)
+        assert "Invented Coat Royal Army from 2,400 Funds" in drafted
+        off = visible((await client.get(coat, params=typed | {"unsold": "1"})).content)
+        assert "Invented Coat Royal Army Not sold · hidden from the store pages" in off
+        dash = visible((await client.get(f"{base}/admin/store/bfheroes/items/2096")).content)
+        assert "Store tile preview" not in dash
+    admin_provider.user = KEEPER
+    async with httpx2.AsyncClient() as client:
+        await sign_in(client, base, next="/admin/store/bfheroes/items/3")
+        context = await edge.new_context(locale="en-GB")
+        for name, value in client.cookies.items():
+            await context.add_cookies([{"name": name, "value": value, "url": base}])
+    page = await context.new_page()
+    await page.goto(coat)
+    tile = page.locator("[data-live] .store-tile")
+    await page.locator("[name=price-2]").fill("999")
+    await tile.get_by_text("999").wait_for()
+    await page.locator("label.prices-off-row").click()
+    await tile.get_by_text("Not sold · hidden from the store pages").wait_for()
+    # Nothing was saved meanwhile.
+    again = await context.new_page()
+    await again.goto(coat)
+    assert "1,300" in await again.locator("[data-live]").inner_text()
+    await context.close()
+
+
+@pytest.mark.usefixtures("prompt_actions")
 async def test_admins_change_add_and_reset_an_items_price_points_that_the_game_then_sells(
     admin_provider: IdentityProvider,
     base: str,
