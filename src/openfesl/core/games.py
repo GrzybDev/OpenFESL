@@ -502,6 +502,8 @@ class Game(BaseModel):
         # A code gives what a reward gives, in the rewards' Funds and with their fallback.
         if self.codes and not (self.rewards and self.site):
             raise ValueError("codes need rewards and a site")
+        if "redeem" in self.pages and not self.codes:
+            raise ValueError("the redeem page needs codes")
         return self
 
     @model_validator(mode="after")

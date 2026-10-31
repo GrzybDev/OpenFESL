@@ -185,6 +185,13 @@
     font-weight: 600;
   }
 
+  .code-link {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    overflow-wrap: anywhere;
+    text-decoration-line: underline;
+  }
+
   /* The editor: the drawn code beside Generate again, the item search's choices, the ways of
      giving the chosen item, the contents so far, and the side column's limits, end and labels. */
   .code-form-head .game-chip {

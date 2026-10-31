@@ -8,7 +8,7 @@ from babel.numbers import format_percent
 
 from openfesl.core.catalogues import Catalogue
 from openfesl.core.games import Game
-from openfesl.core.inventory import COUNTED, PERMANENT, RENTED, Ownership
+from openfesl.core.inventory import COUNTED, PERMANENT, RENTED, Held, Ownership
 from openfesl.core.reward_rules import Gift
 from openfesl.core.store import discount
 from openfesl.core.store_items import HeroChoice, Kind, PricePoint, Requirement, StoreItem, Unfit
@@ -318,6 +318,18 @@ class StoreTexts:
         if held.expires:
             return self.count("web.store.tile.days", self.days_left(held.expires))
         return self.count("web.store.tile.uses", held.uses or 0)
+
+    def left(self, held: Held | None) -> str:
+        """Return the days or uses a hero has left of an item, such as 9 days; empty for none.
+
+        Args:
+            held: How the hero holds the item; none when it holds it for good.
+        """
+        if held and held.expires:
+            return self.count("web.store.price.days", self.days_left(held.expires))
+        if held and held.type == COUNTED:
+            return self.count("web.store.price.uses", held.uses or 0)
+        return ""
 
     def days_left(self, ends: datetime) -> int:
         """Return the days left until a moment, counting a part of a day as a day.

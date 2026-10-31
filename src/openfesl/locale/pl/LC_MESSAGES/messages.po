@@ -4435,6 +4435,9 @@ msgstr "Jedno konto na kod · wykorzystano %(used)s z %(most)s"
 msgid "web.admin.keys.labels"
 msgstr "Etykiety"
 
+msgid "web.admin.keys.link"
+msgstr "Link"
+
 msgid "web.admin.keys.made"
 msgstr "Utworzenie"
 
@@ -7147,6 +7150,15 @@ msgstr "OpenFESL nie przyjmuje płatności i nic w tym serwisie nie kupuje się 
 msgid "web.funds.source"
 msgstr "%(currency)s pochodzą wyłącznie ze źródła poniżej."
 
+msgid "web.funds.sources"
+msgstr "%(currency)s pochodzą wyłącznie ze źródeł poniżej."
+
+msgid "web.funds.codes"
+msgstr "Kody"
+
+msgid "web.funds.codes.text"
+msgstr "Kody od administracji tego serwisu mogą dawać %(currency)s, raz każdemu kontu, które je zrealizuje."
+
 msgid "web.funds.no_source"
 msgstr "Nic w tym serwisie nie daje %(currency)s."
 
@@ -9293,6 +9305,9 @@ msgstr "Zwycięstwa: %(count)s z %(goal)s"
 msgid "web.site.page.rewards"
 msgstr "Nagrody"
 
+msgid "web.site.page.redeem"
+msgstr "Zrealizuj kod"
+
 msgid "games.bfheroes.menu.community"
 msgstr "Społeczność"
 
@@ -9643,6 +9658,201 @@ msgstr "+%(amount)s za bohatera"
 
 msgid "web.funds.rewards.best"
 msgstr "Najlepszy wynik: %(hero)s, %(progress)s"
+
+msgid "web.redeem.title"
+msgstr "Zrealizuj kod"
+
+msgid "web.redeem.lead"
+msgstr "Kody od administracji tego serwisu dają przedmioty bohaterowi, a Funds lub klucze do skrzyń kontu."
+
+msgid "web.redeem.enter"
+msgstr "Wpisz kod"
+
+msgid "web.redeem.field"
+msgstr "Kod"
+
+msgid "web.redeem.hint"
+msgstr "Cztery grupy po cztery litery i cyfry, jak XXXX-XXXX-XXXX-XXXX. Wielkość liter, spacje i myślniki nie mają znaczenia."
+
+msgid "web.redeem.show"
+msgstr "Pokaż zawartość"
+
+msgid "web.redeem.rule.until"
+msgstr "Raz na konto · do %(end)s"
+
+msgid "web.redeem.rule.open"
+msgstr "Raz na konto · bez terminu"
+
+msgid "web.redeem.another_code"
+msgstr "Inny kod"
+
+msgid "web.redeem.gives"
+msgstr "Zawartość"
+
+msgid "web.redeem.item"
+msgstr "Przedmiot %(id)s"
+
+msgid "web.redeem.to_account"
+msgstr "Na konto"
+
+msgid "web.redeem.keys"
+msgstr "Klucze do skrzyń"
+
+msgid "web.redeem.item_missing"
+msgstr "%(item)s nie występuje w katalogu zaimportowanym w tym serwisie. Zostanie przyznany według numeru; gra pokaże własną nazwę."
+
+msgid "web.redeem.hero"
+msgstr "Bohater, który dostanie przedmioty"
+
+msgid "web.redeem.change.new"
+msgstr "%(item)s: nowy, %(what)s"
+
+msgid "web.redeem.change.days"
+msgstr "%(item)s: w posiadaniu, zostało: %(left)s; dodaje %(what)s, potem zostanie: %(total)s"
+
+msgid "web.redeem.change.uses"
+msgstr "%(item)s: dodaje %(what)s, potem razem: %(total)s"
+
+msgid "web.redeem.change.permanent"
+msgstr "%(item)s: odtąd na stałe"
+
+msgid "web.redeem.change.fallback"
+msgstr "%(item)s: posiadany na stałe, więc zamiast tego %(fallback)s"
+
+msgid "web.redeem.unfit.faction"
+msgstr "%(item)s to przedmiot frakcji %(faction)s; %(hero)s należy do frakcji %(mine)s."
+
+msgid "web.redeem.unfit.class"
+msgstr "%(item)s jest dla klasy %(classes)s; %(hero)s ma klasę %(mine)s."
+
+msgid "web.redeem.unfit.level"
+msgstr "%(item)s wymaga poziomu %(level)s; %(hero)s ma poziom %(mine)s."
+
+msgid "web.redeem.unfit.disabled"
+msgstr "Bohater %(hero)s jest wyłączony z gry."
+
+msgid "web.redeem.wallet_note"
+msgstr "Funds i klucze trafiają na konto, niezależnie od tego, który bohater dostanie przedmioty."
+
+msgid "web.redeem.submit"
+msgstr "Zrealizuj dla: %(hero)s"
+
+msgid "web.redeem.submit.plain"
+msgstr "Zrealizuj"
+
+msgid "web.redeem.next_login"
+msgstr "%(game)s pokaże przedmioty przy następnym logowaniu bohatera."
+
+msgid "web.redeem.from_link"
+msgstr "Kod przyszedł z linkiem. Nic nie zostanie zrealizowane przed naciśnięciem przycisku Zrealizuj."
+
+msgid "web.redeem.done"
+msgstr "Kod zrealizowany"
+
+msgid "web.redeem.done.hero"
+msgstr "Kod %(code)s zrealizowany dla: %(hero)s."
+
+msgid "web.redeem.done.hero.wallet"
+msgstr "Kod %(code)s zrealizowany dla: %(hero)s. Na konto trafiło: %(given)s."
+
+msgid "web.redeem.done.account"
+msgstr "Kod %(code)s zrealizowany."
+
+msgid "web.redeem.done.account.wallet"
+msgstr "Kod %(code)s zrealizowany. Na konto trafiło: %(given)s."
+
+msgid "web.redeem.done.account_row"
+msgstr "Konto"
+
+msgid "web.redeem.done.added"
+msgstr "%(item)s, dodano %(what)s; zostało: %(left)s"
+
+msgid "web.redeem.done.permanent"
+msgstr "%(item)s, na stałe"
+
+msgid "web.redeem.done.fallback"
+msgstr "%(item)s, %(what)s, w miejsce przedmiotu posiadanego na stałe"
+
+msgid "web.redeem.done.funds"
+msgstr "dodano %(amount)s; teraz: %(total)s"
+
+msgid "web.redeem.done.keys"
+msgstr "dodano: %(added)s; teraz: %(total)s"
+
+msgid "web.redeem.done.next_login"
+msgstr "%(game)s pokaże przedmioty przy następnym logowaniu bohatera %(hero)s."
+
+msgid "web.redeem.again"
+msgstr "Zrealizuj kolejny kod"
+
+msgid "web.redeem.my_heroes"
+msgstr "Moi bohaterowie"
+
+msgid "web.redeem.signed_out"
+msgstr "Realizacja wymaga zalogowania"
+
+msgid "web.redeem.signed_out.text"
+msgstr "Kody dają przedmioty bohaterom konta, a Funds i klucze jego portfelowi, więc realizacja wymaga zalogowania. Po zalogowaniu ta strona otworzy się ponownie z tym kodem."
+
+msgid "web.redeem.signed_out.code"
+msgstr "Kod z adresu"
+
+msgid "web.redeem.stays"
+msgstr "Ten kod pozostaje dostępny dla konta."
+
+msgid "web.redeem.stays.until"
+msgstr "Ten kod pozostaje dostępny dla konta do %(end)s."
+
+msgid "web.redeem.refused.unknown"
+msgstr "Ten kod nie działa w tym serwisie. Kody składają się z cyfr 1-9 i liter A-Z bez I oraz O."
+
+msgid "web.redeem.refused.expired"
+msgstr "Ten kod wygasł %(date)s."
+
+msgid "web.redeem.refused.used_up"
+msgstr "Ten kod wykorzystano już tyle razy, ile pozwala."
+
+msgid "web.redeem.refused.redeemed"
+msgstr "To konto zrealizowało ten kod %(date)s dla: %(hero)s. Każdy kod działa raz na konto."
+
+msgid "web.redeem.refused.redeemed.account"
+msgstr "To konto zrealizowało ten kod %(date)s. Każdy kod działa raz na konto."
+
+msgid "web.redeem.refused.raced"
+msgstr "Tutaj nic nie zostało zrealizowane: to konto przed chwilą zrealizowało ten kod w innym oknie dla: %(hero)s."
+
+msgid "web.redeem.refused.raced.account"
+msgstr "Tutaj nic nie zostało zrealizowane: to konto przed chwilą zrealizowało ten kod w innym oknie."
+
+msgid "web.redeem.refused.no_hero"
+msgstr "Przedmioty z tego kodu trafiają do bohatera, a konto nie ma jeszcze żadnego."
+
+msgid "web.redeem.refused.no_fit"
+msgstr "Przedmioty z tego kodu wymagają bohatera: %(rule)s, a konto takiego nie ma."
+
+msgid "web.redeem.refused.no_fit.level"
+msgstr "Przedmioty z tego kodu wymagają bohatera: %(rule)s. Najbliższy z bohaterów konta, %(hero)s, ma poziom %(level)s."
+
+msgid "web.redeem.refused.balance"
+msgstr "%(amount)s przekroczyłoby największe saldo, jakie mieści portfel: %(most)s. Nic nie zostało zrealizowane."
+
+msgid "web.redeem.refused.form"
+msgstr "Nic nie zostało zrealizowane: formularz wygasł. Kod jest znów widoczny w formularzu."
+
+msgid "web.redeem.how"
+msgstr "Jak działają kody"
+
+msgid "web.redeem.how.source"
+msgstr "Kody pochodzą od administracji tego serwisu, na przykład jako prezenty w ogłoszeniach."
+
+msgid "web.redeem.how.once"
+msgstr "Każdy kod działa raz na konto. Niektóre kody wygasają o ustalonej porze albo po wykorzystaniu przez określoną liczbę kont."
+
+msgid "web.redeem.how.where"
+msgstr "Przedmioty trafiają do jednego bohatera, który może używać ich wszystkich; Funds i klucze do skrzyń trafiają na konto."
+
+msgid "web.redeem.how.login"
+msgstr "%(game)s pokazuje nowe przedmioty przy następnym logowaniu bohatera."
 
 msgid "games.bfheroes.funds.rewards.lead"
 msgstr "Nagrody ustala administracja tego serwisu. Pierwszy bohater i 100 meczów liczą się raz na konto; każdy poziom liczy się raz dla każdego bohatera, który go osiągnie. Odbiór od razu dodaje %(currency)s na konto."
@@ -11344,6 +11554,9 @@ msgstr "Umiejętności zwrócone w grze"
 
 msgid "web.admin.ledger.reason.reward"
 msgstr "Odebrana nagroda"
+
+msgid "web.admin.ledger.reason.code"
+msgstr "Zrealizowany kod"
 
 msgid "web.admin.ledger.purchase"
 msgstr "zakup %(id)s"

@@ -1,7 +1,7 @@
 // The motion and keyboard of a game's own site: one menu open at a time, closed by Escape, a
 // click outside or another menu, playing its closing first; and the message of the last change,
 // which its button closes. Without scripts the menus open and close as disclosures.
-import { closeDialog, flash, reducedMotion } from "./naming.js";
+import { closeDialog, fill, flash, reducedMotion } from "./naming.js";
 
 document.addEventListener("click", (event) => {
   if (!(event.target instanceof Element)) {
@@ -105,6 +105,21 @@ document.addEventListener("click", (event) => {
     flash(document.getElementById(link.getAttribute("aria-describedby")));
   }
 });
+
+// The redeem form's button names the hero that the code's items go to, as the hero tiles choose
+// it; without scripts it says Redeem alone.
+for (const form of document.querySelectorAll("[data-redeem]")) {
+  const label = form.querySelector("[data-redeem-label]");
+  const show = () => {
+    const hero = form.querySelector("[name=hero]:checked")?.closest("label");
+    if (hero) {
+      const name = hero.querySelector(".store-hero-name").textContent;
+      label.textContent = fill(form.dataset.for, { hero: name });
+    }
+  };
+  form.addEventListener("change", show);
+  show();
+}
 
 /**
  * Opens or closes the hero selector, playing its motion.

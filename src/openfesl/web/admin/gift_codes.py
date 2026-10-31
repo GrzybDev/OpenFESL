@@ -2,7 +2,7 @@ import re
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from typing import Any
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse, Response
@@ -258,6 +258,7 @@ def gift_code_routes(views: GiftCodeViews) -> APIRouter:
         game, entry = await views.found(code)
         texts, catalogue = await views.words(game, request.state.language)
         codes = await views.store.batch_codes(entry.id) if entry.batch else []
+        assert game.site is not None
         return await sessions.render(
             request,
             "admin.GiftCode",
@@ -269,6 +270,7 @@ def gift_code_routes(views: GiftCodeViews) -> APIRouter:
             made=await views.store.made(entry.code),
             codes=codes[:SHOWN],
             more=max(len(codes) - SHOWN, 0),
+            link=f"/{game.id}{game.site.path('redeem')}?{urlencode({'key': entry.code})}",
             manages=admin.role is Role.ADMIN,
         )
 

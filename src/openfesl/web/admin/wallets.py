@@ -27,7 +27,7 @@ REASONS = {
     "purchases": ("purchase", "rename", "hero-slot"),
     "matches": ("server",),
     "levels": ("level", "refund"),
-    "rewards": ("reward",),
+    "rewards": ("reward", "code"),
     "admin": ("admin",),
     "start": ("allowance",),
 }

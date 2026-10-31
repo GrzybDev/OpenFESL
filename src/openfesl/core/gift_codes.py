@@ -1,14 +1,42 @@
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, field
-from datetime import datetime
+from dataclasses import dataclass, field, replace
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any, Protocol
 
+from openfesl.core.account_rules import account_rules
 from openfesl.core.admins import Admin
+from openfesl.core.catalogues import Catalogues
+from openfesl.core.chests import key_tag
+from openfesl.core.games import Game
+from openfesl.core.heroes import Hero, Heroes
+from openfesl.core.inventory import Held, Ownership
+from openfesl.core.policies import SettingStore
 from openfesl.core.reward_rules import Gift
+from openfesl.core.rewards import Rewards
+from openfesl.core.store_items import requirement
+from openfesl.core.wallets import Wallet
 
 # The most personal codes one batch makes.
 MOST_BATCH = 1000
+
+
+class CodeRefusal(StrEnum):
+    """Why a code gives an account nothing."""
+
+    UNKNOWN = "unknown"
+    """No code of the game is written so, or it is disabled, which players are not told."""
+    EXPIRED = "expired"
+    USED_UP = "used_up"
+    """As many accounts as it allows redeemed it."""
+    REDEEMED = "redeemed"
+    """The account redeemed it before, which each account may once."""
+    NO_HERO = "no_hero"
+    """Its items go to a hero, and the account has none."""
+    NO_FIT = "no_fit"
+    """No hero of the account may have all of its items."""
+    BALANCE = "balance"
+    """Its Funds would take the account's wallet past the most a wallet holds."""
 
 
 class CodeState(StrEnum):
@@ -134,11 +162,35 @@ class GiftCodeStore(Protocol):
             game: The game's id.
         """
 
-    async def gift_code(self, code: str) -> GiftCode | None:
+    async def gift_code(self, code: str, whole: bool = True) -> GiftCode | None:
         """Return a code, or the batch it belongs to, whether it gives anything or not.
 
         Args:
             code: The code, in any case.
+            whole: Whether a code of a batch stands for the whole batch; otherwise for itself.
+        """
+
+    async def redemption(self, code: str, account_id: int) -> Redemption | None:
+        """Return an account's redemption of a code, if it redeemed it.
+
+        Args:
+            code: The code as stored.
+            account_id: The account.
+        """
+
+    async def redeem(self, grant: CodeGrant) -> Redemption:
+        """Redeem a code for an account and give what it gives, all of it or none.
+
+        The code is checked again under its lock, so that accounts redeeming it at once count
+        its uses in turn and an account redeems it once.
+
+        Args:
+            grant: What the redemption gives.
+
+        Raises:
+            CodeRefused: When the code is unknown or disabled, ended or used up by now, the
+                account redeemed it already, also at the same time, or its Funds would pass the
+                most a wallet holds.
         """
 
     async def batch_codes(self, batch: int) -> list[str]:
@@ -190,3 +242,224 @@ class GiftCodeStore(Protocol):
         Returns:
             Whether it changed, which it does not when it was so already.
         """
+
+
+@dataclass(frozen=True, slots=True)
+class GivenItem:
+    """An item that a redemption gave a hero.
+
+    Attributes:
+        item_id: The item's number.
+        ownership: How it was given.
+        held: How the hero held it after; none for an item it owned for good.
+        fallback: Whether it is the rewards' fallback, given for an item the hero owned for good.
+    """
+
+    item_id: int
+    ownership: Ownership
+    held: Held | None
+    fallback: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class Redemption:
+    """An account's redemption of a code, with what it gave.
+
+    Attributes:
+        code: The code.
+        labels: What players see the code called, by language.
+        account_id: The account.
+        account: The account's login name.
+        hero_id: The persona of the hero its items went to; none for none, or a hero since gone.
+        hero: The hero's name; none likewise.
+        at: When it was redeemed.
+        items: The items the hero got.
+        funds: The Funds the account got, and its balance after; none for none.
+        keys: The treasure chest keys the account got, and how many it held after; none for none.
+    """
+
+    code: str
+    labels: Mapping[str, str]
+    account_id: int
+    account: str
+    hero_id: int | None
+    hero: str | None
+    at: datetime
+    items: tuple[GivenItem, ...] = ()
+    funds: tuple[int, int] | None = None
+    keys: tuple[int, int] | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class CodeGrant:
+    """What redeeming a code gives at once, all of it or none.
+
+    Attributes:
+        code: The code as stored.
+        game: The id of the game whose code it is.
+        account_id: The account.
+        hero_id: The persona of the hero its items go to; none for a code without items.
+        items: The items the hero gets, each with its ownership.
+        fallback: What the hero gets instead of an item it owns for good.
+        funds: The account's wallet the Funds go to, and how many; none for none.
+        keys: The tag of the account's keys, and how many it gets; none for none.
+    """
+
+    code: str
+    game: str
+    account_id: int
+    hero_id: int | None
+    items: tuple[tuple[int, Ownership], ...]
+    fallback: tuple[int, Ownership]
+    funds: tuple[Wallet, int] | None
+    keys: tuple[str, int] | None
+
+
+class CodeRefused(Exception):
+    """Raised for a code that gave nothing; nothing was given."""
+
+    def __init__(self, refusal: CodeRefusal, earlier: Redemption | None = None) -> None:
+        """Say why the code gave nothing.
+
+        Args:
+            refusal: Why.
+            earlier: The account's redemption of it before, for a code it redeemed already.
+        """
+        super().__init__(refusal.value)
+        self.refusal = refusal
+        self.earlier = earlier
+
+
+@dataclass(frozen=True, slots=True)
+class Look:
+    """A code as an account sees it before redeeming it.
+
+    Attributes:
+        code: The code in its own form, or as typed where it has none.
+        entry: The code; none for no code of the game, or a disabled one.
+        refusal: Why it gives the account nothing; none when it may redeem it.
+        earlier: The account's redemption of it before, for a code it redeemed already.
+        heroes: The account's heroes, oldest first.
+        fitting: The personas of the heroes that may have every item it gives.
+        fallback: What a hero gets instead of an item it owns for good, as the rewards give it.
+    """
+
+    code: str
+    entry: GiftCode | None
+    refusal: CodeRefusal | None
+    earlier: Redemption | None = None
+    heroes: tuple[Hero, ...] = ()
+    fitting: tuple[int, ...] = ()
+    fallback: tuple[int, Ownership] | None = None
+
+
+class GiftCodes:
+    """The codes that a game's site redeems for gifts: items to a hero, Funds and keys."""
+
+    def __init__(
+        self,
+        store: GiftCodeStore,
+        rewards: Rewards,
+        heroes: Heroes,
+        catalogues: Catalogues,
+        settings: SettingStore,
+    ) -> None:
+        """Redeem codes from a store, giving what the rewards give.
+
+        Args:
+            store: Where the codes are kept, and redeemed.
+            rewards: Tell the Funds and the fallback that codes give, as the rewards do.
+            heroes: The accounts' heroes, with their factions, classes and levels.
+            catalogues: The games' imported catalogues, which tell what fits a hero.
+            settings: The instance's settings, which set the wallets' allowance.
+        """
+        self._store = store
+        self._rewards = rewards
+        self._heroes = heroes
+        self._catalogues = catalogues
+        self._settings = settings
+
+    async def look(self, game: Game, account_id: int, typed: str) -> Look:
+        """Return a code as an account sees it: what it gives and to which heroes, or why not.
+
+        Args:
+            game: The game, whose site redeems codes.
+            account_id: The account.
+            typed: The code as typed or linked, in any case, with or without spaces and dashes.
+        """
+        assert game.codes is not None
+        code = game.codes.read(typed)
+        entry = await self._store.gift_code(code, whole=False) if code else None
+        if entry is None or entry.game != game.id or not entry.enabled:
+            return Look(code or typed.strip(), None, CodeRefusal.UNKNOWN)
+        assert code is not None
+        roster = (await self._heroes.roster(game, account_id)).heroes
+        contents = self._catalogues.contents(game)
+        known = [contents.items[item] for item, _ in entry.gift.items if item in contents.items]
+        fitting = tuple(
+            hero.persona.id
+            for hero in roster
+            if hero.playable and all(requirement(game, item).unfit(hero) is None for item in known)
+        )
+        rules = await self._rewards.rules(game)
+        fallback = rules.fallback if rules else None
+        found = Look(code, entry, None, None, tuple(roster), fitting, fallback)
+        if entry.expires is not None and entry.expires <= datetime.now(UTC):
+            return _refused(found, CodeRefusal.EXPIRED)
+        if earlier := await self._store.redemption(code, account_id):
+            return _refused(found, CodeRefusal.REDEEMED, earlier)
+        if entry.max_uses is not None and entry.uses >= entry.max_uses:
+            return _refused(found, CodeRefusal.USED_UP)
+        if entry.gift.items and not roster:
+            return _refused(found, CodeRefusal.NO_HERO)
+        if entry.gift.items and not fitting:
+            return _refused(found, CodeRefusal.NO_FIT)
+        return found
+
+    async def redeem(
+        self, game: Game, account_id: int, typed: str, hero_id: int | None
+    ) -> Redemption:
+        """Redeem a code for an account, its items going to one of its heroes.
+
+        Everything is checked again at the moment of redeeming, and the gift is given at once:
+        items to the hero, Funds and keys to the account.
+
+        Args:
+            game: The game, whose site redeems codes.
+            account_id: The account.
+            typed: The code as typed or linked.
+            hero_id: The persona of the hero its items go to; none for a code without items.
+
+        Raises:
+            CodeRefused: When the code gives the account nothing, or the hero may not have its
+                items.
+        """
+        found = await self.look(game, account_id, typed)
+        if found.refusal is not None or found.entry is None:
+            raise CodeRefused(found.refusal or CodeRefusal.UNKNOWN, found.earlier)
+        gift = found.entry.gift
+        if gift.items and hero_id not in found.fitting:
+            raise CodeRefused(CodeRefusal.NO_FIT)
+        rules = await self._rewards.rules(game)
+        assert rules is not None
+        funds = None
+        if gift.funds:
+            currencies = (await account_rules(game, self._settings)).currencies
+            allowance = currencies[rules.currency].allowance
+            funds = Wallet(game.id, rules.currency, account_id, None, allowance), gift.funds
+        keys = (key_tag(game.chests), gift.keys) if gift.keys and game.chests else None
+        grant = CodeGrant(
+            found.code,
+            game.id,
+            account_id,
+            hero_id if gift.items else None,
+            gift.items,
+            rules.fallback,
+            funds,
+            keys,
+        )
+        return await self._store.redeem(grant)
+
+
+def _refused(found: Look, refusal: CodeRefusal, earlier: Redemption | None = None) -> Look:
+    return replace(found, refusal=refusal, earlier=earlier)

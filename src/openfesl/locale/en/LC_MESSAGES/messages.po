@@ -4249,6 +4249,9 @@ msgstr "One account per code · %(used)s of %(most)s used"
 msgid "web.admin.keys.labels"
 msgstr "Labels"
 
+msgid "web.admin.keys.link"
+msgstr "Link"
+
 msgid "web.admin.keys.made"
 msgstr "Made"
 
@@ -6871,6 +6874,15 @@ msgstr "OpenFESL takes no payments, and nothing on this service is bought with m
 msgid "web.funds.source"
 msgstr "%(currency)s come only from the source below."
 
+msgid "web.funds.sources"
+msgstr "%(currency)s come only from the sources below."
+
+msgid "web.funds.codes"
+msgstr "Codes"
+
+msgid "web.funds.codes.text"
+msgstr "Codes from the administrators of this service may give %(currency)s, once to each account that redeems them."
+
 msgid "web.funds.no_source"
 msgstr "Nothing on this service gives %(currency)s."
 
@@ -8767,6 +8779,9 @@ msgstr "%(count)s of %(goal)s wins"
 msgid "web.site.page.rewards"
 msgstr "Rewards"
 
+msgid "web.site.page.redeem"
+msgstr "Redeem a code"
+
 msgid "games.bfheroes.menu.community"
 msgstr "Community"
 
@@ -9093,6 +9108,201 @@ msgstr "+%(amount)s a hero"
 
 msgid "web.funds.rewards.best"
 msgstr "Best: %(hero)s, %(progress)s"
+
+msgid "web.redeem.title"
+msgstr "Redeem a code"
+
+msgid "web.redeem.lead"
+msgstr "Codes from the administrators of this service give items to a hero, and Funds or treasure chest keys to the account."
+
+msgid "web.redeem.enter"
+msgstr "Enter a code"
+
+msgid "web.redeem.field"
+msgstr "Code"
+
+msgid "web.redeem.hint"
+msgstr "Four groups of four letters and digits, as XXXX-XXXX-XXXX-XXXX. Capitals, spaces and dashes do not matter."
+
+msgid "web.redeem.show"
+msgstr "Show what it gives"
+
+msgid "web.redeem.rule.until"
+msgstr "Once per account · until %(end)s"
+
+msgid "web.redeem.rule.open"
+msgstr "Once per account · no end"
+
+msgid "web.redeem.another_code"
+msgstr "Another code"
+
+msgid "web.redeem.gives"
+msgstr "What it gives"
+
+msgid "web.redeem.item"
+msgstr "Item %(id)s"
+
+msgid "web.redeem.to_account"
+msgstr "To the account"
+
+msgid "web.redeem.keys"
+msgstr "Treasure chest keys"
+
+msgid "web.redeem.item_missing"
+msgstr "%(item)s is not in the catalogue this service imported. It is given by its number; the game shows its own name for it."
+
+msgid "web.redeem.hero"
+msgstr "Hero for the items"
+
+msgid "web.redeem.change.new"
+msgstr "%(item)s: new, %(what)s"
+
+msgid "web.redeem.change.days"
+msgstr "%(item)s: owned with %(left)s left; adds %(what)s, %(total)s left then"
+
+msgid "web.redeem.change.uses"
+msgstr "%(item)s: adds %(what)s, %(total)s then"
+
+msgid "web.redeem.change.permanent"
+msgstr "%(item)s: becomes permanent"
+
+msgid "web.redeem.change.fallback"
+msgstr "%(item)s: owned for good, so %(fallback)s instead"
+
+msgid "web.redeem.unfit.faction"
+msgstr "%(item)s is a %(faction)s item; %(hero)s is %(mine)s."
+
+msgid "web.redeem.unfit.class"
+msgstr "%(item)s is for %(classes)s; %(hero)s is %(mine)s."
+
+msgid "web.redeem.unfit.level"
+msgstr "%(item)s needs level %(level)s; %(hero)s is level %(mine)s."
+
+msgid "web.redeem.unfit.disabled"
+msgstr "%(hero)s is out of play."
+
+msgid "web.redeem.wallet_note"
+msgstr "Funds and keys go to the account, whichever hero gets the items."
+
+msgid "web.redeem.submit"
+msgstr "Redeem for %(hero)s"
+
+msgid "web.redeem.submit.plain"
+msgstr "Redeem"
+
+msgid "web.redeem.next_login"
+msgstr "%(game)s shows the items at the hero's next login."
+
+msgid "web.redeem.from_link"
+msgstr "The code came with the link. Nothing is redeemed until Redeem is pressed."
+
+msgid "web.redeem.done"
+msgstr "Code redeemed"
+
+msgid "web.redeem.done.hero"
+msgstr "Code %(code)s redeemed for %(hero)s."
+
+msgid "web.redeem.done.hero.wallet"
+msgstr "Code %(code)s redeemed for %(hero)s. %(given)s went to the account."
+
+msgid "web.redeem.done.account"
+msgstr "Code %(code)s redeemed."
+
+msgid "web.redeem.done.account.wallet"
+msgstr "Code %(code)s redeemed. %(given)s went to the account."
+
+msgid "web.redeem.done.account_row"
+msgstr "Account"
+
+msgid "web.redeem.done.added"
+msgstr "%(item)s, %(what)s added: %(left)s left"
+
+msgid "web.redeem.done.permanent"
+msgstr "%(item)s, permanent"
+
+msgid "web.redeem.done.fallback"
+msgstr "%(item)s, %(what)s, in place of an item owned for good"
+
+msgid "web.redeem.done.funds"
+msgstr "%(amount)s added: %(total)s now"
+
+msgid "web.redeem.done.keys"
+msgstr "%(added)s added: %(total)s now"
+
+msgid "web.redeem.done.next_login"
+msgstr "%(game)s shows the items at %(hero)s's next login."
+
+msgid "web.redeem.again"
+msgstr "Redeem another code"
+
+msgid "web.redeem.my_heroes"
+msgstr "My heroes"
+
+msgid "web.redeem.signed_out"
+msgstr "Sign in to redeem"
+
+msgid "web.redeem.signed_out.text"
+msgstr "Codes give items to an account's heroes and Funds and keys to its wallet, so redeeming needs a signed-in account. After signing in, this page opens again with the code."
+
+msgid "web.redeem.signed_out.code"
+msgstr "Code from the address"
+
+msgid "web.redeem.stays"
+msgstr "This code stays usable for the account."
+
+msgid "web.redeem.stays.until"
+msgstr "This code stays usable for the account until %(end)s."
+
+msgid "web.redeem.refused.unknown"
+msgstr "This code does not work on this service. Codes use the digits 1-9 and the letters A-Z without I and O."
+
+msgid "web.redeem.refused.expired"
+msgstr "This code ended on %(date)s."
+
+msgid "web.redeem.refused.used_up"
+msgstr "This code has been used as often as it allows."
+
+msgid "web.redeem.refused.redeemed"
+msgstr "This account redeemed this code on %(date)s, for %(hero)s. Each code works once for an account."
+
+msgid "web.redeem.refused.redeemed.account"
+msgstr "This account redeemed this code on %(date)s. Each code works once for an account."
+
+msgid "web.redeem.refused.raced"
+msgstr "Nothing was redeemed here: this account redeemed the code a moment ago in another window, for %(hero)s."
+
+msgid "web.redeem.refused.raced.account"
+msgstr "Nothing was redeemed here: this account redeemed the code a moment ago in another window."
+
+msgid "web.redeem.refused.no_hero"
+msgstr "The items of this code go to a hero, and the account has none yet."
+
+msgid "web.redeem.refused.no_fit"
+msgstr "The items of this code need a hero of %(rule)s, and the account has none."
+
+msgid "web.redeem.refused.no_fit.level"
+msgstr "The items of this code need a hero of %(rule)s. The account's closest, %(hero)s, is level %(level)s."
+
+msgid "web.redeem.refused.balance"
+msgstr "%(amount)s would take the account past the largest balance a wallet holds, %(most)s. Nothing was redeemed."
+
+msgid "web.redeem.refused.form"
+msgstr "Nothing was redeemed: the form expired. The code is shown again."
+
+msgid "web.redeem.how"
+msgstr "How codes work"
+
+msgid "web.redeem.how.source"
+msgstr "Codes come from the administrators of this service, for example as gifts in announcements."
+
+msgid "web.redeem.how.once"
+msgstr "Each code works once for an account. Some codes end at a set time or after a number of accounts."
+
+msgid "web.redeem.how.where"
+msgstr "Items go to one hero that can use all of them; Funds and treasure chest keys go to the account."
+
+msgid "web.redeem.how.login"
+msgstr "%(game)s shows new items at the hero's next login."
 
 msgid "games.bfheroes.funds.rewards.lead"
 msgstr "The administrators of this service set the rewards. The first hero and 100 matches count once for the account; each level counts once for every hero that reaches it. Claim adds the %(currency)s to the account at once."
@@ -10710,6 +10920,9 @@ msgstr "Abilities refunded in the game"
 
 msgid "web.admin.ledger.reason.reward"
 msgstr "Reward claim"
+
+msgid "web.admin.ledger.reason.code"
+msgstr "Code redeemed"
 
 msgid "web.admin.ledger.purchase"
 msgstr "purchase %(id)s"

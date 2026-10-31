@@ -1,10 +1,12 @@
 {#def from_game: bool, points: list, allowance: int, milestones: list, given = None #}
 {# The Funds page: why the game opened it, the account's balances or the way to see them, and the
    rule that Funds are not sold, with the sources they come from on this server: the starting
-   allowance and the rewards that give Funds with what each gives. A reward of the account says
+   allowance, the codes where the site redeems them and the rewards that give Funds with what each
+   gives. A reward of the account says
    where it stands in its own row; one that each hero gets lists the heroes with how far each got
    and Claim once one reached it, or, while none did, the hero that came closest. #}
 {% set rules = game.heroes %}
+{% set codes = "redeem" in game.pages %}
 {% set funds = _("games." ~ game.id ~ ".currency." ~ rules.currency) %}
 <Layout :title="funds">
   {% if from_game %}<FundsArrival :currency="funds" />{% endif %}
@@ -89,22 +91,36 @@
   <section aria-labelledby="sources-title" class="funds-sources">
     <h2 id="sources-title" class="funds-title">{{ _("web.funds.not_sold", currency=funds) }}</h2>
     <p class="site-lead">
-      {{ _("web.funds.no_payments") }} {{ _("web.funds.source" if allowance else "web.funds.no_source", currency=funds) }}
+      {{ _("web.funds.no_payments") }} {{ _("web.funds.sources" if allowance and codes else "web.funds.source" if allowance or codes else "web.funds.no_source", currency=funds) }}
     </p>
-    {% if allowance %}
+    {% if allowance or codes %}
       <div class="funds-source-grid enter-rows">
-        <section aria-labelledby="source-allowance" class="funds-source">
-          <Splash />
-          <div class="store-box store-box-pale">
-            <span aria-hidden="true" class="store-disc"><Icon name="plus" :size="22" stroke="#0A0A0A" /></span>
-            <h3 id="source-allowance" class="site-dialog-title">{{ _("web.funds.allowance") }}</h3>
-            <p class="funds-source-amount">{{ _("web.funds.allowance.amount", amount=number(allowance), currency=funds) }}</p>
-            <p class="funds-source-text">{{ _("web.funds.allowance.text") }}</p>
-            {% if given and player.name %}
-              <p class="funds-source-text">{{ _("web.funds.allowance.given", account=player.name, date=when(given, "yMMMd")) }}</p>
-            {% endif %}
-          </div>
-        </section>
+        {% if allowance %}
+          <section aria-labelledby="source-allowance" class="funds-source">
+            <Splash />
+            <div class="store-box store-box-pale">
+              <span aria-hidden="true" class="store-disc"><Icon name="plus" :size="22" stroke="#0A0A0A" /></span>
+              <h3 id="source-allowance" class="site-dialog-title">{{ _("web.funds.allowance") }}</h3>
+              <p class="funds-source-amount">{{ _("web.funds.allowance.amount", amount=number(allowance), currency=funds) }}</p>
+              <p class="funds-source-text">{{ _("web.funds.allowance.text") }}</p>
+              {% if given and player.name %}
+                <p class="funds-source-text">{{ _("web.funds.allowance.given", account=player.name, date=when(given, "yMMMd")) }}</p>
+              {% endif %}
+            </div>
+          </section>
+        {% endif %}
+        {% if codes %}
+          <section aria-labelledby="source-codes" class="funds-source">
+            <Splash />
+            <div class="store-box store-box-pale">
+              <span aria-hidden="true" class="store-disc"><Icon name="ticket" :size="22" stroke="#0A0A0A" /></span>
+              <h3 id="source-codes" class="site-dialog-title">{{ _("web.funds.codes") }}</h3>
+              <p class="funds-source-text">{{ _("web.funds.codes.text", currency=funds) }}</p>
+              <a href="{{ url('/' ~ game.id ~ game.site.path('redeem')) }}"
+                 class="site-link">{{ _("web.site.page.redeem") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+            </div>
+          </section>
+        {% endif %}
       </div>
     {% endif %}
   </section>

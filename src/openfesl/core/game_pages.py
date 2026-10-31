@@ -9,7 +9,7 @@ type Colour = Annotated[str, StringConstraints(pattern=r"^(#[0-9A-Fa-f]{6}|rgba\
 # the leaderboard the players' pages. The store, hot deals, treasure chests, Funds and rewards
 # pages belong to a game with heroes made on its own site, and the leaderboards of heroes to one
 # whose heroes have public profiles; the friends page and the player search to one whose accounts
-# keep relationships.
+# keep relationships; the page that redeems codes to one whose site gives codes' gifts.
 type PageKind = Literal[
     "servers",
     "leaderboard",
@@ -22,6 +22,7 @@ type PageKind = Literal[
     "treasure-chests",
     "funds",
     "rewards",
+    "redeem",
     "friends",
     "search",
 ]

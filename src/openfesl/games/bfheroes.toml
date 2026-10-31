@@ -9,9 +9,9 @@ partition = "/eagames/bfwest"
 namespace = "bfwest"
 # The web pages the game's menu shows beside its front page: the guide to playing, the leaderboards
 # of its heroes, the store and its hot deals, the treasure chests of an account's heroes, the Funds
-# page, the rewards that accounts claim, their friends and the player search. The server list is
-# drawn for games with squads and a server browser that finds servers by name, and the leaderboard
-# of players for other stats than this game's, so neither is listed.
+# page, the rewards that accounts claim, the page that redeems codes, their friends and the player
+# search. The server list is drawn for games with squads and a server browser that finds servers by
+# name, and the leaderboard of players for other stats than this game's, so neither is listed.
 pages = [
     "play",
     "leaderboards",
@@ -20,6 +20,7 @@ pages = [
     "treasure-chests",
     "funds",
     "rewards",
+    "redeem",
     "friends",
     "search",
 ]
@@ -368,7 +369,7 @@ soft = "#DDDDDD"
 [site]
 host = "www.battlefieldheroes.com"
 addresses = { "/user/createHero" = "/user/createHero?from=game", "/store/purchaseFunds" = "/store/purchaseFunds?from=game", "/store/purchaseBattlefunds" = "/store/purchaseFunds?from=game" }
-paths = { hot-deals = "/store/hot-deals", funds = "/store/purchaseFunds" }
+paths = { hot-deals = "/store/hot-deals", funds = "/store/purchaseFunds", redeem = "/store/redeem" }
 wallets = [
     { currency = "_PF", glyph = "coin", fill = "#F2C12E", ink = "#0A0A0A" },
     { currency = "_DV", glyph = "valor", fill = "#B9453E", ink = "#FFFFFF" },
@@ -388,11 +389,11 @@ pages = ["play", "leaderboards", "host"]
 name = "community"
 pages = ["search", "friends", "rewards"]
 
-# The store, its hot deals, the treasure chests and the Funds; the store's item pages lie under its
-# address.
+# The store, its hot deals, the treasure chests, the Funds and the redeeming of codes, which every
+# visitor sees; the store's item pages lie under its address.
 [[site.menus]]
 name = "store"
-pages = ["store", "hot-deals", "treasure-chests", "funds"]
+pages = ["store", "hot-deals", "treasure-chests", "funds", "redeem"]
 section = "/store"
 
 # Heroes, which the game creates none of: with no hero it opens the website's creator and quits.

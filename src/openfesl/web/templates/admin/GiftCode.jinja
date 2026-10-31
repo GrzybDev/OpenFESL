@@ -1,7 +1,8 @@
-{#def of, entry, state, contents: list, made, codes: list, more: int, manages: bool #}
+{#def of, entry, state, contents: list, made, codes: list, more: int, link: str, manages: bool #}
 {# A code that gives a gift on a game's site, or a batch of personal codes: its contents,
-   accounts, end, labels and who made it, Disable or Enable and Edit for admins, and for a batch
-   its first codes with the download of them all. Moderators read it in full. #}
+   accounts, end, labels, who made it and its one-click link, Disable or Enable and Edit for
+   admins, and for a batch its first codes with the download of them all. Moderators read it in
+   full. #}
 {% set game = of %}
 {% set title = _("web.admin.keys") %}
 {% set base = url("/admin/keys/codes/" ~ entry.code) %}
@@ -50,6 +51,11 @@
         {% if made %}
           <Fact :label="_('web.admin.keys.made')" plain>
             {{ _("web.admin.keys.made.by", date=when(made.at, "yMMMd"), name=made.by or _("web.admin.command_line"), note=made.note) }}
+          </Fact>
+        {% endif %}
+        {% if not entry.batch %}
+          <Fact :label="_('web.admin.keys.link')" plain>
+            <a href="{{ url(link) }}" class="code-link">{{ link }}</a>
           </Fact>
         {% endif %}
       </dl>

@@ -1,7 +1,9 @@
-{#def hero, checked: bool, status: str = "", off: bool = False, holds: bool = False, changed: bool = False #}
+{#def hero, checked: bool, status: str = "", off: bool = False, holds: bool = False, changed: bool = False, shut: bool = False #}
 {# One of the account's heroes as a tile to choose on the store's pages: its faction's tab, its
    class's disc, its name, class and level, and, on an item's page, what it holds of the item or
-   why it cannot have it. An unavailable hero stays choosable to see why. #}
+   why it cannot have it; the content adds lines, such as what a code changes of each item. An
+   unavailable hero stays choosable to see why, unless it is shut, as for a code whose items it
+   may not have. #}
 {% set rules = game.heroes %}
 <label {% if hero.faction %}data-faction="{{ hero.faction }}"{% endif %}
        class="store-hero{% if off %} store-hero-off{% endif %}">
@@ -10,6 +12,7 @@
          value="{{ hero.persona.id }}"
          {% if status %} aria-describedby="hero-{{ hero.persona.id }}"{% endif %}
          {% if off %} aria-disabled="true"{% endif %}
+         {% if shut %} disabled{% endif %}
          {% if checked %} checked{% endif %}
          class="sr-only">
   <span class="store-hero-card">
@@ -36,5 +39,6 @@
       <span id="hero-{{ hero.persona.id }}"
             class="store-hero-status{% if holds %} store-hero-holds{% endif %}{% if changed %} store-hero-changed{% endif %}">{{ status }}</span>
     {% endif %}
+    {{ content }}
   </span>
 </label>

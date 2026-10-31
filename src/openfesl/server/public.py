@@ -38,6 +38,7 @@ from openfesl.web.play import play_routes, relay_address
 from openfesl.web.play_now import PlayNowPages
 from openfesl.web.players import player_routes
 from openfesl.web.profiles import ProfilePages
+from openfesl.web.redeem import RedeemPages
 from openfesl.web.rewards import RewardsPages
 from openfesl.web.search import SearchPages
 from openfesl.web.servers import server_routes
@@ -188,6 +189,11 @@ def include_public_routes(
             services.catalogues,
             stores.entitlements,
             stores.products,
+        ).routes()
+    )
+    app.include_router(
+        RedeemPages(
+            pages, games, services.gift_codes, services.catalogues, stores.entitlements
         ).routes()
     )
     app.include_router(

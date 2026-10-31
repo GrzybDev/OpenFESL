@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import ColumnElement, func, or_, select, update
@@ -6,10 +7,33 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.admin import AdminAction
-from openfesl.core.gift_codes import CodeChange, CodeTerms, GiftCode, Made
+from openfesl.core.gift_codes import (
+    CodeChange,
+    CodeGrant,
+    CodeRefusal,
+    CodeRefused,
+    CodeTerms,
+    GiftCode,
+    GivenItem,
+    Made,
+    Redemption,
+)
+from openfesl.core.inventory import Held, Ownership
 from openfesl.core.reward_rules import Gift
+from openfesl.core.wallets import MOST_BALANCE
 from openfesl.storage.admin import action_row
-from openfesl.storage.models import AdminActionRow, ProductKeyRow, ProductKeyUseRow
+from openfesl.storage.entitlements import add_account_item, add_item
+from openfesl.storage.models import (
+    AccountRow,
+    AdminActionRow,
+    PersonaRow,
+    ProductKeyRow,
+    ProductKeyUseRow,
+)
+from openfesl.storage.wallets import credit, locked
+
+# The ledger's reason for the Funds that codes give.
+CODE = "code"
 
 
 class CodeTaken(Exception):
@@ -48,22 +72,19 @@ class SqlGiftCodeStore:
         entries = [_entry(found, uses) for found in grouped.values()]
         return sorted(entries, key=lambda entry: entry.id, reverse=True)
 
-    async def gift_code(self, code: str) -> GiftCode | None:
+    async def gift_code(self, code: str, whole: bool = True) -> GiftCode | None:
         """Return a code, or the batch it belongs to, whether it gives anything or not.
 
         Args:
             code: The code, in any case.
+            whole: Whether a code of a batch stands for the whole batch; otherwise for itself.
         """
         async with self._sessions() as session:
-            row = await session.scalar(
-                select(ProductKeyRow).where(
-                    ProductKeyRow.gift.is_not(None), func.upper(ProductKeyRow.code) == code.upper()
-                )
-            )
+            row = await session.scalar(select(ProductKeyRow).where(_named(code)))
             if row is None:
                 return None
             rows = [row]
-            if row.batch is not None:
+            if row.batch is not None and whole:
                 rows = list(
                     await session.scalars(
                         select(ProductKeyRow)
@@ -101,6 +122,81 @@ class SqlGiftCodeStore:
                 )
             )
             return Made(row.at, row.admin_name, row.details.get("note", "")) if row else None
+
+    async def redemption(self, code: str, account_id: int) -> Redemption | None:
+        """Return an account's redemption of a code, if it redeemed it.
+
+        Args:
+            code: The code as stored.
+            account_id: The account.
+        """
+        async with self._sessions() as session:
+            found = await _redemptions(
+                session, _named(code), ProductKeyUseRow.account_id == account_id
+            )
+            return found[0] if found else None
+
+    async def redeem(self, grant: CodeGrant) -> Redemption:
+        """Redeem a code for an account and give what it gives, all of it or none.
+
+        The code is checked again under its lock, so that accounts redeeming it at once count
+        its uses in turn and an account redeems it once.
+
+        Args:
+            grant: What the redemption gives.
+
+        Raises:
+            CodeRefused: When the code is unknown or disabled, ended or used up by now, the
+                account redeemed it already, also at the same time, or its Funds would pass the
+                most a wallet holds.
+        """
+        account = grant.account_id
+        async with self._sessions.begin() as session:
+            key = await session.scalar(
+                select(ProductKeyRow).where(_named(grant.code)).with_for_update()
+            )
+            if key is None or key.game != grant.game or not key.enabled:
+                raise CodeRefused(CodeRefusal.UNKNOWN)
+            if key.expires_at is not None and key.expires_at <= datetime.now(UTC):
+                raise CodeRefused(CodeRefusal.EXPIRED)
+            earlier = await _redemptions(
+                session, ProductKeyRow.id == key.id, ProductKeyUseRow.account_id == account
+            )
+            if earlier:
+                raise CodeRefused(CodeRefusal.REDEEMED, earlier[0])
+            if key.max_uses is not None and (await _uses(session, [key.id])).get(key.id, 0) >= (
+                key.max_uses
+            ):
+                raise CodeRefused(CodeRefusal.USED_UP)
+            # The account's keys, the hero's items, then the wallet, in the order purchases and
+            # chest openings lock them, so that one at the same time waits rather than deadlocks.
+            keys = None
+            if grant.keys:
+                keys = grant.keys[1], await add_account_item(session, account, *grant.keys)
+            items = await _give(session, grant) if grant.hero_id is not None else []
+            funds = None
+            if grant.funds:
+                wallet, amount = grant.funds
+                _, balance = await locked(session, wallet)
+                if balance + amount > MOST_BALANCE:
+                    raise CodeRefused(CodeRefusal.BALANCE)
+                after = await credit(session, wallet, amount, CODE)
+                assert after is not None
+                funds = amount, after
+            outcome = {
+                "items": [_written(given) for given in items],
+                "funds": list(funds) if funds else None,
+                "keys": list(keys) if keys else None,
+            }
+            used = ProductKeyUseRow(
+                key_id=key.id, account_id=account, persona_id=grant.hero_id, outcome=outcome
+            )
+            session.add(used)
+            await session.flush()
+            [redeemed] = await _redemptions(
+                session, ProductKeyRow.id == key.id, ProductKeyUseRow.account_id == account
+            )
+            return redeemed
 
     async def make(
         self, game: str, codes: Sequence[str], terms: CodeTerms, change: CodeChange
@@ -240,3 +336,84 @@ def _entry(rows: list[ProductKeyRow], uses: dict[int, int]) -> GiftCode:
         len(rows),
         first.batch is not None,
     )
+
+
+def _named(code: str) -> ColumnElement[bool]:
+    # A code that gives a gift, which its own form writes in capitals.
+    return ProductKeyRow.gift.is_not(None) & (func.upper(ProductKeyRow.code) == code.upper())
+
+
+async def _give(session: AsyncSession, grant: CodeGrant) -> list[GivenItem]:
+    assert grant.hero_id is not None
+    given = []
+    # In the items' order, as purchases and rewards lock them, so that all wait in turn.
+    for item_id, ownership in sorted(grant.items, key=lambda item: item[0]):
+        held = await add_item(session, grant.account_id, grant.hero_id, item_id, ownership)
+        if held is None:
+            fallback, owned = grant.fallback
+            after = await add_item(session, grant.account_id, grant.hero_id, fallback, owned)
+            given.append(GivenItem(fallback, owned, after, True))
+        else:
+            given.append(GivenItem(item_id, ownership, held))
+    return given
+
+
+def _written(given: GivenItem) -> dict[str, Any]:
+    # An item a redemption gave, as its outcome keeps it.
+    held = given.held
+    kept = (
+        [held.type, held.expires.isoformat() if held.expires else None, held.uses] if held else None
+    )
+    return {
+        "item": given.item_id,
+        "given": given.ownership.written,
+        "held": kept,
+        "fallback": given.fallback,
+    }
+
+
+async def _redemptions(session: AsyncSession, *conditions: ColumnElement[bool]) -> list[Redemption]:
+    rows = await session.execute(
+        select(
+            ProductKeyUseRow,
+            ProductKeyRow.code,
+            ProductKeyRow.labels,
+            AccountRow.nuid,
+            PersonaRow.name,
+        )
+        .join(ProductKeyRow, ProductKeyRow.id == ProductKeyUseRow.key_id)
+        .join(AccountRow, AccountRow.id == ProductKeyUseRow.account_id)
+        .outerjoin(PersonaRow, PersonaRow.id == ProductKeyUseRow.persona_id)
+        .where(ProductKeyRow.gift.is_not(None), *conditions)
+        .order_by(ProductKeyUseRow.used_at.desc(), ProductKeyUseRow.key_id.desc())
+    )
+    found = []
+    for used, code, labels, account, hero in rows:
+        outcome = used.outcome or {}
+        items = []
+        for item in outcome.get("items", []):
+            ownership = Ownership.read(item["given"])
+            assert isinstance(ownership, Ownership)
+            kept = item["held"]
+            held = (
+                Held(kept[0], datetime.fromisoformat(kept[1]) if kept[1] else None, kept[2])
+                if kept
+                else None
+            )
+            items.append(GivenItem(item["item"], ownership, held, item["fallback"]))
+        funds, keys = outcome.get("funds"), outcome.get("keys")
+        found.append(
+            Redemption(
+                code,
+                labels,
+                used.account_id,
+                account,
+                used.persona_id,
+                hero,
+                used.used_at,
+                tuple(items),
+                (funds[0], funds[1]) if funds else None,
+                (keys[0], keys[1]) if keys else None,
+            )
+        )
+    return found

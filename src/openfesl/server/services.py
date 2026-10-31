@@ -25,6 +25,7 @@ from openfesl.core.game_art import GameArt
 from openfesl.core.game_http import GameHttp
 from openfesl.core.game_marks import GameMarks
 from openfesl.core.games import Games
+from openfesl.core.gift_codes import GiftCodes
 from openfesl.core.hero_boards import HeroBoards
 from openfesl.core.hero_items import OwnWrites
 from openfesl.core.heroes import Heroes
@@ -152,6 +153,9 @@ class GameServices:
             self.catalogues,
             stores.products,
             drops,
+        )
+        self.gift_codes = GiftCodes(
+            stores.gift_codes, self.rewards, self.heroes, self.catalogues, stores.settings
         )
         self.item_writes = ItemWrites(stores.entitlements)
         self.windows = StoreWindows(

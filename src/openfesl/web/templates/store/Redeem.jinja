@@ -1,0 +1,183 @@
+{#def code: str, look, entry, refusal, said, rows: list, tiles: list, linked: bool, done, free: int #}
+{# The page that redeems a code: the field with the code's form as its hint; the code's
+   contents with the heroes its items may go to and what changes for each; what a code just gave;
+   or why a code gives nothing, in place. A visitor signs in first and comes back to the code. A
+   GET shows a code; only the form's POST redeems it. #}
+{% set title = _("web.redeem.title") %}
+{% set base = url("/" ~ game.id ~ game.site.path("redeem")) %}
+{% set how = ('ticket', 'source'), ('lock', 'once'), ('shield-bars', 'where'), ('clock', 'login') %}
+<Layout :title="title">
+  <section aria-labelledby="redeem-title" class="store-head">
+    <Plaque id="redeem-title">{{ title }}</Plaque>
+    <p class="site-lead">{{ _("web.redeem.lead") }}</p>
+  </section>
+  <div class="store-columns redeem-columns">
+    <section aria-label="{{ title }}" class="store-buy redeem-main enter-panel">
+      <Splash />
+      {% if done %}
+        <div class="store-box store-box-pale redeem-card">
+          <h2 class="site-dialog-title redeem-done-title">{{ _("web.redeem.done") }}</h2>
+          <ul role="list" class="redeem-list">
+            {% for who, text in done.rows %}
+              <li class="redeem-given">
+                <span aria-hidden="true" class="redeem-tick"><Icon name="tick" :size="14" stroke="#FFFFFF" /></span>
+                <span><strong>{{ who }}</strong> · {{ text }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+          {% if done.hero %}
+            <p class="redeem-login">
+              <Icon name="clock" :size="16" stroke="currentColor" />{{ _("web.redeem.done.next_login", game=game.name, hero=done.hero) }}
+            </p>
+          {% endif %}
+          <p class="site-actions">
+            <a href="{{ base }}"
+               class="site-button site-button-large"><Icon name="ticket" :size="18" stroke="#FEDE01" />{{ _("web.redeem.again") }}</a>
+            {% if "treasure-chests" in game.pages %}
+              <a href="{{ url('/' ~ game.id ~ '/treasure-chests') }}"
+                 class="store-back">{{ _("web.chests.title") }}</a>
+            {% endif %}
+            <a href="{{ url('/' ~ game.id ~ '/heroes') }}" class="store-back">{{ _("web.redeem.my_heroes") }}</a>
+          </p>
+        </div>
+      {% elif not player %}
+        <div class="store-box store-box-pale redeem-card">
+          <h2 class="site-dialog-title">{{ _("web.redeem.enter") }}</h2>
+          {% if code %}
+            <p class="redeem-meta">
+              <span class="store-legend">{{ _("web.redeem.signed_out.code") }}</span><code class="redeem-code">{{ code }}</code>
+            </p>
+          {% endif %}
+          <div class="store-box store-box-red redeem-signed-out">
+            <h3 class="store-tab">{{ _("web.redeem.signed_out") }}</h3>
+            <p class="store-signed-out">{{ _("web.redeem.signed_out.text") }}</p>
+            <p class="site-actions">
+              <a href="{{ url('/sign-in') }}?{{ {'next': here}|urlencode }}"
+                 class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+              <a href="{{ url('/register') }}" class="store-link-yellow">{{ _("web.account.sign_in.create") }}</a>
+            </p>
+          </div>
+        </div>
+      {% elif entry and not refusal %}
+        {% if linked %}
+          <p role="status" class="redeem-linked">
+            <Icon name="ticket" :size="20" stroke="#FEDE01" />{{ _("web.redeem.from_link") }}
+          </p>
+        {% endif %}
+        <form method="post"
+              action="{{ base }}"
+              data-redeem
+              data-for="{{ _('web.redeem.submit') }}"
+              class="store-box store-box-pale redeem-card">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <input type="hidden" name="key" value="{{ code }}">
+          <h2 class="site-dialog-title">{{ entry.label(language) }}</h2>
+          <p class="redeem-meta">
+            <code class="redeem-code">{{ code }}</code>
+            <span>{{ _("web.redeem.rule.until", end=_("web.store.utc", time=moment(entry.expires))) if entry.expires else _("web.redeem.rule.open") }}</span>
+            <a href="{{ base }}" class="store-back">{{ _("web.redeem.another_code") }}</a>
+          </p>
+          <h3 class="store-legend redeem-legend">{{ _("web.redeem.gives") }}</h3>
+          <ul role="list" class="redeem-list redeem-gift">
+            {% for row in rows %}
+              <li class="redeem-row">
+                {% if row.icon %}
+                  <img src="{{ row.icon }}" alt="" class="redeem-icon">
+                {% else %}
+                  <span aria-hidden="true" class="redeem-icon redeem-icon-{{ row.glyph }}">
+                    {%- if row.missing %}?{% else %}<Icon :name="row.glyph" :size="24" stroke="currentColor" />{% endif -%}
+                  </span>
+                {% endif %}
+                <span class="redeem-name"><strong>{{ row.name }}</strong><span>{{ row.whom }}</span></span>
+                <strong class="redeem-what">{{ row.what }}</strong>
+              </li>
+            {% endfor %}
+          </ul>
+          {% for row in rows if row.missing %}
+            <p class="redeem-note redeem-missing">{{ _("web.redeem.item_missing", item=row.name) }}</p>
+          {% endfor %}
+          {% if tiles %}
+            <fieldset class="store-field">
+              <legend class="store-legend">{{ _("web.redeem.hero") }}</legend>
+              <div class="store-heroes redeem-heroes">
+                {% for tile in tiles %}
+                  <StoreHero :hero="tile.hero" :checked="tile.checked" :status="tile.unfit" :off="tile.unfit != ''" :shut="tile.unfit != ''">
+                  {% for glyph, text in tile.lines %}
+                    <span class="redeem-line"><Icon :name="glyph" :size="14" stroke="currentColor" />{{ text }}</span>
+                  {% endfor %}
+                  </StoreHero>
+                {% endfor %}
+              </div>
+            </fieldset>
+            {% if entry.gift.funds or entry.gift.keys %}<p class="redeem-note">{{ _("web.redeem.wallet_note") }}</p>{% endif %}
+          {% endif %}
+          <p class="site-actions">
+            <button type="submit" class="site-button site-button-go site-button-large">
+              <Icon name="tick" :size="18" stroke="currentColor" />
+              <span data-redeem-label>{{ _("web.redeem.submit.plain") }}</span>
+            </button>
+            <a href="{{ base }}" class="store-back">{{ _("web.admin.cancel") }}</a>
+          </p>
+          {% if entry.gift.items %}
+            <p class="redeem-login">
+              <Icon name="clock" :size="16" stroke="currentColor" />{{ _("web.redeem.next_login", game=game.name) }}
+            </p>
+          {% endif %}
+        </form>
+      {% else %}
+        <form method="get"
+              action="{{ base }}"
+              class="store-box store-box-pale redeem-card">
+          <h2 class="site-dialog-title">{{ _("web.redeem.enter") }}</h2>
+          <label for="redeem-key" class="store-legend redeem-label">{{ _("web.redeem.field") }}</label>
+          <div class="redeem-entry">
+            <input id="redeem-key"
+                   name="key"
+                   type="text"
+                   value="{{ code }}"
+                   required
+                   maxlength="40"
+                   autocomplete="off"
+                   autocapitalize="characters"
+                   spellcheck="false"
+                   aria-describedby="redeem-hint{% if refusal %} redeem-refused{% endif %}"
+                   {% if refusal %} aria-invalid="true"{% endif %}
+                   class="redeem-field">
+            <button type="submit"
+                    name="from"
+                    value="form"
+                    class="site-button site-button-large">
+              <Icon name="ticket" :size="18" stroke="#FEDE01" />{{ _("web.redeem.show") }}
+            </button>
+          </div>
+          <p id="redeem-hint" class="redeem-note">{{ _("web.redeem.hint") }}</p>
+          {% if refusal %}
+            <div id="redeem-refused" role="alert" class="redeem-refused">
+              <span aria-hidden="true" class="redeem-warn"><Icon name="warn" :size="16" fill="#0A0A0A" /></span>
+              <p>{{ said[0] }}</p>
+            </div>
+            {% if said[1] %}<p class="redeem-note">{{ said[1] }}</p>{% endif %}
+            {% if refusal == "no_hero" and free %}
+              <p class="site-actions">
+                <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
+                   class="site-button site-button-go"><Icon name="plus" :size="16" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+              </p>
+            {% endif %}
+          {% endif %}
+        </form>
+      {% endif %}
+    </section>
+    <aside aria-labelledby="redeem-how"
+           class="store-box store-box-pale redeem-how">
+      <h2 id="redeem-how" class="site-dialog-title">{{ _("web.redeem.how") }}</h2>
+      <ul role="list" class="redeem-list">
+        {% for glyph, name in how %}
+          <li class="redeem-how-row">
+            <span aria-hidden="true" class="redeem-disc"><Icon :name="glyph" :size="16" stroke="#0A0A0A" /></span>
+            <span>{{ _("web.redeem.how." ~ name, game=game.name) }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </aside>
+  </div>
+</Layout>
