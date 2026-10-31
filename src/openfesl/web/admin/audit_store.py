@@ -223,15 +223,17 @@ def _deal_value(texts: StoreTexts, value: Any) -> str:
 
 
 async def offer_entry(
+    action: AdminAction,
     target: str,
     details: dict[str, Any],
     games: Games,
     catalogues: Catalogues,
     language: str,
 ) -> tuple[str, str, str | None, str]:
-    """Return how the audit log shows an admin offer that the admin saved.
+    """Return how the audit log shows an admin offer that the admin saved or ended.
 
     Args:
+        action: What the admin did: saved or ended the offer.
         target: The game and the offer's bundle number, as game:number.
         details: The change's details, as the admin's log keeps them.
         games: The games, whose hot deals list the offer.
@@ -240,11 +242,11 @@ async def offer_entry(
 
     Returns:
         The kind of the action, the offer in words, the panel's page of the offer and what it
-        sells for and when in words.
+        sells for and when, or the end it had, in words.
     """
     game = games.by_id(details["game"])
     if game is None:
-        return AdminAction.DEAL_OFFER.value, details["name"], None, ""
+        return action.value, details["name"], None, ""
     catalogue = await catalogues.of(game, language)
     shown = game_text(game, catalogue, details["name"], language, details["faction"])
     href = localize(f"/admin/store/{target.replace(':', '/deals/offers/', 1)}", language)
@@ -253,6 +255,10 @@ async def offer_entry(
     def written(at: str) -> str:
         return moment(datetime.fromisoformat(at).replace(tzinfo=UTC), language)
 
+    if action is AdminAction.DEAL_ENDED:
+        ends = details["ends"]
+        said = texts.text("web.admin.audit.deal.ended", ends=written(ends)) if ends else ""
+        return action.value, shown, href, said
     said = texts.text(
         "web.admin.audit.deal.offer",
         section=texts.text(f"games.{game.id}.deal_section.{details['section']}"),

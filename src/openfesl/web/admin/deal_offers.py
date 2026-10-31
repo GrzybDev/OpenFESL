@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -138,7 +138,7 @@ def offer_name(game: Game, catalogue: Catalogue, bundle: Bundle, language: str) 
 def offer_routes(sessions: AdminSessions, views: DealOfferViews) -> APIRouter:
     """Return the admin's own offers among each game's hot deals, with their editor.
 
-    Every role reads them; adding and changing them needs the admin role. An offer is
+    Every role reads them; adding, changing and ending them needs the admin role. An offer is
     sold from its start to its end beside the rotation's deals while its section is on, also
     while the rotation is off.
     The add panel and the dropping of items answer the form without saving it.
@@ -241,4 +241,34 @@ def offer_routes(sessions: AdminSessions, views: DealOfferViews) -> APIRouter:
     async def change(request: Request, game_id: str, number: int) -> Response:
         return await save(request, game_id, number)
 
+    @router.get(path + "/{number}/end", response_class=HTMLResponse)
+    async def ending(request: Request, game_id: str, number: int) -> HTMLResponse:
+        admin = sessions.admin(request, Role.ADMIN, SECTION)
+        game = views.deals.stores.game(game_id)
+        row = await _row(views, game, number, request.state.language)
+        return await sessions.render(request, "admin.DealOfferEnd", admin=admin, of=game, row=row)
+
+    @router.post(path + "/{number}/end")
+    async def end(request: Request, game_id: str, number: int) -> Response:
+        admin = sessions.admin(request, Role.ADMIN, SECTION)
+        check_form(request, await request.form())
+        game = views.deals.stores.game(game_id)
+        row = await _row(views, game, number, request.state.language)
+        bundle = row.listed.bundle
+        if row.state != "ended":
+            now = datetime.now(UTC).replace(microsecond=0)
+            details = {"game": game.id, "name": bundle.name, "faction": bundle.faction}
+            details["ends"] = f"{bundle.ends:{CLOCK}}" if bundle.ends else None
+            ended = replace(bundle, ends=now)
+            await views.offers.save(game.id, number, ended, AdminAction.DEAL_ENDED, details, admin)
+            toast(request, "web.admin.toast.deals.ended", offer=row.name)
+        return RedirectResponse(store_url(request, game, "/deals/offers"), 303)
+
     return router
+
+
+async def _row(views: DealOfferViews, game: Game, number: int, language: str) -> OfferRow:
+    row = next((row for row in await views.rows(game, language) if row.listed.id == number), None)
+    if row is None:
+        raise HTTPException(404)
+    return row

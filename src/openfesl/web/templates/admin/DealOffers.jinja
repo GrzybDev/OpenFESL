@@ -1,7 +1,8 @@
 {#def of, rows: list, manages: bool #}
 {# The admin's own offers among a game's hot deals: each with its section, price, the days it
    runs in UTC and its state, live ones first, those ended in the last 90 days at the end; an offer
-   of a section switched off is hidden until its end. #}
+   of a section switched off is hidden until its end. A live, scheduled or hidden offer ends at
+   once after a question. #}
 {% set game = of %}
 {% set base = url("/admin/store/" ~ game.id ~ "/deals/offers") %}
 <AdminPage :title="_('web.admin.deals.view.offers') ~ ' · ' ~ _('web.admin.store.title')"
@@ -21,6 +22,7 @@
                 {% for column in ("offer", "section", "price", "runs", "state") %}
                   <div role="columnheader" class="column-head">{{ _("web.admin.deals.offers.column." ~ column) }}</div>
                 {% endfor %}
+                <div role="columnheader"><span class="sr-only">{{ _("web.admin.deals.offers.column.actions") }}</span></div>
               </div>
             </div>
             <div role="rowgroup" class="enter-rows table-rows">
@@ -49,6 +51,15 @@
                   </div>
                   <div role="cell" class="admin-cell prices-state">
                     <Badge :name="{'live': 'tick', 'scheduled': 'clock', 'off': 'hide', 'ended': 'x'}[row.state]" lines />{{ _("web.admin.deals.offer.state." ~ row.state) }}
+                  </div>
+                  <div role="cell" class="offers-actions">
+                    {% if manages and row.state != "ended" %}
+                      <a href="{{ base }}/{{ row.listed.id }}/end"
+                         data-dialog
+                         aria-haspopup="dialog"
+                         aria-label="{{ _('web.admin.deals.offer.end.of', offer=row.name) }}"
+                         class="form-button"><span aria-hidden="true" class="form-glyph"><Icon name="x" :size="14" stroke="#F4F4EE" /></span>{{ _("web.admin.deals.offer.end") }}</a>
+                    {% endif %}
                   </div>
                 </div>
               {% endfor %}

@@ -11471,6 +11471,9 @@ msgstr "Runs · UTC"
 msgid "web.admin.deals.offers.column.state"
 msgstr "State"
 
+msgid "web.admin.deals.offers.column.actions"
+msgstr "Actions"
+
 msgid "web.admin.deals.offers.items.one"
 msgstr "%(count)s item"
 
@@ -11515,6 +11518,21 @@ msgstr "Ended"
 
 msgid "web.admin.deals.offer.new"
 msgstr "New offer"
+
+msgid "web.admin.deals.offer.end"
+msgstr "End now"
+
+msgid "web.admin.deals.offer.end.of"
+msgstr "End %(offer)s now"
+
+msgid "web.admin.deals.offer.end.confirm"
+msgstr "End this offer now?"
+
+msgid "web.admin.deals.offer.end.busy"
+msgstr "Ending…"
+
+msgid "web.admin.deals.offer.end.text"
+msgstr "It leaves hot deals and the game's home screen at once; bought items stay with their heroes. The offer stays listed as Ended."
 
 msgid "web.admin.deals.offer.waits"
 msgstr "Saving waits for %(what)s."
@@ -11843,6 +11861,9 @@ msgstr "Saved %(offer)s; hot deals list it from its start until %(ends)s."
 msgid "web.admin.toast.deals.offer.off"
 msgstr "Saved %(offer)s; its section is off, so hot deals do not list it."
 
+msgid "web.admin.toast.deals.ended"
+msgstr "Ended %(offer)s now."
+
 msgid "web.admin.audit.action.deal_rotation.on"
 msgstr "Rotation switched on"
 
@@ -11872,6 +11893,12 @@ msgstr "Offer added"
 
 msgid "web.admin.audit.deal.offer"
 msgstr "%(section)s · %(price)s · %(starts)s – %(ends)s UTC"
+
+msgid "web.admin.audit.action.deal_ended"
+msgstr "Offer ended"
+
+msgid "web.admin.audit.deal.ended"
+msgstr "Ended now; was to run until %(ends)s UTC"
 
 msgid "web.admin.home.warning.deals"
 msgstr "Hot deals · section short of deals"

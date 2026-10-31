@@ -12183,6 +12183,9 @@ msgstr "Czas · UTC"
 msgid "web.admin.deals.offers.column.state"
 msgstr "Stan"
 
+msgid "web.admin.deals.offers.column.actions"
+msgstr "Działania"
+
 msgid "web.admin.deals.offers.items.one"
 msgstr "%(count)s przedmiot"
 
@@ -12233,6 +12236,21 @@ msgstr "Zakończona"
 
 msgid "web.admin.deals.offer.new"
 msgstr "Nowa oferta"
+
+msgid "web.admin.deals.offer.end"
+msgstr "Zakończ teraz"
+
+msgid "web.admin.deals.offer.end.of"
+msgstr "Zakończ teraz: %(offer)s"
+
+msgid "web.admin.deals.offer.end.confirm"
+msgstr "Zakończyć tę ofertę teraz?"
+
+msgid "web.admin.deals.offer.end.busy"
+msgstr "Kończenie…"
+
+msgid "web.admin.deals.offer.end.text"
+msgstr "Od razu znika z gorących ofert i ekranu głównego gry; kupione przedmioty zostają u bohaterów. Oferta pozostaje na liście jako zakończona."
 
 msgid "web.admin.deals.offer.waits"
 msgstr "Zapis czeka na %(what)s."
@@ -12591,6 +12609,9 @@ msgstr "Zapisano: %(offer)s; gorące oferty zawierają ją od początku do %(end
 msgid "web.admin.toast.deals.offer.off"
 msgstr "Zapisano: %(offer)s; sekcja jest wyłączona, więc gorące oferty jej nie pokazują."
 
+msgid "web.admin.toast.deals.ended"
+msgstr "Zakończono teraz: %(offer)s."
+
 msgid "web.admin.audit.action.deal_rotation.on"
 msgstr "Włączenie rotacji"
 
@@ -12620,6 +12641,12 @@ msgstr "Dodanie oferty"
 
 msgid "web.admin.audit.deal.offer"
 msgstr "%(section)s · %(price)s · %(starts)s – %(ends)s UTC"
+
+msgid "web.admin.audit.action.deal_ended"
+msgstr "Zakończenie oferty"
+
+msgid "web.admin.audit.deal.ended"
+msgstr "Zakończona teraz; miała trwać do %(ends)s UTC"
 
 msgid "web.admin.home.warning.deals"
 msgstr "Gorące oferty · sekcji brakuje ofert"

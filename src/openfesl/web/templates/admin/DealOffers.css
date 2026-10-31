@@ -1,5 +1,5 @@
-/* The admin's offers among a game's hot deals: a row each, ended and hidden ones greyed. Where the
-   table does not fit, each offer is a block of its own. */
+/* The admin's offers among a game's hot deals: a row each, ended and hidden ones greyed, with the
+   button that ends one that runs. Where the table does not fit, each offer is a block of its own. */
 @layer pages {
   .admin-list .table.offers-table {
     min-width: 900px;
@@ -8,7 +8,7 @@
   .offers-columns {
     --cell: var(--row);
     display: grid;
-    grid-template-columns: minmax(200px, 1.5fr) 130px 170px minmax(200px, 1fr) 140px;
+    grid-template-columns: minmax(200px, 1.5fr) 130px 170px minmax(200px, 1fr) 140px 160px;
     gap: 2px;
   }
 
@@ -18,6 +18,19 @@
 
   .offers-row:is(.offers-ended, .offers-off) {
     --cell: var(--row-pale);
+  }
+
+  .offers-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: var(--cell);
+    padding: 4px;
+
+    > .form-button {
+      flex: 1;
+      justify-content: center;
+    }
   }
 
   .offers-foot {
@@ -45,8 +58,13 @@
     .offers-row.offers-columns {
       grid-template-columns: repeat(2, minmax(0, 1fr));
 
-      > :first-child {
+      > :first-child,
+      > :last-child {
         grid-column: 1 / -1;
+      }
+
+      > .offers-actions:empty {
+        display: none;
       }
     }
   }

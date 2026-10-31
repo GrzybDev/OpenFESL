@@ -1,0 +1,29 @@
+{#def of, row #}
+{# The question before an admin offer ends at once, as a page of its own: the offer, when it
+   would have ended, and what ending it does. Where scripts run, it opens as a dialog over the
+   offers' list. #}
+{% set game = of %}
+{% set bundle = row.listed.bundle %}
+{% set base = url("/admin/store/" ~ game.id ~ "/deals/offers") %}
+<AdminPage :title="_('web.admin.deals.view.offers') ~ ' · ' ~ _('web.admin.store.title')"
+           current="store">
+  <StoreHead :game="game" current="deals" :subtitle="_('web.admin.deals.subtitle', game=game.name)" />
+  <Panel class="enter-panel confirm-frame">
+    <Confirmation :question="_('web.admin.deals.offer.end.confirm')"
+                  :action="base ~ '/' ~ row.listed.id ~ '/end'"
+                  :label="_('web.admin.deals.offer.end')"
+                  :busy="_('web.admin.deals.offer.end.busy')"
+                  :back="base"
+                  glyph="x">
+      <dl class="facts">
+        <Fact :label="_('web.admin.deals.offers.column.offer')" plain>
+          {{ row.name }}
+        </Fact>
+        <Fact :label="_('web.admin.deals.offer.ends')" plain>
+          {{ moment(bundle.ends) }}
+        </Fact>
+      </dl>
+      <p id="confirm-text" class="body-text">{{ _("web.admin.deals.offer.end.text") }}</p>
+    </Confirmation>
+  </Panel>
+</AdminPage>

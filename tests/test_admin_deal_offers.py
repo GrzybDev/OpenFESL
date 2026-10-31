@@ -36,7 +36,7 @@ def written(moment: datetime) -> str:
 
 
 @pytest.mark.usefixtures("prompt_actions")
-async def test_admins_add_and_change_offers_that_hot_deals_sell_at_once(
+async def test_admins_add_change_and_end_offers_that_hot_deals_sell_at_once(
     admin_provider: IdentityProvider,
     base: str,
     server_url: str,
@@ -114,6 +114,9 @@ async def test_admins_add_and_change_offers_that_hot_deals_sell_at_once(
             follow_redirects=True,
         )
         editor = visible((await client.get(offer)).content)
+        token = form_token((await client.get(f"{offer}/end")).text)
+        ended = await client.post(f"{offer}/end", data={"csrf": token}, follow_redirects=True)
+        after = await deals(server_url, "en")
         log = visible((await client.get(f"{base}/admin/audit")).content)
 
     assert "Invented Coat item 3" in found and "Add · Permanent" in found
@@ -148,6 +151,11 @@ async def test_admins_add_and_change_offers_that_hot_deals_sell_at_once(
     assert "Invented Kit bundle" in editor and "Hidden · section off Items" in editor
     assert "Offer added Invented Kit Details Popular · " in log
     assert "Offer saved Invented Kit Details Popular · " in log
+    # Ended at once, it leaves the game's hot deals and stays listed as ended.
+    assert "Ended Invented Kit now." in visible(ended.content)
+    assert "Invented Kit 2 items · own text Section Popular" in visible(ended.content)
+    assert not after
+    assert "Offer ended Invented Kit Details Ended now; was to run until" in log
 
 
 @pytest.mark.usefixtures("prompt_actions")

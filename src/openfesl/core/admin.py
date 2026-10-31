@@ -136,6 +136,9 @@ class AdminAction(StrEnum):
     """Added or changed an admin offer among a game's hot deals, the target naming both as
     game:bundle number; the details hold the offer's name, section, price, start, end and how
     many items it holds, and whether it is new."""
+    DEAL_ENDED = "deal_ended"
+    """Ended an admin offer among a game's hot deals at once, the target naming both as
+    game:bundle number; the details hold the offer's name and the end it had before."""
     STORE_ACCOUNT = "store_account"
     """Changed an account price, allowance or per-round cap of a game, the target naming both
     as game:value, such as bfheroes:slot; the details hold the value's name and the value before

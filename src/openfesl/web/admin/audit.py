@@ -64,6 +64,7 @@ GLYPHS = {
     AdminAction.DEAL_SECTION: "edit",
     AdminAction.DEAL_ART: "edit",
     AdminAction.DEAL_OFFER: "deal",
+    AdminAction.DEAL_ENDED: "x",
 }
 # What the admin does to a hero's items, and to a hero, whose persona is the target.
 ITEM_ACTIONS = (AdminAction.ITEM_GRANT, AdminAction.ITEM_CHANGE, AdminAction.ITEM_REVOKE)
@@ -420,9 +421,9 @@ async def _rows(
             kind = f"box_switch.{chest}{'on' if details['enabled'] else 'off'}"
         elif action is AdminAction.DEAL_ART:
             kind, shown, href, said = await art_entry(target, details, games, catalogues, language)
-        elif action is AdminAction.DEAL_OFFER:
+        elif action in (AdminAction.DEAL_OFFER, AdminAction.DEAL_ENDED):
             kind, shown, href, said = await offer_entry(
-                target, details, games, catalogues, language
+                action, target, details, games, catalogues, language
             )
         elif action in (AdminAction.DEAL_ROTATION, AdminAction.DEAL_SECTION):
             shown, href, said = deal_entry(action, target, details, games, language)
