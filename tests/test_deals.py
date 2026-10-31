@@ -388,7 +388,9 @@ async def test_themed_families_change_one_at_a_time_and_come_back_six_weeks_afte
         assert all(later - earlier in (1, 4, 5, 6, 7) for earlier, later in pairwise(present))
 
 
-async def test_an_event_box_is_sold_only_through_its_event(rotation: Rotation) -> None:
+async def test_an_event_box_is_sold_only_through_its_event_while_it_is_on_sale(
+    rotation: Rotation, database_url: str
+) -> None:
     rotation.game = rotation.game.model_copy(update={"deals": BOX_RULES})
     sold = []
     for moment in (
@@ -403,4 +405,12 @@ async def test_an_event_box_is_sold_only_through_its_event(rotation: Rotation) -
             [name for section, name, _, _ in await rotation.listed() if section == "events"]
         )
 
+    # A box that the admin took off sale is left out of its event's next run.
+    await execute(
+        database_url, "UPDATE store_box SET enabled = false WHERE key = 'royal-trick-or-treat'"
+    )
+    rotation.now = datetime(2028, 10, 25, tzinfo=UTC)
+    off = [name for section, name, _, _ in await rotation.listed() if section == "events"]
+
     assert sold == [[], ["Invented Bag"], ["Invented Bag"], [], ["Invented Bag"]]
+    assert off == []

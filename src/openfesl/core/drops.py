@@ -47,6 +47,7 @@ class Box:
         currency: The currency of its value.
         drops: The products it may give.
         fallback: The product it gives when a hero may get none of the others.
+        enabled: Whether it is sold, or for a chest whether keys open it.
     """
 
     id: int
@@ -59,6 +60,7 @@ class Box:
     currency: str
     drops: tuple[Drop, ...]
     fallback: Product | None
+    enabled: bool = True
 
 
 class Drops:

@@ -4,11 +4,11 @@ from xml.etree import ElementTree
 
 import httpx2
 import pytest
-from accounts import execute, select_value
+from accounts import PASSWORD, execute, post_sign_in, select_value
 from heroes import MAGMA
 from identity import IdentityProvider, form_token, sign_in
 from store import ROYAL_SOLDIER, listed, shopper, stock, without_rotation
-from support import fetch, visible
+from support import fetch, once_token, visible
 from test_admin_heroes import KEEPER, WARDEN
 
 from openfesl.core.store import Bundle
@@ -144,3 +144,80 @@ async def test_admins_change_a_drop_table_within_the_rules_every_table_keeps(
         )
         assert off.status_code == 400
         assert "so the promise stays on." in visible(off.content)
+
+
+@pytest.mark.usefixtures("prompt_actions")
+async def test_a_box_off_sale_leaves_the_hot_deals_and_chests_wait_while_opening_is_off(
+    admin_provider: IdentityProvider,
+    base: str,
+    server_url: str,
+    database_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    products: SqlProductStore,
+) -> None:
+    await stock(server_url, tmp_path, capsys)
+    await without_rotation(database_url)
+    box = await select_value(
+        database_url, "SELECT id FROM store_box WHERE key = 'royal-soldier-supply-drop'"
+    )
+    chest = await select_value(database_url, "SELECT id FROM store_box WHERE kind = 'chest'")
+    assert isinstance(box, int)
+    drop = Bundle("Royal Soldier Supply Drop", None, "_PF", 629, faction="royal", box=box)
+    number = await products.add_bundle("bfheroes", drop)
+    cookie, hero = await shopper(server_url, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    await execute(
+        database_url,
+        "INSERT INTO entitlement (account_id, persona_id, tag, use_count, status) SELECT"
+        " account_id, id, 'BFH_TREASURE_CHEST', 1, 'ACTIVE' FROM persona WHERE id = :hero",
+        hero=hero,
+    )
+    boxes = f"{base}/admin/store/bfheroes/boxes"
+    admin_provider.user = WARDEN
+    async with httpx2.AsyncClient() as client:
+        shown = await sign_in(client, base, next="/admin/store/bfheroes/boxes")
+        assert "aria-pressed" not in shown.text
+        assert "629 On sale" in visible(shown.content)
+        token = form_token(shown.text)
+        assert (await client.post(f"{boxes}/{box}/switch", data={"csrf": token})).status_code == 403
+    admin_provider.user = KEEPER
+    async with httpx2.AsyncClient() as client:
+        token = form_token((await sign_in(client, base, next="/admin/store/bfheroes/boxes")).text)
+        back = "/admin/store/bfheroes/boxes#boxes-unlisted"
+        off = await client.post(f"{boxes}/{box}/switch", data={"csrf": token, "back": back})
+        assert off.headers["location"] == back
+        page = visible((await client.get(boxes)).content)
+        assert "Took WEST_Custom_Bundle_RoyalSoldierSupplyDrop off sale; heroes keep" in page
+        assert "629 WEST_Custom_Bundle_RoyalSoldierSupplyDrop: Off" in page
+        path = f"/ofb/purchase/{hero}/OFB-DBFH:{number}"
+        refused = (await fetch(server_url, path, MAGMA, cookie, b""))[2]
+        _, _, deals = await fetch(server_url, "/ofb/products", MAGMA)
+        on = {"csrf": token, "enabled": "1"}
+        await client.post(f"{boxes}/{box}/switch", data=on)
+        bought = ElementTree.fromstring((await fetch(server_url, path, MAGMA, cookie, b""))[2])
+
+        await client.post(f"{boxes}/{chest}/switch", data={"csrf": token})
+        closed = visible((await client.get(boxes)).content)
+        async with httpx2.AsyncClient() as ann:
+            await post_sign_in(ann, base, "ann@example.test", PASSWORD)
+            chests = await ann.get(f"{base}/bfheroes/treasure-chests")
+            form = {"csrf": form_token(chests.text)}
+            keys = {**form, "keys": "1", "price": "499", "once": once_token(chests.text)}
+            await ann.post(f"{base}/bfheroes/treasure-chests/keys", data=keys)
+            await ann.post(f"{base}/bfheroes/treasure-chests/{hero}/open", data=form)
+            waiting = visible((await ann.get(f"{base}/bfheroes/treasure-chests")).content)
+            await client.post(f"{boxes}/{chest}/switch", data=on)
+            await ann.post(f"{base}/bfheroes/treasure-chests/{hero}/open", data=form)
+            opened = visible((await ann.get(f"{base}/bfheroes/treasure-chests")).content)
+        log = visible((await client.get(f"{base}/admin/audit")).content)
+
+    assert b"UNKNOWN_PRODUCT" in refused and f"OFB-DBFH:{number}".encode() not in deals
+    assert [given.tag for given in bought] == ["product"]
+    assert "Treasure chest Opening off Chests can be opened Opening is off: keys are" in closed
+    assert "Opening chests is switched off on this service." in waiting
+    assert "No chest was opened: opening chests is switched off on this service." in waiting
+    assert "Keys 1 key" in waiting
+    assert "Chest opened for Brassbuckle" in opened
+    assert "Box taken off sale royal-soldier-supply-drop" in log
+    assert "Box put on sale royal-soldier-supply-drop" in log
+    assert "Chest opening switched off treasure-chest" in log

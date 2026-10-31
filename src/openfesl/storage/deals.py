@@ -87,7 +87,9 @@ async def _history(
     )
     products = await session.scalars(select(StoreProductRow).where(StoreProductRow.game == game))
     boxes = await session.scalars(
-        select(StoreBoxRow).where(StoreBoxRow.game == game, StoreBoxRow.kind == "box")
+        select(StoreBoxRow).where(
+            StoreBoxRow.game == game, StoreBoxRow.kind == "box", StoreBoxRow.enabled
+        )
     )
     return History(
         recent=frozenset(pool for pool in recent if pool),

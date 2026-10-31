@@ -1,6 +1,7 @@
-{#def heroes: list | None, keys: int, key, funds: int, waits: bool, lists, imported: bool, next: str #}
+{#def heroes: list | None, keys: int, key, funds: int, waits: bool, lists, imported: bool, next: str, closed: bool = False #}
 {# The treasure chests of an account's heroes: its keys, each hero's chests and what a chest can
-   give the heroes of each faction; signed out, the way to sign in in place of the chests. #}
+   give the heroes of each faction; signed out, the way to sign in in place of the chests. While
+   the admin has switched opening off, the page says so and no chest opens. #}
 {% set title = _("web.chests.title") %}
 {% set price = number(key.price) ~ " " ~ _("games." ~ game.id ~ ".currency." ~ key.currency) if key else "" %}
 <Layout :title="title">
@@ -18,6 +19,11 @@
           {{ _("web.chests.lead") }}
         {% endif %}
       </p>
+      {% if closed %}
+        <p class="chests-closed">
+          <Icon name="lock" :size="18" stroke="currentColor" />{{ _("web.chests.closed") }}
+        </p>
+      {% endif %}
     </div>
     {% if heroes is not none %}
       <KeysPanel :keys="keys" :price="price">
@@ -52,7 +58,7 @@
       <h2 id="chests-heroes" class="site-heading chests-heading">{{ _n("web.chests.total", total) }}</h2>
       <ul role="list" class="chest-cards enter-rows">
         {% for held in heroes %}
-          <ChestCard :held="held" :keys="keys" :price="price" />
+          <ChestCard :held="held" :keys="keys" :price="price" :closed="closed" />
         {% endfor %}
       </ul>
     </section>

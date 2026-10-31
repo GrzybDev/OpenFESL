@@ -1,11 +1,12 @@
-{#def of, catalogue, groups: dict, deals, manages: bool #}
+{#def of, catalogue, groups: dict, deals, chests, manages: bool #}
 {# A game's boxes and chests: the drops worth less than their box's price,
    which rolls skip, then each box by the hot deals' section that sells it with when it is sold,
-   its price, what it gives on average against the price and its drops, beside the themed
-   rotation and the treasure chest. #}
+   its price, its sale switch, what it gives on average against the price and its drops, beside
+   the themed rotation and the treasure chest with the switch that lets keys open it. #}
 {% set game = of %}
 {% set base = url("/admin/store/" ~ game.id ~ "/boxes") %}
 {% set flagged = groups.values()|sum(start=[])|selectattr("below")|list %}
+{% set chest = groups.get("chest", [none])[0] %}
 {% macro ratio(row) -%}
   {%- if row.ratio is not none %}{{ _("web.admin.boxes.value", times=number(row.ratio|float, places=1)) }}{% else %}{{ _("web.admin.boxes.value.none") }}{% endif -%}
 {%- endmacro %}
@@ -47,6 +48,7 @@
                     <div role="columnheader" class="column-head">{{ _("web.admin.boxes.column.sold") }}</div>
                     <div role="columnheader"
                          class="column-head column-number">{{ _("web.admin.boxes.column.price") }}</div>
+                    <div role="columnheader" class="column-head">{{ _("web.admin.boxes.column.switch") }}</div>
                     <div role="columnheader" class="column-head">{{ _("web.admin.boxes.column.value") }}</div>
                     <div role="columnheader"><span class="sr-only">{{ _("web.admin.boxes.column.table") }}</span></div>
                   </div>
@@ -76,6 +78,14 @@
                         {% endif %}
                       </div>
                       <div role="cell" class="admin-cell boxes-price">{{ number(box.value) }}</div>
+                      <div role="cell" class="admin-cell boxes-sale">
+                        {% set sold = _("web.admin.boxes.state.on" if box.enabled else "web.admin.boxes.state.off") if box.kind == "box" else _("web.admin.boxes.chest.on" if box.enabled else "web.admin.boxes.chest.off") %}
+                        {% if manages and box.kind == "box" %}
+                          <AdminSwitch :action="base ~ '/' ~ box.id ~ '/switch'" :on="box.enabled" :name="row.name" :back="base ~ '#boxes-' ~ key" :label="sold" />
+                        {% else %}
+                          <span class="boxes-state"><Badge :name="'tick' if box.enabled else 'x'" lines />{{ sold }}</span>
+                        {% endif %}
+                      </div>
                       <div role="cell" class="admin-cell cell-stack">
                         <span class="prices-points">{{ ratio(row) }}</span>
                         <span class="cell-ago">
@@ -121,18 +131,39 @@
             <p class="bar-text body-text">{{ _("web.admin.boxes.themed.text", days=number(themed.schedule.every), stays=_n("web.store.price.days", themed.schedule.lasts or themed.schedule.every)) }}</p>
           </section>
         {% endif %}
-        {% if game.chests %}
+        {% if chests %}
+          {% set opens = not chest or chest.box.enabled %}
+          {% set account = url("/admin/store/" ~ game.id ~ "/account") %}
           <section aria-labelledby="boxes-chest-rules">
-            <Bar id="boxes-chest-rules">{{ _("web.admin.boxes.chest") }}</Bar>
+            <Bar id="boxes-chest-rules" :extra="_('web.admin.boxes.chest.on' if opens else 'web.admin.boxes.chest.off')" wrap>{{ _("web.admin.boxes.chest") }}</Bar>
+            {% if chest %}
+              <div class="boxes-chest-switch">
+                <p class="boxes-chest-text">
+                  <span class="boxes-chest-title">{{ _("web.admin.boxes.chest.opens") }}</span>
+                  <span>{{ _("web.admin.boxes.chest.text" if opens else "web.admin.boxes.chest.text.off") }}</span>
+                </p>
+                {% if manages %}
+                  <AdminSwitch :action="base ~ '/' ~ chest.box.id ~ '/switch'" :on="opens" :name="_('web.admin.boxes.chest.opens')" :back="base ~ '#boxes-chest-rules'" />
+                {% endif %}
+              </div>
+            {% endif %}
             <dl class="facts">
               <Fact :label="_('web.admin.boxes.chest.key')" plain>
-                {{ number(game.chests.key_price) }} {{ _("games." ~ game.id ~ ".currency." ~ game.chests.currency) }}
+                {{ number(chests.key_price) }} {{ _("games." ~ game.id ~ ".currency." ~ chests.currency) }}
+                <a href="{{ account }}"
+                   class="boxes-chest-link">{{ _("web.admin.boxes.chest.prices") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
               </Fact>
               <Fact :label="_('web.admin.boxes.chest.most')" plain>
-                {{ number(game.chests.most) }}
+                {{ number(chests.most) }}
+                <a href="{{ account }}"
+                   class="boxes-chest-link">{{ _("web.admin.boxes.chest.caps") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
               </Fact>
+              {% if chest %}
+                <Fact :label="_('web.admin.boxes.chest.table')" plain>
+                  {{ _n("web.admin.boxes.entries", chest.box.drops|length) }} · {{ ratio(chest) }}
+                </Fact>
+              {% endif %}
             </dl>
-            <p class="bar-text body-text">{{ _("web.admin.boxes.chest.text") }}</p>
           </section>
         {% endif %}
         <section aria-labelledby="boxes-players">

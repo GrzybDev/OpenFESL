@@ -6901,6 +6901,9 @@ msgstr "Heroes find treasure chests in matches. A key opens one chest, and each 
 msgid "web.chests.lead.worth"
 msgstr "Heroes find treasure chests in matches. A key opens one chest, and each chest gives the hero that found it an item worth at least %(worth)s."
 
+msgid "web.chests.closed"
+msgstr "Opening chests is switched off on this service. Chests and keys are kept, and keys can still be bought."
+
 msgid "web.chests.keys.title"
 msgstr "Keys"
 
@@ -7045,6 +7048,9 @@ msgstr "No keys left. A key costs %(price)s."
 msgid "web.chests.open.why.unsold"
 msgstr "No keys left."
 
+msgid "web.chests.open.why.closed"
+msgstr "Opening chests is switched off."
+
 msgid "web.chests.opened"
 msgstr "Chest opened for %(hero)s: %(item)s, %(term)s. %(keys)s"
 
@@ -7068,6 +7074,9 @@ msgstr "No chest was opened: %(hero)s has no chest left to open. No key was used
 
 msgid "web.chests.refused.nothing"
 msgstr "No chest was opened: chests on this service hold nothing %(hero)s may get. No key was used."
+
+msgid "web.chests.refused.closed"
+msgstr "No chest was opened: opening chests is switched off on this service. No key was used."
 
 msgid "web.chests.held.permanent.start"
 msgstr "Permanent"
@@ -11153,6 +11162,9 @@ msgstr "Sold"
 msgid "web.admin.boxes.column.price"
 msgstr "Price"
 
+msgid "web.admin.boxes.column.switch"
+msgstr "Switch"
+
 msgid "web.admin.boxes.column.value"
 msgstr "Value and entries"
 
@@ -11224,6 +11236,45 @@ msgstr "Chests per round"
 
 msgid "web.admin.boxes.chest.text"
 msgstr "Keys open chests on the website with the treasure chest's drop table."
+
+msgid "web.admin.boxes.chest.text.off"
+msgstr "Opening is off: keys are still sold and kept, and chests wait."
+
+msgid "web.admin.boxes.chest.opens"
+msgstr "Chests can be opened"
+
+msgid "web.admin.boxes.chest.on"
+msgstr "Opening on"
+
+msgid "web.admin.boxes.chest.off"
+msgstr "Opening off"
+
+msgid "web.admin.boxes.chest.prices"
+msgstr "Prices"
+
+msgid "web.admin.boxes.chest.caps"
+msgstr "Caps"
+
+msgid "web.admin.boxes.chest.table"
+msgstr "Drop table"
+
+msgid "web.admin.boxes.state.on"
+msgstr "On sale"
+
+msgid "web.admin.boxes.state.off"
+msgstr "Off"
+
+msgid "web.admin.toast.boxes.box.on"
+msgstr "Put %(box)s on sale again."
+
+msgid "web.admin.toast.boxes.box.off"
+msgstr "Took %(box)s off sale; heroes keep what it gave."
+
+msgid "web.admin.toast.boxes.chest.on"
+msgstr "Chests can be opened again."
+
+msgid "web.admin.toast.boxes.chest.off"
+msgstr "Switched chest opening off; keys stay on sale."
 
 msgid "web.admin.boxes.players"
 msgstr "Shown to players"
@@ -11353,6 +11404,18 @@ msgstr "Saved the drop table of %(box)s."
 
 msgid "web.admin.audit.action.box_table"
 msgstr "Drop table changed"
+
+msgid "web.admin.audit.action.box_switch.on"
+msgstr "Box put on sale"
+
+msgid "web.admin.audit.action.box_switch.off"
+msgstr "Box taken off sale"
+
+msgid "web.admin.audit.action.box_switch.chest.on"
+msgstr "Chest opening switched on"
+
+msgid "web.admin.audit.action.box_switch.chest.off"
+msgstr "Chest opening switched off"
 
 msgid "web.admin.audit.box.removed"
 msgstr "removed %(entries)s"

@@ -27,13 +27,15 @@
   }
 
   .admin-list .table.boxes-table {
-    min-width: 820px;
+    min-width: 940px;
   }
 
   .boxes-columns {
     --cell: var(--row);
     display: grid;
-    grid-template-columns: minmax(240px, 1.4fr) minmax(150px, 1fr) 100px minmax(170px, 1fr) 44px;
+    grid-template-columns:
+      minmax(240px, 1.4fr) minmax(150px, 1fr) 100px 150px
+      minmax(170px, 1fr) 44px;
     gap: 2px;
   }
 
@@ -59,7 +61,64 @@
     font-variant-numeric: tabular-nums;
   }
 
-  @container (width < 820px) {
+  .admin-cell.boxes-sale {
+    padding-left: 4px;
+  }
+
+  .boxes-state {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* The chest's switch beside what it does, and the links to the values it shares with the
+     account prices. */
+  .boxes-chest-switch {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--row-light);
+    padding: 10px 10px 10px 14px;
+    color: var(--ink);
+  }
+
+  .boxes-chest-text {
+    display: grid;
+    gap: 2px;
+    font-size: 14px;
+    line-height: 1.35;
+    font-weight: 500;
+  }
+
+  .boxes-chest-title {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .boxes-chest-link {
+    display: inline-flex;
+    min-height: 32px;
+    align-items: center;
+    gap: 6px;
+    margin-left: 10px;
+    background: var(--ink);
+    padding: 0 10px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--bright);
+    text-transform: uppercase;
+  }
+
+  @container (width < 940px) {
     .admin-list .table.boxes-table {
       min-width: 0;
 
@@ -76,7 +135,8 @@
       grid-template-columns: minmax(0, 1fr) auto 44px;
 
       > :nth-child(2),
-      > :nth-child(4) {
+      > :nth-child(4),
+      > :nth-child(5) {
         grid-column: 1 / -1;
       }
 

@@ -1,0 +1,16 @@
+{#def action: str, on: bool, name: str, back: str, label: str = "", path: str = "" #}
+{# A switch of the admin panel that admins flip, such as a reward's or a box's: a button that sends
+   its form with the state it turns to and says its state by being pressed. The form names what it
+   switches by its action, and by a path where one action switches several things; the label, such
+   as a faction's name, stands in place of On and Off. #}
+<form method="post" action="{{ action }}" class="admin-switch-form">
+  <CsrfField />
+  {% if path %}<input type="hidden" name="path" value="{{ path }}">{% endif %}
+  <input type="hidden" name="back" value="{{ back }}">
+  {% if not on %}<input type="hidden" name="enabled" value="1">{% endif %}
+  <button type="submit"
+          aria-pressed="{{ 'true' if on else 'false' }}"
+          class="admin-switch{% if not on %} admin-switch-off{% endif %}">
+    <span aria-hidden="true" class="admin-switch-box"><Icon :name="'tick' if on else 'x'" :size="14" stroke="currentColor" /></span><span class="sr-only">{{ name }}: </span>{{ label or (_("web.admin.rewards.on") if on else _("web.admin.rewards.off")) }}
+  </button>
+</form>

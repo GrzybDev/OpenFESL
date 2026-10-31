@@ -319,6 +319,8 @@ class StoreBoxRow(Base):
     currency: Mapped[str]
     value: Mapped[int] = mapped_column(BigInteger)
     worth_rule: Mapped[bool] = mapped_column(server_default="true")
+    # Whether it is sold, or for a chest whether keys open it.
+    enabled: Mapped[bool] = mapped_column(server_default="true")
     # The faction and class whose heroes may open it; any where none.
     faction: Mapped[str | None]
     hero_class: Mapped[str | None]

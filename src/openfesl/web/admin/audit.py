@@ -411,6 +411,11 @@ async def _rows(
             shown, href, said = account_entry(details, games, language)
         elif action is AdminAction.BOX_TABLE:
             shown, href, said = await box_entry(details, games, catalogues, language)
+        elif action is AdminAction.BOX_SWITCH:
+            shown = details["box"]
+            href = page(f"/admin/store/{details['game']}/boxes")
+            chest = "" if details["kind"] == "box" else "chest."
+            kind = f"box_switch.{chest}{'on' if details['enabled'] else 'off'}"
         elif action is AdminAction.DEAL_ART:
             kind, shown, href, said = await art_entry(target, details, games, catalogues, language)
         elif action in (AdminAction.DEAL_ROTATION, AdminAction.DEAL_SECTION):

@@ -1,7 +1,7 @@
-{#def held, keys: int, price: str #}
+{#def held, keys: int, price: str, closed: bool = False #}
 {# A hero's treasure chests on its card: its faction's tab, its class and level, a chest for each
    one it has to open, when it last found one, and the form that opens one with a key. Without a
-   key the form stays in view, unavailable, saying why. #}
+   key, or while opening is switched off, the form stays in view, unavailable, saying why. #}
 {% set hero = held.hero %}
 {% set rules = game.heroes %}
 {% set id = hero.persona.id %}
@@ -68,14 +68,16 @@
           <input type="hidden" name="csrf" value="{{ csrf }}">
           <button type="submit"
                   id="chest-open-{{ id }}"
-                  {% if not keys %} aria-disabled="true" aria-describedby="chest-why-{{ id }}"{% endif %}
+                  {% if closed or not keys %} aria-disabled="true" aria-describedby="chest-why-{{ id }}"{% endif %}
                   class="site-button site-button-large">
-            <Icon name="key" :size="18" :stroke="'currentColor' if not keys else '#FEDE01'" />
+            <Icon name="key" :size="18" :stroke="'currentColor' if closed or not keys else '#FEDE01'" />
             {{ _("web.chests.open") }}<span class="sr-only">{{ hero.persona.name }}</span>
           </button>
-          {% if not keys %}
+          {% if closed or not keys %}
             <p id="chest-why-{{ id }}" class="chest-why">
-              {% if price %}
+              {% if closed %}
+                {{ _("web.chests.open.why.closed") }}
+              {% elif price %}
                 {{ _("web.chests.open.why", price=price) }}
               {% else %}
                 {{ _("web.chests.open.why.unsold") }}

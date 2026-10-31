@@ -7213,6 +7213,9 @@ msgstr "Bohaterowie znajdują skrzynie skarbów w meczach. Klucz otwiera jedną 
 msgid "web.chests.lead.worth"
 msgstr "Bohaterowie znajdują skrzynie skarbów w meczach. Klucz otwiera jedną skrzynię, a każda skrzynia daje bohaterowi, który ją znalazł, przedmiot wart co najmniej %(worth)s."
 
+msgid "web.chests.closed"
+msgstr "Otwieranie skrzyń jest w tym serwisie wyłączone. Skrzynie i klucze są zachowane, a klucze nadal można kupić."
+
 msgid "web.chests.keys.title"
 msgstr "Klucze"
 
@@ -7387,6 +7390,9 @@ msgstr "Brak kluczy. Klucz kosztuje %(price)s."
 msgid "web.chests.open.why.unsold"
 msgstr "Brak kluczy."
 
+msgid "web.chests.open.why.closed"
+msgstr "Otwieranie skrzyń jest wyłączone."
+
 msgid "web.chests.opened"
 msgstr "Otwarto skrzynię bohatera %(hero)s: %(item)s, %(term)s. %(keys)s"
 
@@ -7416,6 +7422,9 @@ msgstr "Żadna skrzynia nie została otwarta: %(hero)s nie ma już skrzyń do ot
 
 msgid "web.chests.refused.nothing"
 msgstr "Żadna skrzynia nie została otwarta: skrzynie w tym serwisie nie zawierają niczego, co %(hero)s może dostać. Nie użyto klucza."
+
+msgid "web.chests.refused.closed"
+msgstr "Nie otwarto skrzyni: otwieranie skrzyń jest w tym serwisie wyłączone. Nie użyto klucza."
 
 msgid "web.chests.held.permanent.start"
 msgstr "Na stałe"
@@ -11853,6 +11862,9 @@ msgstr "Sprzedaż"
 msgid "web.admin.boxes.column.price"
 msgstr "Cena"
 
+msgid "web.admin.boxes.column.switch"
+msgstr "Przełącznik"
+
 msgid "web.admin.boxes.column.value"
 msgstr "Wartość i wpisy"
 
@@ -11936,6 +11948,45 @@ msgstr "Skrzynie na rundę"
 
 msgid "web.admin.boxes.chest.text"
 msgstr "Klucze otwierają skrzynie na stronie według tabeli losowania skrzyni skarbów."
+
+msgid "web.admin.boxes.chest.text.off"
+msgstr "Otwieranie wyłączone: klucze są nadal sprzedawane i zachowywane, a skrzynie czekają."
+
+msgid "web.admin.boxes.chest.opens"
+msgstr "Skrzynie można otwierać"
+
+msgid "web.admin.boxes.chest.on"
+msgstr "Otwieranie włączone"
+
+msgid "web.admin.boxes.chest.off"
+msgstr "Otwieranie wyłączone"
+
+msgid "web.admin.boxes.chest.prices"
+msgstr "Ceny"
+
+msgid "web.admin.boxes.chest.caps"
+msgstr "Limity"
+
+msgid "web.admin.boxes.chest.table"
+msgstr "Tabela losowania"
+
+msgid "web.admin.boxes.state.on"
+msgstr "W sprzedaży"
+
+msgid "web.admin.boxes.state.off"
+msgstr "Wyłączona"
+
+msgid "web.admin.toast.boxes.box.on"
+msgstr "Skrzynka %(box)s znów jest w sprzedaży."
+
+msgid "web.admin.toast.boxes.box.off"
+msgstr "Wycofano skrzynkę %(box)s ze sprzedaży; bohaterowie zachowują to, co dała."
+
+msgid "web.admin.toast.boxes.chest.on"
+msgstr "Skrzynie znów można otwierać."
+
+msgid "web.admin.toast.boxes.chest.off"
+msgstr "Wyłączono otwieranie skrzyń; klucze są nadal w sprzedaży."
 
 msgid "web.admin.boxes.players"
 msgstr "Widoczne dla graczy"
@@ -12065,6 +12116,18 @@ msgstr "Zapisano tabelę losowania: %(box)s."
 
 msgid "web.admin.audit.action.box_table"
 msgstr "Zmiana tabeli losowania"
+
+msgid "web.admin.audit.action.box_switch.on"
+msgstr "Skrzynka w sprzedaży"
+
+msgid "web.admin.audit.action.box_switch.off"
+msgstr "Skrzynka wycofana ze sprzedaży"
+
+msgid "web.admin.audit.action.box_switch.chest.on"
+msgstr "Włączono otwieranie skrzyń"
+
+msgid "web.admin.audit.action.box_switch.chest.off"
+msgstr "Wyłączono otwieranie skrzyń"
 
 msgid "web.admin.audit.box.removed"
 msgstr "usunięto: %(entries)s"

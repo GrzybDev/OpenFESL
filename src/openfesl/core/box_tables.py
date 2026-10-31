@@ -92,6 +92,16 @@ class BoxStore(Protocol):
             admin: The admin who saved it.
         """
 
+    async def switch(self, game: str, box: Box, enabled: bool, admin: Admin) -> None:
+        """Put a box on sale or take it off, or let keys open a chest or not, and record it.
+
+        Args:
+            game: The game's data-file name.
+            box: The box or chest.
+            enabled: Whether it is sold, or for a chest whether keys open it.
+            admin: The admin who switched it.
+        """
+
 
 def expected(box: Box) -> Fraction | None:
     """Return what a box gives on average against its price, as a share of it.

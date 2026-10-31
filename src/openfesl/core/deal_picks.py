@@ -27,7 +27,7 @@ class History:
         live: What the rotation's other sections sell when the period starts, by pool.
         live_items: The items of the rotation's bundles that run when the period starts.
         products: The store's products, sold alone or not, by item, ownership and currency.
-        boxes: The store's boxes, by key.
+        boxes: The store's boxes on sale, by key.
     """
 
     recent: frozenset[str]

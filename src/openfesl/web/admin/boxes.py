@@ -4,7 +4,8 @@ from fractions import Fraction
 from typing import Any
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from starlette.exceptions import HTTPException
 
 from openfesl.core.admins import Admin, Role
 from openfesl.core.box_tables import BoxStore, TableEntry, expected
@@ -15,8 +16,9 @@ from openfesl.core.deals import HotDeals
 from openfesl.core.drops import Box, below_value, worth
 from openfesl.core.games import Game
 from openfesl.core.store import ListedBundle, Product
-from openfesl.web.admin.auth import AdminSessions
-from openfesl.web.admin.store import StoreAdminViews
+from openfesl.web.admin.auth import AdminSessions, back_to
+from openfesl.web.admin.store import SECTION, StoreAdminViews, store_url
+from openfesl.web.sessions import check_form, toast
 from openfesl.web.store_texts import StoreTexts
 
 # The group of the boxes that no section of the hot deals sells, and of the treasure chests.
@@ -210,6 +212,17 @@ class BoxAdminViews:
         """
         await self._boxes.save_table(box, weights, entries, worth_rule, details, admin)
 
+    async def switch(self, game: Game, box: Box, enabled: bool, admin: Admin) -> None:
+        """Put a box on sale or take it off, or let keys open a chest or not, and record it.
+
+        Args:
+            game: The box's game.
+            box: The box or chest.
+            enabled: Whether it is sold, or for a chest whether keys open it.
+            admin: The admin who switched it.
+        """
+        await self._boxes.switch(game.id, box, enabled, admin)
+
     async def flags(self, language: str) -> list[BoxFlag]:
         """Return the drops of every store's boxes that are worth less than their box's price.
 
@@ -256,9 +269,10 @@ def tiers(box: Box, catalogue: Catalogue) -> list[TierView]:
 
 
 def box_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter:
-    """Return the boxes and chests of each game's store.
+    """Return the boxes and chests of each game's store, and their switches.
 
-    Every role reads them.
+    Every role reads them; switching a box off sale or the opening of chests off needs the admin
+    role, applies at once and is recorded among the admin's actions.
 
     Args:
         sessions: Signs admins in and renders the panel's pages.
@@ -283,7 +297,26 @@ def box_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter:
             catalogue=catalogue,
             groups=groups,
             deals=await views.deal_rules(game),
+            chests=(await views.stores.account_rules(game)).chests,
             manages=admin.role is Role.ADMIN,
         )
+
+    @router.post("/admin/store/{game_id}/boxes/{box_id}/switch")
+    async def switch(request: Request, game_id: str, box_id: int) -> Response:
+        admin = sessions.admin(request, Role.ADMIN, SECTION)
+        form = await request.form()
+        check_form(request, form)
+        game = views.stores.game(game_id)
+        _, rows = await views.rows(game, request.state.language)
+        row = next((row for row in rows if row.box.id == box_id), None)
+        if row is None:
+            raise HTTPException(404)
+        on = bool(form.get("enabled"))
+        if on != row.box.enabled:
+            await views.switch(game, row.box, on, admin)
+        kind = "box" if row.box.kind == "box" else "chest"
+        toast(request, f"web.admin.toast.boxes.{kind}.{'on' if on else 'off'}", box=row.name)
+        back = back_to(request, str(form.get("back", "")), store_url(request, game, "/boxes"))
+        return RedirectResponse(back, 303)
 
     return router

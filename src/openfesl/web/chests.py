@@ -139,6 +139,7 @@ class ChestsPages:
                 waits=waits,
                 lists=await self._lists(StoreTexts(game, language, datetime.now(UTC)), catalogue),
                 imported=catalogue.imported,
+                closed=await self._chests.closed(game),
                 next=localize(f"/{game.id}{CHESTS}", language),
                 csrf=form_token(request) if player else "",
             )

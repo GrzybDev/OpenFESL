@@ -43,11 +43,15 @@ class ChestRules(BaseModel):
 
 
 class ChestRefusal(StrEnum):
-    """Why a chest was not opened: no key, no chest, or nothing in it the hero may get."""
+    """Why a chest was not opened.
+
+    No key, no chest, nothing in it the hero may get, or opening switched off by the admin.
+    """
 
     NO_KEY = "no-key"
     NO_CHEST = "no-chest"
     NOTHING = "nothing"
+    CLOSED = "closed"
 
 
 class ChestRefused(Exception):
@@ -143,11 +147,13 @@ class Chests:
             What the chest gave the hero, which it now holds.
 
         Raises:
-            ChestRefused: When the account has no key, the hero no chest, or the chest holds
-                nothing the hero may get.
+            ChestRefused: When the account has no key, the hero no chest, the chest holds
+                nothing the hero may get, or the admin switched opening off.
         """
         rules = game.chests
         box = await self._products.box_by_key(game.id, rules.contents) if rules else None
+        if box is not None and not box.enabled:
+            raise ChestRefused(ChestRefusal.CLOSED)
         roster = await self._heroes.roster(game, persona.account_id)
         hero = next((hero for hero in roster.heroes if hero.persona.id == persona.id), None)
         won = await self._drops.roll(game, box, persona, hero) if box and hero else None
@@ -155,6 +161,16 @@ class Chests:
             raise ChestRefused(ChestRefusal.NOTHING)
         await self._store.open_chest(persona, key_tag(rules), rules.tag, won)
         return won
+
+    async def closed(self, game: Game) -> bool:
+        """Return whether the admin switched the opening of a game's chests off.
+
+        Args:
+            game: The game.
+        """
+        rules = game.chests
+        box = await self._products.box_by_key(game.id, rules.contents) if rules else None
+        return box is not None and not box.enabled
 
     async def key(self, game: Game) -> Product | None:
         """Return the product that sells an account a game's keys, if its store sells them.

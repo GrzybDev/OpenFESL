@@ -5,6 +5,18 @@
     margin-top: 40px;
   }
 
+  /* The line that says the admin switched the opening of chests off. */
+  .chests-closed {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: #8c1e18;
+  }
+
   .chests-heading {
     margin-bottom: 16px;
   }

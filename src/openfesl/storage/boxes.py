@@ -91,6 +91,22 @@ class SqlBoxStore:
             )
             session.add(action_row(AdminAction.BOX_TABLE, f"{game}:{box.key}", details, admin))
 
+    async def switch(self, game: str, box: Box, enabled: bool, admin: Admin) -> None:
+        """Put a box on sale or take it off, or let keys open a chest or not, and record it.
+
+        Args:
+            game: The game's data-file name.
+            box: The box or chest.
+            enabled: Whether it is sold, or for a chest whether keys open it.
+            admin: The admin who switched it.
+        """
+        details = {"game": game, "box": box.key, "kind": box.kind, "enabled": enabled}
+        async with self._sessions.begin() as session:
+            await session.execute(
+                update(StoreBoxRow).where(StoreBoxRow.id == box.id).values(enabled=enabled)
+            )
+            session.add(action_row(AdminAction.BOX_SWITCH, f"{game}:{box.key}", details, admin))
+
 
 async def _product(session: AsyncSession, game: str, currency: str, entry: TableEntry) -> int:
     # The store's product of an entry, added unpublished at its price where the store lacks one.

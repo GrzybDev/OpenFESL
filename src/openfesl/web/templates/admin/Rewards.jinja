@@ -6,6 +6,7 @@
    switch at once and save the milestones' Funds and switches together; a refused amount
    stands above Save and nothing is saved. #}
 {% set game = found.game %}
+{% set switch = url("/admin/rewards/" ~ game.id ~ "/switch") %}
 {% set rules = found.rules %}
 {% set words = found.words %}
 {% set strip = found.strip %}
@@ -79,7 +80,7 @@
                 </div>
                 <div role="cell" class="admin-cell">
                   {% if manages %}
-                    <RewardSwitch :game="game" :path="'events.' ~ row.key" :on="event.enabled" :name="_('web.admin.rewards.switch.event', event=_(event.title))" :back="here ~ '#event-' ~ row.key" />
+                    <AdminSwitch :action="switch" :path="'events.' ~ row.key" :on="event.enabled" :name="_('web.admin.rewards.switch.event', event=_(event.title))" :back="here ~ '#event-' ~ row.key" />
                   {% else %}
                     {{ switch(event.enabled) }}
                   {% endif %}
@@ -88,7 +89,7 @@
                   <span aria-hidden="true" class="cell-label">{{ _("web.admin.rewards.column.parts") }}</span>
                   {% for key, part in event.parts.items() %}
                     {% if manages %}
-                      <RewardSwitch :game="game" :path="'events.' ~ row.key ~ '.parts.' ~ key" :on="part.enabled" :name="_(event.title)" :back="here ~ '#event-' ~ row.key" :label="part_name(key, part)" />
+                      <AdminSwitch :action="switch" :path="'events.' ~ row.key ~ '.parts.' ~ key" :on="part.enabled" :name="_(event.title)" :back="here ~ '#event-' ~ row.key" :label="part_name(key, part)" />
                     {% else %}
                       <span class="rewards-part{% if not part.enabled or not event.enabled %} rewards-part-off{% endif %}">
                       <Icon :name="'tick' if part.enabled else 'x'" :size="12" stroke="currentColor" />{{ part_name(key, part) }}<span class="sr-only">: {{ _("web.admin.rewards.on" if part.enabled else "web.admin.rewards.off") }}</span>
@@ -142,7 +143,7 @@
             <div class="rewards-switch-row">
               <span>{{ _n("web.admin.rewards.packs.days", packs.rules.days) }}</span>
               {% if manages %}
-                <RewardSwitch :game="game" path="starter" :on="packs.rules.enabled" :name="_('web.admin.rewards.packs')" :back="here ~ '#rewards-packs'" />
+                <AdminSwitch :action="switch" path="starter" :on="packs.rules.enabled" :name="_('web.admin.rewards.packs')" :back="here ~ '#rewards-packs'" />
               {% else %}
                 {{ switch(packs.rules.enabled) }}
               {% endif %}
@@ -189,7 +190,7 @@
                 <span class="cell-ago">{{ _n("web.admin.rewards.keys.first.text", chest.gift.keys) }}</span>
               </p>
               {% if manages %}
-                <RewardSwitch :game="game" path="first_chest" :on="chest.enabled" :name="found.chest" :back="here ~ '#rewards-key'" />
+                <AdminSwitch :action="switch" path="first_chest" :on="chest.enabled" :name="found.chest" :back="here ~ '#rewards-key'" />
               {% else %}
                 {{ switch(chest.enabled) }}
               {% endif %}

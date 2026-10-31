@@ -1,11 +1,11 @@
-/* A switch of a game's rewards: its box ticked in the accent while on, crossed on black while
+/* A switch of the admin panel: its box ticked in the accent while on, crossed on black while
    off; pressing it flips it. */
 @layer components {
-  .reward-switch-form {
+  .admin-switch-form {
     display: inline-flex;
   }
 
-  .reward-switch {
+  .admin-switch {
     display: inline-flex;
     min-height: 36px;
     align-items: center;
@@ -29,7 +29,7 @@
     }
   }
 
-  .reward-switch-box {
+  .admin-switch-box {
     display: grid;
     width: 26px;
     height: 26px;
@@ -37,7 +37,7 @@
     border: 2px solid currentColor;
   }
 
-  .reward-switch-off {
+  .admin-switch-off {
     background: var(--ink);
     color: var(--row-light);
 
@@ -47,7 +47,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .reward-switch {
+    .admin-switch {
       transition: none;
     }
   }

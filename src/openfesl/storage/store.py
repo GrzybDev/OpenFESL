@@ -206,6 +206,13 @@ class SqlProductStore:
                         StoreBundleRow.published,
                         or_(StoreBundleRow.starts_at.is_(None), StoreBundleRow.starts_at <= now),
                         or_(StoreBundleRow.ends_at.is_(None), StoreBundleRow.ends_at > now),
+                        # A box taken off sale takes its hot deals with it.
+                        or_(
+                            StoreBundleRow.box_id.is_(None),
+                            StoreBundleRow.box_id.in_(
+                                select(StoreBoxRow.id).where(StoreBoxRow.enabled)
+                            ),
+                        ),
                     )
                     .order_by(StoreBundleRow.game_order, StoreBundleRow.id)
                 )
@@ -310,6 +317,7 @@ async def boxes_of(session: AsyncSession, rows: list[StoreBoxRow]) -> list[Box]:
             currency=row.currency,
             drops=tuple(held.get(row.id, [])),
             fallback=fallbacks.get(row.fallback_id) if row.fallback_id else None,
+            enabled=row.enabled,
         )
         for row in rows
     ]
