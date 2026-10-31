@@ -13,6 +13,7 @@ from starlette.exceptions import HTTPException
 
 from openfesl.core.admin import ActionHistory, AdminAction, AuditEntry
 from openfesl.core.admins import Admin, Role
+from openfesl.core.calendar import checked_zone
 from openfesl.core.game_icons import (
     MAX_ICON_SIZE,
     IconProblem,
@@ -27,6 +28,7 @@ from openfesl.core.policies import GamePolicies, Policies, SettingStore, setting
 from openfesl.core.servers import HostingMode
 from openfesl.core.texts import localize, translate
 from openfesl.web.admin.auth import AdminSessions, SignInProvider
+from openfesl.web.admin.rewards import RewardAdminViews
 from openfesl.web.admin.servers import ServerViews
 from openfesl.web.game_icons import ICON_PATH, icon_version, reaches_discord
 from openfesl.web.pages import Toast
@@ -132,6 +134,24 @@ class MarkView:
 
 
 @dataclass(frozen=True, slots=True)
+class ZoneView:
+    """The time zone of a game's rewards, as its block on the settings page shows it.
+
+    Attributes:
+        zone: The zone at whose midnight the days start.
+        default: The zone of the game's data.
+        changed: The latest change as the admin's log records it; none while the data's holds.
+        entered: What the admin entered that names no zone, beside which the refusal stands;
+            none when nothing was refused.
+    """
+
+    zone: str
+    default: str
+    changed: AuditEntry | None
+    entered: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class PolicyView:
     """One of a game's policies as the settings page shows it.
 
@@ -192,13 +212,15 @@ def settings_routes(
     apply_actions: Callable[[], Awaitable[None]],
     marks: GameMarks,
     log: ActionHistory,
+    rewards: RewardAdminViews,
 ) -> APIRouter:
     """Return the settings page: hosting, sign-in, the site's policy and each game's settings.
 
-    Each game has its icon, its own server mark at official servers and its rules. Moderators
-    see the settings; changing them needs the admin role. A change of the hosting mode asks
-    first and applies to the games hosted now too, as does a game's own server mark without
-    asking; policies apply from their next use, and an icon from presence's next update.
+    Each game has its icon, its own server mark at official servers, the time zone of its
+    rewards' days and its rules. Moderators see the settings; changing them needs the admin role.
+    A change of the hosting mode asks first and applies to the games hosted now too, as does a
+    game's own server mark without asking; policies and the zone apply from their next use, and
+    an icon from presence's next update.
 
     Args:
         sessions: Signs admins in and renders the panel's pages.
@@ -217,6 +239,7 @@ def settings_routes(
         marks: Says whether each game shows its own server mark at official servers, which the
             page changes.
         log: Says who last changed each game's own server mark and when.
+        rewards: The games' rewards, whose zone the page changes.
     """
     router = APIRouter()
 
@@ -226,6 +249,7 @@ def settings_routes(
         status: int = 200,
         errors: dict[str, str] | None = None,
         refused: IconRefusal | None = None,
+        entered: tuple[str, str] | None = None,
     ) -> HTMLResponse:
         mode = await hosting.hosting_mode()
         waiting = await servers.waiting(await servers.all())
@@ -238,6 +262,16 @@ def settings_routes(
             for game in games
             if game.official_attribute is not None
         }
+        zones = {}
+        for game in rewards.games:
+            rules = await rewards.rewards.rules(game)
+            assert rules is not None and game.rewards is not None
+            zones[game.id] = ZoneView(
+                rules.zone,
+                game.rewards.zone,
+                await log.latest(AdminAction.REWARD_ZONE, game.id),
+                entered[1] if entered and entered[0] == game.id else None,
+            )
         return await sessions.render(
             request,
             "admin.Settings",
@@ -258,6 +292,7 @@ def settings_routes(
             refused=refused,
             largest=MAX_ICON_SIZE // (1024 * 1024),
             marks=shown_marks,
+            zones=zones,
             failed=Toast("web.toast.failed", {}, error=True),
         )
 
@@ -361,6 +396,29 @@ def settings_routes(
             toast(request, f"web.admin.toast.game_mark.{state}", game=name)
         target = localize("/admin/settings", request.state.language)
         return RedirectResponse(f"{target}#mark-{game.id}", 303)
+
+    @router.post("/admin/settings/games/{game_id}/zone")
+    async def change_zone(request: Request, game_id: str) -> Response:
+        admin = sessions.admin(request, Role.ADMIN, SECTION)
+        form = await request.form()
+        check_form(request, form)
+        game = rewards.game(game_id)
+        rules = await rewards.rewards.rules(game)
+        assert rules is not None and game.rewards is not None
+        zone = str(form.get("zone", "")).strip()
+        try:
+            checked_zone(zone)
+        except ValueError:
+            return await page(request, admin, 400, entered=(game.id, zone))
+        if zone == rules.zone:
+            toast(request, "web.admin.toast.reward_zone.unchanged", zone=zone)
+        else:
+            value = None if zone == game.rewards.zone else zone
+            details = {"before": rules.zone, "after": zone}
+            await rewards.change(game, {"zone": value}, AdminAction.REWARD_ZONE, details, admin)
+            toast(request, "web.admin.toast.reward_zone", zone=zone)
+        target = localize("/admin/settings", request.state.language)
+        return RedirectResponse(f"{target}#zone-{game.id}", 303)
 
     @router.post("/admin/settings/games/{game_id}/icon")
     async def store_icon(request: Request, game_id: str) -> Response:

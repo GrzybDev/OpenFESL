@@ -1,0 +1,59 @@
+{#def game, zone, manages: bool #}
+{# The time zone at whose midnight the days of a game's rewards start, in its section of the
+   settings: the zone's name with the game data's default and the latest change. Admins type the
+   name of another zone, and one that the zone database does not know is refused beside the field;
+   moderators read the zone and the role note. #}
+{% set key = "zone-" ~ game.id %}
+{% set field = key ~ "-field" %}
+{% set refused = zone.entered is not none %}
+<section aria-labelledby="{{ key }}-title" id="{{ key }}" class="game-mark">
+  <h3 id="{{ key }}-title" class="bar bar-wrap">
+    <span>{{ _("web.admin.reward_zone") }}</span><span class="bar-extra">{{ zone.zone }}</span>
+  </h3>
+  <form method="post"
+        action="{{ url('/admin/settings/games/' ~ game.id ~ '/zone') }}">
+    <CsrfField />
+    <div class="settings-policy settings-text">
+      <label for="{{ field }}" class="field-label field-label-joined">{{ _("web.admin.reward_zone.field") }}</label>
+      <input id="{{ field }}"
+             name="zone"
+             type="text"
+             value="{{ zone.entered if refused else zone.zone }}"
+             maxlength="64"
+             autocomplete="off"
+             spellcheck="false"
+             aria-describedby="{{ field }}-note"
+             {% if refused %} aria-invalid="true"{% endif %}
+             {% if not manages %} disabled{% endif %}
+             class="field-input field-code{% if refused %} field-invalid{% endif %}">
+      {% if refused %}
+        <p id="{{ field }}-note" role="alert" class="field-note field-error">
+          <span aria-hidden="true"
+                class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.reward_zone.refused") }}
+        </p>
+      {% else %}
+        <p id="{{ field }}-note" class="field-note">{{ _("web.admin.reward_zone.text") }}</p>
+      {% endif %}
+      <p class="settings-default">
+        {{ _("web.admin.settings.default") if zone.zone == zone.default else _("web.admin.settings.changed", value=zone.default) }}
+      </p>
+    </div>
+    {% if manages %}
+      <div class="settings-save">
+        <SmallAction :label="_('web.admin.reward_zone.save')" :busy="_('web.admin.key.saving')" />
+      </div>
+    {% endif %}
+  </form>
+  <p class="game-mark-line">
+    {% if zone.changed %}
+      {{ _("web.admin.reward_zone.changed", time=_("web.server.time", time=moment(zone.changed.at)), who=zone.changed.name or _("web.admin.command_line")) }}
+    {% endif %}
+    <a href="{{ url('/admin/rewards/' ~ game.id) }}">{{ _("web.admin.reward_zone.rewards") }}</a>
+  </p>
+  {% if not manages %}
+    <p class="role-note">
+      <span aria-hidden="true"
+            class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.reward_zone.managed") }}
+    </p>
+  {% endif %}
+</section>

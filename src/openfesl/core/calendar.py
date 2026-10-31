@@ -17,7 +17,15 @@ from pydantic import (
 _EPOCH = date(2001, 1, 1)
 
 
-def _zone(name: str) -> str:
+def checked_zone(name: str) -> str:
+    """Return the name of a time zone that the zone database knows.
+
+    Args:
+        name: The name, such as UTC or Europe/Warsaw.
+
+    Raises:
+        ValueError: When the database knows no zone by the name.
+    """
     try:
         ZoneInfo(name)
     except ZoneInfoNotFoundError, ValueError:
@@ -25,7 +33,7 @@ def _zone(name: str) -> str:
     return name
 
 
-type Zone = Annotated[str, AfterValidator(_zone)]
+type Zone = Annotated[str, AfterValidator(checked_zone)]
 
 
 def _month_day(text: str) -> str:

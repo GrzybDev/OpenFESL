@@ -141,6 +141,9 @@ class AdminAction(StrEnum):
     REWARD_MILESTONE = "reward_milestone"
     """Changed a milestone of the rewards of the game whose id is the target; the details hold
     its key and its Funds and switch before and after."""
+    REWARD_ZONE = "reward_zone"
+    """Changed the time zone at whose midnight the days of the rewards of the game whose id is
+    the target start; the details hold the zone before and after."""
 
 
 @dataclass(frozen=True, slots=True)

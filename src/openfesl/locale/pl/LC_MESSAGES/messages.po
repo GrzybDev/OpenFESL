@@ -8270,6 +8270,30 @@ msgstr ""
 msgid "web.admin.game_mark.managed"
 msgstr "Zmiana własnego znaku serwera w grze wymaga roli administratora."
 
+msgid "web.admin.reward_zone"
+msgstr "Początek dnia nagród"
+
+msgid "web.admin.reward_zone.field"
+msgstr "Strefa czasowa"
+
+msgid "web.admin.reward_zone.text"
+msgstr "Dni nagród zaczynają się o północy w tej strefie: dzienne prezenty, dni wydarzeń i dni pakietów startowych. Nazwa z bazy stref czasowych, na przykład UTC albo Europe/Warsaw."
+
+msgid "web.admin.reward_zone.refused"
+msgstr "Nie zapisano: baza stref czasowych nie zna strefy o tej nazwie. Nazwy wyglądają tak: UTC albo Europe/Warsaw."
+
+msgid "web.admin.reward_zone.save"
+msgstr "Zapisz strefę"
+
+msgid "web.admin.reward_zone.changed"
+msgstr "Zmieniono %(time)s · %(who)s."
+
+msgid "web.admin.reward_zone.rewards"
+msgstr "Nagrody gry"
+
+msgid "web.admin.reward_zone.managed"
+msgstr "Zmiana strefy dni nagród wymaga roli administratora."
+
 msgid "web.admin.game_mark.save"
 msgstr "Zapisz"
 
@@ -8288,6 +8312,12 @@ msgid "web.admin.toast.game_mark.unchanged.off"
 msgstr ""
 "Nic się nie zmieniło: własny znak serwera w grze %(game)s był już "
 "wyłączony."
+
+msgid "web.admin.toast.reward_zone"
+msgstr "Od teraz dni nagród zaczynają się o północy w strefie %(zone)s."
+
+msgid "web.admin.toast.reward_zone.unchanged"
+msgstr "Nic się nie zmieniło: dni nagród już zaczynają się w strefie %(zone)s."
 
 msgid "web.admin.official.game.off"
 msgstr "%(game)s nie pokazuje teraz własnego znaku serwera."
@@ -12593,6 +12623,12 @@ msgstr "Wyłączenie nagrody"
 
 msgid "web.admin.audit.action.reward_milestone"
 msgstr "Zmiana kamienia milowego"
+
+msgid "web.admin.audit.action.reward_zone"
+msgstr "Zmiana początku dnia"
+
+msgid "web.admin.audit.reward_zone"
+msgstr "%(before)s → %(after)s"
 
 msgid "web.admin.audit.reward_funds"
 msgstr "%(before)s → %(after)s %(currency)s"

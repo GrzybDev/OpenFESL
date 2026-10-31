@@ -1,8 +1,8 @@
-{#def mode: str, modes: list, waiting: int, games: list, site: bool, provider, manages: bool, errors, icons, base: str, reachable: bool, replacing: str, refused, largest: int, marks, failed #}
+{#def mode: str, modes: list, waiting: int, games: list, site: bool, provider, manages: bool, errors, icons, base: str, reachable: bool, replacing: str, refused, largest: int, marks, zones, failed #}
 {# The instance's settings: who can host as two tiles, the sign-in provider the deployment sets
    up, the site's policy, and for each game the icon its Discord presence shows, whether it shows
-   its own server mark at official servers, and its policies with their defaults. Changing them
-   needs the admin role. #}
+   its own server mark at official servers, the time zone of its rewards' days, and its policies
+   with their defaults. Changing them needs the admin role. #}
 {% set title = _("web.admin.settings") %}
 {% set glyphs = {"approved": "lock", "open": "open", "allow": "tick", "refuse": "x", "replace": "retry"} %}
 {% macro shown(policy, value) %}
@@ -115,6 +115,9 @@
         <GameIcon :game="game" :icon="icons.get(game.id)" :refused="refused" :manages="manages" :reachable="reachable" :base="base" :replacing="replacing" :largest="largest" />
         {% if game.id in marks %}
           <GameMark :game="game" :mark="marks[game.id]" :manages="manages" />
+        {% endif %}
+        {% if game.id in zones %}
+          <RewardZone :game="game" :zone="zones[game.id]" :manages="manages" />
         {% endif %}
         <form method="post" action="{{ url('/admin/settings/games/' ~ game.id) }}">
           <CsrfField />

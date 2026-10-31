@@ -165,8 +165,8 @@ def reward_entry(
     """Return how the audit log shows a change of a game's rewards.
 
     Args:
-        action: What the admin did: paused or resumed the claims, flipped a switch or changed a
-            milestone.
+        action: What the admin did: paused or resumed the claims, flipped a switch, changed a
+            milestone or the zone of the days.
         target: The game's id.
         details: The change's details, as the admin's log keeps them.
         games: The games, whose rewards the change was made to.
@@ -186,6 +186,10 @@ def reward_entry(
     if action is AdminAction.REWARD_SWITCH:
         shown = switch_name(game, details["switch"], language)
         return f"{action.value}.{'on' if details['enabled'] else 'off'}", shown, href, ""
+    if action is AdminAction.REWARD_ZONE:
+        shown = translate("web.admin.rewards.subtitle", language) % {"game": game.name}
+        zones = translate("web.admin.audit.reward_zone", language) % details
+        return action.value, shown, localize(f"/admin/settings#zone-{target}", language), zones
     before, after = details["before"], details["after"]
     said = []
     if before["funds"] != after["funds"]:

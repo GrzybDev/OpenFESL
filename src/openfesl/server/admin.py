@@ -207,6 +207,7 @@ def include_admin_routes(
             services.feed.apply,
             services.game_marks,
             stores.admin_log,
+            reward_views,
         )
     )
     app.include_router(

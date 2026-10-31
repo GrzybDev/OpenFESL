@@ -7838,6 +7838,30 @@ msgstr ""
 msgid "web.admin.game_mark.managed"
 msgstr "Changing the game's own server mark needs the admin role."
 
+msgid "web.admin.reward_zone"
+msgstr "Day start of the rewards"
+
+msgid "web.admin.reward_zone.field"
+msgstr "Time zone"
+
+msgid "web.admin.reward_zone.text"
+msgstr "The rewards' days start at midnight in this zone: daily gifts, event days and the days of starter packs. A name from the time zone database, such as UTC or Europe/Warsaw."
+
+msgid "web.admin.reward_zone.refused"
+msgstr "Not saved: the time zone database knows no zone by this name. Names look like UTC or Europe/Warsaw."
+
+msgid "web.admin.reward_zone.save"
+msgstr "Save the zone"
+
+msgid "web.admin.reward_zone.changed"
+msgstr "Changed %(time)s · %(who)s."
+
+msgid "web.admin.reward_zone.rewards"
+msgstr "The game's rewards"
+
+msgid "web.admin.reward_zone.managed"
+msgstr "Changing the zone of the rewards' days needs the admin role."
+
 msgid "web.admin.game_mark.save"
 msgstr "Save"
 
@@ -7852,6 +7876,12 @@ msgstr "Nothing changed: %(game)s already had its own server mark turned on."
 
 msgid "web.admin.toast.game_mark.unchanged.off"
 msgstr "Nothing changed: %(game)s already had its own server mark turned off."
+
+msgid "web.admin.toast.reward_zone"
+msgstr "The rewards' days start at midnight in %(zone)s from now on."
+
+msgid "web.admin.toast.reward_zone.unchanged"
+msgstr "Nothing changed: the rewards' days start in %(zone)s already."
 
 msgid "web.admin.official.game.off"
 msgstr "%(game)s does not show its own server mark now."
@@ -11851,6 +11881,12 @@ msgstr "Reward switched off"
 
 msgid "web.admin.audit.action.reward_milestone"
 msgstr "Milestone changed"
+
+msgid "web.admin.audit.action.reward_zone"
+msgstr "Day start changed"
+
+msgid "web.admin.audit.reward_zone"
+msgstr "%(before)s → %(after)s"
 
 msgid "web.admin.audit.reward_funds"
 msgstr "%(before)s → %(after)s %(currency)s"

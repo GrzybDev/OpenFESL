@@ -236,6 +236,41 @@ async def test_admins_switch_events_parts_packs_and_the_key_and_change_milestone
     assert "Milestone changed Ranked matches: 100 Details On → Off" in log
 
 
+@pytest.mark.usefixtures("halloween", "prompt_actions")
+async def test_admins_set_the_zone_at_whose_midnight_the_rewards_days_start(
+    admin_provider: IdentityProvider, base: str, database_url: str
+) -> None:
+    zone = f"{base}/admin/settings/games/bfheroes/zone"
+    admin_provider.user = WARDEN
+    async with httpx2.AsyncClient() as client:
+        shown = visible((await sign_in(client, base, next="/admin/settings")).content)
+        token = form_token((await client.get(f"{base}/admin/settings")).text)
+        refused = await client.post(zone, data={"csrf": token, "zone": "Europe/Warsaw"})
+    assert "Day start of the rewards UTC" in shown
+    assert "Changing the zone of the rewards' days needs the admin role." in shown
+    assert refused.status_code == 403
+
+    admin_provider.user = KEEPER
+    async with httpx2.AsyncClient() as client:
+        token = form_token((await sign_in(client, base, next="/admin/settings")).text)
+        unknown = await client.post(zone, data={"csrf": token, "zone": "Mars/Olympus"})
+        sent = {"csrf": token, "zone": "Europe/Warsaw"}
+        saved = visible((await client.post(zone, data=sent, follow_redirects=True)).content)
+        kept = await setting(database_url, "bfheroes.rewards.zone")
+        page = visible((await client.get(f"{base}{REWARDS}")).content)
+        await client.post(zone, data={"csrf": token, "zone": "UTC"})
+        log = visible((await client.get(f"{base}/admin/audit")).content)
+
+    assert unknown.status_code == 400
+    assert "the time zone database knows no zone by this name" in visible(unknown.content)
+    assert "The rewards' days start at midnight in Europe/Warsaw from now on." in saved
+    assert kept == "Europe/Warsaw"
+    assert "Today 28 Oct · days start 00:00 Europe/Warsaw" in page
+    # Back at the game data's zone, the setting goes.
+    assert await setting(database_url, "bfheroes.rewards.zone") is None
+    assert "Day start changed Rewards page of Battlefield Heroes Details UTC → Europe/Warsaw" in log
+
+
 @pytest.mark.usefixtures("halloween")
 async def test_the_preview_shows_the_players_page_on_a_date_with_the_switches_applied(
     admin_provider: IdentityProvider, base: str, database_url: str
