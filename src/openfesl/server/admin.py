@@ -37,6 +37,7 @@ from openfesl.web.admin.servers import (
 )
 from openfesl.web.admin.settings import settings_routes
 from openfesl.web.admin.store import StoreAdminViews, store_routes
+from openfesl.web.admin.store_account import store_account_routes
 from openfesl.web.admin.store_item import store_item_routes
 from openfesl.web.admin.store_rules import store_rule_routes
 from openfesl.web.admin.wallets import WalletAdminViews, wallet_routes
@@ -170,6 +171,7 @@ def include_admin_routes(
     app.include_router(store_routes(sign_in, store_views))
     app.include_router(store_item_routes(sign_in, store_views))
     app.include_router(store_rule_routes(sign_in, store_views))
+    app.include_router(store_account_routes(sign_in, store_views))
     app.include_router(box_routes(sign_in, box_views))
     app.include_router(purchase_routes(sign_in, store_views, services.catalogues, stores.purchases))
     app.include_router(box_table_routes(sign_in, box_views))

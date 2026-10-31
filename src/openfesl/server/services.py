@@ -102,8 +102,8 @@ class GameServices:
         self.game_marks = GameMarks(stores.game_marks)
         self.hosting = Hosting(self.approval, self.game_marks)
         self.trust = ServerTrust(self.hosting, self.approval)
-        self.wallets = Wallets(stores.wallets)
-        self.heroes = Heroes(stores.heroes, stores.stats)
+        self.wallets = Wallets(stores.wallets, stores.settings)
+        self.heroes = Heroes(stores.heroes, stores.stats, stores.settings)
         self.hero_boards = HeroBoards(stores.hero_boards)
         self._relay_tokens = RelayTokens()
         self.magma = Magma(
@@ -114,6 +114,7 @@ class GameServices:
             stores.personas,
             stores.entitlements,
             self.wallets,
+            stores.settings,
         )
         self.relationships = Relationships(
             stores.relationships, self.players, self.hosting, self.trust
@@ -139,6 +140,7 @@ class GameServices:
             stores.entitlements,
             drops,
             self.deals,
+            stores.settings,
         )
         self.chests = Chests(stores.products, stores.purchases, self.heroes, drops)
         self.rewards = Rewards(

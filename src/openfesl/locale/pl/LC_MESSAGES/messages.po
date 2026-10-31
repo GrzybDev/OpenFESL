@@ -218,6 +218,9 @@ msgstr "Ten zakup miejsca został już dokonany; ponowne wysłanie nie dodało k
 msgid "web.slots.refused.funds"
 msgstr "Miejsce nie zostało dodane: konto ma %(funds)s %(currency)s, a miejsce kosztuje %(price)s. Nic nie zostało wydane."
 
+msgid "web.slots.refused.price"
+msgstr "Miejsce nie zostało dodane: cena miejsca zmieniła się na %(price)s %(currency)s. Nic nie zostało wydane."
+
 msgid "web.slots.refused.form"
 msgstr "Miejsce nie zostało dodane: formularz wygasł. Nic nie zostało wydane."
 
@@ -637,6 +640,9 @@ msgstr "Zmieniono nazwę bohatera %(old)s na %(new)s. Wydano %(price)s %(currenc
 
 msgid "web.rename.refused.funds"
 msgstr "Nazwa bohatera %(hero)s nie została zmieniona: konto ma %(funds)s %(currency)s, a zmiana nazwy kosztuje %(price)s. Nic nie zostało wydane."
+
+msgid "web.rename.refused.price"
+msgstr "Nazwa bohatera %(hero)s nie została zmieniona: cena zmiany nazwy zmieniła się na %(price)s %(currency)s. Nic nie zostało wydane."
 
 msgid "web.rename.refused.form"
 msgstr "Nazwa bohatera %(hero)s nie została zmieniona: formularz wygasł. Nic nie zostało wydane."
@@ -11385,6 +11391,12 @@ msgstr "Przywrócono ceny przedmiotu %(item)s według zasady rodzaju."
 msgid "web.admin.toast.store.unchanged"
 msgstr "Ceny przedmiotu %(item)s się nie zmieniły."
 
+msgid "web.admin.toast.store.account"
+msgstr "Zapisano ceny konta i limity. Zmienione wartości: %(count)s."
+
+msgid "web.admin.toast.store.account.unchanged"
+msgstr "Ceny konta i limity się nie zmieniły."
+
 msgid "web.admin.audit.action.store_prices"
 msgstr "Zmiana cen"
 
@@ -11457,6 +11469,9 @@ msgstr "Przedmioty"
 msgid "web.admin.store.view.rules"
 msgstr "Zasady rodzajów"
 
+msgid "web.admin.store.view.account"
+msgstr "Ceny konta i limity"
+
 msgid "web.admin.store.rules"
 msgstr "Zasady rodzajów · na podstawie danych gry"
 
@@ -11471,6 +11486,117 @@ msgstr "%(count)s zasad"
 
 msgid "web.admin.store.rules.count.other"
 msgstr "%(count)s zasady"
+
+msgid "web.admin.store.account"
+msgstr "Ceny konta, przydziały i limity na rundę"
+
+msgid "web.admin.store.account.default"
+msgstr "Wszystkie domyślne"
+
+msgid "web.admin.store.account.changed.one"
+msgstr "Zmienione: %(count)s"
+
+msgid "web.admin.store.account.changed.few"
+msgstr "Zmienione: %(count)s"
+
+msgid "web.admin.store.account.changed.many"
+msgstr "Zmienione: %(count)s"
+
+msgid "web.admin.store.account.changed.other"
+msgstr "Zmienione: %(count)s"
+
+msgid "web.admin.store.account.column.setting"
+msgstr "Ustawienie"
+
+msgid "web.admin.store.account.column.value"
+msgstr "Wartość"
+
+msgid "web.admin.store.account.column.unit"
+msgstr "Jednostka"
+
+msgid "web.admin.store.account.column.default"
+msgstr "Dane gry"
+
+msgid "web.admin.store.account.column.state"
+msgstr "Stan"
+
+msgid "web.admin.store.account.slot"
+msgstr "Miejsce na bohatera"
+
+msgid "web.admin.store.account.slot.text.one"
+msgstr "Kolejne miejsce poza %(count)s darmowym"
+
+msgid "web.admin.store.account.slot.text.few"
+msgstr "Kolejne miejsce poza %(count)s darmowymi"
+
+msgid "web.admin.store.account.slot.text.many"
+msgstr "Kolejne miejsce poza %(count)s darmowymi"
+
+msgid "web.admin.store.account.slot.text.other"
+msgstr "Kolejne miejsce poza %(count)s darmowymi"
+
+msgid "web.admin.store.account.rename"
+msgstr "Zmiana nazwy"
+
+msgid "web.admin.store.account.rename.text"
+msgstr "Nowa nazwa bohatera nadawana na stronie"
+
+msgid "web.admin.store.account.key"
+msgstr "Klucz do skrzyni skarbów"
+
+msgid "web.admin.store.account.key.text"
+msgstr "Otwiera jedną skrzynię; pakiet kluczy kosztuje tyle za każdy klucz"
+
+msgid "web.admin.store.account.allowance"
+msgstr "Przydział startowy · %(currency)s"
+
+msgid "web.admin.store.account.allowance.text"
+msgstr "Dodawany przy pierwszym użyciu portfela konta"
+
+msgid "web.admin.store.account.credits"
+msgstr "%(currency)s na rundę"
+
+msgid "web.admin.store.account.credits.text.one"
+msgstr "Najwięcej, ile serwery przyznają kontu w ciągu %(count)s minuty; punkty za rundę przychodzą na jej koniec"
+
+msgid "web.admin.store.account.credits.text.few"
+msgstr "Najwięcej, ile serwery przyznają kontu w ciągu %(count)s minut; punkty za rundę przychodzą na jej koniec"
+
+msgid "web.admin.store.account.credits.text.many"
+msgstr "Najwięcej, ile serwery przyznają kontu w ciągu %(count)s minut; punkty za rundę przychodzą na jej koniec"
+
+msgid "web.admin.store.account.credits.text.other"
+msgstr "Najwięcej, ile serwery przyznają kontu w ciągu %(count)s minuty; punkty za rundę przychodzą na jej koniec"
+
+msgid "web.admin.store.account.chests"
+msgstr "Skrzynie na rundę"
+
+msgid "web.admin.store.account.chests.text"
+msgstr "Najwięcej skrzyń, jakie bohater przynosi z jednej rundy"
+
+msgid "web.admin.store.account.unit.chests"
+msgstr "Skrzynie"
+
+msgid "web.admin.store.account.state.default"
+msgstr "Domyślne"
+
+msgid "web.admin.store.account.state.changed"
+msgstr "Zmienione"
+
+msgid "web.admin.store.account.reset"
+msgstr "Przywróć"
+
+msgid "web.admin.store.account.reset.label"
+msgstr "Przywróć wartość %(value)s: %(setting)s"
+
+msgid "web.admin.store.account.note"
+msgstr "Nowa cena obowiązuje od następnego zakupu, nowy przydział dla portfeli otwieranych od teraz, a limity od następnej rundy zgłoszonej przez serwer."
+
+msgid "web.admin.store.account.save"
+msgstr "Zapisz"
+
+msgid "web.admin.store.account.refused"
+msgstr "Ta wartość wynosi od %(least)s do %(most)s; %(value)s się nie nadaje."
 
 msgid "web.admin.store.rules.column.rule"
 msgstr "Zasada"
@@ -11621,6 +11747,12 @@ msgstr "Zastosowano zasadę %(rule)s. Zmienione przedmioty: %(count)s."
 
 msgid "web.admin.audit.action.store_rule"
 msgstr "Zmiana zasady"
+
+msgid "web.admin.audit.action.store_account"
+msgstr "Zmiana ceny konta lub limitu"
+
+msgid "web.admin.audit.store_account"
+msgstr "%(before)s → %(after)s %(unit)s"
 
 msgid "web.admin.audit.rule"
 msgstr "Zmienione przedmioty: %(changed)s; zachowane ustawienia ręczne: %(kept)s · %(value)s, sprzedawany jako: %(sold)s"

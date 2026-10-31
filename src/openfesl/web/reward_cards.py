@@ -277,7 +277,7 @@ class RewardCards:
         if words.roster.free:
             slot = texts.text("web.rewards.state.slot", slot=len(words.roster.heroes) + 1)
             return f"{said} {slot}", "locked", "create"
-        heroes = words.game.heroes
+        heroes = words.heroes
         assert heroes is not None
         price = texts.priced(heroes.slot_price, heroes.currency)
         full = texts.text("web.rewards.state.full", count=words.roster.slots, price=price)

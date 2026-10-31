@@ -282,17 +282,17 @@ async def test_a_new_name_costs_funds_only_when_it_is_given(
         assert "Brassbuckle was not renamed: the form had expired. Nothing was spent." in refused
 
         # A name that another hero holds comes back in the form, which says so.
-        taken = await client.post(rename, data={"csrf": csrf, "name": "copperpot"})
+        taken = await client.post(rename, data={"csrf": csrf, "price": "1499", "name": "copperpot"})
         assert taken.status_code == 409 and 'value="copperpot"' in taken.text
         assert "copperpot is taken. Names ignore capitals." in markup(taken.content)
         # Nothing was spent, so the Funds were not even taken out of their allowance.
         assert await select_value(database_url, "SELECT count(*) FROM wallet") == 0
 
-        await client.post(rename, data={"csrf": csrf, "name": "Copper_Kettle"})
+        await client.post(rename, data={"csrf": csrf, "price": "1499", "name": "Copper_Kettle"})
         heroes = visible((await client.get(f"{base}/bfheroes/heroes")).content)
         assert "Renamed Brassbuckle to Copper_Kettle. 1,499 Funds spent;" in heroes
         assert "1,001 Funds 0 Valor Points" in heroes
-        poor = await client.post(rename, data={"csrf": csrf, "name": "Kettle_Two"})
+        poor = await client.post(rename, data={"csrf": csrf, "price": "1499", "name": "Kettle_Two"})
         assert poor.status_code == 303
         heroes = markup((await client.get(f"{base}/bfheroes/heroes")).content)
         assert "the account has 1,001 Funds; a rename costs 1,499. Nothing was spent." in heroes
@@ -300,8 +300,8 @@ async def test_a_new_name_costs_funds_only_when_it_is_given(
         # Two renames at once with the price of one: one is given, and the balance stays whole.
         await execute(database_url, "UPDATE wallet SET balance = 1500")
         raced = await asyncio.gather(
-            client.post(rename, data={"csrf": csrf, "name": "Kettle_Two"}),
-            client.post(rename, data={"csrf": csrf, "name": "Kettle_Three"}),
+            client.post(rename, data={"csrf": csrf, "price": "1499", "name": "Kettle_Two"}),
+            client.post(rename, data={"csrf": csrf, "price": "1499", "name": "Kettle_Three"}),
         )
         assert all(answer.status_code == 303 for answer in raced)
     assert await select_value(database_url, "SELECT balance FROM wallet") == 1
@@ -338,7 +338,12 @@ async def test_a_further_hero_slot_is_bought_once_with_the_funds_for_one(
             refused = visible((await client.get(f"{base}{CREATOR}")).content)
             assert "No hero slot was added: the form had expired. Nothing was spent." in refused
         # Two purchases at once with the Funds for one: one slot is added, nothing goes below 0.
-        form = {"csrf": form_token(page.text), "next": CREATOR, "once": once_token(page.text)}
+        form = {
+            "csrf": form_token(page.text),
+            "next": CREATOR,
+            "once": once_token(page.text),
+            "price": "1749",
+        }
         other = (await twin.get(slots)).text
         raced = await asyncio.gather(
             client.post(slots, data=form),
@@ -360,7 +365,12 @@ async def test_a_further_hero_slot_is_bought_once_with_the_funds_for_one(
         # again, as Back and sending it do, adds one slot.
         await execute(database_url, "UPDATE wallet SET balance = 4000")
         page = await client.get(slots)
-        form = {"csrf": form_token(page.text), "next": CREATOR, "once": once_token(page.text)}
+        form = {
+            "csrf": form_token(page.text),
+            "next": CREATOR,
+            "once": once_token(page.text),
+            "price": "1749",
+        }
         await asyncio.gather(*(client.post(slots, data=form) for _ in range(2)))
         await client.get(f"{base}{CREATOR}")
         await client.post(slots, data=form)

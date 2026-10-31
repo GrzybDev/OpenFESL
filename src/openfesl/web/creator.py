@@ -171,7 +171,7 @@ class CreatorPages:
         status = 400 if notice or refused is Refusal.FORMAT else 409 if refused else 200
         context: dict[str, Any] = dict(
             game=game,
-            rules=_rules(game),
+            rules=await self._heroes.rules(game),
             roster=roster,
             look=look,
             name=name,

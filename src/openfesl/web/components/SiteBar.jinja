@@ -34,7 +34,7 @@
   {% if bar and bar.wallets %}
     {# A slot just bought counts the Funds down from what they were before it, a reward just
        claimed up. #}
-    {% set spent = game.heroes.slot_price if game.heroes and toast and toast.key == "web.slots.done" else 0 %}
+    {% set spent = bar.heroes.slot_price if bar.heroes and toast and toast.key == "web.slots.done" else 0 %}
     {% if toast and toast.key.startswith("web.rewards.done") %}
       {% set spent = -(toast.values.funds|int) %}
     {% endif %}

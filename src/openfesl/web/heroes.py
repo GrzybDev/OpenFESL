@@ -177,11 +177,14 @@ class HeroesPages:
                 return found
             name = str(form.get("name", "")).strip()
             old = found.persona.name
-            assert game.heroes is not None
-            price = game.heroes.rename_price
+            price = (await self._heroes.rules(game)).rename_price
             heroes = localize(f"/{game.id}{HEROES}", request.state.language)
             if not form_matches(request, form):
                 toast(request, "web.rename.refused.form", error=True, hero=old)
+                return RedirectResponse(heroes, 303)
+            if str(form.get("price", "")) != str(price):
+                values = self._prices(game, 0, request.state.language, price)
+                toast(request, "web.rename.refused.price", error=True, hero=old, **values)
                 return RedirectResponse(heroes, 303)
             try:
                 await self._heroes.rename(game, found.persona, name)
@@ -225,8 +228,12 @@ class HeroesPages:
             if player is None or not purchase_matches(request, form):
                 toast(request, "web.slots.refused.form", error=True)
                 return RedirectResponse(back, 303)
-            assert game.heroes is not None
-            price, language = game.heroes.slot_price, request.state.language
+            price = (await self._heroes.rules(game)).slot_price
+            language = request.state.language
+            if str(form.get("price", "")) != str(price):
+                values = self._prices(game, 0, language, price)
+                toast(request, "web.slots.refused.price", error=True, **values)
+                return RedirectResponse(back, 303)
             try:
                 async with self._sent.once(form) as bought:
                     if bought:

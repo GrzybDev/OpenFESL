@@ -1,7 +1,7 @@
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-from sqlalchemy import func, insert, select
+from sqlalchemy import func, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -91,6 +91,41 @@ class SqlPriceStore:
             await _save(session, game, points)
             target = f"{game}:{details['rule']}"
             session.add(action_row(AdminAction.STORE_RULE, target, details, admin))
+
+    async def save_account(
+        self,
+        game: str,
+        settings: Mapping[str, str | None],
+        key: tuple[int, int] | None,
+        changes: Sequence[dict[str, Any]],
+        admin: Admin,
+    ) -> None:
+        """Change account prices, allowances and per-round caps, recording each as an action.
+
+        Args:
+            game: The game's data-file name.
+            settings: The settings that override them, by key; None removes one.
+            key: The item number of the chest key and its new price, which the key's product
+                takes too; none when the price stays.
+            changes: What the admin's log keeps of each changed value.
+            admin: The admin who changed them.
+        """
+        async with self._sessions.begin() as session:
+            for name, value in settings.items():
+                await put_setting(session, name, value)
+            if key is not None:
+                await session.execute(
+                    update(StoreProductRow)
+                    .where(
+                        StoreProductRow.game == game,
+                        StoreProductRow.item_id == key[0],
+                        StoreProductRow.account.is_(True),
+                    )
+                    .values(price=key[1])
+                )
+            for change in changes:
+                target = f"{game}:{change['name']}"
+                session.add(action_row(AdminAction.STORE_ACCOUNT, target, change, admin))
 
 
 async def _save(

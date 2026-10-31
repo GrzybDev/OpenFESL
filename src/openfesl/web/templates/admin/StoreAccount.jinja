@@ -1,0 +1,133 @@
+{#def of, values: list, typed: dict, changed: list, refused: dict, manages: bool #}
+{# A game's account prices, allowances and per-round caps: each value with its unit, the game
+   data's value and whether the instance's differs from it, saved together. Reset puts a value back
+   to the game data's in the form without saving it, and where scripts run the states follow the
+   values as they are typed. A refusal stands under its row and nothing is saved. #}
+{% set game = of %}
+{% set here = url("/admin/store/" ~ game.id ~ "/account") %}
+{% macro unit(value) -%}
+  {{ _("web.admin.store.account.unit.chests") if value.unit == "chests" else _("games." ~ game.id ~ ".currency." ~ value.unit) }}
+{%- endmacro %}
+{% macro label(value) -%}
+  {{ _("web.admin.store.account." ~ value.name.partition("-")[0], currency=unit(value)) }}
+{%- endmacro %}
+{% macro hint(value) -%}
+  {%- set kind = value.name.partition("-")[0] -%}
+  {%- if kind == "slot" -%}
+    {{ _n("web.admin.store.account.slot.text", game.heroes.slots) }}
+  {%- elif kind == "credits" -%}
+    {{ _n("web.admin.store.account.credits.text", game.currencies[value.unit].credits.within // 60) }}
+  {%- else -%}
+    {{ _("web.admin.store.account." ~ kind ~ ".text") }}
+  {%- endif -%}
+{%- endmacro %}
+<AdminPage :title="_('web.admin.store.view.account') ~ ' · ' ~ _('web.admin.store.title')"
+           current="store">
+  <StoreHead :game="game" current="prices" :subtitle="_('web.admin.store.subtitle', game=game.name)" />
+  <Panel class="enter-panel">
+    <PricesTabs :game="game" current="account" />
+    {% if manages %}
+      <form method="post" action="{{ here }}" class="account-form">
+        <CsrfField />
+        {# The form's default button, so that Enter in a value saves the values. #}
+        <button type="submit" hidden></button>
+    {% endif %}
+    <section aria-labelledby="account-values" class="admin-list account-values">
+      <h2 id="account-values" class="bar bar-wrap">
+        <span>{{ _("web.admin.store.account") }}</span>
+        <span data-live="{{ here }}" class="bar-extra">
+          {{- _n("web.admin.store.account.changed", changed|length) if changed else _("web.admin.store.account.default") -}}
+        </span>
+      </h2>
+      <div class="table-scroll table-scroll-flush">
+        <div role="table"
+             aria-labelledby="account-values"
+             class="table account-table">
+          <div role="rowgroup" class="admin-list-head">
+            <div role="row" class="account-columns">
+              {% for column in ("setting", "value", "unit", "default", "state") %}
+                <div role="columnheader"
+                     class="column-head{% if column in ('value', 'default') %} column-number{% endif %}">
+                  {{ _("web.admin.store.account.column." ~ column) }}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+          <div role="rowgroup"
+               {% if manages %} data-refresh{% endif %}
+               class="enter-rows table-rows">
+            {% for value in values %}
+              {% set field = "account-" ~ value.name %}
+              {% set wrong = value.name in refused %}
+              <div role="row" class="account-columns account-row">
+                <div role="cell" class="admin-cell cell-stack">
+                  <label for="{{ field }}" class="admin-hero-strong">{{ label(value) }}</label>
+                  <span class="cell-ago">{{ hint(value) }}</span>
+                </div>
+                <div role="cell" class="admin-cell account-value">
+                  {% if manages %}
+                    <input id="{{ field }}"
+                           name="{{ value.name }}"
+                           type="text"
+                           inputmode="numeric"
+                           value="{{ typed[value.name] }}"
+                           maxlength="13"
+                           required
+                           {% if wrong %} aria-invalid="true" aria-describedby="{{ field }}-why"{% endif %}
+                           class="field-input account-input{% if wrong %} field-invalid{% endif %}">
+                  {% else %}
+                    <span id="{{ field }}">{{ number(value.value) }}</span>
+                  {% endif %}
+                </div>
+                <div role="cell" class="admin-cell account-unit">
+                  <span aria-hidden="true"
+                        class="cell-label">{{ _("web.admin.store.account.column.unit") }}</span>{{ unit(value) }}
+                </div>
+                <div role="cell" class="admin-cell account-data">
+                  <span aria-hidden="true"
+                        class="cell-label">{{ _("web.admin.store.account.column.default") }}</span>{{ number(value.data) }}
+                </div>
+                <div role="cell" data-live="{{ here }}" class="admin-cell account-state">
+                  {% set off = value.name in changed %}
+                  <span class="account-state-word"><Badge :name="'edit' if off else 'tick'" lines />{{ _("web.admin.store.account.state." ~ ("changed" if off else "default")) }}</span>
+                  {% if off and manages %}
+                    <button type="submit"
+                            name="reset"
+                            value="{{ value.name }}"
+                            formnovalidate
+                            aria-label="{{ _('web.admin.store.account.reset.label', setting=label(value), value=number(value.data)) }}"
+                            class="form-button account-reset">
+                      <span aria-hidden="true" class="form-glyph"><Icon name="retry" :size="14" stroke="#F4F4EE" /></span>{{ _("web.admin.store.account.reset") }}
+                    </button>
+                  {% endif %}
+                </div>
+              </div>
+              {% if wrong %}
+                <div role="row">
+                  <div role="cell" aria-colspan="5" id="{{ field }}-why">
+                    <p role="alert" class="prices-refusal">
+                      <span aria-hidden="true"
+                            class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span><span>{{ refused[value.name] }}</span>
+                    </p>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="account-save">
+      <p class="body-text">{{ _("web.admin.store.account.note") }}</p>
+      {% if manages %}
+        <SmallAction :label="_('web.admin.store.account.save')" :busy="_('web.admin.store.save.busy')" />
+      {% else %}
+        <p class="bar-text account-role-note">
+          <span aria-hidden="true"
+                class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.store.managed") }}
+        </p>
+      {% endif %}
+    </div>
+    {% if manages %}</form>{% endif %}
+  </Panel>
+</AdminPage>

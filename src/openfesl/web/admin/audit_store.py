@@ -6,6 +6,7 @@ from openfesl.core.catalogues import Catalogues, game_text
 from openfesl.core.games import Games
 from openfesl.core.inventory import Ownership
 from openfesl.core.texts import localize
+from openfesl.web.admin.store_account import CHESTS
 from openfesl.web.store_texts import StoreTexts
 
 
@@ -82,6 +83,41 @@ def rule_entry(details: dict[str, Any], games: Games, language: str) -> tuple[st
     )
     href = localize(f"/admin/store/{game.id}/rules?rule={key}", language)
     return texts.text(f"games.{game.id}.price_rule.{key}"), href, said
+
+
+def account_entry(
+    details: dict[str, Any], games: Games, language: str
+) -> tuple[str, str | None, str]:
+    """Return how the audit log shows an account price, allowance or cap that the admin changed.
+
+    Args:
+        details: The change's details, as the admin's log keeps them.
+        games: The games, whose values the change was made in.
+        language: The log's language.
+
+    Returns:
+        The value in words, the panel's page of the account values and what changed in words.
+    """
+    game = games.by_id(details["game"])
+    if game is None:
+        return details["name"], None, ""
+    texts = StoreTexts(game, language, datetime.now(UTC))
+    unit = details["unit"]
+    named = (
+        texts.text("web.admin.store.account.unit.chests")
+        if unit == CHESTS
+        else texts.currency(unit)
+    )
+    shown = texts.text(
+        f"web.admin.store.account.{details['name'].partition('-')[0]}", currency=named
+    )
+    said = texts.text(
+        "web.admin.audit.store_account",
+        before=texts.amount(details["before"]),
+        after=texts.amount(details["after"]),
+        unit=named,
+    )
+    return shown, localize(f"/admin/store/{game.id}/account", language), said
 
 
 def _owned(texts: StoreTexts, written: str) -> str:

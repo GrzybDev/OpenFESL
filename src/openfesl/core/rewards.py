@@ -5,6 +5,7 @@ from dataclasses import dataclass, replace
 from datetime import UTC, date, datetime, timedelta
 from enum import StrEnum
 
+from openfesl.core.account_rules import account_rules
 from openfesl.core.calendar import day_start, today
 from openfesl.core.catalogues import Catalogues, Contents
 from openfesl.core.chests import key_tag
@@ -304,7 +305,8 @@ class Rewards:
         )
         funds = None
         if gift.funds:
-            allowance = game.currencies[rules.currency].allowance
+            currencies = (await account_rules(game, self._settings)).currencies
+            allowance = currencies[rules.currency].allowance
             funds = Wallet(game.id, rules.currency, account_id, None, allowance), gift.funds
         keys = (key_tag(game.chests), gift.keys) if gift.keys and game.chests else None
         grant = Grant(

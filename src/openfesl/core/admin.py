@@ -128,6 +128,10 @@ class AdminAction(StrEnum):
     """Uploaded a picture of a hot deal's offer of the game whose id is the target, or removed
     the offer's uploaded pictures; the details hold the offer, whether the picture is the big
     one, and whether the pictures were removed."""
+    STORE_ACCOUNT = "store_account"
+    """Changed an account price, allowance or per-round cap of a game, the target naming both
+    as game:value, such as bfheroes:slot; the details hold the value's name and the value before
+    and after."""
     STORE_RULE = "store_rule"
     """Changed a price rule of a game's store and applied it, the target naming both as
     game:rule; the details hold the rule's values before and after, how many items took its

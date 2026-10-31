@@ -11,6 +11,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.datastructures import QueryParams
 from starlette.exceptions import HTTPException
 
+from openfesl.core.account_rules import account_rules
 from openfesl.core.admins import Admin
 from openfesl.core.catalogues import Catalogue, Catalogues
 from openfesl.core.games import Game, Games
@@ -221,6 +222,34 @@ class StoreAdminViews:
         changed = await self._prices.save_points(game.id, item_id, points, reset, admin)
         await self._apply_actions()
         return changed
+
+    async def account_rules(self, game: Game) -> Game:
+        """Return a game with the account prices, allowances and per-round caps the instance sets.
+
+        Args:
+            game: The game, which has a store.
+        """
+        return await account_rules(game, self._settings)
+
+    async def save_account(
+        self,
+        game: Game,
+        settings: Mapping[str, str | None],
+        key: tuple[int, int] | None,
+        changes: list[dict[str, Any]],
+        admin: Admin,
+    ) -> None:
+        """Change account prices, allowances and per-round caps, recording each as an action.
+
+        Args:
+            game: The game, which has a store.
+            settings: The settings that override them, by key; None removes one.
+            key: The item number of the chest key and its new price, which the key's product
+                takes too; none when the price stays.
+            changes: What the admin's log keeps of each changed value.
+            admin: The admin who changed them.
+        """
+        await self._prices.save_account(game.id, settings, key, changes, admin)
 
     async def apply_rule(
         self,

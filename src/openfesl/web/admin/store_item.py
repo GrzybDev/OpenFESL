@@ -26,7 +26,13 @@ from openfesl.core.store_rules import StoreRules
 from openfesl.core.texts import translate
 from openfesl.core.wallets import MOST_BALANCE
 from openfesl.web.admin.auth import AdminSessions
-from openfesl.web.admin.store import SECTION, StoreAdminViews, ordered_lines, price_row, store_url
+from openfesl.web.admin.store import (
+    SECTION,
+    StoreAdminViews,
+    ordered_lines,
+    price_row,
+    store_url,
+)
 from openfesl.web.pages import whole_number
 from openfesl.web.sessions import check_form, toast
 from openfesl.web.store_front import Tile, kind_glyphs, tile
@@ -207,12 +213,11 @@ def store_item_routes(sessions: AdminSessions, views: StoreAdminViews) -> APIRou
 
 
 def _number(text: str, product: int | None = None) -> int:
-    # A whole number a field holds, written with or without groups; another is refused as no
-    # price.
-    digits = "".join(text.replace(",", "").split())
-    if not (digits.isascii() and digits.isdecimal()) or len(digits) > 12:
+    # A whole number a field holds; another is refused as no price.
+    number = whole_number(text, MOST_BALANCE, 0)
+    if number is None:
         raise PriceRefused(PriceRefusal.PRICE, product)
-    return int(digits)
+    return number
 
 
 def _preview(

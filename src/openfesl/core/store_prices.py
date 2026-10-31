@@ -185,6 +185,25 @@ class PriceStore(Protocol):
             admin: The admin who applied it.
         """
 
+    async def save_account(
+        self,
+        game: str,
+        settings: Mapping[str, str | None],
+        key: tuple[int, int] | None,
+        changes: Sequence[dict[str, Any]],
+        admin: Admin,
+    ) -> None:
+        """Change account prices, allowances and per-round caps, recording each as an action.
+
+        Args:
+            game: The game's data-file name.
+            settings: The settings that override them, by key; None removes one.
+            key: The item number of the chest key and its new price, which the key's product
+                takes too; none when the price stays.
+            changes: What the admin's log keeps of each changed value.
+            admin: The admin who changed them.
+        """
+
 
 @dataclass(frozen=True, slots=True)
 class Applied:

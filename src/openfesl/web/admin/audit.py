@@ -23,6 +23,7 @@ from openfesl.web.admin.audit_heroes import (
     wallet_entry,
 )
 from openfesl.web.admin.audit_store import (
+    account_entry,
     art_entry,
     box_entry,
     deal_entry,
@@ -57,6 +58,7 @@ GLYPHS = {
     AdminAction.ITEM_REVOKE: "x",
     AdminAction.STORE_PRICES: "edit",
     AdminAction.STORE_RULE: "retry",
+    AdminAction.STORE_ACCOUNT: "edit",
     AdminAction.BOX_TABLE: "box",
     AdminAction.DEAL_SECTION: "edit",
     AdminAction.DEAL_ART: "edit",
@@ -405,6 +407,8 @@ async def _rows(
                 kind = "store_prices.reset"
         elif action is AdminAction.STORE_RULE:
             shown, href, said = rule_entry(details, games, language)
+        elif action is AdminAction.STORE_ACCOUNT:
+            shown, href, said = account_entry(details, games, language)
         elif action is AdminAction.BOX_TABLE:
             shown, href, said = await box_entry(details, games, catalogues, language)
         elif action is AdminAction.DEAL_ART:

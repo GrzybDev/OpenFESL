@@ -2,7 +2,7 @@
 {# The form that gives a hero a new name for Funds: the name checked as it is typed, the price
    and the Funds left after it, and why it cannot be sent when the account has too few. Heroes
    pages open it as a dialog; without scripts it is a page of its own. #}
-{% set rules = game.heroes %}
+{% set rules = bar.heroes %}
 {% set price = rules.rename_price %}
 {% set short = funds < price %}
 {% set id = hero.persona.id %}
@@ -12,6 +12,7 @@
       data-rename-form
       class="site-dialog-box">
   <input type="hidden" name="csrf" value="{{ csrf }}">
+  <input type="hidden" name="price" value="{{ price }}">
   {% if dialog %}
     <button type="button"
             data-close

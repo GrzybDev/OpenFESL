@@ -165,9 +165,10 @@ class WalletAdminViews:
             shared = shared_currencies(game)
             own = [code for code, kept in game.currencies.items() if kept.scope is Scope.PERSONA]
             balances = await self._wallets.of_account(game, account_id, shared)
+            currencies = await self._wallets.currencies(game)
             lines: list[tuple[Wallet, Hero | None, int, int | None]] = [
                 (
-                    Wallet(game.id, code, account_id, None, game.currencies[code].allowance),
+                    Wallet(game.id, code, account_id, None, currencies[code].allowance),
                     None,
                     held,
                     None,
@@ -177,7 +178,7 @@ class WalletAdminViews:
             personas = [hero.persona for hero in roster.heroes]
             for code in own:
                 points = await self._wallets.of_personas(game, personas, code)
-                allowance = game.currencies[code].allowance
+                allowance = currencies[code].allowance
                 lines += [
                     (
                         Wallet(game.id, code, account_id, hero.persona.id, allowance),

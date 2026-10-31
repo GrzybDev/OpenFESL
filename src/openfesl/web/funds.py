@@ -76,7 +76,7 @@ class FundsPages:
                 # The game's Get Funds buttons open the page, through its website's address.
                 from_game=request.query_params.get("from") == "game",
                 points=list(zip(heroes, points, strict=True)),
-                allowance=game.currencies[rules.currency].allowance,
+                allowance=(await self._wallets.currencies(game))[rules.currency].allowance,
                 given=await self._wallets.allowance_given(game, player.account_id, rules.currency)
                 if bar and player
                 else None,

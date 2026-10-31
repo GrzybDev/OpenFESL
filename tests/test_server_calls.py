@@ -6,7 +6,7 @@ from xml.etree import ElementTree
 
 import anyio
 import pytest
-from accounts import select_value
+from accounts import execute, select_value
 from heroes import MAGMA, create_hero, start, wallets
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from support import THEATER, Game, TheaterAnswer, cli, fetch, game, let_in
@@ -175,6 +175,13 @@ async def test_a_dedicated_server_credits_a_rounds_valor_once_and_stacks_its_che
             await stack(2, tag="2005-lmct"),
             await stack(0),
         ]
+        # Caps that the admin changes apply to the next round a server reports.
+        await execute(
+            database_url,
+            "INSERT INTO setting (key, value) VALUES ('bfheroes.chests.most', '1'),"
+            " ('bfheroes.currencies._DV.credits.most', '1200')",
+        )
+        capped = [await stack(4), await send("_DV", 500, str(uuid.uuid4()))]
         balances = await wallets(server_url, cookie, hero)
 
         # Whatever credits a balance, it never passes the game's 32-bit balance.
@@ -192,7 +199,8 @@ async def test_a_dedicated_server_credits_a_rounds_valor_once_and_stacks_its_che
     assert sorted(cause(body) or "" for body in twice) == ["", "DUPLICATE_TRANSACTION_UUID"]
     assert cause(beyond_cap) is None and cause(hero_points) is None
     assert [cause(body) for body in refused] == [*["INVALID_CREDIT"] * 4, "USER_DOES_NOT_MATCH"]
-    assert balances == {"_DH": 0, "_DV": 1000, "_PF": 2500}
+    assert capped == [b"<success />"] * 2
+    assert balances == {"_DH": 0, "_DV": 1200, "_PF": 2500}
     ledger = await select_value(
         database_url,
         "SELECT string_agg(currency || ':' || reason || ':' || delta, ' ' ORDER BY wallet_entry.id)"
@@ -200,7 +208,7 @@ async def test_a_dedicated_server_credits_a_rounds_valor_once_and_stacks_its_che
         " WHERE account_id = :account AND currency <> '_PF'",
         account=account,
     )
-    assert ledger == "_DV:server:250 _DV:server:100 _DV:server:650 _DH:server:0"
+    assert ledger == "_DV:server:250 _DV:server:100 _DV:server:650 _DH:server:0 _DV:server:200"
     assert topped == [2**31 - 1, 2**31 - 1]
     assert topped_up["_PF"] == 2**31 - 1
     assert [*stacked, beyond_most] == [b"<success />"] * 3
@@ -211,4 +219,4 @@ async def test_a_dedicated_server_credits_a_rounds_valor_once_and_stacks_its_che
         *["USER_DOES_NOT_MATCH"] * 2,
         *["INVALID_STACK"] * 2,
     ]
-    assert await chests(database_url) == f"{hero}:10"
+    assert await chests(database_url) == f"{hero}:11"

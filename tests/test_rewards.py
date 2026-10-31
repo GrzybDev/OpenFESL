@@ -72,12 +72,13 @@ class Site:
         self.entitlements = SqlEntitlementStore(sessions)
         self.personas = SqlPersonaStore(sessions)
         stats = SqlStatStore(sessions)
-        heroes = Heroes(SqlHeroStore(sessions), stats)
+        settings = SqlSettingStore(sessions)
+        heroes = Heroes(SqlHeroStore(sessions), stats, settings)
         # The same drops on every run.
         drops = Drops(self.catalogues, self.entitlements, Random(20111201))
         self.rewards = Rewards(
             SqlRewardStore(sessions),
-            SqlSettingStore(sessions),
+            settings,
             heroes,
             stats,
             self.entitlements,

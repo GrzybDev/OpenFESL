@@ -1,9 +1,11 @@
 import logging
 
+from openfesl.core.account_rules import account_rules
 from openfesl.core.entitlements import Entitlement, EntitlementStore
 from openfesl.core.games import Game
 from openfesl.core.launcher import LauncherSession, LauncherSessions
 from openfesl.core.personas import Persona, PersonaStore
+from openfesl.core.policies import SettingStore
 from openfesl.core.relay_tokens import RelayTokens
 from openfesl.core.session import GameSession, Players
 from openfesl.core.trust import ServerTrust
@@ -69,6 +71,7 @@ class Magma:
         personas: PersonaStore,
         entitlements: EntitlementStore,
         wallets: Wallets,
+        settings: SettingStore,
     ) -> None:
         """Find the askers among the launcher's sign-ins and their personas in the stores.
 
@@ -80,6 +83,8 @@ class Magma:
             personas: Where the personas are found.
             entitlements: Where the personas' items are kept.
             wallets: The balances the personas spend.
+            settings: The instance's settings, which override how many chests the games'
+                servers stack at once.
         """
         self._sessions = sessions
         self._relay_tokens = relay_tokens
@@ -88,6 +93,7 @@ class Magma:
         self._personas = personas
         self._entitlements = entitlements
         self._wallets = wallets
+        self._settings = settings
 
     def session(self, session_id: str | None) -> LauncherSession:
         """Return the launcher session that a request's magma cookie names.
@@ -214,7 +220,7 @@ class Magma:
         persona = await self._kept_by_server(relay_token, game, persona_id)
         if persona.account_id != account_id:
             raise MagmaError(VALIDATION_FAILED, USER_DOES_NOT_MATCH)
-        rules = game.chests
+        rules = (await account_rules(game, self._settings)).chests
         if rules is None or tag != rules.tag or count < 1:
             raise MagmaError(VALIDATION_FAILED, INVALID_STACK)
         await self._entitlements.stack_uses(

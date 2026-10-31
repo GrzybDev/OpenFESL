@@ -6,9 +6,11 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Protocol
 
+from openfesl.core.account_rules import account_rules
 from openfesl.core.games import Game
 from openfesl.core.hero_rules import HeroRules
 from openfesl.core.personas import Persona
+from openfesl.core.policies import SettingStore
 from openfesl.core.stats import PERSONA, Owner, StatStore, bucket_of, partition_of
 from openfesl.core.wallets import Wallet
 from openfesl.protocol.rank import Period
@@ -275,15 +277,25 @@ class HeroStore(Protocol):
 class Heroes:
     """The heroes of games whose heroes are made on their site."""
 
-    def __init__(self, store: HeroStore, stats: StatStore) -> None:
+    def __init__(self, store: HeroStore, stats: StatStore, settings: SettingStore) -> None:
         """Keep heroes in a store, with their stats.
 
         Args:
             store: Where heroes are kept.
             stats: Where their stats are kept.
+            settings: The instance's settings, which override the prices of the games' data.
         """
         self._store = store
         self._stats = stats
+        self._settings = settings
+
+    async def rules(self, game: Game) -> HeroRules:
+        """Return how a game's heroes are made and kept, at the prices the instance sets.
+
+        Args:
+            game: The game, which has hero rules.
+        """
+        return _rules(await account_rules(game, self._settings))
 
     async def roster(self, game: Game, account_id: int) -> Roster:
         """Return an account's heroes in a game, with what the site shows about each.
@@ -371,7 +383,7 @@ class Heroes:
         return await self._store.set_default(account_id, game.id, game.namespace, persona_id)
 
     async def buy_slot(self, game: Game, account_id: int) -> int:
-        """Add a hero slot to an account for the price the game's data sets.
+        """Add a hero slot to an account for the price the instance sets.
 
         Args:
             game: The game, which has hero rules.
@@ -383,6 +395,7 @@ class Heroes:
         Raises:
             HeroRefused: When the account has too little to pay.
         """
+        game = await account_rules(game, self._settings)
         rules = _rules(game)
         bought = await self._store.buy_slot(
             account_id, game.id, self._price(game, account_id), rules.slot_price
@@ -390,7 +403,7 @@ class Heroes:
         return rules.slots + bought
 
     async def rename(self, game: Game, persona: Persona, name: str) -> None:
-        """Give one of an account's heroes a new name for the price the game's data sets.
+        """Give one of an account's heroes a new name for the price the instance sets.
 
         The game shows the new name from its next login.
 
@@ -403,6 +416,7 @@ class Heroes:
             HeroRefused: When the name breaks the rule, is the hero's own or is taken, or the
                 account has too little to pay.
         """
+        game = await account_rules(game, self._settings)
         rules = _rules(game)
         if not re.fullmatch(rules.name, name):
             raise HeroRefused(Refusal.FORMAT)

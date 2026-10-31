@@ -1,8 +1,10 @@
 {#def game, current: str #}
-{# The two views of a game's store prices: its items and the rules their prices come from. #}
+{# The views of a game's store prices: its items, the rules their prices come from, and the prices,
+   allowances and caps of its accounts. #}
 {% set base = url("/admin/store/" ~ game.id) %}
 <nav aria-label="{{ _('web.admin.store.views') }}"
      class="tabs prices-tabs">
   <Tab :href="base" :label="_('web.admin.store.view.items')" :current="current == 'items'" />
   <Tab :href="base ~ '/rules'" :label="_('web.admin.store.view.rules')" :current="current == 'rules'" />
+  <Tab :href="base ~ '/account'" :label="_('web.admin.store.view.account')" :current="current == 'account'" />
 </nav>

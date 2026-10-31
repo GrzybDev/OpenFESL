@@ -9,6 +9,7 @@ from starlette.requests import Request
 from openfesl.core.calendar import day_start, today
 from openfesl.core.catalogues import Catalogue, Catalogues, game_text, paragraphs
 from openfesl.core.games import Game
+from openfesl.core.hero_rules import HeroRules
 from openfesl.core.heroes import Hero, Roster
 from openfesl.core.inventory import Ownership
 from openfesl.core.reward_claims import Claim, Claimed
@@ -63,6 +64,7 @@ class RewardTexts:
         texts: StoreTexts,
         catalogue: Catalogue,
         roster: Roster | None,
+        heroes: HeroRules | None,
         art: bool,
     ) -> None:
         """Describe a game's rewards to an account, or to a visitor signed out.
@@ -73,6 +75,8 @@ class RewardTexts:
             texts: Writes the page's language.
             catalogue: The game's imported catalogue, which names and draws the items.
             roster: The account's heroes; none for a visitor signed out.
+            heroes: How the game's heroes are made and kept, at the prices the instance sets;
+                none for a visitor signed out.
             art: Whether the page shows the game's art to its viewer, its items' icons among it.
         """
         self.game = game
@@ -80,6 +84,7 @@ class RewardTexts:
         self.texts = texts
         self.catalogue = catalogue
         self.roster = roster
+        self.heroes = heroes
         self.art = art
         self.locale = Locale.parse(translate("web.locale", texts.language))
         self.zone = ZoneInfo(rules.zone)
@@ -319,5 +324,6 @@ async def reward_texts(
         StoreTexts(game, language, datetime.now(UTC)),
         await catalogues.of(game, language),
         bar.roster if bar else None,
+        bar.heroes if bar else None,
         art,
     )

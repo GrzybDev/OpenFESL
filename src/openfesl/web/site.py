@@ -6,6 +6,7 @@ from starlette.types import ASGIApp, Receive, Scope, Send
 
 from openfesl.core.game_pages import SiteWallet
 from openfesl.core.games import Game, Games
+from openfesl.core.hero_rules import HeroRules
 from openfesl.core.heroes import Heroes, Roster
 from openfesl.core.rewards import Reward, Rewards, RewardState
 from openfesl.core.wallets import Wallets
@@ -29,6 +30,8 @@ class SiteBar:
         funds: What the account has to pay the game's prices with, in such a game.
         rewards: Its game's rewards as the account sees them now, which its pages read.
         paused: Whether claims of its game's rewards are paused.
+        heroes: How its game's heroes are made and kept, at the prices the instance sets, in a
+            game whose heroes are made on its site.
     """
 
     wallets: list[tuple[SiteWallet, int]]
@@ -36,6 +39,7 @@ class SiteBar:
     funds: int
     rewards: list[Reward] = field(default_factory=list)
     paused: bool = False
+    heroes: HeroRules | None = None
 
     @property
     def ready(self) -> int:
@@ -117,4 +121,6 @@ class SiteBarMiddleware:
         rewards = await self._rewards.available(game, player.account_id)
         rules = await self._rewards.rules(game)
         paused = rules is not None and rules.paused
-        return SiteBar(list(zip(shown, balances, strict=True)), roster, funds, rewards, paused)
+        heroes = await self._heroes.rules(game)
+        wallets = list(zip(shown, balances, strict=True))
+        return SiteBar(wallets, roster, funds, rewards, paused, heroes)

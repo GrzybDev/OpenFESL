@@ -253,7 +253,7 @@ class RewardAdminViews:
         assert rules is not None
         texts = StoreTexts(game, language, datetime.now(UTC))
         catalogue = await self._catalogues.of(game, language)
-        return RewardTexts(game, rules, texts, catalogue, None, False)
+        return RewardTexts(game, rules, texts, catalogue, None, None, False)
 
     async def view(self, game: Game, language: str) -> RewardsView:
         """Return a game's rewards with this year's calendar.

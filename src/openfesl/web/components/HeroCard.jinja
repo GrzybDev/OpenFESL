@@ -2,7 +2,7 @@
 {# A hero's card, a folder hanging from the beam on two strings: its faction's tab, the default
    hero's stamp, its name, class and level, its XP, its facts and what can be done with it. #}
 {% set hero = card.hero %}
-{% set rules = game.heroes %}
+{% set rules = bar.heroes %}
 {% set id = hero.persona.id %}
 {# A hero becoming the default one: its stamp lands, and the previous default's stamp fades. #}
 {% set switched = toast and toast.key == "web.heroes.toast.default" %}

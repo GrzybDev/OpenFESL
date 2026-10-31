@@ -3,9 +3,11 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
+from openfesl.core.account_rules import account_rules
 from openfesl.core.admins import Admin
-from openfesl.core.games import Credits, Game, Scope
+from openfesl.core.games import Credits, Currency, Game, Scope
 from openfesl.core.personas import Persona
+from openfesl.core.policies import SettingStore
 
 # Games keep a balance in a signed 32-bit integer, so no balance may pass this.
 MOST_BALANCE = 2**31 - 1
@@ -196,13 +198,24 @@ def wallet_of(game: Game, persona: Persona, code: str) -> Wallet:
 class Wallets:
     """The balances that players spend in the currencies of their games."""
 
-    def __init__(self, store: WalletStore) -> None:
+    def __init__(self, store: WalletStore, settings: SettingStore) -> None:
         """Keep the balances in a store.
 
         Args:
             store: Where the wallets are kept.
+            settings: The instance's settings, which override the allowances and credits of the
+                games' data.
         """
         self._store = store
+        self._settings = settings
+
+    async def currencies(self, game: Game) -> dict[str, Currency]:
+        """Return a game's currencies, with the allowances and credits the instance sets.
+
+        Args:
+            game: The game.
+        """
+        return (await account_rules(game, self._settings)).currencies
 
     async def of_persona(self, game: Game, persona: Persona) -> dict[str, int]:
         """Return what a persona has to spend in each currency of its game, by code.
@@ -214,6 +227,7 @@ class Wallets:
             game: The persona's game.
             persona: The persona.
         """
+        game = await account_rules(game, self._settings)
         wallets = [wallet_of(game, persona, code) for code in game.currencies]
         return dict(zip(game.currencies, await self._store.balances(wallets), strict=True))
 
@@ -232,6 +246,7 @@ class Wallets:
         Returns:
             The balance, or None when the credit with that id was credited already.
         """
+        game = await account_rules(game, self._settings)
         credits = game.currencies[code].credits
         assert credits is not None
         return await self._store.credit_from_server(
@@ -248,7 +263,7 @@ class Wallets:
             personas: The personas.
             code: The currency, which each persona holds on its own.
         """
-        allowance = game.currencies[code].allowance
+        allowance = (await self.currencies(game))[code].allowance
         wallets = [
             Wallet(game.id, code, persona.account_id, persona.id, allowance) for persona in personas
         ]
@@ -265,9 +280,9 @@ class Wallets:
             account_id: The account.
             codes: The currencies, each one that the account's personas share.
         """
+        currencies = await self.currencies(game)
         wallets = [
-            Wallet(game.id, code, account_id, None, game.currencies[code].allowance)
-            for code in codes
+            Wallet(game.id, code, account_id, None, currencies[code].allowance) for code in codes
         ]
         return await self._store.peek(wallets)
 
@@ -279,5 +294,5 @@ class Wallets:
             account_id: The account.
             code: The currency, one that the account's personas share.
         """
-        allowance = game.currencies[code].allowance
+        allowance = (await self.currencies(game))[code].allowance
         return await self._store.opened(Wallet(game.id, code, account_id, None, allowance))

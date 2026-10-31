@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
+from openfesl.core.account_rules import account_rules
 from openfesl.core.admin import AdminAction, AdminFeed, LoggedAction
 from openfesl.core.catalogues import Catalogue, Catalogues
 from openfesl.core.drops import Box
@@ -398,7 +399,7 @@ class Store:
             (found for found in given if not found.published), key=lambda found: found.item_id
         )
         # A key, which the game has no definition of, is sold to the account alone.
-        if chests := game.chests:
+        if chests := (await account_rules(game, self._settings)).chests:
             key = Ownership(COUNTED, uses=1)
             products.append(
                 NewProduct(chests.key, key, chests.currency, chests.key_price, account=True)

@@ -1,0 +1,102 @@
+/* A game's account prices, allowances and per-round caps: each value's row with its field, unit,
+   the game data's value and its state, then the note on when changes apply beside Save. Where
+   the table does not fit, each value is a block of its own. */
+@layer pages {
+  .account-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns: minmax(240px, 1.2fr) 170px 140px 140px minmax(170px, 0.8fr);
+    gap: 2px;
+  }
+
+  .account-row:nth-child(even of .account-row) {
+    --cell: var(--row-alt);
+  }
+
+  .admin-cell.account-value {
+    justify-content: flex-end;
+    padding: 4px;
+    font-family: var(--font-sans);
+    font-size: 20px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .account-input {
+    width: 100%;
+    min-height: 44px;
+    text-align: right;
+    font-family: var(--font-sans);
+    font-size: 20px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .account-unit {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .account-data {
+    justify-content: flex-end;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .admin-cell.account-state {
+    justify-content: space-between;
+    gap: 8px;
+    padding-right: 4px;
+  }
+
+  .account-state-word {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .form-button.account-reset {
+    min-height: 40px;
+  }
+
+  .account-save {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 14px;
+  }
+
+  @container (width < 940px) {
+    .account-row.account-columns {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+
+      > :first-child,
+      > :last-child {
+        grid-column: 1 / -1;
+      }
+
+      > :nth-child(2) {
+        grid-row: 2;
+        grid-column: 1 / -1;
+      }
+
+      .cell-label {
+        margin-right: 8px;
+      }
+    }
+
+    .account-unit,
+    .account-data {
+      justify-content: flex-start;
+    }
+  }
+}

@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol, TypeGuard
 
+from openfesl.core.account_rules import account_rules
 from openfesl.core.catalogues import Catalogues, Item
 from openfesl.core.deals import HotDeals
 from openfesl.core.drops import Drops
@@ -12,6 +13,7 @@ from openfesl.core.heroes import Hero, Heroes
 from openfesl.core.inventory import Ownership, gains
 from openfesl.core.magma import MagmaError
 from openfesl.core.personas import Persona
+from openfesl.core.policies import SettingStore
 from openfesl.core.store import Bundle, Offer, Product, ProductStore, offer
 from openfesl.core.texts import BASE_LANGUAGE
 from openfesl.core.wallets import Wallet, wallet_of
@@ -169,6 +171,7 @@ class Purchases:
         entitlements: EntitlementStore,
         drops: Drops,
         deals: HotDeals,
+        settings: SettingStore,
     ) -> None:
         """Sell the products a store keeps, paid and given in another.
 
@@ -180,6 +183,8 @@ class Purchases:
             entitlements: Where the items the heroes hold are kept.
             drops: Opens the boxes the heroes buy.
             deals: The hot deals, which sell the bundles they list.
+            settings: The instance's settings, which override the allowances that wallets open
+                with.
         """
         self._products = products
         self._store = store
@@ -188,6 +193,7 @@ class Purchases:
         self._entitlements = entitlements
         self._drops = drops
         self._deals = deals
+        self._settings = settings
 
     async def purchase(self, game: Game, persona: Persona, product_id: str) -> Offer | None:
         """Sell a hero a product, a bundle or a box of its game's store, for its price.
@@ -208,6 +214,7 @@ class Purchases:
             PurchaseRefused: When the store does not sell the product, the hero may not have
                 the item or owns it for good, or the price is more than the wallet holds.
         """
+        game = await account_rules(game, self._settings)
         rules = game.store
         number = rules.number(product_id) if rules else None
         product = await self._products.product(game.id, number) if number is not None else None
@@ -288,6 +295,7 @@ class Purchases:
             PurchaseRefused: When the store sells no such product to accounts, or the price is
                 more than the account's wallet holds.
         """
+        game = await account_rules(game, self._settings)
         rules = game.store
         number = rules.number(product_id) if rules else None
         product = (

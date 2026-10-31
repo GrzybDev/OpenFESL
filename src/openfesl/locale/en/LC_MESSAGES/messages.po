@@ -197,6 +197,9 @@ msgstr "This hero slot purchase was made already; sending it again added no furt
 msgid "web.slots.refused.funds"
 msgstr "No hero slot was added: the account has %(funds)s %(currency)s; a slot costs %(price)s. Nothing was spent."
 
+msgid "web.slots.refused.price"
+msgstr "No hero slot was added: the price of a slot changed to %(price)s %(currency)s. Nothing was spent."
+
 msgid "web.slots.refused.form"
 msgstr "No hero slot was added: the form had expired. Nothing was spent."
 
@@ -574,6 +577,9 @@ msgstr "Renamed %(old)s to %(new)s. %(price)s %(currency)s spent; %(game)s shows
 
 msgid "web.rename.refused.funds"
 msgstr "%(hero)s was not renamed: the account has %(funds)s %(currency)s; a rename costs %(price)s. Nothing was spent."
+
+msgid "web.rename.refused.price"
+msgstr "%(hero)s was not renamed: the price of a rename changed to %(price)s %(currency)s. Nothing was spent."
 
 msgid "web.rename.refused.form"
 msgstr "%(hero)s was not renamed: the form had expired. Nothing was spent."
@@ -10751,6 +10757,12 @@ msgstr "Reset the prices of %(item)s to its kind's rule."
 msgid "web.admin.toast.store.unchanged"
 msgstr "Nothing changed in the prices of %(item)s."
 
+msgid "web.admin.toast.store.account"
+msgstr "Saved the account prices and limits. Values changed: %(count)s."
+
+msgid "web.admin.toast.store.account.unchanged"
+msgstr "Nothing changed in the account prices and limits."
+
 msgid "web.admin.audit.action.store_prices"
 msgstr "Prices changed"
 
@@ -10823,6 +10835,9 @@ msgstr "Items"
 msgid "web.admin.store.view.rules"
 msgstr "Kind rules"
 
+msgid "web.admin.store.view.account"
+msgstr "Account prices and limits"
+
 msgid "web.admin.store.rules"
 msgstr "Kind rules · seeded from game data"
 
@@ -10831,6 +10846,99 @@ msgstr "%(count)s rule"
 
 msgid "web.admin.store.rules.count.other"
 msgstr "%(count)s rules"
+
+msgid "web.admin.store.account"
+msgstr "Account prices, allowances and per-round caps"
+
+msgid "web.admin.store.account.default"
+msgstr "All default"
+
+msgid "web.admin.store.account.changed.one"
+msgstr "%(count)s changed"
+
+msgid "web.admin.store.account.changed.other"
+msgstr "%(count)s changed"
+
+msgid "web.admin.store.account.column.setting"
+msgstr "Setting"
+
+msgid "web.admin.store.account.column.value"
+msgstr "Value"
+
+msgid "web.admin.store.account.column.unit"
+msgstr "Unit"
+
+msgid "web.admin.store.account.column.default"
+msgstr "Game data"
+
+msgid "web.admin.store.account.column.state"
+msgstr "State"
+
+msgid "web.admin.store.account.slot"
+msgstr "Hero slot"
+
+msgid "web.admin.store.account.slot.text.one"
+msgstr "A further slot beyond the %(count)s free one"
+
+msgid "web.admin.store.account.slot.text.other"
+msgstr "A further slot beyond the %(count)s free ones"
+
+msgid "web.admin.store.account.rename"
+msgstr "Rename"
+
+msgid "web.admin.store.account.rename.text"
+msgstr "A hero's new name, given on the website"
+
+msgid "web.admin.store.account.key"
+msgstr "Treasure chest key"
+
+msgid "web.admin.store.account.key.text"
+msgstr "Opens one chest; a pack of keys costs this much per key"
+
+msgid "web.admin.store.account.allowance"
+msgstr "Starting allowance · %(currency)s"
+
+msgid "web.admin.store.account.allowance.text"
+msgstr "Added when an account's wallet is first used"
+
+msgid "web.admin.store.account.credits"
+msgstr "%(currency)s per round"
+
+msgid "web.admin.store.account.credits.text.one"
+msgstr "Most that servers credit an account within %(count)s minute; a round's points come at its end"
+
+msgid "web.admin.store.account.credits.text.other"
+msgstr "Most that servers credit an account within %(count)s minutes; a round's points come at its end"
+
+msgid "web.admin.store.account.chests"
+msgstr "Chests per round"
+
+msgid "web.admin.store.account.chests.text"
+msgstr "Most chests a hero brings from one round"
+
+msgid "web.admin.store.account.unit.chests"
+msgstr "Chests"
+
+msgid "web.admin.store.account.state.default"
+msgstr "Default"
+
+msgid "web.admin.store.account.state.changed"
+msgstr "Changed"
+
+msgid "web.admin.store.account.reset"
+msgstr "Reset"
+
+msgid "web.admin.store.account.reset.label"
+msgstr "Reset %(setting)s to %(value)s"
+
+msgid "web.admin.store.account.note"
+msgstr "A new price applies to the next purchase; a new allowance to wallets opened from now on; caps to the next round a server reports."
+
+msgid "web.admin.store.account.save"
+msgstr "Save"
+
+msgid "web.admin.store.account.refused"
+msgstr "This value is from %(least)s to %(most)s; %(value)s is not."
 
 msgid "web.admin.store.rules.column.rule"
 msgstr "Rule"
@@ -10951,6 +11059,12 @@ msgstr "Applied the rule %(rule)s. Items it changed: %(count)s."
 
 msgid "web.admin.audit.action.store_rule"
 msgstr "Rule changed"
+
+msgid "web.admin.audit.action.store_account"
+msgstr "Account price or limit changed"
+
+msgid "web.admin.audit.store_account"
+msgstr "%(before)s → %(after)s %(unit)s"
 
 msgid "web.admin.audit.rule"
 msgstr "Items changed: %(changed)s; kept as set by hand: %(kept)s · %(value)s, sold as %(sold)s"
