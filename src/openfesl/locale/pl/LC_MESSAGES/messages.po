@@ -12250,3 +12250,126 @@ msgstr "To, co daje kamień milowy, trafia na konto. Poziomy liczą się dla ka�
 
 msgid "web.admin.rewards.today"
 msgstr "Dziś"
+
+msgid "web.admin.rewards.column.open"
+msgstr "Strona wydarzenia"
+
+msgid "web.admin.rewards.open"
+msgstr "Otwórz: %(event)s"
+
+msgid "web.admin.rewards.back"
+msgstr "Kalendarz i zasady"
+
+msgid "web.admin.rewards.event.rule"
+msgstr "Zasada dat"
+
+msgid "web.admin.rewards.event.first"
+msgstr "Pierwszy dzień"
+
+msgid "web.admin.rewards.event.last"
+msgstr "Ostatni dzień"
+
+msgid "web.admin.rewards.event.days"
+msgstr "Dni"
+
+msgid "web.admin.rewards.event.starts"
+msgstr "Początek dnia"
+
+msgid "web.admin.rewards.event.starts.value"
+msgstr "%(time)s · każde wydarzenie"
+
+msgid "web.admin.rewards.event.daily.one"
+msgstr "%(count)s dzienny prezent, od %(first)s do %(last)s; każdy można odebrać tylko w jego dniu, chyba że tego dnia odbiór był wstrzymany."
+
+msgid "web.admin.rewards.event.daily.few"
+msgstr "%(count)s dzienne prezenty, od %(first)s do %(last)s; każdy można odebrać tylko w jego dniu, chyba że tego dnia odbiór był wstrzymany."
+
+msgid "web.admin.rewards.event.daily.many"
+msgstr "%(count)s dziennych prezentów, od %(first)s do %(last)s; każdy można odebrać tylko w jego dniu, chyba że tego dnia odbiór był wstrzymany."
+
+msgid "web.admin.rewards.event.daily.other"
+msgstr "%(count)s dziennego prezentu, od %(first)s do %(last)s; każdy można odebrać tylko w jego dniu, chyba że tego dnia odbiór był wstrzymany."
+
+msgid "web.admin.rewards.event.goals"
+msgstr "Każdy bohater liczy od %(first)s; osiągnięty cel można odebrać do końca %(last)s."
+
+msgid "web.admin.rewards.event.once"
+msgstr "Do odebrania od %(first)s do końca %(last)s."
+
+msgid "web.admin.rewards.event.contents"
+msgstr "Zawartość"
+
+msgid "web.admin.rewards.event.contents.daily"
+msgstr "Prezent każdego dnia"
+
+msgid "web.admin.rewards.event.fixed"
+msgstr "Dni z innymi prezentami"
+
+msgid "web.admin.rewards.event.fixed.note"
+msgstr "Zamiast prezentu tego dnia"
+
+msgid "web.admin.rewards.event.day"
+msgstr "Dzień %(day)s"
+
+msgid "web.admin.rewards.event.texts"
+msgstr "Teksty"
+
+msgid "web.admin.rewards.event.text.missing"
+msgstr "Pojawi się z tekstami gry przy imporcie katalogu"
+
+msgid "web.admin.rewards.goal.goal"
+msgstr "Cel"
+
+msgid "web.admin.rewards.goal.stat"
+msgstr "Liczona statystyka"
+
+msgid "web.admin.rewards.goal.class"
+msgstr "Klasa"
+
+msgid "web.admin.rewards.goal.from"
+msgstr "Liczone od"
+
+msgid "web.admin.rewards.goal.before"
+msgstr "Przed"
+
+msgid "web.admin.rewards.gift.box.roll"
+msgstr "Jedno losowanie: %(box)s"
+
+msgid "web.admin.rewards.gift.box.worth"
+msgstr "Jedno losowanie: %(box)s, warte co najmniej %(price)s"
+
+msgid "web.admin.rewards.gift.box.else"
+msgstr "Jedno losowanie: %(box)s dla bohatera, do którego przedmioty nie pasują"
+
+msgid "web.admin.rewards.claiming"
+msgstr "Odbiór"
+
+msgid "web.admin.rewards.claiming.each"
+msgstr "Każda część"
+
+msgid "web.admin.rewards.claiming.each.day"
+msgstr "Każdy dzień"
+
+msgid "web.admin.rewards.claiming.once"
+msgstr "Raz na konto i frakcję"
+
+msgid "web.admin.rewards.claiming.goes"
+msgstr "Trafia do"
+
+msgid "web.admin.rewards.claiming.goes.value"
+msgstr "Przedmioty do bohatera danej frakcji wybranego przy odbiorze; waluta i klucze na konto"
+
+msgid "web.admin.rewards.claiming.missed"
+msgstr "Pominięty dzień"
+
+msgid "web.admin.rewards.claiming.missed.value"
+msgstr "Przepada, chyba że tego dnia odbiór był wstrzymany"
+
+msgid "web.admin.rewards.paused_days"
+msgstr "Dni wstrzymania"
+
+msgid "web.admin.rewards.paused_days.text"
+msgstr "Odbiór był wstrzymany: %(days)s. Dzienne prezenty z tych dni można odebrać do końca wydarzenia."
+
+msgid "web.admin.rewards.paused_days.none"
+msgstr "W tym roku odbiór nie był wstrzymany podczas tego wydarzenia."

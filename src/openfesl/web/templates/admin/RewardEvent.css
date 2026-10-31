@@ -1,0 +1,81 @@
+/* An event of a game's rewards calendar: its days, its parts side by side, the days that give
+   other gifts and its texts, beside how it is claimed and the days on which claims were paused. */
+@layer pages {
+  .reward-event {
+    display: grid;
+    gap: 14px;
+  }
+
+  .reward-event-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .reward-event-title .rewards-number {
+    background: var(--accent);
+    color: var(--ink);
+  }
+
+  .reward-days tbody th {
+    white-space: nowrap;
+  }
+
+  .reward-event-lead {
+    background: var(--row-light);
+    padding: 10px 14px;
+    color: var(--ink);
+  }
+
+  .reward-parts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 2px;
+    margin-top: 2px;
+  }
+
+  .reward-part {
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    background: var(--row-light);
+    padding: 10px 12px;
+    color: var(--ink);
+  }
+
+  .reward-part-off {
+    background: var(--row-pale);
+    color: var(--dim);
+  }
+
+  .reward-part-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .reward-gift {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-weight: 600;
+  }
+
+  .reward-text-id {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+}

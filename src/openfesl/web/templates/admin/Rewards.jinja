@@ -52,6 +52,7 @@
               <div role="columnheader" class="column-head">{{ found.year }}</div>
               <div role="columnheader" class="column-head">{{ _("web.admin.rewards.column.state") }}</div>
               <div role="columnheader" class="column-head">{{ _("web.admin.rewards.column.text") }}</div>
+              <div role="columnheader"><span class="sr-only">{{ _("web.admin.rewards.column.open") }}</span></div>
             </div>
           </div>
           <div role="rowgroup" class="enter-rows table-rows">
@@ -86,6 +87,9 @@
                 <div role="cell" class="admin-cell cell-ago">
                   {{ _("web.admin.rewards.text.own" if row.own else "web.admin.rewards.text.game") }}
                 </div>
+                <div role="cell" class="cell-end">
+                  <EndSquare :href="url('/admin/rewards/' ~ game.id ~ '/events/' ~ row.key)" :label="_('web.admin.rewards.open', event=_(event.title))" />
+                </div>
               </div>
             {% endfor %}
           </div>
@@ -106,6 +110,7 @@
                     <span class="cell-ago">{{ mission.line }}</span>
                   </span>
                   <span class="prices-state rewards-mission-state">{{ _("web.admin.rewards.off") if not mission.part.enabled else mission.event.said }}</span>
+                  <EndSquare :href="url('/admin/rewards/' ~ game.id ~ '/events/' ~ mission.event.key) ~ '#part-' ~ mission.part.faction" :label="_('web.admin.rewards.open', event=mission.name)" />
                 </li>
               {% endfor %}
             </ul>

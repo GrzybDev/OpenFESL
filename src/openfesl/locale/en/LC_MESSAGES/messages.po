@@ -11520,3 +11520,120 @@ msgstr "What a milestone gives goes to the account. Levels count for each hero; 
 
 msgid "web.admin.rewards.today"
 msgstr "Today"
+
+msgid "web.admin.rewards.column.open"
+msgstr "Event page"
+
+msgid "web.admin.rewards.open"
+msgstr "Open %(event)s"
+
+msgid "web.admin.rewards.back"
+msgstr "Calendar and rules"
+
+msgid "web.admin.rewards.event.rule"
+msgstr "Date rule"
+
+msgid "web.admin.rewards.event.first"
+msgstr "First day"
+
+msgid "web.admin.rewards.event.last"
+msgstr "Last day"
+
+msgid "web.admin.rewards.event.days"
+msgstr "Days"
+
+msgid "web.admin.rewards.event.starts"
+msgstr "Day starts"
+
+msgid "web.admin.rewards.event.starts.value"
+msgstr "%(time)s · every event"
+
+msgid "web.admin.rewards.event.daily.one"
+msgstr "%(count)s daily gift, %(first)s to %(last)s; each can be claimed only on its day, unless claims were paused that day."
+
+msgid "web.admin.rewards.event.daily.other"
+msgstr "%(count)s daily gifts, %(first)s to %(last)s; each can be claimed only on its day, unless claims were paused that day."
+
+msgid "web.admin.rewards.event.goals"
+msgstr "Each hero counts from %(first)s; a goal reached can be claimed until the end of %(last)s."
+
+msgid "web.admin.rewards.event.once"
+msgstr "Claimable from %(first)s to the end of %(last)s."
+
+msgid "web.admin.rewards.event.contents"
+msgstr "Contents"
+
+msgid "web.admin.rewards.event.contents.daily"
+msgstr "Each day's gift"
+
+msgid "web.admin.rewards.event.fixed"
+msgstr "Days with other gifts"
+
+msgid "web.admin.rewards.event.fixed.note"
+msgstr "In place of that day's gift"
+
+msgid "web.admin.rewards.event.day"
+msgstr "Day %(day)s"
+
+msgid "web.admin.rewards.event.texts"
+msgstr "Texts"
+
+msgid "web.admin.rewards.event.text.missing"
+msgstr "Comes with the game's texts in the catalogue import"
+
+msgid "web.admin.rewards.goal.goal"
+msgstr "Goal"
+
+msgid "web.admin.rewards.goal.stat"
+msgstr "Counted stat"
+
+msgid "web.admin.rewards.goal.class"
+msgstr "Class"
+
+msgid "web.admin.rewards.goal.from"
+msgstr "Counted from"
+
+msgid "web.admin.rewards.goal.before"
+msgstr "Before"
+
+msgid "web.admin.rewards.gift.box.roll"
+msgstr "One roll of %(box)s"
+
+msgid "web.admin.rewards.gift.box.worth"
+msgstr "One roll of %(box)s, worth at least %(price)s"
+
+msgid "web.admin.rewards.gift.box.else"
+msgstr "One roll of %(box)s for a hero whom the items do not fit"
+
+msgid "web.admin.rewards.claiming"
+msgstr "Claims"
+
+msgid "web.admin.rewards.claiming.each"
+msgstr "Each part"
+
+msgid "web.admin.rewards.claiming.each.day"
+msgstr "Each day"
+
+msgid "web.admin.rewards.claiming.once"
+msgstr "Once per account and faction"
+
+msgid "web.admin.rewards.claiming.goes"
+msgstr "Goes to"
+
+msgid "web.admin.rewards.claiming.goes.value"
+msgstr "Items to a hero of the faction, chosen when claiming; currency and keys to the account"
+
+msgid "web.admin.rewards.claiming.missed"
+msgstr "A missed day"
+
+msgid "web.admin.rewards.claiming.missed.value"
+msgstr "Gone, unless claims were paused that day"
+
+msgid "web.admin.rewards.paused_days"
+msgstr "Paused days"
+
+msgid "web.admin.rewards.paused_days.text"
+msgstr "Claims were paused on %(days)s. The daily gifts of those days stay claimable until the event ends."
+
+msgid "web.admin.rewards.paused_days.none"
+msgstr "Claims were not paused during this event this year."

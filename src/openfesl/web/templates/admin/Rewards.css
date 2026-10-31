@@ -87,8 +87,8 @@
     --cell: var(--row);
     display: grid;
     grid-template-columns:
-      minmax(240px, 1.6fr) 100px minmax(180px, 1fr) minmax(130px, 0.8fr)
-      minmax(150px, 0.9fr) 120px;
+      minmax(220px, 1.6fr) 136px minmax(180px, 1fr) minmax(130px, 0.8fr)
+      minmax(150px, 0.9fr) 110px 44px;
     gap: 2px;
   }
 
@@ -168,7 +168,7 @@
   .rewards-mission,
   .rewards-milestone {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr) auto 44px;
     align-items: center;
     gap: 10px;
     background: var(--row);
@@ -279,7 +279,7 @@
     }
 
     .rewards-row.rewards-columns {
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: minmax(0, 1fr) auto 44px;
 
       > :nth-child(2) {
         grid-row: 1;
@@ -289,6 +289,25 @@
       > :nth-child(3),
       > :nth-child(6) {
         grid-column: 1 / -1;
+      }
+
+      > :nth-child(5) {
+        grid-column: 2 / -1;
+      }
+
+      > :last-child {
+        grid-row: 1;
+        grid-column: 3;
+      }
+    }
+  }
+
+  /* On phones an event is its name, switches, days and state; its page holds the rest. */
+  @container (width < 600px) {
+    .rewards-row {
+      .rewards-event .cell-ago,
+      > :nth-child(6) {
+        display: none;
       }
     }
   }

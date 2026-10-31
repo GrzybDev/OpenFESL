@@ -3,6 +3,7 @@ from pathlib import Path
 
 import httpx2
 import pytest
+from accounts import execute
 from identity import IdentityProvider, sign_in
 from living import freeze, import_catalogue
 from support import visible
@@ -62,4 +63,45 @@ async def test_every_role_reads_the_years_calendar_missions_packs_and_milestones
     assert "M3 Level 20 Per hero 1,500 Funds On" in page
     assert "Kalendarz 2026 Dziś 28 paź · dzień zaczyna się o 00:00 UTC" in polish
     assert "Trwa · dzień 10 z 13" in polish
+    assert unknown.status_code == 404
+
+
+@pytest.mark.usefixtures("halloween", "prompt_actions")
+async def test_an_events_page_shows_its_days_gifts_goals_texts_and_paused_days(
+    admin_provider: IdentityProvider,
+    base: str,
+    server_url: str,
+    database_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    await import_catalogue(server_url, tmp_path, capsys, INVENTED)
+    await execute(
+        database_url,
+        "INSERT INTO reward_pause (game, day) VALUES ('bfheroes', '2026-10-21'),"
+        " ('bfheroes', '2026-10-22'), ('bfheroes', '2026-02-14')",
+    )
+    admin_provider.user = WARDEN
+    async with httpx2.AsyncClient() as client:
+        await sign_in(client, base, next="/admin/")
+        daily = visible((await client.get(f"{base}{REWARDS}/events/halloween")).content)
+        christmas = visible((await client.get(f"{base}{REWARDS}/events/christmas")).content)
+        mission = visible((await client.get(f"{base}{REWARDS}/events/halloween-machete")).content)
+        unknown = await client.get(f"{base}{REWARDS}/events/harvest")
+
+    assert "E4 Halloween trick-or-treat Running · day 10 of 13" in daily
+    assert "Date rule 13 daily gifts from 19 Oct First day 19 Oct Last day 31 Oct Days 13" in daily
+    assert "Day starts 00:00 UTC · every event" in daily
+    assert "each can be claimed only on its day, unless claims were paused that day" in daily
+    assert "One roll of" in daily and "worth at least 999 Funds" in daily
+    assert "Claims were paused on 21 Oct and 22 Oct." in daily
+    assert "REWARDS_HALLOWEEN_DAY_{day}_ROYAL_NAME Comes with the game's texts" in daily
+    assert "Days with other gifts In place of that day's gift Royal Army National Army" in christmas
+    assert "Day 17" in christmas and "Claims were not paused during this event" in christmas
+    assert "Royal Army On Invented Golden Machete · permanent Goal 700" in mission
+    assert "Counted stat kw106 Class Commando Counted from 19 Oct Before 1 Nov" in mission
+    assert (
+        "Each hero counts from 19 Oct; a goal reached can be claimed until the end of 31 Oct"
+        in (mission)
+    )
     assert unknown.status_code == 404

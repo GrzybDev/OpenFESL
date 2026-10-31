@@ -1,0 +1,154 @@
+{#def found #}
+{# An event of the game data's rewards calendar, read as it runs this year: the rule of its
+   days, what each part gives its faction's heroes or the account, a mission's goal, the days of a
+   daily event that give other gifts, the texts that name it, how it is claimed and the days on
+   which claims were paused, whose daily gifts wait until the event ends. #}
+{% set game = found.game %}
+{% set row = found.row %}
+{% set event = row.run.event %}
+{% set title = _(event.title) %}
+{% macro who(part) -%}
+  {{ _("games." ~ game.id ~ ".faction." ~ part.faction) if part.faction else _("web.admin.rewards.part.account") }}
+{%- endmacro %}
+{% macro gift(lines) %}
+  <ul class="reward-gift">
+    {% for line, href in lines %}
+      <li>
+        {%- if href %}<a href="{{ url(href) }}" class="bar-link">{{ line }}</a>{% else %}{{ line }}{% endif -%}
+      </li>
+    {% endfor %}
+  </ul>
+{% endmacro %}
+<AdminPage :title="title ~ ' · ' ~ _('web.admin.rewards.title')"
+           current="rewards">
+  <RewardsHead :game="game" :subtitle="_('web.admin.rewards.subtitle', game=game.name)" />
+  <Panel class="enter-panel">
+    <nav aria-label="{{ _('web.admin.rewards.title') }}"
+         class="tabs prices-back">
+      <Tab :href="url('/admin/rewards/' ~ game.id) ~ '#event-' ~ row.key" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.rewards.back") }}</Tab>
+    </nav>
+    <div class="list-layout admin-layout">
+      <div class="list-main reward-event">
+        <section aria-labelledby="event-title" class="account-part">
+          <h2 id="event-title" class="bar bar-wrap reward-event-bar">
+            <span class="reward-event-title"><span class="rewards-number">E{{ row.number }}</span>{{ title }}</span>
+            <span class="bar-extra">{{ row.said }}</span>
+          </h2>
+          <p class="reward-event-lead body-text">{{ _(event.summary) }}</p>
+          <dl class="facts reward-event-facts">
+            <Fact :label="_('web.admin.rewards.event.rule')" plain>
+              {{ row.rule }}
+            </Fact>
+            <Fact :label="_('web.admin.rewards.event.first')">
+              {{ found.first }}
+            </Fact>
+            <Fact :label="_('web.admin.rewards.event.last')">
+              {{ found.last }}
+            </Fact>
+            <Fact :label="_('web.admin.rewards.event.days')">
+              {{ number(row.run.days) }}
+            </Fact>
+            <Fact :label="_('web.admin.rewards.event.starts')">
+              {{ _("web.admin.rewards.event.starts.value", time=found.starts) }}
+            </Fact>
+          </dl>
+          <p class="bar-text body-text">
+            {%- if event.daily %}{{ _n("web.admin.rewards.event.daily", row.run.days, first=found.first, last=found.last) }}{% elif found.parts|selectattr("goal")|list %}{{ _("web.admin.rewards.event.goals", first=found.first, last=found.last) }}{% else %}{{ _("web.admin.rewards.event.once", first=found.first, last=found.last) }}{% endif -%}
+          </p>
+        </section>
+        <section aria-labelledby="event-contents" class="account-part">
+          <Bar id="event-contents" :extra="_('web.admin.rewards.event.contents.daily') if event.daily else ''">{{ _("web.admin.rewards.event.contents") }}</Bar>
+          <div class="reward-parts">
+            {% for view in found.parts %}
+              <div id="part-{{ view.key }}"
+                   class="reward-part{% if not view.part.enabled %} reward-part-off{% endif %}">
+                <p class="reward-part-head">
+                  <span>{{ who(view.part) }}</span>
+                  <span class="prices-state rewards-switch"><Badge :name="'tick' if view.part.enabled else 'x'" lines />{{ _("web.admin.rewards.on" if view.part.enabled else "web.admin.rewards.off") }}</span>
+                </p>
+                {{ gift(view.gift) }}
+                {% if view.goal %}
+                  <dl class="facts">
+                    {% for label, value in view.goal %}
+                      <Fact :label="_('web.admin.rewards.goal.' ~ label)"
+                            :plain="label == 'stat'">
+                        {{ value }}
+                      </Fact>
+                    {% endfor %}
+                  </dl>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </section>
+        {% if found.days %}
+          <section aria-labelledby="event-days" class="account-part">
+            <Bar id="event-days" :extra="_('web.admin.rewards.event.fixed.note')">{{ _("web.admin.rewards.event.fixed") }}</Bar>
+            <div class="table-scroll table-scroll-flush">
+              <table class="rewards-packs reward-days">
+                <thead>
+                  <tr>
+                    <td></td>
+                    {% for view in found.parts %}
+                      <th scope="col">{{ who(view.part) }}</th>
+                    {% endfor %}
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for day, gifts in found.days %}
+                    <tr>
+                      <th scope="row">{{ _("web.admin.rewards.event.day", day=day) }}</th>
+                      {% for lines in gifts %}
+                        <td>{{ gift(lines) }}</td>
+                      {% endfor %}
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        {% endif %}
+        <section aria-labelledby="event-texts" class="account-part">
+          <Bar id="event-texts" :extra="_('web.admin.rewards.text.own') if row.own else _('web.admin.rewards.text.game')">{{ _("web.admin.rewards.event.texts") }}</Bar>
+          <dl class="facts">
+            {% for view in found.parts %}
+              {% for text, shown in view.texts %}
+                <Fact :label="who(view.part)" plain>
+                  <span class="reward-text-id">{{ text }}</span>
+                  <span>{{ shown or _("web.admin.rewards.event.text.missing") }}</span>
+                </Fact>
+              {% endfor %}
+            {% endfor %}
+          </dl>
+        </section>
+      </div>
+      <div class="admin-side">
+        <section aria-labelledby="event-claims">
+          <Bar id="event-claims">{{ _("web.admin.rewards.claiming") }}</Bar>
+          <dl class="facts">
+            <Fact :label="_('web.admin.rewards.claiming.each.day' if event.daily else 'web.admin.rewards.claiming.each')"
+                  plain>
+              {{ _("web.admin.rewards.claiming.once") }}
+            </Fact>
+            <Fact :label="_('web.admin.rewards.claiming.goes')" plain>
+              {{ _("web.admin.rewards.claiming.goes.value") }}
+            </Fact>
+            {% if event.daily %}
+              <Fact :label="_('web.admin.rewards.claiming.missed')" plain>
+                {{ _("web.admin.rewards.claiming.missed.value") }}
+              </Fact>
+            {% endif %}
+          </dl>
+        </section>
+        {% if event.daily %}
+          <section aria-labelledby="event-paused">
+            <Bar id="event-paused" :extra="number(found.paused|length)">{{ _("web.admin.rewards.paused_days") }}</Bar>
+            <p class="bar-text body-text">
+              {{ _("web.admin.rewards.paused_days.text", days=listed(found.paused)) if found.paused else _("web.admin.rewards.paused_days.none") }}
+            </p>
+          </section>
+        {% endif %}
+      </div>
+    </div>
+  </Panel>
+</AdminPage>
