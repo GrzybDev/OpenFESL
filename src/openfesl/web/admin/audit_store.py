@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from openfesl.core.admin import AdminAction
-from openfesl.core.catalogues import Catalogues
+from openfesl.core.catalogues import Catalogues, game_text
 from openfesl.core.games import Games
 from openfesl.core.inventory import Ownership
 from openfesl.core.texts import localize
@@ -183,3 +183,32 @@ def _deal_value(texts: StoreTexts, value: Any) -> str:
     if isinstance(value, list):
         return texts.text("web.admin.deals.discount", low=value[0], high=value[1])
     return texts.amount(value) if value is not None else texts.text("web.admin.deals.size.all")
+
+
+async def art_entry(
+    target: str, details: dict[str, Any], games: Games, catalogues: Catalogues, language: str
+) -> tuple[str, str, str | None, str]:
+    """Return how the audit log shows a hot deal's picture that the admin uploaded or removed.
+
+    Args:
+        target: The game's id.
+        details: The change's details, as the admin's log keeps them.
+        games: The games, whose hot deals the pictures show.
+        catalogues: Name the offers.
+        language: The log's language.
+
+    Returns:
+        The kind of the action, the offer in words, the panel's page of the hot deals and which
+        picture was uploaded in words.
+    """
+    game = games.by_id(target)
+    offer = details["offer"]
+    if game is None:
+        return "deal_art", offer, None, ""
+    shown = game_text(game, await catalogues.of(game, language), offer, language)
+    href = localize(f"/admin/store/{game.id}/deals#home", language)
+    if details.get("removed"):
+        return "deal_art.removed", shown, href, ""
+    texts = StoreTexts(game, language, datetime.now(UTC))
+    picture = "big" if details["big"] else "small"
+    return "deal_art", shown, href, texts.text(f"web.admin.audit.deal_art.{picture}")

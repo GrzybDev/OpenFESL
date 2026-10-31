@@ -12028,3 +12028,63 @@ msgstr "Gorące oferty · sekcji brakuje ofert"
 
 msgid "web.admin.home.warning.deals.text"
 msgstr "%(section)s: w ostatnim kroku mniej niż %(size)s ofert jednej z frakcji."
+
+msgid "web.admin.deals.home"
+msgstr "Ekran główny gry"
+
+msgid "web.admin.deals.home.text"
+msgstr "Gra wczytuje listę przy otwarciu ekranu głównego; pierwsze dwie oferty mają duży obraz, kolejne trzy mały. Oferta bez obrazu zostaje z animacją ładowania, więc każda dostaje obraz."
+
+msgid "web.admin.deals.home.big"
+msgstr "Duży obraz"
+
+msgid "web.admin.deals.home.small"
+msgstr "Mały obraz"
+
+msgid "web.admin.deals.art.uploaded"
+msgstr "Przesłany"
+
+msgid "web.admin.deals.art.generated"
+msgstr "Wygenerowany"
+
+msgid "web.admin.deals.art.alt"
+msgstr "Obraz oferty %(deal)s"
+
+msgid "web.admin.deals.art.big"
+msgstr "Duży obraz, PNG"
+
+msgid "web.admin.deals.art.small"
+msgstr "Mały obraz, PNG"
+
+msgid "web.admin.deals.art.upload"
+msgstr "Prześlij"
+
+msgid "web.admin.deals.art.reset"
+msgstr "Przywróć wygenerowane obrazy"
+
+msgid "web.admin.deals.art.rule"
+msgstr "Tylko PNG: duży obraz o szerokości 308 px i wysokości do 355 px, mały dokładnie 200 × 195 px; gra pokazuje je bez skalowania. Przesłany obraz należy do oferty, także gdy rotacja sprzeda ją ponownie. Wygenerowane obrazy pokazują zaimportowane ikony przedmiotów na kafelkach albo puste kafelki tam, gdzie ikona nie jest pokazywana, i nie zawierają słów."
+
+msgid "web.admin.deals.art.refused.big"
+msgstr "Duży obraz to PNG o szerokości 308 px i wysokości do 355 px; %(file)s się nie nadaje."
+
+msgid "web.admin.deals.art.refused.small"
+msgstr "Mały obraz to PNG o wymiarach dokładnie 200 × 195 px; %(file)s się nie nadaje."
+
+msgid "web.admin.toast.deals.art"
+msgstr "Zapisano przesłane obrazy oferty %(deal)s."
+
+msgid "web.admin.toast.deals.art.reset"
+msgstr "Oferta %(deal)s znów pokazuje wygenerowane obrazy."
+
+msgid "web.admin.audit.action.deal_art"
+msgstr "Przesłanie obrazu oferty"
+
+msgid "web.admin.audit.action.deal_art.removed"
+msgstr "Przywrócenie obrazów oferty"
+
+msgid "web.admin.audit.deal_art.big"
+msgstr "duży obraz"
+
+msgid "web.admin.audit.deal_art.small"
+msgstr "mały obraz"

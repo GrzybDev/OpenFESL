@@ -9,6 +9,7 @@ from PIL import Image
 from starlette.exceptions import HTTPException
 
 from openfesl.core.catalogues import CatalogueFiles, Catalogues, file_path
+from openfesl.core.deal_uploads import DealUploads, offer_of
 from openfesl.core.game_art import GameArt
 from openfesl.core.games import Game
 from openfesl.core.magma import Magma
@@ -40,7 +41,8 @@ class DealArt:
     """Makes the pictures of the games' hot deals for their home screens.
 
     The items show as their imported icons where the game's art is shown to the game, and as
-    plain tiles otherwise; a picture once made is kept.
+    plain tiles otherwise; a picture once made is kept. A picture that the admin uploaded for a
+    deal's offer takes the generated one's place.
     """
 
     def __init__(
@@ -48,6 +50,7 @@ class DealArt:
         products: ProductStore,
         catalogues: Catalogues,
         files: CatalogueFiles | None,
+        uploads: DealUploads,
     ) -> None:
         """Read the deals, the catalogues and their files.
 
@@ -55,8 +58,10 @@ class DealArt:
             products: Hold the bundles, sold now or not.
             catalogues: Know the items' icons.
             files: Where the imports' icons are kept; none where the deployment keeps none.
+            uploads: The pictures that the admin uploaded in place of generated ones.
         """
         self._products = products
+        self._uploads = uploads
         self._catalogues = catalogues
         self._files = files
         self._kept: OrderedDict[tuple[str, int, bool, str | None], bytes] = OrderedDict()
@@ -73,6 +78,9 @@ class DealArt:
         listed = await self._products.bundle(game.id, number)
         if listed is None:
             return None
+        uploaded = await self._uploads.picture(game.id, offer_of(listed.bundle), big)
+        if uploaded is not None:
+            return uploaded
         contents = self._catalogues.contents(game)
         revision = contents.revision if shown and contents.icons and self._files else None
         key = (game.id, number, big, revision)

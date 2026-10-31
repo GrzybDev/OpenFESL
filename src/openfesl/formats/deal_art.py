@@ -27,6 +27,26 @@ _INK = "#0A0A0A"
 type _Placement = tuple[float, float, float]
 
 
+def fits(data: bytes, big: bool) -> bool:
+    """Tell whether an uploaded picture is a PNG of the size the game shows a deal's picture.
+
+    The game shows the pictures unscaled: the big one 308 px wide and up to 355 px tall, the
+    small one exactly 200 by 195 px.
+
+    Args:
+        data: The uploaded file.
+        big: Whether it is to be the big picture rather than the small one.
+    """
+    try:
+        with Image.open(BytesIO(data), formats=["PNG"]) as picture:
+            width, height = picture.size
+    except OSError:
+        return False
+    if big:
+        return width == BIG[0] and height <= BIG[1]
+    return (width, height) == SMALL
+
+
 def deal_art(icons: Sequence[Image.Image | None], big: bool) -> bytes:
     """Return a hot deal's picture for the game's home screen, as a PNG with transparency.
 

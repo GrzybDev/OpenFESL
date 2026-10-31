@@ -12,6 +12,7 @@ from openfesl.web.admin.auth import AdminSessions, NeedsRole, SignInNeeded, Sign
 from openfesl.web.admin.box_tables import box_table_routes
 from openfesl.web.admin.boxes import BoxAdminViews, box_routes
 from openfesl.web.admin.catalogues import catalogue_routes
+from openfesl.web.admin.deal_pictures import deal_picture_routes
 from openfesl.web.admin.deals import DealAdminViews, deal_routes
 from openfesl.web.admin.entitlements import entitlement_routes
 from openfesl.web.admin.hero_actions import hero_action_routes
@@ -33,6 +34,7 @@ from openfesl.web.admin.store import StoreAdminViews, store_routes
 from openfesl.web.admin.store_item import store_item_routes
 from openfesl.web.admin.store_rules import store_rule_routes
 from openfesl.web.admin.wallets import WalletAdminViews, wallet_routes
+from openfesl.web.deal_art import DealArt
 from openfesl.web.pages import Pages
 from openfesl.web.sessions import FormExpired
 
@@ -44,6 +46,7 @@ def include_admin_routes(
     pages: Pages,
     services: GameServices,
     stores: Stores,
+    deal_art: DealArt,
 ) -> None:
     """Add the admin panel's pages and the answers to requests its sign-in turns away.
 
@@ -54,6 +57,7 @@ def include_admin_routes(
         pages: Renders the pages.
         services: The games' side of the server, which the panel shows and changes.
         stores: The database's stores.
+        deal_art: Draws the pictures of the hot deals, or gives the uploaded ones.
     """
     census, players, apply = services.census, services.players, services.trust.apply_decisions
     server_views = ServerViews(
@@ -71,7 +75,9 @@ def include_admin_routes(
         games, services.catalogues, stores.prices, stores.settings, services.feed.apply
     )
     box_views = BoxAdminViews(store_views, services.catalogues, services.deals, stores.boxes)
-    deal_views = DealAdminViews(store_views, services.deals, stores.settings)
+    deal_views = DealAdminViews(
+        store_views, services.deals, stores.settings, deal_art, stores.deal_uploads
+    )
 
     async def menu_counts() -> dict[str, int]:
         counts = await server_views.menu_counts()
@@ -145,6 +151,7 @@ def include_admin_routes(
     app.include_router(box_routes(sign_in, box_views))
     app.include_router(box_table_routes(sign_in, box_views))
     app.include_router(deal_routes(sign_in, deal_views))
+    app.include_router(deal_picture_routes(sign_in, deal_views))
     app.include_router(
         audit_routes(
             sign_in,

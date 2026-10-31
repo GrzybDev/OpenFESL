@@ -71,9 +71,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.add_api_websocket_route("/", relay_endpoint(services.start_session))
     app.mount("/static", StaticAssets(directory=STATIC))
+    deal_art = DealArt(
+        stores.products,
+        services.catalogues,
+        services.catalogue_files,
+        stores.deal_uploads,
+    )
     include_public_routes(app, settings, games, pages, services, stores)
-    include_admin_routes(app, settings, games, pages, services, stores)
-    _add_middleware(app, settings, games, services, stores)
+    include_admin_routes(app, settings, games, pages, services, stores, deal_art)
+    _add_middleware(app, settings, games, services, stores, deal_art)
 
     @app.get("/health", response_class=PlainTextResponse)
     async def health() -> str:
@@ -83,7 +89,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
 
 def _add_middleware(
-    app: FastAPI, settings: Settings, games: Games, services: GameServices, stores: Stores
+    app: FastAPI,
+    settings: Settings,
+    games: Games,
+    services: GameServices,
+    stores: Stores,
+    deal_art: DealArt,
 ) -> None:
     # The last one added sees a request first: the game's HTTP keeps its own answers. Only the
     # sign-ins and their forms store anything in the session, so other pages set no cookie.
@@ -107,11 +118,6 @@ def _add_middleware(
     )
     app.add_middleware(LanguageMiddleware)
     app.add_middleware(SecurityHeadersMiddleware)
-    deal_art = DealArt(
-        stores.products,
-        services.catalogues,
-        services.catalogue_files,
-    )
     magma = {
         game.http.magma: magma_app(
             game,

@@ -11,18 +11,40 @@ from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin, Role
 from openfesl.core.calendar import Window, next_start, today
 from openfesl.core.deal_rules import DealRules, DealSection, ItemSection, OfferSection
-from openfesl.core.deals import HotDeals
+from openfesl.core.deal_uploads import DealUploads, offer_of
+from openfesl.core.deals import Deal, HotDeals
 from openfesl.core.games import Game
 from openfesl.core.policies import SettingStore
 from openfesl.core.store import AUTO, ListedBundle
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.store import SECTION, StoreAdminViews, store_url
+from openfesl.web.deal_art import DealArt
 from openfesl.web.sessions import check_form, toast
 from openfesl.web.store_texts import StoreTexts
 
 # The most deals of each faction, and the longest repeat gap in days, that a section takes.
 MOST_SIZE = 50
 MOST_GAP = 365
+# How many deals the game's home screen shows, of which the first ones big.
+HOME = 5
+BIG = 2
+
+
+@dataclass(frozen=True, slots=True)
+class HomeDeal:
+    """A hot deal as the game's home screen shows it, with the pictures it downloads.
+
+    Attributes:
+        deal: The deal, named in the page's language.
+        offer: The name of the offer it sells, which uploaded pictures go with.
+        big: Whether the home screen shows its big picture rather than its small one.
+        uploaded: Which of its pictures were uploaded: True for the big one, False for the small.
+    """
+
+    deal: Deal
+    offer: str
+    big: bool
+    uploaded: set[bool]
 
 
 @dataclass(frozen=True, slots=True)
@@ -86,17 +108,47 @@ class Rotation:
 class DealAdminViews:
     """Puts together what the admin panel shows of the games' hot-deal rotations."""
 
-    def __init__(self, stores: StoreAdminViews, deals: HotDeals, settings: SettingStore) -> None:
+    def __init__(
+        self,
+        stores: StoreAdminViews,
+        deals: HotDeals,
+        settings: SettingStore,
+        art: DealArt,
+        uploads: DealUploads,
+    ) -> None:
         """Read the rotations and change them through the instance's settings.
 
         Args:
             stores: Name the games with stores.
             deals: The hot deals, which run the rotations.
             settings: The instance's settings, which override the rotations' game data.
+            art: Draws the deals' pictures, or gives the uploaded ones.
+            uploads: Where the pictures that the admin uploaded are kept.
         """
         self.stores = stores
         self._deals = deals
         self._settings = settings
+        self.art = art
+        self.uploads = uploads
+
+    async def home(self, game: Game, language: str) -> list[HomeDeal]:
+        """Return the hot deals that the game's home screen shows, with their pictures.
+
+        Args:
+            game: The game, which has hot deals.
+            language: The language of the deals' names.
+        """
+        uploaded = await self.uploads.uploaded(game.id)
+        shown = (await self._deals.hot_deals(game, language))[:HOME]
+        return [
+            HomeDeal(
+                deal,
+                offer_of(deal.listed.bundle),
+                index < BIG,
+                uploaded.get(offer_of(deal.listed.bundle), set()),
+            )
+            for index, deal in enumerate(shown)
+        ]
 
     async def rotation(self, game: Game) -> Rotation:
         """Return a game's hot-deal rotation with its sections and what they sell now.
@@ -176,28 +228,11 @@ def deal_routes(sessions: AdminSessions, views: DealAdminViews) -> APIRouter:
     """
     router = APIRouter()
 
-    async def page(
-        request: Request, admin: Admin, game: Game, key: str, form: dict[str, str], why: str
-    ) -> HTMLResponse:
-        rotation = await views.rotation(game)
-        chosen = next((row for row in rotation.rows if row.key == key), rotation.rows[0])
-        return await sessions.render(
-            request,
-            "admin.StoreDeals",
-            400 if why else 200,
-            admin=admin,
-            of=game,
-            rotation=rotation,
-            chosen=chosen,
-            form=form,
-            why=why,
-            manages=admin.role is Role.ADMIN,
-        )
-
     @router.get("/admin/store/{game_id}/deals", response_class=HTMLResponse)
     async def deals(request: Request, game_id: str, section: str = "") -> HTMLResponse:
         admin = sessions.admin(request)
-        return await page(request, admin, views.stores.game(game_id), section, {}, "")
+        game = views.stores.game(game_id)
+        return await deal_page(sessions, views, request, admin, game, section, {}, "")
 
     @router.post("/admin/store/{game_id}/deals/rotation")
     async def switch(request: Request, game_id: str) -> Response:
@@ -232,7 +267,7 @@ def deal_routes(sessions: AdminSessions, views: DealAdminViews) -> APIRouter:
             values = _values(row.section, fields)
         except ValueError as refused:
             why = texts.text(f"web.admin.deals.refused.{refused}", most=texts.amount(MOST_SIZE))
-            return await page(request, admin, game, key, fields, why)
+            return await deal_page(sessions, views, request, admin, game, key, fields, why)
         before, seed = _fields(row.section), _fields(row.seed)
         settings = {
             f"sections.{key}.{name}": None if value == seed[name] else _written(value)
@@ -248,6 +283,48 @@ def deal_routes(sessions: AdminSessions, views: DealAdminViews) -> APIRouter:
         return RedirectResponse(store_url(request, game, f"/deals?section={key}"), 303)
 
     return router
+
+
+async def deal_page(
+    sessions: AdminSessions,
+    views: DealAdminViews,
+    request: Request,
+    admin: Admin,
+    game: Game,
+    key: str,
+    form: dict[str, str],
+    why: str,
+    art: tuple[int, str] | None = None,
+) -> HTMLResponse:
+    """Render a game's hot-deal rotation page, with a refused change if there is one.
+
+    Args:
+        sessions: Signs admins in and renders the panel's pages.
+        views: Put together what the page shows.
+        request: The request the page answers.
+        admin: The signed-in admin.
+        game: The game, which has hot deals.
+        key: The section whose form the page shows; the first one when no section has the name.
+        form: The section form's fields as they were sent, to show again with a refusal.
+        why: Why the section's change was refused; empty when it was not.
+        art: The deal whose uploaded picture was refused, by its bundle's number, and why.
+    """
+    rotation = await views.rotation(game)
+    chosen = next((row for row in rotation.rows if row.key == key), rotation.rows[0])
+    return await sessions.render(
+        request,
+        "admin.StoreDeals",
+        400 if why or art else 200,
+        admin=admin,
+        of=game,
+        rotation=rotation,
+        chosen=chosen,
+        form=form,
+        why=why,
+        home=await views.home(game, request.state.language),
+        art=art,
+        manages=admin.role is Role.ADMIN,
+    )
 
 
 def _fields(section: DealSection) -> dict[str, Any]:

@@ -342,6 +342,18 @@ class StoreDropRow(Base):
     weight: Mapped[int]
 
 
+class DealArtRow(Base):
+    __tablename__ = "deal_art"
+
+    # A picture of a hot deal's offer, by the offer's name, that the game shows in place of the
+    # generated one: big or small.
+    game: Mapped[str] = mapped_column(primary_key=True)
+    offer: Mapped[str] = mapped_column(primary_key=True)
+    big: Mapped[bool] = mapped_column(primary_key=True)
+    image: Mapped[bytes] = mapped_column(LargeBinary)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class PurchaseRow(Base):
     __tablename__ = "purchase"
 

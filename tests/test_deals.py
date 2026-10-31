@@ -17,6 +17,7 @@ from support import fetch
 from openfesl.core.calendar import Schedule, periods
 from openfesl.core.catalogues import Catalogues
 from openfesl.core.deal_rules import DealRules
+from openfesl.core.deal_uploads import offer_of
 from openfesl.core.deals import HotDeals
 from openfesl.core.games import Game, load_games
 from openfesl.core.store import Bundle
@@ -217,8 +218,8 @@ async def test_a_deal_of_the_day_of_two_deals_makes_two_for_each_faction(
         if listed.bundle.section == "daily"
     ]
 
-    # Each deal of the period has a pool of its own; the first keeps the faction's.
-    assert [(bundle.faction, bundle.pool) for bundle in made] == [
+    # The first of each faction keeps the pictures uploaded for the faction's deal.
+    assert [(bundle.faction, offer_of(bundle)) for bundle in made] == [
         ("royal", "royal"),
         ("royal", "royal:1"),
         ("national", "national"),

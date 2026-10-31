@@ -11316,3 +11316,63 @@ msgstr "Hot deals · section short of deals"
 
 msgid "web.admin.home.warning.deals.text"
 msgstr "%(section)s sold fewer than %(size)s deals of a faction in its latest step."
+
+msgid "web.admin.deals.home"
+msgstr "The game's home screen"
+
+msgid "web.admin.deals.home.text"
+msgstr "The game reads the list when its home screen opens; the first two deals show their big picture, the next three their small one. A deal without a picture keeps the game's loading animation, so every deal gets one."
+
+msgid "web.admin.deals.home.big"
+msgstr "Big picture"
+
+msgid "web.admin.deals.home.small"
+msgstr "Small picture"
+
+msgid "web.admin.deals.art.uploaded"
+msgstr "Uploaded"
+
+msgid "web.admin.deals.art.generated"
+msgstr "Generated"
+
+msgid "web.admin.deals.art.alt"
+msgstr "The picture of %(deal)s"
+
+msgid "web.admin.deals.art.big"
+msgstr "Big picture, PNG"
+
+msgid "web.admin.deals.art.small"
+msgstr "Small picture, PNG"
+
+msgid "web.admin.deals.art.upload"
+msgstr "Upload"
+
+msgid "web.admin.deals.art.reset"
+msgstr "Back to the generated pictures"
+
+msgid "web.admin.deals.art.rule"
+msgstr "PNG only: the big picture 308 px wide and up to 355 px tall, the small one exactly 200 × 195 px; the game shows them unscaled. An upload goes with the deal's offer, also when the rotation sells it again. Generated pictures show the items' imported icons on tiles, or plain tiles where no icon is shown, and carry no words."
+
+msgid "web.admin.deals.art.refused.big"
+msgstr "The big picture is a PNG 308 px wide and up to 355 px tall; %(file)s is not."
+
+msgid "web.admin.deals.art.refused.small"
+msgstr "The small picture is a PNG of exactly 200 × 195 px; %(file)s is not."
+
+msgid "web.admin.toast.deals.art"
+msgstr "Saved the uploaded pictures of %(deal)s."
+
+msgid "web.admin.toast.deals.art.reset"
+msgstr "%(deal)s shows its generated pictures again."
+
+msgid "web.admin.audit.action.deal_art"
+msgstr "Deal picture uploaded"
+
+msgid "web.admin.audit.action.deal_art.removed"
+msgstr "Deal pictures reset"
+
+msgid "web.admin.audit.deal_art.big"
+msgstr "big picture"
+
+msgid "web.admin.audit.deal_art.small"
+msgstr "small picture"

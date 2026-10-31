@@ -176,7 +176,8 @@ def pick_items(
                 price=price,
                 original_price=worth if worth > price else None,
                 faction=faction,
-                # Each deal of a period needs a pool of its own; the first keeps the faction's.
+                # Each deal of a period needs a pool of its own; the first keeps the faction's,
+                # which its uploaded pictures go by.
                 pool=f"{faction}:{number}" if number else faction,
                 source=AUTO,
             )
