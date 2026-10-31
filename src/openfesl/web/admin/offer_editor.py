@@ -7,10 +7,10 @@ from babel import Locale
 from starlette.datastructures import ImmutableMultiDict
 from starlette.exceptions import HTTPException
 
-from openfesl.core.catalogues import Catalogue, Item
+from openfesl.core.catalogues import Catalogue, Item, game_text
 from openfesl.core.deal_offers import offer_state
 from openfesl.core.deal_picks import fit
-from openfesl.core.deal_rules import DealRules, ItemSection, OfferSection
+from openfesl.core.deal_rules import DealRules, ItemSection, Offer, OfferSection
 from openfesl.core.games import Game
 from openfesl.core.store import ADMIN, Bundle, ListedBundle, Product
 from openfesl.core.texts import BASE_LANGUAGE, languages
@@ -38,6 +38,7 @@ class OfferDraft:
         starts: When it starts, as written, in UTC.
         ends: When it ends, as written, in UTC.
         section: The key of the section that lists it.
+        text: imported for the game's text of a bundle with its items, own for the admin's.
         names: Its own name by language code.
         abouts: Its own description by language code.
     """
@@ -49,6 +50,7 @@ class OfferDraft:
     starts: str
     ends: str
     section: str
+    text: str
     names: dict[str, str]
     abouts: dict[str, str]
 
@@ -98,6 +100,7 @@ class OfferEditor:
         items: The offer's items.
         worth: The sum of its items' list prices.
         line: What the price comes to, in words; empty until it is known.
+        imported: The game's bundle with the same items, whose texts the offer may take.
         sections: The keys of the sections that may list it.
         candidates: The items that the add panel's search found.
         refused: Why a field is refused, by its name.
@@ -115,6 +118,7 @@ class OfferEditor:
     items: list[OfferItem]
     worth: int
     line: str
+    imported: Offer | None
     sections: list[str]
     candidates: list[Candidate]
     refused: dict[str, str]
@@ -146,7 +150,7 @@ def editor_of(
     """
     game, language, now = texts.game, texts.language, datetime.now(UTC)
     sections = offer_sections(rules)
-    draft = written(fields) if fields is not None else drafted(listed, sections, now)
+    draft = written(fields) if fields is not None else drafted(rules, listed, sections, now)
     if draft.section not in sections or draft.pricing not in ("price", "discount"):
         raise HTTPException(400)
     items = []
@@ -157,12 +161,14 @@ def editor_of(
             raise HTTPException(400)
         items.append(OfferItem(product, catalogue.name(item.id) or str(item.id), item))
     worth = sum(found.product.price for found in items)
+    given = {found.item.id for found in items}
+    imported = next(
+        (offer for offer in _game_offers(rules) if {item for item, _ in offer.members} == given),
+        None,
+    )
     refused: dict[str, str] = {}
     price, line = _priced(texts, rules, draft, worth, refused)
-    if not items:
-        refused["items"] = texts.text("web.admin.deals.offer.refused.items")
-    if not draft.names.get(BASE_LANGUAGE):
-        refused["name-en"] = texts.text("web.admin.deals.offer.refused.name")
+    _check(texts, rules, draft, items, imported, refused)
     starts, ends = _moment(draft.starts), _moment(draft.ends)
     if starts is None:
         refused["starts"] = texts.text("web.admin.deals.offer.refused.when")
@@ -192,10 +198,13 @@ def editor_of(
         refused["items"] = texts.text("web.admin.deals.offer.refused.fit", items="; ".join(whom))
     bundle = None
     if not refused and price is not None and found is not None:
-        english = draft.names[BASE_LANGUAGE]
+        own = draft.text == "own"
+        english = draft.names.get(BASE_LANGUAGE, "")
         bundle = Bundle(
-            name=english,
-            description=draft.abouts.get(BASE_LANGUAGE) or None,
+            name=english if own or imported is None else imported.name,
+            description=(draft.abouts.get(BASE_LANGUAGE) or None)
+            if own or imported is None
+            else imported.description,
             currency=rules.currency,
             price=price,
             original_price=worth if worth > price else None,
@@ -212,20 +221,24 @@ def editor_of(
             texts={
                 code: (draft.names.get(code) or english, draft.abouts.get(code) or None)
                 for code in languages()[1:]
-                if draft.names.get(code) or draft.abouts.get(code)
+                if own and (draft.names.get(code) or draft.abouts.get(code))
             },
         )
     locale = Locale.parse(language, sep="-")
+    named = draft.names.get(language) or draft.names.get(BASE_LANGUAGE, "")
+    if imported and draft.text == "imported":
+        named = game_text(game, catalogue, imported.name, language, found[0] if found else None)
     return OfferEditor(
         game,
         rules,
         listed.id if listed else None,
         offer_state(listed.bundle, now, rules) if listed else "",
-        draft.names.get(language) or draft.names.get(BASE_LANGUAGE, ""),
+        named,
         draft,
         items,
         worth,
         line,
+        imported,
         sections,
         _candidates(game, catalogue, every, rules, draft.query),
         refused,
@@ -235,12 +248,15 @@ def editor_of(
     )
 
 
-def drafted(listed: ListedBundle | None, sections: list[str], now: datetime) -> OfferDraft:
+def drafted(
+    rules: DealRules, listed: ListedBundle | None, sections: list[str], now: datetime
+) -> OfferDraft:
     """Return an offer's editor fields as it is saved, or those of a new offer.
 
     A new offer starts at once and runs a week.
 
     Args:
+        rules: How the game's hot deals change.
         listed: The offer's bundle; none for a new offer.
         sections: The keys of the sections that may list it.
         now: The moment.
@@ -256,10 +272,12 @@ def drafted(listed: ListedBundle | None, sections: list[str], now: datetime) -> 
             f"{start:{CLOCK}}",
             f"{week:{CLOCK}}",
             sections[0],
+            "own",
             {},
             {},
         )
     bundle = listed.bundle
+    imported = game_named(rules, bundle)
     names = {BASE_LANGUAGE: bundle.name} | {code: own for code, (own, _) in bundle.texts.items()}
     abouts = {BASE_LANGUAGE: bundle.description or ""} | {
         code: about or "" for code, (_, about) in bundle.texts.items()
@@ -272,9 +290,20 @@ def drafted(listed: ListedBundle | None, sections: list[str], now: datetime) -> 
         f"{bundle.starts:{CLOCK}}" if bundle.starts else "",
         f"{bundle.ends:{CLOCK}}" if bundle.ends else "",
         bundle.section if bundle.section in sections else sections[0],
-        names,
-        abouts,
+        "imported" if imported else "own",
+        {} if imported else names,
+        {} if imported else abouts,
     )
+
+
+def game_named(rules: DealRules, bundle: Bundle) -> bool:
+    """Return whether an admin offer takes the texts of the game's bundle with its items.
+
+    Args:
+        rules: How the game's hot deals change, whose sets and offers are the game's bundles.
+        bundle: The offer's bundle.
+    """
+    return any(offer.name == bundle.name for offer in _game_offers(rules))
 
 
 def written(fields: ImmutableMultiDict[str, Any]) -> OfferDraft:
@@ -307,6 +336,7 @@ def written(fields: ImmutableMultiDict[str, Any]) -> OfferDraft:
         field("starts"),
         field("ends"),
         field("section"),
+        field("text") or "own",
         {code: field(f"name-{code}")[:NAME_LONGEST] for code in languages()},
         {code: field(f"about-{code}")[:ABOUT_LONGEST] for code in languages()},
     )
@@ -323,6 +353,15 @@ def offer_sections(rules: DealRules) -> list[str]:
         for key, section in rules.sections.items()
         if isinstance(section, ItemSection) or not any(offer.box for offer in rules.offers(section))
     ]
+
+
+def _game_offers(rules: DealRules) -> list[Offer]:
+    # The game's bundles of items, whose texts an offer with the same items may take.
+    offers = list(rules.sets)
+    for section in rules.sections.values():
+        if isinstance(section, OfferSection):
+            offers += [offer for offer in section.offers if offer.members]
+    return offers
 
 
 def _moment(written: str) -> datetime | None:
@@ -384,6 +423,25 @@ def _priced(
         ending=f"{rules.price_ending or 0:02}",
     )
     return price, line
+
+
+def _check(
+    texts: StoreTexts,
+    rules: DealRules,
+    draft: OfferDraft,
+    items: list[OfferItem],
+    imported: Offer | None,
+    refused: dict[str, str],
+) -> None:
+    # The refusals of the offer's items and texts.
+    if not items:
+        refused["items"] = texts.text("web.admin.deals.offer.refused.items")
+    if draft.text == "imported" and imported is None:
+        refused["text"] = texts.text("web.admin.deals.offer.text.none")
+    elif draft.text == "own" and not draft.names.get(BASE_LANGUAGE):
+        refused["name-en"] = texts.text("web.admin.deals.offer.refused.name")
+    elif draft.text not in ("own", "imported"):
+        raise HTTPException(400)
 
 
 def _candidates(

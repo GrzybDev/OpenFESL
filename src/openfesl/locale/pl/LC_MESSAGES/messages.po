@@ -12201,6 +12201,12 @@ msgstr "%(share)s%% mniej niż %(sum)s"
 msgid "web.admin.deals.offers.list_price"
 msgstr "Cena katalogowa"
 
+msgid "web.admin.deals.offers.text.own"
+msgstr "własny tekst"
+
+msgid "web.admin.deals.offers.text.imported"
+msgstr "tekst z gry"
+
 msgid "web.admin.deals.offers.from"
 msgstr "Od %(time)s"
 
@@ -12293,6 +12299,21 @@ msgstr "Tekst"
 
 msgid "web.admin.deals.offer.text.fallback"
 msgstr "Inne języki mogą zostać puste; ich strony pokażą wtedy tekst angielski."
+
+msgid "web.admin.deals.offer.text.imported"
+msgstr "Tekst zestawu z gry"
+
+msgid "web.admin.deals.offer.text.imported.text"
+msgstr "Gdy zestaw z gry ma te same przedmioty"
+
+msgid "web.admin.deals.offer.text.own"
+msgstr "Własny tekst"
+
+msgid "web.admin.deals.offer.text.own.text"
+msgstr "Angielski wymagany"
+
+msgid "web.admin.deals.offer.text.none"
+msgstr "Żaden zestaw z gry nie ma tych przedmiotów, więc oferta wymaga własnego tekstu."
 
 msgid "web.admin.deals.offer.name"
 msgstr "Nazwa, %(language)s"

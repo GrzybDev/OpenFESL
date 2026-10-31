@@ -67,9 +67,10 @@ NAMES = {
 }
 
 
-# A bundle's name and description and the coat's description in English and Polish, marked up
-# as the game's texts are.
+# The boost pair's name, a bundle's name and description and the coat's description in English
+# and Polish, marked up as the game's texts are.
 BUNDLE_TEXTS = {
+    "WEST_Custom_Bundle_XPVPBoostBundle": ("Invented Boost Pair", "Wymyślona para dopalaczy"),
     "WEST_Custom_Bundle_Invented": ("Invented Set", "Wymyślony zestaw"),
     "WEST_Custom_Bundle_Invented_HotDealsDesc": (
         "A coat, a pet, <b>bandages</b>.",

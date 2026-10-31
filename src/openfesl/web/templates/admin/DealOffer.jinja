@@ -124,48 +124,63 @@
               </ChoiceTile>
             {% endfor %}
           </div>
+          <p class="bar offer-legend">{{ _("web.admin.deals.offer.text") }}</p>
+          <div class="choice-tiles offer-tiles">
+            <ChoiceTile name="text" value="imported" :title="_('web.admin.deals.offer.text.imported')" glyph="doc" :checked="draft.text == 'imported'" :disabled="not found.imported">
+            <span class="choice-text">{{ _("web.admin.deals.offer.text.imported.text") }}</span>
+            </ChoiceTile>
+            <ChoiceTile name="text" value="own" :title="_('web.admin.deals.offer.text.own')" glyph="edit" :checked="draft.text != 'imported'">
+            <span class="choice-text">{{ _("web.admin.deals.offer.text.own.text") }}</span>
+            </ChoiceTile>
+          </div>
         </fieldset>
-        <div class="offer-texts">
-          <fieldset {% if not manages %} disabled{% endif %} class="offer-own-texts">
-            <legend class="bar offer-legend">{{ _("web.admin.deals.offer.text") }}</legend>
-            {% for code, language in found.languages %}
-              {% set english = loop.first %}
-              <div class="reward-own-row offer-own-row">
-                <p class="reward-own-label">
-                  <span>{{ language }}</span>
-                  <span class="reward-own-tag">{{ _("web.admin.rewards.own.required" if english else "web.admin.rewards.own.optional") }}</span>
-                </p>
-                <div class="offer-own-fields">
-                  <label for="offer-name-{{ code }}"
-                         class="sr-only">{{ _("web.admin.deals.offer.name", language=language) }}</label>
-                  <input id="offer-name-{{ code }}"
-                         name="name-{{ code }}"
-                         lang="{{ code }}"
-                         type="text"
-                         value="{{ draft.names.get(code, '') }}"
-                         maxlength="64"
-                         autocomplete="off"
-                         placeholder="{{ _('web.admin.deals.offer.name.hint') if english else _('web.admin.rewards.own.fallback') }}"
-                         {% if english %} data-needed="{{ _('web.admin.deals.offer.waits.name') }}"{% endif %}
-                         {% if english and "name-en" in refused %} aria-invalid="true" aria-describedby="offer-name-en-note"{% endif %}
-                         class="field-input reward-own-input{% if english and 'name-en' in refused %} field-invalid{% endif %}">
-                  <label for="offer-about-{{ code }}"
-                         class="sr-only">{{ _("web.admin.deals.offer.about", language=language) }}</label>
-                  <input id="offer-about-{{ code }}"
-                         name="about-{{ code }}"
-                         lang="{{ code }}"
-                         type="text"
-                         value="{{ draft.abouts.get(code, '') }}"
-                         maxlength="300"
-                         autocomplete="off"
-                         placeholder="{{ _('web.admin.deals.offer.about.hint') if english else _('web.admin.rewards.own.fallback') }}"
-                         class="field-input reward-own-input">
+        <div data-live="{{ path }}" class="offer-texts">
+          {{ refusal("text") }}
+          {% if draft.text == "imported" and found.imported %}
+            <p class="offer-imported">{{ found.name }}</p>
+          {% else %}
+            {% if not found.imported %}<p class="bar-text body-text">{{ _("web.admin.deals.offer.text.none") }}</p>{% endif %}
+            <fieldset {% if not manages %} disabled{% endif %} class="offer-own-texts">
+              <legend class="sr-only">{{ _("web.admin.deals.offer.text.own") }}</legend>
+              {% for code, language in found.languages %}
+                {% set english = loop.first %}
+                <div class="reward-own-row offer-own-row">
+                  <p class="reward-own-label">
+                    <span>{{ language }}</span>
+                    <span class="reward-own-tag">{{ _("web.admin.rewards.own.required" if english else "web.admin.rewards.own.optional") }}</span>
+                  </p>
+                  <div class="offer-own-fields">
+                    <label for="offer-name-{{ code }}"
+                           class="sr-only">{{ _("web.admin.deals.offer.name", language=language) }}</label>
+                    <input id="offer-name-{{ code }}"
+                           name="name-{{ code }}"
+                           lang="{{ code }}"
+                           type="text"
+                           value="{{ draft.names.get(code, '') }}"
+                           maxlength="64"
+                           autocomplete="off"
+                           placeholder="{{ _('web.admin.deals.offer.name.hint') if english else _('web.admin.rewards.own.fallback') }}"
+                           {% if english %} data-needed="{{ _('web.admin.deals.offer.waits.name') }}"{% endif %}
+                           {% if english and "name-en" in refused %} aria-invalid="true" aria-describedby="offer-name-en-note"{% endif %}
+                           class="field-input reward-own-input{% if english and 'name-en' in refused %} field-invalid{% endif %}">
+                    <label for="offer-about-{{ code }}"
+                           class="sr-only">{{ _("web.admin.deals.offer.about", language=language) }}</label>
+                    <input id="offer-about-{{ code }}"
+                           name="about-{{ code }}"
+                           lang="{{ code }}"
+                           type="text"
+                           value="{{ draft.abouts.get(code, '') }}"
+                           maxlength="300"
+                           autocomplete="off"
+                           placeholder="{{ _('web.admin.deals.offer.about.hint') if english else _('web.admin.rewards.own.fallback') }}"
+                           class="field-input reward-own-input">
+                  </div>
                 </div>
-              </div>
-              {% if english %}{{ refusal("name-en") }}{% endif %}
-            {% endfor %}
-          </fieldset>
-          <p class="bar-text body-text">{{ _("web.admin.deals.offer.text.fallback") }}</p>
+                {% if english %}{{ refusal("name-en") }}{% endif %}
+              {% endfor %}
+            </fieldset>
+            <p class="bar-text body-text">{{ _("web.admin.deals.offer.text.fallback") }}</p>
+          {% endif %}
         </div>
         {% if manages %}
           <div class="reward-save">

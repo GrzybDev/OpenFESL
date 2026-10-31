@@ -11483,6 +11483,12 @@ msgstr "%(share)s%% off %(sum)s"
 msgid "web.admin.deals.offers.list_price"
 msgstr "List price"
 
+msgid "web.admin.deals.offers.text.own"
+msgstr "own text"
+
+msgid "web.admin.deals.offers.text.imported"
+msgstr "imported text"
+
 msgid "web.admin.deals.offers.from"
 msgstr "From %(time)s"
 
@@ -11575,6 +11581,21 @@ msgstr "Text"
 
 msgid "web.admin.deals.offer.text.fallback"
 msgstr "Other languages may stay empty; their pages then show the English text."
+
+msgid "web.admin.deals.offer.text.imported"
+msgstr "Imported bundle text"
+
+msgid "web.admin.deals.offer.text.imported.text"
+msgstr "When a game bundle has the same items"
+
+msgid "web.admin.deals.offer.text.own"
+msgstr "Own text"
+
+msgid "web.admin.deals.offer.text.own.text"
+msgstr "English required"
+
+msgid "web.admin.deals.offer.text.none"
+msgstr "No game bundle has these items, so the offer needs own text."
 
 msgid "web.admin.deals.offer.name"
 msgstr "Name in %(language)s"

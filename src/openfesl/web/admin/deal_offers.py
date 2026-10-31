@@ -16,7 +16,7 @@ from openfesl.core.store import Bundle, ListedBundle
 from openfesl.core.store_prices import PriceStore
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.deals import DealAdminViews
-from openfesl.web.admin.offer_editor import CLOCK, OfferEditor, editor_of
+from openfesl.web.admin.offer_editor import CLOCK, OfferEditor, editor_of, game_named
 from openfesl.web.admin.store import SECTION, store_url
 from openfesl.web.sessions import check_form, toast
 from openfesl.web.store_texts import StoreTexts
@@ -34,12 +34,14 @@ class OfferRow:
         name: Its name in the page's language.
         state: scheduled, live, ended, or off while its section is switched off.
         share: How much its price takes off its items' list prices in percent; 0 for none.
+        imported: Whether it takes the texts of the game's bundle with its items.
     """
 
     listed: ListedBundle
     name: str
     state: str
     share: int
+    imported: bool
 
 
 class DealOfferViews:
@@ -86,6 +88,7 @@ class DealOfferViews:
                     offer_name(game, catalogue, bundle, language),
                     offer_state(bundle, now, rules),
                     bundle.discount or off,
+                    game_named(rules, bundle),
                 )
             )
         return sorted(rows, key=lambda row: STATES.index(row.state))

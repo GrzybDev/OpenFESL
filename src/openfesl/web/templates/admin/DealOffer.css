@@ -129,6 +129,14 @@
     gap: 2px;
   }
 
+  .offer-imported {
+    margin: 0;
+    background: var(--row-light);
+    padding: 12px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
   .offer-own-texts {
     display: grid;
     gap: 2px;

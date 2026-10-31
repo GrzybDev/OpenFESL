@@ -7,13 +7,15 @@ from accounts import select_value
 from identity import IdentityProvider, form_token, sign_in
 from living import setting
 from playwright.async_api import Browser
-from store import attribute, deals, stock, without_rotation
+from store import ITEMS, attribute, deals, item, stock, without_rotation
 from support import form_fields, visible
 from test_admin_heroes import KEEPER, WARDEN
 
 pytestmark = pytest.mark.anyio
 
 OFFERS = "/admin/store/bfheroes/deals/offers"
+# The invented catalogue with a second boost, which with the first makes the game's boost pair.
+BOOSTS = [*ITEMS, item(9005, "convenience")]
 
 
 async def product(database_url: str, item_id: int, days: int | None = None) -> int:
@@ -125,7 +127,10 @@ async def test_admins_add_and_change_offers_that_hot_deals_sell_at_once(
     assert "No hero may have all these items" in visible(unfit.content)
     assert "Saved Invented Kit; hot deals list it from its start until" in visible(saved.content)
     price = (worth * 70 // 100 + 1) // 100 * 100 - 1
-    assert f"Invented Kit 2 items Section Popular Price {price:,} Funds 30% off {worth:,}" in listed
+    assert (
+        f"Invented Kit 2 items · own text Section Popular Price {price:,} Funds 30% off {worth:,}"
+        in listed
+    )
     # The game lists it at once, named in its language or else English.
     assert [attribute(deal, "Product Name") for deal in polish] == ["Wymyślony komplet"]
     assert [attribute(deal, "Product Name") for deal in german] == ["Invented Kit"]
@@ -143,6 +148,44 @@ async def test_admins_add_and_change_offers_that_hot_deals_sell_at_once(
     assert "Invented Kit bundle" in editor and "Hidden · section off Items" in editor
     assert "Offer added Invented Kit Details Popular · " in log
     assert "Offer saved Invented Kit Details Popular · " in log
+
+
+@pytest.mark.usefixtures("prompt_actions")
+async def test_an_offer_of_a_game_bundles_items_may_take_the_bundles_texts(
+    admin_provider: IdentityProvider,
+    base: str,
+    server_url: str,
+    database_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    await stock(server_url, tmp_path, capsys, BOOSTS)
+    await without_rotation(database_url)
+    boosts = [await product(database_url, number, 30) for number in (9000, 9005)]
+    new = f"{base}{OFFERS}/new"
+    admin_provider.user = KEEPER
+    async with httpx2.AsyncClient() as client:
+        await sign_in(client, base, next=OFFERS)
+        fields = form_fields((await client.get(new)).text)
+        one = await client.post(new, data=fields | {"add": [str(boosts[0])]})
+        pair = await client.post(new, data=form_fields(one.text) | {"add": [str(boosts[1])]})
+        imported = form_fields(pair.text) | {"text": ["imported"], "section": ["popular"]}
+        alone = await client.post(
+            new, data=form_fields(one.text) | {"text": ["imported"], "amount": ["30"]}
+        )
+        # The price as the panel writes it, its digits grouped.
+        await client.post(new, data=imported | {"pricing": ["price"], "amount": ["9,999"]})
+        polish, german = await deals(server_url, "pl"), await deals(server_url, "de")
+        listed = visible((await client.get(f"{base}{OFFERS}")).content)
+
+    assert "No game bundle has these items, so the offer needs own text." in visible(one.content)
+    assert "No game bundle has these items" not in visible(pair.content)
+    assert alone.status_code == 400
+    assert "No game bundle has these items" in visible(alone.content)
+    # The game's texts name it in every language the game has.
+    assert [attribute(deal, "Product Name") for deal in polish] == ["Wymyślona para dopalaczy"]
+    assert [attribute(deal, "Product Name") for deal in german] == ["Invented Boost Pair"]
+    assert "Invented Boost Pair 2 items · imported text Section Popular Price 9,999" in listed
 
 
 @pytest.mark.usefixtures("prompt_actions")
