@@ -17,8 +17,16 @@ from openfesl.core.heroes import Hero, Heroes
 from openfesl.core.inventory import Ownership
 from openfesl.core.overrides import overridden
 from openfesl.core.policies import SettingStore
+from openfesl.core.referrals import Reach, Recruit, ReferralStore
 from openfesl.core.reward_claims import Claim, Claimed, Given, Grant, RewardStore
-from openfesl.core.reward_rules import Gift, Goal, Milestone, Part, RewardRules
+from openfesl.core.reward_rules import (
+    Gift,
+    Goal,
+    Milestone,
+    Part,
+    ReferralRules,
+    RewardRules,
+)
 from openfesl.core.reward_runs import Run, run_of, running_at
 from openfesl.core.stats import (
     PERSONA,
@@ -33,6 +41,9 @@ from openfesl.protocol.rank import Period as StatPeriod
 
 # The key of the reward that a first treasure chest brings.
 FIRST_CHEST = "first-chest"
+# The start of the keys of Recruit a Friend's rewards: referral:<step> for the recruit's and
+# referral:<recruit>:<step> for the recruiter's.
+REFERRAL = "referral"
 # How often, in seconds, a day on which claims are paused is looked for, also with nobody on the
 # site; a pause is recorded within this long of its day's start.
 PAUSE_CHECK_INTERVAL = 60.0
@@ -103,6 +114,7 @@ class Reward:
         event: The key of the event that brings it; none for a reward that no event brings.
         kept: Whether it is the daily gift of an earlier day, on which claims were paused, so
             that it waits until its event ends.
+        referral: The step of Recruit a Friend that it is for; none for any other reward.
     """
 
     key: str
@@ -120,6 +132,22 @@ class Reward:
     claim: Claim | None = None
     event: str | None = None
     kept: bool = False
+    referral: Referred | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class Referred:
+    """The step of Recruit a Friend that a reward is for.
+
+    Attributes:
+        step: The step's name.
+        recruit: The recruit, with the steps its heroes reached.
+        recruiter: Whether the account gets it as the recruiter rather than as the recruit.
+    """
+
+    step: str
+    recruit: Recruit
+    recruiter: bool
 
 
 class Rewards:
@@ -135,6 +163,7 @@ class Rewards:
         catalogues: Catalogues,
         products: ProductStore,
         drops: Drops,
+        referrals: ReferralStore,
         clock: Callable[[], datetime] | None = None,
     ) -> None:
         """Give rewards from what stores keep.
@@ -148,9 +177,11 @@ class Rewards:
             catalogues: The games' imported catalogues, which tell what fits a hero.
             products: Where the store's boxes are kept, whose drops rewards give.
             drops: Picks what a box gives a hero.
+            referrals: Where the recruits of personal links are kept, whose steps rewards give.
             clock: Tells the time; the system's own when none.
         """
         self._store = store
+        self._referrals = referrals
         self._settings = settings
         self._heroes = heroes
         self._stats = stats
@@ -170,6 +201,25 @@ class Rewards:
             return None
         prefix = f"{game.id}.rewards."
         return overridden(game.rewards, prefix, await self._settings.settings(prefix))
+
+    async def leveled(self, game: Game, account_ids: Iterable[int]) -> None:
+        """Record the steps of Recruit a Friend that recruits' heroes reach as servers level them.
+
+        A step reached within its days is kept so, also when no page of either account is seen
+        before they end.
+
+        Args:
+            game: The game.
+            account_ids: The accounts whose heroes' levels were written.
+        """
+        rules = await self.rules(game)
+        referral = rules.referral if rules else None
+        if referral is None or not referral.enabled:
+            return
+        now = self._clock()
+        for account_id in account_ids:
+            if recruit := await self._referrals.recruited(game, account_id):
+                await self._reach(game, referral, recruit, now)
 
     async def available(self, game: Game, account_id: int) -> list[Reward]:
         """Return the rewards an account sees now, claimed ones and those it lacks a hero for.
@@ -193,6 +243,7 @@ class Rewards:
             *self._starters(game, rules, heroes, now),
             *await self._milestones(game, rules, heroes),
             *await self._first_chest(game, rules, heroes),
+            *await self._referred(game, rules, account_id, heroes, now),
         ]
         claimed = await self._store.claimed(game.id, account_id, {r.key for r in found})
         claims = {(claim.key, claim.faction): claim for claim in claimed}
@@ -308,6 +359,11 @@ class Rewards:
             currencies = (await account_rules(game, self._settings)).currencies
             allowance = currencies[rules.currency].allowance
             funds = Wallet(game.id, rules.currency, account_id, None, allowance), gift.funds
+        points = None
+        if gift.points and rules.points:
+            currencies = (await account_rules(game, self._settings)).currencies
+            held = currencies[rules.points].allowance
+            points = Wallet(game.id, rules.points, account_id, None, held), gift.points
         keys = (key_tag(game.chests), gift.keys) if gift.keys and game.chests else None
         grant = Grant(
             game.id,
@@ -320,6 +376,7 @@ class Rewards:
             funds,
             keys,
             self._clock(),
+            points,
         )
         return Given(await self._store.grant(grant), rolled)
 
@@ -454,6 +511,78 @@ class Rewards:
         state = _state(any(arrived))
         return [Reward(FIRST_CHEST, None, reward.name, reward.description, reward.gift, state)]
 
+    async def _referred(
+        self, game: Game, rules: RewardRules, account_id: int, heroes: list[Hero], now: datetime
+    ) -> list[Reward]:
+        # The steps of the account's public recruits and its own as a recruit. A goal is recorded
+        # the first time it is seen reached within its days while the programme runs; while it
+        # is off only what was reached stays.
+        referral = rules.referral
+        if referral is None:
+            return []
+        recruits = await self._referrals.recruits(game, account_id)
+        sides = [(recruit, True) for recruit in recruits if recruit.account.public]
+        if mine := await self._referrals.recruited(game, account_id):
+            sides.append((mine, False))
+        contents = self._catalogues.contents(game)
+        found = []
+        for recruit, recruiter in sides:
+            recruit = await self._reach(game, referral, recruit, now)
+            leader = recruit.leader
+            level = leader.level if leader else 0
+            for name, step in referral.steps.items():
+                reach, ends = recruit.reached.get(name), step.ends(recruit.joined)
+                running = ends is None or now < ends
+                if not (reach or referral.enabled):
+                    continue
+                side = step.recruiter if recruiter else step.recruit
+                # The recruit's items go to a hero of the step's level or higher.
+                least = 1 if recruiter else step.level
+                fitting = tuple(
+                    hero.persona.id
+                    for hero in heroes
+                    if side.gift.for_hero
+                    and hero.level >= least
+                    and _usable(contents, side.gift, hero)
+                )
+                state = _state(bool(reach) and (not side.gift.for_hero or bool(fitting)))
+                key = (
+                    f"{REFERRAL}:{recruit.account.id}:{name}" if recruiter else f"{REFERRAL}:{name}"
+                )
+                found.append(
+                    Reward(
+                        key,
+                        None,
+                        side.name,
+                        None,
+                        side.gift,
+                        state if reach or running else RewardState.EXPIRED,
+                        fitting,
+                        ends,
+                        progress=level,
+                        goal=step.level,
+                        referral=Referred(name, recruit, recruiter),
+                    )
+                )
+        return found
+
+    async def _reach(
+        self, game: Game, referral: ReferralRules, recruit: Recruit, now: datetime
+    ) -> Recruit:
+        # Records each step whose goal the recruit's best hero meets within the step's days, the
+        # first time it is seen so, while the programme runs.
+        leader = recruit.leader
+        if leader is None or not referral.enabled:
+            return recruit
+        for name, step in referral.steps.items():
+            ends = step.ends(recruit.joined)
+            if leader.level < step.level or name in recruit.reached or (ends and now >= ends):
+                continue
+            reach = Reach(now, leader.name, leader.level)
+            await self._referrals.reach(game.id, recruit.account.id, name, reach)
+            recruit = replace(recruit, reached={**recruit.reached, name: reach})
+        return recruit
+
     def _fits(self, game: Game, faction: str | None, gift: Gift, hero: Hero) -> bool:
         # A hero of the faction, whom the gift's items fit or who gets a drop of its box.
         contents = self._catalogues.contents(game)
@@ -495,6 +624,11 @@ def claimed(rules: RewardRules, claim: Claim) -> Claimed:
         name = rules.starter.name
     elif kind == FIRST_CHEST and rules.first_chest:
         name = rules.first_chest.name
+    elif kind == REFERRAL and rules.referral:
+        # The recruiter's keys name the recruit before the step.
+        *recruit, step = rest.split(":")
+        if found := rules.referral.steps.get(step):
+            name = (found.recruiter if recruit else found.recruit).name
     elif (event := rules.events.get(kind)) and event.own_text:
         name = event.title
     elif event:

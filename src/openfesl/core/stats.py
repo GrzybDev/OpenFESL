@@ -22,9 +22,11 @@ from openfesl.protocol.rank import (
     UpdateType,
 )
 
-# For annotations only, since the check of players' own writes reads stats through this module.
+# For annotations only, since the check of players' own writes and the rewards read stats through
+# this module.
 if TYPE_CHECKING:
     from openfesl.core.hero_items import OwnWrites
+    from openfesl.core.rewards import Rewards
 
 PERSONA = 1
 # The SDK's owner type for values of the whole game, which dedicated servers only add to.
@@ -194,7 +196,12 @@ class StatsService:
     """The rank transactions that read and update stats."""
 
     def __init__(
-        self, store: StatStore, personas: PersonaStore, trust: ServerTrust, own: OwnWrites
+        self,
+        store: StatStore,
+        personas: PersonaStore,
+        trust: ServerTrust,
+        own: OwnWrites,
+        rewards: Rewards,
     ) -> None:
         """Serve stats from a store.
 
@@ -203,11 +210,13 @@ class StatsService:
             personas: Where the personas that own stats are found.
             trust: Which dedicated servers host games that players see, and who plays in them.
             own: What players' own games may write of their heroes' and accounts' stats.
+            rewards: Record the steps of Recruit a Friend that the levels written reach.
         """
         self._store = store
         self._personas = personas
         self._trust = trust
         self._own = own
+        self._rewards = rewards
 
     def routes(self) -> dict[tuple[str, str], Route[Any]]:
         """Return the handlers of the service's transactions."""
@@ -290,7 +299,8 @@ class StatsService:
         while they host a game players see, and a client could write any number. A server that
         logs in as a player writes only for the personas it keeps, and any server writes the
         stats of an account only for an account whose persona it keeps. A player's own game
-        writes only what the game keeps itself of its hero and account.
+        writes only what the game keeps itself of its hero and account. The levels written count
+        for the steps of Recruit a Friend at once.
 
         Args:
             connection: The FESL connection the request came on.
@@ -324,7 +334,16 @@ class StatsService:
         ]
         if len(changes) > MAXIMUM_ENTRIES:
             raise TransactionError(PARAMETERS_ERROR)
-        await self._store.apply(partition_of(game), changes, _levels(game))
+        levels = _levels(game)
+        await self._store.apply(partition_of(game), changes, levels)
+        if levels:
+            leveled = {
+                change.owner.id
+                for change in changes
+                if change.owner.type == PERSONA and change.key == levels.key
+            }
+            personas = [await self._personas.find_by_id(persona_id) for persona_id in leveled]
+            await self._rewards.leveled(game, {p.account_id for p in personas if p})
         return Message()
 
     async def _writable(

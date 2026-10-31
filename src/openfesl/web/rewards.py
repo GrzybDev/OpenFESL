@@ -13,6 +13,7 @@ from openfesl.core.store import ProductStore
 from openfesl.core.texts import localize
 from openfesl.web.account.session import signed_in
 from openfesl.web.pages import Pages, listed
+from openfesl.web.referral_texts import NUMBERS
 from openfesl.web.reward_cards import RewardCards, reward_cards
 from openfesl.web.sessions import form_matches, form_token, inside, toast
 from openfesl.web.site import site_bar
@@ -175,14 +176,17 @@ class RewardsPages:
                 parts = [words.texts.text("web.rewards.given", items=items, hero=name), *parts]
                 if reveal := await claims.reveal(hero, reward.gift, given):
                     request.session[REVEAL] = reveal
-            toast(
-                request,
-                "web.rewards.done.listed" if given.items else "web.rewards.done",
-                reward=claiming.title,
-                given="; ".join(parts),
-                game=game.name,
-                funds=str(claiming.funds),
-            )
+            key = "web.rewards.done.listed" if given.items else "web.rewards.done"
+            values = {"reward": claiming.title, "given": "; ".join(parts), "game": game.name}
+            if referral := reward.referral:
+                key = "web.rewards.referral.claimed" + (".items" if given.items else "")
+                values |= {
+                    "hero": name,
+                    "name": referral.recruit.account.display_name or "",
+                    "n": str(NUMBERS[referral.step]),
+                    "given": ", ".join(words.texts.gift_words(words.catalogue, reward.gift)),
+                }
+            toast(request, key, False, funds=str(claiming.funds), **values)
             return RedirectResponse(page, 303)
 
         return claim

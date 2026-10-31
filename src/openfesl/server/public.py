@@ -39,6 +39,7 @@ from openfesl.web.play_now import PlayNowPages
 from openfesl.web.players import player_routes
 from openfesl.web.profiles import ProfilePages
 from openfesl.web.redeem import RedeemPages
+from openfesl.web.referral import ReferralLinks
 from openfesl.web.rewards import RewardsPages
 from openfesl.web.search import SearchPages
 from openfesl.web.servers import server_routes
@@ -251,6 +252,8 @@ def include_public_routes(
         turnstile,
         services.terms,
     )
+    links = ReferralLinks(pages, games, services.rewards, services.heroes, stores.accounts.account)
+    app.include_router(links.routes())
     register = RegisterPages(
         pages,
         games,
@@ -259,6 +262,7 @@ def include_public_routes(
         lambda: app.state.registration,
         settings.sends_mail,
         turnstile,
+        links,
     )
     app.include_router(sign_in.routes())
     app.include_router(sign_in_services.routes())

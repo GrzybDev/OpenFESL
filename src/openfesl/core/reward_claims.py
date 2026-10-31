@@ -21,6 +21,7 @@ class Claim:
         funds: The Funds the account got.
         keys: The treasure chest keys the account got.
         at: When it was claimed.
+        points: The points the account got.
     """
 
     key: str
@@ -30,6 +31,7 @@ class Claim:
     funds: int
     keys: int
     at: datetime
+    points: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -95,6 +97,7 @@ class Grant:
         funds: The account's wallet the Funds go to, and how many.
         keys: The tag of the account's keys, and how many it gets.
         at: When it is claimed.
+        points: The account's wallet the points go to, and how many.
     """
 
     game: str
@@ -107,6 +110,7 @@ class Grant:
     funds: tuple[Wallet, int] | None
     keys: tuple[str, int] | None
     at: datetime
+    points: tuple[Wallet, int] | None = None
 
 
 class RewardStore(Protocol):

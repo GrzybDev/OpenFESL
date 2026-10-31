@@ -1,8 +1,9 @@
-{#def next: str, values: dict, errors: dict, notice: str, service, identity, countries: list, order: list, reported: bool, check: str, confirm: bool, mail: bool, password_games: list #}
+{#def next: str, values: dict, errors: dict, notice: str, service, identity, countries: list, order: list, reported: bool, check: str, confirm: bool, mail: bool, password_games: list, referrer = None #}
 {# Registration with an e-mail address, or the step that creates the account for a service's new
    identity: the service's answer on top, then the address, the display name, the country and age,
    the game password (optional after a service) and the terms; beside it what happens next. The
-   game password never comes back with the form. #}
+   game password never comes back with the form. A registration that came through a personal link
+   of Recruit a Friend says whose recruit the new account becomes. #}
 {% set games = listed(password_games) %}
 {% if service %}
   {% set title = _("web.account.register.service") %}
@@ -82,6 +83,11 @@
       {% endif %}
       <div class="account-page-form">
         <Bar large>{{ _("web.account.register.names" if service else "web.account.register.signs_in") }}</Bar>
+        {% if referrer %}
+          <ul class="info-rows">
+            <InfoRow glyph="link" :label="_('web.referral.title')">{{ _("web.referral.register", name=referrer.account.display_name, game=referrer.game.name) }}</InfoRow>
+          </ul>
+        {% endif %}
         {% if service and identity.address %}
           {% set address_note = _("web.account.register.email.verified", service=service.name) %}
         {% else %}

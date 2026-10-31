@@ -11,6 +11,7 @@
 [rewards]
 zone = "UTC"
 currency = "_PF"
+points = "_DV"
 # An item a hero owns for good already turns into a pack of tonics worth about a box's price.
 fallback = "2153 x150"
 
@@ -297,3 +298,20 @@ gift = { funds = 1000 }
 name = "REWARDS_TREASURE_CHEST_REWARD_NAME"
 description = "REWARDS_TREASURE_CHEST_REWARD_DESCRIPTION"
 gift = { keys = 1 }
+
+# Recruit a Friend, from 2010 to 2013 (tid 128893, the pages of June 2012): an account made through
+# a player's personal link becomes the player's recruit. A hero of the recruit at level 7 brought
+# the recruiter 1,350 Valor Points and the recruit an XP Boost for a day, taken here as the Basic
+# XP Boost for a hero of that level. The second step's 15,000 Funds bought within 60 days became
+# a hero at level 15 within 60 days of the sign-up, as this server sells no Funds, with the same
+# 3,500 Funds and 1,000 Valor Points. The names are the game's offers, which state these gifts.
+[rewards.referral.first]
+level = 7
+recruiter = { gift = { points = 1350 }, name = "WEST_Custom_LevelOfferAffiliate" }
+recruit = { gift = { items = ["9000 1d"] }, name = "WEST_Custom_LevelOfferNew" }
+
+[rewards.referral.second]
+level = 15
+days = 60
+recruiter = { gift = { funds = 3500 }, name = "WEST_Custom_FundingOfferAffiliate" }
+recruit = { gift = { points = 1000 }, name = "WEST_Custom_FundingOfferNew" }

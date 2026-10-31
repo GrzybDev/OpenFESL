@@ -153,6 +153,7 @@ class GameServices:
             self.catalogues,
             stores.products,
             drops,
+            stores.referrals,
         )
         self.gift_codes = GiftCodes(
             stores.gift_codes, self.rewards, self.heroes, self.catalogues, stores.settings
@@ -253,7 +254,9 @@ class GameServices:
         routes.update(KeyService(stores.keys).routes())
         routes.update(self.game_http.routes())
         own = OwnWrites(stores.stats, stores.entitlements, self.catalogues)
-        routes.update(StatsService(stores.stats, stores.personas, trust, own).routes())
+        routes.update(
+            StatsService(stores.stats, stores.personas, trust, own, self.rewards).routes()
+        )
         routes.update(LeaderboardService(stores.stats).routes())
         routes.update(RecordService(stores.records).routes())
         routes.update(

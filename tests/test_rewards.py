@@ -29,6 +29,7 @@ from openfesl.storage.entitlements import SqlEntitlementStore, add_account_item
 from openfesl.storage.heroes import SqlHeroStore
 from openfesl.storage.personas import SqlPersonaStore
 from openfesl.storage.purchases import SqlPurchaseStore
+from openfesl.storage.referrals import SqlReferralStore
 from openfesl.storage.rewards import SqlRewardStore
 from openfesl.storage.settings import SqlSettingStore
 from openfesl.storage.stats import SqlStatStore
@@ -85,6 +86,7 @@ class Site:
             self.catalogues,
             SqlProductStore(sessions),
             drops,
+            SqlReferralStore(sessions),
             lambda: self.now,
         )
 

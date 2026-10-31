@@ -8860,6 +8860,9 @@ msgstr "Treasure chest key"
 msgid "web.rewards.section.key.lead"
 msgstr "A first key once the account's first treasure chest arrives."
 
+msgid "web.rewards.section.referral"
+msgstr "Recruit a Friend"
+
 msgid "web.rewards.band.account"
 msgstr "Account"
 
@@ -9115,6 +9118,81 @@ msgstr "Claims are paused; this reward waits."
 msgid "web.rewards.when.kept"
 msgstr "Day %(day)s of %(days)s, kept from a paused day · until %(date)s"
 
+msgid "web.rewards.referral.lead.recruiter"
+msgstr "Rewards for this account's recruits. Each step counts once for every recruit."
+
+msgid "web.rewards.referral.lead.recruit"
+msgstr "This account was recruited by %(name)s. Its heroes' steps bring rewards to both accounts."
+
+msgid "web.rewards.referral.lead.recruited"
+msgstr "This account was recruited through Recruit a Friend. Its heroes' steps bring rewards to both accounts."
+
+msgid "web.rewards.referral.band.recruit"
+msgstr "Recruit %(name)s · step %(n)s"
+
+msgid "web.rewards.referral.band.recruited_by"
+msgstr "Recruited by %(name)s · step %(n)s"
+
+msgid "web.rewards.referral.band.recruited"
+msgstr "Recruited · step %(n)s"
+
+msgid "web.rewards.referral.reached"
+msgstr "%(name)s's hero %(hero)s reached level %(level)s on %(date)s."
+
+msgid "web.rewards.referral.reached.within"
+msgstr "%(name)s's hero %(hero)s reached level %(level)s on %(date)s, within %(days)s days."
+
+msgid "web.rewards.referral.reached.own"
+msgstr "%(hero)s reached level %(level)s on %(date)s."
+
+msgid "web.rewards.referral.reached.own.within"
+msgstr "%(hero)s reached level %(level)s on %(date)s, within %(days)s days of sign-up."
+
+msgid "web.rewards.referral.hero_rule"
+msgstr "It goes to a hero of level %(level)s or higher."
+
+msgid "web.rewards.referral.hero_low"
+msgstr "Level %(level)s: it goes to a hero of level %(need)s or higher"
+
+msgid "web.rewards.referral.when"
+msgstr "When a hero of %(name)s reaches level %(level)s."
+
+msgid "web.rewards.referral.when.by"
+msgstr "When a hero of %(name)s reaches level %(level)s by %(date)s."
+
+msgid "web.rewards.referral.when.own"
+msgstr "When a hero of this account reaches level %(level)s."
+
+msgid "web.rewards.referral.when.own.by"
+msgstr "When a hero of this account reaches level %(level)s by %(date)s, %(days)s days after sign-up."
+
+msgid "web.rewards.referral.over"
+msgstr "The %(days)s days after %(name)s's sign-up ended on %(date)s."
+
+msgid "web.rewards.referral.over.own"
+msgstr "The %(days)s days after this account's sign-up ended on %(date)s."
+
+msgid "web.rewards.referral.ready"
+msgstr "Ready to claim · no deadline"
+
+msgid "web.rewards.referral.locked"
+msgstr "Locked until then · no deadline"
+
+msgid "web.rewards.referral.locked.until"
+msgstr "Locked until then · ends %(date)s"
+
+msgid "web.rewards.referral.ended"
+msgstr "Ended on %(date)s; this step can no longer be met."
+
+msgid "web.rewards.referral.ended.level"
+msgstr "Ended on %(date)s at level %(level)s; this step can no longer be met."
+
+msgid "web.rewards.referral.claimed"
+msgstr "%(given)s added to the account for %(name)s's step %(n)s."
+
+msgid "web.rewards.referral.claimed.items"
+msgstr "Claimed for %(hero)s: %(reward)s. %(game)s shows it at %(hero)s's next login."
+
 msgid "web.funds.rewards"
 msgstr "Web rewards with %(currency)s"
 
@@ -9327,6 +9405,54 @@ msgstr "Items go to one hero that can use all of them; Funds and treasure chest 
 
 msgid "web.redeem.how.login"
 msgstr "%(game)s shows new items at the hero's next login."
+
+msgid "web.referral.title"
+msgstr "Recruit a Friend"
+
+msgid "web.referral.landing.title"
+msgstr "Join the fight"
+
+msgid "web.referral.landing.with"
+msgstr "Sign up to play with %(name)s"
+
+msgid "web.referral.landing.hero"
+msgstr "Default hero %(hero)s · %(faction)s %(kind)s"
+
+msgid "web.referral.landing.step.account"
+msgstr "Create an account with an e-mail address or a sign-in service."
+
+msgid "web.referral.landing.step.hero"
+msgstr "Create a hero: faction, class, look and name."
+
+msgid "web.referral.landing.step.play"
+msgstr "Install the game and OpenFESLHook, then play."
+
+msgid "web.referral.landing.sign_up"
+msgstr "Sign up"
+
+msgid "web.referral.landing.have_account"
+msgstr "I already have an account, continue."
+
+msgid "web.referral.landing.signed_in"
+msgstr "Signed in as %(name)s. Recruit a Friend counts only accounts created through a personal link, so this visit changes nothing."
+
+msgid "web.referral.landing.signed_in.unnamed"
+msgstr "Recruit a Friend counts only accounts created through a personal link, so a visit while signed in changes nothing."
+
+msgid "web.referral.landing.own"
+msgstr "This is %(name)s's own personal link. Friends who open it and create an account become recruits."
+
+msgid "web.referral.needs_name"
+msgstr "Personal links work for accounts with a display name, which friends see when they open the link."
+
+msgid "web.referral.needs_name.action"
+msgstr "Choose a display name"
+
+msgid "web.referral.landing.plain"
+msgstr "%(game)s on OpenFESL is free to play with an original copy of the game."
+
+msgid "web.referral.register"
+msgstr "This registration came through %(name)s's personal link: the new account becomes %(name)s's recruit in %(game)s."
 
 msgid "games.bfheroes.funds.rewards.lead"
 msgstr "The administrators of this service set the rewards. The first hero and 100 matches count once for the account; each level counts once for every hero that reaches it. Claim adds the %(currency)s to the account at once."
@@ -13573,6 +13699,9 @@ msgstr "Starter packs"
 
 msgid "web.admin.rewards.claims.kind.milestone"
 msgstr "Milestones"
+
+msgid "web.admin.rewards.claims.kind.referral"
+msgstr "Recruit a Friend"
 
 msgid "web.admin.rewards.claims.kind.first-chest"
 msgstr "First chest key"

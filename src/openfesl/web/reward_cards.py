@@ -8,16 +8,18 @@ from openfesl.core.entitlements import EntitlementStore
 from openfesl.core.games import Game
 from openfesl.core.reward_rules import Gift, Goal, RewardRules
 from openfesl.core.reward_runs import Run
-from openfesl.core.rewards import FIRST_CHEST, Reward, RewardState
+from openfesl.core.rewards import FIRST_CHEST, REFERRAL, Reward, RewardState
 from openfesl.core.store import ProductStore
+from openfesl.web import referral_texts
 from openfesl.web.reward_claims import Claiming, RewardClaims
 from openfesl.web.reward_texts import RewardTexts, reward_texts
 
 # The days before a starter pack's last one from which its card says in red that time runs out.
 SOON = 3
 # The page's sections in order: the daily gifts of the events that run, their other gifts, their
-# missions, the new heroes' starter packs, the milestones and the first chest's key.
-SECTIONS = ("today", "events", "missions", "heroes", "milestones", "key")
+# missions, the new heroes' starter packs, the milestones, Recruit a Friend and the first chest's
+# key.
+SECTIONS = ("today", "events", "missions", "heroes", "milestones", "referral", "key")
 
 
 @dataclass(frozen=True, slots=True)
@@ -59,6 +61,7 @@ class Card:
         tone: The state's kind, which picks its glyph and colour.
         claim: How it is claimed now; none when it may not be, or its rows are claimed.
         needs: What gets it the hero it lacks: create a hero in a free slot, or buy a slot.
+        mark: The glyph of its band where it is for no faction.
         name: A milestone's name, which states its goal, and that each hero counts for it
             where each does.
         each: Whether each hero counts for a milestone on its own.
@@ -81,6 +84,7 @@ class Card:
     tone: str
     claim: Claiming | None = None
     needs: str | None = None
+    mark: str = "user"
     name: str = ""
     each: bool = False
     amount: str = ""
@@ -131,6 +135,9 @@ class RewardCards:
             kind = reward.key.partition(":")[0]
             if kind == "milestone":
                 continue
+            if kind == REFERRAL:
+                found["referral"].append(await self._referral(reward))
+                continue
             card = await self._card(reward, events)
             run = events.get(reward.event or "")
             if run:
@@ -139,7 +146,9 @@ class RewardCards:
             else:
                 found["heroes" if kind == "starter" else "key"].append(card)
         found["milestones"] = await self.milestones(available) if available else []
-        leads = {key: texts.text(f"web.rewards.section.{key}.lead") for key in SECTIONS[2:]}
+        leads = {key: texts.text(f"web.rewards.section.{key}.lead") for key in SECTIONS[2:5]}
+        leads["key"] = texts.text("web.rewards.section.key.lead")
+        leads["referral"] = referral_texts.lead(self.words, available)
         today_lead, events_lead = [], []
         for run in running:
             event = self.words.event(run)
@@ -210,6 +219,42 @@ class RewardCards:
             tone=tone,
             claim=claim,
             needs=needs,
+        )
+
+    async def _referral(self, reward: Reward) -> Card:
+        # A step of Recruit a Friend for the recruiter or the recruit: what reaching it means,
+        # how far the recruit's best hero got while it waits, and whether it is ready, claimed
+        # or ended.
+        words, texts, referral = self.words, self.words.texts, reward.referral
+        assert referral is not None
+        gift, leader = reward.gift, referral.recruit.leader
+        state, tone = referral_texts.standing(words, reward)
+        lines = []
+        if referral.step not in referral.recruit.reached and reward.goal and not reward.claim:
+            goal = reward.goal
+            if leader:
+                shown = texts.text("web.rewards.progress.level", count=leader.level, goal=goal)
+                lines.append(Line(leader.name, shown, share=min(leader.level / goal, 1.0)))
+            else:
+                lines.append(Line(texts.text("web.bar.no_hero"), "", share=0.0))
+        claim = (
+            await self.claims.claiming(reward) if reward.state is RewardState.CLAIMABLE else None
+        )
+        return Card(
+            id=f"reward-{reward.key}".replace(":", "-"),
+            band=referral_texts.band(words, reward),
+            faction=None,
+            glyph="valor" if gift.points else _glyph(gift),
+            icon=None,
+            title=words.title(reward),
+            text=referral_texts.story(words, reward),
+            gifts=[],
+            when="",
+            lines=lines,
+            state=state,
+            tone=tone,
+            claim=claim,
+            mark="user-plus",
         )
 
     def _progress(self, name: str, reward: Reward, text: str) -> Line:

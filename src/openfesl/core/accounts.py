@@ -112,6 +112,12 @@ class Account:
             return None
         return STATE_ERRORS.get(self.state)
 
+    @property
+    def public(self) -> bool:
+        """Whether others see the account: in use, as logins also take one whose state ended."""
+        # And named, as the player search finds it.
+        return self.login_error() is None and bool(self.display_name)
+
 
 @dataclass(frozen=True, slots=True)
 class AccountRecord:
@@ -195,6 +201,7 @@ class AccountStore(Protocol):
         made_in: str | None = None,
         display_name: str | None = None,
         identity: Identity | None = None,
+        recruited_by: tuple[str, int] | None = None,
     ) -> Account | None:
         """Create an account, or return None when its name, display name or identity is taken.
 
@@ -209,6 +216,8 @@ class AccountStore(Protocol):
             display_name: Its public display name, which the site's registration gives it.
             identity: An identity at a sign-in service that becomes a way in with it; nothing is
                 made while the identity opens another account.
+            recruited_by: The game and the account whose personal link brought the registration,
+                which makes the new account its recruit while that account still exists.
         """
 
     async def display_name_taken(self, name: str) -> bool:

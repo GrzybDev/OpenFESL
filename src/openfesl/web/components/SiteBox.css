@@ -50,6 +50,11 @@
     --box-edge: #83a4c0;
   }
 
+  .site-box-blue {
+    --box: #325f89;
+    --box-edge: #4b8fc4;
+  }
+
   .site-box-pale {
     --box: #f1e9de;
     --box-edge: #f8f4ef;

@@ -24,7 +24,7 @@
     {% if claiming.hint %}<p class="claim-hint">{{ claiming.hint }}</p>{% endif %}
     <div class="claim-tiles">
       {% for choice in claiming.choices %}
-        <StoreHero :hero="choice.hero" :checked="choice.checked" :status="choice.status" />
+        <StoreHero :hero="choice.hero" :checked="choice.checked" :status="choice.status" :off="choice.shut" :shut="choice.shut" />
       {% endfor %}
     </div>
   </fieldset>

@@ -139,7 +139,7 @@ class StoreTexts:
         return self.text("web.store.forever" if inline else "web.store.price.permanent")
 
     def gift_words(self, catalogue: Catalogue, gift: Gift) -> list[str]:
-        """Return what a gift gives in words, such as M95 · 7 days or 500 Funds.
+        """Return what a gift gives in words, such as M95 · 7 days or 1,350 Valor Points.
 
         Args:
             catalogue: The game's imported catalogue, which names the items.
@@ -155,8 +155,8 @@ class StoreTexts:
             )
             for item_id, ownership in gift.items
         ]
-        if gift.funds:
-            words.append(self.priced(gift.funds, rules.currency))
+        amounts = [(gift.points, rules.points), (gift.funds, rules.currency)]
+        words += [self.priced(value, code) for value, code in amounts if value and code]
         if gift.keys:
             words.append(self.count("web.rewards.gift.keys", gift.keys))
         return words

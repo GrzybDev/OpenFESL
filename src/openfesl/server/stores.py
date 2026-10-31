@@ -25,6 +25,7 @@ from openfesl.storage.mugshots import SqlMugshotStore
 from openfesl.storage.personas import SqlPersonaStore
 from openfesl.storage.purchases import SqlPurchaseStore
 from openfesl.storage.records import SqlRecordStore
+from openfesl.storage.referrals import SqlReferralStore
 from openfesl.storage.relationships import SqlRelationshipStore
 from openfesl.storage.rewards import SqlRewardStore
 from openfesl.storage.servers import SqlServerStore
@@ -64,6 +65,7 @@ class Stores:
         self.mugshots = SqlMugshotStore(sessions)
         self.personas = SqlPersonaStore(sessions)
         self.records = SqlRecordStore(sessions)
+        self.referrals = SqlReferralStore(sessions)
         self.relationships = SqlRelationshipStore(sessions)
         self.rewards = SqlRewardStore(sessions)
         self.servers = SqlServerStore(sessions)

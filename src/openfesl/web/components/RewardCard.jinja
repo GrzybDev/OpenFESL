@@ -21,7 +21,7 @@
   <article aria-labelledby="{{ card.id }}-title"
            class="pale-card reward-{{ card.tone }}">
     <p class="pale-band{% if not card.faction %} reward-band-account{% endif %}">
-      <Icon :name="rules.factions[card.faction].glyph if card.faction else 'user'" :size="16" stroke="currentColor" />
+      <Icon :name="rules.factions[card.faction].glyph if card.faction else card.mark" :size="16" stroke="currentColor" />
       {{ card.band }}
     </p>
     <div class="reward-body">

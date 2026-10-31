@@ -8,13 +8,14 @@ from openfesl.core.store_rules import DropEntry
 
 
 class Gift(BaseModel):
-    """What a reward gives: items to one hero, or a roll of a box, and Funds and keys.
+    """What a reward gives: items to one hero, or a roll of a box, and Funds, points and keys.
 
     Attributes:
         items: The items a hero gets, each with its ownership, written such as 1127 7d.
         box: The key of the store's box of which a hero gets one drop, where the items do not
             fit the hero or there are none.
         funds: The Funds the account gets.
+        points: The points the account gets in the rewards' currency of points.
         keys: The treasure chest keys the account gets.
     """
 
@@ -23,6 +24,7 @@ class Gift(BaseModel):
     items: tuple[DropEntry, ...] = ()
     box: str | None = None
     funds: NonNegativeInt = 0
+    points: NonNegativeInt = 0
     keys: NonNegativeInt = 0
 
     @property
@@ -34,8 +36,22 @@ class Gift(BaseModel):
     def written(self) -> dict[str, Any]:
         """The gift as game data and the settings write it, without its empty parts."""
         items = [f"{item_id} {ownership.written}" for item_id, ownership in self.items]
-        found = {"items": items, "box": self.box, "funds": self.funds, "keys": self.keys}
+        found = {
+            "items": items,
+            "box": self.box,
+            "funds": self.funds,
+            "points": self.points,
+            "keys": self.keys,
+        }
         return {name: value for name, value in found.items() if value}
+
+    @property
+    def amount(self) -> int:
+        """The one amount a gift names: its points, its Funds, or the days or uses of its item."""
+        if self.points or self.funds:
+            return self.points or self.funds
+        ownership = self.items[0][1] if self.items else None
+        return (ownership.days or ownership.uses or 0) if ownership else 0
 
 
 class Goal(BaseModel):
@@ -237,6 +253,92 @@ class FirstChest(BaseModel):
     gift: Gift
 
 
+class ReferralSide(BaseModel):
+    """What one account of a referral gets at a step, and what players see it called.
+
+    Attributes:
+        gift: What it gets.
+        name: The id of its name in the game's texts or the server's own, which states the game
+            data's gift.
+        own_text: The admin's own name of it by language, in place of the name; English stands in
+            for a language without one. Empty keeps the name.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    gift: Gift
+    name: str
+    own_text: dict[str, str] = {}
+
+    def text(self, language: str) -> str:
+        """Return the admin's own name of the gift in a language, else in English.
+
+        Args:
+            language: The language's code.
+        """
+        return self.own_text.get(language) or self.own_text.get("en", "")
+
+
+class ReferralStep(BaseModel):
+    """A goal that one hero of a recruit reaches, which brings both accounts a gift once.
+
+    Attributes:
+        level: The level a hero of the recruit reaches.
+        days: Within how many days of the recruit's sign-up; none for no deadline.
+        recruiter: What the account that recruited gets.
+        recruit: What the recruit gets; its items go to a hero of at least the level.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    level: PositiveInt
+    days: PositiveInt | None = None
+    recruiter: ReferralSide
+    recruit: ReferralSide
+
+    def ends(self, joined: datetime) -> datetime | None:
+        """Return when the goal can no longer be reached for a recruit; never when none.
+
+        Args:
+            joined: When the recruit signed up.
+        """
+        return joined + timedelta(days=self.days) if self.days else None
+
+
+class ReferralRules(BaseModel):
+    """Recruit a Friend: accounts made through a player's personal link become its recruits.
+
+    Each recruit counts once for each step, whose gifts both accounts claim on their rewards
+    page.
+
+    Attributes:
+        enabled: Whether links record new recruits and goals are counted; what is ready to
+            claim stays claimable while it is off.
+        first: The first goal after the sign-up.
+        second: The second goal, above the first.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    enabled: bool = True
+    first: ReferralStep
+    second: ReferralStep
+
+    @property
+    def steps(self) -> dict[str, ReferralStep]:
+        """The steps by name, in order."""
+        return {"first": self.first, "second": self.second}
+
+    @model_validator(mode="after")
+    def _check_steps(self) -> Self:
+        if self.second.level <= self.first.level:
+            raise ValueError("the second referral goal lies above the first")
+        sides = [side for step in self.steps.values() for side in (step.recruiter, step.recruit)]
+        if any(side.own_text and not side.own_text.get("en") for side in sides):
+            raise ValueError("the own text of a referral gift lacks English")
+        return self
+
+
 class RewardRules(BaseModel):
     """How a game's site gives rewards that accounts claim, as its data sets them.
 
@@ -244,11 +346,14 @@ class RewardRules(BaseModel):
         paused: Whether claims are paused, while everything else goes on.
         zone: The time zone at whose midnight the days start.
         currency: The currency of the Funds that rewards give.
+        points: The currency of the points that rewards give, such as Valor Points; none for
+            rewards that give none.
         fallback: What a hero gets for an item of a gift that it owns for good already.
         events: The events of the yearly calendar, by key.
         starter: The packs that new heroes may claim; none for a game without them.
         milestones: The goals that bring the account a gift, by key.
         first_chest: What the account gets after its first treasure chest; nothing when none.
+        referral: Recruit a Friend; none for a game without it.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -256,21 +361,25 @@ class RewardRules(BaseModel):
     paused: bool = False
     zone: Zone = "UTC"
     currency: str
+    points: str | None = None
     fallback: DropEntry
     events: dict[str, Event] = {}
     starter: StarterPacks | None = None
     milestones: dict[str, Milestone] = {}
     first_chest: FirstChest | None = None
+    referral: ReferralRules | None = None
 
     @property
     def gifts(self) -> list[Gift]:
-        """Every gift of the rewards: of each event and day, pack, milestone and the first chest."""
+        """Every gift: of each event and day, pack, milestone, the first chest and referral step."""
         parts = [part for event in self.events.values() for part in event.parts.values()]
         gifts = [gift for part in parts for gift in (part.gift, *part.days.values())]
         packs = self.starter.packs if self.starter else {}
         gifts += [gift for classes in packs.values() for gift in classes.values()]
         gifts += [milestone.gift for milestone in self.milestones.values()]
         gifts += [self.first_chest.gift] if self.first_chest else []
+        steps = self.referral.steps.values() if self.referral else []
+        gifts += [side.gift for step in steps for side in (step.recruiter, step.recruit)]
         return gifts
 
     @property
@@ -290,6 +399,8 @@ class RewardRules(BaseModel):
             texts.update(named)
         others = [self.starter, *self.milestones.values(), self.first_chest]
         texts.update(t for found in others if found for t in (found.name, found.description) if t)
+        steps = self.referral.steps.values() if self.referral else []
+        texts.update(side.name for step in steps for side in (step.recruiter, step.recruit))
         return texts
 
     @model_validator(mode="after")

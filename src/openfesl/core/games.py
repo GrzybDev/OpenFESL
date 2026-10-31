@@ -492,6 +492,12 @@ class Game(BaseModel):
             raise ValueError(f"rewards give boxes the store lacks: {sorted(unknown)}")
         if self.chests is None and any(gift.keys for gift in gifts):
             raise ValueError("rewards give keys of a game without treasure chests")
+        points = self.currencies.get(rewards.points or "")
+        held = points is not None and points.scope is Scope.ACCOUNT
+        if not held and any(gift.points for gift in gifts):
+            raise ValueError("rewards give points that the account holds in no currency")
+        if "recruit-a-friend" in self.pages and not (rewards.referral and self.site):
+            raise ValueError("the Recruit a Friend page needs referral steps and a site")
         withheld = self.catalogue.withheld if self.catalogue else frozenset()
         if given := sorted(rewards.given_items & withheld):
             raise ValueError(f"rewards give withheld items: {given}")

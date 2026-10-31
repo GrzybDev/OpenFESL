@@ -269,6 +269,13 @@
   <symbol id="user" viewBox="0 0 20 20">
     <path d="M10 3a3.4 3.4 0 1 1 0 6.8A3.4 3.4 0 0 1 10 3zM3.6 17.2c.9-3.1 3.4-4.9 6.4-4.9s5.5 1.8 6.4 4.9" fill="none" stroke-width="2" stroke-linecap="square"/>
   </symbol>
+  <symbol id="user-plus" viewBox="0 0 24 24">
+    <circle cx="9" cy="8.5" r="3.3" fill="none" stroke-width="2.2"/>
+    <path d="M3 19.5c.8-3.5 3.1-5.3 6-5.3s5.2 1.8 6 5.3M18.5 7v7M15 10.5h7" fill="none" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="link" viewBox="0 0 24 24">
+    <path d="M10 14a4 4 0 0 0 5.7 0l3.3-3.3a4 4 0 0 0-5.7-5.7l-1.2 1.2M14 10a4 4 0 0 0-5.7 0L5 13.3a4 4 0 0 0 5.7 5.7l1.2-1.2" fill="none" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
   <symbol id="people" viewBox="0 0 20 20">
     <path d="M7 4.2a2.6 2.6 0 1 1 0 5.2a2.6 2.6 0 0 1 0-5.2zM2.4 16.4c.6-2.6 2.3-4.1 4.6-4.1s4 1.5 4.6 4.1M13.6 5a2.3 2.3 0 1 1 0 4.6M14.6 12.5c1.6.4 2.7 1.7 3.1 3.9" fill="none" stroke-width="1.9" stroke-linecap="square"/>
   </symbol>

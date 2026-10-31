@@ -1,0 +1,64 @@
+{#def kind: str, referrer, hero #}
+{# The landing of a personal link of Recruit a Friend. Through a public account's link a
+   visitor signed out sees whose link it is beside its default hero, the steps to play, Sign up
+   and the way on for an existing account. A link that recruits for nobody says how the game is
+   played, and a signed-in visit says it changes nothing, the account's own link what it does or
+   that links need a display name. #}
+{% set rules = game.heroes %}
+{% set title = _("web.referral.landing.title") %}
+<Layout :title="title">
+  <div class="referral-landing">
+    <Plaque id="landing-title">{{ title }}</Plaque>
+    {% if kind == "referrer" %}
+      {% set name %}<strong>{{ referrer.display_name }}</strong>{% endset %}
+      <div class="referral-referrer enter-panel">
+        {% if hero %}
+          <HeroMugshot :hero="hero" />
+        {% endif %}
+        <p>
+          {{ _("web.referral.landing.with", name=name) }}
+          {% if hero and hero.hero_class %}
+            {% set kind_of = _("web.heroes.kind", hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class), level=hero.level) %}
+            <span class="referral-referrer-hero">{{ _("web.referral.landing.hero", hero=hero.persona.name, faction=_("games." ~ game.id ~ ".faction." ~ hero.faction), kind=kind_of) }}</span>
+          {% endif %}
+        </p>
+      </div>
+    {% else %}
+      <p class="site-box site-box-blue referral-notice enter-panel">
+        {% if kind == "own" and player.name %}
+          {{ _("web.referral.landing.own", name=player.name) }}
+        {% elif kind == "own" %}
+          {{ _("web.referral.needs_name") }}
+        {% elif kind == "signed_in" and player.name %}
+          {{ _("web.referral.landing.signed_in", name=player.name) }}
+        {% elif kind == "signed_in" %}
+          {{ _("web.referral.landing.signed_in.unnamed") }}
+        {% else %}
+          {{ _("web.referral.landing.plain", game=game.name) }}
+        {% endif %}
+      </p>
+    {% endif %}
+    {% if player %}
+      <p class="site-actions">
+        {% if not player.name %}
+          <a href="{{ url('/account/display-name') }}?{{ {'next': here}|urlencode }}"
+             class="site-link">{{ _("web.referral.needs_name.action") }}</a>
+        {% endif %}
+        <a href="{{ url('/' ~ game.id) }}" class="site-link">{{ game.name }}</a>
+        <a href="{{ url('/' ~ game.id ~ '/recruit-a-friend') }}"
+           class="site-link">{{ _("web.referral.title") }}</a>
+      </p>
+    {% else %}
+      <ol class="referral-landing-steps enter-rows">
+        <li>{{ _("web.referral.landing.step.account") }}</li>
+        <li>{{ _("web.referral.landing.step.hero") }}</li>
+        <li>{{ _("web.referral.landing.step.play") }}</li>
+      </ol>
+      <p class="site-actions referral-landing-actions">
+        <a href="{{ url('/register') }}"
+           class="site-button site-button-go site-button-large"><Icon name="user-plus" :size="18" stroke="currentColor" />{{ _("web.referral.landing.sign_up") }}</a>
+        <a href="{{ url('/' ~ game.id) }}" class="site-link">{{ _("web.referral.landing.have_account") }}</a>
+      </p>
+    {% endif %}
+  </div>
+</Layout>

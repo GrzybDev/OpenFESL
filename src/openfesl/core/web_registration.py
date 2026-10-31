@@ -161,7 +161,11 @@ class WebRegistration:
         return name
 
     async def register(
-        self, form: Registration, identity: Identity | None, language: str
+        self,
+        form: Registration,
+        identity: Identity | None,
+        language: str,
+        recruited_by: tuple[str, int] | None = None,
     ) -> Registered:
         """Register an account from a form, linking a service's new identity to it if any.
 
@@ -174,6 +178,8 @@ class WebRegistration:
             identity: The identity that a service answered with, which becomes a way in; None
                 for the direct registration.
             language: The language code of the page, which the mail is written in.
+            recruited_by: The game and the account whose personal link brought the
+                registration, which a new account becomes the recruit of.
         """
         born = _birth_date(*form.birth)
         problems = [
@@ -199,7 +205,7 @@ class WebRegistration:
             return wait
         found = await self._accounts.find(form.address)
         if found is None:
-            account = await self._create(form, identity, language, confirm)
+            account = await self._create(form, identity, language, confirm, recruited_by)
             if account is not None:
                 return Mailed(account.nuid) if confirm else account
             # Another registration took the address, the display name or the identity meanwhile.
@@ -274,7 +280,12 @@ class WebRegistration:
         return max(refusals, key=lambda refusal: refusal.age, default=None)
 
     async def _create(
-        self, form: Registration, identity: Identity | None, language: str, confirm: bool
+        self,
+        form: Registration,
+        identity: Identity | None,
+        language: str,
+        confirm: bool,
+        recruited_by: tuple[str, int] | None,
     ) -> Account | None:
         password_hash = await self._logins.hash(form.password) if form.password else None
         # Every web account that the server can mail gets its link, so its address shows as not
@@ -288,6 +299,7 @@ class WebRegistration:
             verification=link,
             display_name=form.display_name,
             identity=identity,
+            recruited_by=recruited_by,
         )
         if account is None:
             return None

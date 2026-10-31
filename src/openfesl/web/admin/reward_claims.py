@@ -12,7 +12,7 @@ from openfesl.core.admins import Role
 from openfesl.core.calendar import day_start, today
 from openfesl.core.reward_claims import ListedClaim
 from openfesl.core.reward_rules import Gift
-from openfesl.core.rewards import FIRST_CHEST, claimed
+from openfesl.core.rewards import FIRST_CHEST, REFERRAL, claimed
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.rewards import RewardAdminViews
 
@@ -143,9 +143,9 @@ def reward_claim_routes(
                 # Before the game's texts are imported, the event's own name stands in.
                 name = texts.text(rules.events[kind].title)
             gifts = [words.item(*item) for item in claim.items]
-            gifts += words.extra(Gift(funds=claim.funds, keys=claim.keys))
+            gifts += words.extra(Gift(funds=claim.funds, points=claim.points, keys=claim.keys))
             rows.append(ClaimRow(listed, chip, name, ", ".join(gifts)))
-        kinds = [*rules.events, "starter", "milestone", FIRST_CHEST]
+        kinds = [*rules.events, "starter", "milestone", FIRST_CHEST, REFERRAL]
         filters = []
         for kind in kinds:
             if counts.get(kind) or kind == listing.reward:

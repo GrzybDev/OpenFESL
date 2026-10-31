@@ -9386,6 +9386,9 @@ msgstr "Klucz do skrzyni"
 msgid "web.rewards.section.key.lead"
 msgstr "Pierwszy klucz, gdy na konto trafi pierwsza skrzynia skarbów."
 
+msgid "web.rewards.section.referral"
+msgstr "Zaproś znajomych"
+
 msgid "web.rewards.band.account"
 msgstr "Konto"
 
@@ -9665,6 +9668,81 @@ msgstr "Odbieranie jest wstrzymane; ta nagroda poczeka."
 msgid "web.rewards.when.kept"
 msgstr "Dzień %(day)s z %(days)s, zachowany z dnia wstrzymania · do %(date)s"
 
+msgid "web.rewards.referral.lead.recruiter"
+msgstr "Nagrody za konta zaproszone przez to konto. Każdy krok liczy się raz dla każdego zaproszonego konta."
+
+msgid "web.rewards.referral.lead.recruit"
+msgstr "To konto zostało zaproszone przez: %(name)s. Kroki jego bohaterów dają nagrody obu kontom."
+
+msgid "web.rewards.referral.lead.recruited"
+msgstr "To konto zostało zaproszone w ramach programu Zaproś znajomych. Kroki jego bohaterów dają nagrody obu kontom."
+
+msgid "web.rewards.referral.band.recruit"
+msgstr "Zaproszone konto %(name)s · krok %(n)s"
+
+msgid "web.rewards.referral.band.recruited_by"
+msgstr "Zaproszenie od: %(name)s · krok %(n)s"
+
+msgid "web.rewards.referral.band.recruited"
+msgstr "Zaproszenie · krok %(n)s"
+
+msgid "web.rewards.referral.reached"
+msgstr "Bohater %(hero)s konta %(name)s osiągnął poziom %(level)s dnia %(date)s."
+
+msgid "web.rewards.referral.reached.within"
+msgstr "Bohater %(hero)s konta %(name)s osiągnął poziom %(level)s dnia %(date)s, w ciągu %(days)s dni."
+
+msgid "web.rewards.referral.reached.own"
+msgstr "Bohater %(hero)s osiągnął poziom %(level)s dnia %(date)s."
+
+msgid "web.rewards.referral.reached.own.within"
+msgstr "Bohater %(hero)s osiągnął poziom %(level)s dnia %(date)s, w ciągu %(days)s dni od rejestracji."
+
+msgid "web.rewards.referral.hero_rule"
+msgstr "Trafia do bohatera na poziomie %(level)s lub wyższym."
+
+msgid "web.rewards.referral.hero_low"
+msgstr "Poziom %(level)s: trafia do bohatera na poziomie %(need)s lub wyższym"
+
+msgid "web.rewards.referral.when"
+msgstr "Gdy bohater konta %(name)s osiągnie poziom %(level)s."
+
+msgid "web.rewards.referral.when.by"
+msgstr "Gdy bohater konta %(name)s osiągnie poziom %(level)s do %(date)s."
+
+msgid "web.rewards.referral.when.own"
+msgstr "Gdy bohater tego konta osiągnie poziom %(level)s."
+
+msgid "web.rewards.referral.when.own.by"
+msgstr "Gdy bohater tego konta osiągnie poziom %(level)s do %(date)s, %(days)s dni od rejestracji."
+
+msgid "web.rewards.referral.over"
+msgstr "%(days)s dni od rejestracji konta %(name)s minęło %(date)s."
+
+msgid "web.rewards.referral.over.own"
+msgstr "%(days)s dni od rejestracji tego konta minęło %(date)s."
+
+msgid "web.rewards.referral.ready"
+msgstr "Do odebrania · bez terminu"
+
+msgid "web.rewards.referral.locked"
+msgstr "Zablokowane do tego czasu · bez terminu"
+
+msgid "web.rewards.referral.locked.until"
+msgstr "Zablokowane do tego czasu · koniec %(date)s"
+
+msgid "web.rewards.referral.ended"
+msgstr "Zakończono %(date)s; tego kroku nie da się już osiągnąć."
+
+msgid "web.rewards.referral.ended.level"
+msgstr "Zakończono %(date)s na poziomie %(level)s; tego kroku nie da się już osiągnąć."
+
+msgid "web.rewards.referral.claimed"
+msgstr "Dodano %(given)s za krok %(n)s konta %(name)s."
+
+msgid "web.rewards.referral.claimed.items"
+msgstr "Odebrano dla bohatera %(hero)s: %(reward)s. %(game)s pokaże to przy następnym logowaniu bohatera %(hero)s."
+
 msgid "web.funds.rewards"
 msgstr "Nagrody na stronie dające %(currency)s"
 
@@ -9877,6 +9955,54 @@ msgstr "Przedmioty trafiają do jednego bohatera, który może używać ich wszy
 
 msgid "web.redeem.how.login"
 msgstr "%(game)s pokazuje nowe przedmioty przy następnym logowaniu bohatera."
+
+msgid "web.referral.title"
+msgstr "Zaproś znajomych"
+
+msgid "web.referral.landing.title"
+msgstr "Dołącz do walki"
+
+msgid "web.referral.landing.with"
+msgstr "Załóż konto i graj z: %(name)s"
+
+msgid "web.referral.landing.hero"
+msgstr "Domyślny bohater: %(hero)s · %(faction)s, %(kind)s"
+
+msgid "web.referral.landing.step.account"
+msgstr "Załóż konto adresem e-mail lub przez usługę logowania."
+
+msgid "web.referral.landing.step.hero"
+msgstr "Stwórz bohatera: frakcja, klasa, wygląd i nazwa."
+
+msgid "web.referral.landing.step.play"
+msgstr "Zainstaluj grę i OpenFESLHook, a potem graj."
+
+msgid "web.referral.landing.sign_up"
+msgstr "Załóż konto"
+
+msgid "web.referral.landing.have_account"
+msgstr "Mam już konto, przejdź dalej."
+
+msgid "web.referral.landing.signed_in"
+msgstr "Zalogowano jako %(name)s. Zapraszanie liczy tylko konta założone przez osobisty link, więc ta wizyta niczego nie zmienia."
+
+msgid "web.referral.landing.signed_in.unnamed"
+msgstr "Zapraszanie liczy tylko konta założone przez osobisty link, więc wizyta po zalogowaniu niczego nie zmienia."
+
+msgid "web.referral.landing.own"
+msgstr "To osobisty link konta %(name)s. Osoby, które go otworzą i założą konto, zostaną zaproszonymi kontami."
+
+msgid "web.referral.needs_name"
+msgstr "Osobiste linki działają dla kont z nazwą wyświetlaną, którą znajomi widzą po otwarciu linku."
+
+msgid "web.referral.needs_name.action"
+msgstr "Wybierz nazwę wyświetlaną"
+
+msgid "web.referral.landing.plain"
+msgstr "%(game)s na OpenFESL jest darmowe; potrzebna jest oryginalna kopia gry."
+
+msgid "web.referral.register"
+msgstr "Ta rejestracja pochodzi z osobistego linku konta %(name)s: w %(game)s nowe konto będzie kontem zaproszonym przez %(name)s."
 
 msgid "games.bfheroes.funds.rewards.lead"
 msgstr "Nagrody ustala administracja tego serwisu. Pierwszy bohater i 100 meczów liczą się raz na konto; każdy poziom liczy się raz dla każdego bohatera, który go osiągnie. Odbiór od razu dodaje %(currency)s na konto."
@@ -14417,6 +14543,9 @@ msgstr "Pakiety startowe"
 
 msgid "web.admin.rewards.claims.kind.milestone"
 msgstr "Kamienie milowe"
+
+msgid "web.admin.rewards.claims.kind.referral"
+msgstr "Zapraszanie znajomych"
 
 msgid "web.admin.rewards.claims.kind.first-chest"
 msgstr "Klucz za pierwszą skrzynię"

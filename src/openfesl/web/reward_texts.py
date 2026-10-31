@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -15,7 +16,7 @@ from openfesl.core.inventory import Ownership
 from openfesl.core.reward_claims import Claim, Claimed
 from openfesl.core.reward_rules import Gift, Milestone, RewardRules
 from openfesl.core.reward_runs import Run
-from openfesl.core.rewards import Reward
+from openfesl.core.rewards import REFERRAL, Reward
 from openfesl.core.texts import translate
 from openfesl.web.catalogue_files import icon_url
 from openfesl.web.site import site_bar
@@ -189,11 +190,41 @@ class RewardTexts:
         kind, _, rest = reward.key.partition(":")
         if kind == "milestone":
             return self.milestone_title(self.rules.milestones[rest.partition(":")[0]])
+        if reward.referral:
+            return self.referral_name(reward.referral.step, reward.referral.recruiter)
         found = game_text(self.game, self.catalogue, reward.name, self.texts.language)
         if found == reward.name and reward.event:
             # Before the game's texts are imported, the event's own name stands in.
             return self.texts.text(self.rules.events[reward.event].title)
         return found
+
+    def referral_name(self, step: str, recruiter: bool) -> str:
+        """Return what a side of a step of Recruit a Friend gives, as players see it called.
+
+        The admin's own text comes first; the game's offer names the gift while it is the game
+        data's and the imported text states its amount, as an older copy's may not; otherwise
+        the gift's own words name it.
+
+        Args:
+            step: The step's name.
+            recruiter: Whether it is the recruiter's side rather than the recruit's.
+        """
+        assert self.rules.referral is not None
+        found = self.rules.referral.steps[step]
+        side = found.recruiter if recruiter else found.recruit
+        if side.own_text:
+            return side.text(self.texts.language)
+        seed = self.game.rewards.referral if self.game.rewards else None
+        data = seed.steps[step] if seed else None
+        written = (data.recruiter if recruiter else data.recruit).gift if data else None
+        imported = self.catalogue.text(side.name)
+        if (
+            imported
+            and side.gift == written
+            and str(side.gift.amount) in re.findall(r"\d+", imported)
+        ):
+            return imported
+        return ", ".join(self.texts.gift_words(self.catalogue, side.gift))
 
     def description(self, reward: Reward) -> str:
         """Return a reward's text: its event's own text, else its own, if there is one to show.
@@ -238,6 +269,9 @@ class RewardTexts:
         lines = []
         if gift.funds:
             lines.append(self.texts.text("web.rewards.gift.funds", amount=self.funds(gift.funds)))
+        if gift.points and self.rules.points:
+            points = self.texts.priced(gift.points, self.rules.points)
+            lines.append(self.texts.text("web.rewards.gift.funds", amount=points))
         if gift.keys:
             lines.append(self.texts.count("web.rewards.gift.keys", gift.keys))
         return lines
@@ -249,7 +283,7 @@ class RewardTexts:
             claim: The claim.
         """
         parts = [", ".join(self.item(*item) for item in claim.items)] if claim.items else []
-        parts += self.extra(Gift(funds=claim.funds, keys=claim.keys))
+        parts += self.extra(Gift(funds=claim.funds, points=claim.points, keys=claim.keys))
         hero = self.hero(claim.hero)
         return self.texts.text(
             "web.rewards.state.claimed.hero" if hero else "web.rewards.state.claimed",
@@ -265,8 +299,12 @@ class RewardTexts:
             claimed: The claim.
         """
         name = claimed.name
+        kind, _, rest = claimed.claim.key.partition(":")
+        *recruit, step = rest.split(":")
         if claimed.goal is not None:
             name = self.texts.text(name).format(goal=self.texts.amount(claimed.goal))
+        elif kind == REFERRAL and self.rules.referral and step in self.rules.referral.steps:
+            name = self.referral_name(step, bool(recruit))
         else:
             name = game_text(self.game, self.catalogue, name, self.texts.language)
         return Past(self.day(claimed.claim.at), name, self.given(claimed.claim))

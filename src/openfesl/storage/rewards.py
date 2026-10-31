@@ -149,9 +149,12 @@ class SqlRewardStore:
             given = await _give(session, grant) if grant.hero is not None else []
             if grant.funds:
                 await credit(session, *grant.funds, REWARD)
+            if grant.points:
+                await credit(session, *grant.points, REWARD)
             outcome = {
                 "items": [[item_id, ownership.written] for item_id, ownership in given],
                 "funds": grant.funds[1] if grant.funds else 0,
+                "points": grant.points[1] if grant.points else 0,
                 "keys": grant.keys[1] if grant.keys else 0,
             }
             await session.execute(
@@ -291,4 +294,5 @@ def _claim(row: RewardClaimRow) -> Claim:
         outcome["funds"],
         outcome["keys"],
         row.claimed_at,
+        outcome.get("points", 0),
     )

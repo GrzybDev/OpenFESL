@@ -432,6 +432,22 @@ class RewardPauseRow(Base):
     day: Mapped[date] = mapped_column(primary_key=True)
 
 
+class ReferralRow(Base):
+    __tablename__ = "referral"
+
+    # An account made through a personal link, once, when it was made.
+    recruit_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("account.id", ondelete="CASCADE"), primary_key=True
+    )
+    game: Mapped[str]
+    recruiter_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("account.id", ondelete="CASCADE"), index=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    # When each step's goal was first seen reached, by which hero and at which level, by step.
+    reached: Mapped[dict[str, Any]] = mapped_column(JSONB, server_default=text("'{}'::jsonb"))
+
+
 class ProductKeyRow(Base):
     __tablename__ = "product_key"
 

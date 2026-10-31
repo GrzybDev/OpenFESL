@@ -20,13 +20,15 @@ class Choice:
 
     Attributes:
         hero: The hero.
-        status: What the hero would get.
+        status: What the hero would get, or why it may not have it.
         checked: Whether the form picks it at first: the default hero, or else the first.
+        shut: Whether the reward may not go to it, which the form shows with why.
     """
 
     hero: Hero
     status: str
     checked: bool
+    shut: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -88,12 +90,27 @@ class RewardClaims:
         # A starter pack goes to its hero alone; other items to one of the heroes they fit.
         alone = words.hero(reward.hero) if reward.goal is None else None
         heroes = [hero for p in reward.heroes if (hero := words.hero(p))] if not alone else []
+        # A step of Recruit a Friend shows every hero, those below its level with why.
+        need = 0
+        if reward.referral and words.rules.referral and words.roster and gift.for_hero:
+            heroes = words.roster.heroes
+            step = words.rules.referral.steps[reward.referral.step]
+            need = 1 if reward.referral.recruiter else step.level
         default = words.roster.default_id if words.roster else None
         picked = default if default in reward.heroes else next(iter(reward.heroes), None)
         rules = words.game.heroes
         assert rules is not None
         choices = []
         for hero in heroes:
+            if hero.persona.id not in reward.heroes:
+                low = hero.level < need
+                why = texts.text(
+                    "web.rewards.referral.hero_low" if low else "web.rewards.state.unfit",
+                    level=hero.level,
+                    need=need,
+                )
+                choices.append(Choice(hero, why, False, shut=True))
+                continue
             # What the hero would get: one item at random from the gift's box, where its items
             # do not fit the hero, or else each item new, added to or owned for good.
             said = [texts.text("web.rewards.outcome.box")]
@@ -120,6 +137,8 @@ class RewardClaims:
                         said.append(texts.text(key, item=name, term=term))
             choices.append(Choice(hero, "; ".join(said), hero.persona.id == picked))
         hint = ""
+        if need > 1:
+            hint = texts.text("web.rewards.referral.hero_rule", level=need)
         if choices and reward.faction:
             faction = texts.factions(frozenset({reward.faction}))
             hint = texts.text("web.rewards.claim.hint", faction=faction)

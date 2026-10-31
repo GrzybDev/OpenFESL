@@ -1,7 +1,7 @@
 from collections.abc import Collection, Sequence
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import Select, delete, exists, func, select, update
+from sqlalchemy import Select, delete, exists, func, literal, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
@@ -24,6 +24,7 @@ from openfesl.storage.models import (
     LoginTokenRow,
     PasswordResetRow,
     PersonaRow,
+    ReferralRow,
     SignInIdentityRow,
 )
 
@@ -54,7 +55,7 @@ class SqlAccountStore:
             row = await session.scalar(
                 select(AccountRow).where(func.lower(AccountRow.nuid) == func.lower(nuid))
             )
-        return Credentials(_account(row), row.password_hash) if row else None
+        return Credentials(account_from(row), row.password_hash) if row else None
 
     async def totals(self, since: datetime) -> tuple[int, int]:
         """Return how many players' accounts there are, and how many of them are new.
@@ -113,7 +114,7 @@ class SqlAccountStore:
             return None
         async with self._sessions() as session:
             row = await session.get(AccountRow, account_id)
-        return _account(row) if row else None
+        return account_from(row) if row else None
 
     async def record(self, account_id: int) -> AccountRecord | None:
         """Return a player's account by its number.
@@ -211,7 +212,7 @@ class SqlAccountStore:
                     LoginTokenRow.created_at > func.now() - REMEMBERED_FOR,
                 )
             )
-        return _account(row) if row else None
+        return account_from(row) if row else None
 
     async def add(
         self,
@@ -225,6 +226,7 @@ class SqlAccountStore:
         made_in: str | None = None,
         display_name: str | None = None,
         identity: Identity | None = None,
+        recruited_by: tuple[str, int] | None = None,
     ) -> Account | None:
         """Create an account, or return None when its name, display name or identity is taken.
 
@@ -239,6 +241,8 @@ class SqlAccountStore:
             display_name: Its public display name, which the site's registration gives it.
             identity: An identity at a sign-in service that becomes a way in with it; nothing is
                 made while the identity opens another account.
+            recruited_by: The game and the account whose personal link brought the registration,
+                which makes the new account its recruit while that account still exists.
         """
         try:
             async with self._sessions.begin() as session:
@@ -268,7 +272,16 @@ class SqlAccountStore:
                         )
                     )
                     await session.flush()
-                account = _account(row) if row else None
+                if row is not None and recruited_by is not None:
+                    game, recruiter = recruited_by
+                    found = select(literal(row.id), literal(game), AccountRow.id)
+                    await session.execute(
+                        insert(ReferralRow).from_select(
+                            ["recruit_id", "game", "recruiter_id"],
+                            found.where(AccountRow.id == recruiter),
+                        )
+                    )
+                account = account_from(row) if row else None
         except IntegrityError:
             # The identity opens another account, so the transaction made neither.
             return None
@@ -693,10 +706,15 @@ async def _waiting(session: AsyncSession, token_hash: bytes, lock: bool) -> int 
 
 
 def _record(row: AccountRow) -> AccountRecord:
-    return AccountRecord(_account(row), row.created_at, row.last_login_at)
+    return AccountRecord(account_from(row), row.created_at, row.last_login_at)
 
 
-def _account(row: AccountRow) -> Account:
+def account_from(row: AccountRow) -> Account:
+    """Return an account as its row keeps it.
+
+    Args:
+        row: The row.
+    """
     return Account(
         id=row.id,
         nuid=row.nuid,

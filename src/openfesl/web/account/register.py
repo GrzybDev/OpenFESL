@@ -26,6 +26,7 @@ from openfesl.web.account.services import ServiceView, SignInServices
 from openfesl.web.account.session import PENDING, SITE, open_page, signed_in, start, to_sign_in
 from openfesl.web.account.sign_in import password_games
 from openfesl.web.pages import Pages, listed
+from openfesl.web.referral import REFERRAL, ReferralLinks
 from openfesl.web.sessions import form_matches, form_token, inside, toast
 from openfesl.web.turnstile import Turnstile
 
@@ -50,6 +51,7 @@ class RegisterPages:
         registration: Callable[[], WebRegistration],
         mail: bool,
         turnstile: Turnstile | None,
+        links: ReferralLinks,
     ) -> None:
         """Prepare the registration's pages.
 
@@ -61,6 +63,8 @@ class RegisterPages:
             registration: Returns the registration, once the application has started.
             mail: Whether the server sends mail.
             turnstile: Cloudflare's check of the forms; None when the deployment sets none up.
+            links: Tell whose personal link of Recruit a Friend a visitor arrived through, which
+                the new account becomes the recruit of.
         """
         self._pages = pages
         self._games = games
@@ -69,6 +73,7 @@ class RegisterPages:
         self._registration = registration
         self._mail = mail
         self._turnstile = turnstile
+        self._links = links
 
     def routes(self) -> APIRouter:
         """Return the registration's pages, their forms and the page that confirms addresses."""
@@ -172,7 +177,9 @@ class RegisterPages:
             (values["birth_day"], values["birth_month"], values["birth_year"]),
             values["terms"],
         )
-        match await registration.register(entry, identity, request.state.language):
+        referrer = await self._links.referrer(request)
+        recruited_by = (referrer.game.id, referrer.account.id) if referrer else None
+        match await registration.register(entry, identity, request.state.language, recruited_by):
             case list() as problems:
                 return await self._form(request, back, identity, values, problems, status=400)
             case TooYoung(age, consent):
@@ -192,6 +199,7 @@ class RegisterPages:
                 return to_sign_in(request, back, "taken", service=name)
             case Mailed(address):
                 request.session.pop(PENDING, None)
+                request.session.pop(REFERRAL, None)
                 rows = ("web.account.register.sent.in_use", "web.account.register.sent.none")
                 sign_in = ("/sign-in", "web.account.sign_in")
                 return message_page(
@@ -205,6 +213,7 @@ class RegisterPages:
                 )
             case Account() as account:
                 request.session.pop(PENDING, None)
+                request.session.pop(REFERRAL, None)
                 service = self._service(request, identity)
                 start(request, account, way=service.name if service else "")
                 toast(request, "web.account.toast.created")
@@ -240,6 +249,7 @@ class RegisterPages:
             confirm=await self._policies.site_confirmation(),
             mail=self._mail,
             password_games=password_games(self._games, language),
+            referrer=await self._links.referrer(request),
         )
         if self._turnstile:
             self._turnstile.allow(page)
