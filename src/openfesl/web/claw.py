@@ -11,6 +11,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 
 from openfesl.core.catalogues import Catalogue, Catalogues
 from openfesl.core.claw import Claw, ClawRefusal, ClawRefused, Grabbed
+from openfesl.core.claw_rules import ClawRules
 from openfesl.core.games import Game, Games
 from openfesl.core.heroes import Hero
 from openfesl.core.inventory import COUNTED, PERMANENT, Ownership
@@ -20,7 +21,7 @@ from openfesl.web.account.session import open_page, signed_in
 from openfesl.web.catalogue_files import icon_url
 from openfesl.web.pages import Pages
 from openfesl.web.sessions import SentForms, form_token, purchase_matches, toast
-from openfesl.web.site import CLAW, site_bar
+from openfesl.web.site import CLAW, SiteBar, site_bar
 from openfesl.web.store_texts import StoreTexts
 
 # What the last grab gave, which the next page of the Claw shows once.
@@ -31,7 +32,7 @@ BELT = 6
 
 @dataclass(frozen=True, slots=True)
 class PrizeLine:
-    """A prize as the Claw's belts and its chances show it.
+    """A prize as the Claw's belts, its chances and its feed show it.
 
     Attributes:
         item_id: The item's number.
@@ -86,6 +87,29 @@ class HeroPrizes:
     owned: list[str]
 
 
+@dataclass(frozen=True, slots=True)
+class FeedLine:
+    """A rare prize of the feed.
+
+    Attributes:
+        hero_id: The persona of the hero who won it.
+        hero: The hero's name.
+        prize: The prize.
+        at: When it was won.
+        own: Whether the hero is one of the viewing account's.
+        new: Whether it is the grab whose prize the page shows.
+        words: The words of its line around the hero's name and the prize's, in order.
+    """
+
+    hero_id: int
+    hero: str
+    prize: PrizeLine
+    at: datetime
+    own: bool
+    new: bool
+    words: tuple[str, str, str]
+
+
 class ClawPages:
     """The Daily Claw of each game that has one: its page and its grabs."""
 
@@ -136,6 +160,9 @@ class ClawPages:
             player, bar = signed_in(request), await site_bar(request)
             grabbed = request.session.pop(GRABBED, None) if player else None
             context: dict[str, Any] = {}
+            if running:
+                feed = await self._feed(game, running, texts, catalogue, art, bar, grabbed)
+                context = {"feed": feed}
             if running and player and bar and bar.roster is not None:
                 heroes = [hero for hero in bar.roster.heroes if hero.playable]
                 [funds] = await self._wallets.of_account(
@@ -143,7 +170,7 @@ class ClawPages:
                 )
                 default = bar.roster.default_id
                 day = await self._claw.day(game, running, player.account_id)
-                context = {
+                context |= {
                     "day": day,
                     "heroes": [await self._hero(game, texts, catalogue, h, art) for h in heroes],
                     "picked": default if any(h.persona.id == default for h in heroes) else None,
@@ -262,6 +289,43 @@ class ClawPages:
         belts = [belt * -(-BELT // len(belt)) if belt else [] for belt in belts]
         names = [_name(texts, catalogue, product.item_id) for product in owned]
         return HeroPrizes(hero, belts, tier_lines, names)
+
+    async def _feed(
+        self,
+        game: Game,
+        rules: ClawRules,
+        texts: StoreTexts,
+        catalogue: Catalogue,
+        art: bool,
+        bar: SiteBar | None,
+        grabbed: dict[str, Any] | None,
+    ) -> list[FeedLine]:
+        # The latest rare prizes; the grab just made is marked on the first line that is its.
+        roster = bar.roster if bar else None
+        mine = {hero.persona.id for hero in roster.heroes} if roster else set()
+        found, marked = [], False
+        # The line's words, split where the names go, so that the hero's name can be a link.
+        row = texts.text("web.claw.feed.row", hero="\0", item="\1")
+        before, _, rest = row.partition("\0")
+        between, _, after = rest.partition("\1")
+        for won in await self._claw.feed(game, rules):
+            line = _line(texts, catalogue, won.item_id, won.ownership, art, True)
+            new = bool(grabbed) and not marked
+            new = (
+                new
+                and grabbed is not None
+                and (grabbed["hero_id"], grabbed["item"])
+                == (
+                    won.hero_id,
+                    won.item_id,
+                )
+            )
+            marked = marked or new
+            own = won.hero_id in mine
+            found.append(
+                FeedLine(won.hero_id, won.hero, line, won.at, own, new, (before, between, after))
+            )
+        return found
 
 
 def _name(texts: StoreTexts, catalogue: Catalogue, item_id: int) -> str:

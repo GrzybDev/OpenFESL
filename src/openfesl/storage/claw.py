@@ -7,9 +7,11 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from openfesl.core.claw import ClawRefusal, ClawRefused, Grab, NewGrab
 from openfesl.core.entitlements import ACTIVE
 from openfesl.core.inventory import Held, Ownership
+from openfesl.core.personas import PersonaState
 from openfesl.storage.entitlements import add_item, locked_item
-from openfesl.storage.models import ClawGrabRow, PersonaRow, PurchaseRow
+from openfesl.storage.models import AccountRow, ClawGrabRow, PersonaRow, PurchaseRow
 from openfesl.storage.purchases import PURCHASE
+from openfesl.storage.relationships import askable_accounts
 from openfesl.storage.wallets import spend
 
 
@@ -110,6 +112,29 @@ class SqlClawStore:
                     )
                 )
             return before, after
+
+    async def feed(self, game: str, limit: int) -> list[Grab]:
+        """Return the latest rare prizes of the heroes that others see, the latest first.
+
+        Args:
+            game: The game's data-file name.
+            limit: The most to return.
+        """
+        async with self._sessions() as session:
+            rows = await session.execute(
+                select(ClawGrabRow, PersonaRow.name)
+                .join(PersonaRow, PersonaRow.id == ClawGrabRow.persona_id)
+                .join(AccountRow, AccountRow.id == ClawGrabRow.account_id)
+                .where(
+                    ClawGrabRow.game == game,
+                    ClawGrabRow.rare,
+                    PersonaRow.state == PersonaState.ACTIVE,
+                    *askable_accounts(),
+                )
+                .order_by(ClawGrabRow.created_at.desc(), ClawGrabRow.id.desc())
+                .limit(limit)
+            )
+            return [_grab(row, name) for row, name in rows]
 
 
 async def _free_count(session: AsyncSession, grab: NewGrab) -> int:

@@ -1,0 +1,26 @@
+{#def feed: list, rules #}
+{# The Claw's latest rare prizes, newest first: the hero to its profile, the prize and how
+   long ago; the account's own heroes say so, and the grab whose prize the page shows stands out.
+   Left out while the admin has switched the feed off. #}
+{% if rules.feed.enabled %}
+  <aside aria-labelledby="claw-feed-title" class="claw-feed">
+    <h2 id="claw-feed-title" class="claw-feed-title">{{ _("web.claw.feed") }}</h2>
+    {% if feed %}
+      <p class="claw-feed-text">{{ _("web.claw.feed.text") }}</p>
+      <ol role="list" data-claw-feed class="claw-feed-list">
+        {% for won in feed %}
+          <li class="claw-feed-row{% if won.new %} claw-feed-new{% endif %}">
+            <ClawIcon :prize="won.prize" :size="40" />
+            <p>
+              {{ won.words[0] }}<a href="{{ url('/' ~ game.id ~ '/heroes/' ~ won.hero_id) }}"
+   class="claw-feed-hero">{{ won.hero }}</a>{{ won.words[1] }}<strong>{{ won.prize.name }}</strong>{{ won.words[2] }}
+              <span class="claw-feed-when">{{ won.prize.held }} · {{ ago(won.at) }}{% if won.own %} · {{ _("web.claw.feed.own") }}{% endif %}</span>
+            </p>
+          </li>
+        {% endfor %}
+      </ol>
+    {% else %}
+      <p class="claw-feed-empty">{{ _("web.claw.feed.empty") }}</p>
+    {% endif %}
+  </aside>
+{% endif %}

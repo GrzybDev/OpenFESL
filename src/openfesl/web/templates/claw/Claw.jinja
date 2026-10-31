@@ -1,8 +1,9 @@
-{#def rules, running, imported: bool, name: str, day = None, heroes: list = [], picked = None, funds: int = 0, grabbed = None, left: str = "" #}
+{#def rules, running, imported: bool, name: str, feed: list = [], day = None, heroes: list = [], picked = None, funds: int = 0, grabbed = None, left: str = "" #}
 {# The Daily Claw: the prize of the last grab, the free grab that waits, the hero the
-   prize goes to, the grab with the time to the next free one and the paid grab, and the chances.
-   It is a form whose hero is a radio group, and the next page shows the prize. Signed out it
-   asks for a sign-in; off or without the catalogue it says why. #}
+   prize goes to, the grab with the time to the next free one and the paid grab, the chances, and
+   the latest rare
+   prizes. It is a form whose hero is a radio group, and the next page shows the prize. Signed out
+   it asks for a sign-in; off or without the catalogue it says why. #}
 {% set base = url("/" ~ game.id ~ "/claw") %}
 <Layout :title="name">
   <section aria-labelledby="claw-title" class="store-head">
@@ -165,7 +166,11 @@
           {% endfor %}
         </details>
       </div>
+      <ClawFeed :feed="feed" :rules="running" />
       </div>
+    {% endif %}
+    {% if running and not player %}
+      <ClawFeed :feed="feed" :rules="running" />
     {% endif %}
   </div>
 </Layout>

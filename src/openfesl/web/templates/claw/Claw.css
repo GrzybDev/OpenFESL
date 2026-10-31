@@ -1,6 +1,7 @@
 /* The Daily Claw: a dark wooden box with the prize card, the welcome, the hero picker, the
    machine (its own component), the grab row with the countdown and the paid grab's confirmation,
-   and the chances. The prize card scales in and its rare badge lands (180 ms), a fade alone with reduced motion. */
+   the chances and the feed beside them, which goes under the machine on narrow screens. The prize
+   card scales in and its rare badge lands (180 ms), a fade alone with reduced motion. */
 @layer pages {
   .claw-body {
     position: relative;

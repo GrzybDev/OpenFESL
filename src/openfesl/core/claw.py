@@ -187,6 +187,14 @@ class ClawStore(Protocol):
                 time, the wallet holds less than the price, or the hero owns the item for good.
         """
 
+    async def feed(self, game: str, limit: int) -> list[Grab]:
+        """Return the latest rare prizes of the heroes that others see, the latest first.
+
+        Args:
+            game: The game's data-file name.
+            limit: The most to return.
+        """
+
 
 class Claw:
     """The Daily Claw of the games' sites: a free grab a day, paid grabs, and their prizes."""
@@ -336,6 +344,15 @@ class Claw:
         )
         before, after = await self._store.grab(grab)
         return Grabbed(hero, won, rare, before, after, price)
+
+    async def feed(self, game: Game, rules: ClawRules) -> list[Grab]:
+        """Return the latest rare prizes of the heroes that others see, while the feed is on.
+
+        Args:
+            game: The game.
+            rules: The Claw's rules as the instance sets them.
+        """
+        return await self._store.feed(game.id, rules.feed.length) if rules.feed.enabled else []
 
     async def _zone(self, game: Game) -> str:
         rules = await self._rewards.rules(game)

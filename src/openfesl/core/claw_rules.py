@@ -22,6 +22,20 @@ class PaidGrabs(BaseModel):
     currency: str
 
 
+class ClawFeed(BaseModel):
+    """The list of the latest rare prizes that the Claw shows.
+
+    Attributes:
+        enabled: Whether it is shown.
+        length: How many prizes it lists.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    enabled: bool = True
+    length: PositiveInt = 20
+
+
 class ClawRules(BaseModel):
     """The Daily Claw of a game's site: a claw machine whose prizes go to an account's heroes.
 
@@ -30,6 +44,7 @@ class ClawRules(BaseModel):
         enabled: Whether it runs.
         free: How many free grabs an account has a day, from the start of the rewards' day.
         paid: The grabs bought after the free ones.
+        feed: The list of the latest rare prizes.
         currency: The currency that its prizes are valued in, as the store's products price them.
         tiers: The prizes it starts with, in tiers; the admin changes them as a box's drops.
     """
@@ -40,6 +55,7 @@ class ClawRules(BaseModel):
     enabled: bool = True
     free: PositiveInt = 1
     paid: PaidGrabs
+    feed: ClawFeed = ClawFeed()
     currency: str
     tiers: tuple[Tier, ...]
 

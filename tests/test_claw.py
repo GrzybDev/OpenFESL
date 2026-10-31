@@ -113,6 +113,7 @@ async def test_a_day_at_the_claw_gives_the_free_grab_once_and_sells_the_next(
     shown = "Invented Monkey Clothing · Permanent · a rare prize Brassbuckle owns it for good."
     assert shown in won
     assert "Battlefield Heroes shows it at Brassbuckle's next login." in won
+    assert "Brassbuckle got Invented Monkey Permanent" in won
     assert re.search(r"Nothing was taken: today's free grab was used at \d\d:\d\d UTC", refused)
     assert "in another window, for Brassbuckle" in refused
     assert "Next free grab in" in won and "Grab again for 599 Funds" in won
@@ -176,7 +177,7 @@ async def test_the_claw_says_why_it_takes_no_grab(
     assert "The Daily Claw needs the game's catalogue." in before
     assert "Daily claw machine" not in menu
     assert "Sign in to grab" in signed_out and "Create an account" in signed_out
-    assert "Daily claw machine" in listed
+    assert "Daily claw machine" in listed and "No rare prizes yet." in signed_out
     assert "The Claw needs a hero" in empty and "Create a hero" in empty
     assert moved.status_code == 301 and moved.headers["location"] == CLAW
     assert "Nothing was taken: the Claw holds no prize for this hero now." in shown

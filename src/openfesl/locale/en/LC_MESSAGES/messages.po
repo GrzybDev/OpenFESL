@@ -14153,6 +14153,21 @@ msgstr "%(item)s is left out: %(hero)s owns it for good, so its share goes to th
 msgid "web.claw.chances.added"
 msgstr "Rentals and uses already owned are added to."
 
+msgid "web.claw.feed"
+msgstr "Rare prizes"
+
+msgid "web.claw.feed.text"
+msgstr "The latest rare grabs of all players, newest first."
+
+msgid "web.claw.feed.row"
+msgstr "%(hero)s got %(item)s"
+
+msgid "web.claw.feed.own"
+msgstr "this account"
+
+msgid "web.claw.feed.empty"
+msgstr "No rare prizes yet. Rare grabs of every player show here."
+
 msgid "web.claw.prize"
 msgstr "Prize for %(hero)s"
 

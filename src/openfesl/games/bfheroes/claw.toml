@@ -7,6 +7,7 @@
 name = "WEST_Custom_DailySpinner"
 free = 1
 paid = { price = 599, currency = "_PF" }
+feed = { length = 20 }
 # The prizes are valued in Funds, as the store prices them.
 currency = "_PF"
 

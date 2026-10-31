@@ -15015,6 +15015,21 @@ msgstr "Pominięto: %(item)s. %(hero)s ma to na stałe, więc udział przechodzi
 msgid "web.claw.chances.added"
 msgstr "Posiadane wypożyczenia i użycia są przedłużane."
 
+msgid "web.claw.feed"
+msgstr "Rzadkie nagrody"
+
+msgid "web.claw.feed.text"
+msgstr "Ostatnie rzadkie nagrody ze wszystkich kont, od najnowszych."
+
+msgid "web.claw.feed.row"
+msgstr "%(hero)s: %(item)s"
+
+msgid "web.claw.feed.own"
+msgstr "to konto"
+
+msgid "web.claw.feed.empty"
+msgstr "Na razie brak rzadkich nagród. Pojawią się tu rzadkie nagrody ze wszystkich kont."
+
 msgid "web.claw.prize"
 msgstr "Nagroda dla: %(hero)s"
 
