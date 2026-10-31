@@ -1,0 +1,17 @@
+{#def of, recruit, back: str, error: str #}
+{# Taking an account out of its recruiter's recruits, after a note that the audit log
+   keeps, as a page of its own; where scripts run, its panel opens as a dialog over the account's
+   page. What it does to both accounts is said before it is sent. #}
+{% set game = of %}
+{% set name = recruit.account.display_name or recruit.account.nuid %}
+{% set recruiter = recruit.recruiter.display_name or recruit.recruiter.nuid %}
+<AdminPage :title="_('web.admin.account.recruit.remove') ~ ' · ' ~ name"
+           current="accounts">
+  <Panel class="enter-panel confirm-frame">
+    <AdminForm :question="_('web.admin.account.recruit.remove.question', recruit=name, name=recruiter)" :action="url('/admin/accounts/' ~ recruit.account.id ~ '/referral/' ~ game.id ~ '/remove')" :label="_('web.admin.account.recruit.remove')" :busy="_('web.admin.account.recruit.remove.busy')" :back="back" glyph="x" :error="error">
+    <ul id="confirm-text" class="admin-effects">
+      <li>{{ _("web.admin.account.recruit.remove.text", recruit=name, name=recruiter) }}</li>
+    </ul>
+    </AdminForm>
+  </Panel>
+</AdminPage>

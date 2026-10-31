@@ -1,11 +1,13 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import Select, literal, select, update
+from sqlalchemy import Select, delete, literal, select, update
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import aliased
 
+from openfesl.core.admin import AdminAction
+from openfesl.core.admins import Admin
 from openfesl.core.games import Game
 from openfesl.core.personas import PersonaState
 from openfesl.core.referrals import Leader, Reach, Recruit, ReferralCounts
@@ -13,6 +15,7 @@ from openfesl.core.rewards import REFERRAL
 from openfesl.core.stats import PERSONA, bucket_of, partition_of
 from openfesl.protocol.rank import Period
 from openfesl.storage.accounts import account_from
+from openfesl.storage.admin import action_row
 from openfesl.storage.models import AccountRow, PersonaRow, ReferralRow, RewardClaimRow, StatRow
 
 _RECRUITER = aliased(AccountRow)
@@ -69,6 +72,36 @@ class SqlReferralStore:
                 )
                 .values(reached=ReferralRow.reached.concat(literal({step: written}, JSONB)))
             )
+
+    async def remove(self, game: Game, recruit_id: int, note: str, admin: Admin) -> Recruit | None:
+        """Take an account out of the recruits of its recruiter and record why; claims stay.
+
+        Args:
+            game: The game.
+            recruit_id: The recruit's account.
+            note: Why, as the admin wrote it.
+            admin: The admin who removed it.
+
+        Returns:
+            The recruit as it was; none when it was no recruit, also once removed meanwhile.
+        """
+        found = await self.recruited(game, recruit_id)
+        if found is None:
+            return None
+        names = [found.account.display_name or found.account.nuid]
+        names.append(found.recruiter.display_name or found.recruiter.nuid)
+        details = {"game": game.id, "recruiter": found.recruiter.id, "names": names, "note": note}
+        async with self._sessions.begin() as session:
+            removed = await session.scalar(
+                delete(ReferralRow)
+                .where(ReferralRow.recruit_id == recruit_id, ReferralRow.game == game.id)
+                .returning(ReferralRow.recruit_id)
+            )
+            if removed is not None:
+                session.add(
+                    action_row(AdminAction.REFERRAL_REMOVED, str(recruit_id), details, admin)
+                )
+        return found if removed is not None else None
 
     async def counts(self, game: str, since: datetime) -> ReferralCounts:
         """Return how many recruits signed up and how many rewards were claimed and wait.

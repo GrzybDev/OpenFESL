@@ -13685,6 +13685,9 @@ msgstr "Recruit a Friend switched on"
 msgid "web.admin.audit.action.referral_settings.off"
 msgstr "Recruit a Friend switched off"
 
+msgid "web.admin.audit.action.referral_removed"
+msgstr "Recruit removed"
+
 msgid "web.admin.audit.reward_zone"
 msgstr "%(before)s → %(after)s"
 
@@ -14020,6 +14023,33 @@ msgstr "Recruit a Friend switched off."
 
 msgid "web.admin.toast.referral.step"
 msgstr "Step %(n)s saved: %(goal)s; %(recruiter)s and %(recruit)s."
+
+msgid "web.admin.toast.referral.removed"
+msgstr "%(recruit)s is no longer %(name)s's recruit."
+
+msgid "web.admin.account.recruited_by"
+msgstr "Recruited by %(name)s on %(date)s through a personal link."
+
+msgid "web.admin.account.recruits"
+msgstr "Recruits of %(name)s · %(count)s"
+
+msgid "web.admin.account.recruit.remove"
+msgstr "Remove from recruits"
+
+msgid "web.admin.account.recruit.remove.name"
+msgstr "Remove %(recruit)s from recruits"
+
+msgid "web.admin.account.recruit.remove.question"
+msgstr "Remove %(recruit)s from %(name)s's recruits?"
+
+msgid "web.admin.account.recruit.remove.busy"
+msgstr "Removing…"
+
+msgid "web.admin.account.recruit.remove.text"
+msgstr "%(recruit)s stops being %(name)s's recruit. Steps not yet claimed go from both rewards pages; rewards already given stay (the wallets page takes them back if needed). Neither account is told."
+
+msgid "web.admin.audit.referral.recruit"
+msgstr "%(recruit)s (recruit of %(name)s)"
 
 msgid "web.admin.audit.referral.level"
 msgstr "Goal level %(before)s → %(after)s"

@@ -391,6 +391,53 @@
     margin-top: 6px;
   }
 
+  /* Recruit a Friend: who recruited the account, then a row for each recruit with its steps and
+     Remove from recruits. */
+  .referral-by {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 2px;
+    background: var(--row-light);
+    padding: 10px 12px;
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .referral-recruits-bar {
+    margin-top: 2px;
+  }
+
+  .referral-recruit {
+    display: grid;
+    grid-template-columns: minmax(120px, 1fr) auto minmax(150px, 1.2fr) minmax(170px, 1.3fr) auto;
+    align-items: center;
+    gap: 6px 12px;
+    margin-top: 2px;
+    background: var(--row);
+    padding: 6px 6px 6px 12px;
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 600;
+
+    &:nth-of-type(odd) {
+      background: var(--row-alt);
+    }
+  }
+
+  @container (width < 760px) {
+    .referral-recruit {
+      grid-template-columns: minmax(0, 1fr) auto;
+
+      > span:nth-of-type(n + 2) {
+        grid-column: 1 / -1;
+      }
+    }
+  }
+
   @media (width < 40rem) {
     .account-list-when {
       margin-left: 0;

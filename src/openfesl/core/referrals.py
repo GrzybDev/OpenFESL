@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Protocol
 
 from openfesl.core.accounts import Account
+from openfesl.core.admins import Admin
 from openfesl.core.games import Game
 
 
@@ -100,6 +101,19 @@ class ReferralStore(Protocol):
             recruit_id: The recruit's account.
             step: The step's name.
             reach: When, by which hero and at which level.
+        """
+
+    async def remove(self, game: Game, recruit_id: int, note: str, admin: Admin) -> Recruit | None:
+        """Take an account out of the recruits of its recruiter and record why; claims stay.
+
+        Args:
+            game: The game.
+            recruit_id: The recruit's account.
+            note: Why, as the admin wrote it.
+            admin: The admin who removed it.
+
+        Returns:
+            The recruit as it was; none when it was no recruit, also once removed meanwhile.
         """
 
     async def counts(self, game: str, since: datetime) -> ReferralCounts:

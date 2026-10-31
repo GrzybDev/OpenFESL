@@ -179,6 +179,9 @@ class AdminAction(StrEnum):
     """Switched Recruit a Friend of the game whose id is the target on or off, or changed a step
     of it; the details hold whether it runs, or the step with its goal, window and gifts before
     and after, and the admin's note."""
+    REFERRAL_REMOVED = "referral_removed"
+    """Took the account numbered as the target out of the recruits of its recruiter; the details
+    hold the game, the recruiter's account, both accounts' names and the admin's note."""
     REWARD_EVENT = "reward_event"
     """Changed an event of the rewards of the game whose id is the target; the details hold its
     key, the first and last days of its run before and after, and its own text before and

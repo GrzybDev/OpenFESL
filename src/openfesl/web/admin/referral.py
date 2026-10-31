@@ -1,6 +1,6 @@
 import json
 from collections.abc import Mapping
-from dataclasses import replace
+from dataclasses import dataclass, replace
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -9,6 +9,8 @@ from starlette.exceptions import HTTPException
 from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin, Role
 from openfesl.core.games import Game, Games
+from openfesl.core.referrals import Recruit, ReferralStore
+from openfesl.core.rewards import Reward, Rewards
 from openfesl.core.texts import languages
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.admin.referral_editor import (
@@ -21,22 +23,61 @@ from openfesl.web.admin.referral_editor import (
 )
 from openfesl.web.admin.referral_view import goal
 from openfesl.web.admin.rewards import SECTION, RewardAdminViews, rewards_url
-from openfesl.web.referral_texts import NUMBERS
+from openfesl.web.referral_texts import NUMBERS, Chip, chip
 from openfesl.web.reward_texts import RewardTexts
 from openfesl.web.sessions import check_form, toast
+
+
+@dataclass(frozen=True, slots=True)
+class RecruitLine:
+    """A recruit as its recruiter's page in the panel lists it.
+
+    Attributes:
+        account_id: The recruit's account.
+        name: Its display name, else its login name.
+        joined: When it signed up, in words.
+        chips: Where each step stands.
+    """
+
+    account_id: int
+    name: str
+    joined: str
+    chips: list[Chip]
+
+
+@dataclass(frozen=True, slots=True)
+class AccountReferral:
+    """Recruit a Friend of a game as an account's page in the panel shows it.
+
+    Attributes:
+        game: The game.
+        recruiter: Who recruited the account by name and account, and when; none for an
+            account that no link brought.
+        recruits: The account's recruits, every one of them.
+    """
+
+    game: Game
+    recruiter: tuple[str, int, str] | None
+    recruits: list[RecruitLine]
 
 
 class ReferralAdminViews:
     """Puts together what the admin panel shows of the games' Recruit a Friend, and changes it."""
 
-    def __init__(self, rewards: RewardAdminViews, games: Games) -> None:
+    def __init__(
+        self, rewards: RewardAdminViews, store: ReferralStore, engine: Rewards, games: Games
+    ) -> None:
         """Read Recruit a Friend through the games' rewards.
 
         Args:
             rewards: The panel's views of the games' rewards, whose settings it changes.
+            store: Where the recruits are kept.
+            engine: Gives the rewards, which say where each recruit's steps stand.
             games: The games, of which those with referral steps have Recruit a Friend.
         """
         self.rewards = rewards
+        self.store = store
+        self._engine = engine
         self._games = [game for game in games if game.rewards and game.rewards.referral]
 
     def game(self, game_id: str) -> Game:
@@ -52,6 +93,39 @@ class ReferralAdminViews:
         if game is None:
             raise HTTPException(404)
         return game
+
+    async def of_account(self, account_id: int, language: str) -> list[AccountReferral]:
+        """Return who recruited an account and its recruits, in each game with Recruit a Friend.
+
+        Args:
+            account_id: The account.
+            language: The page's language.
+        """
+        found = []
+        for game in self._games:
+            words = await self.rewards.words(game, language)
+            mine = await self.store.recruited(game, account_id)
+            recruiter = None
+            if mine:
+                name = mine.recruiter.display_name or mine.recruiter.nuid
+                recruiter = (name, mine.recruiter.id, words.day(mine.joined, "yMMMd"))
+            grouped: dict[int, tuple[Recruit, list[Reward]]] = {}
+            for reward in await self._engine.recruiting(game, account_id):
+                assert reward.referral is not None
+                recruit = reward.referral.recruit
+                grouped.setdefault(recruit.account.id, (recruit, []))[1].append(reward)
+            recruits = [
+                RecruitLine(
+                    recruit.account.id,
+                    recruit.account.display_name or recruit.account.nuid,
+                    words.day(recruit.joined, "yMMMd"),
+                    [chip(words, reward) for reward in rewards],
+                )
+                for recruit, rewards in grouped.values()
+            ]
+            if recruiter or recruits:
+                found.append(AccountReferral(game, recruiter, recruits))
+        return found
 
     def editor(
         self,
@@ -124,9 +198,10 @@ class ReferralAdminViews:
 def referral_routes(sessions: AdminSessions, views: ReferralAdminViews) -> APIRouter:
     """Return the changes of the games' Recruit a Friend, which need the admin role.
 
-    Switching it asks for a note as a page of its own, which opens as a dialog where scripts run;
-    a step's editor saves its goal, window and both gifts with a note, and moderators read it.
-    Each change is recorded with its note, and applies from the next page or claim.
+    Switching it and removing a recruit ask for a note as pages of their own, which open as
+    dialogs where scripts run; a step's editor saves its goal, window and both gifts with a note,
+    and moderators read it. Each change is recorded with its note, and applies from the next page
+    or claim.
 
     Args:
         sessions: Signs admins in and renders the panel's pages.
@@ -135,6 +210,7 @@ def referral_routes(sessions: AdminSessions, views: ReferralAdminViews) -> APIRo
     router = APIRouter()
     rewards = views.rewards
     switch = "/admin/rewards/{game_id}/referral/switch"
+    remove = "/admin/accounts/{recruit_id:int}/referral/{game_id}/remove"
 
     async def switch_page(
         request: Request, admin: Admin, game: Game, back: str, error: str = ""
@@ -242,5 +318,49 @@ def referral_routes(sessions: AdminSessions, views: ReferralAdminViews) -> APIRo
             recruit=", ".join(words.texts.gift_words(words.catalogue, saved.recruit.gift)),
         )
         return RedirectResponse(rewards_url(request, game) + "#rewards-referral", 303)
+
+    async def remove_page(
+        request: Request, admin: Admin, game: Game, recruit: Recruit, back: str, error: str = ""
+    ) -> HTMLResponse:
+        return await sessions.render(
+            request,
+            "admin.ReferralRemove",
+            400 if error else 200,
+            admin=admin,
+            of=game,
+            recruit=recruit,
+            back=back,
+            error=error,
+        )
+
+    @router.get(remove, response_class=HTMLResponse)
+    async def ask_remove(
+        request: Request, recruit_id: int, game_id: str, back: str = ""
+    ) -> HTMLResponse:
+        admin = sessions.admin(request, Role.ADMIN, "accounts")
+        game = views.game(game_id)
+        recruit = await views.store.recruited(game, recruit_id)
+        if recruit is None:
+            raise HTTPException(404)
+        return await remove_page(request, admin, game, recruit, back_to(request, back))
+
+    @router.post(remove)
+    async def remove_recruit(request: Request, recruit_id: int, game_id: str) -> Response:
+        admin = sessions.admin(request, Role.ADMIN, "accounts")
+        form = await request.form()
+        check_form(request, form)
+        game = views.game(game_id)
+        back = back_to(request, str(form.get("back", "")))
+        note = str(form.get("note", "")).strip()
+        recruit = await views.store.recruited(game, recruit_id)
+        if recruit is None:
+            # Removed meanwhile, as from another tab.
+            return RedirectResponse(back, 303)
+        if not note:
+            return await remove_page(request, admin, game, recruit, back, "note")
+        if removed := await views.store.remove(game, recruit_id, note, admin):
+            names = [a.display_name or a.nuid for a in (removed.account, removed.recruiter)]
+            toast(request, "web.admin.toast.referral.removed", recruit=names[0], name=names[1])
+        return RedirectResponse(back, 303)
 
     return router

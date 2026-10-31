@@ -1,7 +1,9 @@
-{#def view, entitlements: list, active: int, changes, remembered: list, heroes: list, codes, total: int, terms: str, manages: bool #}
+{#def view, entitlements: list, active: int, changes, remembered: list, heroes: list, codes, total: int, terms: str, manages: bool, referrals: list = [] #}
 {# A player's account: what is kept about it, its in-game names, heroes in the games whose heroes
-   are made on their site, entitlements and the codes it redeemed where a game's site redeems
-   codes, beside the search, the session it is logged in on and the logins its game remembers. #}
+   are made on their site, entitlements, the codes it redeemed where a game's site redeems codes,
+   and who recruited it and its recruits through Recruit a Friend, with Remove from recruits for
+   admins, beside the search, the session it is logged in on and the logins its game
+   remembers. #}
 {% set names = view.personas|rejectattr("game.heroes")|list %}
 {% set record = view.record %}
 {% set account = record.account %}
@@ -262,6 +264,35 @@
             {% endfor %}
           </section>
         {% endif %}
+        {% for found in referrals %}
+          <section aria-labelledby="account-referral-{{ found.game.id }}"
+                   class="account-part">
+            <Bar :id="'account-referral-' ~ found.game.id" :extra="found.game.name">{{ _("web.referral.title") }}</Bar>
+            {% if found.recruiter %}
+              {% set by_name, by_id, joined = found.recruiter %}
+              {% set by %}<a href="{{ url('/admin/accounts/' ~ by_id) }}" class="row-link">{{ by_name }}</a>{% endset %}
+              <p class="referral-by">
+                <span aria-hidden="true" class="badge"><Icon name="link" :size="14" stroke="#0A0A0A" /></span><span>{{ _("web.admin.account.recruited_by", name=by, date=joined) }}</span>
+              </p>
+            {% endif %}
+            {% if found.recruits %}
+              <h3 class="bar referral-recruits-bar">{{ _("web.admin.account.recruits", name=account.display_name or account.nuid, count=number(found.recruits|length)) }}</h3>
+              {% for line in found.recruits %}
+                <div class="referral-recruit">
+                  <a href="{{ url('/admin/accounts/' ~ line.account_id) }}"
+                     class="row-link">{{ line.name }}</a>
+                  <span>{{ line.joined }}</span>
+                  {% for chip in line.chips %}
+                    <span>{{ _("web.referral.step", n=loop.index + 1) }}: {{ chip.text }}{% if chip.until %} · {{ chip.until }}{% endif %}</span>
+                  {% endfor %}
+                  {% if manages %}
+                    <SmallAction :href="url('/admin/accounts/' ~ line.account_id ~ '/referral/' ~ found.game.id ~ '/remove') ~ '?back=' ~ here|urlencode" :label="_('web.admin.account.recruit.remove')" :name="_('web.admin.account.recruit.remove.name', recruit=line.name)" glyph="x" dialog />
+                  {% endif %}
+                </div>
+              {% endfor %}
+            {% endif %}
+          </section>
+        {% endfor %}
       </div>
 
       <div class="list-side admin-side">

@@ -72,6 +72,7 @@ GLYPHS = {
     AdminAction.DEAL_ENDED: "x",
     AdminAction.DEAL_RESTOCKED: "plus",
     AdminAction.DEAL_PIN: "star",
+    AdminAction.REFERRAL_REMOVED: "x",
 }
 # What the admin does to a hero's items, and to a hero, whose persona is the target.
 ITEM_ACTIONS = (AdminAction.ITEM_GRANT, AdminAction.ITEM_CHANGE, AdminAction.ITEM_REVOKE)
@@ -465,7 +466,7 @@ async def _rows(
             AdminAction.REWARD_EVENT,
         ):
             kind, shown, href, said = reward_entry(action, target, details, games, language)
-        elif action is AdminAction.REFERRAL_SETTINGS:
+        elif action in (AdminAction.REFERRAL_SETTINGS, AdminAction.REFERRAL_REMOVED):
             kind, shown, href, said = await referral_entry(
                 action, target, details, games, catalogues, language
             )

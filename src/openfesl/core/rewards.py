@@ -245,6 +245,25 @@ class Rewards:
             *await self._first_chest(game, rules, heroes),
             *await self._referred(game, rules, account_id, heroes, now),
         ]
+        return await self._claimed(game, account_id, found)
+
+    async def recruiting(self, game: Game, account_id: int) -> list[Reward]:
+        """Return the steps of an account's recruits as it gets them, those others do not see too.
+
+        Args:
+            game: The game.
+            account_id: The recruiter's account.
+        """
+        rules = await self.rules(game)
+        if rules is None:
+            return []
+        heroes = (await self._heroes.roster(game, account_id)).heroes
+        steps = await self._referred(game, rules, account_id, heroes, self._clock(), everyone=True)
+        found = [reward for reward in steps if reward.referral and reward.referral.recruiter]
+        return await self._claimed(game, account_id, found)
+
+    async def _claimed(self, game: Game, account_id: int, found: list[Reward]) -> list[Reward]:
+        # The rewards with the account's claims of them, leaving out a kept day's claimed gift.
         claimed = await self._store.claimed(game.id, account_id, {r.key for r in found})
         claims = {(claim.key, claim.faction): claim for claim in claimed}
         return [
@@ -512,16 +531,21 @@ class Rewards:
         return [Reward(FIRST_CHEST, None, reward.name, reward.description, reward.gift, state)]
 
     async def _referred(
-        self, game: Game, rules: RewardRules, account_id: int, heroes: list[Hero], now: datetime
+        self,
+        game: Game,
+        rules: RewardRules,
+        account_id: int,
+        heroes: list[Hero],
+        now: datetime,
+        everyone: bool = False,
     ) -> list[Reward]:
-        # The steps of the account's public recruits and its own as a recruit. A goal is recorded
-        # the first time it is seen reached within its days while the programme runs; while it
-        # is off only what was reached stays.
+        # The steps of the account's recruits, those others see unless everyone is asked for, and
+        # its own as a recruit; while the programme is off only what was reached stays.
         referral = rules.referral
         if referral is None:
             return []
         recruits = await self._referrals.recruits(game, account_id)
-        sides = [(recruit, True) for recruit in recruits if recruit.account.public]
+        sides = [(recruit, True) for recruit in recruits if everyone or recruit.account.public]
         if mine := await self._referrals.recruited(game, account_id):
             sides.append((mine, False))
         contents = self._catalogues.contents(game)

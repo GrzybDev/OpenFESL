@@ -14505,6 +14505,9 @@ msgstr "Włączenie zapraszania znajomych"
 msgid "web.admin.audit.action.referral_settings.off"
 msgstr "Wyłączenie zapraszania znajomych"
 
+msgid "web.admin.audit.action.referral_removed"
+msgstr "Usunięcie zaproszonego konta"
+
 msgid "web.admin.audit.reward_zone"
 msgstr "%(before)s → %(after)s"
 
@@ -14864,6 +14867,33 @@ msgstr "Zapraszanie znajomych wyłączone."
 
 msgid "web.admin.toast.referral.step"
 msgstr "Zapisano krok %(n)s: %(goal)s; %(recruiter)s i %(recruit)s."
+
+msgid "web.admin.toast.referral.removed"
+msgstr "%(recruit)s nie jest już kontem zaproszonym przez %(name)s."
+
+msgid "web.admin.account.recruited_by"
+msgstr "Zaproszone przez %(name)s, %(date)s, przez osobisty link."
+
+msgid "web.admin.account.recruits"
+msgstr "Konta zaproszone przez %(name)s · %(count)s"
+
+msgid "web.admin.account.recruit.remove"
+msgstr "Usuń z zaproszonych"
+
+msgid "web.admin.account.recruit.remove.name"
+msgstr "Usuń %(recruit)s z zaproszonych"
+
+msgid "web.admin.account.recruit.remove.question"
+msgstr "Usunąć %(recruit)s z kont zaproszonych przez %(name)s?"
+
+msgid "web.admin.account.recruit.remove.busy"
+msgstr "Usuwanie…"
+
+msgid "web.admin.account.recruit.remove.text"
+msgstr "%(recruit)s przestaje być kontem zaproszonym przez %(name)s. Nieodebrane kroki znikają ze stron nagród obu kont; przyznane nagrody zostają (w razie potrzeby można je cofnąć na stronie portfeli). Żadne z kont nie dostaje powiadomienia."
+
+msgid "web.admin.audit.referral.recruit"
+msgstr "%(recruit)s (konto zaproszone przez %(name)s)"
 
 msgid "web.admin.audit.referral.level"
 msgstr "Poziom celu %(before)s → %(after)s"

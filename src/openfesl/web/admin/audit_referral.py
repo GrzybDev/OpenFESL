@@ -22,8 +22,8 @@ async def referral_entry(
     """Return how the audit log shows a change of Recruit a Friend.
 
     Args:
-        action: What the admin did: switched it or changed a step.
-        target: The game's id.
+        action: What the admin did: switched it, changed a step or removed a recruit.
+        target: The game's id, or the removed recruit's account.
         details: The change's details, as the admin's log keeps them.
         games: The games.
         catalogues: The games' imported catalogues, which name the items.
@@ -34,6 +34,13 @@ async def referral_entry(
         changed in words; the note follows them.
     """
     title = translate("web.referral.title", language)
+    if action is AdminAction.REFERRAL_REMOVED:
+        recruit, recruiter = details["names"]
+        shown = translate("web.admin.audit.referral.recruit", language) % {
+            "recruit": recruit,
+            "name": recruiter,
+        }
+        return action.value, shown, localize(f"/admin/accounts/{target}", language), ""
     href = localize(f"/admin/rewards/{target}#rewards-referral", language)
     if "enabled" in details:
         return f"{action.value}.{'on' if details['enabled'] else 'off'}", title, href, ""

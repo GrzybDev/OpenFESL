@@ -101,7 +101,7 @@ def include_admin_routes(
         stores.admin_log,
         stores.referrals,
     )
-    referral_views = ReferralAdminViews(reward_views, games)
+    referral_views = ReferralAdminViews(reward_views, stores.referrals, services.rewards, games)
 
     async def menu_counts() -> dict[str, int]:
         counts = await server_views.menu_counts()
@@ -150,6 +150,7 @@ def include_admin_routes(
             hero_views,
             services.terms.version,
             code_views,
+            referral_views,
         )
     )
     app.include_router(

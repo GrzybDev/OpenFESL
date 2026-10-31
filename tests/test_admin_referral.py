@@ -46,7 +46,7 @@ async def test_admins_change_a_step_and_the_switch_with_notes_that_players_and_t
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     await import_catalogue(server_url, tmp_path, capsys, {**INVENTED, 257: INVENTED[1439]})
-    await recruited(base, database_url)
+    ann, cat = await recruited(base, database_url)
     admin_provider.user = KEEPER
     async with httpx2.AsyncClient() as client:
         token = form_token((await sign_in(client, base, next=REWARDS)).text)
@@ -82,6 +82,11 @@ async def test_admins_change_a_step_and_the_switch_with_notes_that_players_and_t
         switched = visible(
             (await client.post(f"{base}{SWITCH}", data=off, follow_redirects=True)).content
         )
+        account = visible((await client.get(f"{base}/admin/accounts/{ann}")).content)
+        recruit = visible((await client.get(f"{base}/admin/accounts/{cat}")).content)
+        remove = f"{base}/admin/accounts/{cat}/referral/bfheroes/remove"
+        note = {"csrf": token, "back": f"/admin/accounts/{ann}", "note": "Second account"}
+        removed = visible((await client.post(remove, data=note, follow_redirects=True)).content)
         log = visible((await client.get(f"{base}/admin/audit")).content)
     async with httpx2.AsyncClient() as player:
         await post_sign_in(player, base, "ann@example.test", PASSWORD)
@@ -105,6 +110,12 @@ async def test_admins_change_a_step_and_the_switch_with_notes_that_players_and_t
     assert (
         "Recruit a Friend switched off." in switched and "Off: links record nothing new" in switched
     )
+    assert "Recruits of Quillfuse · 1 Invented_Cat" in account
+    assert "Step 2: Ready on the rewards page" in account
+    assert "Recruited by Quillfuse on" in recruit
+    assert "Invented_Cat is no longer Quillfuse's recruit." in removed
+    assert await select_value(database_url, "SELECT count(*) FROM referral") == 0
+    assert "Recruit removed Invented_Cat (recruit of Quillfuse) Details Second account" in log
     assert "Recruit a Friend switched off Recruit a Friend Details Pause while second" in log
     assert "Goal level 15 → 12; Recruiter: 3,500 Funds → 3,000 Funds" in log
     assert "Recruit a Friend is not running on this service" in page
@@ -113,7 +124,7 @@ async def test_admins_change_a_step_and_the_switch_with_notes_that_players_and_t
 async def test_moderators_read_recruit_a_friend_and_change_nothing(
     admin_provider: IdentityProvider, base: str, database_url: str
 ) -> None:
-    await recruited(base, database_url)
+    ann, _ = await recruited(base, database_url)
     admin_provider.user = WARDEN
     async with httpx2.AsyncClient() as client:
         token = form_token((await sign_in(client, base, next=REWARDS)).text)
@@ -123,8 +134,11 @@ async def test_moderators_read_recruit_a_friend_and_change_nothing(
         sent = await client.post(
             f"{base}{SWITCH}", data={"csrf": token, "enabled": "0", "note": "x"}
         )
+        account = (await client.get(f"{base}/admin/accounts/{ann}")).text
 
     assert "Recruit a Friend" in visible(overview.encode()) and SWITCH not in overview
     assert "Recruit a Friend is changed with the admin role." in step
     assert asked.status_code == 403 and sent.status_code == 403
+    assert "Invented_Cat" in account and "/referral/bfheroes/remove" not in account
+    assert 'id="account-referral-bfheroes"' in account
     assert await select_value(database_url, "SELECT count(*) FROM setting") == 1
