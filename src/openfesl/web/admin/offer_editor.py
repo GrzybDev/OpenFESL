@@ -11,6 +11,7 @@ from openfesl.core.catalogues import Catalogue, Item, game_text
 from openfesl.core.deal_offers import offer_state
 from openfesl.core.deal_picks import fit
 from openfesl.core.deal_rules import DealRules, ItemSection, Offer, OfferSection
+from openfesl.core.deal_uploads import offer_of
 from openfesl.core.games import Game
 from openfesl.core.store import ADMIN, Bundle, ListedBundle, Product
 from openfesl.core.texts import BASE_LANGUAGE, languages
@@ -38,6 +39,8 @@ class OfferDraft:
         starts: When it starts, as written, in UTC.
         ends: When it ends, as written, in UTC.
         stock: How many of it are sold in all, as written; empty for no limit.
+        pinned: Whether hot deals list it first in its section and the game's home screen
+            right after its big deals.
         section: The key of the section that lists it.
         text: imported for the game's text of a bundle with its items, own for the admin's.
         names: Its own name by language code.
@@ -51,6 +54,7 @@ class OfferDraft:
     starts: str
     ends: str
     stock: str
+    pinned: bool
     section: str
     text: str
     names: dict[str, str]
@@ -109,6 +113,7 @@ class OfferEditor:
         bundle: The offer as it is to be sold; none while a field is refused.
         languages: The languages of its own texts, English first, each with its name.
         icons: Whether the catalogue holds the items' icons.
+        uploaded: Which of its pictures were uploaded: True for the big one, False for the small.
     """
 
     game: Game
@@ -127,6 +132,7 @@ class OfferEditor:
     bundle: Bundle | None
     languages: list[tuple[str, str]]
     icons: bool
+    uploaded: set[bool]
 
 
 def editor_of(
@@ -136,6 +142,7 @@ def editor_of(
     every: Mapping[int, Product],
     listed: ListedBundle | None,
     fields: ImmutableMultiDict[str, Any] | None,
+    uploaded: set[bool],
 ) -> OfferEditor:
     """Return an admin offer's editor, with its fields as written where a form sent them.
 
@@ -146,6 +153,7 @@ def editor_of(
         every: Every product of the game's store by number, which the offer may hold.
         listed: The offer's bundle; none for a new offer.
         fields: The form's fields; none for the offer as it is saved.
+        uploaded: Which of its pictures were uploaded: True for the big one, False for the small.
 
     Raises:
         HTTPException: 400 for fields that no form of the editor sends.
@@ -256,6 +264,7 @@ def editor_of(
         bundle,
         [(code, str(locale.languages.get(code, code))) for code in languages()],
         catalogue.contents.icons > 0,
+        uploaded,
     )
 
 
@@ -283,6 +292,7 @@ def drafted(
             f"{start:{CLOCK}}",
             f"{week:{CLOCK}}",
             "",
+            False,
             sections[0],
             "own",
             {},
@@ -302,6 +312,7 @@ def drafted(
         f"{bundle.starts:{CLOCK}}" if bundle.starts else "",
         f"{bundle.ends:{CLOCK}}" if bundle.ends else "",
         str(bundle.stock) if bundle.stock is not None else "",
+        offer_of(bundle) in rules.pinned,
         bundle.section if bundle.section in sections else sections[0],
         "imported" if imported else "own",
         {} if imported else names,
@@ -349,6 +360,7 @@ def written(fields: ImmutableMultiDict[str, Any]) -> OfferDraft:
         field("starts"),
         field("ends"),
         field("stock"),
+        bool(field("pinned")),
         field("section"),
         field("text") or "own",
         {code: field(f"name-{code}")[:NAME_LONGEST] for code in languages()},

@@ -136,6 +136,10 @@ class AdminAction(StrEnum):
     """Added or changed an admin offer among a game's hot deals, the target naming both as
     game:bundle number; the details hold the offer's name, section, price, start, end and how
     many items it holds, and whether it is new."""
+    DEAL_PIN = "deal_pin"
+    """Pinned or unpinned a hot deal's offer of the game whose id is the target, which hot deals
+    then list first in its section and the game's home screen right after its big deals; the
+    details hold the offer's name and faction and whether it is pinned."""
     DEAL_RESTOCKED = "deal_restocked"
     """Added to the stock of an admin offer among a game's hot deals, the target naming both as
     game:bundle number; the details hold the offer's name, how many were added and how many

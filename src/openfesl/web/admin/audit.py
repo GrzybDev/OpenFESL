@@ -28,6 +28,7 @@ from openfesl.web.admin.audit_store import (
     box_entry,
     deal_entry,
     offer_entry,
+    pin_entry,
     price_entry,
     rule_entry,
 )
@@ -66,6 +67,7 @@ GLYPHS = {
     AdminAction.DEAL_OFFER: "deal",
     AdminAction.DEAL_ENDED: "x",
     AdminAction.DEAL_RESTOCKED: "plus",
+    AdminAction.DEAL_PIN: "star",
 }
 # What the admin does to a hero's items, and to a hero, whose persona is the target.
 ITEM_ACTIONS = (AdminAction.ITEM_GRANT, AdminAction.ITEM_CHANGE, AdminAction.ITEM_REVOKE)
@@ -420,6 +422,8 @@ async def _rows(
             href = page(f"/admin/store/{details['game']}/boxes")
             chest = "" if details["kind"] == "box" else "chest."
             kind = f"box_switch.{chest}{'on' if details['enabled'] else 'off'}"
+        elif action is AdminAction.DEAL_PIN:
+            kind, shown, href = await pin_entry(target, details, games, catalogues, language)
         elif action is AdminAction.DEAL_ART:
             kind, shown, href, said = await art_entry(target, details, games, catalogues, language)
         elif action in (

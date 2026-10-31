@@ -13,8 +13,8 @@ from openfesl.web.admin.auth import AdminSessions, NeedsRole, SignInNeeded, Sign
 from openfesl.web.admin.box_tables import box_table_routes
 from openfesl.web.admin.boxes import BoxAdminViews, box_routes
 from openfesl.web.admin.catalogues import catalogue_routes
+from openfesl.web.admin.deal_home import DealHomeViews, deal_home_routes
 from openfesl.web.admin.deal_offers import DealOfferViews, offer_routes
-from openfesl.web.admin.deal_pictures import deal_picture_routes
 from openfesl.web.admin.deal_sections import DealSectionViews, section_routes
 from openfesl.web.admin.deals import DealAdminViews, deal_routes
 from openfesl.web.admin.entitlements import entitlement_routes
@@ -88,13 +88,7 @@ def include_admin_routes(
     box_views = BoxAdminViews(store_views, services.catalogues, services.deals, stores.boxes)
     deal_steps = DealSteps(services.deals)
     deal_views = DealAdminViews(
-        store_views,
-        services.deals,
-        deal_steps,
-        stores.settings,
-        deal_art,
-        stores.deal_uploads,
-        services.catalogues,
+        store_views, services.deals, deal_steps, stores.settings, services.catalogues
     )
     reward_views = RewardAdminViews(
         games, services.rewards, services.catalogues, stores.settings, stores.admin_log
@@ -186,10 +180,15 @@ def include_admin_routes(
     app.include_router(purchase_routes(sign_in, store_views, services.catalogues, stores.purchases))
     app.include_router(box_table_routes(sign_in, box_views))
     app.include_router(deal_routes(sign_in, deal_views))
-    app.include_router(deal_picture_routes(sign_in, deal_views))
+    home_views = DealHomeViews(
+        deal_views, deal_art, stores.deal_uploads, stores.products, services.game_art
+    )
+    app.include_router(deal_home_routes(sign_in, home_views))
     section_views = DealSectionViews(deal_views, services.catalogues, stores.boxes)
     app.include_router(section_routes(sign_in, section_views))
-    offer_views = DealOfferViews(deal_views, stores.offers, stores.prices, services.catalogues)
+    offer_views = DealOfferViews(
+        deal_views, stores.offers, stores.prices, services.catalogues, stores.deal_uploads
+    )
     app.include_router(offer_routes(sign_in, offer_views))
     app.include_router(reward_routes(sign_in, reward_views))
     app.include_router(reward_change_routes(sign_in, reward_views, stores.rewards))

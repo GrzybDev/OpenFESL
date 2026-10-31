@@ -36,14 +36,14 @@
               class="badge"><Icon name="lock" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.deals.managed") }}
       </p>
     {% endif %}
-    <form method="post"
-          action="{{ path }}"
-          {% if manages %} data-admin-form data-still="{{ _('web.admin.deals.offer.waits') }}"{% endif %}
-          class="list-layout admin-layout">
-      <CsrfField />
-      {# The form's default button, so that Enter answers the fields without saving them. #}
-      <button type="submit" name="find" value="1" hidden></button>
-      <div class="list-main offer-main">
+    <div class="list-layout admin-layout">
+      <form method="post"
+            action="{{ path }}"
+            {% if manages %} data-admin-form data-still="{{ _('web.admin.deals.offer.waits') }}"{% endif %}
+            class="list-main offer-main">
+        <CsrfField />
+        {# The form's default button, so that Enter answers the fields without saving them. #}
+        <button type="submit" name="find" value="1" hidden></button>
         <h2 class="bar bar-wrap offer-bar">
           <span class="offer-title">{{ title }}{% if found.number is not none %}<span class="offer-number">{{ _("web.admin.deals.offer.number", number=found.number) }}</span>{% endif %}</span>
           {% if found.state %}<span class="bar-extra">{{ _("web.admin.deals.offer.state." ~ found.state) }}</span>{% endif %}
@@ -79,6 +79,31 @@
             <span>{{ _("web.admin.deals.offer.sum") }}</span><span class="admin-hero-strong">{{ number(found.worth) }} {{ currency }}</span>
           </p>
           {{ refusal("items") }}
+          {% if manages %}
+            <section aria-labelledby="offer-add" class="offer-add">
+              <Bar id="offer-add">{{ _("web.admin.deals.offer.add") }}</Bar>
+              <ItemSearch id="offer-q" :label="_('web.admin.store.search')" :value="draft.query" refresh />
+              <div data-live="{{ path }}" class="offer-candidates">
+                {% for candidate in found.candidates %}
+                  <div class="box-candidate">
+                    <p class="box-candidate-name">
+                      <AdminItemIcon :game="game" :item="candidate.item" :shown="icons" />
+                      <span class="cell-stack"><span class="admin-hero-strong">{{ candidate.name }}</span><span class="cell-ago">{{ _("web.admin.items.number", id=candidate.item.id) }} · {{ _("games." ~ game.id ~ ".item_kind." ~ candidate.item.kind) }}</span></span>
+                    </p>
+                    {% for product in candidate.products %}
+                      <FormButton icon="plus" name="add" :value="product.id">{{ _("web.admin.deals.offer.add.submit", ownership=owned(product.ownership), price=number(product.price) ~ " " ~ currency) }}</FormButton>
+                    {% else %}
+                      <p class="field-note">{{ _("web.admin.deals.offer.refused.unpriced", item=candidate.name, currency=currency) }}</p>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <p class="bar-text body-text">
+                    {{ _("web.admin.deals.offer.add.none", query=draft.query) if draft.query else _("web.admin.deals.offer.add.text") }}
+                  </p>
+                {% endfor %}
+              </div>
+            </section>
+          {% endif %}
           <p class="bar offer-legend">{{ _("web.admin.deals.offer.price") }}</p>
           <div class="choice-tiles offer-tiles">
             {% for pricing, glyph in (("price", "coin"), ("discount", "tag")) %}
@@ -125,6 +150,19 @@
               </ChoiceTile>
             {% endfor %}
           </div>
+          <label class="check-row prices-off-row offer-pin">
+            <span class="prices-off-text">
+              <span class="prices-off-title">{{ _("web.admin.deals.offer.pinned") }}</span>
+              <span>{{ _("web.admin.deals.offer.pinned.text") }}</span>
+            </span>
+            <span class="check-place">
+              <input type="checkbox"
+                     name="pinned"
+                     value="1"
+                     {% if draft.pinned %} checked{% endif %}
+                     class="check">
+              <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>
+          </label>
           <p class="bar offer-legend">{{ _("web.admin.deals.offer.text") }}</p>
           <div class="choice-tiles offer-tiles">
             <ChoiceTile name="text" value="imported" :title="_('web.admin.deals.offer.text.imported')" glyph="doc" :checked="draft.text == 'imported'" :disabled="not found.imported">
@@ -192,32 +230,52 @@
             <ActionButton :label="_('web.admin.deals.offer.save')" :busy="_('web.admin.store.save.busy')" />
           </div>
         {% endif %}
-      </div>
-      {% if manages %}
-        <section aria-labelledby="offer-add" class="list-side admin-side offer-side">
-          <Bar id="offer-add">{{ _("web.admin.deals.offer.add") }}</Bar>
-          <ItemSearch id="offer-q" :label="_('web.admin.store.search')" :value="draft.query" refresh />
-          <div data-live="{{ path }}" class="offer-candidates">
-            {% for candidate in found.candidates %}
-              <div class="box-candidate">
-                <p class="box-candidate-name">
-                  <AdminItemIcon :game="game" :item="candidate.item" :shown="icons" />
-                  <span class="cell-stack"><span class="admin-hero-strong">{{ candidate.name }}</span><span class="cell-ago">{{ _("web.admin.items.number", id=candidate.item.id) }} · {{ _("games." ~ game.id ~ ".item_kind." ~ candidate.item.kind) }}</span></span>
-                </p>
-                {% for product in candidate.products %}
-                  <FormButton icon="plus" name="add" :value="product.id">{{ _("web.admin.deals.offer.add.submit", ownership=owned(product.ownership), price=number(product.price) ~ " " ~ currency) }}</FormButton>
-                {% else %}
-                  <p class="field-note">{{ _("web.admin.deals.offer.refused.unpriced", item=candidate.name, currency=currency) }}</p>
-                {% endfor %}
-              </div>
-            {% else %}
-              <p class="bar-text body-text">
-                {{ _("web.admin.deals.offer.add.none", query=draft.query) if draft.query else _("web.admin.deals.offer.add.text") }}
-              </p>
+      </form>
+      {% if found.number is not none %}
+        {% set art = url("/admin/store/" ~ game.id ~ "/deals/art/" ~ found.number) %}
+        <section aria-labelledby="offer-art" class="list-side admin-side offer-side">
+          <Bar id="offer-art">{{ _("web.admin.deals.offer.art") }}</Bar>
+          <div class="offer-art">
+            {% for big in (true, false) %}
+              {% set size = "big" if big else "small" %}
+              <figure class="offer-picture">
+                <img src="{{ art }}_{{ size }}.png"
+                     alt="{{ _('web.admin.deals.art.alt', deal=title) }}"
+                     loading="lazy"
+                     class="deals-home-picture deals-home-{{ size }}">
+                <figcaption>{{ _("web.admin.deals.home." ~ size) }} · {{ _("web.admin.deals.art.uploaded") if big in found.uploaded else _("web.admin.deals.art.generated") }}</figcaption>
+              </figure>
             {% endfor %}
           </div>
+          {% if manages %}
+            <form method="post"
+                  action="{{ art }}"
+                  enctype="multipart/form-data"
+                  class="deals-home-upload">
+              <CsrfField />
+              <input type="hidden" name="offer" value="1">
+              <label class="field-label" for="offer-big">{{ _("web.admin.deals.art.big") }}</label>
+              <input id="offer-big"
+                     name="big"
+                     type="file"
+                     accept="image/png"
+                     class="field-input">
+              <label class="field-label" for="offer-small">{{ _("web.admin.deals.art.small") }}</label>
+              <input id="offer-small"
+                     name="small"
+                     type="file"
+                     accept="image/png"
+                     class="field-input">
+              <FormButton icon="plus">{{ _("web.admin.deals.art.upload") }}</FormButton>
+              {% if found.uploaded %}
+                <FormButton icon="retry" :formaction="art ~ '/reset'">{{ _("web.admin.deals.art.reset") }}</FormButton>
+              {% endif %}
+            </form>
+          {% endif %}
+          <p class="bar-text body-text">{{ _("web.admin.deals.art.rule") }}</p>
+          <p class="bar-text body-text">{{ _("web.admin.deals.offer.art.text") }}</p>
         </section>
       {% endif %}
-    </form>
+    </div>
   </Panel>
 </AdminPage>

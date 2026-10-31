@@ -11,6 +11,7 @@ from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin, Role
 from openfesl.core.catalogues import Catalogue, Catalogues, game_text
 from openfesl.core.deal_offers import STATES, OfferStore, offer_state
+from openfesl.core.deal_uploads import DealUploads, offer_of
 from openfesl.core.games import Game
 from openfesl.core.store import Bundle, ListedBundle
 from openfesl.core.store_prices import PriceStore
@@ -38,6 +39,8 @@ class OfferRow:
             off.
         share: How much its price takes off its items' list prices in percent; 0 for none.
         imported: Whether it takes the texts of the game's bundle with its items.
+        pinned: Whether hot deals list it first in its section and the game's home screen
+            right after its big deals.
     """
 
     listed: ListedBundle
@@ -45,6 +48,7 @@ class OfferRow:
     state: str
     share: int
     imported: bool
+    pinned: bool
 
 
 class DealOfferViews:
@@ -56,19 +60,23 @@ class DealOfferViews:
         offers: OfferStore,
         prices: PriceStore,
         catalogues: Catalogues,
+        uploads: DealUploads,
     ) -> None:
         """Read and change the admin's offers, which sell products of the stores.
 
         Args:
-            deals: The games' hot-deal rotations, whose sections list the offers.
+            deals: The games' hot-deal rotations, whose sections list the offers and which
+                keep the pins.
             offers: Where the admin's offers are kept.
             prices: Hold every product of the stores, which the offers sell.
             catalogues: The games' imported catalogues, which name the items.
+            uploads: Where the pictures that the admin uploaded for offers are kept.
         """
         self.deals = deals
         self.offers = offers
         self._prices = prices
         self._catalogues = catalogues
+        self._uploads = uploads
 
     async def rows(self, game: Game, language: str) -> list[OfferRow]:
         """Return a game's admin offers, live first, with those ended in the last 90 days.
@@ -92,6 +100,7 @@ class DealOfferViews:
                     offer_state(bundle, now, rules),
                     bundle.discount or off,
                     game_named(rules, bundle),
+                    offer_of(bundle) in rules.pinned,
                 )
             )
         return sorted(rows, key=lambda row: STATES.index(row.state))
@@ -122,7 +131,9 @@ class DealOfferViews:
         texts = StoreTexts(game, language, datetime.now(UTC))
         catalogue = await self._catalogues.of(game, language)
         every = {product.id: product for product in await self._prices.every(game.id)}
-        return editor_of(texts, rules, catalogue, every, listed, fields)
+        uploaded = await self._uploads.uploaded(game.id) if listed else {}
+        pictures = uploaded.get(offer_of(listed.bundle), set()) if listed else set()
+        return editor_of(texts, rules, catalogue, every, listed, fields, pictures)
 
 
 def offer_name(game: Game, catalogue: Catalogue, bundle: Bundle, language: str) -> str:
@@ -222,11 +233,16 @@ def offer_routes(sessions: AdminSessions, views: DealOfferViews) -> APIRouter:
             "items": len(bundle.members),
             "new": number is None,
         }
+        before = await views.offers.offer(game.id, number) if number is not None else None
         saved = await views.offers.save(
             game.id, number, bundle, AdminAction.DEAL_OFFER, details, admin
         )
         if saved is None:
             raise HTTPException(404)
+        # A pin goes with the offer's name, so a new name takes it along.
+        if before is not None and offer_of(before.bundle) != offer_of(bundle):
+            await views.deals.pin(game, offer_of(before.bundle), bundle.faction, False, admin)
+        await views.deals.pin(game, offer_of(bundle), bundle.faction, found.draft.pinned, admin)
         if found.rules.sections[found.draft.section].enabled:
             texts = StoreTexts(game, request.state.language, datetime.now(UTC))
             assert bundle.ends is not None

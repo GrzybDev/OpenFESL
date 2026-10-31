@@ -1,12 +1,10 @@
-{#def of, rotation, steps, home: list, art, manages: bool #}
+{#def of, rotation, steps, manages: bool #}
 {# A game's hot-deal rotation: its switch, each section with whether it runs,
    how many deals of each faction it picks, its schedule, its next change and how many of its
    deals are on sale, each leading to the section's page, and with the preview what each one's
    next step brings and ends as things stand; the sections whose latest period sold
    fewer deals than asked, and beside them what hot deals sell now and the windows of the year
-   that sections sell in. Changes apply from each section's next period. The deals of the game's
-   home screen show the pictures the game downloads, drawn from the items' icons or uploaded in
-   their place for the deal's offer, which a reset takes back to the drawn ones. #}
+   that sections sell in. Changes apply from each section's next period. #}
 {% set game = of %}
 {% set base = url("/admin/store/" ~ game.id ~ "/deals") %}
 {% set rules = rotation.rules %}
@@ -162,57 +160,6 @@
               <FormButton icon="clock" :href="base ~ '?preview=1'">{{ _("web.admin.deals.preview") }}</FormButton>
             {% endif %}
           </div>
-        </section>
-        <section id="home" aria-labelledby="deals-home" class="admin-list">
-          <Bar id="deals-home" :extra="number(home|length)">{{ _("web.admin.deals.home") }}</Bar>
-          <p class="bar-text body-text">{{ _("web.admin.deals.home.text") }}</p>
-          <ol class="deals-home">
-            {% for shown in home %}
-              {% set deal_id = shown.deal.listed.id %}
-              {% set size = "big" if shown.big else "small" %}
-              <li class="deals-home-deal">
-                <p class="deals-home-name">
-                  <span class="admin-hero-strong">{{ shown.deal.name }}</span>
-                  <span class="prices-from">{{ _("web.admin.deals.home." ~ size) }} · {{ _("web.admin.deals.art.uploaded") if shown.big in shown.uploaded else _("web.admin.deals.art.generated") }}</span>
-                </p>
-                <img src="{{ base }}/art/{{ deal_id }}_{{ size }}.png"
-                     alt="{{ _('web.admin.deals.art.alt', deal=shown.deal.name) }}"
-                     loading="lazy"
-                     class="deals-home-picture deals-home-{{ size }}">
-                {% if art and art[0] == deal_id %}
-                  <p role="alert" class="prices-refusal">
-                    <span aria-hidden="true"
-                          class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span><span>{{ art[1] }}</span>
-                  </p>
-                {% endif %}
-                {% if manages %}
-                  <form method="post"
-                        action="{{ base }}/art/{{ deal_id }}"
-                        enctype="multipart/form-data"
-                        class="deals-home-upload">
-                    <CsrfField />
-                    <label class="field-label" for="big-{{ deal_id }}">{{ _("web.admin.deals.art.big") }}</label>
-                    <input id="big-{{ deal_id }}"
-                           name="big"
-                           type="file"
-                           accept="image/png"
-                           class="field-input">
-                    <label class="field-label" for="small-{{ deal_id }}">{{ _("web.admin.deals.art.small") }}</label>
-                    <input id="small-{{ deal_id }}"
-                           name="small"
-                           type="file"
-                           accept="image/png"
-                           class="field-input">
-                    <FormButton icon="plus">{{ _("web.admin.deals.art.upload") }}</FormButton>
-                    {% if shown.uploaded %}
-                      <FormButton icon="retry" :formaction="base ~ '/art/' ~ deal_id ~ '/reset'">{{ _("web.admin.deals.art.reset") }}</FormButton>
-                    {% endif %}
-                  </form>
-                {% endif %}
-              </li>
-            {% endfor %}
-          </ol>
-          <p class="bar-text body-text">{{ _("web.admin.deals.art.rule") }}</p>
         </section>
       </div>
 

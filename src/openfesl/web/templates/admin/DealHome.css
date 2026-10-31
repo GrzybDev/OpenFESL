@@ -1,0 +1,64 @@
+/* The deals of a game's home screen: a block each with its picture as the game shows it, its place
+   and why it is there, its pin and its pictures' upload; the big ones first, on a paler ground. */
+@layer pages {
+  .deals-home {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2px;
+    margin: 2px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .deals-home-deal {
+    display: grid;
+    align-content: start;
+    gap: 8px;
+    background: var(--panel);
+    padding: 12px;
+  }
+
+  .deals-home-large {
+    background: var(--row-light);
+  }
+
+  .deals-home-name {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    background: var(--row);
+    padding: 8px 10px;
+    color: var(--ink);
+  }
+
+  .deals-home-slot {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .deals-home-pin-button {
+    width: 100%;
+    justify-content: center;
+
+    &[aria-pressed="true"] {
+      background: var(--accent);
+      color: var(--ink);
+    }
+  }
+
+  /* The game shows its pictures unscaled, so the panel does too. */
+  .deals-home-picture {
+    justify-self: center;
+    max-width: 100%;
+  }
+
+  .deals-home-upload {
+    display: grid;
+    gap: 4px;
+  }
+}

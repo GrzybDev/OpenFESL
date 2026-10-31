@@ -1,3 +1,4 @@
+import json
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -12,37 +13,14 @@ from openfesl.core.calendar import Window, today
 from openfesl.core.catalogues import Catalogues, game_text
 from openfesl.core.deal_rules import DealRules, DealSection, ItemSection, OfferSection
 from openfesl.core.deal_steps import DealSteps, next_change, short
-from openfesl.core.deal_uploads import DealUploads, offer_of
-from openfesl.core.deals import Deal, HotDeals
+from openfesl.core.deals import HotDeals
 from openfesl.core.games import Game
 from openfesl.core.policies import SettingStore
 from openfesl.core.store import AUTO, Bundle, ListedBundle
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.store import SECTION, StoreAdminViews, store_url
-from openfesl.web.deal_art import DealArt
 from openfesl.web.sessions import check_form, toast
 from openfesl.web.store_texts import StoreTexts
-
-# How many deals the game's home screen shows, of which the first ones big.
-HOME = 5
-BIG = 2
-
-
-@dataclass(frozen=True, slots=True)
-class HomeDeal:
-    """A hot deal as the game's home screen shows it, with the pictures it downloads.
-
-    Attributes:
-        deal: The deal, named in the page's language.
-        offer: The name of the offer it sells, which uploaded pictures go with.
-        big: Whether the home screen shows its big picture rather than its small one.
-        uploaded: Which of its pictures were uploaded: True for the big one, False for the small.
-    """
-
-    deal: Deal
-    offer: str
-    big: bool
-    uploaded: set[bool]
 
 
 @dataclass(frozen=True, slots=True)
@@ -127,8 +105,6 @@ class DealAdminViews:
         deals: HotDeals,
         steps: DealSteps,
         settings: SettingStore,
-        art: DealArt,
-        uploads: DealUploads,
         catalogues: Catalogues,
     ) -> None:
         """Read the rotations and change them through the instance's settings.
@@ -138,36 +114,13 @@ class DealAdminViews:
             deals: The hot deals, which run the rotations.
             steps: The rotations' steps, of which the page previews the next.
             settings: The instance's settings, which override the rotations' game data.
-            art: Draws the deals' pictures, or gives the uploaded ones.
-            uploads: Where the pictures that the admin uploaded are kept.
             catalogues: The games' imported catalogues, which name the deals of a preview.
         """
         self.stores = stores
+        self.deals = deals
         self.steps = steps
         self._catalogues = catalogues
-        self._deals = deals
         self._settings = settings
-        self.art = art
-        self.uploads = uploads
-
-    async def home(self, game: Game, language: str) -> list[HomeDeal]:
-        """Return the hot deals that the game's home screen shows, with their pictures.
-
-        Args:
-            game: The game, which has hot deals.
-            language: The language of the deals' names.
-        """
-        uploaded = await self.uploads.uploaded(game.id)
-        shown = (await self._deals.hot_deals(game, language))[:HOME]
-        return [
-            HomeDeal(
-                deal,
-                offer_of(deal.listed.bundle),
-                index < BIG,
-                uploaded.get(offer_of(deal.listed.bundle), set()),
-            )
-            for index, deal in enumerate(shown)
-        ]
 
     async def rules(self, game: Game) -> DealRules:
         """Return how a game's hot deals change, with the instance's settings over its data.
@@ -178,7 +131,7 @@ class DealAdminViews:
         Raises:
             HTTPException: 404 for a game without hot deals.
         """
-        rules = await self._deals.rules(game)
+        rules = await self.deals.rules(game)
         if rules is None:
             raise HTTPException(404)
         return rules
@@ -194,7 +147,7 @@ class DealAdminViews:
         """
         rules = await self.rules(game)
         assert game.deals is not None
-        listed = await self._deals.current(game)
+        listed = await self.deals.current(game)
         now = datetime.now(UTC)
         rows = []
         for key, section in rules.sections.items():
@@ -283,7 +236,7 @@ class DealAdminViews:
             game: The game.
             section: The section's name.
         """
-        return await self._deals.shown(game, section)
+        return await self.deals.shown(game, section)
 
     async def short(self) -> list[tuple[Game, SectionRow]]:
         """Return the sections of the rotations whose latest period sells fewer deals than asked."""
@@ -317,6 +270,27 @@ class DealAdminViews:
         prefix = f"{game.id}.deals."
         keyed = {prefix + key: value for key, value in settings.items()}
         await self._settings.change_all(keyed, action, target, details, admin)
+
+    async def pin(
+        self, game: Game, offer: str, faction: str | None, on: bool, admin: Admin
+    ) -> None:
+        """Pin a hot deal's offer or unpin it, and record it, if it changes.
+
+        Args:
+            game: The game, which has hot deals.
+            offer: The name of the offer the deal sells.
+            faction: The faction whose heroes may buy the deal, which its name may tell.
+            on: Whether it is pinned.
+            admin: The admin who pinned it.
+        """
+        rules, seed = await self.rules(game), game.deals
+        assert seed is not None
+        if on == (offer in rules.pinned):
+            return
+        pinned = [found for found in rules.pinned if found != offer] + ([offer] if on else [])
+        value = None if tuple(pinned) == seed.pinned else json.dumps(pinned)
+        details = {"game": game.id, "offer": offer, "faction": faction, "pinned": on}
+        await self.change(game, {"pinned": value}, AdminAction.DEAL_PIN, game.id, details, admin)
 
 
 def deal_routes(sessions: AdminSessions, views: DealAdminViews) -> APIRouter:
@@ -363,10 +337,9 @@ async def deal_page(
     request: Request,
     admin: Admin,
     game: Game,
-    art: tuple[int, str] | None = None,
     preview: bool = False,
 ) -> HTMLResponse:
-    """Render a game's hot-deal rotation page, with a refused picture if there is one.
+    """Render a game's hot-deal rotation page.
 
     Args:
         sessions: Signs admins in and renders the panel's pages.
@@ -374,20 +347,16 @@ async def deal_page(
         request: The request the page answers.
         admin: The signed-in admin.
         game: The game, which has hot deals.
-        art: The deal whose uploaded picture was refused, by its bundle's number, and why.
         preview: Whether the page shows what each section's next step brings and ends.
     """
     language = request.state.language
     return await sessions.render(
         request,
         "admin.StoreDeals",
-        400 if art else 200,
         admin=admin,
         of=game,
         rotation=await views.rotation(game),
         steps=await views.preview(game, language) if preview else None,
-        home=await views.home(game, language),
-        art=art,
         manages=admin.role is Role.ADMIN,
     )
 

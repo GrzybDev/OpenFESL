@@ -305,6 +305,30 @@ async def offer_entry(
     return f"deal_offer{'.new' if details['new'] else ''}", shown, href, said
 
 
+async def pin_entry(
+    target: str, details: dict[str, Any], games: Games, catalogues: Catalogues, language: str
+) -> tuple[str, str, str | None]:
+    """Return how the audit log shows a hot deal's offer that the admin pinned or unpinned.
+
+    Args:
+        target: The game's id.
+        details: The change's details, as the admin's log keeps them.
+        games: The games, whose hot deals the offer is among.
+        catalogues: Name the offers.
+        language: The log's language.
+
+    Returns:
+        The kind of the action, the offer in words and the panel's page of the home screen.
+    """
+    kind = f"deal_pin.{'on' if details['pinned'] else 'off'}"
+    game = games.by_id(target)
+    if game is None:
+        return kind, details["offer"], None
+    catalogue = await catalogues.of(game, language)
+    shown = game_text(game, catalogue, details["offer"], language, details["faction"])
+    return kind, shown, localize(f"/admin/store/{game.id}/deals/home", language)
+
+
 async def art_entry(
     target: str, details: dict[str, Any], games: Games, catalogues: Catalogues, language: str
 ) -> tuple[str, str, str | None, str]:
@@ -326,7 +350,7 @@ async def art_entry(
     if game is None:
         return "deal_art", offer, None, ""
     shown = game_text(game, await catalogues.of(game, language), offer, language)
-    href = localize(f"/admin/store/{game.id}/deals#home", language)
+    href = localize(f"/admin/store/{game.id}/deals/home", language)
     if details.get("removed"):
         return "deal_art.removed", shown, href, ""
     texts = StoreTexts(game, language, datetime.now(UTC))

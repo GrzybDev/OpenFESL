@@ -1,0 +1,93 @@
+{#def of, home: list, art, manages: bool #}
+{# The hot deals of a game's home screen: the two big and three small ones in the game's
+   order, each with its place, whether the rule or a pin put it there, the pin that moves its
+   offer right after the big ones, and the picture the game downloads, generated from the items'
+   icons or uploaded in its place for the deal's offer, which a reset takes back to the generated
+   one. A refused picture says why beside its deal. #}
+{% set game = of %}
+{% set base = url("/admin/store/" ~ game.id ~ "/deals") %}
+<AdminPage :title="_('web.admin.deals.view.home') ~ ' · ' ~ _('web.admin.store.title')"
+           current="store">
+  <StoreHead :game="game" current="deals" :subtitle="_('web.admin.deals.subtitle', game=game.name)" />
+  <Panel class="enter-panel">
+    <DealsTabs :game="game" current="home" />
+    <section aria-labelledby="deals-home" class="admin-list">
+      <Bar id="deals-home" :extra="_('web.admin.deals.home.rule')" wrap>{{ _("web.admin.deals.home") }}</Bar>
+      <ol class="deals-home">
+        {% set big = home|selectattr("big")|list|length %}
+        {% for shown in home %}
+          {% set deal_id = shown.deal.listed.id %}
+          {% set size = "big" if shown.big else "small" %}
+          <li class="deals-home-deal{% if shown.big %} deals-home-large{% endif %}">
+            <img src="{{ base }}/art/{{ deal_id }}_{{ size }}.png"
+                 alt="{{ _('web.admin.deals.art.alt', deal=shown.deal.name) }}"
+                 loading="lazy"
+                 class="deals-home-picture deals-home-{{ size }}">
+            <p class="deals-home-name">
+              <span class="deals-home-slot">
+                <span>{{ _("web.admin.deals.home.slot." ~ size, place=loop.index if shown.big else loop.index - big) }}</span>
+                <span>{{ _("web.admin.deals.home.pinned" if shown.pinned else "web.admin.deals.home.rule.one") }}</span>
+              </span>
+              <span class="admin-hero-strong">{{ shown.deal.name }}</span>
+              <span class="prices-from">{{ _("web.admin.deals.art.uploaded") if shown.big in shown.uploaded else _("web.admin.deals.art.generated") }}</span>
+            </p>
+            {% if manages %}
+              <form method="post"
+                    action="{{ base }}/home/{{ deal_id }}/pin"
+                    class="deals-home-pin">
+                <CsrfField />
+                {% if not shown.pinned %}<input type="hidden" name="pinned" value="1">{% endif %}
+                <button type="submit"
+                        aria-pressed="{{ 'true' if shown.pinned else 'false' }}"
+                        aria-label="{{ _('web.admin.deals.home.pin.of', deal=shown.deal.name) }}"
+                        class="form-button deals-home-pin-button">
+                  <span aria-hidden="true" class="form-glyph"><Icon name="star" :size="14" stroke="currentColor" /></span>{{ _("web.admin.deals.home.pinned" if shown.pinned else "web.admin.deals.home.pin") }}
+                </button>
+              </form>
+            {% endif %}
+            {% if art and art[0] == deal_id %}
+              <p role="alert" class="prices-refusal">
+                <span aria-hidden="true"
+                      class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span><span>{{ art[1] }}</span>
+              </p>
+            {% endif %}
+            {% if manages %}
+              <form method="post"
+                    action="{{ base }}/art/{{ deal_id }}"
+                    enctype="multipart/form-data"
+                    class="deals-home-upload">
+                <CsrfField />
+                <label class="field-label" for="big-{{ deal_id }}">{{ _("web.admin.deals.art.big") }}</label>
+                <input id="big-{{ deal_id }}"
+                       name="big"
+                       type="file"
+                       accept="image/png"
+                       class="field-input">
+                <label class="field-label" for="small-{{ deal_id }}">{{ _("web.admin.deals.art.small") }}</label>
+                <input id="small-{{ deal_id }}"
+                       name="small"
+                       type="file"
+                       accept="image/png"
+                       class="field-input">
+                <FormButton icon="plus">{{ _("web.admin.deals.art.upload") }}</FormButton>
+                {% if shown.uploaded %}
+                  <FormButton icon="retry" :formaction="base ~ '/art/' ~ deal_id ~ '/reset'">{{ _("web.admin.deals.art.reset") }}</FormButton>
+                {% endif %}
+              </form>
+            {% endif %}
+          </li>
+        {% else %}
+          <li class="bar-text body-text">{{ _("web.admin.deals.home.none") }}</li>
+        {% endfor %}
+      </ol>
+      <p class="bar-text body-text">{{ _("web.admin.deals.home.text") }}</p>
+      <p class="bar-text body-text">{{ _("web.admin.deals.art.rule") }}</p>
+      {% if not manages %}
+        <p class="bar-text account-role-note">
+          <span aria-hidden="true"
+                class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.deals.managed") }}
+        </p>
+      {% endif %}
+    </section>
+  </Panel>
+</AdminPage>

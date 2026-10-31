@@ -158,7 +158,37 @@
   }
 
   .list-side.offer-side {
-    flex-basis: 380px;
+    flex-basis: 360px;
+  }
+
+  .offer-add {
+    display: grid;
+    gap: 2px;
+    margin-top: 10px;
+  }
+
+  .offer-pin {
+    margin-top: 2px;
+  }
+
+  .offer-art {
+    display: grid;
+    gap: 2px;
+  }
+
+  .offer-picture {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    margin: 0;
+    background: var(--panel);
+    padding: 12px;
+
+    figcaption {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--bright);
+    }
   }
 
   .offer-candidates .form-button {

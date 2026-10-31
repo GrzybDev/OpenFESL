@@ -134,6 +134,8 @@ class DealRules(BaseModel):
             it is rounded down to them; such prices are kept exact when none.
         sections: The sections in the order the hot deals list them, by name.
         sets: The sets that sections sell a few of at a time.
+        pinned: The offers that hot deals list first in their sections, and the game's home
+            screen right after its big deals, by the name of the offer they sell.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -144,6 +146,7 @@ class DealRules(BaseModel):
     price_ending: Annotated[int, Field(ge=0, lt=100)] | None = None
     sections: dict[str, DealSection]
     sets: tuple[Offer, ...] = ()
+    pinned: tuple[str, ...] = ()
 
     def rounded(self, price: int) -> int:
         """Return a price worked out from items' prices as the deals end it.

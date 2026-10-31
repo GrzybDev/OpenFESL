@@ -12189,6 +12189,9 @@ msgstr "Rotacja"
 msgid "web.admin.deals.view.offers"
 msgstr "Oferty administracji"
 
+msgid "web.admin.deals.view.home"
+msgstr "Ekran główny gry"
+
 msgid "web.admin.deals.offers"
 msgstr "Oferty administracji"
 
@@ -12374,6 +12377,18 @@ msgstr "Zapas · puste bez limitu"
 
 msgid "web.admin.deals.offer.section"
 msgstr "Sekcja"
+
+msgid "web.admin.deals.offer.pinned"
+msgstr "Przypięta"
+
+msgid "web.admin.deals.offer.pinned.text"
+msgstr "Pierwsza w sekcji i zaraz po dużych ofertach na ekranie głównym gry"
+
+msgid "web.admin.deals.offer.art"
+msgstr "Obraz na ekranie głównym gry"
+
+msgid "web.admin.deals.offer.art.text"
+msgstr "Gra pobiera te obrazy, gdy ekran główny pokazuje ofertę; przypięcie ją tam umieszcza."
 
 msgid "web.admin.deals.offer.text"
 msgstr "Tekst"
@@ -12771,6 +12786,12 @@ msgstr "Zakończono teraz: %(offer)s."
 msgid "web.admin.toast.deals.restocked"
 msgstr "Uzupełniono zapas: %(offer)s, o %(count)s."
 
+msgid "web.admin.toast.deals.pin.on"
+msgstr "Przypięto: %(deal)s; oferta jest pierwsza w sekcji i zaraz po dużych ofertach ekranu głównego."
+
+msgid "web.admin.toast.deals.pin.off"
+msgstr "Odpięto: %(deal)s."
+
 msgid "web.admin.audit.action.deal_rotation.on"
 msgstr "Włączenie rotacji"
 
@@ -12825,6 +12846,12 @@ msgstr "Uzupełnienie zapasu"
 msgid "web.admin.audit.deal.restocked"
 msgstr "+%(count)s: zostało %(before)s → %(after)s"
 
+msgid "web.admin.audit.action.deal_pin.on"
+msgstr "Przypięcie oferty"
+
+msgid "web.admin.audit.action.deal_pin.off"
+msgstr "Odpięcie oferty"
+
 msgid "web.admin.home.warning.deals"
 msgstr "Gorące oferty · sekcji brakuje ofert"
 
@@ -12836,6 +12863,30 @@ msgstr "Ekran główny gry"
 
 msgid "web.admin.deals.home.text"
 msgstr "Gra wczytuje listę przy otwarciu ekranu głównego; pierwsze dwie oferty mają duży obraz, kolejne trzy mały. Oferta bez obrazu zostaje z animacją ładowania, więc każda dostaje obraz."
+
+msgid "web.admin.deals.home.rule"
+msgstr "Zasada: dwie pierwsze oferty duże, potem przypięte, potem kolejność sekcji"
+
+msgid "web.admin.deals.home.slot.big"
+msgstr "Duża %(place)s"
+
+msgid "web.admin.deals.home.slot.small"
+msgstr "Mała %(place)s"
+
+msgid "web.admin.deals.home.pinned"
+msgstr "Przypięta"
+
+msgid "web.admin.deals.home.rule.one"
+msgstr "Według zasady"
+
+msgid "web.admin.deals.home.pin"
+msgstr "Przypnij"
+
+msgid "web.admin.deals.home.pin.of"
+msgstr "Przypnij: %(deal)s"
+
+msgid "web.admin.deals.home.none"
+msgstr "Brak gorących ofert, więc ekran główny gry ich nie pokazuje."
 
 msgid "web.admin.deals.home.big"
 msgstr "Duży obraz"

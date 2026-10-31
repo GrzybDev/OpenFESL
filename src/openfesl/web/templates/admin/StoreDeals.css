@@ -1,6 +1,6 @@
-/* A game's hot-deal rotation: its switch, each section's row beside the chosen section's form,
-   and the seasonal windows of the year. Where the table does not fit, each section is a block of
-   its own. */
+/* A game's hot-deal rotation: its switch, each section's row with its preview under it, and
+   beside them what is on sale now and the seasonal windows of the year. Where the table does not
+   fit, each section is a block of its own. */
 @layer pages {
   .deals-rotation {
     display: grid;
@@ -128,42 +128,6 @@
   .deals-season-ended {
     background: var(--row-pale);
     color: var(--dim);
-  }
-
-  .deals-home {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 2px;
-    margin: 2px 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .deals-home-deal {
-    display: grid;
-    align-content: start;
-    gap: 8px;
-    background: var(--panel);
-    padding: 12px;
-  }
-
-  .deals-home-name {
-    display: grid;
-    gap: 2px;
-    background: var(--row);
-    padding: 8px 10px;
-    color: var(--ink);
-  }
-
-  /* The game shows its pictures unscaled, so the panel does too. */
-  .deals-home-picture {
-    justify-self: center;
-    max-width: 100%;
-  }
-
-  .deals-home-upload {
-    display: grid;
-    gap: 4px;
   }
 
   @container (width < 820px) {

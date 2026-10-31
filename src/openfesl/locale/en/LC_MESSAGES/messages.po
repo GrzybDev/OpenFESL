@@ -11465,6 +11465,9 @@ msgstr "Rotation"
 msgid "web.admin.deals.view.offers"
 msgstr "Admin offers"
 
+msgid "web.admin.deals.view.home"
+msgstr "Game home screen"
+
 msgid "web.admin.deals.offers"
 msgstr "Admin offers"
 
@@ -11644,6 +11647,18 @@ msgstr "Stock · empty for no limit"
 
 msgid "web.admin.deals.offer.section"
 msgstr "Section"
+
+msgid "web.admin.deals.offer.pinned"
+msgstr "Pinned"
+
+msgid "web.admin.deals.offer.pinned.text"
+msgstr "First in its section and right after the big deals of the game's home screen"
+
+msgid "web.admin.deals.offer.art"
+msgstr "Game home-screen image"
+
+msgid "web.admin.deals.offer.art.text"
+msgstr "The game downloads these pictures while its home screen shows the offer; a pin puts it there."
 
 msgid "web.admin.deals.offer.text"
 msgstr "Text"
@@ -12005,6 +12020,12 @@ msgstr "Ended %(offer)s now."
 msgid "web.admin.toast.deals.restocked"
 msgstr "Restocked %(offer)s with %(count)s."
 
+msgid "web.admin.toast.deals.pin.on"
+msgstr "Pinned %(deal)s: it comes first in its section and right after the home screen's big deals."
+
+msgid "web.admin.toast.deals.pin.off"
+msgstr "Unpinned %(deal)s."
+
 msgid "web.admin.audit.action.deal_rotation.on"
 msgstr "Rotation switched on"
 
@@ -12059,6 +12080,12 @@ msgstr "Offer restocked"
 msgid "web.admin.audit.deal.restocked"
 msgstr "+%(count)s: %(before)s → %(after)s left"
 
+msgid "web.admin.audit.action.deal_pin.on"
+msgstr "Offer pinned"
+
+msgid "web.admin.audit.action.deal_pin.off"
+msgstr "Offer unpinned"
+
 msgid "web.admin.home.warning.deals"
 msgstr "Hot deals · section short of deals"
 
@@ -12070,6 +12097,30 @@ msgstr "The game's home screen"
 
 msgid "web.admin.deals.home.text"
 msgstr "The game reads the list when its home screen opens; the first two deals show their big picture, the next three their small one. A deal without a picture keeps the game's loading animation, so every deal gets one."
+
+msgid "web.admin.deals.home.rule"
+msgstr "Rule: the first two deals big, then pinned offers, then section order"
+
+msgid "web.admin.deals.home.slot.big"
+msgstr "Large %(place)s"
+
+msgid "web.admin.deals.home.slot.small"
+msgstr "Small %(place)s"
+
+msgid "web.admin.deals.home.pinned"
+msgstr "Pinned"
+
+msgid "web.admin.deals.home.rule.one"
+msgstr "By rule"
+
+msgid "web.admin.deals.home.pin"
+msgstr "Pin"
+
+msgid "web.admin.deals.home.pin.of"
+msgstr "Pin %(deal)s"
+
+msgid "web.admin.deals.home.none"
+msgstr "No hot deals now, so the game's home screen shows none."
 
 msgid "web.admin.deals.home.big"
 msgstr "Big picture"

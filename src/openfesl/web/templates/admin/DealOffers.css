@@ -20,6 +20,13 @@
     --cell: var(--row-pale);
   }
 
+  .offers-pin {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
   .offers-actions {
     display: flex;
     align-items: center;

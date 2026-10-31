@@ -32,7 +32,9 @@
                 <div role="row" class="offers-columns offers-row offers-{{ row.state }}">
                   <div role="cell" class="admin-cell cell-stack">
                     <a href="{{ base }}/{{ row.listed.id }}" class="admin-hero-strong">{{ row.name }}</a>
-                    <span class="cell-ago">{{ _n("web.admin.deals.offers.items", row.listed.members|length) }} · {{ _("web.admin.deals.offers.text." ~ ("imported" if row.imported else "own")) }}</span>
+                    <span class="cell-ago">{{ _n("web.admin.deals.offers.items", row.listed.members|length) }} · {{ _("web.admin.deals.offers.text." ~ ("imported" if row.imported else "own")) }}
+                      {%- if row.pinned %} · <span class="offers-pin"><Icon name="star" :size="12" stroke="currentColor" />{{ _("web.admin.deals.home.pinned") }}</span>{% endif -%}
+                    </span>
                   </div>
                   <div role="cell" class="admin-cell cell-stack">
                     <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.offers.column.section") }}</span>

@@ -12,6 +12,7 @@ from openfesl.core.calendar import Period, Window, periods
 from openfesl.core.catalogues import Catalogue, Catalogues, game_text
 from openfesl.core.deal_picks import History, NewDeal, pick_items, pick_offers
 from openfesl.core.deal_rules import DealRules, ItemSection, Offer, OfferSection
+from openfesl.core.deal_uploads import offer_of
 from openfesl.core.games import Game
 from openfesl.core.overrides import overridden
 from openfesl.core.policies import SettingStore
@@ -25,6 +26,11 @@ from openfesl.core.store import (
 )
 from openfesl.core.store import Offer as Listing
 from openfesl.core.texts import BASE_LANGUAGE
+
+# How many hot deals the game's home screen shows, of which the first ones big.
+HOME = 5
+BIG = 2
+
 
 type Maker = Callable[[History], list[NewDeal]]
 
@@ -139,8 +145,8 @@ class HotDeals:
         """Return the bundles a game's store sells now, in the order its hot deals list them.
 
         The rotation's bundles come first, by section, and the admin's after those of their
-        section; a section switched off is left out, and with the rotation off only the
-        admin's bundles are listed.
+        section, but pinned offers first of all in theirs; a section switched off is left out,
+        and with the rotation off only the admin's bundles are listed.
 
         Args:
             game: The game.
@@ -160,10 +166,13 @@ class HotDeals:
                 return False
             return bundle.source != AUTO or bool(rules and rules.enabled and section)
 
-        def place(listed: ListedBundle) -> tuple[int, bool, int, int]:
+        pinned = set(rules.pinned) if rules else set()
+
+        def place(listed: ListedBundle) -> tuple[int, bool, bool, int, int]:
             bundle = listed.bundle
             index = sections.index(bundle.section) if bundle.section in sections else len(sections)
-            return index, bundle.source != AUTO, bundle.game_order, listed.id
+            unpinned = offer_of(bundle) not in pinned
+            return index, unpinned, bundle.source != AUTO, bundle.game_order, listed.id
 
         listed = await self._products.bundles(game.id, now)
         return sorted((found for found in listed if shown(found.bundle)), key=place)
@@ -178,10 +187,11 @@ class HotDeals:
         return next((listed for listed in await self.current(game) if listed.id == number), None)
 
     async def hot_deals(self, game: Game, language: str, sold_out: bool = False) -> list[Deal]:
-        """Return the bundles a game's store sells now, named in a language.
+        """Return the bundles a game's store sells now, named in a language, in the game's order.
 
         A name or description is a text of the game's language table, else one of the
-        server's own; a bundle without a description is described by its items' names.
+        server's own; a bundle without a description is described by its items' names. As the
+        game's home screen shows the first deals, the pinned ones come right after its big ones.
 
         Args:
             game: The game.
@@ -191,9 +201,18 @@ class HotDeals:
         if game.store is None:
             return []
         catalogue = await self._catalogues.of(game, language)
+        rules = await self.rules(game)
+        pinned = set(rules.pinned) if rules else set()
+        found = await self.current(game, sold_out)
+        rest = found[BIG:]
+        ordered = [
+            *found[:BIG],
+            *(listed for listed in rest if offer_of(listed.bundle) in pinned),
+            *(listed for listed in rest if offer_of(listed.bundle) not in pinned),
+        ]
         return [
             _deal(game, catalogue, listed, order, language)
-            for order, listed in enumerate(await self.current(game, sold_out), 1)
+            for order, listed in enumerate(ordered, 1)
         ]
 
     async def deal(self, game: Game, listed: ListedBundle, language: str) -> Deal:
