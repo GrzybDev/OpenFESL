@@ -28,7 +28,6 @@ LIST_SERVERS = "listServers"
 
 JOIN = "JOIN"
 LIST = "LIST"
-NO_MATCH = "NOMATCH"
 NO_SERVER = "NOSERVER"
 
 CLOSED = "C"
@@ -100,8 +99,10 @@ class PlayNow:
             for hosted in listed
             if _joinable(hosted) and _passes(props, hosted)
         ]
+        # Games search in epochs that loosen their filters, such as Battlefield Heroes going on
+        # to empty servers; they go on after NOSERVER and stop for good after NOMATCH.
         if not fits:
-            return Outcome(result_type=NO_MATCH, available_server_count=0)
+            return Outcome(result_type=NO_SERVER, available_server_count=0)
         # The best fit first, then the fuller game, so players end up together.
         fits.sort(key=lambda found: (-found[0], -found[1].taken(), found[1].id))
         if kind == LIST_SERVERS:

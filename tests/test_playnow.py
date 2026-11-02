@@ -81,7 +81,7 @@ async def test_play_now_finds_the_open_games_that_fit_a_player_best(
         assert (listed["props.{resultType}"], len(found(listed))) == ("LIST", 1)
         newer = [("filter-version", "ROMEPC999999"), ("filterToGame-version", "version")]
         _, no_match = await play_now(ann, "findServer", *newer)
-        assert no_match["props.{resultType}"] == "NOMATCH"
+        assert no_match["props.{resultType}"] == "NOSERVER"
 
         cancelled = await ann.request(
             FESL,
