@@ -3,7 +3,7 @@ from io import BytesIO
 import pytest
 from PIL import Image
 
-from openfesl.formats.icons import webp
+from openfesl.formats.icons import png, webp
 
 
 def picture(form: str, **options: str) -> bytes:
@@ -50,3 +50,12 @@ def test_a_lossy_picture_keeps_its_size_and_transparency() -> None:
     with Image.open(BytesIO(converted)) as decoded:
         assert decoded.size == (4, 2)
         assert decoded.getchannel("A").getpixel((0, 0)) == 0
+
+
+def test_a_kept_icon_becomes_a_png_picture_with_the_same_pixels() -> None:
+    kept = webp(picture("PNG"))
+
+    converted = png(kept)
+
+    assert converted.startswith(b"\x89PNG\r\n\x1a\n")
+    assert pixels(converted) == pixels(kept)

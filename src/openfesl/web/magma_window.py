@@ -11,6 +11,8 @@ from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse, Response
 from markupsafe import Markup
 
+from openfesl.core.catalogues import Catalogues
+from openfesl.core.game_art import GameArt
 from openfesl.core.game_pages import SiteWallet
 from openfesl.core.games import Game
 from openfesl.core.magma import Magma, MagmaError
@@ -18,6 +20,7 @@ from openfesl.core.personas import Persona
 from openfesl.core.purchases import ALREADY_OWNED, INSUFFICIENT_FUNDS, PurchaseRefused, Purchases
 from openfesl.core.store_window import PricePoint, Shelf, StoreWindow, StoreWindows, Ware
 from openfesl.core.texts import translate
+from openfesl.web.catalogue_files import icon_url
 from openfesl.web.in_game import digest, inline, language_of
 from openfesl.web.magma import SessionId
 from openfesl.web.pages import listed, render_alone
@@ -86,6 +89,8 @@ class Visit:
         persona: The hero.
         token: What the store's forms send back, from the game's session.
         equipped: The game's list of what the hero has equipped, as its query sent it.
+        icons: The addresses of the items' icons as PNG pictures, which the game's browser
+            decodes, by item number; an item without one shown keeps its category's glyph.
     """
 
     segment: str
@@ -93,6 +98,7 @@ class Visit:
     persona: Persona
     token: str
     equipped: str
+    icons: Mapping[int, str]
 
     def path(self, *parts: str | int) -> str:
         """Return the path of a page of the store, without its query.
@@ -116,19 +122,27 @@ class Visit:
 
 
 def window_router(
-    game: Game, magma: Magma, windows: StoreWindows, purchases: Purchases
+    game: Game,
+    magma: Magma,
+    windows: StoreWindows,
+    purchases: Purchases,
+    catalogues: Catalogues,
+    art: GameArt,
 ) -> APIRouter:
     """Return the store that a game opens in its own browser during a match, on its Magma host.
 
     The game names the hero in the query and the session in its magma cookie; the hero must be
     the session's account's own. Buying goes through the store's purchases, and the page then
-    tells the game through its script bridge, so that the game loads the item.
+    tells the game through its script bridge, so that the game loads the item. The items show
+    their imported icons where the game's art is shown to the game.
 
     Args:
         game: The game, whose store data names the in-game store's categories.
         magma: Answers about who asks.
         windows: Opens a hero's store.
         purchases: Sells the store's products.
+        catalogues: Know the items' icons.
+        art: Says to whom the game's art is shown.
     """
     router = APIRouter()
     if game.store is None or game.store.in_game is None:
@@ -149,7 +163,17 @@ def window_router(
         if window is None:
             raise _Closed
         token = hmac.new(session.token.encode(), b"in-game store", hashlib.sha256).hexdigest()
-        return Visit(segment, window, persona, token, " ".join(entry[0] for entry in entries))
+        # The game counts as signed in through the session that opened the store.
+        catalogue = await catalogues.of(game, game.language_of(segment))
+        shown = art.shown(game, signed_in=True)
+        icons = {
+            ware.item.id: src
+            for shelf in window.shelves
+            for ware in shelf.wares
+            if (src := icon_url(game.id, catalogue, ware.item.id, shown, as_png=True))
+        }
+        equipped = " ".join(entry[0] for entry in entries)
+        return Visit(segment, window, persona, token, equipped, icons)
 
     def page(segment: str, template: str, **context: Any) -> Response:
         language = language_of(game, segment)
@@ -361,7 +385,7 @@ def _kit(game: Game) -> Kit:
     script = inline("store.js")
     policy = (
         f"default-src 'none'; style-src {digest(css)}; script-src {digest(script)}; "
-        "img-src data:; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"
+        "img-src 'self' data:; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"
     )
     return Kit(
         game=game,

@@ -1,4 +1,5 @@
 import asyncio
+import secrets
 import shutil
 from collections.abc import AsyncIterator, Mapping
 from contextlib import asynccontextmanager
@@ -176,8 +177,12 @@ class CatalogueFolder:
     @staticmethod
     def _write(folder: Path, files: Mapping[str, bytes]) -> None:
         for path, data in files.items():
-            (folder / path).parent.mkdir(parents=True, exist_ok=True)
-            (folder / path).write_bytes(data)
+            target = folder / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            # A file appears whole, as a page may ask for one while it is written.
+            part = target.with_name(f"{target.name}.{secrets.token_hex(4)}")
+            part.write_bytes(data)
+            part.replace(target)
 
     @staticmethod
     def _keep_only(folder: Path, revision: str) -> None:

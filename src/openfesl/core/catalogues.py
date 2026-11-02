@@ -30,10 +30,11 @@ from openfesl.core.texts import BASE_LANGUAGE, translate
 
 logger = logging.getLogger(__name__)
 
-# The names of an import, and of a file it keeps in its folder.
+# The names of an import, and of a file it keeps in its folder: an icon also as a PNG picture.
 REVISION: Final = re.compile(r"[0-9a-f]{16}")
 KEPT_FILE: Final = re.compile(
-    r"(?:icons|textures)/[a-z0-9_-]{1,64}\.webp|models/[a-z0-9_-]{1,64}\.glb"
+    r"(?:icons|textures)/[a-z0-9_-]{1,64}\.webp|icons/[a-z0-9_-]{1,64}\.png"
+    r"|models/[a-z0-9_-]{1,64}\.glb"
 )
 # How many items a search lists at most.
 MATCHES: Final = 8
@@ -111,7 +112,8 @@ class CatalogueFiles(Protocol):
     """Where the files of the games' imported catalogues are kept, a folder per import.
 
     The files are the catalogues' icons and the models and textures of their heroes, each by
-    its path in its import's folder, as KEPT_FILE names it.
+    its path in its import's folder, as KEPT_FILE names it, and the PNG copies of icons made for
+    browsers without WebP.
     """
 
     async def write(self, game: str, revision: str, files: Mapping[str, bytes]) -> None:

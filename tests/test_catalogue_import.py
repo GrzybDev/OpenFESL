@@ -105,7 +105,7 @@ async def test_an_imported_catalogue_names_items_in_the_pages_language_and_serve
         texture = await client.get(f"{folder}/textures/invented_hair.webp")
         missing = [
             await client.get(f"{base}/catalogues/bfheroes/{'0' * 16}/icons/item1.webp"),
-            await client.get(f"{folder}/icons/item1.png"),
+            await client.get(f"{folder}/icons/item1.gif"),
             await client.get(f"{folder}/models/invented_lost.glb"),
             await client.get(f"{base}/catalogues/bfbc2/{kept.name}/icons/item1.webp"),
         ]

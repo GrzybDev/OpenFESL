@@ -190,6 +190,18 @@ a.row:active {
   text-align: center;
 }
 
+/* An imported icon, centred at its own proportions. */
+.icon-art {
+  padding-top: 0;
+  line-height: 40px;
+}
+
+.icon-art img {
+  max-width: 36px;
+  max-height: 36px;
+  vertical-align: middle;
+}
+
 .status-low {
   color: #8c1e18;
 }

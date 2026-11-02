@@ -29,3 +29,16 @@ def webp(data: bytes, quality: int | None = None) -> bytes:
         # Exact keeps the colour of transparent pixels, which filtering blends into the edges.
         pixels.save(converted, "WEBP", quality=quality, exact=True)
     return converted.getvalue()
+
+
+def png(data: bytes) -> bytes:
+    """Return a WebP picture as a PNG picture with its transparency, for browsers without WebP.
+
+    Args:
+        data: The picture, as an import keeps its icons.
+    """
+    with Image.open(BytesIO(data), formats=("WEBP",)) as picture:
+        pixels = picture.convert("RGBA")
+    converted = BytesIO()
+    pixels.save(converted, "PNG", optimize=True)
+    return converted.getvalue()

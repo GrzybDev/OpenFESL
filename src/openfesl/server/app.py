@@ -2,7 +2,7 @@ import secrets
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI
 from fastapi.responses import PlainTextResponse
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from starlette.exceptions import HTTPException
@@ -17,6 +17,7 @@ from openfesl.server.settings import Settings
 from openfesl.server.stores import Stores
 from openfesl.storage.database import migrate
 from openfesl.web.account.session import PlayerSessionMiddleware
+from openfesl.web.catalogue_files import catalogue_file_routes
 from openfesl.web.deal_art import DealArt, deal_art_router
 from openfesl.web.game_http import GameHttpMiddleware
 from openfesl.web.languages import LanguageMiddleware
@@ -120,6 +121,18 @@ def _add_middleware(
     )
     app.add_middleware(LanguageMiddleware)
     app.add_middleware(SecurityHeadersMiddleware)
+    # The game's own browser asks its Magma host for the in-game store's icons.
+    files: list[APIRouter] = []
+    if services.catalogue_files is not None:
+        files.append(
+            catalogue_file_routes(
+                games,
+                services.catalogues,
+                services.catalogue_files,
+                services.game_art,
+                services.magma,
+            )
+        )
     magma = {
         game.http.magma: magma_app(
             game,
@@ -136,7 +149,15 @@ def _add_middleware(
                     services.purchases,
                     services.item_writes,
                 ),
-                window_router(game, services.magma, services.windows, services.purchases),
+                window_router(
+                    game,
+                    services.magma,
+                    services.windows,
+                    services.purchases,
+                    services.catalogues,
+                    services.game_art,
+                ),
+                *files,
                 deal_art_router(game, services.magma, deal_art, services.game_art),
                 notices_router(game, settings.public_url),
             ],

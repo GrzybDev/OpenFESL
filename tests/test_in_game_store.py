@@ -1,11 +1,15 @@
 import re
+from io import BytesIO
 from pathlib import Path
 from urllib.parse import urlencode
 
 import pytest
 from heroes import MAGMA, wallets
+from PIL import Image
 from store import CHEER, ITEMS, ROYAL_SOLDIER, grant, listed, offers, shopper, stock
 from support import PUBLIC_URL, fetch, visible
+
+from openfesl.formats.icons import webp
 
 pytestmark = pytest.mark.anyio
 
@@ -90,6 +94,46 @@ async def test_the_game_store_shows_a_hero_what_fits_it_and_what_it_holds(
     # The game names Brazilian Portuguese br, in which the coat has a name of its own.
     clothing = await opened(server_url, f"/br/game/store/clothing{query}", cookie)
     assert "Casaco inventado" in visible(clothing.encode())
+
+
+@pytest.mark.usefixtures("files", "prompt_actions", "base")
+async def test_the_game_store_shows_the_imported_icons_as_png_to_the_games_browser(
+    server_url: str, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    rifle = Image.new("RGBA", (64, 64), (20, 200, 60, 255))
+    rifle.putpixel((0, 0), (0, 0, 0, 0))
+    source = BytesIO()
+    rifle.save(source, "PNG")
+    items = [
+        entry.model_copy(update={"icon": "item3015"}) if entry.id == 3015 else entry
+        for entry in ITEMS
+    ]
+    await stock(server_url, tmp_path, capsys, items, {"item3015": webp(source.getvalue())})
+    cookie, hero = await shopper(server_url, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
+    query = f"?personaId={hero}"
+
+    # The game counts as signed in through its session, so its browser gets the import's icons
+    # as PNG pictures, which it decodes; an item without an icon keeps its category's glyph.
+    weapons = await opened(server_url, f"{STORE}/weapons{query}", cookie)
+    [src] = re.findall(r'<img src="(/catalogues/[^"]+)"', weapons)
+    assert re.fullmatch(r"/catalogues/bfheroes/[0-9a-f]{16}/icons/item3015\.png", src)
+    assert f'<img src="{src}"' in await opened(server_url, f"{STORE}/weapons/3015{query}", cookie)
+    clothing = await opened(server_url, f"{STORE}/clothing{query}", cookie)
+    assert "/catalogues/" not in clothing
+    assert re.search(r'class="icon">\s*<img src="data:image/svg\+xml', clothing)
+
+    status, headers, picture = await fetch(server_url, src, MAGMA, cookie)
+    assert status == 200 and headers["Content-Type"] == "image/png"
+    assert picture.startswith(b"\x89PNG\r\n\x1a\n")
+    with Image.open(BytesIO(picture)) as shown:
+        assert shown.convert("RGBA").tobytes() == rifle.tobytes()
+    # The picture is made once and kept beside the import's icon; later requests send the file.
+    [kept] = Path(tmp_path, "files", "catalogues", "bfheroes").glob("*/icons/item3015.png")
+    made = kept.stat().st_mtime_ns
+    assert (await fetch(server_url, src, MAGMA, cookie))[2] == picture
+    assert kept.stat().st_mtime_ns == made
+    # Without the game's session nothing is sent, as the art is shown to the signed-in.
+    assert (await fetch(server_url, src, MAGMA))[0] == 404
 
 
 @pytest.mark.usefixtures("base")

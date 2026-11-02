@@ -15,6 +15,16 @@
   padding-top: 16px;
 }
 
+.ware .icon-art {
+  padding-top: 0;
+  line-height: 60px;
+}
+
+.ware .icon-art img {
+  max-width: 56px;
+  max-height: 56px;
+}
+
 .ware-name {
   margin: 0;
   font:

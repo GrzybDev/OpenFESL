@@ -1,6 +1,7 @@
 {#def kit, visit, shelf, highlight: str = "" #}
-{# A category of the in-game store: each item the hero may have, with what it has of it and the
-   lowest price in each currency. An item just bought is highlighted on the way back. #}
+{# A category of the in-game store: each item the hero may have, with its icon or the category's
+   glyph, what the hero has of it and the lowest price in each currency. An item just bought is
+   highlighted on the way back. #}
 {% set key = shelf.category.key %}
 {% set name = _("games." ~ kit.game.id ~ ".store." ~ key) %}
 {# Drawn once, as a category may list hundreds of items. #}
@@ -18,11 +19,14 @@
       <ul class="list">
         {% for ware in shelf.wares %}
           {% set cheapest = ware.cheapest %}
+          {% set src = visit.icons.get(ware.item.id) %}
           <li>
             <a id="item-{{ ware.item.id }}"
                href="{{ visit.link(key, ware.item.id) }}"
                class="row row-ware{% if cheapest %} priced{% endif %}{% if highlight == ware.item.id | string %} row-hl{% endif %}">
-              <span aria-hidden="true" class="icon">{{ icon }}</span>
+              <span aria-hidden="true" class="icon{% if src %} icon-art{% endif %}">
+                {%- if src %}<img src="{{ src }}" alt="">{% else %}{{ icon }}{% endif -%}
+              </span>
               <span class="row-name">{{ ware.name }}</span>
               <span class="row-sub{% if ware.low %} status-low{% elif ware.left %} status-held{% endif %}">
                 <InGameStanding :ware="ware" />
