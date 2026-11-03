@@ -19,6 +19,7 @@ from openfesl.core.rewards import FIRST_CHEST, RewardState
 from openfesl.core.texts import localize
 from openfesl.core.wallets import Wallets
 from openfesl.web.account.session import signed_in
+from openfesl.web.catalogue_files import icon_url
 from openfesl.web.pages import Pages
 from openfesl.web.sessions import form_matches, form_token, toast
 from openfesl.web.site import site_bar
@@ -51,11 +52,14 @@ class DropLine:
             its class.
         held: For how long or for how many uses the hero gets it.
         chance: Its chance, as the page's language writes it.
+        icon: The address of the item's imported icon, where the page shows the game's art; none
+            for several items.
     """
 
     name: str
     held: str
     chance: str
+    icon: str | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -128,6 +132,8 @@ class ChestsPages:
                         game, player.account_id, [key.currency]
                     )
             catalogue = await self._catalogues.of(game, language)
+            texts = StoreTexts(game, language, datetime.now(UTC))
+            art = self._pages.shows_art(request, game)
             return self._pages.render(
                 request,
                 "chests.Chests",
@@ -137,7 +143,7 @@ class ChestsPages:
                 key=key,
                 funds=funds,
                 waits=waits,
-                lists=await self._lists(StoreTexts(game, language, datetime.now(UTC)), catalogue),
+                lists=await self._lists(texts, catalogue, art),
                 imported=catalogue.imported,
                 closed=await self._chests.closed(game),
                 next=localize(f"/{game.id}{CHESTS}", language),
@@ -170,6 +176,7 @@ class ChestsPages:
             key = await self._chests.key(game)
             keys = await held_keys(self._entitlements, _rules(game), hero.persona.account_id)
             texts = StoreTexts(game, language, datetime.now(UTC))
+            art = self._pages.shows_art(request, game)
             worth = {"worth": texts.priced(won.price, won.currency)}
             if key:
                 worth["price"] = texts.priced(key.price, key.currency)
@@ -179,6 +186,7 @@ class ChestsPages:
                 error=False,
                 hero=name,
                 item=catalogue.name(won.item_id) or str(won.item_id),
+                icon=icon_url(game.id, catalogue, won.item_id, art) or "",
                 term=_term(won.ownership, texts),
                 keys=texts.count("web.chests.opened.keys", keys)
                 if keys
@@ -207,13 +215,13 @@ class ChestsPages:
             heroes.append(HeroChests(hero, count, stack.granted if stack else None))
         return await held_keys(self._entitlements, rules, account_id), heroes
 
-    async def _lists(self, texts: StoreTexts, catalogue: Catalogue) -> ChestLists | None:
+    async def _lists(self, texts: StoreTexts, catalogue: Catalogue, art: bool) -> ChestLists | None:
         odds = await self._chests.odds(texts.game)
         if odds is None:
             return None
         worth = texts.priced(odds.worth, odds.currency) if odds.worth else ""
         factions = {
-            faction: [_line(drop, catalogue, texts) for drop in drops]
+            faction: [_line(drop, catalogue, texts, art) for drop in drops]
             for faction, drops in odds.factions.items()
         }
         return ChestLists(worth, factions)
@@ -230,14 +238,15 @@ def _term(ownership: Ownership, texts: StoreTexts, start: bool = False) -> str:
     return texts.text("web.chests.held.permanent")
 
 
-def _line(drop: ChestDrop, catalogue: Catalogue, texts: StoreTexts) -> DropLine:
+def _line(drop: ChestDrop, catalogue: Catalogue, texts: StoreTexts, art: bool) -> DropLine:
     locale = Locale.parse(texts.text("web.locale"))
     names = [catalogue.name(product.item_id) or str(product.item_id) for product in drop.products]
-    name = names[0]
+    name, icon = names[0], icon_url(texts.game.id, catalogue, drop.products[0].item_id, art)
     if len(names) > 1:
-        # One item of several, by the class of the hero that opens the chest.
+        # One item of several, by the class of the hero that opens the chest, for which no one
+        # item's icon stands.
         joined = str(format_list(names, style="or", locale=locale))
-        name = texts.text("web.chests.lists.by_class", names=joined)
+        name, icon = texts.text("web.chests.lists.by_class", names=joined), None
     low, high = (
         str(format_percent(float(value), "#,##0.#%", locale=locale)) for value in drop.chance
     )
@@ -246,7 +255,7 @@ def _line(drop: ChestDrop, catalogue: Catalogue, texts: StoreTexts) -> DropLine:
         chance = texts.text("web.chests.chance.up_to", chance=high)
     elif low != high:
         chance = texts.text("web.chests.chance.range", low=low, high=high)
-    return DropLine(name, _term(drop.products[0].ownership, texts), chance)
+    return DropLine(name, _term(drop.products[0].ownership, texts), chance, icon)
 
 
 async def held_keys(entitlements: EntitlementStore, rules: ChestRules, account_id: int) -> int:

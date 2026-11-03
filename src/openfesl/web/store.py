@@ -23,6 +23,7 @@ from openfesl.core.store import Product
 from openfesl.core.store_items import HeroChoice, Kind, PricePoint, StoreItem, StoreItems, Unfit
 from openfesl.core.texts import localize, translate
 from openfesl.web.account.session import open_page, signed_in
+from openfesl.web.catalogue_files import icon_url
 from openfesl.web.pages import Pages
 from openfesl.web.sessions import SentForms, form_matches, form_token, purchase_matches, toast
 from openfesl.web.site import site_bar
@@ -53,7 +54,7 @@ class StorePages:
             items: Finds what a page sells and what each hero may buy of it.
             sent: Lets each confirmation buy once.
             purchases: Sells it, as the game's own store does.
-            catalogues: Name what a box gave in the page's language.
+            catalogues: Name what a box gave in the page's language, and find the items' icons.
         """
         self._pages = pages
         self._games = games
@@ -175,6 +176,9 @@ class StorePages:
                 back=self._address(request, game, number, hero or "", price or ""),
                 csrf=form_token(request),
             )
+        catalogue = await self._catalogues.of(game, language)
+        art = self._pages.shows_art(request, game)
+        numbers = [sold.item.id] if sold.item else [content.item_id for content in sold.contents]
         context: dict[str, Any] = dict(
             game=game,
             sold=sold,
@@ -182,6 +186,7 @@ class StorePages:
             choices=choices,
             offered=offered,
             texts=texts,
+            icons=[icon_url(game.id, catalogue, number, art) for number in numbers],
             reveal=request.session.pop(REVEAL, None) if not review else None,
             back=_back(game, sold, chosen, language),
             csrf=form_token(request),
@@ -254,6 +259,7 @@ class StorePages:
         request.session[REVEAL] = {
             "hero": offered.choice.hero.persona.name,
             "item": name,
+            "icon": icon_url(game.id, catalogue, won.item_id, self._pages.shows_art(request, game)),
             "line": texts.text(
                 "web.store.reveal.line",
                 ownership=texts.ownership(won.ownership),

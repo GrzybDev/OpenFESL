@@ -1,5 +1,6 @@
 """Helpers of the tests of the stores, which sell the items of imported catalogues."""
 
+import re
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -9,10 +10,21 @@ import anyio
 import pytest
 from accounts import PASSWORD, execute
 from heroes import MAGMA, create_hero, start
-from support import FESL, THEATER, cli, fetch, game, launcher_sign_in, let_in, log_in_player
+from support import (
+    FESL,
+    THEATER,
+    cli,
+    fetch,
+    game,
+    launcher_sign_in,
+    let_in,
+    log_in_player,
+    png_image,
+)
 from test_player_servers import SERVER_GAME
 
 from openfesl.core.catalogue import CatalogueDocument, CatalogueFile, CatalogueItem
+from openfesl.formats.icons import webp
 
 
 def item(number: int, kind: str, **fields: str) -> CatalogueItem:
@@ -142,6 +154,20 @@ async def stock(
     with anyio.fail_after(30):
         while not await offers(server_url):
             await anyio.sleep(0.05)
+
+
+def iconed(items: list[CatalogueItem]) -> tuple[list[CatalogueItem], dict[str, bytes]]:
+    """Return items that each have an invented icon named after its number, and the icons."""
+    icon = webp(png_image(8, 8))
+    return (
+        [entry.model_copy(update={"icon": f"item{entry.id}"}) for entry in items],
+        {f"item{entry.id}": icon for entry in items},
+    )
+
+
+def icons(page: str) -> list[str]:
+    """Return the names of the imported icons that a page of the site shows, in its order."""
+    return re.findall(r'<img src="/catalogues/bfheroes/[0-9a-f]{16}/icons/(\w+)\.webp"', page)
 
 
 def listed(product: ElementTree.Element) -> str:

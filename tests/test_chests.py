@@ -1,4 +1,5 @@
 import asyncio
+import re
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -11,7 +12,7 @@ from accounts import PASSWORD, execute, post_sign_in, select_value
 from heroes import MAGMA, create_hero, wallets
 from identity import form_token
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from store import NAMES, ROYAL_SOLDIER, kept_by_server, shopper, stock
+from store import ITEMS, NAMES, ROYAL_SOLDIER, iconed, icons, kept_by_server, shopper, stock
 from support import fetch, once_token, visible
 from test_server_calls import ask
 
@@ -56,7 +57,7 @@ async def services(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> AsyncIterator[Services]:
-    await stock(server_url, tmp_path, capsys)
+    await stock(server_url, tmp_path, capsys, *iconed(ITEMS))
     engine = create_async_engine(database_url)
     sessions = async_sessionmaker(engine)
     games = load_games()
@@ -112,7 +113,7 @@ async def opened(services: Services, persona: Persona) -> Product | ChestRefusal
         return refused.refusal
 
 
-@pytest.mark.usefixtures("prompt_actions", "open_hosting")
+@pytest.mark.usefixtures("files", "prompt_actions", "open_hosting")
 async def test_a_stacked_chest_opens_on_the_page_into_an_item_the_game_lists(
     services: Services, server_url: str, database_url: str
 ) -> None:
@@ -135,7 +136,8 @@ async def test_a_stacked_chest_opens_on_the_page_into_an_item_the_game_lists(
             bought = {**form, "keys": "1", "price": "499", "once": once_token(page.text)}
             await site.post(f"{base}{PAGE}/keys", data=bought)
             await site.post(opening, data=form)
-            revealed = visible((await site.get(f"{base}{PAGE}")).content)
+            page = await site.get(f"{base}{PAGE}")
+            revealed = visible(page.content)
             await site.post(opening, data=form)
             without_key = visible((await site.get(f"{base}{PAGE}")).content)
             not_hers = await site.post(f"{base}{PAGE}/{others}/open", data=form)
@@ -151,6 +153,9 @@ async def test_a_stacked_chest_opens_on_the_page_into_an_item_the_game_lists(
         if f"for ann {NAMES[item]} " in revealed
     ]
     assert f"{item}-".encode() in body
+    # The item rises with its icon.
+    [reveal] = re.findall(r'<dialog id="chest-reveal".*?</dialog>', page.text, flags=re.DOTALL)
+    assert icons(reveal) == [f"item{item}"]
     assert f"Chest opened for ann: {won}, " in revealed
     assert f"1 key used; no keys left. Chest opened Item for ann {won} " in revealed
     assert "No keys left; ann has 1 chest to open." in revealed
@@ -185,7 +190,7 @@ async def test_a_chest_opens_once_for_one_key_and_never_without_a_chest(
     assert await held(database_url, "BFH_TREASURE_CHEST", number) == 1
 
 
-@pytest.mark.usefixtures("prompt_actions")
+@pytest.mark.usefixtures("files", "prompt_actions")
 async def test_the_chests_page_lists_each_heros_chests_and_what_a_chest_gives(
     base: str,
     server_url: str,
@@ -193,7 +198,7 @@ async def test_the_chests_page_lists_each_heros_chests_and_what_a_chest_gives(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    await stock(server_url, tmp_path, capsys)
+    await stock(server_url, tmp_path, capsys, *iconed(ITEMS))
     brassbuckle = await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
     await create_hero(base, "ann@example.test", "Tin_Tankard")
     engine = create_async_engine(database_url)
@@ -203,9 +208,11 @@ async def test_the_chests_page_lists_each_heros_chests_and_what_a_chest_gives(
         await store.stack_uses(1, brassbuckle, "BFH_TREASURE_CHEST", picked)
     await engine.dispose()
     async with httpx2.AsyncClient() as visitor, httpx2.AsyncClient() as ann:
-        signed_out = visible((await visitor.get(f"{base}{PAGE}")).content)
+        hidden = await visitor.get(f"{base}{PAGE}")
+        signed_out = visible(hidden.content)
         await post_sign_in(ann, base, "ann@example.test", PASSWORD)
-        mine = visible((await ann.get(f"{base}{PAGE}")).content)
+        shown = await ann.get(f"{base}{PAGE}")
+        mine = visible(shown.content)
         await post_sign_in(visitor, base, "bob@example.test", PASSWORD)
         heroless = visible((await visitor.get(f"{base}{PAGE}")).content)
         await create_hero(base, "bob@example.test", "Copperpot")
@@ -227,6 +234,10 @@ async def test_the_chests_page_lists_each_heros_chests_and_what_a_chest_gives(
         assert "Invented Rifle · 7 days chance up to 28%" in page
         assert "Invented Monkey · permanent chance 10%\N{EN DASH}14.3%" in page
         assert "Invented Longrifle · permanent chance up to 2.2%" in page
+    # The items' icons are shown to signed-in players, where a visitor gets OpenFESL's tiles.
+    royal = ["item2005", "item2153", "item3015", "item521", "item3015"]
+    national = ["item2005", "item2153", "item3042", "item3042"]
+    assert (icons(hidden.text), icons(shown.text)) == ([], royal + national)
     assert "The account has no hero yet." in heroless and "Create a hero" in heroless
     assert "No chests to open" in chestless and "Play Now as Copperpot" in chestless
 

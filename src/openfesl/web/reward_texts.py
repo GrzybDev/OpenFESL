@@ -163,6 +163,14 @@ class RewardTexts:
         """
         return icon_url(self.game.id, self.catalogue, item_id, self.art)
 
+    def gift_icon(self, gift: Gift) -> str | None:
+        """Return the address of the imported icon of a gift's first item, if it gives items.
+
+        Args:
+            gift: The gift.
+        """
+        return self.icon(gift.items[0][0]) if gift.items else None
+
     def event(self, run: Run) -> EventText:
         """Return an event's name, its dates, its first day and what it gives.
 

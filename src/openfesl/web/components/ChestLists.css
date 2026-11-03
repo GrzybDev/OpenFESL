@@ -1,5 +1,5 @@
 /* What a chest can give, in the dark orange box (white text only): a list per faction with the
-   item, for how long or how many uses, and its chance on the right. */
+   item's tile, the item, for how long or how many uses, and its chance on the right. */
 @layer components {
   .chest-lists-box {
     --box: #9b4e14;
@@ -55,10 +55,9 @@
 
     > li {
       display: flex;
-      min-height: 44px;
       align-items: center;
       gap: 10px;
-      padding: 5px 10px;
+      padding: 5px 10px 5px 5px;
     }
 
     > li:nth-child(even) {

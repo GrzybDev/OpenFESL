@@ -39,10 +39,19 @@
             <span class="sr-only">{{ _("web.referral.step", n=step.number) }}</span>{{ step.title }}
           </h2>
           <p class="referral-step-text">{{ step.text }}</p>
-          {% for side, gift, glyph in (("recruiter", step.recruiter, step.glyphs[0]), ("recruit", step.recruit, step.glyphs[1])) %}
+          {% for side, gift, glyph, icon in (("recruiter", step.recruiter, step.glyphs[0], step.icons[0]), ("recruit", step.recruit, step.glyphs[1], step.icons[1])) %}
             <p class="referral-gift">
-              <span aria-hidden="true"
-                    class="referral-gift-disc referral-gift-{{ glyph }}"><Icon :name="glyph" :size="18" stroke="currentColor" /></span>
+              {% if icon %}
+                <img src="{{ icon }}"
+                     width="32"
+                     height="32"
+                     alt=""
+                     loading="lazy"
+                     class="referral-gift-disc referral-gift-icon">
+              {% else %}
+                <span aria-hidden="true"
+                      class="referral-gift-disc referral-gift-{{ glyph }}"><Icon :name="glyph" :size="18" stroke="currentColor" /></span>
+              {% endif %}
               <span><span class="referral-gift-who">{{ _("web.referral.side." ~ side) }}</span><strong>{{ gift }}</strong></span>
             </p>
           {% endfor %}

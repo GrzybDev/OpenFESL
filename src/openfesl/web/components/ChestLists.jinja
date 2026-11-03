@@ -1,6 +1,7 @@
 {#def lists, imported: bool #}
-{# What a treasure chest can give the heroes of each faction, with the chances, in the dark orange
-   box; before the game's catalogue is imported, why the lists are missing. #}
+{# What a treasure chest can give the heroes of each faction, each item with its icon and its
+   chance, in the dark orange box; before the game's catalogue is imported, why the lists are
+   missing. #}
 {% set rules = game.heroes %}
 <section aria-labelledby="chest-lists-title"
          class="info-boxes chest-lists enter-panel">
@@ -26,6 +27,7 @@
               <ul role="list" class="chest-drops">
                 {% for line in lines %}
                   <li>
+                    <ItemIcon :src="line.icon" />
                     <span class="chest-drop-name"><strong>{{ line.name }}</strong> · {{ line.held }}</span>
                     <span class="chest-drop-chance"><span class="sr-only">{{ _("web.chests.lists.chance") }}</span>{{ line.chance }}</span>
                   </li>

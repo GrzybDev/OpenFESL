@@ -81,7 +81,6 @@
     background: #2f3317;
   }
 
-  /* Where the game's own icon of an item would show, which this server does not serve. */
   .store-icon {
     display: grid;
     width: 110px;
@@ -90,6 +89,7 @@
     border: 2px solid #000;
     background: #cdbfa6;
     color: #3b2d23;
+    object-fit: contain;
   }
 
   .store-icon-small {
@@ -113,17 +113,6 @@
         background: rgb(0 0 0 / 0.22);
       }
     }
-  }
-
-  .store-row-icon {
-    display: grid;
-    flex: 0 0 auto;
-    width: 44px;
-    height: 44px;
-    place-items: center;
-    border: 2px solid #000;
-    background: #cdbfa6;
-    color: #3b2d23;
   }
 
   .store-row-text {

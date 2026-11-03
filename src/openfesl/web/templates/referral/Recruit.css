@@ -156,6 +156,12 @@
     color: #fff;
   }
 
+  .referral-gift-icon {
+    border-radius: 4px;
+    background: #cdbfa6;
+    object-fit: contain;
+  }
+
   .referral-gift-who {
     display: block;
     font: 800 13px/1.2 var(--site-heading);

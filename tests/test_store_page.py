@@ -7,7 +7,7 @@ import pytest
 from accounts import PASSWORD, execute, post_sign_in, select_value
 from heroes import create_hero
 from identity import form_token
-from store import CHEER, ITEMS, ROYAL_SOLDIER, grant, stock, without_rotation
+from store import CHEER, ITEMS, ROYAL_SOLDIER, grant, iconed, icons, stock, without_rotation
 from support import visible
 
 from openfesl.core.store import Bundle
@@ -28,6 +28,11 @@ async def shown(client: httpx2.AsyncClient, base: str, number: int, **chosen: in
     return visible(page.content)
 
 
+async def pictured(client: httpx2.AsyncClient, base: str, number: int) -> list[str]:
+    """Return the names of the imported icons that a store page shows, in its order."""
+    return icons((await client.get(f"{base}{PAGE.format(number)}")).text)
+
+
 async def confirmation(
     client: httpx2.AsyncClient, base: str, number: int, hero: int, price: int
 ) -> tuple[str, dict[str, str]]:
@@ -44,20 +49,26 @@ async def confirmation(
     return visible(answer.content), fields
 
 
-async def bought(client: httpx2.AsyncClient, base: str, number: int, form: dict[str, str]) -> str:
-    """Send a confirmation's form, and return the text of the page it leads back to."""
+async def sent(client: httpx2.AsyncClient, base: str, number: int, form: dict[str, str]) -> str:
+    """Send a confirmation's form, and return the markup of the page it leads back to."""
     answer = await client.post(f"{base}{PAGE.format(number)}/confirm", data=form)
     assert answer.status_code == 303, answer.text
-    return visible((await client.get(f"{base}{answer.headers['location']}")).content)
+    return (await client.get(f"{base}{answer.headers['location']}")).text
 
 
-@pytest.mark.usefixtures("prompt_actions")
+async def bought(client: httpx2.AsyncClient, base: str, number: int, form: dict[str, str]) -> str:
+    """Send a confirmation's form, and return the text of the page it leads back to."""
+    return visible((await sent(client, base, number, form)).encode())
+
+
+@pytest.mark.usefixtures("files", "prompt_actions")
 async def test_a_store_page_shows_each_hero_what_it_holds_or_why_it_cannot_have_the_item(
     base: str, server_url: str, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    await stock(server_url, tmp_path, capsys, [*ITEMS, CHEER])
+    await stock(server_url, tmp_path, capsys, *iconed([*ITEMS, CHEER]))
     async with httpx2.AsyncClient() as client:
         signed_out = await shown(client, base, COAT_MONTH)
+        hidden = await pictured(client, base, COAT_MONTH)
         await post_sign_in(client, base, "ann@example.test", PASSWORD)
         no_hero = await shown(client, base, COAT_MONTH)
     await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
@@ -66,6 +77,7 @@ async def test_a_store_page_shows_each_hero_what_it_holds_or_why_it_cannot_have_
     async with httpx2.AsyncClient() as client:
         await post_sign_in(client, base, "ann@example.test", PASSWORD)
         offered = await shown(client, base, COAT_MONTH)
+        pictures = await pictured(client, base, COAT_MONTH)
         other = await shown(client, base, COAT_MONTH, hero=mud)
         # Every hero starts with bandages, to which bought uses add, and the game grants it the
         # cheer.
@@ -75,6 +87,9 @@ async def test_a_store_page_shows_each_hero_what_it_holds_or_why_it_cannot_have_
 
     assert "Sign in to buy" in signed_out
     assert "Requires Royal Army, any class, any level" in signed_out
+    # The game's art is shown to signed-in players: the coat's icon on its tile and in its row,
+    # where a visitor gets OpenFESL's tiles.
+    assert (hidden, pictures) == ([], ["item3", "item3"])
     assert "the account has no hero yet" in no_hero and "4 slots are free" in no_hero
     assert "Brassbuckle Soldier · level 1 Not owned" in offered
     assert "Mudlark Commando · level 1 Royal Army only" in offered
@@ -168,7 +183,7 @@ async def test_a_hero_buys_an_item_on_its_page_and_refused_purchases_spend_nothi
     assert "1,200 Funds" in forged
 
 
-@pytest.mark.usefixtures("prompt_actions")
+@pytest.mark.usefixtures("files", "prompt_actions")
 async def test_hot_deals_and_random_boxes_sell_on_their_pages_while_they_run(
     base: str,
     server_url: str,
@@ -177,7 +192,7 @@ async def test_hot_deals_and_random_boxes_sell_on_their_pages_while_they_run(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    await stock(server_url, tmp_path, capsys)
+    await stock(server_url, tmp_path, capsys, *iconed(ITEMS))
     await without_rotation(database_url)
     now = datetime.now(UTC)
     royal_set = Bundle(
@@ -207,14 +222,17 @@ async def test_hot_deals_and_random_boxes_sell_on_their_pages_while_they_run(
     async with httpx2.AsyncClient() as client:
         await post_sign_in(client, base, "ann@example.test", PASSWORD)
         offered = await shown(client, base, deal)
+        set_icons = await pictured(client, base, deal)
         _, form = await confirmation(client, base, deal, brass, deal)
         dealt = await bought(client, base, deal, form)
         gone = await shown(client, base, ended)
         late = await bought(client, base, ended, form | {"price": str(ended), "paid": "10"})
         await grant(database_url, brass, "_PF", 1000)
         boxed = await shown(client, base, drop)
+        box_icons = await pictured(client, base, drop)
         _, form = await confirmation(client, base, drop, brass, drop)
-        opened = await bought(client, base, drop, form)
+        revealed = await sent(client, base, drop, form)
+        opened = visible(revealed.encode())
         again = await shown(client, base, drop)
 
     assert (
@@ -222,6 +240,9 @@ async def test_hot_deals_and_random_boxes_sell_on_their_pages_while_they_run(
     ) in offered
     assert "-45% 45% off Deal ends in 1 d 01:" in offered
     assert "Invented Coat Permanent Invented Monkey Permanent Invented Bandage 25 uses" in offered
+    # A tile and a row for each of the set's items, and a row for each item the box may give.
+    assert set_icons == ["item3", "item521", "item2005"] * 2
+    assert box_icons == ["item521"]
     assert "About A coat, a pet, bandages." in offered
     assert "Mudlark Commando · level 1 Royal Army only" in offered
     assert "Brassbuckle gets the 3 items of Invented Set as listed." in offered
@@ -232,7 +253,9 @@ async def test_hot_deals_and_random_boxes_sell_on_their_pages_while_they_run(
     assert (
         "Each box gives one of these items, worth at least the box's price of 629 Funds." in boxed
     )
-    # The hero owns the deal's pet for good, so the box gives its tonics instead.
+    # The hero owns the deal's pet for good, so the box gives its tonics instead, which rise with
+    # their icon above the box's rows.
+    assert icons(revealed) == ["item2153", "item521"]
     assert (
         "Royal Soldier Supply Drop opened for Brassbuckle: Invented Tonic, 110 uses. "
         "629 Funds spent."

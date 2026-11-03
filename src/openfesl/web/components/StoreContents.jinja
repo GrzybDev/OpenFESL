@@ -1,7 +1,8 @@
-{#def sold, texts #}
+{#def sold, texts, icons: list #}
 {# What a store page sells, in the green box beside the buy panel: a hot deal's sticker and the
    time it has left, the items a bundle holds or a box may give with their chances, which heroes
-   may have it and what else holds for it. #}
+   may have it and what else holds for it. The icons are the items' imported icons in the rows'
+   order, none for an item whose tile the page draws itself. #}
 {% set box = sold.kind == "box" %}
 <section aria-labelledby="contents-title" class="store-contents">
   <Splash />
@@ -36,22 +37,31 @@
         <span class="store-icon"><Icon name="box" :size="28" stroke="currentColor" /></span>
       {% else %}
         {# A tile for each of a bundle's first three items, as the 2012 page showed their icons. #}
-        {% for _content in (sold.contents or [sold])[:3] %}
-          <span class="store-icon{% if sold.contents|length > 1 %} store-icon-small{% endif %}"><Icon :name="'bag' if sold.kind == 'item' else 'deal'" :size="28" stroke="currentColor" /></span>
+        {% set small = icons|length > 1 %}
+        {% for src in icons[:3] %}
+          {% if src %}
+            <img src="{{ src }}"
+                 width="{{ 76 if small else 110 }}"
+                 height="{{ 76 if small else 110 }}"
+                 alt=""
+                 class="store-icon{% if small %} store-icon-small{% endif %}">
+          {% else %}
+            <span class="store-icon{% if small %} store-icon-small{% endif %}"><Icon :name="'bag' if sold.kind == 'item' else 'deal'" :size="28" stroke="currentColor" /></span>
+          {% endif %}
         {% endfor %}
       {% endif %}
     </div>
     <ul role="list" class="store-rows">
       {% if sold.kind == "item" %}
         <li>
-          <span aria-hidden="true" class="store-row-icon"><Icon name="bag" :size="18" stroke="currentColor" /></span>
+          <ItemIcon :src="icons[0]" />
           <span class="store-row-text"><strong>{{ sold.name }}</strong>
             <span>{{ texts.chosen(sold) }}</span></span>
         </li>
       {% endif %}
       {% for content in sold.contents %}
         <li>
-          <span aria-hidden="true" class="store-row-icon"><Icon name="bag" :size="18" stroke="currentColor" /></span>
+          <ItemIcon :src="icons[loop.index0]" />
           <span class="store-row-text"><strong>{{ content.name }}</strong>
             <span>{{ texts.ownership(content.ownership) }}</span></span>
           {% if content.chance is not none %}

@@ -22,7 +22,8 @@
                  :size="40"
                  :recipient="_('web.chests.reveal.for', hero=hero.persona.name)"
                  :item="values.item"
-                 :line="values.line" />
+                 :line="values.line"
+                 :src="values.icon" />
     <p class="reveal-after">
       {{ _("web.chests.reveal.listed", game=game.name) }}
       {% set left_keys = _n("web.chests.reveal.keys", keys) if keys else _("web.chests.reveal.keys.none") %}

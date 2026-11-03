@@ -15,7 +15,7 @@ from accounts import (
 from heroes import create, create_hero, start
 from identity import IdentityProvider, form_token
 from living import import_catalogue, setting
-from store import ROYAL_SOLDIER
+from store import ROYAL_SOLDIER, icons
 from support import FESL, THEATER, game, let_in, update_stats, visible
 from test_player_servers import SERVER_GAME, until_listed
 from test_rewards import INVENTED
@@ -68,7 +68,7 @@ async def claim(client: httpx2.AsyncClient, base: str, key: str, hero: str = "")
     await client.post(f"{base}{CLAIM}", data=form)
 
 
-@pytest.mark.usefixtures("prompt_actions")
+@pytest.mark.usefixtures("files", "prompt_actions")
 async def test_a_link_makes_a_new_account_a_recruit_whose_steps_each_account_claims_once(
     base: str,
     server_url: str,
@@ -76,7 +76,7 @@ async def test_a_link_makes_a_new_account_a_recruit_whose_steps_each_account_cla
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    await import_catalogue(server_url, tmp_path, capsys, INVENTED, OFFERS)
+    await import_catalogue(server_url, tmp_path, capsys, INVENTED, OFFERS, icons=True)
     await setting(database_url, UNCONFIRMED, "off")
     await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
     named = "UPDATE account SET display_name = 'Quillfuse' WHERE nuid = 'ann@example.test'"
@@ -91,6 +91,7 @@ async def test_a_link_makes_a_new_account_a_recruit_whose_steps_each_account_cla
         await create(friend, base, "Cinderpatch", faction="royal", **{"class": "commando"})
         await create(friend, base, "Hollyhock", faction="national", **{"class": "soldier"})
         waiting = visible((await friend.get(f"{base}{REWARDS}")).content)
+        steps = (await friend.get(f"{base}/bfheroes/recruit-a-friend")).text
         await level(database_url, "Hollyhock", 7)
         ready = await friend.get(f"{base}{REWARDS}")
         picking = visible(
@@ -132,6 +133,8 @@ async def test_a_link_makes_a_new_account_a_recruit_whose_steps_each_account_cla
     assert "Locked until then · no deadline" in waiting
     assert "Recruited by Quillfuse · step 2" in visible(ready.content)
     assert "Ready to claim · no deadline" in visible(ready.content)
+    # The recruit's first gift shows its item's icon; the others give no item.
+    assert icons(steps) == ["item9000"] and "item9000" in icons(ready.text)
     # The gift is the game data's, but the copy's text of it was never imported: its own words.
     assert "Invented XP Boost · 1 day" in picking
     assert "Level 1: it goes to a hero of level 7 or higher" in picking

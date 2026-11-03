@@ -63,6 +63,8 @@ class StepView:
         recruiter: What the recruiter gets.
         recruit: What the recruit gets.
         glyphs: The glyphs of the recruiter's and the recruit's gifts.
+        icons: The imported icons of the recruiter's and the recruit's gifts, where the page
+            shows the game's art and a gift gives an item.
     """
 
     number: int
@@ -73,6 +75,7 @@ class StepView:
     recruiter: str
     recruit: str
     glyphs: tuple[str, str]
+    icons: tuple[str | None, str | None]
 
 
 @dataclass(frozen=True, slots=True)
@@ -216,6 +219,7 @@ class ReferralLinks:
                         words.referral_name(name, True),
                         gets,
                         (gift_glyph(step.recruiter.gift), gift_glyph(step.recruit.gift)),
+                        (words.gift_icon(step.recruiter.gift), words.gift_icon(step.recruit.gift)),
                     )
                 )
             # The steps of each public recruit, as the rewards list them, newest recruit first.

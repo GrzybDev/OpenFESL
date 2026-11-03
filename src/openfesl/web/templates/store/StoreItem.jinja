@@ -1,4 +1,4 @@
-{#def sold, roster, choices: list, offered, texts, reveal, back #}
+{#def sold, roster, choices: list, offered, texts, icons: list, reveal, back #}
 {# A page of the game's store: the way back to the list it is found in, what it sells and for
    whom on the right, and on the left the hero it is bought for, its price and the purchase, or
    why no hero can buy it. A box just opened shows what it gave first. #}
@@ -83,7 +83,7 @@
         </div>
       </section>
     {% endif %}
-    <StoreContents :sold="sold" :texts="texts" />
+    <StoreContents :sold="sold" :texts="texts" :icons="icons" />
   </div>
   {% if offered %}
     <dialog id="buy-confirm"

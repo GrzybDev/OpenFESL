@@ -88,11 +88,13 @@ class Content:
     """An item that a bundle holds or a box may give.
 
     Attributes:
+        item_id: Its number.
         name: Its name.
         ownership: How the hero owns it.
         chance: How likely a box gives it, from 0 to 1; none for a bundle's item.
     """
 
+    item_id: int
     name: str
     ownership: Ownership
     chance: float | None = None
@@ -291,7 +293,8 @@ class StoreItems:
         price = PricePoint(listed.id, None, bundle.currency, bundle.price, bundle.original_price)
         if box is None:
             contents = tuple(
-                Content(member.name, member.product.ownership) for member in deal.members
+                Content(member.product.item_id, member.name, member.product.ownership)
+                for member in deal.members
             )
             sold_alone = all(member.product.published for member in deal.members)
         else:
@@ -346,6 +349,7 @@ def _drops(catalogue: Catalogue, box: Box) -> tuple[Content, ...]:
     total = sum(weight for weight, _ in tiers.values())
     return tuple(
         Content(
+            drop.product.item_id,
             catalogue.name(drop.product.item_id) or str(drop.product.item_id),
             drop.product.ownership,
             tiers[drop.tier][0] / total / tiers[drop.tier][1],
