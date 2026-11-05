@@ -53,13 +53,16 @@ class Breakdown(BaseModel):
         keys: The pattern of each stat's key by the stat's name, with {id} for the number of the
             map, weapon, vehicle or moment.
         names: The name of each by its number: the id of a text of the game's language table, or
-            for vehicles OpenFESL's own word for it; one without a name shows its number.
+            for vehicles OpenFESL's own word for it. A vehicle without a name is left out; anything
+            else without one shows its number.
+        other: The number that everything the servers do not tell apart is counted under.
     """
 
     model_config = ConfigDict(frozen=True)
 
     keys: dict[str, str]
     names: dict[int, str] = {}
+    other: int | None = None
 
     def read(self, values: Mapping[str, float]) -> list[tuple[int, dict[str, float]]]:
         """Return the stats of each one that a hero's stats name, by number.

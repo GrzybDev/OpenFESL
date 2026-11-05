@@ -10646,9 +10646,6 @@ msgstr "Przegrane"
 msgid "web.hero.stat.ratio"
 msgstr "Stosunek"
 
-msgid "web.hero.stat.collisions"
-msgstr "Staranowani"
-
 msgid "web.hero.stat.destroyed"
 msgstr "Zniszczone"
 
@@ -10658,11 +10655,11 @@ msgstr "Zgony od pojazdu"
 msgid "web.hero.stat.deaths_inside"
 msgstr "Zgony w środku"
 
+msgid "web.hero.other_maps"
+msgstr "Inne mapy"
+
 msgid "web.hero.map"
 msgstr "Mapa %(number)s"
-
-msgid "web.hero.vehicle"
-msgstr "Pojazd %(number)s"
 
 msgid "web.hero.moment"
 msgstr "Heroiczny moment %(number)s"

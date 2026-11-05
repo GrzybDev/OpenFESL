@@ -10066,9 +10066,6 @@ msgstr "Losses"
 msgid "web.hero.stat.ratio"
 msgstr "Ratio"
 
-msgid "web.hero.stat.collisions"
-msgstr "Run over"
-
 msgid "web.hero.stat.destroyed"
 msgstr "Destroyed"
 
@@ -10078,11 +10075,11 @@ msgstr "Deaths from it"
 msgid "web.hero.stat.deaths_inside"
 msgstr "Deaths inside"
 
+msgid "web.hero.other_maps"
+msgstr "Other maps"
+
 msgid "web.hero.map"
 msgstr "Map %(number)s"
-
-msgid "web.hero.vehicle"
-msgstr "Vehicle %(number)s"
 
 msgid "web.hero.moment"
 msgstr "Heroic moment %(number)s"

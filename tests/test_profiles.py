@@ -53,7 +53,9 @@ PLAYED = {
     "m_los3": 3,
     "m_ct8": 1200,
     "m_win8": 2,
+    "m_ct999": 600,
     "tv0": 600,
+    "tv7": 300,
     "kv0": 31,
     "kvr0": 9,
     "dstrv0": 4,
@@ -146,13 +148,15 @@ async def test_a_heros_profile_shows_its_stats_as_its_game_keeps_them_to_anyone(
     assert "Stats as the game reports them at the end of each round." in shown
     assert "Wynik 1\u00a0284\u00a0560" in visible(polish.content)
     # The weapons used, the longest first, and those that killed the hero, each by number, as
-    # are maps without names; the vehicles go by OpenFESL's own words.
+    # are maps without names but the number of unnamed variants; the vehicles go by OpenFESL's
+    # own words, and one without a word stays out.
     assert (
         "Maps, weapons and vehicles Weapons used Item 3003 Time 2 h 1 min Kills 4,210"
         " Deaths using it 618 Accuracy 0.252 Item 2026 Time 0 h 30 min Kills 64"
         " Deaths using it 0 Weapons that defeated this hero Item 3015 Deaths 95"
         " Maps Map 3 Time 1 h 0 min Wins 9 Losses 3 Ratio 3.00 Map 8 Time 0 h 20 min Wins 2"
-        " Losses 0 Ratio 2.00 Vehicles Jeep Time 0 h 10 min Kills 31 Road kills 9 Destroyed 4"
+        " Losses 0 Ratio 2.00 Other maps Time 0 h 10 min Wins 0 Losses 0 Ratio 0.00"
+        " Vehicles Jeep Time 0 h 10 min Kills 31 Road kills 9 Destroyed 4"
         " Deaths from it 2 Deaths inside 3"
     ) in shown
     assert "Heroic Moments Heroic moment 19 · 96 Heroic moment 12 · 41" in shown

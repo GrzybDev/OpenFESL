@@ -505,9 +505,11 @@ keys = { time = "tw{id}", kills = "kw{id}", deaths = "dww{id}", hits = "hw{id}",
 keys = { deaths = "dfw{id}" }
 
 # Each map by the number the servers count it under (python/bf2/stats/constants.py, levelsTypeMap),
-# its night variant under the same one, with the name of its main level.
+# its other variants under the same one, with the name of its main level, and the variants of no
+# number under 999.
 [heroes.profile.maps]
 keys = { time = "m_ct{id}", wins = "m_win{id}", losses = "m_los{id}" }
+other = 999
 names = { 0 = "WEST_LEVELNAME_VILLAGE", 1 = "WEST_LEVELNAME_SEASIDE_SKIRMISH", 2 = "WEST_LEVELNAME_river", 3 = "WEST_LEVELNAME_LAKE", 4 = "WEST_LEVELNAME_Mayhem", 5 = "WEST_LEVELNAME_Smack2", 6 = "WEST_LEVELNAME_HEAT", 9 = "WEST_LEVELNAME_ruin", 10 = "WEST_LEVELNAME_woodlands", 11 = "WEST_LEVELNAME_wicked_wake", 12 = "WEST_LEVELNAME_Royal_Rumble", 13 = "WEST_LEVELNAME_Lunar" }
 
 # The jeep, tank and plane: time inside, kills, kills by running into foes (road kills, tank

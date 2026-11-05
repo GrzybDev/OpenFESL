@@ -231,7 +231,11 @@ def lists(
         named = profile.maps.names.get(map_id)
         losses = stats["losses"]
         ratio = stats["wins"] / losses if losses else stats["wins"]
-        name = (catalogue.text(named) if named else None) or text("web.hero.map", number=map_id)
+        name = (catalogue.text(named) if named else None) or (
+            text("web.hero.other_maps")
+            if map_id == profile.maps.other
+            else text("web.hero.map", number=map_id)
+        )
         shown = [
             (text("web.hero.stat.time"), duration(stats["time"], language)),
             (text("web.hero.stat.wins"), count(stats["wins"])),
@@ -242,15 +246,15 @@ def lists(
     vehicles = []
     for vehicle, stats in profile.vehicles.read(numbers):
         word = profile.vehicles.names.get(vehicle)
+        # The guns that servers count too, which the original profiles did not list.
+        if word is None:
+            continue
         named = f"games.{game.id}.vehicle.{word}"
-        name = text(named) if word else text("web.hero.vehicle", number=vehicle)
+        name = text(named)
         shown = [
             (text("web.hero.stat.time"), duration(stats["time"], language)),
             (text("web.hero.stat.kills"), count(stats["kills"])),
-            (
-                text(f"{named}.collisions" if word else "web.hero.stat.collisions"),
-                count(stats["collisions"]),
-            ),
+            (text(f"{named}.collisions"), count(stats["collisions"])),
             (text("web.hero.stat.destroyed"), count(stats["destroyed"])),
             (text("web.hero.stat.deaths_by"), count(stats["deaths"])),
             (text("web.hero.stat.deaths_inside"), count(stats["inside"])),
