@@ -245,7 +245,7 @@
           </form>
           {% for game, here_already in starting %}
             <section aria-labelledby="starting-{{ game.id }}">
-              <Bar id="starting-{{ game.id }}" :extra="_('web.admin.keys.starting.here', here=number(here_already), count=number(game.keys|length))">{{ _("web.admin.keys.starting") }}</Bar>
+              <Bar :id="'starting-' ~ game.id" :extra="_('web.admin.keys.starting.here', here=number(here_already), count=number(game.keys|length))">{{ _("web.admin.keys.starting") }}</Bar>
               <p class="bar-text body-text">{{ _n("web.admin.keys.starting.text", game.keys|length, game=game.name) }}</p>
               <form method="post" action="{{ list }}" class="find-button">
                 <CsrfField />
