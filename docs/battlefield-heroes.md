@@ -93,7 +93,7 @@ see neutral placeholders, and the files are served only to those who see them.
   of a faction and class with a skin tone, hair colour, hair and facial hair, and its faction's and class's starting
   kit; with an imported catalogue that holds hero models, it shows the hero as the game's menu draws it
 - Names are 2 to 16 letters, digits, `_` or `-`, unique ignoring case
-- An account has 4 hero slots and buys more for 1,749 Funds each; a rename costs 1,499 Funds
+- An account has 4 hero slots and buys more for 2,499 Funds each; a rename costs 5,899 Funds
 - The heroes page chooses the default hero, which the game and Play Now play
 - Heroes reach level 30 and earn one Hero Point on each even level
 - The game writes its hero's look, equipment, emotes and missions itself, which the service accepts only with items
@@ -113,9 +113,11 @@ Each wallet keeps a ledger of its changes.
 
 ## The store
 
-- The game data prices each item by the first rule of its kind in each currency, to own it for good, rent it for
-  days or buy a pack of uses; items that no rule covers, such as missions, and those it excludes, such as the
-  clothes every hero holds, are not sold
+- The game data lists what the original store last sold most items for, in Funds and Valor Points, to own them for
+  good, rent them for days or buy packs of uses; an item it does not list follows the first rule of its kind in each
+  currency, and what a box gives of a listed item is priced from its listed price. Items that no rule sells, such as
+  most pets, the pieces that only boxes give and missions, and those it excludes, such as the clothes every hero
+  holds, are not sold alone
 - In the game, the store opens in the game's own browser with its categories, items and prices for the hero playing,
   and a purchase there tells the game what was bought
 - On the site, the store front lists every item on sale for a chosen hero, and each item's page shows what each hero
