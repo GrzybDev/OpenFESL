@@ -460,8 +460,8 @@ running_low_days = 3
 # Further hero slots and new names cost Funds, the currency of the account; renames follow the
 # rule of new names, and a bought slot stays with the account.
 currency = "_PF"
-rename_price = 1499
-slot_price = 1749
+rename_price = 5899
+slot_price = 2499
 
 # The stats that a hero's public profile shows, as the 2012 site did: the keys of the game's stats
 # dictionary (BFHeroes.exe 1.89 0x006aa1fb) that its dedicated servers add to at the end of each

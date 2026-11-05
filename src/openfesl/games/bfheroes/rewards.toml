@@ -249,7 +249,7 @@ gunner = { items = ["3043 7d", "9040 7d", "9000 7d", "2153 x25"] }
 
 # Funds milestones, this server's own: the original rewarded no player's milestones, so the
 # amounts follow its event gifts of 77 and 100 BattleFunds and 1,500 Funds, and a level-10 gift
-# stays below a hero slot's 1,749 Funds. Levels count for each hero, the first hero and 100
+# stays below a hero slot on sale at 1,749 Funds. Levels count for each hero, the first hero and 100
 # finished ranked matches (wins and losses of all its heroes) once for the account.
 [rewards.milestones.first-hero]
 name = "web.rewards.milestone.first_hero.name"

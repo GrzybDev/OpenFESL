@@ -6,6 +6,7 @@ import pytest
 from accounts import PASSWORD, execute, post_sign_in, select_value
 from heroes import CREATOR, MAGMA, create, create_hero, pictures
 from identity import form_token
+from living import setting
 from support import FESL, fetch, game, launcher_sign_in, markup, once_token, visible
 
 pytestmark = pytest.mark.anyio
@@ -259,6 +260,8 @@ async def test_the_heroes_page_lists_each_hero_and_changes_the_hero_the_game_log
 async def test_a_new_name_costs_funds_only_when_it_is_given(
     base: str, server_url: str, database_url: str
 ) -> None:
+    # A price that the starting allowance pays.
+    await setting(database_url, "bfheroes.heroes.rename_price", "1499")
     hero = await create_hero(base, "ann@example.test", "Brassbuckle")
     stranger = await create_hero(base, "bob@example.test", "Copperpot")
     rename = f"{base}/bfheroes/heroes/{hero}/rename"
@@ -325,15 +328,15 @@ async def test_a_further_hero_slot_is_bought_once_with_the_funds_for_one(
         full = await client.get(f"{base}{CREATOR}")
         shown = visible(full.content)
         assert "All 4 hero slots are in use" in shown
-        assert "Price 1,749 Funds · Funds now 2,500" in shown
+        assert "Price 2,499 Funds · Funds now 2,500" in shown
         assert 'href="/bfheroes/user/buyCharacterSlots?next=%2Fbfheroes%2Fuser%2FcreateHero"' in (
             full.text
         )
         page = await client.get(f"{slots}?next={CREATOR}")
-        assert "4 → 5" in visible(page.content) and "Funds after 751" in visible(page.content)
+        assert "4 → 5" in visible(page.content) and "Funds after 1" in visible(page.content)
 
         # A form from another site, or one without its one-time token, buys nothing.
-        for sent in ({"csrf": "forged"}, {"csrf": form_token(page.text), "price": "1749"}):
+        for sent in ({"csrf": "forged"}, {"csrf": form_token(page.text), "price": "2499"}):
             await client.post(slots, data={**sent, "next": CREATOR})
             refused = visible((await client.get(f"{base}{CREATOR}")).content)
             assert "No hero slot was added: the form had expired. Nothing was spent." in refused
@@ -342,7 +345,7 @@ async def test_a_further_hero_slot_is_bought_once_with_the_funds_for_one(
             "csrf": form_token(page.text),
             "next": CREATOR,
             "once": once_token(page.text),
-            "price": "1749",
+            "price": "2499",
         }
         other = (await twin.get(slots)).text
         raced = await asyncio.gather(
@@ -358,8 +361,8 @@ async def test_a_further_hero_slot_is_bought_once_with_the_funds_for_one(
         await create(client, base, "Mudlark")
         short = await client.get(f"{base}{CREATOR}")
         assert 'aria-disabled="true" aria-describedby="creator-why"' in short.text
-        assert "Funds now 751 · 998 short" in visible(short.content)
-        assert "The account has 751 Funds; a slot costs 1,749." in visible(short.content)
+        assert "Funds now 1 · 2,498 short" in visible(short.content)
+        assert "The account has 1 Funds; a slot costs 2,499." in visible(short.content)
 
         # One form sent twice at once, as a double click without scripts sends it, and later
         # again, as Back and sending it do, adds one slot.
@@ -369,19 +372,19 @@ async def test_a_further_hero_slot_is_bought_once_with_the_funds_for_one(
             "csrf": form_token(page.text),
             "next": CREATOR,
             "once": once_token(page.text),
-            "price": "1749",
+            "price": "2499",
         }
         await asyncio.gather(*(client.post(slots, data=form) for _ in range(2)))
         await client.get(f"{base}{CREATOR}")
         await client.post(slots, data=form)
         again = visible((await client.get(f"{base}{CREATOR}")).content)
     messages = opened + refused
-    assert "Hero slot 5 added. 1,749 Funds spent." in messages
-    assert "No hero slot was added: the account has 751 Funds; a slot costs 1,749." in messages
+    assert "Hero slot 5 added. 2,499 Funds spent." in messages
+    assert "No hero slot was added: the account has 1 Funds; a slot costs 2,499." in messages
     assert "4 of 5 used" in opened and 'name="faction"' in creator.text
     assert "This hero slot purchase was made already; sending it again added no further" in again
-    assert await select_value(database_url, "SELECT balance FROM wallet") == 2251
+    assert await select_value(database_url, "SELECT balance FROM wallet") == 1501
     ledger = await select_value(
         database_url, "SELECT string_agg(reason || ':' || delta, ' ' ORDER BY id) FROM wallet_entry"
     )
-    assert ledger == "allowance:2500 hero-slot:-1749 hero-slot:-1749"
+    assert ledger == "allowance:2500 hero-slot:-2499 hero-slot:-2499"

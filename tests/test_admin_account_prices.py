@@ -13,8 +13,8 @@ pytestmark = pytest.mark.anyio
 
 # The values of the game data, as the form sends them unchanged.
 VALUES = {
-    "slot": "1749",
-    "rename": "1499",
+    "slot": "2499",
+    "rename": "5899",
     "key": "499",
     "allowance-_PF": "2500",
     "allowance-_DV": "0",
@@ -41,8 +41,8 @@ async def test_account_prices_and_allowances_change_on_the_panel_and_apply_at_on
         shown = visible((await sign_in(client, base, next="/admin/store/bfheroes/account")).content)
         assert (
             "Account prices, allowances and per-round caps All default Setting Value Unit Game"
-            " data State Hero slot A further slot beyond the 4 free ones 1,749 Unit Funds Game"
-            " data 1,749 Default" in shown
+            " data State Hero slot A further slot beyond the 4 free ones 2,499 Unit Funds Game"
+            " data 2,499 Default" in shown
         )
         assert "Valor Points per round Most that servers credit an account within 10 minutes" in (
             shown
@@ -58,11 +58,11 @@ async def test_account_prices_and_allowances_change_on_the_panel_and_apply_at_on
         assert "This value is from 1 to 2,147,483,647; 0 is not." in visible(refused.content)
         # What a script sends while a value is typed: its state follows it.
         typed = visible((await client.get(page, params=VALUES | {"slot": "1,800"})).content)
-        assert "per-round caps 1 changed" in typed and "1,749 Changed Reset" in typed
+        assert "per-round caps 1 changed" in typed and "2,499 Changed Reset" in typed
         # Reset puts the value back in the form and saves nothing.
         sent = {"csrf": token, **VALUES, "slot": "1800", "reset": "slot"}
         reset = await client.post(page, data=sent)
-        assert 'value="1749"' in reset.text and "All default" in visible(reset.content)
+        assert 'value="2499"' in reset.text and "All default" in visible(reset.content)
         assert await select_value(database_url, SETTINGS) is None
 
         changed = VALUES | {
@@ -81,7 +81,7 @@ async def test_account_prices_and_allowances_change_on_the_panel_and_apply_at_on
             " bfheroes.heroes.slot_price=1800"
         )
         log = visible((await client.get(f"{base}/admin/audit")).content)
-        assert "Account price or limit changed Hero slot Details 1,749 → 1,800 Funds" in log
+        assert "Account price or limit changed Hero slot Details 2,499 → 1,800 Funds" in log
         assert "Starting allowance · Valor Points Details 0 → 500 Valor Points" in log
 
         # The prices, the allowances of wallets not opened yet and the key apply at once.
@@ -92,9 +92,9 @@ async def test_account_prices_and_allowances_change_on_the_panel_and_apply_at_on
             # Forms shown at the game data's prices before the change buy nothing.
             shown = (await ann.get(f"{base}/bfheroes/user/buyCharacterSlots")).text
             old = {"csrf": form_token(shown), "once": once_token(shown)}
-            await ann.post(f"{base}/bfheroes/user/buyCharacterSlots", data=old | {"price": "1749"})
+            await ann.post(f"{base}/bfheroes/user/buyCharacterSlots", data=old | {"price": "2499"})
             slot = visible((await ann.get(f"{base}/bfheroes/heroes")).content)
-            renaming = old | {"name": "Copper_Kettle", "price": "1499"}
+            renaming = old | {"name": "Copper_Kettle", "price": "5899"}
             await ann.post(f"{base}/bfheroes/heroes/{hero}/rename", data=renaming)
             renamed = visible((await ann.get(f"{base}/bfheroes/heroes")).content)
         assert "Heroes 1 3,000 Funds 500 Valor Points" in heroes
