@@ -142,8 +142,8 @@ async def test_the_panel_lists_each_accounts_purchases_and_the_stores_with_a_fil
         store = f"{base}/admin/store/bfheroes/purchases"
         listed = visible((await client.get(store)).content)
         assert "Purchases of Battlefield Heroes" in listed and "4 purchases" in listed
-        assert "ann@example.test Brassbuckle Item OFB-DBFH:14 250 Valor Points" in listed
-        assert "Hero Points spent 1 Valor Points spent 250 Funds spent 3,500" in listed
+        assert "ann@example.test Brassbuckle Item OFB-DBFH:14 150 Valor Points" in listed
+        assert "Hero Points spent 1 Valor Points spent 150 Funds spent 3,499" in listed
         named = visible((await client.get(store, params={"who": "mud"})).content)
         assert "1 purchase" in named and "bob@example.test Mudlark Item OFB-DBFH:5" in named
         valor = visible((await client.get(store, params={"currency": "_DV"})).content)

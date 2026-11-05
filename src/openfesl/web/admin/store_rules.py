@@ -76,7 +76,10 @@ def rule_rows(
         if prices.unsold:
             continue
         for rule in rules.rules(prices.item):
-            key = keys[id(rule)]
+            # The store's listing, which prices an item instead of a rule.
+            key = keys.get(id(rule))
+            if key is None:
+                continue
             items[key] += 1
             lines = [line for line in prices.lines if line.product.currency == rule.currency]
             own[key] += any(line.own for line in lines)

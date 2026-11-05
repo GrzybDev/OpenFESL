@@ -58,7 +58,7 @@ async def test_the_game_store_shows_a_hero_what_fits_it_and_what_it_holds(
     assert "Boosts 1 item · none owned" in store
 
     weapons = visible((await opened(server_url, f"{STORE}/weapons{query}", cookie)).encode())
-    assert "Invented Rifle Not owned from 250 Valor Points 6,720 Funds" in weapons
+    assert "Invented Rifle Not owned from 150 Valor Points 6,719 Funds" in weapons
     assert "Longrifle" not in weapons
     widgets = visible((await opened(server_url, f"{STORE}/widgets{query}", cookie)).encode())
     assert "Invented Bandage Equipped 3 uses left · running low" in widgets
@@ -69,21 +69,21 @@ async def test_the_game_store_shows_a_hero_what_fits_it_and_what_it_holds(
     rifle = visible((await opened(server_url, f"{STORE}/weapons/3015{query}", cookie)).encode())
     assert "Invented Rifle Royal Soldier" in rifle
     assert "Brassbuckle · Not owned" in rifle
-    assert "1 day 250 Valor Points" in rifle and "Permanent 6,720 Funds 4,220 short" in rifle
+    assert "1 day 150 Valor Points" in rifle and "Permanent 6,719 Funds 4,219 short" in rifle
     assert "After buying: 1 day left, until" in rifle
-    assert "the account keeps 350 Valor Points." in rifle
+    assert "the account keeps 450 Valor Points." in rifle
     for_good = await product(server_url, "3015-unlm")
     picked = f"{STORE}/weapons/3015{query}&pick={for_good}"
     short = visible((await opened(server_url, picked, cookie)).encode())
-    assert "The account has 2,500 Funds; this costs 6,720." in short
+    assert "The account has 2,500 Funds; this costs 6,719." in short
     assert "Where Funds come from" in short
 
     need = f"{STORE}/weapons/3015/need{query}&product={for_good}"
     more = visible((await opened(server_url, need, cookie)).encode())
-    assert "Need more Funds Not enough Funds Price 6,720 Funds Invented Rifle, permanent" in more
-    assert "The account has 2,500 Funds Short 4,220 Funds" in more
+    assert "Need more Funds Not enough Funds Price 6,719 Funds Invented Rifle, permanent" in more
+    assert "The account has 2,500 Funds Short 4,219 Funds" in more
     assert "How Funds are earned" in more
-    assert "1 day costs 250 Valor Points, which the account has." in more
+    assert "1 day costs 150 Valor Points, which the account has." in more
 
     cheer = visible((await opened(server_url, f"{STORE}/emotes/5016{query}", cookie)).encode())
     assert "Brassbuckle owns this permanently; there is nothing to buy." in cheer
@@ -180,28 +180,28 @@ async def test_a_hero_buys_in_the_game_store_and_a_refusal_spends_nothing(
         return {"csrf": csrf, "product": product, "price": str(price), "equip": "1"}
 
     # A form of an older page, a price that changed meanwhile and a price above the balance.
-    expired = await opened(server_url, rifle, cookie, form(day, 250, "forged"))
+    expired = await opened(server_url, rifle, cookie, form(day, 150, "forged"))
     assert "Not bought The store's page had expired. Nothing was spent;" in visible(
         expired.encode()
     )
     changed = await opened(server_url, rifle, cookie, form(day, 200))
     assert "The price points of this item changed a moment ago." in visible(changed.encode())
-    poor = visible((await opened(server_url, rifle, cookie, form(for_good, 6720))).encode())
-    assert "Need more Funds" in poor and "Short 4,220 Funds" in poor
+    poor = visible((await opened(server_url, rifle, cookie, form(for_good, 6719))).encode())
+    assert "Need more Funds" in poor and "Short 4,219 Funds" in poor
     # Nor is the cheer sold, which the game grants the hero.
     emote = f"{STORE}/emotes/5016?personaId={hero}"
     cheer = await product(server_url, "5016-unlm")
-    owned = visible((await opened(server_url, emote, cookie, form(cheer, 1680))).encode())
+    owned = visible((await opened(server_url, emote, cookie, form(cheer, 1679))).encode())
     assert "Brassbuckle owns this item permanently by now. Nothing was spent." in owned
     # Nor may the account buy for another account's hero.
     theirs = f"{STORE}/weapons/3015?personaId={bob_hero}"
-    assert "<title>offline</title>" in await opened(server_url, theirs, cookie, form(day, 250))
+    assert "<title>offline</title>" in await opened(server_url, theirs, cookie, form(day, 150))
     assert await wallets(server_url, cookie, hero) == {"_DH": 0, "_DV": 600, "_PF": 2500}
     assert await wallets(server_url, bob, bob_hero) == {"_DH": 0, "_DV": 0, "_PF": 2500}
 
-    bought = visible((await opened(server_url, rifle, cookie, form(day, 250))).encode())
+    bought = visible((await opened(server_url, rifle, cookie, form(day, 150))).encode())
     assert "Bought and equipped Invented Rifle, 1 day, for Brassbuckle." in bought
-    assert "250 Valor Points spent; the account has 350 Valor Points." in bought
+    assert "150 Valor Points spent; the account has 450 Valor Points." in bought
     assert "Brassbuckle now has 1 day left." in bought
     # The item the page tells the game of is the one the game then loads.
     _, _, held = await fetch(server_url, f"/nucleus/entitlements/{hero}", MAGMA, cookie)

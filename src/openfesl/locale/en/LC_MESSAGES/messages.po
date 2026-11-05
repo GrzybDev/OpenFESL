@@ -11439,7 +11439,7 @@ msgid "web.admin.store.none"
 msgstr "No item matches the filter."
 
 msgid "web.admin.store.list.note"
-msgstr "Sorted by name · %(count)s per page · prices follow the kind's rule unless the item has own prices."
+msgstr "Sorted by name · %(count)s per page · prices follow the store's listing or the kind's rule unless the item has own prices."
 
 msgid "web.admin.store.filter"
 msgstr "Filter"
@@ -11475,7 +11475,7 @@ msgid "web.admin.store.no_catalogue"
 msgstr "Prices need the catalogue of %(game)s."
 
 msgid "web.admin.store.no_catalogue.text"
-msgstr "The store lists the catalogue's items; once it is imported, every item takes the prices of its kind's rule. The kind rules can be set meanwhile."
+msgstr "The store lists the catalogue's items; once it is imported, every item takes its listed price or the prices of its kind's rule. The kind rules can be set meanwhile."
 
 msgid "web.admin.store.points.count.one"
 msgstr "%(count)s price point"
@@ -11545,6 +11545,9 @@ msgstr "Rule"
 
 msgid "web.admin.store.rule.use"
 msgstr "%(price)s a use"
+
+msgid "web.admin.store.rule.listed"
+msgstr "As last listed"
 
 msgid "web.admin.store.rule.none"
 msgstr "None"
@@ -11673,7 +11676,7 @@ msgid "web.admin.store.point.add.submit"
 msgstr "Add"
 
 msgid "web.admin.store.reset"
-msgstr "Reset to the kind's rule"
+msgstr "Reset to the seeded prices"
 
 msgid "web.admin.store.point.named"
 msgstr "%(currency)s, %(ownership)s"
@@ -11700,7 +11703,7 @@ msgid "web.admin.toast.store.added"
 msgstr "Added a price point to %(item)s: %(point)s."
 
 msgid "web.admin.toast.store.reset"
-msgstr "Reset the prices of %(item)s to its kind's rule."
+msgstr "Reset the prices of %(item)s to the seeded prices."
 
 msgid "web.admin.toast.store.unchanged"
 msgstr "Nothing changed in the prices of %(item)s."

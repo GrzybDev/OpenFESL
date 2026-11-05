@@ -75,6 +75,7 @@ convention = "google"
 testpaths = ["tests"]
 addopts = ["-ra", "--strict-markers", "--import-mode=importlib"]
 pythonpath = ["tests"]
+markers = ["listed_prices: the server keeps the store's listed prices, for the real catalogue"]
 
 [tool.mypy]
 files = ["src", "tests"]

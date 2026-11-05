@@ -1,4 +1,5 @@
 import gzip
+from dataclasses import replace
 from pathlib import Path
 
 import anyio
@@ -8,8 +9,9 @@ from heroes import MAGMA
 from store import ITEMS, catalogue_file, item, listed, offers, stock
 from support import cli, fetch
 
+from openfesl.core.catalogues import Item
 from openfesl.core.games import Game
-from openfesl.core.inventory import RENTED, Ownership
+from openfesl.core.inventory import COUNTED, PERMANENT, RENTED, Ownership
 from openfesl.core.store_rules import PriceRule
 
 pytestmark = pytest.mark.anyio
@@ -36,7 +38,7 @@ async def test_the_store_sells_each_way_to_own_an_imported_item_as_a_product_of_
         "OFB-DBFH:2 3-tlmd 30d 1300_PF",
         "OFB-DBFH:3 4-unlm 2600_PF",
         "OFB-DBFH:4 4-tlmd 30d 1300_PF",
-        "OFB-DBFH:5 521-unlm 900_PF",
+        "OFB-DBFH:5 521-unlm 899_PF",
         "OFB-DBFH:6 2005-lmct x25 175_PF",
         "OFB-DBFH:7 2005-lmct x110 770_PF",
         "OFB-DBFH:8 2096-unlm 1_DH",
@@ -44,19 +46,15 @@ async def test_the_store_sells_each_way_to_own_an_imported_item_as_a_product_of_
         "OFB-DBFH:10 2098-unlm 1_DH",
         "OFB-DBFH:11 2153-lmct x25 175_PF",
         "OFB-DBFH:12 2153-lmct x110 770_PF",
-        "OFB-DBFH:13 3015-unlm 6720_PF",
-        "OFB-DBFH:14 3015-tlmd 1d 250_DV",
-        "OFB-DBFH:15 3015-tlmd 3d 500_DV",
-        "OFB-DBFH:16 3015-tlmd 7d 1000_DV",
-        "OFB-DBFH:17 3015-tlmd 30d 2500_DV",
-        "OFB-DBFH:18 3042-unlm 6720_PF",
-        "OFB-DBFH:19 3042-tlmd 1d 250_DV",
-        "OFB-DBFH:20 3042-tlmd 3d 500_DV",
-        "OFB-DBFH:21 3042-tlmd 7d 1000_DV",
-        "OFB-DBFH:22 3042-tlmd 30d 2500_DV",
-        "OFB-DBFH:23 5001-unlm 1680_PF",
-        "OFB-DBFH:24 5001-tlmd 30d 840_PF",
-        "OFB-DBFH:25 9000-tlmd 30d 6299_PF",
+        "OFB-DBFH:13 3015-unlm 6719_PF",
+        "OFB-DBFH:14 3015-tlmd 1d 150_DV",
+        "OFB-DBFH:15 3015-tlmd 3d 450_DV",
+        "OFB-DBFH:16 3042-unlm 6719_PF",
+        "OFB-DBFH:17 3042-tlmd 1d 150_DV",
+        "OFB-DBFH:18 3042-tlmd 3d 450_DV",
+        "OFB-DBFH:19 5001-unlm 1679_PF",
+        "OFB-DBFH:20 5001-tlmd 30d 839_PF",
+        "OFB-DBFH:21 9000-tlmd 30d 6299_PF",
     ]
     # The game asks for the list compressed and inflates it to the same document.
     assert packed[1]["Content-Encoding"] == "gzip"
@@ -107,6 +105,42 @@ async def test_a_later_import_keeps_the_admins_products_and_takes_out_withheld_i
     assert on_sale is not None and on_sale.get("value") == "2600"
 
 
+async def test_a_listed_item_sells_as_listed_while_its_rule_prices_what_boxes_give(
+    bfheroes: Game,
+) -> None:
+    rules = bfheroes.store
+    assert rules is not None
+    shirt = Item(
+        3,
+        "appearance",
+        "3",
+        frozenset(),
+        frozenset(),
+        None,
+        (),
+        None,
+        {},
+        (),
+        False,
+        None,
+        False,
+        False,
+    )
+    sold = {
+        (rule.currency, ownership.written, rules.price(rule, ownership))
+        for rule in rules.rules(shirt)
+        for ownership in rule.sold
+    }
+    assert sold == {("_PF", "perm", 839), ("_DV", "1d", 50), ("_DV", "3d", 150)}
+    assert rules.price_of(shirt, Ownership(PERMANENT), "_PF") == 839
+    # Half of its listed price, which the listing does not sell.
+    assert rules.price_of(shirt, Ownership(RENTED, days=30), "_PF") == 419
+    assert rules.sells_alone(shirt)
+    # Uses at the rate of its largest pack, beside the rule's 7 Funds a use.
+    bandage = replace(shirt, id=2005, kind="ability", fields={"consumable": "true"})
+    assert rules.price_of(bandage, Ownership(COUNTED, uses=132), "_PF") == 502
+
+
 async def test_valor_point_rentals_round_down_to_50_while_funds_rentals_stay_exact(
     bfheroes: Game,
 ) -> None:
@@ -114,7 +148,7 @@ async def test_valor_point_rentals_round_down_to_50_while_funds_rentals_stay_exa
     assert rules is not None
     valor = PriceRule(kind="weapon", currency="_DV", value=5555)
     weeks = [Ownership(RENTED, days=days) for days in (1, 3, 7, 30)]
-    assert [rules.price(valor, days) for days in weeks] == [250, 550, 1100, 2750]
+    assert [rules.price(valor, days) for days in weeks] == [250, 800, 1650, 2750]
     # A week of a Super weapon stays worth the 629 Funds of the class supply drops that drop it.
-    funds = PriceRule(kind="weapon", currency="_PF", value=3360)
-    assert rules.price(funds, Ownership(RENTED, days=7)) == 672
+    funds = PriceRule(kind="weapon", currency="_PF", value=3359)
+    assert rules.price(funds, Ownership(RENTED, days=7)) == 1007

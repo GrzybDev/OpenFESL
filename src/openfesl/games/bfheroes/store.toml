@@ -1,16 +1,17 @@
 # The store's starting set: what the items of the imported catalogue sell for, which fills a store
-# that has no products; the admin changes the products from there. Prices are those of autumn 2012
-# where the archived hot deals and forum posts keep them, else derived from them. The game buys a
-# product by its id, which the original store wrote OFB-DBFH:<number> (the 2013-2015 site); the
-# game puts it in a path as it is.
+# that has no products; the admin changes the products from there. Most items sell as the store
+# last listed them (bfheroes/listing.toml); the rules below price the others and what a box gives
+# of any item. The game buys a product by its id, which the original store wrote OFB-DBFH:<number>
+# (the 2013-2015 site); the game puts it in a path as it is.
 [store]
 ids = "OFB-DBFH:{id}"
 # A rental's share of the item's value in percent, by its days: 30 days were half the price of
-# owning an item for good (emotes 140 or 280 BattleFunds, 2010), the shorter ones are inferred.
-rentals = { 1 = 5, 3 = 10, 7 = 20, 30 = 50 }
-# A rental in Valor Points costs a multiple of 50, rounded down; no archive shows one. Funds
-# rentals stay exact, as a week of a Super weapon (672) would fall below the 629 of the class
-# supply drops that promise to be worth their price if it ended in 99.
+# owning an item for good and 14 days of a weapon 37%, the plain weapons' Valor Point rentals 5%
+# of 3,000 a day and 15% for 3 days; a week is inferred, below 14 days and above the 27% of a
+# day of a Super weapon in Funds.
+rentals = { 1 = 5, 3 = 15, 7 = 30, 14 = 37, 30 = 50 }
+# A rental in Valor Points costs a multiple of 50, rounded down, as the listed weapons' do. Funds
+# rentals stay exact, as half of a price that ends in 9 is the store's own price for 30 days.
 rounding = { _DV = { step = 50 } }
 # An item's description is the game's own text, as its script bridge's getItemDescription reads it
 # (BFHeroes.exe 1.89 0x009fe31e).
@@ -50,7 +51,7 @@ items = [
 kind = "weapon"
 items = [3015, 3025, 3038, 3041, 3042, 3043]
 currency = "_PF"
-value = 6720
+value = 6719
 sold = ["perm"]
 
 # Tier 1 weapons, 1,200 BattleFunds in 2010.
@@ -58,7 +59,7 @@ sold = ["perm"]
 kind = "weapon"
 items = [3148, 3149, 3150, 3151, 3152, 3153]
 currency = "_PF"
-value = 7200
+value = 7199
 sold = ["perm"]
 
 # Super and Uber weapons and their stolen and pilfered copies of the other faction, 560
@@ -73,7 +74,7 @@ items = [
     3186, 3187,
 ]
 currency = "_PF"
-value = 3360
+value = 3359
 sold = ["perm"]
 
 # Other weapons sell for Valor Points alone; boxes that drop them for Funds value them as Super
@@ -81,22 +82,22 @@ sold = ["perm"]
 [store.prices.other-weapons]
 kind = "weapon"
 currency = "_PF"
-value = 3360
+value = 3359
 
-# Every weapon also rents for Valor Points, from a value of 5,000, the permanent price that some
-# weapons got in February 2013; no Valor Point price of 2012 survives.
+# Weapons rent for Valor Points by the day or for three days, as the store sold them from
+# November 2009; permanent prices came in February 2013, after the 1.89 client.
 [store.prices.weapon-rentals]
 kind = "weapon"
 currency = "_DV"
-value = 5000
-sold = ["1d", "3d", "7d", "30d"]
+value = 3000
+sold = ["1d", "3d"]
 
 # Pets, about 900 Funds (Drayseen the Dragon was refunded at 899 in June 2012).
 [store.prices.pets]
 kind = "appearance"
 items = [362, 521, 973, 974, 1123, 1124, 1507, 1529, 1530, 1581, 1583]
 currency = "_PF"
-value = 900
+value = 899
 sold = ["perm"]
 
 # The rocket packs, at their archived price.
@@ -104,7 +105,7 @@ sold = ["perm"]
 kind = "appearance"
 items = [589, 597]
 currency = "_PF"
-value = 3600
+value = 3599
 sold = ["perm"]
 
 # Clothing, about 2,600 Funds an item: the median of the item prices of the appearance sets of
@@ -119,7 +120,7 @@ sold = ["perm", "30d"]
 [store.prices.emotes]
 kind = "emote"
 currency = "_PF"
-value = 1680
+value = 1679
 sold = ["perm", "30d"]
 
 # Boosts and the other convenience items, 6,299 Funds for 30 days (the XP and VP boost bundle of

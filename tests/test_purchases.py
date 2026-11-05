@@ -17,8 +17,8 @@ pytestmark = pytest.mark.anyio
 # and for 30 days where it is stocked.
 COAT_MONTH, TUNIC, PET, BANDAGES = 2, 3, 5, 6
 DASH_1, DASH_2, DASH_3 = 8, 9, 10
-RIFLE_DAY, LONGRIFLE, WAVE = 14, 18, 23
-CHEER_FOR_GOOD, CHEER_MONTH = 25, 26
+RIFLE_DAY, LONGRIFLE, WAVE = 14, 16, 19
+CHEER_FOR_GOOD, CHEER_MONTH = 21, 22
 
 
 async def ends(database_url: str, hero: int, item: int) -> datetime:
@@ -66,7 +66,7 @@ async def test_a_hero_buys_with_its_accounts_funds_and_valor_and_its_own_hero_po
     ]
     assert second_end - first_end == timedelta(days=1)
     # Funds and Valor Points from the account, Hero Points from the hero.
-    assert await wallets(server_url, cookie, hero) == {"_DH": 0, "_DV": 100, "_PF": 1425}
+    assert await wallets(server_url, cookie, hero) == {"_DH": 0, "_DV": 300, "_PF": 1426}
     assert await items(server_url, cookie, hero) == [
         "2005-lmct 35",
         "521-unlm 0",
@@ -82,8 +82,8 @@ async def test_a_hero_buys_with_its_accounts_funds_and_valor_and_its_own_hero_po
         hero=hero,
     )
     assert recorded == (
-        'OFB-DBFH:5 _PF900 {"items": [521]}, OFB-DBFH:14 _DV250 {"items": [3015]}, '
-        'OFB-DBFH:14 _DV250 {"items": [3015]}, OFB-DBFH:6 _PF175 {"items": [2005]}, '
+        'OFB-DBFH:5 _PF899 {"items": [521]}, OFB-DBFH:14 _DV150 {"items": [3015]}, '
+        'OFB-DBFH:14 _DV150 {"items": [3015]}, OFB-DBFH:6 _PF175 {"items": [2005]}, '
         'OFB-DBFH:8 _DH1 {"items": [2096]}, OFB-DBFH:9 _DH1 {"items": [2097]}, '
         'OFB-DBFH:10 _DH1 {"items": [2098]}'
     )
@@ -131,7 +131,7 @@ async def test_a_purchase_the_hero_may_not_make_takes_nothing_and_gives_nothing(
         ("error", "UNKNOWN_PRODUCT"),
         ("error", "USER_DOES_NOT_MATCH"),
     ]
-    assert (await wallets(server_url, cookie, hero))["_PF"] == 2500 - 1680
+    assert (await wallets(server_url, cookie, hero))["_PF"] == 2500 - 1679
     assert await items(server_url, cookie, hero) == ["2005-lmct 10", "5001-unlm 0"]
     assert await select_value(database_url, "SELECT count(*) FROM purchase") == 1
 

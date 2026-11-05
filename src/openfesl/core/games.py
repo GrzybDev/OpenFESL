@@ -643,12 +643,15 @@ def load_games(folder: Traversable | None = None) -> Games:
 
 def _load(entry: Traversable, folder: Traversable) -> Game:
     data = tomllib.loads(entry.read_text("utf-8"))
-    # A data file may keep parts of the game's data in files of their own, each part in one.
+    # A data file may keep parts of the game's data in files of their own, a table's keys each
+    # in one.
     for name in data.pop("include", []):
         part = tomllib.loads(folder.joinpath(*name.split("/")).read_text("utf-8"))
-        if twice := data.keys() & part.keys():
-            raise ValueError(f"{name} defines {sorted(twice)} again")
-        data |= part
+        for key, table in part.items():
+            held = data.setdefault(key, {})
+            if twice := held.keys() & table.keys():
+                raise ValueError(f"{name} defines {key} {sorted(twice)} again")
+            held |= table
     http = data.get("http", {})
     # The data file names each editorial file by its path in the folder.
     contents = {

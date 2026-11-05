@@ -12079,7 +12079,7 @@ msgid "web.admin.store.none"
 msgstr "Żaden przedmiot nie pasuje do filtra."
 
 msgid "web.admin.store.list.note"
-msgstr "Według nazwy · %(count)s na stronę · ceny wynikają z zasady rodzaju, chyba że przedmiot ma własne."
+msgstr "Według nazwy · %(count)s na stronę · ceny wynikają z cennika sklepu albo zasady rodzaju, chyba że przedmiot ma własne."
 
 msgid "web.admin.store.filter"
 msgstr "Filtr"
@@ -12115,7 +12115,7 @@ msgid "web.admin.store.no_catalogue"
 msgstr "Ceny wymagają katalogu gry %(game)s."
 
 msgid "web.admin.store.no_catalogue.text"
-msgstr "Sklep pokazuje przedmioty z katalogu; po imporcie każdy przedmiot dostaje ceny według zasady swojego rodzaju. Zasady rodzajów można ustawić już teraz."
+msgstr "Sklep pokazuje przedmioty z katalogu; po imporcie każdy przedmiot dostaje cenę z cennika sklepu albo według zasady swojego rodzaju. Zasady rodzajów można ustawić już teraz."
 
 msgid "web.admin.store.points.count.one"
 msgstr "%(count)s punkt cenowy"
@@ -12197,6 +12197,9 @@ msgstr "Zasada"
 
 msgid "web.admin.store.rule.use"
 msgstr "%(price)s za użycie"
+
+msgid "web.admin.store.rule.listed"
+msgstr "Jak w ostatnim cenniku"
 
 msgid "web.admin.store.rule.none"
 msgstr "Brak"
@@ -12343,7 +12346,7 @@ msgid "web.admin.store.point.add.submit"
 msgstr "Dodaj"
 
 msgid "web.admin.store.reset"
-msgstr "Przywróć zasadę rodzaju"
+msgstr "Przywróć ceny startowe"
 
 msgid "web.admin.store.point.named"
 msgstr "%(currency)s, %(ownership)s"
@@ -12370,7 +12373,7 @@ msgid "web.admin.toast.store.added"
 msgstr "Dodano punkt cenowy przedmiotu %(item)s: %(point)s."
 
 msgid "web.admin.toast.store.reset"
-msgstr "Przywrócono ceny przedmiotu %(item)s według zasady rodzaju."
+msgstr "Przywrócono ceny startowe przedmiotu %(item)s."
 
 msgid "web.admin.toast.store.unchanged"
 msgstr "Ceny przedmiotu %(item)s się nie zmieniły."

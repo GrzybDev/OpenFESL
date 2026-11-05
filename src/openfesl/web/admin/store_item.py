@@ -267,7 +267,7 @@ def _adding(game: Game, rules: StoreRules, prices: ItemPrices) -> Adding:
     points = game.heroes.points if game.heroes else None
     priced = {rule.currency for rule in rules.prices.values()}
     currencies = [code for code in game.currencies if code in priced and code != points]
-    uses = any(rule.use_price for rule in rules.rules(prices.item))
+    uses = rules.counted(prices.item)
     return Adding(currencies, uses, [f"{days}d" for days in sorted(rules.rentals)] + ["perm"])
 
 
@@ -329,9 +329,11 @@ def _rule_text(texts: StoreTexts, rules: StoreRules, prices: ItemPrices) -> str:
     # What each rule that prices the item makes owning it for good worth, or a use of it.
     said = []
     for rule in rules.rules(prices.item):
-        if rule.value:
-            said.append(texts.priced(rule.value, rule.currency))
+        if value := rules.price(rule, Ownership(PERMANENT)):
+            said.append(texts.priced(value, rule.currency))
         elif rule.use_price:
             price = texts.priced(rule.use_price, rule.currency)
             said.append(texts.text("web.admin.store.rule.use", price=price))
+        elif rule.points:
+            said.append(texts.text("web.admin.store.rule.listed"))
     return " · ".join(said) or texts.text("web.admin.store.rule.none")

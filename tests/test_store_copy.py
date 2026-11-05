@@ -19,6 +19,7 @@ from openfesl.storage.store import SqlProductStore
 pytestmark = [
     NEEDS_COPY,
     pytest.mark.anyio,
+    pytest.mark.listed_prices,
 ]
 
 
@@ -48,7 +49,7 @@ async def test_the_store_data_names_the_copys_items_and_every_box_is_worth_its_p
 
     rules = game.store
     assert rules
-    named = {item for rule in rules.prices.values() for item in rule.items}
+    named = {item for rule in [*rules.prices.values(), *rules.listed] for item in rule.items}
     # The Claw's prizes are a box of the store too.
     seeded = [*rules.boxes, *([game.claw.box] if game.claw else [])]
     for box in seeded:

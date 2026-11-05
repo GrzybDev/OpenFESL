@@ -26,7 +26,7 @@ def product(number: int, item: int, ownership: Ownership, price: int) -> Product
 
 HAT = product(1, 10, Ownership(PERMANENT), 2600)
 COAT = product(2, 11, Ownership(PERMANENT), 2600)
-RIFLE = product(3, 12, Ownership(RENTED, days=7), 672)
+RIFLE = product(3, 12, Ownership(RENTED, days=7), 1007)
 TONICS = product(4, 13, Ownership(COUNTED, uses=110), 770)
 # A box of 629 Funds: a hat or a coat in six rolls of ten, a rifle for a week in four.
 BOX = Box(
@@ -108,7 +108,7 @@ async def test_a_bought_box_gives_one_item_the_hero_may_use_and_never_one_it_own
     # Each answer lists the one product the box gave, as the game adds it.
     assert [answer.tag for answer in answers] == ["products", "products"]
     assert [[listed(given) for given in answer] for answer in answers] == [
-        ["OFB-DBFH:5 521-unlm 900_PF"],
+        ["OFB-DBFH:5 521-unlm 899_PF"],
         ["OFB-DBFH:12 2153-lmct x110 770_PF"],
     ]
     assert refused == ("error", "NOT_FOR_HERO")

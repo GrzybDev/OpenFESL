@@ -25,7 +25,7 @@ pytestmark = pytest.mark.anyio
 
 # The invented catalogue's products: the Royal coat for good, the National tunic, the Royal pet
 # and 25 bandages, and the cheer for good where it is stocked.
-COAT, TUNIC, PET, BANDAGES, CHEER_FOR_GOOD = 1, 3, 5, 6, 25
+COAT, TUNIC, PET, BANDAGES, CHEER_FOR_GOOD = 1, 3, 5, 6, 21
 
 
 @pytest.mark.usefixtures("prompt_actions")
@@ -88,7 +88,7 @@ async def test_a_hot_deal_sells_its_members_together_while_it_runs(
         ("OFB-DBFH:1", "3-unlm"),
         ("OFB-DBFH:5", "521-unlm"),
         ("OFB-DBFH:6", "2005-lmct"),
-        ("OFB-DBFH:25", "5016-unlm"),
+        ("OFB-DBFH:21", "5016-unlm"),
     ]
     assert bought == ("success", None)
     assert refused == [
@@ -96,7 +96,7 @@ async def test_a_hot_deal_sells_its_members_together_while_it_runs(
         ("error", "UNKNOWN_PRODUCT"),
         ("error", "UNKNOWN_PRODUCT"),
     ]
-    assert (await wallets(server_url, cookie, hero))["_PF"] == 2500 - 900 + 1000 - 2000
+    assert (await wallets(server_url, cookie, hero))["_PF"] == 2500 - 899 + 1000 - 2000
     assert await items(server_url, cookie, hero) == ["2005-lmct 35", "521-unlm 0", "3-unlm 0"]
     assert (
         await select_value(database_url, "SELECT outcome::text FROM purchase WHERE kind = 'bundle'")

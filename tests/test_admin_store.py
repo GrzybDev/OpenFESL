@@ -9,7 +9,28 @@ from store import listed, offers, stock
 from support import visible
 from test_admin_heroes import KEEPER, WARDEN
 
+from openfesl.core.store_rules import PriceRule, StoreRules
+
 pytestmark = pytest.mark.anyio
+
+
+@pytest.mark.usefixtures("prompt_actions")
+async def test_a_listed_item_shows_its_listing_and_a_listed_widget_takes_more_packs(
+    admin_provider: IdentityProvider,
+    base: str,
+    server_url: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    tonics = PriceRule(currency="_PF", points={"x110": 770})
+    monkeypatch.setattr(StoreRules, "_listings", {2153: [tonics]})
+    await stock(server_url, tmp_path, capsys)
+    admin_provider.user = KEEPER
+    async with httpx2.AsyncClient() as client:
+        page = await sign_in(client, base, next="/admin/store/bfheroes/items/2153")
+        assert "Rule As last listed" in visible(page.content)
+        assert 'name="add-uses"' in page.text
 
 
 @pytest.mark.usefixtures("prompt_actions")
@@ -36,7 +57,7 @@ async def test_the_panel_lists_the_store_prices_with_their_rules_and_why_items_a
             "Invented Coat item 3 Kind Appearance Requires Royal Army, any class, any level Price"
             " points 2 price points Funds 30 days, permanent Own prices" in listed
         )
-        assert "Valor Points 1, 3, 7, 30 days · Funds permanent On sale" in listed
+        assert "Valor Points 1, 3 days · Funds permanent On sale" in listed
         assert "Invented Dash item 2096" in listed and "3 steps Hero Points: 1 per step" in listed
         assert "Invented Knife item 3001" in listed and "None Starting kit Not sold" in listed
         assert "Invented Logo Shirt item 257" in listed
@@ -184,14 +205,14 @@ async def test_admins_change_add_and_reset_an_items_price_points_that_the_game_t
         )
         twice = visible((await client.post(f"{coat}/add", data=add | {"add-price": "9"})).content)
         assert "Valor Points, 7 days is already a price point of Invented Coat." in twice
-        longer = await client.post(f"{coat}/add", data=add | {"add-ownership": "14d"})
+        longer = await client.post(f"{coat}/add", data=add | {"add-ownership": "13d"})
         assert (
-            "Not saved: 14 days is not a duration of the rules; they know 1, 3, 7 and 30 days"
+            "Not saved: 13 days is not a duration of the rules; they know 1, 3, 7, 14 and 30 days"
             in visible(longer.content)
         )
 
         reset = await client.post(f"{coat}/reset", data={"csrf": token}, follow_redirects=True)
-        assert "Reset the prices of Invented Coat to its kind's rule." in visible(reset.content)
+        assert "Reset the prices of Invented Coat to the seeded prices." in visible(reset.content)
         points = await select_value(
             database_url,
             "SELECT string_agg(id || ':' || price || ':' || published, ' ' ORDER BY id)"
@@ -238,8 +259,8 @@ async def test_admins_apply_a_changed_kind_rule_to_the_items_without_own_prices(
     admin_provider.user = WARDEN
     async with httpx2.AsyncClient() as client:
         shown = visible((await sign_in(client, base, next="/admin/store/bfheroes/rules")).content)
-        assert "Emotes Emotes Currency Funds 2,000 game data: 1,680" in shown
-        assert "Weapons of the class sets Weapons Currency Funds 6,720" in shown
+        assert "Emotes Emotes Currency Funds 2,000 game data: 1,679" in shown
+        assert "Weapons of the class sets Weapons Currency Funds 6,719" in shown
         assert "2 items 1 with own prices" in shown and "Ability levels" in shown
         token = form_token(shown := (await client.get(rules)).text)
         assert (await client.post(weapons, data={"csrf": token})).status_code == 403
@@ -271,8 +292,8 @@ async def test_admins_apply_a_changed_kind_rule_to_the_items_without_own_prices(
         )
         sold = [listed(product) for product in await offers(server_url)]
         assert "OFB-DBFH:13 3015-unlm 7000_PF" in sold and "3015-tlmd 30d 3500_PF" in " ".join(sold)
-        assert "OFB-DBFH:18 3042-unlm 9999_PF" in sold
-        assert "OFB-DBFH:23 5001-unlm 2000_PF" in sold
+        assert "OFB-DBFH:16 3042-unlm 9999_PF" in sold
+        assert "OFB-DBFH:19 5001-unlm 2000_PF" in sold
         kept = await select_value(
             database_url,
             "SELECT value FROM setting WHERE key = 'bfheroes.store.prices.class-weapons.sold'",
@@ -292,7 +313,7 @@ async def test_admins_apply_a_changed_kind_rule_to_the_items_without_own_prices(
         await client.post(f"{rules}/clothing/apply", data=clothing)
         assert not any(" 3-" in listed(product) for product in await offers(server_url))
 
-        seeded = {"csrf": token, "value": "6720", "sold-perm": "1"}
+        seeded = {"csrf": token, "value": "6719", "sold-perm": "1"}
         await client.post(f"{weapons}/apply", data=seeded)
         left = await select_value(
             database_url, "SELECT count(*) FROM setting WHERE key LIKE 'bfheroes.store.%'"

@@ -68,7 +68,7 @@ async def test_the_store_page_tells_the_game_of_what_was_bought(
     await page.get_by_role("link", name=re.compile("Invented Rifle")).click()
     await page.get_by_role("button", name=re.compile("3 days")).click()
     # Picking a price point says what it leaves, without a new page.
-    assert await page.get_by_text("the account keeps 500 Valor Points").is_visible()
+    assert await page.get_by_text("the account keeps 550 Valor Points").is_visible()
     await page.get_by_role("button", name="Buy and equip").click()
     await page.wait_for_url(re.compile("bought="))
     await page.get_by_text("Bought and equipped").wait_for()

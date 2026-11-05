@@ -1,0 +1,1117 @@
+# What the store last listed the items for, which sells them that way alone; an item it does not
+# list sells by its rule (bfheroes/store.toml). The prices are those that the fan catalogue
+# bfh-info.cs-heroes.cz keeps of the store's last years, read against the struck prices of its deal
+# history and of archived 2010-2013 deals, whose set totals they then equal. It shows a sale's price
+# as a day's: of two such prices the higher is the permanent one, a third off the list price for
+# most items, which is put back, and the lower one is of 30 days when it is half or about a third
+# of the permanent one. Two cuts of later years are taken back: a third off the machine guns, and
+# the 7 and 30 days in Valor Points that are leftovers of 2009, cheaper than a day; permanent
+# Valor Point prices came in 2013, after the 1.89 client. A rental that costs as much as a longer
+# one is left out, and an item whose permanent price the catalogue lost keeps its rule's.
+
+[[store.listed]]
+currency = "_PF"
+points = { 1d = 150, 7d = 1199, 30d = 2519 }
+items = [9040]
+
+[[store.listed]]
+currency = "_PF"
+points = { 1d = 1259, 30d = 6299, 90d = 15999, 180d = 24999 }
+items = [9000]
+
+[[store.listed]]
+currency = "_PF"
+points = { 1d = 1259, 30d = 6299, 90d = 16379, 180d = 25199 }
+items = [9005]
+
+[[store.listed]]
+currency = "_PF"
+points = { 1d = 1599, 7d = 4499, 30d = 8999 }
+items = [9001]
+
+[[store.listed]]
+currency = "_PF"
+points = { 1d = 2499, 7d = 8999, 30d = 16799 }
+items = [9002]
+
+[[store.listed]]
+currency = "_PF"
+points = { 30d = 3359 }
+items = [2156, 2157]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 389 }
+items = [77, 80, 389, 474]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 419 }
+items = [1079, 1088]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 599 }
+items = [11, 37, 74, 92, 147, 155, 165, 189, 226, 228, 231, 234, 302, 316, 336, 350, 560, 987]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 608 }
+items = [3005, 3006]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 797, 30d = 569 }
+items = [3129, 3138]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 799, 30d = 399 }
+items = [63, 150, 151]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 809 }
+items = [5003, 5004, 5006, 5016, 5017]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 839 }
+items = [3, 20, 23, 25, 101, 140, 333, 445, 982, 1100]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 839, 1d = 399 }
+items = [
+    46, 78, 79, 81, 119, 134, 141, 142, 143, 168, 173, 179, 195, 196, 202, 204, 206, 208, 209,
+    210, 406, 505, 1092,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 869 }
+items = [
+    3007, 3008, 3035, 3036, 3045, 3046, 3055, 3056, 3061, 3062, 3081, 3082, 3087, 3088, 3095,
+    3096, 3123, 3124, 3135, 3136, 3145, 3146, 3157, 3158,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 999 }
+items = [
+    1148, 1149, 1150, 1151, 1152, 1153, 1154, 1156, 1158, 1159, 1160, 1161, 1162, 1163, 1164,
+    1168, 1169, 1170, 1171, 1172, 1174, 1175, 1176, 1178, 1180, 1181, 1182, 1183, 1184, 1185,
+    1186, 1188, 1190, 1191, 1192, 1193, 1194, 1195, 1196, 1200, 1201, 1202, 1203, 1204, 1206,
+    1207, 1208, 1210, 1831, 1835, 1838, 1842,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 999, 30d = 499 }
+items = [148]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1049 }
+items = [6, 12, 14, 17, 61, 66, 93, 94, 110, 145, 937, 938, 983, 984]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1139 }
+items = [3049, 3050]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1139, 30d = 569 }
+items = [
+    3044, 3052, 3053, 3057, 3070, 3071, 3072, 3077, 3078, 3079, 3098, 3099, 3105, 3106, 3107,
+    3113, 3114, 3115, 3116, 3120, 3121, 3122, 3133, 3140, 3141,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1139, 30d = 599 }
+items = [3130]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1249 }
+items = [1790, 1793, 1796, 1798]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1259 }
+items = [1083, 1108]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1259, 1d = 399 }
+items = [1012, 1017]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1259, 30d = 419 }
+items = [496, 514]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1259, 30d = 629 }
+items = [158, 169, 1082, 1084, 1085, 1116]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1299 }
+items = [1849]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1499 }
+items = [
+    531, 532, 546, 547, 554, 559, 605, 606, 994, 995, 1248, 1258, 1718, 1722, 1749, 1751, 1752,
+    1762, 1763, 1764, 1806, 1812, 1854, 1857, 1879, 1884,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1499, 1d = 599 }
+items = [1539, 1540]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1499, 30d = 499 }
+items = [1006]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1499, 30d = 749 }
+items = [1078, 1087]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1649, 30d = 829 }
+items = [435, 485]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1679 }
+items = [
+    594, 930, 1028, 1029, 1099, 1104, 1111, 1113, 1119, 1121, 1267, 1272, 1274, 1276, 1280,
+    1285, 1289, 1333, 1334, 1339, 1340, 1345, 1377, 1379, 1386, 1396, 1400, 1401, 1403, 1406,
+    1416, 1418, 1423, 1432, 1441, 1455, 1460,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1679, 1d = 269 }
+items = [185]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1679, 1d = 399 }
+items = [
+    57, 58, 59, 64, 65, 118, 144, 175, 180, 198, 199, 386, 504, 517, 1086, 1089, 1090, 1131,
+    1133, 1138, 1140,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1679, 30d = 539 }
+items = [49, 54]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1679, 30d = 569 }
+items = [1015, 1020, 1022, 1036]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1679, 30d = 839 }
+items = [
+    170, 382, 410, 413, 429, 990, 1294, 1296, 1298, 1300, 1304, 1305, 1515, 1520, 1522, 1527,
+    5001, 5002, 5005, 5008, 5009, 5010, 5011, 5012, 5013, 5014, 5015, 5023, 5024, 5025, 5026,
+    5027, 5028, 5029,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1680 }
+items = [1487, 1500, 1508]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1699 }
+items = [1562, 1564, 1566, 1570, 1571, 1573, 1661, 1664, 1666, 1670, 1671, 1673]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1799 }
+items = [1346, 1358]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1799, 30d = 589 }
+items = [1010]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1799, 30d = 599 }
+items = [1041, 1045]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1799, 30d = 889 }
+items = [216]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1799, 30d = 899 }
+items = [207, 914]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1919 }
+items = [1353]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1919, 30d = 959 }
+items = [1001]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1999 }
+items = [
+    136, 139, 534, 548, 556, 600, 614, 840, 856, 870, 871, 881, 882, 946, 947, 1246, 1250, 1256,
+    1260, 1361, 1366, 1369, 1371, 1373, 1694, 1697, 1698, 1703, 1704, 1717, 1721, 1742, 1744,
+    1745, 1750, 1755, 1756, 1757, 1761, 1791, 1794, 1797, 1800, 1807, 1811, 1855, 1863, 1870,
+    5069, 5070,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1999, 1d = 499 }
+items = [433]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1999, 1d = 589 }
+items = [5059, 5060]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1999, 1d = 689 }
+items = [478]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1999, 1d = 699 }
+items = [616]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 1999, 30d = 699 }
+items = [5065, 5066]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2099 }
+items = [1350, 1357, 1421, 1437]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2099, 1d = 499 }
+items = [182, 424, 536, 574, 998, 999, 1000]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2099, 30d = 679 }
+items = [1005]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2099, 30d = 689 }
+items = [502, 1013, 1018, 1023, 1024, 1025, 1040, 1044]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2099, 30d = 1039 }
+items = [411]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2279 }
+items = [268, 384, 1344, 1352, 1354, 1378, 1383, 1387, 1391, 1417, 1433]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2279, 1d = 499 }
+items = [
+    28, 149, 211, 219, 220, 221, 229, 230, 240, 259, 263, 265, 272, 273, 290, 298, 299, 314,
+    315, 317, 319, 321, 330, 332, 337, 341, 346, 347, 348, 364, 370, 498,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2279, 1d = 599 }
+items = [
+    22, 111, 152, 157, 159, 160, 162, 181, 183, 235, 239, 309, 328, 340, 437, 463, 495, 501,
+    506, 518, 915,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2279, 1d = 799 }
+items = [3160, 3171, 3172, 3173]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2279, 1d = 799, 30d = 1139 }
+items = [3161, 3162, 3163, 3164, 3165, 3166, 3167, 3168, 3169, 3170]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2279, 30d = 1139 }
+items = [
+    60, 67, 138, 245, 256, 258, 270, 286, 294, 297, 300, 303, 363, 378, 428, 449, 482, 598,
+    1002, 1003, 1061, 1063, 1091,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2280, 1d = 499 }
+items = [271]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2339 }
+items = [1125, 1126, 1127, 1128]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2351, 1d = 899, 14d = 1259, 30d = 1679 }
+items = [3019, 3026]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2399, 30d = 799 }
+items = [1009]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2399, 30d = 1199 }
+items = [1132, 1139, 1146, 5040, 5041]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2499 }
+items = [
+    1247, 1249, 1257, 1363, 1565, 1572, 1593, 1649, 1663, 1669, 1743, 1754, 1803, 1804, 1813,
+    1856, 1868,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2499, 1d = 499 }
+items = [1259]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2499, 1d = 599 }
+items = [137, 200, 214, 469, 541, 1481, 1482]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2499, 1d = 799 }
+items = [3265, 3266]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2519 }
+items = [
+    167, 215, 246, 477, 483, 510, 1027, 1030, 1109, 1112, 1117, 1120, 1264, 1266, 1268, 1271,
+    1273, 1275, 1279, 1281, 1282, 1286, 1287, 1288, 1349, 1356, 1380, 1382, 1384, 1390, 1392,
+    1402, 1422, 1424, 1435, 1438, 1442, 1445, 1446, 1447, 1456, 1458, 1461, 1462,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2519, 1d = 359, 30d = 1259 }
+items = [5032]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2519, 1d = 399 }
+items = [154]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2519, 1d = 599 }
+items = [
+    15, 16, 19, 24, 27, 33, 38, 40, 41, 43, 44, 55, 75, 91, 95, 98, 115, 116, 166, 188, 190,
+    201, 203, 205, 213, 217, 225, 233, 236, 237, 241, 252, 262, 289, 305, 306, 310, 311, 313,
+    318, 320, 327, 334, 335, 338, 339, 342, 343, 345, 349, 352, 353, 357, 358, 360, 371, 387,
+    397, 398, 443, 466, 467, 468, 494, 497, 527, 539, 543, 568, 569, 571, 576, 580, 583, 591,
+    596, 991, 992, 993, 1134, 1135, 1136, 1141, 5033,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2519, 1d = 799 }
+items = [3066, 3068]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2519, 1d = 799, 30d = 1259 }
+items = [3058, 3063, 3075, 3083, 3102, 3111, 3128, 3131, 3142, 3147]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2519, 30d = 839 }
+items = [511, 1014, 1019, 1035]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2519, 30d = 1259 }
+items = [
+    96, 171, 191, 192, 244, 391, 425, 426, 451, 458, 480, 484, 493, 515, 525, 533, 1144, 1293,
+    1295, 1299, 1301, 1302, 1306, 1484, 1485, 1516, 1521, 1523, 1528,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2520 }
+items = [1486, 1488, 1498, 1499]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2600, 1d = 399 }
+items = [1052, 1059, 1093, 1094]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2600, 1d = 499 }
+items = [1049, 1050, 1056, 1057]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2600, 1d = 599 }
+items = [509, 1047, 1054]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2600, 1d = 699 }
+items = [1051, 1058]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2600, 1d = 799 }
+items = [1046, 1048, 1053, 1055]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2699 }
+items = [1098, 1103, 1290, 1332, 1338]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2699, 1d = 699 }
+items = [193, 307]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2699, 1d = 999, 30d = 1349 }
+items = [3201]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2699, 30d = 899 }
+items = [1038, 1042]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2699, 30d = 1349 }
+items = [376, 519, 524, 3202]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2729, 1d = 899, 30d = 1949 }
+items = [3134, 3139]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2759, 30d = 919 }
+items = [1011]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2879, 30d = 1439 }
+items = [324, 372]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2939 }
+items = [513, 1347, 1348, 1355, 1398, 1405, 1407, 5034, 5035, 5036, 5037, 5038, 5039]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2939, 1d = 399 }
+items = [1016, 1021]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2939, 1d = 399, 30d = 990 }
+items = [1039, 1043]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2939, 1d = 699 }
+items = [325]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2939, 30d = 989 }
+items = [487, 1004, 1008, 1032]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2939, 30d = 1469 }
+items = [381, 393, 394, 396, 402, 523]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2969, 1d = 589 }
+items = [3269, 3270]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2989, 1d = 589 }
+items = [5051]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2999 }
+items = [
+    530, 545, 555, 599, 604, 615, 858, 873, 874, 942, 977, 1242, 1252, 1365, 1368, 1374, 1696,
+    1699, 1710, 1715, 1716, 1719, 1720, 1741, 1746, 1748, 1753, 1758, 1760, 1801, 1802, 1809,
+    1846, 1850, 1852, 1867, 1869, 1871, 1888, 1925, 5052, 5053,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2999, 1d = 589 }
+items = [5056]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2999, 1d = 599 }
+items = [5054, 5055]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2999, 1d = 699 }
+items = [5071, 5072]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2999, 1d = 799 }
+items = [635]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 2999, 1d = 899 }
+items = [3245, 3246, 5063, 5064]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3249 }
+items = [1241, 1251, 1789, 1795]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3249, 1d = 599 }
+items = [1244, 1245, 1254, 1255]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3359 }
+items = [
+    296, 407, 408, 988, 1026, 1031, 1033, 1034, 1095, 1096, 1101, 1102, 1106, 1107, 1110, 1114,
+    1118, 1261, 1262, 1270, 1284, 1331, 1335, 1336, 1337, 1341, 1342, 1343, 1351, 1381, 1389,
+    1397, 1404, 1419, 1434, 1443, 1457,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3359, 1d = 539 }
+items = [72, 421]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3359, 1d = 539, 30d = 1679 }
+items = [3196, 3197, 3199, 3200]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3359, 1d = 549 }
+items = [269, 401]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3359, 1d = 599 }
+items = [212]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3359, 1d = 699, 14d = 1259, 30d = 1679 }
+items = [3040]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3359, 1d = 799 }
+items = [76, 197, 238, 354, 592, 1129, 1130, 1137, 5048]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3359, 1d = 899, 14d = 1259 }
+items = [3174, 3175, 3186, 3187]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3359, 1d = 899, 14d = 1259, 30d = 1679 }
+items = [
+    3016, 3017, 3020, 3021, 3022, 3023, 3024, 3027, 3028, 3029, 3030, 3032, 3034, 3037, 3039,
+    3176, 3177, 3178, 3179, 3180, 3181, 3182, 3183, 3185,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3359, 1d = 899, 14d = 1259, 30d = 1679 }
+items = [3033]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3359, 1d = 899, 30d = 1679 }
+items = [3031]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3359, 1d = 999, 30d = 1679 }
+items = [3195, 3198]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3359, 30d = 1139 }
+items = [1007]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3359, 30d = 1679 }
+items = [
+    374, 404, 427, 1115, 1292, 1303, 1517, 1519, 1524, 1526, 5042, 5043, 5044, 5045, 5046, 5047,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3360 }
+items = [1495, 1497, 1510, 1514]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3399 }
+items = [1560, 1561, 1567, 1568, 1569, 1584, 1660, 1662]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3399, 1d = 699 }
+items = [5057, 5058]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3499 }
+items = [
+    602, 846, 857, 861, 865, 868, 903, 944, 996, 1747, 1759, 1808, 1845, 1853, 1862, 1865, 1874,
+    1875, 1881,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3499, 1d = 899 }
+items = [1537, 1538]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3499, 1d = 1099 }
+items = [3217, 3240]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3539, 1d = 899, 14d = 1259, 30d = 1679 }
+items = [3184]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3599 }
+items = [409, 589, 597, 1060, 1062, 1362, 1364, 1370, 1372, 1399]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3599, 30d = 1799 }
+items = [163]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3799, 1d = 799 }
+items = [3259, 3260]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3899 }
+items = [1563, 1574, 1659, 3067]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3899, 1d = 599 }
+items = [3203, 3204, 3208, 3210, 3214, 3215]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3899, 1d = 899 }
+items = [3069]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3899, 1d = 899, 30d = 1309 }
+items = [3047, 3048, 3054, 3059, 3060, 3065]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3899, 1d = 899, 30d = 1949 }
+items = [
+    3073, 3074, 3080, 3084, 3085, 3089, 3100, 3101, 3103, 3108, 3109, 3110, 3117, 3118, 3119,
+    3125, 3126, 3127, 3132, 3137, 3143, 3144,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3899, 30d = 1949 }
+items = [1518, 1525]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3900 }
+items = [1496, 1513]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3999 }
+items = [
+    18, 542, 553, 558, 561, 578, 593, 601, 603, 612, 613, 859, 866, 878, 885, 886, 912, 941,
+    945, 975, 976, 1243, 1253, 1667, 1668, 1692, 1695, 1702, 1727, 1728, 1792, 1799,
+]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3999, 1d = 799 }
+items = [3247, 3248, 3249, 3250, 3261, 3262, 3263, 3264, 3267, 3268]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 3999, 1d = 999 }
+items = [1535, 1536, 3273, 3274]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 4299, 1d = 899 }
+items = [3271, 3272, 5061, 5062]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 4689 }
+items = [3340, 3341]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 4789, 1d = 589 }
+items = [1531, 1532, 1546, 1551]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 4819, 1d = 559 }
+items = [3220]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 4819, 1d = 999 }
+items = [3221]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 4899, 1d = 999, 30d = 2409 }
+items = [3191, 3194]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 4899, 1d = 999, 30d = 3599 }
+items = [3154, 3192]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 4899, 1d = 1099, 30d = 3599 }
+items = [3193]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 4899, 30d = 3599 }
+items = [3190]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 4999 }
+items = [552, 557, 1700, 1701]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 4999, 1d = 899 }
+items = [3000, 3207, 3241, 3242]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 5539, 30d = 2769 }
+items = [1470, 1483]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 6719, 14d = 2519, 30d = 3359 }
+items = [3025]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 6719, 1d = 999, 14d = 2519, 30d = 3359 }
+items = [3015, 3038]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 6719, 1d = 999, 14d = 2519, 30d = 3359 }
+items = [3041, 3042]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 6719, 1d = 999, 30d = 3359 }
+items = [3043]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 6999, 1d = 899 }
+items = [3224, 3225, 3228, 3229, 3238, 3239, 3342, 3343]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 6999, 1d = 999 }
+items = [3226, 3227]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 7189, 1d = 829 }
+items = [3218, 3219]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 7199 }
+items = [3212, 3213]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 7199, 1d = 999, 30d = 2409 }
+items = [3150, 3151]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 7199, 1d = 999, 30d = 3599 }
+items = [3148, 3149, 3152, 3153]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 7499 }
+items = [1359, 1360]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 7499, 3d = 839, 30d = 3749 }
+items = [3051, 3064, 3076, 3086, 3104, 3112]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 7999, 1d = 1999 }
+items = [1081]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 8389 }
+items = [1529, 1530]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 8389, 1d = 769, 30d = 2809 }
+items = [1547]
+
+[[store.listed]]
+currency = "_PF"
+points = { perm = 8389, 30d = 2809 }
+items = [1552]
+
+[[store.listed]]
+currency = "_PF"
+points = { x10 = 99, x50 = 499, x110 = 999 }
+items = [2188, 2189]
+
+[[store.listed]]
+currency = "_PF"
+points = { x10 = 249, x50 = 1499, x110 = 2499 }
+items = [2192, 2193]
+
+[[store.listed]]
+currency = "_PF"
+points = { x10 = 589, x50 = 1789, x100 = 2929 }
+items = [2183, 2184]
+
+[[store.listed]]
+currency = "_PF"
+points = { x100 = 599 }
+items = [2165, 2166, 2167, 2168, 2169, 2170]
+
+[[store.listed]]
+currency = "_PF"
+points = { x100 = 3359 }
+items = [2155]
+
+[[store.listed]]
+currency = "_PF"
+points = { x110 = 1799 }
+items = [2171, 2172]
+
+[[store.listed]]
+currency = "_PF"
+points = { x50 = 209, x110 = 419 }
+items = [2005, 2150, 9020]
+
+[[store.listed]]
+currency = "_PF"
+points = { x50 = 389, x110 = 779 }
+items = [2153]
+
+[[store.listed]]
+currency = "_PF"
+points = { x50 = 419, x100 = 779 }
+items = [2179, 2180]
+
+[[store.listed]]
+currency = "_PF"
+points = { x50 = 419, x110 = 839 }
+items = [2173, 2174]
+
+[[store.listed]]
+currency = "_PF"
+points = { x50 = 599 }
+items = [2194, 2195]
+
+[[store.listed]]
+currency = "_PF"
+points = { x50 = 699, x100 = 1249 }
+items = [2175, 2176]
+
+[[store.listed]]
+currency = "_PF"
+points = { x50 = 899 }
+items = [2177, 2178]
+
+[[store.listed]]
+currency = "_PF"
+points = { x50 = 999 }
+items = [2190, 2191]
+
+[[store.listed]]
+currency = "_PF"
+points = { x50 = 1049 }
+items = [2181, 2182]
+
+[[store.listed]]
+currency = "_DV"
+points = { 1d = 25 }
+items = [1079, 1088]
+
+[[store.listed]]
+currency = "_DV"
+points = { 1d = 25, 3d = 75 }
+items = [52, 77, 80, 389, 474]
+
+[[store.listed]]
+currency = "_DV"
+points = { 1d = 40, 3d = 120 }
+items = [11, 74, 147, 226, 231, 316, 336, 350]
+
+[[store.listed]]
+currency = "_DV"
+points = { 1d = 40, 3d = 120 }
+items = [37, 189, 228, 234]
+
+[[store.listed]]
+currency = "_DV"
+points = { 1d = 50 }
+items = [1085]
+
+[[store.listed]]
+currency = "_DV"
+points = { 1d = 50, 3d = 150 }
+items = [3, 14, 17, 20, 23, 25, 93, 94, 101, 333, 445, 937, 938, 982, 983, 984]
+
+[[store.listed]]
+currency = "_DV"
+points = { 1d = 75, 3d = 225 }
+items = [6, 12, 61, 66, 92, 110, 145, 155, 165, 302, 560, 987]
+
+[[store.listed]]
+currency = "_DV"
+points = { 1d = 150, 3d = 450 }
+items = [
+    3005, 3006, 3007, 3008, 3035, 3036, 3045, 3046, 3055, 3056, 3061, 3062, 3081, 3082, 3087,
+    3088, 3095, 3096, 3123, 3124, 3135, 3136, 3145, 3146, 3157, 3158,
+]
+
+[[store.listed]]
+currency = "_DV"
+points = { 1d = 450, 3d = 1350 }
+items = [
+    3016, 3017, 3019, 3020, 3021, 3022, 3023, 3024, 3026, 3027, 3028, 3029, 3030, 3031, 3032,
+    3033, 3034, 3037, 3039, 3040, 3174, 3175, 3176, 3177, 3178, 3179, 3180, 3181, 3182, 3183,
+    3184, 3185, 3186, 3187, 3195, 3198,
+]
+
+[[store.listed]]
+currency = "_DV"
+points = { x10 = 80 }
+items = [9020]
+
+[[store.listed]]
+currency = "_DV"
+points = { x10 = 100 }
+items = [2005]
+
+[[store.listed]]
+currency = "_DV"
+points = { x10 = 120 }
+items = [2150, 2153]
+
+[[store.listed]]
+currency = "_DV"
+points = { x10 = 290 }
+items = [2155, 2158]
+
+[[store.listed]]
+currency = "_DV"
+points = { x5 = 150 }
+items = [2175, 2176]
+
+[[store.listed]]
+currency = "_DV"
+points = { x5 = 200 }
+items = [2159, 2160, 2179, 2180]

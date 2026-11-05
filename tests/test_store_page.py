@@ -17,7 +17,7 @@ pytestmark = pytest.mark.anyio
 
 # The invented catalogue's products: the Royal coat for good and for 30 days, the National
 # tunic, the Royal pet and 25 bandages, and the cheer for good where it is stocked.
-COAT, COAT_MONTH, TUNIC, PET, BANDAGES, CHEER_FOR_GOOD = 1, 2, 3, 5, 6, 25
+COAT, COAT_MONTH, TUNIC, PET, BANDAGES, CHEER_FOR_GOOD = 1, 2, 3, 5, 6, 21
 PAGE = "/bfheroes/store/buy/{}"
 
 
@@ -135,9 +135,9 @@ async def test_a_hero_buys_an_item_on_its_page_and_refused_purchases_spend_nothi
         forged = await bought(client, base, PET, form | {"csrf": "forged"})
         # A confirmation without its one-time token buys nothing.
         sent = {name: value for name, value in form.items() if name != "once"}
-        tokenless = await bought(client, base, PET, sent | {"price": str(PET), "paid": "900"})
+        tokenless = await bought(client, base, PET, sent | {"price": str(PET), "paid": "899"})
         # The cheer, which the game grants every hero.
-        cheer = {"price": str(CHEER_FOR_GOOD), "paid": "1680"}
+        cheer = {"price": str(CHEER_FOR_GOOD), "paid": "1679"}
         granted = await bought(client, base, CHEER_FOR_GOOD, form | cheer)
         # The pet taken out of use, as an admin's revocation or the game's status write leaves it.
         await execute(
@@ -147,7 +147,7 @@ async def test_a_hero_buys_an_item_on_its_page_and_refused_purchases_spend_nothi
             hero=brass,
         )
         pet = await shown(client, base, PET)
-        taken = await bought(client, base, PET, form | {"price": str(PET), "paid": "900"})
+        taken = await bought(client, base, PET, form | {"price": str(PET), "paid": "899"})
 
     assert "Confirm the purchase Item Invented Coat Hero Brassbuckle Time 30 days, until" in review
     assert "Price 1,300 Funds Funds now 2,500 Funds after 1,200" in review
@@ -165,7 +165,7 @@ async def test_a_hero_buys_an_item_on_its_page_and_refused_purchases_spend_nothi
         "Invented Coat costs 1,300. No Funds were spent."
     ) in short
     assert (
-        "Nothing was bought: the price of Invented Monkey changed to 900 Funds. No Funds were "
+        "Nothing was bought: the price of Invented Monkey changed to 899 Funds. No Funds were "
         "spent; the page shows the new price."
     ) in stale
     for expired in (forged, tokenless):

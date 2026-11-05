@@ -74,7 +74,7 @@ async def test_the_store_front_lists_what_each_hero_can_have_and_holds(
     # items, Hero Point abilities, missions and nameless items are no store front's.
     assert "Sign in to see what each hero owns and to buy." in signed_out
     assert "Invented Coat Royal Army from 1,300 Funds" in signed_out
-    assert "Invented Rifle Royal Army · Soldier from 6,720 Funds · 250 Valor Points" in signed_out
+    assert "Invented Rifle Royal Army · Soldier from 6,719 Funds · 150 Valor Points" in signed_out
     for left_out in ("Logo Shirt", "Partner Shirt", "Dash", "Mission", "Not owned"):
         assert left_out not in signed_out
     assert "Items are bought for a hero. Every item can be browsed meanwhile." in no_hero
@@ -84,7 +84,7 @@ async def test_the_store_front_lists_what_each_hero_can_have_and_holds(
     assert "Invented Tunic" not in shown and "Invented Longrifle" not in shown
     assert "Invented Coat Royal Army from 1,300 Funds Owns it · 2 days left · running low" in shown
     assert "Invented Bandage Any hero from 175 Funds 3 uses left · running low" in shown
-    assert "Invented Monkey Royal Army from 900 Funds Not owned" in shown
+    assert "Invented Monkey Royal Army from 899 Funds Not owned" in shown
     # Owned by is the hero's inventory, running low first; a category or a search counts only what
     # it lists.
     assert "Brassbuckle owns 3 items 2 running low · shown first" in mine

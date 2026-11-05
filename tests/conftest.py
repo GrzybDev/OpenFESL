@@ -21,6 +21,7 @@ from testcontainers.community.postgres import PostgresContainer
 
 from openfesl.core import admin, history, trust
 from openfesl.core.games import Game, load_games
+from openfesl.core.store_rules import PriceRule, StoreRules
 from openfesl.server.cli import RelayServer, main, uvicorn_config
 from openfesl.storage.database import migrate
 from openfesl.storage.history import SqlHistoryStore
@@ -41,8 +42,13 @@ def database_url() -> Iterator[str]:
 
 @pytest.fixture
 async def relay_server(
-    database_url: str, monkeypatch: pytest.MonkeyPatch
+    database_url: str, monkeypatch: pytest.MonkeyPatch, request: pytest.FixtureRequest
 ) -> AsyncIterator[tuple[str, RelayServer]]:
+    # The invented catalogue borrows real numbers to fall under the game's rules, not the prices
+    # that the store listed for the real items, and sells its own pet.
+    if not request.node.get_closest_marker("listed_prices"):
+        pet = PriceRule(currency="_PF", points={"perm": 899})
+        monkeypatch.setattr(StoreRules, "_listings", {521: [pet]})
     # The production server and settings, so the handshake, subprotocol, frame limits and
     # shutdown are the ones the hook meets.
     # A plain URL, as database hosts such as Dokploy hand it out; the server picks its driver.

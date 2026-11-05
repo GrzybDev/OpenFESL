@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Annotated, Literal, Self
+from functools import cached_property
+from typing import TYPE_CHECKING, Annotated, Any, Literal, Self
 
 from pydantic import (
     BaseModel,
@@ -40,26 +41,35 @@ class PriceRule(BaseModel):
     """What items of a kind are worth in one currency, and how the store sells them.
 
     Attributes:
-        kind: The kind of the items, as the catalogue knows it.
+        kind: The kind of the items, as the catalogue knows it; none for a listing, which names
+            its items.
         items: The numbers of the items it covers; every item of the kind when empty.
         fields: Values that the items' definitions hold, by field, compared ignoring capitals,
             with a field the definition lacks read as empty.
         currency: The currency.
         value: What owning an item for good is worth, of which a rental costs its share.
         use_price: What one use of an item limited by uses costs.
+        points: What the ways of owning the items cost, as the store last listed them, by the
+            way, written as in sold; the rule sells them unless it says otherwise.
         sold: How the store sells the items, written perm, as a rental such as 30d or as uses
             such as x25; none for items it only prices, such as those that boxes drop.
     """
 
     model_config = ConfigDict(frozen=True)
 
-    kind: str
+    kind: str = ""
     items: frozenset[int] = frozenset()
     fields: dict[str, str] = {}
     currency: str
     value: PositiveInt | None = None
     use_price: PositiveInt | None = None
+    points: dict[str, PositiveInt] = {}
     sold: tuple[Written, ...] = ()
+
+    @model_validator(mode="before")
+    @classmethod
+    def _sell_points(cls, data: dict[str, Any]) -> dict[str, Any]:
+        return {"sold": list(data.get("points", ())), **data}
 
     def covers(self, item: Item) -> bool:
         """Tell whether the rule prices an item.
@@ -219,6 +229,8 @@ class StoreRules(BaseModel):
             number; the first one the catalogue holds describes it.
         prices: The price rules by key, in order; the first rule of each currency that covers an
             item prices it in that currency.
+        listed: What the store last sold items for, which sells them that way alone; their
+            rules still price the other ways of owning them, such as a box's drops.
         excluded: The items never sold nor dropped.
         boxes: The boxes and their drops.
         in_game: The store the game opens in its own browser; none for a game without one.
@@ -231,6 +243,7 @@ class StoreRules(BaseModel):
     rounding: dict[str, Rounding] = {}
     descriptions: list[str] = []
     prices: dict[Annotated[str, Field(pattern=r"^[a-z][a-z-]*$")], PriceRule]
+    listed: list[PriceRule] = []
     excluded: Exclusions = Exclusions()
     boxes: list[BoxRule] = []
     in_game: InGameStore | None = None
@@ -293,16 +306,12 @@ class StoreRules(BaseModel):
         )
 
     def rules(self, item: Item) -> list[PriceRule]:
-        """Return the rule that prices an item in each currency, in the rules' order.
+        """Return what sells an item in each currency: its listings, else the rules of its kind.
 
         Args:
             item: The item, from the game's catalogue.
         """
-        found: dict[str, PriceRule] = {}
-        for rule in self.prices.values():
-            if rule.currency not in found and rule.covers(item):
-                found[rule.currency] = rule
-        return list(found.values())
+        return self._listings.get(item.id) or self._kind_rules(item)
 
     def price(self, rule: PriceRule, ownership: Ownership) -> int | None:
         """Return what owning an item a rule covers in a way costs, if the rule prices that way.
@@ -312,14 +321,22 @@ class StoreRules(BaseModel):
             ownership: How the item is owned.
         """
         days, uses = ownership.days, ownership.uses
+        if ownership.written in rule.points:
+            return rule.points[ownership.written]
+        value = rule.points.get("perm", rule.value)
         if ownership.type == PERMANENT:
-            return rule.value
-        if ownership.type == RENTED and rule.value and days in self.rentals:
-            price = rule.value * self.rentals[days] // 100
+            return value
+        if ownership.type == RENTED and value and days in self.rentals:
+            price = value * self.rentals[days] // 100
             rounding = self.rounding.get(rule.currency)
             return rounding.rounded(price) if rounding else price
-        if ownership.type == COUNTED and rule.use_price and uses:
-            return rule.use_price * uses
+        if ownership.type == COUNTED and uses:
+            if rule.use_price:
+                return rule.use_price * uses
+            packs = [(int(way[1:]), price) for way, price in rule.points.items() if way[0] == "x"]
+            if packs:
+                size, cost = max(packs)
+                return cost * uses // size
         return None
 
     def describe(self, catalogue: Catalogue, item_id: int) -> tuple[str, ...]:
@@ -343,8 +360,29 @@ class StoreRules(BaseModel):
             ownership: How it is owned.
             currency: The currency.
         """
-        rule = next((rule for rule in self.rules(item) if rule.currency == currency), None)
-        return self.price(rule, ownership) if rule else None
+        return next(
+            (
+                price
+                for rule in (*self._listings.get(item.id, ()), *self._kind_rules(item))
+                if rule.currency == currency and (price := self.price(rule, ownership))
+            ),
+            None,
+        )
+
+    @cached_property
+    def _listings(self) -> dict[int, list[PriceRule]]:
+        found: dict[int, list[PriceRule]] = {}
+        for rule in self.listed:
+            for number in rule.items:
+                found.setdefault(number, []).append(rule)
+        return found
+
+    def _kind_rules(self, item: Item) -> list[PriceRule]:
+        found: dict[str, PriceRule] = {}
+        for rule in self.prices.values():
+            if rule.currency not in found and rule.covers(item):
+                found[rule.currency] = rule
+        return list(found.values())
 
     @model_validator(mode="after")
     def _check_boxes(self) -> Self:
