@@ -40,7 +40,7 @@ DEFINITIONS = {
     "Abilities.xml": """<abilities>
         <item><faction>1</faction><kits>1</kits>
           <upgrade id="2000"><values><cost>1</cost></values></upgrade>
-          <upgrade id="2001"><values><cost>1</cost></values></upgrade></item>
+          <upgrade id="2097"><values><cost>1</cost></values></upgrade></item>
         <item><faction>3</faction><kits>7</kits><consumable>true</consumable>
           <upgrade id="2010"><values><cost>1</cost></values></upgrade></item>
         </abilities>""",

@@ -261,7 +261,7 @@ async def test_hot_deals_and_random_boxes_sell_on_their_pages_while_they_run(
         "629 Funds spent."
     ) in opened
     assert (
-        "Box opened Item for Brassbuckle Invented Tonic 110 uses · store price 770 Funds; "
+        "Box opened Item for Brassbuckle Invented Tonic 110 uses · worth 770 Funds; "
         "the box cost 629 Funds."
     ) in opened
     assert "Box opened" not in again

@@ -281,8 +281,8 @@ def item_prices(
 ) -> list[ItemPrices]:
     """Return the items of the kinds a game's store prices, each with its price points.
 
-    Items without a name, leftovers of the game's making, are left out, as are an ability's
-    later levels, which its first one stands for.
+    Items without a name, leftovers of the game's making, are left out, as are the later levels
+    of an ability that heroes learn, which its first one stands for.
 
     Args:
         game: The game.
@@ -310,12 +310,13 @@ def item_prices(
     for item in sorted(catalogue.contents.items.values(), key=lambda item: item.id):
         if item.kind not in kinds or not catalogue.name(item.id):
             continue
-        if item.levels and item.id != item.levels[0]:
+        alone = rules.counted(item) or not item.levels
+        if not alone and item.id != item.levels[0]:
             continue
         priced = rules.rules(item)
         lines = tuple(
             PriceLine(product, rules.price_of(level, product.ownership, product.currency))
-            for number in item.levels or (item.id,)
+            for number in ((item.id,) if alone else item.levels)
             if (level := catalogue.item(number))
             for product in held.get(number, [])
         )

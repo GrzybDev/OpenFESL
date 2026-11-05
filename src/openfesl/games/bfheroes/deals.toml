@@ -64,25 +64,28 @@ leaves = true
 # Cliffhanger's Bundle (34140, HD 20120106), for January
 [[deals.sections.seasonal.offers]]
 name = "WEST_Custom_Bundle_CliffhangersBundle"
-members = [1046, 1047, 1048, 1049, 1050, 1051, 1052, 1094, 1126, 1127]
+members = [1046, 1047, 1048, 1049, 1050, 1051, 1052, 1094]
 window = { dates = ["01-01", "01-31"] }
 
 # Alpiner's Bundle (34141, HD 20120106), for January
 [[deals.sections.seasonal.offers]]
 name = "WEST_Custom_Bundle_AlpinersBundle"
-members = [1053, 1054, 1055, 1056, 1057, 1058, 1059, 1093, 1125, 1128]
+members = [1053, 1054, 1055, 1056, 1057, 1058, 1059, 1093]
 window = { dates = ["01-01", "01-31"] }
 
 # The Bundles of Love of Valentine's Day, whose texts promise an item nobody identified, so they
-# have none: the faction's rose and trousers with ten gift-package traps (tid 315081).
+# have none: the faction's rose and trousers with ten gift-package traps (tid 315081), at their
+# price of February 2014.
 [[deals.sections.seasonal.offers]]
 name = "WEST_Custom_Bundle_RoyalBundleofLove"
 members = [1126, 1127, "2172 x10"]
+price = 3999
 window = { dates = ["02-13", "02-15"] }
 
 [[deals.sections.seasonal.offers]]
 name = "WEST_Custom_Bundle_NationalBundleofLove"
 members = [1125, 1128, "2171 x10"]
+price = 3999
 window = { dates = ["02-13", "02-15"] }
 
 # Casey Rabbit Set (35866, HD 20120408), for Easter, Good Friday to Easter Monday
@@ -203,9 +206,8 @@ box = "national-widget-supply-drop"
 
 # Themed boxes: three families of a Royal and a National box at a time; every 14 days the oldest
 # leaves and another comes, so each stays six weeks and comes back no sooner than six weeks
-# later (4 to 13 themed boxes at once in 2012). A box keeps its own text only where the store's
-# drops match what the text promises: the Pandora's Boxes and Spoils of War promised a Valor
-# Points Boost for a duplicate, the Spare Parts a pet and the Ace's and Aviator's drops widgets.
+# later (4 to 13 themed boxes at once in 2012). Blackbeard's chest sells for one faction, and the
+# language table keeps no readable text of it.
 [deals.sections.themed]
 kind = "offers"
 schedule = { every = 14, lasts = 42 }
@@ -252,43 +254,67 @@ pool = "experimental"
 
 [[deals.sections.themed.offers]]
 name = "WEST_Custom_Bundle_RoadRangersSpareParts"
+description = "WEST_Custom_Bundle_RoadRangersSpareParts_HotDealsDesc"
 box = "royal-spare-parts"
 pool = "spare-parts"
 
 [[deals.sections.themed.offers]]
 name = "WEST_Custom_Bundle_TrackHuntersSpareParts"
+description = "WEST_Custom_Bundle_TrackHuntersSpareParts_HotDealsDesc"
 box = "national-spare-parts"
 pool = "spare-parts"
 
 [[deals.sections.themed.offers]]
 name = "WEST_Custom_Bundle_RoyalPandorasBox"
+description = "WEST_Custom_Bundle_RoyalPandorasBox_HotDealsDesc"
 box = "royal-pandora"
 pool = "pandora"
 
 [[deals.sections.themed.offers]]
 name = "WEST_Custom_Bundle_NationalPandorasBox"
+description = "WEST_Custom_Bundle_NationalPandorasBox_HotDealsDesc"
 box = "national-pandora"
 pool = "pandora"
 
 [[deals.sections.themed.offers]]
 name = "WEST_Custom_Bundle_CruelSpoilsOfWar"
+description = "WEST_Custom_Bundle_CruelSpoilsOfWar_HotDealsDesc"
 box = "royal-spoils-of-war"
 pool = "spoils-of-war"
 
 [[deals.sections.themed.offers]]
 name = "WEST_Custom_Bundle_BrutalSpoilsOfWar"
+description = "WEST_Custom_Bundle_BrutalSpoilsOfWar_HotDealsDesc"
 box = "national-spoils-of-war"
 pool = "spoils-of-war"
 
 [[deals.sections.themed.offers]]
 name = "WEST_Custom_Bundle_AviatorsSupplyDrop"
+description = "WEST_Custom_Bundle_AviatorsSupplyDrop_HotDealsDesc"
 box = "royal-ace-supply-drop"
 pool = "ace"
 
 [[deals.sections.themed.offers]]
 name = "WEST_Custom_Bundle_AcesSupplyDrop"
+description = "WEST_Custom_Bundle_AcesSupplyDrop_HotDealsDesc"
 box = "national-ace-supply-drop"
 pool = "ace"
+
+[[deals.sections.themed.offers]]
+name = "WEST_Custom_Bundle_RoyalTradeSupplies"
+description = "WEST_Custom_Bundle_RoyalTradeSupplies_HotDealsDesc"
+box = "royal-trade-supplies"
+pool = "trade-supplies"
+
+[[deals.sections.themed.offers]]
+name = "WEST_Custom_Bundle_NationalTradeSupplies"
+description = "WEST_Custom_Bundle_NationalTradeSupplies_HotDealsDesc"
+box = "national-trade-supplies"
+pool = "trade-supplies"
+
+[[deals.sections.themed.offers]]
+name = "WEST_Custom_Bundle_BlackbeardsTreasureChest"
+box = "national-blackbeards-treasure-chest"
 
 [[deals.sections.themed.offers]]
 name = "WEST_Custom_Bundle_RoyalLostTreasure"

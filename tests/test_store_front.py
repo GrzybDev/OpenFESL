@@ -41,14 +41,20 @@ async def test_the_store_front_lists_what_each_hero_can_have_and_holds(
         no_hero = await listed(client, base)
     brass = await create_hero(base, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
     mud = await create_hero(base, "ann@example.test", "Mudlark")
-    # The coat rented for two more days, and three bandages left of the starting ones.
-    await execute(
-        database_url,
-        "INSERT INTO entitlement (account_id, persona_id, tag, status, expires_at)"
-        " SELECT account_id, id, '3-tlmd', 'ACTIVE', :ends FROM persona WHERE id = :hero",
-        ends=datetime.now(UTC) + timedelta(days=2, hours=1),
-        hero=brass,
-    )
+    # The coat rented for two more days, the rifle for good, and three bandages left of the
+    # starting ones.
+    for tag, ends in (
+        ("3-tlmd", datetime.now(UTC) + timedelta(days=2, hours=1)),
+        ("3015-unlm", None),
+    ):
+        await execute(
+            database_url,
+            "INSERT INTO entitlement (account_id, persona_id, tag, status, expires_at)"
+            " SELECT account_id, id, :tag, 'ACTIVE', :ends FROM persona WHERE id = :hero",
+            tag=tag,
+            ends=ends,
+            hero=brass,
+        )
     await execute(
         database_url,
         "UPDATE entitlement SET use_count = 3 WHERE persona_id = :hero AND tag = '2005-lmct'",

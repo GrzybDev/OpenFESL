@@ -7682,7 +7682,7 @@ msgid "web.store.reveal.after"
 msgstr "%(game)s pokaże go od następnego logowania."
 
 msgid "web.store.reveal.line"
-msgstr "%(ownership)s · cena w sklepie %(worth)s; skrzynka kosztowała %(price)s."
+msgstr "%(ownership)s · wartość %(worth)s; skrzynka kosztowała %(price)s."
 
 msgid "web.store.refused.ended"
 msgstr "Nic nie zostało kupione: oferta %(item)s skończyła się %(moment)s, zanim dotarł zakup. Nie wydano %(currency)s."
@@ -12429,11 +12429,17 @@ msgstr "Zwierzaki"
 msgid "games.bfheroes.price_rule.rocket-packs"
 msgstr "Plecaki rakietowe"
 
+msgid "games.bfheroes.price_rule.box-pieces"
+msgstr "Elementy tylko ze skrzynek"
+
 msgid "games.bfheroes.price_rule.clothing"
 msgstr "Ubrania"
 
 msgid "games.bfheroes.price_rule.emotes"
 msgstr "Gesty"
+
+msgid "games.bfheroes.price_rule.boost-uses"
+msgstr "Wzmocnienia na użycia"
 
 msgid "games.bfheroes.price_rule.boosts"
 msgstr "Wzmocnienia"

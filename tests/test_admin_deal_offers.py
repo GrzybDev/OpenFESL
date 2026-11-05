@@ -58,7 +58,7 @@ async def test_admins_add_change_and_end_offers_that_hot_deals_sell_at_once(
 ) -> None:
     await stock(server_url, tmp_path, capsys)
     await without_rotation(database_url)
-    coat, tunic, pet = [await product(database_url, number) for number in (3, 4, 521)]
+    coat, tunic, pet = [await product(database_url, number) for number in (3, 7, 521)]
     worth = await select_value(
         database_url,
         "SELECT sum(price)::integer FROM store_product WHERE id IN (:coat, :pet)",

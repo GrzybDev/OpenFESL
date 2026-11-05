@@ -210,7 +210,7 @@ def _offer_deal(
         return _box_deal(history, given)
     items = [catalogue.item(item_id) for item_id, _ in given.members]
     # An item that its rules sell alone but the store sells in no way was marked not sold; one
-    # that its rules let only boxes and sets give, such as a claw attack, stays in its sets.
+    # that its rules let only boxes and sets give, such as a Cosmic piece, stays in its sets.
     found = [
         item
         for item in items

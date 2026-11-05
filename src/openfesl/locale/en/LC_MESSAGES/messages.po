@@ -7346,7 +7346,7 @@ msgid "web.store.reveal.after"
 msgstr "%(game)s lists it from its next login."
 
 msgid "web.store.reveal.line"
-msgstr "%(ownership)s · store price %(worth)s; the box cost %(price)s."
+msgstr "%(ownership)s · worth %(worth)s; the box cost %(price)s."
 
 msgid "web.store.refused.ended"
 msgstr "Nothing was bought: %(item)s ended on %(moment)s, before the purchase arrived. No %(currency)s were spent."
@@ -11759,11 +11759,17 @@ msgstr "Pets"
 msgid "games.bfheroes.price_rule.rocket-packs"
 msgstr "Rocket packs"
 
+msgid "games.bfheroes.price_rule.box-pieces"
+msgstr "Pieces only boxes give"
+
 msgid "games.bfheroes.price_rule.clothing"
 msgstr "Clothing"
 
 msgid "games.bfheroes.price_rule.emotes"
 msgstr "Emotes"
+
+msgid "games.bfheroes.price_rule.boost-uses"
+msgstr "Boosts in uses"
 
 msgid "games.bfheroes.price_rule.boosts"
 msgstr "Boosts"

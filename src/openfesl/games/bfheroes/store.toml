@@ -18,26 +18,36 @@ rounding = { _DV = { step = 50 } }
 descriptions = ["WEST_FE_WEAPON_DESCRIPTION_{id}", "WEST_Custom_Item_Info_{id}"]
 
 # Never sold nor dropped: the hair, facial hair and heads a hero's look takes from its creation;
-# the weapons and class abilities of the loadouts, which the game grants every hero itself
-# (BFHeroes.exe 1.89 0x007bae0d); and the partner, celebration, retailer, test and mission-reward
-# items of 2012. The clothes the definitions mark default are never sold either, as every hero
-# they fit holds them.
+# what the loadouts hold, which the game grants every hero itself (BFHeroes.exe 1.89 0x007bae0d);
+# and the partner, celebration, developer, retailer, test and mission-reward items, which the
+# store did not sell alone in 2012. The clothes the definitions mark default are never sold
+# either, as every hero they fit holds them.
 [store.excluded]
 slots = ["head", "hair", "facial_hair"]
 items = [
     # The loadouts' weapons and level-1 class abilities.
     3001, 3002, 3003, 3004, 3009, 3010, 3011, 3012, 3013, 3014, 3155, 3156, 2026, 2075, 2136, 2141,
+    # The loadouts' clothes and emotes.
+    4, 5, 9, 10, 32, 36, 73, 444, 935, 936, 978, 979, 980, 981, 5000, 5007,
+    # The lower levels of the bandage and wrench, as only the Supreme ones were on offer, and the
+    # prototype widgets.
+    2001, 2002, 2003, 2004, 2146, 2147, 2148, 2149, 2185, 2186, 2187,
     # Partner items: Minecraft, Battlefield 3, N7, Battlefield Play4Free medals, beta medals.
     1468, 1469, 1471, 1472, 1689, 1690, 1394, 1395, 450, 459, 928,
     # The 10-million shirts, Need for Speed items and server shirts.
     1556, 1557, 1558, 1559, 997, 1066, 1073, 1283, 1297, 1367, 1385, 1676, 1677, 1683, 1684, 1685,
     1731, 1733, 1737, 1739,
     # Retailer launchers.
-    3230, 3231, 3232, 3233, 3234, 3235, 3236, 3237, 3275, 3276, 3277, 3278, 3279, 3280, 3281, 3282,
+    3230, 3231, 3232, 3233, 3234, 3235, 3236, 3237, 3275, 3276, 3279, 3280, 3281, 3282,
+    # The Micro Blaster and Lil' Boomer, first seen in the chests of February 2013.
+    3277, 3278,
+    # The developers' items.
+    1822, 1892, 5067, 5068,
     # Unnamed and test items.
-    3018, 3188, 3189, 3216, 3222, 3223, 3243, 3244, 3344, 3345,
-    # Mission rewards.
-    1511, 1512, 3205, 3206, 3209, 3211,
+    1122, 3018, 3188, 3189, 3216, 3222, 3223, 3243, 3244, 3344, 3345,
+    # Mission rewards, the golden weapons among them.
+    1511, 1512, 3205, 3206, 3209, 3211, 3090, 3091, 3092, 3093, 3094, 3097, 3251, 3252, 3253, 3254,
+    3255, 3256, 3257, 3258,
 ]
 
 # The first rule of a currency that covers an item prices it in that currency; an item no rule
@@ -92,13 +102,13 @@ currency = "_DV"
 value = 3000
 sold = ["1d", "3d"]
 
-# Pets, about 900 Funds (Drayseen the Dragon was refunded at 899 in June 2012).
+# The pets that only boxes and chests give: worth the 1,999 Funds of the dearest box that holds
+# one and promises its price. The gnome and leprechaun sell at their listed price.
 [store.prices.pets]
 kind = "appearance"
-items = [362, 521, 973, 974, 1123, 1124, 1507, 1529, 1530, 1581, 1583]
+items = [362, 521, 860, 891, 973, 974, 1123, 1124, 1489, 1507, 1581, 1583]
 currency = "_PF"
-value = 899
-sold = ["perm"]
+value = 1999
 
 # The rocket packs, at their archived price.
 [store.prices.rocket-packs]
@@ -107,6 +117,26 @@ items = [589, 597]
 currency = "_PF"
 value = 3599
 sold = ["perm"]
+
+# The pieces that only boxes, chests and their sets give, which no listing sells alone: worth
+# what clothing is.
+[store.prices.box-pieces]
+kind = "appearance"
+items = [
+    178, 184, 247, 488, 489, 490, 491, 607, 608, 609, 643, 645, 853, 864, 904, 909, 910, 970,
+    971, 972, 1097, 1105, 1388, 1393, 1408, 1409, 1410, 1411, 1412, 1413, 1414, 1415, 1420,
+    1425, 1426, 1427, 1428, 1429, 1430, 1431, 1436, 1444, 1448, 1449, 1450, 1451, 1452, 1453,
+    1454, 1459, 1463, 1464, 1465, 1466, 1467, 1474, 1475, 1476, 1477, 1478, 1479, 1480, 1490,
+    1491, 1492, 1493, 1494, 1501, 1502, 1503, 1504, 1505, 1506, 1509, 1585, 1588, 1590, 1594,
+    1650, 1651, 1652, 1653, 1665, 1672, 1674, 1675, 1678, 1679, 1680, 1681, 1682, 1693, 1705,
+    1706, 1707, 1708, 1709, 1711, 1712, 1713, 1714, 1765, 1766, 1767, 1768, 1769, 1770, 1771,
+    1772, 1773, 1774, 1775, 1776, 1777, 1778, 1779, 1780, 1781, 1782, 1783, 1784, 1785, 1786,
+    1787, 1788, 1810, 1815, 1816, 1817, 1819, 1820, 1821, 1823, 1824, 1825, 1826, 1827, 1828,
+    1829, 1851, 1859, 1860, 1864, 1866, 1873, 1876, 1877, 1878, 1880, 1883, 1885, 1887, 1889,
+    1891,
+]
+currency = "_PF"
+value = 2600
 
 # Clothing, about 2,600 Funds an item: the median of the item prices of the appearance sets of
 # July 2012.
@@ -122,6 +152,14 @@ kind = "emote"
 currency = "_PF"
 value = 1679
 sold = ["perm", "30d"]
+
+# The Fire Proof Underpants, the one boost sold in uses.
+[store.prices.boost-uses]
+kind = "convenience"
+fields = { consumable = "true" }
+currency = "_PF"
+use_price = 7
+sold = ["x50", "x110"]
 
 # Boosts and the other convenience items, 6,299 Funds for 30 days (the XP and VP boost bundle of
 # 2012 cost 12,598).
@@ -140,8 +178,8 @@ currency = "_PF"
 use_price = 7
 sold = ["x25", "x110"]
 
-# The widgets that last a while, such as the claw attacks, which only boxes drop; their value is
-# inferred.
+# The widgets that last a while and sell in no listing; their value is inferred from the claw
+# attacks' 3,359 Funds for 30 days.
 [store.prices.widgets]
 kind = "ability"
 fields = { widget = "true" }
@@ -262,7 +300,7 @@ weight = 90
 drops = ["3017 7d", "3022 7d", "3174 7d", "3176 7d", "3034 7d", "3182 7d"]
 
 # The Widget Supply Drops, sold always for 629 Funds: rarely the faction's pet for good, else
-# a pack of a widget's uses or a boost for 30 days.
+# a pack of a widget's uses or a boost for 30 days, each worth the box's price.
 [[store.boxes]]
 key = "royal-widget-supply-drop"
 faction = "royal"
@@ -276,9 +314,9 @@ drops = ["1124 perm"]
 
 [[store.boxes.tiers]]
 weight = 95
-drops = ["2153 x110", "2150 x110", "2005 x110", "2183 x110", "2184 x110", "2185 x110",
-    "2186 x110", "2187 x110", "2159 x110", "2161 x110", "2163 x110", "2165 x110", "2167 x110",
-    "2169 x110", "9000 30d", "9005 30d", "9020 30d", "9040 30d"]
+drops = ["2153 x110", "2150 x166", "2005 x166", "2183 x110", "2184 x110", "2159 x110",
+    "2161 x110", "2163 x110", "2165 x110", "2167 x110", "2169 x110", "9000 30d", "9005 30d",
+    "9020 x166", "9040 30d"]
 
 [[store.boxes]]
 key = "national-widget-supply-drop"
@@ -293,14 +331,15 @@ drops = ["1123 perm"]
 
 [[store.boxes.tiers]]
 weight = 95
-drops = ["2153 x110", "2150 x110", "2005 x110", "2183 x110", "2184 x110", "2185 x110",
-    "2186 x110", "2187 x110", "2160 x110", "2162 x110", "2164 x110", "2166 x110", "2168 x110",
-    "2170 x110", "9000 30d", "9005 30d", "9020 30d", "9040 30d"]
+drops = ["2153 x110", "2150 x166", "2005 x166", "2183 x110", "2184 x110", "2160 x110",
+    "2162 x110", "2164 x110", "2166 x110", "2168 x110", "2170 x110", "9000 30d", "9005 30d",
+    "9020 x166", "9040 30d"]
 
 # The themed boxes, which the hot-deal rotation sells three pairs at a time: a piece of the
-# family for good (counts and prices of the 2012 boxes; contents inferred). A hero who owns
-# them all gets a pack of tonics worth the price.
-# The Mechanical Drops: the Mark II pieces and their weapons.
+# family for good (counts and prices of the 2012 boxes, contents as the store's last years list
+# them, inferred for the Cosmic Drops, Pandora's Boxes and Lost Treasures). A hero who owns them
+# all gets a pack of tonics worth the price.
+# The Mechanical Drops: the Mark II pieces.
 [[store.boxes]]
 key = "royal-mechanical"
 faction = "royal"
@@ -309,11 +348,7 @@ value = 999
 fallback = "2153 x143"
 
 [[store.boxes.tiers]]
-weight = 20
-drops = ["3341 perm", "3343 perm"]
-
-[[store.boxes.tiers]]
-weight = 80
+weight = 100
 drops = ["1693 perm", "1711 perm", "1712 perm", "1713 perm", "1714 perm"]
 
 [[store.boxes]]
@@ -324,11 +359,7 @@ value = 999
 fallback = "2153 x143"
 
 [[store.boxes.tiers]]
-weight = 20
-drops = ["3340 perm", "3342 perm"]
-
-[[store.boxes.tiers]]
-weight = 80
+weight = 100
 drops = ["1705 perm", "1706 perm", "1707 perm", "1708 perm", "1709 perm"]
 
 # The Cosmic Drops: the spacemen's and galactic pieces.
@@ -379,7 +410,7 @@ fallback = "2153 x286"
 weight = 100
 drops = ["1672 perm", "1680 perm", "1681 perm", "1682 perm"]
 
-# The Spare Parts: the road and track pieces; their pets are worth less than the box.
+# The Spare Parts: four road or track pieces and a pet.
 [[store.boxes]]
 key = "royal-spare-parts"
 faction = "royal"
@@ -389,8 +420,7 @@ fallback = "2153 x286"
 
 [[store.boxes.tiers]]
 weight = 100
-drops = ["1585 perm", "1586 perm", "1587 perm", "1588 perm", "1589 perm", "1590 perm",
-    "1591 perm", "1592 perm", "1594 perm"]
+drops = ["1585 perm", "1588 perm", "1590 perm", "1594 perm", "1581 perm"]
 
 [[store.boxes]]
 key = "national-spare-parts"
@@ -401,59 +431,69 @@ fallback = "2153 x286"
 
 [[store.boxes.tiers]]
 weight = 100
-drops = ["1650 perm", "1651 perm", "1652 perm", "1653 perm", "1654 perm"]
+drops = ["1650 perm", "1651 perm", "1652 perm", "1653 perm", "1583 perm"]
 
-# Pandora's Boxes: the elements' pieces and staffs.
+# Pandora's Boxes: the elements' pieces and staffs, with a low chance of a day of the Valor Point
+# boost, which a hero who owns them all always gets.
 [[store.boxes]]
 key = "royal-pandora"
 faction = "royal"
 currency = "_PF"
 value = 1199
-fallback = "2153 x172"
+fallback = "9005 1d"
 
 [[store.boxes.tiers]]
 weight = 100
 drops = ["1408 perm", "1409 perm", "1410 perm", "1411 perm", "1412 perm", "1413 perm",
     "1414 perm", "1420 perm", "1415 perm"]
 
+[[store.boxes.tiers]]
+weight = 5
+drops = ["9005 1d"]
+
 [[store.boxes]]
 key = "national-pandora"
 faction = "national"
 currency = "_PF"
 value = 1199
-fallback = "2153 x172"
+fallback = "9005 1d"
 
 [[store.boxes.tiers]]
 weight = 100
 drops = ["1425 perm", "1426 perm", "1427 perm", "1428 perm", "1429 perm", "1430 perm",
     "1431 perm", "1436 perm"]
 
-# The Spoils of War: the barbarians' pieces.
+[[store.boxes.tiers]]
+weight = 5
+drops = ["9005 1d"]
+
+# The Spoils of War: the barbarians' pieces, with a day of the Valor Point boost for a hero who
+# owns them all.
 [[store.boxes]]
 key = "royal-spoils-of-war"
 faction = "royal"
 currency = "_PF"
 value = 1199
-fallback = "2153 x172"
+fallback = "9005 1d"
 
 [[store.boxes.tiers]]
 weight = 100
 drops = ["1444 perm", "1448 perm", "1449 perm", "1450 perm", "1451 perm", "1452 perm",
-    "1454 perm", "488 perm", "489 perm", "490 perm", "491 perm", "492 perm"]
+    "1454 perm", "488 perm", "489 perm", "490 perm", "491 perm"]
 
 [[store.boxes]]
 key = "national-spoils-of-war"
 faction = "national"
 currency = "_PF"
 value = 1199
-fallback = "2153 x172"
+fallback = "9005 1d"
 
 [[store.boxes.tiers]]
 weight = 100
 drops = ["1453 perm", "1459 perm", "1463 perm", "1464 perm", "1465 perm", "1466 perm",
     "1467 perm"]
 
-# The Aviator's and Ace's Supply Drops.
+# The Aviator's and Ace's Supply Drops: the pieces and, as their texts say, common widgets.
 [[store.boxes]]
 key = "royal-ace-supply-drop"
 faction = "royal"
@@ -462,8 +502,12 @@ value = 1199
 fallback = "2153 x172"
 
 [[store.boxes.tiers]]
-weight = 100
+weight = 80
 drops = ["1097 perm", "1474 perm", "1475 perm", "1476 perm"]
+
+[[store.boxes.tiers]]
+weight = 20
+drops = ["2153 x172", "2005 x315", "2150 x315", "9005 1d"]
 
 [[store.boxes]]
 key = "national-ace-supply-drop"
@@ -473,8 +517,12 @@ value = 1199
 fallback = "2153 x172"
 
 [[store.boxes.tiers]]
-weight = 100
+weight = 80
 drops = ["1105 perm", "1477 perm", "1478 perm", "1479 perm", "1480 perm"]
+
+[[store.boxes.tiers]]
+weight = 20
+drops = ["2153 x172", "2005 x315", "2150 x315", "9005 1d"]
 
 # The Lost Treasures: rare pieces of the knights' sets.
 [[store.boxes]]
@@ -499,23 +547,54 @@ fallback = "2153 x172"
 weight = 100
 drops = ["607 perm", "608 perm", "609 perm"]
 
-# Blackbeard's Treasure Chest, for National heroes only; its very rare parrot is worth less
-# than the box, so it is left out.
+# Blackbeard's Treasure Chest, for National heroes only, with its very rare parrot, and a day of
+# the Valor Point boost for a hero who owns it all.
 [[store.boxes]]
 key = "national-blackbeards-treasure-chest"
 faction = "national"
 currency = "_PF"
 value = 1199
-fallback = "2153 x172"
+fallback = "9005 1d"
+
+[[store.boxes.tiers]]
+weight = 95
+drops = ["1393 perm", "1388 perm", "178 perm", "184 perm", "247 perm"]
+
+[[store.boxes.tiers]]
+weight = 5
+drops = ["362 perm"]
+
+# The Trade Supplies: the Western frontier's pieces.
+[[store.boxes]]
+key = "royal-trade-supplies"
+faction = "royal"
+currency = "_PF"
+value = 749
+fallback = "2153 x107"
 
 [[store.boxes.tiers]]
 weight = 100
-drops = ["1393 perm", "1388 perm", "178 perm", "184 perm"]
+drops = ["1823 perm", "1824 perm", "1825 perm", "1826 perm", "1827 perm", "1828 perm",
+    "1829 perm", "1851 perm", "1859 perm", "1860 perm", "1864 perm", "1866 perm", "1885 perm",
+    "1887 perm", "1889 perm"]
+
+[[store.boxes]]
+key = "national-trade-supplies"
+faction = "national"
+currency = "_PF"
+value = 749
+fallback = "2153 x107"
+
+[[store.boxes.tiers]]
+weight = 100
+drops = ["1810 perm", "1815 perm", "1816 perm", "1817 perm", "1819 perm", "1820 perm",
+    "1821 perm", "1873 perm", "1876 perm", "1877 perm", "1878 perm", "1880 perm", "1883 perm",
+    "1891 perm"]
 
 # The event boxes, which the rotation sells in their windows and the rewards give daily.
 # The Trick-or-Treat bags of 19-31 October, 999 Funds: rarely a mummy's piece or a Halloween
 # emote for good, else a Halloween piece for good or for 30 days, tonics or the claw attack
-# (inferred tables; the scarab pet is worth less than the bag and is left out).
+# (inferred tables).
 [[store.boxes]]
 key = "royal-trick-or-treat"
 faction = "royal"
@@ -525,22 +604,21 @@ fallback = "2153 x150"
 
 [[store.boxes.tiers]]
 weight = 5
-drops = ["1501 perm", "1502 perm", "1503 perm", "1504 perm", "1505 perm", "1506 perm",
-    "1509 perm", "5030 perm", "5049 perm"]
+drops = ["1501 perm", "1502 perm", "1503 perm", "1504 perm", "1505 perm", "1506 perm", "1509 perm",
+    "1507 perm", "5030 perm", "5049 perm"]
 
 [[store.boxes.tiers]]
 weight = 35
-drops = ["1106 perm", "1107 perm", "1108 perm", "1109 perm", "1110 perm", "1111 perm",
-    "1112 perm", "1113 perm", "1026 perm", "1027 perm", "1028 perm", "1029 perm", "1030 perm",
-    "1033 perm", "1034 perm", "1495 perm", "1496 perm", "1497 perm", "1498 perm", "1499 perm",
-    "1500 perm", "1508 perm", "1318 perm", "325 perm"]
+drops = ["1106 perm", "1107 perm", "1108 perm", "1109 perm", "1110 perm", "1111 perm", "1112 perm",
+    "1113 perm", "1026 perm", "1027 perm", "1028 perm", "1029 perm", "1030 perm", "1033 perm",
+    "1034 perm", "1495 perm", "1496 perm", "1497 perm", "1498 perm", "1499 perm", "1500 perm",
+    "1508 perm", "1318 perm", "325 perm"]
 
 [[store.boxes.tiers]]
 weight = 60
-drops = ["1106 30d", "1107 30d", "1108 30d", "1109 30d", "1110 30d", "1111 30d", "1112 30d",
-    "1113 30d", "1026 30d", "1027 30d", "1028 30d", "1029 30d", "1030 30d", "1033 30d",
-    "1034 30d", "1495 30d", "1496 30d", "1497 30d", "1498 30d", "1499 30d", "1500 30d",
-    "1508 30d", "1318 30d", "325 30d", "2153 x150", "2156 30d"]
+drops = ["1106 30d", "1107 30d", "1109 30d", "1110 30d", "1112 30d", "1026 30d", "1027 30d",
+    "1030 30d", "1033 30d", "1034 30d", "1495 30d", "1496 30d", "1497 30d", "1498 30d", "1499 30d",
+    "1318 30d", "325 30d", "2153 x150", "2156 30d"]
 
 [[store.boxes]]
 key = "national-trick-or-treat"
@@ -551,46 +629,45 @@ fallback = "2153 x150"
 
 [[store.boxes.tiers]]
 weight = 5
-drops = ["1490 perm", "1491 perm", "1492 perm", "1493 perm", "1494 perm", "5031 perm",
-    "5050 perm"]
+drops = ["1490 perm", "1491 perm", "1492 perm", "1493 perm", "1494 perm", "1489 perm",
+    "5031 perm", "5050 perm"]
 
 [[store.boxes.tiers]]
 weight = 35
-drops = ["1114 perm", "1115 perm", "1116 perm", "1117 perm", "1118 perm", "1119 perm",
-    "1120 perm", "1121 perm", "407 perm", "408 perm", "409 perm", "410 perm", "594 perm",
-    "1031 perm", "1486 perm", "1487 perm", "1488 perm", "1510 perm", "1513 perm", "1514 perm",
-    "1319 perm", "503 perm", "207 perm", "294 perm", "293 perm"]
+drops = ["1114 perm", "1115 perm", "1116 perm", "1117 perm", "1118 perm", "1119 perm", "1120 perm",
+    "1121 perm", "407 perm", "408 perm", "409 perm", "410 perm", "594 perm", "1031 perm",
+    "1486 perm", "1487 perm", "1488 perm", "1510 perm", "1513 perm", "1514 perm", "1319 perm",
+    "503 perm", "207 perm", "294 perm", "293 perm"]
 
 [[store.boxes.tiers]]
 weight = 60
-drops = ["1114 30d", "1115 30d", "1116 30d", "1117 30d", "1118 30d", "1119 30d", "1120 30d",
-    "1121 30d", "407 30d", "408 30d", "409 30d", "410 30d", "594 30d", "1031 30d", "1486 30d",
-    "1487 30d", "1488 30d", "1510 30d", "1513 30d", "1514 30d", "1319 30d", "503 30d", "207 30d",
-    "294 30d", "293 30d", "2153 x150", "2157 30d"]
+drops = ["1114 30d", "1115 30d", "1117 30d", "1118 30d", "1120 30d", "407 30d",
+    "408 30d", "409 30d", "1031 30d", "1486 30d", "1488 30d", "1510 30d", "1513 30d",
+    "1514 30d", "1319 30d", "503 30d", "293 30d", "2153 x150", "2157 30d"]
 
-# The sarcophagi of 19-31 October, 1,199 Funds: a mummy's piece for good.
+# The sarcophagi of 19-31 October, 1,260 Funds: a mummy's piece or pet for good.
 [[store.boxes]]
 key = "royal-sarcophagus"
 faction = "royal"
 currency = "_PF"
-value = 1199
-fallback = "2153 x172"
+value = 1260
+fallback = "2153 x180"
 
 [[store.boxes.tiers]]
 weight = 100
 drops = ["1501 perm", "1502 perm", "1503 perm", "1504 perm", "1505 perm", "1506 perm",
-    "1509 perm"]
+    "1507 perm", "1509 perm"]
 
 [[store.boxes]]
 key = "national-sarcophagus"
 faction = "national"
 currency = "_PF"
-value = 1199
-fallback = "2153 x172"
+value = 1260
+fallback = "2153 x180"
 
 [[store.boxes.tiers]]
 weight = 100
-drops = ["1490 perm", "1491 perm", "1492 perm", "1493 perm", "1494 perm"]
+drops = ["1489 perm", "1490 perm", "1491 perm", "1492 perm", "1493 perm", "1494 perm"]
 
 # The Bento Boxes of 21-27 November, 1,199 Funds, which promised no worth: a day's trial of
 # the Bushido or Samurai set, rarely an exclusive weapon for a week, ninja pieces for a week or
@@ -644,8 +721,8 @@ weight = 15
 drops = ["2153 x25", "2162 x10"]
 
 # Santa's and Nikolaus' Visits of 1-25 December, 999 Funds: rarely the holiday set's pieces or
-# a holiday emote for good, else a winter piece for good or for 30 days, a class weapon for 30
-# days or a pack of festive widgets (the pets are worth less than the box and are left out).
+# a holiday emote or the gnome or leprechaun pet for good, else a winter piece for good or for
+# 30 days, a class weapon for 30 days or a pack of festive widgets.
 [[store.boxes]]
 key = "royal-santas-visit"
 faction = "royal"
@@ -655,21 +732,19 @@ fallback = "2153 x150"
 
 [[store.boxes.tiers]]
 weight = 5
-drops = ["1060 perm", "1325 perm", "1326 perm", "1327 perm", "1328 perm", "1329 perm",
+drops = ["1060 perm", "1325 perm", "1326 perm", "1327 perm", "1328 perm", "1329 perm", "1530 perm",
     "5052 perm", "5051 perm"]
 
 [[store.boxes.tiers]]
 weight = 35
-drops = ["1081 perm", "1082 perm", "1083 perm", "1061 perm", "1078 perm", "1079 perm",
-    "1080 perm", "1089 perm", "421 perm", "1090 perm", "1091 perm", "1547 perm", "1546 perm",
-    "1531 perm", "1535 perm", "1537 perm", "1539 perm", "49 perm", "1533 perm", "1541 perm",
-    "1555 perm"]
+drops = ["1081 perm", "1082 perm", "1083 perm", "1061 perm", "1078 perm", "1080 perm", "1089 perm",
+    "421 perm", "1090 perm", "1091 perm", "1547 perm", "1546 perm", "1531 perm", "1535 perm",
+    "1537 perm", "1539 perm", "49 perm", "1533 perm", "1541 perm", "1555 perm"]
 
 [[store.boxes.tiers]]
 weight = 60
-drops = ["1081 30d", "1082 30d", "1083 30d", "1061 30d", "1078 30d", "1079 30d", "1080 30d",
-    "1089 30d", "421 30d", "1090 30d", "1091 30d", "1547 30d", "1546 30d", "1531 30d", "1535 30d",
-    "1537 30d", "1539 30d", "49 30d", "1533 30d", "1541 30d", "1555 30d", "3212 30d", "3221 30d",
+drops = ["1081 30d", "1061 30d", "1080 30d", "421 30d", "1091 30d", "1547 30d", "1546 30d",
+    "1531 30d", "1535 30d", "1537 30d", "1533 30d", "1541 30d", "1555 30d", "3212 30d", "3221 30d",
     "3219 30d", "3192 30d", "3193 30d", "3194 30d", "2172 x150", "2163 x150", "2161 x150",
     "2183 x150", "2184 x150", "2153 x150"]
 
@@ -682,24 +757,23 @@ fallback = "2153 x150"
 
 [[store.boxes.tiers]]
 weight = 5
-drops = ["1062 perm", "1320 perm", "1321 perm", "1322 perm", "1323 perm", "1324 perm",
+drops = ["1062 perm", "1320 perm", "1321 perm", "1322 perm", "1323 perm", "1324 perm", "1529 perm",
     "5053 perm", "5051 perm"]
 
 [[store.boxes.tiers]]
 weight = 35
-drops = ["1084 perm", "1085 perm", "1063 perm", "1087 perm", "1088 perm", "1086 perm", "72 perm",
-    "1092 perm", "1552 perm", "1551 perm", "1532 perm", "1536 perm", "1538 perm", "1540 perm",
-    "54 perm", "1534 perm", "1542 perm", "235 perm"]
+drops = ["1084 perm", "1085 perm", "1063 perm", "1087 perm", "1086 perm", "72 perm", "1552 perm",
+    "1551 perm", "1532 perm", "1536 perm", "1538 perm", "1540 perm", "54 perm", "1534 perm",
+    "1542 perm", "235 perm"]
 
 [[store.boxes.tiers]]
 weight = 60
-drops = ["1084 30d", "1085 30d", "1063 30d", "1087 30d", "1088 30d", "1086 30d", "72 30d",
-    "1092 30d", "1552 30d", "1551 30d", "1532 30d", "1536 30d", "1538 30d", "1540 30d", "54 30d",
+drops = ["1063 30d", "72 30d", "1552 30d", "1551 30d", "1532 30d", "1536 30d", "1538 30d",
     "1534 30d", "1542 30d", "235 30d", "3213 30d", "3220 30d", "3218 30d", "3154 30d", "3190 30d",
     "3191 30d", "2171 x150", "2164 x150", "2162 x150", "2183 x150", "2184 x150", "2153 x150"]
 
-# The treasure chest, which a key of 499 Funds opens: the 2012 pool of both factions, of which
-# a hero gets what fits it, worth about 1.8 times the key on average (inferred table).
+# The treasure chest, which a key of 499 Funds opens: the 2012 pool of both factions with the
+# agents' pieces of October 2012, of which a hero gets what fits it (inferred table).
 [[store.boxes]]
 key = "treasure-chest"
 kind = "chest"
@@ -709,7 +783,7 @@ fallback = "2153 x75"
 
 [[store.boxes.tiers]]
 weight = 60
-drops = ["2153 x75", "2005 x75", "2150 x75", "9020 30d"]
+drops = ["2153 x75", "2005 x132", "2150 x132", "9020 x132"]
 
 [[store.boxes.tiers]]
 weight = 28
@@ -719,7 +793,8 @@ drops = ["3025 7d", "3015 7d", "3038 7d", "3042 7d", "3041 7d", "3043 7d", "5063
 weight = 10
 drops = ["970 perm", "971 perm", "972 perm", "643 perm", "1470 perm", "1359 perm", "607 perm",
     "608 perm", "609 perm", "645 perm", "1483 perm", "1360 perm", "1124 perm", "521 perm",
-    "1123 perm", "362 perm", "5063 perm", "5064 perm"]
+    "1123 perm", "362 perm", "5063 perm", "5064 perm", "904 perm", "909 perm", "910 perm",
+    "853 perm", "864 perm", "868 perm", "891 perm", "860 perm"]
 
 [[store.boxes.tiers]]
 weight = 2

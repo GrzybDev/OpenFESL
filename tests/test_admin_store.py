@@ -308,7 +308,7 @@ async def test_admins_apply_a_changed_kind_rule_to_the_items_without_own_prices(
         assert (await client.post(f"{base}/admin/store/bfheroes/items/3", data=coat)).is_redirect
         clothing = {"csrf": token, "value": "2,800", "sold-perm": "1", "sold-30d": "1"}
         asked = visible((await client.post(f"{rules}/clothing", data=clothing)).content)
-        assert "Change now 0 items without own prices" in asked
+        assert "Change now 1 item without own prices" in asked
         assert "Keep their prices 1 item priced or sold by hand" in asked
         await client.post(f"{rules}/clothing/apply", data=clothing)
         assert not any(" 3-" in listed(product) for product in await offers(server_url))

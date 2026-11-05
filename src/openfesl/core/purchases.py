@@ -253,7 +253,8 @@ class Purchases:
             raise PurchaseRefused(NOT_FOR_HERO)
         assert item is not None
         level = item.levels.index(item.id) if item.id in item.levels else 0
-        if level and game.heroes:
+        # Levels are learned in order; an item sold in uses is bought as it is.
+        if level and game.heroes and not (game.store and game.store.counted(item)):
             kept = await self._entitlements.of_persona(persona.id)
             if item.levels[level - 1] not in held(game.heroes, hero.faction, hero.hero_class, kept):
                 raise PurchaseRefused(LEVEL_MISSING)

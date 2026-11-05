@@ -267,7 +267,8 @@ class StoreItems:
             ]
             unfit = sold.requirement.unfit(hero)
             holds = held(rules, hero.faction, hero.hero_class, kept)
-            if unfit is None and item and item.id in item.levels[1:]:
+            uses = bool(item and game.store and game.store.counted(item))
+            if unfit is None and item and item.id in item.levels[1:] and not uses:
                 previous = item.levels[item.levels.index(item.id) - 1]
                 unfit = None if previous in holds else Unfit.ORDER
             if unfit is None and item:

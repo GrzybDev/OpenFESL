@@ -36,8 +36,8 @@ async def test_the_store_sells_each_way_to_own_an_imported_item_as_a_product_of_
     assert sold == [
         "OFB-DBFH:1 3-unlm 2600_PF",
         "OFB-DBFH:2 3-tlmd 30d 1300_PF",
-        "OFB-DBFH:3 4-unlm 2600_PF",
-        "OFB-DBFH:4 4-tlmd 30d 1300_PF",
+        "OFB-DBFH:3 7-unlm 2600_PF",
+        "OFB-DBFH:4 7-tlmd 30d 1300_PF",
         "OFB-DBFH:5 521-unlm 899_PF",
         "OFB-DBFH:6 2005-lmct x25 175_PF",
         "OFB-DBFH:7 2005-lmct x110 770_PF",

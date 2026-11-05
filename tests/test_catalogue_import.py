@@ -72,7 +72,7 @@ async def test_an_imported_catalogue_names_items_in_the_pages_language_and_serve
     assert rifle.classes == {"gunner"}
     assert rifle.level is None
     assert wave.classes == {"commando", "soldier", "gunner"} and wave.icon == "emote5000"
-    assert [item.id for item in polish.items("ability")] == [2000, 2001, 2010]
+    assert [item.id for item in polish.items("ability")] == [2000, 2010, 2097]
     # A mission names its one team by the team's id, or 0 for either.
     mission, any_team = polish.item(6000), polish.item(6001)
     assert mission and mission.classes == {"commando"} and mission.level == 0
@@ -81,7 +81,7 @@ async def test_an_imported_catalogue_names_items_in_the_pages_language_and_serve
     # ability by its first one's; texts are found whatever their case and stray spaces.
     assert polish.name(1) == "Wymyślony kapelusz"
     assert polish.name(3000) == "Practice Rifle"
-    assert polish.name(2001) == "Wymyślony zryw"
+    assert polish.name(2097) == "Wymyślony zryw"
     assert polish.name(5000) == "Wymyślone machnięcie"
     assert polish.name(2) is None and polish.name(4) is None
     assert polish.text("auto_rules_mission_6000") == "Wymyślona codzienna"

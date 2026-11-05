@@ -395,6 +395,7 @@ async def test_the_game_lists_and_sells_the_deal_of_the_day_and_the_admins_offer
         for number, item in INVENTED.items()
         if item[2].get("slot") != LEGS and number != 2153
     }
+    await setting(database_url, "bfheroes.deals.sections.themed.enabled", "off")
     await import_catalogue(server_url, tmp_path, capsys, kept, TEXTS)
     cookie, hero = await shopper(server_url, "ann@example.test", "Brassbuckle", **ROYAL_SOLDIER)
     boost = await select_value(
