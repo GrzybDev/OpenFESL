@@ -72,6 +72,11 @@
     text-transform: uppercase;
   }
 
+  /* The dot between the map and the mode where they share a line. */
+  .cell-dot {
+    display: none;
+  }
+
   .cell-mode {
     flex-direction: column;
     align-items: flex-start;
@@ -165,9 +170,9 @@
       padding: 0 0 8px 12px;
     }
 
-    .cell-map::after {
-      content: "·";
-      margin-left: 8px;
+    /* In the markup, as a listed row's cells give their own pseudo-elements to its motion. */
+    .cell-dot {
+      display: inline;
     }
 
     .cell-mode {

@@ -11,7 +11,7 @@
 <div role="cell" class="cell-map {{ cell }}">
   <Published kind="map" :label="server.map" />
 </div>
-<div role="cell" class="cell-mode {{ cell }}"><Published kind="mode" :label="server.mode" />{% if server.hardcore %}<span class="hardcore-mark">{{ _("web.server.hardcore") }}</span>{% endif %}</div>
+<div role="cell" class="cell-mode {{ cell }}"><span aria-hidden="true" class="cell-dot">·</span><Published kind="mode" :label="server.mode" />{% if server.hardcore %}<span class="hardcore-mark">{{ _("web.server.hardcore") }}</span>{% endif %}</div>
 <div role="cell" class="cell-players {{ cell }}">
   <span class="cell-taken"><Count :value="server.players" class="count-ink count-sm live-value" />&nbsp;/&nbsp;{{ number(server.max_players) }}<span class="cell-free"><Free :server="server" /></span></span>
   <Seats :taken="server.players" :slots="server.max_players" />
