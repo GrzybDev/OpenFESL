@@ -197,6 +197,8 @@ async def test_the_stage_shows_the_games_model_and_falls_back_to_the_look_in_wor
     # A browser without WebGL2 keeps the look in words and loads none of the model's files, and
     # so does one that draws WebGL in software, where loading the model would hold the page up.
     without = await creator(edge, base)
+    # The first load still has WebGL2; files it asks for later must not count as the reload's.
+    await without.locator("[data-stage][data-shown=model]").wait_for()
     await without.context.add_init_script("delete window.WebGL2RenderingContext")
     software = await creator(edge, base, card=False)
     asked: list[str] = []
@@ -211,8 +213,7 @@ async def test_the_stage_shows_the_games_model_and_falls_back_to_the_look_in_wor
     failing = await creator(edge, base)
     await failing.route(re.compile(r"\.glb$"), lambda route: route.abort())
     await failing.reload()
-    await failing.wait_for_load_state("networkidle")
-    assert await failing.locator("canvas").count() == 0
+    await failing.locator("canvas").wait_for(state="detached")
     assert await failing.locator("[data-stage][data-shown]").count() == 0
 
 
