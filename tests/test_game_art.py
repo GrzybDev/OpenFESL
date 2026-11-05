@@ -22,7 +22,6 @@ from openfesl.core.game_art import ArtViewers, GameArt
 from openfesl.core.games import Game
 from openfesl.storage.admin import SqlAdminLog
 from openfesl.storage.game_art import SqlArtStore
-from openfesl.web.pages import built_assets
 
 pytestmark = pytest.mark.anyio
 ANN = "ann@example.test"
@@ -155,11 +154,10 @@ async def test_a_choice_of_who_sees_the_art_reaches_every_server_through_the_log
             await session.execute(text("DELETE FROM setting WHERE key LIKE 'art.%'"))
 
 
+@pytest.mark.usefixtures("scripts")
 async def test_the_tiles_save_a_choice_once_it_rests_and_say_when_it_failed(
     files: Path, admin_provider: IdentityProvider, server_url: str, edge: Browser
 ) -> None:
-    if not built_assets().app:
-        pytest.skip("the web pages' scripts are not built")
     base = server_url.replace("ws://", "http://").rstrip("/")
     async with httpx2.AsyncClient() as client:
         admin_provider.user = KEEPER

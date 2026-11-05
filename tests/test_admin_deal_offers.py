@@ -46,7 +46,7 @@ def written(moment: datetime) -> str:
     return f"{moment:%Y-%m-%dT%H:%M}"
 
 
-@pytest.mark.usefixtures("prompt_actions")
+@pytest.mark.usefixtures("prompt_actions", "scripts")
 async def test_admins_add_change_and_end_offers_that_hot_deals_sell_at_once(
     admin_provider: IdentityProvider,
     base: str,

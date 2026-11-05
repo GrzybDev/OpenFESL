@@ -220,6 +220,7 @@ async def test_the_claw_says_why_it_takes_no_grab(
     assert await select_value(database_url, grabs, hero=hero) == 1
 
 
+@pytest.mark.usefixtures("scripts")
 async def test_the_claw_over_a_page_keeps_its_hero_and_the_focus_through_grabs_and_closes(
     base: str,
     server_url: str,

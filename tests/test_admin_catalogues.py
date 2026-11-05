@@ -14,7 +14,6 @@ from support import cli
 from test_catalogue_import import extracted
 
 from openfesl.core.catalogue import CatalogueFile
-from openfesl.web.pages import built_assets
 
 pytestmark = pytest.mark.anyio
 KEEPER = {"sub": "keeper-9", "preferred_username": "invented-keeper", "groups": ["fesl-admins"]}
@@ -195,6 +194,7 @@ async def importing(browser: Browser, base: str, client: httpx2.AsyncClient) -> 
     return page
 
 
+@pytest.mark.usefixtures("scripts")
 async def test_the_page_sends_the_file_in_the_background_and_asks_before_a_replacement(
     files: Path,
     admin_provider: IdentityProvider,
@@ -203,8 +203,6 @@ async def test_the_page_sends_the_file_in_the_background_and_asks_before_a_repla
     capsys: pytest.CaptureFixture[str],
     edge: Browser,
 ) -> None:
-    if not built_assets().app:
-        pytest.skip("the web pages' scripts are not built")
     base = server_url.replace("ws://", "http://").rstrip("/")
     file = await extracted(tmp_path, capsys)
     async with httpx2.AsyncClient() as client:

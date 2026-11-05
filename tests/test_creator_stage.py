@@ -16,8 +16,6 @@ from playwright.async_api import Browser, Page
 from support import cli, visible
 from test_catalogue_import import extracted
 
-from openfesl.web.pages import built_assets
-
 pytestmark = pytest.mark.anyio
 
 FIGURE = "/bfheroes/heroes/figure"
@@ -148,12 +146,10 @@ async def creator(
     return page
 
 
-@pytest.mark.usefixtures("prompt_actions")
+@pytest.mark.usefixtures("prompt_actions", "scripts")
 async def test_the_stage_shows_the_games_model_and_falls_back_to_the_look_in_words(
     files: Path, base: str, tmp_path: Path, capsys: pytest.CaptureFixture[str], edge: Browser
 ) -> None:
-    if not built_assets().app:
-        pytest.skip("the web pages' scripts are not built")
     await import_models(base, tmp_path, capsys)
     page = await creator(edge, base)
     stage = page.locator("[data-stage]")
@@ -224,13 +220,11 @@ async def test_the_stage_shows_the_games_model_and_falls_back_to_the_look_in_wor
 @pytest.mark.skipif(
     not PORTRAIT, reason="OPENFESL_TEST_BFHEROES_PORTRAIT names no saved portrait from the game"
 )
-@pytest.mark.usefixtures("prompt_actions")
+@pytest.mark.usefixtures("prompt_actions", "scripts")
 async def test_the_stage_draws_and_moves_the_hero_as_the_games_menu_does(
     files: Path, base: str, tmp_path: Path, capsys: pytest.CaptureFixture[str], edge: Browser
 ) -> None:
     assert COPY and PORTRAIT
-    if not built_assets().app:
-        pytest.skip("the web pages' scripts are not built")
     catalogue = tmp_path / "catalogue.zip"
     await cli(capsys, "catalogue", "extract", COPY, "-o", str(catalogue))
     await cli(capsys, "catalogue", "import", str(catalogue))

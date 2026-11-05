@@ -20,7 +20,7 @@ DEALS = "/bfheroes/store/hot-deals"
 COAT, TUNIC, PET, BANDAGES = 1, 3, 5, 6
 
 
-@pytest.mark.usefixtures("prompt_actions")
+@pytest.mark.usefixtures("prompt_actions", "scripts")
 async def test_the_hot_deals_page_lists_each_shelf_and_expires_a_deal_whose_time_runs_out(
     base: str,
     server_url: str,

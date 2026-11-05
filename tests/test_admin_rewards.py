@@ -236,7 +236,7 @@ async def test_admins_change_an_events_days_with_own_text_where_the_games_texts_
     ) in log
 
 
-@pytest.mark.usefixtures("halloween", "prompt_actions")
+@pytest.mark.usefixtures("halloween", "prompt_actions", "scripts")
 async def test_admins_change_what_each_part_gives_and_the_days_of_other_gifts(
     admin_provider: IdentityProvider,
     base: str,

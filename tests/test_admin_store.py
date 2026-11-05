@@ -101,7 +101,7 @@ async def test_enter_in_the_add_panel_adds_the_price_point_without_scripts(
     await context.close()
 
 
-@pytest.mark.usefixtures("prompt_actions")
+@pytest.mark.usefixtures("prompt_actions", "scripts")
 async def test_the_item_page_previews_the_store_tile_as_its_prices_are_typed(
     admin_provider: IdentityProvider,
     base: str,

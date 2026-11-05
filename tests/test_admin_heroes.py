@@ -175,7 +175,7 @@ async def test_moderators_rename_and_disable_heroes_and_admins_choose_the_defaul
             assert line in log
 
 
-@pytest.mark.usefixtures("prompt_actions")
+@pytest.mark.usefixtures("prompt_actions", "scripts")
 async def test_admins_grant_change_and_revoke_items_that_fit_the_hero(
     admin_provider: IdentityProvider,
     base: str,

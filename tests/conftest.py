@@ -25,6 +25,7 @@ from openfesl.server.cli import RelayServer, main, uvicorn_config
 from openfesl.storage.database import migrate
 from openfesl.storage.history import SqlHistoryStore
 from openfesl.storage.store import SqlProductStore
+from openfesl.web.pages import built_assets
 
 
 @pytest.fixture
@@ -110,6 +111,13 @@ def files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     folder = tmp_path / "files"
     monkeypatch.setenv("FILES_PATH", str(folder))
     return folder
+
+
+@pytest.fixture
+def scripts() -> None:
+    """Skip a test of the pages' scripts where no build made them, as in CI's tests."""
+    if not built_assets().app:
+        pytest.skip("the web pages' scripts are not built")
 
 
 @pytest.fixture
