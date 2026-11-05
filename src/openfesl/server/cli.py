@@ -3,6 +3,7 @@ import asyncio
 import logging
 import socket
 from collections.abc import Sequence
+from contextlib import suppress
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -185,7 +186,10 @@ def main(argv: Sequence[str] | None = None) -> None:
     logging.basicConfig(
         level=settings.log_level, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
     )
-    RelayServer(uvicorn_config(args.host, args.port)).run()
+    # Uvicorn stops gracefully on Ctrl+C and then raises it again for its caller to end quietly,
+    # as its own run function does.
+    with suppress(KeyboardInterrupt):
+        RelayServer(uvicorn_config(args.host, args.port)).run()
 
 
 class RelayServer(uvicorn.Server):
