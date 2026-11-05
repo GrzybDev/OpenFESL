@@ -477,8 +477,8 @@ name = "WEST_Custom_Bundle_ClassicNationalEmoteBundle"
 members = [5005, 5010, 5011, 5013]
 price = 5039
 
-# The sets that New and On sale pick from: the archived sets whose items are all in 1.89, of one
-# faction each (Royal first).
+# The sets that New and On sale pick from: the sets that the game names, in archives or the fan
+# catalogue's set pages, whose items are all in 1.89, of one faction each (Royal first).
 # Templar Bundle (18834, HD 20100402)
 [[deals.sets]]
 name = "WEST_Custom_Bundle_TemplarBundle"
@@ -966,3 +966,61 @@ members = [866, 868, 871, 874, 882, 885]
 [[deals.sets]]
 name = "WEST_Custom_Bundle_BlackWidowSet"
 members = [1360, 3198]
+
+[[deals.sets]]
+name = "WEST_Custom_Bundle_RoyalTrackSet"
+description = "WEST_Custom_Bundle_RoyalTrackSet_HotDealsDesc"
+members = [959, 960, 961]
+
+[[deals.sets]]
+name = "WEST_Custom_Bundle_NationalTrackSet"
+description = "WEST_Custom_Bundle_NationalTrackSet_HotDealsDesc"
+members = [958, 962, 963]
+
+[[deals.sets]]
+name = "WEST_Custom_Bundle_RoyalBoxerSet"
+description = "WEST_Custom_Bundle_RoyalBoxerSet_HotDealsDesc"
+members = [948, 949, 950, 951]
+
+[[deals.sets]]
+name = "WEST_Custom_Bundle_NationalBoxerSet"
+description = "WEST_Custom_Bundle_NationalBoxerSet_HotDealsDesc"
+members = [653, 952, 954, 955]
+
+[[deals.sets]]
+name = "WEST_Custom_Bundle_BjornTennisSet"
+description = "WEST_Custom_Bundle_BjornTennisSet_HotDealsDesc"
+members = [956, 967, 968, 969]
+
+[[deals.sets]]
+name = "WEST_Custom_Bundle_JohnTennisSet"
+description = "WEST_Custom_Bundle_JohnTennisSet_HotDealsDesc"
+members = [957, 964, 965, 966]
+
+[[deals.sets]]
+name = "WEST_Custom_Bundle_SpacemansGraySet"
+description = "WEST_Custom_Bundle_SpacemansGraySet_HotDealsDesc"
+members = [1771, 1772, 1773, 1774, 1775, 1776]
+
+[[deals.sets]]
+name = "WEST_Custom_Bundle_SpacemansGreenSet"
+description = "WEST_Custom_Bundle_SpacemansGreenSet_HotDealsDesc"
+members = [1765, 1766, 1767, 1768, 1769, 1770]
+
+[[deals.sets]]
+name = "WEST_Custom_Bundle_RedGalacticSet"
+description = "WEST_Custom_Bundle_RedGalacticSet_HotDealsDesc"
+members = [1777, 1778, 1779, 1780, 1781, 1782]
+
+[[deals.sets]]
+name = "WEST_Custom_Bundle_PurpleGalactic Set"
+description = "WEST_Custom_Bundle_PurpleGalactic Set_HotDealsDesc"
+members = [1783, 1784, 1785, 1786, 1787, 1788]
+
+[[deals.sets]]
+name = "WEST_Custom_Bundle_LegionnairesSet"
+members = [1229, 1230, 1231, 1232, 1233, 1234]
+
+[[deals.sets]]
+name = "WEST_Custom_Bundle_DesertFoxsSet"
+members = [1235, 1236, 1237, 1238, 1239, 1240]
