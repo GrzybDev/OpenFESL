@@ -115,7 +115,7 @@ def files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 @pytest.fixture
 def scripts() -> None:
-    """Skip a test of the pages' scripts where no build made them, as in CI's tests."""
+    """Skip a test of the pages' scripts where no build made them."""
     if not built_assets().app:
         pytest.skip("the web pages' scripts are not built")
 

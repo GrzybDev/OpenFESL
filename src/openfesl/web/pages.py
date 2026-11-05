@@ -114,7 +114,7 @@ def built_assets() -> Assets:
     try:
         modified = MANIFEST.stat().st_mtime_ns
     except FileNotFoundError:
-        # The tests run without a build, so pages then load no scripts or stylesheets.
+        # Tests may run without a build, so pages then load no scripts or stylesheets.
         return Assets()
     return _read_manifest(modified)
 
