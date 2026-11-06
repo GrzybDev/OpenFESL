@@ -306,7 +306,6 @@ def gift_code_routes(views: GiftCodeViews) -> APIRouter:
         admin = sessions.admin(request)
         game, entry = await views.found(code)
         texts, catalogue = await views.words(game, request.state.language)
-        codes = await views.store.batch_codes(entry.id) if entry.batch else []
         redemptions = await views.store.redemptions(entry)
         assert game.site is not None
         return await sessions.render(
@@ -318,8 +317,8 @@ def gift_code_routes(views: GiftCodeViews) -> APIRouter:
             state=entry.state(datetime.now(UTC)),
             contents=texts.gift_words(catalogue, entry.gift),
             made=await views.store.made(entry.code),
-            codes=codes[:SHOWN],
-            more=max(len(codes) - SHOWN, 0),
+            codes=entry.codes[:SHOWN] if entry.batch else (),
+            more=max(entry.count - SHOWN, 0) if entry.batch else 0,
             redemptions=[(done, given(texts, catalogue, done)) for done in redemptions],
             link=f"/{game.id}{game.site.path('redeem')}?{urlencode({'key': entry.code})}",
             manages=admin.role is Role.ADMIN,
@@ -331,10 +330,9 @@ def gift_code_routes(views: GiftCodeViews) -> APIRouter:
         _, entry = await views.found(code)
         if not entry.batch:
             raise HTTPException(404)
-        codes = await views.store.batch_codes(entry.id)
         name = re.sub(r"[^a-z0-9]+", "-", entry.label("en").lower()).strip("-") or "codes"
         return PlainTextResponse(
-            "".join(f"{found}\n" for found in codes),
+            "".join(f"{found}\n" for found in entry.codes),
             headers={"Content-Disposition": f'attachment; filename="{name}.txt"'},
         )
 

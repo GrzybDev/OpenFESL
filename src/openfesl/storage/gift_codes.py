@@ -94,20 +94,6 @@ class SqlGiftCodeStore:
                 )
             return _entry(rows, await _uses(session, [found.id for found in rows]))
 
-    async def batch_codes(self, batch: int) -> list[str]:
-        """Return the codes of a batch, in the order they were made.
-
-        Args:
-            batch: The number of the batch's first key.
-        """
-        async with self._sessions() as session:
-            codes = await session.scalars(
-                select(ProductKeyRow.code)
-                .where(ProductKeyRow.batch == batch)
-                .order_by(ProductKeyRow.id)
-            )
-            return list(codes)
-
     async def made(self, code: str) -> Made | None:
         """Return when a code or batch was made, as the admin's actions record it.
 
@@ -180,11 +166,9 @@ class SqlGiftCodeStore:
                 raise CodeRefused(CodeRefusal.UNKNOWN)
             if key.expires_at is not None and key.expires_at <= datetime.now(UTC):
                 raise CodeRefused(CodeRefusal.EXPIRED)
-            earlier = await _redemptions(
-                session, ProductKeyRow.id == key.id, ProductKeyUseRow.account_id == account
-            )
-            if earlier:
-                raise CodeRefused(CodeRefusal.REDEEMED, earlier[0])
+            this_redemption = (ProductKeyRow.id == key.id, ProductKeyUseRow.account_id == account)
+            if await _redemptions(session, *this_redemption):
+                raise CodeRefused(CodeRefusal.REDEEMED)
             if key.max_uses is not None and (await _uses(session, [key.id])).get(key.id, 0) >= (
                 key.max_uses
             ):
@@ -214,9 +198,7 @@ class SqlGiftCodeStore:
             )
             session.add(used)
             await session.flush()
-            [redeemed] = await _redemptions(
-                session, ProductKeyRow.id == key.id, ProductKeyUseRow.account_id == account
-            )
+            [redeemed] = await _redemptions(session, *this_redemption)
             return redeemed
 
     async def make(
@@ -352,9 +334,8 @@ def _entry(rows: list[ProductKeyRow], uses: dict[int, int]) -> GiftCode:
         first.max_uses,
         first.expires_at,
         first.enabled,
-        first.created_at,
         sum(uses.get(row.id, 0) for row in rows),
-        len(rows),
+        tuple(row.code for row in rows),
         first.batch is not None,
     )
 
@@ -429,7 +410,6 @@ async def _redemptions(session: AsyncSession, *conditions: ColumnElement[bool]) 
                 labels,
                 used.account_id,
                 account,
-                used.persona_id,
                 hero,
                 used.used_at,
                 tuple(items),

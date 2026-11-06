@@ -64,9 +64,8 @@ class GiftCode:
         max_uses: How many accounts may redeem it; None for any number, one each for a batch's.
         expires: When it can no longer be redeemed; never when None.
         enabled: Whether it may be redeemed.
-        created: When it was made.
         uses: How many accounts redeemed it, or a batch's codes.
-        count: How many codes the batch has; 1 for a code of its own.
+        codes: Its codes, in the order they were made; the one code where it is not a whole batch.
         batch: Whether it is a batch.
     """
 
@@ -78,9 +77,8 @@ class GiftCode:
     max_uses: int | None
     expires: datetime | None
     enabled: bool
-    created: datetime
     uses: int
-    count: int = 1
+    codes: tuple[str, ...]
     batch: bool = False
 
     def state(self, now: datetime) -> CodeState:
@@ -103,6 +101,11 @@ class GiftCode:
             language: The language's code.
         """
         return self.labels.get(language) or self.labels.get("en", "")
+
+    @property
+    def count(self) -> int:
+        """How many codes it has; 1 for a code of its own."""
+        return len(self.codes)
 
 
 @dataclass(frozen=True, slots=True)
@@ -208,13 +211,6 @@ class GiftCodeStore(Protocol):
                 most a wallet holds.
         """
 
-    async def batch_codes(self, batch: int) -> list[str]:
-        """Return the codes of a batch, in the order they were made.
-
-        Args:
-            batch: The number of the batch's first key.
-        """
-
     async def made(self, code: str) -> Made | None:
         """Return when a code or batch was made, as the admin's actions record it.
 
@@ -285,8 +281,7 @@ class Redemption:
         labels: What players see the code called, by language.
         account_id: The account.
         account: The account's login name.
-        hero_id: The persona of the hero its items went to; none for none, or a hero since gone.
-        hero: The hero's name; none likewise.
+        hero: The name of the hero its items went to; none for none, or a hero since gone.
         at: When it was redeemed.
         items: The items the hero got.
         funds: The Funds the account got, and its balance after; none for none.
@@ -297,12 +292,11 @@ class Redemption:
     labels: Mapping[str, str]
     account_id: int
     account: str
-    hero_id: int | None
     hero: str | None
     at: datetime
-    items: tuple[GivenItem, ...] = ()
-    funds: tuple[int, int] | None = None
-    keys: tuple[int, int] | None = None
+    items: tuple[GivenItem, ...]
+    funds: tuple[int, int] | None
+    keys: tuple[int, int] | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -333,16 +327,14 @@ class CodeGrant:
 class CodeRefused(Exception):
     """Raised for a code that gave nothing; nothing was given."""
 
-    def __init__(self, refusal: CodeRefusal, earlier: Redemption | None = None) -> None:
+    def __init__(self, refusal: CodeRefusal) -> None:
         """Say why the code gave nothing.
 
         Args:
             refusal: Why.
-            earlier: The account's redemption of it before, for a code it redeemed already.
         """
         super().__init__(refusal.value)
         self.refusal = refusal
-        self.earlier = earlier
 
 
 @dataclass(frozen=True, slots=True)
@@ -451,7 +443,7 @@ class GiftCodes:
         """
         found = await self.look(game, account_id, typed)
         if found.refusal is not None or found.entry is None:
-            raise CodeRefused(found.refusal or CodeRefusal.UNKNOWN, found.earlier)
+            raise CodeRefused(found.refusal or CodeRefusal.UNKNOWN)
         gift = found.entry.gift
         if gift.items and hero_id not in found.fitting:
             raise CodeRefused(CodeRefusal.NO_FIT)
