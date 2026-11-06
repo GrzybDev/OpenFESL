@@ -211,14 +211,6 @@ class InGameStore(BaseModel):
     categories: list[StoreCategory]
     help: dict[str, str] = {}
 
-    def category(self, key: str) -> StoreCategory | None:
-        """Return a category by its name, if the store has one.
-
-        Args:
-            key: The category's name.
-        """
-        return next((category for category in self.categories if category.key == key), None)
-
 
 class StoreRules(BaseModel):
     """How a game's store prices and sells the items of its catalogue, as its data seeds it.
