@@ -8,15 +8,7 @@
          aria-describedby="confirm-text"
          data-confirm
          class="confirm">
-  <div class="confirm-head">
-    <h2 id="confirm-question">{{ question }}</h2>
-    <button type="button"
-            data-close
-            class="confirm-close"
-            aria-label="{{ _('web.admin.close') }}">
-      <span><Icon name="x" :size="14" stroke="currentColor" /></span>
-    </button>
-  </div>
+  <ConfirmHead :question="question" />
   <div class="confirm-body">{{ content }}</div>
   <div class="confirm-buttons">
     <FormButton icon="x" :href="back">{{ _("web.admin.cancel") }}</FormButton>

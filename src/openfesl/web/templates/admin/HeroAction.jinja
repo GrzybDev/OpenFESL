@@ -17,52 +17,50 @@
   "default": "web.admin.hero.make_default",
   "portrait": "web.admin.hero.portrait.remove"
 } %}
-<AdminPage :title="title ~ ' · ' ~ hero.persona.name" current="accounts">
-  <PageHead labelledby="action-title"
-            :title="title"
-            :subtitle="hero.persona.name" />
-  <Panel class="enter-panel confirm-frame">
-    <AdminForm :question="questions[action]" :action="url(base ~ '/' ~ action)" :label="_(labels[action])" :busy="_(labels[action] ~ '.busy')" :back="back" :glyph="'x' if action in ('disable', 'portrait') else 'go'" :note="form.get('note', '')" :error="error" :why="_('web.admin.still_needed', what=_('web.admin.still_needed.name')) if error == 'name' else ''">
-    <p class="confirm-account">
-      <span>{{ hero.persona.name }}</span>
-      <span>
-        {%- if hero.faction and hero.hero_class -%}
-          {{ _("web.admin.hero.line", faction=_("games." ~ game.id ~ ".faction." ~ hero.faction), hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class), level=number(hero.level), id=hero.persona.id) }}
-        {%- else -%}
-          {{ _("web.admin.hero.heading", id=hero.persona.id) }}
-        {%- endif -%}
-      </span>
-    </p>
-    {% if action == "rename" %}
-      <TextField id="rename-name" name="name" :label="_('web.admin.hero.rename.name')" :value="form.get('name', '')" :wrong="form.get('check') not in (none, 'free')" required :minlength="rules.name_length[0]" :maxlength="rules.name_length[1]" :pattern="rules.name" autocomplete="off" spellcheck="false" autofocus :data-needed="_('web.admin.still_needed.name')" :data-name-check="url(base ~ '/rename/check')" :data-checking="_('web.creator.name.checking')" aria-describedby="rename-hint name-status" />
-      <p id="rename-hint"
-         class="field-note">{{ _("web.admin.hero.rename.hint", shortest=rules.name_length[0], longest=rules.name_length[1]) }}</p>
-      <NameStatus :name="form.get('name', '')" :check="form.get('check', '')" />
-      <p id="confirm-text" class="body-text">{{ _("web.admin.hero.rename.text", game=game.name) }}</p>
-    {% elif action == "disable" %}
-      {% set next = page.next_default %}
-      <ul id="confirm-text" class="admin-effects">
-        <li>{{ _("web.admin.hero.disable.hidden") }}</li>
-        <li>{{ _("web.admin.hero.disable.login") }}</li>
-        <li>{{ _("web.admin.hero.disable.slot", used=number(page.roster.heroes|length), total=number(page.roster.slots)) }}</li>
-        {% if page.card.default %}
-          <li>{{ _("web.admin.hero.disable.default", hero=next.persona.name) if next else _("web.admin.hero.disable.no_default", game=game.name) }}</li>
-        {% endif %}
-      </ul>
-      <p class="body-text">{{ _("web.admin.hero.disable.kept") }}</p>
-    {% elif action == "enable" %}
-      <p id="confirm-text" class="body-text">{{ _("web.admin.hero.enable.text") }}</p>
-    {% elif action == "default" %}
-      <p id="confirm-text"
-         class="body-text">{{ _("web.admin.hero.default.text", hero=hero.persona.name, game=game.name) }}</p>
-    {% elif action == "portrait" %}
-      {% if hero.portrait %}
-        <img src="{{ url('/admin/mugshots/' ~ game.id ~ '/' ~ hero.persona.id ~ '/' ~ hero.portrait ~ '.png') }}"
-             alt="{{ _('web.heroes.mugshot.game', name=hero.persona.name) }}"
-             class="admin-hero-mugshot-image">
+<AdminDialog :title="title"
+             :name="hero.persona.name"
+             id="action-title"
+             current="accounts">
+  <AdminForm :question="questions[action]" :action="url(base ~ '/' ~ action)" :label="_(labels[action])" :busy="_(labels[action] ~ '.busy')" :back="back" :glyph="'x' if action in ('disable', 'portrait') else 'go'" :note="form.get('note', '')" :error="error" :why="_('web.admin.still_needed', what=_('web.admin.still_needed.name')) if error == 'name' else ''">
+  <p class="confirm-account">
+    <span>{{ hero.persona.name }}</span>
+    <span>
+      {%- if hero.faction and hero.hero_class -%}
+        {{ _("web.admin.hero.line", faction=_("games." ~ game.id ~ ".faction." ~ hero.faction), hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class), level=number(hero.level), id=hero.persona.id) }}
+      {%- else -%}
+        {{ _("web.admin.hero.heading", id=hero.persona.id) }}
+      {%- endif -%}
+    </span>
+  </p>
+  {% if action == "rename" %}
+    <TextField id="rename-name" name="name" :label="_('web.admin.hero.rename.name')" :value="form.get('name', '')" :wrong="form.get('check') not in (none, 'free')" required :minlength="rules.name_length[0]" :maxlength="rules.name_length[1]" :pattern="rules.name" autocomplete="off" spellcheck="false" autofocus :data-needed="_('web.admin.still_needed.name')" :data-name-check="url(base ~ '/rename/check')" :data-checking="_('web.creator.name.checking')" aria-describedby="rename-hint name-status" />
+    <p id="rename-hint"
+       class="field-note">{{ _("web.admin.hero.rename.hint", shortest=rules.name_length[0], longest=rules.name_length[1]) }}</p>
+    <NameStatus :name="form.get('name', '')" :check="form.get('check', '')" />
+    <p id="confirm-text" class="body-text">{{ _("web.admin.hero.rename.text", game=game.name) }}</p>
+  {% elif action == "disable" %}
+    {% set next = page.next_default %}
+    <ul id="confirm-text" class="admin-effects">
+      <li>{{ _("web.admin.hero.disable.hidden") }}</li>
+      <li>{{ _("web.admin.hero.disable.login") }}</li>
+      <li>{{ _("web.admin.hero.disable.slot", used=number(page.roster.heroes|length), total=number(page.roster.slots)) }}</li>
+      {% if page.card.default %}
+        <li>{{ _("web.admin.hero.disable.default", hero=next.persona.name) if next else _("web.admin.hero.disable.no_default", game=game.name) }}</li>
       {% endif %}
-      <p id="confirm-text" class="body-text">{{ _("web.admin.hero.portrait.confirm.text", game=game.name) }}</p>
+    </ul>
+    <p class="body-text">{{ _("web.admin.hero.disable.kept") }}</p>
+  {% elif action == "enable" %}
+    <p id="confirm-text" class="body-text">{{ _("web.admin.hero.enable.text") }}</p>
+  {% elif action == "default" %}
+    <p id="confirm-text"
+       class="body-text">{{ _("web.admin.hero.default.text", hero=hero.persona.name, game=game.name) }}</p>
+  {% elif action == "portrait" %}
+    {% if hero.portrait %}
+      <img src="{{ url('/admin/mugshots/' ~ game.id ~ '/' ~ hero.persona.id ~ '/' ~ hero.portrait ~ '.png') }}"
+           alt="{{ _('web.heroes.mugshot.game', name=hero.persona.name) }}"
+           class="admin-hero-mugshot-image">
     {% endif %}
-    </AdminForm>
-  </Panel>
-</AdminPage>
+    <p id="confirm-text" class="body-text">{{ _("web.admin.hero.portrait.confirm.text", game=game.name) }}</p>
+  {% endif %}
+  </AdminForm>
+</AdminDialog>

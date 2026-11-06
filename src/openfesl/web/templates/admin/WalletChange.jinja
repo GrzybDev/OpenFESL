@@ -20,21 +20,18 @@
 {% else %}
   {% set why = "" %}
 {% endif %}
-<AdminPage :title="title ~ ' · ' ~ owner" current="accounts">
-  <PageHead labelledby="wallet-title" :title="title" :subtitle="owner" />
-  <Panel class="enter-panel confirm-frame">
-    <AdminForm :question="_('web.admin.wallets.dialog', currency=currency)" :action="url('/admin/accounts/' ~ account.id ~ '/wallets/' ~ game ~ '/' ~ line.key)" :label="_('web.admin.wallets.dialog.submit')" :busy="_('web.admin.count.busy')" :back="back" :note="form.get('note', '')" :error="error" :why="why">
-    <p class="confirm-account">
-      <span>{{ owner }}</span>
-      <span>{{ code }} · {{ _("web.admin.hero.heading", id=line.hero.persona.id) if line.hero else _("web.admin.account.number", number=account.id) }}</span>
-    </p>
-    {% if not line.head.opened and line.wallet.allowance %}
-      <p class="bar-text body-text">{{ _("web.admin.wallets.closed.text", amount=number(line.wallet.allowance), currency=currency) }}</p>
-    {% endif %}
-    <CountFields :now="line.balance" :most="most" :label="_('web.admin.wallets.dialog.amount', currency=currency)" :fewer="fewer" :more="_('web.admin.wallets.refused.max', max=number(most), after='%(after)s')" :chosen="form.get('direction', 'grant')" :amount="form.get('amount', '')" />
-    <p id="confirm-text" class="body-text">
-      {{ _("web.admin.wallets.dialog.points") if line.hero else _("web.admin.wallets.dialog.text") }}
-    </p>
-    </AdminForm>
-  </Panel>
-</AdminPage>
+<AdminDialog :title="title" :name="owner" id="wallet-title" current="accounts">
+  <AdminForm :question="_('web.admin.wallets.dialog', currency=currency)" :action="url('/admin/accounts/' ~ account.id ~ '/wallets/' ~ game ~ '/' ~ line.key)" :label="_('web.admin.wallets.dialog.submit')" :busy="_('web.admin.count.busy')" :back="back" :note="form.get('note', '')" :error="error" :why="why">
+  <p class="confirm-account">
+    <span>{{ owner }}</span>
+    <span>{{ code }} · {{ _("web.admin.hero.heading", id=line.hero.persona.id) if line.hero else _("web.admin.account.number", number=account.id) }}</span>
+  </p>
+  {% if not line.head.opened and line.wallet.allowance %}
+    <p class="bar-text body-text">{{ _("web.admin.wallets.closed.text", amount=number(line.wallet.allowance), currency=currency) }}</p>
+  {% endif %}
+  <CountFields :now="line.balance" :most="most" :label="_('web.admin.wallets.dialog.amount', currency=currency)" :fewer="fewer" :more="_('web.admin.wallets.refused.max', max=number(most), after='%(after)s')" :chosen="form.get('direction', 'grant')" :amount="form.get('amount', '')" />
+  <p id="confirm-text" class="body-text">
+    {{ _("web.admin.wallets.dialog.points") if line.hero else _("web.admin.wallets.dialog.text") }}
+  </p>
+  </AdminForm>
+</AdminDialog>

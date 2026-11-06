@@ -8,15 +8,7 @@
          aria-describedby="confirm-text"
          data-confirm
          class="confirm">
-  <div class="confirm-head">
-    <h2 id="confirm-question">{{ question }}</h2>
-    <button type="button"
-            data-close
-            class="confirm-close"
-            aria-label="{{ _('web.admin.close') }}">
-      <span><Icon name="x" :size="14" stroke="currentColor" /></span>
-    </button>
-  </div>
+  <ConfirmHead :question="question" />
   {% if search %}
     <form id="admin-search" method="get" action="{{ search }}">
     </form>
@@ -43,12 +35,7 @@
              class="field-input{% if error == 'note' %} field-invalid{% endif %}">
       <p id="admin-note-hint" class="field-note">{{ _("web.admin.note.hint") }}</p>
     </div>
-    <p aria-live="polite" class="admin-form-why">
-      <Badge name="warn" :size="14" />
-      <span data-why>
-        {%- if error == "note" %}{{ _("web.admin.still_needed", what=_("web.admin.still_needed.note")) }}{% else %}{{ why }}{% endif -%}
-      </span>
-    </p>
+    <FormWhy>{%- if error == "note" %}{{ _("web.admin.still_needed", what=_("web.admin.still_needed.note")) }}{% else %}{{ why }}{% endif -%}</FormWhy>
     <div class="confirm-buttons">
       <FormButton icon="x" :href="back">{{ _("web.admin.cancel") }}</FormButton>
       <SmallAction :label="label" :busy="busy" :glyph="glyph" />

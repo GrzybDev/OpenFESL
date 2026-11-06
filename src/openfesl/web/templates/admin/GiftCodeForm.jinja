@@ -202,10 +202,7 @@
            data-live="{{ path }}"
            class="offer-line code-summary">{{ found.summary }}</p>
         <div class="reward-save code-save">
-          <p aria-live="polite" class="admin-form-why">
-            <Badge name="warn" :size="14" />
-            <span data-why>{{ _("web.admin.keys.refused") if refused else "" }}</span>
-          </p>
+          <FormWhy>{{ _("web.admin.keys.refused") if refused else "" }}</FormWhy>
           <div data-live="{{ path }}" class="code-buttons">
             <ActionButton :label="_('web.admin.keys.save') if entry else (_n('web.admin.keys.create.batch', draft.count|int) if draft.kind == 'batch' else _('web.admin.keys.create.single'))" :busy="_('web.admin.store.save.busy')" />
             <FormButton icon="x" :href="back">{{ _("web.admin.cancel") }}</FormButton>

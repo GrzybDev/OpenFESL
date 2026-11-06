@@ -181,10 +181,7 @@
         </div>
         {% if manages %}
           <div class="reward-save">
-            <p aria-live="polite" class="admin-form-why">
-              <Badge name="warn" :size="14" />
-              <span data-why>{{ _("web.admin.deals.offer.refused") if refused else "" }}</span>
-            </p>
+            <FormWhy>{{ _("web.admin.deals.offer.refused") if refused else "" }}</FormWhy>
             <ActionButton :label="_('web.admin.deals.offer.save')" :busy="_('web.admin.store.save.busy')" />
           </div>
         {% endif %}

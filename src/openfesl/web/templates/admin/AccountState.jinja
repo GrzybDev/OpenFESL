@@ -6,55 +6,45 @@
 {% set title = _("web.admin.account") %}
 {% set chosen = form.get("state") or account.state %}
 {% set glyphs = {"active": "tick", "disabled": "lock", "banned": "warn", "deactivated": "x"} %}
-<AdminPage :title="title ~ ' · ' ~ account.nuid" current="accounts">
-  <PageHead labelledby="state-title" :title="title" :subtitle="account.nuid" />
-  <Panel class="enter-panel confirm-frame">
-    <section aria-labelledby="confirm-question"
-             aria-describedby="confirm-text"
-             data-confirm
-             class="confirm">
-      <div class="confirm-head">
-        <h2 id="confirm-question">{{ _("web.admin.account.state.change") }}</h2>
-        <button type="button"
-                data-close
-                class="confirm-close"
-                aria-label="{{ _('web.admin.close') }}">
-          <span><Icon name="x" :size="14" stroke="currentColor" /></span>
-        </button>
+<AdminDialog :title="title"
+             :name="account.nuid"
+             id="state-title"
+             current="accounts">
+  <section aria-labelledby="confirm-question"
+           aria-describedby="confirm-text"
+           data-confirm
+           class="confirm">
+    <ConfirmHead :question="_('web.admin.account.state.change')" />
+    <form method="post"
+          action="{{ url('/admin/accounts/' ~ account.id ~ '/state') }}">
+      <CsrfField />
+      <div class="confirm-body">
+        <ConfirmWho :name="account.nuid" :about="_('web.admin.account.number', number=account.id)" />
+        {% if form.get("error") == "state" %}
+          <FieldError role="alert" class="confirm-error">{{ _("web.admin.account.state.missing") }}</FieldError>
+        {% endif %}
+        <fieldset class="choice-tiles state-tiles">
+          <legend class="sr-only">{{ _("web.admin.state") }}</legend>
+          {% for state in states %}
+            <ChoiceTile name="state" :value="state.value" :title="_('web.admin.account.state.' ~ state)" :glyph="glyphs[state.value]" :checked="state == chosen" :focus="state == chosen">
+            <span class="choice-text">{{ _("web.admin.account.state." ~ state ~ ".text") }}</span>
+            </ChoiceTile>
+          {% endfor %}
+        </fieldset>
+        <label for="state-until"
+               class="field-label field-label-joined state-until">{{ _("web.admin.account.state.until") }}</label>
+        <TextField id="state-until" name="until" type="datetime-local" :value="form.get('until') or (account.state_until.strftime('%Y-%m-%dT%H:%M') if account.state_until else '')" :wrong="form.get('error') == 'until'" aria-describedby="state-until-note" />
+        {% if form.get("error") == "until" %}
+          <FieldError id="state-until-note" role="alert">{{ _("web.admin.account.state.until.past") }}</FieldError>
+        {% else %}
+          <p id="state-until-note" class="field-note">{{ _("web.admin.account.state.until.note") }}</p>
+        {% endif %}
+        <p id="confirm-text" class="body-text">{{ _("web.admin.account.state.text") }}</p>
       </div>
-      <form method="post"
-            action="{{ url('/admin/accounts/' ~ account.id ~ '/state') }}">
-        <CsrfField />
-        <div class="confirm-body">
-          <p class="confirm-account">
-            <span>{{ account.nuid }}</span><span>{{ _("web.admin.account.number", number=account.id) }}</span>
-          </p>
-          {% if form.get("error") == "state" %}
-            <FieldError role="alert" class="confirm-error">{{ _("web.admin.account.state.missing") }}</FieldError>
-          {% endif %}
-          <fieldset class="choice-tiles state-tiles">
-            <legend class="sr-only">{{ _("web.admin.state") }}</legend>
-            {% for state in states %}
-              <ChoiceTile name="state" :value="state.value" :title="_('web.admin.account.state.' ~ state)" :glyph="glyphs[state.value]" :checked="state == chosen" :focus="state == chosen">
-              <span class="choice-text">{{ _("web.admin.account.state." ~ state ~ ".text") }}</span>
-              </ChoiceTile>
-            {% endfor %}
-          </fieldset>
-          <label for="state-until"
-                 class="field-label field-label-joined state-until">{{ _("web.admin.account.state.until") }}</label>
-          <TextField id="state-until" name="until" type="datetime-local" :value="form.get('until') or (account.state_until.strftime('%Y-%m-%dT%H:%M') if account.state_until else '')" :wrong="form.get('error') == 'until'" aria-describedby="state-until-note" />
-          {% if form.get("error") == "until" %}
-            <FieldError id="state-until-note" role="alert">{{ _("web.admin.account.state.until.past") }}</FieldError>
-          {% else %}
-            <p id="state-until-note" class="field-note">{{ _("web.admin.account.state.until.note") }}</p>
-          {% endif %}
-          <p id="confirm-text" class="body-text">{{ _("web.admin.account.state.text") }}</p>
-        </div>
-        <div class="confirm-buttons">
-          <FormButton icon="x" :href="back">{{ _("web.admin.cancel") }}</FormButton>
-          <SmallAction :label="_('web.admin.account.state.save')" :busy="_('web.admin.account.state.saving')" />
-        </div>
-      </form>
-    </section>
-  </Panel>
-</AdminPage>
+      <div class="confirm-buttons">
+        <FormButton icon="x" :href="back">{{ _("web.admin.cancel") }}</FormButton>
+        <SmallAction :label="_('web.admin.account.state.save')" :busy="_('web.admin.account.state.saving')" />
+      </div>
+    </form>
+  </section>
+</AdminDialog>

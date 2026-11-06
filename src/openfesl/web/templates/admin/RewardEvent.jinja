@@ -312,10 +312,7 @@
         </section>
         {% if manages %}
           <div class="reward-save">
-            <p aria-live="polite" class="admin-form-why">
-              <Badge name="warn" :size="14" />
-              <span data-why>{{ editor.blocked or editor.refused.get('text-en', '') }}</span>
-            </p>
+            <FormWhy>{{ editor.blocked or editor.refused.get('text-en', '') }}</FormWhy>
             <ActionButton :label="_('web.admin.rewards.event.save')" :busy="_('web.admin.store.save.busy')" />
           </div>
         {% endif %}

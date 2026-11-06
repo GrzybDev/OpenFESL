@@ -19,22 +19,19 @@
 {% else %}
   {% set why = "" %}
 {% endif %}
-<AdminPage :title="title ~ ' · ' ~ holder" current="accounts">
-  <PageHead labelledby="count-title" :title="title" :subtitle="holder" />
-  <Panel class="enter-panel confirm-frame">
-    <AdminForm :question="_('web.admin.count.' ~ shown.kind ~ '.title')" :action="url(path)" :label="_('web.admin.count.' ~ shown.kind ~ '.submit')" :busy="_('web.admin.count.busy')" :back="back" glyph="go" :note="form.get('note', '')" :error="error" :why="why">
-    <p class="confirm-account">
-      <span>{{ holder }}</span>
-      <span>
-        {%- if card -%}
-          {{ _("web.admin.hero.heading", id=card.hero.persona.id) }}
-        {%- else -%}
-          {{ _("web.admin.account.number", number=account.id) }}{% if account.display_name %} · {{ account.display_name }}{% endif %}
-        {%- endif -%}
-      </span>
-    </p>
-    <CountFields :now="shown.now" :most="2147483647" :label="_('web.admin.count.' ~ shown.kind ~ '.amount')" :fewer="fewer" :more="_('web.admin.count.more')" :take="shown.kind != 'slots'" :chosen="form.get('direction', 'grant')" :amount="form.get('amount', '')" />
-    <p id="confirm-text" class="body-text">{{ _("web.admin.count." ~ shown.kind ~ ".text") }}</p>
-    </AdminForm>
-  </Panel>
-</AdminPage>
+<AdminDialog :title="title" :name="holder" id="count-title" current="accounts">
+  <AdminForm :question="_('web.admin.count.' ~ shown.kind ~ '.title')" :action="url(path)" :label="_('web.admin.count.' ~ shown.kind ~ '.submit')" :busy="_('web.admin.count.busy')" :back="back" glyph="go" :note="form.get('note', '')" :error="error" :why="why">
+  <p class="confirm-account">
+    <span>{{ holder }}</span>
+    <span>
+      {%- if card -%}
+        {{ _("web.admin.hero.heading", id=card.hero.persona.id) }}
+      {%- else -%}
+        {{ _("web.admin.account.number", number=account.id) }}{% if account.display_name %} · {{ account.display_name }}{% endif %}
+      {%- endif -%}
+    </span>
+  </p>
+  <CountFields :now="shown.now" :most="2147483647" :label="_('web.admin.count.' ~ shown.kind ~ '.amount')" :fewer="fewer" :more="_('web.admin.count.more')" :take="shown.kind != 'slots'" :chosen="form.get('direction', 'grant')" :amount="form.get('amount', '')" />
+  <p id="confirm-text" class="body-text">{{ _("web.admin.count." ~ shown.kind ~ ".text") }}</p>
+  </AdminForm>
+</AdminDialog>

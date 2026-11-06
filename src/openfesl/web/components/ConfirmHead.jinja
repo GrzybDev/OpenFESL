@@ -1,0 +1,11 @@
+{#def question: str #}
+{# The black head of a panel that asks, with the button that closes it where it opens as a dialog. #}
+<div class="confirm-head">
+  <h2 id="confirm-question">{{ question }}</h2>
+  <button type="button"
+          data-close
+          class="confirm-close"
+          aria-label="{{ _('web.admin.close') }}">
+    <span><Icon name="x" :size="14" stroke="currentColor" /></span>
+  </button>
+</div>

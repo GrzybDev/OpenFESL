@@ -14,10 +14,7 @@
     <input type="hidden"
            name="enabled"
            value="{{ '1' if turn == 'enable' else '0' }}">
-    <p class="confirm-account">
-      <span>{{ entry.label(language) }}</span>
-      <span>{{ _("web.admin.keys.batch_row", count=number(entry.count)) if entry.batch else entry.code }}</span>
-    </p>
+    <ConfirmWho :name="entry.label(language)" :about="_('web.admin.keys.batch_row', count=number(entry.count)) if entry.batch else entry.code" />
     <p id="confirm-text" class="body-text">{{ _("web.admin.keys." ~ turn ~ ".text") }}</p>
     </AdminForm>
   </Panel>
