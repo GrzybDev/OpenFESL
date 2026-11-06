@@ -34,320 +34,317 @@
     <TextField :id="'event-' ~ name" :name="name" :label="label" :type="'date' if kind == 'date' else 'number'" :value="value" :wrong="name in editor.refused" :aria-describedby="'event-line' if name in editor.refused else none" />
   </div>
 {% endmacro %}
-<AdminPage :title="title ~ ' · ' ~ _('web.admin.rewards.title')"
-           current="rewards">
-  <RewardsHead :game="game" current="rules" :subtitle="_('web.admin.rewards.subtitle', game=game.name)" />
-  <Panel class="enter-panel">
-    <PanelBack :href="url('/admin/rewards/' ~ game.id) ~ '#event-' ~ row.key" :label="_('web.admin.rewards.back')" :name="_('web.admin.rewards.title')" />
-    {% if not manages %}
-      <RoleNote glyph="lock" lines>{{ _("web.admin.refused.role.rewards") }}</RoleNote>
-    {% endif %}
-    <div class="list-layout admin-layout">
-      <form method="post"
-            action="{{ path }}"
-            {% if manages %} data-admin-form data-still="{{ _('web.admin.rewards.event.waits') }}"{% endif %}
-            class="list-main reward-event">
-        <CsrfField />
-        {# The form's default button, so that Enter answers the fields without saving them. #}
-        <button type="submit" name="find" value="1" hidden></button>
-        <section aria-labelledby="event-title" class="account-part">
-          <h2 id="event-title" class="bar bar-wrap reward-event-bar">
-            <span class="reward-event-title"><span class="rewards-number">E{{ row.number }}</span>{{ title }}</span>
-            <span class="bar-extra">{{ row.said }}</span>
-          </h2>
-          <p class="reward-event-lead body-text">{{ _(event.summary) }}</p>
-          <fieldset data-refresh
-                    {% if not manages %} disabled{% endif %}
-                    class="reward-dating">
-            <legend class="field-label reward-legend">{{ _("web.admin.rewards.event.rule") }}</legend>
-            <div class="choice-tiles reward-rules">
-              {% for rule, glyph in (("fixed", "time"), ("easter", "star"), ("count", "bars")) %}
-                <ChoiceTile name="rule" :value="rule" :title="_('web.admin.rewards.rule.' ~ rule ~ '.title')" :glyph="glyph" :checked="draft.rule == rule">
-                <span class="choice-text">{{ _("web.admin.rewards.rule." ~ rule ~ ".text") }}</span>
-                </ChoiceTile>
-              {% endfor %}
-            </div>
-            <div class="reward-dates">
-              {{ day_field("first", _("web.admin.rewards.event.first"), draft.first) }}
-              {{ day_field("last", _("web.admin.rewards.event.last"), draft.last) }}
-              {{ day_field("count", _("web.admin.rewards.event.days"), draft.count, "count") }}
-              {{ day_field("before", _("web.admin.rewards.event.first"), draft.before, "easter") }}
-              {{ day_field("after", _("web.admin.rewards.event.last"), draft.after, "easter") }}
-              <div class="reward-date">
-                <p class="field-label field-label-joined">{{ _("web.admin.rewards.event.starts") }}</p>
-                <p class="reward-starts">
-                  <a href="{{ url('/admin/settings') }}#zone-{{ game.id }}"
-                     class="bar-link">{{ _("web.admin.rewards.event.starts.value", time=found.starts) }}</a>
-                </p>
-              </div>
-            </div>
-            <p class="field-note reward-when-easter">{{ _("web.admin.rewards.event.easter.note") }}</p>
-            <p id="event-line"
-               aria-live="polite"
-               data-live="{{ path }}"
-               {% if editor.blocked %} data-blocked="{{ editor.blocked }}"{% endif %}
-               class="reward-line">
-              {%- if editor.blocked %}<Badge name="warn" :size="14" />{% endif %}<span>{{ editor.line }}</span>
-            </p>
-          </fieldset>
-        </section>
-        <section aria-labelledby="event-contents" class="account-part">
-          <Bar id="event-contents" :extra="_('web.admin.rewards.event.contents.daily') if event.daily else ''">{{ _("web.admin.rewards.event.contents") }}</Bar>
-          <fieldset data-refresh
-                    {% if not manages %} disabled{% endif %}
-                    class="reward-parts">
-            <legend class="sr-only">{{ _("web.admin.rewards.event.contents") }}</legend>
-            <input type="hidden" name="parts" value="1">
-            {% for view in found.parts %}
-              {% set draft_part = view.draft %}
-              {% set refusal = editor.refused.get("part-" ~ view.key) if refusing else "" %}
-              <div id="part-{{ view.key }}"
-                   class="reward-part{% if not draft_part.on %} reward-part-off{% endif %}">
-                <p class="reward-part-head">
-                  <span>{{ who(view.part) }}</span>
-                  <label class="prices-sold">
-                    <CheckBox :name="'on-' ~ view.key" :checked="draft_part.on" />
-                    <span class="sr-only">{{ who(view.part) }}: </span>{{ _("web.admin.rewards.on") }}
-                  </label>
-                </p>
-                {% if view.items %}
-                  <ul class="reward-items">
-                    {% for written, label, item in view.items %}
-                      <li class="reward-item">
-                        <input type="hidden" name="item-{{ view.key }}" value="{{ written }}">
-                        <AdminItemIcon :game="game" :item="item" :shown="icons" />
-                        <span class="reward-item-name">{{ label }}</span>
-                        <label class="reward-drop">
-                          <input type="checkbox"
-                                 name="drop-{{ view.key }}"
-                                 value="{{ loop.index0 }}"
-                                 class="reward-drop-input">
-                          <span aria-hidden="true"
-                                class="reward-drop-mark"><Icon name="x" :size="12" stroke="currentColor" /></span>
-                          <span class="sr-only">{{ _("web.admin.rewards.item.remove", item=label) }}</span>
-                        </label>
-                      </li>
-                    {% endfor %}
-                  </ul>
-                {% endif %}
-                <div class="reward-amounts">
-                  {% if view.boxes %}
-                    <label for="box-{{ view.key }}" class="reward-amount reward-amount-wide">
-                      <span class="reward-amount-label">{{ _("web.admin.rewards.box") }}</span>
-                      <select id="box-{{ view.key }}"
-                              name="box-{{ view.key }}"
-                              class="field-input reward-amount-input">
-                        <option value="">{{ _("web.admin.rewards.box.none") }}</option>
-                        {% for key, name in view.boxes %}
-                          <option value="{{ key }}"
-                                  {% if key == draft_part.box %} selected{% endif %}>{{ name }}</option>
-                        {% endfor %}
-                      </select>
-                    </label>
-                    {% if view.rolled %}<div class="reward-amount-wide">{{ gift(view.rolled) }}</div>{% endif %}
-                  {% endif %}
-                  {% for amount in ("funds", "keys") if amount == "funds" or game.chests %}
-                    {% set name = amount ~ "-" ~ view.key %}
-                    {% set wrong = refusing and name in editor.refused %}
-                    <label for="{{ name }}" class="reward-amount">
-                      <span class="reward-amount-label">{{ _("games." ~ game.id ~ ".currency." ~ found.words.rules.currency) if amount == "funds" else _("web.admin.rewards.keys.count") }}</span>
-                      <TextField :id="name" :name="name" :value="draft_part.funds if amount == 'funds' else draft_part.keys" :wrong="wrong" class="reward-amount-input" inputmode="numeric" autocomplete="off" :aria-describedby="name ~ '-note' if wrong else none" />
-                    </label>
-                    {% if wrong %}
-                      <FieldError :id="name ~ '-note'">{{ editor.refused[name] }}</FieldError>
-                    {% endif %}
-                  {% endfor %}
-                </div>
-                {% if refusal %}
-                  <FieldError :id="'part-' ~ view.key ~ '-note'">{{ refusal }}</FieldError>
-                {% endif %}
-                {% if view.goal %}
-                  {% set goal_name = "goal-" ~ view.key %}
-                  {% set wrong_goal = refusing and goal_name in editor.refused %}
-                  <dl class="facts reward-goal">
-                    {% for label, value in view.goal %}
-                      <Fact :label="_('web.admin.rewards.goal.' ~ label)"
-                            :plain="label == 'stat'">
-                        {% if label == "goal" %}
-                          <TextField :name="goal_name" :value="draft_part.goal" :wrong="wrong_goal" class="reward-goal-input" inputmode="numeric" autocomplete="off" :aria-label="_('web.admin.rewards.goal.goal') ~ ' · ' ~ who(view.part)" :aria-describedby="goal_name ~ '-note' if wrong_goal else none" />
-                        {% else %}
-                          {{ value }}
-                        {% endif %}
-                      </Fact>
-                    {% endfor %}
-                  </dl>
-                  {% if wrong_goal %}
-                    <FieldError :id="goal_name ~ '-note'">{{ editor.refused[goal_name] }}</FieldError>
-                  {% endif %}
-                {% endif %}
-              </div>
+<RewardsPage :game="game"
+             :title="title ~ ' · ' ~ _('web.admin.rewards.title')"
+             current="rules">
+  <PanelBack :href="url('/admin/rewards/' ~ game.id) ~ '#event-' ~ row.key" :label="_('web.admin.rewards.back')" :name="_('web.admin.rewards.title')" />
+  {% if not manages %}
+    <RoleNote glyph="lock" lines>{{ _("web.admin.refused.role.rewards") }}</RoleNote>
+  {% endif %}
+  <div class="list-layout admin-layout">
+    <form method="post"
+          action="{{ path }}"
+          {% if manages %} data-admin-form data-still="{{ _('web.admin.rewards.event.waits') }}"{% endif %}
+          class="list-main reward-event">
+      <CsrfField />
+      {# The form's default button, so that Enter answers the fields without saving them. #}
+      <button type="submit" name="find" value="1" hidden></button>
+      <section aria-labelledby="event-title" class="account-part">
+        <h2 id="event-title" class="bar bar-wrap reward-event-bar">
+          <span class="reward-event-title"><span class="rewards-number">E{{ row.number }}</span>{{ title }}</span>
+          <span class="bar-extra">{{ row.said }}</span>
+        </h2>
+        <p class="reward-event-lead body-text">{{ _(event.summary) }}</p>
+        <fieldset data-refresh
+                  {% if not manages %} disabled{% endif %}
+                  class="reward-dating">
+          <legend class="field-label reward-legend">{{ _("web.admin.rewards.event.rule") }}</legend>
+          <div class="choice-tiles reward-rules">
+            {% for rule, glyph in (("fixed", "time"), ("easter", "star"), ("count", "bars")) %}
+              <ChoiceTile name="rule" :value="rule" :title="_('web.admin.rewards.rule.' ~ rule ~ '.title')" :glyph="glyph" :checked="draft.rule == rule">
+              <span class="choice-text">{{ _("web.admin.rewards.rule." ~ rule ~ ".text") }}</span>
+              </ChoiceTile>
             {% endfor %}
-          </fieldset>
-        </section>
-        {% if found.days %}
-          <section aria-labelledby="event-days" class="account-part">
-            <Bar id="event-days" :extra="_('web.admin.rewards.event.fixed.note')">{{ _("web.admin.rewards.event.fixed") }}</Bar>
-            <div class="table-scroll table-scroll-flush">
-              <table data-refresh class="rewards-packs reward-days">
-                <thead>
-                  <tr>
-                    <td></td>
-                    {% for view in found.parts %}
-                      <th scope="col">{{ who(view.part) }}</th>
-                    {% endfor %}
-                    <th scope="col"><span class="sr-only">{{ _("web.admin.rewards.event.day.drop") }}</span></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for day, cells in found.days %}
-                    <tr>
-                      <th scope="row">{{ _("web.admin.rewards.event.day", day=day) }}</th>
-                      {% for key, items, box, lines in cells %}
-                        <td>
-                          {% for item in items %}<input type="hidden" name="day-{{ key }}-{{ day }}" value="{{ item }}">{% endfor %}
-                          {% if items or box %}<input type="hidden" name="day-box-{{ key }}-{{ day }}" value="{{ box }}">{% endif %}
-                          {{ gift(lines) }}
-                        </td>
-                      {% endfor %}
-                      <td class="reward-day-drop">
-                        <label class="reward-drop">
-                          <input type="checkbox"
-                                 name="drop-day"
-                                 value="{{ day }}"
-                                 {% if not manages %} disabled{% endif %}
-                                 class="reward-drop-input">
-                          <span aria-hidden="true"
-                                class="reward-drop-mark"><Icon name="x" :size="12" stroke="currentColor" /></span>
-                          <span class="sr-only">{{ _("web.admin.rewards.event.day.remove", day=day) }}</span>
-                        </label>
-                      </td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
+          </div>
+          <div class="reward-dates">
+            {{ day_field("first", _("web.admin.rewards.event.first"), draft.first) }}
+            {{ day_field("last", _("web.admin.rewards.event.last"), draft.last) }}
+            {{ day_field("count", _("web.admin.rewards.event.days"), draft.count, "count") }}
+            {{ day_field("before", _("web.admin.rewards.event.first"), draft.before, "easter") }}
+            {{ day_field("after", _("web.admin.rewards.event.last"), draft.after, "easter") }}
+            <div class="reward-date">
+              <p class="field-label field-label-joined">{{ _("web.admin.rewards.event.starts") }}</p>
+              <p class="reward-starts">
+                <a href="{{ url('/admin/settings') }}#zone-{{ game.id }}"
+                   class="bar-link">{{ _("web.admin.rewards.event.starts.value", time=found.starts) }}</a>
+              </p>
             </div>
-          </section>
-        {% endif %}
-        {% if manages %}
-          <section aria-labelledby="event-add" class="account-part">
-            <Bar id="event-add">{{ _("web.admin.rewards.add") }}</Bar>
-            <ItemSearch id="event-q" :label="_('web.admin.store.search')" :value="draft.query" refresh />
-            <div data-live="{{ path }}" class="reward-candidates">
-              {% if editor.contents.added %}<p role="status"
-   class="bar-text body-text">{{ editor.contents.added }}</p>{% endif %}
-              {% if "add" in editor.refused %}
-                <Refusal>{{ editor.refused.add }}</Refusal>
+          </div>
+          <p class="field-note reward-when-easter">{{ _("web.admin.rewards.event.easter.note") }}</p>
+          <p id="event-line"
+             aria-live="polite"
+             data-live="{{ path }}"
+             {% if editor.blocked %} data-blocked="{{ editor.blocked }}"{% endif %}
+             class="reward-line">
+            {%- if editor.blocked %}<Badge name="warn" :size="14" />{% endif %}<span>{{ editor.line }}</span>
+          </p>
+        </fieldset>
+      </section>
+      <section aria-labelledby="event-contents" class="account-part">
+        <Bar id="event-contents" :extra="_('web.admin.rewards.event.contents.daily') if event.daily else ''">{{ _("web.admin.rewards.event.contents") }}</Bar>
+        <fieldset data-refresh
+                  {% if not manages %} disabled{% endif %}
+                  class="reward-parts">
+          <legend class="sr-only">{{ _("web.admin.rewards.event.contents") }}</legend>
+          <input type="hidden" name="parts" value="1">
+          {% for view in found.parts %}
+            {% set draft_part = view.draft %}
+            {% set refusal = editor.refused.get("part-" ~ view.key) if refusing else "" %}
+            <div id="part-{{ view.key }}"
+                 class="reward-part{% if not draft_part.on %} reward-part-off{% endif %}">
+              <p class="reward-part-head">
+                <span>{{ who(view.part) }}</span>
+                <label class="prices-sold">
+                  <CheckBox :name="'on-' ~ view.key" :checked="draft_part.on" />
+                  <span class="sr-only">{{ who(view.part) }}: </span>{{ _("web.admin.rewards.on") }}
+                </label>
+              </p>
+              {% if view.items %}
+                <ul class="reward-items">
+                  {% for written, label, item in view.items %}
+                    <li class="reward-item">
+                      <input type="hidden" name="item-{{ view.key }}" value="{{ written }}">
+                      <AdminItemIcon :game="game" :item="item" :shown="icons" />
+                      <span class="reward-item-name">{{ label }}</span>
+                      <label class="reward-drop">
+                        <input type="checkbox"
+                               name="drop-{{ view.key }}"
+                               value="{{ loop.index0 }}"
+                               class="reward-drop-input">
+                        <span aria-hidden="true"
+                              class="reward-drop-mark"><Icon name="x" :size="12" stroke="currentColor" /></span>
+                        <span class="sr-only">{{ _("web.admin.rewards.item.remove", item=label) }}</span>
+                      </label>
+                    </li>
+                  {% endfor %}
+                </ul>
               {% endif %}
-              {% for candidate in found.candidates %}
-                {% set id = candidate.item.id %}
-                <div class="box-candidate reward-candidate">
-                  <p class="box-candidate-name">
-                    <AdminItemIcon :game="game" :item="candidate.item" :shown="icons" />
-                    <span class="cell-stack"><span class="admin-hero-strong">{{ candidate.name }}</span><span class="cell-ago">{{ _("web.admin.items.number", id=id) }}</span></span>
-                  </p>
-                  <div class="prices-picks">
-                    {% for view in found.parts if view.part.faction %}
-                      <FilterPick :name="'to-' ~ id" :value="view.key" :checked="view.key == (candidate.part or found.parts[0].key)">{{ who(view.part) }}</FilterPick>
-                    {% endfor %}
-                  </div>
-                  <div class="prices-picks reward-ownerships">
-                    {% for written, name in found.ownerships %}
-                      <FilterPick :name="'own-' ~ id" :value="written" :checked="loop.first">{{ name }}</FilterPick>
-                    {% endfor %}
-                    <label class="reward-amount reward-uses">
-                      <span class="reward-amount-label">{{ _("web.admin.items.tile.uses") }}</span>
-                      <TextField :name="'uses-' ~ id" value="10" class="reward-amount-input" inputmode="numeric" autocomplete="off" />
-                    </label>
-                  </div>
-                  {% if event.daily %}
-                    <label class="reward-amount reward-add-day">
-                      <span class="reward-amount-label">{{ _("web.admin.rewards.add.day") }}</span>
-                      <TextField :name="'add-day-' ~ id" class="reward-amount-input" inputmode="numeric" autocomplete="off" :placeholder="_('web.admin.rewards.add.every')" />
-                    </label>
-                  {% endif %}
-                  <FormButton icon="plus" name="add" :value="id">{{ _("web.admin.rewards.add.submit") }}</FormButton>
-                </div>
-              {% else %}
-                {% if draft.query %}<p class="bar-text body-text">{{ _("web.admin.rewards.add.none", query=draft.query) }}</p>{% endif %}
-              {% endfor %}
-            </div>
-          </section>
-        {% endif %}
-        <section aria-labelledby="event-texts" class="account-part">
-          <Bar id="event-texts" :extra="_('web.admin.rewards.text.own') if row.own else _('web.admin.rewards.text.game')">{{ _("web.admin.rewards.event.texts") }}</Bar>
-          <dl class="facts">
-            {% for view in found.parts %}
-              {% for text, shown in view.texts %}
-                <Fact :label="who(view.part)" plain>
-                  <span class="reward-text-id">{{ text }}</span>
-                  <span>{{ shown or _("web.admin.rewards.event.text.missing") }}</span>
-                </Fact>
-              {% endfor %}
-            {% endfor %}
-          </dl>
-          <div data-live="{{ path }}" class="reward-own-live">
-            {% if showing_own %}
-              <fieldset {% if not manages %} disabled{% endif %} class="reward-own">
-                <legend class="reward-own-why">
-                  <Badge name="warn" :size="14" />
-                  <span>{{ (editor.needs + [_("web.admin.rewards.text_rule.english")])|join(" ") if editor.needs else _("web.admin.rewards.text_rule.own") }}</span>
-                </legend>
-                {% for code, name in editor.languages %}
-                  {% set english = loop.first %}
-                  {% set refused = refusing and english and "text-en" in editor.refused %}
-                  <div class="reward-own-row">
-                    <label for="own-{{ code }}" class="reward-own-label">
-                      <span>{{ name }}</span>
-                      <span class="reward-own-tag">{{ _("web.admin.rewards.own.required" if english else "web.admin.rewards.own.optional") }}</span>
-                    </label>
-                    <TextField :id="'own-' ~ code" :name="'text-' ~ code" :value="draft.texts.get(code, '')" :wrong="refused" class="reward-own-input" :lang="code" :maxlength="editor.longest" autocomplete="off" :placeholder="_('web.admin.rewards.own.placeholder') if english else _('web.admin.rewards.own.fallback')" :data-needed="_('web.admin.rewards.event.waits.english') if english and editor.needs else none" :aria-describedby="'own-en-note' if refused else none" />
-                  </div>
-                  {% if refused %}
-                    <FieldError id="own-en-note">{{ editor.refused["text-en"] }}</FieldError>
+              <div class="reward-amounts">
+                {% if view.boxes %}
+                  <label for="box-{{ view.key }}" class="reward-amount reward-amount-wide">
+                    <span class="reward-amount-label">{{ _("web.admin.rewards.box") }}</span>
+                    <select id="box-{{ view.key }}"
+                            name="box-{{ view.key }}"
+                            class="field-input reward-amount-input">
+                      <option value="">{{ _("web.admin.rewards.box.none") }}</option>
+                      {% for key, name in view.boxes %}
+                        <option value="{{ key }}" {% if key == draft_part.box %} selected{% endif %}>{{ name }}</option>
+                      {% endfor %}
+                    </select>
+                  </label>
+                  {% if view.rolled %}<div class="reward-amount-wide">{{ gift(view.rolled) }}</div>{% endif %}
+                {% endif %}
+                {% for amount in ("funds", "keys") if amount == "funds" or game.chests %}
+                  {% set name = amount ~ "-" ~ view.key %}
+                  {% set wrong = refusing and name in editor.refused %}
+                  <label for="{{ name }}" class="reward-amount">
+                    <span class="reward-amount-label">{{ _("games." ~ game.id ~ ".currency." ~ found.words.rules.currency) if amount == "funds" else _("web.admin.rewards.keys.count") }}</span>
+                    <TextField :id="name" :name="name" :value="draft_part.funds if amount == 'funds' else draft_part.keys" :wrong="wrong" class="reward-amount-input" inputmode="numeric" autocomplete="off" :aria-describedby="name ~ '-note' if wrong else none" />
+                  </label>
+                  {% if wrong %}
+                    <FieldError :id="name ~ '-note'">{{ editor.refused[name] }}</FieldError>
                   {% endif %}
                 {% endfor %}
-              </fieldset>
-            {% endif %}
+              </div>
+              {% if refusal %}
+                <FieldError :id="'part-' ~ view.key ~ '-note'">{{ refusal }}</FieldError>
+              {% endif %}
+              {% if view.goal %}
+                {% set goal_name = "goal-" ~ view.key %}
+                {% set wrong_goal = refusing and goal_name in editor.refused %}
+                <dl class="facts reward-goal">
+                  {% for label, value in view.goal %}
+                    <Fact :label="_('web.admin.rewards.goal.' ~ label)"
+                          :plain="label == 'stat'">
+                      {% if label == "goal" %}
+                        <TextField :name="goal_name" :value="draft_part.goal" :wrong="wrong_goal" class="reward-goal-input" inputmode="numeric" autocomplete="off" :aria-label="_('web.admin.rewards.goal.goal') ~ ' · ' ~ who(view.part)" :aria-describedby="goal_name ~ '-note' if wrong_goal else none" />
+                      {% else %}
+                        {{ value }}
+                      {% endif %}
+                    </Fact>
+                  {% endfor %}
+                </dl>
+                {% if wrong_goal %}
+                  <FieldError :id="goal_name ~ '-note'">{{ editor.refused[goal_name] }}</FieldError>
+                {% endif %}
+              {% endif %}
+            </div>
+          {% endfor %}
+        </fieldset>
+      </section>
+      {% if found.days %}
+        <section aria-labelledby="event-days" class="account-part">
+          <Bar id="event-days" :extra="_('web.admin.rewards.event.fixed.note')">{{ _("web.admin.rewards.event.fixed") }}</Bar>
+          <div class="table-scroll table-scroll-flush">
+            <table data-refresh class="rewards-packs reward-days">
+              <thead>
+                <tr>
+                  <td></td>
+                  {% for view in found.parts %}
+                    <th scope="col">{{ who(view.part) }}</th>
+                  {% endfor %}
+                  <th scope="col"><span class="sr-only">{{ _("web.admin.rewards.event.day.drop") }}</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for day, cells in found.days %}
+                  <tr>
+                    <th scope="row">{{ _("web.admin.rewards.event.day", day=day) }}</th>
+                    {% for key, items, box, lines in cells %}
+                      <td>
+                        {% for item in items %}<input type="hidden" name="day-{{ key }}-{{ day }}" value="{{ item }}">{% endfor %}
+                        {% if items or box %}<input type="hidden" name="day-box-{{ key }}-{{ day }}" value="{{ box }}">{% endif %}
+                        {{ gift(lines) }}
+                      </td>
+                    {% endfor %}
+                    <td class="reward-day-drop">
+                      <label class="reward-drop">
+                        <input type="checkbox"
+                               name="drop-day"
+                               value="{{ day }}"
+                               {% if not manages %} disabled{% endif %}
+                               class="reward-drop-input">
+                        <span aria-hidden="true"
+                              class="reward-drop-mark"><Icon name="x" :size="12" stroke="currentColor" /></span>
+                        <span class="sr-only">{{ _("web.admin.rewards.event.day.remove", day=day) }}</span>
+                      </label>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
           </div>
         </section>
-        {% if manages %}
-          <div class="reward-save">
-            <FormWhy>{{ editor.blocked or editor.refused.get('text-en', '') }}</FormWhy>
-            <ActionButton :label="_('web.admin.rewards.event.save')" :busy="_('web.admin.store.save.busy')" />
+      {% endif %}
+      {% if manages %}
+        <section aria-labelledby="event-add" class="account-part">
+          <Bar id="event-add">{{ _("web.admin.rewards.add") }}</Bar>
+          <ItemSearch id="event-q" :label="_('web.admin.store.search')" :value="draft.query" refresh />
+          <div data-live="{{ path }}" class="reward-candidates">
+            {% if editor.contents.added %}<p role="status"
+   class="bar-text body-text">{{ editor.contents.added }}</p>{% endif %}
+            {% if "add" in editor.refused %}
+              <Refusal>{{ editor.refused.add }}</Refusal>
+            {% endif %}
+            {% for candidate in found.candidates %}
+              {% set id = candidate.item.id %}
+              <div class="box-candidate reward-candidate">
+                <p class="box-candidate-name">
+                  <AdminItemIcon :game="game" :item="candidate.item" :shown="icons" />
+                  <span class="cell-stack"><span class="admin-hero-strong">{{ candidate.name }}</span><span class="cell-ago">{{ _("web.admin.items.number", id=id) }}</span></span>
+                </p>
+                <div class="prices-picks">
+                  {% for view in found.parts if view.part.faction %}
+                    <FilterPick :name="'to-' ~ id" :value="view.key" :checked="view.key == (candidate.part or found.parts[0].key)">{{ who(view.part) }}</FilterPick>
+                  {% endfor %}
+                </div>
+                <div class="prices-picks reward-ownerships">
+                  {% for written, name in found.ownerships %}
+                    <FilterPick :name="'own-' ~ id" :value="written" :checked="loop.first">{{ name }}</FilterPick>
+                  {% endfor %}
+                  <label class="reward-amount reward-uses">
+                    <span class="reward-amount-label">{{ _("web.admin.items.tile.uses") }}</span>
+                    <TextField :name="'uses-' ~ id" value="10" class="reward-amount-input" inputmode="numeric" autocomplete="off" />
+                  </label>
+                </div>
+                {% if event.daily %}
+                  <label class="reward-amount reward-add-day">
+                    <span class="reward-amount-label">{{ _("web.admin.rewards.add.day") }}</span>
+                    <TextField :name="'add-day-' ~ id" class="reward-amount-input" inputmode="numeric" autocomplete="off" :placeholder="_('web.admin.rewards.add.every')" />
+                  </label>
+                {% endif %}
+                <FormButton icon="plus" name="add" :value="id">{{ _("web.admin.rewards.add.submit") }}</FormButton>
+              </div>
+            {% else %}
+              {% if draft.query %}<p class="bar-text body-text">{{ _("web.admin.rewards.add.none", query=draft.query) }}</p>{% endif %}
+            {% endfor %}
           </div>
-        {% endif %}
-      </form>
-      <div class="admin-side">
-        <section aria-labelledby="event-claims">
-          <Bar id="event-claims">{{ _("web.admin.rewards.claiming") }}</Bar>
-          <dl class="facts">
-            <Fact :label="_('web.admin.rewards.claiming.each.day' if event.daily else 'web.admin.rewards.claiming.each')"
-                  plain>
-              {{ _("web.admin.rewards.claiming.once") }}
-            </Fact>
-            <Fact :label="_('web.admin.rewards.claiming.goes')" plain>
-              {{ _("web.admin.rewards.claiming.goes.value") }}
-            </Fact>
-            {% if event.daily %}
-              <Fact :label="_('web.admin.rewards.claiming.missed')" plain>
-                {{ _("web.admin.rewards.claiming.missed.value") }}
+        </section>
+      {% endif %}
+      <section aria-labelledby="event-texts" class="account-part">
+        <Bar id="event-texts" :extra="_('web.admin.rewards.text.own') if row.own else _('web.admin.rewards.text.game')">{{ _("web.admin.rewards.event.texts") }}</Bar>
+        <dl class="facts">
+          {% for view in found.parts %}
+            {% for text, shown in view.texts %}
+              <Fact :label="who(view.part)" plain>
+                <span class="reward-text-id">{{ text }}</span>
+                <span>{{ shown or _("web.admin.rewards.event.text.missing") }}</span>
               </Fact>
-            {% endif %}
-          </dl>
+            {% endfor %}
+          {% endfor %}
+        </dl>
+        <div data-live="{{ path }}" class="reward-own-live">
+          {% if showing_own %}
+            <fieldset {% if not manages %} disabled{% endif %} class="reward-own">
+              <legend class="reward-own-why">
+                <Badge name="warn" :size="14" />
+                <span>{{ (editor.needs + [_("web.admin.rewards.text_rule.english")])|join(" ") if editor.needs else _("web.admin.rewards.text_rule.own") }}</span>
+              </legend>
+              {% for code, name in editor.languages %}
+                {% set english = loop.first %}
+                {% set refused = refusing and english and "text-en" in editor.refused %}
+                <div class="reward-own-row">
+                  <label for="own-{{ code }}" class="reward-own-label">
+                    <span>{{ name }}</span>
+                    <span class="reward-own-tag">{{ _("web.admin.rewards.own.required" if english else "web.admin.rewards.own.optional") }}</span>
+                  </label>
+                  <TextField :id="'own-' ~ code" :name="'text-' ~ code" :value="draft.texts.get(code, '')" :wrong="refused" class="reward-own-input" :lang="code" :maxlength="editor.longest" autocomplete="off" :placeholder="_('web.admin.rewards.own.placeholder') if english else _('web.admin.rewards.own.fallback')" :data-needed="_('web.admin.rewards.event.waits.english') if english and editor.needs else none" :aria-describedby="'own-en-note' if refused else none" />
+                </div>
+                {% if refused %}
+                  <FieldError id="own-en-note">{{ editor.refused["text-en"] }}</FieldError>
+                {% endif %}
+              {% endfor %}
+            </fieldset>
+          {% endif %}
+        </div>
+      </section>
+      {% if manages %}
+        <div class="reward-save">
+          <FormWhy>{{ editor.blocked or editor.refused.get('text-en', '') }}</FormWhy>
+          <ActionButton :label="_('web.admin.rewards.event.save')" :busy="_('web.admin.store.save.busy')" />
+        </div>
+      {% endif %}
+    </form>
+    <div class="admin-side">
+      <section aria-labelledby="event-claims">
+        <Bar id="event-claims">{{ _("web.admin.rewards.claiming") }}</Bar>
+        <dl class="facts">
+          <Fact :label="_('web.admin.rewards.claiming.each.day' if event.daily else 'web.admin.rewards.claiming.each')"
+                plain>
+            {{ _("web.admin.rewards.claiming.once") }}
+          </Fact>
+          <Fact :label="_('web.admin.rewards.claiming.goes')" plain>
+            {{ _("web.admin.rewards.claiming.goes.value") }}
+          </Fact>
+          {% if event.daily %}
+            <Fact :label="_('web.admin.rewards.claiming.missed')" plain>
+              {{ _("web.admin.rewards.claiming.missed.value") }}
+            </Fact>
+          {% endif %}
+        </dl>
+      </section>
+      <section aria-labelledby="event-edits">
+        <Bar id="event-edits">{{ _("web.admin.rewards.edits") }}</Bar>
+        <p class="bar-text body-text">{{ _("web.admin.rewards.edits.text") }}</p>
+      </section>
+      {% if event.daily %}
+        <section aria-labelledby="event-paused">
+          <Bar id="event-paused" :extra="number(found.paused|length)">{{ _("web.admin.rewards.paused_days") }}</Bar>
+          <p class="bar-text body-text">
+            {{ _("web.admin.rewards.paused_days.text", days=listed(found.paused)) if found.paused else _("web.admin.rewards.paused_days.none") }}
+          </p>
         </section>
-        <section aria-labelledby="event-edits">
-          <Bar id="event-edits">{{ _("web.admin.rewards.edits") }}</Bar>
-          <p class="bar-text body-text">{{ _("web.admin.rewards.edits.text") }}</p>
-        </section>
-        {% if event.daily %}
-          <section aria-labelledby="event-paused">
-            <Bar id="event-paused" :extra="number(found.paused|length)">{{ _("web.admin.rewards.paused_days") }}</Bar>
-            <p class="bar-text body-text">
-              {{ _("web.admin.rewards.paused_days.text", days=listed(found.paused)) if found.paused else _("web.admin.rewards.paused_days.none") }}
-            </p>
-          </section>
-        {% endif %}
-      </div>
+      {% endif %}
     </div>
-  </Panel>
-</AdminPage>
+  </div>
+</RewardsPage>

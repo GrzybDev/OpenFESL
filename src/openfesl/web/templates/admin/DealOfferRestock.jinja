@@ -5,28 +5,28 @@
 {% set game = of %}
 {% set bundle = row.listed.bundle %}
 {% set base = url("/admin/store/" ~ game.id ~ "/deals/offers") %}
-<AdminPage :title="_('web.admin.deals.view.offers') ~ ' · ' ~ _('web.admin.store.title')"
-           current="store">
-  <StoreHead :game="game" current="deals" :subtitle="_('web.admin.deals.subtitle', game=game.name)" />
-  <Panel class="enter-panel confirm-frame">
-    <Confirmation :question="_('web.admin.deals.offer.restock.confirm')"
-                  :action="base ~ '/' ~ row.listed.id ~ '/restock'"
-                  :label="_('web.admin.deals.offer.restock')"
-                  :busy="_('web.admin.deals.offer.restock.busy')"
-                  :back="base"
-                  glyph="plus"
-                  form="restock-form">
-      <dl class="facts">
-        <Fact :label="_('web.admin.deals.offers.column.offer')" plain>
-          {{ row.name }}
-        </Fact>
-        <Fact :label="_('web.admin.deals.offers.column.stock')" plain>
-          {{ _("web.admin.deals.offers.left", left=number(bundle.stock - bundle.sold), total=number(bundle.stock)) }}
-        </Fact>
-      </dl>
-      <TextField id="restock-count" name="count" :label="_('web.admin.deals.offer.restock.count')" :value="count" :wrong="why" form="restock-form" inputmode="numeric" maxlength="10" autocomplete="off" autofocus :aria-describedby="'restock-note' if why else none" />
-      {% if why %}<FieldError id="restock-note">{{ why }}</FieldError>{% endif %}
-      <p id="confirm-text" class="body-text">{{ _("web.admin.deals.offer.restock.text") }}</p>
-    </Confirmation>
-  </Panel>
-</AdminPage>
+<StorePage :game="game"
+           :title="_('web.admin.deals.view.offers') ~ ' · ' ~ _('web.admin.store.title')"
+           current="deals"
+           :subtitle="_('web.admin.deals.subtitle', game=game.name)"
+           frame="confirm-frame">
+  <Confirmation :question="_('web.admin.deals.offer.restock.confirm')"
+                :action="base ~ '/' ~ row.listed.id ~ '/restock'"
+                :label="_('web.admin.deals.offer.restock')"
+                :busy="_('web.admin.deals.offer.restock.busy')"
+                :back="base"
+                glyph="plus"
+                form="restock-form">
+    <dl class="facts">
+      <Fact :label="_('web.admin.deals.offers.column.offer')" plain>
+        {{ row.name }}
+      </Fact>
+      <Fact :label="_('web.admin.deals.offers.column.stock')" plain>
+        {{ _("web.admin.deals.offers.left", left=number(bundle.stock - bundle.sold), total=number(bundle.stock)) }}
+      </Fact>
+    </dl>
+    <TextField id="restock-count" name="count" :label="_('web.admin.deals.offer.restock.count')" :value="count" :wrong="why" form="restock-form" inputmode="numeric" maxlength="10" autocomplete="off" autofocus :aria-describedby="'restock-note' if why else none" />
+    {% if why %}<FieldError id="restock-note">{{ why }}</FieldError>{% endif %}
+    <p id="confirm-text" class="body-text">{{ _("web.admin.deals.offer.restock.text") }}</p>
+  </Confirmation>
+</StorePage>

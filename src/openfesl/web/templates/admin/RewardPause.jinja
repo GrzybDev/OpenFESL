@@ -5,21 +5,18 @@
 {% set game = of %}
 {% set title = _("web.admin.rewards.title") %}
 {% set label = "web.admin.rewards.pause.pause" if pausing else "web.admin.rewards.pause.resume" %}
-<AdminPage :title="_(label) ~ ' · ' ~ title" current="rewards">
-  <RewardsHead :game="game" :subtitle="_('web.admin.rewards.subtitle', game=game.name)" />
-  <Panel class="enter-panel confirm-frame">
-    <AdminForm :question="_('web.admin.rewards.pause.question' if pausing else 'web.admin.rewards.resume.question')" :action="url('/admin/rewards/' ~ game.id ~ '/pause')" :label="_(label)" :busy="_(label ~ '.busy')" :back="back" :glyph="'pause' if pausing else 'play'" :error="error">
-    <input type="hidden" name="paused" value="{{ 1 if pausing else 0 }}">
-    <ul id="confirm-text" class="admin-effects">
-      {% if pausing %}
-        <li>{{ _("web.admin.rewards.pause.effect.claims") }}</li>
-        <li>{{ _("web.admin.rewards.pause.effect.counting") }}</li>
-        <li>{{ _("web.admin.rewards.pause.effect.days") }}</li>
-      {% else %}
-        <li>{{ _("web.admin.rewards.resume.effect.claims") }}</li>
-        <li>{{ _("web.admin.rewards.pause.effect.days") }}</li>
-      {% endif %}
-    </ul>
-    </AdminForm>
-  </Panel>
-</AdminPage>
+<RewardsPage :game="game" :title="_(label) ~ ' · ' ~ title" frame="confirm-frame">
+  <AdminForm :question="_('web.admin.rewards.pause.question' if pausing else 'web.admin.rewards.resume.question')" :action="url('/admin/rewards/' ~ game.id ~ '/pause')" :label="_(label)" :busy="_(label ~ '.busy')" :back="back" :glyph="'pause' if pausing else 'play'" :error="error">
+  <input type="hidden" name="paused" value="{{ 1 if pausing else 0 }}">
+  <ul id="confirm-text" class="admin-effects">
+    {% if pausing %}
+      <li>{{ _("web.admin.rewards.pause.effect.claims") }}</li>
+      <li>{{ _("web.admin.rewards.pause.effect.counting") }}</li>
+      <li>{{ _("web.admin.rewards.pause.effect.days") }}</li>
+    {% else %}
+      <li>{{ _("web.admin.rewards.resume.effect.claims") }}</li>
+      <li>{{ _("web.admin.rewards.pause.effect.days") }}</li>
+    {% endif %}
+  </ul>
+  </AdminForm>
+</RewardsPage>

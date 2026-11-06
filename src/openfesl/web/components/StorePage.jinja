@@ -1,0 +1,9 @@
+{#def game, title: str, current: str, subtitle: str, frame: str = "", counts: dict = {} #}
+{# A page of a game's store in the admin panel: its head and tabs over the panel that the content
+   fills, in a frame of its own if it has one. #}
+<AdminPage :title="title" current="store">
+  <StoreHead :game="game" :current="current" :subtitle="subtitle" :counts="counts" />
+  <Panel :class="'enter-panel ' ~ frame">
+    {{ content }}
+  </Panel>
+</AdminPage>

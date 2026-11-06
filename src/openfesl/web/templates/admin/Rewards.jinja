@@ -17,231 +17,231 @@
 {% macro part_name(key, part) -%}
   {{ _("games." ~ game.id ~ ".faction." ~ part.faction) if part.faction else _("web.admin.rewards.part.account") }}
 {%- endmacro %}
-<AdminPage :title="_('web.admin.rewards.title')" current="rewards">
-  <RewardsHead :game="game" current="rules" :subtitle="_('web.admin.rewards.subtitle', game=game.name)" />
-  <Panel class="enter-panel rewards-page">
-    <PauseBar :game="game" :paused="rules.paused" :entry="found.pause" :manages="manages" />
-    {% if not manages %}
-      <RoleNote glyph="lock" lines>{{ _("web.admin.refused.role.rewards") }}</RoleNote>
-    {% endif %}
-    <section aria-labelledby="rewards-calendar" class="admin-list">
-      <Bar id="rewards-calendar" :extra="_('web.admin.rewards.calendar.today', date=found.today, time=found.starts)" wrap>{{ _("web.admin.rewards.calendar", year=found.year) }}</Bar>
-      <div class="rewards-strip-scroll">
-        <svg viewBox="0 0 {{ strip.width }} {{ tall }}"
-             aria-hidden="true"
-             class="rewards-strip">
-          {% for x, month in strip.months %}
-            <line x1="{{ x }}" y1="0" x2="{{ x }}" y2="{{ tall }}" class="rewards-strip-month" />
-            <text x="{{ x + 8 }}" y="17" class="rewards-strip-name">{{ month }}</text>
-          {% endfor %}
-          {% for chip in strip.chips %}
-            {% set y = 26 + chip.line * 34 %}
-            <rect x="{{ chip.x }}" y="{{ y }}" width="{{ chip.width }}" height="26" class="rewards-strip-event{% if chip.row.state == 'off' %} rewards-strip-off{% endif %}" />
-            <text x="{{ chip.x + chip.width / 2 }}" y="{{ y + 18 }}" class="rewards-strip-label">E{{ chip.row.number }}</text>
-          {% endfor %}
-          <line x1="{{ strip.today }}" y1="0" x2="{{ strip.today }}" y2="{{ tall }}" class="rewards-strip-today" />
-          <text x="{{ strip.today - 6 }}" y="17" class="rewards-strip-now">{{ _("web.admin.rewards.today") }}</text>
-        </svg>
-      </div>
-      <p class="bar-text body-text">{{ _("web.admin.rewards.calendar.note", year=found.year) }}</p>
-    </section>
-    <section aria-labelledby="rewards-events" class="admin-list">
-      <Bar id="rewards-events" :extra="_('web.admin.rewards.events.on', on=number(found.events|selectattr('run.event.enabled')|list|length), total=number(found.events|length))">{{ _("web.admin.rewards.events") }}</Bar>
-      <div class="table-scroll table-scroll-flush">
-        <div role="table"
-             aria-labelledby="rewards-events"
-             class="table rewards-table">
-          <div role="rowgroup" class="admin-list-head">
-            <div role="row" class="rewards-columns">
-              <div role="columnheader" class="column-head column-name">{{ _("web.admin.rewards.column.event") }}</div>
-              <div role="columnheader" class="column-head">{{ _("web.admin.rewards.column.runs") }}</div>
-              <div role="columnheader" class="column-head">{{ _("web.admin.rewards.column.parts") }}</div>
-              <div role="columnheader" class="column-head">{{ found.year }}</div>
-              <div role="columnheader" class="column-head">{{ _("web.admin.rewards.column.state") }}</div>
-              <div role="columnheader" class="column-head">{{ _("web.admin.rewards.column.text") }}</div>
-              <div role="columnheader"><span class="sr-only">{{ _("web.admin.rewards.column.open") }}</span></div>
-            </div>
-          </div>
-          <div role="rowgroup" class="enter-rows table-rows">
-            {% for row in found.events %}
-              {% set event = row.run.event %}
-              <div role="row"
-                   id="event-{{ row.key }}"
-                   class="rewards-columns rewards-row">
-                <div role="cell" class="admin-cell rewards-event">
-                  <span class="rewards-number">E{{ row.number }}</span>
-                  <span class="rewards-stack">
-                    <span class="admin-hero-strong">{{ _(event.title) }}</span>
-                    <span class="cell-ago">{{ _(event.summary) }}</span>
-                  </span>
-                </div>
-                <div role="cell" class="admin-cell">
-                  {% if manages %}
-                    <AdminSwitch :action="switch" :path="'events.' ~ row.key" :on="event.enabled" :name="_('web.admin.rewards.switch.event', event=_(event.title))" :back="here ~ '#event-' ~ row.key" />
-                  {% else %}
-                    {{ switch(event.enabled) }}
-                  {% endif %}
-                </div>
-                <div role="cell" class="admin-cell rewards-parts">
-                  <span aria-hidden="true" class="cell-label">{{ _("web.admin.rewards.column.parts") }}</span>
-                  {% for key, part in event.parts.items() %}
-                    {% if manages %}
-                      <AdminSwitch :action="switch" :path="'events.' ~ row.key ~ '.parts.' ~ key" :on="part.enabled" :name="_(event.title)" :back="here ~ '#event-' ~ row.key" :label="part_name(key, part)" />
-                    {% else %}
-                      <span class="rewards-part{% if not part.enabled or not event.enabled %} rewards-part-off{% endif %}">
-                      <Icon :name="'tick' if part.enabled else 'x'" :size="12" stroke="currentColor" />{{ part_name(key, part) }}<span class="sr-only">: {{ _("web.admin.rewards.on" if part.enabled else "web.admin.rewards.off") }}</span>
-                      </span>
-                    {% endif %}
-                  {% endfor %}
-                </div>
-                <div role="cell" class="admin-cell cell-stack">
-                  <span class="cell-time">{{ row.dates }}</span>
-                  <span class="cell-ago">{{ row.rule }}</span>
-                </div>
-                <div role="cell" class="admin-cell prices-state">
-                  <Badge :name="{'off': 'x', 'ended': 'clock', 'next': 'time', 'paused': 'pause'}.get(row.state, 'tick')" :lines="row.state in ('off', 'running', 'ended')" />{{ row.said }}
-                </div>
-                <div role="cell" class="admin-cell cell-ago">
-                  {{ _("web.admin.rewards.text.own" if row.own else "web.admin.rewards.text.game") }}
-                </div>
-                <div role="cell" class="cell-end">
-                  <EndSquare :href="url('/admin/rewards/' ~ game.id ~ '/events/' ~ row.key)" :label="_('web.admin.rewards.open', event=_(event.title))" />
-                </div>
-              </div>
-            {% endfor %}
+<RewardsPage :game="game"
+             :title="_('web.admin.rewards.title')"
+             current="rules"
+             frame="rewards-page">
+  <PauseBar :game="game" :paused="rules.paused" :entry="found.pause" :manages="manages" />
+  {% if not manages %}
+    <RoleNote glyph="lock" lines>{{ _("web.admin.refused.role.rewards") }}</RoleNote>
+  {% endif %}
+  <section aria-labelledby="rewards-calendar" class="admin-list">
+    <Bar id="rewards-calendar" :extra="_('web.admin.rewards.calendar.today', date=found.today, time=found.starts)" wrap>{{ _("web.admin.rewards.calendar", year=found.year) }}</Bar>
+    <div class="rewards-strip-scroll">
+      <svg viewBox="0 0 {{ strip.width }} {{ tall }}"
+           aria-hidden="true"
+           class="rewards-strip">
+        {% for x, month in strip.months %}
+          <line x1="{{ x }}" y1="0" x2="{{ x }}" y2="{{ tall }}" class="rewards-strip-month" />
+          <text x="{{ x + 8 }}" y="17" class="rewards-strip-name">{{ month }}</text>
+        {% endfor %}
+        {% for chip in strip.chips %}
+          {% set y = 26 + chip.line * 34 %}
+          <rect x="{{ chip.x }}" y="{{ y }}" width="{{ chip.width }}" height="26" class="rewards-strip-event{% if chip.row.state == 'off' %} rewards-strip-off{% endif %}" />
+          <text x="{{ chip.x + chip.width / 2 }}" y="{{ y + 18 }}" class="rewards-strip-label">E{{ chip.row.number }}</text>
+        {% endfor %}
+        <line x1="{{ strip.today }}" y1="0" x2="{{ strip.today }}" y2="{{ tall }}" class="rewards-strip-today" />
+        <text x="{{ strip.today - 6 }}" y="17" class="rewards-strip-now">{{ _("web.admin.rewards.today") }}</text>
+      </svg>
+    </div>
+    <p class="bar-text body-text">{{ _("web.admin.rewards.calendar.note", year=found.year) }}</p>
+  </section>
+  <section aria-labelledby="rewards-events" class="admin-list">
+    <Bar id="rewards-events" :extra="_('web.admin.rewards.events.on', on=number(found.events|selectattr('run.event.enabled')|list|length), total=number(found.events|length))">{{ _("web.admin.rewards.events") }}</Bar>
+    <div class="table-scroll table-scroll-flush">
+      <div role="table"
+           aria-labelledby="rewards-events"
+           class="table rewards-table">
+        <div role="rowgroup" class="admin-list-head">
+          <div role="row" class="rewards-columns">
+            <div role="columnheader" class="column-head column-name">{{ _("web.admin.rewards.column.event") }}</div>
+            <div role="columnheader" class="column-head">{{ _("web.admin.rewards.column.runs") }}</div>
+            <div role="columnheader" class="column-head">{{ _("web.admin.rewards.column.parts") }}</div>
+            <div role="columnheader" class="column-head">{{ found.year }}</div>
+            <div role="columnheader" class="column-head">{{ _("web.admin.rewards.column.state") }}</div>
+            <div role="columnheader" class="column-head">{{ _("web.admin.rewards.column.text") }}</div>
+            <div role="columnheader"><span class="sr-only">{{ _("web.admin.rewards.column.open") }}</span></div>
           </div>
         </div>
-      </div>
-    </section>
-    <div class="rewards-split">
-      <div class="rewards-side-main">
-        {% if found.missions %}
-          <section aria-labelledby="rewards-missions" class="admin-list">
-            <Bar id="rewards-missions" :extra="_('web.admin.rewards.missions.running', running=number(found.missions|selectattr('event.state', 'in', ('running', 'paused'))|list|length), total=number(found.missions|length))">{{ _("web.admin.rewards.missions") }}</Bar>
-            <ul class="rewards-missions">
-              {% for mission in found.missions %}
-                <li class="rewards-mission{% if not mission.part.enabled or mission.event.state == 'off' %} rewards-mission-off{% endif %}">
-                  <span class="rewards-number">E{{ mission.event.number }}</span>
-                  <span class="rewards-stack">
-                    <span class="admin-hero-strong">{{ mission.name }}</span>
-                    <span class="cell-ago">{{ mission.line }}</span>
-                  </span>
-                  <span class="prices-state rewards-mission-state">{{ _("web.admin.rewards.off") if not mission.part.enabled else mission.event.said }}</span>
-                  <EndSquare :href="url('/admin/rewards/' ~ game.id ~ '/events/' ~ mission.event.key) ~ '#part-' ~ mission.part.faction" :label="_('web.admin.rewards.open', event=mission.name)" />
-                </li>
-              {% endfor %}
-            </ul>
-          </section>
-        {% endif %}
-        {% if found.packs %}
-          {% set packs = found.packs %}
-          <section aria-labelledby="rewards-packs" class="admin-list">
-            <Bar id="rewards-packs">{{ _("web.admin.rewards.packs") }}</Bar>
-            <div class="rewards-switch-row">
-              <span>{{ _n("web.admin.rewards.packs.days", packs.rules.days) }}</span>
-              {% if manages %}
-                <AdminSwitch :action="switch" path="starter" :on="packs.rules.enabled" :name="_('web.admin.rewards.packs')" :back="here ~ '#rewards-packs'" />
-              {% else %}
-                {{ switch(packs.rules.enabled) }}
-              {% endif %}
-            </div>
-            <div class="table-scroll table-scroll-flush">
-              <table class="rewards-packs">
-                <thead>
-                  <tr>
-                    <td></td>
-                    {% for name in packs.classes %}
-                      <th scope="col">{{ _("games." ~ game.id ~ ".class." ~ name) }}</th>
-                    {% endfor %}
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for faction, cells in packs.rows %}
-                    <tr>
-                      <th scope="row">{{ _("games." ~ game.id ~ ".faction." ~ faction) }}</th>
-                      {% for cell in cells %}
-                        <td>
-                          <span class="admin-hero-strong">{{ cell }}</span>
-                          {% if packs.shared %}<span class="cell-ago">{{ _("web.admin.rewards.packs.plus") }}</span>{% endif %}
-                        </td>
-                      {% endfor %}
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-            {% if packs.shared %}
-              <p class="bar-text body-text">{{ _("web.admin.rewards.packs.shared", items=packs.shared) }}</p>
-            {% endif %}
-          </section>
-        {% endif %}
-      </div>
-      <div class="rewards-side">
-        {% if rules.first_chest %}
-          {% set chest = rules.first_chest %}
-          <section aria-labelledby="rewards-key" class="admin-list">
-            <Bar id="rewards-key">{{ _("web.admin.rewards.keys") }}</Bar>
-            <div class="rewards-key">
-              <p class="rewards-stack">
-                <span class="admin-hero-strong">K1 · {{ found.chest }}</span>
-                <span class="cell-ago">{{ _n("web.admin.rewards.keys.first.text", chest.gift.keys) }}</span>
-              </p>
-              {% if manages %}
-                <AdminSwitch :action="switch" path="first_chest" :on="chest.enabled" :name="found.chest" :back="here ~ '#rewards-key'" />
-              {% else %}
-                {{ switch(chest.enabled) }}
-              {% endif %}
-            </div>
-          </section>
-        {% endif %}
-        {% if found.milestones %}
-          <section aria-labelledby="rewards-milestones" class="admin-list">
-            <Bar id="rewards-milestones" :extra="_('web.admin.rewards.events.on', on=number(found.milestones|selectattr('1.enabled')|list|length), total=number(found.milestones|length))">{{ _("web.admin.rewards.milestones") }}</Bar>
-            {% if manages %}
-              <form method="post"
-                    action="{{ url('/admin/rewards/' ~ game.id ~ '/milestones') }}"
-                    class="end-button-form">
-                <CsrfField />
-            {% endif %}
-            <ul class="rewards-milestones">
-              {% for key, milestone, name in found.milestones %}
-                {% set funds = form.get("funds-" ~ key, milestone.gift.funds) %}
-                {% set on = form.get("on-" ~ key) if form else milestone.enabled %}
-                <li class="rewards-milestone{% if not milestone.enabled %} rewards-mission-off{% endif %}">
-                  <span class="rewards-number">M{{ loop.index }}</span>
-                  <span class="rewards-stack">
-                    <span class="admin-hero-strong">{{ name }}</span>
-                    <span class="cell-ago">{{ _("web.admin.rewards.milestone.hero" if milestone.each else "web.admin.rewards.milestone.account") }}</span>
-                  </span>
+        <div role="rowgroup" class="enter-rows table-rows">
+          {% for row in found.events %}
+            {% set event = row.run.event %}
+            <div role="row"
+                 id="event-{{ row.key }}"
+                 class="rewards-columns rewards-row">
+              <div role="cell" class="admin-cell rewards-event">
+                <span class="rewards-number">E{{ row.number }}</span>
+                <span class="rewards-stack">
+                  <span class="admin-hero-strong">{{ _(event.title) }}</span>
+                  <span class="cell-ago">{{ _(event.summary) }}</span>
+                </span>
+              </div>
+              <div role="cell" class="admin-cell">
+                {% if manages %}
+                  <AdminSwitch :action="switch" :path="'events.' ~ row.key" :on="event.enabled" :name="_('web.admin.rewards.switch.event', event=_(event.title))" :back="here ~ '#event-' ~ row.key" />
+                {% else %}
+                  {{ switch(event.enabled) }}
+                {% endif %}
+              </div>
+              <div role="cell" class="admin-cell rewards-parts">
+                <span aria-hidden="true" class="cell-label">{{ _("web.admin.rewards.column.parts") }}</span>
+                {% for key, part in event.parts.items() %}
                   {% if manages %}
-                    <label class="rewards-funds-field">
-                      <span class="sr-only">{{ name }}</span>
-                      <TextField :name="'funds-' ~ key" :value="funds" :wrong="form.get('refused') == key" class="rewards-funds-input" inputmode="numeric" pattern="[0-9]+" required />
-                      <span class="rewards-currency">{{ _("games." ~ game.id ~ ".currency." ~ rules.currency) }}</span>
-                    </label>
-                    <label class="prices-sold">
-                      <CheckBox :name="'on-' ~ key" :checked="on" />
-                      <span class="sr-only">{{ name }}: </span>{{ _("web.admin.rewards.on") }}
-                    </label>
+                    <AdminSwitch :action="switch" :path="'events.' ~ row.key ~ '.parts.' ~ key" :on="part.enabled" :name="_(event.title)" :back="here ~ '#event-' ~ row.key" :label="part_name(key, part)" />
                   {% else %}
-                    <span class="rewards-funds">{{ words.funds(milestone.gift.funds) }}</span>
-                    {{ switch(milestone.enabled) }}
+                    <span class="rewards-part{% if not part.enabled or not event.enabled %} rewards-part-off{% endif %}">
+                    <Icon :name="'tick' if part.enabled else 'x'" :size="12" stroke="currentColor" />{{ part_name(key, part) }}<span class="sr-only">: {{ _("web.admin.rewards.on" if part.enabled else "web.admin.rewards.off") }}</span>
+                    </span>
                   {% endif %}
-                </li>
-              {% endfor %}
-            </ul>
-            {% if manages %}
-              {% if why %}
-                <Refusal>{{ why }}</Refusal>
-              {% endif %}
-              <FormButton icon="tick">{{ _("web.admin.rewards.milestones.save") }}</FormButton>
-              </form>
-            {% endif %}
-            <p class="bar-text body-text">{{ _("web.admin.rewards.milestones.note") }}</p>
-          </section>
-        {% endif %}
+                {% endfor %}
+              </div>
+              <div role="cell" class="admin-cell cell-stack">
+                <span class="cell-time">{{ row.dates }}</span>
+                <span class="cell-ago">{{ row.rule }}</span>
+              </div>
+              <div role="cell" class="admin-cell prices-state">
+                <Badge :name="{'off': 'x', 'ended': 'clock', 'next': 'time', 'paused': 'pause'}.get(row.state, 'tick')" :lines="row.state in ('off', 'running', 'ended')" />{{ row.said }}
+              </div>
+              <div role="cell" class="admin-cell cell-ago">
+                {{ _("web.admin.rewards.text.own" if row.own else "web.admin.rewards.text.game") }}
+              </div>
+              <div role="cell" class="cell-end">
+                <EndSquare :href="url('/admin/rewards/' ~ game.id ~ '/events/' ~ row.key)" :label="_('web.admin.rewards.open', event=_(event.title))" />
+              </div>
+            </div>
+          {% endfor %}
+        </div>
       </div>
     </div>
-    {% if found.referral %}<RewardsReferral :found="found.referral" :game="game" :manages="manages" />{% endif %}
-  </Panel>
-</AdminPage>
+  </section>
+  <div class="rewards-split">
+    <div class="rewards-side-main">
+      {% if found.missions %}
+        <section aria-labelledby="rewards-missions" class="admin-list">
+          <Bar id="rewards-missions" :extra="_('web.admin.rewards.missions.running', running=number(found.missions|selectattr('event.state', 'in', ('running', 'paused'))|list|length), total=number(found.missions|length))">{{ _("web.admin.rewards.missions") }}</Bar>
+          <ul class="rewards-missions">
+            {% for mission in found.missions %}
+              <li class="rewards-mission{% if not mission.part.enabled or mission.event.state == 'off' %} rewards-mission-off{% endif %}">
+                <span class="rewards-number">E{{ mission.event.number }}</span>
+                <span class="rewards-stack">
+                  <span class="admin-hero-strong">{{ mission.name }}</span>
+                  <span class="cell-ago">{{ mission.line }}</span>
+                </span>
+                <span class="prices-state rewards-mission-state">{{ _("web.admin.rewards.off") if not mission.part.enabled else mission.event.said }}</span>
+                <EndSquare :href="url('/admin/rewards/' ~ game.id ~ '/events/' ~ mission.event.key) ~ '#part-' ~ mission.part.faction" :label="_('web.admin.rewards.open', event=mission.name)" />
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+      {% if found.packs %}
+        {% set packs = found.packs %}
+        <section aria-labelledby="rewards-packs" class="admin-list">
+          <Bar id="rewards-packs">{{ _("web.admin.rewards.packs") }}</Bar>
+          <div class="rewards-switch-row">
+            <span>{{ _n("web.admin.rewards.packs.days", packs.rules.days) }}</span>
+            {% if manages %}
+              <AdminSwitch :action="switch" path="starter" :on="packs.rules.enabled" :name="_('web.admin.rewards.packs')" :back="here ~ '#rewards-packs'" />
+            {% else %}
+              {{ switch(packs.rules.enabled) }}
+            {% endif %}
+          </div>
+          <div class="table-scroll table-scroll-flush">
+            <table class="rewards-packs">
+              <thead>
+                <tr>
+                  <td></td>
+                  {% for name in packs.classes %}
+                    <th scope="col">{{ _("games." ~ game.id ~ ".class." ~ name) }}</th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for faction, cells in packs.rows %}
+                  <tr>
+                    <th scope="row">{{ _("games." ~ game.id ~ ".faction." ~ faction) }}</th>
+                    {% for cell in cells %}
+                      <td>
+                        <span class="admin-hero-strong">{{ cell }}</span>
+                        {% if packs.shared %}<span class="cell-ago">{{ _("web.admin.rewards.packs.plus") }}</span>{% endif %}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% if packs.shared %}
+            <p class="bar-text body-text">{{ _("web.admin.rewards.packs.shared", items=packs.shared) }}</p>
+          {% endif %}
+        </section>
+      {% endif %}
+    </div>
+    <div class="rewards-side">
+      {% if rules.first_chest %}
+        {% set chest = rules.first_chest %}
+        <section aria-labelledby="rewards-key" class="admin-list">
+          <Bar id="rewards-key">{{ _("web.admin.rewards.keys") }}</Bar>
+          <div class="rewards-key">
+            <p class="rewards-stack">
+              <span class="admin-hero-strong">K1 · {{ found.chest }}</span>
+              <span class="cell-ago">{{ _n("web.admin.rewards.keys.first.text", chest.gift.keys) }}</span>
+            </p>
+            {% if manages %}
+              <AdminSwitch :action="switch" path="first_chest" :on="chest.enabled" :name="found.chest" :back="here ~ '#rewards-key'" />
+            {% else %}
+              {{ switch(chest.enabled) }}
+            {% endif %}
+          </div>
+        </section>
+      {% endif %}
+      {% if found.milestones %}
+        <section aria-labelledby="rewards-milestones" class="admin-list">
+          <Bar id="rewards-milestones" :extra="_('web.admin.rewards.events.on', on=number(found.milestones|selectattr('1.enabled')|list|length), total=number(found.milestones|length))">{{ _("web.admin.rewards.milestones") }}</Bar>
+          {% if manages %}
+            <form method="post"
+                  action="{{ url('/admin/rewards/' ~ game.id ~ '/milestones') }}"
+                  class="end-button-form">
+              <CsrfField />
+          {% endif %}
+          <ul class="rewards-milestones">
+            {% for key, milestone, name in found.milestones %}
+              {% set funds = form.get("funds-" ~ key, milestone.gift.funds) %}
+              {% set on = form.get("on-" ~ key) if form else milestone.enabled %}
+              <li class="rewards-milestone{% if not milestone.enabled %} rewards-mission-off{% endif %}">
+                <span class="rewards-number">M{{ loop.index }}</span>
+                <span class="rewards-stack">
+                  <span class="admin-hero-strong">{{ name }}</span>
+                  <span class="cell-ago">{{ _("web.admin.rewards.milestone.hero" if milestone.each else "web.admin.rewards.milestone.account") }}</span>
+                </span>
+                {% if manages %}
+                  <label class="rewards-funds-field">
+                    <span class="sr-only">{{ name }}</span>
+                    <TextField :name="'funds-' ~ key" :value="funds" :wrong="form.get('refused') == key" class="rewards-funds-input" inputmode="numeric" pattern="[0-9]+" required />
+                    <span class="rewards-currency">{{ _("games." ~ game.id ~ ".currency." ~ rules.currency) }}</span>
+                  </label>
+                  <label class="prices-sold">
+                    <CheckBox :name="'on-' ~ key" :checked="on" />
+                    <span class="sr-only">{{ name }}: </span>{{ _("web.admin.rewards.on") }}
+                  </label>
+                {% else %}
+                  <span class="rewards-funds">{{ words.funds(milestone.gift.funds) }}</span>
+                  {{ switch(milestone.enabled) }}
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+          {% if manages %}
+            {% if why %}
+              <Refusal>{{ why }}</Refusal>
+            {% endif %}
+            <FormButton icon="tick">{{ _("web.admin.rewards.milestones.save") }}</FormButton>
+            </form>
+          {% endif %}
+          <p class="bar-text body-text">{{ _("web.admin.rewards.milestones.note") }}</p>
+        </section>
+      {% endif %}
+    </div>
+  </div>
+  {% if found.referral %}<RewardsReferral :found="found.referral" :game="game" :manages="manages" />{% endif %}
+</RewardsPage>

@@ -19,119 +19,116 @@
     <TextField :id="'referral-' ~ name" :name="name" :label="label" :value="value" :error="refused.get(name, '')" :maxlength="size" inputmode="numeric" autocomplete="off" />
   </div>
 {% endmacro %}
-<AdminPage :title="title ~ ' · ' ~ _('web.admin.rewards.referral.title')"
-           current="rewards">
-  <RewardsHead :game="game" :subtitle="_('web.admin.rewards.subtitle', game=game.name)" />
-  <Panel class="enter-panel">
-    <form method="post"
-          action="{{ path }}"
-          data-admin-form
-          data-still="{{ _('web.admin.still_needed') }}"
-          class="referral-step-form">
-      <CsrfField />
-      <h2 class="bar bar-large">{{ title }} · {{ _("web.admin.rewards.referral.title") }}</h2>
-      {% if not manages %}
-        <RoleNote glyph="lock" lines>{{ _("web.admin.rewards.referral.moderator") }}</RoleNote>
-      {% endif %}
-      <fieldset {% if not manages %}disabled{% endif %} class="referral-step-fields">
-        <legend class="sr-only">{{ title }}</legend>
-        <div class="referral-pair">
-          {{ field("level", _("web.admin.rewards.referral.level"), found.level, "3") }}
-          {% if found.name == "second" %}{{ field("days", _("web.admin.rewards.referral.window"), found.days, "4") }}{% endif %}
-        </div>
-        <p class="bar-text body-text">{{ found.order }}</p>
-        {% for side in ("recruiter", "recruit") %}
-          {% set draft = found.sides[side] %}
-          <fieldset class="referral-side">
-            <legend class="bar">{{ _("web.admin.rewards.referral.col." ~ side) }}</legend>
-            <div role="radiogroup"
-                 aria-label="{{ _('web.admin.rewards.referral.col.' ~ side) }}"
-                 class="choice-tiles referral-kinds">
-              {% for kind, glyph in (("points", "valor"), ("funds", "coin"), ("item", "gift")) %}
-                {% if kind != "points" or found.points %}
-                  {% set currency = rules.points if kind == "points" else rules.currency %}
-                  <ChoiceTile :name="side ~ '-kind'" :value="kind" :title="_('web.admin.rewards.referral.item_kind') if kind == 'item' else _('games.' ~ game.id ~ '.currency.' ~ currency)" :glyph="glyph" :checked="draft.kind == kind" />
-                {% endif %}
-              {% endfor %}
+<RewardsPage :game="game"
+             :title="title ~ ' · ' ~ _('web.admin.rewards.referral.title')">
+  <form method="post"
+        action="{{ path }}"
+        data-admin-form
+        data-still="{{ _('web.admin.still_needed') }}"
+        class="referral-step-form">
+    <CsrfField />
+    <h2 class="bar bar-large">{{ title }} · {{ _("web.admin.rewards.referral.title") }}</h2>
+    {% if not manages %}
+      <RoleNote glyph="lock" lines>{{ _("web.admin.rewards.referral.moderator") }}</RoleNote>
+    {% endif %}
+    <fieldset {% if not manages %}disabled{% endif %} class="referral-step-fields">
+      <legend class="sr-only">{{ title }}</legend>
+      <div class="referral-pair">
+        {{ field("level", _("web.admin.rewards.referral.level"), found.level, "3") }}
+        {% if found.name == "second" %}{{ field("days", _("web.admin.rewards.referral.window"), found.days, "4") }}{% endif %}
+      </div>
+      <p class="bar-text body-text">{{ found.order }}</p>
+      {% for side in ("recruiter", "recruit") %}
+        {% set draft = found.sides[side] %}
+        <fieldset class="referral-side">
+          <legend class="bar">{{ _("web.admin.rewards.referral.col." ~ side) }}</legend>
+          <div role="radiogroup"
+               aria-label="{{ _('web.admin.rewards.referral.col.' ~ side) }}"
+               class="choice-tiles referral-kinds">
+            {% for kind, glyph in (("points", "valor"), ("funds", "coin"), ("item", "gift")) %}
+              {% if kind != "points" or found.points %}
+                {% set currency = rules.points if kind == "points" else rules.currency %}
+                <ChoiceTile :name="side ~ '-kind'" :value="kind" :title="_('web.admin.rewards.referral.item_kind') if kind == 'item' else _('games.' ~ game.id ~ '.currency.' ~ currency)" :glyph="glyph" :checked="draft.kind == kind" />
+              {% endif %}
+            {% endfor %}
+          </div>
+          {{ refusal(side ~ "-gift") }}
+          <div class="referral-pair">
+            {{ field(side ~ "-amount", _("web.admin.rewards.referral.amount"), draft.amount, "10") }}
+            {% if not found.searchable %}{{ field(side ~ "-item", _("web.admin.rewards.referral.item"), draft.item, "10") }}{% endif %}
+          </div>
+          {% if found.searchable %}
+            <ItemSearch :id="'referral-' ~ side ~ '-q'" :name="side ~ '-q'" :label="_('web.admin.items.search')" :value="draft.query" refresh joined />
+            <div data-live="{{ path }}" class="code-add">
+              {% if found.candidates[side] %}
+                <fieldset class="field-stack">
+                  <legend class="sr-only">{{ _("web.admin.keys.matches") }}</legend>
+                  {% for item, name in found.candidates[side] %}
+                    {% set picked = draft.item == item.id|string %}
+                    <label {% if picked %}aria-current="true"{% endif %}
+                           class="admin-match code-candidate">
+                      <input type="radio"
+                             name="{{ side }}-item"
+                             value="{{ item.id }}"
+                             {% if picked %} checked{% endif %}
+                             class="choice-input">
+                      <AdminItemIcon :game="game" :item="item" :shown="found.icons" />
+                      <span class="cell-stack">
+                        <span class="admin-hero-strong">{{ name }}</span>
+                        <span class="admin-item-kind">{{ _("games." ~ game.id ~ ".item_kind." ~ item.kind) }} · {{ _("web.admin.items.number", id=item.id) }}</span>
+                      </span>
+                    </label>
+                  {% endfor %}
+                </fieldset>
+              {% else %}
+                <p aria-live="polite" class="bar-text body-text">
+                  {{ _("web.admin.items.search.none", query=draft.query) if draft.query else _("web.admin.items.search.hint") }}
+                </p>
+              {% endif %}
             </div>
-            {{ refusal(side ~ "-gift") }}
-            <div class="referral-pair">
-              {{ field(side ~ "-amount", _("web.admin.rewards.referral.amount"), draft.amount, "10") }}
-              {% if not found.searchable %}{{ field(side ~ "-item", _("web.admin.rewards.referral.item"), draft.item, "10") }}{% endif %}
-            </div>
-            {% if found.searchable %}
-              <ItemSearch :id="'referral-' ~ side ~ '-q'" :name="side ~ '-q'" :label="_('web.admin.items.search')" :value="draft.query" refresh joined />
-              <div data-live="{{ path }}" class="code-add">
-                {% if found.candidates[side] %}
-                  <fieldset class="field-stack">
-                    <legend class="sr-only">{{ _("web.admin.keys.matches") }}</legend>
-                    {% for item, name in found.candidates[side] %}
-                      {% set picked = draft.item == item.id|string %}
-                      <label {% if picked %}aria-current="true"{% endif %}
-                             class="admin-match code-candidate">
-                        <input type="radio"
-                               name="{{ side }}-item"
-                               value="{{ item.id }}"
-                               {% if picked %} checked{% endif %}
-                               class="choice-input">
-                        <AdminItemIcon :game="game" :item="item" :shown="found.icons" />
-                        <span class="cell-stack">
-                          <span class="admin-hero-strong">{{ name }}</span>
-                          <span class="admin-item-kind">{{ _("games." ~ game.id ~ ".item_kind." ~ item.kind) }} · {{ _("web.admin.items.number", id=item.id) }}</span>
-                        </span>
-                      </label>
-                    {% endfor %}
-                  </fieldset>
-                {% else %}
-                  <p aria-live="polite" class="bar-text body-text">
-                    {{ _("web.admin.items.search.none", query=draft.query) if draft.query else _("web.admin.items.search.hint") }}
-                  </p>
-                {% endif %}
+          {% endif %}
+          <div role="radiogroup"
+               aria-label="{{ _('web.admin.items.ownership') }}"
+               class="choice-tiles referral-owns">
+            {% for own, glyph in (("perm", "infinity"), ("days", "clock"), ("uses", "uses")) %}
+              <ChoiceTile :name="side ~ '-own'" :value="own" :title="_('web.admin.keys.own.' ~ own ~ '.title')" :glyph="glyph" :checked="draft.own == own" />
+            {% endfor %}
+          </div>
+          <div class="referral-pair">{{ field(side ~ "-count", _("web.admin.rewards.referral.count"), draft.count, "10") }}</div>
+          <p class="field-label field-label-joined">{{ _("web.admin.rewards.referral.name") }}</p>
+          <div role="radiogroup"
+               aria-label="{{ _('web.admin.rewards.referral.name') }}"
+               class="choice-tiles referral-names">
+            {% set imported = found.imported.get(side) %}
+            <ChoiceTile :name="side ~ '-name'" value="imported" :title="_('web.admin.rewards.referral.name.imported')" glyph="link" :checked="draft.name != 'own'">
+            <span class="choice-text">
+              {%- if imported %}{{ _("web.admin.rewards.referral.name.imported.text", name=imported[0], id=imported[1]) }}{% else %}{{ _("web.admin.rewards.referral.name.words") }}{% endif -%}
+            </span>
+            </ChoiceTile>
+            <ChoiceTile :name="side ~ '-name'" value="own" :title="_('web.admin.rewards.referral.name.own')" glyph="edit" :checked="draft.name == 'own'">
+            <span class="choice-text">{{ _("web.admin.rewards.referral.name.own.text") }}</span>
+            </ChoiceTile>
+          </div>
+          {{ refusal(side ~ "-name") }}
+          <div class="referral-pair">
+            {% for language in codes %}
+              <div class="field-column">
+                <TextField :id="'referral-' ~ side ~ '-text-' ~ language" :name="side ~ '-text-' ~ language" :label="_('web.admin.rewards.referral.text', language=language_name(language))" :value="draft.texts.get(language, '')" maxlength="60" autocomplete="off" />
               </div>
-            {% endif %}
-            <div role="radiogroup"
-                 aria-label="{{ _('web.admin.items.ownership') }}"
-                 class="choice-tiles referral-owns">
-              {% for own, glyph in (("perm", "infinity"), ("days", "clock"), ("uses", "uses")) %}
-                <ChoiceTile :name="side ~ '-own'" :value="own" :title="_('web.admin.keys.own.' ~ own ~ '.title')" :glyph="glyph" :checked="draft.own == own" />
-              {% endfor %}
-            </div>
-            <div class="referral-pair">{{ field(side ~ "-count", _("web.admin.rewards.referral.count"), draft.count, "10") }}</div>
-            <p class="field-label field-label-joined">{{ _("web.admin.rewards.referral.name") }}</p>
-            <div role="radiogroup"
-                 aria-label="{{ _('web.admin.rewards.referral.name') }}"
-                 class="choice-tiles referral-names">
-              {% set imported = found.imported.get(side) %}
-              <ChoiceTile :name="side ~ '-name'" value="imported" :title="_('web.admin.rewards.referral.name.imported')" glyph="link" :checked="draft.name != 'own'">
-              <span class="choice-text">
-                {%- if imported %}{{ _("web.admin.rewards.referral.name.imported.text", name=imported[0], id=imported[1]) }}{% else %}{{ _("web.admin.rewards.referral.name.words") }}{% endif -%}
-              </span>
-              </ChoiceTile>
-              <ChoiceTile :name="side ~ '-name'" value="own" :title="_('web.admin.rewards.referral.name.own')" glyph="edit" :checked="draft.name == 'own'">
-              <span class="choice-text">{{ _("web.admin.rewards.referral.name.own.text") }}</span>
-              </ChoiceTile>
-            </div>
-            {{ refusal(side ~ "-name") }}
-            <div class="referral-pair">
-              {% for language in codes %}
-                <div class="field-column">
-                  <TextField :id="'referral-' ~ side ~ '-text-' ~ language" :name="side ~ '-text-' ~ language" :label="_('web.admin.rewards.referral.text', language=language_name(language))" :value="draft.texts.get(language, '')" maxlength="60" autocomplete="off" />
-                </div>
-              {% endfor %}
-            </div>
-          </fieldset>
-        {% endfor %}
-      </fieldset>
-      {% if manages %}
-        <TextField id="referral-note" name="note" :label="_('web.admin.note')" :value="found.note" :error="refused.get('note', '')" required maxlength="300" autocomplete="off" :data-needed="_('web.admin.still_needed.note')" />
-        <div class="reward-save">
-          <FormWhy>{{ _("web.admin.rewards.referral.refused") if refused else "" }}</FormWhy>
-          <ActionButton :label="_('web.admin.rewards.referral.save', n=found.number)" :busy="_('web.admin.store.save.busy')" />
-        </div>
-      {% endif %}
-      <p class="referral-back">
-        <FormButton icon="back" :href="url('/admin/rewards/' ~ game.id) ~ '#rewards-referral'">{{ _("web.admin.rewards.referral.back") }}</FormButton>
-      </p>
-    </form>
-  </Panel>
-</AdminPage>
+            {% endfor %}
+          </div>
+        </fieldset>
+      {% endfor %}
+    </fieldset>
+    {% if manages %}
+      <TextField id="referral-note" name="note" :label="_('web.admin.note')" :value="found.note" :error="refused.get('note', '')" required maxlength="300" autocomplete="off" :data-needed="_('web.admin.still_needed.note')" />
+      <div class="reward-save">
+        <FormWhy>{{ _("web.admin.rewards.referral.refused") if refused else "" }}</FormWhy>
+        <ActionButton :label="_('web.admin.rewards.referral.save', n=found.number)" :busy="_('web.admin.store.save.busy')" />
+      </div>
+    {% endif %}
+    <p class="referral-back">
+      <FormButton icon="back" :href="url('/admin/rewards/' ~ game.id) ~ '#rewards-referral'">{{ _("web.admin.rewards.referral.back") }}</FormButton>
+    </p>
+  </form>
+</RewardsPage>

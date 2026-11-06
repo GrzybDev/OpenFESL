@@ -20,158 +20,157 @@
 {% macro owned(ownership) -%}
   {%- if ownership.type == "tlmd" %}{{ _n("web.store.price.days", ownership.days) }}{% elif ownership.type == "lmct" %}{{ _n("web.store.price.uses", ownership.uses) }}{% else %}{{ _("web.store.price.permanent") }}{% endif -%}
 {%- endmacro %}
-<AdminPage :title="row.name ~ ' · ' ~ _('web.admin.store.tab.boxes')"
-           current="store">
-  <StoreHead :game="game" current="boxes" :subtitle="_('web.admin.boxes.subtitle', game=game.name)" />
-  <Panel class="enter-panel">
-    <PanelBack :href="url('/admin/store/' ~ game.id ~ '/boxes') ~ '#boxes-claw'" :label="_('web.admin.store.tab.boxes')" />
-    <div class="list-layout admin-layout">
-      <div class="list-main prices-item-main">
-        {% if manages %}
-          <form method="post" action="{{ here }}" class="prices-form">
-            <CsrfField />
-        {% endif %}
-        <h2 class="bar bar-large">{{ _("web.admin.boxes.claw.pool.title", name=row.name) }}</h2>
-        {% for tier in tiers %}
-          {% set marked = ("rare-" ~ tier.index) in form if saved else tier.index in rare %}
-          <section aria-labelledby="tier-{{ tier.index }}" class="account-part">
-            <h3 id="tier-{{ tier.index }}" class="bar claw-tier-bar">
-              <span>{{ tier_name(tier.index) }} · {{ _n("web.admin.boxes.entries", tier.entries|length) }}{% if tier.index in rare %} · {{ _("web.claw.rare") }}{% endif %}</span>
-              {% if manages %}
-                <label class="claw-rare-mark">
-                  <CheckBox :name="'rare-' ~ tier.index" :checked="marked" />
-                  {{ _("web.admin.boxes.claw.rare_mark") }}
-                </label>
-                <label class="box-weight">
-                  <span>{{ _("web.admin.boxes.weight") }}</span>
-                  <TextField :name="'weight-' ~ tier.index" :value="weights[loop.index0]" class="box-weight-input" inputmode="numeric" maxlength="3" />
-                  <span>%</span>
-                </label>
-              {% else %}
-                <span class="bar-extra">{{ _("web.admin.boxes.tier.share", share=number(tier.share|float, places=1)) }}</span>
-              {% endif %}
-            </h3>
-            <div class="table-scroll">
-              <div role="table"
-                   aria-labelledby="tier-{{ tier.index }}"
-                   class="table claw-table">
-                <div role="rowgroup" class="enter-rows table-rows">
-                  {% for entry in tier.entries %}
-                    {% set product = entry.product %}
-                    <div role="row"
-                         class="claw-columns{% if manages %} claw-columns-edit{% endif %}">
-                      <div role="cell" class="admin-cell admin-item-name">
-                        <AdminItemIcon :game="game" :item="catalogue.item(product.item_id)" :shown="icons" />
-                        <span class="cell-stack">
-                          <span class="admin-hero-strong">{{ entry.name }}</span>
-                          <span class="cell-ago prices-number">{{ _("web.admin.items.number", id=product.item_id) }}</span>
-                        </span>
-                      </div>
-                      <div role="cell" class="admin-cell">{{ owned(product.ownership) }}</div>
-                      <div role="cell" class="admin-cell claw-fits">{{ fits.get(product.id, "") }}</div>
-                      {% if manages %}
-                        <div role="cell" class="admin-cell prices-state">
-                          <label class="prices-sold">
-                            <CheckBox :name="'remove-' ~ product.id" :checked="form.get('remove-' ~ product.id)" />
-                            {{ _("web.admin.boxes.entry.remove") }}
-                          </label>
-                        </div>
-                      {% endif %}
+<StorePage :game="game"
+           :title="row.name ~ ' · ' ~ _('web.admin.store.tab.boxes')"
+           current="boxes"
+           :subtitle="_('web.admin.boxes.subtitle', game=game.name)">
+  <PanelBack :href="url('/admin/store/' ~ game.id ~ '/boxes') ~ '#boxes-claw'" :label="_('web.admin.store.tab.boxes')" />
+  <div class="list-layout admin-layout">
+    <div class="list-main prices-item-main">
+      {% if manages %}
+        <form method="post" action="{{ here }}" class="prices-form">
+          <CsrfField />
+      {% endif %}
+      <h2 class="bar bar-large">{{ _("web.admin.boxes.claw.pool.title", name=row.name) }}</h2>
+      {% for tier in tiers %}
+        {% set marked = ("rare-" ~ tier.index) in form if saved else tier.index in rare %}
+        <section aria-labelledby="tier-{{ tier.index }}" class="account-part">
+          <h3 id="tier-{{ tier.index }}" class="bar claw-tier-bar">
+            <span>{{ tier_name(tier.index) }} · {{ _n("web.admin.boxes.entries", tier.entries|length) }}{% if tier.index in rare %} · {{ _("web.claw.rare") }}{% endif %}</span>
+            {% if manages %}
+              <label class="claw-rare-mark">
+                <CheckBox :name="'rare-' ~ tier.index" :checked="marked" />
+                {{ _("web.admin.boxes.claw.rare_mark") }}
+              </label>
+              <label class="box-weight">
+                <span>{{ _("web.admin.boxes.weight") }}</span>
+                <TextField :name="'weight-' ~ tier.index" :value="weights[loop.index0]" class="box-weight-input" inputmode="numeric" maxlength="3" />
+                <span>%</span>
+              </label>
+            {% else %}
+              <span class="bar-extra">{{ _("web.admin.boxes.tier.share", share=number(tier.share|float, places=1)) }}</span>
+            {% endif %}
+          </h3>
+          <div class="table-scroll">
+            <div role="table"
+                 aria-labelledby="tier-{{ tier.index }}"
+                 class="table claw-table">
+              <div role="rowgroup" class="enter-rows table-rows">
+                {% for entry in tier.entries %}
+                  {% set product = entry.product %}
+                  <div role="row"
+                       class="claw-columns{% if manages %} claw-columns-edit{% endif %}">
+                    <div role="cell" class="admin-cell admin-item-name">
+                      <AdminItemIcon :game="game" :item="catalogue.item(product.item_id)" :shown="icons" />
+                      <span class="cell-stack">
+                        <span class="admin-hero-strong">{{ entry.name }}</span>
+                        <span class="cell-ago prices-number">{{ _("web.admin.items.number", id=product.item_id) }}</span>
+                      </span>
                     </div>
-                  {% endfor %}
-                </div>
+                    <div role="cell" class="admin-cell">{{ owned(product.ownership) }}</div>
+                    <div role="cell" class="admin-cell claw-fits">{{ fits.get(product.id, "") }}</div>
+                    {% if manages %}
+                      <div role="cell" class="admin-cell prices-state">
+                        <label class="prices-sold">
+                          <CheckBox :name="'remove-' ~ product.id" :checked="form.get('remove-' ~ product.id)" />
+                          {{ _("web.admin.boxes.entry.remove") }}
+                        </label>
+                      </div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
               </div>
             </div>
-          </section>
-        {% else %}
-          <p class="bar-text body-text">{{ _("web.admin.boxes.empty") }}</p>
-        {% endfor %}
-        <p class="bar-text claw-sum{% if total != 100 %} claw-sum-off{% endif %}">
-          <Icon :name="'tick' if total == 100 else 'warn'" :size="16" stroke="currentColor" fill="none" />{{ _("web.admin.boxes.claw.sum.ok") if total == 100 else _("web.admin.boxes.refused.weights", sum=number(total)) }}
-        </p>
-        <p class="bar-text body-text">{{ _("web.admin.boxes.claw.pool.rule") }}</p>
-        {% if manages %}
-          <div class="field-column">
-            <TextField id="claw-pool-note" name="note" :label="_('web.admin.note')" :value="form.get('note', '')" required maxlength="300" autocomplete="off" />
           </div>
-          {% if refused %}
-            <Refusal>{{ refused }}</Refusal>
-          {% endif %}
-          <div class="prices-save">
-            <SmallAction :label="_('web.admin.boxes.claw.pool.save')" :busy="_('web.admin.store.save.busy')" />
-          </div>
-          </form>
-          <section aria-labelledby="box-add" class="account-part">
-            <Bar id="box-add">{{ _("web.admin.boxes.add") }}</Bar>
-            <ItemSearch id="box-search" :label="_('web.admin.store.search')" :value="query" :action="here ~ '#box-add'" />
-            {% if withheld %}
-              <Refusal>{{ _("web.admin.keys.refused.withheld", id=withheld) }}</Refusal>
-            {% endif %}
-            {% for found in candidates %}
-              <form method="post" action="{{ here }}/add" class="box-candidate">
-                <CsrfField />
-                <input type="hidden" name="item" value="{{ found.item.id }}">
-                <p class="box-candidate-name">
-                  <AdminItemIcon :game="game" :item="found.item" :shown="icons" />
-                  <span class="cell-stack"><span class="admin-hero-strong">{{ found.name }}</span><span class="cell-ago">{{ _("web.admin.items.number", id=found.item.id) }}</span></span>
-                </p>
-                <div class="prices-picks">
-                  {% for option in found.options %}
-                    <FilterPick name="ownership" :value="option.written" :checked="loop.first">{{ option.label }}</FilterPick>
-                  {% endfor %}
-                </div>
-                <div class="prices-picks">
-                  {% for tier in tiers %}
-                    <FilterPick name="tier" :value="tier.index" :checked="loop.first">{{ tier_name(tier.index) }}</FilterPick>
-                  {% endfor %}
-                </div>
-                <FormButton icon="plus">{{ _("web.admin.boxes.add.submit") }}</FormButton>
-              </form>
-            {% else %}
-              {% if query and not withheld %}<p class="bar-text body-text">{{ _("web.admin.boxes.add.none", query=query) }}</p>{% endif %}
-            {% endfor %}
-          </section>
-        {% else %}
-          <RoleNote glyph="guard">{{ _("web.admin.boxes.claw.moderator") }}</RoleNote>
-        {% endif %}
-      </div>
-      <div class="list-side admin-side">
-        <section aria-labelledby="claw-preview">
-          <Bar id="claw-preview">{{ _("web.admin.boxes.claw.chances_for") }}</Bar>
-          <nav aria-label="{{ _('web.admin.boxes.claw.chances_for') }}"
-               class="claw-picks">
-            {% for key in game.heroes.factions %}
-              <a href="{{ here }}?{{ {'faction': key, 'class': hero_class}|urlencode }}#claw-preview"
-                 {% if key == faction %} aria-current="true"{% endif %}
-                 class="claw-pick">{{ _("games." ~ game.id ~ ".faction." ~ key) }}</a>
-            {% endfor %}
-          </nav>
-          <nav aria-label="{{ _('web.admin.boxes.claw.chances_for') }}"
-               class="claw-picks claw-picks-classes">
-            {% for key in game.heroes.classes %}
-              <a href="{{ here }}?{{ {'faction': faction, 'class': key}|urlencode }}#claw-preview"
-                 {% if key == hero_class %} aria-current="true"{% endif %}
-                 class="claw-pick">{{ _("games." ~ game.id ~ ".class." ~ key) }}</a>
-            {% endfor %}
-          </nav>
-          <div role="table"
-               aria-labelledby="claw-preview"
-               class="table claw-odds-table">
-            <div role="rowgroup">
-              {% for prize, share in preview %}
-                <div role="row" class="claw-odds-row">
-                  <div role="cell" class="claw-odds-tier">{{ tier_name(prize.tier) }}</div>
-                  <div role="cell">{{ catalogue.name(prize.product.item_id) or prize.product.item_id }} · {{ owned(prize.product.ownership) }}</div>
-                  <div role="cell" class="claw-odds-share">{{ share }}</div>
-                </div>
-              {% else %}
-                <p class="bar-text body-text">{{ _("web.admin.boxes.claw.chances.none") }}</p>
-              {% endfor %}
-            </div>
-          </div>
-          <p class="bar-text body-text">{{ _("web.admin.boxes.claw.chances.note", faction=_("games." ~ game.id ~ ".faction." ~ faction), hero_class=_("games." ~ game.id ~ ".class." ~ hero_class)) }}</p>
         </section>
-      </div>
+      {% else %}
+        <p class="bar-text body-text">{{ _("web.admin.boxes.empty") }}</p>
+      {% endfor %}
+      <p class="bar-text claw-sum{% if total != 100 %} claw-sum-off{% endif %}">
+        <Icon :name="'tick' if total == 100 else 'warn'" :size="16" stroke="currentColor" fill="none" />{{ _("web.admin.boxes.claw.sum.ok") if total == 100 else _("web.admin.boxes.refused.weights", sum=number(total)) }}
+      </p>
+      <p class="bar-text body-text">{{ _("web.admin.boxes.claw.pool.rule") }}</p>
+      {% if manages %}
+        <div class="field-column">
+          <TextField id="claw-pool-note" name="note" :label="_('web.admin.note')" :value="form.get('note', '')" required maxlength="300" autocomplete="off" />
+        </div>
+        {% if refused %}
+          <Refusal>{{ refused }}</Refusal>
+        {% endif %}
+        <div class="prices-save">
+          <SmallAction :label="_('web.admin.boxes.claw.pool.save')" :busy="_('web.admin.store.save.busy')" />
+        </div>
+        </form>
+        <section aria-labelledby="box-add" class="account-part">
+          <Bar id="box-add">{{ _("web.admin.boxes.add") }}</Bar>
+          <ItemSearch id="box-search" :label="_('web.admin.store.search')" :value="query" :action="here ~ '#box-add'" />
+          {% if withheld %}
+            <Refusal>{{ _("web.admin.keys.refused.withheld", id=withheld) }}</Refusal>
+          {% endif %}
+          {% for found in candidates %}
+            <form method="post" action="{{ here }}/add" class="box-candidate">
+              <CsrfField />
+              <input type="hidden" name="item" value="{{ found.item.id }}">
+              <p class="box-candidate-name">
+                <AdminItemIcon :game="game" :item="found.item" :shown="icons" />
+                <span class="cell-stack"><span class="admin-hero-strong">{{ found.name }}</span><span class="cell-ago">{{ _("web.admin.items.number", id=found.item.id) }}</span></span>
+              </p>
+              <div class="prices-picks">
+                {% for option in found.options %}
+                  <FilterPick name="ownership" :value="option.written" :checked="loop.first">{{ option.label }}</FilterPick>
+                {% endfor %}
+              </div>
+              <div class="prices-picks">
+                {% for tier in tiers %}
+                  <FilterPick name="tier" :value="tier.index" :checked="loop.first">{{ tier_name(tier.index) }}</FilterPick>
+                {% endfor %}
+              </div>
+              <FormButton icon="plus">{{ _("web.admin.boxes.add.submit") }}</FormButton>
+            </form>
+          {% else %}
+            {% if query and not withheld %}<p class="bar-text body-text">{{ _("web.admin.boxes.add.none", query=query) }}</p>{% endif %}
+          {% endfor %}
+        </section>
+      {% else %}
+        <RoleNote glyph="guard">{{ _("web.admin.boxes.claw.moderator") }}</RoleNote>
+      {% endif %}
     </div>
-  </Panel>
-</AdminPage>
+    <div class="list-side admin-side">
+      <section aria-labelledby="claw-preview">
+        <Bar id="claw-preview">{{ _("web.admin.boxes.claw.chances_for") }}</Bar>
+        <nav aria-label="{{ _('web.admin.boxes.claw.chances_for') }}"
+             class="claw-picks">
+          {% for key in game.heroes.factions %}
+            <a href="{{ here }}?{{ {'faction': key, 'class': hero_class}|urlencode }}#claw-preview"
+               {% if key == faction %} aria-current="true"{% endif %}
+               class="claw-pick">{{ _("games." ~ game.id ~ ".faction." ~ key) }}</a>
+          {% endfor %}
+        </nav>
+        <nav aria-label="{{ _('web.admin.boxes.claw.chances_for') }}"
+             class="claw-picks claw-picks-classes">
+          {% for key in game.heroes.classes %}
+            <a href="{{ here }}?{{ {'faction': faction, 'class': key}|urlencode }}#claw-preview"
+               {% if key == hero_class %} aria-current="true"{% endif %}
+               class="claw-pick">{{ _("games." ~ game.id ~ ".class." ~ key) }}</a>
+          {% endfor %}
+        </nav>
+        <div role="table"
+             aria-labelledby="claw-preview"
+             class="table claw-odds-table">
+          <div role="rowgroup">
+            {% for prize, share in preview %}
+              <div role="row" class="claw-odds-row">
+                <div role="cell" class="claw-odds-tier">{{ tier_name(prize.tier) }}</div>
+                <div role="cell">{{ catalogue.name(prize.product.item_id) or prize.product.item_id }} · {{ owned(prize.product.ownership) }}</div>
+                <div role="cell" class="claw-odds-share">{{ share }}</div>
+              </div>
+            {% else %}
+              <p class="bar-text body-text">{{ _("web.admin.boxes.claw.chances.none") }}</p>
+            {% endfor %}
+          </div>
+        </div>
+        <p class="bar-text body-text">{{ _("web.admin.boxes.claw.chances.note", faction=_("games." ~ game.id ~ ".faction." ~ faction), hero_class=_("games." ~ game.id ~ ".class." ~ hero_class)) }}</p>
+      </section>
+    </div>
+  </div>
+</StorePage>

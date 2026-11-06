@@ -1,0 +1,9 @@
+{#def game, title: str, current: str = "", frame: str = "" #}
+{# A page of a game's rewards in the admin panel: its head and tabs over the panel that the content
+   fills, in a frame of its own if it has one. #}
+<AdminPage :title="title" current="rewards">
+  <RewardsHead :game="game" :current="current" :subtitle="_('web.admin.rewards.subtitle', game=game.name)" />
+  <Panel :class="'enter-panel ' ~ frame">
+    {{ content }}
+  </Panel>
+</AdminPage>

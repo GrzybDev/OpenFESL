@@ -14,165 +14,164 @@
 {% macro owned(ownership) -%}
   {%- if ownership.type == "tlmd" %}{{ _n("web.store.price.days", ownership.days) }}{% elif ownership.type == "lmct" %}{{ _n("web.store.price.uses", ownership.uses) }}{% else %}{{ _("web.store.forever") }}{% endif -%}
 {%- endmacro %}
-<AdminPage :title="_('web.admin.store.tab.boxes') ~ ' · ' ~ _('web.admin.store.title')"
-           current="store">
-  <StoreHead :game="game" current="boxes" :subtitle="_('web.admin.boxes.subtitle', game=game.name)" />
-  <Panel class="enter-panel">
-    {% if flagged %}
-      <section aria-labelledby="boxes-flag" class="boxes-flag">
-        <p id="boxes-flag" class="prices-missing-head">
-          <Badge name="warn" :size="14" />{{ _n("web.admin.boxes.flag", flagged|map(attribute="below")|map("length")|sum) }}
-        </p>
-        {% for row in flagged %}
-          {% for product in row.below %}
-            <p class="boxes-flag-title">
-              {{ _("web.admin.boxes.flag.title", box=row.name, item=catalogue.name(product.item_id) or product.item_id, ownership=owned(product.ownership), value=number(product.price), currency=_("games." ~ game.id ~ ".currency." ~ product.currency), price=number(row.box.value)) }}
-            </p>
-          {% endfor %}
+<StorePage :game="game"
+           :title="_('web.admin.store.tab.boxes') ~ ' · ' ~ _('web.admin.store.title')"
+           current="boxes"
+           :subtitle="_('web.admin.boxes.subtitle', game=game.name)">
+  {% if flagged %}
+    <section aria-labelledby="boxes-flag" class="boxes-flag">
+      <p id="boxes-flag" class="prices-missing-head">
+        <Badge name="warn" :size="14" />{{ _n("web.admin.boxes.flag", flagged|map(attribute="below")|map("length")|sum) }}
+      </p>
+      {% for row in flagged %}
+        {% for product in row.below %}
+          <p class="boxes-flag-title">
+            {{ _("web.admin.boxes.flag.title", box=row.name, item=catalogue.name(product.item_id) or product.item_id, ownership=owned(product.ownership), value=number(product.price), currency=_("games." ~ game.id ~ ".currency." ~ product.currency), price=number(row.box.value)) }}
+          </p>
         {% endfor %}
-        <p class="body-text">{{ _("web.admin.boxes.flag.text") }}</p>
-        <SmallAction :href="base ~ '/' ~ flagged[0].box.id" :label="_('web.admin.boxes.edit', box=flagged[0].name)" />
-      </section>
-    {% endif %}
-    <div class="list-layout admin-layout">
-      <div class="list-main boxes-main">
-        {% for key, rows in groups.items() %}
-          <section aria-labelledby="boxes-{{ key }}" class="admin-list">
-            <Bar :id="'boxes-' ~ key" :extra="_n('web.admin.boxes.count', rows|length)">{{ _("web.admin.boxes.group." ~ key) if key in ("chest", "unlisted") else _("games." ~ game.id ~ ".deal_section." ~ key) }}</Bar>
-            <div class="table-scroll table-scroll-flush">
-              <div role="table"
-                   aria-labelledby="boxes-{{ key }}"
-                   class="table boxes-table">
-                <div role="rowgroup" class="admin-list-head">
-                  <div role="row" class="boxes-columns">
-                    <div role="columnheader" class="column-head column-name">{{ _("web.admin.boxes.column.box") }}</div>
-                    <div role="columnheader" class="column-head">{{ _("web.admin.boxes.column.sold") }}</div>
-                    <div role="columnheader"
-                         class="column-head column-number">{{ _("web.admin.boxes.column.price") }}</div>
-                    <div role="columnheader" class="column-head">{{ _("web.admin.boxes.column.switch") }}</div>
-                    <div role="columnheader" class="column-head">{{ _("web.admin.boxes.column.value") }}</div>
-                    <div role="columnheader"><span class="sr-only">{{ _("web.admin.boxes.column.table") }}</span></div>
-                  </div>
+      {% endfor %}
+      <p class="body-text">{{ _("web.admin.boxes.flag.text") }}</p>
+      <SmallAction :href="base ~ '/' ~ flagged[0].box.id" :label="_('web.admin.boxes.edit', box=flagged[0].name)" />
+    </section>
+  {% endif %}
+  <div class="list-layout admin-layout">
+    <div class="list-main boxes-main">
+      {% for key, rows in groups.items() %}
+        <section aria-labelledby="boxes-{{ key }}" class="admin-list">
+          <Bar :id="'boxes-' ~ key" :extra="_n('web.admin.boxes.count', rows|length)">{{ _("web.admin.boxes.group." ~ key) if key in ("chest", "unlisted") else _("games." ~ game.id ~ ".deal_section." ~ key) }}</Bar>
+          <div class="table-scroll table-scroll-flush">
+            <div role="table"
+                 aria-labelledby="boxes-{{ key }}"
+                 class="table boxes-table">
+              <div role="rowgroup" class="admin-list-head">
+                <div role="row" class="boxes-columns">
+                  <div role="columnheader" class="column-head column-name">{{ _("web.admin.boxes.column.box") }}</div>
+                  <div role="columnheader" class="column-head">{{ _("web.admin.boxes.column.sold") }}</div>
+                  <div role="columnheader"
+                       class="column-head column-number">{{ _("web.admin.boxes.column.price") }}</div>
+                  <div role="columnheader" class="column-head">{{ _("web.admin.boxes.column.switch") }}</div>
+                  <div role="columnheader" class="column-head">{{ _("web.admin.boxes.column.value") }}</div>
+                  <div role="columnheader"><span class="sr-only">{{ _("web.admin.boxes.column.table") }}</span></div>
                 </div>
-                <div role="rowgroup" class="enter-rows table-rows">
-                  {% for row in rows %}
-                    {% set box = row.box %}
-                    {% set href = base ~ "/" ~ box.id %}
-                    <div role="row" class="boxes-columns boxes-row">
-                      <div role="cell" class="admin-cell prices-item-name">
-                        <Badge :name="'chest' if box.kind != 'box' else 'box'" both />
-                        <a href="{{ href }}" class="account-link"><span class="admin-hero-strong">{{ row.name }}</span><span class="admin-item-kind">{{ _("games." ~ game.id ~ ".faction." ~ box.faction) if box.faction else _("web.store.requires.any_faction") }} · {{ _("games." ~ game.id ~ ".class." ~ box.hero_class) if box.hero_class else _("web.store.requires.any_class") }}</span></a>
-                      </div>
-                      <div role="cell" class="admin-cell cell-stack">
-                        <span aria-hidden="true" class="cell-label">{{ _("web.admin.boxes.column.sold") }}</span>
-                        {% if box.kind != "box" %}
-                          <span>{{ _("web.admin.boxes.sold.keys") }}</span>
-                        {% elif row.always %}
-                          <span>{{ _("web.admin.boxes.sold.always") }}</span>
-                        {% elif row.days %}
-                          <span>{{ _("web.admin.boxes.sold.window", first=when(row.days[0], "MMMd"), last=when(row.days[1], "MMMd")) }}</span>
-                          <span class="cell-ago">{{ _("web.admin.boxes.sold.now") if row.selling else _("web.admin.boxes.sold.not_now") }}</span>
-                        {% elif row.selling and row.selling.bundle.ends %}
-                          <span>{{ _("web.admin.boxes.sold.until", day=when(row.selling.bundle.ends, "yMMMd")) }}</span>
-                        {% else %}
-                          <span>{{ _("web.admin.boxes.sold.not_now") }}</span>
-                        {% endif %}
-                      </div>
-                      <div role="cell" class="admin-cell boxes-price">{{ number(box.value) }}</div>
-                      <div role="cell" class="admin-cell boxes-sale">
-                        {% set sold = _("web.admin.boxes.state.on" if box.enabled else "web.admin.boxes.state.off") if box.kind == "box" else _("web.admin.boxes.chest.on" if box.enabled else "web.admin.boxes.chest.off") %}
-                        {% if manages and box.kind == "box" %}
-                          <AdminSwitch :action="base ~ '/' ~ box.id ~ '/switch'" :on="box.enabled" :name="row.name" :back="base ~ '#boxes-' ~ key" :label="sold" />
-                        {% else %}
-                          <span class="state-word"><Badge :name="'tick' if box.enabled else 'x'" lines />{{ sold }}</span>
-                        {% endif %}
-                      </div>
-                      <div role="cell" class="admin-cell cell-stack">
-                        <span class="prices-points">{{ ratio(row) }}</span>
-                        <span class="cell-ago">
-                          {%- if row.below %}<Icon name="warn" :size="12" fill="currentColor" />
-                          {% endif -%}
-                          {{ _n("web.admin.boxes.entries", box.drops|length) }}{% if row.below %} · {{ _n("web.admin.boxes.entries.below", row.below|length) }}{% endif %}
-                        </span>
-                      </div>
-                      <div role="cell" class="cell-end">
-                        <EndSquare :href="href" :label="_('web.admin.boxes.edit', box=row.name)" />
-                      </div>
+              </div>
+              <div role="rowgroup" class="enter-rows table-rows">
+                {% for row in rows %}
+                  {% set box = row.box %}
+                  {% set href = base ~ "/" ~ box.id %}
+                  <div role="row" class="boxes-columns boxes-row">
+                    <div role="cell" class="admin-cell prices-item-name">
+                      <Badge :name="'chest' if box.kind != 'box' else 'box'" both />
+                      <a href="{{ href }}" class="account-link"><span class="admin-hero-strong">{{ row.name }}</span><span class="admin-item-kind">{{ _("games." ~ game.id ~ ".faction." ~ box.faction) if box.faction else _("web.store.requires.any_faction") }} · {{ _("games." ~ game.id ~ ".class." ~ box.hero_class) if box.hero_class else _("web.store.requires.any_class") }}</span></a>
                     </div>
-                  {% endfor %}
-                </div>
+                    <div role="cell" class="admin-cell cell-stack">
+                      <span aria-hidden="true" class="cell-label">{{ _("web.admin.boxes.column.sold") }}</span>
+                      {% if box.kind != "box" %}
+                        <span>{{ _("web.admin.boxes.sold.keys") }}</span>
+                      {% elif row.always %}
+                        <span>{{ _("web.admin.boxes.sold.always") }}</span>
+                      {% elif row.days %}
+                        <span>{{ _("web.admin.boxes.sold.window", first=when(row.days[0], "MMMd"), last=when(row.days[1], "MMMd")) }}</span>
+                        <span class="cell-ago">{{ _("web.admin.boxes.sold.now") if row.selling else _("web.admin.boxes.sold.not_now") }}</span>
+                      {% elif row.selling and row.selling.bundle.ends %}
+                        <span>{{ _("web.admin.boxes.sold.until", day=when(row.selling.bundle.ends, "yMMMd")) }}</span>
+                      {% else %}
+                        <span>{{ _("web.admin.boxes.sold.not_now") }}</span>
+                      {% endif %}
+                    </div>
+                    <div role="cell" class="admin-cell boxes-price">{{ number(box.value) }}</div>
+                    <div role="cell" class="admin-cell boxes-sale">
+                      {% set sold = _("web.admin.boxes.state.on" if box.enabled else "web.admin.boxes.state.off") if box.kind == "box" else _("web.admin.boxes.chest.on" if box.enabled else "web.admin.boxes.chest.off") %}
+                      {% if manages and box.kind == "box" %}
+                        <AdminSwitch :action="base ~ '/' ~ box.id ~ '/switch'" :on="box.enabled" :name="row.name" :back="base ~ '#boxes-' ~ key" :label="sold" />
+                      {% else %}
+                        <span class="state-word"><Badge :name="'tick' if box.enabled else 'x'" lines />{{ sold }}</span>
+                      {% endif %}
+                    </div>
+                    <div role="cell" class="admin-cell cell-stack">
+                      <span class="prices-points">{{ ratio(row) }}</span>
+                      <span class="cell-ago">
+                        {%- if row.below %}<Icon name="warn" :size="12" fill="currentColor" />
+                        {% endif -%}
+                        {{ _n("web.admin.boxes.entries", box.drops|length) }}{% if row.below %} · {{ _n("web.admin.boxes.entries.below", row.below|length) }}{% endif %}
+                      </span>
+                    </div>
+                    <div role="cell" class="cell-end">
+                      <EndSquare :href="href" :label="_('web.admin.boxes.edit', box=row.name)" />
+                    </div>
+                  </div>
+                {% endfor %}
               </div>
             </div>
-          </section>
-        {% else %}
-          <div class="prices-missing">
-            <p class="prices-missing-title">{{ _("web.admin.boxes.none", game=game.name) }}</p>
-            <p class="body-text">{{ _("web.admin.boxes.none.text") }}</p>
-            <SmallAction :href="url('/admin/catalogues')" :label="_('web.admin.menu.catalogues')" />
           </div>
-        {% endfor %}
-      </div>
-
-      <div class="list-side admin-side">
-        {% set themed = deals.sections.get("themed") if deals else none %}
-        {% if themed and themed.schedule %}
-          <section aria-labelledby="boxes-rotation">
-            <Bar id="boxes-rotation">{{ _("web.admin.boxes.themed") }}</Bar>
-            <dl class="facts">
-              <Fact :label="_('web.admin.boxes.themed.size')" plain>
-                {{ number((themed.size or 1) * ((themed.schedule.lasts or themed.schedule.every) // themed.schedule.every)) }}
-              </Fact>
-              <Fact :label="_('web.admin.boxes.themed.every')" plain>
-                {{ _n("web.store.price.days", themed.schedule.every) }}
-              </Fact>
-              <Fact :label="_('web.admin.boxes.themed.gap')" plain>
-                {{ _n("web.store.price.days", themed.gap) }}
-              </Fact>
-            </dl>
-            <p class="bar-text body-text">{{ _("web.admin.boxes.themed.text", days=number(themed.schedule.every), stays=_n("web.store.price.days", themed.schedule.lasts or themed.schedule.every)) }}</p>
-          </section>
-        {% endif %}
-        {% if chests %}
-          {% set opens = not chest or chest.box.enabled %}
-          {% set account = url("/admin/store/" ~ game.id ~ "/account") %}
-          <section aria-labelledby="boxes-chest-rules">
-            <Bar id="boxes-chest-rules" :extra="_('web.admin.boxes.chest.on' if opens else 'web.admin.boxes.chest.off')" wrap>{{ _("web.admin.boxes.chest") }}</Bar>
-            {% if chest %}
-              <div class="boxes-chest-switch">
-                <p class="prices-off-text">
-                  <span class="prices-off-title">{{ _("web.admin.boxes.chest.opens") }}</span>
-                  <span>{{ _("web.admin.boxes.chest.text" if opens else "web.admin.boxes.chest.text.off") }}</span>
-                </p>
-                {% if manages %}
-                  <AdminSwitch :action="base ~ '/' ~ chest.box.id ~ '/switch'" :on="opens" :name="_('web.admin.boxes.chest.opens')" :back="base ~ '#boxes-chest-rules'" />
-                {% endif %}
-              </div>
-            {% endif %}
-            <dl class="facts">
-              <Fact :label="_('web.admin.boxes.chest.key')" plain>
-                {{ number(chests.key_price) }} {{ _("games." ~ game.id ~ ".currency." ~ chests.currency) }}
-                <a href="{{ account }}"
-                   class="boxes-chest-link">{{ _("web.admin.boxes.chest.prices") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
-              </Fact>
-              <Fact :label="_('web.admin.boxes.chest.most')" plain>
-                {{ number(chests.most) }}
-                <a href="{{ account }}"
-                   class="boxes-chest-link">{{ _("web.admin.boxes.chest.caps") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
-              </Fact>
-              {% if chest %}
-                <Fact :label="_('web.admin.boxes.chest.table')" plain>
-                  {{ _n("web.admin.boxes.entries", chest.box.drops|length) }} · {{ ratio(chest) }}
-                </Fact>
-              {% endif %}
-            </dl>
-          </section>
-        {% endif %}
-        {% if claw %}<AdminClaw :of="game" :claw="claw" :manages="manages" />{% endif %}
-        <section aria-labelledby="boxes-players">
-          <Bar id="boxes-players">{{ _("web.admin.boxes.players") }}</Bar>
-          <p class="bar-text body-text">{{ _("web.admin.boxes.players.text") }}</p>
         </section>
-      </div>
+      {% else %}
+        <div class="prices-missing">
+          <p class="prices-missing-title">{{ _("web.admin.boxes.none", game=game.name) }}</p>
+          <p class="body-text">{{ _("web.admin.boxes.none.text") }}</p>
+          <SmallAction :href="url('/admin/catalogues')" :label="_('web.admin.menu.catalogues')" />
+        </div>
+      {% endfor %}
     </div>
-  </Panel>
-</AdminPage>
+
+    <div class="list-side admin-side">
+      {% set themed = deals.sections.get("themed") if deals else none %}
+      {% if themed and themed.schedule %}
+        <section aria-labelledby="boxes-rotation">
+          <Bar id="boxes-rotation">{{ _("web.admin.boxes.themed") }}</Bar>
+          <dl class="facts">
+            <Fact :label="_('web.admin.boxes.themed.size')" plain>
+              {{ number((themed.size or 1) * ((themed.schedule.lasts or themed.schedule.every) // themed.schedule.every)) }}
+            </Fact>
+            <Fact :label="_('web.admin.boxes.themed.every')" plain>
+              {{ _n("web.store.price.days", themed.schedule.every) }}
+            </Fact>
+            <Fact :label="_('web.admin.boxes.themed.gap')" plain>
+              {{ _n("web.store.price.days", themed.gap) }}
+            </Fact>
+          </dl>
+          <p class="bar-text body-text">{{ _("web.admin.boxes.themed.text", days=number(themed.schedule.every), stays=_n("web.store.price.days", themed.schedule.lasts or themed.schedule.every)) }}</p>
+        </section>
+      {% endif %}
+      {% if chests %}
+        {% set opens = not chest or chest.box.enabled %}
+        {% set account = url("/admin/store/" ~ game.id ~ "/account") %}
+        <section aria-labelledby="boxes-chest-rules">
+          <Bar id="boxes-chest-rules" :extra="_('web.admin.boxes.chest.on' if opens else 'web.admin.boxes.chest.off')" wrap>{{ _("web.admin.boxes.chest") }}</Bar>
+          {% if chest %}
+            <div class="boxes-chest-switch">
+              <p class="prices-off-text">
+                <span class="prices-off-title">{{ _("web.admin.boxes.chest.opens") }}</span>
+                <span>{{ _("web.admin.boxes.chest.text" if opens else "web.admin.boxes.chest.text.off") }}</span>
+              </p>
+              {% if manages %}
+                <AdminSwitch :action="base ~ '/' ~ chest.box.id ~ '/switch'" :on="opens" :name="_('web.admin.boxes.chest.opens')" :back="base ~ '#boxes-chest-rules'" />
+              {% endif %}
+            </div>
+          {% endif %}
+          <dl class="facts">
+            <Fact :label="_('web.admin.boxes.chest.key')" plain>
+              {{ number(chests.key_price) }} {{ _("games." ~ game.id ~ ".currency." ~ chests.currency) }}
+              <a href="{{ account }}"
+                 class="boxes-chest-link">{{ _("web.admin.boxes.chest.prices") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+            </Fact>
+            <Fact :label="_('web.admin.boxes.chest.most')" plain>
+              {{ number(chests.most) }}
+              <a href="{{ account }}"
+                 class="boxes-chest-link">{{ _("web.admin.boxes.chest.caps") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+            </Fact>
+            {% if chest %}
+              <Fact :label="_('web.admin.boxes.chest.table')" plain>
+                {{ _n("web.admin.boxes.entries", chest.box.drops|length) }} · {{ ratio(chest) }}
+              </Fact>
+            {% endif %}
+          </dl>
+        </section>
+      {% endif %}
+      {% if claw %}<AdminClaw :of="game" :claw="claw" :manages="manages" />{% endif %}
+      <section aria-labelledby="boxes-players">
+        <Bar id="boxes-players">{{ _("web.admin.boxes.players") }}</Bar>
+        <p class="bar-text body-text">{{ _("web.admin.boxes.players.text") }}</p>
+      </section>
+    </div>
+  </div>
+</StorePage>

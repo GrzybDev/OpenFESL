@@ -19,128 +19,127 @@
 {% macro value(rule) -%}
   {%- if rule.use_price is not none %}{{ _("web.admin.store.rule.use", price=number(rule.use_price)) }}{% else %}{{ number(rule.value or 0) }}{% endif -%}
 {%- endmacro %}
-<AdminPage :title="_('web.admin.store.view.rules') ~ ' · ' ~ _('web.admin.store.title')"
-           current="store">
-  <StoreHead :game="game" current="prices" :subtitle="_('web.admin.store.subtitle', game=game.name)" />
-  <Panel class="enter-panel">
-    <PricesTabs :game="game" current="rules" />
-    <div class="list-layout admin-layout">
-      <section aria-labelledby="rules-list" class="list-main admin-list rules-list">
-        <Bar id="rules-list" :extra="_n('web.admin.store.rules.count', rows|length)">{{ _("web.admin.store.rules") }}</Bar>
-        <div class="table-scroll table-scroll-flush">
-          <div role="table" aria-labelledby="rules-list" class="table rules-table">
-            <div role="rowgroup" class="admin-list-head">
-              <div role="row" class="rules-columns">
-                <div role="columnheader"
-                     class="column-head column-name">{{ _("web.admin.store.rules.column.rule") }}</div>
-                <div role="columnheader" class="column-head">{{ _("web.admin.store.point.column.currency") }}</div>
-                <div role="columnheader"
-                     class="column-head column-number">{{ _("web.admin.store.rules.column.value") }}</div>
-                <div role="columnheader" class="column-head">{{ _("web.admin.store.rules.column.sold") }}</div>
-                <div role="columnheader" class="column-head">{{ _("web.admin.store.rules.column.items") }}</div>
-                <div role="columnheader"><span class="sr-only">{{ _("web.admin.store.column.edit") }}</span></div>
-              </div>
-            </div>
-            <div role="rowgroup" class="enter-rows table-rows">
-              {% for row in rows %}
-                {% set name = _("games." ~ game.id ~ ".price_rule." ~ row.key) %}
-                <div role="row"
-                     {% if row.key == chosen.key %} aria-current="true"{% endif %}
-                     class="rules-columns rules-row">
-                  <div role="cell" class="admin-cell cell-stack">
-                    <span class="admin-hero-strong">{{ name }}</span>
-                    <span class="cell-ago">{{ _("games." ~ game.id ~ ".item_kind." ~ row.rule.kind) }}</span>
-                  </div>
-                  <div role="cell" class="admin-cell">
-                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.store.point.column.currency") }}</span>
-                    {{ _("games." ~ game.id ~ ".currency." ~ row.rule.currency) }}
-                  </div>
-                  <div role="cell" class="admin-cell cell-stack rules-value">
-                    <span>{{ value(row.rule) }}</span>
-                    {% if row.rule != row.seed %}
-                      <span class="cell-ago">{{ _("web.admin.store.rules.seed", value=value(row.seed)) }}</span>
-                    {% endif %}
-                  </div>
-                  <div role="cell" class="admin-cell">
-                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.store.rules.column.sold") }}</span>
-                    {{ _("web.admin.store.rules.fixed") if row.fixed else ways(row.rule) }}
-                  </div>
-                  <div role="cell" class="admin-cell cell-stack">
-                    <span class="prices-points">{{ _n("web.admin.store.rules.items", row.items) }}</span>
-                    <span class="cell-ago">{{ _("web.admin.store.rules.not_editable") if row.fixed else _n("web.admin.store.rules.own", row.own) }}</span>
-                  </div>
-                  <div role="cell" class="cell-end">
-                    {% if not row.fixed %}
-                      <EndSquare :href="base ~ '?rule=' ~ row.key ~ '#rule-form'" :label="_('web.admin.store.rules.edit', rule=name)" />
-                    {% endif %}
-                  </div>
-                </div>
-              {% endfor %}
+<StorePage :game="game"
+           :title="_('web.admin.store.view.rules') ~ ' · ' ~ _('web.admin.store.title')"
+           current="prices"
+           :subtitle="_('web.admin.store.subtitle', game=game.name)">
+  <PricesTabs :game="game" current="rules" />
+  <div class="list-layout admin-layout">
+    <section aria-labelledby="rules-list" class="list-main admin-list rules-list">
+      <Bar id="rules-list" :extra="_n('web.admin.store.rules.count', rows|length)">{{ _("web.admin.store.rules") }}</Bar>
+      <div class="table-scroll table-scroll-flush">
+        <div role="table" aria-labelledby="rules-list" class="table rules-table">
+          <div role="rowgroup" class="admin-list-head">
+            <div role="row" class="rules-columns">
+              <div role="columnheader"
+                   class="column-head column-name">{{ _("web.admin.store.rules.column.rule") }}</div>
+              <div role="columnheader" class="column-head">{{ _("web.admin.store.point.column.currency") }}</div>
+              <div role="columnheader"
+                   class="column-head column-number">{{ _("web.admin.store.rules.column.value") }}</div>
+              <div role="columnheader" class="column-head">{{ _("web.admin.store.rules.column.sold") }}</div>
+              <div role="columnheader" class="column-head">{{ _("web.admin.store.rules.column.items") }}</div>
+              <div role="columnheader"><span class="sr-only">{{ _("web.admin.store.column.edit") }}</span></div>
             </div>
           </div>
-        </div>
-        <dl class="facts rules-facts">
-          <Fact :label="_('web.admin.store.rules.shares')" plain>
-            {% for days, share in rules.rentals|dictsort %}
-              {%- if not loop.first %}· {% endif %}{{ _n("web.store.price.days", days) }} {{ share }}%
-            {%- endfor %}
-          </Fact>
-          <Fact :label="_('web.admin.store.rules.rounding')" plain>
-            {% for code, rounding in rules.rounding.items() %}
-              {{ _("web.admin.store.rules.rounding." ~ ("ending" if rounding.ending else "step"), currency=_("games." ~ game.id ~ ".currency." ~ code), step=number(rounding.step), ending=rounding.ending) }}
-            {% endfor %}
-            {{ _("web.admin.store.rules.rounding.exact") }}
-          </Fact>
-          <Fact :label="_('web.admin.store.rules.seeded')" plain>
-            {{ _("web.admin.store.rules.seeded.text", game=game.name) }}
-          </Fact>
-        </dl>
-      </section>
-
-      <div class="list-side admin-side">
-        <form id="rule-form"
-              method="post"
-              action="{{ base ~ '/' ~ chosen.key }}"
-              aria-labelledby="rule-title"
-              class="rules-form">
-          <CsrfField />
-          <h2 id="rule-title" class="bar bar-large">
-            <span>{{ _("web.admin.store.rules.form", rule=_("games." ~ game.id ~ ".price_rule." ~ chosen.key)) }}</span>
-            <span class="bar-extra">{{ _("games." ~ game.id ~ ".currency." ~ rule.currency) }}</span>
-          </h2>
-          <fieldset class="rules-fields"{% if not manages %} disabled{% endif %}>
-            <label for="rule-value"
-                   class="field-label">{{ _("web.admin.store.rules.use_price" if uses else "web.admin.store.rules.value") }}</label>
-            <TextField id="rule-value" name="value" :value="form.get('value', rule.use_price if uses else rule.value)" :wrong="why" class="rules-input" inputmode="numeric" maxlength="13" required :aria-describedby="'rule-why' if why else none" />
-            {% if uses %}
-              <label for="rule-packs" class="field-label">{{ _("web.admin.store.rules.packs") }}</label>
-              <TextField id="rule-packs" name="packs" :value="form.get('packs', rule.sold|map(attribute='uses')|join(', '))" maxlength="60" aria-describedby="rule-packs-hint" />
-              <p id="rule-packs-hint" class="field-note">{{ _("web.admin.store.rules.packs.hint") }}</p>
-            {% else %}
-              <fieldset class="prices-add-part">
-                <legend class="field-label">{{ _("web.admin.store.rules.column.sold") }}</legend>
-                <div class="prices-picks">
-                  {% set sold = rule.sold|map(attribute="written")|list %}
-                  {% for days in rules.rentals|sort %}
-                    {% set written = days ~ "d" %}
-                    <FilterPick :name="'sold-' ~ written" value="1" :checked="form.get('sold-' ~ written) if form else written in sold" type="checkbox">{{ _n("web.store.price.days", days) }}</FilterPick>
-                  {% endfor %}
-                  <FilterPick name="sold-perm" value="1" :checked="form.get('sold-perm') if form else 'perm' in sold" type="checkbox">{{ _("web.store.price.permanent") }}</FilterPick>
+          <div role="rowgroup" class="enter-rows table-rows">
+            {% for row in rows %}
+              {% set name = _("games." ~ game.id ~ ".price_rule." ~ row.key) %}
+              <div role="row"
+                   {% if row.key == chosen.key %} aria-current="true"{% endif %}
+                   class="rules-columns rules-row">
+                <div role="cell" class="admin-cell cell-stack">
+                  <span class="admin-hero-strong">{{ name }}</span>
+                  <span class="cell-ago">{{ _("games." ~ game.id ~ ".item_kind." ~ row.rule.kind) }}</span>
                 </div>
-              </fieldset>
-            {% endif %}
-          </fieldset>
-          {% if why %}
-            <Refusal id="rule-why">{{ why }}</Refusal>
-          {% endif %}
-          <p class="bar-text body-text">{{ _("web.admin.store.rules.apply.text") }}</p>
-          {% if manages %}
-            <SmallAction :label="_('web.admin.store.rules.apply')" />
-          {% else %}
-            <RoleNote glyph="guard">{{ _("web.admin.store.managed") }}</RoleNote>
-          {% endif %}
-        </form>
+                <div role="cell" class="admin-cell">
+                  <span aria-hidden="true" class="cell-label">{{ _("web.admin.store.point.column.currency") }}</span>
+                  {{ _("games." ~ game.id ~ ".currency." ~ row.rule.currency) }}
+                </div>
+                <div role="cell" class="admin-cell cell-stack rules-value">
+                  <span>{{ value(row.rule) }}</span>
+                  {% if row.rule != row.seed %}
+                    <span class="cell-ago">{{ _("web.admin.store.rules.seed", value=value(row.seed)) }}</span>
+                  {% endif %}
+                </div>
+                <div role="cell" class="admin-cell">
+                  <span aria-hidden="true" class="cell-label">{{ _("web.admin.store.rules.column.sold") }}</span>
+                  {{ _("web.admin.store.rules.fixed") if row.fixed else ways(row.rule) }}
+                </div>
+                <div role="cell" class="admin-cell cell-stack">
+                  <span class="prices-points">{{ _n("web.admin.store.rules.items", row.items) }}</span>
+                  <span class="cell-ago">{{ _("web.admin.store.rules.not_editable") if row.fixed else _n("web.admin.store.rules.own", row.own) }}</span>
+                </div>
+                <div role="cell" class="cell-end">
+                  {% if not row.fixed %}
+                    <EndSquare :href="base ~ '?rule=' ~ row.key ~ '#rule-form'" :label="_('web.admin.store.rules.edit', rule=name)" />
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
       </div>
+      <dl class="facts rules-facts">
+        <Fact :label="_('web.admin.store.rules.shares')" plain>
+          {% for days, share in rules.rentals|dictsort %}
+            {%- if not loop.first %}· {% endif %}{{ _n("web.store.price.days", days) }} {{ share }}%
+          {%- endfor %}
+        </Fact>
+        <Fact :label="_('web.admin.store.rules.rounding')" plain>
+          {% for code, rounding in rules.rounding.items() %}
+            {{ _("web.admin.store.rules.rounding." ~ ("ending" if rounding.ending else "step"), currency=_("games." ~ game.id ~ ".currency." ~ code), step=number(rounding.step), ending=rounding.ending) }}
+          {% endfor %}
+          {{ _("web.admin.store.rules.rounding.exact") }}
+        </Fact>
+        <Fact :label="_('web.admin.store.rules.seeded')" plain>
+          {{ _("web.admin.store.rules.seeded.text", game=game.name) }}
+        </Fact>
+      </dl>
+    </section>
+
+    <div class="list-side admin-side">
+      <form id="rule-form"
+            method="post"
+            action="{{ base ~ '/' ~ chosen.key }}"
+            aria-labelledby="rule-title"
+            class="rules-form">
+        <CsrfField />
+        <h2 id="rule-title" class="bar bar-large">
+          <span>{{ _("web.admin.store.rules.form", rule=_("games." ~ game.id ~ ".price_rule." ~ chosen.key)) }}</span>
+          <span class="bar-extra">{{ _("games." ~ game.id ~ ".currency." ~ rule.currency) }}</span>
+        </h2>
+        <fieldset class="rules-fields"{% if not manages %} disabled{% endif %}>
+          <label for="rule-value"
+                 class="field-label">{{ _("web.admin.store.rules.use_price" if uses else "web.admin.store.rules.value") }}</label>
+          <TextField id="rule-value" name="value" :value="form.get('value', rule.use_price if uses else rule.value)" :wrong="why" class="rules-input" inputmode="numeric" maxlength="13" required :aria-describedby="'rule-why' if why else none" />
+          {% if uses %}
+            <label for="rule-packs" class="field-label">{{ _("web.admin.store.rules.packs") }}</label>
+            <TextField id="rule-packs" name="packs" :value="form.get('packs', rule.sold|map(attribute='uses')|join(', '))" maxlength="60" aria-describedby="rule-packs-hint" />
+            <p id="rule-packs-hint" class="field-note">{{ _("web.admin.store.rules.packs.hint") }}</p>
+          {% else %}
+            <fieldset class="prices-add-part">
+              <legend class="field-label">{{ _("web.admin.store.rules.column.sold") }}</legend>
+              <div class="prices-picks">
+                {% set sold = rule.sold|map(attribute="written")|list %}
+                {% for days in rules.rentals|sort %}
+                  {% set written = days ~ "d" %}
+                  <FilterPick :name="'sold-' ~ written" value="1" :checked="form.get('sold-' ~ written) if form else written in sold" type="checkbox">{{ _n("web.store.price.days", days) }}</FilterPick>
+                {% endfor %}
+                <FilterPick name="sold-perm" value="1" :checked="form.get('sold-perm') if form else 'perm' in sold" type="checkbox">{{ _("web.store.price.permanent") }}</FilterPick>
+              </div>
+            </fieldset>
+          {% endif %}
+        </fieldset>
+        {% if why %}
+          <Refusal id="rule-why">{{ why }}</Refusal>
+        {% endif %}
+        <p class="bar-text body-text">{{ _("web.admin.store.rules.apply.text") }}</p>
+        {% if manages %}
+          <SmallAction :label="_('web.admin.store.rules.apply')" />
+        {% else %}
+          <RoleNote glyph="guard">{{ _("web.admin.store.managed") }}</RoleNote>
+        {% endif %}
+      </form>
     </div>
-  </Panel>
-</AdminPage>
+  </div>
+</StorePage>

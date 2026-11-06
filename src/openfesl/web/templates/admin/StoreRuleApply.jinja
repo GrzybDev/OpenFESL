@@ -5,30 +5,30 @@
 {% set game = of %}
 {% set name = _("games." ~ game.id ~ ".price_rule." ~ key) %}
 {% set back = url("/admin/store/" ~ game.id ~ "/rules?rule=" ~ key) %}
-<AdminPage :title="_('web.admin.store.view.rules') ~ ' · ' ~ _('web.admin.store.title')"
-           current="store">
-  <StoreHead :game="game" current="prices" :subtitle="_('web.admin.store.subtitle', game=game.name)" />
-  <Panel class="enter-panel confirm-frame">
-    <Confirmation :question="_('web.admin.store.rules.confirm', rule=name)"
-                  :action="url('/admin/store/' ~ game.id ~ '/rules/' ~ key ~ '/apply')"
-                  :label="_n('web.admin.store.rules.confirm.submit', outcome.changed)"
-                  :busy="_('web.admin.store.rules.confirm.busy')"
-                  :back="back"
-                  :hidden="fields">
-      <dl class="facts">
-        <Fact :label="_('web.admin.store.rules.confirm.change')" plain>
-          {{ _n("web.admin.store.rules.confirm.changed", outcome.changed) }}
+<StorePage :game="game"
+           :title="_('web.admin.store.view.rules') ~ ' · ' ~ _('web.admin.store.title')"
+           current="prices"
+           :subtitle="_('web.admin.store.subtitle', game=game.name)"
+           frame="confirm-frame">
+  <Confirmation :question="_('web.admin.store.rules.confirm', rule=name)"
+                :action="url('/admin/store/' ~ game.id ~ '/rules/' ~ key ~ '/apply')"
+                :label="_n('web.admin.store.rules.confirm.submit', outcome.changed)"
+                :busy="_('web.admin.store.rules.confirm.busy')"
+                :back="back"
+                :hidden="fields">
+    <dl class="facts">
+      <Fact :label="_('web.admin.store.rules.confirm.change')" plain>
+        {{ _n("web.admin.store.rules.confirm.changed", outcome.changed) }}
+      </Fact>
+      <Fact :label="_('web.admin.store.rules.confirm.keep')" plain>
+        {{ _n("web.admin.store.rules.confirm.kept", outcome.kept) }}
+      </Fact>
+      {% if example %}
+        <Fact :label="_('web.admin.store.rules.confirm.example')" plain>
+          {{ example }}
         </Fact>
-        <Fact :label="_('web.admin.store.rules.confirm.keep')" plain>
-          {{ _n("web.admin.store.rules.confirm.kept", outcome.kept) }}
-        </Fact>
-        {% if example %}
-          <Fact :label="_('web.admin.store.rules.confirm.example')" plain>
-            {{ example }}
-          </Fact>
-        {% endif %}
-      </dl>
-      <p id="confirm-text" class="body-text">{{ _("web.admin.store.rules.confirm.text") }}</p>
-    </Confirmation>
-  </Panel>
-</AdminPage>
+      {% endif %}
+    </dl>
+    <p id="confirm-text" class="body-text">{{ _("web.admin.store.rules.confirm.text") }}</p>
+  </Confirmation>
+</StorePage>

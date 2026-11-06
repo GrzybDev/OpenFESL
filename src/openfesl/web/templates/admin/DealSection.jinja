@@ -10,104 +10,104 @@
 {% set base = url("/admin/store/" ~ game.id ~ "/deals") %}
 {% set name = _("games." ~ game.id ~ ".deal_section." ~ row.key) %}
 {% set states = (("in", "tick"), ("out", "x"), ("pin", "star")) if found.pins else (("in", "tick"), ("out", "x")) %}
-<AdminPage :title="name ~ ' · ' ~ _('web.admin.store.title')" current="store">
-  <StoreHead :game="game" current="deals" :subtitle="_('web.admin.deals.subtitle', game=game.name)" />
-  <Panel class="enter-panel">
-    <DealsTabs :game="game" current="rotation" />
-    <PanelBack :href="base" :label="_('web.admin.deals.view.rotation')" />
-    <form method="post"
-          action="{{ base }}/sections/{{ row.key }}"
-          aria-labelledby="section-title"
-          class="deal-section{% if found.pool %} deal-section-pool{% endif %}">
-      <CsrfField />
-      <div class="rules-form deal-section-fields">
-        <h2 id="section-title" class="bar bar-large">
-          <span>{{ _("web.admin.deals.section.edit", section=name) }}</span>
-        </h2>
-        <fieldset class="rules-fields"{% if not manages %} disabled{% endif %}>
-          <label class="check-row prices-off-row">
-            <span class="prices-off-text"><span class="prices-off-title">{{ _("web.admin.deals.section.runs") }}</span></span>
-            <CheckBox name="enabled" :checked="form.get('enabled') if form else section.enabled" />
-          </label>
-          {% if section.size is not none %}
-            <label for="section-size" class="field-label">{{ _("web.admin.deals.section.size") }}</label>
-            <TextField id="section-size" name="size" :value="form.get('size', section.size)" class="rules-input" inputmode="numeric" maxlength="3" />
-          {% endif %}
-          {% if section.kind == "items" %}
-            <label for="section-discount" class="field-label">{{ _("web.admin.deals.section.discount") }}</label>
-            <TextField id="section-discount" name="discount" :value="form.get('discount', section.discount)" class="rules-input" inputmode="numeric" maxlength="3" />
-          {% else %}
-            {% for field, value in (("low", section.discount[0]), ("high", section.discount[1]), ("gap", section.gap)) %}
-              <label for="section-{{ field }}"
-                     class="field-label">{{ _("web.admin.deals.section." ~ {'low': 'from', 'high': 'to', 'gap': 'gap'}[field]) }}</label>
-              <TextField :id="'section-' ~ field" :name="field" :value="form.get(field, value)" class="rules-input" inputmode="numeric" maxlength="3" />
-            {% endfor %}
-          {% endif %}
-        </fieldset>
-        {% if why %}
-          <Refusal>{{ why }}</Refusal>
+<StorePage :game="game"
+           :title="name ~ ' · ' ~ _('web.admin.store.title')"
+           current="deals"
+           :subtitle="_('web.admin.deals.subtitle', game=game.name)">
+  <DealsTabs :game="game" current="rotation" />
+  <PanelBack :href="base" :label="_('web.admin.deals.view.rotation')" />
+  <form method="post"
+        action="{{ base }}/sections/{{ row.key }}"
+        aria-labelledby="section-title"
+        class="deal-section{% if found.pool %} deal-section-pool{% endif %}">
+    <CsrfField />
+    <div class="rules-form deal-section-fields">
+      <h2 id="section-title" class="bar bar-large">
+        <span>{{ _("web.admin.deals.section.edit", section=name) }}</span>
+      </h2>
+      <fieldset class="rules-fields"{% if not manages %} disabled{% endif %}>
+        <label class="check-row prices-off-row">
+          <span class="prices-off-text"><span class="prices-off-title">{{ _("web.admin.deals.section.runs") }}</span></span>
+          <CheckBox name="enabled" :checked="form.get('enabled') if form else section.enabled" />
+        </label>
+        {% if section.size is not none %}
+          <label for="section-size" class="field-label">{{ _("web.admin.deals.section.size") }}</label>
+          <TextField id="section-size" name="size" :value="form.get('size', section.size)" class="rules-input" inputmode="numeric" maxlength="3" />
         {% endif %}
-        <p class="bar-text body-text">{{ _("web.admin.deals.next_note", zone=found.zone) }}</p>
-        {% if not found.pool %}
-          <p class="bar-text body-text">{{ _("web.admin.deals.pool.items") }}</p>
+        {% if section.kind == "items" %}
+          <label for="section-discount" class="field-label">{{ _("web.admin.deals.section.discount") }}</label>
+          <TextField id="section-discount" name="discount" :value="form.get('discount', section.discount)" class="rules-input" inputmode="numeric" maxlength="3" />
+        {% else %}
+          {% for field, value in (("low", section.discount[0]), ("high", section.discount[1]), ("gap", section.gap)) %}
+            <label for="section-{{ field }}"
+                   class="field-label">{{ _("web.admin.deals.section." ~ {'low': 'from', 'high': 'to', 'gap': 'gap'}[field]) }}</label>
+            <TextField :id="'section-' ~ field" :name="field" :value="form.get(field, value)" class="rules-input" inputmode="numeric" maxlength="3" />
+          {% endfor %}
         {% endif %}
-      </div>
-      {% if found.pool %}
-        {% set pinned = found.pool|selectattr("state", "eq", "pin")|list|length %}
-        {% set excluded = found.pool|selectattr("state", "eq", "out")|list|length %}
-        <section aria-labelledby="section-pool" class="admin-list deal-section-list">
-          <Bar id="section-pool" :extra="_('web.admin.deals.pool.counts', included=number(found.pool|length - pinned - excluded), pinned=number(pinned), excluded=number(excluded))" wrap>{{ _("web.admin.deals.pool") }}</Bar>
-          <div class="table-scroll table-scroll-flush">
-            <div role="table" aria-labelledby="section-pool" class="table pool-table">
-              <div role="rowgroup" class="admin-list-head">
-                <div role="row" class="pool-columns">
-                  {% for column in ("offer", "faction", "last", "state") %}
-                    <div role="columnheader" class="column-head">{{ _("web.admin.deals.pool.column." ~ column) }}</div>
-                  {% endfor %}
-                </div>
-              </div>
-              <div role="rowgroup" class="table-rows">
-                {% for entry in found.pool %}
-                  {% set field = "pool-" ~ loop.index0 %}
-                  {% set chosen = form.get(field, entry.state) %}
-                  <div role="row" class="pool-columns pool-row">
-                    <div role="cell" class="admin-cell cell-stack">
-                      <span class="admin-hero-strong">{{ entry.name }}</span>
-                      <span class="cell-ago">{{ _n("web.admin.deals.pool.boxes" if entry.boxes else "web.admin.deals.offers.items", entry.count) }}</span>
-                    </div>
-                    <div role="cell" class="admin-cell cell-stack">
-                      <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.pool.column.faction") }}</span>
-                      <span>
-                        {%- if entry.faction %}{{ _("games." ~ game.id ~ ".faction." ~ entry.faction) }}{% elif entry.faction is none %}{{ _("web.admin.deals.pool.any") }}{% else %}{{ _("web.admin.deals.pool.unknown") }}{% endif -%}
-                      </span>
-                    </div>
-                    <div role="cell" class="admin-cell cell-stack">
-                      <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.pool.column.last") }}</span>
-                      <span>{{ when(entry.last, "yMMMd") if entry.last else _("web.admin.deals.pool.never") }}</span>
-                    </div>
-                    <div role="cell" class="pool-cell">
-                      <fieldset class="pool-states" {% if not manages %} disabled{% endif %}>
-                        <legend class="sr-only">{{ _("web.admin.deals.pool.state.of", offer=entry.name) }}</legend>
-                        {% for state, glyph in states %}
-                          <FilterPick :name="field" :value="state" :checked="chosen == state" class="pool-pick"><Icon :name="glyph" :size="12" stroke="currentColor" />{{ _("web.admin.deals.pool." ~ state) }}</FilterPick>
-                        {% endfor %}
-                      </fieldset>
-                    </div>
-                  </div>
+      </fieldset>
+      {% if why %}
+        <Refusal>{{ why }}</Refusal>
+      {% endif %}
+      <p class="bar-text body-text">{{ _("web.admin.deals.next_note", zone=found.zone) }}</p>
+      {% if not found.pool %}
+        <p class="bar-text body-text">{{ _("web.admin.deals.pool.items") }}</p>
+      {% endif %}
+    </div>
+    {% if found.pool %}
+      {% set pinned = found.pool|selectattr("state", "eq", "pin")|list|length %}
+      {% set excluded = found.pool|selectattr("state", "eq", "out")|list|length %}
+      <section aria-labelledby="section-pool" class="admin-list deal-section-list">
+        <Bar id="section-pool" :extra="_('web.admin.deals.pool.counts', included=number(found.pool|length - pinned - excluded), pinned=number(pinned), excluded=number(excluded))" wrap>{{ _("web.admin.deals.pool") }}</Bar>
+        <div class="table-scroll table-scroll-flush">
+          <div role="table" aria-labelledby="section-pool" class="table pool-table">
+            <div role="rowgroup" class="admin-list-head">
+              <div role="row" class="pool-columns">
+                {% for column in ("offer", "faction", "last", "state") %}
+                  <div role="columnheader" class="column-head">{{ _("web.admin.deals.pool.column." ~ column) }}</div>
                 {% endfor %}
               </div>
             </div>
+            <div role="rowgroup" class="table-rows">
+              {% for entry in found.pool %}
+                {% set field = "pool-" ~ loop.index0 %}
+                {% set chosen = form.get(field, entry.state) %}
+                <div role="row" class="pool-columns pool-row">
+                  <div role="cell" class="admin-cell cell-stack">
+                    <span class="admin-hero-strong">{{ entry.name }}</span>
+                    <span class="cell-ago">{{ _n("web.admin.deals.pool.boxes" if entry.boxes else "web.admin.deals.offers.items", entry.count) }}</span>
+                  </div>
+                  <div role="cell" class="admin-cell cell-stack">
+                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.pool.column.faction") }}</span>
+                    <span>
+                      {%- if entry.faction %}{{ _("games." ~ game.id ~ ".faction." ~ entry.faction) }}{% elif entry.faction is none %}{{ _("web.admin.deals.pool.any") }}{% else %}{{ _("web.admin.deals.pool.unknown") }}{% endif -%}
+                    </span>
+                  </div>
+                  <div role="cell" class="admin-cell cell-stack">
+                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.pool.column.last") }}</span>
+                    <span>{{ when(entry.last, "yMMMd") if entry.last else _("web.admin.deals.pool.never") }}</span>
+                  </div>
+                  <div role="cell" class="pool-cell">
+                    <fieldset class="pool-states" {% if not manages %} disabled{% endif %}>
+                      <legend class="sr-only">{{ _("web.admin.deals.pool.state.of", offer=entry.name) }}</legend>
+                      {% for state, glyph in states %}
+                        <FilterPick :name="field" :value="state" :checked="chosen == state" class="pool-pick"><Icon :name="glyph" :size="12" stroke="currentColor" />{{ _("web.admin.deals.pool." ~ state) }}</FilterPick>
+                      {% endfor %}
+                    </fieldset>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
           </div>
-          <p class="bar-text body-text">{{ _("web.admin.deals.pool.note" if found.pins else "web.admin.deals.pool.note.all") }}</p>
-        </section>
+        </div>
+        <p class="bar-text body-text">{{ _("web.admin.deals.pool.note" if found.pins else "web.admin.deals.pool.note.all") }}</p>
+      </section>
+    {% endif %}
+    <div class="deal-section-save">
+      {% if manages %}
+        <ActionButton :label="_('web.admin.deals.section.save')" :busy="_('web.admin.store.save.busy')" />
+      {% else %}
+        <RoleNote glyph="guard">{{ _("web.admin.deals.managed") }}</RoleNote>
       {% endif %}
-      <div class="deal-section-save">
-        {% if manages %}
-          <ActionButton :label="_('web.admin.deals.section.save')" :busy="_('web.admin.store.save.busy')" />
-        {% else %}
-          <RoleNote glyph="guard">{{ _("web.admin.deals.managed") }}</RoleNote>
-        {% endif %}
-      </div>
-    </form>
-  </Panel>
-</AdminPage>
+    </div>
+  </form>
+</StorePage>

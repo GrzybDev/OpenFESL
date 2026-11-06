@@ -9,171 +9,169 @@
 {% set base = url("/admin/store/" ~ game.id ~ "/deals") %}
 {% set rules = rotation.rules %}
 {% macro name(key) %}{{ _("games." ~ game.id ~ ".deal_section." ~ key) }}{% endmacro %}
-<AdminPage :title="_('web.admin.store.tab.deals') ~ ' · ' ~ _('web.admin.store.title')"
-           current="store">
-  <StoreHead :game="game" current="deals" :subtitle="_('web.admin.deals.subtitle', game=game.name)" />
-  <Panel class="enter-panel">
-    <DealsTabs :game="game" current="rotation" />
-    <DealsShort :game="game" :rows="rotation.rows|selectattr('short')|list" />
-    <div class="list-layout admin-layout">
-      <div class="list-main boxes-main">
-        <form method="post"
-              action="{{ base }}/rotation"
-              aria-labelledby="deals-rotation"
-              class="end-button-form">
-          <CsrfField />
-          <label class="check-row prices-off-row">
-            <span class="prices-off-text">
-              <span id="deals-rotation" class="prices-off-title">{{ _("web.admin.deals.rotation") }}</span>
-              <span>{{ _("web.admin.deals.rotation.on" if rules.enabled else "web.admin.deals.rotation.off") }}</span>
-            </span>
-            {% if manages %}
-              <CheckBox name="enabled" :checked="rules.enabled" />
-            {% else %}
-              <span class="prices-from">{{ _("web.admin.deals.switch.on" if rules.enabled else "web.admin.deals.switch.off") }}</span>
-            {% endif %}
-          </label>
+<StorePage :game="game"
+           :title="_('web.admin.store.tab.deals') ~ ' · ' ~ _('web.admin.store.title')"
+           current="deals"
+           :subtitle="_('web.admin.deals.subtitle', game=game.name)">
+  <DealsTabs :game="game" current="rotation" />
+  <DealsShort :game="game" :rows="rotation.rows|selectattr('short')|list" />
+  <div class="list-layout admin-layout">
+    <div class="list-main boxes-main">
+      <form method="post"
+            action="{{ base }}/rotation"
+            aria-labelledby="deals-rotation"
+            class="end-button-form">
+        <CsrfField />
+        <label class="check-row prices-off-row">
+          <span class="prices-off-text">
+            <span id="deals-rotation" class="prices-off-title">{{ _("web.admin.deals.rotation") }}</span>
+            <span>{{ _("web.admin.deals.rotation.on" if rules.enabled else "web.admin.deals.rotation.off") }}</span>
+          </span>
           {% if manages %}
-            <FormButton icon="tick">{{ _("web.admin.deals.rotation.save") }}</FormButton>
+            <CheckBox name="enabled" :checked="rules.enabled" />
           {% else %}
-            <RoleNote glyph="guard">{{ _("web.admin.deals.managed") }}</RoleNote>
+            <span class="prices-from">{{ _("web.admin.deals.switch.on" if rules.enabled else "web.admin.deals.switch.off") }}</span>
           {% endif %}
-        </form>
-        {% if not rules.enabled %}
-          <p role="status" class="bar-text body-text deals-off">
-            <Badge name="x" :size="14" lines />{{ _n("web.admin.deals.rotation.off.text", rotation.listed|rejectattr("bundle.source", "eq", "auto")|list|length) }}
-          </p>
+        </label>
+        {% if manages %}
+          <FormButton icon="tick">{{ _("web.admin.deals.rotation.save") }}</FormButton>
+        {% else %}
+          <RoleNote glyph="guard">{{ _("web.admin.deals.managed") }}</RoleNote>
         {% endif %}
-        <section aria-labelledby="deals-sections" class="admin-list">
-          <Bar id="deals-sections" :extra="_('web.admin.deals.sections.running', running=number(rotation.rows|selectattr('section.enabled')|list|length), total=number(rotation.rows|length))">{{ _("web.admin.deals.sections") }}</Bar>
-          <div class="table-scroll table-scroll-flush">
-            <div role="table"
-                 aria-labelledby="deals-sections"
-                 class="table deals-table">
-              <div role="rowgroup" class="admin-list-head">
-                <div role="row" class="deals-columns">
-                  <div role="columnheader"
-                       class="column-head column-name">{{ _("web.admin.deals.column.section") }}</div>
-                  <div role="columnheader" class="column-head">{{ _("web.admin.deals.column.runs") }}</div>
-                  <div role="columnheader" class="column-head">{{ _("web.admin.deals.column.size") }}</div>
-                  <div role="columnheader" class="column-head">{{ _("web.admin.deals.column.next") }}</div>
-                  <div role="columnheader" class="column-head column-number">{{ _("web.admin.deals.column.now") }}</div>
-                  <div role="columnheader"><span class="sr-only">{{ _("web.admin.store.column.edit") }}</span></div>
-                </div>
-              </div>
-              <div role="rowgroup" class="enter-rows table-rows">
-                {% for row in rotation.rows %}
-                  {% set each = row.section %}
-                  {% set state = "off" if not rules.enabled or not each.enabled else "stopped" if row.short else "runs" %}
-                  <div role="row"
-                       class="deals-columns deals-row{% if loop.index is even %} deals-row-alt{% endif %}">
-                    <div role="cell" class="admin-cell cell-stack">
-                      <span class="admin-hero-strong">{{ name(row.key) }}</span>
-                      <span class="cell-ago">
-                        {%- if each.schedule %}{{ _("web.admin.deals.daily") if each.schedule.every == 1 else _n("web.admin.deals.every", each.schedule.every) }}{% if each.schedule.lasts %} · {{ _n("web.admin.deals.lasts", each.schedule.lasts) }}{% endif %}{% else %}{{ _("web.admin.deals.windows") }}{% endif -%}
-                      </span>
-                    </div>
-                    <div role="cell" class="admin-cell prices-state">
-                      <Badge :name="'tick' if state == 'runs' else 'warn' if state == 'stopped' else 'x'" lines />{{ _("web.admin.deals.switch." ~ state) }}
-                    </div>
-                    <div role="cell" class="admin-cell cell-stack">
-                      <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.column.size") }}</span>
-                      <span>{{ _n("web.admin.deals.size", each.size) if each.size else _("web.admin.deals.size.all") }}</span>
-                      {% if each.kind == "items" %}
-                        <span class="cell-ago">{{ _("web.admin.deals.discount.one", percent=each.discount) }}</span>
-                      {% elif each.discount[1] %}
-                        <span class="cell-ago">{{ _("web.admin.deals.discount", low=each.discount[0], high=each.discount[1]) }}</span>
-                      {% endif %}
-                    </div>
-                    <div role="cell" class="admin-cell cell-stack">
-                      <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.column.next") }}</span>
-                      {% if row.next and each.enabled and rules.enabled %}
-                        <span class="cell-time">{{ when(row.next, "yMMMd") }}</span>
-                        <span class="cell-ago">{{ _("web.server.time", time=when(row.next, "Hm")) }}</span>
-                      {% else %}
-                        <span>{{ _("web.admin.deals.next.none") }}</span>
-                      {% endif %}
-                    </div>
-                    <div role="cell" class="admin-cell boxes-price">{{ number(row.now) }}</div>
-                    <div role="cell" class="cell-end">
-                      <EndSquare :href="base ~ '/sections/' ~ row.key" :label="_('web.admin.deals.edit', section=name(row.key))" />
-                    </div>
-                  </div>
-                  {% if steps is not none %}
-                    {% set step = steps.get(row.key) %}
-                    <div role="row" class="deals-step">
-                      {% for part, lines in (("comes", step.comes if step else []), ("leaves", step.leaves if step else [])) %}
-                        <div role="cell" class="deals-step-part">
-                          <p class="deals-step-head">
-                            <Icon :name="'plus' if part == 'comes' else 'x'" :size="12" stroke="currentColor" />{{ _("web.admin.deals.preview." ~ part) }}
-                          </p>
-                          {% if lines %}
-                            <ul class="deals-step-lines">
-                              {% for line in lines %}<li>{{ line }}</li>{% endfor %}
-                            </ul>
-                          {% else %}
-                            <p class="deals-step-none">{{ _("web.admin.deals.preview.nothing" if step else "web.admin.deals.preview.none") }}</p>
-                          {% endif %}
-                          {% if part == "comes" and step %}
-                            {% for line in step.short %}<p class="deals-step-short"><Badge name="warn" />{{ line }}</p>{% endfor %}
-                          {% endif %}
-                        </div>
-                      {% endfor %}
-                    </div>
-                  {% endif %}
-                {% endfor %}
+      </form>
+      {% if not rules.enabled %}
+        <p role="status" class="bar-text body-text deals-off">
+          <Badge name="x" :size="14" lines />{{ _n("web.admin.deals.rotation.off.text", rotation.listed|rejectattr("bundle.source", "eq", "auto")|list|length) }}
+        </p>
+      {% endif %}
+      <section aria-labelledby="deals-sections" class="admin-list">
+        <Bar id="deals-sections" :extra="_('web.admin.deals.sections.running', running=number(rotation.rows|selectattr('section.enabled')|list|length), total=number(rotation.rows|length))">{{ _("web.admin.deals.sections") }}</Bar>
+        <div class="table-scroll table-scroll-flush">
+          <div role="table"
+               aria-labelledby="deals-sections"
+               class="table deals-table">
+            <div role="rowgroup" class="admin-list-head">
+              <div role="row" class="deals-columns">
+                <div role="columnheader" class="column-head column-name">{{ _("web.admin.deals.column.section") }}</div>
+                <div role="columnheader" class="column-head">{{ _("web.admin.deals.column.runs") }}</div>
+                <div role="columnheader" class="column-head">{{ _("web.admin.deals.column.size") }}</div>
+                <div role="columnheader" class="column-head">{{ _("web.admin.deals.column.next") }}</div>
+                <div role="columnheader" class="column-head column-number">{{ _("web.admin.deals.column.now") }}</div>
+                <div role="columnheader"><span class="sr-only">{{ _("web.admin.store.column.edit") }}</span></div>
               </div>
             </div>
-          </div>
-          <div class="deals-preview">
-            <p class="body-text">
-              {{ _("web.admin.deals.preview.note") if steps is not none else _("web.admin.deals.next_note", zone=rules.zone) }}
-            </p>
-            {% if steps is not none %}
-              <FormButton icon="x" :href="base">{{ _("web.admin.deals.preview.hide") }}</FormButton>
-            {% else %}
-              <FormButton icon="clock" :href="base ~ '?preview=1'">{{ _("web.admin.deals.preview") }}</FormButton>
-            {% endif %}
-          </div>
-        </section>
-      </div>
-
-      <div class="list-side admin-side">
-        <section aria-labelledby="deals-now">
-          <Bar id="deals-now" :extra="number(rotation.listed|length)">{{ _("web.admin.deals.now") }}</Bar>
-          <dl class="facts">
-            {% for row in rotation.rows if row.now %}
-              <Fact :label="name(row.key)" plain>
-                {{ number(row.now) }}
-              </Fact>
-            {% endfor %}
-            {% set offered = rotation.listed|rejectattr("bundle.source", "eq", "auto")|list|length %}
-            {% if offered %}
-              <Fact :label="_('web.admin.deals.view.offers')" plain>
-                {{ number(offered) }}
-              </Fact>
-            {% endif %}
-          </dl>
-          {% if "hot-deals" in game.pages %}
-            <a href="{{ url('/' ~ game.id ~ game.site.path('hot-deals')) }}"
-               class="bar bar-link deals-players">{{ _("web.admin.deals.players_page") }}<Icon name="go" :size="14" stroke="currentColor" /></a>
-          {% endif %}
-        </section>
-        {% if rotation.seasons %}
-          <section aria-labelledby="deals-seasons" class="admin-list">
-            <Bar id="deals-seasons">{{ _("web.admin.deals.seasons", year=rotation.seasons[0].first.year) }}</Bar>
-            <ul class="deals-seasons">
-              {% for season in rotation.seasons %}
-                <li class="deals-season deals-season-{{ season.state }}">
-                  <span class="admin-hero-strong">{{ when(season.first, "MMMd") }} – {{ when(season.last, "MMMd") }}</span>
-                  <span class="prices-from">{{ _("web.admin.deals.season." ~ season.state) }}</span>
-                  <span class="cell-ago">{{ _n("web.admin.deals.season.offers", season.names|length) }}</span>
-                </li>
+            <div role="rowgroup" class="enter-rows table-rows">
+              {% for row in rotation.rows %}
+                {% set each = row.section %}
+                {% set state = "off" if not rules.enabled or not each.enabled else "stopped" if row.short else "runs" %}
+                <div role="row"
+                     class="deals-columns deals-row{% if loop.index is even %} deals-row-alt{% endif %}">
+                  <div role="cell" class="admin-cell cell-stack">
+                    <span class="admin-hero-strong">{{ name(row.key) }}</span>
+                    <span class="cell-ago">
+                      {%- if each.schedule %}{{ _("web.admin.deals.daily") if each.schedule.every == 1 else _n("web.admin.deals.every", each.schedule.every) }}{% if each.schedule.lasts %} · {{ _n("web.admin.deals.lasts", each.schedule.lasts) }}{% endif %}{% else %}{{ _("web.admin.deals.windows") }}{% endif -%}
+                    </span>
+                  </div>
+                  <div role="cell" class="admin-cell prices-state">
+                    <Badge :name="'tick' if state == 'runs' else 'warn' if state == 'stopped' else 'x'" lines />{{ _("web.admin.deals.switch." ~ state) }}
+                  </div>
+                  <div role="cell" class="admin-cell cell-stack">
+                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.column.size") }}</span>
+                    <span>{{ _n("web.admin.deals.size", each.size) if each.size else _("web.admin.deals.size.all") }}</span>
+                    {% if each.kind == "items" %}
+                      <span class="cell-ago">{{ _("web.admin.deals.discount.one", percent=each.discount) }}</span>
+                    {% elif each.discount[1] %}
+                      <span class="cell-ago">{{ _("web.admin.deals.discount", low=each.discount[0], high=each.discount[1]) }}</span>
+                    {% endif %}
+                  </div>
+                  <div role="cell" class="admin-cell cell-stack">
+                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.column.next") }}</span>
+                    {% if row.next and each.enabled and rules.enabled %}
+                      <span class="cell-time">{{ when(row.next, "yMMMd") }}</span>
+                      <span class="cell-ago">{{ _("web.server.time", time=when(row.next, "Hm")) }}</span>
+                    {% else %}
+                      <span>{{ _("web.admin.deals.next.none") }}</span>
+                    {% endif %}
+                  </div>
+                  <div role="cell" class="admin-cell boxes-price">{{ number(row.now) }}</div>
+                  <div role="cell" class="cell-end">
+                    <EndSquare :href="base ~ '/sections/' ~ row.key" :label="_('web.admin.deals.edit', section=name(row.key))" />
+                  </div>
+                </div>
+                {% if steps is not none %}
+                  {% set step = steps.get(row.key) %}
+                  <div role="row" class="deals-step">
+                    {% for part, lines in (("comes", step.comes if step else []), ("leaves", step.leaves if step else [])) %}
+                      <div role="cell" class="deals-step-part">
+                        <p class="deals-step-head">
+                          <Icon :name="'plus' if part == 'comes' else 'x'" :size="12" stroke="currentColor" />{{ _("web.admin.deals.preview." ~ part) }}
+                        </p>
+                        {% if lines %}
+                          <ul class="deals-step-lines">
+                            {% for line in lines %}<li>{{ line }}</li>{% endfor %}
+                          </ul>
+                        {% else %}
+                          <p class="deals-step-none">{{ _("web.admin.deals.preview.nothing" if step else "web.admin.deals.preview.none") }}</p>
+                        {% endif %}
+                        {% if part == "comes" and step %}
+                          {% for line in step.short %}<p class="deals-step-short"><Badge name="warn" />{{ line }}</p>{% endfor %}
+                        {% endif %}
+                      </div>
+                    {% endfor %}
+                  </div>
+                {% endif %}
               {% endfor %}
-            </ul>
-          </section>
-        {% endif %}
-      </div>
+            </div>
+          </div>
+        </div>
+        <div class="deals-preview">
+          <p class="body-text">
+            {{ _("web.admin.deals.preview.note") if steps is not none else _("web.admin.deals.next_note", zone=rules.zone) }}
+          </p>
+          {% if steps is not none %}
+            <FormButton icon="x" :href="base">{{ _("web.admin.deals.preview.hide") }}</FormButton>
+          {% else %}
+            <FormButton icon="clock" :href="base ~ '?preview=1'">{{ _("web.admin.deals.preview") }}</FormButton>
+          {% endif %}
+        </div>
+      </section>
     </div>
-  </Panel>
-</AdminPage>
+
+    <div class="list-side admin-side">
+      <section aria-labelledby="deals-now">
+        <Bar id="deals-now" :extra="number(rotation.listed|length)">{{ _("web.admin.deals.now") }}</Bar>
+        <dl class="facts">
+          {% for row in rotation.rows if row.now %}
+            <Fact :label="name(row.key)" plain>
+              {{ number(row.now) }}
+            </Fact>
+          {% endfor %}
+          {% set offered = rotation.listed|rejectattr("bundle.source", "eq", "auto")|list|length %}
+          {% if offered %}
+            <Fact :label="_('web.admin.deals.view.offers')" plain>
+              {{ number(offered) }}
+            </Fact>
+          {% endif %}
+        </dl>
+        {% if "hot-deals" in game.pages %}
+          <a href="{{ url('/' ~ game.id ~ game.site.path('hot-deals')) }}"
+             class="bar bar-link deals-players">{{ _("web.admin.deals.players_page") }}<Icon name="go" :size="14" stroke="currentColor" /></a>
+        {% endif %}
+      </section>
+      {% if rotation.seasons %}
+        <section aria-labelledby="deals-seasons" class="admin-list">
+          <Bar id="deals-seasons">{{ _("web.admin.deals.seasons", year=rotation.seasons[0].first.year) }}</Bar>
+          <ul class="deals-seasons">
+            {% for season in rotation.seasons %}
+              <li class="deals-season deals-season-{{ season.state }}">
+                <span class="admin-hero-strong">{{ when(season.first, "MMMd") }} – {{ when(season.last, "MMMd") }}</span>
+                <span class="prices-from">{{ _("web.admin.deals.season." ~ season.state) }}</span>
+                <span class="cell-ago">{{ _n("web.admin.deals.season.offers", season.names|length) }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+    </div>
+  </div>
+</StorePage>
