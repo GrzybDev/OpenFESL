@@ -1,4 +1,3 @@
-from collections.abc import Collection
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from fractions import Fraction
@@ -10,11 +9,11 @@ from starlette.exceptions import HTTPException
 
 from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin, Role
-from openfesl.core.box_tables import BoxStore, TableEntry, expected
+from openfesl.core.box_tables import BoxStore, expected
 from openfesl.core.calendar import Window, today
 from openfesl.core.catalogues import Catalogue, Catalogues, game_text
 from openfesl.core.claw import Claw
-from openfesl.core.deal_rules import DealRules, OfferSection
+from openfesl.core.deal_rules import OfferSection
 from openfesl.core.deals import HotDeals
 from openfesl.core.drops import Box, below_value, worth
 from openfesl.core.games import Game
@@ -134,8 +133,8 @@ class BoxAdminViews:
         self.stores = stores
         self.claw = claw
         self._catalogues = catalogues
-        self._deals = deals
-        self._boxes = boxes
+        self.deals = deals
+        self.boxes = boxes
         self._settings = settings
 
     async def rows(self, game: Game, language: str) -> tuple[Catalogue, list[BoxRow]]:
@@ -146,7 +145,7 @@ class BoxAdminViews:
             language: The language of the boxes' names.
         """
         catalogue = await self._catalogues.of(game, language)
-        rules = await self._deals.rules(game)
+        rules = await self.deals.rules(game)
         offered: dict[str, tuple[str, str, Window | None, bool, bool]] = {}
         for key, section in rules.sections.items() if rules else []:
             if isinstance(section, OfferSection):
@@ -158,14 +157,14 @@ class BoxAdminViews:
                         offered[offer.box] = (offer.name, key, offer.window, always, promised)
         selling = {
             listed.bundle.box: listed
-            for listed in await self._deals.current(game)
+            for listed in await self.deals.current(game)
             if listed.bundle.box is not None
         }
         order = list(rules.sections) if rules else []
         zone = rules.zone if rules else "UTC"
         year = today(datetime.now(UTC), zone).year
         rows = []
-        for box in await self._boxes.boxes(game.id):
+        for box in await self.boxes.boxes(game.id):
             text, shelf, window, always, promised = offered.get(
                 box.key, ("", "", None, False, False)
             )
@@ -198,37 +197,6 @@ class BoxAdminViews:
         )
         return catalogue, rows
 
-    async def deal_rules(self, game: Game) -> DealRules | None:
-        """Return how a game's hot deals change, which sells its boxes, as the instance sets it.
-
-        Args:
-            game: The game.
-        """
-        return await self._deals.rules(game)
-
-    async def save_table(
-        self,
-        box: Box,
-        weights: list[int],
-        entries: list[TableEntry],
-        worth_rule: bool,
-        details: dict[str, Any],
-        admin: Admin,
-        rare: Collection[int] = (),
-    ) -> None:
-        """Replace a box's drop table and record the change among the admin's actions.
-
-        Args:
-            box: The box, as it was.
-            weights: The weight of each tier, by its number.
-            entries: Its entries; those without a product add one, unpublished, at their price.
-            worth_rule: Whether it promises that every entry is worth its price.
-            details: What the admin's log keeps of the change.
-            admin: The admin who saved it.
-            rare: The numbers of the tiers whose drops are rare, as the Claw marks them.
-        """
-        await self._boxes.save_table(box, weights, entries, worth_rule, details, admin, rare)
-
     async def change_claw(
         self, game: Game, settings: dict[str, str | None], details: dict[str, Any], admin: Admin
     ) -> None:
@@ -242,17 +210,6 @@ class BoxAdminViews:
         """
         keyed = {f"{game.id}.claw.{key}": value for key, value in settings.items()}
         await self._settings.change_all(keyed, AdminAction.CLAW_SETTINGS, game.id, details, admin)
-
-    async def switch(self, game: Game, box: Box, enabled: bool, admin: Admin) -> None:
-        """Put a box on sale or take it off, or let keys open a chest or not, and record it.
-
-        Args:
-            game: The box's game.
-            box: The box or chest.
-            enabled: Whether it is sold, or for a chest whether keys open it.
-            admin: The admin who switched it.
-        """
-        await self._boxes.switch(game.id, box, enabled, admin)
 
     async def flags(self, language: str) -> list[BoxFlag]:
         """Return the drops of every store's boxes that are worth less than their box's price.
@@ -273,7 +230,7 @@ class BoxAdminViews:
         """Return how many drops of the stores' boxes are worth less than their box's price."""
         count = 0
         for game in self.stores.games:
-            count += sum(len(below_value(box)) for box in await self._boxes.boxes(game.id))
+            count += sum(len(below_value(box)) for box in await self.boxes.boxes(game.id))
         return count
 
 
@@ -332,7 +289,7 @@ async def boxes_page(
         of=game,
         catalogue=catalogue,
         groups=groups,
-        deals=await views.deal_rules(game),
+        deals=await views.deals.rules(game),
         chests=(await views.stores.account_rules(game)).chests,
         claw=await claw_panel(views.claw, game, catalogue, language, claw),
     )
@@ -366,7 +323,7 @@ def box_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter:
             raise HTTPException(404)
         on = bool(form.get("enabled"))
         if on != row.box.enabled:
-            await views.switch(game, row.box, on, admin)
+            await views.boxes.switch(game.id, row.box, on, admin)
         kind = "box" if row.box.kind == "box" else "chest"
         toast(request, f"web.admin.toast.boxes.{kind}.{'on' if on else 'off'}", box=row.name)
         back = back_to(request, str(form.get("back", "")), store_url(request, game, "/boxes"))

@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from math import ceil
 from typing import Any, Self
@@ -123,6 +124,31 @@ class LedgerList:
         return f"?{urlencode(fields)}"
 
 
+def counted_change(
+    form: Mapping[str, Any], now: int, takes: bool = True
+) -> tuple[int, bool, str, dict[str, str]]:
+    """Return what a form asks of a count, or the fields of the form to show again with why.
+
+    Args:
+        form: The form, with its amount, its note and whether it takes the amount or grants it.
+        now: What the count holds.
+        takes: Whether the form may take from the count, or only grant.
+
+    Returns:
+        The amount, whether it is taken, the note, and the fields of a refused form or none.
+    """
+    note = str(form.get("note", "")).strip()
+    written = str(form.get("amount", "")).strip()
+    taking = takes and form.get("direction") == "take"
+    amount = whole_number(written, MOST_BALANCE) or 0
+    after = now - amount if taking else now + amount
+    error = "amount" if amount <= 0 else "fewer" if after < 0 else ""
+    error = error or ("more" if after > MOST_BALANCE else "") or ("note" if not note else "")
+    direction = "take" if taking else "grant"
+    refused = {"amount": written, "note": note, "error": error, "direction": direction}
+    return amount, taking, note, refused if error else {}
+
+
 def shared_currencies(game: Game) -> list[str]:
     """Return the currencies that an account's heroes share, in the order its site lists them.
 
@@ -222,16 +248,10 @@ def wallet_routes(
     """
     router = APIRouter()
 
-    async def account(account_id: str) -> AccountView:
-        view = await accounts.find(account_id)
-        if view is None:
-            raise HTTPException(404)
-        return view
-
     @router.get("/admin/accounts/{account_id}/wallets", response_class=HTMLResponse)
     async def wallets(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request)
-        view = await account(account_id)
+        view = await accounts.found(account_id)
         number = view.record.account.id
         found = await views.of_account(number)
         bought = {}
@@ -253,7 +273,7 @@ def wallet_routes(
         )
 
     async def wallet_line(account_id: str, game: str, key: str) -> tuple[AccountView, WalletLine]:
-        view = await account(account_id)
+        view = await accounts.found(account_id)
         for found in await views.of_account(view.record.account.id):
             line = next((line for line in found.lines if line.key == key), None)
             if found.game.id == game and line is not None:
@@ -275,20 +295,8 @@ def wallet_routes(
         form = await checked_form(request)
         view, line = await wallet_line(account_id, game, key)
         back = back_to(request, str(form.get("back", "")), _wallets(view))
-        note = str(form.get("note", "")).strip()
-        written = str(form.get("amount", "")).strip()
-        taking = form.get("direction") == "take"
-        amount = whole_number(written, MOST_BALANCE) or 0
-        after = line.balance - amount if taking else line.balance + amount
-        error = "amount" if amount <= 0 else "fewer" if after < 0 else ""
-        error = error or ("more" if after > MOST_BALANCE else "") or ("note" if not note else "")
-        if error:
-            fields = {
-                "amount": written,
-                "note": note,
-                "error": error,
-                "direction": "take" if taking else "grant",
-            }
+        amount, taking, note, refused = counted_change(form, line.balance)
+        if refused:
             return await sessions.render(
                 request,
                 "admin.WalletChange",
@@ -297,7 +305,7 @@ def wallet_routes(
                 view=view,
                 line=line,
                 back=back,
-                form=fields,
+                form=refused,
             )
         hero = line.hero.persona.name if line.hero else None
         change = -amount if taking else amount
@@ -312,15 +320,15 @@ def wallet_routes(
             "most": number(MOST_BALANCE, language),
         }
         done_key = "taken" if taking else "granted"
-        refused = "fewer" if taking else "more"
-        key = f"web.admin.toast.wallet.{done_key if done else refused}"
+        not_done = "fewer" if taking else "more"
+        key = f"web.admin.toast.wallet.{done_key if done else not_done}"
         toast(request, key, error=not done, **values)
         return RedirectResponse(back, 303)
 
     @router.get("/admin/accounts/{account_id}/ledger", response_class=HTMLResponse)
     async def ledger(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request)
-        view = await account(account_id)
+        view = await accounts.found(account_id)
         listing = LedgerList.read(request.query_params)
         found = await views.of_account(view.record.account.id)
         game = next((each for each in found if each.game.id == listing.game), None)

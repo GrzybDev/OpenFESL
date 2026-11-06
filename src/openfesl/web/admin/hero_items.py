@@ -162,13 +162,6 @@ def hero_item_routes(
     router = APIRouter()
     path = "/admin/accounts/{account_id}/heroes/{hero_id}"
 
-    async def hero_page(request: Request, account_id: str, hero_id: int) -> HeroPage:
-        view = await accounts.find(account_id)
-        page = await views.page(view, hero_id, request.state.language) if view else None
-        if page is None:
-            raise HTTPException(404)
-        return page
-
     def held(page: HeroPage, item_id: int) -> InventoryRow:
         # An item the admin may change or revoke: one in use that the hero holds by a grant.
         row = next((row for row in page.items if row.item_id == item_id), None)
@@ -192,7 +185,7 @@ def hero_item_routes(
     @router.get(path + "/items/grant", response_class=HTMLResponse)
     async def ask_grant(request: Request, account_id: str, hero_id: int) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        page = await hero_page(request, account_id, hero_id)
+        page = await views.page(accounts, account_id, hero_id, request.state.language)
         grant = grant_form(page, request.query_params, request.state.language)
         address = request.query_params.get("back", "")
         return await render(
@@ -211,7 +204,7 @@ def hero_item_routes(
     async def grant(request: Request, account_id: str, hero_id: int) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         form = await checked_form(request)
-        page = await hero_page(request, account_id, hero_id)
+        page = await views.page(accounts, account_id, hero_id, request.state.language)
         shown = grant_form(page, form, request.state.language)
         note = str(form.get("note", "")).strip()
         address = back(request, account_id, hero_id, str(form.get("back", "")))
@@ -263,7 +256,7 @@ def hero_item_routes(
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         if change not in ("change", "revoke"):
             raise HTTPException(404)
-        page = await hero_page(request, account_id, hero_id)
+        page = await views.page(accounts, account_id, hero_id, request.state.language)
         row = held(page, item_id)
         if change == "change" and row.held.type not in (RENTED, COUNTED):
             raise HTTPException(404)
@@ -287,7 +280,7 @@ def hero_item_routes(
         if change not in ("change", "revoke"):
             raise HTTPException(404)
         form = await checked_form(request)
-        page = await hero_page(request, account_id, hero_id)
+        page = await views.page(accounts, account_id, hero_id, request.state.language)
         row = held(page, item_id)
         address = back(request, account_id, hero_id, str(form.get("back", "")))
         note = str(form.get("note", "")).strip()

@@ -107,12 +107,6 @@ def entitlement_routes(
     """
     router = APIRouter()
 
-    async def account(account_id: str) -> AccountView:
-        view = await views.find(account_id)
-        if view is None:
-            raise HTTPException(404)
-        return view
-
     def page_of(request: Request, view: AccountView) -> str:
         return localize(f"/admin/accounts/{view.record.account.id}", request.state.language)
 
@@ -141,13 +135,13 @@ def entitlement_routes(
     @router.get("/admin/accounts/{account_id}/grant", response_class=HTMLResponse)
     async def choose(request: Request, account_id: str) -> HTMLResponse:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        return await grant_page(request, admin, await account(account_id))
+        return await grant_page(request, admin, await views.found(account_id))
 
     @router.post("/admin/accounts/{account_id}/grant")
     async def grant(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         form = await checked_form(request)
-        view = await account(account_id)
+        view = await views.found(account_id)
         chosen = str(form.get("key", ""))
         fields = {name: str(form.get(name, "")).strip() for name in ("tag", "group", "product")}
         if chosen == ONE_TAG:
@@ -174,7 +168,7 @@ def entitlement_routes(
         request: Request, account_id: str, tag: str = "", back: str = ""
     ) -> HTMLResponse:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        view = await account(account_id)
+        view = await views.found(account_id)
         held = await store.of_account(view.record.account.id, EntitlementQuery(tag=tag))
         if not tag or not held:
             raise HTTPException(404)
@@ -190,7 +184,7 @@ def entitlement_routes(
     for decision in ("revoke", "restore"):
         router.add_api_route(
             f"/admin/accounts/{{account_id}}/entitlements/{decision}",
-            _decide(sessions, account, store, decision),
+            _decide(sessions, views, store, decision),
             methods=["POST"],
         )
     return router
@@ -198,14 +192,14 @@ def entitlement_routes(
 
 def _decide(
     sessions: AdminSessions,
-    account: Callable[[str], Awaitable[AccountView]],
+    views: AccountViews,
     store: EntitlementAdmin,
     decision: str,
 ) -> Callable[[Request, str], Awaitable[Response]]:
     async def decide(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         form = await checked_form(request)
-        view = await account(account_id)
+        view = await views.found(account_id)
         tag = str(form.get("tag", ""))
         path = f"/admin/accounts/{view.record.account.id}"
         back = back_to(request, str(form.get("back", "")), path)

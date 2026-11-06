@@ -29,7 +29,7 @@ from openfesl.core.store_prices import (
 )
 from openfesl.core.store_rules import StoreRules
 from openfesl.core.texts import localize, translate_count
-from openfesl.web.admin.auth import AdminSessions
+from openfesl.web.admin.auth import AdminSessions, game_among
 from openfesl.web.store_front import kind_glyphs
 from openfesl.web.store_texts import StoreTexts
 
@@ -161,7 +161,7 @@ class StoreAdminViews:
         """
         self.games = [game for game in games if game.store and game.heroes]
         self._catalogues = catalogues
-        self._prices = prices
+        self.store = prices
         self._settings = settings
         self._apply_actions = apply_actions
 
@@ -174,10 +174,7 @@ class StoreAdminViews:
         Raises:
             HTTPException: 404 when no game with a store has the name.
         """
-        game = next((game for game in self.games if game.id == game_id), None)
-        if game is None:
-            raise HTTPException(404)
-        return game
+        return game_among(self.games, game_id)
 
     async def rules(self, game: Game) -> StoreRules:
         """Return how a game's store prices items, with the instance's settings over its data.
@@ -198,7 +195,7 @@ class StoreAdminViews:
         """
         rules = await self.rules(game)
         catalogue = await self._catalogues.of(game, language)
-        products = await self._prices.every(game.id)
+        products = await self.store.every(game.id)
         return catalogue, item_prices(game, rules, catalogue, products)
 
     async def save(
@@ -219,7 +216,7 @@ class StoreAdminViews:
         Raises:
             PriceRefused: When a point to add is one the store has, also at the same time.
         """
-        changed = await self._prices.save_points(game.id, item_id, points, reset, admin)
+        changed = await self.store.save_points(game.id, item_id, points, reset, admin)
         await self._apply_actions()
         return changed
 
@@ -230,26 +227,6 @@ class StoreAdminViews:
             game: The game, which has a store.
         """
         return await account_rules(game, self._settings)
-
-    async def save_account(
-        self,
-        game: Game,
-        settings: Mapping[str, str | None],
-        key: tuple[int, int] | None,
-        changes: list[dict[str, Any]],
-        admin: Admin,
-    ) -> None:
-        """Change account prices, allowances and per-round caps, recording each as an action.
-
-        Args:
-            game: The game, which has a store.
-            settings: The settings that override them, by key; None removes one.
-            key: The item number of the chest key and its new price, which the key's product
-                takes too; none when the price stays.
-            changes: What the admin's log keeps of each changed value.
-            admin: The admin who changed them.
-        """
-        await self._prices.save_account(game.id, settings, key, changes, admin)
 
     async def apply_rule(
         self,
@@ -268,7 +245,7 @@ class StoreAdminViews:
             details: What the admin's log keeps of the change: the rule and what it changed.
             admin: The admin who applied it.
         """
-        await self._prices.apply_rule(game.id, settings, points, details, admin)
+        await self.store.apply_rule(game.id, settings, points, details, admin)
         await self._apply_actions()
 
     async def item(self, game: Game, item_id: int, language: str) -> tuple[Catalogue, ItemPrices]:

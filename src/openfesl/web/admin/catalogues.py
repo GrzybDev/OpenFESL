@@ -18,7 +18,7 @@ from openfesl.core.games import Game, Games
 from openfesl.core.mugshots import Mugshots
 from openfesl.core.texts import localize
 from openfesl.formats.catalogue_archive import MAX_SIZE
-from openfesl.web.admin.auth import AdminSessions
+from openfesl.web.admin.auth import AdminSessions, game_among
 from openfesl.web.pages import Toast, language_name
 from openfesl.web.sessions import check_form, checked_form, toast
 
@@ -166,9 +166,7 @@ def catalogue_routes(
     async def choose_art(request: Request, game_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         form = await checked_form(request)
-        game = games.by_id(game_id)
-        if game is None or game.catalogue is None:
-            raise HTTPException(404)
+        game = game_among(taking, game_id)
         try:
             viewers = ArtViewers(str(form.get("shown", "")))
         except ValueError:

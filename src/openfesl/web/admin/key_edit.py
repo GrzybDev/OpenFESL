@@ -5,28 +5,21 @@ from typing import Protocol
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.datastructures import FormData
-from starlette.exceptions import HTTPException
 
 from openfesl.core.admins import Admin, Role
 from openfesl.core.games import Games, Grant
-from openfesl.core.keys import KeyHistory, KeyLimits, StoredKey
+from openfesl.core.keys import KeyLimits
 from openfesl.core.texts import languages, localize
 from openfesl.web.admin.auth import AdminSessions
-from openfesl.web.admin.keys import SECTION, KeyList
-from openfesl.web.keys import KeyView, key_views
+from openfesl.web.admin.keys import SECTION, KeyAdmin, KeyList, key_view
+from openfesl.web.keys import KeyView
 from openfesl.web.sessions import checked_form, toast
 
 MAXIMUM_LABEL = 80
 
 
-class KeyEditor(Protocol):
+class KeyEditor(KeyAdmin, Protocol):
     """Where the admin panel reads product keys and changes what they grant."""
-
-    async def keys(self) -> list[StoredKey]:
-        """Return every product key with what it grants, in the order they were added."""
-
-    async def key_history(self) -> dict[str, KeyHistory]:
-        """Return when each product key was added and last enabled or disabled by the admin."""
 
     async def edit_key(
         self,
@@ -169,13 +162,6 @@ def key_edit_routes(sessions: AdminSessions, games: Games, store: KeyEditor) -> 
     """
     router = APIRouter()
 
-    async def find(code: str) -> KeyView:
-        views = key_views(games, await store.keys(), await store.key_history())
-        view = next((view for view in views if view.key.code == code), None)
-        if view is None:
-            raise HTTPException(404)
-        return view
-
     async def page(
         request: Request, view: KeyView, form: KeyForm, status: int = 200
     ) -> HTMLResponse:
@@ -193,14 +179,14 @@ def key_edit_routes(sessions: AdminSessions, games: Games, store: KeyEditor) -> 
     @router.get("/admin/keys/{code}", response_class=HTMLResponse)
     async def edit(request: Request, code: str) -> HTMLResponse:
         sessions.admin(request, Role.ADMIN, SECTION)
-        view = await find(code)
+        view = await key_view(games, store, code)
         return await page(request, view, KeyForm.of(view))
 
     @router.post("/admin/keys/{code}")
     async def save(request: Request, code: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         sent = await checked_form(request)
-        view = await find(code)
+        view = await key_view(games, store, code)
         form = KeyForm.read(sent)
         if form.error:
             return await page(request, view, form, 400)

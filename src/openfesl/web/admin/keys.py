@@ -135,15 +135,6 @@ def key_routes(
     # The games whose keys grant entitlements, to which the admin adds keys here.
     granting = [game for game in games if game.codes is None]
 
-    async def views() -> list[KeyView]:
-        return key_views(games, await store.keys(), await store.key_history())
-
-    async def find(code: str) -> KeyView:
-        view = next((view for view in await views() if view.key.code == code), None)
-        if view is None:
-            raise HTTPException(404)
-        return view
-
     async def page(
         request: Request, admin: Admin, shown: Game, status: int = 200, **form: str
     ) -> HTMLResponse:
@@ -151,7 +142,8 @@ def key_routes(
         # Keys that grant entitlements never expire, so their page has no such tab.
         tab = listing.tab if listing.tab in TABS else "all"
         listing = replace(listing, game=shown.id, tab=tab)
-        every = [view for view in await views() if view.game in (shown, None)]
+        listed = key_views(games, await store.keys(), await store.key_history())
+        every = [view for view in listed if view.game in (shown, None)]
         known = {view.key.code.upper() for view in every}
         here = sum(key.code.upper() in known for key in shown.keys)
         return await sessions.render(
@@ -190,7 +182,7 @@ def key_routes(
                 toast(request, "web.admin.toast.keys_imported", count=str(added))
             else:
                 toast(request, "web.admin.toast.keys_imported_none")
-            return RedirectResponse(_listed(request), 303)
+            return RedirectResponse(localize("/admin/keys", request.state.language), 303)
         code = str(form.get("code", "")).strip()
         chosen = str(form.get("game", ""))
         game = next((game for game in granting if game.id == chosen), None)
@@ -213,28 +205,41 @@ def key_routes(
             request,
             "admin.KeyDisable",
             admin=admin,
-            view=await find(code),
+            view=await key_view(games, store, code),
             back=back_to(request, back, "/admin/keys"),
         )
 
     for decision in ("enable", "disable"):
         router.add_api_route(
             f"/admin/keys/{{code}}/{decision}",
-            _decide(sessions, store, find, decision == "enable"),
+            _decide(sessions, games, store, decision == "enable"),
             methods=["POST"],
         )
     return router
 
 
-def _listed(request: Request, open: str | None = None) -> str:
-    target = localize("/admin/keys", request.state.language)
-    return f"{target}{KeyList().link(open=open)}" + (f"#key-{open}" if open else "")
+async def key_view(games: Games, store: KeyAdmin, code: str) -> KeyView:
+    """Return a product key by its code.
+
+    Args:
+        games: The games, each of which lists its own keys.
+        store: Where the keys are kept.
+        code: The key's code.
+
+    Raises:
+        HTTPException: 404 for no key by the code.
+    """
+    views = key_views(games, await store.keys(), await store.key_history())
+    view = next((view for view in views if view.key.code == code), None)
+    if view is None:
+        raise HTTPException(404)
+    return view
 
 
 def _decide(
     sessions: AdminSessions,
+    games: Games,
     store: KeyAdmin,
-    find: Callable[[str], Awaitable[KeyView]],
     enabled: bool,
 ) -> Callable[[Request, str], Awaitable[Response]]:
     done = "web.admin.toast.key_enabled" if enabled else "web.admin.toast.key_disabled"
@@ -242,7 +247,7 @@ def _decide(
     async def decide(request: Request, code: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         form = await checked_form(request)
-        view = await find(code)
+        view = await key_view(games, store, code)
         back = back_to(request, str(form.get("back", "")), "/admin/keys")
         if not enabled and form.get("confirmed") != "1":
             target = localize(f"/admin/keys/{code}/disable", request.state.language)

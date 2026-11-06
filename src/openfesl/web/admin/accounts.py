@@ -6,6 +6,7 @@ from urllib.parse import urlencode
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from starlette.datastructures import QueryParams
+from starlette.exceptions import HTTPException
 
 from openfesl.core.accounts import AccountRecord, RememberedLogin
 from openfesl.core.census import Census, Server
@@ -233,6 +234,20 @@ class AccountViews:
         """
         record = await self.accounts.record(int(account_id)) if account_id.isdigit() else None
         return (await self.views([record]))[0] if record else None
+
+    async def found(self, account_id: str) -> AccountView:
+        """Return a player's account by its number as an address names it.
+
+        Args:
+            account_id: The number.
+
+        Raises:
+            HTTPException: 404 for no account by the number.
+        """
+        view = await self.find(account_id)
+        if view is None:
+            raise HTTPException(404)
+        return view
 
 
 def account_routes(

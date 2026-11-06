@@ -6,11 +6,11 @@ from starlette.exceptions import HTTPException
 
 from openfesl.core.admins import Admin, Role
 from openfesl.core.chests import key_tag
-from openfesl.core.wallets import MOST_BALANCE
 from openfesl.web.admin.accounts import AccountView, AccountViews
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.admin.heroes import GameHeroes, HeroAdminViews
-from openfesl.web.pages import number, whole_number
+from openfesl.web.admin.wallets import counted_change
+from openfesl.web.pages import number
 from openfesl.web.sessions import checked_form, toast
 
 SECTION = "accounts"
@@ -51,11 +51,8 @@ def hero_count_routes(
     router = APIRouter()
 
     async def counted(request: Request, kind: str, account_id: str, key: str) -> Counted:
-        view = await accounts.find(account_id)
-        language = request.state.language
-        found = await views.of_account(view.record.account.id, language) if view else []
-        for heroes in found:
-            assert view is not None
+        view = await accounts.found(account_id)
+        for heroes in await views.of_account(view.record.account.id, request.state.language):
             if kind == "chests":
                 card = next((c for c in heroes.cards if str(c.hero.persona.id) == key), None)
                 if card is not None and heroes.game.chests:
@@ -82,22 +79,10 @@ def hero_count_routes(
         form = await checked_form(request)
         shown = await counted(request, kind, account_id, key)
         back = back_of(request, shown, str(form.get("back", "")))
-        note = str(form.get("note", "")).strip()
-        written = str(form.get("amount", "")).strip()
-        taking = kind != "slots" and form.get("direction") == "take"
-        amount = whole_number(written, MOST_BALANCE) or 0
-        after = shown.now - amount if taking else shown.now + amount
-        error = "amount" if amount <= 0 else "fewer" if after < 0 else ""
-        error = error or ("more" if after > MOST_BALANCE else "")
-        if error or not note:
-            fields = {
-                "amount": written,
-                "note": note,
-                "error": error or "note",
-                "direction": "take" if taking else "grant",
-            }
+        amount, taking, note, refused = counted_change(form, shown.now, takes=kind != "slots")
+        if refused:
             return await sessions.render(
-                request, "admin.CountForm", 400, admin=admin, shown=shown, back=back, form=fields
+                request, "admin.CountForm", 400, admin=admin, shown=shown, back=back, form=refused
             )
         return await _apply(request, views, shown, amount, taking, note, admin, back)
 

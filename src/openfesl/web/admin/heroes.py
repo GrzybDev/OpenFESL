@@ -161,19 +161,26 @@ class HeroAdminViews:
             found.append(GameHeroes(game, roster, cards, keys, balances))
         return found
 
-    async def page(self, view: AccountView, hero_id: int, language: str) -> HeroPage | None:
-        """Return the page of one of an account's heroes, if it has the hero.
+    async def page(
+        self, accounts: AccountViews, account_id: str, hero_id: int, language: str
+    ) -> HeroPage:
+        """Return the page of one of an account's heroes.
 
         Args:
-            view: The account.
+            accounts: Find the account.
+            account_id: The account's number as an address names it.
             hero_id: The hero's persona.
             language: The page's language, which names the items.
+
+        Raises:
+            HTTPException: 404 for no such account, or no such hero of it.
         """
+        view = await accounts.found(account_id)
         for found in await self.of_account(view.record.account.id, language):
             for card in found.cards:
                 if card.hero.persona.id == hero_id:
                     return await self._page(found, card, view, language)
-        return None
+        raise HTTPException(404)
 
     async def _page(
         self, found: GameHeroes, card: HeroCard, view: AccountView, language: str
@@ -239,10 +246,7 @@ def hero_routes(
     @router.get("/admin/accounts/{account_id}/heroes/{hero_id}", response_class=HTMLResponse)
     async def hero(request: Request, account_id: str, hero_id: int, items: str = "") -> Response:
         admin = sessions.admin(request)
-        view = await accounts.find(account_id)
-        page = await views.page(view, hero_id, request.state.language) if view else None
-        if page is None:
-            raise HTTPException(404)
+        page = await views.page(accounts, account_id, hero_id, request.state.language)
         return await sessions.render(
             request,
             "admin.Hero",

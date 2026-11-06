@@ -106,7 +106,7 @@ class DealSectionViews:
             return SectionView(row, [], False, zone)
         catalogue = await self._catalogues.of(game, language)
         boxes = {box.key: box.faction for box in await self._boxes.boxes(game.id)}
-        shown = await self.deals.shown(game, key)
+        shown = await self.deals.deals.shown(game, key)
         factions = list(game.heroes.factions) if game.heroes else []
         classes = list(game.heroes.classes) if game.heroes else []
         pool = []

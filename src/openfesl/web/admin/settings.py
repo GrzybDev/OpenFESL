@@ -27,7 +27,7 @@ from openfesl.core.games import Game, Games
 from openfesl.core.policies import GamePolicies, Policies, SettingStore, setting_key
 from openfesl.core.servers import HostingMode
 from openfesl.core.texts import localize, translate
-from openfesl.web.admin.auth import AdminSessions, SignInProvider
+from openfesl.web.admin.auth import AdminSessions, SignInProvider, game_among
 from openfesl.web.admin.rewards import RewardAdminViews
 from openfesl.web.admin.servers import ServerViews
 from openfesl.web.game_icons import ICON_PATH, icon_version, reaches_discord
@@ -341,16 +341,13 @@ def settings_routes(
         else:
             await policies.set_site_confirmation(on, admin)
             toast(request, "web.admin.toast.site")
-        target = localize("/admin/settings", request.state.language)
-        return RedirectResponse(f"{target}#site", 303)
+        return RedirectResponse(_settings_at(request, "site"), 303)
 
     @router.post("/admin/settings/games/{game_id}")
     async def change_policies(request: Request, game_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         form = await checked_form(request)
-        game = games.by_id(game_id)
-        if game is None:
-            raise HTTPException(404)
+        game = game_among(games, game_id)
         wanted, errors = _read(game, form)
         if errors:
             return await page(request, admin, 400, errors)
@@ -366,8 +363,7 @@ def settings_routes(
             toast(request, "web.admin.toast.policies", game=game.name)
         else:
             toast(request, "web.admin.toast.policies_unchanged", game=game.name)
-        target = localize("/admin/settings", request.state.language)
-        return RedirectResponse(f"{target}#game-{game.id}", 303)
+        return RedirectResponse(_settings_at(request, f"game-{game.id}"), 303)
 
     @router.post("/admin/settings/games/{game_id}/mark")
     async def change_mark(request: Request, game_id: str) -> Response:
@@ -389,8 +385,7 @@ def settings_routes(
             )
             await marks.show(game, shown, official, admin)
             toast(request, f"web.admin.toast.game_mark.{state}", game=name)
-        target = localize("/admin/settings", request.state.language)
-        return RedirectResponse(f"{target}#mark-{game.id}", 303)
+        return RedirectResponse(_settings_at(request, f"mark-{game.id}"), 303)
 
     @router.post("/admin/settings/games/{game_id}/zone")
     async def change_zone(request: Request, game_id: str) -> Response:
@@ -411,17 +406,14 @@ def settings_routes(
             details = {"before": rules.zone, "after": zone}
             await rewards.change(game, {"zone": value}, AdminAction.REWARD_ZONE, details, admin)
             toast(request, "web.admin.toast.reward_zone", zone=zone)
-        target = localize("/admin/settings", request.state.language)
-        return RedirectResponse(f"{target}#zone-{game.id}", 303)
+        return RedirectResponse(_settings_at(request, f"zone-{game.id}"), 303)
 
     @router.post("/admin/settings/games/{game_id}/icon")
     async def store_icon(request: Request, game_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         async with request.form() as form:
             check_form(request, form)
-            game = games.by_id(game_id)
-            if game is None:
-                raise HTTPException(404)
+            game = game_among(games, game_id)
             upload = form.get("icon")
             name, data = "", b""
             if isinstance(upload, UploadFile):
@@ -436,28 +428,25 @@ def settings_routes(
         await icons.store(game.id, png, admin)
         await apply_actions()
         toast(request, "web.admin.toast.icon.stored", game=game.name)
-        return RedirectResponse(_presence(request, game.id), 303)
+        return RedirectResponse(_settings_at(request, f"presence-{game.id}"), 303)
 
     @router.post("/admin/settings/games/{game_id}/icon/remove")
     async def remove_icon(request: Request, game_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         await checked_form(request)
-        game = games.by_id(game_id)
-        if game is None:
-            raise HTTPException(404)
+        game = game_among(games, game_id)
         if await icons.remove(game.id, admin):
             await apply_actions()
             toast(request, "web.admin.toast.icon.removed", game=game.name)
         else:
             toast(request, "web.admin.toast.icon.none", game=game.name)
-        return RedirectResponse(_presence(request, game.id), 303)
+        return RedirectResponse(_settings_at(request, f"presence-{game.id}"), 303)
 
     return router
 
 
-def _presence(request: Request, game_id: str) -> str:
-    # The settings page at a game's presence section.
-    return f"{localize('/admin/settings', request.state.language)}#presence-{game_id}"
+def _settings_at(request: Request, part: str) -> str:
+    return f"{localize('/admin/settings', request.state.language)}#{part}"
 
 
 def _icon_view(base: str, game_id: str, icon: StoredIcon) -> IconView:

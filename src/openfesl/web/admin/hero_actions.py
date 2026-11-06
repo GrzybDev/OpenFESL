@@ -42,13 +42,6 @@ def hero_action_routes(
     router = APIRouter()
     path = "/admin/accounts/{account_id}/heroes/{hero_id}"
 
-    async def hero_page(request: Request, account_id: str, hero_id: int) -> HeroPage:
-        view = await accounts.find(account_id)
-        page = await views.page(view, hero_id, request.state.language) if view else None
-        if page is None:
-            raise HTTPException(404)
-        return page
-
     def allowed(request: Request, action: str) -> Admin:
         if action not in ACTIONS:
             raise HTTPException(404)
@@ -81,7 +74,7 @@ def hero_action_routes(
     @router.get(path + "/rename/check", response_class=HTMLResponse)
     async def check(request: Request, account_id: str, hero_id: int, name: str = "") -> Response:
         sessions.admin(request)
-        page = await hero_page(request, account_id, hero_id)
+        page = await views.page(accounts, account_id, hero_id, request.state.language)
         wanted = name.strip()
         found = await name_check(page, wanted) if wanted else ""
         return await sessions.render(request, "heroes.NameCheck", name=wanted, check=found)
@@ -91,7 +84,7 @@ def hero_action_routes(
         request: Request, account_id: str, hero_id: int, action: str, back: str = ""
     ) -> Response:
         admin = allowed(request, action)
-        page = await hero_page(request, account_id, hero_id)
+        page = await views.page(accounts, account_id, hero_id, request.state.language)
         default = path.format(account_id=account_id, hero_id=hero_id)
         return await form_page(request, admin, page, action, back_to(request, back, default))
 
@@ -99,7 +92,7 @@ def hero_action_routes(
     async def act(request: Request, account_id: str, hero_id: int, action: str) -> Response:
         admin = allowed(request, action)
         form = await checked_form(request)
-        page = await hero_page(request, account_id, hero_id)
+        page = await views.page(accounts, account_id, hero_id, request.state.language)
         own = localize(path.format(account_id=account_id, hero_id=hero_id), request.state.language)
         back = back_to(request, str(form.get("back", "")), own)
         note = str(form.get("note", "")).strip()

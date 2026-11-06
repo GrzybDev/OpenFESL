@@ -88,22 +88,13 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
         game, catalogue, row = await found(request, game_id, box_id)
         fallback = row.box.fallback
         query = request.query_params.get("q", "").strip()[:64]
-        if row.box.kind == "claw":
-            return await claw_page(request, admin, game, catalogue, row, query, form, refused)
-        return await sessions.render(
-            request,
-            "admin.StoreBox",
-            400 if refused else 200,
+        status = 400 if refused else 200
+        shared: dict[str, Any] = dict(
             admin=admin,
             of=game,
             catalogue=catalogue,
             row=row,
             tiers=tiers(row.box, catalogue),
-            fallback=Entry(
-                fallback, catalogue.name(fallback.item_id) or str(fallback.item_id), True
-            )
-            if fallback
-            else None,
             query=query,
             candidates=await _candidates(views, game, catalogue, row, query, request)
             if query
@@ -111,16 +102,28 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
             form=dict(form or {}),
             refused=refused,
         )
+        if row.box.kind == "claw":
+            return await claw_page(request, game, catalogue, row, query, status, shared)
+        return await sessions.render(
+            request,
+            "admin.StoreBox",
+            status,
+            fallback=Entry(
+                fallback, catalogue.name(fallback.item_id) or str(fallback.item_id), True
+            )
+            if fallback
+            else None,
+            **shared,
+        )
 
     async def claw_page(
         request: Request,
-        admin: Admin,
         game: Game,
         catalogue: Catalogue,
         row: BoxRow,
         query: str,
-        form: Mapping[str, str] | None,
-        refused: str,
+        status: int,
+        shared: dict[str, Any],
     ) -> HTMLResponse:
         # The Claw's prizes: its tiers with their names and rare marks, each entry
         # with whom it fits, and the chances of a hero of the faction and class chosen.
@@ -139,12 +142,7 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
         return await sessions.render(
             request,
             "admin.ClawPool",
-            400 if refused else 200,
-            admin=admin,
-            of=game,
-            catalogue=catalogue,
-            row=row,
-            tiers=tiers(row.box, catalogue),
+            status,
             names=[tier.name for tier in game.claw.tiers],
             rare={drop.tier for drop in row.box.drops if drop.rare},
             fits=fits,
@@ -154,13 +152,8 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
                 (prize, str(format_percent(float(prize.chance), "#,##0.##%", locale=locale)))
                 for prize in await views.claw.preview(game, faction, kind)
             ],
-            query=query,
-            candidates=await _candidates(views, game, catalogue, row, query, request)
-            if query
-            else [],
             withheld=withheld.id if withheld and withheld.withheld else None,
-            form=dict(form or {}),
-            refused=refused,
+            **shared,
         )
 
     async def saved(
@@ -211,7 +204,7 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
             or (box.worth_rule != worth_rule)
             or (claw and was != sorted(rare))
         ):
-            await views.save_table(box, weights, entries, worth_rule, details, admin, rare)
+            await views.boxes.save_table(box, weights, entries, worth_rule, details, admin, rare)
             if claw:
                 tiers = str(sum(1 for weight in weights if weight))
                 toast(request, "web.admin.toast.claw.pool", tiers=tiers, entries=str(len(entries)))
@@ -235,7 +228,7 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
         # Weights in whole percent; any other text counts as none.
         written = [
             fields.get(f"weight-{tier}", "").strip().removesuffix("%").strip()
-            for tier in range(_tiers_of(row) + 1)
+            for tier in range(len(_weights(box)))
         ]
         weights = [
             int(digits) if digits.isascii() and digits.isdecimal() and len(digits) < 4 else 0
@@ -264,7 +257,12 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
         chosen = next((found for found in candidates if str(found.item.id) == item_id), None)
         written = fields.get("ownership")
         option = next((o for o in chosen.options if o.written == written), None) if chosen else None
-        if chosen is None or option is None or not tier.isdecimal() or int(tier) > _tiers_of(row):
+        if (
+            chosen is None
+            or option is None
+            or not tier.isdecimal()
+            or int(tier) >= len(_weights(box))
+        ):
             raise HTTPException(400)
         ownership = Ownership.read(option.written)
         entries = [_entry(drop.tier, drop.product, box.currency) for drop in box.drops]
@@ -276,11 +274,6 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
         )
 
     return router
-
-
-def _tiers_of(row: BoxRow) -> int:
-    # The number of the box's last tier.
-    return max((drop.tier for drop in row.box.drops), default=0)
 
 
 def _weights(box: Box) -> list[int]:

@@ -23,7 +23,7 @@ from openfesl.core.gift_codes import (
 )
 from openfesl.core.reward_rules import Gift
 from openfesl.core.texts import localize
-from openfesl.web.admin.auth import AdminSessions
+from openfesl.web.admin.auth import AdminSessions, game_among
 from openfesl.web.admin.code_editor import CodeEditor, drafted, editor_of, written
 from openfesl.web.pages import whole_number
 from openfesl.web.sessions import checked_form, toast
@@ -123,10 +123,9 @@ class GiftCodeViews:
             HTTPException: 404 for no code of a game that has codes.
         """
         entry = await self.store.gift_code(code)
-        game = self._games.by_id(entry.game) if entry else None
-        if entry is None or game is None or game.codes is None:
+        if entry is None:
             raise HTTPException(404)
-        return game, entry
+        return self.game(entry.game), entry
 
     def game(self, game_id: str) -> Game:
         """Return a game that has codes.
@@ -137,10 +136,7 @@ class GiftCodeViews:
         Raises:
             HTTPException: 404 for a game without codes.
         """
-        game = self._games.by_id(game_id)
-        if game is None or game.codes is None:
-            raise HTTPException(404)
-        return game
+        return game_among((game for game in self._games if game.codes), game_id)
 
     async def editor(
         self,

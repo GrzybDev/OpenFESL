@@ -105,20 +105,6 @@ def account_decision_routes(
     """
     router = APIRouter()
 
-    async def account(request: Request, account_id: str) -> AccountView:
-        view = await views.find(account_id)
-        if view is None:
-            raise HTTPException(404)
-        return view
-
-    def persona_of(view: AccountView, persona_id: str) -> PersonaView:
-        found = next(
-            (entry for entry in view.personas if str(entry.record.persona.id) == persona_id), None
-        )
-        if found is None:
-            raise HTTPException(404)
-        return found
-
     def page_of(request: Request, view: AccountView) -> str:
         return localize(_path(view), request.state.language)
 
@@ -139,13 +125,13 @@ def account_decision_routes(
     @router.get("/admin/accounts/{account_id}/state", response_class=HTMLResponse)
     async def change_state(request: Request, account_id: str) -> HTMLResponse:
         sessions.admin(request)
-        return await state_page(request, await account(request, account_id))
+        return await state_page(request, await views.found(account_id))
 
     @router.post("/admin/accounts/{account_id}/state")
     async def set_state(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request)
         form = await checked_form(request)
-        view = await account(request, account_id)
+        view = await views.found(account_id)
         chosen = str(form.get("state", ""))
         written = str(form.get("until", "")).strip()
         if chosen not in set(AccountState):
@@ -171,7 +157,7 @@ def account_decision_routes(
     async def verify(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request)
         await checked_form(request)
-        view = await account(request, account_id)
+        view = await views.found(account_id)
         name = view.record.account.nuid
         if view.record.account.verification_expires_at is None:
             toast(request, "web.admin.toast.verified_already", error=True, name=name)
@@ -184,7 +170,7 @@ def account_decision_routes(
     async def forget(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request)
         form = await checked_form(request)
-        view = await account(request, account_id)
+        view = await views.found(account_id)
         login = form.get("login")
         chosen = [str(login)] if login else None
         removed = await accounts.forget(view.record.account.id, chosen, admin)
@@ -199,8 +185,8 @@ def account_decision_routes(
     async def enable(request: Request, account_id: str, persona_id: str) -> Response:
         admin = sessions.admin(request)
         await checked_form(request)
-        view = await account(request, account_id)
-        persona = persona_of(view, persona_id)
+        view = await views.found(account_id)
+        persona = _persona(view, persona_id)
         await personas.set_state(persona.record.persona.id, PersonaState.ACTIVE, admin)
         toast(request, "web.admin.toast.enabled", name=persona.record.persona.name)
         return RedirectResponse(page_of(request, view), 303)
@@ -209,7 +195,7 @@ def account_decision_routes(
         path = "/session/end" if decision == "end" else f"/names/{{persona_id}}/{decision}"
         router.add_api_route(
             f"/admin/accounts/{{account_id}}{path}",
-            _confirmation(sessions, account, persona_of, decision),
+            _confirmation(sessions, views, decision),
             response_class=HTMLResponse,
         )
 
@@ -217,7 +203,7 @@ def account_decision_routes(
     async def end(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request)
         form = await checked_form(request)
-        view = await account(request, account_id)
+        view = await views.found(account_id)
         back = back_to(request, str(form.get("back", "")), _path(view))
         name = view.record.account.nuid
         if form.get("confirmed") != "1":
@@ -236,8 +222,8 @@ def account_decision_routes(
             raise HTTPException(404)
         admin = sessions.admin(request)
         form = await checked_form(request)
-        view = await account(request, account_id)
-        persona = persona_of(view, persona_id)
+        view = await views.found(account_id)
+        persona = _persona(view, persona_id)
         back = back_to(request, str(form.get("back", "")), _path(view))
         if form.get("confirmed") != "1":
             path = f"/admin/accounts/{account_id}/names/{persona_id}/{decision}"
@@ -255,6 +241,15 @@ def account_decision_routes(
     return router
 
 
+def _persona(view: AccountView, persona_id: str) -> PersonaView:
+    found = next(
+        (entry for entry in view.personas if str(entry.record.persona.id) == persona_id), None
+    )
+    if found is None:
+        raise HTTPException(404)
+    return found
+
+
 def _path(view: AccountView) -> str:
     return f"/admin/accounts/{view.record.account.id}"
 
@@ -266,16 +261,15 @@ def _ask(request: Request, path: str, back: str) -> Response:
 
 def _confirmation(
     sessions: AdminSessions,
-    account: Callable[[Request, str], Awaitable[AccountView]],
-    persona_of: Callable[[AccountView, str], PersonaView],
+    views: AccountViews,
     decision: str,
 ) -> Callable[..., Awaitable[HTMLResponse]]:
     async def confirm(
         request: Request, account_id: str, persona_id: str = "", back: str = ""
     ) -> HTMLResponse:
         admin = sessions.admin(request)
-        view = await account(request, account_id)
-        persona = persona_of(view, persona_id) if decision != "end" else None
+        view = await views.found(account_id)
+        persona = _persona(view, persona_id) if decision != "end" else None
         return await sessions.render(
             request,
             "admin.AccountConfirm",

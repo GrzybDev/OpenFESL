@@ -229,15 +229,6 @@ class DealAdminViews:
             )
         return found
 
-    async def shown(self, game: Game, section: str) -> dict[str, datetime]:
-        """Return when the rotation last brought each offer of a section, by its picked name.
-
-        Args:
-            game: The game.
-            section: The section's name.
-        """
-        return await self.deals.shown(game, section)
-
     async def short(self) -> list[tuple[Game, SectionRow]]:
         """Return the sections of the rotations whose latest period sells fewer deals than asked."""
         found = []
@@ -309,7 +300,14 @@ def deal_routes(sessions: AdminSessions, views: DealAdminViews) -> APIRouter:
     async def deals(request: Request, game_id: str, preview: bool = False) -> HTMLResponse:
         admin = sessions.admin(request)
         game = views.stores.game(game_id)
-        return await deal_page(sessions, views, request, admin, game, preview=preview)
+        return await sessions.render(
+            request,
+            "admin.StoreDeals",
+            admin=admin,
+            of=game,
+            rotation=await views.rotation(game),
+            steps=await views.preview(game, request.state.language) if preview else None,
+        )
 
     @router.post("/admin/store/{game_id}/deals/rotation")
     async def switch(request: Request, game_id: str) -> Response:
@@ -328,35 +326,6 @@ def deal_routes(sessions: AdminSessions, views: DealAdminViews) -> APIRouter:
         return RedirectResponse(store_url(request, game, "/deals"), 303)
 
     return router
-
-
-async def deal_page(
-    sessions: AdminSessions,
-    views: DealAdminViews,
-    request: Request,
-    admin: Admin,
-    game: Game,
-    preview: bool = False,
-) -> HTMLResponse:
-    """Render a game's hot-deal rotation page.
-
-    Args:
-        sessions: Signs admins in and renders the panel's pages.
-        views: Put together what the page shows.
-        request: The request the page answers.
-        admin: The signed-in admin.
-        game: The game, which has hot deals.
-        preview: Whether the page shows what each section's next step brings and ends.
-    """
-    language = request.state.language
-    return await sessions.render(
-        request,
-        "admin.StoreDeals",
-        admin=admin,
-        of=game,
-        rotation=await views.rotation(game),
-        steps=await views.preview(game, language) if preview else None,
-    )
 
 
 def _seasons(rules: DealRules, now: datetime) -> list[SeasonView]:

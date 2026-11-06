@@ -17,7 +17,7 @@ from openfesl.core.reward_rules import Milestone, Part, RewardRules, StarterPack
 from openfesl.core.reward_runs import Run, run_now, run_of
 from openfesl.core.rewards import Rewards
 from openfesl.core.texts import localize
-from openfesl.web.admin.auth import AdminSessions
+from openfesl.web.admin.auth import AdminSessions, game_among
 from openfesl.web.admin.referral_view import ReferralView, overview
 from openfesl.web.reward_texts import RewardTexts
 from openfesl.web.store_texts import StoreTexts
@@ -199,10 +199,7 @@ class RewardAdminViews:
         Raises:
             HTTPException: 404 when no game with rewards has the id.
         """
-        game = next((game for game in self.games if game.id == game_id), None)
-        if game is None:
-            raise HTTPException(404)
-        return game
+        return game_among(self.games, game_id)
 
     async def pause(self, game: Game) -> AuditEntry | None:
         """Return who paused the claims of a game's rewards, when and why, while they are paused.

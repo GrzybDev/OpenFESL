@@ -12,7 +12,7 @@ from openfesl.core.games import Game, Games
 from openfesl.core.referrals import Recruit, ReferralStore
 from openfesl.core.rewards import Reward, Rewards
 from openfesl.core.texts import languages
-from openfesl.web.admin.auth import AdminSessions, back_to
+from openfesl.web.admin.auth import AdminSessions, back_to, game_among
 from openfesl.web.admin.referral_editor import (
     SIDES,
     StepEditor,
@@ -89,10 +89,7 @@ class ReferralAdminViews:
         Raises:
             HTTPException: 404 when no game with Recruit a Friend has the id.
         """
-        game = next((game for game in self._games if game.id == game_id), None)
-        if game is None:
-            raise HTTPException(404)
-        return game
+        return game_among(self._games, game_id)
 
     async def of_account(self, account_id: int, language: str) -> list[AccountReferral]:
         """Return who recruited an account and its recruits, in each game with Recruit a Friend.

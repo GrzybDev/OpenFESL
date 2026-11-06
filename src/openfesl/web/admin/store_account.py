@@ -220,7 +220,7 @@ def store_account_routes(sessions: AdminSessions, views: StoreAdminViews) -> API
             settings[f"{game.id}.heroes.sales_run"] = None if "sales" in fields else "false"
             changes.append({"game": game.id, "name": "sales", "after": "sales" in fields})
         if changes:
-            await views.save_account(game, settings, key, changes, admin)
+            await views.store.save_account(game.id, settings, key, changes, admin)
             toast(request, "web.admin.toast.store.account", count=str(len(changes)))
         else:
             toast(request, "web.admin.toast.store.account.unchanged")

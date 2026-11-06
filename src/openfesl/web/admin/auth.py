@@ -1,5 +1,5 @@
 import logging
-from collections.abc import Awaitable, Callable, Mapping
+from collections.abc import Awaitable, Callable, Iterable, Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
@@ -8,8 +8,10 @@ from urllib.parse import urlencode
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from pydantic import SecretStr
+from starlette.exceptions import HTTPException
 
 from openfesl.core.admins import Admin, GroupRoles, Role
+from openfesl.core.games import Game
 from openfesl.core.texts import localize
 from openfesl.web.oidc import ServiceClient, SignInFailed, SignInService
 from openfesl.web.pages import Pages, Viewer
@@ -279,6 +281,22 @@ class AdminSessions:
 
 def _admin(signed_in: Mapping[str, str]) -> Admin:
     return Admin(signed_in["subject"], signed_in["name"], Role(signed_in["role"]))
+
+
+def game_among(games: Iterable[Game], game_id: str) -> Game:
+    """Return one of some games by its id.
+
+    Args:
+        games: The games that have the part of the panel an address asks for.
+        game_id: The game's id.
+
+    Raises:
+        HTTPException: 404 when none of them has the id.
+    """
+    game = next((game for game in games if game.id == game_id), None)
+    if game is None:
+        raise HTTPException(404)
+    return game
 
 
 def back_to(request: Request, back: str, default: str = "/admin/") -> str:
