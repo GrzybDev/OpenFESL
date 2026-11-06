@@ -76,16 +76,14 @@
                     <span class="admin-hero-strong">{{ entry.name }}</span>
                     <span class="cell-ago">{{ _n("web.admin.deals.pool.boxes" if entry.boxes else "web.admin.deals.offers.items", entry.count) }}</span>
                   </div>
-                  <div role="cell" class="admin-cell cell-stack">
-                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.pool.column.faction") }}</span>
+                  <AdminCell :label="_('web.admin.deals.pool.column.faction')" class="cell-stack">
                     <span>
                       {%- if entry.faction %}{{ _("games." ~ game.id ~ ".faction." ~ entry.faction) }}{% elif entry.faction is none %}{{ _("web.admin.deals.pool.any") }}{% else %}{{ _("web.admin.deals.pool.unknown") }}{% endif -%}
                     </span>
-                  </div>
-                  <div role="cell" class="admin-cell cell-stack">
-                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.pool.column.last") }}</span>
+                  </AdminCell>
+                  <AdminCell :label="_('web.admin.deals.pool.column.last')" class="cell-stack">
                     <span>{{ when(entry.last, "yMMMd") if entry.last else _("web.admin.deals.pool.never") }}</span>
-                  </div>
+                  </AdminCell>
                   <div role="cell" class="pool-cell">
                     <fieldset class="pool-states" {% if not manages %} disabled{% endif %}>
                       <legend class="sr-only">{{ _("web.admin.deals.pool.state.of", offer=entry.name) }}</legend>

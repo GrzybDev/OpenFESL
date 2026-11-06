@@ -14,12 +14,7 @@
 {% set revoked = entitlements|length - active %}
 <AdminPage :title="title ~ ' · ' ~ account.nuid" current="accounts">
   <PageHead labelledby="account-title">
-    <div class="enter-title page-title page-title-wider">
-      <h1 id="account-title" class="account-heading">
-        <span class="title-block">{{ title }}</span>
-        <span class="title-sub account-heading-name">{{ account.nuid }}</span>
-      </h1>
-    </div>
+    <AccountHeading id="account-title" :title="title" :name="account.nuid" />
     <Tab :href="url('/admin/accounts')" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.accounts.all") }}<span class="tab-count">{{ number(total) }}</span></Tab>
   </PageHead>
   <Panel class="enter-panel">

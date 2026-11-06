@@ -54,18 +54,16 @@
                     {% endif %}
                     <span class="admin-hero-strong">{{ entry.label(language) }}</span>
                   </div>
-                  <div role="cell" class="admin-cell cell-stack code-contents">
-                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.keys.col.contents") }}</span>
+                  <AdminCell :label="_('web.admin.keys.col.contents')"
+                             class="cell-stack code-contents">
                     <span>{{ row.contents }}</span>
-                  </div>
-                  <div role="cell" class="admin-cell cell-stack code-used">
-                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.keys.col.uses") }}</span>
+                  </AdminCell>
+                  <AdminCell :label="_('web.admin.keys.col.uses')" class="cell-stack code-used">
                     <span>{{ uses(entry) }}</span>
-                  </div>
-                  <div role="cell" class="admin-cell cell-stack">
-                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.keys.col.ends") }}</span>
+                  </AdminCell>
+                  <AdminCell :label="_('web.admin.keys.col.ends')" class="cell-stack">
                     <span>{{ ends(entry, row.state) }}</span>
-                  </div>
+                  </AdminCell>
                   <div role="cell" class="admin-cell prices-state">
                     <Badge :name="glyphs[row.state]" lines />{{ _("web.admin.keys.state." ~ row.state) }}
                   </div>

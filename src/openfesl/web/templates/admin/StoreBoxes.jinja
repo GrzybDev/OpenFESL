@@ -63,8 +63,7 @@
                       <Badge :name="'chest' if box.kind != 'box' else 'box'" both />
                       <a href="{{ href }}" class="account-link"><span class="admin-hero-strong">{{ row.name }}</span><span class="admin-item-kind">{{ _("games." ~ game.id ~ ".faction." ~ box.faction) if box.faction else _("web.store.requires.any_faction") }} · {{ _("games." ~ game.id ~ ".class." ~ box.hero_class) if box.hero_class else _("web.store.requires.any_class") }}</span></a>
                     </div>
-                    <div role="cell" class="admin-cell cell-stack">
-                      <span aria-hidden="true" class="cell-label">{{ _("web.admin.boxes.column.sold") }}</span>
+                    <AdminCell :label="_('web.admin.boxes.column.sold')" class="cell-stack">
                       {% if box.kind != "box" %}
                         <span>{{ _("web.admin.boxes.sold.keys") }}</span>
                       {% elif row.always %}
@@ -77,7 +76,7 @@
                       {% else %}
                         <span>{{ _("web.admin.boxes.sold.not_now") }}</span>
                       {% endif %}
-                    </div>
+                    </AdminCell>
                     <div role="cell" class="admin-cell boxes-price">{{ number(box.value) }}</div>
                     <div role="cell" class="admin-cell boxes-sale">
                       {% set sold = _("web.admin.boxes.state.on" if box.enabled else "web.admin.boxes.state.off") if box.kind == "box" else _("web.admin.boxes.chest.on" if box.enabled else "web.admin.boxes.chest.off") %}

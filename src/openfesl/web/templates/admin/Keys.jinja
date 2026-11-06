@@ -67,8 +67,8 @@
                       </span>
                       <DetailsButton :href="list ~ listing.link(open=None if open else key.code) ~ '#key-' ~ key.code" :open="open" :key="key.code" :name="key.code" />
                     </div>
-                    <div role="cell" class="admin-cell row-cell cell-stack key-label">
-                      <span aria-hidden="true" class="cell-label">{{ _("web.admin.key.label") }}</span>
+                    <AdminCell :label="_('web.admin.key.label')"
+                               class="row-cell cell-stack key-label">
                       {% set own = view.label(language) %}
                       {% if own %}
                         <span class="key-label-main">{{ own }}</span>
@@ -79,25 +79,22 @@
                         {% if view.label(other) %}<span lang="{{ other }}"
       class="cell-ago">{{ view.label(other) }}</span>{% endif %}
                       {% endfor %}
-                    </div>
-                    <div role="cell" class="admin-cell row-cell cell-count">
-                      <span aria-hidden="true"
-                            class="cell-label">{{ _("web.admin.key.grants") }}</span>{{ _n("web.admin.grant.tags", key.grants|length) }}
-                    </div>
-                    <div role="cell" class="admin-cell row-cell cell-stack">
-                      <span aria-hidden="true" class="cell-label">{{ _("web.admin.key.source") }}</span>
+                    </AdminCell>
+                    <AdminCell :label="_('web.admin.key.grants')" class="row-cell cell-count">
+                      {{ _n("web.admin.grant.tags", key.grants|length) }}
+                    </AdminCell>
+                    <AdminCell :label="_('web.admin.key.source')" class="row-cell cell-stack">
                       <span class="cell-hosted">{{ _("web.admin.key.source.game") if view.starting else _("web.admin.key.source.here") }}</span>
                       <span class="cell-ago">
                         {%- if view.starting %}{{ _("web.admin.key.source.starting") }}{% else %}{{ when(key.created, "yMMMd") }}{% if added %} · {{ added.by or _("web.admin.command_line") }}{% endif %}{% endif -%}
                       </span>
-                    </div>
-                    <div role="cell" class="admin-cell row-cell cell-stack">
-                      <span aria-hidden="true" class="cell-label">{{ _("web.admin.state") }}</span>
+                    </AdminCell>
+                    <AdminCell :label="_('web.admin.state')" class="row-cell cell-stack">
                       <span class="account-now">{{ _("web.admin.key.state." ~ view.tab) }}</span>
                       {% if changed and not key.enabled %}
                         <span class="cell-ago">{{ _("web.server.time", time=moment(changed.at)) }}</span>
                       {% endif %}
-                    </div>
+                    </AdminCell>
                     {% if manages %}
                       <div role="cell" class="cell-end">
                         <EndSquare :href="base" :label="_('web.admin.key.edit.of', code=key.code)" />
@@ -171,15 +168,7 @@
                   </div>
                 </div>
               {% else %}
-                <div role="row">
-                  <div role="cell"
-                       aria-colspan="{{ 7 if manages else 6 }}"
-                       class="row-details list-empty">
-                    <div>
-                      <p class="list-empty-title">{{ _("web.admin.keys.none." ~ tab) }}</p>
-                    </div>
-                  </div>
-                </div>
+                <EmptyRow :columns="7 if manages else 6" :title="_('web.admin.keys.none.' ~ tab)" />
               {% endfor %}
             </div>
           </div>

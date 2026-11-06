@@ -51,20 +51,18 @@
                   <span class="admin-hero-strong">{{ name }}</span>
                   <span class="cell-ago">{{ _("games." ~ game.id ~ ".item_kind." ~ row.rule.kind) }}</span>
                 </div>
-                <div role="cell" class="admin-cell">
-                  <span aria-hidden="true" class="cell-label">{{ _("web.admin.store.point.column.currency") }}</span>
+                <AdminCell :label="_('web.admin.store.point.column.currency')">
                   {{ _("games." ~ game.id ~ ".currency." ~ row.rule.currency) }}
-                </div>
+                </AdminCell>
                 <div role="cell" class="admin-cell cell-stack rules-value">
                   <span>{{ value(row.rule) }}</span>
                   {% if row.rule != row.seed %}
                     <span class="cell-ago">{{ _("web.admin.store.rules.seed", value=value(row.seed)) }}</span>
                   {% endif %}
                 </div>
-                <div role="cell" class="admin-cell">
-                  <span aria-hidden="true" class="cell-label">{{ _("web.admin.store.rules.column.sold") }}</span>
+                <AdminCell :label="_('web.admin.store.rules.column.sold')">
                   {{ _("web.admin.store.rules.fixed") if row.fixed else ways(row.rule) }}
-                </div>
+                </AdminCell>
                 <div role="cell" class="admin-cell cell-stack">
                   <span class="prices-points">{{ _n("web.admin.store.rules.items", row.items) }}</span>
                   <span class="cell-ago">{{ _("web.admin.store.rules.not_editable") if row.fixed else _n("web.admin.store.rules.own", row.own) }}</span>

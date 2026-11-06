@@ -83,8 +83,7 @@
                   {{ switch(event.enabled) }}
                 {% endif %}
               </div>
-              <div role="cell" class="admin-cell rewards-parts">
-                <span aria-hidden="true" class="cell-label">{{ _("web.admin.rewards.column.parts") }}</span>
+              <AdminCell :label="_('web.admin.rewards.column.parts')" class="rewards-parts">
                 {% for key, part in event.parts.items() %}
                   {% if manages %}
                     <AdminSwitch :action="switch" :path="'events.' ~ row.key ~ '.parts.' ~ key" :on="part.enabled" :name="_(event.title)" :back="here ~ '#event-' ~ row.key" :label="part_name(key, part)" />
@@ -94,7 +93,7 @@
                     </span>
                   {% endif %}
                 {% endfor %}
-              </div>
+              </AdminCell>
               <div role="cell" class="admin-cell cell-stack">
                 <span class="cell-time">{{ row.dates }}</span>
                 <span class="cell-ago">{{ row.rule }}</span>

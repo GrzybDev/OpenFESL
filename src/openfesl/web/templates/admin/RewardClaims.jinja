@@ -36,36 +36,27 @@
                   <span class="cell-time">{{ when(claim.at, "yMMMd") }}</span>
                   <span class="cell-ago">{{ _("web.server.time", time=when(claim.at, "Hm")) }}</span>
                 </div>
-                <div role="cell" class="admin-cell cell-stack">
-                  <span aria-hidden="true" class="cell-label">{{ _("web.admin.rewards.claims.account") }}</span>
+                <AdminCell :label="_('web.admin.rewards.claims.account')" class="cell-stack">
                   <a href="{{ url('/admin/accounts/' ~ row.listed.account_id) }}"
                      class="bar-link">{{ row.listed.account }}</a>
-                </div>
-                <div role="cell" class="admin-cell cell-stack">
-                  <span aria-hidden="true" class="cell-label">{{ _("web.admin.rewards.claims.hero") }}</span>
+                </AdminCell>
+                <AdminCell :label="_('web.admin.rewards.claims.hero')" class="cell-stack">
                   {% if row.listed.hero %}
                     {{ row.listed.hero }}
                   {% else %}
                     <span aria-hidden="true">–</span><span class="sr-only">{{ _("web.admin.rewards.claims.no_hero") }}</span>
                   {% endif %}
-                </div>
+                </AdminCell>
                 <div role="cell" class="admin-cell rewards-event">
                   {% if row.chip %}<span class="rewards-number">{{ row.chip }}</span>{% endif %}
                   <span>{{ row.name }}</span>
                 </div>
-                <div role="cell" class="admin-cell cell-stack">
-                  <span aria-hidden="true" class="cell-label">{{ _("web.admin.rewards.claims.given") }}</span>
+                <AdminCell :label="_('web.admin.rewards.claims.given')" class="cell-stack">
                   {{ row.given or "–" }}
-                </div>
+                </AdminCell>
               </div>
             {% else %}
-              <div role="row">
-                <div role="cell" aria-colspan="5" class="row-details list-empty">
-                  <div>
-                    <p class="list-empty-title">{{ _("web.admin.rewards.claims.none") }}</p>
-                  </div>
-                </div>
-              </div>
+              <EmptyRow :columns="5" :title="_('web.admin.rewards.claims.none')" />
             {% endfor %}
           </div>
         </div>

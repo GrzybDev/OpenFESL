@@ -1,0 +1,14 @@
+{#def columns: int, title: str, text: str = "" #}
+{# What an admin list says in place of its rows when it has none, across its columns, with the way
+   on that the content gives. #}
+<div role="row">
+  <div role="cell"
+       aria-colspan="{{ columns }}"
+       class="row-details list-empty">
+    <div>
+      <p class="list-empty-title">{{ title }}</p>
+      {% if text %}<p class="body-text">{{ text }}</p>{% endif %}
+    </div>
+    {{ content }}
+  </div>
+</div>

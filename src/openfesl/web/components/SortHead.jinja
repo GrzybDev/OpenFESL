@@ -1,0 +1,6 @@
+{#def href: str, label: str, current: bool, descending: bool #}
+{# A column's head that sorts its list, as a link; the current column shows its order with an
+   arrow. #}
+<div role="columnheader"
+     {% if current %} aria-sort="{{ 'descending' if descending else 'ascending' }}"{% endif %}
+     class="column-head column-sort{% if attrs.classes %} {{ attrs.classes }}{% endif %}"><a href="{{ href }}">{{ label }}{% if current %}<Icon name="down" :size="14" stroke="currentColor" :class="'' if descending else 'ascending'" />{% endif %}</a></div>

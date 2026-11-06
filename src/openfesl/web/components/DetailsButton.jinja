@@ -1,7 +1,6 @@
 {#def href: str, open: bool, key: str, name: str #}
-{# The square at the end of a row's name that opens the row's details in place, where key names
-   them; a link, so that it also works without scripts.
-   Args: name is what the screen reader says it opens. #}
+{# The square at the end of a row's name that opens the row's details in place, whose element key
+   names, and that name tells screen readers about; a link, so that it also works without scripts. #}
 <a href="{{ href }}"
    role="button"
    aria-expanded="{{ 'true' if open else 'false' }}"

@@ -46,8 +46,8 @@
                   <div role="cell" class="admin-cell admin-name-cell">
                     <a href="{{ href }}" class="account-link"><span class="account-login">{{ marked(account.nuid) }}</span><span class="cell-ago">{{ _("web.admin.account.number", number=account.id) }}</span></a>
                   </div>
-                  <div role="cell" class="admin-cell cell-stack account-names">
-                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.account.names") }}</span>
+                  <AdminCell :label="_('web.admin.account.names')"
+                             class="cell-stack account-names">
                     {% for persona in view.personas %}
                       <span class="account-name"><span>{{ marked(persona.record.persona.name) }}
                         {%- if not persona.usable %} · {{ _("web.admin.persona.mark.removed") if persona.record.removed else _("web.admin.persona.mark.disabled") }}{% endif -%}
@@ -58,20 +58,17 @@
                     {% else %}
                       <span class="cell-ago">{{ _("web.admin.account.names.none") }}</span>
                     {% endfor %}
-                  </div>
-                  <div role="cell" class="admin-cell account-country">
-                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.account.country") }}</span>
+                  </AdminCell>
+                  <AdminCell :label="_('web.admin.account.country')" class="account-country">
                     {% if account.country %}
                       <span class="country-code">{{ account.country }}</span>{{ country(account.country) }}
                     {% endif %}
-                  </div>
-                  <div role="cell" class="admin-cell cell-stack">
-                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.account.created") }}</span>
+                  </AdminCell>
+                  <AdminCell :label="_('web.admin.account.created')" class="cell-stack">
                     <span class="cell-time">{{ when(view.record.created, "yMMMd") }}</span>
                     <span class="cell-ago">{{ _("web.server.time", time=when(view.record.created, "Hm")) }}</span>
-                  </div>
-                  <div role="cell" class="admin-cell cell-stack">
-                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.account.now") }}</span>
+                  </AdminCell>
+                  <AdminCell :label="_('web.admin.account.now')" class="cell-stack">
                     <span class="account-now">{{ _("web.admin.account.online") if view.session else _("web.admin.account.offline") }}</span>
                     <span class="cell-ago">
                       {% if playing and playing.server %}
@@ -86,7 +83,7 @@
                         {{ _("web.admin.account.never") }}
                       {% endif %}
                     </span>
-                  </div>
+                  </AdminCell>
                   <div role="cell" class="cell-end">
                     <EndSquare :href="href" :label="_('web.admin.account.page.of', name=account.nuid)" />
                   </div>

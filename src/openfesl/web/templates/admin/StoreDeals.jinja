@@ -75,24 +75,22 @@
                   <div role="cell" class="admin-cell prices-state">
                     <Badge :name="'tick' if state == 'runs' else 'warn' if state == 'stopped' else 'x'" lines />{{ _("web.admin.deals.switch." ~ state) }}
                   </div>
-                  <div role="cell" class="admin-cell cell-stack">
-                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.column.size") }}</span>
+                  <AdminCell :label="_('web.admin.deals.column.size')" class="cell-stack">
                     <span>{{ _n("web.admin.deals.size", each.size) if each.size else _("web.admin.deals.size.all") }}</span>
                     {% if each.kind == "items" %}
                       <span class="cell-ago">{{ _("web.admin.deals.discount.one", percent=each.discount) }}</span>
                     {% elif each.discount[1] %}
                       <span class="cell-ago">{{ _("web.admin.deals.discount", low=each.discount[0], high=each.discount[1]) }}</span>
                     {% endif %}
-                  </div>
-                  <div role="cell" class="admin-cell cell-stack">
-                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.column.next") }}</span>
+                  </AdminCell>
+                  <AdminCell :label="_('web.admin.deals.column.next')" class="cell-stack">
                     {% if row.next and each.enabled and rules.enabled %}
                       <span class="cell-time">{{ when(row.next, "yMMMd") }}</span>
                       <span class="cell-ago">{{ _("web.server.time", time=when(row.next, "Hm")) }}</span>
                     {% else %}
                       <span>{{ _("web.admin.deals.next.none") }}</span>
                     {% endif %}
-                  </div>
+                  </AdminCell>
                   <div role="cell" class="admin-cell boxes-price">{{ number(row.now) }}</div>
                   <div role="cell" class="cell-end">
                     <EndSquare :href="base ~ '/sections/' ~ row.key" :label="_('web.admin.deals.edit', section=name(row.key))" />

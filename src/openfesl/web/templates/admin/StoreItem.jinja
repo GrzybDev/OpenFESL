@@ -17,9 +17,6 @@
 {% set editable = manages and not fixed and not row.prices.unsold %}
 {% set saving = form if refused_point is not none else {} %}
 {% set unsold = saving.get("unsold") if saving else state == "off" and lines %}
-{% macro refusal(text) %}
-  <Refusal>{{ text }}</Refusal>
-{% endmacro %}
 <StorePage :game="game"
            :title="row.name ~ ' · ' ~ _('web.admin.store.title')"
            current="prices"
@@ -93,14 +90,11 @@
                   {% set wrong = refused_point == product.id %}
                   <div role="row" class="prices-point-columns prices-point-row">
                     <div role="cell" class="admin-cell prices-product">{{ game.store.product_id(product.id) }}</div>
-                    <div role="cell" class="admin-cell prices-currency">
-                      <span aria-hidden="true"
-                            class="cell-label">{{ _("web.admin.store.point.column.currency") }}</span>
+                    <AdminCell :label="_('web.admin.store.point.column.currency')"
+                               class="prices-currency">
                       {{ _("games." ~ game.id ~ ".currency." ~ product.currency) }}
-                    </div>
-                    <div role="cell" class="admin-cell">
-                      <span aria-hidden="true"
-                            class="cell-label">{{ _("web.admin.store.point.column.ownership") }}</span>
+                    </AdminCell>
+                    <AdminCell :label="_('web.admin.store.point.column.ownership')">
                       {% if fixed %}
                         {{ _("web.admin.store.step", step=number(levels.index(product.item_id) + 1), steps=number(levels|length)) }}
                       {% elif ownership.type == "tlmd" %}
@@ -110,7 +104,7 @@
                       {% else %}
                         {{ _("web.store.price.permanent") }}
                       {% endif %}
-                    </div>
+                    </AdminCell>
                     <div role="cell" class="admin-cell prices-price">
                       {% if editable %}
                         <TextField :id="field" :name="field" :value="saving.get(field, product.price)" :wrong="wrong" class="prices-price-input" inputmode="numeric" maxlength="13" required :aria-label="_('web.admin.store.point.price_of', currency=_('games.' ~ game.id ~ '.currency.' ~ product.currency), point=game.store.product_id(product.id))" :aria-describedby="'prices-why' if wrong else none" />
@@ -118,8 +112,7 @@
                         {{ number(product.price) }}
                       {% endif %}
                     </div>
-                    <div role="cell" class="admin-cell cell-stack">
-                      <span aria-hidden="true" class="cell-label">{{ _("web.admin.store.point.column.from") }}</span>
+                    <AdminCell :label="_('web.admin.store.point.column.from')" class="cell-stack">
                       {% if fixed %}
                         <span class="prices-from">{{ _("web.admin.store.state.fixed") }}</span>
                       {% elif line.own %}
@@ -128,7 +121,7 @@
                       {% else %}
                         <span class="prices-from">{{ _("web.admin.store.point.rule") }}</span>
                       {% endif %}
-                    </div>
+                    </AdminCell>
                     {% if editable %}
                       <div role="cell" class="admin-cell prices-state">
                         <label class="prices-sold">
@@ -144,7 +137,9 @@
                   </div>
                   {% if wrong %}
                     <div role="row">
-                      <div role="cell" aria-colspan="6" id="prices-why">{{ refusal(why) }}</div>
+                      <div role="cell" aria-colspan="6" id="prices-why">
+                        <Refusal>{{ why }}</Refusal>
+                      </div>
                     </div>
                   {% endif %}
                 {% endfor %}
@@ -195,7 +190,7 @@
               </fieldset>
               <label for="add-price" class="field-label">{{ _("web.admin.store.point.column.price") }}</label>
               <TextField id="add-price" name="add-price" :value="form.get('add-price', '')" form="prices-add" inputmode="numeric" maxlength="13" :placeholder="_('web.admin.store.point.add.rule')" />
-              {% if refused and refused_point is none %}{{ refusal(why) }}{% endif %}
+              {% if refused and refused_point is none %}<Refusal>{{ why }}</Refusal>{% endif %}
               <FormButton icon="plus" form="prices-add">{{ _("web.admin.store.point.add.submit") }}</FormButton>
             </div>
           </details>

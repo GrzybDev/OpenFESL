@@ -37,10 +37,10 @@
                   <Badge :name="'warn' if step.short else 'tick'" :lines="not step.short" />{{ _("web.admin.deals.log.result." ~ ("stopped" if step.short else "done")) }}
                 </div>
                 {% for column, lines in (("came", row.came), ("left", row.left)) %}
-                  <div role="cell" class="admin-cell cell-stack log-deals">
-                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.log.column." ~ column) }}</span>
+                  <AdminCell :label="_('web.admin.deals.log.column.' ~ column)"
+                             class="cell-stack log-deals">
                     <span>{{ lines|join(", ") if lines else _("web.admin.deals.preview.nothing") }}</span>
-                  </div>
+                  </AdminCell>
                 {% endfor %}
               </div>
             {% endfor %}

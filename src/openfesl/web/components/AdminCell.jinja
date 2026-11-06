@@ -1,0 +1,7 @@
+{#def label: str #}
+{# A cell of an admin list, with its column's name for where the table turns into blocks. Further
+   attributes go on the cell. #}
+<div role="cell" {{ attrs.render(class="admin-cell") }}>
+  <span aria-hidden="true" class="cell-label">{{ label }}</span>
+  {{ content }}
+</div>

@@ -68,18 +68,16 @@
                     <AdminItemIcon :game="game" :item="item" :shown="icons" />
                     <a href="{{ href }}" class="account-link"><span class="admin-hero-strong">{{ row.name }}</span><span class="cell-ago prices-number">{{ _("web.admin.items.number", id=item.id) }}</span></a>
                   </div>
-                  <div role="cell" class="admin-cell admin-item-kind">
-                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.store.column.kind") }}</span>{{ _("games." ~ game.id ~ ".item_kind." ~ item.kind) }}
-                  </div>
-                  <div role="cell" class="admin-cell">
-                    <span aria-hidden="true"
-                          class="cell-label">{{ _("web.admin.store.column.requires") }}</span>{{ row.requires }}
-                  </div>
-                  <div role="cell" class="admin-cell cell-stack">
-                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.store.column.points") }}</span>
+                  <AdminCell :label="_('web.admin.store.column.kind')" class="admin-item-kind">
+                    {{ _("games." ~ game.id ~ ".item_kind." ~ item.kind) }}
+                  </AdminCell>
+                  <AdminCell :label="_('web.admin.store.column.requires')">
+                    {{ row.requires }}
+                  </AdminCell>
+                  <AdminCell :label="_('web.admin.store.column.points')" class="cell-stack">
                     <span class="prices-points">{{ row.summary }}</span>
                     <span class="cell-ago">{{ row.ways }}</span>
-                  </div>
+                  </AdminCell>
                   <div role="cell" class="admin-cell prices-state">
                     <Badge :name="states[state]" lines />{{ _("web.admin.store.state." ~ state) }}
                   </div>
@@ -88,14 +86,7 @@
                   </div>
                 </div>
               {% else %}
-                <div role="row">
-                  <div role="cell" aria-colspan="6" class="row-details list-empty">
-                    <div>
-                      <p class="list-empty-title">{{ _("web.admin.store.none") }}</p>
-                    </div>
-                    <SmallAction :href="list" :label="_('web.admin.store.filter.clear')" />
-                  </div>
-                </div>
+                <EmptyRow :columns="6" :title="_('web.admin.store.none')"><SmallAction :href="list" :label="_('web.admin.store.filter.clear')" /></EmptyRow>
               {% endfor %}
             </div>
           </div>

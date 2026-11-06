@@ -7,9 +7,7 @@
 {% macro region_name() %}{% for region, _count in regions if (region.name or region.value) == filters.region %}<Published kind="region" :label="region" />{% else %}{{ filters.region }}{% endfor %}{% endmacro %}
 {% macro sort_header(column, label) %}
   {% set current = filters.sort == column %}
-  <div role="columnheader"
-       {% if current %} aria-sort="{{ 'descending' if filters.descending else 'ascending' }}"{% endif %}
-       class="column-head column-sort{% if column == 'name' %} column-name{% endif %}"><a href="{{ list ~ filters.changed(sort=column, descending=(not filters.descending) if current else column == 'players').query() }}">{{ label }}{% if current %}<Icon name="down" :size="14" stroke="currentColor" :class="'' if filters.descending else 'ascending'" />{% endif %}</a></div>
+  <SortHead :href="list ~ filters.changed(sort=column, descending=(not filters.descending) if current else column == 'players').query()" :label="label" :current="current" :descending="filters.descending" :class="'column-name' if column == 'name' else ''" />
 {%- endmacro %}
 {% macro chip(href, filter, label, plain=False) %}
   <li><a href="{{ href }}"

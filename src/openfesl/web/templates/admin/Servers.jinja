@@ -9,12 +9,6 @@
   "approved": [("map", "web.admin.column.hosting"), ("decided", "web.admin.column.approved"), ("players", "web.admin.column.players")],
   "revoked": [("last", "web.admin.column.last"), ("decided", "web.admin.column.revoked"), ("refused", "web.admin.column.refused")],
 }[tab] %}
-{% macro sort_header(column, label, extra="") %}
-  {% set current = listing.sort == column %}
-  <div role="columnheader"
-       {% if current %} aria-sort="{{ 'descending' if listing.descending else 'ascending' }}"{% endif %}
-       class="column-head column-sort {{ extra }}"><a href="{{ list ~ listing.sorted_by(column).link() }}">{{ label }}{% if current %}<Icon name="down" :size="14" stroke="currentColor" :class="'' if listing.descending else 'ascending'" />{% endif %}</a></div>
-{%- endmacro %}
 {% macro moment_cell(at) %}
   {% if at %}
     <span class="cell-time">{{ _("web.server.time", time=when(at, "Hm")) }}</span>
@@ -107,9 +101,11 @@
                 <div role="row" class="admin-server-columns">
                   <div role="columnheader"
                        class="column-head"><span class="sr-only">{{ _("web.admin.state") }}</span></div>
-                  {{ sort_header("name", _("web.servers.name"), "column-name") }}
-                  {{ sort_header("provider", _("web.admin.provider")) }}
-                  {% for column, key in columns %}{{ sort_header(column, _(key)) }}{% endfor %}
+                  <SortHead :href="list ~ listing.sorted_by('name').link()" :label="_('web.servers.name')" :current="listing.sort == 'name'" :descending="listing.descending" class="column-name" />
+                  <SortHead :href="list ~ listing.sorted_by('provider').link()" :label="_('web.admin.provider')" :current="listing.sort == 'provider'" :descending="listing.descending" />
+                  {% for column, key in columns %}
+                    <SortHead :href="list ~ listing.sorted_by(column).link()" :label="_(key)" :current="listing.sort == column" :descending="listing.descending" />
+                  {% endfor %}
                   <div role="columnheader"><span class="sr-only">{{ _("web.servers.page") }}</span></div>
                 </div>
               </div>

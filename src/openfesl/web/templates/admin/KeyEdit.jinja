@@ -4,9 +4,6 @@
    the labels and the limits. #}
 {% set key = view.key %}
 {% set title = _("web.admin.keys") %}
-{% macro field_error(text) %}
-  <FieldError>{{ text }}</FieldError>
-{% endmacro %}
 <AdminPage :title="title ~ ' · ' ~ key.code" current="keys">
   <PageHead labelledby="edit-title"
             :title="title"
@@ -88,13 +85,13 @@
           </div>
         {% endfor %}
       </div>
-      {% if form.error == "label" %}{{ field_error(_("web.admin.key.edit.label", count=number(longest))) }}{% endif %}
+      {% if form.error == "label" %}<FieldError>{{ _("web.admin.key.edit.label", count=number(longest)) }}</FieldError>{% endif %}
 
       <section aria-labelledby="edit-limits" class="key-edit-limits">
         <Bar id="edit-limits" :extra="_n('web.admin.key.used', key.limits.uses)">{{ _("web.admin.key.limits") }}</Bar>
         <TextField id="edit-uses" name="max_uses" :label="_('web.admin.key.limits.most')" type="number" :value="form.max_uses" :wrong="form.error == 'uses'" min="1" inputmode="numeric" aria-describedby="edit-uses-note" />
         {% if form.error == "uses" %}
-          {{ field_error(_("web.admin.key.limits.wrong")) }}
+          <FieldError>{{ _("web.admin.key.limits.wrong") }}</FieldError>
         {% else %}
           <p id="edit-uses-note" class="field-note">{{ _("web.admin.key.limits.most.note") }}</p>
         {% endif %}

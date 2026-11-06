@@ -36,28 +36,25 @@
                     {%- if row.pinned %} · <span class="offers-pin"><Icon name="star" :size="12" stroke="currentColor" />{{ _("web.admin.deals.home.pinned") }}</span>{% endif -%}
                   </span>
                 </div>
-                <div role="cell" class="admin-cell cell-stack">
-                  <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.offers.column.section") }}</span>
+                <AdminCell :label="_('web.admin.deals.offers.column.section')"
+                           class="cell-stack">
                   <span>{{ _("games." ~ game.id ~ ".deal_section." ~ bundle.section) if bundle.section else "" }}</span>
-                </div>
-                <div role="cell" class="admin-cell cell-stack">
-                  <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.offers.column.price") }}</span>
+                </AdminCell>
+                <AdminCell :label="_('web.admin.deals.offers.column.price')" class="cell-stack">
                   <span class="admin-hero-strong">{{ number(bundle.price) }} {{ _("games." ~ game.id ~ ".currency." ~ bundle.currency) }}</span>
                   <span class="cell-ago">
                     {%- if row.share %}{{ _("web.admin.deals.offers.off", share=row.share, sum=number(bundle.original_price)) }}{% else %}{{ _("web.admin.deals.offers.list_price") }}{% endif -%}
                   </span>
-                </div>
-                <div role="cell" class="admin-cell cell-stack">
-                  <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.offers.column.runs") }}</span>
+                </AdminCell>
+                <AdminCell :label="_('web.admin.deals.offers.column.runs')" class="cell-stack">
                   <span>{{ _("web.admin.deals.offers.from", time=moment(bundle.starts)) }}</span>
                   <span>{{ _("web.admin.deals.offers.to", time=moment(bundle.ends)) }}</span>
-                </div>
-                <div role="cell" class="admin-cell cell-stack">
-                  <span aria-hidden="true" class="cell-label">{{ _("web.admin.deals.offers.column.stock") }}</span>
+                </AdminCell>
+                <AdminCell :label="_('web.admin.deals.offers.column.stock')" class="cell-stack">
                   <span>
                     {%- if bundle.stock is none %}{{ _("web.admin.deals.offers.no_limit") }}{% else %}{{ _("web.admin.deals.offers.left", left=number(bundle.stock - bundle.sold), total=number(bundle.stock)) }}{% endif -%}
                   </span>
-                </div>
+                </AdminCell>
                 <div role="cell" class="admin-cell prices-state">
                   <Badge :name="{'live': 'tick', 'scheduled': 'clock', 'off': 'hide', 'sold': 'box', 'ended': 'x'}[row.state]" lines />{{ _("web.admin.deals.offer.state." ~ row.state) }}
                 </div>

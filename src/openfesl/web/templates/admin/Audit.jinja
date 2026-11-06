@@ -50,16 +50,14 @@
                   <div role="cell" class="admin-cell admin-badges">
                     <Badge :name="row.glyph" both />
                   </div>
-                  <div role="cell" class="admin-cell cell-stack">
-                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.audit.time") }}</span>
+                  <AdminCell :label="_('web.admin.audit.time')" class="cell-stack">
                     <span class="cell-time">{{ _("web.server.time", time=when(entry.at, "Hm")) }}</span>
                     <span class="cell-ago">{{ when(entry.at, "MMMd") }} · {{ ago(entry.at) }}</span>
-                  </div>
-                  <div role="cell" class="admin-cell cell-stack">
-                    <span aria-hidden="true" class="cell-label">{{ _("web.admin.audit.admin") }}</span>
+                  </AdminCell>
+                  <AdminCell :label="_('web.admin.audit.admin')" class="cell-stack">
                     <span class="audit-who">{{ who(entry.admin, entry.name, entry.role, entry.action) }}</span>
                     {% if entry.role %}<span class="audit-role">{{ _("web.admin.role." ~ entry.role) }}</span>{% endif %}
-                  </div>
+                  </AdminCell>
                   <div role="cell" class="admin-cell cell-stack audit-action">
                     <span class="audit-title">{{ row.title }}</span>
                     {% if row.href %}
@@ -69,22 +67,15 @@
                       <span class="audit-target{% if row.code %} audit-code{% endif %}">{{ row.target }}</span>
                     {% endif %}
                   </div>
-                  <div role="cell" class="admin-cell audit-details">
-                    <span aria-hidden="true"
-                          class="cell-label">{{ _("web.admin.audit.details") }}</span>{{ row.details or "–" }}
-                  </div>
+                  <AdminCell :label="_('web.admin.audit.details')" class="audit-details">
+                    {{ row.details or "–" }}
+                  </AdminCell>
                   <div role="cell" class="cell-end">
                     {% if row.href %}<EndSquare :href="row.href" :label="_('web.admin.audit.open', target=row.target)" />{% endif %}
                   </div>
                 </div>
               {% else %}
-                <div role="row">
-                  <div role="cell" aria-colspan="6" class="row-details list-empty">
-                    <div>
-                      <p class="list-empty-title">{{ _("web.admin.audit.none." ~ ("filtered" if listing.admin is not none or listing.account is not none else "all")) }}</p>
-                    </div>
-                  </div>
-                </div>
+                <EmptyRow :columns="6" :title="_('web.admin.audit.none.' ~ ('filtered' if listing.admin is not none or listing.account is not none else 'all'))" />
               {% endfor %}
             </div>
           </div>

@@ -12,12 +12,7 @@
 {% set title = _("web.admin.ledger.title") %}
 <AdminPage :title="title ~ ' · ' ~ currency ~ ' · ' ~ owner" current="accounts">
   <PageHead labelledby="ledger-title">
-    <div class="enter-title page-title page-title-wider">
-      <h1 id="ledger-title" class="account-heading">
-        <span class="title-block">{{ title }}</span>
-        <span class="title-sub account-heading-name">{{ currency }} · {{ owner }}</span>
-      </h1>
-    </div>
+    <AccountHeading id="ledger-title" :title="title" :name="currency ~ ' · ' ~ owner" />
     <Tab :href="base ~ '/wallets'" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.account.number", number=account.id) }}<span class="tab-count">{{ account.display_name or account.nuid }}</span></Tab>
   </PageHead>
   <Panel class="enter-panel">
@@ -68,10 +63,9 @@
                     <div role="cell" class="admin-cell ledger-change">
                       <Icon :name="'plus' if entry.change >= 0 else 'down'" :size="12" stroke="currentColor" />{{ "+" if entry.change > 0 else "" }}{{ number(entry.change) }}
                     </div>
-                    <div role="cell" class="admin-cell ledger-balance">
-                      <span aria-hidden="true"
-                            class="cell-label">{{ _("web.admin.ledger.column.after") }}</span>{{ number(entry.balance) }}
-                    </div>
+                    <AdminCell :label="_('web.admin.ledger.column.after')" class="ledger-balance">
+                      {{ number(entry.balance) }}
+                    </AdminCell>
                     <div role="cell" class="admin-cell cell-stack">
                       <span class="admin-item-kind">{{ _("web.admin.ledger.reason." ~ reason) }}</span>
                       {% if entry.purchase %}

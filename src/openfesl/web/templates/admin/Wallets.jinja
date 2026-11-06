@@ -8,12 +8,7 @@
 {% set base = url("/admin/accounts/" ~ account.id) %}
 <AdminPage :title="title ~ ' · ' ~ account.nuid" current="accounts">
   <PageHead labelledby="wallets-title">
-    <div class="enter-title page-title page-title-wider">
-      <h1 id="wallets-title" class="account-heading">
-        <span class="title-block">{{ title }}</span>
-        <span class="title-sub account-heading-name">{{ account.nuid }}</span>
-      </h1>
-    </div>
+    <AccountHeading id="wallets-title" :title="title" :name="account.nuid" />
     <Tab :href="base" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.account.number", number=account.id) }}<span class="tab-count">{{ account.display_name or account.nuid }}</span></Tab>
   </PageHead>
   <Panel class="enter-panel">
@@ -55,10 +50,9 @@
                           <span class="admin-item-kind">{{ code }} · {{ owner }}{% if not line.head.opened %} · {{ _("web.admin.wallets.closed") }}{% endif %}</span>
                         </span>
                       </div>
-                      <div role="cell" class="admin-cell">
-                        <span aria-hidden="true"
-                              class="cell-label">{{ _("web.admin.wallets.column.owner") }}</span>{{ owner }}
-                      </div>
+                      <AdminCell :label="_('web.admin.wallets.column.owner')">
+                        {{ owner }}
+                      </AdminCell>
                       <div role="cell" class="admin-cell wallet-balance">
                         {%- if line.earned is not none -%}
                           {{ _("web.admin.wallets.points.balance", unspent=number(line.balance), earned=number(line.earned)) }}

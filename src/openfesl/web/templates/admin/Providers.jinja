@@ -6,12 +6,6 @@
 {% set list = url("/admin/providers") %}
 {% set tab = listing.tab %}
 {% macro code(text) %}<code class="provider-code">{{ text }}</code>{% endmacro %}
-{% macro sort_header(column, label, extra="") %}
-  {% set current = listing.sort == column %}
-  <div role="columnheader"
-       {% if current %} aria-sort="{{ 'descending' if listing.descending else 'ascending' }}"{% endif %}
-       class="column-head column-sort {{ extra }}"><a href="{{ list ~ listing.sorted_by(column).link() }}">{{ label }}{% if current %}<Icon name="down" :size="14" stroke="currentColor" :class="'' if listing.descending else 'ascending'" />{% endif %}</a></div>
-{%- endmacro %}
 {% macro server_line(view) %}
   {% if view.tab == "waiting" %}
     {{ _("web.admin.server.line.waiting", time=_("web.server.time", time=when(view.server.first_seen, "Hm"))) if view.server.first_seen else _("web.admin.state.waiting") }}
@@ -55,12 +49,12 @@
                 <div role="row" class="provider-columns">
                   <div role="columnheader"
                        class="column-head"><span class="sr-only">{{ _("web.admin.state") }}</span></div>
-                  {{ sort_header("name", _("web.admin.provider"), "column-name") }}
+                  <SortHead :href="list ~ listing.sorted_by('name').link()" :label="_('web.admin.provider')" :current="listing.sort == 'name'" :descending="listing.descending" class="column-name" />
                   <div role="columnheader" class="column-head">{{ _("web.admin.provider_id") }}</div>
-                  {{ sort_header("approved", _("web.admin.column.approved")) }}
-                  {{ sort_header("waiting", _("web.admin.column.waiting")) }}
+                  <SortHead :href="list ~ listing.sorted_by('approved').link()" :label="_('web.admin.column.approved')" :current="listing.sort == 'approved'" :descending="listing.descending" />
+                  <SortHead :href="list ~ listing.sorted_by('waiting').link()" :label="_('web.admin.column.waiting')" :current="listing.sort == 'waiting'" :descending="listing.descending" />
                   <div role="columnheader" class="column-head">{{ _("web.admin.column.revoked") }}</div>
-                  {{ sort_header("added", _("web.admin.column.added")) }}
+                  <SortHead :href="list ~ listing.sorted_by('added').link()" :label="_('web.admin.column.added')" :current="listing.sort == 'added'" :descending="listing.descending" />
                   <div role="columnheader"><span class="sr-only">{{ _("web.servers.page") }}</span></div>
                 </div>
               </div>
@@ -93,26 +87,22 @@
                       <div role="cell" class="admin-cell row-cell">
                         <ProviderId :id="provider.id" />
                       </div>
-                      <div role="cell" class="admin-cell row-cell cell-stack">
-                        <span aria-hidden="true" class="cell-label">{{ _("web.admin.column.approved") }}</span>
+                      <AdminCell :label="_('web.admin.column.approved')" class="row-cell cell-stack">
                         <span class="cell-time">{{ number(view.count("approved")) }}</span>
                         {% if view.hosting %}
                           <span class="cell-ago">{{ _("web.admin.hosting_count", count=number(view.hosting|length)) }}</span>
                         {% endif %}
-                      </div>
-                      <div role="cell" class="admin-cell row-cell cell-count">
-                        <span aria-hidden="true"
-                              class="cell-label">{{ _("web.admin.column.waiting") }}</span>{{ number(waiting) }}
-                      </div>
-                      <div role="cell" class="admin-cell row-cell cell-count">
-                        <span aria-hidden="true"
-                              class="cell-label">{{ _("web.admin.column.revoked") }}</span>{{ number(view.count("revoked")) }}
-                      </div>
-                      <div role="cell" class="admin-cell row-cell cell-stack">
-                        <span aria-hidden="true" class="cell-label">{{ _("web.admin.column.added") }}</span>
+                      </AdminCell>
+                      <AdminCell :label="_('web.admin.column.waiting')" class="row-cell cell-count">
+                        {{ number(waiting) }}
+                      </AdminCell>
+                      <AdminCell :label="_('web.admin.column.revoked')" class="row-cell cell-count">
+                        {{ number(view.count("revoked")) }}
+                      </AdminCell>
+                      <AdminCell :label="_('web.admin.column.added')" class="row-cell cell-stack">
                         <span class="cell-time">{{ when(view.history.added, "yMMMd") }}</span>
                         <span class="cell-ago">{{ _("web.server.time", time=when(view.history.added, "Hm")) }}</span>
-                      </div>
+                      </AdminCell>
                       <div role="cell" class="cell-end">
                         <EndSquare :href="href" :label="_('web.admin.provider.page.of', name=provider.name)" />
                       </div>
@@ -171,14 +161,7 @@
                     </div>
                   </div>
                 {% else %}
-                  <div role="row">
-                    <div role="cell" aria-colspan="8" class="row-details list-empty">
-                      <div>
-                        <p class="list-empty-title">{{ _("web.admin.providers.none." ~ tab) }}</p>
-                        <p class="body-text">{{ _("web.admin.providers.none." ~ tab ~ ".text") }}</p>
-                      </div>
-                    </div>
-                  </div>
+                  <EmptyRow :columns="8" :title="_('web.admin.providers.none.' ~ tab)" :text="_('web.admin.providers.none.' ~ tab ~ '.text')" />
                 {% endfor %}
               </div>
             </div>
