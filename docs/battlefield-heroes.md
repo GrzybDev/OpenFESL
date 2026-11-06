@@ -93,7 +93,9 @@ see neutral placeholders, and the files are served only to those who see them.
   of a faction and class with a skin tone, hair colour, hair and facial hair, and its faction's and class's starting
   kit; with an imported catalogue that holds hero models, it shows the hero as the game's menu draws it
 - Names are 2 to 16 letters, digits, `_` or `-`, unique ignoring case
-- An account has 4 hero slots and buys more for 2,499 Funds each; a rename costs 5,899 Funds
+- An account has 4 hero slots and buys more for 2,499 Funds each; a rename costs 5,899 Funds. The sales of 2012 come
+  back each year: slots at 50% off on 2-6 July and 13-17 November and at 30% off on 1-5 October, renames at 50% off on
+  6-10 July and 15-19 November
 - The heroes page chooses the default hero, which the game and Play Now play
 - Heroes reach level 30 and earn one Hero Point on each even level
 - The game writes its hero's look, equipment, emotes and missions itself, which the service accepts only with items
