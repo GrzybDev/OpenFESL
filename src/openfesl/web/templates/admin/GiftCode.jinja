@@ -12,11 +12,9 @@
 {% set end = _("web.store.utc", time=moment(entry.expires)) if entry.expires else "" %}
 {% set glyphs = {"enabled": "tick", "used_up": "full", "expired": "clock", "disabled": "x"} %}
 <AdminPage :title="(label or entry.code) ~ ' · ' ~ title" current="keys">
-  <PageHead labelledby="code-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="code-title">{{ _("web.admin.keys.subtitle.batch" if entry.batch else "web.admin.keys.subtitle.code", game=game.name) }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="code-title"
+            :title="title"
+            :subtitle="_('web.admin.keys.subtitle.batch' if entry.batch else 'web.admin.keys.subtitle.code', game=game.name)" />
   <Panel class="enter-panel">
     <nav aria-label="{{ _('web.admin.keys.all_codes') }}"
          class="tabs prices-back">

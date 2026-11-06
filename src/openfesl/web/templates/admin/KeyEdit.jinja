@@ -10,10 +10,9 @@
   </p>
 {% endmacro %}
 <AdminPage :title="title ~ ' · ' ~ key.code" current="keys">
-  <PageHead labelledby="edit-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="edit-title">{{ _("web.admin.key.edit") }}</TitleBlock>
-    </div>
+  <PageHead labelledby="edit-title"
+            :title="title"
+            :subtitle="_('web.admin.key.edit')">
     <Tab :href="url('/admin/keys')" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.keys.all") }}</Tab>
   </PageHead>
   <Panel class="enter-panel key-edit-frame">

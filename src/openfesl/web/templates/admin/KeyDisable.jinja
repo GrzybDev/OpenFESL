@@ -5,11 +5,9 @@
 {% set key = view.key %}
 {% set title = _("web.admin.keys") %}
 <AdminPage :title="title" current="keys">
-  <PageHead labelledby="disable-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="disable-title">{{ _("web.admin.keys.subtitle") }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="disable-title"
+            :title="title"
+            :subtitle="_('web.admin.keys.subtitle')" />
   <Panel class="enter-panel confirm-frame">
     <Confirmation :question="_('web.admin.confirm.key')"
                   :action="url('/admin/keys/' ~ key.code|urlencode ~ '/disable')"

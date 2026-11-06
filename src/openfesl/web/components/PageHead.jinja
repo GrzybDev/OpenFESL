@@ -1,4 +1,11 @@
-{#def tag: str = "section", labelledby: str = "" #}
-{# The head of a game's page under its menu bar: the title block, which the content wraps in the
-   page-title block, and the page's tabs or a link beside it. #}
-<{{ tag }}{% if labelledby %} aria-labelledby="{{ labelledby }}"{% endif %} class="page-head{% if attrs.classes %} {{ attrs.classes }}{% endif %}">{{ content }}</{{ tag }}>
+{#def tag: str = "section", labelledby: str = "", title: str = "", subtitle: str = "" #}
+{# The head of a page under its menu bar: the title block with its subtitle, and the page's tabs or
+   a link beside it, which the content gives. A title block of another shape comes with the
+   content too, wrapped in the page-title block. #}
+<{{ tag }}{% if labelledby %} aria-labelledby="{{ labelledby }}"{% endif %} class="page-head{% if attrs.classes %} {{ attrs.classes }}{% endif %}">
+  {%- if title %}
+    <div class="enter-title page-title">
+      <TitleBlock :title="title" :id="labelledby">{{ subtitle }}</TitleBlock>
+    </div>
+  {% endif -%}
+{{ content }}</{{ tag }}>

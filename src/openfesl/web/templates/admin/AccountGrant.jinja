@@ -8,11 +8,7 @@
 {% set open = keys|selectattr("open")|map(attribute="view.key.code")|list %}
 {% set chosen = form.get("key") or (open[0] if open else "tag") %}
 <AdminPage :title="title ~ ' · ' ~ account.nuid" current="accounts">
-  <PageHead labelledby="grant-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="grant-title">{{ account.nuid }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="grant-title" :title="title" :subtitle="account.nuid" />
   <Panel class="enter-panel confirm-frame">
     <section aria-labelledby="confirm-question"
              aria-describedby="confirm-text"

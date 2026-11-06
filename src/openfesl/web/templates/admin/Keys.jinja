@@ -11,10 +11,9 @@
   {%- if limits.max_uses is none %}{{ _("web.admin.key.uses.any", uses=number(limits.uses)) }}{% else %}{{ _("web.admin.key.uses.most", uses=number(limits.uses), most=number(limits.max_uses)) }}{% endif %} · {{ _("web.admin.key.uses.once") if limits.once_per_account else _("web.admin.key.uses.again") }}
 {%- endmacro %}
 <AdminPage :title="title" current="keys">
-  <PageHead labelledby="keys-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="keys-title">{{ _("web.admin.keys.subtitle") }}</TitleBlock>
-    </div>
+  <PageHead labelledby="keys-title"
+            :title="title"
+            :subtitle="_('web.admin.keys.subtitle')">
     <nav aria-label="{{ _('web.admin.keys.states') }}" class="tabs">
       {% for name in ["all", "enabled", "disabled"] %}
         <Tab :href="list ~ listing.link(tab=name)" :label="_('web.admin.keys.tab.' ~ name)" :count="counts[name]" :current="tab == name" />

@@ -21,11 +21,7 @@
   {% set why = "" %}
 {% endif %}
 <AdminPage :title="title ~ ' · ' ~ owner" current="accounts">
-  <PageHead labelledby="wallet-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="wallet-title">{{ owner }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="wallet-title" :title="title" :subtitle="owner" />
   <Panel class="enter-panel confirm-frame">
     <AdminForm :question="_('web.admin.wallets.dialog', currency=currency)" :action="url('/admin/accounts/' ~ account.id ~ '/wallets/' ~ game ~ '/' ~ line.key)" :label="_('web.admin.wallets.dialog.submit')" :busy="_('web.admin.count.busy')" :back="back" :note="form.get('note', '')" :error="error" :why="why">
     <p class="confirm-account">

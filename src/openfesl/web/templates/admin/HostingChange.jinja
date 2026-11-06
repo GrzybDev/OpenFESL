@@ -4,11 +4,9 @@
    settings. #}
 {% set title = _("web.admin.settings") %}
 <AdminPage :title="title" current="settings">
-  <PageHead labelledby="mode-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="mode-title">{{ _("web.admin.settings.subtitle") }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="mode-title"
+            :title="title"
+            :subtitle="_('web.admin.settings.subtitle')" />
   <Panel class="enter-panel confirm-frame">
     <Confirmation :question="_('web.admin.confirm.mode')"
                   :action="url('/admin/settings/hosting')"

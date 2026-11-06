@@ -18,11 +18,9 @@
   "portrait": "web.admin.hero.portrait.remove"
 } %}
 <AdminPage :title="title ~ ' · ' ~ hero.persona.name" current="accounts">
-  <PageHead labelledby="action-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="action-title">{{ hero.persona.name }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="action-title"
+            :title="title"
+            :subtitle="hero.persona.name" />
   <Panel class="enter-panel confirm-frame">
     <AdminForm :question="questions[action]" :action="url(base ~ '/' ~ action)" :label="_(labels[action])" :busy="_(labels[action] ~ '.busy')" :back="back" :glyph="'x' if action in ('disable', 'portrait') else 'go'" :note="form.get('note', '')" :error="error" :why="_('web.admin.still_needed', what=_('web.admin.still_needed.name')) if error == 'name' else ''">
     <p class="confirm-account">

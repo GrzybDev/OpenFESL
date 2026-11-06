@@ -20,11 +20,7 @@
   {% set why = "" %}
 {% endif %}
 <AdminPage :title="title ~ ' · ' ~ holder" current="accounts">
-  <PageHead labelledby="count-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="count-title">{{ holder }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="count-title" :title="title" :subtitle="holder" />
   <Panel class="enter-panel confirm-frame">
     <AdminForm :question="_('web.admin.count.' ~ shown.kind ~ '.title')" :action="url(path)" :label="_('web.admin.count.' ~ shown.kind ~ '.submit')" :busy="_('web.admin.count.busy')" :back="back" glyph="go" :note="form.get('note', '')" :error="error" :why="why">
     <p class="confirm-account">

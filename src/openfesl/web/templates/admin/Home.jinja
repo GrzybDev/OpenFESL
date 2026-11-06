@@ -6,10 +6,9 @@
        hx-trigger="every 15s, refresh"
        hx-select="#live"
        hx-swap="outerMorph">
-    <PageHead labelledby="home-title">
-      <div class="enter-title page-title">
-        <TitleBlock :title="title" id="home-title">{{ _("web.admin.home.subtitle") }}</TitleBlock>
-      </div>
+    <PageHead labelledby="home-title"
+              :title="title"
+              :subtitle="_('web.admin.home.subtitle')">
       <div class="home-numbers">
         <p>{{ _n("web.shell.online", online) }} · {{ _n("web.admin.home.hosting", hosting) }}</p>
         <p>

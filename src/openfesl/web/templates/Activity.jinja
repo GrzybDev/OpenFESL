@@ -43,10 +43,7 @@
 <Layout :title="title">
   <GameMenu current="activity" />
 
-  <PageHead labelledby="activity-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="activity-title">{{ period_line }}</TitleBlock>
-    </div>
+  <PageHead labelledby="activity-title" :title="title" :subtitle="period_line">
     <nav aria-label="{{ _('web.activity.period') }}" class="tabs">
       {% for option in periods %}
         <Tab :href="page_url ~ ('' if option == 'day' else '?period=' ~ option)" :label="_('web.activity.period.' ~ option)" :current="option == chart.period" />

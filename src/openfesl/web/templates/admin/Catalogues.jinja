@@ -4,11 +4,9 @@
    none. Importing and choosing who sees the art need the admin role. #}
 {% set title = _("web.admin.catalogue.title") %}
 <AdminPage :title="title" current="catalogues">
-  <PageHead labelledby="catalogues-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="catalogues-title">{{ _("web.admin.catalogue.subtitle") }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="catalogues-title"
+            :title="title"
+            :subtitle="_('web.admin.catalogue.subtitle')" />
   <Panel class="enter-panel">
     <div data-catalogues class="catalogue-layout">
       <div class="catalogue-games">

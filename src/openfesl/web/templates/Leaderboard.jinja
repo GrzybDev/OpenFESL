@@ -13,10 +13,9 @@
     <GameStatus :activity="activity" />
     <GameMenu current="leaderboard" />
 
-    <PageHead labelledby="board-title">
-      <div class="enter-title page-title">
-        <TitleBlock :title="title" id="board-title">{{ _("web.leaderboard.all_time") }}</TitleBlock>
-      </div>
+    <PageHead labelledby="board-title"
+              :title="title"
+              :subtitle="_('web.leaderboard.all_time')">
       {% if everyone %}
         <nav aria-label="{{ _('web.leaderboard.sort') }}" class="tabs">
           {% for order in orders %}

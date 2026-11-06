@@ -8,11 +8,7 @@
 {% set playing = persona or view.playing %}
 {% set action = "/admin/accounts/" ~ account.id ~ ("/session/end" if decision == "end" else "/names/" ~ persona.record.persona.id ~ "/" ~ decision) %}
 <AdminPage :title="title ~ ' · ' ~ account.nuid" current="accounts">
-  <PageHead labelledby="decision-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="decision-title">{{ account.nuid }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="decision-title" :title="title" :subtitle="account.nuid" />
   <Panel class="enter-panel confirm-frame">
     <Confirmation :question="_('web.admin.confirm.account.' ~ decision)"
                   :action="url(action)"

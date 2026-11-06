@@ -4,11 +4,7 @@
    confirm it. Where scripts run, its panel opens as a dialog over the account page. #}
 {% set title = _("web.account.page") %}
 <Layout :title="title" page="account">
-  <PageHead labelledby="decision-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="decision-title">{{ name }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="decision-title" :title="title" :subtitle="name" />
   <Panel class="enter-panel confirm-frame">
     <Confirmation :question="question"
                   :action="action"

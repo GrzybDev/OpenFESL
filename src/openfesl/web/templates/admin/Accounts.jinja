@@ -12,11 +12,9 @@
   {%- endif -%}
 {%- endmacro %}
 <AdminPage :title="title" current="accounts">
-  <PageHead labelledby="accounts-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="accounts-title">{{ _("web.admin.accounts.subtitle") }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="accounts-title"
+            :title="title"
+            :subtitle="_('web.admin.accounts.subtitle')" />
   <Panel class="enter-panel">
     <div class="list-layout admin-layout">
       <section aria-labelledby="accounts-list" class="list-main admin-list">

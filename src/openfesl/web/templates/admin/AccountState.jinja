@@ -7,11 +7,7 @@
 {% set chosen = form.get("state") or account.state %}
 {% set glyphs = {"active": "tick", "disabled": "lock", "banned": "warn", "deactivated": "x"} %}
 <AdminPage :title="title ~ ' · ' ~ account.nuid" current="accounts">
-  <PageHead labelledby="state-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="state-title">{{ account.nuid }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="state-title" :title="title" :subtitle="account.nuid" />
   <Panel class="enter-panel confirm-frame">
     <section aria-labelledby="confirm-question"
              aria-describedby="confirm-text"

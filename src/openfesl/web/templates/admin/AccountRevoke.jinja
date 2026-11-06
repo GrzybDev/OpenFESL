@@ -5,11 +5,7 @@
 {% set account = view.record.account %}
 {% set title = _("web.admin.account") %}
 <AdminPage :title="title ~ ' · ' ~ account.nuid" current="accounts">
-  <PageHead labelledby="revoke-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="revoke-title">{{ account.nuid }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="revoke-title" :title="title" :subtitle="account.nuid" />
   <Panel class="enter-panel confirm-frame">
     <Confirmation :question="_('web.admin.confirm.entitlement')"
                   :action="url('/admin/accounts/' ~ account.id ~ '/entitlements/revoke')"

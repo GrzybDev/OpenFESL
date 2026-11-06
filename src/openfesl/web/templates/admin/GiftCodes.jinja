@@ -15,10 +15,9 @@
   {%- if not end %}{{ _("web.admin.keys.no_end") }}{% elif state == "expired" %}{{ _("web.admin.keys.ended", time=end) }}{% else %}{{ end }}{% endif -%}
 {% endmacro %}
 <AdminPage :title="title" current="keys">
-  <PageHead labelledby="keys-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="keys-title">{{ _("web.admin.keys.subtitle.gifts", game=game.name) }}</TitleBlock>
-    </div>
+  <PageHead labelledby="keys-title"
+            :title="title"
+            :subtitle="_('web.admin.keys.subtitle.gifts', game=game.name)">
     {% if manages %}
       <Action :href="url('/admin/keys/codes/new') ~ '?game=' ~ game.id" :label="_('web.admin.keys.new')" glyph="plus" />
     {% endif %}

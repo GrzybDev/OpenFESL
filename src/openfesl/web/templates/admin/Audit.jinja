@@ -8,10 +8,9 @@
   {%- if action == "deletion_request" %}{{ _("web.admin.audit.player") }}{% elif subject is none %}{{ _("web.admin.command_line") }}{% else %}{{ name or subject }}{% endif -%}
 {% endmacro %}
 <AdminPage :title="title" current="audit">
-  <PageHead labelledby="audit-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="audit-title">{{ _("web.admin.audit.subtitle") }}</TitleBlock>
-    </div>
+  <PageHead labelledby="audit-title"
+            :title="title"
+            :subtitle="_('web.admin.audit.subtitle')">
     {% if listing.account is not none %}
       <Tab :href="list" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.audit.whole") }}</Tab>
     {% endif %}

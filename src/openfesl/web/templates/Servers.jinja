@@ -34,10 +34,7 @@
     <GameStatus :activity="activity" />
     <GameMenu current="servers" />
 
-    <PageHead labelledby="servers-title">
-      <div class="enter-title page-title">
-        <TitleBlock :title="title" id="servers-title">{{ game.name }}</TitleBlock>
-      </div>
+    <PageHead labelledby="servers-title" :title="title" :subtitle="game.name">
       {% if modes_data %}
         <nav aria-label="{{ _('web.servers.mode') }}" class="tabs">
           <Tab :href="list ~ filters.changed(mode=None).query()" :label="_('web.servers.all')" :count="total" :current="not filters.mode" />

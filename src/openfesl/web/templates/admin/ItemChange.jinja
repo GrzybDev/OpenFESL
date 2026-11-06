@@ -20,11 +20,7 @@
   {% set now = _("web.store.price.permanent") %}
 {% endif %}
 <AdminPage :title="title ~ ' · ' ~ hero.persona.name" current="accounts">
-  <PageHead labelledby="item-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="item-title">{{ hero.persona.name }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="item-title" :title="title" :subtitle="hero.persona.name" />
   <Panel class="enter-panel confirm-frame">
     <AdminForm :question="_('web.admin.items.change.title') if change == 'change' else _('web.admin.items.revoke.confirm', item=name)" :action="url(path)" :label="_('web.admin.items.' ~ change)" :busy="_('web.admin.items.' ~ change ~ '.busy')" :back="back" :glyph="'x' if change == 'revoke' else 'go'" :note="form.get('note', '')" :error="error" :why="_('web.admin.still_needed', what=_('web.admin.still_needed.' ~ ('uses' if counted else 'end'))) if error == 'value' else ''">
     <p class="confirm-account">

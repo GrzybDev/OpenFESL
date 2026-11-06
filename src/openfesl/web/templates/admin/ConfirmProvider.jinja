@@ -8,11 +8,9 @@
 {% set total = view.servers|length %}
 {% set official = view.servers|selectattr("server.official")|map(attribute="server.name")|list %}
 <AdminPage :title="title" current="providers">
-  <PageHead labelledby="confirm-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="confirm-title">{{ _("web.admin.providers.list.active") }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="confirm-title"
+            :title="title"
+            :subtitle="_('web.admin.providers.list.active')" />
   <Panel class="enter-panel confirm-frame">
     <Confirmation :question="_('web.admin.confirm.provider')"
                   :action="url('/admin/providers/' ~ provider.id.hex() ~ '/revoke')"

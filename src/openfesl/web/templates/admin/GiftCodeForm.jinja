@@ -16,11 +16,9 @@
   {% if name in refused %}<FieldError :id="'code-' ~ name ~ '-note'">{{ refused[name] }}</FieldError>{% endif %}
 {% endmacro %}
 <AdminPage :title="title ~ ' · ' ~ _('web.admin.keys')" current="keys">
-  <PageHead labelledby="form-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="_('web.admin.keys')" id="form-title">{{ _("web.admin.keys.subtitle.edit" if entry else "web.admin.keys.subtitle.new", game=game.name) }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="form-title"
+            :title="_('web.admin.keys')"
+            :subtitle="_('web.admin.keys.subtitle.edit' if entry else 'web.admin.keys.subtitle.new', game=game.name)" />
   <Panel class="enter-panel">
     <form method="post"
           action="{{ path }}"

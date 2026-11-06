@@ -9,11 +9,9 @@
   {%- if policy.kind == "switch" %}{{ _("web.admin.policy.value." ~ value) }}{% elif policy.kind == "choice" %}{{ _("web.admin.policy." ~ policy.name ~ "." ~ value) }}{% else %}{{ value or _("web.admin.policy.version.any") }}{% endif -%}
 {% endmacro %}
 <AdminPage :title="title" current="settings">
-  <PageHead labelledby="settings-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="settings-title">{{ _("web.admin.settings.subtitle") }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="settings-title"
+            :title="title"
+            :subtitle="_('web.admin.settings.subtitle')" />
   <Panel class="enter-panel">
     <div class="settings-columns">
       <section aria-labelledby="settings-mode">

@@ -2,11 +2,9 @@
 {% set title = _("web.admin.sign_in") %}
 {% set through = provider.name if provider else "" %}
 <AdminPage :title="title" current="sign_in">
-  <PageHead labelledby="sign-in-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="sign-in-title">{{ _("web.admin.sign_in.subtitle") }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="sign-in-title"
+            :title="title"
+            :subtitle="_('web.admin.sign_in.subtitle')" />
   <Panel tag="section"
          aria-labelledby="sign-in-through"
          class="enter-panel sign-in">

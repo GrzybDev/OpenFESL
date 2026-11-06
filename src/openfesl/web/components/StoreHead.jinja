@@ -2,10 +2,9 @@
 {# The head of a game's store in the admin panel: the title with what the chosen tab shows, and the
    tabs of its parts with how many each holds. #}
 {% set base = url("/admin/store/" ~ game.id) %}
-<PageHead labelledby="store-title">
-  <div class="enter-title page-title">
-    <TitleBlock :title="_('web.admin.store.title')" id="store-title">{{ subtitle }}</TitleBlock>
-  </div>
+<PageHead labelledby="store-title"
+          :title="_('web.admin.store.title')"
+          :subtitle="subtitle">
   <nav aria-label="{{ _('web.admin.store.tabs') }}" class="tabs">
     {% for tab, path in [("prices", ""), ("deals", "/deals"), ("boxes", "/boxes"), ("purchases", "/purchases")] %}
       <Tab :href="base ~ path" :label="_('web.admin.store.tab.' ~ tab)" :count="counts.get(tab)" :current="tab == current" />

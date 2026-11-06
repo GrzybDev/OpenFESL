@@ -12,11 +12,9 @@
 {% endif %}
 {% macro hosted() %}<Published kind="map" :label="view.hosting.map" :of="view.game" /> · <Published kind="mode" :label="view.hosting.mode" :of="view.game" />{% endmacro %}
 <AdminPage :title="title" current="servers">
-  <PageHead labelledby="confirm-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="confirm-title">{{ _("web.admin.servers.list." ~ tab) }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="confirm-title"
+            :title="title"
+            :subtitle="_('web.admin.servers.list.' ~ tab)" />
   <Panel class="enter-panel confirm-frame">
     <Confirmation :question="_('web.admin.confirm.' ~ decision)"
                   :action="url('/admin/servers/' ~ server.ugid ~ '/' ~ decision)"

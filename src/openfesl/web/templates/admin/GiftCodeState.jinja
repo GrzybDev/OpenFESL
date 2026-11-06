@@ -6,11 +6,9 @@
 {% set base = url("/admin/keys/codes/" ~ entry.code) %}
 {% set turn = "enable" if not entry.enabled else "disable" %}
 <AdminPage :title="title" current="keys">
-  <PageHead labelledby="state-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="state-title">{{ _("web.admin.keys.subtitle.code", game=of.name) }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="state-title"
+            :title="title"
+            :subtitle="_('web.admin.keys.subtitle.code', game=of.name)" />
   <Panel class="enter-panel confirm-frame">
     <AdminForm :question="_('web.admin.keys.' ~ turn ~ '.question')" :action="base ~ '/state'" :label="_('web.admin.keys.' ~ turn)" :busy="_('web.admin.keys.' ~ turn ~ '.busy')" :back="base" :note="note" :error="error" :glyph="'tick' if turn == 'enable' else 'x'">
     <input type="hidden"

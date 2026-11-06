@@ -32,11 +32,7 @@
   {% set blocked = "" %}
 {% endif %}
 <AdminPage :title="title ~ ' · ' ~ hero.persona.name" current="accounts">
-  <PageHead labelledby="grant-title">
-    <div class="enter-title page-title">
-      <TitleBlock :title="title" id="grant-title">{{ hero.persona.name }}</TitleBlock>
-    </div>
-  </PageHead>
+  <PageHead labelledby="grant-title" :title="title" :subtitle="hero.persona.name" />
   <Panel class="enter-panel confirm-frame">
     <AdminForm :question="_('web.admin.items.grant')" :action="url(path)" :label="_('web.admin.items.grant.submit')" :busy="_('web.admin.items.grant.busy')" :back="back" :note="note" :error="error" :why="why" :search="url(path)">
     <p class="confirm-account">
