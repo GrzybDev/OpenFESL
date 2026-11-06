@@ -2,7 +2,6 @@ from dataclasses import dataclass, replace
 from datetime import date, datetime
 from math import ceil
 from typing import Any, Protocol, Self
-from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
@@ -14,6 +13,7 @@ from openfesl.core.reward_rules import Gift
 from openfesl.core.rewards import FIRST_CHEST, REFERRAL, claimed
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.rewards import RewardAdminViews
+from openfesl.web.pages import page_number, query_of
 
 PAGE_SIZE = 50
 
@@ -62,9 +62,7 @@ class ClaimListing:
         Args:
             query: The address's query.
         """
-        page = query.get("page", "")
-        number = int(page) if page.isdigit() and 0 < int(page) < 10**6 else 1
-        return cls(query.get("reward", "")[:64], number)
+        return cls(query.get("reward", "")[:64], page_number(query.get("page", "")))
 
     def changed(self, **changes: Any) -> ClaimListing:
         """Return the list with some choices changed.
@@ -76,9 +74,7 @@ class ClaimListing:
 
     def query(self) -> str:
         """Return the query of the list's address, with a leading ? unless it is empty."""
-        fields = [("reward", self.reward), ("page", str(self.page) if self.page > 1 else "")]
-        query = urlencode([(key, value) for key, value in fields if value])
-        return f"?{query}" if query else ""
+        return query_of(("reward", self.reward), ("page", str(self.page) if self.page > 1 else ""))
 
 
 @dataclass(frozen=True, slots=True)

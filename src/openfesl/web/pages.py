@@ -10,6 +10,7 @@ from functools import cache
 from math import ceil
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlencode
 
 from babel import Locale
 from babel.dates import format_skeleton, format_timedelta
@@ -42,6 +43,8 @@ STATIC = Path(__file__).with_name("static")
 # Vite writes the built scripts, stylesheet and fonts here, named after their content.
 BUILT = STATIC / "build"
 MANIFEST = BUILT / "manifest.json"
+# A page of a list that an address may ask for lies below this one.
+MOST_PAGE = 10**6
 # A static file's address names its version, so browsers may keep it until the file changes.
 KEEP = "public, max-age=31536000, immutable"
 
@@ -275,6 +278,25 @@ def _listed(context: Context, items: list[str]) -> str:
 
 def _locale(context: Context) -> Locale:
     return Locale.parse(translate("web.locale", context["language"]))
+
+
+def page_number(text: str) -> int:
+    """Return the page of a list that an address names, the first for anything else.
+
+    Args:
+        text: The address's parameter, as sent.
+    """
+    return int(text) if text.isdigit() and 0 < int(text) < MOST_PAGE else 1
+
+
+def query_of(*fields: tuple[str, str]) -> str:
+    """Return the query of a list's address, with a leading ? unless it is empty.
+
+    Args:
+        fields: Each parameter and its value; those without a value are left out.
+    """
+    query = urlencode([(key, value) for key, value in fields if value])
+    return f"?{query}" if query else ""
 
 
 def page_links(page: int, pages: int) -> list[int | None]:

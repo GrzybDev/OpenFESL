@@ -2,7 +2,6 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, replace
 from math import ceil
 from typing import Any, Self
-from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -14,7 +13,7 @@ from openfesl.core.rankings import KD, RankingStore
 from openfesl.core.stats import bucket_of, partition_of
 from openfesl.core.texts import localize
 from openfesl.protocol.rank import Period
-from openfesl.web.pages import Pages
+from openfesl.web.pages import Pages, query_of
 
 PAGE_SIZE = 50
 # What the leaderboard sorts by, in the order of its tabs.
@@ -67,14 +66,12 @@ class View:
         Args:
             paged: Whether the query names the first page too, as one that a search chose.
         """
-        fields = [
+        return query_of(
             ("stat", "" if self.order == "score" else self.order),
             ("show", "online" if self.online else ""),
             ("player", self.player),
             ("page", "" if self.page == 1 and not paged else str(self.page)),
-        ]
-        query = urlencode([(key, value) for key, value in fields if value])
-        return f"?{query}" if query else ""
+        )
 
 
 def leaderboard_routes(

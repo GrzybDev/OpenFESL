@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
 from typing import Protocol
-from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -27,7 +26,7 @@ from openfesl.core.games import Game, Games
 from openfesl.core.policies import GamePolicies, Policies, SettingStore, setting_key
 from openfesl.core.servers import HostingMode
 from openfesl.core.texts import localize, translate
-from openfesl.web.admin.auth import AdminSessions, SignInProvider, game_among
+from openfesl.web.admin.auth import AdminSessions, SignInProvider, game_among, to_query
 from openfesl.web.admin.rewards import RewardAdminViews
 from openfesl.web.admin.servers import ServerViews
 from openfesl.web.game_icons import ICON_PATH, icon_version, reaches_discord
@@ -324,8 +323,7 @@ def settings_routes(
             toast(request, "web.admin.toast.mode_unchanged")
             return RedirectResponse(back, 303)
         if form.get("confirmed") != "1":
-            target = localize("/admin/settings/hosting", request.state.language)
-            return RedirectResponse(f"{target}?{urlencode({'mode': chosen})}", 303)
+            return to_query(request, "/admin/settings/hosting", mode=chosen)
         await hosting.set_hosting_mode(HostingMode(chosen), admin)
         await apply()
         toast(request, f"web.admin.toast.mode.{chosen}")

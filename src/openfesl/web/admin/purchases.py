@@ -13,6 +13,7 @@ from openfesl.core.games import Game, Scope
 from openfesl.core.purchases import ListedPurchase
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.store import StoreAdminViews
+from openfesl.web.pages import page_number, query_of
 
 PAGE_SIZE = 50
 
@@ -77,14 +78,14 @@ class PurchaseListing:
         Args:
             query: The address's query.
         """
-        page, account = query.get("page", ""), query.get("account", "")
+        account = query.get("account", "")
         return cls(
             query.get("currency", "")[:16],
             _day(query.get("from", "")),
             _day(query.get("to", "")),
             query.get("who", "").strip()[:64],
             int(account) if account.isdigit() and len(account) < 19 else None,
-            int(page) if page.isdigit() and 0 < int(page) < 10**6 else 1,
+            page_number(query.get("page", "")),
         )
 
     def changed(self, **changes: Any) -> PurchaseListing:
@@ -97,16 +98,14 @@ class PurchaseListing:
 
     def query(self) -> str:
         """Return the query of the list's address, with a leading ? unless it is empty."""
-        fields = [
+        return query_of(
             ("currency", self.currency),
             ("from", self.start),
             ("to", self.end),
             ("who", self.who),
             ("account", str(self.account) if self.account else ""),
             ("page", str(self.page) if self.page > 1 else ""),
-        ]
-        query = urlencode([(key, value) for key, value in fields if value])
-        return f"?{query}" if query else ""
+        )
 
 
 @dataclass(frozen=True, slots=True)

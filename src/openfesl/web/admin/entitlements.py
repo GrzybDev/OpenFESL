@@ -1,7 +1,6 @@
 from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass
 from typing import Protocol
-from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -12,7 +11,7 @@ from openfesl.core.entitlements import Entitlement, EntitlementQuery, StatusChan
 from openfesl.core.games import Games, Grant
 from openfesl.core.texts import localize
 from openfesl.web.admin.accounts import AccountView, AccountViews
-from openfesl.web.admin.auth import AdminSessions, back_to
+from openfesl.web.admin.auth import AdminSessions, back_to, to_query
 from openfesl.web.keys import KeySource, KeyView, key_views
 from openfesl.web.sessions import checked_form, toast
 
@@ -204,8 +203,7 @@ def _decide(
         path = f"/admin/accounts/{view.record.account.id}"
         back = back_to(request, str(form.get("back", "")), path)
         if decision == "revoke" and form.get("confirmed") != "1":
-            target = localize(f"{path}/entitlements/revoke", request.state.language)
-            return RedirectResponse(f"{target}?{urlencode({'tag': tag, 'back': back})}", 303)
+            return to_query(request, f"{path}/entitlements/revoke", tag=tag, back=back)
         if await store.set_status(view.record.account.id, tag, decision == "restore", admin):
             toast(request, f"web.admin.toast.{decision}d", tag=tag)
         else:

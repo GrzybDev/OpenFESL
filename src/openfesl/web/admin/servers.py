@@ -23,7 +23,7 @@ from openfesl.core.servers import (
     ServerStore,
 )
 from openfesl.core.texts import localize
-from openfesl.web.admin.auth import AdminSessions, back_to
+from openfesl.web.admin.auth import AdminSessions, back_to, to_query
 from openfesl.web.servers import label_name
 from openfesl.web.sessions import checked_form, toast
 
@@ -417,8 +417,7 @@ def _decide(
             # Another admin decided first, or the provider's revocation keeps it refused.
             toast(request, "web.admin.toast.unchanged", error=True, name=name)
         elif asks_first(decision, view) and form.get("confirmed") != "1":
-            target = localize(f"/admin/servers/{ugid}/{decision}", request.state.language)
-            return RedirectResponse(f"{target}?{urlencode({'back': back})}", 303)
+            return to_query(request, f"/admin/servers/{ugid}/{decision}", back=back)
         elif await views.store.set_state(ugid, state, admin):
             await apply()
             toast(request, f"web.admin.toast.{decision}", name=name)

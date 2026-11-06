@@ -1,7 +1,6 @@
 from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
 from typing import Protocol
-from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -13,7 +12,7 @@ from openfesl.core.admins import Admin
 from openfesl.core.personas import PersonaState
 from openfesl.core.texts import localize
 from openfesl.web.admin.accounts import AccountView, AccountViews, PersonaView
-from openfesl.web.admin.auth import AdminSessions, back_to
+from openfesl.web.admin.auth import AdminSessions, back_to, to_query
 from openfesl.web.sessions import checked_form, toast
 
 # The decisions about an account or one of its names that ask for confirmation first.
@@ -207,7 +206,7 @@ def account_decision_routes(
         back = back_to(request, str(form.get("back", "")), _path(view))
         name = view.record.account.nuid
         if form.get("confirmed") != "1":
-            return _ask(request, f"/admin/accounts/{account_id}/session/end", back)
+            return to_query(request, f"/admin/accounts/{account_id}/session/end", back=back)
         if view.session is None:
             toast(request, "web.admin.toast.ended_already", error=True, name=name)
         else:
@@ -227,7 +226,7 @@ def account_decision_routes(
         back = back_to(request, str(form.get("back", "")), _path(view))
         if form.get("confirmed") != "1":
             path = f"/admin/accounts/{account_id}/names/{persona_id}/{decision}"
-            return _ask(request, path, back)
+            return to_query(request, path, back=back)
         name = persona.record.persona.name
         target = persona.record.persona.id
         if decision == "kick":
@@ -252,11 +251,6 @@ def _persona(view: AccountView, persona_id: str) -> PersonaView:
 
 def _path(view: AccountView) -> str:
     return f"/admin/accounts/{view.record.account.id}"
-
-
-def _ask(request: Request, path: str, back: str) -> Response:
-    target = localize(path, request.state.language)
-    return RedirectResponse(f"{target}?{urlencode({'back': back})}", 303)
 
 
 def _confirmation(

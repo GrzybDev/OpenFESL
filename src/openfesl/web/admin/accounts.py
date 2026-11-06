@@ -1,7 +1,6 @@
 from dataclasses import dataclass, replace
 from math import ceil
 from typing import TYPE_CHECKING, Any, Protocol, Self
-from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
@@ -17,6 +16,7 @@ from openfesl.core.session import GameSession, Players
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.gift_codes import GiftCodeViews
 from openfesl.web.admin.referral import ReferralAdminViews
+from openfesl.web.pages import query_of
 
 # For annotations only, as the heroes' pages build on the accounts'.
 if TYPE_CHECKING:
@@ -169,13 +169,11 @@ class AccountList:
 
     def query(self) -> str:
         """Return the query of the list's address, with a leading ? unless it is empty."""
-        fields = [
+        return query_of(
             ("q", self.search),
             ("order", "asc" if self.oldest_first else ""),
             ("page", str(self.page) if self.page > 1 else ""),
-        ]
-        query = urlencode([(key, value) for key, value in fields if value])
-        return f"?{query}" if query else ""
+        )
 
 
 class AccountViews:

@@ -3,7 +3,6 @@ from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 from typing import Any
-from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, Response
@@ -17,7 +16,7 @@ from openfesl.core.store_items import Requirement, Unfit, requirement
 from openfesl.core.store_window import DAYS, HOURS, USES
 from openfesl.core.texts import localize
 from openfesl.web.catalogue_files import icon_url
-from openfesl.web.pages import Pages
+from openfesl.web.pages import Pages, query_of
 from openfesl.web.site import site_bar
 from openfesl.web.store import ITEM
 from openfesl.web.store_texts import StoreTexts
@@ -100,15 +99,13 @@ class Choice:
 
     def query(self) -> str:
         """Return the query of the store front's address for these choices, with a leading ?."""
-        fields = [
+        return query_of(
             ("hero", str(self.hero.persona.id) if self.hero else ""),
             ("kind", self.kind),
             ("owned", "1" if self.owned else ""),
             ("q", self.search),
             ("page", str(self.page) if self.page > 1 else ""),
-        ]
-        kept = [(name, value) for name, value in fields if value]
-        return "?" + urlencode(kept) if kept else ""
+        )
 
 
 @dataclass(frozen=True, slots=True)

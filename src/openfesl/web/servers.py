@@ -3,7 +3,6 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field, replace
 from math import ceil
 from typing import Any, Self
-from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
@@ -13,7 +12,7 @@ from openfesl.core.census import Census, Label, Server
 from openfesl.core.games import Game, Games
 from openfesl.core.servers import Approval
 from openfesl.core.texts import translate
-from openfesl.web.pages import Pages
+from openfesl.web.pages import Pages, query_of
 
 PAGE_SIZE = 50
 SORTS = ("players", "name", "map", "mode", "region")
@@ -89,11 +88,7 @@ class Filters:
         Args:
             server: The server.
         """
-        states = {
-            "squad": server.room,
-            "full": server.free == 0,
-            "empty": server.players == 0,
-        }
+        states = _states(server)
         wanted = self.show & set(STATES)
         return (
             self.name.casefold() in server.name.casefold()
@@ -122,7 +117,7 @@ class Filters:
 
     def query(self) -> str:
         """Return the query of the list's address, with a leading ? unless it is empty."""
-        fields = [
+        return query_of(
             ("q", self.name),
             ("mode", self.mode or ""),
             ("map", self.map or ""),
@@ -132,9 +127,7 @@ class Filters:
             ("order", "" if self.descending == (self.sort == "players") else self.direction),
             ("page", "" if self.page == 1 else str(self.page)),
             ("open", self.open or ""),
-        ]
-        query = urlencode([(key, value) for key, value in fields if value])
-        return f"?{query}" if query else ""
+        )
 
     @property
     def direction(self) -> str:
@@ -204,15 +197,7 @@ def _list(pages: Pages, census: Census, game: Game) -> Callable[[Request], Await
                 key=lambda region: label_name(game, "region", region[0], language).casefold(),
             ),
             shown=Counter(
-                state
-                for server in every
-                for state, passes in (
-                    ("squad", server.room),
-                    ("full", server.free == 0),
-                    ("empty", server.players == 0),
-                    ("hardcore", server.hardcore),
-                )
-                if passes
+                state for server in every for state, passes in _states(server).items() if passes
             ),
         )
 
@@ -263,6 +248,16 @@ def _page(
         )
 
     return show_server
+
+
+def _states(server: Server) -> dict[str, bool]:
+    # The states a reader may show only and the hardcore rules, each with whether a server has it.
+    return {
+        "squad": server.room,
+        "full": server.free == 0,
+        "empty": server.players == 0,
+        "hardcore": server.hardcore,
+    }
 
 
 def _key(label: Label | None) -> str | None:

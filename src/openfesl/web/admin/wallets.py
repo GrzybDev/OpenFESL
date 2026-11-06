@@ -18,7 +18,7 @@ from openfesl.core.wallets import MOST_BALANCE, Ledger, Wallet, WalletHead, Wall
 from openfesl.web.admin.accounts import AccountView, AccountViews
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.admin.purchases import PurchaseLog, purchase_lines
-from openfesl.web.pages import number, whole_number
+from openfesl.web.pages import number, page_number, whole_number
 from openfesl.web.sessions import checked_form, toast
 
 SECTION = "accounts"
@@ -100,12 +100,11 @@ class LedgerList:
         Args:
             query: The address's query.
         """
-        page = query.get("page", "")
         return cls(
             game=query.get("game", ""),
             wallet=query.get("wallet", ""),
             groups=tuple(group for group in REASONS if query.get(group)),
-            page=int(page) if page.isdigit() and 0 < int(page) < 10**6 else 1,
+            page=page_number(query.get("page", "")),
         )
 
     def changed(self, **changes: Any) -> LedgerList:

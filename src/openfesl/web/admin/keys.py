@@ -2,7 +2,7 @@ import re
 from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass, replace
 from typing import Protocol, Self
-from urllib.parse import quote, urlencode
+from urllib.parse import quote
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -13,9 +13,10 @@ from openfesl.core.admins import Admin, Role
 from openfesl.core.games import Game, Games, ProductKey
 from openfesl.core.keys import KeyHistory, StoredKey
 from openfesl.core.texts import languages, localize
-from openfesl.web.admin.auth import AdminSessions, back_to
+from openfesl.web.admin.auth import AdminSessions, back_to, to_query
 from openfesl.web.admin.gift_codes import GiftCodeViews
 from openfesl.web.keys import KeyView, key_views
+from openfesl.web.pages import query_of
 from openfesl.web.sessions import checked_form, toast
 
 SECTION = "keys"
@@ -107,13 +108,11 @@ class KeyList:
             game: The game whose keys are listed; this list's when empty.
         """
         shown = tab or self.tab
-        fields = [
+        return query_of(
             ("game", game or self.game),
             ("state", "" if shown == "all" else shown),
             ("open", open or ""),
-        ]
-        query = urlencode([(key, value) for key, value in fields if value])
-        return f"?{query}" if query else ""
+        )
 
 
 def key_routes(
@@ -250,8 +249,7 @@ def _decide(
         view = await key_view(games, store, code)
         back = back_to(request, str(form.get("back", "")), "/admin/keys")
         if not enabled and form.get("confirmed") != "1":
-            target = localize(f"/admin/keys/{code}/disable", request.state.language)
-            return RedirectResponse(f"{target}?{urlencode({'back': back})}", 303)
+            return to_query(request, f"/admin/keys/{code}/disable", back=back)
         if await store.enable(view.key.code, enabled, admin):
             toast(request, done, code=code)
         else:

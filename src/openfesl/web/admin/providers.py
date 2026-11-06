@@ -2,7 +2,6 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 from typing import Any, Self
-from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -20,8 +19,9 @@ from openfesl.core.servers import (
     provider_file,
 )
 from openfesl.core.texts import localize
-from openfesl.web.admin.auth import AdminSessions, back_to
+from openfesl.web.admin.auth import AdminSessions, back_to, to_query
 from openfesl.web.admin.servers import ServerView, ServerViews
+from openfesl.web.pages import query_of
 from openfesl.web.sessions import checked_form, toast
 
 # The tabs of the providers page with their sortable columns, the first the default order.
@@ -133,14 +133,12 @@ class ProviderList:
 
     def link(self) -> str:
         """Return the query of the list's address, with a leading ? unless it is empty."""
-        fields = [
+        return query_of(
             ("state", "" if self.tab == "active" else self.tab),
             ("sort", "" if self.sort == TABS[self.tab][0] else self.sort),
             ("order", "" if self.descending == (self.sort in DESCENDING) else self.direction),
             ("open", self.open or ""),
-        ]
-        query = urlencode([(key, value) for key, value in fields if value])
-        return f"?{query}" if query else ""
+        )
 
     @property
     def direction(self) -> str:
@@ -239,8 +237,7 @@ def provider_routes(
                 (found.name for found in known if found.name.casefold() == name.casefold()), name
             )
             return await page(request, admin, 400, name=name, error="taken", taken=taken)
-        target = localize("/admin/providers", request.state.language)
-        return RedirectResponse(f"{target}?{urlencode({'added': provider.id.hex()})}", 303)
+        return to_query(request, "/admin/providers", added=provider.id.hex())
 
     @router.get("/admin/providers/{provider}")
     async def provider(request: Request, provider: str) -> Response:
@@ -285,8 +282,7 @@ def provider_routes(
         if view.provider.revoked:
             toast(request, "web.admin.toast.provider_unchanged", error=True, name=name)
         elif form.get("confirmed") != "1":
-            target = localize(f"/admin/providers/{provider}/revoke", request.state.language)
-            return RedirectResponse(f"{target}?{urlencode({'back': back})}", 303)
+            return to_query(request, f"/admin/providers/{provider}/revoke", back=back)
         elif await servers.store.revoke_provider(view.provider.id, admin):
             await apply()
             toast(request, "web.admin.toast.provider_revoke", name=name)

@@ -4,7 +4,6 @@ from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from math import ceil
 from typing import Any, Self
-from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -30,6 +29,7 @@ from openfesl.core.store_prices import (
 from openfesl.core.store_rules import StoreRules
 from openfesl.core.texts import localize, translate_count
 from openfesl.web.admin.auth import AdminSessions, game_among
+from openfesl.web.pages import page_number, query_of
 from openfesl.web.store_front import kind_glyphs
 from openfesl.web.store_texts import StoreTexts
 
@@ -64,14 +64,13 @@ class ItemList:
         Args:
             query: The address's query.
         """
-        page = query.get("page", "")
         return cls(
             kind=query.get("kind", ""),
             faction=query.get("faction", ""),
             hero_class=query.get("class", ""),
             states=tuple(state for state in PriceState if query.get(state.value)),
             search=query.get("q", "").strip()[:64],
-            page=int(page) if page.isdigit() and 0 < int(page) < 10**6 else 1,
+            page=page_number(query.get("page", "")),
         )
 
     def changed(self, **changes: Any) -> ItemList:
@@ -84,16 +83,14 @@ class ItemList:
 
     def query(self) -> str:
         """Return the query of the list's address, with a leading ? unless it is empty."""
-        fields = [
+        return query_of(
             ("kind", self.kind),
             ("faction", self.faction),
             ("class", self.hero_class),
             *((state.value, "1") for state in self.states),
             ("q", self.search),
             ("page", str(self.page) if self.page > 1 else ""),
-        ]
-        query = urlencode([(key, value) for key, value in fields if value])
-        return f"?{query}" if query else ""
+        )
 
 
 @dataclass(frozen=True, slots=True)

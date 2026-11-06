@@ -252,8 +252,7 @@ class AdminSessions:
             error: The SignInNeeded raised, naming the page.
         """
         assert isinstance(error, SignInNeeded)
-        target = localize("/admin/sign-in", request.state.language)
-        return RedirectResponse(f"{target}?{urlencode({'next': error.path})}", 303)
+        return to_query(request, "/admin/sign-in", next=error.path)
 
     async def form_expired(self, request: Request, error: Exception) -> Response:
         """Answer a form whose token does not match with the page that says so.
@@ -281,6 +280,18 @@ class AdminSessions:
 
 def _admin(signed_in: Mapping[str, str]) -> Admin:
     return Admin(signed_in["subject"], signed_in["name"], Role(signed_in["role"]))
+
+
+def to_query(request: Request, path: str, **query: str) -> RedirectResponse:
+    """Send the browser to a page of the panel with a query, in the request's language.
+
+    Args:
+        request: The request.
+        path: The page's path.
+        query: The query's parameters.
+    """
+    target = localize(path, request.state.language)
+    return RedirectResponse(f"{target}?{urlencode(query)}", 303)
 
 
 def game_among(games: Iterable[Game], game_id: str) -> Game:
