@@ -394,10 +394,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .claw-prize-rare {
-      animation: site-fade-in 100ms linear;
-    }
-
+    .claw-prize-rare,
     .claw-prize:modal {
       animation: site-fade-in 100ms linear;
     }

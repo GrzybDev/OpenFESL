@@ -13,15 +13,9 @@
   }
 
   .wallet-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns: minmax(200px, 1fr) 150px 140px 190px 170px;
     gap: 2px;
-  }
-
-  .wallet-row:nth-child(even),
-  .ledger-row:nth-child(even) {
-    --cell: var(--row-alt);
   }
 
   .wallet-label {
@@ -44,17 +38,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .wallet-decide {
-    display: flex;
-    gap: 2px;
-    background: var(--cell);
-
-    > .form-button {
-      flex: 1;
-      padding-inline: 10px;
-    }
-  }
-
   .admin-wallets-managed {
     min-width: 1000px;
 
@@ -73,7 +56,6 @@
   }
 
   .ledger-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns: 130px 120px 130px minmax(220px, 1fr) minmax(160px, 0.6fr);
     gap: 2px;

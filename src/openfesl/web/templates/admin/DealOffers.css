@@ -6,14 +6,9 @@
   }
 
   .offers-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns: minmax(170px, 1.3fr) 120px 150px minmax(180px, 1fr) 120px 130px 270px;
     gap: 2px;
-  }
-
-  .offers-row:nth-child(even) {
-    --cell: var(--row-alt);
   }
 
   .offers-row:is(.offers-ended, .offers-off) {

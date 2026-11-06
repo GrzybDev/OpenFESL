@@ -16,11 +16,6 @@
 
   /* A tab's two columns, the wider first, which stack on phones. */
   .player-columns {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 14px;
-
     > :first-child {
       min-width: 0;
       flex: 3 1 520px;

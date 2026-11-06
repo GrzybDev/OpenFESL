@@ -3,15 +3,10 @@
    fit, each server is a block of its own. */
 @layer pages {
   .admin-server-columns {
-    --cell: var(--row);
     display: grid;
     /* The state column fits three badges: the state, an unknown provider and the official mark. */
     grid-template-columns: 98px minmax(166px, 1fr) 210px 170px 130px 104px 44px;
     gap: 2px;
-  }
-
-  .server:nth-child(even) > .admin-server-columns {
-    --cell: var(--row-alt);
   }
 
   @container (width < 940px) {

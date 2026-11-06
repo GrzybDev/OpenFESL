@@ -118,12 +118,7 @@
   }
 
   .key {
-    --cell: var(--row);
     color: var(--ink);
-
-    &:nth-child(even) {
-      --cell: var(--row-alt);
-    }
 
     > :not(.key-copy) {
       display: flex;

@@ -69,10 +69,15 @@
     padding: 30px 18px 0;
     text-align: center;
     color: var(--shell-text);
+    transition: transform 120ms var(--ease-menu);
 
     .tiles-many > & {
       gap: 16px;
       padding: 40px 16px 0;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
     }
   }
 
@@ -81,6 +86,9 @@
     inset: -2px;
     pointer-events: none;
     border: 2px solid var(--accent);
+
+    opacity: 0;
+    transition: opacity 120ms var(--ease-menu);
   }
 
   .tile-title {
@@ -286,6 +294,11 @@
     background: var(--ink);
     padding: 5px;
     color: var(--bright);
+    opacity: 0;
+    transform: translateX(calc(100% + 4px));
+    transition:
+      transform 160ms var(--ease-menu),
+      opacity 160ms var(--ease-menu);
 
     > :first-child {
       display: grid;
@@ -317,36 +330,15 @@
         font-size: 24px;
       }
     }
-  }
-
-  /* A game's tile lifts and lights its edge in the game's colour under the pointer or focus,
-     and the chosen tile's chevron block slides in. Without either, the first tile is the chosen
-     one. */
-  .tile {
-    transition: transform 120ms var(--ease-menu);
-
-    &:hover {
-      transform: translateY(-2px);
-    }
-  }
-
-  .tile-edge {
-    opacity: 0;
-    transition: opacity 120ms var(--ease-menu);
-  }
-
-  .tile-go {
-    opacity: 0;
-    transform: translateX(calc(100% + 4px));
-    transition:
-      transform 160ms var(--ease-menu),
-      opacity 160ms var(--ease-menu);
 
     .go {
       transition: transform 120ms var(--ease-menu);
     }
   }
 
+  /* A game's tile lifts and lights its edge in the game's colour under the pointer or focus,
+     and the chosen tile's chevron block slides in. Without either, the first tile is the chosen
+     one. */
   .tile:is(:hover, :focus-within) .tile-go .go {
     transform: translateX(4px);
   }
@@ -434,18 +426,8 @@
     }
   }
 
-  .menu-servers-rows {
-    display: grid;
-    gap: 2px;
-  }
-
   .menu-server {
-    --cell: var(--row);
     color: var(--ink);
-
-    &:nth-child(even) {
-      --cell: var(--row-alt);
-    }
 
     > :not(.cell-end) {
       display: flex;

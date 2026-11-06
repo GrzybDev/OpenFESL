@@ -34,7 +34,8 @@
     color: var(--soft);
   }
 
-  .activity-chart {
+  .activity-chart,
+  .chart-note {
     margin-top: 10px;
   }
 
@@ -278,10 +279,6 @@
     }
   }
 
-  .chart-note {
-    margin-top: 10px;
-  }
-
   .chart-values {
     margin-top: 12px;
 
@@ -333,6 +330,10 @@
       text-align: left;
     }
 
+    tbody tr {
+      background: var(--row);
+    }
+
     tbody tr:nth-child(even) {
       background: var(--row-alt);
     }
@@ -361,10 +362,6 @@
 
     tbody th {
       height: 36px;
-    }
-
-    tbody tr {
-      background: var(--row);
     }
 
     tbody tr.values-highest {
@@ -402,10 +399,6 @@
   }
 
   .activity-more {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 14px;
     margin-top: 14px;
   }
 
@@ -444,10 +437,6 @@
       &:nth-child(4) {
         width: 110px;
       }
-    }
-
-    tbody tr {
-      background: var(--row);
     }
 
     tbody th {

@@ -1,13 +1,6 @@
 /* The admin panel's catalogues: the games' blocks beside the import, which follows them on phones,
    and the games that take no catalogue under them. */
 @layer pages {
-  .catalogue-layout {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 14px;
-  }
-
   .catalogue-games {
     display: grid;
     min-width: 0;
@@ -38,12 +31,5 @@
     font-family: var(--font-sans);
     font-size: 15px;
     font-weight: 700;
-  }
-
-  .catalogue-other-state {
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
   }
 }

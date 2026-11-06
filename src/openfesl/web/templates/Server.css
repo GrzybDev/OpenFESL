@@ -1,12 +1,5 @@
 /* A server's page: its settings and message, its players and the scoreboard. */
 @layer pages {
-  .server-layout {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 14px;
-  }
-
   .server-about {
     min-width: 0;
     flex: 999 1 560px;

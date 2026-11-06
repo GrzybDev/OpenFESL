@@ -174,7 +174,7 @@
                       </div>
                       {% if manages %}
                         {% set label = catalogue.name(row.item_id) or _("web.admin.items.unnamed", id=row.item_id) %}
-                        <div role="cell" class="admin-item-decide">
+                        <div role="cell" class="row-decide">
                           {% if row.entry and row.state == "active" %}
                             {% if row.held.type in ("tlmd", "lmct") %}
                               <a href="{{ base }}/items/{{ row.item_id }}/change"
@@ -228,7 +228,7 @@
             {% endif %}
           </div>
           {% if hero.portrait and manages %}
-            <div class="account-end">
+            <div class="find-button">
               <FormButton icon="x" :href="base ~ '/portrait'" dialog>{{ _("web.admin.hero.portrait.remove") }}</FormButton>
             </div>
           {% endif %}
@@ -247,7 +247,7 @@
             <Bar id="hero-chests" :extra="number(page.card.chests or 0)">{{ _("web.admin.hero.chests") }}</Bar>
             <p class="bar-text body-text">{{ _n("web.admin.hero.chests.count", page.card.chests or 0) }}</p>
             {% if manages %}
-              <div class="account-end">
+              <div class="find-button">
                 <FormButton icon="chest" :href="base ~ '/chests'" dialog>{{ _("web.admin.hero.chests.change") }}</FormButton>
               </div>
             {% endif %}

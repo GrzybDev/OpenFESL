@@ -2,15 +2,6 @@
    beside them what is on sale now and the seasonal windows of the year. Where the table does not
    fit, each section is a block of its own. */
 @layer pages {
-  .deals-rotation {
-    display: grid;
-    gap: 2px;
-
-    > .form-button {
-      justify-self: end;
-    }
-  }
-
   .deals-short-links {
     display: flex;
     flex-wrap: wrap;

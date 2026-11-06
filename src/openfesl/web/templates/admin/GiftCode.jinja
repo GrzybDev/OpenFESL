@@ -28,7 +28,7 @@
       </span>
       <span class="code-state code-state-{{ state }}"><Icon :name="glyphs[state]" :size="14" stroke="currentColor" />{{ _("web.admin.keys.state." ~ state) }}</span>
     </h2>
-    <div class="code-layout">
+    <div class="panel-columns code-layout">
       <dl class="facts code-facts">
         <Fact :label="_('web.admin.keys.col.contents')" plain>
           {{ contents|join(" · ") or _("web.admin.audit.nothing") }}

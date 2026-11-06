@@ -13,13 +13,6 @@
     }
   }
 
-  .account-sides {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 14px;
-  }
-
   .account-side {
     min-width: 0;
     flex: 1 1 480px;

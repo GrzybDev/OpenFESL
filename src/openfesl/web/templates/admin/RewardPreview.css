@@ -40,15 +40,6 @@
     list-style: none;
   }
 
-  .preview-card {
-    display: grid;
-    align-content: start;
-    gap: 6px;
-    background: var(--row-light);
-    padding: 10px 12px;
-    color: var(--ink);
-  }
-
   .preview-card-always {
     background: var(--row);
   }

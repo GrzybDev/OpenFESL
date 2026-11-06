@@ -57,14 +57,9 @@
   }
 
   .admin-item-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns: minmax(220px, 1fr) 120px 170px 130px 150px;
     gap: 2px;
-  }
-
-  .admin-item-row:nth-child(even) {
-    --cell: var(--row-alt);
   }
 
   .admin-hero-inventory-managed {
@@ -72,17 +67,6 @@
 
     .admin-item-columns {
       grid-template-columns: minmax(216px, 1fr) 120px 170px 130px 150px 224px;
-    }
-  }
-
-  .admin-item-decide {
-    display: flex;
-    gap: 2px;
-    background: var(--cell);
-
-    > .form-button {
-      flex: 1;
-      padding-inline: 10px;
     }
   }
 

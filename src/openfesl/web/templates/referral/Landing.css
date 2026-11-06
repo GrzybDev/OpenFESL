@@ -48,10 +48,7 @@
       align-items: stretch;
       text-align: center;
 
-      .site-button {
-        justify-content: center;
-      }
-
+      .site-button,
       .site-link {
         justify-content: center;
       }

@@ -2,11 +2,6 @@
    game's policies grouped by their section, each with its default. */
 @layer pages {
   .settings-columns {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 14px;
-
     > section {
       min-width: 0;
       flex: 1 1 520px;

@@ -8,7 +8,7 @@
             :title="title"
             :subtitle="_('web.admin.catalogue.subtitle')" />
   <Panel class="enter-panel">
-    <div data-catalogues class="catalogue-layout">
+    <div data-catalogues class="panel-columns">
       <div class="catalogue-games">
         {% for view in views %}
           <CatalogueGame :view="view" :result="result" :keeps_files="keeps_files">
@@ -21,7 +21,7 @@
             <ul class="catalogue-others">
               {% for game in others %}
                 <li>
-                  <span class="catalogue-other-name">{{ game.name }}</span><span class="catalogue-other-state">{{ _("web.admin.catalogue.none") }}</span>
+                  <span class="catalogue-other-name">{{ game.name }}</span><span class="admin-item-kind">{{ _("web.admin.catalogue.none") }}</span>
                 </li>
               {% endfor %}
             </ul>

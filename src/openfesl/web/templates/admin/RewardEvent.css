@@ -35,6 +35,10 @@
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 2px;
     margin-top: 2px;
+    margin: 2px 0 0;
+    border: 0;
+    padding: 0;
+    min-width: 0;
   }
 
   .reward-part {
@@ -270,13 +274,6 @@
    ticked, its box, Funds and keys, the square that drops a day of other gifts, and the add panel,
    whose uses field shows while uses are chosen. */
 @layer pages {
-  .reward-parts {
-    margin: 2px 0 0;
-    border: 0;
-    padding: 0;
-    min-width: 0;
-  }
-
   .reward-items {
     display: grid;
     gap: 2px;

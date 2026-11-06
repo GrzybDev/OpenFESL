@@ -2,7 +2,9 @@
    and starter packs, the chest key and the milestones. The strip scrolls sideways inside its
    box on narrow screens; where the table does not fit, each event is a block of its own. */
 @layer pages {
-  .rewards-page {
+  .rewards-page,
+  .rewards-side-main,
+  .rewards-side {
     display: grid;
     gap: 14px;
   }
@@ -84,16 +86,11 @@
   }
 
   .rewards-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns:
       minmax(220px, 1.6fr) 136px minmax(180px, 1fr) minmax(130px, 0.8fr)
       minmax(150px, 0.9fr) 110px 44px;
     gap: 2px;
-  }
-
-  .rewards-row:nth-child(even) {
-    --cell: var(--row-alt);
   }
 
   .rewards-row:target {
@@ -150,12 +147,6 @@
     gap: 14px;
   }
 
-  .rewards-side-main,
-  .rewards-side {
-    display: grid;
-    gap: 14px;
-  }
-
   .rewards-missions,
   .rewards-milestones {
     display: grid;
@@ -199,15 +190,6 @@
     font-size: 16px;
     font-weight: 800;
     font-variant-numeric: tabular-nums;
-  }
-
-  .rewards-milestones-form {
-    display: grid;
-    gap: 2px;
-
-    > .form-button {
-      justify-self: end;
-    }
   }
 
   .rewards-funds-field {

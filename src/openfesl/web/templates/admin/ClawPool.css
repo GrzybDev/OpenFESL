@@ -19,14 +19,9 @@
   }
 
   .claw-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns: minmax(220px, 1.4fr) 120px minmax(170px, 1fr);
     gap: 2px;
-
-    &:nth-child(even) {
-      --cell: var(--row-alt);
-    }
   }
 
   .claw-columns-edit {

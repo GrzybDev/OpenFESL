@@ -97,7 +97,7 @@
     </section>
     {% if signed %}
       <section aria-labelledby="referral-recruits" class="referral-recruits">
-        <div class="referral-recruits-head">
+        <div class="list-head">
           <h2 id="referral-recruits"
               class="site-heading">{{ _("web.referral.recruits", count=number(recruits|length)) }}</h2>
           <a href="{{ url('/' ~ game.id ~ '/rewards') }}"

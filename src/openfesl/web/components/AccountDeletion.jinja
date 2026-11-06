@@ -10,7 +10,7 @@
 {% if said.get("notice") == "form" %}
   <Alert :label="_('web.account.deletion.not_requested')" :title="_('web.account.notice.form')" glyph="warn" alert>{{ _("web.account.notice.form.text") }}</Alert>
 {% endif %}
-<div class="account-sides">
+<div class="panel-columns">
   <section aria-labelledby="kept-title" class="account-side deletion-kept">
     <Bar tag="h3" id="kept-title">{{ _("web.account.deletion.kept") }}</Bar>
     <div class="deletion-table">

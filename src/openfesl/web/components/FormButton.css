@@ -40,6 +40,15 @@
     }
   }
 
+  .end-button-form {
+    display: grid;
+    gap: 2px;
+
+    > .form-button {
+      justify-self: end;
+    }
+  }
+
   /* A form's reset and search buttons side by side. */
   .form-buttons {
     display: grid;

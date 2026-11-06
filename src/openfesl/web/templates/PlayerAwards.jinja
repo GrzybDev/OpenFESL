@@ -4,7 +4,7 @@
         :tab="tab"
         :rank="rank"
         :tags="tags">
-  <div class="player-columns awards">
+  <div class="panel-columns player-columns awards">
     <section aria-labelledby="player-pins">
       <Bar id="player-pins" :extra="_('web.player.pins.all', count=number(pins_total))">{{ _("web.player.pins") }}</Bar>
       {% if pins %}

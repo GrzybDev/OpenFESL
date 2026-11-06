@@ -8,16 +8,11 @@
   }
 
   .purchase-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns:
       130px minmax(150px, 0.9fr) minmax(170px, 1fr) 130px
       minmax(200px, 1.4fr) 44px;
     gap: 2px;
-  }
-
-  .purchase-row:nth-child(even) {
-    --cell: var(--row-alt);
   }
 
   .purchase-price {

@@ -81,7 +81,7 @@
       </div>
       <p class="field-note">{{ _("web.admin.key.edit.rows") }}</p>
 
-      <div class="key-edit-labels">
+      <div class="field-columns">
         {% for language in codes %}
           <div>
             <TextField :id="'label-' ~ language" :name="'label.' ~ language" :label="_('web.admin.key.label.in', language=language_name(language))" :value="form.labels.get(language, '')" :lang="language" :maxlength="longest" autocomplete="off" />

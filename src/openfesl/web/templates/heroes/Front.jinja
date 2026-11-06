@@ -17,7 +17,7 @@
         {% if event %}
           {% set info, run, gifts, daily = event %}
           <Splash />
-          <article aria-labelledby="front-event" class="front-event">
+          <article aria-labelledby="front-event" class="pale-box front-event">
             <div class="front-event-head">
               <span aria-hidden="true" class="front-event-disc"><Icon name="gift" :size="24" stroke="#0A0A0A" /></span>
               <div>
@@ -94,7 +94,7 @@
         </p>
         {% if top %}
           {% if shares %}<FactionSplit :shares="shares" />{% endif %}
-          <ol class="front-top enter-rows">
+          <ol class="pale-box front-top enter-rows">
             {% for line in top %}
               <li class="front-top-row">
                 <span class="front-top-place"><span class="sr-only">{{ _("web.front.top.place") }}</span>{{ line.place }}</span>
@@ -131,7 +131,7 @@
       <section aria-labelledby="front-start" class="front-section">
         <Plaque id="front-start" :level="2">{{ _("web.front.start") }}</Plaque>
         <ol class="front-step-list enter-rows">
-          <li class="front-step">
+          <li class="pale-box front-step">
             <span aria-hidden="true" class="front-step-number">1</span>
             <h3>{{ _("web.front.start.account") }}</h3>
             <p>{{ _("web.front.start.account.text") }}</p>
@@ -146,7 +146,7 @@
               </p>
             {% endif %}
           </li>
-          <li class="front-step">
+          <li class="pale-box front-step">
             <span aria-hidden="true" class="front-step-number">2</span>
             <h3>{{ _("web.front.start.hero") }}</h3>
             <p>{{ _n("web.front.start.hero.text", rules.slots) }}</p>
@@ -167,7 +167,7 @@
               </p>
             {% endif %}
           </li>
-          <li class="front-step">
+          <li class="pale-box front-step">
             <span aria-hidden="true" class="front-step-number">3</span>
             <h3>{{ _("web.front.start.game") }}</h3>
             <p>{{ _("web.front.start.game.text", game=game.name) }}</p>

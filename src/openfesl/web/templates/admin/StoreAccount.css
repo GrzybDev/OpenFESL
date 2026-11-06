@@ -3,22 +3,16 @@
    the table does not fit, each value is a block of its own. */
 @layer pages {
   .account-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns: minmax(240px, 1.2fr) 170px 140px 140px minmax(170px, 0.8fr);
     gap: 2px;
   }
 
   .sales-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns: 170px 110px 110px 110px minmax(220px, 1fr);
     gap: 2px;
     min-width: 720px;
-  }
-
-  .sales-row:nth-child(even) {
-    --cell: var(--row-alt);
   }
 
   .sales-row.sales-running {
@@ -59,16 +53,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .account-input {
-    width: 100%;
-    min-height: 44px;
-    text-align: right;
-    font-family: var(--font-sans);
-    font-size: 20px;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-  }
-
   .account-unit {
     font-family: var(--font-sans);
     font-size: 12px;
@@ -86,17 +70,6 @@
     justify-content: space-between;
     gap: 8px;
     padding-right: 4px;
-  }
-
-  .account-state-word {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-family: var(--font-sans);
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
   }
 
   .form-button.account-reset {

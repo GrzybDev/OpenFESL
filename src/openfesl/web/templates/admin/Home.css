@@ -24,13 +24,6 @@
     }
   }
 
-  .home-columns {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 14px;
-  }
-
   .home-decisions {
     min-width: 0;
     flex: 999 1 820px;
@@ -111,12 +104,7 @@
   }
 
   .waiting-row {
-    --cell: var(--row);
     color: var(--ink);
-
-    &:nth-child(even) {
-      --cell: var(--row-alt);
-    }
 
     &:hover {
       --cell: var(--row-light);

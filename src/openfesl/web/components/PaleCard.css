@@ -6,11 +6,8 @@
     display: flex;
   }
 
+  .pale-box,
   .pale-card {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    overflow: hidden;
     border: 3px solid #000;
     border-radius: 8px;
     background: #f1e9de;
@@ -18,6 +15,13 @@
       inset 0 0 0 3px #f8f4ef,
       0 4px 0 rgb(0 0 0 / 0.3);
     color: #1f1712;
+  }
+
+  .pale-card {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
   }
 
   .pale-band {

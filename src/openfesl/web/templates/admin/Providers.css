@@ -2,14 +2,9 @@
    beside adding a provider or, right after adding one, its file and where it goes. */
 @layer pages {
   .provider-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns: 64px minmax(180px, 1fr) 170px 118px 104px 94px 140px 44px;
     gap: 2px;
-  }
-
-  .server:nth-child(even) > .provider-columns {
-    --cell: var(--row-alt);
   }
 
   .provider-code {

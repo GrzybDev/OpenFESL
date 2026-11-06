@@ -33,7 +33,7 @@
 {% if not accepted %}
   <TermsUpdate :terms="terms" :next="url('/account') ~ '#profile'" />
 {% endif %}
-<div class="account-sides">
+<div class="panel-columns">
   <div class="account-side">
     <Bar tag="h3" :extra="_('web.account.public')">{{ _("web.account.display_name") }}</Bar>
     <details {% if form == "display_name" %}open{% endif %}

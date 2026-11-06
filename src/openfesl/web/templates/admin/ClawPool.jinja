@@ -60,7 +60,7 @@
                     {% set product = entry.product %}
                     <div role="row"
                          class="claw-columns{% if manages %} claw-columns-edit{% endif %}">
-                      <div role="cell" class="admin-cell box-item">
+                      <div role="cell" class="admin-cell admin-item-name">
                         <AdminItemIcon :game="game" :item="catalogue.item(product.item_id)" :shown="icons" />
                         <span class="cell-stack">
                           <span class="admin-hero-strong">{{ entry.name }}</span>
@@ -91,7 +91,7 @@
         </p>
         <p class="bar-text body-text">{{ _("web.admin.boxes.claw.pool.rule") }}</p>
         {% if manages %}
-          <div class="claw-field">
+          <div class="field-column">
             <TextField id="claw-pool-note" name="note" :label="_('web.admin.note')" :value="form.get('note', '')" required maxlength="300" autocomplete="off" />
           </div>
           {% if refused %}

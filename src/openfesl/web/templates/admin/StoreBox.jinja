@@ -18,7 +18,7 @@
   {% set item = catalogue.item(product.item_id) %}
   <div role="row"
        class="box-columns box-row{% if editable %} box-columns-edit{% endif %}{% if not entry.counts %} box-row-skipped{% endif %}">
-    <div role="cell" class="admin-cell box-item">
+    <div role="cell" class="admin-cell admin-item-name">
       <AdminItemIcon :game="game" :item="item" :shown="icons" />
       <span class="cell-stack">
         <span class="admin-hero-strong">{{ entry.name }}</span>
@@ -179,7 +179,7 @@
             <div role="table"
                  aria-labelledby="box-owned"
                  class="table box-table box-fallback">
-              <div role="rowgroup">{{ entry(fallback) }}</div>
+              <div role="rowgroup" class="table-rows">{{ entry(fallback) }}</div>
             </div>
           {% else %}
             <p class="bar-text body-text">{{ _("web.admin.boxes.owned.none") }}</p>

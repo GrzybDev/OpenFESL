@@ -6,17 +6,12 @@
   }
 
   .box-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns: minmax(220px, 1.4fr) 120px minmax(150px, 1fr) 170px;
     gap: 2px;
   }
 
-  .box-row:nth-child(even) {
-    --cell: var(--row-alt);
-  }
-
-  .box-row-skipped {
+  .box-row-skipped:nth-child(odd) {
     --cell: var(--row-pale);
   }
 
@@ -63,15 +58,6 @@
     background: var(--row);
     padding: 6px 10px;
     color: var(--ink);
-
-    > .cell-stack {
-      display: flex;
-    }
-  }
-
-  .box-item {
-    gap: 10px;
-    padding-block: 6px;
 
     > .cell-stack {
       display: flex;

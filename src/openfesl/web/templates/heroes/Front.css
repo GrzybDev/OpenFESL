@@ -31,13 +31,6 @@
     position: relative;
     margin-top: 18px;
     overflow: hidden;
-    border: 3px solid #000;
-    border-radius: 8px;
-    background: #f1e9de;
-    box-shadow:
-      inset 0 0 0 3px #f8f4ef,
-      0 4px 0 rgb(0 0 0 / 0.3);
-    color: #1f1712;
   }
 
   .front-event-head {
@@ -132,13 +125,6 @@
   .front-top {
     margin-top: 16px;
     padding: 4px 18px;
-    border: 3px solid #000;
-    border-radius: 8px;
-    background: #f1e9de;
-    box-shadow:
-      inset 0 0 0 3px #f8f4ef,
-      0 4px 0 rgb(0 0 0 / 0.3);
-    color: #1f1712;
   }
 
   .front-top-row {
@@ -205,13 +191,6 @@
     flex-direction: column;
     gap: 8px;
     padding: 16px;
-    border: 3px solid #000;
-    border-radius: 8px;
-    background: #f1e9de;
-    box-shadow:
-      inset 0 0 0 3px #f8f4ef,
-      0 4px 0 rgb(0 0 0 / 0.3);
-    color: #1f1712;
     font-size: 14px;
     line-height: 1.45;
 

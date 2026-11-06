@@ -45,14 +45,9 @@
   }
 
   .admin-hero-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns: 128px minmax(200px, 1fr) 64px 120px 140px 80px 172px 44px;
     gap: 2px;
-  }
-
-  .admin-hero-row:nth-child(even) {
-    --cell: var(--row-alt);
   }
 
   .admin-hero-state {

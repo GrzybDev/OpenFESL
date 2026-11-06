@@ -133,6 +133,14 @@
 
   .grow {
     fill: var(--accent);
+
+    transform-box: fill-box;
+    transform-origin: left;
+    animation: grow 600ms var(--ease-menu) both;
+
+    html.refreshed & {
+      animation: none;
+    }
   }
 
   .progress-ends {
@@ -392,16 +400,6 @@
   }
 
   /* Progress bars grow from zero on first view. */
-  .grow {
-    transform-box: fill-box;
-    transform-origin: left;
-    animation: grow 600ms var(--ease-menu) both;
-
-    html.refreshed & {
-      animation: none;
-    }
-  }
-
   @keyframes grow {
     from {
       transform: scaleX(0);

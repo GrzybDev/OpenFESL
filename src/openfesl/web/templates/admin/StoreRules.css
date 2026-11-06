@@ -7,14 +7,9 @@
   }
 
   .rules-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns: minmax(200px, 1.2fr) 120px 110px minmax(180px, 1.3fr) 150px 44px;
     gap: 2px;
-  }
-
-  .rules-row:nth-child(even) {
-    --cell: var(--row-alt);
   }
 
   .rules-row[aria-current="true"] {

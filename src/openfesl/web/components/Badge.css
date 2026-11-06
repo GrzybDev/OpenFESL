@@ -8,4 +8,15 @@
     border: 1px solid var(--badge-edge);
     background: var(--badge);
   }
+
+  .state-word {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
 }

@@ -324,7 +324,7 @@
                 {% endif %}
               </Fact>
             </dl>
-            <div class="account-end">
+            <div class="find-button">
               <FormButton icon="x" :href="base ~ '/session/end?back=' ~ here|urlencode" dialog>{{ _("web.admin.account.end") }}</FormButton>
             </div>
             <p class="body-text side-note">{{ _("web.admin.sessions.note") }}</p>
@@ -355,7 +355,7 @@
             </ul>
             <form method="post"
                   action="{{ base }}/remembered/remove"
-                  class="account-end">
+                  class="find-button">
               <CsrfField />
               <FormButton icon="x">{{ _("web.admin.remembered.remove_all") }}</FormButton>
             </form>

@@ -7,7 +7,7 @@
   {% set played.counts = played.counts + [_n("games." ~ game.id ~ ".personas.count", lines|length)] %}
 {% endfor %}
 <AccountPart id="games" :title="_('web.account.games')" :extra="listed(played.counts)">
-<div class="account-sides">
+<div class="panel-columns">
   {% for game, lines in games %}
     <section aria-labelledby="games-{{ game.id }}"
              class="account-side account-game">

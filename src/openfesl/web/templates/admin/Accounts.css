@@ -3,14 +3,9 @@
    account is a block of its own. */
 @layer pages {
   .account-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns: minmax(230px, 1fr) 220px 150px 150px 190px 44px;
     gap: 2px;
-  }
-
-  .account-row:nth-child(even) {
-    --cell: var(--row-alt);
   }
 
   .account-link {

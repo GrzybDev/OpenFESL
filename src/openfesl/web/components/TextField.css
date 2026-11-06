@@ -5,4 +5,28 @@
     justify-content: space-between;
     gap: 12px;
   }
+
+  .field-stack {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .field-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2px;
+    margin-top: 10px;
+  }
+
+  .field-column {
+    display: grid;
+    align-content: start;
+  }
+
+  .form-part {
+    display: grid;
+    gap: 2px;
+    margin-top: 10px;
+  }
 }

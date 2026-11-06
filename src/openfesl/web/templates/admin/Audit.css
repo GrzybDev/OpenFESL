@@ -2,14 +2,9 @@
    table does not fit, each action is a block of its own. */
 @layer pages {
   .audit-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns: 64px 140px 170px minmax(260px, 1fr) 220px 44px;
     gap: 2px;
-  }
-
-  .audit-row:nth-child(even) {
-    --cell: var(--row-alt);
   }
 
   .audit-account {

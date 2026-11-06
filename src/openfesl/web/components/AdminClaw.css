@@ -48,11 +48,6 @@
     gap: 2px;
   }
 
-  .claw-field {
-    display: grid;
-    align-content: start;
-  }
-
   .claw-admin-day {
     min-height: 44px;
     margin: 0;

@@ -44,7 +44,7 @@
         </h2>
         <fieldset data-refresh
                   {% if not manages %} disabled{% endif %}
-                  class="offer-fields">
+                  class="field-stack">
           <legend class="bar offer-legend">{{ _("web.admin.deals.offer.items") }}</legend>
           {% for line in found.items %}
             {% set product = line.product %}
@@ -74,7 +74,7 @@
           </p>
           {{ refusal("items") }}
           {% if manages %}
-            <section aria-labelledby="offer-add" class="offer-add">
+            <section aria-labelledby="offer-add" class="form-part">
               <Bar id="offer-add">{{ _("web.admin.deals.offer.add") }}</Bar>
               <ItemSearch id="offer-q" :label="_('web.admin.store.search')" :value="draft.query" refresh />
               <div data-live="{{ path }}" class="offer-candidates">
@@ -112,14 +112,14 @@
           </div>
           {{ refusal("amount") }}
           <p aria-live="polite" data-live="{{ path }}" class="offer-line">{{- found.line -}}</p>
-          <div class="offer-when">
+          <div class="field-columns">
             {% for name in ("starts", "ends") %}
-              <div class="offer-day">
+              <div class="field-column">
                 <TextField :id="'offer-' ~ name" :name="name" :label="_('web.admin.deals.offer.' ~ name)" type="datetime-local" :value="draft[name]" :wrong="name in refused" :aria-describedby="'offer-' ~ name ~ '-note' if name in refused else none" />
                 {{ refusal(name) }}
               </div>
             {% endfor %}
-            <div class="offer-day">
+            <div class="field-column">
               <TextField id="offer-stock" name="stock" :label="_('web.admin.deals.offer.stock')" :value="draft.stock" :wrong="'stock' in refused" inputmode="numeric" maxlength="10" autocomplete="off" :aria-describedby="'offer-stock-note' if 'stock' in refused else none" />
               {{ refusal("stock") }}
             </div>

@@ -69,7 +69,7 @@
           <ItemSearch id="code-q" :label="_('web.admin.items.search')" :value="draft.query" />
           <div data-live="{{ path }}" class="code-add">
             {% if found.candidates %}
-              <fieldset class="code-candidates">
+              <fieldset class="field-stack">
                 <legend class="sr-only">{{ _("web.admin.keys.matches") }}</legend>
                 {% for item, name, whom in found.candidates %}
                   <label {% if found.picked and found.picked.id == item.id %}aria-current="true"{% endif %}
@@ -131,7 +131,7 @@
         {% endif %}
         <div role="list"
              aria-label="{{ _('web.admin.keys.contents_so_far') }}"
-             class="code-lines">
+             class="form-part">
           {% for line in found.lines %}
             <div role="listitem" class="offer-item code-line">
               <input type="hidden"
@@ -157,7 +157,7 @@
           {% endfor %}
         </div>
         {{ refusal("items") }}
-        <div class="code-wallet">
+        <div class="form-buttons">
           <div>
             <TextField id="code-funds" name="funds" :label="_('web.admin.keys.funds')" :value="draft.funds" :wrong="'amounts' in refused" inputmode="numeric" maxlength="13" autocomplete="off" :aria-describedby="'code-amounts-note' if 'amounts' in refused else none" />
           </div>

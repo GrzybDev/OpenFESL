@@ -11,6 +11,16 @@
     gap: 2px;
   }
 
+  /* The rows' cells take turns between two shades, without a weight of their own, as a row that
+     says something by its shade sets it itself. */
+  :where(.table-rows > *) {
+    --cell: var(--row);
+  }
+
+  :where(.table-rows > :nth-child(even)) {
+    --cell: var(--row-alt);
+  }
+
   .table-scroll {
     margin-inline: -6px;
     overflow-x: auto;

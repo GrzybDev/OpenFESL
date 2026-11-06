@@ -6,14 +6,9 @@
   }
 
   .log-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns: 140px 150px 120px minmax(220px, 1.2fr) minmax(200px, 1fr);
     gap: 2px;
-  }
-
-  .log-row:nth-child(even) {
-    --cell: var(--row-alt);
   }
 
   .log-row.log-stopped {
@@ -44,10 +39,7 @@
     .log-row.log-columns {
       grid-template-columns: repeat(2, minmax(0, 1fr));
 
-      > .log-deals {
-        grid-column: 1 / -1;
-      }
-
+      > .log-deals,
       > :nth-child(3) {
         grid-column: 1 / -1;
       }

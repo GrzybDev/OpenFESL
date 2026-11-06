@@ -58,11 +58,6 @@
     }
   }
 
-  .account-end {
-    display: grid;
-    margin-top: 2px;
-  }
-
   .account-list-actions {
     display: flex;
     gap: 2px;
@@ -113,14 +108,8 @@
     margin-top: 12px;
   }
 
-  .state-until {
-    margin-top: 12px;
-  }
-
-  .confirm-error {
-    margin-top: 12px;
-  }
-
+  .state-until,
+  .confirm-error,
   .grant-tiles {
     margin-top: 12px;
   }
@@ -162,6 +151,7 @@
 
   .account-part {
     margin-top: 14px;
+    container-type: inline-size;
   }
 
   .account-list {
@@ -216,23 +206,14 @@
     text-transform: uppercase;
   }
 
-  .account-part {
-    container-type: inline-size;
-  }
-
   .entitlements {
     min-width: 720px;
   }
 
   .entitlement-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns: 64px minmax(210px, 1fr) 130px 150px 180px;
     gap: 2px;
-  }
-
-  .entitlement-row:nth-child(even) {
-    --cell: var(--row-alt);
   }
 
   .entitlements-managed {

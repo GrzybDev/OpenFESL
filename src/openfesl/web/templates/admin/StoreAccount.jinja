@@ -67,7 +67,7 @@
                 </div>
                 <div role="cell" class="admin-cell account-value">
                   {% if manages %}
-                    <TextField :id="field" :name="value.name" :value="typed[value.name]" :wrong="wrong" class="account-input" inputmode="numeric" maxlength="13" required :aria-describedby="field ~ '-why' if wrong else none" />
+                    <TextField :id="field" :name="value.name" :value="typed[value.name]" :wrong="wrong" class="prices-price-input" inputmode="numeric" maxlength="13" required :aria-describedby="field ~ '-why' if wrong else none" />
                   {% else %}
                     <span id="{{ field }}">{{ number(value.value) }}</span>
                   {% endif %}
@@ -82,7 +82,7 @@
                 </div>
                 <div role="cell" data-live="{{ here }}" class="admin-cell account-state">
                   {% set off = value.name in changed %}
-                  <span class="account-state-word"><Badge :name="'edit' if off else 'tick'" lines />{{ _("web.admin.store.account.state." ~ ("changed" if off else "default")) }}</span>
+                  <span class="state-word"><Badge :name="'edit' if off else 'tick'" lines />{{ _("web.admin.store.account.state." ~ ("changed" if off else "default")) }}</span>
                   {% if off and manages %}
                     <FormButton icon="retry" name="reset" :value="value.name" formnovalidate :aria-label="_('web.admin.store.account.reset.label', setting=label(value), value=number(value.data))" class="account-reset">{{ _("web.admin.store.account.reset") }}</FormButton>
                   {% endif %}

@@ -31,26 +31,11 @@
   }
 
   .boxes-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns:
       minmax(240px, 1.4fr) minmax(150px, 1fr) 100px 150px
       minmax(170px, 1fr) 44px;
     gap: 2px;
-  }
-
-  .boxes-row:nth-child(even) {
-    --cell: var(--row-alt);
-  }
-
-  .boxes-name {
-    gap: 10px;
-    padding-block: 6px;
-
-    .account-link {
-      display: flex;
-      flex-direction: column;
-    }
   }
 
   .boxes-price {
@@ -65,17 +50,6 @@
     padding-left: 4px;
   }
 
-  .boxes-state {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-family: var(--font-sans);
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
   /* The chest's switch beside what it does, and the links to the values it shares with the
      account prices. */
   .boxes-chest-switch {
@@ -86,20 +60,6 @@
     background: var(--row-light);
     padding: 10px 10px 10px 14px;
     color: var(--ink);
-  }
-
-  .boxes-chest-text {
-    display: grid;
-    gap: 2px;
-    font-size: 14px;
-    line-height: 1.35;
-    font-weight: 500;
-  }
-
-  .boxes-chest-title {
-    font-family: var(--font-sans);
-    font-size: 16px;
-    font-weight: 800;
   }
 
   .boxes-chest-link {

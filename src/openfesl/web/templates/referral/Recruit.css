@@ -216,14 +216,6 @@
     margin-top: 36px;
   }
 
-  .referral-recruits-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 4px 16px;
-  }
-
   .referral-table {
     margin-top: 12px;
     overflow: hidden;
@@ -371,10 +363,6 @@
       background: #fbf1cc;
     }
 
-    .referral-row-head {
-      display: none;
-    }
-
     .referral-name {
       flex: 1 1 auto;
       min-height: 44px;
@@ -386,6 +374,7 @@
       color: #5c4a3c;
     }
 
+    .referral-row-head,
     .referral-level {
       display: none;
     }

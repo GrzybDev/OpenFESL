@@ -24,15 +24,6 @@
     color: var(--accent);
   }
 
-  .offer-fields {
-    display: grid;
-    gap: 2px;
-    margin: 0;
-    border: 0;
-    padding: 0;
-    min-width: 0;
-  }
-
   .offer-legend {
     float: left;
     width: 100%;
@@ -112,19 +103,8 @@
     color: var(--ink);
   }
 
-  .offer-when {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 2px;
-    margin-top: 10px;
-  }
-
-  .offer-day {
-    display: grid;
-    align-content: start;
-  }
-
-  .offer-texts {
+  .offer-texts,
+  .offer-art {
     display: grid;
     gap: 2px;
   }
@@ -161,19 +141,8 @@
     flex-basis: 360px;
   }
 
-  .offer-add {
-    display: grid;
-    gap: 2px;
-    margin-top: 10px;
-  }
-
   .offer-pin {
     margin-top: 2px;
-  }
-
-  .offer-art {
-    display: grid;
-    gap: 2px;
   }
 
   .offer-picture {

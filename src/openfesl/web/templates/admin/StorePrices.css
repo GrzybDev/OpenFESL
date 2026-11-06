@@ -35,16 +35,11 @@
   }
 
   .prices-item-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns:
       minmax(220px, 1.3fr) 120px minmax(150px, 0.9fr) minmax(220px, 1.4fr)
       150px 44px;
     gap: 2px;
-  }
-
-  .prices-item-row:nth-child(even) {
-    --cell: var(--row-alt);
   }
 
   .prices-item-name {

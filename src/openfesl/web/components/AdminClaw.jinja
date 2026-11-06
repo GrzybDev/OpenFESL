@@ -25,7 +25,7 @@
   </label>
 {% endmacro %}
 {% macro number_field(name, label) %}
-  <div class="claw-field">
+  <div class="field-column">
     <label for="claw-{{ name }}" class="field-label field-label-joined">{{ label }}</label>
     <input id="claw-{{ name }}"
            name="{{ name }}"
@@ -58,7 +58,7 @@
       {{ check("runs", _("web.admin.boxes.claw.run"), _("web.admin.boxes.claw.run.text")) }}
       <div class="claw-admin-pair">
         {{ number_field("free", _("web.admin.boxes.claw.free")) }}
-        <div class="claw-field">
+        <div class="field-column">
           <span class="field-label field-label-joined">{{ _("web.admin.boxes.claw.day") }}</span>
           <p class="claw-admin-day">
             {{ claw.day }} · <a href="{{ url('/admin/settings') }}#zone-{{ game.id }}"
@@ -87,7 +87,7 @@
       {{ error("feed") }}
       {{ number_field("length", _("web.admin.boxes.claw.feed.length")) }}
       <ClawToday :of="game" :claw="claw" />
-      <div class="claw-field">
+      <div class="field-column">
         <label for="claw-note" class="field-label field-label-joined">{{ _("web.admin.note") }}</label>
         <input id="claw-note"
                name="note"

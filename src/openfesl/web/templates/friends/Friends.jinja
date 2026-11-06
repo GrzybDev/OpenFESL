@@ -30,7 +30,7 @@
         <h2 id="friends-requests" class="site-heading">
           {{ _("web.friends.requests", count=number(incoming|length + outgoing|length)) }}
         </h2>
-        <ul role="list" class="friends-list enter-rows">
+        <ul role="list" class="pale-box friends-list enter-rows">
           {% for friend in incoming %}
             <FriendRow :friend="friend" kind="incoming" />
           {% endfor %}
@@ -43,7 +43,7 @@
     <section aria-labelledby="friends-list" class="friends-section">
       <h2 id="friends-list" class="site-heading">{{ _("web.friends.list", count=number(friends|length)) }}</h2>
       {% if friends %}
-        <ul role="list" class="friends-list enter-rows">
+        <ul role="list" class="pale-box friends-list enter-rows">
           {% for friend in friends %}
             <FriendRow :friend="friend" kind="friend" />
           {% endfor %}
@@ -67,7 +67,7 @@
       <section aria-labelledby="friends-vip" class="friends-section">
         <h2 id="friends-vip" class="site-heading">{{ _("web.friends.vip") }}</h2>
         <p class="site-lead friends-vip-lead">{{ _("web.friends.vip.lead") }}</p>
-        <ul role="list" class="friends-list enter-rows">
+        <ul role="list" class="pale-box friends-list enter-rows">
           {% for friend in vip %}
             <FriendRow :friend="friend" kind="vip" />
           {% endfor %}

@@ -32,14 +32,9 @@
   }
 
   .pool-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns: minmax(180px, 1.4fr) 130px 120px minmax(260px, 1.2fr);
     gap: 2px;
-  }
-
-  .pool-row:nth-child(even) {
-    --cell: var(--row-alt);
   }
 
   .pool-cell {

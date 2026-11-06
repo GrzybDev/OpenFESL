@@ -33,7 +33,7 @@
       {% endif %}
       <ul class="preview-cards">
         {% for card in found.cards %}
-          <li class="preview-card preview-card-{{ card.state }}">
+          <li class="reward-part preview-card-{{ card.state }}">
             <p class="preview-card-head">
               <span class="rewards-number">
                 {%- if card.number %}E{{ card.number }}{% else %}{{ _("web.admin.rewards.preview.always") }}{% endif -%}

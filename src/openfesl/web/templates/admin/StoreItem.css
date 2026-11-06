@@ -46,14 +46,9 @@
   }
 
   .prices-point-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns: 170px 150px 130px 120px minmax(140px, 1fr) 160px;
     gap: 2px;
-  }
-
-  .prices-point-row:nth-child(even) {
-    --cell: var(--row-alt);
   }
 
   .prices-price {

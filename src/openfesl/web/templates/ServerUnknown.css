@@ -1,13 +1,6 @@
 /* A server's address with no server behind it: the reason, and a search that may find the
    server the reader looked for. */
 @layer pages {
-  .missing-layout {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 14px;
-  }
-
   .missing-text {
     min-width: 0;
     flex: 999 1 560px;

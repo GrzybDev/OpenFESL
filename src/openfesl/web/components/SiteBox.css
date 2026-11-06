@@ -68,6 +68,14 @@
     text-shadow: var(--site-outline-thin);
   }
 
+  .list-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 16px;
+  }
+
   /* An outlined heading on the parchment, over one of a page's lists. */
   .site-heading {
     font: 800 23px/1.2 var(--site-heading);

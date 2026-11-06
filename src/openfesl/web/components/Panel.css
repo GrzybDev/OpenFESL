@@ -5,6 +5,14 @@
     padding: 12px;
   }
 
+  /* A panel's columns, each under the other once they no longer fit side by side. */
+  .panel-columns {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
   /* A panel whose stats need the room on phones keeps a thinner frame there. */
   @media (width < 40rem) {
     .panel-thin {

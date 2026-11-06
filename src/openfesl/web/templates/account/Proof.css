@@ -14,13 +14,6 @@
     color: var(--ink);
   }
 
-  .proof-fact-label {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-
   .proof-fact-value {
     font-family: var(--font-sans);
     font-size: 15px;

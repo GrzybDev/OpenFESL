@@ -3,7 +3,6 @@
    its players and region. Server rows, also the admin panel's, open their details in place. */
 @layer components {
   .server-columns {
-    --cell: var(--row);
     display: grid;
     /* The badge column fits three: room, hardcore and the official mark. */
     grid-template-columns: 98px minmax(200px, 1fr) 140px 150px 160px 150px 44px;

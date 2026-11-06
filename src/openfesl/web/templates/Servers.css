@@ -39,10 +39,6 @@
     }
   }
 
-  .server:nth-child(even) > .server-columns {
-    --cell: var(--row-alt);
-  }
-
   .server-roster {
     margin-top: 6px;
   }

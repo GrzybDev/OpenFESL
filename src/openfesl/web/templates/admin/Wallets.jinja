@@ -77,7 +77,7 @@
                           <span class="cell-ago">{{ _("web.admin.wallets.closed") }}</span>
                         {% endif %}
                       </div>
-                      <div role="cell" class="wallet-decide">
+                      <div role="cell" class="row-decide">
                         <FormButton icon="doc" :href="ledger">{{ _("web.admin.wallets.view_ledger") }}</FormButton>
                         {% if manages %}
                           <a href="{{ base }}/wallets/{{ game.id }}/{{ line.key }}"

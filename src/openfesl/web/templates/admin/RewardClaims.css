@@ -6,16 +6,11 @@
   }
 
   .claims-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns:
       130px minmax(160px, 1fr) minmax(120px, 0.8fr) minmax(200px, 1.3fr)
       minmax(200px, 1.3fr);
     gap: 2px;
-  }
-
-  .claims-row:nth-child(even) {
-    --cell: var(--row-alt);
   }
 
   @container (width < 820px) {

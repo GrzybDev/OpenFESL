@@ -15,7 +15,7 @@
   {% if name in refused %}<FieldError :id="'referral-' ~ name ~ '-note'">{{ refused[name] }}</FieldError>{% endif %}
 {% endmacro %}
 {% macro field(name, label, value, size="5") %}
-  <div class="referral-step-field">
+  <div class="field-column">
     <TextField :id="'referral-' ~ name" :name="name" :label="label" :value="value" :error="refused.get(name, '')" :maxlength="size" inputmode="numeric" autocomplete="off" />
   </div>
 {% endmacro %}
@@ -63,7 +63,7 @@
               <ItemSearch :id="'referral-' ~ side ~ '-q'" :name="side ~ '-q'" :label="_('web.admin.items.search')" :value="draft.query" refresh joined />
               <div data-live="{{ path }}" class="code-add">
                 {% if found.candidates[side] %}
-                  <fieldset class="code-candidates">
+                  <fieldset class="field-stack">
                     <legend class="sr-only">{{ _("web.admin.keys.matches") }}</legend>
                     {% for item, name in found.candidates[side] %}
                       {% set picked = draft.item == item.id|string %}
@@ -114,7 +114,7 @@
             {{ refusal(side ~ "-name") }}
             <div class="referral-pair">
               {% for language in codes %}
-                <div class="referral-step-field">
+                <div class="field-column">
                   <TextField :id="'referral-' ~ side ~ '-text-' ~ language" :name="side ~ '-text-' ~ language" :label="_('web.admin.rewards.referral.text', language=language_name(language))" :value="draft.texts.get(language, '')" maxlength="60" autocomplete="off" />
                 </div>
               {% endfor %}

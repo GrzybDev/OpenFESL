@@ -27,16 +27,11 @@
   }
 
   .referral-admin-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns:
       52px minmax(180px, 1fr) minmax(200px, 1.1fr) minmax(220px, 1.2fr)
       44px;
     gap: 2px;
-  }
-
-  .referral-admin-row:nth-child(even) {
-    --cell: var(--row-alt);
   }
 
   .referral-admin-row:target {

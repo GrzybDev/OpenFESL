@@ -33,7 +33,7 @@
     {% set paged = heroes.pages > 1 or players.pages > 1 %}
     {% for found in listed if heroes.total or players.total %}
       <section aria-labelledby="search-{{ found.kind }}" class="friends-section">
-        <div class="search-head">
+        <div class="list-head">
           <h2 id="search-{{ found.kind }}"
               class="site-heading">{{ _("web.search.list." ~ found.kind, count=number(found.total)) }}</h2>
           {% if paged and found.results %}
@@ -43,7 +43,7 @@
           {% endif %}
         </div>
         {% if found.results %}
-          <ul role="list" class="friends-list enter-rows">
+          <ul role="list" class="pale-box friends-list enter-rows">
             {% for result in found.results %}
               <SearchRow :result="result" :query="query" :self_id="self_id" />
             {% endfor %}

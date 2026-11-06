@@ -3,7 +3,6 @@
    key is a block of its own. */
 @layer pages {
   .admin-key-columns {
-    --cell: var(--row);
     display: grid;
     grid-template-columns: 64px minmax(230px, 1fr) 220px 96px 140px 150px;
     gap: 2px;
@@ -25,10 +24,6 @@
     }
   }
 
-  .server:nth-child(even) > .admin-key-columns {
-    --cell: var(--row-alt);
-  }
-
   .key-label {
     font-family: var(--font-sans);
   }
@@ -39,7 +34,8 @@
     font-weight: 600;
   }
 
-  .key-grants {
+  .key-grants,
+  .key-edit-grants {
     display: grid;
     gap: 2px;
     margin-top: 2px;
@@ -171,12 +167,6 @@
     }
   }
 
-  .key-edit-grants {
-    display: grid;
-    gap: 2px;
-    margin-top: 2px;
-  }
-
   .key-edit-columns {
     display: grid;
     grid-template-columns: 44px minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr) 44px;
@@ -225,13 +215,6 @@
     font-size: 14px;
     font-weight: 600;
     color: var(--ink);
-  }
-
-  .key-edit-labels {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 2px;
-    margin-top: 10px;
   }
 
   .key-edit-limits {
