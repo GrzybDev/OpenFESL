@@ -6,7 +6,7 @@ from typing import Any
 from openfesl.core.fesl import FeslConnection, Route, TransactionError
 from openfesl.core.games import Game
 from openfesl.core.hosted_games import HostedGame
-from openfesl.core.hosting import GAME, Hosting
+from openfesl.core.hosting import CLOSED, GAME, Hosting
 from openfesl.core.personas import NOT_LOGGED_IN
 from openfesl.protocol.message import Message
 from openfesl.protocol.pnow import (
@@ -29,8 +29,6 @@ LIST_SERVERS = "listServers"
 JOIN = "JOIN"
 LIST = "LIST"
 NO_SERVER = "NOSERVER"
-
-CLOSED = "C"
 
 # The game looks the games up one after another and joins the first it finds, so a few
 # spare ones cover games that end meanwhile.
@@ -90,18 +88,15 @@ class PlayNow:
 
     def _search(self, game: Game, props: dict[str, str]) -> Outcome:
         kind = props.get("sessionType", FIND_SERVER)
-        listed = [hosted for hosted in self._hosting.all_games(game) if hosted.type == GAME]
-        # The server finds games; it never makes a player's game a host.
-        if kind not in {FIND_SERVER, LIST_SERVERS} or not listed:
-            return Outcome(result_type=NO_SERVER, available_server_count=0)
         fits = [
             (_fit(props, hosted), hosted)
-            for hosted in listed
-            if _joinable(hosted) and _passes(props, hosted)
+            for hosted in self._hosting.all_games(game)
+            if hosted.type == GAME and _joinable(hosted) and _passes(props, hosted)
         ]
-        # Games search in epochs that loosen their filters, such as Battlefield Heroes going on
-        # to empty servers; they go on after NOSERVER and stop for good after NOMATCH.
-        if not fits:
+        # The server finds games; it never makes a player's game a host. Games search in epochs
+        # that loosen their filters, such as Battlefield Heroes going on to empty servers; they go
+        # on after NOSERVER and stop for good after NOMATCH.
+        if kind not in {FIND_SERVER, LIST_SERVERS} or not fits:
             return Outcome(result_type=NO_SERVER, available_server_count=0)
         # The best fit first, then the fuller game, so players end up together.
         fits.sort(key=lambda found: (-found[0], -found[1].taken(), found[1].id))

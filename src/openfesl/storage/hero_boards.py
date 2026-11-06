@@ -8,7 +8,7 @@ from openfesl.core.stats import PERSONA, Bucket, bucket_of
 from openfesl.protocol.rank import Period
 from openfesl.storage.models import AccountRow, PersonaRow, StatRow
 from openfesl.storage.relationships import askable_accounts
-from openfesl.storage.stats import per, summed
+from openfesl.storage.stats import in_period, per, summed
 
 
 class SqlHeroBoards:
@@ -62,11 +62,9 @@ class SqlHeroBoards:
             statement = statement.outerjoin(
                 look,
                 and_(
-                    look.partition == partition,
+                    *in_period(look, partition, all_time),
                     look.owner_type == PERSONA,
                     look.owner_id == totals.c.owner_id,
-                    look.period == all_time.period,
-                    look.period_start == all_time.start,
                     look.key == key,
                 ),
             )

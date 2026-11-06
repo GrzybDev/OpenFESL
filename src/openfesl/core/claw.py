@@ -13,7 +13,7 @@ from openfesl.core.drops import Box, Drops
 from openfesl.core.games import Game
 from openfesl.core.heroes import Hero, Heroes
 from openfesl.core.inventory import Held, Ownership
-from openfesl.core.overrides import overridden
+from openfesl.core.overrides import with_settings
 from openfesl.core.personas import Persona
 from openfesl.core.policies import SettingStore
 from openfesl.core.rewards import Rewards
@@ -249,10 +249,7 @@ class Claw:
         Args:
             game: The game.
         """
-        if game.claw is None:
-            return None
-        prefix = f"{game.id}.claw."
-        return overridden(game.claw, prefix, await self._settings.settings(prefix))
+        return await with_settings(game.claw, game.id, "claw", self._settings)
 
     async def running(self, game: Game) -> ClawRules | None:
         """Return a game's Claw while it runs: switched on, with the catalogue its prizes need.

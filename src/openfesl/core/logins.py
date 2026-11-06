@@ -1,5 +1,4 @@
 import asyncio
-import hashlib
 import secrets
 from typing import TYPE_CHECKING
 
@@ -7,6 +6,7 @@ from pwdlib import PasswordHash
 from pwdlib.hashers.argon2 import Argon2Hasher
 
 from openfesl.core.fesl import TransactionError
+from openfesl.core.verification import digest
 
 # For annotations only, since the account service imports this module.
 if TYPE_CHECKING:
@@ -94,7 +94,7 @@ class Logins:
             TransactionError: When the token is unknown or too old, or the admin took the
                 account out of use.
         """
-        account = await self._store.find_remembered(_digest(token))
+        account = await self._store.find_remembered(digest(token))
         if account is None or account.server:
             raise TransactionError(INVALID_PASSWORD)
         _check_state(account)
@@ -136,7 +136,7 @@ class Logins:
                 with the old password keeps no way back in.
         """
         token = secrets.token_urlsafe(32)
-        if not await self._store.remember(account_id, _digest(token), password_hash):
+        if not await self._store.remember(account_id, digest(token), password_hash):
             raise TransactionError(INVALID_PASSWORD)
         return token
 
@@ -145,7 +145,3 @@ def _check_state(account: Account) -> None:
     # Only once the password or token proved who logs in, so a state stays private.
     if code := account.login_error():
         raise TransactionError(code)
-
-
-def _digest(token: str) -> bytes:
-    return hashlib.sha256(token.encode("utf-8", "surrogateescape")).digest()

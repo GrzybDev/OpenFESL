@@ -17,6 +17,7 @@ from openfesl.core.stats import PERSONA, bucket_of
 from openfesl.protocol.rank import Period
 from openfesl.storage.models import AccountRow, GameServerRow, PersonaRow, RelationshipRow, StatRow
 from openfesl.storage.personas import like
+from openfesl.storage.stats import in_period
 
 _SIDE = ("game", "tag", "owner_id", "owner_server", "member_id", "member_server")
 # Each side with its member's name: an account's display name, or the name a server last listed
@@ -196,11 +197,9 @@ class SqlRelationshipStore:
         hero = _heroes(namespace, start).outerjoin(
             StatRow,
             and_(
-                StatRow.partition == partition,
+                *in_period(StatRow, partition, bucket),
                 StatRow.owner_type == PERSONA,
                 StatRow.owner_id == PersonaRow.id,
-                StatRow.period == bucket.period,
-                StatRow.period_start == bucket.start,
                 StatRow.key == key,
             ),
         )

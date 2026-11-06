@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Any, Self
 
 from openfesl.core.hosted_games import HostedGame, Player, PlayerState
-from openfesl.core.hosting import GAME, NO_GAME, Hosting
+from openfesl.core.hosting import CLOSED, GAME, Hosting
 from openfesl.core.theater import FAILED, TheaterConnection, TheaterError, TheaterRoute
 from openfesl.protocol.theater import (
     GameData,
@@ -20,8 +20,6 @@ from openfesl.protocol.theater import (
 )
 
 logger = logging.getLogger(__name__)
-
-CLOSED = "C"
 
 _FILTER = "FILTER-ATTR-"
 
@@ -196,16 +194,7 @@ class Browsing:
         Raises:
             TheaterError: When no such game is listed.
         """
-        hosted: HostedGame | None = None
-        if request.lid is not None and request.gid is not None:
-            hosted = self._hosting.find(connection.game, request.lid, request.gid)
-        elif request.user or request.uid is not None:
-            found = self._hosting.find_by_player(
-                connection.game, request.type, request.user, request.uid
-            )
-            hosted = found[0] if found else None
-        if hosted is None:
-            raise TheaterError(NO_GAME)
+        hosted, _ = self._hosting.named(connection.game, request)
         connection.send("GDAT", _game_data(hosted, Favourites()), tid)
         details = GameDetails(
             lid=hosted.lobby.id, gid=hosted.id, ugid=hosted.ugid, attributes=hosted.details

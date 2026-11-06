@@ -1,4 +1,3 @@
-import hashlib
 import hmac
 import logging
 import re
@@ -14,6 +13,7 @@ from typing import Protocol
 
 from openfesl.core.admins import Admin
 from openfesl.core.theater import UNAUTHORIZED, TheaterError
+from openfesl.core.verification import digest
 
 logger = logging.getLogger(__name__)
 
@@ -393,7 +393,7 @@ class Approval:
         found = await self._store.find([ugid]) if _UGID.fullmatch(ugid) and secret else []
         if found:
             server = found[0]
-            if not hmac.compare_digest(server.secret_hash, _digest(secret)):
+            if not hmac.compare_digest(server.secret_hash, digest(secret)):
                 logger.warning("Refusing server %s: its secret is wrong", ugid)
                 raise TheaterError(BAD_SECRET)
             identity = Identity(ugid, secret)
@@ -401,7 +401,7 @@ class Approval:
             identity = new_identity()
             # The name only tells the admin which server it is; what text cannot hold goes.
             label = name.encode("utf-8", "replace").decode("utf-8").replace("\0", "")
-            server = GameServer(identity.ugid, _digest(identity.secret), label)
+            server = GameServer(identity.ugid, digest(identity.secret), label)
             await self._store.add(server)
             logger.info("Issued the server id %s to %r", server.ugid, label)
         standing = server.standing(await self._store.hosting_mode())
@@ -451,7 +451,3 @@ class Approval:
         tried.append((now, refused))
         while tried[0][0] < now - timedelta(days=1):
             tried.popleft()
-
-
-def _digest(secret: str) -> bytes:
-    return hashlib.sha256(secret.encode("utf-8", "surrogateescape")).digest()

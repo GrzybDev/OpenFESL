@@ -10,7 +10,7 @@ from openfesl.core.catalogues import Catalogue, Catalogues
 from openfesl.core.drops import Box
 from openfesl.core.games import Game, Games
 from openfesl.core.inventory import COUNTED, PERMANENT, Ownership
-from openfesl.core.overrides import overridden
+from openfesl.core.overrides import with_settings
 from openfesl.core.policies import SettingStore
 from openfesl.core.store_rules import BoxRule, StoreRules
 from openfesl.core.texts import BASE_LANGUAGE
@@ -432,10 +432,7 @@ async def store_rules(game: Game, settings: SettingStore) -> StoreRules | None:
         game: The game.
         settings: The instance's settings, such as bfheroes.store.prices.clothing.value.
     """
-    if game.store is None:
-        return None
-    prefix = f"{game.id}.store."
-    return overridden(game.store, prefix, await settings.settings(prefix))
+    return await with_settings(game.store, game.id, "store", settings)
 
 
 def offer(game: Game, catalogue: Catalogue, product: Product) -> Offer:

@@ -149,14 +149,7 @@ class LeaderboardService:
             request: The owner, period, keys and their orders.
         """
         owner = owner_of(connection, request.owner, request.owner_type)
-        found = await self._ranked(
-            connection,
-            [owner],
-            request.keys,
-            request.rank_orders,
-            request.period_id,
-            request.period_past,
-        )
+        found = await self._ranked(connection, [owner], request)
         return GetRankedStatsAnswer(
             stats=[_ranked_stat(key, found.get((owner, key))) for key in request.keys]
         )
@@ -171,14 +164,7 @@ class LeaderboardService:
             request: The owners, period, keys and their orders.
         """
         owners = [Owner(owner.owner_type, owner.owner_id) for owner in request.owners]
-        found = await self._ranked(
-            connection,
-            owners,
-            request.keys,
-            request.rank_orders,
-            request.period_id,
-            request.period_past,
-        )
+        found = await self._ranked(connection, owners, request)
         return GetRankedStatsForOwnersAnswer(
             ranked_stats=[
                 OwnerRankedStats(
@@ -248,22 +234,19 @@ class LeaderboardService:
         self,
         connection: FeslConnection,
         owners: Sequence[Owner],
-        keys: Sequence[str],
-        orders: Sequence[RankOrder],
-        period: Period,
-        past: int,
+        request: GetRankedStats | GetRankedStatsForOwners,
     ) -> dict[tuple[Owner, str], Ranked]:
         partition = partition_of(game_of(connection))
-        check_size(len(owners), keys)
+        check_size(len(owners), request.keys)
+        orders = request.rank_orders
         by_order: dict[RankOrder, list[str]] = {}
-        for index, key in enumerate(keys):
+        for index, key in enumerate(request.keys):
             order = orders[index] if index < len(orders) else RankOrder.DESCENDING
             by_order.setdefault(order, []).append(key)
+        bucket = bucket_of(request.period_id, request.period_past)
         found: dict[tuple[Owner, str], Ranked] = {}
         for order, ordered in by_order.items():
-            found |= await self._store.ranked(
-                partition, owners, ordered, order, bucket_of(period, past)
-            )
+            found |= await self._store.ranked(partition, owners, ordered, order, bucket)
         return found
 
     async def _standings(self, connection: FeslConnection, request: GetTopN) -> list[Standing]:

@@ -8,7 +8,7 @@ from typing import Any
 from openfesl.core.accounts import AccountState
 from openfesl.core.admin import AdminAction, AdminFeed, LoggedAction
 from openfesl.core.hosted_games import HostedGame, Player, PlayerState
-from openfesl.core.hosting import NO_GAME, NOT_FOUND, Hosting
+from openfesl.core.hosting import CLOSED, NOT_FOUND, Hosting
 from openfesl.core.personas import Persona, PersonaState
 from openfesl.core.theater import (
     BAD_PARAMETERS,
@@ -39,7 +39,6 @@ logger = logging.getLogger(__name__)
 DENIED = "jden"
 QUEUED = "queu"
 
-CLOSED = "C"
 PARTICIPANT = "P"
 OBSERVER = "O"
 
@@ -113,7 +112,7 @@ class Joining:
             logger.warning("Refusing EGAM: the player has no public IPv4 address")
             raise TheaterError(FAILED)
         assert connection.persona is not None
-        hosted, looked_up = self._target(connection, request)
+        hosted, looked_up = self._hosting.named(connection.game, request)
         player = Player(
             pid=next(hosted.pids),
             persona=connection.persona,
@@ -282,21 +281,6 @@ class Joining:
         hosted.queue.sort(key=lambda player: order.get(player.pid, len(order)))
         connection.send("UQUE", None, tid)
         self._report_queue(hosted)
-
-    def _target(
-        self, connection: TheaterConnection, request: EnterGame
-    ) -> tuple[HostedGame, Persona | None]:
-        if request.lid is not None and request.gid is not None:
-            hosted = self._hosting.find(connection.game, request.lid, request.gid)
-            if hosted is not None:
-                return hosted, None
-        elif request.user or request.uid is not None:
-            found = self._hosting.find_by_player(
-                connection.game, request.type, request.user, request.uid
-            )
-            if found is not None:
-                return found
-        raise TheaterError(NO_GAME)
 
     def _ask_host(self, hosted: HostedGame, player: Player) -> None:
         player.state = PlayerState.JOINING

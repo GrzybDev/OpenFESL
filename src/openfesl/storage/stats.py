@@ -88,11 +88,9 @@ class SqlStatStore:
         async with self._sessions() as session:
             rows = await session.scalars(
                 select(StatRow).where(
-                    StatRow.partition == partition,
+                    *in_period(StatRow, partition, bucket),
                     StatRow.owner_type == owner.type,
                     StatRow.owner_id == owner.id,
-                    StatRow.period == bucket.period,
-                    StatRow.period_start == bucket.start,
                 )
             )
             return {row.key: Value(row.value, row.text) for row in rows}
@@ -173,11 +171,9 @@ class SqlStatStore:
                 func.row_number().over(order_by=(best, StatRow.owner_id)).label("place"),
             )
             .where(
-                StatRow.partition == partition,
+                *in_period(StatRow, partition, bucket),
                 StatRow.owner_type == owner_type,
                 StatRow.key == key,
-                StatRow.period == bucket.period,
-                StatRow.period_start == bucket.start,
                 _ranked(StatRow),
             )
             .subquery()
@@ -344,11 +340,9 @@ async def _grant_points(
         .join(StatRow, StatRow.owner_id == PersonaRow.id)
         .where(
             PersonaRow.id.in_(raised),
-            StatRow.partition == partition,
+            *in_period(StatRow, partition, bucket),
             StatRow.owner_type == PERSONA,
             StatRow.key == key,
-            StatRow.period == bucket.period,
-            StatRow.period_start == bucket.start,
         )
         # One order of the wallets' locks for every transaction.
         .order_by(PersonaRow.id)
@@ -374,23 +368,36 @@ def _owned(
         .render_derived()
     )
     return [
-        StatRow.partition == partition,
+        *in_period(StatRow, partition, bucket),
         tuple_(StatRow.owner_type, StatRow.owner_id).in_(select(listed.c.type, listed.c.id)),
-        StatRow.period == bucket.period,
-        StatRow.period_start == bucket.start,
         StatRow.key == any_(literal(list(keys), ARRAY(String))),
     ]
 
 
 def _personas(partition: str, keys: Sequence[str], bucket: Bucket) -> list[ColumnElement[bool]]:
     return [
-        StatRow.partition == partition,
+        *in_period(StatRow, partition, bucket),
         StatRow.owner_type == PERSONA,
-        StatRow.period == bucket.period,
-        StatRow.period_start == bucket.start,
         StatRow.key == any_(literal(list(keys), ARRAY(String))),
         _ranked(StatRow),
     ]
+
+
+def in_period(
+    row: type[StatRow], partition: str, bucket: Bucket
+) -> tuple[ColumnElement[bool], ...]:
+    """Return the conditions of the stat rows of a game's partition and a period.
+
+    Args:
+        row: The stat table, or an alias of it.
+        partition: The game's partition.
+        bucket: The period.
+    """
+    return (
+        row.partition == partition,
+        row.period == bucket.period,
+        row.period_start == bucket.start,
+    )
 
 
 def summed(partition: str, sums: Mapping[str, Sequence[str]], bucket: Bucket) -> Subquery:

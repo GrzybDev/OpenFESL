@@ -15,7 +15,7 @@ from openfesl.core.games import Game
 from openfesl.core.hero_items import fits
 from openfesl.core.heroes import Hero, Heroes
 from openfesl.core.inventory import Ownership
-from openfesl.core.overrides import overridden
+from openfesl.core.overrides import with_settings
 from openfesl.core.policies import SettingStore
 from openfesl.core.referrals import Reach, Recruit, ReferralStore
 from openfesl.core.reward_claims import Claim, Claimed, Given, Grant, RewardStore
@@ -197,10 +197,7 @@ class Rewards:
         Args:
             game: The game.
         """
-        if game.rewards is None:
-            return None
-        prefix = f"{game.id}.rewards."
-        return overridden(game.rewards, prefix, await self._settings.settings(prefix))
+        return await with_settings(game.rewards, game.id, "rewards", self._settings)
 
     async def leveled(self, game: Game, account_ids: Iterable[int]) -> None:
         """Record the steps of Recruit a Friend that recruits' heroes reach as servers level them.

@@ -14,7 +14,7 @@ from openfesl.core.deal_picks import History, NewDeal, pick_items, pick_offers
 from openfesl.core.deal_rules import DealRules, ItemSection, Offer, OfferSection
 from openfesl.core.deal_uploads import offer_of
 from openfesl.core.games import Game
-from openfesl.core.overrides import overridden
+from openfesl.core.overrides import with_settings
 from openfesl.core.policies import SettingStore
 from openfesl.core.store import (
     AUTO,
@@ -144,10 +144,7 @@ class HotDeals:
         Args:
             game: The game.
         """
-        if game.deals is None:
-            return None
-        prefix = f"{game.id}.deals."
-        return overridden(game.deals, prefix, await self._settings.settings(prefix))
+        return await with_settings(game.deals, game.id, "deals", self._settings)
 
     async def current(self, game: Game, sold_out: bool = False) -> list[ListedBundle]:
         """Return the bundles a game's store sells now, in the order its hot deals list them.

@@ -1,7 +1,7 @@
 from collections.abc import Collection, Sequence
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import Select, delete, exists, func, literal, select, update
+from sqlalchemy import ColumnElement, Select, delete, exists, func, literal, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
@@ -548,17 +548,8 @@ class SqlAccountStore:
             Whether the link was replaced, which it is not while the last one works or once
             the address is confirmed.
         """
-        async with self._sessions.begin() as session:
-            renewed = await session.scalar(
-                update(AccountRow)
-                .where(
-                    AccountRow.id == account_id,
-                    AccountRow.verification_expires_at <= datetime.now(UTC),
-                )
-                .values(verification_hash=link.token_hash, verification_expires_at=link.expires_at)
-                .returning(AccountRow.id)
-            )
-        return renewed is not None
+        expired = AccountRow.verification_expires_at <= datetime.now(UTC)
+        return await self._replace_link(account_id, link, expired)
 
     async def replace(self, account_id: int, link: Link) -> bool:
         """Replace the link of an account that waits for its address to be confirmed.
@@ -570,10 +561,16 @@ class SqlAccountStore:
         Returns:
             Whether the link was replaced, which it is not once the address is confirmed.
         """
+        waiting = AccountRow.verification_expires_at.is_not(None)
+        return await self._replace_link(account_id, link, waiting)
+
+    async def _replace_link(
+        self, account_id: int, link: Link, condition: ColumnElement[bool]
+    ) -> bool:
         async with self._sessions.begin() as session:
             replaced = await session.scalar(
                 update(AccountRow)
-                .where(AccountRow.id == account_id, AccountRow.verification_expires_at.is_not(None))
+                .where(AccountRow.id == account_id, condition)
                 .values(verification_hash=link.token_hash, verification_expires_at=link.expires_at)
                 .returning(AccountRow.id)
             )

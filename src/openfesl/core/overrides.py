@@ -4,6 +4,8 @@ from collections.abc import Mapping
 
 from pydantic import BaseModel, ValidationError
 
+from openfesl.core.policies import SettingStore
+
 logger = logging.getLogger(__name__)
 
 
@@ -34,6 +36,23 @@ def overridden[Rules: BaseModel](rules: Rules, prefix: str, settings: Mapping[st
         except KeyError, TypeError, ValidationError:
             logger.warning("Ignoring the setting %s, which no rule takes", key)
     return rules
+
+
+async def with_settings[Rules: BaseModel](
+    rules: Rules | None, game: str, part: str, settings: SettingStore
+) -> Rules | None:
+    """Return a part of a game's data with the instance's settings over it, if the game has it.
+
+    Args:
+        rules: The part, as the game's data gives it.
+        game: The game's id.
+        part: The start of the part's settings after the game's id, such as deals.
+        settings: The instance's settings.
+    """
+    if rules is None:
+        return None
+    prefix = f"{game}.{part}."
+    return overridden(rules, prefix, await settings.settings(prefix))
 
 
 def _read(value: str) -> object:

@@ -111,7 +111,7 @@ def new_link(valid_for: timedelta | None = None) -> tuple[str, Link]:
 
 
 def digest(token: str) -> bytes:
-    """Return the digest that the store keeps of a link's token, which it never keeps itself.
+    """Return the digest that a store keeps of a token or secret, which it never keeps itself.
 
     Args:
         token: The token.
@@ -160,15 +160,14 @@ class EmailVerification:
         Once the last link expired, a new one goes out.
 
         Args:
-            account: The account that logs in.
+            account: The account that logs in, whose address waits to be confirmed.
             language: The language code of the game it logs in from.
 
         Raises:
             TransactionError: When the account waits for its address to be confirmed.
         """
-        if account.verification_expires_at is None:
-            return
-        if account.verification_expires_at <= datetime.now(UTC):
+        expires = account.verification_expires_at
+        if expires and expires <= datetime.now(UTC):
             token, link = new_link()
             if await self._store.renew(account.id, link):
                 self.send(account.nuid, token, link, language)

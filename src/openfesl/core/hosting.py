@@ -21,6 +21,8 @@ from openfesl.core.theater import FAILED, TheaterConnection, TheaterError, Theat
 from openfesl.protocol.theater import (
     CreateGame,
     CreateGameAnswer,
+    EnterGame,
+    GameLookup,
     GameRequest,
     PlayerRequest,
     RemoveGame,
@@ -34,6 +36,8 @@ logger = logging.getLogger(__name__)
 
 GAME = "G"
 PLAYGROUP = "P"
+# The join mode of a game that takes nobody.
+CLOSED = "C"
 
 IN_GAME = "ingm"
 LOBBY_FULL = "lbfl"
@@ -145,6 +149,28 @@ class Hosting:
                 if persona.id == uid or (name and persona.name.casefold() == name.casefold()):
                     return hosted, persona
         return None
+
+    def named(
+        self, game: Game, request: EnterGame | GameLookup
+    ) -> tuple[HostedGame, Persona | None]:
+        """Return a game that a request names by its ids or by a player in it, with that player.
+
+        Args:
+            game: The game it belongs to.
+            request: The request.
+
+        Raises:
+            TheaterError: When players see no such game.
+        """
+        if request.lid is not None and request.gid is not None:
+            hosted = self.find(game, request.lid, request.gid)
+            if hosted is not None:
+                return hosted, None
+        elif request.user or request.uid is not None:
+            found = self.find_by_player(game, request.type, request.user, request.uid)
+            if found is not None:
+                return found
+        raise TheaterError(NO_GAME)
 
     def own(self, connection: TheaterConnection, request: GameRequest) -> HostedGame:
         """Return a game that a request names, as long as the connection hosts it.

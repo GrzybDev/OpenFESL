@@ -18,6 +18,7 @@ from openfesl.storage.models import (
     RewardPauseRow,
     StatRow,
 )
+from openfesl.storage.stats import in_period
 from openfesl.storage.wallets import credit
 
 # The ledger's reason for the Funds that rewards give.
@@ -87,10 +88,8 @@ class SqlRewardStore:
                 cast(literal("{}"), JSONB),
             ),
         ).where(
-            StatRow.partition == partition,
+            *in_period(StatRow, partition, bucket),
             StatRow.owner_type == PERSONA,
-            StatRow.period == bucket.period,
-            StatRow.period_start == bucket.start,
             StatRow.key == stat,
         )
         columns = ["game", "key", "stat", "values"]

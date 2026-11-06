@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import Select, delete, literal, select, update
+from sqlalchemy import Select, and_, delete, literal, select, update
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import aliased
@@ -17,6 +17,7 @@ from openfesl.protocol.rank import Period
 from openfesl.storage.accounts import account_from
 from openfesl.storage.admin import action_row
 from openfesl.storage.models import AccountRow, PersonaRow, ReferralRow, RewardClaimRow, StatRow
+from openfesl.storage.stats import in_period
 
 _RECRUITER = aliased(AccountRow)
 
@@ -182,12 +183,12 @@ async def _leaders(session: AsyncSession, game: Game, accounts: list[int]) -> di
         select(PersonaRow.account_id, PersonaRow.id, PersonaRow.name, StatRow.value)
         .outerjoin(
             StatRow,
-            (StatRow.owner_id == PersonaRow.id)
-            & (StatRow.partition == partition_of(game))
-            & (StatRow.owner_type == PERSONA)
-            & (StatRow.period == bucket.period)
-            & (StatRow.period_start == bucket.start)
-            & (StatRow.key == game.heroes.stats.level),
+            and_(
+                *in_period(StatRow, partition_of(game), bucket),
+                StatRow.owner_id == PersonaRow.id,
+                StatRow.owner_type == PERSONA,
+                StatRow.key == game.heroes.stats.level,
+            ),
         )
         .where(
             PersonaRow.account_id.in_(accounts),
