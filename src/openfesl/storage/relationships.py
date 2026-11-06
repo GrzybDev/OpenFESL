@@ -1,7 +1,7 @@
-from sqlalchemy import ColumnElement, and_, delete, func, or_, select, update
+from sqlalchemy import ColumnElement, Select, and_, delete, func, or_, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-from sqlalchemy.orm import InstrumentedAttribute, outerjoin
+from sqlalchemy.orm import outerjoin
 
 from openfesl.core.accounts import AccountState
 from openfesl.core.personas import PersonaState
@@ -85,8 +85,8 @@ class SqlRelationshipStore:
                 if await _agreed(session, game, tag, owner) >= most:
                     raise RelationshipRefused(Refusal.LIST_FULL)
                 # The side that changed it has seen the change; the other side has not.
-                await _upsert(session, (game, tag, owner, member), owner_agrees=True, new=False)
-                await _upsert(session, (game, tag, member, owner), member_agrees=True, new=True)
+                await _upsert(session, game, tag, owner, member, owner_agrees=True, new=False)
+                await _upsert(session, game, tag, member, owner, member_agrees=True, new=True)
             [relationship] = await _sides(session, *_side(game, tag, owner, member))
             return relationship
 
@@ -118,8 +118,8 @@ class SqlRelationshipStore:
             if withdrawn is None:
                 return None
             if not ends:
-                await _upsert(session, (game, tag, owner, member), owner_agrees=False, new=False)
-                await _upsert(session, (game, tag, member, owner), member_agrees=False, new=True)
+                await _upsert(session, game, tag, owner, member, owner_agrees=False, new=False)
+                await _upsert(session, game, tag, member, owner, member_agrees=False, new=True)
             pair = or_(
                 and_(*_side(game, tag, owner, member)), and_(*_side(game, tag, member, owner))
             )
@@ -167,26 +167,13 @@ class SqlRelationshipStore:
         start = like(f"{pattern}*")
         async with self._sessions() as session:
             accounts = await session.execute(
-                select(AccountRow.id, AccountRow.display_name)
-                .where(AccountRow.display_name.ilike(start, escape="\\"), *askable_accounts())
-                .order_by(func.lower(AccountRow.display_name))
-                .limit(limit)
+                _players(start).order_by(func.lower(AccountRow.display_name)).limit(limit)
             )
             heroes = await session.execute(
-                select(PersonaRow.account_id, PersonaRow.name)
-                .join(AccountRow, AccountRow.id == PersonaRow.account_id)
-                .where(
-                    PersonaRow.namespace == namespace,
-                    PersonaRow.name.ilike(start, escape="\\"),
-                    PersonaRow.disabled_at.is_(None),
-                    PersonaRow.state == PersonaState.ACTIVE,
-                    *askable_accounts(),
-                )
-                .order_by(func.lower(PersonaRow.name))
-                .limit(limit)
+                _heroes(namespace, start).order_by(func.lower(PersonaRow.name)).limit(limit)
             )
             found = [Found(account_id, name or "", False) for account_id, name in accounts]
-            found += [Found(account_id, name, True) for account_id, name in heroes]
+            found += [Found(account_id, name, True) for account_id, name, _ in heroes]
         return sorted(found, key=lambda each: each.name.casefold())[:limit]
 
     async def matches(
@@ -205,30 +192,17 @@ class SqlRelationshipStore:
         start = like(f"{pattern}*")
         partition, key = level
         bucket = bucket_of(Period.ALL_TIME, 0)
-        named = select(AccountRow.id, AccountRow.display_name).where(
-            AccountRow.display_name.ilike(start, escape="\\"), *askable_accounts()
-        )
-        hero = (
-            select(PersonaRow.account_id, PersonaRow.name, AccountRow.display_name)
-            .join(AccountRow, AccountRow.id == PersonaRow.account_id)
-            .outerjoin(
-                StatRow,
-                and_(
-                    StatRow.partition == partition,
-                    StatRow.owner_type == PERSONA,
-                    StatRow.owner_id == PersonaRow.id,
-                    StatRow.period == bucket.period,
-                    StatRow.period_start == bucket.start,
-                    StatRow.key == key,
-                ),
-            )
-            .where(
-                PersonaRow.namespace == namespace,
-                PersonaRow.name.ilike(start, escape="\\"),
-                PersonaRow.disabled_at.is_(None),
-                PersonaRow.state == PersonaState.ACTIVE,
-                *askable_accounts(),
-            )
+        named = _players(start)
+        hero = _heroes(namespace, start).outerjoin(
+            StatRow,
+            and_(
+                StatRow.partition == partition,
+                StatRow.owner_type == PERSONA,
+                StatRow.owner_id == PersonaRow.id,
+                StatRow.period == bucket.period,
+                StatRow.period_start == bucket.start,
+                StatRow.key == key,
+            ),
         )
         async with self._sessions() as session:
             hero_count = await session.scalar(select(func.count()).select_from(hero.subquery()))
@@ -278,9 +252,8 @@ async def _agreed(session: AsyncSession, game: str, tag: str, owner: Party) -> i
 
 
 async def _upsert(
-    session: AsyncSession, side: tuple[str, str, Party, Party], **changes: bool
+    session: AsyncSession, game: str, tag: str, owner: Party, member: Party, **changes: bool
 ) -> None:
-    game, tag, owner, member = side
     columns = (game, tag, owner.account_id, owner.server, member.account_id, member.server)
     # A new side agrees to nothing that the change does not say.
     agreeing = {"owner_agrees": False, "member_agrees": False, **changes}
@@ -293,25 +266,46 @@ async def _upsert(
 
 async def _sides(session: AsyncSession, *where: ColumnElement[bool]) -> list[Relationship]:
     rows = await session.execute(
-        select(
-            RelationshipRow.id,
-            RelationshipRow.tag,
-            RelationshipRow.member_id,
-            RelationshipRow.member_server,
-            _NAME,
-            RelationshipRow.owner_agrees,
-            RelationshipRow.member_agrees,
-            RelationshipRow.new,
-            RelationshipRow.modified_at,
-        )
+        select(RelationshipRow, _NAME)
         .select_from(_MEMBERS)
         .where(*where, or_(RelationshipRow.member_server.is_not(None), and_(*askable_accounts())))
         .order_by(RelationshipRow.created_at, RelationshipRow.id)
     )
     return [
-        Relationship(side, tag, Party(account_id, server), name or "", own, theirs, new, modified)
-        for side, tag, account_id, server, name, own, theirs, new, modified in rows
+        Relationship(
+            row.id,
+            row.tag,
+            Party(row.member_id, row.member_server),
+            name or "",
+            row.owner_agrees,
+            row.member_agrees,
+            row.new,
+            row.modified_at,
+        )
+        for row, name in rows
     ]
+
+
+def _players(start: str) -> Select[int, str | None]:
+    # The accounts that others may ask, by a start of their display names.
+    return select(AccountRow.id, AccountRow.display_name).where(
+        AccountRow.display_name.ilike(start, escape="\\"), *askable_accounts()
+    )
+
+
+def _heroes(namespace: str, start: str) -> Select[int, str, str | None]:
+    # The heroes in play of the accounts that others may ask, by a start of their names.
+    return (
+        select(PersonaRow.account_id, PersonaRow.name, AccountRow.display_name)
+        .join(AccountRow, AccountRow.id == PersonaRow.account_id)
+        .where(
+            PersonaRow.namespace == namespace,
+            PersonaRow.name.ilike(start, escape="\\"),
+            PersonaRow.disabled_at.is_(None),
+            PersonaRow.state == PersonaState.ACTIVE,
+            *askable_accounts(),
+        )
+    )
 
 
 def askable_accounts() -> tuple[ColumnElement[bool], ...]:
@@ -328,8 +322,8 @@ def askable_accounts() -> tuple[ColumnElement[bool], ...]:
 
 def _owned_by(owner: Party) -> tuple[ColumnElement[bool], ...]:
     return (
-        _equals(RelationshipRow.owner_id, owner.account_id),
-        _equals(RelationshipRow.owner_server, owner.server),
+        RelationshipRow.owner_id == owner.account_id,
+        RelationshipRow.owner_server == owner.server,
     )
 
 
@@ -338,10 +332,6 @@ def _side(game: str, tag: str, owner: Party, member: Party) -> tuple[ColumnEleme
         RelationshipRow.game == game,
         RelationshipRow.tag == tag,
         *_owned_by(owner),
-        _equals(RelationshipRow.member_id, member.account_id),
-        _equals(RelationshipRow.member_server, member.server),
+        RelationshipRow.member_id == member.account_id,
+        RelationshipRow.member_server == member.server,
     )
-
-
-def _equals[T](column: InstrumentedAttribute[T | None], value: T | None) -> ColumnElement[bool]:
-    return column.is_(None) if value is None else column == value

@@ -417,14 +417,10 @@ class Relationships:
         return _names(hosted) if hosted is not None else set()
 
     def _server_named(self, server: str) -> GameSession | None:
-        return next(
-            (
-                hosted.host.session
-                for hosted in self._hosting.every()
-                if hosted.type == GAME and hosted.server and server in _names(hosted)
-            ),
-            None,
-        )
+        for hosted in self._hosting.every():
+            if hosted.type == GAME and hosted.server and server in _names(hosted):
+                return hosted.host.session
+        return None
 
 
 def _check(rules: RelationshipRules, owner: Party, member: Party, tag: str) -> None:
