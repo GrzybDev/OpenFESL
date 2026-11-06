@@ -5,7 +5,7 @@ from babel import Locale
 from babel.messages.catalog import Catalog
 from babel.messages.pofile import read_po
 
-from openfesl.core.texts import BASE_LANGUAGE, languages
+from openfesl.core.texts import BASE_LANGUAGE, languages, localize
 
 PLACEHOLDER = re.compile(r"%\((\w+)\)s|\{(\w+)\}")
 CATEGORIES = (".zero", ".one", ".two", ".few", ".many", ".other")
@@ -43,3 +43,9 @@ def test_every_language_has_every_text_with_its_placeholders_and_plural_forms() 
                 text = found.get(f"{key}.{form}", "")
                 assert text, (language, key, form)
                 assert placeholders(text) == placeholders(base[f"{key}.other"]), (language, key)
+
+
+def test_a_localized_address_keeps_its_one_language_prefix() -> None:
+    assert localize("/admin/", "pl") == "/pl/admin/"
+    assert localize("/pl/admin/", "pl") == "/pl/admin/"
+    assert localize("/", "pl") == "/pl"

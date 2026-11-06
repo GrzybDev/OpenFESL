@@ -46,10 +46,10 @@ def localize(path: str, language: str) -> str:
     English pages have no prefix; the others start with their language code, such as /pl/terms.
 
     Args:
-        path: The page's path without a language prefix, such as /terms.
+        path: The page's path, such as /terms; one that has the language's prefix stays as it is.
         language: The language code.
     """
-    if language == BASE_LANGUAGE:
+    if language == BASE_LANGUAGE or path.startswith(f"/{language}/"):
         return path
     return f"/{language}" + ("" if path == "/" else path)
 
