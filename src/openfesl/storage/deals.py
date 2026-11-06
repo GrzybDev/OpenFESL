@@ -1,7 +1,7 @@
 from dataclasses import replace
 from datetime import datetime, timedelta
 
-from sqlalchemy import exists, func, insert, select
+from sqlalchemy import exists, func, select
 from sqlalchemy.dialects.postgresql import insert as upsert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -16,13 +16,7 @@ from openfesl.storage.models import (
     StoreBundleRow,
     StoreProductRow,
 )
-from openfesl.storage.store import (
-    add_members,
-    bundle_values,
-    product_of,
-    product_values,
-    with_members,
-)
+from openfesl.storage.store import add_bundle, product_of, product_values, with_members
 
 type Key = tuple[int, Ownership, str]
 
@@ -215,10 +209,4 @@ async def _add(
         source=AUTO,
         members=tuple(sorted(members)),
     )
-    number = await session.scalar(
-        insert(StoreBundleRow)
-        .values(game=game, **bundle_values(bundle))
-        .returning(StoreBundleRow.id)
-    )
-    assert number is not None
-    await add_members(session, number, bundle)
+    await add_bundle(session, game, bundle)

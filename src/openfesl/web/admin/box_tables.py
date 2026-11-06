@@ -271,7 +271,6 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
         if chosen is None or option is None or not tier.isdecimal() or int(tier) > _tiers_of(row):
             raise HTTPException(400)
         ownership = Ownership.read(option.written)
-        assert isinstance(ownership, Ownership)
         entries = [_entry(drop.tier, drop.product, box.currency) for drop in box.drops]
         entries.append(TableEntry(int(tier), chosen.item.id, ownership, option.price, None))
         # An entry added keeps the tiers' rare marks.

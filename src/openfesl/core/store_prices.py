@@ -1,7 +1,7 @@
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Any, Protocol
+from typing import Any, Protocol, Self
 
 from openfesl.core.admins import Admin
 from openfesl.core.catalogues import Catalogue, Item
@@ -137,6 +137,19 @@ class PointChange:
     price: int
     published: bool
 
+    @classmethod
+    def of(cls, product: Product, price: int, published: bool) -> Self:
+        """Return the price point of a product of the store, at a price.
+
+        Args:
+            product: The product.
+            price: The price.
+            published: Whether the store sells it.
+        """
+        return cls(
+            product.id, product.item_id, product.ownership, product.currency, price, published
+        )
+
 
 class PriceStore(Protocol):
     """Where the price points of the games' stores are kept and the admin changes them."""
@@ -256,16 +269,8 @@ def applied(old: StoreRules, new: StoreRules, key: str, found: Iterable[ItemPric
         for line in lines:
             product = line.product
             price = new.price(after, product.ownership)
-            taken.append(
-                PointChange(
-                    product.id,
-                    product.item_id,
-                    product.ownership,
-                    product.currency,
-                    price or product.price,
-                    price is not None and product.ownership in after.sold,
-                )
-            )
+            sold = price is not None and product.ownership in after.sold
+            taken.append(PointChange.of(product, price or product.price, sold))
         held = {line.product.ownership for line in lines}
         for ownership in after.sold:
             if ownership not in held and (price := new.price(after, ownership)):
@@ -386,16 +391,8 @@ def reset_points(rules: StoreRules, prices: ItemPrices) -> list[PointChange]:
     for line in prices.lines:
         product = line.product
         key = (product.currency, product.ownership)
-        points.append(
-            PointChange(
-                product.id,
-                product.item_id,
-                product.ownership,
-                product.currency,
-                line.rule or product.price,
-                line.rule is not None and key in sold,
-            )
-        )
+        published = line.rule is not None and key in sold
+        points.append(PointChange.of(product, line.rule or product.price, published))
     held = {(line.product.currency, line.product.ownership) for line in prices.lines}
     for currency, ownership in sorted(sold - held, key=lambda key: (key[0], key[1].written)):
         if price := rules.price_of(item, ownership, currency):

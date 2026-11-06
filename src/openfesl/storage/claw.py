@@ -181,7 +181,6 @@ async def _free_count(session: AsyncSession, grab: NewGrab) -> int:
 
 def _grab(row: ClawGrabRow, hero: str) -> Grab:
     ownership = Ownership.read(row.ownership)
-    assert isinstance(ownership, Ownership)
     return Grab(
         row.persona_id,
         hero,

@@ -404,7 +404,6 @@ def _card(
 ) -> dict[str, Any]:
     # The prize card of a grab as the session kept it, in the page's language.
     ownership = Ownership.read(grabbed["ownership"])
-    assert isinstance(ownership, Ownership)
     prize = _line(texts, catalogue, grabbed["item"], ownership, art, grabbed["rare"])
     hero, held, uses, before = grabbed["hero"], grabbed["held"], grabbed["uses"], grabbed["before"]
     if held == PERMANENT:

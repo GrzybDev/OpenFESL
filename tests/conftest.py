@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 os.environ.setdefault("TESTCONTAINERS_HOST_OVERRIDE", "127.0.0.1")
 
 from playwright.async_api import Browser, Error, async_playwright
-from support import FESL, PUBLIC_URL, Mailbox, game
+from support import FESL, PUBLIC_URL, Mailbox, Products, game
 from testcontainers.community.postgres import PostgresContainer
 
 from openfesl.core import admin, history, trust
@@ -26,7 +26,6 @@ from openfesl.core.store_rules import PriceRule, StoreRules
 from openfesl.server.cli import RelayServer, main, uvicorn_config
 from openfesl.storage.database import migrate
 from openfesl.storage.history import SqlHistoryStore
-from openfesl.storage.store import SqlProductStore
 from openfesl.web.pages import built_assets
 
 
@@ -180,10 +179,9 @@ async def history_store(database_url: str) -> AsyncIterator[SqlHistoryStore]:
 
 
 @pytest.fixture
-async def products(database_url: str) -> AsyncIterator[SqlProductStore]:
-    # Bundles added straight to the store, as the admin panel adds its offers.
+async def products(database_url: str) -> AsyncIterator[Products]:
     engine = create_async_engine(database_url)
-    yield SqlProductStore(async_sessionmaker(engine))
+    yield Products(async_sessionmaker(engine))
     await engine.dispose()
 
 

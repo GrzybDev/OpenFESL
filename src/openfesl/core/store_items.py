@@ -260,11 +260,7 @@ class StoreItems:
         now, item, choices = self._clock(), sold.item, []
         for index, hero in enumerate(heroes):
             rows = await self._entitlements.of_persona(hero.persona.id)
-            kept = [
-                entry
-                for entry in rows
-                if entry.status == ACTIVE and (entry.expires is None or entry.expires > now)
-            ]
+            kept = [entry for entry in rows if entry.in_use(now)]
             unfit = sold.requirement.unfit(hero)
             holds = held(rules, hero.faction, hero.hero_class, kept)
             uses = bool(item and game.store and game.store.counted(item))

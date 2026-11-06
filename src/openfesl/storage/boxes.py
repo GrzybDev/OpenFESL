@@ -9,9 +9,10 @@ from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin
 from openfesl.core.box_tables import TableEntry
 from openfesl.core.drops import Box
+from openfesl.core.store import NewProduct
 from openfesl.storage.admin import action_row
 from openfesl.storage.models import StoreBoxRow, StoreDropRow, StoreProductRow
-from openfesl.storage.store import boxes_of
+from openfesl.storage.store import add_drops, boxes_of, product_values
 
 
 class SqlBoxStore:
@@ -70,25 +71,8 @@ class SqlBoxStore:
                 for entry in entries
             ]
             await session.execute(delete(StoreDropRow).where(StoreDropRow.box_id == box.id))
-            # A product that two tiers name is given by the first.
-            drops = {
-                number: entry.tier
-                for number, entry in reversed(list(zip(numbers, entries, strict=True)))
-            }
-            if drops:
-                await session.execute(
-                    insert(StoreDropRow),
-                    [
-                        {
-                            "box_id": box.id,
-                            "product_id": number,
-                            "tier": tier,
-                            "weight": weights[tier],
-                            "rare": tier in rare,
-                        }
-                        for number, tier in drops.items()
-                    ],
-                )
+            drops = [(entry.tier, number) for entry, number in zip(entries, numbers, strict=True)]
+            await add_drops(session, box.id, drops, weights, rare)
             await session.execute(
                 update(StoreBoxRow).where(StoreBoxRow.id == box.id).values(worth_rule=worth_rule)
             )
@@ -115,19 +99,10 @@ class SqlBoxStore:
 async def _product(session: AsyncSession, game: str, currency: str, entry: TableEntry) -> int:
     # The store's product of an entry, added unpublished at its price where the store lacks one.
     ownership = entry.ownership
+    assert entry.price is not None
+    new = NewProduct(entry.item_id, ownership, currency, entry.price)
     await session.execute(
-        insert(StoreProductRow)
-        .values(
-            game=game,
-            item_id=entry.item_id,
-            type=ownership.type,
-            days=ownership.days,
-            uses=ownership.uses,
-            currency=currency,
-            price=entry.price,
-            published=False,
-        )
-        .on_conflict_do_nothing()
+        insert(StoreProductRow).values(product_values(game, new)).on_conflict_do_nothing()
     )
     number = await session.scalar(
         select(StoreProductRow.id).where(

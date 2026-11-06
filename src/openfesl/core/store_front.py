@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 
 from openfesl.core.catalogues import Catalogues, Item
-from openfesl.core.entitlements import ACTIVE, EntitlementStore
+from openfesl.core.entitlements import EntitlementStore
 from openfesl.core.games import Game
 from openfesl.core.hero_items import granted, held, holding
 from openfesl.core.heroes import Hero
@@ -148,11 +148,8 @@ class StoreFront:
         rules = game.heroes
         assert rules is not None
         now = self._clock()
-        kept = [
-            entry
-            for entry in await self._entitlements.of_persona(hero.persona.id)
-            if entry.status == ACTIVE and (entry.expires is None or entry.expires > now)
-        ]
+        rows = await self._entitlements.of_persona(hero.persona.id)
+        kept = [entry for entry in rows if entry.in_use(now)]
         tagged = {entry.tag.partition("-")[0] for entry in kept}
         loadout = granted(rules, hero.faction, hero.hero_class)
         owned = {}

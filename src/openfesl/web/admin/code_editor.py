@@ -310,7 +310,7 @@ def _lines(texts: StoreTexts, catalogue: Catalogue, items: tuple[str, ...]) -> l
             ownership = Ownership.read(own)
         except ValueError:
             raise HTTPException(400) from None
-        if not (number.isascii() and number.isdecimal()) or not isinstance(ownership, Ownership):
+        if not (number.isascii() and number.isdecimal()):
             raise HTTPException(400)
         item = catalogue.item(int(number))
         if item and item.withheld:

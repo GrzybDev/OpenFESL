@@ -279,17 +279,12 @@ async def _give(session: AsyncSession, grant: Grant) -> list[tuple[int, Ownershi
 
 
 def _claim(row: RewardClaimRow) -> Claim:
-    items = []
-    for item_id, text in row.outcome["items"]:
-        ownership = Ownership.read(text)
-        assert isinstance(ownership, Ownership)
-        items.append((item_id, ownership))
     outcome = row.outcome
     return Claim(
         row.key,
         row.faction,
         row.persona_id,
-        tuple(items),
+        tuple((item_id, Ownership.read(text)) for item_id, text in outcome["items"]),
         outcome["funds"],
         outcome["keys"],
         row.claimed_at,

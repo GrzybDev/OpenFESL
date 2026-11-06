@@ -227,17 +227,6 @@ class ProductStore(Protocol):
             item_id: The item's number.
         """
 
-    async def add_bundle(self, game: str, bundle: Bundle) -> int:
-        """Add a bundle to a game's store.
-
-        Args:
-            game: The game's data-file name.
-            bundle: The bundle, whose products the store holds.
-
-        Returns:
-            The bundle's number.
-        """
-
     async def bundles(self, game: str, now: datetime) -> list[ListedBundle]:
         """Return the bundles a game's store sells at a moment, by their order among the hot deals.
 
@@ -345,18 +334,6 @@ class Store:
             return []
         catalogue = await self._catalogues.of(game, BASE_LANGUAGE)
         return [offer(game, catalogue, product) for product in await self._store.products(game.id)]
-
-    async def add_bundle(self, game: Game, bundle: Bundle) -> int:
-        """Add a bundle to a game's store, to sell its products together as a hot deal.
-
-        Args:
-            game: The game.
-            bundle: The bundle, whose products the store holds.
-
-        Returns:
-            The bundle's number.
-        """
-        return await self._store.add_bundle(game.id, bundle)
 
     async def _imported(self, action: LoggedAction) -> None:
         game = self._games.by_id(action.target)

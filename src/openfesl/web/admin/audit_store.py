@@ -129,7 +129,6 @@ def account_entry(
 def _owned(texts: StoreTexts, written: str) -> str:
     # An ownership as the log keeps it, such as 30d, in words.
     ownership = Ownership.read(written)
-    assert isinstance(ownership, Ownership)
     return texts.ownership(ownership, inline=True)
 
 

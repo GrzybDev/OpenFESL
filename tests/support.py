@@ -20,6 +20,7 @@ from aiosmtpd.smtp import SMTP, Envelope, Session
 from websockets.asyncio.client import ClientConnection, connect
 from websockets.typing import Subprotocol
 
+from openfesl.core.store import Bundle
 from openfesl.protocol.fields import Fields, format_fields, parse_fields
 from openfesl.protocol.packet import Packet
 from openfesl.protocol.relay import (
@@ -33,6 +34,7 @@ from openfesl.protocol.relay import (
     encode_frame,
 )
 from openfesl.server.cli import main
+from openfesl.storage.store import SqlProductStore, add_bundle
 
 type Answer = dict[str, str]
 type Update = tuple[int, str, str, str, str]
@@ -72,6 +74,14 @@ CREATE_GAME = [
     ("B-version", "ROMEPC795745"),
     ("JOIN", "O"),
 ]
+
+
+class Products(SqlProductStore):
+    """A store of products that tests add bundles to, as the admin panel adds its offers."""
+
+    async def add_bundle(self, game: str, bundle: Bundle) -> int:
+        async with self._sessions.begin() as session:
+            return await add_bundle(session, game, bundle)
 
 
 @dataclass(frozen=True)

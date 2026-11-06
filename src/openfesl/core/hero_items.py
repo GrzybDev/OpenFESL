@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime
 
 from openfesl.core.catalogues import Catalogue, Catalogues, Contents, Item
-from openfesl.core.entitlements import ACTIVE, Entitlement, EntitlementStore
+from openfesl.core.entitlements import Entitlement, EntitlementStore
 from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, TransactionError
 from openfesl.core.games import Game
 from openfesl.core.hero_rules import HeroRules, WrittenStat
@@ -37,11 +37,7 @@ def held(
         kept: The entitlements kept for the hero.
     """
     now = datetime.now(UTC)
-    tags = (
-        item.tag.partition("-")[0]
-        for item in kept
-        if item.status == ACTIVE and (item.expires is None or item.expires > now)
-    )
+    tags = (item.tag.partition("-")[0] for item in kept if item.in_use(now))
     # The tags of what is neither worn nor used, such as a treasure chest's, name no item.
     items = {int(number) for number in tags if number.isascii() and number.isdecimal()}
     return items | granted(rules, faction, hero_class)

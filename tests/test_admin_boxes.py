@@ -8,11 +8,10 @@ from accounts import PASSWORD, execute, post_sign_in, select_value
 from heroes import MAGMA
 from identity import IdentityProvider, form_token, sign_in
 from store import ROYAL_SOLDIER, listed, shopper, stock, without_rotation
-from support import fetch, once_token, visible
+from support import Products, fetch, once_token, visible
 from test_admin_heroes import KEEPER, WARDEN
 
 from openfesl.core.store import Bundle
-from openfesl.storage.store import SqlProductStore
 
 pytestmark = pytest.mark.anyio
 
@@ -25,7 +24,7 @@ async def test_a_drop_that_falls_below_its_boxs_price_is_skipped_in_rolls_and_fl
     database_url: str,
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
-    products: SqlProductStore,
+    products: Products,
 ) -> None:
     await stock(server_url, tmp_path, capsys)
     await without_rotation(database_url)
@@ -154,7 +153,7 @@ async def test_a_box_off_sale_leaves_the_hot_deals_and_chests_wait_while_opening
     database_url: str,
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
-    products: SqlProductStore,
+    products: Products,
 ) -> None:
     await stock(server_url, tmp_path, capsys)
     await without_rotation(database_url)

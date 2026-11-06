@@ -15,6 +15,7 @@ ALLOWANCE = "allowance"
 SERVER = "server"
 REFUND = "refund"
 ADMIN = "admin"
+_KEY_COLUMNS = (WalletRow.game, WalletRow.currency, WalletRow.account_id, WalletRow.persona_id)
 
 
 class SqlWalletStore:
@@ -64,13 +65,7 @@ class SqlWalletStore:
             return []
         async with self._sessions() as session:
             rows = await session.execute(
-                select(
-                    WalletRow.game,
-                    WalletRow.currency,
-                    WalletRow.account_id,
-                    WalletRow.persona_id,
-                    func.coalesce(func.sum(WalletEntryRow.delta), 0),
-                )
+                select(*_KEY_COLUMNS, func.coalesce(func.sum(WalletEntryRow.delta), 0))
                 .outerjoin(
                     WalletEntryRow,
                     and_(
@@ -306,14 +301,6 @@ def matching(wallets: Sequence[Wallet]) -> ColumnElement[bool]:
 
 
 async def _held(session: AsyncSession, wallets: Sequence[Wallet]) -> list[int]:
-    held = await session.execute(
-        select(
-            WalletRow.game,
-            WalletRow.currency,
-            WalletRow.account_id,
-            WalletRow.persona_id,
-            WalletRow.balance,
-        ).where(matching(wallets))
-    )
+    held = await session.execute(select(*_KEY_COLUMNS, WalletRow.balance).where(matching(wallets)))
     found = {(row[0], row[1], row[2], row[3]): row[4] for row in held}
     return [found.get(_key(wallet), wallet.allowance) for wallet in wallets]

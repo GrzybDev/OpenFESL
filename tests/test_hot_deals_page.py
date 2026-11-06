@@ -7,10 +7,9 @@ from accounts import PASSWORD, execute, post_sign_in, select_value
 from heroes import create_hero
 from playwright.async_api import Browser
 from store import ROYAL_SOLDIER, stock, without_rotation
-from support import visible
+from support import Products, visible
 
 from openfesl.core.store import Bundle
-from openfesl.storage.store import SqlProductStore
 
 pytestmark = pytest.mark.anyio
 
@@ -25,7 +24,7 @@ async def test_the_hot_deals_page_lists_each_shelf_and_expires_a_deal_whose_time
     base: str,
     server_url: str,
     database_url: str,
-    products: SqlProductStore,
+    products: Products,
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
     edge: Browser,

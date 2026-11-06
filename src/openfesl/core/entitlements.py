@@ -52,6 +52,14 @@ class Entitlement:
     uses: int | None
     expires: datetime | None
 
+    def in_use(self, now: datetime) -> bool:
+        """Return whether its item is in use and has time left at a moment.
+
+        Args:
+            now: The moment.
+        """
+        return self.status == ACTIVE and (self.expires is None or self.expires > now)
+
 
 @dataclass(frozen=True, slots=True)
 class StatusChange:

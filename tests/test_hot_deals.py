@@ -17,9 +17,9 @@ from store import (
     stock,
     without_rotation,
 )
+from support import Products
 
 from openfesl.core.store import Bundle
-from openfesl.storage.store import SqlProductStore
 
 pytestmark = pytest.mark.anyio
 
@@ -33,7 +33,7 @@ async def test_a_hot_deal_sells_its_members_together_while_it_runs(
     base: str,
     server_url: str,
     database_url: str,
-    products: SqlProductStore,
+    products: Products,
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:

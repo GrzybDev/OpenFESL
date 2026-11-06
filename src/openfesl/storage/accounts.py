@@ -380,21 +380,10 @@ class SqlAccountStore:
         Returns:
             When it was deactivated.
         """
-        state = AccountState.DEACTIVATED
         changed = datetime.now(UTC)
-        async with self._sessions.begin() as session:
-            await _change(
-                session,
-                account_id,
-                state=state.value,
-                state_until=None,
-                state_changed_at=changed,
-                session_epoch=AccountRow.session_epoch + 1,
-            )
-            details = {"state": state.value, "until": None}
-            session.add(
-                action_row(AdminAction.DELETION_REQUEST, str(account_id), details, admin=None)
-            )
+        await self._set_state(
+            account_id, AccountState.DEACTIVATED, changed, AdminAction.DELETION_REQUEST
+        )
         return changed
 
     async def end_sessions(self, account_id: int) -> None:
@@ -525,17 +514,30 @@ class SqlAccountStore:
             until: When the state ends, if it does.
             admin: The admin who changed it; None for the command line.
         """
+        await self._set_state(
+            account_id, state, func.now(), AdminAction.ACCOUNT_STATE, until, admin
+        )
+
+    async def _set_state(
+        self,
+        account_id: int,
+        state: AccountState,
+        changed: object,
+        action: AdminAction,
+        until: datetime | None = None,
+        admin: Admin | None = None,
+    ) -> None:
         async with self._sessions.begin() as session:
             await _change(
                 session,
                 account_id,
                 state=state.value,
                 state_until=until,
-                state_changed_at=func.now(),
+                state_changed_at=changed,
                 session_epoch=AccountRow.session_epoch + 1,
             )
             details = {"state": state.value, "until": until.isoformat() if until else None}
-            session.add(action_row(AdminAction.ACCOUNT_STATE, str(account_id), details, admin))
+            session.add(action_row(action, str(account_id), details, admin))
 
     async def renew(self, account_id: int, link: Link) -> bool:
         """Replace the link of an account once its link expired.

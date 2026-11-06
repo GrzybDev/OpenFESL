@@ -6,11 +6,10 @@ import pytest
 from heroes import MAGMA
 from PIL import Image
 from store import ITEMS, ROYAL_SOLDIER, attribute, deals, shopper, stock, without_rotation
-from support import fetch
+from support import Products, fetch
 
 from openfesl.core.store import Bundle
 from openfesl.formats.icons import webp
-from openfesl.storage.store import SqlProductStore
 
 pytestmark = pytest.mark.anyio
 
@@ -24,7 +23,7 @@ GREEN = (20, 200, 60, 255)
 async def test_the_game_downloads_each_hot_deals_pictures_from_the_addresses_it_is_given(
     server_url: str,
     database_url: str,
-    products: SqlProductStore,
+    products: Products,
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:

@@ -2,6 +2,7 @@ import re
 from collections.abc import Collection
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from typing import Self
 
 # How Magma tags say a hero owns an item, after the item's number: for good, for a number of
 # days or for a number of uses (BFHeroes.exe 1.89 0x006a658b).
@@ -35,8 +36,8 @@ class Ownership:
     uses: int | None = None
 
     @classmethod
-    def read(cls, text: object) -> object:
-        """Read an ownership as game data writes it, leaving anything else to its validation.
+    def read(cls, text: str) -> Self:
+        """Read an ownership as game data writes it.
 
         Args:
             text: perm, a number of days such as 7d, or of uses such as x75.
@@ -44,8 +45,6 @@ class Ownership:
         Raises:
             ValueError: When the text is none of them.
         """
-        if not isinstance(text, str):
-            return text
         written = _WRITTEN.fullmatch(text)
         if written is None:
             raise ValueError(f"{text!r} is no ownership such as perm, 7d or x75")

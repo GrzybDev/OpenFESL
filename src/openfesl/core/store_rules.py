@@ -18,7 +18,12 @@ from openfesl.core.inventory import COUNTED, PERMANENT, RENTED, Ownership
 if TYPE_CHECKING:
     from openfesl.core.catalogues import Catalogue, Item
 
-type Written = Annotated[Ownership, BeforeValidator(Ownership.read)]
+
+def _read_ownership(text: object) -> object:
+    return Ownership.read(text) if isinstance(text, str) else text
+
+
+type Written = Annotated[Ownership, BeforeValidator(_read_ownership)]
 
 
 def _read_drop(text: object) -> object:

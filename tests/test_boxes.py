@@ -9,13 +9,12 @@ import pytest
 from accounts import select_value
 from heroes import MAGMA, wallets
 from store import ROYAL_SOLDIER, buy, items, listed, shopper, stock, without_rotation
-from support import fetch
+from support import Products, fetch
 
 from openfesl.core.box_tables import expected
 from openfesl.core.drops import Box, Drop, below_value, odds, pick
 from openfesl.core.inventory import COUNTED, PERMANENT, RENTED, Ownership
 from openfesl.core.store import Bundle, Product
-from openfesl.storage.store import SqlProductStore
 
 pytestmark = pytest.mark.anyio
 
@@ -75,7 +74,7 @@ async def test_a_bought_box_gives_one_item_the_hero_may_use_and_never_one_it_own
     base: str,
     server_url: str,
     database_url: str,
-    products: SqlProductStore,
+    products: Products,
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:

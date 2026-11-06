@@ -395,7 +395,6 @@ async def _redemptions(session: AsyncSession, *conditions: ColumnElement[bool]) 
         items = []
         for item in outcome.get("items", []):
             ownership = Ownership.read(item["given"])
-            assert isinstance(ownership, Ownership)
             kept = item["held"]
             held = (
                 Held(kept[0], datetime.fromisoformat(kept[1]) if kept[1] else None, kept[2])

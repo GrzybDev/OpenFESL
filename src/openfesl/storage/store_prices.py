@@ -7,12 +7,12 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin
-from openfesl.core.store import Product
+from openfesl.core.store import NewProduct, Product
 from openfesl.core.store_prices import PointChange, PriceRefusal, PriceRefused
 from openfesl.storage.admin import action_row
 from openfesl.storage.models import StoreProductRow
 from openfesl.storage.settings import put_setting
-from openfesl.storage.store import product_of
+from openfesl.storage.store import product_of, product_values
 
 
 class SqlPriceStore:
@@ -157,20 +157,10 @@ async def _save(
     try:
         async with session.begin_nested():
             for sort, point in enumerate(added, (last or 0) + 1):
+                new = NewProduct(point.item_id, point.ownership, point.currency, point.price)
+                values = product_values(game, new) | {"published": point.published, "sort": sort}
                 number = await session.scalar(
-                    insert(StoreProductRow)
-                    .values(
-                        game=game,
-                        item_id=point.item_id,
-                        type=point.ownership.type,
-                        days=point.ownership.days,
-                        uses=point.ownership.uses,
-                        currency=point.currency,
-                        price=point.price,
-                        published=point.published,
-                        sort=sort,
-                    )
-                    .returning(StoreProductRow.id)
+                    insert(StoreProductRow).values(values).returning(StoreProductRow.id)
                 )
                 assert number is not None
                 changed.append(_change(number, point, None, False))

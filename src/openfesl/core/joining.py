@@ -242,9 +242,7 @@ class Joining:
             request: The player.
             tid: The request's TID.
         """
-        hosted = self._hosting.own(connection, request)
-        player = self._queued(hosted, request.pid)
-        hosted.queue.remove(player)
+        hosted, player = self._take_queued(connection, request)
         connection.send("DQEG", None, tid)
         self._ask_host(hosted, player)
         self._report_queue(hosted)
@@ -259,9 +257,7 @@ class Joining:
             request: The player and the reason.
             tid: The request's TID.
         """
-        hosted = self._hosting.own(connection, request)
-        player = self._queued(hosted, request.pid)
-        hosted.queue.remove(player)
+        hosted, player = self._take_queued(connection, request)
         connection.send("QKCK", None, tid)
         refusal = Refusal(lid=hosted.lobby.id, gid=hosted.id, reason=request.reason)
         player.connection.send("EGEG", refusal, error=DENIED)
@@ -390,10 +386,14 @@ class Joining:
             )
             player.connection.send("QLEN", update)
 
-    def _queued(self, hosted: HostedGame, pid: int) -> Player:
+    def _take_queued(
+        self, connection: TheaterConnection, request: PlayerRequest
+    ) -> tuple[HostedGame, Player]:
+        hosted = self._hosting.own(connection, request)
         for player in hosted.queue:
-            if player.pid == pid:
-                return player
+            if player.pid == request.pid:
+                hosted.queue.remove(player)
+                return hosted, player
         raise TheaterError(NOT_FOUND)
 
     def _watch(self, connection: TheaterConnection) -> None:

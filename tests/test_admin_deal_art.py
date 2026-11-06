@@ -9,11 +9,10 @@ from heroes import MAGMA
 from identity import IdentityProvider, form_token, sign_in
 from PIL import Image
 from store import attribute, deals, stock, without_rotation
-from support import fetch, form_fields, visible
+from support import Products, fetch, form_fields, visible
 from test_admin_heroes import KEEPER
 
 from openfesl.core.store import Bundle
-from openfesl.storage.store import SqlProductStore
 
 pytestmark = pytest.mark.anyio
 
@@ -31,7 +30,7 @@ async def test_an_uploaded_picture_takes_the_generated_ones_place_until_it_is_re
     base: str,
     server_url: str,
     database_url: str,
-    products: SqlProductStore,
+    products: Products,
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -77,7 +76,7 @@ async def test_a_pinned_offer_comes_first_in_its_section_and_right_after_the_big
     base: str,
     server_url: str,
     database_url: str,
-    products: SqlProductStore,
+    products: Products,
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:

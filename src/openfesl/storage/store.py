@@ -92,17 +92,7 @@ class SqlProductStore:
         Args:
             game: The game's data-file name.
         """
-        async with self._sessions() as session:
-            rows = await session.scalars(
-                select(StoreProductRow)
-                .where(
-                    StoreProductRow.game == game,
-                    StoreProductRow.published,
-                    StoreProductRow.account.is_(False),
-                )
-                .order_by(StoreProductRow.sort, StoreProductRow.id)
-            )
-            return [product_of(row) for row in rows]
+        return await self._published(game, StoreProductRow.account.is_(False))
 
     async def product(self, game: str, number: int, account: bool = False) -> Product | None:
         """Return a product a game's store sells, if it lists one by a number.
@@ -130,39 +120,10 @@ class SqlProductStore:
             game: The game's data-file name.
             item_id: The item's number.
         """
-        async with self._sessions() as session:
-            row = await session.scalar(
-                select(StoreProductRow)
-                .where(
-                    StoreProductRow.game == game,
-                    StoreProductRow.item_id == item_id,
-                    StoreProductRow.published,
-                    StoreProductRow.account,
-                )
-                .order_by(StoreProductRow.sort, StoreProductRow.id)
-                .limit(1)
-            )
-            return product_of(row) if row else None
-
-    async def add_bundle(self, game: str, bundle: Bundle) -> int:
-        """Add a bundle to a game's store.
-
-        Args:
-            game: The game's data-file name.
-            bundle: The bundle, whose products the store holds.
-
-        Returns:
-            The bundle's number.
-        """
-        async with self._sessions.begin() as session:
-            number: int | None = await session.scalar(
-                insert(StoreBundleRow)
-                .values(game=game, **bundle_values(bundle))
-                .returning(StoreBundleRow.id)
-            )
-            assert number is not None
-            await add_members(session, number, bundle)
-            return number
+        sold = await self._published(
+            game, StoreProductRow.item_id == item_id, StoreProductRow.account.is_(True)
+        )
+        return sold[0] if sold else None
 
     async def bundles(self, game: str, now: datetime) -> list[ListedBundle]:
         """Return the bundles a game's store sells at a moment, by their order among the hot deals.
@@ -218,18 +179,9 @@ class SqlProductStore:
             game: The game's data-file name.
             item_id: The item's number.
         """
-        async with self._sessions() as session:
-            rows = await session.scalars(
-                select(StoreProductRow)
-                .where(
-                    StoreProductRow.game == game,
-                    StoreProductRow.item_id == item_id,
-                    StoreProductRow.published,
-                    StoreProductRow.account.is_(False),
-                )
-                .order_by(StoreProductRow.sort, StoreProductRow.id)
-            )
-            return [product_of(row) for row in rows]
+        return await self._published(
+            game, StoreProductRow.item_id == item_id, StoreProductRow.account.is_(False)
+        )
 
     async def bundle(self, game: str, number: int) -> ListedBundle | None:
         """Return a bundle of a game's store by its number, whether it is sold now or not.
@@ -248,6 +200,15 @@ class SqlProductStore:
             )
             found = await with_members(session, [row] if row else [])
         return found[0] if found else None
+
+    async def _published(self, game: str, *chosen: ColumnElement[bool]) -> list[Product]:
+        async with self._sessions() as session:
+            rows = await session.scalars(
+                select(StoreProductRow)
+                .where(StoreProductRow.game == game, StoreProductRow.published, *chosen)
+                .order_by(StoreProductRow.sort, StoreProductRow.id)
+            )
+            return [product_of(row) for row in rows]
 
     async def _box(self, *chosen: ColumnElement[bool]) -> Box | None:
         async with self._sessions() as session:
@@ -370,6 +331,27 @@ def product_values(game: str, product: NewProduct) -> dict[str, Any]:
     }
 
 
+async def add_bundle(session: AsyncSession, game: str, bundle: Bundle) -> int:
+    """Add a bundle to a game's store, with its products.
+
+    Args:
+        session: The session that writes the bundle.
+        game: The game's data-file name.
+        bundle: The bundle.
+
+    Returns:
+        The bundle's number.
+    """
+    number: int | None = await session.scalar(
+        insert(StoreBundleRow)
+        .values(game=game, **bundle_values(bundle))
+        .returning(StoreBundleRow.id)
+    )
+    assert number is not None
+    await add_members(session, number, bundle)
+    return number
+
+
 def bundle_values(bundle: Bundle) -> dict[str, Any]:
     """Return a bundle's fields as its row keeps them, but for its game, members and sales.
 
@@ -412,6 +394,40 @@ async def add_members(session: AsyncSession, number: int, bundle: Bundle) -> Non
         )
 
 
+async def add_drops(
+    session: AsyncSession,
+    box_id: int,
+    drops: Sequence[tuple[int, int]],
+    weights: Sequence[int],
+    rare: Collection[int],
+) -> None:
+    """Add the drops of a box's table to its row.
+
+    Args:
+        session: The session that writes the box.
+        box_id: The box's number.
+        drops: Each drop's tier and product, in order; a product that two tiers name is dropped
+            from the first.
+        weights: The weight of each tier, by its number.
+        rare: The numbers of the tiers whose drops are rare.
+    """
+    chosen = {product: tier for tier, product in reversed(drops)}
+    if chosen:
+        await session.execute(
+            insert(StoreDropRow),
+            [
+                {
+                    "box_id": box_id,
+                    "product_id": product,
+                    "tier": tier,
+                    "weight": weights[tier],
+                    "rare": tier in rare,
+                }
+                for product, tier in chosen.items()
+            ],
+        )
+
+
 async def _stock_boxes(session: AsyncSession, game: str, boxes: Sequence[NewBox]) -> None:
     stored = await session.execute(
         select(
@@ -448,22 +464,11 @@ async def _stock_boxes(session: AsyncSession, game: str, boxes: Sequence[NewBox]
             )
             .returning(StoreBoxRow.id)
         )
-        # A product that two tiers of a box name is dropped from the first.
-        drops = {number(product): tier for tier, product in reversed(box.drops)}
-        if drops:
-            await session.execute(
-                insert(StoreDropRow),
-                [
-                    {
-                        "box_id": box_id,
-                        "product_id": product_id,
-                        "tier": tier,
-                        "weight": rule.tiers[tier].weight,
-                        "rare": rule.tiers[tier].rare,
-                    }
-                    for product_id, tier in drops.items()
-                ],
-            )
+        assert box_id is not None
+        drops = [(tier, number(product)) for tier, product in box.drops]
+        weights = [tier.weight for tier in rule.tiers]
+        rare = {index for index, tier in enumerate(rule.tiers) if tier.rare}
+        await add_drops(session, box_id, drops, weights, rare)
 
 
 async def _add_boxes(session: AsyncSession, game: str, boxes: Sequence[NewBox]) -> None:

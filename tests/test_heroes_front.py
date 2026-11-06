@@ -7,13 +7,12 @@ from accounts import PASSWORD, post_sign_in
 from heroes import create_hero
 from living import ROYAL, freeze, import_catalogue, worn
 from store import ROYAL_SOLDIER, stock, without_rotation
-from support import visible
+from support import Products, visible
 from test_hot_deals_page import BANDAGES, COAT, PET
 from test_profiles import name_players, play
 from test_rewards import CHRISTMAS
 
 from openfesl.core.store import Bundle
-from openfesl.storage.store import SqlProductStore
 
 pytestmark = pytest.mark.anyio
 
@@ -103,7 +102,7 @@ async def test_the_deal_of_the_day_shows_its_discount_items_and_who_may_buy_it(
     database_url: str,
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
-    products: SqlProductStore,
+    products: Products,
 ) -> None:
     await stock(server_url, tmp_path, capsys)
     await without_rotation(database_url)

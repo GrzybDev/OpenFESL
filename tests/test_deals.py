@@ -13,7 +13,7 @@ from heroes import MAGMA, wallets
 from living import NATIONAL, ROYAL, Invented, import_catalogue, setting, worn
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from store import ROYAL_SOLDIER, attribute, buy, deals, grant, shopper
-from support import fetch
+from support import Products, fetch
 
 from openfesl.core.calendar import Schedule, periods
 from openfesl.core.catalogues import Catalogues
@@ -26,7 +26,6 @@ from openfesl.core.store import Bundle
 from openfesl.storage.catalogues import SqlCatalogueStore
 from openfesl.storage.deals import SqlDealStore
 from openfesl.storage.settings import SqlSettingStore
-from openfesl.storage.store import SqlProductStore
 
 pytestmark = pytest.mark.anyio
 
@@ -135,7 +134,7 @@ class Rotation:
         self.game = game
         self.sessions = sessions
         self.catalogues = Catalogues(SqlCatalogueStore(sessions), None, load_games())
-        self.products = SqlProductStore(sessions)
+        self.products = Products(sessions)
         self.now = SUNDAY
         self.deals = self.server()
         self.steps = DealSteps(self.deals, SqlDealStore(sessions), lambda: self.now)
@@ -384,7 +383,7 @@ async def test_two_servers_looking_at_once_make_a_period_once(
 async def test_the_game_lists_and_sells_the_deal_of_the_day_and_the_admins_offers_after_it(
     server_url: str,
     database_url: str,
-    products: SqlProductStore,
+    products: Products,
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:

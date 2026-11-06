@@ -8,10 +8,9 @@ from accounts import PASSWORD, execute, post_sign_in, select_value
 from heroes import create_hero
 from identity import form_token
 from store import CHEER, ITEMS, ROYAL_SOLDIER, grant, iconed, icons, stock, without_rotation
-from support import visible
+from support import Products, visible
 
 from openfesl.core.store import Bundle
-from openfesl.storage.store import SqlProductStore
 
 pytestmark = pytest.mark.anyio
 
@@ -188,7 +187,7 @@ async def test_hot_deals_and_random_boxes_sell_on_their_pages_while_they_run(
     base: str,
     server_url: str,
     database_url: str,
-    products: SqlProductStore,
+    products: Products,
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
