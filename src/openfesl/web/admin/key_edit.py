@@ -14,7 +14,7 @@ from openfesl.core.texts import languages, localize
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.keys import SECTION, KeyList
 from openfesl.web.keys import KeyView, key_views
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 
 MAXIMUM_LABEL = 80
 
@@ -199,8 +199,7 @@ def key_edit_routes(sessions: AdminSessions, games: Games, store: KeyEditor) -> 
     @router.post("/admin/keys/{code}")
     async def save(request: Request, code: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        sent = await request.form()
-        check_form(request, sent)
+        sent = await checked_form(request)
         view = await find(code)
         form = KeyForm.read(sent)
         if form.error:

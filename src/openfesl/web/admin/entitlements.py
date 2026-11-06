@@ -14,7 +14,7 @@ from openfesl.core.texts import localize
 from openfesl.web.admin.accounts import AccountView, AccountViews
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.keys import KeySource, KeyView, key_views
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 
 SECTION = "accounts"
 # The grant form's choice of one tag typed by hand instead of a product key's.
@@ -146,8 +146,7 @@ def entitlement_routes(
     @router.post("/admin/accounts/{account_id}/grant")
     async def grant(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         view = await account(account_id)
         chosen = str(form.get("key", ""))
         fields = {name: str(form.get(name, "")).strip() for name in ("tag", "group", "product")}
@@ -205,8 +204,7 @@ def _decide(
 ) -> Callable[[Request, str], Awaitable[Response]]:
     async def decide(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         view = await account(account_id)
         tag = str(form.get("tag", ""))
         path = f"/admin/accounts/{view.record.account.id}"

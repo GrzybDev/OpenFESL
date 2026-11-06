@@ -8,7 +8,6 @@ from fastapi.responses import HTMLResponse
 from starlette.datastructures import QueryParams
 
 from openfesl.core.accounts import AccountRecord, RememberedLogin
-from openfesl.core.admins import Role
 from openfesl.core.census import Census, Server
 from openfesl.core.entitlements import ACTIVE, Entitlement, EntitlementQuery, StatusChange
 from openfesl.core.games import Game, Games
@@ -301,7 +300,6 @@ def account_routes(
             referrals=await referrals.of_account(number, request.state.language),
             total=total,
             terms=terms,
-            manages=admin.role is Role.ADMIN,
         )
 
     return router

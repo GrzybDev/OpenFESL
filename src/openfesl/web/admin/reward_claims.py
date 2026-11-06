@@ -8,7 +8,6 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from starlette.datastructures import QueryParams
 
-from openfesl.core.admins import Role
 from openfesl.core.calendar import day_start, today
 from openfesl.core.reward_claims import ListedClaim
 from openfesl.core.reward_rules import Gift
@@ -170,7 +169,6 @@ def reward_claim_routes(
             size=PAGE_SIZE,
             pause=await views.pause(game),
             paused=rules.paused,
-            manages=admin.role is Role.ADMIN,
         )
 
     return router

@@ -14,7 +14,7 @@ from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.store import SECTION, StoreAdminViews, store_url
 from openfesl.web.admin.wallets import shared_currencies
 from openfesl.web.pages import whole_number
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 from openfesl.web.store_texts import StoreTexts
 
 # The unit of the chests a hero brings from a round, which is no currency.
@@ -174,7 +174,6 @@ def store_account_routes(sessions: AdminSessions, views: StoreAdminViews) -> API
             typed=typed,
             changed=changed,
             refused=dict(refused or {}),
-            manages=admin.role is Role.ADMIN,
             sales=sale_rows(live.heroes, texts, datetime.now(UTC)) if live.heroes else [],
             sales_run=("sales" in form) if form else bool(live.heroes and live.heroes.sales_run),
         )
@@ -189,8 +188,7 @@ def store_account_routes(sessions: AdminSessions, views: StoreAdminViews) -> API
     async def save(request: Request, game_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         game = views.game(game_id)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         fields = {key: str(value) for key, value in form.items()}
         live = await views.account_rules(game)
         values = account_values(game, live)

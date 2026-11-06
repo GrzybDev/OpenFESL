@@ -19,7 +19,7 @@ from openfesl.core.policies import SettingStore
 from openfesl.core.store import AUTO, Bundle, ListedBundle
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.store import SECTION, StoreAdminViews, store_url
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 from openfesl.web.store_texts import StoreTexts
 
 
@@ -314,8 +314,7 @@ def deal_routes(sessions: AdminSessions, views: DealAdminViews) -> APIRouter:
     @router.post("/admin/store/{game_id}/deals/rotation")
     async def switch(request: Request, game_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         game = views.stores.game(game_id)
         rotation = await views.rotation(game)
         on = bool(form.get("enabled"))
@@ -357,7 +356,6 @@ async def deal_page(
         of=game,
         rotation=await views.rotation(game),
         steps=await views.preview(game, language) if preview else None,
-        manages=admin.role is Role.ADMIN,
     )
 
 

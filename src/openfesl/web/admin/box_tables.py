@@ -22,7 +22,7 @@ from openfesl.core.texts import translate
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.boxes import BoxAdminViews, BoxRow, Entry, tiers
 from openfesl.web.admin.store import SECTION, store_url
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 from openfesl.web.store_texts import StoreTexts
 
 
@@ -104,7 +104,6 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
             )
             if fallback
             else None,
-            manages=admin.role is Role.ADMIN,
             query=query,
             candidates=await _candidates(views, game, catalogue, row, query, request)
             if query
@@ -155,7 +154,6 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
                 (prize, str(format_percent(float(prize.chance), "#,##0.##%", locale=locale)))
                 for prize in await views.claw.preview(game, faction, kind)
             ],
-            manages=admin.role is Role.ADMIN,
             query=query,
             candidates=await _candidates(views, game, catalogue, row, query, request)
             if query
@@ -230,8 +228,7 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
     @router.post(path)
     async def save(request: Request, game_id: str, box_id: int) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         fields = {key: str(value) for key, value in form.items()}
         game, catalogue, row = await found(request, game_id, box_id)
         box = row.box
@@ -257,8 +254,7 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
     @router.post(path + "/add")
     async def add(request: Request, game_id: str, box_id: int) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         fields = {key: str(value) for key, value in form.items()}
         game, catalogue, row = await found(request, game_id, box_id)
         box = row.box

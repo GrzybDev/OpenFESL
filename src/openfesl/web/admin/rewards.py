@@ -7,7 +7,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.exceptions import HTTPException
 
 from openfesl.core.admin import ActionHistory, AdminAction, AuditEntry
-from openfesl.core.admins import Admin, Role
+from openfesl.core.admins import Admin
 from openfesl.core.calendar import day_start, today
 from openfesl.core.catalogues import Catalogues, game_text
 from openfesl.core.games import Game, Games
@@ -465,7 +465,6 @@ async def rewards_page(
         400 if why else 200,
         admin=admin,
         found=await views.view(game, request.state.language),
-        manages=admin.role is Role.ADMIN,
         form=form or {},
         why=why,
     )

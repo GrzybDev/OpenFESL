@@ -10,7 +10,7 @@ from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.boxes import BoxAdminViews, boxes_page
 from openfesl.web.admin.claw_panel import FIELDS, claw_form, read_form
 from openfesl.web.admin.store import SECTION, store_url
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 from openfesl.web.store_texts import StoreTexts
 
 
@@ -29,8 +29,7 @@ def claw_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter:
     @router.post("/admin/store/{game_id}/claw")
     async def save_claw(request: Request, game_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         game = views.stores.game(game_id)
         rules = await views.claw.rules(game)
         if rules is None or game.claw is None:

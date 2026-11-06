@@ -16,7 +16,7 @@ from openfesl.web.admin.accounts import AccountViews
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.admin.heroes import HeroAdminViews, HeroPage, InventoryRow
 from openfesl.web.pages import whole_number
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 from openfesl.web.store_texts import StoreTexts
 
 SECTION = "accounts"
@@ -210,8 +210,7 @@ def hero_item_routes(
     @router.post(path + "/items/grant")
     async def grant(request: Request, account_id: str, hero_id: int) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         page = await hero_page(request, account_id, hero_id)
         shown = grant_form(page, form, request.state.language)
         note = str(form.get("note", "")).strip()
@@ -287,8 +286,7 @@ def hero_item_routes(
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         if change not in ("change", "revoke"):
             raise HTTPException(404)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         page = await hero_page(request, account_id, hero_id)
         row = held(page, item_id)
         address = back(request, account_id, hero_id, str(form.get("back", "")))

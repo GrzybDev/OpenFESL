@@ -25,7 +25,7 @@ from openfesl.web.admin.referral_view import goal
 from openfesl.web.admin.rewards import SECTION, RewardAdminViews, rewards_url
 from openfesl.web.referral_texts import NUMBERS, Chip, chip
 from openfesl.web.reward_texts import RewardTexts
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 
 
 @dataclass(frozen=True, slots=True)
@@ -238,8 +238,7 @@ def referral_routes(sessions: AdminSessions, views: ReferralAdminViews) -> APIRo
     @router.post(switch)
     async def switch_referral(request: Request, game_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         game = views.game(game_id)
         back = back_to(request, str(form.get("back", "")), rewards_url(request, game))
         rules = await rewards.rewards.rules(game)
@@ -271,15 +270,13 @@ def referral_routes(sessions: AdminSessions, views: ReferralAdminViews) -> APIRo
             admin=admin,
             of=game,
             found=views.editor(words, step, None, request.query_params or None),
-            manages=admin.role is Role.ADMIN,
             codes=languages(),
         )
 
     @router.post("/admin/rewards/{game_id}/referral/{step}")
     async def save_step(request: Request, game_id: str, step: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         game = views.game(game_id)
         if step not in NUMBERS:
             raise HTTPException(404)
@@ -299,7 +296,6 @@ def referral_routes(sessions: AdminSessions, views: ReferralAdminViews) -> APIRo
                 admin=admin,
                 of=game,
                 found=found,
-                manages=True,
                 codes=languages(),
             )
         steps = {**rules.steps, step: saved}
@@ -347,8 +343,7 @@ def referral_routes(sessions: AdminSessions, views: ReferralAdminViews) -> APIRo
     @router.post(remove)
     async def remove_recruit(request: Request, recruit_id: int, game_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, "accounts")
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         game = views.game(game_id)
         back = back_to(request, str(form.get("back", "")))
         note = str(form.get("note", "")).strip()

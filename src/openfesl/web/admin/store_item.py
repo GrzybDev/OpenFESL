@@ -34,7 +34,7 @@ from openfesl.web.admin.store import (
     store_url,
 )
 from openfesl.web.pages import whole_number
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 from openfesl.web.store_front import Tile, kind_glyphs, tile
 from openfesl.web.store_texts import StoreTexts
 
@@ -118,7 +118,6 @@ def store_item_routes(sessions: AdminSessions, views: StoreAdminViews) -> APIRou
             row=price_row(game, texts, name, prices),
             lines=ordered_lines(game, prices.lines),
             rule=_rule_text(texts, rules, prices),
-            manages=admin.role is Role.ADMIN,
             adding=_adding(game, rules, prices),
             form=dict(form or {}),
             refused=refused.refusal.value if refused else "",
@@ -132,8 +131,7 @@ def store_item_routes(sessions: AdminSessions, views: StoreAdminViews) -> APIRou
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         game = views.game(game_id)
         rules = await views.rules(game)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         catalogue, prices = await views.item(game, item_id, request.state.language)
         if prices.fixed or prices.unsold:
             raise HTTPException(400)

@@ -16,7 +16,7 @@ from openfesl.core.texts import languages, localize
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.admin.gift_codes import GiftCodeViews
 from openfesl.web.keys import KeyView, key_views
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 
 SECTION = "keys"
 TABS = ("all", "enabled", "disabled")
@@ -164,7 +164,6 @@ def key_routes(
             keys=[view for view in every if listing.tab in ("all", view.tab)],
             counts={tab: sum(tab in ("all", view.tab) for view in every) for tab in TABS},
             starting=[(shown, here)] if shown.keys else [],
-            manages=admin.role is Role.ADMIN,
             longest=MAXIMUM_CODE,
             games=list(games),
             granting=granting,
@@ -184,8 +183,7 @@ def key_routes(
     @router.post("/admin/keys")
     async def add(request: Request) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         if form.get("starting"):
             added = await store.import_keys(games.keys, admin)
             if added:
@@ -243,8 +241,7 @@ def _decide(
 
     async def decide(request: Request, code: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         view = await find(code)
         back = back_to(request, str(form.get("back", "")), "/admin/keys")
         if not enabled and form.get("confirmed") != "1":

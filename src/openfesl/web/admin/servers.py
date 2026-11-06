@@ -25,7 +25,7 @@ from openfesl.core.servers import (
 from openfesl.core.texts import localize
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.servers import label_name
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 
 # The tabs of the servers page with their sortable columns, the first the default order.
 TABS = {
@@ -311,7 +311,6 @@ def server_list_routes(sessions: AdminSessions, views: ServerViews) -> APIRouter
             total=len(every),
             mode=(await views.store.hosting_mode()).value,
             fellows=fellows,
-            manages=admin.role is Role.ADMIN,
         )
 
     @router.get("/admin/servers/{ugid}")
@@ -409,8 +408,7 @@ def _decide(
 
     async def decide(request: Request, ugid: str) -> Response:
         admin = sessions.admin(request)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         view = await views.find(ugid)
         back = back_to(request, str(form.get("back", "")))
         name = view.server.name
@@ -439,8 +437,7 @@ def _mark(
 ) -> Callable[[Request, str], Awaitable[Response]]:
     async def mark(request: Request, ugid: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         view = await views.find(ugid)
         back = back_to(request, str(form.get("back", "")))
         # Another admin may have revoked the server or changed its mark first.

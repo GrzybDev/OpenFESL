@@ -26,7 +26,7 @@ from openfesl.core.texts import localize
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.code_editor import CodeEditor, drafted, editor_of, written
 from openfesl.web.pages import whole_number
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 from openfesl.web.store_texts import StoreTexts
 
 SECTION = "keys"
@@ -97,7 +97,6 @@ class GiftCodeViews:
             tab=tab,
             rows=[row for row in rows if tab not in TABS or row.state in TABS[tab]],
             counts={"all": len(rows), **counts},
-            manages=admin.role is Role.ADMIN,
         )
 
     async def rows(self, game: Game, language: str) -> list[CodeRow]:
@@ -279,8 +278,7 @@ def gift_code_routes(views: GiftCodeViews) -> APIRouter:
     @router.post(CODES + "/new")
     async def make(request: Request) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         game = views.game(str(form.get("game", "")))
         if any(name in form for name in ANSWERS):
             return await editor_page(request, admin, game, None)
@@ -321,7 +319,6 @@ def gift_code_routes(views: GiftCodeViews) -> APIRouter:
             more=max(entry.count - SHOWN, 0) if entry.batch else 0,
             redemptions=[(done, given(texts, catalogue, done)) for done in redemptions],
             link=f"/{game.id}{game.site.path('redeem')}?{urlencode({'key': entry.code})}",
-            manages=admin.role is Role.ADMIN,
         )
 
     @router.get(CODES + "/{code}/codes.txt")
@@ -345,8 +342,7 @@ def gift_code_routes(views: GiftCodeViews) -> APIRouter:
     @router.post(CODES + "/{code}/edit")
     async def save(request: Request, code: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         game, entry = await views.found(code)
         if any(name in form for name in ANSWERS):
             return await editor_page(request, admin, game, entry)
@@ -369,8 +365,7 @@ def gift_code_routes(views: GiftCodeViews) -> APIRouter:
     @router.post(CODES + "/{code}/state")
     async def switch(request: Request, code: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         game, entry = await views.found(code)
         note = str(form.get("note", "")).strip()
         if not note:

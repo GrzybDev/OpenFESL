@@ -18,7 +18,7 @@ from openfesl.web.admin.accounts import AccountView, AccountViews
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.admin.purchases import PurchaseLog, purchase_lines
 from openfesl.web.pages import number, whole_number
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 
 SECTION = "accounts"
 PAGE_SIZE = 50
@@ -250,7 +250,6 @@ def wallet_routes(
             found=found,
             bought=bought,
             size=PAGE_SIZE,
-            manages=admin.role is Role.ADMIN,
         )
 
     async def wallet_line(account_id: str, game: str, key: str) -> tuple[AccountView, WalletLine]:
@@ -273,8 +272,7 @@ def wallet_routes(
     @router.post("/admin/accounts/{account_id}/wallets/{game}/{key}")
     async def change(request: Request, account_id: str, game: str, key: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         view, line = await wallet_line(account_id, game, key)
         back = back_to(request, str(form.get("back", "")), _wallets(view))
         note = str(form.get("note", "")).strip()
@@ -357,7 +355,6 @@ def wallet_routes(
             pages=ceil(shown.total / PAGE_SIZE),
             size=PAGE_SIZE,
             catalogue=await catalogues.of(game.game, request.state.language),
-            manages=admin.role is Role.ADMIN,
         )
 
     return router

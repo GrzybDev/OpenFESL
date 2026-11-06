@@ -14,7 +14,7 @@ from openfesl.core.personas import PersonaState
 from openfesl.core.texts import localize
 from openfesl.web.admin.accounts import AccountView, AccountViews, PersonaView
 from openfesl.web.admin.auth import AdminSessions, back_to
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 
 # The decisions about an account or one of its names that ask for confirmation first.
 CONFIRMED = ("end", "kick", "disable")
@@ -144,8 +144,7 @@ def account_decision_routes(
     @router.post("/admin/accounts/{account_id}/state")
     async def set_state(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         view = await account(request, account_id)
         chosen = str(form.get("state", ""))
         written = str(form.get("until", "")).strip()
@@ -171,8 +170,7 @@ def account_decision_routes(
     @router.post("/admin/accounts/{account_id}/verify")
     async def verify(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request)
-        form = await request.form()
-        check_form(request, form)
+        await checked_form(request)
         view = await account(request, account_id)
         name = view.record.account.nuid
         if view.record.account.verification_expires_at is None:
@@ -185,8 +183,7 @@ def account_decision_routes(
     @router.post("/admin/accounts/{account_id}/remembered/remove")
     async def forget(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         view = await account(request, account_id)
         login = form.get("login")
         chosen = [str(login)] if login else None
@@ -201,8 +198,7 @@ def account_decision_routes(
     @router.post("/admin/accounts/{account_id}/names/{persona_id}/enable")
     async def enable(request: Request, account_id: str, persona_id: str) -> Response:
         admin = sessions.admin(request)
-        form = await request.form()
-        check_form(request, form)
+        await checked_form(request)
         view = await account(request, account_id)
         persona = persona_of(view, persona_id)
         await personas.set_state(persona.record.persona.id, PersonaState.ACTIVE, admin)
@@ -220,8 +216,7 @@ def account_decision_routes(
     @router.post("/admin/accounts/{account_id}/session/end")
     async def end(request: Request, account_id: str) -> Response:
         admin = sessions.admin(request)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         view = await account(request, account_id)
         back = back_to(request, str(form.get("back", "")), _path(view))
         name = view.record.account.nuid
@@ -240,8 +235,7 @@ def account_decision_routes(
         if decision not in ("kick", "disable"):
             raise HTTPException(404)
         admin = sessions.admin(request)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         view = await account(request, account_id)
         persona = persona_of(view, persona_id)
         back = back_to(request, str(form.get("back", "")), _path(view))

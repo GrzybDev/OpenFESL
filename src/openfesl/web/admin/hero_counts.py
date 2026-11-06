@@ -11,7 +11,7 @@ from openfesl.web.admin.accounts import AccountView, AccountViews
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.admin.heroes import GameHeroes, HeroAdminViews
 from openfesl.web.pages import number, whole_number
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 
 SECTION = "accounts"
 
@@ -79,8 +79,7 @@ def hero_count_routes(
 
     async def act(request: Request, kind: str, account_id: str, key: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         shown = await counted(request, kind, account_id, key)
         back = back_of(request, shown, str(form.get("back", "")))
         note = str(form.get("note", "")).strip()

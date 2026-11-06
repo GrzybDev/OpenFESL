@@ -4,7 +4,6 @@ from datetime import date
 from fastapi import APIRouter, Query, Request
 from fastapi.responses import HTMLResponse
 
-from openfesl.core.admins import Role
 from openfesl.core.calendar import day_start, today
 from openfesl.core.games import Game
 from openfesl.core.reward_runs import run_of, running_at
@@ -135,7 +134,6 @@ def reward_preview_routes(sessions: AdminSessions, views: RewardAdminViews) -> A
             admin=admin,
             found=found,
             pause=await views.pause(game),
-            manages=admin.role is Role.ADMIN,
         )
 
     return router

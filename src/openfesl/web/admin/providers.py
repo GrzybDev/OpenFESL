@@ -22,7 +22,7 @@ from openfesl.core.servers import (
 from openfesl.core.texts import localize
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.admin.servers import ServerView, ServerViews
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 
 # The tabs of the providers page with their sortable columns, the first the default order.
 TABS = {
@@ -210,7 +210,6 @@ def provider_routes(
             file_size=len(provider_file(bytes(PROVIDER_ID_SIZE))),
             longest=MAXIMUM_PROVIDER_NAME,
             mode=(await servers.store.hosting_mode()).value,
-            manages=admin.role is Role.ADMIN,
             form=form,
         )
 
@@ -228,8 +227,7 @@ def provider_routes(
     @router.post("/admin/providers")
     async def add(request: Request) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         name = str(form.get("name", "")).strip()
         try:
             provider = new_provider(name)
@@ -280,8 +278,7 @@ def provider_routes(
     @router.post("/admin/providers/{provider}/revoke")
     async def revoke(request: Request, provider: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         view = await find(provider)
         back = back_to(request, str(form.get("back", "")), "/admin/providers")
         name = view.provider.name

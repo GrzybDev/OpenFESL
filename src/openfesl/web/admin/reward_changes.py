@@ -17,7 +17,7 @@ from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.admin.reward_editor import event_entry
 from openfesl.web.admin.rewards import SECTION, RewardAdminViews, rewards_page, rewards_url
 from openfesl.web.pages import number, whole_number
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 
 
 def reward_change_routes(
@@ -65,8 +65,7 @@ def reward_change_routes(
     @router.post(path)
     async def pause(request: Request, game_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         game = views.game(game_id)
         back = back_to(request, str(form.get("back", "")), rewards_url(request, game))
         note = str(form.get("note", "")).strip()
@@ -92,8 +91,7 @@ def reward_change_routes(
     @router.post("/admin/rewards/{game_id}/switch")
     async def switch(request: Request, game_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         game = views.game(game_id)
         rules = await views.rewards.rules(game)
         assert rules is not None and game.rewards is not None
@@ -116,8 +114,7 @@ def reward_change_routes(
     @router.post("/admin/rewards/{game_id}/milestones")
     async def milestones(request: Request, game_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         fields = {name: str(value).strip() for name, value in form.items()}
         game = views.game(game_id)
         rules = await views.rewards.rules(game)

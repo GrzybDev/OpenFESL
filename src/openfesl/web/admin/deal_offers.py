@@ -21,7 +21,7 @@ from openfesl.web.admin.deals import DealAdminViews
 from openfesl.web.admin.offer_editor import CLOCK, OfferEditor, editor_of, game_named
 from openfesl.web.admin.store import SECTION, store_url
 from openfesl.web.pages import whole_number
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 from openfesl.web.store_texts import StoreTexts
 
 # How long the panel lists an ended offer.
@@ -175,7 +175,6 @@ def offer_routes(sessions: AdminSessions, views: DealOfferViews) -> APIRouter:
             admin=admin,
             of=game,
             rows=rows,
-            manages=admin.role is Role.ADMIN,
         )
 
     async def page(
@@ -197,7 +196,6 @@ def offer_routes(sessions: AdminSessions, views: DealOfferViews) -> APIRouter:
             admin=admin,
             found=found,
             refusing=status == 400,
-            manages=admin.role is Role.ADMIN,
         )
 
     @router.get(path + "/new", response_class=HTMLResponse)
@@ -212,8 +210,7 @@ def offer_routes(sessions: AdminSessions, views: DealOfferViews) -> APIRouter:
 
     async def save(request: Request, game_id: str, number: int | None) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         game = views.deals.stores.game(game_id)
         if any(name in form for name in ("find", "add", "drop")):
             return await page(request, admin, game, number)
@@ -278,8 +275,7 @@ def offer_routes(sessions: AdminSessions, views: DealOfferViews) -> APIRouter:
     @router.post(path + "/{number}/restock")
     async def restock(request: Request, game_id: str, number: int) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         game = views.deals.stores.game(game_id)
         row = await stocked(request, game, number)
         bundle = row.listed.bundle
@@ -315,7 +311,7 @@ def offer_routes(sessions: AdminSessions, views: DealOfferViews) -> APIRouter:
     @router.post(path + "/{number}/end")
     async def end(request: Request, game_id: str, number: int) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        check_form(request, await request.form())
+        await checked_form(request)
         game = views.deals.stores.game(game_id)
         row = await _row(views, game, number, request.state.language)
         bundle = row.listed.bundle

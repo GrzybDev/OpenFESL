@@ -5,7 +5,6 @@ from fastapi import APIRouter, Request
 from fastapi.responses import FileResponse, HTMLResponse, Response
 from starlette.exceptions import HTTPException
 
-from openfesl.core.admins import Role
 from openfesl.core.catalogues import Catalogue, CatalogueFiles, Catalogues, file_path
 from openfesl.core.chests import key_tag
 from openfesl.core.entitlements import ACTIVE, Entitlement, EntitlementQuery, EntitlementStore
@@ -250,7 +249,6 @@ def hero_routes(
             admin=admin,
             page=page,
             tab=items if items in TABS else TABS[0],
-            manages=admin.role is Role.ADMIN,
         )
 
     @router.get("/admin/icons/{game}/{item_id}")

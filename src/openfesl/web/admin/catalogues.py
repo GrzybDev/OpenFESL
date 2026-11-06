@@ -20,7 +20,7 @@ from openfesl.core.texts import localize
 from openfesl.formats.catalogue_archive import MAX_SIZE
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.pages import Toast, language_name
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import check_form, checked_form, toast
 
 SECTION = "catalogues"
 # What the last import of the page brought, until the page shows it.
@@ -127,7 +127,6 @@ def catalogue_routes(
             admin=admin,
             views=views,
             others=[game for game in games if game.catalogue is None],
-            manages=admin.role is Role.ADMIN,
             keeps_files=keeps_files,
             result=result,
             most=MAX_SIZE,
@@ -166,8 +165,7 @@ def catalogue_routes(
     @router.post("/admin/catalogues/{game_id}/art")
     async def choose_art(request: Request, game_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         game = games.by_id(game_id)
         if game is None or game.catalogue is None:
             raise HTTPException(404)

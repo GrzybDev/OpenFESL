@@ -19,7 +19,7 @@ from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.deals import DealAdminViews, SectionRow
 from openfesl.web.admin.store import SECTION, store_url
 from openfesl.web.pages import whole_number
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 from openfesl.web.store_texts import StoreTexts
 
 # The most deals of each faction, and the longest repeat gap in days, that a section takes.
@@ -163,7 +163,6 @@ def section_routes(sessions: AdminSessions, views: DealSectionViews) -> APIRoute
             found=found,
             form=form,
             why=why,
-            manages=admin.role is Role.ADMIN,
         )
 
     @router.get(path, response_class=HTMLResponse)
@@ -174,8 +173,7 @@ def section_routes(sessions: AdminSessions, views: DealSectionViews) -> APIRoute
     @router.post(path)
     async def change(request: Request, game_id: str, key: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         fields = {name: str(value).strip() for name, value in form.items()}
         game = views.deals.stores.game(game_id)
         found = await views.section(game, key, request.state.language)

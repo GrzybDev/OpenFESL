@@ -32,7 +32,7 @@ from openfesl.web.admin.rewards import RewardAdminViews
 from openfesl.web.admin.servers import ServerViews
 from openfesl.web.game_icons import ICON_PATH, icon_version, reaches_discord
 from openfesl.web.pages import Toast
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import check_form, checked_form, toast
 
 SECTION = "settings"
 # An icon file holds a few small images, so only this much of an upload is read into memory and
@@ -283,7 +283,6 @@ def settings_routes(
             games=shown,
             site=site,
             provider=provider,
-            manages=admin.role is Role.ADMIN,
             errors=errors or {},
             icons={game: _icon_view(base, game, icon) for game, icon in stored.items()},
             base=base,
@@ -318,8 +317,7 @@ def settings_routes(
     @router.post("/admin/settings/hosting")
     async def change_mode(request: Request) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         chosen = str(form.get("mode", ""))
         back = localize("/admin/settings", request.state.language)
         if chosen not in set(HostingMode) or chosen == await hosting.hosting_mode():
@@ -336,8 +334,7 @@ def settings_routes(
     @router.post("/admin/settings/site")
     async def change_site(request: Request) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         on = form.get("accounts.email_verification") == "on"
         if on == await policies.site_confirmation():
             toast(request, "web.admin.toast.site_unchanged")
@@ -350,8 +347,7 @@ def settings_routes(
     @router.post("/admin/settings/games/{game_id}")
     async def change_policies(request: Request, game_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         game = games.by_id(game_id)
         if game is None:
             raise HTTPException(404)
@@ -376,8 +372,7 @@ def settings_routes(
     @router.post("/admin/settings/games/{game_id}/mark")
     async def change_mark(request: Request, game_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         game = games.by_id(game_id)
         if game is None or game.official_attribute is None:
             raise HTTPException(404)
@@ -400,8 +395,7 @@ def settings_routes(
     @router.post("/admin/settings/games/{game_id}/zone")
     async def change_zone(request: Request, game_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         game = rewards.game(game_id)
         rules = await rewards.rewards.rules(game)
         assert rules is not None and game.rewards is not None
@@ -447,7 +441,7 @@ def settings_routes(
     @router.post("/admin/settings/games/{game_id}/icon/remove")
     async def remove_icon(request: Request, game_id: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        check_form(request, await request.form())
+        await checked_form(request)
         game = games.by_id(game_id)
         if game is None:
             raise HTTPException(404)

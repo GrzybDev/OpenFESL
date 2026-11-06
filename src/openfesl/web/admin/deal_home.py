@@ -17,7 +17,7 @@ from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.deals import DealAdminViews
 from openfesl.web.admin.store import SECTION, store_url
 from openfesl.web.deal_art import DealArt
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import check_form, checked_form, toast
 from openfesl.web.store_texts import StoreTexts
 
 # The largest picture an upload takes; the game's own are a few hundred kilobytes at most.
@@ -134,8 +134,7 @@ def deal_home_routes(sessions: AdminSessions, views: DealHomeViews) -> APIRouter
     @router.post("/admin/store/{game_id}/deals/home/{number}/pin")
     async def pin(request: Request, game_id: str, number: int) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         game = views.deals.stores.game(game_id)
         shown = await views.deal(game, number, request.state.language)
         on = bool(form.get("pinned"))
@@ -194,8 +193,7 @@ def deal_home_routes(sessions: AdminSessions, views: DealHomeViews) -> APIRouter
     async def reset(request: Request, game_id: str, number: int) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         game = views.deals.stores.game(game_id)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         shown = await views.deal(game, number, request.state.language)
         if await views.uploads.remove(game.id, shown.offer, admin):
             toast(request, "web.admin.toast.deals.art.reset", deal=shown.deal.name)
@@ -231,5 +229,4 @@ async def home_page(
         of=game,
         home=await views.home(game, request.state.language),
         art=art,
-        manages=admin.role is Role.ADMIN,
     )

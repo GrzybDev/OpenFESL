@@ -18,7 +18,7 @@ from openfesl.core.wallets import MOST_BALANCE
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.store import SECTION, StoreAdminViews, store_url
 from openfesl.web.pages import whole_number
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 from openfesl.web.store_texts import StoreTexts
 
 
@@ -125,7 +125,6 @@ def store_rule_routes(sessions: AdminSessions, views: StoreAdminViews) -> APIRou
             chosen=chosen,
             form=change.fields if change else {},
             why=change.refused if change else "",
-            manages=admin.role is Role.ADMIN,
         )
 
     async def changed(
@@ -133,8 +132,7 @@ def store_rule_routes(sessions: AdminSessions, views: StoreAdminViews) -> APIRou
     ) -> tuple[Admin, Game, StoreRules, RuleChange]:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
         game = views.game(game_id)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         rules = await views.rules(game)
         rule = rules.prices.get(key)
         if rule is None or (game.heroes and rule.currency == game.heroes.points):

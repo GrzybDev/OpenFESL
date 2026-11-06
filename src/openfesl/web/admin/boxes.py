@@ -23,7 +23,7 @@ from openfesl.core.store import ListedBundle, Product
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.admin.claw_panel import ClawForm, claw_panel
 from openfesl.web.admin.store import SECTION, StoreAdminViews, store_url
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 from openfesl.web.store_texts import StoreTexts
 
 # The group of the boxes that no section of the hot deals sells, and of the treasure chests.
@@ -335,7 +335,6 @@ async def boxes_page(
         deals=await views.deal_rules(game),
         chests=(await views.stores.account_rules(game)).chests,
         claw=await claw_panel(views.claw, game, catalogue, language, claw),
-        manages=admin.role is Role.ADMIN,
     )
 
 
@@ -359,8 +358,7 @@ def box_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter:
     @router.post("/admin/store/{game_id}/boxes/{box_id}/switch")
     async def switch(request: Request, game_id: str, box_id: int) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         game = views.stores.game(game_id)
         _, rows = await views.rows(game, request.state.language)
         row = next((row for row in rows if row.box.id == box_id), None)

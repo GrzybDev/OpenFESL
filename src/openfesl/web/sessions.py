@@ -7,6 +7,7 @@ from typing import Any
 from weakref import WeakValueDictionary
 
 from fastapi import Request
+from starlette.datastructures import FormData
 
 # A signed-in admin signs in again after this long, as a stolen cookie should not last.
 ADMIN_LIFETIME = timedelta(hours=12)
@@ -59,6 +60,20 @@ def check_form(request: Request, form: Mapping[str, Any]) -> None:
     """
     if not form_matches(request, form):
         raise FormExpired
+
+
+async def checked_form(request: Request) -> FormData:
+    """Return a request's form once it proves to come from a page of this session.
+
+    Args:
+        request: The request that sent the form.
+
+    Raises:
+        FormExpired: For a form from elsewhere or from a token renewed since.
+    """
+    form = await request.form()
+    check_form(request, form)
+    return form
 
 
 def form_matches(request: Request, form: Mapping[str, Any]) -> bool:

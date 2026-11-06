@@ -15,7 +15,7 @@ from openfesl.web.oidc import ServiceClient, SignInFailed, SignInService
 from openfesl.web.pages import Pages, Viewer
 from openfesl.web.sessions import (
     ADMIN_LIFETIME,
-    check_form,
+    checked_form,
     form_token,
     inside,
     notify,
@@ -166,6 +166,7 @@ class AdminSessions:
         if admin is not None:
             through = self.provider.name if self.provider else ""
             viewer = Viewer(admin, through, await self._menu_counts(), self._sections)
+            context["manages"] = admin.role is Role.ADMIN
         return self._pages.render(
             request, template, status, steel=True, viewer=viewer, csrf=token, **context
         )
@@ -189,8 +190,7 @@ class AdminSessions:
 
         @router.post("/admin/sign-in")
         async def start(request: Request) -> Response:
-            form = await request.form()
-            check_form(request, form)
+            form = await checked_form(request)
             if self._client is None:
                 return RedirectResponse(localize("/admin/sign-in", request.state.language), 303)
             request.session["after"] = {
@@ -234,7 +234,7 @@ class AdminSessions:
 
         @router.post("/admin/sign-out")
         async def sign_out(request: Request) -> Response:
-            check_form(request, await request.form())
+            await checked_form(request)
             request.session.pop("admin", None)
             notify(request, "signed_out")
             renew_form_token(request)

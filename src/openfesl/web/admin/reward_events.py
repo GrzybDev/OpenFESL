@@ -23,7 +23,7 @@ from openfesl.web.admin.reward_contents import PartDraft
 from openfesl.web.admin.reward_editor import Editor, drafted, editor_of, run_days, written
 from openfesl.web.admin.rewards import SECTION, EventRow, RewardAdminViews, event_row
 from openfesl.web.reward_texts import RewardTexts
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 
 # A line of what a gift gives, with the panel's page of the box it rolls; empty for no box.
 type GiftLine = tuple[str, str]
@@ -279,16 +279,12 @@ def reward_event_routes(sessions: AdminSessions, views: RewardEventViews) -> API
         found = await views.event(
             game, key, request.state.language, query if "rule" in query else None
         )
-        manages = admin.role is Role.ADMIN
-        return await sessions.render(
-            request, "admin.RewardEvent", admin=admin, found=found, manages=manages
-        )
+        return await sessions.render(request, "admin.RewardEvent", admin=admin, found=found)
 
     @router.post(path)
     async def save(request: Request, game_id: str, key: str) -> Response:
         admin = sessions.admin(request, Role.ADMIN, SECTION)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         if form.get("rule") not in ("fixed", "easter", "count"):
             raise HTTPException(400)
         game = views.rewards.game(game_id)
@@ -305,7 +301,6 @@ def reward_event_routes(sessions: AdminSessions, views: RewardEventViews) -> API
                 status,
                 admin=admin,
                 found=found,
-                manages=True,
                 refusing=saving,
             )
         assert game.rewards is not None

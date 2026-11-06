@@ -12,7 +12,7 @@ from openfesl.core.texts import localize
 from openfesl.web.admin.accounts import AccountViews
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.admin.heroes import HeroAdminViews, HeroPage
-from openfesl.web.sessions import check_form, toast
+from openfesl.web.sessions import checked_form, toast
 
 SECTION = "accounts"
 # What moderators may change of a hero; the other changes need the admin role.
@@ -98,8 +98,7 @@ def hero_action_routes(
     @router.post(path + "/{action}")
     async def act(request: Request, account_id: str, hero_id: int, action: str) -> Response:
         admin = allowed(request, action)
-        form = await request.form()
-        check_form(request, form)
+        form = await checked_form(request)
         page = await hero_page(request, account_id, hero_id)
         own = localize(path.format(account_id=account_id, hero_id=hero_id), request.state.language)
         back = back_to(request, str(form.get("back", "")), own)
