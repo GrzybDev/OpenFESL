@@ -128,7 +128,7 @@ class DealOfferViews:
         listed = await self.offers.offer(game.id, number) if number is not None else None
         if number is not None and listed is None:
             raise HTTPException(404)
-        texts = StoreTexts(game, language, datetime.now(UTC))
+        texts = StoreTexts(game, language)
         catalogue = await self._catalogues.of(game, language)
         every = {product.id: product for product in await self._prices.every(game.id)}
         uploaded = await self._uploads.uploaded(game.id) if listed else {}
@@ -241,7 +241,7 @@ def offer_routes(sessions: AdminSessions, views: DealOfferViews) -> APIRouter:
             await views.deals.pin(game, offer_of(before.bundle), bundle.faction, False, admin)
         await views.deals.pin(game, offer_of(bundle), bundle.faction, found.draft.pinned, admin)
         if found.rules.sections[found.draft.section].enabled:
-            texts = StoreTexts(game, request.state.language, datetime.now(UTC))
+            texts = StoreTexts(game, request.state.language)
             assert bundle.ends is not None
             ends = texts.moment(bundle.ends)
             toast(request, "web.admin.toast.deals.offer", offer=found.name, ends=ends)
@@ -280,7 +280,7 @@ def offer_routes(sessions: AdminSessions, views: DealOfferViews) -> APIRouter:
         row = await stocked(request, game, number)
         bundle = row.listed.bundle
         assert bundle.stock is not None
-        texts = StoreTexts(game, request.state.language, datetime.now(UTC))
+        texts = StoreTexts(game, request.state.language)
         written = str(form.get("count", "")).strip()
         most = MOST_BALANCE - bundle.stock
         count = whole_number(written, most)

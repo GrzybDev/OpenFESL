@@ -176,7 +176,7 @@ class GiftCodeViews:
             game: The game.
             language: The language.
         """
-        texts = StoreTexts(game, language, datetime.now(UTC))
+        texts = StoreTexts(game, language)
         return texts, await self._catalogues.of(game, language)
 
     async def redeemed(self, account_id: int, language: str) -> list[tuple[Redemption, str]] | None:

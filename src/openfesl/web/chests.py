@@ -1,10 +1,7 @@
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 
-from babel import Locale
-from babel.lists import format_list
-from babel.numbers import format_percent
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.exceptions import HTTPException
@@ -132,7 +129,7 @@ class ChestsPages:
                         game, player.account_id, [key.currency]
                     )
             catalogue = await self._catalogues.of(game, language)
-            texts = StoreTexts(game, language, datetime.now(UTC))
+            texts = StoreTexts(game, language)
             art = self._pages.shows_art(request, game)
             return self._pages.render(
                 request,
@@ -175,7 +172,7 @@ class ChestsPages:
             catalogue = await self._catalogues.of(game, language)
             key = await self._chests.key(game)
             keys = await held_keys(self._entitlements, _rules(game), hero.persona.account_id)
-            texts = StoreTexts(game, language, datetime.now(UTC))
+            texts = StoreTexts(game, language)
             art = self._pages.shows_art(request, game)
             worth = {"worth": texts.priced(won.price, won.currency)}
             if key:
@@ -239,17 +236,14 @@ def _term(ownership: Ownership, texts: StoreTexts, start: bool = False) -> str:
 
 
 def _line(drop: ChestDrop, catalogue: Catalogue, texts: StoreTexts, art: bool) -> DropLine:
-    locale = Locale.parse(texts.text("web.locale"))
     names = [catalogue.name(product.item_id) or str(product.item_id) for product in drop.products]
     name, icon = names[0], icon_url(texts.game.id, catalogue, drop.products[0].item_id, art)
     if len(names) > 1:
         # One item of several, by the class of the hero that opens the chest, for which no one
         # item's icon stands.
-        joined = str(format_list(names, style="or", locale=locale))
+        joined = texts.alternatives(names)
         name, icon = texts.text("web.chests.lists.by_class", names=joined), None
-    low, high = (
-        str(format_percent(float(value), "#,##0.#%", locale=locale)) for value in drop.chance
-    )
+    low, high = (texts.percent(float(value)) for value in drop.chance)
     chance = low
     if low != high and not drop.chance[0]:
         chance = texts.text("web.chests.chance.up_to", chance=high)

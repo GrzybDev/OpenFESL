@@ -4,8 +4,6 @@ from datetime import UTC, datetime
 from fractions import Fraction
 from typing import Any
 
-from babel import Locale
-from babel.numbers import format_percent
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 
@@ -163,7 +161,7 @@ class ClawPages:
             language = request.state.language
             rules, running = await self._claw.rules(game), await self._claw.running(game)
             catalogue = await self._catalogues.of(game, language)
-            texts = StoreTexts(game, language, datetime.now(UTC))
+            texts = StoreTexts(game, language)
             art = self._pages.shows_art(request, game)
             player, bar = signed_in(request), await site_bar(request)
             grabbed = request.session.pop(GRABBED, None) if player else None
@@ -213,7 +211,7 @@ class ClawPages:
                 return RedirectResponse(page, 303)
             chosen = str(form.get("hero", ""))
             hero_id = int(chosen) if chosen.isascii() and chosen.isdecimal() else 0
-            texts = StoreTexts(game, request.state.language, datetime.now(UTC))
+            texts = StoreTexts(game, request.state.language)
             # A paid grab is charged only at the price and in the currency that the page showed.
             rules = await self._claw.running(game)
             charged = (str(rules.paid.price), rules.paid.currency) if rules else None
@@ -283,11 +281,10 @@ class ClawPages:
     ) -> HeroPrizes:
         # A hero's prizes over three belts and by tier, with their chances.
         prizes, owned = await self._claw.prizes(game, hero)
-        locale = Locale.parse(translate("web.locale", texts.language))
         lines = [
             replace(
                 _line(texts, catalogue, p.product.item_id, p.product.ownership, art, p.rare),
-                chance=str(format_percent(float(p.chance), "#,##0.##%", locale=locale)),
+                chance=texts.percent(float(p.chance), "#,##0.##%"),
             )
             for p in prizes
         ]
@@ -302,14 +299,14 @@ class ClawPages:
                 texts.text(f"games.{game.id}.claw.tier.{rules.tiers[tier].name}")
                 if tier < len(rules.tiers) and rules.tiers[tier].name
                 else texts.text("web.admin.boxes.tier", number=tier + 1),
-                str(format_percent(float(share), "#,##0.##%", locale=locale)),
+                texts.percent(float(share), "#,##0.##%"),
                 found,
             )
             for tier, (share, found) in sorted(tiers.items())
         ]
         belts = [lines[row::3] or lines for row in range(3)]
         belts = [belt * -(-BELT // len(belt)) if belt else [] for belt in belts]
-        names = [_name(texts, catalogue, product.item_id) for product in owned]
+        names = [texts.item_name(catalogue, product.item_id) for product in owned]
         return HeroPrizes(hero, belts, tier_lines, names)
 
     async def _feed(
@@ -332,26 +329,14 @@ class ClawPages:
         between, _, after = rest.partition("\1")
         for won in await self._claw.feed(game, rules):
             line = _line(texts, catalogue, won.item_id, won.ownership, art, True)
-            new = bool(grabbed) and not marked
-            new = (
-                new
-                and grabbed is not None
-                and (grabbed["hero_id"], grabbed["item"])
-                == (
-                    won.hero_id,
-                    won.item_id,
-                )
-            )
+            mark = (grabbed["hero_id"], grabbed["item"]) if grabbed else None
+            new = not marked and mark == (won.hero_id, won.item_id)
             marked = marked or new
             own = won.hero_id in mine
             found.append(
                 FeedLine(won.hero_id, won.hero, line, won.at, own, new, (before, between, after))
             )
         return found
-
-
-def _name(texts: StoreTexts, catalogue: Catalogue, item_id: int) -> str:
-    return catalogue.name(item_id) or texts.text("web.redeem.item", id=item_id)
 
 
 def _line(
@@ -373,7 +358,7 @@ def _line(
     )
     return PrizeLine(
         item_id,
-        _name(texts, catalogue, item_id),
+        texts.item_name(catalogue, item_id),
         texts.ownership(ownership),
         icon_url(game.id, catalogue, item_id, art),
         category.glyph if category else "items",

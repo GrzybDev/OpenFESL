@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Any
 from urllib.parse import quote
 
@@ -36,7 +36,7 @@ async def code_entry(
     href = localize(f"{CODES}/{quote(target)}", language)
     if game is None:
         return action.value, target, href, ""
-    texts = StoreTexts(game, language, datetime.now(UTC))
+    texts = StoreTexts(game, language)
     catalogue = await catalogues.of(game, language)
 
     def gift(written: dict[str, Any]) -> str:

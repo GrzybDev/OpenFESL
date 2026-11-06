@@ -109,7 +109,7 @@ async def claw_panel(
     rules = await claw.rules(game)
     if rules is None:
         return None
-    texts = StoreTexts(game, language, datetime.now(UTC))
+    texts = StoreTexts(game, language)
     box = await claw.box(game)
     zone = await claw.zone(game)
     start = day_start(today(datetime.now(UTC), zone), zone)

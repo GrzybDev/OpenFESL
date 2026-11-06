@@ -1,7 +1,6 @@
 from collections import Counter
 from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass, replace
-from datetime import UTC, datetime
 from math import ceil
 from typing import Any, Self
 
@@ -271,7 +270,7 @@ class StoreAdminViews:
             language: The page's language.
         """
         catalogue, found = await self.prices(game, language)
-        texts = StoreTexts(game, language, datetime.now(UTC))
+        texts = StoreTexts(game, language)
         named = sorted(
             ((catalogue.name(prices.item.id) or "", prices) for prices in found),
             key=lambda pair: (pair[0].casefold(), pair[1].item.id),

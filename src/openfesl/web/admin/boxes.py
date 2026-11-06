@@ -168,7 +168,7 @@ class BoxAdminViews:
             text, shelf, window, always, promised = offered.get(
                 box.key, ("", "", None, False, False)
             )
-            texts = StoreTexts(game, language, datetime.now(UTC))
+            texts = StoreTexts(game, language)
             if text:
                 name = game_text(game, catalogue, text, language)
             elif box.kind == "claw" and game.claw:

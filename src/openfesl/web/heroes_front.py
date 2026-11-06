@@ -110,7 +110,7 @@ class HeroesFrontPages:
                 else:
                     upcoming = await self._rewards.upcoming(game)
                     next_event = words.event(upcoming[0]) if upcoming else None
-            texts = StoreTexts(game, language, datetime.now(UTC))
+            texts = StoreTexts(game, language)
             catalogue = await catalogues.of(game, language)
             deals = await self._daily_deals(game, language)
             deal_rules = await self._deals.rules(game) if deals else None

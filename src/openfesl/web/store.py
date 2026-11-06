@@ -110,7 +110,7 @@ class StorePages:
             if not purchase_matches(request, form):
                 toast(request, "web.store.refused.form", error=True)
                 return RedirectResponse(back, 303)
-            texts = QuoteTexts(game, request.state.language, datetime.now(UTC))
+            texts = QuoteTexts(game, request.state.language)
             offered = await self._offered(request, game, number, hero, price)
             if offered is None:
                 toast(request, "web.store.refused.gone", error=True)
@@ -159,7 +159,7 @@ class StorePages:
         bar = await site_bar(request)
         roster = bar.roster if bar else None
         choices = await self._choices(request, game, sold, roster)
-        texts = QuoteTexts(game, language, datetime.now(UTC))
+        texts = QuoteTexts(game, language)
         chosen = _chosen(choices, roster, hero)
         offered = None
         if chosen is not None:

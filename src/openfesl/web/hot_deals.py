@@ -1,6 +1,6 @@
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, Response
@@ -164,7 +164,7 @@ class HotDealsPages:
     def _page(self, game: Game) -> Callable[[Request], Awaitable[Response]]:
         async def show_deals(request: Request) -> Response:
             language = request.state.language
-            texts = StoreTexts(game, language, datetime.now(UTC))
+            texts = StoreTexts(game, language)
             bar = await site_bar(request)
             heroes = bar.roster.heroes if bar and bar.roster else None
             rules = await self._deals.rules(game)

@@ -1,4 +1,3 @@
-from datetime import UTC, datetime
 from typing import Any
 
 from openfesl.core.admin import AdminAction
@@ -35,7 +34,7 @@ async def claw_entry(
     game = games.by_id(target.partition(":")[0])
     if game is None or game.claw is None:
         return action.value, target, None, ""
-    texts = StoreTexts(game, language, datetime.now(UTC))
+    texts = StoreTexts(game, language)
     name = claw_name(game, await catalogues.of(game, language), texts)
     if action is AdminAction.CLAW_TABLE:
         _, href, said = await box_entry(details, games, catalogues, language)

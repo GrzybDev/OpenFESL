@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from datetime import UTC, datetime
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -174,7 +173,7 @@ def deal_home_routes(sessions: AdminSessions, views: DealHomeViews) -> APIRouter
         offer = bool(form.get("offer"))
         back = f"/deals/offers/{number}" if offer else "/deals/home"
         shown = await views.deal(game, number, request.state.language)
-        texts = StoreTexts(game, request.state.language, datetime.now(UTC))
+        texts = StoreTexts(game, request.state.language)
         for big, (name, data) in files.items():
             if len(data) > MOST_PICTURE or not fits(data, big):
                 key = f"web.admin.deals.art.refused.{'big' if big else 'small'}"

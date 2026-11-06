@@ -1,7 +1,7 @@
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, Request
@@ -178,7 +178,7 @@ def section_routes(sessions: AdminSessions, views: DealSectionViews) -> APIRoute
         game = views.deals.stores.game(game_id)
         found = await views.section(game, key, request.state.language)
         row = found.row
-        texts = StoreTexts(game, request.state.language, datetime.now(UTC))
+        texts = StoreTexts(game, request.state.language)
         try:
             values = _values(row.section, fields, [entry.picked for entry in found.pool])
         except ValueError as refused:

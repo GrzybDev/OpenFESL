@@ -1,7 +1,6 @@
 import math
 from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass, field, replace
-from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Request
@@ -156,7 +155,7 @@ class StoreFrontPages:
     def _page(self, game: Game) -> Callable[[Request], Awaitable[Response]]:
         async def show_store(request: Request) -> Response:
             language = request.state.language
-            texts = StoreTexts(game, language, datetime.now(UTC))
+            texts = StoreTexts(game, language)
             bar = await site_bar(request)
             roster = bar.roster if bar else None
             heroes = roster.heroes if roster else []

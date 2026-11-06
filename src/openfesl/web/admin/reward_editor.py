@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from datetime import date, timedelta
 from typing import Any
 
-from babel import Locale
 from babel.dates import format_interval
 from starlette.datastructures import ImmutableMultiDict
 
@@ -22,7 +21,7 @@ from openfesl.web.admin.reward_contents import (
     written_adding,
     written_parts,
 )
-from openfesl.web.pages import number
+from openfesl.web.pages import locale_of, number
 from openfesl.web.reward_texts import RewardTexts
 
 # The most characters of an own text, which a reward's card shows in full.
@@ -287,7 +286,7 @@ def event_entry(game: Game, details: dict[str, Any], language: str) -> tuple[str
     key = details["event"]
     event = game.rewards.events.get(key)
     shown = translate(event.title, language) if event else key
-    locale = Locale.parse(translate("web.locale", language))
+    locale = locale_of(language)
     said = []
     before, after = details["dates"]
     if before != after:

@@ -1,5 +1,4 @@
 from collections.abc import Awaitable, Callable
-from datetime import UTC, datetime
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -101,7 +100,7 @@ class KeyPages:
             if key is None or count not in game.chests.packs:
                 toast(request, "web.chests.keys.refused.unsold", error=True)
                 return RedirectResponse(page, 303)
-            texts = StoreTexts(game, language, datetime.now(UTC))
+            texts = StoreTexts(game, language)
             if str(form.get("price", "")) != str(key.price):
                 each = texts.priced(key.price, key.currency)
                 toast(request, "web.chests.keys.refused.price", error=True, price=each)

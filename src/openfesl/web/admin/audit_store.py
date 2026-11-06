@@ -32,7 +32,7 @@ async def price_entry(
     if game is None or game.store is None:
         return str(item), None, ""
     catalogue = await catalogues.of(game, language)
-    texts = StoreTexts(game, language, datetime.now(UTC))
+    texts = StoreTexts(game, language)
     points = details["points"]
     shown = catalogue.name(item) or texts.text("web.admin.items.unnamed", id=item)
     if points:
@@ -72,7 +72,7 @@ def rule_entry(details: dict[str, Any], games: Games, language: str) -> tuple[st
     game, key = games.by_id(details["game"]), details["rule"]
     if game is None:
         return key, None, ""
-    texts = StoreTexts(game, language, datetime.now(UTC))
+    texts = StoreTexts(game, language)
     after = details["after"]
     value = after["use_price"] or after["value"]
     said = texts.text(
@@ -103,7 +103,7 @@ def account_entry(
     game = games.by_id(details["game"])
     if game is None:
         return details["name"], None, ""
-    texts = StoreTexts(game, language, datetime.now(UTC))
+    texts = StoreTexts(game, language)
     href = localize(f"/admin/store/{game.id}/account", language)
     if details["name"] == "sales":
         said = texts.text(f"web.admin.audit.sales.{'on' if details['after'] else 'off'}")
@@ -150,7 +150,7 @@ async def box_entry(
     if game is None:
         return details["box"], None, ""
     catalogue = await catalogues.of(game, language)
-    texts = StoreTexts(game, language, datetime.now(UTC))
+    texts = StoreTexts(game, language)
 
     def entries(listed: list[list[Any]]) -> str:
         return ", ".join(
@@ -203,7 +203,7 @@ async def deal_entry(
     game = games.by_id(target.partition(":")[0])
     if game is None or game.deals is None:
         return target, None, ""
-    texts = StoreTexts(game, language, datetime.now(UTC))
+    texts = StoreTexts(game, language)
     href = localize(f"/admin/store/{game.id}/deals", language)
     if action is AdminAction.DEAL_ROTATION:
         return texts.text("web.admin.deals.rotation"), href, ""
@@ -281,7 +281,7 @@ async def offer_entry(
     catalogue = await catalogues.of(game, language)
     shown = game_text(game, catalogue, details["name"], language, details["faction"])
     href = localize(f"/admin/store/{target.replace(':', '/deals/offers/', 1)}", language)
-    texts = StoreTexts(game, language, datetime.now(UTC))
+    texts = StoreTexts(game, language)
 
     def written(at: str) -> str:
         return moment(datetime.fromisoformat(at).replace(tzinfo=UTC), language)
@@ -356,6 +356,6 @@ async def art_entry(
     href = localize(f"/admin/store/{game.id}/deals/home", language)
     if details.get("removed"):
         return "deal_art.removed", shown, href, ""
-    texts = StoreTexts(game, language, datetime.now(UTC))
+    texts = StoreTexts(game, language)
     picture = "big" if details["big"] else "small"
     return "deal_art", shown, href, texts.text(f"web.admin.audit.deal_art.{picture}")

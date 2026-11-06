@@ -1,4 +1,3 @@
-from datetime import UTC, datetime
 from typing import Any
 
 from openfesl.core.admin import AdminAction
@@ -54,7 +53,7 @@ async def referral_entry(
     for side in SIDES:
         was, now = before[side], after[side]
         if was != now and game:
-            texts = StoreTexts(game, language, datetime.now(UTC))
+            texts = StoreTexts(game, language)
             catalogue = await catalogues.of(game, language)
             values = {"before": _said(texts, catalogue, was), "after": _said(texts, catalogue, now)}
             said.append(translate(f"web.admin.audit.referral.{side}_gift", language) % values)

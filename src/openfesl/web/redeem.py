@@ -238,9 +238,7 @@ class RedeemPages:
 
     async def _words(self, request: Request, game: Game) -> tuple[StoreTexts, Catalogue]:
         language = request.state.language
-        return StoreTexts(game, language, datetime.now(UTC)), await self._catalogues.of(
-            game, language
-        )
+        return StoreTexts(game, language), await self._catalogues.of(game, language)
 
 
 def _path(game: Game) -> str:
@@ -253,10 +251,6 @@ def _currency(game: Game) -> str:
     return game.rewards.currency
 
 
-def _name(texts: StoreTexts, catalogue: Catalogue, item_id: int) -> str:
-    return catalogue.name(item_id) or texts.text("web.redeem.item", id=item_id)
-
-
 def _rows(texts: StoreTexts, catalogue: Catalogue, gift: Gift, art: bool) -> list[GiftRow]:
     # What a code gives: its items with whom they fit and how each is given, then the Funds and
     # keys for the account.
@@ -267,7 +261,7 @@ def _rows(texts: StoreTexts, catalogue: Catalogue, gift: Gift, art: bool) -> lis
         whom = texts.requires(requirement(game, item)) if item else ""
         rows.append(
             GiftRow(
-                _name(texts, catalogue, item_id),
+                texts.item_name(catalogue, item_id),
                 whom,
                 texts.ownership(ownership),
                 icon_url(game.id, catalogue, item_id, art),
@@ -296,7 +290,7 @@ def _change(
 ) -> tuple[str, str]:
     # What a code changes of an item a hero holds, with the line's glyph: new, days or uses
     # added, made permanent, or the fallback in place of an item owned for good.
-    item = _name(texts, catalogue, item_id)
+    item = texts.item_name(catalogue, item_id)
     what = texts.ownership(gained, inline=True)
     after = fold(before, gained, now)
     if before is None:
@@ -307,7 +301,7 @@ def _change(
         fallback, owned = look.fallback
         instead = texts.text(
             "web.deals.card.item",
-            item=_name(texts, catalogue, fallback),
+            item=texts.item_name(catalogue, fallback),
             ownership=texts.ownership(owned, inline=True),
         )
         return "tick", texts.text("web.redeem.change.fallback", item=item, fallback=instead)
@@ -335,7 +329,7 @@ def _unfit(texts: StoreTexts, catalogue: Catalogue, look: Look, hero: Hero) -> s
         if item is None or why is None:
             continue
         found = requirement(game, item)
-        values = {"item": _name(texts, catalogue, item_id), "hero": name}
+        values = {"item": texts.item_name(catalogue, item_id), "hero": name}
         if why is Unfit.FACTION:
             mine = texts.factions(frozenset({hero.faction or ""}))
             return texts.text(
@@ -420,7 +414,7 @@ def _done(texts: StoreTexts, catalogue: Catalogue, done: Redemption) -> dict[str
     hero = done.hero or ""
     rows = []
     for given in done.items:
-        item = _name(texts, catalogue, given.item_id)
+        item = texts.item_name(catalogue, given.item_id)
         what = texts.ownership(given.ownership, inline=True)
         if given.fallback:
             text = texts.text("web.redeem.done.fallback", item=item, what=what)

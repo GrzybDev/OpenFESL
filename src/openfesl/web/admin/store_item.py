@@ -1,9 +1,6 @@
 from collections.abc import Mapping
 from dataclasses import dataclass, replace
-from datetime import UTC, datetime
 
-from babel import Locale
-from babel.lists import format_list
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.exceptions import HTTPException
@@ -23,7 +20,6 @@ from openfesl.core.store_prices import (
     reset_points,
 )
 from openfesl.core.store_rules import StoreRules
-from openfesl.core.texts import translate
 from openfesl.core.wallets import MOST_BALANCE
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.store import (
@@ -33,7 +29,7 @@ from openfesl.web.admin.store import (
     price_row,
     store_url,
 )
-from openfesl.web.pages import whole_number
+from openfesl.web.pages import listed, whole_number
 from openfesl.web.sessions import checked_form, toast
 from openfesl.web.store_front import Tile, kind_glyphs, tile
 from openfesl.web.store_texts import StoreTexts
@@ -104,7 +100,7 @@ def store_item_routes(sessions: AdminSessions, views: StoreAdminViews) -> APIRou
         rules = await views.rules(game)
         language = request.state.language
         catalogue, prices = await views.item(game, item_id, language)
-        texts = StoreTexts(game, language, datetime.now(UTC))
+        texts = StoreTexts(game, language)
         name = catalogue.name(item_id) or str(item_id)
         # The preview follows the prices that a script sends as they are typed, or a refused form.
         drafted = form or request.query_params
@@ -198,7 +194,7 @@ def store_item_routes(sessions: AdminSessions, views: StoreAdminViews) -> APIRou
             point = new_point(sent.rules, sent.prices, currency, ownership, price)
         except PriceRefused as refused:
             return await page(request, sent.admin, sent.game, item_id, sent.form, refused)
-        texts = StoreTexts(sent.game, request.state.language, datetime.now(UTC))
+        texts = StoreTexts(sent.game, request.state.language)
         named = _point(texts, point.currency, point.ownership)
         return await saved(request, sent, [point], "added", named)
 
@@ -304,7 +300,6 @@ def _why(
             point = _point(texts, form.get("add-currency", ""), ownership)
             return texts.text("web.admin.store.refused.twice", point=point, item=name)
         case PriceRefusal.DURATION:
-            locale = Locale.parse(translate("web.locale", texts.language))
             known = [texts.amount(days) for days in sorted(rules.rentals)]
             written = form.get("add-ownership", "")
             days = written.removesuffix("d")
@@ -316,7 +311,7 @@ def _why(
             return texts.text(
                 "web.admin.store.refused.duration",
                 duration=duration,
-                days=format_list(known, locale=locale),
+                days=listed(known, texts.language),
             )
         case PriceRefusal.USES:
             uses = form.get("add-uses", "").strip() or "0"

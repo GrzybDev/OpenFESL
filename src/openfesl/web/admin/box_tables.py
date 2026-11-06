@@ -1,10 +1,7 @@
 from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import UTC, datetime
 from typing import Any
 
-from babel import Locale
-from babel.numbers import format_percent
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.exceptions import HTTPException
@@ -18,7 +15,6 @@ from openfesl.core.inventory import Ownership
 from openfesl.core.store import Product
 from openfesl.core.store_items import requirement
 from openfesl.core.store_prices import ItemPrices
-from openfesl.core.texts import translate
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.boxes import BoxAdminViews, BoxRow, Entry, tiers
 from openfesl.web.admin.store import SECTION, store_url
@@ -128,7 +124,7 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
         # The Claw's prizes: its tiers with their names and rare marks, each entry
         # with whom it fits, and the chances of a hero of the faction and class chosen.
         assert game.heroes is not None and game.claw is not None
-        texts = StoreTexts(game, request.state.language, datetime.now(UTC))
+        texts = StoreTexts(game, request.state.language)
         faction = request.query_params.get("faction", "")
         faction = faction if faction in game.heroes.factions else next(iter(game.heroes.factions))
         kind = request.query_params.get("class", "")
@@ -138,7 +134,6 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
             item = catalogue.item(drop.product.item_id)
             fits[drop.product.id] = texts.requires(requirement(game, item)) if item else ""
         withheld = catalogue.item(int(query)) if query.isascii() and query.isdecimal() else None
-        locale = Locale.parse(translate("web.locale", texts.language))
         return await sessions.render(
             request,
             "admin.ClawPool",
@@ -149,7 +144,7 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
             faction=faction,
             hero_class=kind,
             preview=[
-                (prize, str(format_percent(float(prize.chance), "#,##0.##%", locale=locale)))
+                (prize, texts.percent(float(prize.chance), "#,##0.##%"))
                 for prize in await views.claw.preview(game, faction, kind)
             ],
             withheld=withheld.id if withheld and withheld.withheld else None,
@@ -168,7 +163,7 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
         form: Mapping[str, str],
     ) -> Response:
         box = row.box
-        texts = StoreTexts(game, request.state.language, datetime.now(UTC))
+        texts = StoreTexts(game, request.state.language)
         claw = box.kind == "claw"
         rare = {tier for tier in range(len(weights)) if form.get(f"rare-{tier}")} if claw else set()
         try:
@@ -302,7 +297,7 @@ async def _candidates(
     # hero may own each and their value in the box's currency.
     rules = await views.stores.rules(game)
     _, prices = await views.stores.prices(game, request.state.language)
-    texts = StoreTexts(game, request.state.language, datetime.now(UTC))
+    texts = StoreTexts(game, request.state.language)
     kinds = {rule.kind for rule in rules.prices.values()}
     held: dict[int, ItemPrices] = {}
     for item_prices in prices:

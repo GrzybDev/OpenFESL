@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from datetime import UTC, datetime
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
@@ -47,7 +46,7 @@ def log_routes(sessions: AdminSessions, views: DealAdminViews, catalogues: Catal
         game = views.stores.game(game_id)
         language = request.state.language
         rotation = await views.rotation(game)
-        texts = StoreTexts(game, language, datetime.now(UTC))
+        texts = StoreTexts(game, language)
         catalogue = await catalogues.of(game, language)
 
         def said(key: str, deal: StepDeal) -> str:

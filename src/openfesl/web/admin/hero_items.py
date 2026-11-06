@@ -85,7 +85,7 @@ def grant_form(page: HeroPage, chosen: Mapping[str, object], language: str) -> G
     game, catalogue, hero = page.game, page.catalogue, page.card.hero
     rules = game.heroes
     assert rules is not None
-    texts = StoreTexts(game, language, datetime.now(UTC))
+    texts = StoreTexts(game, language)
     query = str(chosen.get("q", "")).strip()
     typed = whole_number(query, MOST_BALANCE)
     matches: list[tuple[int, Item | None]] = []
@@ -239,7 +239,7 @@ def hero_item_routes(
                 request, "web.admin.toast.item.held", error=True, item=name, hero=hero.persona.name
             )
         else:
-            texts = StoreTexts(page.game, request.state.language, datetime.now(UTC))
+            texts = StoreTexts(page.game, request.state.language)
             toast(
                 request,
                 "web.admin.toast.item.granted",

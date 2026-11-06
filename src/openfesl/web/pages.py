@@ -183,6 +183,15 @@ def whole_number(text: str, most: int, least: int = 1) -> int | None:
     return int(digits) if least <= int(digits) <= most else None
 
 
+def locale_of(language: str) -> Locale:
+    """Return the locale that writes a language's dates, numbers and lists.
+
+    Args:
+        language: The language.
+    """
+    return Locale.parse(translate("web.locale", language))
+
+
 def moment(value: datetime, language: str, day: str = "yMMMd") -> str:
     """Return a day and a time of day in UTC as a language writes them.
 
@@ -191,7 +200,7 @@ def moment(value: datetime, language: str, day: str = "yMMMd") -> str:
         language: The language code.
         day: The CLDR skeleton of the day, which leaves out the year or not.
     """
-    locale = Locale.parse(translate("web.locale", language))
+    locale = locale_of(language)
     shown = format_skeleton(day, value, tzinfo=UTC, locale=locale)
     time = format_skeleton("Hm", value, tzinfo=UTC, locale=locale)
     return str(locale.datetime_formats["medium"]).format(time, shown)
@@ -206,7 +215,7 @@ def _moment(context: Context, value: datetime, day: str = "yMMMd") -> str:
 def _when(context: Context, value: datetime, skeleton: str) -> str:
     # A time in UTC with the fields a CLDR skeleton names, such as MMMEd for "Sat 17 Oct", in the
     # order and words of the page's language.
-    return str(format_skeleton(skeleton, value, tzinfo=UTC, locale=_locale(context)))
+    return str(format_skeleton(skeleton, value, tzinfo=UTC, locale=locale_of(context["language"])))
 
 
 @pass_context
@@ -228,7 +237,7 @@ def _cost(context: Context, price: int, currency: str, sale: SalePrice | None) -
 def _ago(context: Context, value: datetime) -> str:
     # How long ago a moment was, as the page's language says it, such as "18 minutes ago".
     elapsed = value - datetime.now(UTC)
-    return str(format_timedelta(elapsed, add_direction=True, locale=_locale(context)))
+    return str(format_timedelta(elapsed, add_direction=True, locale=locale_of(context["language"])))
 
 
 @pass_context
@@ -242,7 +251,7 @@ def _seconds_left(context: Context, ends: datetime) -> int:
 @pass_context
 def _country(context: Context, code: str) -> str:
     # A country's name in the page's language, from its ISO code.
-    return str(_locale(context).territories.get(code.upper(), code))
+    return str(locale_of(context["language"]).territories.get(code.upper(), code))
 
 
 def language_name(code: str, language: str) -> str:
@@ -252,8 +261,7 @@ def language_name(code: str, language: str) -> str:
         code: The named language's code, such as pt-BR.
         language: The code of the language it is written in.
     """
-    locale = Locale.parse(translate("web.locale", language))
-    return str(Locale.parse(code, sep="-").get_display_name(locale))
+    return str(Locale.parse(code, sep="-").get_display_name(locale_of(language)))
 
 
 @pass_context
@@ -268,16 +276,12 @@ def listed(items: list[str], language: str) -> str:
         items: The names.
         language: The language code.
     """
-    return str(format_list(items, locale=Locale.parse(translate("web.locale", language))))
+    return str(format_list(items, locale=locale_of(language)))
 
 
 @pass_context
 def _listed(context: Context, items: list[str]) -> str:
     return listed(items, context["language"])
-
-
-def _locale(context: Context) -> Locale:
-    return Locale.parse(translate("web.locale", context["language"]))
 
 
 def page_number(text: str) -> int:

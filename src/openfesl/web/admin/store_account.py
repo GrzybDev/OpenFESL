@@ -155,7 +155,7 @@ def store_account_routes(sessions: AdminSessions, views: StoreAdminViews) -> API
     ) -> HTMLResponse:
         live = await views.account_rules(game)
         values = account_values(game, live)
-        texts = StoreTexts(game, request.state.language, datetime.now(UTC))
+        texts = StoreTexts(game, request.state.language)
         # The values a form holds, as a script sends them while they are typed or a refused
         # form sent them, else those set; each is changed while it is not the game data's.
         typed = {value.name: form.get(value.name, str(value.value)) for value in values}
@@ -195,7 +195,7 @@ def store_account_routes(sessions: AdminSessions, views: StoreAdminViews) -> API
         # Reset puts a value back to the game data's in the form, saving nothing.
         if reset := next((value for value in values if value.name == fields.get("reset")), None):
             return await page(request, admin, game, fields | {reset.name: str(reset.data)})
-        texts = StoreTexts(game, request.state.language, datetime.now(UTC))
+        texts = StoreTexts(game, request.state.language)
         refused, settings, changes = {}, {}, []
         key = None
         for value in values:

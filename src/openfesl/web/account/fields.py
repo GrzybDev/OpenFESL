@@ -1,8 +1,8 @@
-from babel import Locale
 from babel.lists import format_list
 
 from openfesl.core.problems import Problem
 from openfesl.core.texts import translate
+from openfesl.web.pages import locale_of
 
 _LETTERS = {"day": "d", "month": "M", "year": "y"}
 
@@ -23,13 +23,13 @@ def birth_order(language: str) -> list[str]:
     Args:
         language: The page's language code.
     """
-    pattern = str(_locale(language).date_formats["short"].pattern)
+    pattern = str(locale_of(language).date_formats["short"].pattern)
     return sorted(_LETTERS, key=lambda part: pattern.find(_LETTERS[part]))
 
 
 def _sentence(problem: Problem, language: str) -> str:
     text = translate(f"web.account.error.{problem.field}.{problem.kind}", language)
-    locale = _locale(language)
+    locale = locale_of(language)
     match problem:
         case Problem("display_name", "characters", characters):
             space = translate("web.account.error.space", language)
@@ -39,7 +39,3 @@ def _sentence(problem: Problem, language: str) -> str:
             day, month = detail.split("-")
             return text % {"day": day, "month": locale.months["format"]["wide"][int(month)]}
     return text % {"detail": problem.detail}
-
-
-def _locale(language: str) -> Locale:
-    return Locale.parse(translate("web.locale", language))

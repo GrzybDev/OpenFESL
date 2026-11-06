@@ -1,4 +1,3 @@
-from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Request
@@ -34,7 +33,7 @@ def claw_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter:
         rules = await views.claw.rules(game)
         if rules is None or game.claw is None:
             raise HTTPException(404)
-        texts = StoreTexts(game, request.state.language, datetime.now(UTC))
+        texts = StoreTexts(game, request.state.language)
         currencies = [wallet.currency for wallet in game.site.wallets] if game.site else []
         sent = read_form(form, currencies, texts)
         box = await views.claw.box(game)

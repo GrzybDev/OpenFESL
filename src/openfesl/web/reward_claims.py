@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from openfesl.core.calendar import day_start, today
 from openfesl.core.entitlements import ACTIVE, EntitlementStore
@@ -183,7 +183,7 @@ class RewardClaims:
             kept = await self._entitlements.of_persona(hero.persona.id, ownership.tag(item_id))
             expires = kept[0].expires if kept else None
             # Counted from after the grant, so that a rental new to the hero has its own days.
-            after = StoreTexts(words.game, texts.language, datetime.now(UTC))
+            after = StoreTexts(words.game, texts.language)
             left = after.days_left(expires) if expires else 0
         line = term
         if box and box.fallback and box.fallback.item_id == item_id:

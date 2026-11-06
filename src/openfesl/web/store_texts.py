@@ -1,7 +1,7 @@
 import math
+from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timedelta
 
-from babel import Locale
 from babel.dates import format_interval, format_skeleton
 from babel.lists import format_list
 from babel.numbers import format_percent
@@ -13,26 +13,25 @@ from openfesl.core.reward_rules import Gift
 from openfesl.core.store import discount
 from openfesl.core.store_items import HeroChoice, Kind, PricePoint, Requirement, StoreItem, Unfit
 from openfesl.core.texts import translate, translate_count
-from openfesl.web.pages import moment, number
+from openfesl.web.pages import locale_of, moment, number
 
 # The glyphs of the price tiles of a rental and of uses; one owned for good shows infinity.
 _GLYPHS = {RENTED: "clock", COUNTED: "uses"}
 
 
+@dataclass(eq=False)
 class StoreTexts:
-    """The sentences a store page says about what it sells and to whom, in a language."""
+    """The sentences a store page says about what it sells and to whom, in a language.
 
-    def __init__(self, game: Game, language: str, now: datetime) -> None:
-        """Write for a game's store in a language, at a moment.
+    Attributes:
+        game: The game, which has heroes.
+        language: The language code.
+        _now: The moment that times left count from.
+    """
 
-        Args:
-            game: The game, which has heroes.
-            language: The language code.
-            now: The moment that times left count from.
-        """
-        self.game = game
-        self.language = language
-        self._now = now
+    game: Game
+    language: str
+    _now: datetime = field(default_factory=lambda: datetime.now(UTC))
 
     def text(self, key: str, **values: object) -> str:
         """Return a text of the catalogues with its placeholders filled.
@@ -93,7 +92,7 @@ class StoreTexts:
         Args:
             value: The day.
         """
-        return str(format_skeleton("yMMMd", value, tzinfo=UTC, locale=self._locale()))
+        return str(format_skeleton("yMMMd", value, tzinfo=UTC, locale=locale_of(self.language)))
 
     def day_range(self, first: date, last: date) -> str:
         """Return a run of days as the language writes it, such as 1-5 Oct.
@@ -102,7 +101,7 @@ class StoreTexts:
             first: Its first day.
             last: Its last day.
         """
-        return str(format_interval(first, last, "MMMd", locale=self._locale()))
+        return str(format_interval(first, last, "MMMd", locale=locale_of(self.language)))
 
     def countdown(self, ends: datetime) -> str:
         """Return the time left until a moment, as days and a clock, such as 1 d 23:22:40.
@@ -117,13 +116,14 @@ class StoreTexts:
         clock = f"{rest // 3600:02}:{rest % 3600 // 60:02}:{rest % 60:02}"
         return self.text("web.store.countdown", days=days, time=clock) if days else clock
 
-    def percent(self, share: float) -> str:
-        """Return a share as a percentage with at most one decimal, as the language writes it.
+    def percent(self, share: float, pattern: str = "#,##0.#%") -> str:
+        """Return a share as a percentage, as the language writes it.
 
         Args:
             share: The share, from 0 to 1.
+            pattern: The format, at most one decimal by default.
         """
-        return str(format_percent(share, "#,##0.#%", locale=self._locale()))
+        return str(format_percent(share, pattern, locale=locale_of(self.language)))
 
     def off(self, price: PricePoint) -> str:
         """Return the share of its usual price that a sale takes off a price, in whole percent.
@@ -195,6 +195,15 @@ class StoreTexts:
         return self.text(
             "web.store.chosen.time" if RENTED in types else "web.store.price.permanent"
         )
+
+    def item_name(self, catalogue: Catalogue, item_id: int) -> str:
+        """Return an item's name, or its number in words where the catalogue names none.
+
+        Args:
+            catalogue: The game's catalogue.
+            item_id: The item.
+        """
+        return catalogue.name(item_id) or self.text("web.redeem.item", id=item_id)
 
     def glyph(self, sold: StoreItem, price: PricePoint) -> str:
         """Return the glyph of a price's tile: a box, a deal, a rental's clock, uses or for good.
@@ -359,7 +368,4 @@ class StoreTexts:
         Args:
             names: The names.
         """
-        return str(format_list(names, style="or", locale=self._locale()))
-
-    def _locale(self) -> Locale:
-        return Locale.parse(translate("web.locale", self.language))
+        return str(format_list(names, style="or", locale=locale_of(self.language)))

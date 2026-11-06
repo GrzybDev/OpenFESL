@@ -84,7 +84,7 @@ def freeze(monkeypatch: pytest.MonkeyPatch, moment: datetime) -> None:
         "core.heroes",
         "core.rewards",
         "web.reward_texts",
-        "web.reward_claims",
+        "web.store_texts",
         "web.admin.reward_changes",
         "storage.entitlements",
     )

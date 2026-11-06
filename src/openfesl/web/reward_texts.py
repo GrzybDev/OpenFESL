@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from babel import Locale
 from babel.dates import format_interval, format_skeleton, format_timedelta
 from starlette.requests import Request
 
@@ -17,8 +16,8 @@ from openfesl.core.reward_claims import Claim, Claimed
 from openfesl.core.reward_rules import Gift, Milestone, RewardRules
 from openfesl.core.reward_runs import Run
 from openfesl.core.rewards import REFERRAL, Reward
-from openfesl.core.texts import translate
 from openfesl.web.catalogue_files import icon_url
+from openfesl.web.pages import locale_of
 from openfesl.web.site import site_bar
 from openfesl.web.store_texts import StoreTexts
 
@@ -87,7 +86,7 @@ class RewardTexts:
         self.roster = roster
         self.heroes = heroes
         self.art = art
-        self.locale = Locale.parse(translate("web.locale", texts.language))
+        self.locale = locale_of(texts.language)
         self.zone = ZoneInfo(rules.zone)
         self.now = datetime.now(UTC)
 
@@ -367,7 +366,7 @@ async def reward_texts(
     return RewardTexts(
         game,
         rules,
-        StoreTexts(game, language, datetime.now(UTC)),
+        StoreTexts(game, language),
         await catalogues.of(game, language),
         bar.roster if bar else None,
         bar.heroes if bar else None,

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import UTC, date, datetime, timedelta
+from datetime import date, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Request
@@ -255,7 +255,7 @@ class RewardAdminViews:
         """
         rules = await self.rewards.rules(game)
         assert rules is not None
-        texts = StoreTexts(game, language, datetime.now(UTC))
+        texts = StoreTexts(game, language)
         catalogue = await self._catalogues.of(game, language)
         return RewardTexts(game, rules, texts, catalogue, None, None, False)
 

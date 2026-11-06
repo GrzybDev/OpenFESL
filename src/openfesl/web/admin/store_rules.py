@@ -1,6 +1,5 @@
 import json
 from dataclasses import dataclass
-from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Request
@@ -137,7 +136,7 @@ def store_rule_routes(sessions: AdminSessions, views: StoreAdminViews) -> APIRou
         rule = rules.prices.get(key)
         if rule is None or (game.heroes and rule.currency == game.heroes.points):
             raise HTTPException(404)
-        texts = StoreTexts(game, request.state.language, datetime.now(UTC))
+        texts = StoreTexts(game, request.state.language)
         return admin, game, rules, _change(texts, rules, rule, form)
 
     @router.get("/admin/store/{game_id}/rules", response_class=HTMLResponse)
@@ -153,7 +152,7 @@ def store_rule_routes(sessions: AdminSessions, views: StoreAdminViews) -> APIRou
         _, catalogue, items = await found(game, request.state.language)
         new = rules.model_copy(update={"prices": rules.prices | {key: change.rule}})
         outcome = applied(rules, new, key, items)
-        texts = StoreTexts(game, request.state.language, datetime.now(UTC))
+        texts = StoreTexts(game, request.state.language)
         example = ""
         if outcome.example:
             item, points = outcome.example
@@ -200,9 +199,7 @@ def store_rule_routes(sessions: AdminSessions, views: StoreAdminViews) -> APIRou
             "kept": outcome.kept,
         }
         await views.apply_rule(game, settings, outcome.points, details, admin)
-        name = StoreTexts(game, request.state.language, datetime.now(UTC)).text(
-            f"games.{game.id}.price_rule.{key}"
-        )
+        name = StoreTexts(game, request.state.language).text(f"games.{game.id}.price_rule.{key}")
         toast(request, "web.admin.toast.store.rule", rule=name, count=str(outcome.changed))
         return RedirectResponse(store_url(request, game, f"/rules?rule={key}"), 303)
 
