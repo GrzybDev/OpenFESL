@@ -195,6 +195,17 @@ def wallet_of(game: Game, persona: Persona, code: str) -> Wallet:
     return Wallet(game.id, code, persona.account_id, owner, currency.allowance)
 
 
+def account_wallet(game: Game, account_id: int, code: str) -> Wallet:
+    """Return an account's wallet of a currency that its personas share.
+
+    Args:
+        game: The game, with the allowances the instance sets.
+        account_id: The account.
+        code: The currency.
+    """
+    return Wallet(game.id, code, account_id, None, game.currencies[code].allowance)
+
+
 class Wallets:
     """The balances that players spend in the currencies of their games."""
 
@@ -280,11 +291,8 @@ class Wallets:
             account_id: The account.
             codes: The currencies, each one that the account's personas share.
         """
-        currencies = await self.currencies(game)
-        wallets = [
-            Wallet(game.id, code, account_id, None, currencies[code].allowance) for code in codes
-        ]
-        return await self._store.peek(wallets)
+        game = await account_rules(game, self._settings)
+        return await self._store.peek([account_wallet(game, account_id, code) for code in codes])
 
     async def allowance_given(self, game: Game, account_id: int, code: str) -> datetime | None:
         """Return when an account received the allowance of a currency, if it did.

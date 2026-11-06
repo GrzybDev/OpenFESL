@@ -1,4 +1,4 @@
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from enum import StrEnum
@@ -18,7 +18,7 @@ from openfesl.core.personas import Persona
 from openfesl.core.policies import SettingStore
 from openfesl.core.rewards import Rewards
 from openfesl.core.store import Product, ProductStore
-from openfesl.core.wallets import Wallet
+from openfesl.core.wallets import Wallet, account_wallet
 
 
 class ClawRefusal(StrEnum):
@@ -299,12 +299,7 @@ class Claw:
         if box is None:
             return [], []
         chances, owned = await self._drops.chances(game, box, hero.persona, hero)
-        prizes = [
-            Prize(drop.product, chances[drop.product], drop.tier, drop.rare)
-            for drop in box.drops
-            if drop.product in chances
-        ]
-        return prizes, owned
+        return _prizes(box, chances), owned
 
     async def preview(self, game: Game, faction: str, hero_class: str) -> list[Prize]:
         """Return the prizes a hero of a faction and class that owns none of them may win.
@@ -317,12 +312,7 @@ class Claw:
         box = await self.box(game)
         if box is None:
             return []
-        chances = self._drops.odds(game, box, faction, hero_class)
-        return [
-            Prize(drop.product, chances[drop.product], drop.tier, drop.rare)
-            for drop in box.drops
-            if drop.product in chances
-        ]
+        return _prizes(box, self._drops.odds(game, box, faction, hero_class))
 
     async def grab(self, game: Game, account_id: int, hero_id: int, paid: bool) -> Grabbed:
         """Grab a prize for one of an account's heroes, drawn as the grab starts.
@@ -357,9 +347,8 @@ class Claw:
         day = today(self._clock(), await self.zone(game))
         wallet, price = None, 0
         if paid:
-            currencies = (await account_rules(game, self._settings)).currencies
-            allowance = currencies[rules.paid.currency].allowance
-            wallet = Wallet(game.id, rules.paid.currency, account_id, None, allowance)
+            priced = await account_rules(game, self._settings)
+            wallet = account_wallet(priced, account_id, rules.paid.currency)
             price = rules.paid.price
         grab = NewGrab(
             game.id,
@@ -404,3 +393,11 @@ class Claw:
         """
         rules = await self._rewards.rules(game)
         return rules.zone if rules else "UTC"
+
+
+def _prizes(box: Box, chances: Mapping[Product, Fraction]) -> list[Prize]:
+    return [
+        Prize(drop.product, chances[drop.product], drop.tier, drop.rare)
+        for drop in box.drops
+        if drop.product in chances
+    ]

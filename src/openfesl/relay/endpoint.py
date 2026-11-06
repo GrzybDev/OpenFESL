@@ -198,7 +198,7 @@ class _Link:
         try:
             self._outgoing.put_nowait(frame)
         except asyncio.QueueFull:
-            self._fail(_POLICY_VIOLATION, f"{SEND_LIMIT} frames are waiting for the hook")
+            self.end(_POLICY_VIOLATION, f"{SEND_LIMIT} frames are waiting for the hook")
 
     async def send_paced(self, frame: Data) -> None:
         """Queue a frame of a long burst, such as a game list, once at most half of the queue waits.
@@ -220,7 +220,9 @@ class _Link:
             code: The WebSocket close code.
             reason: Why, for the log.
         """
-        self._fail(code, reason)
+        if self._failure is None:
+            self._failure = (code, reason)
+            self._failed.set()
 
     def close_connection(self, key: ConnectionKey) -> None:
         """Stop handling a game connection after its queued packets, and ask the hook to close it.
@@ -238,12 +240,12 @@ class _Link:
             if message["type"] == "websocket.disconnect":
                 return
             if (data := message.get("bytes")) is None:
-                self._fail(_UNSUPPORTED_DATA, "the hook sent a text message")
+                self.end(_UNSUPPORTED_DATA, "the hook sent a text message")
                 return
             try:
                 frame = decode_frame(data)
             except FrameError as error:
-                self._fail(_PROTOCOL_ERROR, str(error))
+                self.end(_PROTOCOL_ERROR, str(error))
                 return
             self._dispatch(frame)
             if self._failure:
@@ -253,7 +255,7 @@ class _Link:
         match frame:
             case Open(key):
                 if key in self.inbound:
-                    self._fail(_PROTOCOL_ERROR, f"{_name(key)} was opened twice")
+                    self.end(_PROTOCOL_ERROR, f"{_name(key)} was opened twice")
                     return
                 logger.info(
                     "Session %d: %s opened to %s:%d from port %d",
@@ -275,7 +277,7 @@ class _Link:
                     # The server may have closed the connection while the game was still sending.
                     logger.debug("Session %d: dropped data for closed %s", self.number, _name(key))
                 elif inbound.packets.qsize() >= RECEIVE_LIMIT:
-                    self._fail(_POLICY_VIOLATION, f"{RECEIVE_LIMIT} packets wait on {_name(key)}")
+                    self.end(_POLICY_VIOLATION, f"{RECEIVE_LIMIT} packets wait on {_name(key)}")
                 else:
                     inbound.packets.put_nowait(packet)
             case Close(key):
@@ -297,11 +299,6 @@ class _Link:
             frame = await self._outgoing.get()
             self._dequeued.set()
             await self._websocket.send_bytes(encode_frame(frame))
-
-    def _fail(self, code: int, reason: str) -> None:
-        if self._failure is None:
-            self._failure = (code, reason)
-            self._failed.set()
 
 
 def _name(key: ConnectionKey) -> str:

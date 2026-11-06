@@ -16,7 +16,7 @@ from openfesl.core.personas import Persona
 from openfesl.core.policies import SettingStore
 from openfesl.core.store import Bundle, Offer, Product, ProductStore, offer
 from openfesl.core.texts import BASE_LANGUAGE
-from openfesl.core.wallets import Wallet, wallet_of
+from openfesl.core.wallets import Wallet, account_wallet, wallet_of
 
 # The code of a refused purchase and its causes, which the game only logs: a product it does
 # not sell, an item the hero may not use, an ability level before the one below it, an item the
@@ -313,8 +313,7 @@ class Purchases:
         )
         if product is None:
             raise PurchaseRefused(UNKNOWN_PRODUCT)
-        allowance = game.currencies[product.currency].allowance
-        wallet = Wallet(game.id, product.currency, account_id, None, allowance)
+        wallet = account_wallet(game, account_id, product.currency)
         await self._store.buy_for_account(account_id, product_id, product, wallet, count)
 
     async def refund(self, game: Game, persona: Persona) -> Refund | None:

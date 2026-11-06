@@ -36,7 +36,7 @@ from openfesl.core.stats import (
     partition_of,
 )
 from openfesl.core.store import ProductStore
-from openfesl.core.wallets import Wallet
+from openfesl.core.wallets import account_wallet
 from openfesl.protocol.rank import Period as StatPeriod
 
 # The key of the reward that a first treasure chest brings.
@@ -375,14 +375,12 @@ class Rewards:
         )
         funds = None
         if gift.funds:
-            currencies = (await account_rules(game, self._settings)).currencies
-            allowance = currencies[rules.currency].allowance
-            funds = Wallet(game.id, rules.currency, account_id, None, allowance), gift.funds
+            priced = await account_rules(game, self._settings)
+            funds = account_wallet(priced, account_id, rules.currency), gift.funds
         points = None
         if gift.points and rules.points:
-            currencies = (await account_rules(game, self._settings)).currencies
-            held = currencies[rules.points].allowance
-            points = Wallet(game.id, rules.points, account_id, None, held), gift.points
+            priced = await account_rules(game, self._settings)
+            points = account_wallet(priced, account_id, rules.points), gift.points
         keys = (key_tag(game.chests), gift.keys) if gift.keys and game.chests else None
         grant = Grant(
             game.id,

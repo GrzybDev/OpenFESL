@@ -46,9 +46,7 @@ class SqlKeyStore:
             rows = await session.scalars(
                 select(ProductKeyGrantRow).where(ProductKeyGrantRow.key_id == key.id)
             )
-            return [
-                Grant(tag=row.tag, group=row.group_name, product=row.product_id) for row in rows
-            ]
+            return [_grant(row) for row in rows]
 
     async def redeem(self, account_id: int, code: str) -> list[Grant] | KeyRefusal:
         """Grant an account what an enabled product key grants, within the key's limits.
@@ -87,9 +85,7 @@ class SqlKeyStore:
                     select(ProductKeyGrantRow).where(ProductKeyGrantRow.key_id == key.id)
                 )
             )
-            grants = [
-                Grant(tag=row.tag, group=row.group_name, product=row.product_id) for row in rows
-            ]
+            grants = [_grant(row) for row in rows]
             if grants:
                 await session.execute(grant_statement(account_id, grants))
             return grants
@@ -109,9 +105,7 @@ class SqlKeyStore:
             )
             grants: dict[int, list[Grant]] = {key.id: [] for key in keys}
             for row in await session.scalars(select(ProductKeyGrantRow)):
-                grants[row.key_id].append(
-                    Grant(tag=row.tag, group=row.group_name, product=row.product_id)
-                )
+                grants[row.key_id].append(_grant(row))
             counted = await session.execute(
                 select(ProductKeyUseRow.key_id, func.count()).group_by(ProductKeyUseRow.key_id)
             )
@@ -174,17 +168,11 @@ class SqlKeyStore:
             key = await session.scalar(
                 select(ProductKeyRow).where(ProductKeyRow.code == code).with_for_update()
             )
-            if key is None:
-                return
+            assert key is not None
             await session.execute(
                 delete(ProductKeyGrantRow).where(ProductKeyGrantRow.key_id == key.id)
             )
-            session.add_all(
-                ProductKeyGrantRow(
-                    key_id=key.id, tag=grant.tag, group_name=grant.group, product_id=grant.product
-                )
-                for grant in grants
-            )
+            session.add_all(_grant_rows(key.id, grants))
             details: dict[str, object] = {"tags": [grant.tag for grant in grants]}
             session.add(
                 action_row(AdminAction.KEY_GRANTS, code, details | {"labels": labels}, admin)
@@ -306,20 +294,25 @@ class SqlKeyStore:
                 if admin is not None:
                     details = {"starting": True}
                     session.add(action_row(AdminAction.KEY_ADD, key.code, details, admin))
-                session.add_all(
-                    ProductKeyGrantRow(
-                        key_id=key_id,
-                        tag=grant.tag,
-                        group_name=grant.group,
-                        product_id=grant.product,
-                    )
-                    for grant in key.entitlements
-                )
+                session.add_all(_grant_rows(key_id, key.entitlements))
         return added
 
 
 def _named(code: str) -> ColumnElement[bool]:
     return func.upper(ProductKeyRow.code) == func.upper(code.strip())
+
+
+def _grant(row: ProductKeyGrantRow) -> Grant:
+    return Grant(tag=row.tag, group=row.group_name, product=row.product_id)
+
+
+def _grant_rows(key_id: int, grants: Sequence[Grant]) -> list[ProductKeyGrantRow]:
+    return [
+        ProductKeyGrantRow(
+            key_id=key_id, tag=grant.tag, group_name=grant.group, product_id=grant.product
+        )
+        for grant in grants
+    ]
 
 
 def _enabled(code: str) -> ColumnElement[bool]:

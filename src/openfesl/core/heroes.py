@@ -12,7 +12,7 @@ from openfesl.core.hero_rules import HeroRules
 from openfesl.core.personas import Persona
 from openfesl.core.policies import SettingStore
 from openfesl.core.stats import PERSONA, Owner, StatStore, bucket_of, partition_of
-from openfesl.core.wallets import Wallet
+from openfesl.core.wallets import Wallet, account_wallet
 from openfesl.protocol.rank import Period
 
 
@@ -400,9 +400,8 @@ class Heroes:
         """
         game = await account_rules(game, self._settings)
         rules = _rules(game)
-        bought = await self._store.buy_slot(
-            account_id, game.id, self._price(game, account_id), price
-        )
+        wallet = account_wallet(game, account_id, rules.currency)
+        bought = await self._store.buy_slot(account_id, game.id, wallet, price)
         return rules.slots + bought
 
     async def rename(self, game: Game, persona: Persona, name: str, price: int) -> None:
@@ -426,13 +425,8 @@ class Heroes:
             raise HeroRefused(Refusal.FORMAT)
         if name.casefold() == persona.name.casefold():
             raise HeroRefused(Refusal.SAME)
-        await self._store.rename(persona, name, self._price(game, persona.account_id), price)
-
-    def _price(self, game: Game, account_id: int) -> Wallet:
-        # The account's wallet that the game's prices are paid from.
-        currency = _rules(game).currency
-        allowance = game.currencies[currency].allowance
-        return Wallet(game.id, currency, account_id, None, allowance)
+        wallet = account_wallet(game, persona.account_id, rules.currency)
+        await self._store.rename(persona, name, wallet, price)
 
     async def create(self, game: Game, account_id: int, look: Look, name: str) -> Persona:
         """Create a hero with its starting stats and items.

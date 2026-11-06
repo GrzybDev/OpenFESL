@@ -15,7 +15,7 @@ from openfesl.core.policies import SettingStore
 from openfesl.core.reward_rules import Gift
 from openfesl.core.rewards import Rewards
 from openfesl.core.store_items import requirement
-from openfesl.core.wallets import Wallet
+from openfesl.core.wallets import Wallet, account_wallet
 
 # The most personal codes one batch makes.
 MOST_BATCH = 1000
@@ -451,9 +451,8 @@ class GiftCodes:
         assert rules is not None
         funds = None
         if gift.funds:
-            currencies = (await account_rules(game, self._settings)).currencies
-            allowance = currencies[rules.currency].allowance
-            funds = Wallet(game.id, rules.currency, account_id, None, allowance), gift.funds
+            priced = await account_rules(game, self._settings)
+            funds = account_wallet(priced, account_id, rules.currency), gift.funds
         keys = (key_tag(game.chests), gift.keys) if gift.keys and game.chests else None
         grant = CodeGrant(
             found.code,
