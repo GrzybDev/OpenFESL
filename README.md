@@ -67,7 +67,7 @@ tested; other versions are expected to work, but that is not guaranteed.
 - The rewards calendar, starter packs and milestones, gift codes, Recruit a Friend and the Daily Claw
 - Friends, the player search and dedicated servers' VIP lists, in the game and on the site
 - The portraits the game renders of its heroes, heroes' leaderboards, and heroes' and players' public profiles
-- Dedicated servers that log in with a player's account and hero, approved like other games' servers
+- Dedicated servers that share a server account, approved like other games' servers
 - The game's catalogue of items, texts, icons and hero models, extracted from a copy of the game and imported
 - The game's web pages: a front page, Play Now, the guide to playing, heroes, the store, hot deals, treasure chests,
   the Daily Claw, redeeming codes, Funds, rewards, Recruit a Friend, friends, the player search, leaderboards and

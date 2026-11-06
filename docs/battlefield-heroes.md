@@ -12,7 +12,7 @@ includes; the admin panel changes most of them. The game's web pages are under `
 
 Started without a session, `BFHeroes.exe` opens OpenFESLHook's
 [launcher](https://github.com/GrzybDev/OpenFESLHook#battlefield-heroes), which signs in at `POST /launcher/session`
-with the account's e-mail address and game password, to play or to host
+with the account's e-mail address and game password to play, or asks for the dedicated servers' session to host
 ([launcher sign-in](https://github.com/GrzybDev/OpenFESLHook/blob/main/docs/relay-protocol.md#launcher-sign-in)). The
 session it gets starts the game as the account's default hero, or its oldest playable one; an account without a hero
 is refused with `no-hero`.
@@ -44,9 +44,12 @@ which leads to the site's page in the address's language, or else the browser's.
 
 ## Dedicated servers
 
-A dedicated server is `BFHeroes.exe` started to host through OpenFESLHook's launcher. It logs in with a player's
-account and hero, so the account that hosts needs a hero. Its games are approved, revoked and listed like other
-games' servers ([Administration](../README.md#administration)), and `connect.minimum_client_version` and
+A dedicated server is `BFHeroes.exe` started to host through OpenFESLHook's launcher, or by hand with the session
+`POST /launcher/session` gives for `{"game": "bfheroes", "role": "host"}`. Servers share an account and a persona of
+the service, `bfh.server`, so hosting needs no account of a player, and what the launcher sends for one is ignored.
+A server's Magma calls about its players need the relay token of its game process, which OpenFESLHook adds. Its games
+are approved, revoked and listed like other games' servers ([Administration](../README.md#administration)), and
+`connect.minimum_client_version` and
 `connect.maintenance` keep it out as they keep players out ([Policies](../README.md#policies)).
 
 At the end of a round, a server reports the heroes' stats, credits Valor Points, at most 1,000 to an account within
