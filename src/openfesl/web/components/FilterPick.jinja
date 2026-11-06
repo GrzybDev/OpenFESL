@@ -1,0 +1,12 @@
+{#def name: str, value, type: str = "radio", checked: bool = False, form: str = "" #}
+{# One of a form's choices side by side, as a small block that takes the accent while chosen. Its
+   classes go on the block. #}
+<label class="prices-filter-pick{% if attrs.classes %} {{ attrs.classes }}{% endif %}">
+  <input type="{{ type }}"
+         name="{{ name }}"
+         {% if form %} form="{{ form }}"{% endif %}
+         value="{{ value }}"
+         {% if checked %} checked{% endif %}
+         class="choice-input">
+  <span>{{ content }}</span>
+</label>

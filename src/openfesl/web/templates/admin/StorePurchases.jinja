@@ -47,14 +47,7 @@
             <legend class="bar prices-filter-legend">{{ _("web.admin.purchases.filter.currency") }}</legend>
             <div class="prices-filter-row">
               {% for code in [""] + game.currencies|list %}
-                <label class="prices-filter-pick">
-                  <input type="radio"
-                         name="currency"
-                         value="{{ code }}"
-                         {% if listing.currency == code %} checked{% endif %}
-                         class="choice-input">
-                  <span>{{ _("games." ~ game.id ~ ".currency." ~ code) if code else _("web.admin.store.filter.any") }}</span>
-                </label>
+                <FilterPick name="currency" :value="code" :checked="listing.currency == code">{{ _("games." ~ game.id ~ ".currency." ~ code) if code else _("web.admin.store.filter.any") }}</FilterPick>
               {% endfor %}
             </div>
           </fieldset>

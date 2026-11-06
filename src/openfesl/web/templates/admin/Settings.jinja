@@ -80,14 +80,7 @@
                 <span class="settings-policy-name">{{ _("web.admin.policy.accounts.email_verification") }}</span>
                 <span class="settings-policy-text">{{ _("web.admin.policy.site.email_verification.text") }}</span>
               </span>
-              <span class="check-place">
-                <input type="checkbox"
-                       name="accounts.email_verification"
-                       value="on"
-                       {% if site %} checked{% endif %}
-                       class="check">
-                <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span>
-              </span>
+              <CheckBox name="accounts.email_verification" value="on" :checked="site" />
             </label>
             <p class="settings-default">
               {{ _("web.admin.settings.site.default") if site else _("web.admin.settings.site.changed") }}
@@ -137,14 +130,7 @@
                       <span class="settings-policy-name">{{ _("web.admin.policy." ~ name) }}</span>
                       <span class="settings-policy-text">{{ _("web.admin.policy." ~ name ~ ".text") }}</span>
                     </span>
-                    <span class="check-place">
-                      <input type="checkbox"
-                             name="{{ name }}"
-                             value="on"
-                             {% if policy.value == "on" %} checked{% endif %}
-                             class="check">
-                      <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span>
-                    </span>
+                    <CheckBox :name="name" value="on" :checked="policy.value == 'on'" />
                   </label>
                 {% elif policy.kind == "choice" %}
                   <fieldset class="settings-choice">

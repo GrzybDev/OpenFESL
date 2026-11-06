@@ -69,13 +69,7 @@
                 <span class="prices-off-title">{{ _("web.admin.store.not_sold") }}</span>
                 <span>{{ _("web.admin.store.not_sold.text" if row.prices.alone else "web.admin.store.not_sold.text.drops") }}</span>
               </span>
-              <span class="check-place">
-                <input type="checkbox"
-                       name="unsold"
-                       value="1"
-                       {% if unsold %} checked{% endif %}
-                       class="check">
-                <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>
+              <CheckBox name="unsold" :checked="unsold" />
             </label>
           {% endif %}
           <Bar id="prices-points" :extra="_n('web.admin.store.points.own', lines|selectattr('own')|list|length, total=number(lines|length))">{{ _("web.admin.store.points") }}</Bar>
@@ -143,14 +137,7 @@
                       {% if editable %}
                         <div role="cell" class="admin-cell prices-state">
                           <label class="prices-sold">
-                            <span class="check-place">
-                              <input type="checkbox"
-                                     name="sold-{{ product.id }}"
-                                     value="1"
-                                     {% if sold %} checked{% endif %}
-                                     class="check">
-                              <span aria-hidden="true"
-                                    class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>
+                            <CheckBox :name="'sold-' ~ product.id" :checked="sold" />
                             {{ _("web.admin.store.point.on") }}
                           </label>
                         </div>
@@ -198,15 +185,7 @@
                   <legend class="field-label">{{ _("web.admin.store.point.column.currency") }}</legend>
                   <div class="prices-picks">
                     {% for code in adding.currencies %}
-                      <label class="prices-filter-pick">
-                        <input type="radio"
-                               name="add-currency"
-                               form="prices-add"
-                               value="{{ code }}"
-                               {% if form.get("add-currency", adding.currencies[0]) == code %} checked{% endif %}
-                               class="choice-input">
-                        <span>{{ _("games." ~ game.id ~ ".currency." ~ code) }}</span>
-                      </label>
+                      <FilterPick name="add-currency" form="prices-add" :value="code" :checked="form.get('add-currency', adding.currencies[0]) == code">{{ _("games." ~ game.id ~ ".currency." ~ code) }}</FilterPick>
                     {% endfor %}
                   </div>
                 </fieldset>
@@ -217,15 +196,7 @@
                   {% else %}
                     <div class="prices-picks">
                       {% for written in adding.ownerships %}
-                        <label class="prices-filter-pick">
-                          <input type="radio"
-                                 name="add-ownership"
-                                 form="prices-add"
-                                 value="{{ written }}"
-                                 {% if form.get("add-ownership", adding.ownerships[0]) == written %} checked{% endif %}
-                                 class="choice-input">
-                          <span>{{ _("web.store.price.permanent") if written == "perm" else _n("web.store.price.days", written[:-1]|int) }}</span>
-                        </label>
+                        <FilterPick name="add-ownership" form="prices-add" :value="written" :checked="form.get('add-ownership', adding.ownerships[0]) == written">{{ _("web.store.price.permanent") if written == "perm" else _n("web.store.price.days", written[:-1]|int) }}</FilterPick>
                       {% endfor %}
                     </div>
                   {% endif %}

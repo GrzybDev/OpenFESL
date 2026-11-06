@@ -42,13 +42,7 @@
               <span>{{ tier_name(tier.index) }} · {{ _n("web.admin.boxes.entries", tier.entries|length) }}{% if tier.index in rare %} · {{ _("web.claw.rare") }}{% endif %}</span>
               {% if manages %}
                 <label class="claw-rare-mark">
-                  <span class="check-place">
-                    <input type="checkbox"
-                           name="rare-{{ tier.index }}"
-                           value="1"
-                           {% if marked %} checked{% endif %}
-                           class="check">
-                    <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>
+                  <CheckBox :name="'rare-' ~ tier.index" :checked="marked" />
                   {{ _("web.admin.boxes.claw.rare_mark") }}
                 </label>
                 <label class="box-weight">
@@ -81,14 +75,7 @@
                       {% if manages %}
                         <div role="cell" class="admin-cell prices-state">
                           <label class="prices-sold">
-                            <span class="check-place">
-                              <input type="checkbox"
-                                     name="remove-{{ product.id }}"
-                                     value="1"
-                                     {% if form.get("remove-" ~ product.id) %} checked{% endif %}
-                                     class="check">
-                              <span aria-hidden="true"
-                                    class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>
+                            <CheckBox :name="'remove-' ~ product.id" :checked="form.get('remove-' ~ product.id)" />
                             {{ _("web.admin.boxes.entry.remove") }}
                           </label>
                         </div>
@@ -138,26 +125,12 @@
                 </p>
                 <div class="prices-picks">
                   {% for option in found.options %}
-                    <label class="prices-filter-pick">
-                      <input type="radio"
-                             name="ownership"
-                             value="{{ option.written }}"
-                             {% if loop.first %} checked{% endif %}
-                             class="choice-input">
-                      <span>{{ option.label }}</span>
-                    </label>
+                    <FilterPick name="ownership" :value="option.written" :checked="loop.first">{{ option.label }}</FilterPick>
                   {% endfor %}
                 </div>
                 <div class="prices-picks">
                   {% for tier in tiers %}
-                    <label class="prices-filter-pick">
-                      <input type="radio"
-                             name="tier"
-                             value="{{ tier.index }}"
-                             {% if loop.first %} checked{% endif %}
-                             class="choice-input">
-                      <span>{{ tier_name(tier.index) }}</span>
-                    </label>
+                    <FilterPick name="tier" :value="tier.index" :checked="loop.first">{{ tier_name(tier.index) }}</FilterPick>
                   {% endfor %}
                 </div>
                 <FormButton icon="plus">{{ _("web.admin.boxes.add.submit") }}</FormButton>

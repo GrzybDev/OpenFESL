@@ -21,13 +21,7 @@
       <span class="prices-off-title">{{ title }}</span>
       <span>{{ text }}</span>
     </span>
-    <span class="check-place">
-      <input type="checkbox"
-             name="{{ name }}"
-             value="1"
-             {% if values[name] %} checked{% endif %}
-             class="check">
-      <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>
+    <CheckBox :name="name" :checked="values[name]" />
   </label>
 {% endmacro %}
 {% macro number_field(name, label) %}

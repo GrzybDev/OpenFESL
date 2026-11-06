@@ -123,23 +123,9 @@
                   {% set sold = rule.sold|map(attribute="written")|list %}
                   {% for days in rules.rentals|sort %}
                     {% set written = days ~ "d" %}
-                    <label class="prices-filter-pick">
-                      <input type="checkbox"
-                             name="sold-{{ written }}"
-                             value="1"
-                             {% if (form.get('sold-' ~ written) if form else written in sold) %} checked{% endif %}
-                             class="choice-input">
-                      <span>{{ _n("web.store.price.days", days) }}</span>
-                    </label>
+                    <FilterPick :name="'sold-' ~ written" value="1" :checked="form.get('sold-' ~ written) if form else written in sold" type="checkbox">{{ _n("web.store.price.days", days) }}</FilterPick>
                   {% endfor %}
-                  <label class="prices-filter-pick">
-                    <input type="checkbox"
-                           name="sold-perm"
-                           value="1"
-                           {% if (form.get('sold-perm') if form else 'perm' in sold) %} checked{% endif %}
-                           class="choice-input">
-                    <span>{{ _("web.store.price.permanent") }}</span>
-                  </label>
+                  <FilterPick name="sold-perm" value="1" :checked="form.get('sold-perm') if form else 'perm' in sold" type="checkbox">{{ _("web.store.price.permanent") }}</FilterPick>
                 </div>
               </fieldset>
             {% endif %}

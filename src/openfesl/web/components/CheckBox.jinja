@@ -1,0 +1,10 @@
+{#def name: str, value = "1", checked: bool = False #}
+{# A square check box with its tick, which the label around it toggles. Further attributes go on the
+   field. #}
+<span class="check-place">
+  <input type="checkbox"
+         name="{{ name }}"
+         value="{{ value }}"
+         {% if checked %} checked{% endif %}
+         {{ attrs.render(class="check") }}>
+  <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>

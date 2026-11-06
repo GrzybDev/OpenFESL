@@ -26,14 +26,7 @@
             <span class="settings-policy-name">{{ _("web.admin.game_mark.switch") }}</span>
             <span class="settings-policy-text">{{ _("web.admin.game_mark.switch.text", game=short) }}</span>
           </span>
-          <span class="check-place">
-            <input type="checkbox"
-                   name="shown"
-                   value="on"
-                   {% if mark.shown %} checked{% endif %}
-                   class="check">
-            <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span>
-          </span>
+          <CheckBox name="shown" value="on" :checked="mark.shown" />
         </label>
       {% else %}
         <div class="settings-switch-row">

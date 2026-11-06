@@ -30,13 +30,7 @@
         <fieldset class="rules-fields"{% if not manages %} disabled{% endif %}>
           <label class="check-row prices-off-row">
             <span class="prices-off-text"><span class="prices-off-title">{{ _("web.admin.deals.section.runs") }}</span></span>
-            <span class="check-place">
-              <input type="checkbox"
-                     name="enabled"
-                     value="1"
-                     {% if (form.get("enabled") if form else section.enabled) %} checked{% endif %}
-                     class="check">
-              <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>
+            <CheckBox name="enabled" :checked="form.get('enabled') if form else section.enabled" />
           </label>
           {% if section.size is not none %}
             <label for="section-size" class="field-label">{{ _("web.admin.deals.section.size") }}</label>
@@ -101,14 +95,7 @@
                       <fieldset class="pool-states" {% if not manages %} disabled{% endif %}>
                         <legend class="sr-only">{{ _("web.admin.deals.pool.state.of", offer=entry.name) }}</legend>
                         {% for state, glyph in states %}
-                          <label class="prices-filter-pick pool-pick">
-                            <input type="radio"
-                                   name="{{ field }}"
-                                   value="{{ state }}"
-                                   {% if chosen == state %} checked{% endif %}
-                                   class="choice-input">
-                            <span><Icon :name="glyph" :size="12" stroke="currentColor" />{{ _("web.admin.deals.pool." ~ state) }}</span>
-                          </label>
+                          <FilterPick :name="field" :value="state" :checked="chosen == state" class="pool-pick"><Icon :name="glyph" :size="12" stroke="currentColor" />{{ _("web.admin.deals.pool." ~ state) }}</FilterPick>
                         {% endfor %}
                       </fieldset>
                     </div>

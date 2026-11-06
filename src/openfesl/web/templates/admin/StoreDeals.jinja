@@ -28,13 +28,7 @@
               <span>{{ _("web.admin.deals.rotation.on" if rules.enabled else "web.admin.deals.rotation.off") }}</span>
             </span>
             {% if manages %}
-              <span class="check-place">
-                <input type="checkbox"
-                       name="enabled"
-                       value="1"
-                       {% if rules.enabled %} checked{% endif %}
-                       class="check">
-                <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>
+              <CheckBox name="enabled" :checked="rules.enabled" />
             {% else %}
               <span class="prices-from">{{ _("web.admin.deals.switch.on" if rules.enabled else "web.admin.deals.switch.off") }}</span>
             {% endif %}

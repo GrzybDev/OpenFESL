@@ -91,10 +91,7 @@
           {% if replaced %}
             <label class="catalogue-confirm-box no-js-only">
               <span>{{ _("web.admin.catalogue.confirm.check", game=listed(replaced|map(attribute="game.name")|list)) }}</span>
-              <span class="check-place">
-                <input type="checkbox" name="confirmed" value="1" required class="check">
-                <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span>
-              </span>
+              <CheckBox name="confirmed" required />
             </label>
           {% endif %}
           <div data-catalogue-send>

@@ -143,13 +143,7 @@
               <span class="prices-off-title">{{ _("web.admin.deals.offer.pinned") }}</span>
               <span>{{ _("web.admin.deals.offer.pinned.text") }}</span>
             </span>
-            <span class="check-place">
-              <input type="checkbox"
-                     name="pinned"
-                     value="1"
-                     {% if draft.pinned %} checked{% endif %}
-                     class="check">
-              <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>
+            <CheckBox name="pinned" :checked="draft.pinned" />
           </label>
           <p class="bar offer-legend">{{ _("web.admin.deals.offer.text") }}</p>
           <div class="choice-tiles offer-tiles">

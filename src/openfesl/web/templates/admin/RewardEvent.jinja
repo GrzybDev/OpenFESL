@@ -112,14 +112,7 @@
                 <p class="reward-part-head">
                   <span>{{ who(view.part) }}</span>
                   <label class="prices-sold">
-                    <span class="check-place">
-                      <input type="checkbox"
-                             name="on-{{ view.key }}"
-                             value="1"
-                             {% if draft_part.on %} checked{% endif %}
-                             class="check">
-                      <span aria-hidden="true"
-                            class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>
+                    <CheckBox :name="'on-' ~ view.key" :checked="draft_part.on" />
                     <span class="sr-only">{{ who(view.part) }}: </span>{{ _("web.admin.rewards.on") }}
                   </label>
                 </p>
@@ -263,26 +256,12 @@
                   </p>
                   <div class="prices-picks">
                     {% for view in found.parts if view.part.faction %}
-                      <label class="prices-filter-pick">
-                        <input type="radio"
-                               name="to-{{ id }}"
-                               value="{{ view.key }}"
-                               {% if view.key == (candidate.part or found.parts[0].key) %} checked{% endif %}
-                               class="choice-input">
-                        <span>{{ who(view.part) }}</span>
-                      </label>
+                      <FilterPick :name="'to-' ~ id" :value="view.key" :checked="view.key == (candidate.part or found.parts[0].key)">{{ who(view.part) }}</FilterPick>
                     {% endfor %}
                   </div>
                   <div class="prices-picks reward-ownerships">
                     {% for written, name in found.ownerships %}
-                      <label class="prices-filter-pick">
-                        <input type="radio"
-                               name="own-{{ id }}"
-                               value="{{ written }}"
-                               {% if loop.first %} checked{% endif %}
-                               class="choice-input">
-                        <span>{{ name }}</span>
-                      </label>
+                      <FilterPick :name="'own-' ~ id" :value="written" :checked="loop.first">{{ name }}</FilterPick>
                     {% endfor %}
                     <label class="reward-amount reward-uses">
                       <span class="reward-amount-label">{{ _("web.admin.items.tile.uses") }}</span>

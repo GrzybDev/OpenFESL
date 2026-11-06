@@ -103,15 +103,7 @@
         {% endif %}
         <label class="key-edit-once">
           <span class="check-label">{{ _("web.admin.key.uses.once") }}</span>
-          <span class="check-place">
-            <input type="checkbox"
-                   name="once"
-                   value="1"
-                   {% if form.once %} checked{% endif %}
-                   aria-describedby="edit-once-note"
-                   class="check">
-            <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span>
-          </span>
+          <CheckBox name="once" aria-describedby="edit-once-note" :checked="form.once" />
         </label>
         <p id="edit-once-note" class="field-note">{{ _("web.admin.key.limits.once.note") }}</p>
       </section>

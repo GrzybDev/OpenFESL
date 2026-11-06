@@ -223,14 +223,7 @@
                       <span class="rewards-currency">{{ _("games." ~ game.id ~ ".currency." ~ rules.currency) }}</span>
                     </label>
                     <label class="prices-sold">
-                      <span class="check-place">
-                        <input type="checkbox"
-                               name="on-{{ key }}"
-                               value="1"
-                               {% if on %} checked{% endif %}
-                               class="check">
-                        <span aria-hidden="true"
-                              class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>
+                      <CheckBox :name="'on-' ~ key" :checked="on" />
                       <span class="sr-only">{{ name }}: </span>{{ _("web.admin.rewards.on") }}
                     </label>
                   {% else %}

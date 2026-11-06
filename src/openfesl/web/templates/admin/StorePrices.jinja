@@ -138,14 +138,7 @@
                 <legend class="bar prices-filter-legend">{{ _("web.admin.store.filter." ~ name) }}</legend>
                 <div class="prices-filter-row">
                   {% for option in [""] + options|list %}
-                    <label class="prices-filter-pick">
-                      <input type="radio"
-                             name="{{ name }}"
-                             value="{{ option }}"
-                             {% if listing[field] == option %} checked{% endif %}
-                             class="choice-input">
-                      <span>{{ _("games." ~ game.id ~ "." ~ name ~ "." ~ option) if option else _("web.admin.store.filter.any") }}</span>
-                    </label>
+                    <FilterPick :name="name" :value="option" :checked="listing[field] == option">{{ _("games." ~ game.id ~ "." ~ name ~ "." ~ option) if option else _("web.admin.store.filter.any") }}</FilterPick>
                   {% endfor %}
                 </div>
               </fieldset>
