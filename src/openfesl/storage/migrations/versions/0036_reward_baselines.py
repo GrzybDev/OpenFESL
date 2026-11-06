@@ -4,16 +4,12 @@ Revision ID: 0036
 Revises: 0035
 """
 
-from collections.abc import Sequence
-
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects.postgresql import JSONB
 
 revision: str = "0036"
 down_revision: str | None = "0035"
-branch_labels: str | Sequence[str] | None = None
-depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
