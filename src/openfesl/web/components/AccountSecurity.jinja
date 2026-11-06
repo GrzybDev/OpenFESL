@@ -170,10 +170,7 @@
         </form>
         <form method="post" action="{{ url('/sign-out/everywhere') }}">
           <CsrfField />
-          <button type="submit" aria-describedby="sessions-note" class="form-button">
-            <span aria-hidden="true"
-                  class="form-glyph"><Icon name="sign-out" :size="14" stroke="#F4F4EE" /></span>{{ _("web.account.sessions.everywhere") }}
-          </button>
+          <FormButton icon="sign-out" aria-describedby="sessions-note">{{ _("web.account.sessions.everywhere") }}</FormButton>
         </form>
       </div>
       <p id="sessions-note" class="field-note">{{ _("web.account.sessions.everywhere.note") }}</p>

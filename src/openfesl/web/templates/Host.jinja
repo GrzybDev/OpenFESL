@@ -8,12 +8,7 @@
 {% endmacro %}
 {% macro inline(name) %}<code class="host-inline">{{ name }}</code>{% endmacro %}
 <Layout :title="title">
-  <div id="live"
-       hx-get="{{ here }}"
-       hx-trigger="every 15s, refresh"
-       hx-select="#live"
-       hx-select-oob="#shell-games:outerMorph"
-       hx-swap="outerMorph">
+  <LiveArea shell>
     <GameStatus :activity="activity" />
     <GameMenu current="host" />
 
@@ -106,5 +101,5 @@
         {% endif %}
       </div>
     </Panel>
-  </div>
+  </LiveArea>
 </Layout>

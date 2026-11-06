@@ -26,10 +26,7 @@
   <StoreHead :game="game" current="deals" :subtitle="_('web.admin.deals.subtitle', game=game.name)" />
   <Panel class="enter-panel">
     <DealsTabs :game="game" current="offers" />
-    <nav aria-label="{{ _('web.admin.deals.view.offers') }}"
-         class="tabs prices-back">
-      <Tab :href="base" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.deals.view.offers") }}</Tab>
-    </nav>
+    <PanelBack :href="base" :label="_('web.admin.deals.view.offers')" />
     {% if not manages %}
       <RoleNote glyph="lock" lines>{{ _("web.admin.deals.managed") }}</RoleNote>
     {% endif %}

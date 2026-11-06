@@ -1,11 +1,7 @@
 {#def online: int, logged_in: int, hosting: int, accounts: int, new_accounts: int, mode: str, waiting: list, warnings: list, flags: list, short: list, paused: list #}
 {% set title = _("web.admin.home") %}
 <AdminPage :title="title" current="home">
-  <div id="live"
-       hx-get="{{ here }}"
-       hx-trigger="every 15s, refresh"
-       hx-select="#live"
-       hx-swap="outerMorph">
+  <LiveArea>
     <PageHead labelledby="home-title"
               :title="title"
               :subtitle="_('web.admin.home.subtitle')">
@@ -188,5 +184,5 @@
         </div>
       </div>
     </Panel>
-  </div>
+  </LiveArea>
 </AdminPage>

@@ -9,13 +9,7 @@
     <p class="enter-panel menu-lead">{{ _("web.menu.lead") }}</p>
   </section>
 
-  <Panel id="live"
-         :hx-get="here"
-         hx-trigger="every 15s, refresh"
-         hx-select="#live"
-         hx-select-oob="#shell-games:outerMorph"
-         hx-swap="outerMorph"
-         class="enter-panel">
+  <LiveArea shell class="panel enter-panel">
     <div class="menu-columns">
 
       <section aria-labelledby="menu-games" class="menu-games">
@@ -146,5 +140,5 @@
       </div>
 
     </div>
-  </Panel>
+  </LiveArea>
 </Layout>

@@ -86,11 +86,7 @@
   {% endif %}
 {%- endmacro %}
 <AdminPage :title="title" current="servers">
-  <div id="live"
-       hx-get="{{ here }}"
-       hx-trigger="every 15s, refresh"
-       hx-select="#live"
-       hx-swap="outerMorph">
+  <LiveArea>
     <PageHead labelledby="servers-title"
               :title="title"
               :subtitle="_('web.admin.servers.subtitle')">
@@ -136,13 +132,7 @@
                           {%- if view.game %}<GameChip :of="view.game" /> {% endif %}
                           {%- if server.official %}<OfficialChip />{% endif %}
                         </span>
-                        <a href="{{ list ~ listing.changed(open=None if open else server.ugid).link() }}#row-{{ server.ugid }}"
-                           role="button"
-                           aria-expanded="{{ 'true' if open else 'false' }}"
-                           aria-controls="details-{{ server.ugid }}"
-                           aria-label="{{ _('web.servers.details', name=server.name) }}"
-                           data-details
-                           class="details-button"><span><Icon name="down" stroke="#F4F4EE" class="details-chevron" /></span></a>
+                        <DetailsButton :href="list ~ listing.changed(open=None if open else server.ugid).link() ~ '#row-' ~ server.ugid" :open="open" :key="server.ugid" :name="server.name" />
                       </div>
                       <div role="cell" class="admin-cell row-cell cell-stack">
                         <ProviderName :view="view" />
@@ -278,5 +268,5 @@
         </div>
       </div>
     </Panel>
-  </div>
+  </LiveArea>
 </AdminPage>

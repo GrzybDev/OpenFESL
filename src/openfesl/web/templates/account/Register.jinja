@@ -71,13 +71,7 @@
           <p class="alert-text">{{ _("web.account.register.service.text", service=service.name) }}</p>
           <div class="register-ways">
             <SmallAction :href="url('/sign-in')" :label="_('web.account.sign_in.email.only')" />
-            <button type="submit"
-                    formaction="{{ url('/register/service/cancel') }}"
-                    formnovalidate
-                    class="form-button">
-              <span aria-hidden="true"
-                    class="form-glyph"><Icon name="x" :size="14" stroke="#F4F4EE" /></span>{{ _("web.account.proof.cancel") }}
-            </button>
+            <FormButton icon="x" :formaction="url('/register/service/cancel')" formnovalidate>{{ _("web.account.proof.cancel") }}</FormButton>
           </div>
         </div>
       {% endif %}

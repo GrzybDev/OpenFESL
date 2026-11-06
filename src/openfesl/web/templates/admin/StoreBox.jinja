@@ -51,10 +51,7 @@
            current="store">
   <StoreHead :game="game" current="boxes" :subtitle="_('web.admin.boxes.subtitle', game=game.name)" />
   <Panel class="enter-panel">
-    <nav aria-label="{{ _('web.admin.store.tab.boxes') }}"
-         class="tabs prices-back">
-      <Tab :href="url('/admin/store/' ~ game.id ~ '/boxes')" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.store.tab.boxes") }}</Tab>
-    </nav>
+    <PanelBack :href="url('/admin/store/' ~ game.id ~ '/boxes')" :label="_('web.admin.store.tab.boxes')" />
     <div class="list-layout admin-layout">
       <div class="list-main prices-item-main">
         {% if manages %}

@@ -78,7 +78,7 @@
                         {% endif %}
                       </div>
                       <div role="cell" class="wallet-decide">
-                        <a href="{{ ledger }}" class="form-button"><span aria-hidden="true" class="form-glyph"><Icon name="doc" :size="14" stroke="#F4F4EE" /></span>{{ _("web.admin.wallets.view_ledger") }}</a>
+                        <FormButton icon="doc" :href="ledger">{{ _("web.admin.wallets.view_ledger") }}</FormButton>
                         {% if manages %}
                           <a href="{{ base }}/wallets/{{ game.id }}/{{ line.key }}"
                              data-dialog

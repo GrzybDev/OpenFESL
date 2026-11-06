@@ -25,12 +25,7 @@
   {% endif %}
 {%- endmacro %}
 <Layout :title="title">
-  <div id="live"
-       hx-get="{{ here }}"
-       hx-trigger="every 15s, refresh"
-       hx-select="#live"
-       hx-select-oob="#shell-games:outerMorph"
-       hx-swap="outerMorph">
+  <LiveArea shell>
     <GameStatus :activity="activity" />
     <GameMenu current="servers" />
 
@@ -168,13 +163,7 @@
                        class="server">
                     <div role="row" class="server-row server-columns">
                       <ServerCells :server="server" :href="href" listed>
-                      <a href="{{ list ~ filters.changed(open=None if open else server.slug, page=filters.page).query() }}#row-{{ server.slug }}"
-                         role="button"
-                         aria-expanded="{{ 'true' if open else 'false' }}"
-                         aria-controls="details-{{ server.slug }}"
-                         aria-label="{{ _('web.servers.details', name=server.name) }}"
-                         data-details
-                         class="details-button"><span><Icon name="down" stroke="#F4F4EE" class="details-chevron" /></span></a>
+                      <DetailsButton :href="list ~ filters.changed(open=None if open else server.slug, page=filters.page).query() ~ '#row-' ~ server.slug" :open="open" :key="server.slug" :name="server.name" />
                       </ServerCells>
                     </div>
                     <div role="row" class="drawer">
@@ -260,5 +249,5 @@
 
       </div>
     </Panel>
-  </div>
+  </LiveArea>
 </Layout>

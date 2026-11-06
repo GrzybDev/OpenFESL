@@ -72,11 +72,7 @@
       <section aria-labelledby="rewards-sign-in" class="site-box site-box-red">
         <h2 id="rewards-sign-in" class="site-box-title">{{ _("web.rewards.signed_out") }}</h2>
         <p>{{ _("web.rewards.signed_out.text") }}</p>
-        <p class="site-actions">
-          <a href="{{ url('/sign-in') }}?{{ {'next': next}|urlencode }}"
-             class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
-          <a href="{{ url('/register') }}" class="site-link-light">{{ _("web.account.sign_in.create") }}</a>
-        </p>
+        <SignInActions :next="next" link="site-link-light" />
       </section>
     </div>
   {% elif not bar.roster.heroes %}

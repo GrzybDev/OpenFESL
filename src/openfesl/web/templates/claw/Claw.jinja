@@ -26,11 +26,7 @@
       <div class="store-box store-box-red claw-signed-out">
         <h2 class="store-tab">{{ _("web.claw.signed_out") }}</h2>
         <p class="store-signed-out">{{ _("web.claw.signed_out.text") }}</p>
-        <p class="site-actions">
-          <a href="{{ url('/sign-in') }}?{{ {'next': here}|urlencode }}"
-             class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
-          <a href="{{ url('/register') }}" class="store-link-yellow">{{ _("web.account.sign_in.create") }}</a>
-        </p>
+        <SignInActions :next="here" link="store-link-yellow" />
       </div>
     {% elif not heroes %}
       <div class="claw-no-hero">

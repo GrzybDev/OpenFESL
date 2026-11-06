@@ -79,11 +79,7 @@
         <h2 id="balances-title" class="funds-signed-out-title">{{ _("web.funds.balances") }}</h2>
         <p>{{ _("web.funds.signed_out") }}</p>
         {% if not from_game %}
-          <p class="site-actions">
-            <a href="{{ url('/sign-in') }}?{{ {'next': here}|urlencode }}"
-               class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
-            <a href="{{ url('/register') }}" class="site-link">{{ _("web.account.sign_in.create") }}</a>
-          </p>
+          <SignInActions :next="here" />
         {% endif %}
       </div>
     </section>

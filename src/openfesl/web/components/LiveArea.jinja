@@ -1,0 +1,10 @@
+{#def shell: bool = False #}
+{# The part of a page that refreshes itself every 15 seconds; with the shell, the games' counts in
+   its menu follow. Further attributes go on the area. #}
+<div id="live"
+     hx-get="{{ here }}"
+     hx-trigger="every 15s, refresh"
+     hx-select="#live"
+     {% if shell %} hx-select-oob="#shell-games:outerMorph"{% endif %}
+     hx-swap="outerMorph"
+     {{ attrs.render() }}>{{ content }}</div>

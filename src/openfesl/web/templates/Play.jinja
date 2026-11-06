@@ -3,12 +3,7 @@
 {% set servers = url("/" ~ game.id ~ "/servers") %}
 {% set hook %}<FileName text="dinput8.dll" />{% endset %}
 <Layout :title="title">
-  <div id="live"
-       hx-get="{{ here }}"
-       hx-trigger="every 15s, refresh"
-       hx-select="#live"
-       hx-select-oob="#shell-games:outerMorph"
-       hx-swap="outerMorph">
+  <LiveArea shell>
     <GameStatus :activity="activity" />
     <GameMenu current="play" />
 
@@ -121,5 +116,5 @@
         </section>
       {% endif %}
     </Panel>
-  </div>
+  </LiveArea>
 </Layout>

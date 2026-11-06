@@ -14,10 +14,7 @@
   <StoreHead :game="game" current="deals" :subtitle="_('web.admin.deals.subtitle', game=game.name)" />
   <Panel class="enter-panel">
     <DealsTabs :game="game" current="rotation" />
-    <nav aria-label="{{ _('web.admin.deals.view.rotation') }}"
-         class="tabs prices-back">
-      <Tab :href="base" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.deals.view.rotation") }}</Tab>
-    </nav>
+    <PanelBack :href="base" :label="_('web.admin.deals.view.rotation')" />
     <form method="post"
           action="{{ base }}/sections/{{ row.key }}"
           aria-labelledby="section-title"

@@ -34,11 +34,7 @@
   {% endif %}
 {%- endmacro %}
 <AdminPage :title="title" current="providers">
-  <div id="live"
-       hx-get="{{ here }}"
-       hx-trigger="every 15s, refresh"
-       hx-select="#live"
-       hx-swap="outerMorph">
+  <LiveArea>
     <PageHead labelledby="providers-title"
               :title="title"
               :subtitle="_('web.admin.providers.subtitle')">
@@ -92,13 +88,7 @@
                       <div role="cell" class="admin-cell row-cell admin-name-cell">
                         <span class="admin-server-name"><a href="{{ href }}"
    class="server-name">{{ provider.name }}</a></span>
-                        <a href="{{ list ~ listing.changed(open=None if open else key).link() }}#row-{{ key }}"
-                           role="button"
-                           aria-expanded="{{ 'true' if open else 'false' }}"
-                           aria-controls="details-{{ key }}"
-                           aria-label="{{ _('web.servers.details', name=provider.name) }}"
-                           data-details
-                           class="details-button"><span><Icon name="down" stroke="#F4F4EE" class="details-chevron" /></span></a>
+                        <DetailsButton :href="list ~ listing.changed(open=None if open else key).link() ~ '#row-' ~ key" :open="open" :key="key" :name="provider.name" />
                       </div>
                       <div role="cell" class="admin-cell row-cell">
                         <ProviderId :id="provider.id" />
@@ -273,5 +263,5 @@
         </div>
       </div>
     </Panel>
-  </div>
+  </LiveArea>
 </AdminPage>

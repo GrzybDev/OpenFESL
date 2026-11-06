@@ -4,12 +4,7 @@
 {% set stat = _("web.leaderboard.by." ~ view.order) %}
 {% set showing = _("web.leaderboard.show.online") if view.online else _("web.leaderboard.show.everyone") %}
 <Layout :title="title">
-  <div id="live"
-       hx-get="{{ here }}"
-       hx-trigger="every 15s, refresh"
-       hx-select="#live"
-       hx-select-oob="#shell-games:outerMorph"
-       hx-swap="outerMorph">
+  <LiveArea shell>
     <GameStatus :activity="activity" />
     <GameMenu current="leaderboard" />
 
@@ -167,5 +162,5 @@
 </div>
 {% endif %}
 </Panel>
-</div>
+</LiveArea>
 </Layout>

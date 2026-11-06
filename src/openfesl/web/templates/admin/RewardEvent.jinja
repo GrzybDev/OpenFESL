@@ -38,10 +38,7 @@
            current="rewards">
   <RewardsHead :game="game" current="rules" :subtitle="_('web.admin.rewards.subtitle', game=game.name)" />
   <Panel class="enter-panel">
-    <nav aria-label="{{ _('web.admin.rewards.title') }}"
-         class="tabs prices-back">
-      <Tab :href="url('/admin/rewards/' ~ game.id) ~ '#event-' ~ row.key" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.rewards.back") }}</Tab>
-    </nav>
+    <PanelBack :href="url('/admin/rewards/' ~ game.id) ~ '#event-' ~ row.key" :label="_('web.admin.rewards.back')" :name="_('web.admin.rewards.title')" />
     {% if not manages %}
       <RoleNote glyph="lock" lines>{{ _("web.admin.refused.role.rewards") }}</RoleNote>
     {% endif %}

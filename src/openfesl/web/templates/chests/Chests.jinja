@@ -46,11 +46,7 @@
       <div class="chests-empty-text">
         <h2 id="chests-closed" class="chests-empty-title">{{ _("web.chests.signed_out") }}</h2>
         <p>{{ _("web.chests.signed_out.text") }}</p>
-        <p class="site-actions">
-          <a href="{{ url('/sign-in') }}?{{ {'next': next}|urlencode }}"
-             class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
-          <a href="{{ url('/register') }}" class="site-link">{{ _("web.account.sign_in.create") }}</a>
-        </p>
+        <SignInActions :next="next" />
       </div>
     </section>
   {% elif total %}

@@ -51,13 +51,7 @@
     </nav>
   </PageHead>
 
-  <Panel id="live"
-         :hx-get="here"
-         hx-trigger="every 15s, refresh"
-         hx-select="#live"
-         hx-select-oob="#shell-games:outerMorph"
-         hx-swap="outerMorph"
-         class="enter-panel panel-thin">
+  <LiveArea shell class="panel enter-panel panel-thin">
     <dl class="stats">
       <Stat :label="_('web.activity.online_now')" kind="accent">
         <Count :value="activity.online" class="count-ink live-value" />
@@ -291,5 +285,5 @@
         {% endif %}
       </div>
     </div>
-  </Panel>
+  </LiveArea>
 </Layout>

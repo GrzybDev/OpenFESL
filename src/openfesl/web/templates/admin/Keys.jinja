@@ -65,13 +65,7 @@
                       <span class="admin-server-name">{{ code(key.code) }}
                         {%- if view.game %}<GameChip :of="view.game" />{% endif %}
                       </span>
-                      <a href="{{ list ~ listing.link(open=None if open else key.code) }}#key-{{ key.code }}"
-                         role="button"
-                         aria-expanded="{{ 'true' if open else 'false' }}"
-                         aria-controls="details-{{ key.code }}"
-                         aria-label="{{ _('web.servers.details', name=key.code) }}"
-                         data-details
-                         class="details-button"><span><Icon name="down" stroke="#F4F4EE" class="details-chevron" /></span></a>
+                      <DetailsButton :href="list ~ listing.link(open=None if open else key.code) ~ '#key-' ~ key.code" :open="open" :key="key.code" :name="key.code" />
                     </div>
                     <div role="cell" class="admin-cell row-cell cell-stack key-label">
                       <span aria-hidden="true" class="cell-label">{{ _("web.admin.key.label") }}</span>

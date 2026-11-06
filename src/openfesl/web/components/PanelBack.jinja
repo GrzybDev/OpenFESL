@@ -1,0 +1,6 @@
+{#def href: str, label: str, name: str = "" #}
+{# The way back to a list, as the only tab over a panel's page. A name says what the way leads to
+   where its label does not. #}
+<nav aria-label="{{ name or label }}" class="tabs prices-back">
+  <Tab :href="href" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ label }}</Tab>
+</nav>

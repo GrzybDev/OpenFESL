@@ -9,13 +9,7 @@
       <TitleBlock :title="game.name" id="front-title">{{ _("games." ~ game.id ~ ".tagline") }}</TitleBlock>
     </div>
 
-    <Panel id="live"
-           :hx-get="here"
-           hx-trigger="every 15s, refresh"
-           hx-select="#live"
-           hx-select-oob="#shell-games:outerMorph"
-           hx-swap="outerMorph"
-           class="enter-panel panel-thin">
+    <LiveArea shell class="panel enter-panel panel-thin">
       {# Two stats a line on phones, as many as fit elsewhere. #}
       <dl class="stats">
         <Stat :label="_('web.activity.online_now')" kind="accent">
@@ -134,6 +128,6 @@
           </div>
         {% endif %}
       </div>
-    </Panel>
+    </LiveArea>
   </section>
 </Layout>

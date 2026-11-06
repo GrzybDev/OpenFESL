@@ -2,12 +2,7 @@
 {# A player's page around one of its tabs, which the content gives. #}
 {% set profile = url("/" ~ game.id ~ "/players/" ~ persona.name|urlencode) %}
 <Layout :title="persona.name">
-  <div id="live"
-       hx-get="{{ here }}"
-       hx-trigger="every 15s, refresh"
-       hx-select="#live"
-       hx-select-oob="#shell-games:outerMorph"
-       hx-swap="outerMorph">
+  <LiveArea shell>
     <GameStatus :activity="activity" />
     <GameMenu current="leaderboard" :exact="false" />
 
@@ -28,5 +23,5 @@
     <Panel class="enter-panel">
       {{ content }}
     </Panel>
-  </div>
+  </LiveArea>
 </Layout>

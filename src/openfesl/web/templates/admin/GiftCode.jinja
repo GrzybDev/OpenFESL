@@ -16,10 +16,7 @@
             :title="title"
             :subtitle="_('web.admin.keys.subtitle.batch' if entry.batch else 'web.admin.keys.subtitle.code', game=game.name)" />
   <Panel class="enter-panel">
-    <nav aria-label="{{ _('web.admin.keys.all_codes') }}"
-         class="tabs prices-back">
-      <Tab :href="url('/admin/keys') ~ '?game=' ~ game.id" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.keys.all_codes") }}</Tab>
-    </nav>
+    <PanelBack :href="url('/admin/keys') ~ '?game=' ~ game.id" :label="_('web.admin.keys.all_codes')" />
     <h2 class="bar bar-wrap code-head">
       <span class="code-head-name">
         {% if entry.batch %}

@@ -3,12 +3,7 @@
 {% set hosting = server.ended is none %}
 {% set heading %}{% if server.mode %}<Published kind="mode" :label="server.mode" />{% else %}{{ _("web.server.title") }}{% endif %}{% endset %}
 <Layout :title="server.name">
-  <div id="live"
-       hx-get="{{ here }}"
-       hx-trigger="every 15s, refresh"
-       hx-select="#live"
-       hx-select-oob="#shell-games:outerMorph"
-       hx-swap="outerMorph">
+  <LiveArea shell>
     <GameStatus :activity="activity" />
     <GameMenu current="servers" :exact="false" />
 
@@ -197,5 +192,5 @@
         </section>
       {% endif %}
     </Panel>
-  </div>
+  </LiveArea>
 </Layout>

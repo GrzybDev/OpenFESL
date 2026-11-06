@@ -217,11 +217,7 @@
                             <form method="post" action="{{ base }}/entitlements/restore">
                               <CsrfField />
                               <input type="hidden" name="tag" value="{{ entitlement.tag }}">
-                              <button type="submit"
-                                      aria-label="{{ _('web.admin.entitlement.restore.of', tag=entitlement.tag) }}"
-                                      class="form-button">
-                                <span aria-hidden="true" class="form-glyph"><Icon name="tick" :size="14" stroke="#F4F4EE" /></span>{{ _("web.admin.entitlement.restore") }}
-                              </button>
+                              <FormButton icon="tick" :aria-label="_('web.admin.entitlement.restore.of', tag=entitlement.tag)">{{ _("web.admin.entitlement.restore") }}</FormButton>
                             </form>
                           {% endif %}
                         </div>
