@@ -35,7 +35,7 @@
             <span class="settings-policy-text">{{ _("web.admin.game_mark.switch.text", game=short) }}</span>
           </span>
           <span class="game-mark-state">
-            <span aria-hidden="true" class="badge"><Icon :name="'tick' if mark.shown else 'x'" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.game_mark.state." ~ state) }}
+            <Badge :name="'tick' if mark.shown else 'x'" :size="14" lines />{{ _("web.admin.game_mark.state." ~ state) }}
           </span>
         </div>
       {% endif %}
@@ -57,8 +57,7 @@
   <p class="game-mark-line">{{ _("web.admin.game_mark.when") }}</p>
   {% if not manages %}
     <p class="role-note">
-      <span aria-hidden="true"
-            class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.game_mark.managed") }}
+      <Badge name="guard" :size="14" />{{ _("web.admin.game_mark.managed") }}
     </p>
   {% endif %}
 </section>

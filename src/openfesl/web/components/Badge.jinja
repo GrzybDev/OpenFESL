@@ -1,5 +1,5 @@
-{#def name: str, lines: bool = False #}
-{# One of the small badges of a server's state, whose word stands elsewhere; a glyph drawn in lines,
-   such as the tick, is stroked rather than filled. #}
+{#def name: str, lines: bool = False, size: int = 16 #}
+{# One of the small badges of a state, whose word stands elsewhere; a glyph drawn in lines, such as
+   the tick, is stroked rather than filled. #}
 <span aria-hidden="true"
-      class="badge"><Icon :name="name" :stroke="'#0A0A0A' if lines else ''" :fill="'' if lines else '#0A0A0A'" /></span>
+      class="badge"><Icon :name="name" :size="size" :stroke="'#0A0A0A' if lines else ''" :fill="'' if lines else '#0A0A0A'" /></span>

@@ -90,10 +90,7 @@
         {% if manages %}
           <Action :href="base ~ '/new'" :label="_('web.admin.deals.offer.new')" glyph="plus" />
         {% else %}
-          <p class="bar-text account-role-note">
-            <span aria-hidden="true"
-                  class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.deals.managed") }}
-          </p>
+          <RoleNote glyph="guard">{{ _("web.admin.deals.managed") }}</RoleNote>
         {% endif %}
       </div>
     </section>

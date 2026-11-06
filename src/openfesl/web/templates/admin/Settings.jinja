@@ -146,9 +146,7 @@
                 {% else %}
                   <TextField :id="field" :name="name" :label="_('web.admin.policy.' ~ name)" :value="errors.get(name, policy.value)" :wrong="wrong" class="field-code" inputmode="decimal" autocomplete="off" :aria-describedby="field ~ '-note'" />
                   {% if wrong %}
-                    <p id="{{ field }}-note" class="field-note field-error">
-                      <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.policy.version.wrong") }}
-                    </p>
+                    <FieldError :id="field ~ '-note'">{{ _("web.admin.policy.version.wrong") }}</FieldError>
                   {% else %}
                     <p id="{{ field }}-note" class="field-note">{{ _("web.admin.policy." ~ name ~ ".text") }}</p>
                   {% endif %}

@@ -125,7 +125,7 @@
           </div>
         {% else %}
           <p class="key-edit-alert">
-            <span aria-hidden="true" class="badge"><Icon name="lock" :size="14" stroke="#0A0A0A" /></span>
+            <Badge name="lock" :size="14" lines />
             <span>{{ _("web.admin.keys.no_catalogue") }} <a href="{{ url('/admin/catalogues') }}">{{ _("web.admin.menu.catalogues") }}</a></span>
           </p>
         {% endif %}
@@ -203,7 +203,7 @@
            class="offer-line code-summary">{{ found.summary }}</p>
         <div class="reward-save code-save">
           <p aria-live="polite" class="admin-form-why">
-            <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>
+            <Badge name="warn" :size="14" />
             <span data-why>{{ _("web.admin.keys.refused") if refused else "" }}</span>
           </p>
           <div data-live="{{ path }}" class="code-buttons">

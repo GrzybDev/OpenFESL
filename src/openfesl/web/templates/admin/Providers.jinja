@@ -84,10 +84,9 @@
                     <div role="row" class="server-row provider-columns">
                       <div role="cell" class="admin-cell row-cell admin-badges">
                         <span class="sr-only">{{ _n("web.admin.provider.state.active.waiting", waiting) if tab == "active" and waiting else _("web.admin.provider.state." ~ tab) }}</span>
-                        <span aria-hidden="true"
-                              class="badge"><Icon :name="'tick' if tab == 'active' else 'x'" stroke="#0A0A0A" /></span>
+                        <Badge :name="'tick' if tab == 'active' else 'x'" lines />
                         {% if tab == "active" and waiting %}
-                          <span aria-hidden="true" class="badge"><Icon name="clock" stroke="#0A0A0A" /></span>
+                          <Badge name="clock" lines />
                         {% endif %}
                       </div>
                       <div role="cell" class="admin-cell row-cell admin-name-cell">
@@ -208,8 +207,7 @@
           {% if added %}
             <section aria-labelledby="added-title" class="provider-added">
               <h2 id="added-title" class="bar bar-large provider-added-title">
-                <span aria-hidden="true"
-                      class="badge"><Icon name="tick" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.provider.added") }}
+                <Badge name="tick" :size="14" lines />{{ _("web.admin.provider.added") }}
               </h2>
               <div class="bar-text">
                 <p class="server-title">{{ added.provider.name }}</p>
@@ -255,13 +253,9 @@
               <CsrfField />
               <TextField id="add-name" name="name" :label="_('web.admin.provider.name')" :value="form.get('name', '')" :wrong="form.get('error')" required :placeholder="_('web.admin.provider.name.hint')" autocomplete="off" aria-describedby="add-note" />
               {% if form.get("error") == "taken" %}
-                <p id="add-note" class="field-note field-error">
-                  <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.provider.name.taken", name=form.get('taken')) }}
-                </p>
+                <FieldError id="add-note">{{ _("web.admin.provider.name.taken", name=form.get('taken')) }}</FieldError>
               {% elif form.get("error") %}
-                <p id="add-note" class="field-note field-error">
-                  <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.provider.name.length", count=number(longest)) }}
-                </p>
+                <FieldError id="add-note">{{ _("web.admin.provider.name.length", count=number(longest)) }}</FieldError>
               {% else %}
                 <p id="add-note" class="field-note">{{ _("web.admin.provider.name.note", file=file_name) }}</p>
               {% endif %}

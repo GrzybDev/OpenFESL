@@ -14,8 +14,7 @@
   <h2 id="import-title" class="bar bar-large">{{ _("web.admin.catalogue.import") }}</h2>
   {% if not manages %}
     <p class="role-note">
-      <span aria-hidden="true"
-            class="badge"><Icon name="lock" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.catalogue.managed") }}
+      <Badge name="lock" :size="14" lines />{{ _("web.admin.catalogue.managed") }}
     </p>
   {% else %}
     <div data-catalogue-result class="catalogue-result">
@@ -78,8 +77,7 @@
              role="alert"
              {% if not result or result.kind != "needed" %} hidden{% endif %}
              class="field-note field-error catalogue-needed">
-            <span aria-hidden="true"
-                  class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.catalogue.file.needed") }}
+            <Badge name="warn" :size="14" />{{ _("web.admin.catalogue.file.needed") }}
           </p>
           <p id="catalogue-file-note" class="catalogue-step-hint">{{ _("web.admin.catalogue.file.hint") }}</p>
         </li>

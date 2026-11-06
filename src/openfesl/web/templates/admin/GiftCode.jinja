@@ -63,10 +63,7 @@
           <FormButton icon="edit" :href="base ~ '/edit'">{{ _("web.admin.keys.edit") }}</FormButton>
           <p class="bar-text body-text">{{ _("web.admin.keys.edit.rule") }}</p>
         {% else %}
-          <p class="bar-text account-role-note">
-            <span aria-hidden="true"
-                  class="badge"><Icon name="lock" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.keys.moderator") }}
-          </p>
+          <RoleNote glyph="lock" lines>{{ _("web.admin.keys.moderator") }}</RoleNote>
         {% endif %}
       </div>
     </div>

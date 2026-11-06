@@ -102,10 +102,7 @@
             {% endif %}
             <p class="body-text side-note">{{ _("web.admin.wallets.note") }}</p>
             {% if not manages %}
-              <p class="bar-text account-role-note">
-                <span aria-hidden="true"
-                      class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.wallets.managed") }}
-              </p>
+              <RoleNote glyph="guard">{{ _("web.admin.wallets.managed") }}</RoleNote>
             {% endif %}
           </section>
           {% if game.id in bought %}

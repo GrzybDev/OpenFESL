@@ -45,8 +45,7 @@
   {% if not rules.enabled %}
     <div class="claw-admin-off">
       <p class="bar-text claw-admin-off-note">
-        <span aria-hidden="true"
-              class="badge"><Icon name="window-closed" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.boxes.claw.off") }}
+        <Badge name="window-closed" :size="14" lines />{{ _("web.admin.boxes.claw.off") }}
       </p>
       <p class="claw-admin-shown">
         <strong>{{ _("web.claw.off") }}</strong><span>{{ _("web.claw.off.text") }}</span>
@@ -125,10 +124,7 @@
       </Fact>
     </dl>
     <ClawToday :of="game" :claw="claw" />
-    <p class="bar-text account-role-note">
-      <span aria-hidden="true"
-            class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.boxes.claw.moderator") }}
-    </p>
+    <RoleNote glyph="guard">{{ _("web.admin.boxes.claw.moderator") }}</RoleNote>
   {% endif %}
   {% if pool %}
     <a href="{{ pool }}" class="claw-admin-pool">

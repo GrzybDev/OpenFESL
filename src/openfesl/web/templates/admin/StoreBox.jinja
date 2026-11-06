@@ -112,10 +112,7 @@
         {% endfor %}
         {% if manages %}
           {% if refused %}
-            <p role="alert" class="prices-refusal">
-              <span aria-hidden="true"
-                    class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span><span>{{ refused }}</span>
-            </p>
+            <Refusal>{{ refused }}</Refusal>
           {% endif %}
           <div class="prices-save">
             <p class="body-text">{{ _("web.admin.boxes.save.note") }}</p>
@@ -150,10 +147,7 @@
             {% endfor %}
           </section>
         {% else %}
-          <p class="bar-text account-role-note">
-            <span aria-hidden="true"
-                  class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.boxes.managed") }}
-          </p>
+          <RoleNote glyph="guard">{{ _("web.admin.boxes.managed") }}</RoleNote>
         {% endif %}
       </div>
       <div class="list-side admin-side">

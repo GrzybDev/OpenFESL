@@ -59,8 +59,7 @@
                   <div role="row" class="server-row admin-key-columns">
                     <div role="cell" class="admin-cell row-cell admin-badges">
                       <span class="sr-only">{{ _("web.admin.key.state." ~ view.tab) }}</span>
-                      <span aria-hidden="true"
-                            class="badge"><Icon :name="'tick' if key.enabled else 'x'" stroke="#0A0A0A" /></span>
+                      <Badge :name="'tick' if key.enabled else 'x'" lines />
                     </div>
                     <div role="cell" class="admin-cell row-cell admin-name-cell">
                       <span class="admin-server-name">{{ code(key.code) }}
@@ -208,9 +207,7 @@
             <CsrfField />
             <TextField id="add-code" name="code" :label="_('web.admin.key.code')" :value="form.get('code', '')" :wrong="form.get('error')" class="field-code" required :maxlength="longest" :placeholder="_('web.admin.key.code.hint')" autocomplete="off" aria-describedby="add-code-note" />
             {% if form.get("error") %}
-              <p id="add-code-note" class="field-note field-error">
-                <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.key.code." ~ form.get('error'), count=number(longest)) }}
-              </p>
+              <FieldError id="add-code-note">{{ _("web.admin.key.code." ~ form.get('error'), count=number(longest)) }}</FieldError>
             {% else %}
               <p id="add-code-note" class="field-note">{{ _("web.admin.key.code.note") }}</p>
             {% endif %}
@@ -223,10 +220,7 @@
                 {% endfor %}
               </fieldset>
               {% if form.get("error") == "game" %}
-                <p class="field-note field-error">
-                  <span aria-hidden="true"
-                        class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.key.for.missing") }}
-                </p>
+                <FieldError>{{ _("web.admin.key.for.missing") }}</FieldError>
               {% endif %}
             {% endif %}
             <ActionButton :label="_('web.admin.key.add.button')" :busy="_('web.admin.key.add.busy')" />

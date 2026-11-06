@@ -21,7 +21,7 @@
     {% if flagged %}
       <section aria-labelledby="boxes-flag" class="boxes-flag">
         <p id="boxes-flag" class="prices-missing-head">
-          <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _n("web.admin.boxes.flag", flagged|map(attribute="below")|map("length")|sum) }}
+          <Badge name="warn" :size="14" />{{ _n("web.admin.boxes.flag", flagged|map(attribute="below")|map("length")|sum) }}
         </p>
         {% for row in flagged %}
           {% for product in row.below %}

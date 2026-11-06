@@ -31,10 +31,7 @@
       <CsrfField />
       <h2 class="bar bar-large">{{ title }} · {{ _("web.admin.rewards.referral.title") }}</h2>
       {% if not manages %}
-        <p class="bar-text account-role-note">
-          <span aria-hidden="true"
-                class="badge"><Icon name="lock" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.rewards.referral.moderator") }}
-        </p>
+        <RoleNote glyph="lock" lines>{{ _("web.admin.rewards.referral.moderator") }}</RoleNote>
       {% endif %}
       <fieldset {% if not manages %}disabled{% endif %} class="referral-step-fields">
         <legend class="sr-only">{{ title }}</legend>
@@ -129,7 +126,7 @@
         <TextField id="referral-note" name="note" :label="_('web.admin.note')" :value="found.note" :error="refused.get('note', '')" required maxlength="300" autocomplete="off" :data-needed="_('web.admin.still_needed.note')" />
         <div class="reward-save">
           <p aria-live="polite" class="admin-form-why">
-            <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>
+            <Badge name="warn" :size="14" />
             <span data-why>{{ _("web.admin.rewards.referral.refused") if refused else "" }}</span>
           </p>
           <ActionButton :label="_('web.admin.rewards.referral.save', n=found.number)" :busy="_('web.admin.store.save.busy')" />

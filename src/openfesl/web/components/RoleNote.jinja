@@ -1,0 +1,5 @@
+{#def glyph: str, lines: bool = False #}
+{# What only the admin role may change, as a moderator reads it under what it says about. #}
+<p class="bar-text account-role-note">
+  <Badge :name="glyph" :size="14" :lines="lines" />{{ content }}
+</p>

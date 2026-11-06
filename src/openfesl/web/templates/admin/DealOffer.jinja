@@ -31,10 +31,7 @@
       <Tab :href="base" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.deals.view.offers") }}</Tab>
     </nav>
     {% if not manages %}
-      <p class="bar-text account-role-note">
-        <span aria-hidden="true"
-              class="badge"><Icon name="lock" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.deals.managed") }}
-      </p>
+      <RoleNote glyph="lock" lines>{{ _("web.admin.deals.managed") }}</RoleNote>
     {% endif %}
     <div class="list-layout admin-layout">
       <form method="post"
@@ -188,7 +185,7 @@
         {% if manages %}
           <div class="reward-save">
             <p aria-live="polite" class="admin-form-why">
-              <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>
+              <Badge name="warn" :size="14" />
               <span data-why>{{ _("web.admin.deals.offer.refused") if refused else "" }}</span>
             </p>
             <ActionButton :label="_('web.admin.deals.offer.save')" :busy="_('web.admin.store.save.busy')" />

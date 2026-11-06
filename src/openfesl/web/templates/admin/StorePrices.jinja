@@ -18,8 +18,7 @@
     {% if not catalogue.imported %}
       <div class="prices-missing">
         <p class="prices-missing-head">
-          <span aria-hidden="true"
-                class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.store.none.head") }}
+          <Badge name="warn" :size="14" />{{ _("web.admin.store.none.head") }}
         </p>
         <p class="prices-missing-title">{{ _("web.admin.store.no_catalogue", game=game.name) }}</p>
         <p class="body-text">{{ _("web.admin.store.no_catalogue.text") }}</p>

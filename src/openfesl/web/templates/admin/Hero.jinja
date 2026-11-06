@@ -282,10 +282,7 @@
             {% endif %}
           </div>
           {% if not manages %}
-            <p class="bar-text account-role-note">
-              <span aria-hidden="true"
-                    class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.hero.managed") }}
-            </p>
+            <RoleNote glyph="guard">{{ _("web.admin.hero.managed") }}</RoleNote>
           {% endif %}
         </section>
       </div>

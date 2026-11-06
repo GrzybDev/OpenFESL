@@ -5,9 +5,7 @@
 {% set key = view.key %}
 {% set title = _("web.admin.keys") %}
 {% macro field_error(text) %}
-  <p class="field-note field-error">
-    <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ text }}
-  </p>
+  <FieldError>{{ text }}</FieldError>
 {% endmacro %}
 <AdminPage :title="title ~ ' · ' ~ key.code" current="keys">
   <PageHead labelledby="edit-title"
@@ -26,7 +24,7 @@
       </h2>
       {% if form.error in ("no-tag", "repeated") %}
         <p role="alert" class="key-edit-alert">
-          <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>
+          <Badge name="warn" :size="14" />
           <span>{{ _("web.admin.key.edit.failed") }} <a href="#grant-tag-{{ form.row }}">{{ _("web.admin.key.edit." ~ form.error, number=form.row) }}</a></span>
         </p>
       {% endif %}

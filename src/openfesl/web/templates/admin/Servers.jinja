@@ -169,8 +169,7 @@
                               {% if view.reports_provider %}
                                 <Fact :label="_('web.admin.provider')" plain>
                                   {% if not server.provider %}
-                                    <span aria-hidden="true"
-                                          class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>
+                                    <Badge name="warn" :size="14" />
                                   {% endif %}
                                   {{ server.provider.name if server.provider else _("web.admin.unknown_provider") }}
                                 </Fact>
@@ -201,7 +200,7 @@
                                 {% endif %}
                                 <Fact :label="_('web.server.official')" wide>
                                   {% if server.official %}
-                                    <span aria-hidden="true" class="badge"><Icon name="star" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.official.yes") }}
+                                    <Badge name="star" :size="14" />{{ _("web.admin.official.yes") }}
                                   {% else %}
                                     {{ _("web.admin.official.no") }}
                                   {% endif %}

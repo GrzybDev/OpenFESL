@@ -46,10 +46,7 @@
               </form>
             {% endif %}
             {% if art and art[0] == deal_id %}
-              <p role="alert" class="prices-refusal">
-                <span aria-hidden="true"
-                      class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span><span>{{ art[1] }}</span>
-              </p>
+              <Refusal>{{ art[1] }}</Refusal>
             {% endif %}
             {% if manages %}
               <form method="post"
@@ -83,10 +80,7 @@
       <p class="bar-text body-text">{{ _("web.admin.deals.home.text") }}</p>
       <p class="bar-text body-text">{{ _("web.admin.deals.art.rule") }}</p>
       {% if not manages %}
-        <p class="bar-text account-role-note">
-          <span aria-hidden="true"
-                class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.deals.managed") }}
-        </p>
+        <RoleNote glyph="guard">{{ _("web.admin.deals.managed") }}</RoleNote>
       {% endif %}
     </section>
   </Panel>

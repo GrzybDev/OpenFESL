@@ -23,7 +23,7 @@
               {% if line.rank is not none %}
                 <Shield :rank="line.rank" />
               {% else %}
-                <span aria-hidden="true" class="badge"><Icon name="user" stroke="#0A0A0A" /></span>
+                <Badge name="user" lines />
               {% endif %}
               <span class="account-persona">
                 <span class="account-persona-name">{{ name }}</span>

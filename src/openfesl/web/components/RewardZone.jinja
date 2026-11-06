@@ -27,10 +27,7 @@
              {% if not manages %} disabled{% endif %}
              class="field-input field-code{% if refused %} field-invalid{% endif %}">
       {% if refused %}
-        <p id="{{ field }}-note" role="alert" class="field-note field-error">
-          <span aria-hidden="true"
-                class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.reward_zone.refused") }}
-        </p>
+        <FieldError :id="field ~ '-note'" role="alert">{{ _("web.admin.reward_zone.refused") }}</FieldError>
       {% else %}
         <p id="{{ field }}-note" class="field-note">{{ _("web.admin.reward_zone.text") }}</p>
       {% endif %}
@@ -52,8 +49,7 @@
   </p>
   {% if not manages %}
     <p class="role-note">
-      <span aria-hidden="true"
-            class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.reward_zone.managed") }}
+      <Badge name="guard" :size="14" />{{ _("web.admin.reward_zone.managed") }}
     </p>
   {% endif %}
 </section>

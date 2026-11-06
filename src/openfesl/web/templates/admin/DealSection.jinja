@@ -48,10 +48,7 @@
           {% endif %}
         </fieldset>
         {% if why %}
-          <p role="alert" class="prices-refusal">
-            <span aria-hidden="true"
-                  class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span><span>{{ why }}</span>
-          </p>
+          <Refusal>{{ why }}</Refusal>
         {% endif %}
         <p class="bar-text body-text">{{ _("web.admin.deals.next_note", zone=found.zone) }}</p>
         {% if not found.pool %}
@@ -111,10 +108,7 @@
         {% if manages %}
           <ActionButton :label="_('web.admin.deals.section.save')" :busy="_('web.admin.store.save.busy')" />
         {% else %}
-          <p class="bar-text account-role-note">
-            <span aria-hidden="true"
-                  class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.deals.managed") }}
-          </p>
+          <RoleNote glyph="guard">{{ _("web.admin.deals.managed") }}</RoleNote>
         {% endif %}
       </div>
     </form>

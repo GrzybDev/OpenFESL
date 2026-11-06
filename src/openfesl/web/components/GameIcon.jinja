@@ -13,10 +13,7 @@
          class="game-icon">
   <Bar tag="h3" :id="key ~ '-title'" :extra="_('web.admin.icon.set') if icon else _('web.admin.icon.none')" wrap>{{ _("web.admin.icon") }}</Bar>
   {% if not reachable %}
-    <p class="field-note field-error game-icon-warning">
-      <span aria-hidden="true"
-            class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.icon.unreachable", address=base) }}
-    </p>
+    <FieldError class="game-icon-warning">{{ _("web.admin.icon.unreachable", address=base) }}</FieldError>
   {% endif %}
   <div class="game-icon-row">
     {% if icon %}
@@ -107,9 +104,7 @@
           <span aria-hidden="true" class="form-button js-only">{{ _("web.admin.icon.choose") }}</span>
         </label>
         {% if refusal %}
-          <p id="{{ key }}-note" role="alert" class="field-note field-error">
-            <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.icon.refused." ~ refusal.problem, most=number(largest)) }}
-          </p>
+          <FieldError :id="key ~ '-note'" role="alert">{{ _("web.admin.icon.refused." ~ refusal.problem, most=number(largest)) }}</FieldError>
         {% else %}
           <p id="{{ key }}-note" class="field-note">{{ _("web.admin.icon.file.text") }}</p>
         {% endif %}

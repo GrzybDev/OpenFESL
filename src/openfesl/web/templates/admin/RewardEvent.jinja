@@ -43,10 +43,7 @@
       <Tab :href="url('/admin/rewards/' ~ game.id) ~ '#event-' ~ row.key" class="tab-back tab-link"><Icon name="go" :size="14" stroke="currentColor" class="go" />{{ _("web.admin.rewards.back") }}</Tab>
     </nav>
     {% if not manages %}
-      <p class="bar-text account-role-note">
-        <span aria-hidden="true"
-              class="badge"><Icon name="lock" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.refused.role.rewards") }}
-      </p>
+      <RoleNote glyph="lock" lines>{{ _("web.admin.refused.role.rewards") }}</RoleNote>
     {% endif %}
     <div class="list-layout admin-layout">
       <form method="post"
@@ -93,7 +90,7 @@
                data-live="{{ path }}"
                {% if editor.blocked %} data-blocked="{{ editor.blocked }}"{% endif %}
                class="reward-line">
-              {%- if editor.blocked %}<span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{% endif %}<span>{{ editor.line }}</span>
+              {%- if editor.blocked %}<Badge name="warn" :size="14" />{% endif %}<span>{{ editor.line }}</span>
             </p>
           </fieldset>
         </section>
@@ -242,10 +239,7 @@
               {% if editor.contents.added %}<p role="status"
    class="bar-text body-text">{{ editor.contents.added }}</p>{% endif %}
               {% if "add" in editor.refused %}
-                <p role="alert" class="prices-refusal">
-                  <span aria-hidden="true"
-                        class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span><span>{{ editor.refused.add }}</span>
-                </p>
+                <Refusal>{{ editor.refused.add }}</Refusal>
               {% endif %}
               {% for candidate in found.candidates %}
                 {% set id = candidate.item.id %}
@@ -298,7 +292,7 @@
             {% if showing_own %}
               <fieldset {% if not manages %} disabled{% endif %} class="reward-own">
                 <legend class="reward-own-why">
-                  <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>
+                  <Badge name="warn" :size="14" />
                   <span>{{ (editor.needs + [_("web.admin.rewards.text_rule.english")])|join(" ") if editor.needs else _("web.admin.rewards.text_rule.own") }}</span>
                 </legend>
                 {% for code, name in editor.languages %}
@@ -322,7 +316,7 @@
         {% if manages %}
           <div class="reward-save">
             <p aria-live="polite" class="admin-form-why">
-              <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>
+              <Badge name="warn" :size="14" />
               <span data-why>{{ editor.blocked or editor.refused.get('text-en', '') }}</span>
             </p>
             <ActionButton :label="_('web.admin.rewards.event.save')" :busy="_('web.admin.store.save.busy')" />

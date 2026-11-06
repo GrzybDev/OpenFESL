@@ -98,10 +98,7 @@
             <TextField id="claw-pool-note" name="note" :label="_('web.admin.note')" :value="form.get('note', '')" required maxlength="300" autocomplete="off" />
           </div>
           {% if refused %}
-            <p role="alert" class="prices-refusal">
-              <span aria-hidden="true"
-                    class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span><span>{{ refused }}</span>
-            </p>
+            <Refusal>{{ refused }}</Refusal>
           {% endif %}
           <div class="prices-save">
             <SmallAction :label="_('web.admin.boxes.claw.pool.save')" :busy="_('web.admin.store.save.busy')" />
@@ -111,9 +108,7 @@
             <Bar id="box-add">{{ _("web.admin.boxes.add") }}</Bar>
             <ItemSearch id="box-search" :label="_('web.admin.store.search')" :value="query" :action="here ~ '#box-add'" />
             {% if withheld %}
-              <p role="alert" class="prices-refusal">
-                <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span><span>{{ _("web.admin.keys.refused.withheld", id=withheld) }}</span>
-              </p>
+              <Refusal>{{ _("web.admin.keys.refused.withheld", id=withheld) }}</Refusal>
             {% endif %}
             {% for found in candidates %}
               <form method="post" action="{{ here }}/add" class="box-candidate">
@@ -140,10 +135,7 @@
             {% endfor %}
           </section>
         {% else %}
-          <p class="bar-text account-role-note">
-            <span aria-hidden="true"
-                  class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.boxes.claw.moderator") }}
-          </p>
+          <RoleNote glyph="guard">{{ _("web.admin.boxes.claw.moderator") }}</RoleNote>
         {% endif %}
       </div>
       <div class="list-side admin-side">

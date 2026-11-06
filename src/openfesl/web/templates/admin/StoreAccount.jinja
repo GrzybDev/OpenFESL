@@ -98,10 +98,7 @@
               {% if wrong %}
                 <div role="row">
                   <div role="cell" aria-colspan="5" id="{{ field }}-why">
-                    <p role="alert" class="prices-refusal">
-                      <span aria-hidden="true"
-                            class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span><span>{{ refused[value.name] }}</span>
-                    </p>
+                    <Refusal>{{ refused[value.name] }}</Refusal>
                   </div>
                 </div>
               {% endif %}
@@ -160,10 +157,7 @@
       {% if manages %}
         <SmallAction :label="_('web.admin.store.account.save')" :busy="_('web.admin.store.save.busy')" />
       {% else %}
-        <p class="bar-text account-role-note">
-          <span aria-hidden="true"
-                class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.store.managed") }}
-        </p>
+        <RoleNote glyph="guard">{{ _("web.admin.store.managed") }}</RoleNote>
       {% endif %}
     </div>
     {% if manages %}</form>{% endif %}

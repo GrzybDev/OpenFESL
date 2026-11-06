@@ -36,15 +36,12 @@
           {% if manages %}
             <FormButton icon="tick">{{ _("web.admin.deals.rotation.save") }}</FormButton>
           {% else %}
-            <p class="bar-text account-role-note">
-              <span aria-hidden="true"
-                    class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.deals.managed") }}
-            </p>
+            <RoleNote glyph="guard">{{ _("web.admin.deals.managed") }}</RoleNote>
           {% endif %}
         </form>
         {% if not rules.enabled %}
           <p role="status" class="bar-text body-text deals-off">
-            <span aria-hidden="true" class="badge"><Icon name="x" :size="14" stroke="#0A0A0A" /></span>{{ _n("web.admin.deals.rotation.off.text", rotation.listed|rejectattr("bundle.source", "eq", "auto")|list|length) }}
+            <Badge name="x" :size="14" lines />{{ _n("web.admin.deals.rotation.off.text", rotation.listed|rejectattr("bundle.source", "eq", "auto")|list|length) }}
           </p>
         {% endif %}
         <section aria-labelledby="deals-sections" class="admin-list">

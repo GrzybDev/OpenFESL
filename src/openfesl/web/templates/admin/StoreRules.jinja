@@ -131,19 +131,13 @@
             {% endif %}
           </fieldset>
           {% if why %}
-            <p id="rule-why" role="alert" class="prices-refusal">
-              <span aria-hidden="true"
-                    class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span><span>{{ why }}</span>
-            </p>
+            <Refusal id="rule-why">{{ why }}</Refusal>
           {% endif %}
           <p class="bar-text body-text">{{ _("web.admin.store.rules.apply.text") }}</p>
           {% if manages %}
             <SmallAction :label="_('web.admin.store.rules.apply')" />
           {% else %}
-            <p class="bar-text account-role-note">
-              <span aria-hidden="true"
-                    class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.store.managed") }}
-            </p>
+            <RoleNote glyph="guard">{{ _("web.admin.store.managed") }}</RoleNote>
           {% endif %}
         </form>
       </div>

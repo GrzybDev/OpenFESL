@@ -6,8 +6,7 @@
 {% if rows %}
   <section aria-labelledby="deals-short" class="boxes-flag deals-short">
     <p id="deals-short" class="prices-missing-head">
-      <span aria-hidden="true"
-            class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.deals.short") }}
+      <Badge name="warn" :size="14" />{{ _("web.admin.deals.short") }}
     </p>
     {% for row in rows %}
       {% set name = _("games." ~ game.id ~ ".deal_section." ~ row.key) %}

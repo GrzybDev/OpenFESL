@@ -18,9 +18,7 @@
 {% set saving = form if refused_point is not none else {} %}
 {% set unsold = saving.get("unsold") if saving else state == "off" and lines %}
 {% macro refusal(text) %}
-  <p role="alert" class="prices-refusal">
-    <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span><span>{{ text }}</span>
-  </p>
+  <Refusal>{{ text }}</Refusal>
 {% endmacro %}
 <AdminPage :title="row.name ~ ' · ' ~ _('web.admin.store.title')"
            current="store">
@@ -55,7 +53,7 @@
           </dl>
           {% if row.prices.unsold %}
             <p class="bar-text prices-unsold">
-              <span aria-hidden="true" class="badge"><Icon name="lock" :size="14" stroke="#0A0A0A" /></span><span>{{ row.ways }} · {{ _("web.admin.store.unsold.text." ~ row.prices.unsold.value) }}</span>
+              <Badge name="lock" :size="14" lines /><span>{{ row.ways }} · {{ _("web.admin.store.unsold.text." ~ row.prices.unsold.value) }}</span>
             </p>
           {% endif %}
         </section>
@@ -162,10 +160,7 @@
           {% if fixed %}
             <p class="bar-text body-text">{{ _("web.admin.store.ability") }}</p>
           {% elif not manages %}
-            <p class="bar-text account-role-note">
-              <span aria-hidden="true"
-                    class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.store.managed") }}
-            </p>
+            <RoleNote glyph="guard">{{ _("web.admin.store.managed") }}</RoleNote>
           {% endif %}
         </section>
         {% if editable %}

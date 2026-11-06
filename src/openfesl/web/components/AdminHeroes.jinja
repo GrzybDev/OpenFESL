@@ -105,7 +105,7 @@
     <span class="bar-chip">{{ _("web.admin.chest_keys.title") }}<GameChip :of="game" full /></span>
     </Bar>
     <div class="bar-text admin-hero-keys">
-      <span aria-hidden="true" class="badge"><Icon name="key" :size="14" stroke="#0A0A0A" /></span>
+      <Badge name="key" :size="14" lines />
       <p class="cell-stack">
         <span class="admin-hero-strong">{{ _n("web.admin.chest_keys.held", of.keys) }}</span>
         <span class="cell-ago">{{ _("web.admin.chest_keys.text", item=game.chests.key) }}</span>

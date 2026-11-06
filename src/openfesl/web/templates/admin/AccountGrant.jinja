@@ -32,10 +32,7 @@
             <span>{{ account.nuid }}</span><span>{{ _("web.admin.account.number", number=account.id) }}</span>
           </p>
           {% if form.get("error") == "key" %}
-            <p role="alert" class="field-note field-error confirm-error">
-              <span aria-hidden="true"
-                    class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.grant.key_gone") }}
-            </p>
+            <FieldError role="alert" class="confirm-error">{{ _("web.admin.grant.key_gone") }}</FieldError>
           {% endif %}
           <fieldset class="choice-tiles grant-tiles">
             <legend class="sr-only">{{ _("web.admin.grant.what") }}</legend>
@@ -67,10 +64,7 @@
           </div>
         </div>
         {% if missing %}
-          <p id="grant-missing" role="alert" class="field-note field-error">
-            <span aria-hidden="true"
-                  class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.grant.tag_missing") }}
-          </p>
+          <FieldError id="grant-missing" role="alert">{{ _("web.admin.grant.tag_missing") }}</FieldError>
         {% endif %}
         <p id="confirm-text" class="field-note grant-note">{{ _("web.admin.grant.note") }}</p>
         <div class="confirm-buttons">

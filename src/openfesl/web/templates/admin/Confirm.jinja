@@ -26,7 +26,7 @@
       <dl class="facts">
         {% if tab == "approved" %}
           <Fact :label="_('web.admin.state')">
-            <span aria-hidden="true" class="badge"><Icon name="tick" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.hosting_now") if view.hosting else _("web.admin.hosting_not") }}
+            <Badge name="tick" :size="14" lines />{{ _("web.admin.hosting_now") if view.hosting else _("web.admin.hosting_not") }}
           </Fact>
           {% if view.hosting %}
             <Fact :label="_('web.admin.column.hosting')">
@@ -38,8 +38,7 @@
           {% endif %}
         {% elif tab == "revoked" %}
           <Fact :label="_('web.admin.state')">
-            <span aria-hidden="true"
-                  class="badge"><Icon name="x" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.state.revoked") }}
+            <Badge name="x" :size="14" lines />{{ _("web.admin.state.revoked") }}
           </Fact>
         {% endif %}
         {% if view.reports_provider %}
@@ -47,8 +46,7 @@
             {% if server.provider %}
               {{ server.provider.name }}
             {% else %}
-              <span aria-hidden="true"
-                    class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.unknown_provider") }}
+              <Badge name="warn" :size="14" />{{ _("web.admin.unknown_provider") }}
             {% endif %}
           </Fact>
         {% endif %}
@@ -59,8 +57,7 @@
         {% endif %}
         {% if server.official %}
           <Fact :label="_('web.server.official')">
-            <span aria-hidden="true"
-                  class="badge"><Icon name="star" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.official.yes") }}
+            <Badge name="star" :size="14" />{{ _("web.admin.official.yes") }}
           </Fact>
         {% endif %}
         {% if tab == "waiting" %}

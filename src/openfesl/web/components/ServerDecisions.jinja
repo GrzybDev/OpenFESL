@@ -36,8 +36,7 @@
       <p class="row-text">{{ _("web.admin.how.official." ~ ("unmark" if official else "mark.menu" if view.game and view.game.site else "mark")) }}</p>
     {% else %}
       <p class="row-text admin-role-note">
-        <span aria-hidden="true"
-              class="badge"><Icon name="guard" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.refused.role.servers") }}
+        <Badge name="guard" :size="14" />{{ _("web.admin.refused.role.servers") }}
       </p>
     {% endif %}
     {% if view.marked_in_game %}

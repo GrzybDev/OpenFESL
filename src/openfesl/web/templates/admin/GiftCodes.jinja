@@ -81,7 +81,7 @@
         <p class="bar-text body-text">{{ _("web.admin.keys.codes.none." ~ tab) }}</p>
       {% else %}
         <div class="codes-empty">
-          <span aria-hidden="true" class="badge"><Icon name="gift" :size="22" stroke="#0A0A0A" /></span>
+          <Badge name="gift" :size="22" lines />
           <p>{{ _("web.admin.keys.empty", game=game.name) }}</p>
           {% if manages %}
             <FormButton icon="plus" :href="url('/admin/keys/codes/new') ~ '?game=' ~ game.id">{{ _("web.admin.keys.new") }}</FormButton>
@@ -90,10 +90,7 @@
       {% endif %}
       <p class="bar-text body-text codes-rule">{{ _("web.admin.keys.rule") }}</p>
       {% if not manages %}
-        <p class="bar-text account-role-note">
-          <span aria-hidden="true"
-                class="badge"><Icon name="lock" :size="14" stroke="#0A0A0A" /></span>{{ _("web.admin.keys.moderator") }}
-        </p>
+        <RoleNote glyph="lock" lines>{{ _("web.admin.keys.moderator") }}</RoleNote>
       {% endif %}
     </section>
   </Panel>
