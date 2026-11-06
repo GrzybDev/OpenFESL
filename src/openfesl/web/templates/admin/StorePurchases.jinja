@@ -61,26 +61,11 @@
           <div class="purchases-days">
             {% for name, value in [("from", listing.start), ("to", listing.end)] %}
               <div class="purchases-day">
-                <label for="purchases-{{ name }}"
-                       class="field-label field-label-joined">{{ _("web.admin.purchases.filter." ~ name) }}</label>
-                <input id="purchases-{{ name }}"
-                       name="{{ name }}"
-                       type="date"
-                       value="{{ value }}"
-                       class="field-input">
+                <TextField :id="'purchases-' ~ name" :name="name" :label="_('web.admin.purchases.filter.' ~ name)" type="date" :value="value" />
               </div>
             {% endfor %}
           </div>
-          <label for="purchases-who"
-                 class="field-label field-label-joined">{{ _("web.admin.purchases.filter.who") }}</label>
-          <input id="purchases-who"
-                 name="who"
-                 type="search"
-                 value="{{ listing.who }}"
-                 maxlength="64"
-                 autocomplete="off"
-                 placeholder="{{ _('web.admin.purchases.filter.who.hint') }}"
-                 class="field-input">
+          <TextField id="purchases-who" name="who" :label="_('web.admin.purchases.filter.who')" type="search" :value="listing.who" maxlength="64" autocomplete="off" :placeholder="_('web.admin.purchases.filter.who.hint')" />
           <p class="bar-text body-text">{{ _("web.admin.purchases.filter.note") }}</p>
           <div class="find-button">
             <FormButton icon="find">{{ _("web.admin.purchases.filter.apply") }}</FormButton>

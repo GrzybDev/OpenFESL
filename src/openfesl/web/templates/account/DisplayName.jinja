@@ -23,7 +23,7 @@
       <div class="account-page-form">
         <Bar id="display-name-bar" :extra="_('web.account.public')" large>{{ title }}</Bar>
         {% set note %}{% if suggestion %}{{ _("web.account.display_name.suggested", name=suggestion.name, game=_("games." ~ suggestion.game.id ~ ".short")) }} {% endif %}{{ _("web.account.display_name.rule") }}{% endset %}
-        <TextField id="display-name" name="display_name" autocomplete="nickname" pattern="[A-Za-z0-9_\\-]{4,16}" :minlength="4" :maxlength="16" :label="title" :value="value" :note="note" :error="error" />
+        <TextField id="display-name" name="display_name" autocomplete="nickname" pattern="[A-Za-z0-9_\\-]{4,16}" :minlength="4" :maxlength="16" :label="title" :value="value" :note="note" :error="error" spellcheck="false" required />
         <ActionButton :label="_('web.account.display_name.action')" :busy="_('web.account.display_name.busy')" />
       </div>
     </Panel>

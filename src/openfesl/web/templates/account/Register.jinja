@@ -35,7 +35,7 @@
 {# The display name joins the address after a service, and heads the public part otherwise. #}
 {% macro name_field() %}
   {% set suggested = service and values.display_name and values.display_name == identity.name %}
-  <TextField id="register-name" name="display_name" autocomplete="nickname" pattern="[A-Za-z0-9_\\-]{4,16}" :minlength="4" :maxlength="16" :label="_('web.account.display_name')" :tag="_('web.account.public')" :value="values.display_name" :note="(_('web.account.register.name.suggested', service=service.name) ~ ' ' if suggested else '') ~ _('web.account.display_name.rule')" :error="errors.get('display_name', '')" />
+  <TextField id="register-name" name="display_name" autocomplete="nickname" pattern="[A-Za-z0-9_\\-]{4,16}" :minlength="4" :maxlength="16" :label="_('web.account.display_name')" :tag="_('web.account.public')" :value="values.display_name" :note="(_('web.account.register.name.suggested', service=service.name) ~ ' ' if suggested else '') ~ _('web.account.display_name.rule')" :error="errors.get('display_name', '')" spellcheck="false" required />
 {% endmacro %}
 <AccountPage :title="title" :subtitle="subtitle" :turnstile="check != ''">
   <div class="account-page-main register-main">
@@ -93,7 +93,7 @@
         {% else %}
           {% set address_note %}{{ _("web.account.register.email", games=games) }}{% if mail %} {{ _("web.account.register.email.link") }}{% endif %}{% endset %}
         {% endif %}
-        <TextField id="register-email" name="email" type="email" autocomplete="email" :maxlength="63" :label="_('web.account.address')" :value="values.email" :note="address_note" :error="errors.get('email', '')" />
+        <TextField id="register-email" name="email" type="email" autocomplete="email" :maxlength="63" :label="_('web.account.address')" :value="values.email" :note="address_note" :error="errors.get('email', '')" spellcheck="false" required />
         {{ password_field() if not service else name_field() }}
       </div>
       <div class="account-page-form">

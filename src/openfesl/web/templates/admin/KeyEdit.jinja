@@ -51,33 +51,13 @@
               {%- if new %}<span aria-hidden="true">+</span><span class="sr-only">{{ _("web.admin.key.grant.new") }}</span>{% else %}{{ number }}{% endif -%}
             </div>
             <div role="cell">
-              <input id="grant-tag-{{ number }}"
-                     name="tag"
-                     placeholder="{{ _('web.admin.entitlement.tag') }}"
-                     type="text"
-                     value="{{ row.tag }}"
-                     autocomplete="off"
-                     aria-labelledby="grant-head-tag grant-row-{{ number }}"
-                     {% if wrong %} aria-invalid="true" aria-describedby="grant-error"{% endif %}
-                     class="field-input field-code{% if wrong %} field-invalid{% endif %}">
+              <TextField :id="'grant-tag-' ~ number" name="tag" :value="row.tag" :wrong="wrong" class="field-code" :placeholder="_('web.admin.entitlement.tag')" autocomplete="off" :aria-labelledby="'grant-head-tag grant-row-' ~ number" :aria-describedby="'grant-error' if wrong else none" />
             </div>
             <div role="cell">
-              <input name="group"
-                     placeholder="{{ _('web.admin.entitlement.group') }}"
-                     type="text"
-                     value="{{ row.group }}"
-                     autocomplete="off"
-                     aria-labelledby="grant-head-group grant-row-{{ number }}"
-                     class="field-input field-code">
+              <TextField name="group" :value="row.group" class="field-code" :placeholder="_('web.admin.entitlement.group')" autocomplete="off" :aria-labelledby="'grant-head-group grant-row-' ~ number" />
             </div>
             <div role="cell">
-              <input name="product"
-                     placeholder="{{ _('web.admin.entitlement.product') }}"
-                     type="text"
-                     value="{{ row.product }}"
-                     autocomplete="off"
-                     aria-labelledby="grant-head-product grant-row-{{ number }}"
-                     class="field-input field-code">
+              <TextField name="product" :value="row.product" class="field-code" :placeholder="_('web.admin.entitlement.product')" autocomplete="off" :aria-labelledby="'grant-head-product grant-row-' ~ number" />
             </div>
             <div role="cell" class="key-edit-remove">
               {% if not new %}
@@ -107,16 +87,7 @@
       <div class="key-edit-labels">
         {% for language in codes %}
           <div>
-            <label for="label-{{ language }}"
-                   class="field-label field-label-joined">{{ _("web.admin.key.label.in", language=language_name(language)) }}</label>
-            <input id="label-{{ language }}"
-                   name="label.{{ language }}"
-                   type="text"
-                   value="{{ form.labels.get(language, '') }}"
-                   lang="{{ language }}"
-                   maxlength="{{ longest }}"
-                   autocomplete="off"
-                   class="field-input">
+            <TextField :id="'label-' ~ language" :name="'label.' ~ language" :label="_('web.admin.key.label.in', language=language_name(language))" :value="form.labels.get(language, '')" :lang="language" :maxlength="longest" autocomplete="off" />
           </div>
         {% endfor %}
       </div>
@@ -124,16 +95,7 @@
 
       <section aria-labelledby="edit-limits" class="key-edit-limits">
         <Bar id="edit-limits" :extra="_n('web.admin.key.used', key.limits.uses)">{{ _("web.admin.key.limits") }}</Bar>
-        <label for="edit-uses" class="field-label field-label-joined">{{ _("web.admin.key.limits.most") }}</label>
-        <input id="edit-uses"
-               name="max_uses"
-               type="number"
-               min="1"
-               inputmode="numeric"
-               value="{{ form.max_uses }}"
-               aria-describedby="edit-uses-note"
-               {% if form.error == 'uses' %} aria-invalid="true"{% endif %}
-               class="field-input{% if form.error == 'uses' %} field-invalid{% endif %}">
+        <TextField id="edit-uses" name="max_uses" :label="_('web.admin.key.limits.most')" type="number" :value="form.max_uses" :wrong="form.error == 'uses'" min="1" inputmode="numeric" aria-describedby="edit-uses-note" />
         {% if form.error == "uses" %}
           {{ field_error(_("web.admin.key.limits.wrong")) }}
         {% else %}

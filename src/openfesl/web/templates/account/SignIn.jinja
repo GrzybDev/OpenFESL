@@ -69,15 +69,7 @@
         <CsrfField />
         {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
         <Bar id="sign-in-email" large>{{ _("web.account.sign_in.email" if services else "web.account.sign_in.email.only") }}</Bar>
-        <label for="sign-in-address" class="field-label field-label-joined">{{ _("web.account.address") }}</label>
-        <input id="sign-in-address"
-               name="email"
-               type="email"
-               value="{{ address }}"
-               required
-               autocomplete="username"
-               spellcheck="false"
-               class="field-input">
+        <TextField id="sign-in-address" name="email" :label="_('web.account.address')" type="email" :value="address" required autocomplete="username" spellcheck="false" />
         <PasswordField id="sign-in-password"
                        :label="_('web.account.password')"
                        note="sign-in-password-note"

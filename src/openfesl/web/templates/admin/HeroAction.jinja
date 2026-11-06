@@ -36,24 +36,7 @@
       </span>
     </p>
     {% if action == "rename" %}
-      <label for="rename-name" class="field-label field-label-joined">{{ _("web.admin.hero.rename.name") }}</label>
-      <input id="rename-name"
-             name="name"
-             type="text"
-             value="{{ form.get('name', '') }}"
-             required
-             minlength="{{ rules.name_length[0] }}"
-             maxlength="{{ rules.name_length[1] }}"
-             pattern="{{ rules.name }}"
-             autocomplete="off"
-             spellcheck="false"
-             autofocus
-             data-needed="{{ _('web.admin.still_needed.name') }}"
-             data-name-check="{{ url(base ~ '/rename/check') }}"
-             data-checking="{{ _('web.creator.name.checking') }}"
-             aria-describedby="rename-hint name-status"
-             {% if form.get("check") not in (none, "free") %} aria-invalid="true"{% endif %}
-             class="field-input{% if form.get('check') not in (none, 'free') %} field-invalid{% endif %}">
+      <TextField id="rename-name" name="name" :label="_('web.admin.hero.rename.name')" :value="form.get('name', '')" :wrong="form.get('check') not in (none, 'free')" required :minlength="rules.name_length[0]" :maxlength="rules.name_length[1]" :pattern="rules.name" autocomplete="off" spellcheck="false" autofocus :data-needed="_('web.admin.still_needed.name')" :data-name-check="url(base ~ '/rename/check')" :data-checking="_('web.creator.name.checking')" aria-describedby="rename-hint name-status" />
       <p id="rename-hint"
          class="field-note">{{ _("web.admin.hero.rename.hint", shortest=rules.name_length[0], longest=rules.name_length[1]) }}</p>
       <NameStatus :name="form.get('name', '')" :check="form.get('check', '')" />

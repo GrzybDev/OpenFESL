@@ -111,24 +111,10 @@
           <fieldset class="rules-fields"{% if not manages %} disabled{% endif %}>
             <label for="rule-value"
                    class="field-label">{{ _("web.admin.store.rules.use_price" if uses else "web.admin.store.rules.value") }}</label>
-            <input id="rule-value"
-                   name="value"
-                   type="text"
-                   inputmode="numeric"
-                   value="{{ form.get('value', rule.use_price if uses else rule.value) }}"
-                   maxlength="13"
-                   required
-                   {% if why %} aria-invalid="true" aria-describedby="rule-why"{% endif %}
-                   class="field-input rules-input{% if why %} field-invalid{% endif %}">
+            <TextField id="rule-value" name="value" :value="form.get('value', rule.use_price if uses else rule.value)" :wrong="why" class="rules-input" inputmode="numeric" maxlength="13" required :aria-describedby="'rule-why' if why else none" />
             {% if uses %}
               <label for="rule-packs" class="field-label">{{ _("web.admin.store.rules.packs") }}</label>
-              <input id="rule-packs"
-                     name="packs"
-                     type="text"
-                     value="{{ form.get('packs', rule.sold|map(attribute='uses')|join(', ')) }}"
-                     maxlength="60"
-                     aria-describedby="rule-packs-hint"
-                     class="field-input">
+              <TextField id="rule-packs" name="packs" :value="form.get('packs', rule.sold|map(attribute='uses')|join(', '))" maxlength="60" aria-describedby="rule-packs-hint" />
               <p id="rule-packs-hint" class="field-note">{{ _("web.admin.store.rules.packs.hint") }}</p>
             {% else %}
               <fieldset class="prices-add-part">

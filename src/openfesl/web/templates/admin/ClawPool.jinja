@@ -53,12 +53,7 @@
                 </label>
                 <label class="box-weight">
                   <span>{{ _("web.admin.boxes.weight") }}</span>
-                  <input name="weight-{{ tier.index }}"
-                         type="text"
-                         inputmode="numeric"
-                         value="{{ weights[loop.index0] }}"
-                         maxlength="3"
-                         class="field-input box-weight-input">
+                  <TextField :name="'weight-' ~ tier.index" :value="weights[loop.index0]" class="box-weight-input" inputmode="numeric" maxlength="3" />
                   <span>%</span>
                 </label>
               {% else %}
@@ -113,15 +108,7 @@
         <p class="bar-text body-text">{{ _("web.admin.boxes.claw.pool.rule") }}</p>
         {% if manages %}
           <div class="claw-field">
-            <label for="claw-pool-note" class="field-label field-label-joined">{{ _("web.admin.note") }}</label>
-            <input id="claw-pool-note"
-                   name="note"
-                   type="text"
-                   value="{{ form.get('note', '') }}"
-                   required
-                   maxlength="300"
-                   autocomplete="off"
-                   class="field-input">
+            <TextField id="claw-pool-note" name="note" :label="_('web.admin.note')" :value="form.get('note', '')" required maxlength="300" autocomplete="off" />
           </div>
           {% if refused %}
             <p role="alert" class="prices-refusal">

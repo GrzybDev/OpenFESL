@@ -219,14 +219,7 @@
                   {% if manages %}
                     <label class="rewards-funds-field">
                       <span class="sr-only">{{ name }}</span>
-                      <input name="funds-{{ key }}"
-                             type="text"
-                             inputmode="numeric"
-                             pattern="[0-9]+"
-                             value="{{ funds }}"
-                             required
-                             {% if form.get("refused") == key %} aria-invalid="true"{% endif %}
-                             class="field-input rewards-funds-input{% if form.get('refused') == key %} field-invalid{% endif %}">
+                      <TextField :name="'funds-' ~ key" :value="funds" :wrong="form.get('refused') == key" class="rewards-funds-input" inputmode="numeric" pattern="[0-9]+" required />
                       <span class="rewards-currency">{{ _("games." ~ game.id ~ ".currency." ~ rules.currency) }}</span>
                     </label>
                     <label class="prices-sold">

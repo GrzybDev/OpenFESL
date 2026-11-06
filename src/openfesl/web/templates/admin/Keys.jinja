@@ -207,18 +207,7 @@
                 class="provider-add">
             <Bar id="add-key-title" large>{{ _("web.admin.key.add") }}</Bar>
             <CsrfField />
-            <label for="add-code" class="field-label field-label-joined">{{ _("web.admin.key.code") }}</label>
-            <input id="add-code"
-                   name="code"
-                   type="text"
-                   value="{{ form.get('code', '') }}"
-                   required
-                   maxlength="{{ longest }}"
-                   placeholder="{{ _('web.admin.key.code.hint') }}"
-                   autocomplete="off"
-                   aria-describedby="add-code-note"
-                   {% if form.get('error') %} aria-invalid="true"{% endif %}
-                   class="field-input field-code{% if form.get('error') %} field-invalid{% endif %}">
+            <TextField id="add-code" name="code" :label="_('web.admin.key.code')" :value="form.get('code', '')" :wrong="form.get('error')" class="field-code" required :maxlength="longest" :placeholder="_('web.admin.key.code.hint')" autocomplete="off" aria-describedby="add-code-note" />
             {% if form.get("error") %}
               <p id="add-code-note" class="field-note field-error">
                 <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.key.code." ~ form.get('error'), count=number(longest)) }}

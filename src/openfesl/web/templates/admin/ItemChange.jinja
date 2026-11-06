@@ -45,17 +45,11 @@
       </dl>
       <p id="confirm-text" class="body-text">{{ _("web.admin.items.revoke.text") }}</p>
     {% else %}
-      <label for="item-value"
-             class="field-label field-label-joined">{{ _("web.admin.items.change.uses") if counted else _("web.admin.items.change.end") }}</label>
-      <input id="item-value"
-             name="value"
-             {% if counted %} type="number" min="0" max="2147483647" value="{{ form.get('value') or held.uses or 0 }}" {% else %} type="date" value="{{ form.get('value') or held.expires.strftime('%Y-%m-%d') }}" {% endif %}
-             required
-             autofocus
-             data-needed="{{ _('web.admin.still_needed.' ~ ('uses' if counted else 'end')) }}"
-             aria-describedby="confirm-text"
-             {% if error == "value" %} aria-invalid="true"{% endif %}
-             class="field-input{% if error == 'value' %} field-invalid{% endif %}">
+      {% if counted %}
+        <TextField id="item-value" name="value" :label="_('web.admin.items.change.uses')" type="number" :value="form.get('value') or held.uses or 0" :wrong="error == 'value'" min="0" max="2147483647" required autofocus :data-needed="_('web.admin.still_needed.uses')" aria-describedby="confirm-text" />
+      {% else %}
+        <TextField id="item-value" name="value" :label="_('web.admin.items.change.end')" type="date" :value="form.get('value') or held.expires.strftime('%Y-%m-%d')" :wrong="error == 'value'" required autofocus :data-needed="_('web.admin.still_needed.end')" aria-describedby="confirm-text" />
+      {% endif %}
       <p id="confirm-text" class="field-note">
         {{ _("web.admin.items.change.now", now=now) }} {{ _("web.admin.items.change.uses.text") if counted else _("web.admin.items.change.end.text") }}
       </p>

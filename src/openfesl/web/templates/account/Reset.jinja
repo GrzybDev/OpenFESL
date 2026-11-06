@@ -19,7 +19,7 @@
       <div class="account-page-form">
         <Bar id="reset-request" large>{{ _("web.account.reset.request") }}</Bar>
         <p class="bar-text body-text">{{ _("web.account.reset.request.text") }}</p>
-        <TextField id="reset-email" name="email" type="email" autocomplete="username" :maxlength="63" :label="_('web.account.address')" :value="address" :note="_('web.account.reset.email', games=listed(password_games))" :error="error" />
+        <TextField id="reset-email" name="email" type="email" autocomplete="username" :maxlength="63" :label="_('web.account.address')" :value="address" :note="_('web.account.reset.email', games=listed(password_games))" :error="error" spellcheck="false" required />
         {% if check %}<TurnstileCheck :key="check" />{% endif %}
         <ActionButton :label="_('web.account.reset.send')" :busy="_('web.account.notice.sending')" />
       </div>

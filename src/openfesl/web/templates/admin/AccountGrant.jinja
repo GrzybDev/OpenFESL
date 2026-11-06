@@ -61,32 +61,13 @@
         </div>
         <div class="grant-fields">
           <div>
-            <label for="grant-tag" class="field-label field-label-joined">{{ _("web.admin.entitlement.tag") }}</label>
-            <input id="grant-tag"
-                   name="tag"
-                   type="text"
-                   value="{{ form.get('tag', '') }}"
-                   autocomplete="off"
-                   {% if missing %} aria-invalid="true" aria-describedby="grant-missing"{% endif %}
-                   class="field-input field-code{% if missing %} field-invalid{% endif %}">
+            <TextField id="grant-tag" name="tag" :label="_('web.admin.entitlement.tag')" :value="form.get('tag', '')" :wrong="missing" class="field-code" autocomplete="off" :aria-describedby="'grant-missing' if missing else none" />
           </div>
           <div>
-            <label for="grant-group" class="field-label field-label-joined">{{ _("web.admin.grant.group") }}</label>
-            <input id="grant-group"
-                   name="group"
-                   type="text"
-                   value="{{ form.get('group', '') }}"
-                   autocomplete="off"
-                   class="field-input field-code">
+            <TextField id="grant-group" name="group" :label="_('web.admin.grant.group')" :value="form.get('group', '')" class="field-code" autocomplete="off" />
           </div>
           <div>
-            <label for="grant-product" class="field-label field-label-joined">{{ _("web.admin.grant.product") }}</label>
-            <input id="grant-product"
-                   name="product"
-                   type="text"
-                   value="{{ form.get('product', '') }}"
-                   autocomplete="off"
-                   class="field-input field-code">
+            <TextField id="grant-product" name="product" :label="_('web.admin.grant.product')" :value="form.get('product', '')" class="field-code" autocomplete="off" />
           </div>
         </div>
         {% if missing %}

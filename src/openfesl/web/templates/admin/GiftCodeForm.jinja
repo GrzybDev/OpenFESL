@@ -15,9 +15,6 @@
 {% macro refusal(name) %}
   {% if name in refused %}<FieldError :id="'code-' ~ name ~ '-note'">{{ refused[name] }}</FieldError>{% endif %}
 {% endmacro %}
-{% macro invalid(name) %}
-  {%- if name in refused %} aria-invalid="true" aria-describedby="code-{{ name }}-note"{% endif -%}
-{% endmacro %}
 <AdminPage :title="title ~ ' · ' ~ _('web.admin.keys')" current="keys">
   <PageHead labelledby="form-title">
     <div class="enter-title page-title">
@@ -55,27 +52,13 @@
             <label for="code-code"
                    class="field-label field-label-joined">{{ _("web.admin.keys.code_generated") }}</label>
             <div class="code-generated">
-              <input id="code-code"
-                     name="code"
-                     type="text"
-                     value="{{ draft.code }}"
-                     readonly
-                     class="field-input code-text">
+              <TextField id="code-code" name="code" :value="draft.code" class="code-text" readonly />
               <FormButton icon="retry" name="again" value="1" formnovalidate>{{ _("web.admin.keys.generate_again") }}</FormButton>
             </div>
             <p class="field-note">{{ _("web.admin.keys.format") }}</p>
           </div>
           <div class="code-count">
-            <label for="code-count" class="field-label field-label-joined">{{ _("web.admin.keys.batch_count") }}</label>
-            <input id="code-count"
-                   name="count"
-                   type="text"
-                   inputmode="numeric"
-                   value="{{ draft.count }}"
-                   maxlength="5"
-                   autocomplete="off"
-                   {{ invalid("count") }}
-                   class="field-input{% if 'count' in refused %} field-invalid{% endif %}">
+            <TextField id="code-count" name="count" :label="_('web.admin.keys.batch_count')" :value="draft.count" :wrong="'count' in refused" inputmode="numeric" maxlength="5" autocomplete="off" :aria-describedby="'code-count-note' if 'count' in refused else none" />
             {% if "count" in refused %}
               {{ refusal("count") }}
             {% else %}
@@ -133,28 +116,10 @@
                 {% endfor %}
               </fieldset>
               <div class="code-amount code-days">
-                <label for="code-days" class="field-label field-label-joined">{{ _("web.admin.keys.days") }}</label>
-                <input id="code-days"
-                       name="days"
-                       type="text"
-                       inputmode="numeric"
-                       value="{{ draft.days }}"
-                       maxlength="3"
-                       autocomplete="off"
-                       data-refresh
-                       class="field-input">
+                <TextField id="code-days" name="days" :label="_('web.admin.keys.days')" :value="draft.days" inputmode="numeric" maxlength="3" autocomplete="off" data-refresh />
               </div>
               <div class="code-amount code-uses">
-                <label for="code-uses" class="field-label field-label-joined">{{ _("web.admin.keys.uses") }}</label>
-                <input id="code-uses"
-                       name="uses"
-                       type="text"
-                       inputmode="numeric"
-                       value="{{ draft.uses }}"
-                       maxlength="10"
-                       autocomplete="off"
-                       data-refresh
-                       class="field-input">
+                <TextField id="code-uses" name="uses" :label="_('web.admin.keys.uses')" :value="draft.uses" inputmode="numeric" maxlength="10" autocomplete="off" data-refresh />
               </div>
               <FormButton icon="plus" name="add" value="1" formnovalidate class="code-add-button">{{ found.add or _("web.admin.keys.add") }}</FormButton>
             {% endif %}
@@ -196,27 +161,10 @@
         {{ refusal("items") }}
         <div class="code-wallet">
           <div>
-            <label for="code-funds" class="field-label field-label-joined">{{ _("web.admin.keys.funds") }}</label>
-            <input id="code-funds"
-                   name="funds"
-                   type="text"
-                   inputmode="numeric"
-                   value="{{ draft.funds }}"
-                   maxlength="13"
-                   autocomplete="off"
-                   {{ invalid("amounts") }}
-                   class="field-input{% if 'amounts' in refused %} field-invalid{% endif %}">
+            <TextField id="code-funds" name="funds" :label="_('web.admin.keys.funds')" :value="draft.funds" :wrong="'amounts' in refused" inputmode="numeric" maxlength="13" autocomplete="off" :aria-describedby="'code-amounts-note' if 'amounts' in refused else none" />
           </div>
           <div>
-            <label for="code-keys" class="field-label field-label-joined">{{ _("web.admin.keys.keys") }}</label>
-            <input id="code-keys"
-                   name="keys"
-                   type="text"
-                   inputmode="numeric"
-                   value="{{ draft.keys }}"
-                   maxlength="13"
-                   autocomplete="off"
-                   class="field-input{% if 'amounts' in refused %} field-invalid{% endif %}">
+            <TextField id="code-keys" name="keys" :label="_('web.admin.keys.keys')" :value="draft.keys" inputmode="numeric" maxlength="13" autocomplete="off" :class="'field-invalid' if 'amounts' in refused else ''" />
           </div>
         </div>
         {{ refusal("amounts") }}
@@ -233,17 +181,7 @@
             {% endfor %}
           </fieldset>
           <div class="code-most">
-            <label for="code-most" class="field-label field-label-joined">{{ _("web.admin.keys.accounts.max") }}</label>
-            <input id="code-most"
-                   name="most"
-                   type="text"
-                   inputmode="numeric"
-                   value="{{ draft.most }}"
-                   maxlength="10"
-                   autocomplete="off"
-                   {{ invalid("most") }}
-                   class="field-input{% if 'most' in refused %} field-invalid{% endif %}">
-            {{ refusal("most") }}
+            <TextField id="code-most" name="most" :label="_('web.admin.keys.accounts.max')" :value="draft.most" :error="refused.get('most', '')" inputmode="numeric" maxlength="10" autocomplete="off" />
           </div>
         {% endif %}
         {% if not entry or entry.batch %}
@@ -252,47 +190,16 @@
         <p class="bar offer-legend">{{ _("web.admin.keys.ends") }}</p>
         <div class="code-ends">
           <label for="code-ends-day" class="sr-only">{{ _("web.admin.keys.ends.day") }}</label>
-          <input id="code-ends-day"
-                 name="ends_day"
-                 type="date"
-                 value="{{ draft.ends_day }}"
-                 {{ invalid("ends") }}
-                 class="field-input{% if 'ends' in refused %} field-invalid{% endif %}">
+          <TextField id="code-ends-day" name="ends_day" type="date" :value="draft.ends_day" :wrong="'ends' in refused" :aria-describedby="'code-ends-note' if 'ends' in refused else none" />
           <label for="code-ends-time" class="sr-only">{{ _("web.admin.keys.ends.time") }}</label>
-          <input id="code-ends-time"
-                 name="ends_time"
-                 type="time"
-                 value="{{ draft.ends_time }}"
-                 class="field-input">
+          <TextField id="code-ends-time" name="ends_time" type="time" :value="draft.ends_time" />
         </div>
         {{ refusal("ends") }}
         {% for code, name in found.languages %}
           {% set english = loop.first %}
-          <label for="code-label-{{ code }}"
-                 class="field-label field-label-joined">{{ _("web.admin.keys.label.base" if english else "web.admin.keys.label.in", language=name) }}</label>
-          <input id="code-label-{{ code }}"
-                 name="label-{{ code }}"
-                 lang="{{ code }}"
-                 type="text"
-                 value="{{ draft.labels.get(code, '') }}"
-                 maxlength="80"
-                 autocomplete="off"
-                 {% if english %} required data-needed="{{ _('web.admin.keys.still_needed.label') }}" {{ invalid("label") }}{% endif %}
-                 class="field-input{% if english and 'label' in refused %} field-invalid{% endif %}">
-          {% if english %}{{ refusal("label") }}{% endif %}
+          <TextField :id="'code-label-' ~ code" :name="'label-' ~ code" :label="_('web.admin.keys.label.base' if english else 'web.admin.keys.label.in', language=name)" :value="draft.labels.get(code, '')" :error="refused.get('label', '') if english else ''" :lang="code" maxlength="80" autocomplete="off" :required="english" :data-needed="_('web.admin.keys.still_needed.label') if english else none" />
         {% endfor %}
-        <label for="code-note" class="field-label field-label-joined">{{ _("web.admin.keys.note") }}</label>
-        <input id="code-note"
-               name="note"
-               type="text"
-               value="{{ draft.note }}"
-               required
-               maxlength="300"
-               autocomplete="off"
-               data-needed="{{ _('web.admin.still_needed.note') }}"
-               {{ invalid("note") }}
-               class="field-input{% if 'note' in refused %} field-invalid{% endif %}">
-        {{ refusal("note") }}
+        <TextField id="code-note" name="note" :label="_('web.admin.keys.note')" :value="draft.note" :error="refused.get('note', '')" required maxlength="300" autocomplete="off" :data-needed="_('web.admin.still_needed.note')" />
         <p aria-live="polite"
            data-live="{{ path }}"
            class="offer-line code-summary">{{ found.summary }}</p>

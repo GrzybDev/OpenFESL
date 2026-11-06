@@ -45,17 +45,7 @@
     </p>
     <label for="grant-q" class="field-label field-label-joined">{{ _("web.admin.items.search") }}</label>
     <div class="admin-search">
-      <input id="grant-q"
-             name="q"
-             form="admin-search"
-             type="search"
-             value="{{ grant.query }}"
-             autocomplete="off"
-             spellcheck="false"
-             {% if not grant.item %} autofocus{% endif %}
-             data-refresh
-             aria-describedby="grant-found"
-             class="field-input">
+      <TextField id="grant-q" name="q" type="search" :value="grant.query" form="admin-search" autocomplete="off" spellcheck="false" :autofocus="not grant.item" data-refresh aria-describedby="grant-found" />
       <input type="hidden" name="back" form="admin-search" value="{{ back }}">
       <button type="submit" form="admin-search" class="list-button no-js-only">{{ _("web.admin.find.search") }}</button>
     </div>
@@ -124,15 +114,7 @@
             {% endfor %}
           </fieldset>
           <div class="admin-uses">
-            <label for="grant-uses" class="field-label field-label-joined">{{ _("web.admin.items.uses") }}</label>
-            <input id="grant-uses"
-                   name="uses"
-                   type="number"
-                   min="1"
-                   max="2147483647"
-                   value="{{ grant.uses }}"
-                   data-refresh
-                   class="field-input">
+            <TextField id="grant-uses" name="uses" :label="_('web.admin.items.uses')" type="number" :value="grant.uses" min="1" max="2147483647" data-refresh />
           </div>
           <p class="bar-text admin-result">{{ blocked or grant.result }}</p>
         {% endif %}

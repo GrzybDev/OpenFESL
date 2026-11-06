@@ -12,14 +12,7 @@
     <PauseBar :game="game" :paused="found.paused" :entry="pause" :manages="manages" />
     <div class="preview-dates">
       <form method="get" action="{{ base }}" class="preview-date">
-        <label for="preview-date"
-               class="field-label field-label-joined">{{ _("web.admin.rewards.preview.date") }}</label>
-        <input id="preview-date"
-               name="date"
-               type="date"
-               value="{{ found.day.isoformat() }}"
-               required
-               class="field-input">
+        <TextField id="preview-date" name="date" :label="_('web.admin.rewards.preview.date')" type="date" :value="found.day.isoformat()" required />
         <FormButton icon="go">{{ _("web.admin.rewards.preview.show") }}</FormButton>
       </form>
       <nav aria-label="{{ _('web.admin.rewards.preview.jumps') }}"

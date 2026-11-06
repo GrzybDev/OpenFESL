@@ -26,17 +26,7 @@
       {% if confirm %}
         <div class="decision-confirm">
           <label for="decision-name" class="field-label">{{ _("web.account.deletion.confirm") }}</label>
-          <input id="decision-name"
-                 name="confirm_name"
-                 form="decision-form"
-                 type="text"
-                 value="{{ value }}"
-                 required
-                 autocomplete="off"
-                 spellcheck="false"
-                 aria-describedby="decision-note"
-                 {% if error %} aria-invalid="true" autofocus{% endif %}
-                 class="field-input{% if error %} field-invalid{% endif %}">
+          <TextField id="decision-name" name="confirm_name" :value="value" :wrong="error" form="decision-form" required autocomplete="off" spellcheck="false" aria-describedby="decision-note" :autofocus="error != ''" />
           {% if error %}
             <FieldError id="decision-note">{{ error }}</FieldError>
           {% else %}

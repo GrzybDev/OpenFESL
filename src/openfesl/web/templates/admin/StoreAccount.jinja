@@ -67,15 +67,7 @@
                 </div>
                 <div role="cell" class="admin-cell account-value">
                   {% if manages %}
-                    <input id="{{ field }}"
-                           name="{{ value.name }}"
-                           type="text"
-                           inputmode="numeric"
-                           value="{{ typed[value.name] }}"
-                           maxlength="13"
-                           required
-                           {% if wrong %} aria-invalid="true" aria-describedby="{{ field }}-why"{% endif %}
-                           class="field-input account-input{% if wrong %} field-invalid{% endif %}">
+                    <TextField :id="field" :name="value.name" :value="typed[value.name]" :wrong="wrong" class="account-input" inputmode="numeric" maxlength="13" required :aria-describedby="field ~ '-why' if wrong else none" />
                   {% else %}
                     <span id="{{ field }}">{{ number(value.value) }}</span>
                   {% endif %}

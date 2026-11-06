@@ -14,22 +14,9 @@
 {% macro refusal(name) %}
   {% if name in refused %}<FieldError :id="'referral-' ~ name ~ '-note'">{{ refused[name] }}</FieldError>{% endif %}
 {% endmacro %}
-{% macro invalid(name) %}
-  {%- if name in refused %} aria-invalid="true" aria-describedby="referral-{{ name }}-note"{% endif -%}
-{% endmacro %}
 {% macro field(name, label, value, size="5") %}
   <div class="referral-step-field">
-    <label for="referral-{{ name }}" class="field-label field-label-joined">{{ label }}</label>
-    <input id="referral-{{ name }}"
-           name="{{ name }}"
-           type="text"
-           inputmode="numeric"
-           value="{{ value }}"
-           maxlength="{{ size }}"
-           autocomplete="off"
-           {{ invalid(name) }}
-           class="field-input{% if name in refused %} field-invalid{% endif %}">
-    {{ refusal(name) }}
+    <TextField :id="'referral-' ~ name" :name="name" :label="label" :value="value" :error="refused.get(name, '')" :maxlength="size" inputmode="numeric" autocomplete="off" />
   </div>
 {% endmacro %}
 <AdminPage :title="title ~ ' · ' ~ _('web.admin.rewards.referral.title')"
@@ -131,15 +118,7 @@
             <div class="referral-pair">
               {% for language in codes %}
                 <div class="referral-step-field">
-                  <label for="referral-{{ side }}-text-{{ language }}"
-                         class="field-label field-label-joined">{{ _("web.admin.rewards.referral.text", language=language_name(language)) }}</label>
-                  <input id="referral-{{ side }}-text-{{ language }}"
-                         name="{{ side }}-text-{{ language }}"
-                         type="text"
-                         value="{{ draft.texts.get(language, '') }}"
-                         maxlength="60"
-                         autocomplete="off"
-                         class="field-input">
+                  <TextField :id="'referral-' ~ side ~ '-text-' ~ language" :name="side ~ '-text-' ~ language" :label="_('web.admin.rewards.referral.text', language=language_name(language))" :value="draft.texts.get(language, '')" maxlength="60" autocomplete="off" />
                 </div>
               {% endfor %}
             </div>
@@ -147,18 +126,7 @@
         {% endfor %}
       </fieldset>
       {% if manages %}
-        <label for="referral-note" class="field-label field-label-joined">{{ _("web.admin.note") }}</label>
-        <input id="referral-note"
-               name="note"
-               type="text"
-               value="{{ found.note }}"
-               required
-               maxlength="300"
-               autocomplete="off"
-               data-needed="{{ _('web.admin.still_needed.note') }}"
-               {{ invalid("note") }}
-               class="field-input{% if 'note' in refused %} field-invalid{% endif %}">
-        {{ refusal("note") }}
+        <TextField id="referral-note" name="note" :label="_('web.admin.note')" :value="found.note" :error="refused.get('note', '')" required maxlength="300" autocomplete="off" :data-needed="_('web.admin.still_needed.note')" />
         <div class="reward-save">
           <p aria-live="polite" class="admin-form-why">
             <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>

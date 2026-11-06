@@ -31,13 +31,7 @@
 {% endmacro %}
 {% macro day_field(name, label, value, kind="date") %}
   <div class="reward-date reward-when-{{ name if kind == 'date' else kind }}">
-    <label for="event-{{ name }}" class="field-label field-label-joined">{{ label }}</label>
-    <input id="event-{{ name }}"
-           name="{{ name }}"
-           type="{{ 'date' if kind == 'date' else 'number' }}"
-           value="{{ value }}"
-           {% if name in editor.refused %} aria-invalid="true" aria-describedby="event-line"{% endif %}
-           class="field-input{% if name in editor.refused %} field-invalid{% endif %}">
+    <TextField :id="'event-' ~ name" :name="name" :label="label" :type="'date' if kind == 'date' else 'number'" :value="value" :wrong="name in editor.refused" :aria-describedby="'event-line' if name in editor.refused else none" />
   </div>
 {% endmacro %}
 <AdminPage :title="title ~ ' · ' ~ _('web.admin.rewards.title')"
@@ -170,14 +164,7 @@
                     {% set wrong = refusing and name in editor.refused %}
                     <label for="{{ name }}" class="reward-amount">
                       <span class="reward-amount-label">{{ _("games." ~ game.id ~ ".currency." ~ found.words.rules.currency) if amount == "funds" else _("web.admin.rewards.keys.count") }}</span>
-                      <input id="{{ name }}"
-                             name="{{ name }}"
-                             type="text"
-                             inputmode="numeric"
-                             value="{{ draft_part.funds if amount == 'funds' else draft_part.keys }}"
-                             autocomplete="off"
-                             {% if wrong %} aria-invalid="true" aria-describedby="{{ name }}-note"{% endif %}
-                             class="field-input reward-amount-input{% if wrong %} field-invalid{% endif %}">
+                      <TextField :id="name" :name="name" :value="draft_part.funds if amount == 'funds' else draft_part.keys" :wrong="wrong" class="reward-amount-input" inputmode="numeric" autocomplete="off" :aria-describedby="name ~ '-note' if wrong else none" />
                     </label>
                     {% if wrong %}
                       <FieldError :id="name ~ '-note'">{{ editor.refused[name] }}</FieldError>
@@ -195,14 +182,7 @@
                       <Fact :label="_('web.admin.rewards.goal.' ~ label)"
                             :plain="label == 'stat'">
                         {% if label == "goal" %}
-                          <input name="{{ goal_name }}"
-                                 type="text"
-                                 inputmode="numeric"
-                                 value="{{ draft_part.goal }}"
-                                 autocomplete="off"
-                                 aria-label="{{ _('web.admin.rewards.goal.goal') }} · {{ who(view.part) }}"
-                                 {% if wrong_goal %} aria-invalid="true" aria-describedby="{{ goal_name }}-note"{% endif %}
-                                 class="field-input reward-goal-input{% if wrong_goal %} field-invalid{% endif %}">
+                          <TextField :name="goal_name" :value="draft_part.goal" :wrong="wrong_goal" class="reward-goal-input" inputmode="numeric" autocomplete="off" :aria-label="_('web.admin.rewards.goal.goal') ~ ' · ' ~ who(view.part)" :aria-describedby="goal_name ~ '-note' if wrong_goal else none" />
                         {% else %}
                           {{ value }}
                         {% endif %}
@@ -306,23 +286,13 @@
                     {% endfor %}
                     <label class="reward-amount reward-uses">
                       <span class="reward-amount-label">{{ _("web.admin.items.tile.uses") }}</span>
-                      <input name="uses-{{ id }}"
-                             type="text"
-                             inputmode="numeric"
-                             value="10"
-                             autocomplete="off"
-                             class="field-input reward-amount-input">
+                      <TextField :name="'uses-' ~ id" value="10" class="reward-amount-input" inputmode="numeric" autocomplete="off" />
                     </label>
                   </div>
                   {% if event.daily %}
                     <label class="reward-amount reward-add-day">
                       <span class="reward-amount-label">{{ _("web.admin.rewards.add.day") }}</span>
-                      <input name="add-day-{{ id }}"
-                             type="text"
-                             inputmode="numeric"
-                             autocomplete="off"
-                             placeholder="{{ _('web.admin.rewards.add.every') }}"
-                             class="field-input reward-amount-input">
+                      <TextField :name="'add-day-' ~ id" class="reward-amount-input" inputmode="numeric" autocomplete="off" :placeholder="_('web.admin.rewards.add.every')" />
                     </label>
                   {% endif %}
                   <FormButton icon="plus" name="add" :value="id">{{ _("web.admin.rewards.add.submit") }}</FormButton>
@@ -360,17 +330,7 @@
                       <span>{{ name }}</span>
                       <span class="reward-own-tag">{{ _("web.admin.rewards.own.required" if english else "web.admin.rewards.own.optional") }}</span>
                     </label>
-                    <input id="own-{{ code }}"
-                           name="text-{{ code }}"
-                           lang="{{ code }}"
-                           type="text"
-                           value="{{ draft.texts.get(code, '') }}"
-                           maxlength="{{ editor.longest }}"
-                           autocomplete="off"
-                           placeholder="{{ _('web.admin.rewards.own.placeholder') if english else _('web.admin.rewards.own.fallback') }}"
-                           {% if english and editor.needs %} data-needed="{{ _('web.admin.rewards.event.waits.english') }}"{% endif %}
-                           {% if refused %} aria-invalid="true" aria-describedby="own-en-note"{% endif %}
-                           class="field-input reward-own-input{% if refused %} field-invalid{% endif %}">
+                    <TextField :id="'own-' ~ code" :name="'text-' ~ code" :value="draft.texts.get(code, '')" :wrong="refused" class="reward-own-input" :lang="code" :maxlength="editor.longest" autocomplete="off" :placeholder="_('web.admin.rewards.own.placeholder') if english else _('web.admin.rewards.own.fallback')" :data-needed="_('web.admin.rewards.event.waits.english') if english and editor.needs else none" :aria-describedby="'own-en-note' if refused else none" />
                   </div>
                   {% if refused %}
                     <FieldError id="own-en-note">{{ editor.refused["text-en"] }}</FieldError>

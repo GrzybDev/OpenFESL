@@ -254,17 +254,7 @@
                   class="provider-add">
               <Bar id="add-title" large>{{ _("web.admin.provider.add") }}</Bar>
               <CsrfField />
-              <label for="add-name" class="field-label field-label-joined">{{ _("web.admin.provider.name") }}</label>
-              <input id="add-name"
-                     name="name"
-                     type="text"
-                     value="{{ form.get('name', '') }}"
-                     required
-                     placeholder="{{ _('web.admin.provider.name.hint') }}"
-                     autocomplete="off"
-                     aria-describedby="add-note"
-                     {% if form.get('error') %} aria-invalid="true"{% endif %}
-                     class="field-input{% if form.get('error') %} field-invalid{% endif %}">
+              <TextField id="add-name" name="name" :label="_('web.admin.provider.name')" :value="form.get('name', '')" :wrong="form.get('error')" required :placeholder="_('web.admin.provider.name.hint')" autocomplete="off" aria-describedby="add-note" />
               {% if form.get("error") == "taken" %}
                 <p id="add-note" class="field-note field-error">
                   <span aria-hidden="true" class="badge"><Icon name="warn" :size="14" fill="#0A0A0A" /></span>{{ _("web.admin.provider.name.taken", name=form.get('taken')) }}

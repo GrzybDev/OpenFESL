@@ -103,12 +103,7 @@
               {% if manages %}
                 <label class="box-weight">
                   <span>{{ _("web.admin.boxes.weight") }}</span>
-                  <input name="weight-{{ tier.index }}"
-                         type="text"
-                         inputmode="numeric"
-                         value="{{ form.get('weight-' ~ tier.index, tier.weight) }}"
-                         maxlength="3"
-                         class="field-input box-weight-input">
+                  <TextField :name="'weight-' ~ tier.index" :value="form.get('weight-' ~ tier.index, tier.weight)" class="box-weight-input" inputmode="numeric" maxlength="3" />
                   <span>%</span>
                 </label>
               {% else %}

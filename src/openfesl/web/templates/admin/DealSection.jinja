@@ -40,34 +40,16 @@
           </label>
           {% if section.size is not none %}
             <label for="section-size" class="field-label">{{ _("web.admin.deals.section.size") }}</label>
-            <input id="section-size"
-                   name="size"
-                   type="text"
-                   inputmode="numeric"
-                   value="{{ form.get('size', section.size) }}"
-                   maxlength="3"
-                   class="field-input rules-input">
+            <TextField id="section-size" name="size" :value="form.get('size', section.size)" class="rules-input" inputmode="numeric" maxlength="3" />
           {% endif %}
           {% if section.kind == "items" %}
             <label for="section-discount" class="field-label">{{ _("web.admin.deals.section.discount") }}</label>
-            <input id="section-discount"
-                   name="discount"
-                   type="text"
-                   inputmode="numeric"
-                   value="{{ form.get('discount', section.discount) }}"
-                   maxlength="3"
-                   class="field-input rules-input">
+            <TextField id="section-discount" name="discount" :value="form.get('discount', section.discount)" class="rules-input" inputmode="numeric" maxlength="3" />
           {% else %}
             {% for field, value in (("low", section.discount[0]), ("high", section.discount[1]), ("gap", section.gap)) %}
               <label for="section-{{ field }}"
                      class="field-label">{{ _("web.admin.deals.section." ~ {'low': 'from', 'high': 'to', 'gap': 'gap'}[field]) }}</label>
-              <input id="section-{{ field }}"
-                     name="{{ field }}"
-                     type="text"
-                     inputmode="numeric"
-                     value="{{ form.get(field, value) }}"
-                     maxlength="3"
-                     class="field-input rules-input">
+              <TextField :id="'section-' ~ field" :name="field" :value="form.get(field, value)" class="rules-input" inputmode="numeric" maxlength="3" />
             {% endfor %}
           {% endif %}
         </fieldset>

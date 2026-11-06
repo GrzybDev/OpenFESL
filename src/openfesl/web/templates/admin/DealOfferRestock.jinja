@@ -24,19 +24,7 @@
           {{ _("web.admin.deals.offers.left", left=number(bundle.stock - bundle.sold), total=number(bundle.stock)) }}
         </Fact>
       </dl>
-      <label for="restock-count"
-             class="field-label field-label-joined">{{ _("web.admin.deals.offer.restock.count") }}</label>
-      <input id="restock-count"
-             name="count"
-             form="restock-form"
-             type="text"
-             inputmode="numeric"
-             value="{{ count }}"
-             maxlength="10"
-             autocomplete="off"
-             autofocus
-             {% if why %} aria-invalid="true" aria-describedby="restock-note"{% endif %}
-             class="field-input{% if why %} field-invalid{% endif %}">
+      <TextField id="restock-count" name="count" :label="_('web.admin.deals.offer.restock.count')" :value="count" :wrong="why" form="restock-form" inputmode="numeric" maxlength="10" autocomplete="off" autofocus :aria-describedby="'restock-note' if why else none" />
       {% if why %}<FieldError id="restock-note">{{ why }}</FieldError>{% endif %}
       <p id="confirm-text" class="body-text">{{ _("web.admin.deals.offer.restock.text") }}</p>
     </Confirmation>

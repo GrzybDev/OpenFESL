@@ -114,33 +114,21 @@
           </div>
           <div class="offer-amount">
             <label for="offer-amount" class="field-label offer-amount-label"><span data-live="{{ path }}">{{ _("web.admin.deals.offer.amount." ~ draft.pricing, currency=currency) }}</span></label>
-            <input id="offer-amount"
-                   name="amount"
-                   type="text"
-                   inputmode="numeric"
-                   value="{{ draft.amount }}"
-                   maxlength="10"
-                   autocomplete="off"
-                   {% if "amount" in refused %} aria-invalid="true" aria-describedby="offer-amount-note"{% endif %}
-                   class="field-input{% if 'amount' in refused %} field-invalid{% endif %}">
+            <TextField id="offer-amount" name="amount" :value="draft.amount" :wrong="'amount' in refused" inputmode="numeric" maxlength="10" autocomplete="off" :aria-describedby="'offer-amount-note' if 'amount' in refused else none" />
           </div>
           {{ refusal("amount") }}
           <p aria-live="polite" data-live="{{ path }}" class="offer-line">{{- found.line -}}</p>
           <div class="offer-when">
-            {% for name in ("starts", "ends", "stock") %}
+            {% for name in ("starts", "ends") %}
               <div class="offer-day">
-                <label for="offer-{{ name }}"
-                       class="field-label field-label-joined">{{ _("web.admin.deals.offer." ~ name) }}</label>
-                <input id="offer-{{ name }}"
-                       name="{{ name }}"
-                       type="{{ 'text' if name == 'stock' else 'datetime-local' }}"
-                       {% if name == "stock" %} inputmode="numeric" maxlength="10" autocomplete="off"{% endif %}
-                       value="{{ draft[name] }}"
-                       {% if name in refused %} aria-invalid="true" aria-describedby="offer-{{ name }}-note"{% endif %}
-                       class="field-input{% if name in refused %} field-invalid{% endif %}">
+                <TextField :id="'offer-' ~ name" :name="name" :label="_('web.admin.deals.offer.' ~ name)" type="datetime-local" :value="draft[name]" :wrong="name in refused" :aria-describedby="'offer-' ~ name ~ '-note' if name in refused else none" />
                 {{ refusal(name) }}
               </div>
             {% endfor %}
+            <div class="offer-day">
+              <TextField id="offer-stock" name="stock" :label="_('web.admin.deals.offer.stock')" :value="draft.stock" :wrong="'stock' in refused" inputmode="numeric" maxlength="10" autocomplete="off" :aria-describedby="'offer-stock-note' if 'stock' in refused else none" />
+              {{ refusal("stock") }}
+            </div>
           </div>
           <p class="bar offer-legend">{{ _("web.admin.deals.offer.section") }}</p>
           <div class="choice-tiles offer-tiles">
@@ -191,28 +179,10 @@
                   <div class="offer-own-fields">
                     <label for="offer-name-{{ code }}"
                            class="sr-only">{{ _("web.admin.deals.offer.name", language=language) }}</label>
-                    <input id="offer-name-{{ code }}"
-                           name="name-{{ code }}"
-                           lang="{{ code }}"
-                           type="text"
-                           value="{{ draft.names.get(code, '') }}"
-                           maxlength="64"
-                           autocomplete="off"
-                           placeholder="{{ _('web.admin.deals.offer.name.hint') if english else _('web.admin.rewards.own.fallback') }}"
-                           {% if english %} data-needed="{{ _('web.admin.deals.offer.waits.name') }}"{% endif %}
-                           {% if english and "name-en" in refused %} aria-invalid="true" aria-describedby="offer-name-en-note"{% endif %}
-                           class="field-input reward-own-input{% if english and 'name-en' in refused %} field-invalid{% endif %}">
+                    <TextField :id="'offer-name-' ~ code" :name="'name-' ~ code" :value="draft.names.get(code, '')" :wrong="english and 'name-en' in refused" class="reward-own-input" :lang="code" maxlength="64" autocomplete="off" :placeholder="_('web.admin.deals.offer.name.hint') if english else _('web.admin.rewards.own.fallback')" :data-needed="_('web.admin.deals.offer.waits.name') if english else none" :aria-describedby="'offer-name-en-note' if english and 'name-en' in refused else none" />
                     <label for="offer-about-{{ code }}"
                            class="sr-only">{{ _("web.admin.deals.offer.about", language=language) }}</label>
-                    <input id="offer-about-{{ code }}"
-                           name="about-{{ code }}"
-                           lang="{{ code }}"
-                           type="text"
-                           value="{{ draft.abouts.get(code, '') }}"
-                           maxlength="300"
-                           autocomplete="off"
-                           placeholder="{{ _('web.admin.deals.offer.about.hint') if english else _('web.admin.rewards.own.fallback') }}"
-                           class="field-input reward-own-input">
+                    <TextField :id="'offer-about-' ~ code" :name="'about-' ~ code" :value="draft.abouts.get(code, '')" class="reward-own-input" :lang="code" maxlength="300" autocomplete="off" :placeholder="_('web.admin.deals.offer.about.hint') if english else _('web.admin.rewards.own.fallback')" />
                   </div>
                 </div>
                 {% if english %}{{ refusal("name-en") }}{% endif %}

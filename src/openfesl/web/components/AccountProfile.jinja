@@ -43,7 +43,7 @@
         <span class="account-change">{{ _("web.account.change") }}<span class="sr-only"> {{ _("web.account.display_name.change") }}</span><Icon name="caret" :size="14" class="fold-chevron" /></span>
       </summary>
       <AccountForm action="/account/display-name" part="profile">
-      <TextField id="display-name" name="display_name" autocomplete="nickname" pattern="[A-Za-z0-9_\\-]{4,16}" :minlength="4" :maxlength="16" :label="_('web.account.display_name.new')" :value="said.value if form == 'display_name' else account.display_name" :note="_('web.account.display_name.rule')" :error="errors.get('display_name', '') if form == 'display_name' else ''" :focus="form == 'display_name'" />
+      <TextField id="display-name" name="display_name" autocomplete="nickname" pattern="[A-Za-z0-9_\\-]{4,16}" :minlength="4" :maxlength="16" :label="_('web.account.display_name.new')" :value="said.value if form == 'display_name' else account.display_name" :note="_('web.account.display_name.rule')" :error="errors.get('display_name', '') if form == 'display_name' else ''" :autofocus="form == 'display_name'" spellcheck="false" required />
       <SmallAction :label="_('web.account.display_name.action')" :busy="_('web.account.display_name.busy')" />
       </AccountForm>
     </details>

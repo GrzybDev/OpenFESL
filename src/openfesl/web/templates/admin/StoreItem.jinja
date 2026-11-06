@@ -124,16 +124,7 @@
                       </div>
                       <div role="cell" class="admin-cell prices-price">
                         {% if editable %}
-                          <input id="{{ field }}"
-                                 name="{{ field }}"
-                                 type="text"
-                                 inputmode="numeric"
-                                 value="{{ saving.get(field, product.price) }}"
-                                 maxlength="13"
-                                 required
-                                 aria-label="{{ _('web.admin.store.point.price_of', currency=_('games.' ~ game.id ~ '.currency.' ~ product.currency), point=game.store.product_id(product.id)) }}"
-                                 {% if wrong %} aria-invalid="true" aria-describedby="prices-why"{% endif %}
-                                 class="field-input prices-price-input{% if wrong %} field-invalid{% endif %}">
+                          <TextField :id="field" :name="field" :value="saving.get(field, product.price)" :wrong="wrong" class="prices-price-input" inputmode="numeric" maxlength="13" required :aria-label="_('web.admin.store.point.price_of', currency=_('games.' ~ game.id ~ '.currency.' ~ product.currency), point=game.store.product_id(product.id))" :aria-describedby="'prices-why' if wrong else none" />
                         {% else %}
                           {{ number(product.price) }}
                         {% endif %}
@@ -222,15 +213,7 @@
                 <fieldset class="prices-add-part">
                   <legend class="field-label">{{ _("web.admin.store.point.column.ownership") }}</legend>
                   {% if adding.uses %}
-                    <input name="add-uses"
-                           form="prices-add"
-                           type="text"
-                           inputmode="numeric"
-                           value="{{ form.get('add-uses', '') }}"
-                           maxlength="10"
-                           aria-label="{{ _('web.admin.store.point.uses') }}"
-                           placeholder="{{ _('web.admin.store.point.uses') }}"
-                           class="field-input">
+                    <TextField name="add-uses" :value="form.get('add-uses', '')" form="prices-add" inputmode="numeric" maxlength="10" :aria-label="_('web.admin.store.point.uses')" :placeholder="_('web.admin.store.point.uses')" />
                   {% else %}
                     <div class="prices-picks">
                       {% for written in adding.ownerships %}
@@ -248,15 +231,7 @@
                   {% endif %}
                 </fieldset>
                 <label for="add-price" class="field-label">{{ _("web.admin.store.point.column.price") }}</label>
-                <input id="add-price"
-                       name="add-price"
-                       form="prices-add"
-                       type="text"
-                       inputmode="numeric"
-                       value="{{ form.get('add-price', '') }}"
-                       maxlength="13"
-                       placeholder="{{ _('web.admin.store.point.add.rule') }}"
-                       class="field-input">
+                <TextField id="add-price" name="add-price" :value="form.get('add-price', '')" form="prices-add" inputmode="numeric" maxlength="13" :placeholder="_('web.admin.store.point.add.rule')" />
                 {% if refused and refused_point is none %}{{ refusal(why) }}{% endif %}
                 <FormButton icon="plus" form="prices-add">{{ _("web.admin.store.point.add.submit") }}</FormButton>
               </div>
