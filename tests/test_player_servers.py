@@ -269,8 +269,8 @@ async def test_servers_share_an_account_that_gives_nobody_the_rights_of_a_player
         created = await first.theater(THEATER, "CGAM", SERVER_GAME)
         apart = await second.theater(THEATER, "CGAM", SERVER_GAME)
         await cli(capsys, "servers", "approve", created.fields["UGID"])
-        await cli(capsys, "servers", "approve", apart.fields["UGID"])
         await until_listed(ann)
+        await cli(capsys, "servers", "approve", apart.fields["UGID"])
         await let_in(first, ann, created.fields)
 
         wallets = f"/nucleus/wallets/{ann_hero}"
