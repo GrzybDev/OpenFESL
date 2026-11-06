@@ -15,6 +15,10 @@ if TYPE_CHECKING:
 UNKNOWN_USER = 101
 INVALID_PASSWORD = 122
 
+# The login token of a game's dedicated servers, which share an account and whose login proves
+# nothing: they are told apart and approved in Theater.
+SERVER_TOKEN = "dedicated-server"
+
 # Argon2 is slow on purpose; this many hashes at once keep logins from starving the server.
 CONCURRENT_HASHES = 4
 

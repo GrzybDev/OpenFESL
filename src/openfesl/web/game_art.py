@@ -44,7 +44,7 @@ def hidden() -> Response:
 
 def _game_session(request: Request, magma: Magma) -> bool:
     try:
-        magma.session(request.cookies.get("magma"))
+        # Anyone may start a dedicated server, whose session stands for no signed-in player.
+        return not magma.session(request.cookies.get("magma")).server
     except MagmaError:
         return False
-    return True

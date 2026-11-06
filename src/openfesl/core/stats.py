@@ -229,8 +229,9 @@ class StatsService:
     async def get_stats(self, connection: FeslConnection, request: GetStats) -> GetStatsAnswer:
         """Return one owner's stats, as a dedicated server loads a joining player's.
 
-        A dedicated server that logs in with a server account gets them only while it hosts a
-        game players see, as it writes; one that logs in as a player reads as players do.
+        A dedicated server gets them only while it hosts a game players see, as it writes; one of
+        a game whose heroes are made on its site loads its own hero's stats before it lists, so
+        it reads as players do.
 
         Args:
             connection: The FESL connection the request came on.
@@ -244,7 +245,12 @@ class StatsService:
         account = connection.session.account
         # Refused, a server uploads none of the player's stats that session; given them, it
         # would retry every upload until it quits.
-        if account and account.server and not await self._trust.admits(connection.session):
+        if (
+            account
+            and account.server
+            and not game.heroes
+            and not await self._trust.admits(connection.session)
+        ):
             raise TransactionError(PARAMETERS_ERROR)
         owners = stat_owners(connection, game, request.owner, request.owner_type, request.keys)
         check_size(1, request.keys)
@@ -296,8 +302,9 @@ class StatsService:
         """Update stats as servers report players' rounds or games keep their own, all or nothing.
 
         Players' stats come from the rounds they play, which the game's dedicated servers write
-        while they host a game players see, and a client could write any number. A server that
-        logs in as a player writes only for the personas it keeps, and any server writes the
+        while they host a game players see, and a client could write any number. A server of a
+        game whose heroes are made on its site writes only for the personas it keeps, and any
+        server writes the
         stats of an account only for an account whose persona it keeps. A player's own game
         writes only what the game keeps itself of its hero and account. The levels written count
         for the steps of Recruit a Friend at once.
@@ -365,10 +372,12 @@ class StatsService:
             persona = await self._personas.find_by_id(owner.id)
             if persona is None or persona.namespace != game.namespace:
                 raise TransactionError(UNKNOWN_PERSONA)
-            # Only dedicated servers have the game's server account; a server that logs in as a
-            # player could be any player's game, so it writes only for the personas it keeps.
+            # Heroes buy with what their rounds earn, so such a game's servers write only for
+            # the personas they keep.
             account = session.account
-            if (account and account.server) or await self._trust.keeps_persona(session, owner.id):
+            if (account and account.server and not game.heroes) or (
+                await self._trust.keeps_persona(session, owner.id)
+            ):
                 return
             raise TransactionError(PARAMETERS_ERROR)
         if owner.type == ACCOUNT and not await self._trust.keeps_account(session, owner.id):

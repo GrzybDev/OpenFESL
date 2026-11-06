@@ -244,7 +244,12 @@ class Magma:
         return persona
 
     async def entitlements(
-        self, session_id: str | None, game: Game, persona_id: int, tag: str = ""
+        self,
+        session_id: str | None,
+        game: Game,
+        persona_id: int,
+        tag: str = "",
+        relay_token: str | None = None,
     ) -> list[Entitlement]:
         """Return the items that a persona of the asking account owns, one entitlement per item.
 
@@ -254,31 +259,41 @@ class Magma:
             persona_id: The persona.
             tag: A tag whose item alone is returned, however the tag says it is owned; every
                 item when empty.
+            relay_token: The relay token of the game process that asks, if any.
 
         Raises:
             MagmaError: When the request names no session that is known, or the persona is
                 not the game's, or neither its account's nor one its account keeps as a server.
         """
-        persona = await self.persona(session_id, game, persona_id)
+        persona = await self.persona(session_id, game, persona_id, relay_token=relay_token)
         return await self._entitlements.of_persona(persona.id, tag)
 
-    async def wallets(self, session_id: str | None, game: Game, persona_id: int) -> dict[str, int]:
+    async def wallets(
+        self, session_id: str | None, game: Game, persona_id: int, relay_token: str | None = None
+    ) -> dict[str, int]:
         """Return what a persona of the asking account has to spend in each currency, by code.
 
         Args:
             session_id: The magma cookie's value; none when the request carries no cookie.
             game: The game whose Magma host was asked.
             persona_id: The persona.
+            relay_token: The relay token of the game process that asks, if any.
 
         Raises:
             MagmaError: When the request names no session that is known, or the persona is
                 not the game's, or neither its account's nor one its account keeps as a server.
         """
-        persona = await self.persona(session_id, game, persona_id)
+        persona = await self.persona(session_id, game, persona_id, relay_token=relay_token)
         return await self._wallets.of_persona(game, persona)
 
     async def persona(
-        self, session_id: str | None, game: Game, persona_id: int, *, own: bool = False
+        self,
+        session_id: str | None,
+        game: Game,
+        persona_id: int,
+        *,
+        own: bool = False,
+        relay_token: str | None = None,
     ) -> Persona:
         """Return a persona of the game that the asking account owns, or keeps as a server.
 
@@ -289,20 +304,23 @@ class Magma:
             own: Whether only the account's own personas are returned, for what only a
                 player may do, such as buying or uploading a mugshot; a server's players are
                 refused then.
+            relay_token: The relay token of the game process that asks, if any.
 
         Raises:
             MagmaError: When the request names no session that is known, or the persona is
                 not the game's, or neither the account's nor, unless it must be its own, one
                 the account keeps as a server.
         """
-        account_id = self.session(session_id).account_id
+        asker = self.session(session_id)
+        account_id = asker.account_id
         persona = await self._personas.find_by_id(persona_id)
         if (
             persona is None
             or persona.namespace != game.namespace
             or not (
-                persona.account_id == account_id
-                or (not own and await self._keeps(account_id, persona))
+                # The servers' session is nobody's, so it does nothing that only a player may.
+                (persona.account_id == account_id and not (own and asker.server))
+                or (not own and await self._keeps(asker, relay_token, persona))
             )
         ):
             logger.info(
@@ -313,31 +331,47 @@ class Magma:
             raise MagmaError(VALIDATION_FAILED, USER_DOES_NOT_MATCH)
         return persona
 
-    async def _keeps(self, account_id: int, persona: Persona) -> bool:
-        # A dedicated server asks with the session of the account it logged in with, about the
-        # personas of its players.
-        hosting = self._players.online(account_id)
+    def _hosting(self, asker: LauncherSession, relay_token: str | None) -> GameSession | None:
+        # Dedicated servers share a session and an account, so only the relay token of its game
+        # process tells which one asks.
+        if not asker.server:
+            return self._players.online(asker.account_id)
+        session = self._relay_tokens.find(relay_token) if relay_token else None
+        logged_in = session.account if session is not None else None
+        return session if logged_in is not None and logged_in.id == asker.account_id else None
+
+    async def _keeps(
+        self, asker: LauncherSession, relay_token: str | None, persona: Persona
+    ) -> bool:
+        # A dedicated server asks about the personas of its players.
+        hosting = self._hosting(asker, relay_token)
         return hosting is not None and await self._trust.keeps_persona(hosting, persona.id)
 
-    async def serving(self, session_id: str | None, game: Game) -> GameSession:
+    async def serving(
+        self, session_id: str | None, game: Game, relay_token: str | None = None
+    ) -> GameSession:
         """Return the session of the dedicated server whose launcher session a cookie names.
 
         Args:
             session_id: The magma cookie's value; none when the request carries no cookie.
             game: The game whose Magma host was asked.
+            relay_token: The relay token of the game process that asks, if any.
 
         Raises:
             MagmaError: When the request names no session that is known, or its account is not
                 logged in as a dedicated server of the game that hosts a game players see.
         """
-        account_id = self.session(session_id).account_id
-        hosting = self._players.online(account_id)
+        asker = self.session(session_id)
+        account_id = asker.account_id
+        hosting = self._hosting(asker, relay_token)
         if hosting is None or hosting.game is not game or not await self._trust.serves(hosting):
             logger.info("Account %d asked Magma as a server, which it does not run", account_id)
             raise MagmaError(VALIDATION_FAILED, NOT_A_SERVER)
         return hosting
 
-    async def user(self, session_id: str | None, game: Game, user_id: int) -> None:
+    async def user(
+        self, session_id: str | None, game: Game, user_id: int, relay_token: str | None = None
+    ) -> None:
         """Check that an account or a persona of the game is the asking account's or kept by it.
 
         A game names a player by either of them; a dedicated server keeps those of its players.
@@ -346,15 +380,16 @@ class Magma:
             session_id: The magma cookie's value; none when the request carries no cookie.
             game: The game whose Magma host was asked.
             user_id: The account or persona.
+            relay_token: The relay token of the game process that asks, if any.
 
         Raises:
             MagmaError: When the request names no session that is known, or the id is neither
                 its account nor an account or persona that it owns or keeps.
         """
-        account_id = self.session(session_id).account_id
-        hosting = self._players.online(account_id)
-        if user_id == account_id or (
+        asker = self.session(session_id)
+        hosting = self._hosting(asker, relay_token)
+        if user_id == asker.account_id or (
             hosting is not None and await self._trust.keeps_account(hosting, user_id)
         ):
             return
-        await self.persona(session_id, game, user_id)
+        await self.persona(session_id, game, user_id, relay_token=relay_token)

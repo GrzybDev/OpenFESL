@@ -117,8 +117,8 @@ async def test_a_server_acknowledges_a_request_and_acts_only_under_its_own_names
         accepted = await post(
             server_url, host, f"/relationships/increase/{server}/nucleus:{ann[1]}/bvip"
         )
-        # It may go by its hero's name too, whose relationships are its own.
-        by_hero = await server_roster(server_url, host, "server:host_hero")
+        # It may go by its persona's name too, whose relationships are its own.
+        by_hero = await server_roster(server_url, host, "server:bfh.server")
         refusals = [
             refusal(await post(server_url, player, path))
             for player, path in (

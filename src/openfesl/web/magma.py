@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from typing import Annotated
 
-from fastapi import APIRouter, Cookie, FastAPI, Path, Query, Request
+from fastapi import APIRouter, Cookie, FastAPI, Header, Path, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import Response
@@ -21,6 +21,9 @@ XML = "text/xml"
 
 # The session id the game was started with, which it sends as its magma cookie.
 SessionId = Annotated[str | None, Cookie(alias="magma")]
+# The token of the relay session whose game process sent a request, which the hook adds while
+# the process's WebSocket is open.
+RelayToken = Annotated[str | None, Header(alias="X-OpenFESL-Relay")]
 # The original service names a persona in a path userId, also in its refusals.
 UserId = Annotated[int, Path(alias="userId")]
 
@@ -55,8 +58,9 @@ def magma_app(game: Game, magma: Magma, routers: Sequence[APIRouter] = ()) -> Fa
         persona_id: UserId,
         session_id: SessionId = None,
         tag: Annotated[str, Query(alias="entitlementTag")] = "",
+        relay_token: RelayToken = None,
     ) -> Response:
-        held = await magma.entitlements(session_id, game, persona_id, tag)
+        held = await magma.entitlements(session_id, game, persona_id, tag, relay_token)
         entries = [
             EntitlementEntry(
                 entitlement.id,
@@ -71,8 +75,12 @@ def magma_app(game: Game, magma: Magma, routers: Sequence[APIRouter] = ()) -> Fa
         return _xml(entitlements(entries))
 
     @app.get("/nucleus/wallets/{userId}")
-    async def wallets(persona_id: UserId, session_id: SessionId = None) -> Response:
-        return _xml(billing_accounts(await magma.wallets(session_id, game, persona_id)))
+    async def wallets(
+        persona_id: UserId, session_id: SessionId = None, relay_token: RelayToken = None
+    ) -> Response:
+        return _xml(
+            billing_accounts(await magma.wallets(session_id, game, persona_id, relay_token))
+        )
 
     # Telemetry the game can do without, so it is not kept; any root but <success> is a denial
     # that the game logs.

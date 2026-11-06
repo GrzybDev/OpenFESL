@@ -1,17 +1,14 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Header, Path
+from fastapi import APIRouter, Path
 from fastapi.responses import Response
 
 from openfesl.core.games import Game
 from openfesl.core.magma import Magma
 from openfesl.protocol.magma import name, success
-from openfesl.web.magma import XML, UserId
+from openfesl.web.magma import XML, RelayToken, UserId
 from openfesl.web.magma_heroes import PersonaId
 
-# The token of the relay session whose game process sent a request, which the hook adds while
-# the process's WebSocket is open.
-RelayToken = Annotated[str | None, Header(alias="X-OpenFESL-Relay")]
 # The original service names an account in these paths userId too, also in its refusals.
 AccountId = Annotated[int, Path(alias="userId")]
 

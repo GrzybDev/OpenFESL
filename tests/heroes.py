@@ -71,6 +71,9 @@ async def start(
     _, _, body = await fetch(server_url, "/nucleus/authToken", MAGMA, cookie)
     token = ElementTree.fromstring(body).findtext("token") or ""
     await process.hello(FESL, "bfwest-pc", client_type="client-noreg")
+    # A server's Magma calls carry its process's relay token, since servers share a session.
+    if role == "host" and process.relay_token:
+        cookie["X-OpenFESL-Relay"] = process.relay_token
     silent = [("TXN", "NuLogin"), ("returnEncryptedInfo", "0"), ("encryptedInfo", token)]
     account_id = int((await process.request(FESL, "acct", silent))["userId"])
     hero = [("TXN", "NuLoginPersona"), ("name", session["personaName"])]

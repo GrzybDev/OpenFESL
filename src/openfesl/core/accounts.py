@@ -13,7 +13,7 @@ from openfesl.core.fesl import PARAMETERS_ERROR, FeslConnection, Route, Transact
 from openfesl.core.games import Game, Games
 from openfesl.core.identities import Identity
 from openfesl.core.keys import KeyRefusal, KeyStore
-from openfesl.core.logins import INVALID_PASSWORD, UNKNOWN_USER, Logins
+from openfesl.core.logins import INVALID_PASSWORD, SERVER_TOKEN, UNKNOWN_USER, Logins
 from openfesl.core.policies import ConcurrentLogin, GamePolicies, Policies
 from openfesl.core.registration import (
     INVALID_VALUE,
@@ -425,6 +425,11 @@ class AccountService:
             if connection.hello.client_type != "server":
                 raise TransactionError(INVALID_PASSWORD)
             account = await self._server_account(expected, request.nuid)
+        elif request.encrypted_info == SERVER_TOKEN and connection.client.server_client:
+            shared = connection.game.clients[connection.client.server_client].server_account
+            assert shared is not None
+            account = await self._server_account(shared, shared)
+            token = SERVER_TOKEN
         else:
             account, token = await self._player_account(connection, request, policies)
         key = secrets.token_urlsafe(20) + "."

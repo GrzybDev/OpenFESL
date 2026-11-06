@@ -364,7 +364,7 @@ class Relationships:
         level = partition_of(game), game.heroes.stats.level
         return await self._store.matches(game.namespace, pattern, level, heroes, players)
 
-    def report(self, account_id: int, text: str) -> None:
+    def report(self, account_id: int, text: str, server: GameSession | None = None) -> None:
         """Keep the status line that a game reports while it is logged in with an account.
 
         A report from an account that no game is logged in with is dropped.
@@ -372,6 +372,7 @@ class Relationships:
         Args:
             account_id: The account; a dedicated server's is the one it logged in with.
             text: The status line.
+            server: The dedicated server that reports, which shares its account with others.
 
         Raises:
             RelationshipRefused: When the line is too long to be one or holds characters that
@@ -381,7 +382,7 @@ class Relationships:
             raise RelationshipRefused(Refusal.STATUS_TOO_LONG)
         if _NOT_TEXT.search(text):
             raise RelationshipRefused(Refusal.STATUS_NOT_TEXT)
-        session = self._players.online(account_id)
+        session = server or self._players.online(account_id)
         if session is not None:
             self._presence[session] = Presence(account_id, text)
 

@@ -9,7 +9,7 @@ from openfesl.core.accounts import STATE_ERRORS, Account
 from openfesl.core.fesl import TransactionError
 from openfesl.core.games import Game, Games
 from openfesl.core.heroes import Heroes
-from openfesl.core.logins import Logins
+from openfesl.core.logins import SERVER_TOKEN, Logins
 from openfesl.core.personas import Persona, PersonaService
 from openfesl.core.session import GameSession, Players
 from openfesl.core.start_links import StartLinks
@@ -62,12 +62,14 @@ class LauncherSession:
         account_id: The account that signed in.
         account_name: The account's login name.
         persona_name: The persona the game plays or hosts as.
+        server: Whether it is the session that a game's dedicated servers share.
     """
 
     token: str
     account_id: int
     account_name: str
     persona_name: str
+    server: bool = False
 
 
 class LauncherSessions:
@@ -91,6 +93,7 @@ class LauncherSessions:
         self._ttl = ttl
         self._clock = clock
         self._sessions: dict[str, tuple[LauncherSession, float]] = {}
+        self._servers: dict[str, LauncherSession] = {}
         players.on_leave(self._left)
 
     def issue(self, session: LauncherSession) -> str:
@@ -104,12 +107,23 @@ class LauncherSessions:
         self._sessions[session_id] = (session, self._clock() + self._ttl)
         return session_id
 
+    def keep_server(self, session_id: str, session: LauncherSession) -> None:
+        """Keep the session of a game's dedicated servers, under an id that outlives a restart.
+
+        Args:
+            session_id: The id.
+            session: The session.
+        """
+        self._servers[session_id] = session
+
     def find(self, session_id: str) -> LauncherSession | None:
         """Return the sign-in a session id names while it is kept, which this use extends.
 
         Args:
             session_id: The id that the game carries in its Magma requests.
         """
+        if server := self._servers.get(session_id):
+            return server
         kept = self._sessions.get(session_id)
         if kept is None:
             return None
@@ -171,6 +185,36 @@ class LauncherService:
         self._heroes = heroes
         self._sessions = sessions
         self._links = links
+
+    async def prepare(self, servers: list[tuple[Game, Account]]) -> None:
+        """Keep the session of each game's dedicated servers that start through a launcher.
+
+        Args:
+            servers: Each game with its dedicated servers' account.
+        """
+        for game, account in servers:
+            persona = await self._personas.first_or_new(account, game.namespace)
+            if persona is None:
+                continue
+            session = LauncherSession(
+                SERVER_TOKEN, account.id, account.nuid, persona.name, server=True
+            )
+            self._sessions.keep_server(_server_session_id(game), session)
+
+    def host(self, game: str) -> tuple[str, LauncherSession]:
+        """Return the session that a game's dedicated servers share, which needs no account.
+
+        Args:
+            game: The game's data-file name.
+
+        Raises:
+            LauncherError: When the game is unknown or has no such session.
+        """
+        session_id = _server_session_id(self._served(game))
+        session = self._sessions.find(session_id)
+        if session is None:
+            raise LauncherError(Refusal.NO_PERSONA)
+        return session_id, session
 
     async def sign_in(
         self, game: str, role: str, account: str, password: str
@@ -236,7 +280,7 @@ class LauncherService:
     async def _start(
         self, account: Account, game: Game, role: str, token: str
     ) -> tuple[str, LauncherSession]:
-        persona = await self._persona(account, game, role)
+        persona = await self._persona(account, game)
         if persona is None:
             raise LauncherError(Refusal.NO_HERO if game.heroes else Refusal.NO_PERSONA)
         session = LauncherSession(
@@ -246,13 +290,14 @@ class LauncherService:
         logger.info("Launcher signed account %d in to %s to %s", account.id, game.id, role)
         return session_id, session
 
-    async def _persona(self, account: Account, game: Game, role: str) -> Persona | None:
+    async def _persona(self, account: Account, game: Game) -> Persona | None:
         # A game whose heroes are made on its site is given none. It plays as the default hero,
-        # or else the oldest, of those it can play; a server it hosts plays as none of them, so
-        # it logs in as any.
+        # or else the oldest, of those it can play.
         if not game.heroes:
             return await self._personas.first_or_new(account, game.namespace)
-        roster = await self._heroes.roster(game, account.id)
-        hosting = roster.default or next(iter(roster.heroes), None)
-        hero = hosting if role == HOST else roster.playing
+        hero = (await self._heroes.roster(game, account.id)).playing
         return hero.persona if hero else None
+
+
+def _server_session_id(game: Game) -> str:
+    return f"server.{game.id}"

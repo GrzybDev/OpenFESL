@@ -21,7 +21,7 @@ from openfesl.protocol.magma import (
     success,
 )
 from openfesl.web.deal_art import deal_art_url
-from openfesl.web.magma import XML, SessionId, UserId
+from openfesl.web.magma import XML, RelayToken, SessionId, UserId
 
 # The id of a product, as the game buys it, and of an item's entitlement, as it changes one.
 ProductId = Annotated[str, Path(alias="productId")]
@@ -87,17 +87,23 @@ def store_router(
     # A player's game and the dedicated server keeping the player change the items it uses.
     @router.post("/nucleus/entitlement/{entitlementId}/useCount/{uses}")
     async def use(
-        entitlement_id: EntitlementId, uses: int, session_id: SessionId = None
+        entitlement_id: EntitlementId,
+        uses: int,
+        session_id: SessionId = None,
+        relay_token: RelayToken = None,
     ) -> Response:
-        await _holder(magma, game, writes, entitlement_id, session_id)
+        await _holder(magma, game, writes, entitlement_id, session_id, relay_token)
         await writes.use_up(entitlement_id, uses)
         return Response(success(), media_type=XML)
 
     @router.post("/nucleus/entitlement/{entitlementId}/status/{status}")
     async def take_out(
-        entitlement_id: EntitlementId, status: str, session_id: SessionId = None
+        entitlement_id: EntitlementId,
+        status: str,
+        session_id: SessionId = None,
+        relay_token: RelayToken = None,
     ) -> Response:
-        await _holder(magma, game, writes, entitlement_id, session_id)
+        await _holder(magma, game, writes, entitlement_id, session_id, relay_token)
         await writes.take_out(entitlement_id, status)
         return Response(success(), media_type=XML)
 
@@ -112,11 +118,17 @@ def store_router(
 
 
 async def _holder(
-    magma: Magma, game: Game, writes: ItemWrites, entitlement_id: int, session_id: str | None
+    magma: Magma,
+    game: Game,
+    writes: ItemWrites,
+    entitlement_id: int,
+    session_id: str | None,
+    relay_token: str | None,
 ) -> None:
     # Who asks first, so that only an asker who may change items learns which exist.
     magma.session(session_id)
-    await magma.persona(session_id, game, await writes.holder(entitlement_id))
+    holder = await writes.holder(entitlement_id)
+    await magma.persona(session_id, game, holder, relay_token=relay_token)
 
 
 def _deal(game: Game, deal: Deal) -> BundleEntry:

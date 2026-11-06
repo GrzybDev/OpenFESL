@@ -164,12 +164,7 @@ class ServerTrust:
 
 
 def _server_login(session: GameSession) -> bool:
-    # The servers of some games share a server account, which only the server client their Hello
-    # stands for logs in with; those of others log in as players do, through the game's client.
-    account, client = session.account, session.client
-    return account is not None and (
-        account.server or (client is not None and client.servers_log_in_as_players)
-    )
+    return session.account is not None and session.account.server
 
 
 def _kept(hosted: HostedGame) -> list[Persona]:

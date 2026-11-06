@@ -48,9 +48,14 @@ include = [
 # play, so no entitlement is needed to log in.
 [clients.bfwest-pc]
 theater_port = 18275
-# A dedicated server logs in like a client, with a player's account and hero, since the game's
-# account and password login does nothing (BFHeroes.exe 1.89 0x0040216f, 0x004b6e5b).
-servers_log_in_as_players = true
+# The game's account and password login does nothing (BFHeroes.exe 1.89 0x0040216f, 0x004b6e5b),
+# so a dedicated server logs in with the token of the session that the launcher's host role gives.
+server_client = "bfwest-dedicated"
+
+# The host that a dedicated server's FESL connection opens, whose servers share this account.
+[clients.bfwest-dedicated]
+theater_port = 18275
+server_account = "bfh.server@openfesl.invalid"
 
 # The host of the game's Magma web services, the default of 1.89's magmaHost and 1.46's PROD
 # environment: the account layer where the game trades the session it was started with for its

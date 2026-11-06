@@ -8,7 +8,7 @@ from openfesl.core.games import Game
 from openfesl.core.magma import USER_DOES_NOT_MATCH, VALIDATION_FAILED, Magma, MagmaError
 from openfesl.core.mugshots import LARGEST_FILE, NOT_A_MUGSHOT, Mugshots
 from openfesl.protocol.magma import success
-from openfesl.web.magma import XML, SessionId
+from openfesl.web.magma import XML, RelayToken, SessionId
 
 # The original service names an account or a persona in a path userId, also in its refusals.
 UserId = Annotated[int, Path(alias="userId")]
@@ -38,15 +38,19 @@ def hero_router(game: Game, magma: Magma, mugshots: Mugshots) -> APIRouter:
         return _xml(success())
 
     @router.get("/nucleus/check/persona/{personaId}")
-    async def check_persona(persona_id: PersonaId, session_id: SessionId = None) -> Response:
-        await magma.persona(session_id, game, persona_id)
+    async def check_persona(
+        persona_id: PersonaId, session_id: SessionId = None, relay_token: RelayToken = None
+    ) -> Response:
+        await magma.persona(session_id, game, persona_id, relay_token=relay_token)
         return _xml(success())
 
     # A dedicated server asks the original service to refresh the profiles it cached of the
     # players whose stats it changed; this server caches none, so the request only succeeds.
     @router.post("/user/updateUserProfile/{userId}")
-    async def refresh_profile(user_id: UserId, session_id: SessionId = None) -> Response:
-        await magma.user(session_id, game, user_id)
+    async def refresh_profile(
+        user_id: UserId, session_id: SessionId = None, relay_token: RelayToken = None
+    ) -> Response:
+        await magma.user(session_id, game, user_id, relay_token)
         return _xml(success())
 
     # The game reads the raw answer, 1 to render the hero and upload it, anything else not to.

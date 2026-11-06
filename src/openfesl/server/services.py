@@ -209,10 +209,12 @@ class GameServices:
             games,
         )
         personas = PersonaService(stores.personas)
-        await personas.prepare(await accounts.prepare(games))
+        servers = await accounts.prepare(games)
+        await personas.prepare(servers)
         app.state.launcher = LauncherService(
             logins, games, personas, self.heroes, self._launcher_sessions, self.start_links
         )
+        await app.state.launcher.prepare(servers)
         mailings = Mailings()
         attempts = Attempts()
         sign_in = WebSignIn(

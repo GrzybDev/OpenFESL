@@ -14,8 +14,10 @@ from support import (
     fetch,
     game,
     ids,
+    launcher_sign_in,
     let_in,
     log_in_player,
+    login,
     update_stats,
 )
 
@@ -97,17 +99,17 @@ async def magma(server_url: str, cookie: dict[str, str], path: str) -> tuple[str
 
 
 @pytest.mark.usefixtures("prompt_decisions")
-async def test_a_server_that_logs_in_as_a_player_keeps_the_rounds_of_the_players_in_its_game(
+async def test_a_server_keeps_only_the_rounds_of_the_players_in_its_game(
     server_url: str, capsys: pytest.CaptureFixture[str]
 ) -> None:
     # Cid registers first and Ann makes her hero first, so Ann's account has the number of Cid's
     # hero: the game names an account and a hero by the same owner type, and only the key tells
     # which one it means.
-    accounts = ("cid@example.test", "ann@example.test", "host@example.test")
+    accounts = ("cid@example.test", "ann@example.test")
     for account in accounts:
         await register(server_url, account)
     base = server_url.replace("ws://", "http://").rstrip("/")
-    for account in (accounts[1], accounts[0], accounts[2]):
+    for account in (accounts[1], accounts[0]):
         await create_hero(base, account, account.split("@")[0])
     # Ann's second hero stays out of the server's game.
     ann_two = await create_hero(base, accounts[1], "ann_two")
@@ -252,3 +254,50 @@ async def test_a_hero_earns_a_hero_point_on_each_even_level_once(
         hero=hero,
     )
     assert ledger == "level:1 level:2 level:1 level:1 level:10"
+
+
+@pytest.mark.usefixtures("prompt_decisions")
+async def test_servers_share_an_account_that_gives_nobody_the_rights_of_a_player(
+    base: str, server_url: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    await register(server_url, "ann@example.test")
+    await create_hero(base, "ann@example.test", "ann")
+    async with game(server_url) as ann, game(server_url) as first, game(server_url) as second:
+        ann_cookie, ann_account, ann_hero = await start(server_url, ann, "ann@example.test")
+        cookie, server_account, server_hero = await start(server_url, first, "", role="host")
+        other, other_account, _ = await start(server_url, second, "", role="host")
+        created = await first.theater(THEATER, "CGAM", SERVER_GAME)
+        apart = await second.theater(THEATER, "CGAM", SERVER_GAME)
+        await cli(capsys, "servers", "approve", created.fields["UGID"])
+        await cli(capsys, "servers", "approve", apart.fields["UGID"])
+        await until_listed(ann)
+        await let_in(first, ann, created.fields)
+
+        wallets = f"/nucleus/wallets/{ann_hero}"
+        # The session alone is anyone's; only the process that hosts Ann reads what she holds.
+        hosting = await magma(server_url, cookie, wallets)
+        elsewhere = await magma(server_url, other, wallets)
+        without_process = await magma(server_url, {"Cookie": cookie["Cookie"]}, wallets)
+        _, _, may_upload = await fetch(
+            server_url, f"/api/mugshot/mayupload/{server_hero}", MAGMA, cookie
+        )
+        ask_ann = f"/relationships/increase/nucleus:{server_account}/nucleus:{ann_account}/friends"
+        _, _, friend = await fetch(server_url, ask_ann, MAGMA, cookie, b"")
+        by_password = await launcher_sign_in(server_url, "bfh.server@openfesl.invalid", "any")
+
+        # A player cannot take the servers' account with its name and a password.
+        async with game(server_url) as player:
+            await player.hello(FESL, "bfwest-pc", client_type="client-noreg")
+            taken = await player.request(FESL, "acct", login("bfh.server@openfesl.invalid", "any"))
+
+    assert ann_cookie != cookie
+    assert other == {**cookie, "X-OpenFESL-Relay": other["X-OpenFESL-Relay"]}
+    assert other_account == server_account
+    assert created.fields["UGID"] != apart.fields["UGID"]
+    assert hosting == ("billingAccounts", None)
+    assert elsewhere == ("error", "USER_DOES_NOT_MATCH")
+    assert without_process == ("error", "USER_DOES_NOT_MATCH")
+    assert may_upload == b"0"
+    assert b"USER_DOES_NOT_MATCH" in friend
+    assert by_password.status_code == 401
+    assert taken["errorCode"] == "122"

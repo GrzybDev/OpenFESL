@@ -80,7 +80,7 @@ async def test_a_sign_in_is_refused_with_a_reason_the_launcher_words(
     wrong = await launcher_sign_in(server_url, account, "a-wrong-password")
     unknown = await launcher_sign_in(server_url, account, "secret-pass", game="made-up")
     # A persona without the faction and class of a hero made on the site, as an earlier
-    # server made them: the game cannot play it, while a server it hosts logs in as it.
+    # server made them: the game cannot play it.
     await execute(
         database_url,
         "INSERT INTO persona (account_id, namespace, name)"
@@ -88,12 +88,13 @@ async def test_a_sign_in_is_refused_with_a_reason_the_launcher_words(
         account=account,
     )
     no_hero = await launcher_sign_in(server_url, account, "secret-pass")
-    hosting = await launcher_sign_in(server_url, account, "secret-pass", role="host")
+    hosting = await launcher_sign_in(server_url, account, "a-wrong-password", role="host")
     await cli(capsys, "accounts", "state", account, "banned")
     banned = await launcher_sign_in(server_url, account, "secret-pass")
 
     assert (wrong.status_code, wrong.json()) == (401, {"error": "wrong-sign-in"})
     assert (unknown.status_code, unknown.json()) == (404, {"error": "unknown-game"})
     assert (no_hero.status_code, no_hero.json()) == (401, {"error": "no-hero"})
-    assert hosting.json()["personaName"] == "Ann_bare"
+    # Dedicated servers share an account, so what their launcher sends proves nothing.
+    assert hosting.json()["personaName"] == "bfh.server"
     assert (banned.status_code, banned.json()) == (401, {"error": "banned"})

@@ -32,7 +32,9 @@ class SignIn(BaseModel):
 
     @model_validator(mode="after")
     def _one_way_in(self) -> SignIn:
-        if (self.code is None) == (self.account is None or self.password is None):
+        if self.role != "host" and (self.code is None) == (
+            self.account is None or self.password is None
+        ):
             raise ValueError("either a code or an account and its password")
         return self
 
@@ -55,6 +57,9 @@ def launcher_routes(service: Callable[[], LauncherService]) -> APIRouter:
                 session_id, session = await launcher.redeem(
                     request.game, request.role, request.code
                 )
+            # Dedicated servers share an account, so what a launcher sends to host proves nothing.
+            elif request.role == "host":
+                session_id, session = launcher.host(request.game)
             else:
                 assert request.account is not None and request.password is not None
                 session_id, session = await launcher.sign_in(
