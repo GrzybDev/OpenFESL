@@ -168,6 +168,11 @@ def take_notice(request: Request) -> dict[str, str] | None:
     return notice
 
 
+# What takes a browser from a path to another site: // and a backslash, and tabs and line breaks,
+# which it drops from an address before it reads the address, so that /<tab>/site is //site.
+_OFFSITE = ("//", "\\", "\t", "\r", "\n")
+
+
 def inside(path: str, prefixes: tuple[str, ...]) -> str:
     """Return a path when it leads to one of the site's own pages, otherwise an empty string.
 
@@ -175,7 +180,6 @@ def inside(path: str, prefixes: tuple[str, ...]) -> str:
         path: The path, such as the page that a form names to open next.
         prefixes: What the allowed pages' paths start with, such as /admin/ and /pl/admin/.
     """
-    # A browser takes a path with // or a backslash to another site.
-    if path.startswith(prefixes) and "//" not in path and "\\" not in path:
+    if path.startswith(prefixes) and not any(mark in path for mark in _OFFSITE):
         return path
     return ""

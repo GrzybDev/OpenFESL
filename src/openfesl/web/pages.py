@@ -560,10 +560,14 @@ def _take_toast(session: dict[str, Any]) -> Toast | None:
 
 def _address(request: Request) -> tuple[str, str]:
     state = request.scope.get("state", {})
-    if "language" in state:
-        return state["language"], request.url.path
     # The server's error page sees the address before the language middleware strips it.
-    return split_language(request.url.path)
+    language, path = (
+        (state["language"], request.url.path)
+        if "language" in state
+        else split_language(request.url.path)
+    )
+    # An address that opens with // would make the page's links lead to another site.
+    return language, "/" + path.lstrip("/")
 
 
 def _theme_rule(game: Game) -> str:
