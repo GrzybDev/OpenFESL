@@ -27,7 +27,7 @@ from openfesl.web.account.session import (
     start,
     to_sign_in,
 )
-from openfesl.web.oidc import ServiceAnswer, ServiceClient, SignInFailed, SignInService
+from openfesl.web.oidc import ServiceClient, SignInFailed, SignInService
 from openfesl.web.sessions import form_matches, inside, notify, toast
 
 logger = logging.getLogger(__name__)
@@ -118,6 +118,16 @@ class SignInServices:
             language: The page's language code.
         """
         return next((view for view in self.views(language) if view.id == service_id), None)
+
+    def name_of(self, service_id: str, language: str) -> str:
+        """Return a service's name, or its id once the deployment no longer configures it.
+
+        Args:
+            service_id: The service's id.
+            language: The language of the service's texts.
+        """
+        view = self.view(service_id, language)
+        return view.name if view else service_id
 
     async def start(
         self,
@@ -222,16 +232,17 @@ class SignInServices:
                     return answered(request, "sign-in", notice="failed", service=service.name)
                 notify(request, "failed", service=service.name)
                 return open_page(request, PROOF if flow["proof"] else "/sign-in", flow["next"])
+            identity = Identity(service.id, answer.subject, answer.name, answer.address)
             if flow.get("link") is not None:
-                return await self._linked(request, service, answer, flow["link"])
+                return await self._linked(request, service, identity, flow["link"])
             if flow["proof"]:
-                return await self._proved(request, service, answer)
-            return await self._signed_in(request, service, answer, flow["next"])
+                return await self._proved(request, service, identity)
+            return await self._signed_in(request, service, identity, flow["next"])
 
         return router
 
     async def _linked(
-        self, request: Request, service: SignInService, answer: ServiceAnswer, account_id: int
+        self, request: Request, service: SignInService, identity: Identity, account_id: int
     ) -> Response:
         # The account that started the linking must still be the one signed in.
         player = signed_in(request)
@@ -240,17 +251,15 @@ class SignInServices:
         )
         if account is None:
             return open_page(request, "/sign-in")
-        identity = Identity(service.id, answer.subject, answer.name, answer.address)
         refusal = await self._management().link(account, identity)
         if refusal is not None:
             return answered(request, "sign-in", notice=refusal.name.lower(), service=service.name)
-        toast(request, "web.account.toast.service_linked", service=service.name, name=answer.name)
+        toast(request, "web.account.toast.service_linked", service=service.name, name=identity.name)
         return answered(request, "sign-in")
 
     async def _signed_in(
-        self, request: Request, service: SignInService, answer: ServiceAnswer, back: str
+        self, request: Request, service: SignInService, identity: Identity, back: str
     ) -> Response:
-        identity = Identity(service.id, answer.subject, answer.name, answer.address)
         try:
             account = await self._sign_in().with_service(identity)
         except SignInRefused as refused:
@@ -272,7 +281,7 @@ class SignInServices:
         return landing(request, account, back, self._terms.version)
 
     async def _proved(
-        self, request: Request, service: SignInService, answer: ServiceAnswer
+        self, request: Request, service: SignInService, answered_by: Identity
     ) -> Response:
         # The account of a linked service proves the pending identity's account.
         pending = pending_identity(request)
@@ -281,9 +290,7 @@ class SignInServices:
         identity, account_id = pending
         sign_in = self._sign_in()
         try:
-            found = await sign_in.with_service(
-                Identity(service.id, answer.subject, answer.name, answer.address)
-            )
+            found = await sign_in.with_service(answered_by)
         except SignInRefused as refused:
             if refused.refusal is Refusal.UNCONFIRMED or refused.account is None:
                 request.session.pop(PENDING, None)
@@ -295,8 +302,7 @@ class SignInServices:
             notify(request, "other", service=service.name)
             return open_page(request, PROOF, "")
         linked = await sign_in.link(found, identity)
-        pending_client = self._clients.get(identity.service)
-        name = pending_client.service.name if pending_client else identity.service
+        name = self.name_of(identity.service, request.state.language)
         return proved(request, found, identity, name, linked, self._terms.version)
 
 

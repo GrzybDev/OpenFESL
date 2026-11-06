@@ -1,7 +1,7 @@
 from collections.abc import Awaitable, Callable
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from fastapi.responses import HTMLResponse, Response
 
 from openfesl.core.accounts import Account
 from openfesl.core.display_names import DisplayNames
@@ -18,6 +18,7 @@ from openfesl.web.account.session import (
     answered,
     open_page,
     signed_in,
+    to_account,
 )
 from openfesl.web.pages import Pages
 from openfesl.web.sessions import form_matches, form_token, inside, notify, toast
@@ -63,7 +64,7 @@ class DisplayNamePages:
             if not isinstance(account, Account):
                 return account
             if account.display_name is not None:
-                return _done(request, back)
+                return to_account(request, back)
             return await self._render(request, account, back)
 
         @router.post(DISPLAY_NAME)
@@ -83,7 +84,7 @@ class DisplayNamePages:
             toast(request, "web.account.toast.named", name=name)
             if account.terms_version != self._terms.version:
                 return open_page(request, TERMS, back)
-            return _done(request, back)
+            return to_account(request, back)
 
         return router
 
@@ -139,7 +140,3 @@ class DisplayNamePages:
             accepted=account.terms_version == self._terms.version,
             services=[service.name for service in self._services.views(language)],
         )
-
-
-def _done(request: Request, back: str) -> RedirectResponse:
-    return RedirectResponse(back or localize("/account", request.state.language), 303)

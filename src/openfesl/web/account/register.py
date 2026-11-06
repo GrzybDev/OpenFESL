@@ -2,7 +2,7 @@ from collections.abc import Callable, Mapping
 from typing import Any
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from fastapi.responses import HTMLResponse, Response
 
 from openfesl.core.accounts import Account
 from openfesl.core.games import Games
@@ -23,7 +23,16 @@ from openfesl.core.web_registration import (
 from openfesl.web.account.fields import birth_order, field_errors
 from openfesl.web.account.message import SECRET, message_page
 from openfesl.web.account.services import ServiceView, SignInServices
-from openfesl.web.account.session import PENDING, SITE, open_page, signed_in, start, to_sign_in
+from openfesl.web.account.session import (
+    PENDING,
+    SITE,
+    cancel_pending,
+    open_page,
+    signed_in,
+    start,
+    to_account,
+    to_sign_in,
+)
 from openfesl.web.account.sign_in import password_games
 from openfesl.web.pages import Pages, listed
 from openfesl.web.referral import REFERRAL, ReferralLinks
@@ -83,7 +92,7 @@ class RegisterPages:
         async def page(request: Request, next: str = "") -> Response:
             back = inside(next, SITE)
             if signed_in(request):
-                return RedirectResponse(back or _account(request), 303)
+                return to_account(request, back)
             if not await self._registration().offered():
                 return self._unavailable(request, None)
             return await self._form(request, back, None, {"country": _reported(request)})
@@ -116,11 +125,7 @@ class RegisterPages:
                 return open_page(request, "/sign-in")
             return await self._register(request, *pending)
 
-        @router.post(SERVICE + "/cancel")
-        async def cancel(request: Request) -> Response:
-            if form_matches(request, await request.form()):
-                request.session.pop(PENDING, None)
-            return open_page(request, "/sign-in")
+        router.add_api_route(SERVICE + "/cancel", cancel_pending, methods=["POST"])
 
         # Opening the link only asks, as mail scanners open links too; its button confirms.
         @router.get(PATH, response_class=HTMLResponse)
@@ -217,7 +222,7 @@ class RegisterPages:
                 service = self._service(request, identity)
                 start(request, account, way=service.name if service else "")
                 toast(request, "web.account.toast.created")
-                return RedirectResponse(back or _account(request), 303)
+                return to_account(request, back)
 
     async def _form(
         self,
@@ -314,7 +319,3 @@ def _onward(request: Request) -> tuple[str, str]:
     if signed_in(request):
         return "/account", "web.account.confirm.open"
     return "/sign-in", "web.account.sign_in"
-
-
-def _account(request: Request) -> str:
-    return localize("/account", request.state.language)

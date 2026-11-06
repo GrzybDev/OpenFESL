@@ -6,8 +6,7 @@ from fastapi.responses import FileResponse, HTMLResponse, Response
 from starlette.exceptions import HTTPException
 
 from openfesl.core.catalogues import Catalogue, CatalogueFiles, Catalogues, file_path
-from openfesl.core.chests import key_tag
-from openfesl.core.entitlements import ACTIVE, Entitlement, EntitlementQuery, EntitlementStore
+from openfesl.core.entitlements import ACTIVE, Entitlement, EntitlementStore
 from openfesl.core.games import Game, Games
 from openfesl.core.hero_admin import HeroAdminStore, HeroHistory, ItemSource, next_default
 from openfesl.core.hero_items import granted, holding
@@ -19,6 +18,7 @@ from openfesl.core.wallets import Wallets
 from openfesl.web.admin.accounts import AccountView, AccountViews, PersonaView
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.wallets import shared_currencies
+from openfesl.web.chests import held_keys
 from openfesl.web.heroes import HeroCard, hero_cards
 
 # The inventory's tabs: the items a hero holds now, those it held, and both.
@@ -152,9 +152,7 @@ class HeroAdminViews:
             cards = await hero_cards(game, roster, catalogue, self._wallets, self._entitlements)
             keys = None
             if game.chests:
-                query = EntitlementQuery(tag=key_tag(game.chests), status=ACTIVE)
-                held = await self._entitlements.of_account(account_id, query)
-                keys = sum(entry.uses or 0 for entry in held)
+                keys = await held_keys(self._entitlements, game.chests, account_id)
             shared = shared_currencies(game)
             amounts = await self._wallets.of_account(game, account_id, shared)
             balances = list(zip(shared, amounts, strict=True))

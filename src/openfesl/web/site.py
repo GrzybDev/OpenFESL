@@ -181,14 +181,14 @@ class SiteBarMiddleware:
         balances = await self._wallets.of_account(
             game, player.account_id, [wallet.currency for wallet in shown]
         )
+        wallets = list(zip(shown, balances, strict=True))
         if not game.heroes:
-            return SiteBar(list(zip(shown, balances, strict=True)), None, 0)
+            return SiteBar(wallets, None, 0)
         roster = await self._heroes.roster(game, player.account_id)
         [funds] = await self._wallets.of_account(game, player.account_id, [game.heroes.currency])
         rewards = await self._rewards.available(game, player.account_id)
         rules = await self._rewards.rules(game)
         paused = rules is not None and rules.paused
         heroes = await self._heroes.rules(game)
-        wallets = list(zip(shown, balances, strict=True))
         claw = await self._entry(game, player, scope)
         return SiteBar(wallets, roster, funds, rewards, paused, heroes, claw)

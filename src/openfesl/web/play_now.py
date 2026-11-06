@@ -73,7 +73,6 @@ class PlayNowPages:
     def _render(
         self, request: Request, game: Game, template: str, state: str, link: StartLink | None
     ) -> Response:
-        minutes = int(LIFETIME / timedelta(minutes=1))
         return self._pages.render(
             request,
             template,
@@ -81,7 +80,7 @@ class PlayNowPages:
             headers=UNCACHED,
             state=state,
             link=link,
-            minutes=minutes,
+            minutes=int(LIFETIME / timedelta(minutes=1)),
         )
 
 

@@ -4,7 +4,7 @@ from typing import Any
 from urllib.parse import urlencode
 
 from fastapi import Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, Response
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from openfesl.core.accounts import Account
@@ -14,7 +14,7 @@ from openfesl.core.sign_in import Refusal, SignInRefused
 from openfesl.core.texts import localize
 from openfesl.core.verification import VALID_FOR
 from openfesl.web.pages import Player
-from openfesl.web.sessions import notify, renew_form_token, toast
+from openfesl.web.sessions import form_matches, notify, renew_form_token, toast
 
 # A player signs in again after this long, so a browser left signed in does not stay so for good.
 LIFETIME = timedelta(days=14)
@@ -70,7 +70,28 @@ def landing(request: Request, account: Account, back: str, terms: str) -> Redire
         return open_page(request, DISPLAY_NAME, back)
     if account.terms_version != terms:
         return open_page(request, TERMS, back)
-    return RedirectResponse(back or localize("/account", request.state.language), 303)
+    return to_account(request, back)
+
+
+def to_account(request: Request, back: str = "") -> RedirectResponse:
+    """Send the browser to the page it is to open, else to the account page.
+
+    Args:
+        request: The request.
+        back: The page to open, if any.
+    """
+    return RedirectResponse(back or localize(ACCOUNT, request.state.language), 303)
+
+
+async def cancel_pending(request: Request) -> Response:
+    """Answer the form that gives up on a service's answer that waits for an account.
+
+    Args:
+        request: The form's request.
+    """
+    if form_matches(request, await request.form()):
+        request.session.pop(PENDING, None)
+    return open_page(request, "/sign-in")
 
 
 def renew(request: Request, epoch: int) -> None:

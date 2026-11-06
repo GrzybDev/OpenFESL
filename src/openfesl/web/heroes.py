@@ -15,14 +15,13 @@ from openfesl.core.heroes import Hero, Heroes, HeroRefused, Refusal, Roster
 from openfesl.core.store_window import running_low
 from openfesl.core.texts import localize, translate
 from openfesl.core.wallets import Wallets
-from openfesl.web.account.session import open_page, signed_in
+from openfesl.web.account.session import signed_in, to_sign_in
 from openfesl.web.pages import Pages, number
 from openfesl.web.sessions import (
     SentForms,
     form_matches,
     form_token,
     inside,
-    notify,
     purchase_matches,
     toast,
 )
@@ -121,9 +120,8 @@ class HeroesPages:
         async def show_heroes(request: Request) -> Response:
             bar = await site_bar(request)
             if bar is None or bar.roster is None:
-                notify(request, "needed", page="heroes")
                 back = localize(f"/{game.id}{HEROES}", request.state.language)
-                return open_page(request, "/sign-in", back)
+                return to_sign_in(request, back, "needed", page="heroes")
             catalogue = await self._catalogues.of(game, request.state.language)
             return self._pages.render(
                 request,
@@ -206,9 +204,8 @@ class HeroesPages:
     def _slots_page(self, game: Game) -> Callable[[Request, str], Awaitable[Response]]:
         async def show_slots(request: Request, next: str = "") -> Response:
             if signed_in(request) is None:
-                notify(request, "needed", page="heroes")
                 back = localize(f"/{game.id}{SLOTS}", request.state.language)
-                return open_page(request, "/sign-in", back)
+                return to_sign_in(request, back, "needed", page="heroes")
             return self._pages.render(
                 request,
                 "heroes.BuySlots",
@@ -258,9 +255,8 @@ class HeroesPages:
         # The signed-in account's hero, or the sign-in page, or no page for another's hero.
         bar = await site_bar(request)
         if bar is None or bar.roster is None:
-            notify(request, "needed", page="heroes")
             back = localize(f"/{game.id}{HEROES}", request.state.language)
-            return open_page(request, "/sign-in", back)
+            return to_sign_in(request, back, "needed", page="heroes")
         hero = next((hero for hero in bar.roster.heroes if hero.persona.id == hero_id), None)
         if hero is None:
             raise HTTPException(404)

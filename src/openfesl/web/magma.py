@@ -51,7 +51,7 @@ def magma_app(game: Game, magma: Magma, routers: Sequence[APIRouter] = ()) -> Fa
 
     @app.get("/nucleus/authToken")
     async def auth_token(session_id: SessionId = None) -> Response:
-        return _xml(token(magma.session(session_id).token))
+        return xml(token(magma.session(session_id).token))
 
     @app.get("/nucleus/entitlements/{userId}")
     async def items(
@@ -72,22 +72,20 @@ def magma_app(game: Game, magma: Magma, routers: Sequence[APIRouter] = ()) -> Fa
             )
             for entitlement in held
         ]
-        return _xml(entitlements(entries))
+        return xml(entitlements(entries))
 
     @app.get("/nucleus/wallets/{userId}")
     async def wallets(
         persona_id: UserId, session_id: SessionId = None, relay_token: RelayToken = None
     ) -> Response:
-        return _xml(
-            billing_accounts(await magma.wallets(session_id, game, persona_id, relay_token))
-        )
+        return xml(billing_accounts(await magma.wallets(session_id, game, persona_id, relay_token)))
 
     # Telemetry the game can do without, so it is not kept; any root but <success> is a denial
     # that the game logs.
     @app.post("/dc/submit")
     @app.post("/dc/submitTelemetry")
     async def data_collection() -> Response:
-        return _xml(success())
+        return xml(success())
 
     for router in routers:
         app.include_router(router)
@@ -95,14 +93,19 @@ def magma_app(game: Game, magma: Magma, routers: Sequence[APIRouter] = ()) -> Fa
 
 
 async def _refused(request: Request, refused: MagmaError) -> Response:
-    return _xml(error(refused.code, refused.cause))
+    return xml(error(refused.code, refused.cause))
 
 
 async def _not_numeric(request: Request, invalid: RequestValidationError) -> Response:
     # Only the ids in paths are checked, by the names the original service gives them.
     field = invalid.errors()[0]["loc"][-1]
-    return _xml(error(VALIDATION_FAILED, NOT_NUMERIC, str(field)))
+    return xml(error(VALIDATION_FAILED, NOT_NUMERIC, str(field)))
 
 
-def _xml(document: bytes) -> Response:
+def xml(document: bytes) -> Response:
+    """Return an answer of the Magma host.
+
+    Args:
+        document: The XML document.
+    """
     return Response(document, media_type=XML)

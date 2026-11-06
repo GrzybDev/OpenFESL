@@ -207,10 +207,11 @@ def lists(
         name = catalogue.name(item_id) or text("web.hero.item", number=item_id)
         return Played(item_id, name, icon_url(game.id, catalogue, item_id, art), stats)
 
+    def ranked(breakdown: Breakdown, key: str) -> list[tuple[int, Mapping[str, float]]]:
+        return sorted(breakdown.read(numbers), key=lambda found: -found[1][key])
+
     weapons = []
-    for item_id, stats in sorted(
-        profile.weapons.read(numbers), key=lambda found: -found[1]["time"]
-    ):
+    for item_id, stats in ranked(profile.weapons, "time"):
         shown = [
             (text("web.hero.stat.time"), duration(stats["time"], language)),
             (text("web.hero.stat.kills"), count(stats["kills"])),
@@ -222,12 +223,10 @@ def lists(
         weapons.append(item(item_id, shown))
     foes = [
         item(item_id, [(text("web.hero.stat.deaths"), count(stats["deaths"]))])
-        for item_id, stats in sorted(
-            profile.foes.read(numbers), key=lambda found: -found[1]["deaths"]
-        )
+        for item_id, stats in ranked(profile.foes, "deaths")
     ]
     maps = []
-    for map_id, stats in sorted(profile.maps.read(numbers), key=lambda found: -found[1]["time"]):
+    for map_id, stats in ranked(profile.maps, "time"):
         named = profile.maps.names.get(map_id)
         losses = stats["losses"]
         ratio = stats["wins"] / losses if losses else stats["wins"]
@@ -261,9 +260,7 @@ def lists(
         ]
         vehicles.append(Played(vehicle, name, None, shown))
     moments = []
-    for moment, stats in sorted(
-        profile.moments.read(numbers), key=lambda found: -found[1]["count"]
-    ):
+    for moment, stats in ranked(profile.moments, "count"):
         named = profile.moments.names.get(moment)
         name = (catalogue.text(named) if named else None) or text("web.hero.moment", number=moment)
         if stats["count"] > 0:

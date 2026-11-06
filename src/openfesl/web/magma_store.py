@@ -21,7 +21,7 @@ from openfesl.protocol.magma import (
     success,
 )
 from openfesl.web.deal_art import deal_art_url
-from openfesl.web.magma import XML, RelayToken, SessionId, UserId
+from openfesl.web.magma import XML, RelayToken, SessionId, UserId, xml
 
 # The id of a product, as the game buys it, and of an item's entitlement, as it changes one.
 ProductId = Annotated[str, Path(alias="productId")]
@@ -63,7 +63,7 @@ def store_router(
         _, plain, packed = built
         if "gzip" in request.headers.get("Accept-Encoding", ""):
             return Response(packed, media_type=XML, headers={"Content-Encoding": "gzip"})
-        return Response(plain, media_type=XML)
+        return xml(plain)
 
     # The game adds what it bought itself once the answer is a success, or for a box the one
     # product the answer lists (BFHeroes.exe 1.89 0x007bafb7, 0x006a0335).
@@ -73,7 +73,7 @@ def store_router(
     ) -> Response:
         persona = await magma.persona(session_id, game, persona_id, own=True)
         won = await purchases.purchase(game, persona, product_id)
-        return Response(products([_entry(won)]) if won else success(), media_type=XML)
+        return xml(products([_entry(won)]) if won else success())
 
     # The game reads the hero's new balance and the items it no longer holds (BFHeroes.exe
     # 1.89 0x006a17d0).
@@ -82,7 +82,7 @@ def store_router(
         persona = await magma.persona(session_id, game, persona_id, own=True)
         done = await purchases.refund(game, persona)
         answer = refunded(done.currency, done.balance, done.items) if done else nothing_refunded()
-        return Response(answer, media_type=XML)
+        return xml(answer)
 
     # A player's game and the dedicated server keeping the player change the items it uses.
     @router.post("/nucleus/entitlement/{entitlementId}/useCount/{uses}")
@@ -94,7 +94,7 @@ def store_router(
     ) -> Response:
         await _holder(magma, game, writes, entitlement_id, session_id, relay_token)
         await writes.use_up(entitlement_id, uses)
-        return Response(success(), media_type=XML)
+        return xml(success())
 
     @router.post("/nucleus/entitlement/{entitlementId}/status/{status}")
     async def take_out(
@@ -105,14 +105,14 @@ def store_router(
     ) -> Response:
         await _holder(magma, game, writes, entitlement_id, session_id, relay_token)
         await writes.take_out(entitlement_id, status)
-        return Response(success(), media_type=XML)
+        return xml(success())
 
     # The game asks in the language of its menus, such as en.
     @router.get("/{language}/game/hotDeals")
     async def hot(language: str) -> Response:
         listed = await deals.hot_deals(game, game.language_of(language))
         entries = [_deal(game, deal) for deal in listed]
-        return Response(hot_deals(entries), media_type=XML)
+        return xml(hot_deals(entries))
 
     return router
 

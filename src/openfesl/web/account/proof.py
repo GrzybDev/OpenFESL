@@ -15,6 +15,7 @@ from openfesl.web.account.message import SECRET
 from openfesl.web.account.services import PROOF, SignInServices
 from openfesl.web.account.session import (
     PENDING,
+    cancel_pending,
     open_page,
     pending_identity,
     proved,
@@ -123,8 +124,7 @@ class ProofPages:
             if self._turnstile and not await self._turnstile.passed(request, form):
                 return self._render(request, target, {"kind": "check_mail"}, 400)
             identity, _ = pending
-            service = self._services.view(identity.service, request.state.language)
-            name = service.name if service else identity.service
+            name = self._services.name_of(identity.service, request.state.language)
             sent = await self._proof_mail().send(
                 target.account, identity, name, request.state.language
             )
@@ -133,11 +133,7 @@ class ProofPages:
                 return self._render(request, target, wait, 429)
             return self._render(request, target, {"kind": "link_sent", "expires": sent.expires})
 
-        @router.post(PROOF + "/cancel")
-        async def cancel(request: Request) -> Response:
-            if form_matches(request, await request.form()):
-                request.session.pop(PENDING, None)
-            return open_page(request, "/sign-in")
+        router.add_api_route(PROOF + "/cancel", cancel_pending, methods=["POST"])
 
         # Opening the link only asks, as mail scanners open links too; its button links.
         @router.get(PATH, response_class=HTMLResponse)
@@ -156,8 +152,7 @@ class ProofPages:
                 return to_sign_in(request, "", **refused_notice(request, refused))
             if isinstance(used, ProofGone):
                 return self._link_page(request, token, used)
-            view = self._services.view(used.identity.service, request.state.language)
-            name = view.name if view else used.identity.service
+            name = self._services.name_of(used.identity.service, request.state.language)
             terms = self._terms.version
             return proved(request, used.account, used.identity, name, used.linked, terms)
 
@@ -172,8 +167,7 @@ class ProofPages:
             service = view.name if view and found.service else ""
             status, name, account = 404 if found.service is None else 410, "", ""
         else:
-            view = self._services.view(found.identity.service, language)
-            service = view.name if view else found.identity.service
+            service = self._services.name_of(found.identity.service, language)
             status = 400 if notice else 200
             name = found.identity.name
             account = found.account.display_name or found.account.nuid

@@ -2,14 +2,14 @@ from collections.abc import Callable, Mapping
 from typing import Any
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from fastapi.responses import HTMLResponse, Response
 
 from openfesl.core.games import Games
 from openfesl.core.limits import Wait
 from openfesl.core.policies import GamePolicies
 from openfesl.core.registration import Terms
 from openfesl.core.sign_in import LinkSent, Refusal, SignInRefused, WebSignIn
-from openfesl.core.texts import localize, translate
+from openfesl.core.texts import translate
 from openfesl.web.account.services import SignInServices
 from openfesl.web.account.session import (
     SITE,
@@ -21,6 +21,7 @@ from openfesl.web.account.session import (
     shown,
     signed_in,
     start,
+    to_account,
     to_sign_in,
 )
 from openfesl.web.pages import Pages
@@ -80,7 +81,7 @@ class SignInPages:
         async def page(request: Request, next: str = "") -> Response:
             back = inside(next, SITE)
             if signed_in(request):
-                return RedirectResponse(back or _account(request), 303)
+                return to_account(request, back)
             return await self._render(request, back, take_notice(request))
 
         @router.post("/sign-in")
@@ -183,7 +184,3 @@ def password_games(games: Games, language: str) -> list[str]:
         language: The page's language code.
     """
     return [translate(f"games.{game.id}.short", language) for game in games if not game.launched]
-
-
-def _account(request: Request) -> str:
-    return localize("/account", request.state.language)

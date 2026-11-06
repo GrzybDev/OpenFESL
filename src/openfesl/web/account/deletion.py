@@ -127,7 +127,6 @@ class DeletionPages:
                 facts.append((entry.game.name, text % {"count": count}))
         ways = [translate("web.account.password", language)] if overview.password else []
         for identity in overview.linked:
-            view = self._services.view(identity.service, language)
-            ways.append(view.name if view else identity.service)
+            ways.append(self._services.name_of(identity.service, language))
         facts.append((translate("web.account.ways.title", language), listed(ways, language)))
         return facts

@@ -1,13 +1,12 @@
 from collections.abc import Awaitable, Callable
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from fastapi.responses import HTMLResponse, Response
 
 from openfesl.core.account_management import AccountManagement
 from openfesl.core.accounts import Account
 from openfesl.core.registration import Terms
-from openfesl.core.texts import localize
-from openfesl.web.account.session import ACCOUNT, SITE, TERMS, account_of
+from openfesl.web.account.session import SITE, TERMS, account_of, to_account
 from openfesl.web.pages import Pages
 from openfesl.web.sessions import form_matches, form_token, inside, toast
 
@@ -50,7 +49,7 @@ class TermsPages:
             if not isinstance(account, Account):
                 return account
             if account.terms_version == self._terms.version:
-                return _onward(request, back)
+                return to_account(request, back)
             return self._render(request, back)
 
         @router.post(TERMS)
@@ -65,7 +64,7 @@ class TermsPages:
             if not await self._management().accept_terms(account, str(form.get("version", ""))):
                 return self._render(request, back, "changed")
             toast(request, "web.account.toast.terms")
-            return _onward(request, back)
+            return to_account(request, back)
 
         return router
 
@@ -91,7 +90,3 @@ def terms_shown(terms: Terms, language: str) -> dict[str, object]:
     """
     text = terms.text(terms.language(language))
     return {"version": terms.version, "paragraphs": text.split("\n\n")}
-
-
-def _onward(request: Request, back: str) -> RedirectResponse:
-    return RedirectResponse(back or localize(ACCOUNT, request.state.language), 303)

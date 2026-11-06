@@ -27,7 +27,7 @@ from openfesl.protocol.magma import (
     status_update,
     success,
 )
-from openfesl.web.magma import XML, RelayToken, SessionId
+from openfesl.web.magma import RelayToken, SessionId, xml
 
 # What a relationship's paths and entries call an account and a dedicated server.
 NUCLEUS = "nucleus"
@@ -107,7 +107,7 @@ def social_router(game: Game, magma: Magma, relationships: Relationships) -> API
     ) -> Response:
         party, _, _ = await asking(session_id, relay_token, owner)
         listed = await relationships.roster(game, party)
-        return _xml(roster(entry(found) for found in listed))
+        return xml(roster(entry(found) for found in listed))
 
     # A dedicated server asks for its VIP list with the states it lists, such as 1,3.
     @router.get("/relationships/roster/{owner}/{tag}/{states}")
@@ -121,7 +121,7 @@ def social_router(game: Game, magma: Magma, relationships: Relationships) -> API
         party, _, _ = await asking(session_id, relay_token, owner)
         wanted = {int(state) for state in states.split(",") if state.isdigit()}
         listed = await relationships.roster(game, party)
-        return _xml(
+        return xml(
             roster(entry(found) for found in listed if found.tag == tag and _state(found) in wanted)
         )
 
@@ -136,7 +136,7 @@ def social_router(game: Game, magma: Magma, relationships: Relationships) -> API
         party = await changing(session_id, relay_token, owner)
         with _refusals():
             changed = await relationships.increase(game, party, _party(member), tag)
-        return _xml(relationship(entry(changed)))
+        return xml(relationship(entry(changed)))
 
     @router.post("/relationships/decrease/{owner}/{member}/{tag}")
     async def decrease(
@@ -149,7 +149,7 @@ def social_router(game: Game, magma: Magma, relationships: Relationships) -> API
         party = await changing(session_id, relay_token, owner)
         with _refusals():
             changed = await relationships.decrease(game, party, _party(member), tag)
-        return _xml(relationship(entry(changed)))
+        return xml(relationship(entry(changed)))
 
     @router.post("/relationships/acknowledge/{owner}/{relationshipId}")
     async def acknowledge(
@@ -161,7 +161,7 @@ def social_router(game: Game, magma: Magma, relationships: Relationships) -> API
         party = await changing(session_id, relay_token, owner)
         with _refusals():
             await relationships.acknowledge(game, party, relationship_id)
-        return _xml(success())
+        return xml(success())
 
     @router.post("/relationships/status/{owner}")
     async def status(
@@ -179,7 +179,7 @@ def social_router(game: Game, magma: Magma, relationships: Relationships) -> API
             raise MagmaError(VALIDATION_FAILED, NO_STATUS)
         with _refusals():
             relationships.report(account_id, text, serving)
-        return _xml(success())
+        return xml(success())
 
     # A name the player types may hold anything, a slash too.
     @router.get("/nucleus/personas/{search:path}")
@@ -187,7 +187,7 @@ def social_router(game: Game, magma: Magma, relationships: Relationships) -> API
         magma.session(session_id)
         with _refusals():
             found = await relationships.search(game, search)
-        return _xml(
+        return xml(
             personas(
                 PersonaEntry(
                     each.account_id,
@@ -220,7 +220,3 @@ def _refusals() -> Iterator[None]:
         yield
     except RelationshipRefused as refused:
         raise MagmaError(VALIDATION_FAILED, refused.refusal.value) from None
-
-
-def _xml(document: bytes) -> Response:
-    return Response(document, media_type=XML)

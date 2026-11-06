@@ -8,10 +8,9 @@ from openfesl.core.games import Game
 from openfesl.core.magma import USER_DOES_NOT_MATCH, VALIDATION_FAILED, Magma, MagmaError
 from openfesl.core.mugshots import LARGEST_FILE, NOT_A_MUGSHOT, Mugshots
 from openfesl.protocol.magma import success
-from openfesl.web.magma import XML, RelayToken, SessionId
+from openfesl.web.magma import RelayToken, SessionId, UserId, xml
 
-# The original service names an account or a persona in a path userId, also in its refusals.
-UserId = Annotated[int, Path(alias="userId")]
+# The original service names a persona in a path personaId, also in its refusals.
 PersonaId = Annotated[int, Path(alias="personaId")]
 # A mugshot's file and the form around it.
 LARGEST_UPLOAD = LARGEST_FILE + 1024
@@ -35,14 +34,14 @@ def hero_router(game: Game, magma: Magma, mugshots: Mugshots) -> APIRouter:
     async def check_user(user_id: UserId, session_id: SessionId = None) -> Response:
         if magma.session(session_id).account_id != user_id:
             raise MagmaError(VALIDATION_FAILED, USER_DOES_NOT_MATCH)
-        return _xml(success())
+        return xml(success())
 
     @router.get("/nucleus/check/persona/{personaId}")
     async def check_persona(
         persona_id: PersonaId, session_id: SessionId = None, relay_token: RelayToken = None
     ) -> Response:
         await magma.persona(session_id, game, persona_id, relay_token=relay_token)
-        return _xml(success())
+        return xml(success())
 
     # A dedicated server asks the original service to refresh the profiles it cached of the
     # players whose stats it changed; this server caches none, so the request only succeeds.
@@ -51,7 +50,7 @@ def hero_router(game: Game, magma: Magma, mugshots: Mugshots) -> APIRouter:
         user_id: UserId, session_id: SessionId = None, relay_token: RelayToken = None
     ) -> Response:
         await magma.user(session_id, game, user_id, relay_token)
-        return _xml(success())
+        return xml(success())
 
     # The game reads the raw answer, 1 to render the hero and upload it, anything else not to.
     @router.get("/api/mugshot/mayupload/{personaId}", response_class=PlainTextResponse)
@@ -77,7 +76,7 @@ def hero_router(game: Game, magma: Magma, mugshots: Mugshots) -> APIRouter:
         if not isinstance(picture, UploadFile):
             raise MagmaError(VALIDATION_FAILED, NOT_A_MUGSHOT)
         await mugshots.replace(persona, await picture.read(LARGEST_FILE + 1))
-        return _xml(success())
+        return xml(success())
 
     return router
 
@@ -89,7 +88,3 @@ async def _discard(request: Request) -> None:
         discarded += len(chunk)
         if discarded > LARGEST_DISCARD:
             break
-
-
-def _xml(document: bytes) -> Response:
-    return Response(document, media_type=XML)

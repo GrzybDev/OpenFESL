@@ -9,10 +9,10 @@ from openfesl.core.games import Game, Games
 from openfesl.core.purchases import INSUFFICIENT_FUNDS, PurchaseRefused, Purchases
 from openfesl.core.texts import localize
 from openfesl.core.wallets import Wallets
-from openfesl.web.account.session import open_page, signed_in
+from openfesl.web.account.session import signed_in, to_sign_in
 from openfesl.web.chests import CHESTS, held_keys
 from openfesl.web.pages import Pages
-from openfesl.web.sessions import SentForms, form_token, notify, purchase_matches, toast
+from openfesl.web.sessions import SentForms, form_token, purchase_matches, toast
 from openfesl.web.store_texts import StoreTexts
 
 KEYS = CHESTS + "/keys"
@@ -63,10 +63,8 @@ class KeyPages:
         async def show_keys(request: Request) -> Response:
             player = signed_in(request)
             if player is None:
-                notify(request, "needed", page="keys")
-                return open_page(
-                    request, "/sign-in", localize(f"/{game.id}{KEYS}", request.state.language)
-                )
+                back = localize(f"/{game.id}{KEYS}", request.state.language)
+                return to_sign_in(request, back, "needed", page="keys")
             assert game.chests is not None
             key = await self._chests.key(game)
             funds = 0

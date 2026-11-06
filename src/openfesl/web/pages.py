@@ -620,14 +620,10 @@ def _theme_rule(game: Game) -> str:
 def _hero_rules(scope: str, heroes: HeroRules) -> list[str]:
     # The colours of each faction, and of every skin tone and hair colour, for the elements that
     # name them in their attributes.
-    rules = []
-    for name, faction in heroes.factions.items():
-        colours = {
-            "faction": faction.colour,
-            "faction-ink": faction.ink,
-        }
-        listed = ";".join(f"--{key}:{value}" for key, value in colours.items())
-        rules.append(f'{scope} [data-faction="{name}"]{{{listed}}}')
+    rules = [
+        f'{scope} [data-faction="{name}"]{{--faction:{faction.colour};--faction-ink:{faction.ink}}}'
+        for name, faction in heroes.factions.items()
+    ]
     rules += [
         f'{scope} [data-skin="{tone}"]{{--skin:{colour}}}'
         for tone, colour in enumerate(heroes.skin_tones, 1)

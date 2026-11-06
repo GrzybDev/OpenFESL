@@ -99,7 +99,7 @@ class RedeemPages:
             assert game.site is not None
             path = f"/{game.id}{game.site.path('redeem')}"
             router.add_api_route(path, self._page(game), response_class=HTMLResponse)
-            router.add_api_route(path, self._redeem(game), methods=["POST"])
+            router.add_api_route(path, self._redeem(game, path), methods=["POST"])
         return router
 
     def _page(self, game: Game) -> Callable[[Request], Awaitable[Response]]:
@@ -119,11 +119,11 @@ class RedeemPages:
 
         return show_redeem
 
-    def _redeem(self, game: Game) -> Callable[[Request], Awaitable[Response]]:
+    def _redeem(self, game: Game, path: str) -> Callable[[Request], Awaitable[Response]]:
         async def redeem(request: Request) -> Response:
             form = await request.form()
             typed = str(form.get("key", ""))
-            base = localize(f"/{game.id}{_path(game)}", request.state.language)
+            base = localize(path, request.state.language)
             # As the entry form sends it, so that the page does not take the code for a link's.
             again = f"{base}?{urlencode({'key': typed, 'from': 'form'})}" if typed else base
             player = signed_in(request)
@@ -199,7 +199,7 @@ class RedeemPages:
             look=look,
             entry=entry,
             refusal=refusal,
-            said=_refusal(texts, catalogue, look, refusal, raced) if refusal else ("", ""),
+            said=_refusal(texts, catalogue, look, refusal, raced) if look and refusal else ("", ""),
             rows=rows,
             tiles=tiles,
             linked=linked,
@@ -239,11 +239,6 @@ class RedeemPages:
     async def _words(self, request: Request, game: Game) -> tuple[StoreTexts, Catalogue]:
         language = request.state.language
         return StoreTexts(game, language), await self._catalogues.of(game, language)
-
-
-def _path(game: Game) -> str:
-    assert game.site is not None
-    return game.site.path("redeem")
 
 
 def _currency(game: Game) -> str:
@@ -350,13 +345,13 @@ def _unfit(texts: StoreTexts, catalogue: Catalogue, look: Look, hero: Hero) -> s
 def _refusal(
     texts: StoreTexts,
     catalogue: Catalogue,
-    look: Look | None,
+    look: Look,
     refusal: CodeRefusal,
     raced: bool,
 ) -> tuple[str, str]:
     # Why a code gives the account nothing, and what follows from it, such as until when it
     # stays usable for the account.
-    entry = look.entry if look else None
+    entry = look.entry
     until = (
         texts.text("web.redeem.stays.until", end=texts.moment(entry.expires))
         if entry and entry.expires
@@ -364,7 +359,7 @@ def _refusal(
     )
     if refusal is CodeRefusal.EXPIRED and entry and entry.expires:
         return texts.text("web.redeem.refused.expired", date=texts.moment(entry.expires)), ""
-    if refusal is CodeRefusal.REDEEMED and look and look.earlier:
+    if refusal is CodeRefusal.REDEEMED and look.earlier:
         earlier = look.earlier
         key = "web.redeem.refused.raced" if raced else "web.redeem.refused.redeemed"
         if earlier.hero is None:
@@ -372,7 +367,7 @@ def _refusal(
         return texts.text(key, date=texts.day(earlier.at), hero=earlier.hero or ""), ""
     if refusal is CodeRefusal.NO_HERO:
         return texts.text("web.redeem.refused.no_hero"), until
-    if refusal is CodeRefusal.NO_FIT and entry and look:
+    if refusal is CodeRefusal.NO_FIT and entry:
         needed = _needed(texts, catalogue, entry.gift)
         rule = texts.requires(needed)
         # The hero of the faction and class that lacks only levels, the highest of them.
