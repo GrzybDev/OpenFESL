@@ -2,7 +2,7 @@
 {# The hot deals: how they change beside the title, then each shelf under its plaque in the
    rotation's order, its deals as the 2012 cards; a shelf with nothing in it is left out, and a
    page without any says that the store's items stay at their usual prices. Without the rotation
-   the shelves hold the admins' offers alone and say so. #}
+   the shelves hold the admins' offers and any sale of hero slots and new names, and say so. #}
 {% set title = _("web.site.page.hot-deals") %}
 {% set texts_key = "games." ~ game.id ~ ".deals." %}
 <Layout :title="title">
@@ -32,9 +32,10 @@
       <SectionHead :id="'shelf-' ~ shelf.key" :title="_(texts_key ~ 'section.' ~ shelf.key)" :flip="loop.index is even">
       {% if rotation %}
         {{ _(texts_key ~ "section." ~ shelf.key ~ ".lead", percent=number(shelf.discount or 0), time=midnight) }}
-      {% else %}
+      {% elif not shelf.sales %}
         {{ _(texts_key ~ "section.offers.lead") }}
       {% endif %}
+      {% if shelf.sales %}{{ _("web.sale.lead") }}{% endif %}
       </SectionHead>
       <ul role="list" class="deal-cards enter-rows">
         {% for card in shelf.cards %}

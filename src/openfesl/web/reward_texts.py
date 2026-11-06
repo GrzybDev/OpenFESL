@@ -76,7 +76,7 @@ class RewardTexts:
             texts: Writes the page's language.
             catalogue: The game's imported catalogue, which names and draws the items.
             roster: The account's heroes; none for a visitor signed out.
-            heroes: How the game's heroes are made and kept, at the prices the instance sets;
+            heroes: How the game's heroes are made and kept, at the prices of this moment;
                 none for a visitor signed out.
             art: Whether the page shows the game's art to its viewer, its items' icons among it.
         """

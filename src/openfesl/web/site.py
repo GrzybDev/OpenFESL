@@ -64,7 +64,7 @@ class SiteBar:
         funds: What the account has to pay the game's prices with, in such a game.
         rewards: Its game's rewards as the account sees them now, which its pages read.
         paused: Whether claims of its game's rewards are paused.
-        heroes: How its game's heroes are made and kept, at the prices the instance sets, in a
+        heroes: How its game's heroes are made and kept, at the prices of this moment, in a
             game whose heroes are made on its site.
         claw: Its game's Daily Claw while it runs.
     """

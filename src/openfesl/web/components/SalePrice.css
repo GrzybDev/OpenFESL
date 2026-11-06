@@ -1,0 +1,30 @@
+/* The usual price struck through beside a sale's, on the pale boxes and the black pills, and the
+   discount burst at the end of a dialog's price row, whose text wraps beside it. */
+@layer components {
+  .sale-was {
+    color: #5c4a3c;
+    font-weight: 600;
+    text-decoration-thickness: 2px;
+  }
+
+  .site-button .sale-was {
+    color: inherit;
+  }
+
+  .sale-price {
+    position: relative;
+    padding-right: 58px;
+
+    .deal-sticker {
+      top: -16px;
+      right: -6px;
+      width: 64px;
+      height: 64px;
+      font-size: 15px;
+    }
+  }
+
+  .site-facts [role="timer"] {
+    white-space: nowrap;
+  }
+}

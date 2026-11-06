@@ -2,7 +2,7 @@ import re
 import secrets
 from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Protocol
 
@@ -290,12 +290,14 @@ class Heroes:
         self._settings = settings
 
     async def rules(self, game: Game) -> HeroRules:
-        """Return how a game's heroes are made and kept, at the prices the instance sets.
+        """Return how a game's heroes are made and kept, at the prices of this moment.
+
+        Those are the prices the instance sets, less the sales that run.
 
         Args:
             game: The game, which has hero rules.
         """
-        return _rules(await account_rules(game, self._settings))
+        return _rules(await account_rules(game, self._settings)).at(datetime.now(UTC))
 
     async def roster(self, game: Game, account_id: int) -> Roster:
         """Return an account's heroes in a game, with what the site shows about each.
@@ -382,12 +384,13 @@ class Heroes:
             return False
         return await self._store.set_default(account_id, game.id, game.namespace, persona_id)
 
-    async def buy_slot(self, game: Game, account_id: int) -> int:
-        """Add a hero slot to an account for the price the instance sets.
+    async def buy_slot(self, game: Game, account_id: int, price: int) -> int:
+        """Add a hero slot to an account at a price.
 
         Args:
             game: The game, which has hero rules.
             account_id: The account.
+            price: What it costs, as the page that sold it was shown.
 
         Returns:
             The number of the new slot.
@@ -398,12 +401,12 @@ class Heroes:
         game = await account_rules(game, self._settings)
         rules = _rules(game)
         bought = await self._store.buy_slot(
-            account_id, game.id, self._price(game, account_id), rules.slot_price
+            account_id, game.id, self._price(game, account_id), price
         )
         return rules.slots + bought
 
-    async def rename(self, game: Game, persona: Persona, name: str) -> None:
-        """Give one of an account's heroes a new name for the price the instance sets.
+    async def rename(self, game: Game, persona: Persona, name: str, price: int) -> None:
+        """Give one of an account's heroes a new name at a price.
 
         The game shows the new name from its next login.
 
@@ -411,6 +414,7 @@ class Heroes:
             game: The game, which has hero rules.
             persona: The hero's persona.
             name: The new name.
+            price: What it costs, as the page that sold it was shown.
 
         Raises:
             HeroRefused: When the name breaks the rule, is the hero's own or is taken, or the
@@ -422,8 +426,7 @@ class Heroes:
             raise HeroRefused(Refusal.FORMAT)
         if name.casefold() == persona.name.casefold():
             raise HeroRefused(Refusal.SAME)
-        price = self._price(game, persona.account_id)
-        await self._store.rename(persona, name, price, rules.rename_price)
+        await self._store.rename(persona, name, self._price(game, persona.account_id), price)
 
     def _price(self, game: Game, account_id: int) -> Wallet:
         # The account's wallet that the game's prices are paid from.

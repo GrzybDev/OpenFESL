@@ -9,12 +9,14 @@ from openfesl.core.catalogues import Catalogue, Catalogues, paragraphs
 from openfesl.core.deal_rules import DealRules, ItemSection
 from openfesl.core.deals import Deal, HotDeals
 from openfesl.core.games import Game, Games
-from openfesl.core.heroes import Hero
+from openfesl.core.hero_rules import HeroRules, SalePrice
+from openfesl.core.heroes import Hero, Heroes
 from openfesl.core.rewards import Rewards
 from openfesl.core.store import Offer as Listing
 from openfesl.core.store import ProductStore, discount
 from openfesl.core.texts import localize
 from openfesl.web.catalogue_files import icon_url
+from openfesl.web.heroes import HEROES, SLOTS
 from openfesl.web.pages import Pages
 from openfesl.web.site import site_bar
 from openfesl.web.store import ITEM
@@ -23,6 +25,8 @@ from openfesl.web.store_texts import StoreTexts
 
 # The shelf of the admin's own offers that name no section of the rotation.
 OFFERS = "offers"
+# The shelf that the sales of hero slots and new names open.
+SALE = "sale"
 # The most item icons a card shows, and the most items it names, a line each or the first of
 # a set in one line.
 MOST_ICONS = 6
@@ -47,7 +51,7 @@ class DealCard:
     """A hot deal as its card on the hot deals page shows it.
 
     Attributes:
-        number: Its bundle's number.
+        number: Its bundle's number, or the name of what a sale that is no bundle sells.
         href: The address of its page, where it is bought.
         name: Its name.
         box: Whether it is a random box.
@@ -69,9 +73,10 @@ class DealCard:
         until: When it ends, as the page's language writes it.
         leaves: Whether it leaves the page for a while rather than end.
         free: Whether it is a box that an event that runs gives free once a day.
+        action: What the way to its page says; the deals' usual words when empty.
     """
 
-    number: int
+    number: int | str
     href: str
     name: str
     box: bool
@@ -92,6 +97,7 @@ class DealCard:
     until: str
     leaves: bool
     free: bool
+    action: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -102,15 +108,20 @@ class Shelf:
         key: Its name, which the ids of its texts hold.
         cards: Its deals.
         discount: The discount of its deals in percent, where its rules give one alone.
+        sales: Whether it holds the sales of hero slots and new names.
     """
 
     key: str
     cards: list[DealCard]
     discount: int | None = None
+    sales: bool = False
 
 
 class HotDealsPages:
-    """The hot deals page of a game's site: the rotation's sections and the admin's offers."""
+    """The hot deals page of a game's site.
+
+    It lists the rotation's sections, the admin's offers and the sales of hero slots and new names.
+    """
 
     def __init__(
         self,
@@ -120,6 +131,7 @@ class HotDealsPages:
         catalogues: Catalogues,
         products: ProductStore,
         rewards: Rewards,
+        heroes: Heroes,
     ) -> None:
         """Prepare the hot deals page of each game that lists it.
 
@@ -130,6 +142,7 @@ class HotDealsPages:
             catalogues: Name and draw the deals' items in the page's language.
             products: Hold the boxes that random boxes give from.
             rewards: Tell which boxes the events that run give free each day.
+            heroes: Tell which sales of hero slots and new names run.
         """
         self._pages = pages
         self._games = games
@@ -137,6 +150,7 @@ class HotDealsPages:
         self._catalogues = catalogues
         self._products = products
         self._rewards = rewards
+        self._heroes = heroes
 
     def routes(self) -> APIRouter:
         """Return the hot deals page of each game that lists it."""
@@ -179,12 +193,15 @@ class HotDealsPages:
                 found = rules.sections.get(section) if rules and section else None
                 shelf = (found.shelf or section) if found and section else OFFERS
                 shelves.setdefault(shelf, []).append(card)
+            sales = _sale_cards(texts, await self._heroes.rules(game)) if game.heroes else []
+            if sales:
+                shelves[SALE] = sales + shelves.get(SALE, [])
             return self._pages.render(
                 request,
                 "store.HotDeals",
                 game=game,
                 shelves=[
-                    Shelf(key, cards, _discount(rules, key))
+                    Shelf(key, cards, _discount(rules, key), bool(sales) and key == SALE)
                     for key, cards in shelves.items()
                     if cards
                 ],
@@ -276,6 +293,54 @@ async def deal_card(
         leaves=bool(section and section.leaves),
         free=box is not None and box.key in free,
     )
+
+
+def _sale_cards(texts: StoreTexts, rules: HeroRules) -> list[DealCard]:
+    # The sales of a hero slot and a new name that run, which no rotation sells and no game's own
+    # hot deals list, as a hero slot and a name are no products.
+    game, cards = texts.game, []
+
+    def card(
+        name: str, sale: SalePrice, price: int, glyph: str, href: str, lines: list[str], action: str
+    ) -> DealCard:
+        return DealCard(
+            number=name,
+            href=localize(f"/{game.id}{href}", texts.language),
+            name=texts.text(f"web.sale.{name}.name"),
+            box=False,
+            off=texts.amount(sale.off),
+            price=texts.amount(price),
+            original=texts.amount(sale.usual),
+            currency=rules.currency,
+            faction=None,
+            icons=[Icon(None, glyph)],
+            lines=lines,
+            requires=texts.text("web.sale.requires"),
+            heroes=None,
+            stock="",
+            sold_out="",
+            ends=sale.ends,
+            soon=texts.days_left(sale.ends) <= 1,
+            left=texts.countdown(sale.ends),
+            until=texts.moment(sale.ends),
+            leaves=False,
+            free=False,
+            action=action,
+        )
+
+    if rules.slot_sale:
+        lines = [texts.text("web.sale.slot.line"), texts.text("web.sale.slot.kept")]
+        action = texts.text("web.slots.buy")
+        cards.append(card("slot", rules.slot_sale, rules.slot_price, "coin", SLOTS, lines, action))
+    if rules.rename_sale:
+        lines = [
+            texts.text("web.sale.rename.line"),
+            texts.text("web.sale.rename.login", game=game.name),
+        ]
+        action = texts.text("web.deals.card.choose")
+        price = rules.rename_price
+        cards.append(card("rename", rules.rename_sale, price, "edit", HEROES, lines, action))
+    return cards
 
 
 def _discount(rules: DealRules | None, shelf: str) -> int | None:

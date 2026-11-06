@@ -104,6 +104,10 @@ def account_entry(
     if game is None:
         return details["name"], None, ""
     texts = StoreTexts(game, language, datetime.now(UTC))
+    href = localize(f"/admin/store/{game.id}/account", language)
+    if details["name"] == "sales":
+        said = texts.text(f"web.admin.audit.sales.{'on' if details['after'] else 'off'}")
+        return texts.text("web.admin.store.sales"), href, said
     unit = details["unit"]
     named = (
         texts.text("web.admin.store.account.unit.chests")
@@ -119,7 +123,7 @@ def account_entry(
         after=texts.amount(details["after"]),
         unit=named,
     )
-    return shown, localize(f"/admin/store/{game.id}/account", language), said
+    return shown, href, said
 
 
 def _owned(texts: StoreTexts, written: str) -> str:

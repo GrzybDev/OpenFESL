@@ -1,9 +1,10 @@
 {#def roster, taking: int = 0, buy: bool = False #}
 {# An account's hero slots: a pip per slot, filled when used and yellow for the one a new hero
-   takes, with the count, a note under them and, where asked, the way to buy another. The slot
-   just bought joins the pips with a motion. #}
+   takes, with the count, a note under them and, where asked, the way to buy another with the
+   discount of a sale that runs. The slot just bought joins the pips with a motion. #}
 {% set bought = toast and toast.key == "web.slots.done" %}
 <section aria-labelledby="slots-title" class="slot-panel">
+  {% if buy and bar.heroes.slot_sale %}<DealSticker :off="number(bar.heroes.slot_sale.off)" />{% endif %}
   <h2 id="slots-title" class="slot-panel-title">{{ _("web.slots.title") }}</h2>
   <div class="slot-count">
     <span role="img"

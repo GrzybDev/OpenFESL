@@ -88,6 +88,11 @@
     }
   }
 
+  .selector-free .slot-price {
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
   .selector-card,
   .selector-free {
     display: flex;

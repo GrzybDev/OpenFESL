@@ -102,7 +102,7 @@
         {% endif %}
         <a href="{{ url('/' ~ game.id ~ '/heroes/' ~ id ~ '/rename') }}"
            data-opens="rename-{{ id }}"
-           class="site-button site-button-ghost hero-rename"><Icon name="edit" :size="17" stroke="currentColor" />{{ _("web.rename.action") }}<span class="sr-only">{{ hero.persona.name }}</span><span class="hero-price">· {{ _("web.rename.price.short", price=number(rules.rename_price), currency=_("games." ~ game.id ~ ".currency." ~ rules.currency)) }}</span></a>
+           class="site-button site-button-ghost hero-rename"><Icon name="edit" :size="17" stroke="currentColor" />{{ _("web.rename.action") }}<span class="sr-only">{{ hero.persona.name }}</span><span class="hero-price">{% if not rules.rename_sale %}· {% endif %}<SalePrice :sale="rules.rename_sale" :price="_('web.rename.price.short', price=number(rules.rename_price), currency=_('games.' ~ game.id ~ '.currency.' ~ rules.currency))" /></span></a>
         {# A hero made before the creator has no faction, class or look to start the game with. #}
         {% if not card.default and hero.playable %}
           <form method="post"

@@ -1,8 +1,8 @@
 import math
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 
 from babel import Locale
-from babel.dates import format_skeleton
+from babel.dates import format_interval, format_skeleton
 from babel.lists import format_list
 from babel.numbers import format_percent
 
@@ -94,6 +94,15 @@ class StoreTexts:
             value: The day.
         """
         return str(format_skeleton("yMMMd", value, tzinfo=UTC, locale=self._locale()))
+
+    def day_range(self, first: date, last: date) -> str:
+        """Return a run of days as the language writes it, such as 1-5 Oct.
+
+        Args:
+            first: Its first day.
+            last: Its last day.
+        """
+        return str(format_interval(first, last, "MMMd", locale=self._locale()))
 
     def countdown(self, ends: datetime) -> str:
         """Return the time left until a moment, as days and a clock, such as 1 d 23:22:40.

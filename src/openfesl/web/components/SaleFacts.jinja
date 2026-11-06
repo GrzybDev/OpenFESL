@@ -1,0 +1,21 @@
+{#def sale, price: str #}
+{# The price rows of a dialog's facts: the price and, while a sale runs, how much it takes off and
+   the time it has left, which counts down with scripts and whose end touches no store page's
+   own deal. #}
+<dt>{{ _("web.rename.price") }}</dt>
+<dd{% if sale %} class="sale-price"{% endif %}>
+  <SalePrice :sale="sale" :price="price" />
+  {% if sale %}<DealSticker :off="number(sale.off)" />{% endif %}
+</dd>
+{% if sale %}
+  <dt>{{ _("web.sale.label") }}</dt>
+  <dd>
+    {{ _("web.sale.off", off=number(sale.off)) }} ·
+    <span class="js-only">{{ _("web.sale.ends_in") }}
+      <strong role="timer"
+              data-sale
+              data-left="{{ seconds_left(sale.ends) }}"
+              data-format="{{ _('web.store.countdown') }}"></strong></span>
+    <span class="no-js-only">{{ _("web.sale.ends_at") }} {{ _("web.store.utc", time=moment(sale.ends)) }}</span>
+  </dd>
+{% endif %}

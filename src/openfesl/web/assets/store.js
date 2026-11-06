@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     buyPanel(form);
   }
   for (const timer of document.querySelectorAll("[role=timer][data-left]:not([data-deal] *)")) {
-    countDown(timer, endDeal);
+    countDown(timer, "sale" in timer.dataset ? () => {} : endDeal);
   }
   const reveal = document.querySelector("dialog[data-reveal]");
   if (reveal) {
@@ -67,7 +67,7 @@ function buyPanel(form) {
     history.replaceState(null, "", `${location.pathname}?${query}`);
     // The tile that was chosen keeps the focus, though the price tiles were drawn again.
     form.querySelector(`[name=${changed.name}][value="${changed.value}"]`)?.focus();
-    for (const timer of document.querySelectorAll("[role=timer][data-left]")) {
+    for (const timer of document.querySelectorAll("[role=timer][data-left]:not([data-sale])")) {
       if (timer.dataset.ended) {
         endDeal();
       }
@@ -154,7 +154,7 @@ function endDeal() {
   document.querySelector("[data-deal-ended]")?.removeAttribute("hidden");
   document.querySelector("[data-summary]")?.remove();
   const buy = document.querySelector("[data-buy-open]");
-  const why = document.querySelector("[data-why]");
+  const why = document.querySelector("[data-buy] [data-why]");
   if (buy && why) {
     buy.setAttribute("aria-disabled", "true");
     why.textContent = why.dataset.ended;

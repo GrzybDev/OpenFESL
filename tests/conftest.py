@@ -21,6 +21,7 @@ from testcontainers.community.postgres import PostgresContainer
 
 from openfesl.core import admin, history, trust
 from openfesl.core.games import Game, load_games
+from openfesl.core.hero_rules import HeroRules
 from openfesl.core.store_rules import PriceRule, StoreRules
 from openfesl.server.cli import RelayServer, main, uvicorn_config
 from openfesl.storage.database import migrate
@@ -49,6 +50,9 @@ async def relay_server(
     if not request.node.get_closest_marker("listed_prices"):
         pet = PriceRule(currency="_PF", points={"perm": 899})
         monkeypatch.setattr(StoreRules, "_listings", {521: [pet]})
+    # A test of the usual prices meets no sale, whatever day it runs on.
+    if not request.node.get_closest_marker("hero_sales"):
+        monkeypatch.setattr(HeroRules, "at", lambda rules, _: rules)
     # The production server and settings, so the handshake, subprotocol, frame limits and
     # shutdown are the ones the hook meets.
     # A plain URL, as database hosts such as Dokploy hand it out; the server picks its driver.

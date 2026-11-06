@@ -19,7 +19,7 @@
         <p class="site-lead">
           {{ _("web.creator.lead") }}
           {% if not roster.default %}{{ _("web.creator.lead.first") }}{% endif %}
-          {{ _("web.creator.lead.kept", price=number(rules.rename_price), currency=_("games." ~ game.id ~ ".currency." ~ rules.currency)) }}
+          {{ _("web.creator.lead.kept", cost=cost(rules.rename_price, _("games." ~ game.id ~ ".currency." ~ rules.currency), rules.rename_sale)) }}
         </p>
       {% endif %}
       {% if roster and roster.heroes %}
@@ -33,7 +33,7 @@
         {{ _("web.slots.taking", slot=slot) }}
       {% else %}
         {{ _n("web.slots.free", rules.slots) }}
-        {{ _("web.slots.further", price=number(rules.slot_price), currency=_("games." ~ game.id ~ ".currency." ~ rules.currency)) }}
+        {{ _("web.slots.further", cost=cost(rules.slot_price, _("games." ~ game.id ~ ".currency." ~ rules.currency), rules.slot_sale)) }}
       {% endif %}
       </SlotPanel>
     {% endif %}
@@ -66,9 +66,9 @@
             class="creator-unavailable-disc creator-unavailable-coin"><Icon name="coin" :size="34" stroke="#0A0A0A" /></span>
       <div class="creator-unavailable-text">
         <h2 id="creator-closed" class="site-box-title">{{ _n("web.creator.full", roster.slots) }}</h2>
-        <p>{{ _("web.creator.full.text", price=number(price), currency=currency) }}</p>
+        <p>{{ _("web.creator.full.text", cost=cost(price, currency, rules.slot_sale)) }}</p>
         <p class="creator-amounts">
-          <span>{{ _("web.rename.price") }}</span> <strong>{{ number(price) }} {{ currency }}</strong> ·
+          <span>{{ _("web.rename.price") }}</span> <strong><SalePrice :sale="rules.slot_sale" :price="number(price) ~ ' ' ~ currency" /></strong> ·
           <span>{{ _("web.rename.funds_now", currency=currency) }}</span>
           <strong{% if short %} class="site-short"{% endif %}>{{ number(bar.funds) }}{% if short %} · {{ _("web.rename.short", amount=number(price - bar.funds)) }}{% endif %}</strong>
         </p>

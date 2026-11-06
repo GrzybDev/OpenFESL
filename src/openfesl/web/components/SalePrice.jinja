@@ -1,0 +1,3 @@
+{#def sale, price: str #}
+{# A price, after the usual one struck through while a sale runs. #}
+{% if sale %}<s class="sale-was"><span class="sr-only">{{ _("web.store.was") }}</span>{{ number(sale.usual) }}</s> {% endif %}{{ price }}

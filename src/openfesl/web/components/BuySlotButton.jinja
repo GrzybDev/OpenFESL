@@ -9,8 +9,8 @@
   {% if plus %}<Icon name="plus" :size="17" :stroke="'currentColor' if why else '#FEDE01'" />{% endif %}
   {{ _("web.slots.buy") }}
   {% if why %}
-    <span>· {{ price }}</span>
+    <span>· <SalePrice :sale="rules.slot_sale" :price="price" /></span>
   {% else %}
-    <span class="slot-price"><Icon name="coin" :size="15" stroke="currentColor" />{{ price }}</span>
+    <span class="slot-price"><Icon name="coin" :size="15" stroke="currentColor" /><SalePrice :sale="rules.slot_sale" :price="price" /></span>
   {% endif %}
 </a>

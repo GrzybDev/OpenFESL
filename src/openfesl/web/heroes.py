@@ -187,7 +187,7 @@ class HeroesPages:
                 toast(request, "web.rename.refused.price", error=True, hero=old, **values)
                 return RedirectResponse(heroes, 303)
             try:
-                await self._heroes.rename(game, found.persona, name)
+                await self._heroes.rename(game, found.persona, name, price)
             except HeroRefused as refused:
                 if refused.refusal is not Refusal.FUNDS:
                     return await self._render_rename(request, game, found, name, refused.refusal)
@@ -239,14 +239,17 @@ class HeroesPages:
                     if bought:
                         toast(request, "web.slots.done.again", error=False)
                         return RedirectResponse(back, 303)
-                    slot = await self._heroes.buy_slot(game, player.account_id)
+                    slot = await self._heroes.buy_slot(game, player.account_id, price)
             except HeroRefused:
                 funds = await self._funds(game, player.account_id)
                 values = self._prices(game, funds, language, price)
                 toast(request, "web.slots.refused.funds", error=True, **values)
                 return RedirectResponse(back, 303)
             values = self._prices(game, 0, language, price)
-            toast(request, "web.slots.done", error=False, slot=number(slot, language), **values)
+            slot_number = number(slot, language)
+            toast(
+                request, "web.slots.done", error=False, slot=slot_number, spent=str(price), **values
+            )
             return RedirectResponse(back, 303)
 
         return buy_slot

@@ -140,6 +140,45 @@ msgstr "Create a hero"
 msgid "web.dialog.close"
 msgstr "Close"
 
+msgid "web.sale.label"
+msgstr "Sale"
+
+msgid "web.sale.off"
+msgstr "%(off)s%% off"
+
+msgid "web.sale.cost"
+msgstr "%(price)s %(currency)s until %(end)s, then %(usual)s"
+
+msgid "web.sale.requires"
+msgstr "A signed-in account"
+
+msgid "web.sale.slot.name"
+msgstr "Hero slot"
+
+msgid "web.sale.slot.line"
+msgstr "One more hero on the account"
+
+msgid "web.sale.slot.kept"
+msgstr "The slot stays with the account"
+
+msgid "web.sale.rename.name"
+msgstr "Hero rename"
+
+msgid "web.sale.rename.line"
+msgstr "A new name for one hero"
+
+msgid "web.sale.rename.login"
+msgstr "%(game)s shows it from its next login"
+
+msgid "web.sale.ends_in"
+msgstr "ends in"
+
+msgid "web.sale.ends_at"
+msgstr "ends at"
+
+msgid "web.sale.lead"
+msgstr "Hero slots and renames go on sale on the same days each year; a slot stays with the account."
+
 msgid "web.slots.title"
 msgstr "Hero slots"
 
@@ -162,7 +201,7 @@ msgid "web.slots.buy"
 msgstr "Buy a hero slot"
 
 msgid "web.slots.further"
-msgstr "Each further slot costs %(price)s %(currency)s."
+msgstr "Each further slot costs %(cost)s."
 
 msgid "web.slots.kept"
 msgstr "The slot stays with the account. Heroes cannot be deleted, so each hero keeps its slot."
@@ -183,10 +222,10 @@ msgid "web.slots.another"
 msgstr "Another hero slot"
 
 msgid "web.slots.another.text.one"
-msgstr "The %(count)s slot is in use. Another slot costs %(price)s %(currency)s and stays with the account."
+msgstr "The %(count)s slot is in use. Another slot costs %(cost)s and stays with the account."
 
 msgid "web.slots.another.text.other"
-msgstr "All %(count)s slots are in use. Another slot costs %(price)s %(currency)s and stays with the account."
+msgstr "All %(count)s slots are in use. Another slot costs %(cost)s and stays with the account."
 
 msgid "web.slots.done"
 msgstr "Hero slot %(slot)s added. %(price)s %(currency)s spent."
@@ -213,7 +252,7 @@ msgid "web.creator.lead.first"
 msgstr "The first hero becomes the default hero, the one Play Now starts the game with."
 
 msgid "web.creator.lead.kept"
-msgstr "Faction, class and the look chosen here stay with the hero; a new name later costs %(price)s %(currency)s."
+msgstr "Faction, class and the look chosen here stay with the hero; a new name later costs %(cost)s."
 
 msgid "web.creator.lead.full"
 msgstr "A new hero needs a free hero slot."
@@ -234,7 +273,7 @@ msgid "web.creator.full.other"
 msgstr "All %(count)s hero slots are in use"
 
 msgid "web.creator.full.text"
-msgstr "Heroes cannot be deleted, so a new hero needs another slot. A slot costs %(price)s %(currency)s and stays with the account; the creator opens here once it is added."
+msgstr "Heroes cannot be deleted, so a new hero needs another slot. A slot costs %(cost)s and stays with the account; the creator opens here once it is added."
 
 msgid "web.creator.refused.taken"
 msgstr "%(name)s was not created: the name was taken a moment earlier. No hero slot was used, and the other choices are kept below."
@@ -8584,8 +8623,8 @@ msgstr "00:00 %(zone)s"
 
 msgid "games.bfheroes.deals.schedule"
 msgstr ""
-"Deal of the Day changes at %(time)s, new sets come every Monday, and sales "
-"run 72 hours."
+"Deal of the Day changes at %(time)s, new sets come every Monday, and item "
+"sales run 72 hours."
 
 msgid "games.bfheroes.deals.section.daily"
 msgstr "Deal of the Day"
@@ -8607,7 +8646,7 @@ msgid "games.bfheroes.deals.section.sale"
 msgstr "On sale"
 
 msgid "games.bfheroes.deals.section.sale.lead"
-msgstr "Sales run 72 hours and start on Mondays and Thursdays."
+msgstr "Item sales run 72 hours and start on Mondays and Thursdays."
 
 msgid "games.bfheroes.deals.section.boxes"
 msgstr "Random boxes"
@@ -12019,6 +12058,60 @@ msgstr "Rule changed"
 
 msgid "web.admin.audit.action.store_account"
 msgstr "Account price or limit changed"
+
+msgid "web.admin.store.sales"
+msgstr "Sales of hero slots and renames"
+
+msgid "web.admin.store.sales.yearly"
+msgstr "Every year · 00:00 UTC"
+
+msgid "web.admin.store.sales.run"
+msgstr "Run these sales"
+
+msgid "web.admin.store.sales.run.text"
+msgstr "Off, a slot and a rename cost their prices above all year."
+
+msgid "web.admin.store.sales.column.dates"
+msgstr "Dates"
+
+msgid "web.admin.store.sales.column.slot"
+msgstr "Hero slot"
+
+msgid "web.admin.store.sales.column.rename"
+msgstr "Rename"
+
+msgid "web.admin.store.sales.column.price"
+msgstr "Price then"
+
+msgid "web.admin.store.sales.column.state"
+msgstr "State"
+
+msgid "web.admin.store.sales.off_share"
+msgstr "%(off)s%%"
+
+msgid "web.admin.store.sales.running"
+msgstr "Running · ends in %(left)s"
+
+msgid "web.admin.store.sales.next_year"
+msgstr "Next year"
+
+msgid "web.admin.store.sales.off"
+msgstr "Switched off"
+
+msgid "web.admin.store.sales.note"
+msgstr "A sale takes its share off the prices above, so a changed price changes the sale's too."
+
+msgid "web.admin.audit.sales.on"
+msgstr "Switched on"
+
+msgid "web.admin.audit.sales.off"
+msgstr "Switched off"
+
+msgid "web.admin.store.sales.in.one"
+msgstr "In %(count)s day"
+
+msgid "web.admin.store.sales.in.other"
+msgstr "In %(count)s days"
 
 msgid "web.admin.audit.store_account"
 msgstr "%(before)s → %(after)s %(unit)s"

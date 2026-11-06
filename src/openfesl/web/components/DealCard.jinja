@@ -83,7 +83,7 @@
     {% else %}
       <a data-live href="{{ card.href }}" class="site-button deal-buy">
         <Icon :name="'box' if card.box else 'bag'" :size="16" stroke="#FEDE01" />
-        {{ _("web.deals.card.contents" if card.box else "web.deals.card.choose") }}
+        {{ card.action or _("web.deals.card.contents" if card.box else "web.deals.card.choose") }}
       </a>
     {% endif %}
   </div>

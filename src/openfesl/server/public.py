@@ -180,7 +180,13 @@ def include_public_routes(
     )
     app.include_router(
         HotDealsPages(
-            pages, games, services.deals, services.catalogues, stores.products, services.rewards
+            pages,
+            games,
+            services.deals,
+            services.catalogues,
+            stores.products,
+            services.rewards,
+            services.heroes,
         ).routes()
     )
     app.include_router(

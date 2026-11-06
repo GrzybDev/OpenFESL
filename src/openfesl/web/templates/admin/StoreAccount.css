@@ -9,6 +9,43 @@
     gap: 2px;
   }
 
+  .sales-columns {
+    --cell: var(--row);
+    display: grid;
+    grid-template-columns: 170px 110px 110px 110px minmax(220px, 1fr);
+    gap: 2px;
+    min-width: 720px;
+  }
+
+  .sales-row:nth-child(even) {
+    --cell: var(--row-alt);
+  }
+
+  .sales-row.sales-running {
+    --cell: #f2c12e;
+  }
+
+  .account-sales {
+    margin-top: 20px;
+  }
+
+  .account-sales-switch {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    color: var(--ink);
+
+    > :first-child {
+      flex: 1;
+    }
+
+    strong {
+      display: block;
+    }
+  }
+
   .account-row:nth-child(even of .account-row) {
     --cell: var(--row-alt);
   }
@@ -76,6 +113,20 @@
   }
 
   @container (width < 940px) {
+    .sales-columns {
+      min-width: 0;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+
+      > :first-child,
+      > :last-child {
+        grid-column: 1 / -1;
+      }
+
+      .cell-label {
+        margin-right: 8px;
+      }
+    }
+
     .account-row.account-columns {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 

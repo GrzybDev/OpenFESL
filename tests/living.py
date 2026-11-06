@@ -81,6 +81,7 @@ def freeze(monkeypatch: pytest.MonkeyPatch, moment: datetime) -> None:
             return cls.combine(shown.date(), shown.timetz())
 
     modules = (
+        "core.heroes",
         "core.rewards",
         "web.reward_texts",
         "web.reward_claims",

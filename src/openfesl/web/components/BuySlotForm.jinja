@@ -1,7 +1,7 @@
 {#def roster, funds: int, next: str, dialog: bool = False #}
-{# The form that buys a further hero slot for Funds: the price, the Funds before and after, the
-   slots before and after, and why it cannot be sent when the account has too few. Pages open it
-   as a dialog; without scripts it is a page of its own. #}
+{# The form that buys a further hero slot for Funds: the price and any sale of it, the Funds before
+   and after, the slots before and after, and why it cannot be sent when the account has too few.
+   Pages open it as a dialog; without scripts it is a page of its own. #}
 {% set rules = bar.heroes %}
 {% set price = rules.slot_price %}
 {% set short = funds < price %}
@@ -28,10 +28,7 @@
     <h1 id="buy-slot-title-page" class="site-dialog-title">{{ _("web.slots.buy") }}</h1>
   {% endif %}
   <dl class="site-facts">
-    <dt>{{ _("web.rename.price") }}</dt>
-    <dd>
-      {{ number(price) }} {{ currency }}
-    </dd>
+    <SaleFacts :sale="rules.slot_sale" :price="number(price) ~ ' ' ~ currency" />
     <dt>{{ _("web.rename.funds_now", currency=currency) }}</dt>
     <dd>
       {{ number(funds) }}

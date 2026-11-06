@@ -1,8 +1,9 @@
-{#def of, values: list, typed: dict, changed: list, refused: dict, manages: bool #}
+{#def of, values: list, typed: dict, changed: list, refused: dict, manages: bool, sales: list, sales_run: bool #}
 {# A game's account prices, allowances and per-round caps: each value with its unit, the game
    data's value and whether the instance's differs from it, saved together. Reset puts a value back
    to the game data's in the form without saving it, and where scripts run the states follow the
-   values as they are typed. A refusal stands under its row and nothing is saved. #}
+   values as they are typed. A refusal stands under its row and nothing is saved. Under them
+   stand the sales of hero slots and new names, with the switch that runs them. #}
 {% set game = of %}
 {% set here = url("/admin/store/" ~ game.id ~ "/account") %}
 {% macro unit(value) -%}
@@ -117,6 +118,57 @@
         </div>
       </div>
     </section>
+    {% if sales %}
+      <section aria-labelledby="account-sales" class="admin-list account-sales">
+        <h2 id="account-sales" class="bar bar-wrap">
+          <span>{{ _("web.admin.store.sales") }}</span>
+          <span class="bar-extra">{{ _("web.admin.store.sales.yearly") }}</span>
+        </h2>
+        <label class="check-row account-sales-switch">
+          <span>
+            <strong>{{ _("web.admin.store.sales.run") }}</strong>
+            {{ _("web.admin.store.sales.run.text") }}
+          </span>
+          {% if manages %}
+            <span class="check-place">
+              <input type="checkbox"
+                     name="sales"
+                     value="1"
+                     {% if sales_run %} checked{% endif %}
+                     class="check">
+              <span aria-hidden="true" class="check-box"><Icon name="tick" stroke="currentColor" /></span></span>
+          {% else %}
+            <span class="prices-from">{{ _("web.admin.deals.switch.on" if sales_run else "web.admin.deals.switch.off") }}</span>
+          {% endif %}
+        </label>
+        <div class="table-scroll table-scroll-flush">
+          <div role="table"
+               aria-labelledby="account-sales"
+               class="table sales-table">
+            <div role="rowgroup" class="admin-list-head">
+              <div role="row" class="sales-columns">
+                {% for column in ("dates", "slot", "rename", "price", "state") %}
+                  <div role="columnheader" class="column-head">{{ _("web.admin.store.sales.column." ~ column) }}</div>
+                {% endfor %}
+              </div>
+            </div>
+            <div role="rowgroup" class="enter-rows table-rows">
+              {% for sale in sales %}
+                <div role="row"
+                     class="sales-columns sales-row{% if sale.running %} sales-running{% endif %}">
+                  <div role="cell" class="admin-cell admin-hero-strong"><span aria-hidden="true" class="cell-label">{{ _("web.admin.store.sales.column.dates") }}</span>{{ sale.dates }}</div>
+                  <div role="cell" class="admin-cell"><span aria-hidden="true" class="cell-label">{{ _("web.admin.store.sales.column.slot") }}</span>{{ sale.slot }}</div>
+                  <div role="cell" class="admin-cell"><span aria-hidden="true" class="cell-label">{{ _("web.admin.store.sales.column.rename") }}</span>{{ sale.rename }}</div>
+                  <div role="cell" class="admin-cell"><span aria-hidden="true" class="cell-label">{{ _("web.admin.store.sales.column.price") }}</span>{{ sale.price }}</div>
+                  <div role="cell" class="admin-cell"><span aria-hidden="true" class="cell-label">{{ _("web.admin.store.sales.column.state") }}</span>{{ sale.state }}</div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <p class="bar-text">{{ _("web.admin.store.sales.note") }}</p>
+      </section>
+    {% endif %}
     <div class="account-save">
       <p class="body-text">{{ _("web.admin.store.account.note") }}</p>
       {% if manages %}

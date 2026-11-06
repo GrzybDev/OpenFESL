@@ -143,6 +143,45 @@ msgstr "Utwórz bohatera"
 msgid "web.dialog.close"
 msgstr "Zamknij"
 
+msgid "web.sale.label"
+msgstr "Wyprzedaż"
+
+msgid "web.sale.off"
+msgstr "%(off)s%% taniej"
+
+msgid "web.sale.cost"
+msgstr "%(price)s %(currency)s do %(end)s, potem %(usual)s"
+
+msgid "web.sale.requires"
+msgstr "Zalogowane konto"
+
+msgid "web.sale.slot.name"
+msgstr "Miejsce na bohatera"
+
+msgid "web.sale.slot.line"
+msgstr "Jeszcze jeden bohater na koncie"
+
+msgid "web.sale.slot.kept"
+msgstr "Miejsce zostaje przy koncie"
+
+msgid "web.sale.rename.name"
+msgstr "Zmiana nazwy bohatera"
+
+msgid "web.sale.rename.line"
+msgstr "Nowa nazwa dla jednego bohatera"
+
+msgid "web.sale.rename.login"
+msgstr "%(game)s pokaże ją od następnego logowania"
+
+msgid "web.sale.ends_in"
+msgstr "koniec za"
+
+msgid "web.sale.ends_at"
+msgstr "koniec"
+
+msgid "web.sale.lead"
+msgstr "Miejsca na bohaterów i zmiany nazwy tanieją co roku w te same dni; miejsce zostaje przy koncie."
+
 msgid "web.slots.title"
 msgstr "Miejsca na bohaterów"
 
@@ -171,7 +210,7 @@ msgid "web.slots.buy"
 msgstr "Kup miejsce na bohatera"
 
 msgid "web.slots.further"
-msgstr "Każde kolejne miejsce kosztuje %(price)s %(currency)s."
+msgstr "Każde kolejne miejsce kosztuje %(cost)s."
 
 msgid "web.slots.kept"
 msgstr "Miejsce zostaje przy koncie. Bohaterów nie można usuwać, więc każdy bohater zachowuje swoje miejsce."
@@ -198,16 +237,16 @@ msgid "web.slots.another"
 msgstr "Kolejne miejsce"
 
 msgid "web.slots.another.text.one"
-msgstr "%(count)s miejsce jest zajęte. Kolejne kosztuje %(price)s %(currency)s i zostaje przy koncie."
+msgstr "%(count)s miejsce jest zajęte. Kolejne kosztuje %(cost)s i zostaje przy koncie."
 
 msgid "web.slots.another.text.few"
-msgstr "Wszystkie %(count)s miejsca są zajęte. Kolejne kosztuje %(price)s %(currency)s i zostaje przy koncie."
+msgstr "Wszystkie %(count)s miejsca są zajęte. Kolejne kosztuje %(cost)s i zostaje przy koncie."
 
 msgid "web.slots.another.text.many"
-msgstr "Wszystkie %(count)s miejsc jest zajętych. Kolejne kosztuje %(price)s %(currency)s i zostaje przy koncie."
+msgstr "Wszystkie %(count)s miejsc jest zajętych. Kolejne kosztuje %(cost)s i zostaje przy koncie."
 
 msgid "web.slots.another.text.other"
-msgstr "Wszystkie %(count)s miejsca są zajęte. Kolejne kosztuje %(price)s %(currency)s i zostaje przy koncie."
+msgstr "Wszystkie %(count)s miejsca są zajęte. Kolejne kosztuje %(cost)s i zostaje przy koncie."
 
 msgid "web.slots.done"
 msgstr "Dodano miejsce %(slot)s. Wydano %(price)s %(currency)s."
@@ -234,7 +273,7 @@ msgid "web.creator.lead.first"
 msgstr "Pierwszy bohater zostaje domyślnym bohaterem, z którym „Graj” uruchamia grę."
 
 msgid "web.creator.lead.kept"
-msgstr "Wybrane tu frakcja, klasa i wygląd zostają z bohaterem na stałe; późniejsza zmiana nazwy kosztuje %(price)s %(currency)s."
+msgstr "Wybrane tu frakcja, klasa i wygląd zostają z bohaterem na stałe; późniejsza zmiana nazwy kosztuje %(cost)s."
 
 msgid "web.creator.lead.full"
 msgstr "Nowy bohater potrzebuje wolnego miejsca."
@@ -261,7 +300,7 @@ msgid "web.creator.full.other"
 msgstr "Wszystkie %(count)s miejsca na bohaterów są zajęte"
 
 msgid "web.creator.full.text"
-msgstr "Bohaterów nie można usuwać, więc nowy bohater potrzebuje kolejnego miejsca. Miejsce kosztuje %(price)s %(currency)s i zostaje przy koncie; po jego dodaniu kreator otworzy się tutaj."
+msgstr "Bohaterów nie można usuwać, więc nowy bohater potrzebuje kolejnego miejsca. Miejsce kosztuje %(cost)s i zostaje przy koncie; po jego dodaniu kreator otworzy się tutaj."
 
 msgid "web.creator.refused.taken"
 msgstr "Bohater %(name)s nie powstał: nazwa została zajęta przed chwilą. Żadne miejsce nie zostało użyte, a pozostałe wybory są zachowane poniżej."
@@ -9085,7 +9124,7 @@ msgstr "00:00 %(zone)s"
 msgid "games.bfheroes.deals.schedule"
 msgstr ""
 "Okazja dnia zmienia się o %(time)s, nowe zestawy pojawiają się w każdy "
-"poniedziałek, a wyprzedaże trwają 72 godziny."
+"poniedziałek, a wyprzedaże przedmiotów trwają 72 godziny."
 
 msgid "games.bfheroes.deals.section.daily"
 msgstr "Okazja dnia"
@@ -9108,7 +9147,7 @@ msgstr "Wyprzedaż"
 
 msgid "games.bfheroes.deals.section.sale.lead"
 msgstr ""
-"Wyprzedaże trwają 72 godziny i zaczynają się w poniedziałki i czwartki."
+"Wyprzedaże przedmiotów trwają 72 godziny i zaczynają się w poniedziałki i czwartki."
 
 msgid "games.bfheroes.deals.section.boxes"
 msgstr "Losowe skrzynki"
@@ -12743,6 +12782,66 @@ msgstr "Zmiana zasady"
 
 msgid "web.admin.audit.action.store_account"
 msgstr "Zmiana ceny konta lub limitu"
+
+msgid "web.admin.store.sales"
+msgstr "Wyprzedaże miejsc i zmian nazwy"
+
+msgid "web.admin.store.sales.yearly"
+msgstr "Co roku · 00:00 UTC"
+
+msgid "web.admin.store.sales.run"
+msgstr "Prowadź te wyprzedaże"
+
+msgid "web.admin.store.sales.run.text"
+msgstr "Po wyłączeniu miejsce i zmiana nazwy kosztują przez cały rok ceny podane wyżej."
+
+msgid "web.admin.store.sales.column.dates"
+msgstr "Daty"
+
+msgid "web.admin.store.sales.column.slot"
+msgstr "Miejsce"
+
+msgid "web.admin.store.sales.column.rename"
+msgstr "Zmiana nazwy"
+
+msgid "web.admin.store.sales.column.price"
+msgstr "Cena wtedy"
+
+msgid "web.admin.store.sales.column.state"
+msgstr "Stan"
+
+msgid "web.admin.store.sales.off_share"
+msgstr "%(off)s%%"
+
+msgid "web.admin.store.sales.running"
+msgstr "Trwa · koniec za %(left)s"
+
+msgid "web.admin.store.sales.next_year"
+msgstr "W przyszłym roku"
+
+msgid "web.admin.store.sales.off"
+msgstr "Wyłączona"
+
+msgid "web.admin.store.sales.note"
+msgstr "Wyprzedaż odejmuje swoją część od cen podanych wyżej, więc zmiana ceny zmienia też cenę w wyprzedaży."
+
+msgid "web.admin.audit.sales.on"
+msgstr "Włączone"
+
+msgid "web.admin.audit.sales.off"
+msgstr "Wyłączone"
+
+msgid "web.admin.store.sales.in.one"
+msgstr "Za %(count)s dzień"
+
+msgid "web.admin.store.sales.in.few"
+msgstr "Za %(count)s dni"
+
+msgid "web.admin.store.sales.in.many"
+msgstr "Za %(count)s dni"
+
+msgid "web.admin.store.sales.in.other"
+msgstr "Za %(count)s dnia"
 
 msgid "web.admin.audit.store_account"
 msgstr "%(before)s → %(after)s %(unit)s"

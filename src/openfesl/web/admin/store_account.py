@@ -8,6 +8,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 
 from openfesl.core.admins import Admin, Role
 from openfesl.core.games import Game
+from openfesl.core.hero_rules import SALE_ZONE, HeroRules, HeroSale, sale_price
 from openfesl.core.wallets import MOST_BALANCE
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.store import SECTION, StoreAdminViews, store_url
@@ -40,6 +41,65 @@ class AccountValue:
     data: int
     value: int
     least: int
+
+
+@dataclass(frozen=True, slots=True)
+class SaleRow:
+    """A sale of hero slots or new names as the account prices list it.
+
+    Attributes:
+        dates: Its days of each year.
+        slot: How much of a hero slot's price it takes off; empty when it leaves the price.
+        rename: How much of a new name's price it takes off, likewise.
+        price: What it sells for.
+        state: Whether it runs, or how long until it does.
+        running: Whether it runs.
+    """
+
+    dates: str
+    slot: str
+    rename: str
+    price: str
+    state: str
+    running: bool
+
+
+def sale_rows(rules: HeroRules, texts: StoreTexts, now: datetime) -> list[SaleRow]:
+    """Return a game's sales of hero slots and new names, as of a moment.
+
+    Args:
+        rules: Its hero rules, at the prices the instance sets.
+        texts: Writes the panel's language for the game.
+        now: The moment.
+    """
+
+    def state(sale: HeroSale) -> tuple[str, bool]:
+        running = sale.window.running(now, SALE_ZONE)
+        if not rules.sales_run:
+            return texts.text("web.admin.store.sales.off"), False
+        if running:
+            return texts.text(
+                "web.admin.store.sales.running", left=texts.countdown(running.end)
+            ), True
+        coming = sale.window.period(now.year, SALE_ZONE)
+        if coming.start < now:
+            return texts.text("web.admin.store.sales.next_year"), False
+        return texts.count("web.admin.store.sales.in", texts.days_left(coming.start)), False
+
+    def share(off: int) -> str:
+        return texts.text("web.admin.store.sales.off_share", off=off) if off else "—"
+
+    rows = []
+    for sale in rules.sales:
+        first, last = sale.window.days(now.year)
+        price = texts.amount(
+            sale_price(rules.slot_price, sale.slot)
+            if sale.slot
+            else sale_price(rules.rename_price, sale.rename)
+        )
+        dates = texts.day_range(first, last)
+        rows.append(SaleRow(dates, share(sale.slot), share(sale.rename), price, *state(sale)))
+    return rows
 
 
 def account_values(data: Game, live: Game) -> list[AccountValue]:
@@ -93,7 +153,9 @@ def store_account_routes(sessions: AdminSessions, views: StoreAdminViews) -> API
         form: Mapping[str, str],
         refused: Mapping[str, str] | None = None,
     ) -> HTMLResponse:
-        values = account_values(game, await views.account_rules(game))
+        live = await views.account_rules(game)
+        values = account_values(game, live)
+        texts = StoreTexts(game, request.state.language, datetime.now(UTC))
         # The values a form holds, as a script sends them while they are typed or a refused
         # form sent them, else those set; each is changed while it is not the game data's.
         typed = {value.name: form.get(value.name, str(value.value)) for value in values}
@@ -113,6 +175,8 @@ def store_account_routes(sessions: AdminSessions, views: StoreAdminViews) -> API
             changed=changed,
             refused=dict(refused or {}),
             manages=admin.role is Role.ADMIN,
+            sales=sale_rows(live.heroes, texts, datetime.now(UTC)) if live.heroes else [],
+            sales_run=("sales" in form) if form else bool(live.heroes and live.heroes.sales_run),
         )
 
     @router.get(path, response_class=HTMLResponse)
@@ -128,7 +192,8 @@ def store_account_routes(sessions: AdminSessions, views: StoreAdminViews) -> API
         form = await request.form()
         check_form(request, form)
         fields = {key: str(value) for key, value in form.items()}
-        values = account_values(game, await views.account_rules(game))
+        live = await views.account_rules(game)
+        values = account_values(game, live)
         # Reset puts a value back to the game data's in the form, saving nothing.
         if reset := next((value for value in values if value.name == fields.get("reset")), None):
             return await page(request, admin, game, fields | {reset.name: str(reset.data)})
@@ -153,6 +218,9 @@ def store_account_routes(sessions: AdminSessions, views: StoreAdminViews) -> API
                     key = (game.chests.key, number)
         if refused:
             return await page(request, admin, game, fields, refused)
+        if live.heroes and live.heroes.sales and live.heroes.sales_run != ("sales" in fields):
+            settings[f"{game.id}.heroes.sales_run"] = None if "sales" in fields else "false"
+            changes.append({"game": game.id, "name": "sales", "after": "sales" in fields})
         if changes:
             await views.save_account(game, settings, key, changes, admin)
             toast(request, "web.admin.toast.store.account", count=str(len(changes)))

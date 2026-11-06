@@ -1,8 +1,11 @@
 import re
-from typing import Self
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Annotated, Self
 
 from pydantic import BaseModel, ConfigDict, Field, PositiveInt, model_validator
 
+from openfesl.core.calendar import Window
 from openfesl.core.game_pages import Colour, Glyph
 from openfesl.core.profiles import ProfileRules
 
@@ -152,6 +155,51 @@ class WrittenStat(BaseModel):
         return [int(value)]
 
 
+# The time zone whose midnights the sales of hero slots and new names start at.
+SALE_ZONE = "UTC"
+
+
+def sale_price(usual: int, off: int) -> int:
+    """Return a price less the share that a sale takes off.
+
+    Args:
+        usual: The price without the sale.
+        off: The share, in percent.
+    """
+    return usual * (100 - off) // 100
+
+
+class HeroSale(BaseModel):
+    """A sale of hero slots or new names, on the same days of each year.
+
+    Attributes:
+        window: The days it runs on.
+        slot: How much of a further hero slot's price it takes off, in percent.
+        rename: How much of a new name's price it takes off, in percent.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    window: Window
+    slot: Annotated[int, Field(ge=0, lt=100)] = 0
+    rename: Annotated[int, Field(ge=0, lt=100)] = 0
+
+
+@dataclass(frozen=True, slots=True)
+class SalePrice:
+    """A price while a sale runs.
+
+    Attributes:
+        usual: The price without the sale.
+        off: How much of it the sale takes off, in percent.
+        ends: When the sale ends.
+    """
+
+    usual: int
+    off: int
+    ends: datetime
+
+
 class HeroRules(BaseModel):
     """How a game's heroes are made and kept, for a game whose heroes are made on its site.
 
@@ -181,6 +229,10 @@ class HeroRules(BaseModel):
             paid in.
         rename_price: What a new name costs.
         slot_price: What a further hero slot costs.
+        sales: The sales of hero slots and new names.
+        sales_run: Whether the sales run.
+        slot_sale: The sale of a hero slot that its price is at; none outside a sale.
+        rename_sale: The sale of a new name that its price is at; none outside a sale.
         running_low: The uses left at which an item limited by uses runs low.
         running_low_days: The days left at which a rental runs low; one with hours left does.
         profile: The stats that a hero's public profile shows; none for a game without profiles.
@@ -209,9 +261,33 @@ class HeroRules(BaseModel):
     currency: str
     rename_price: PositiveInt
     slot_price: PositiveInt
+    sales: tuple[HeroSale, ...] = ()
+    sales_run: bool = True
+    slot_sale: SalePrice | None = None
+    rename_sale: SalePrice | None = None
     running_low: PositiveInt
     running_low_days: PositiveInt
     profile: ProfileRules | None = None
+
+    def at(self, now: datetime) -> Self:
+        """Return the rules at a moment, at the prices of the sales that run then.
+
+        Args:
+            now: The moment.
+        """
+        if not self.sales_run:
+            return self
+        changes: dict[str, object] = {}
+        for sale in self.sales:
+            if period := sale.window.running(now, SALE_ZONE):
+                for off, kind, usual in (
+                    (sale.slot, "slot", self.slot_price),
+                    (sale.rename, "rename", self.rename_price),
+                ):
+                    if off:
+                        changes[f"{kind}_price"] = sale_price(usual, off)
+                        changes[f"{kind}_sale"] = SalePrice(usual, off, period.end)
+        return self.model_copy(update=changes)
 
     def faction_of(self, team: int | None) -> str | None:
         """Return the faction whose team number a hero's faction stat holds, if it is one.

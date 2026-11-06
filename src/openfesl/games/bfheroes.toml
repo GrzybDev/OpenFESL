@@ -464,6 +464,28 @@ currency = "_PF"
 rename_price = 5899
 slot_price = 2499
 
+# The sales of 2012 on the same days each year, by the fan catalogue's tables of hero slot and
+# name change deals. Only the first kept its end, so the others are taken to last as long.
+[[heroes.sales]]
+window = { dates = ["07-02", "07-06"] }
+slot = 50
+
+[[heroes.sales]]
+window = { dates = ["07-06", "07-10"] }
+rename = 50
+
+[[heroes.sales]]
+window = { dates = ["10-01", "10-05"] }
+slot = 30
+
+[[heroes.sales]]
+window = { dates = ["11-13", "11-17"] }
+slot = 50
+
+[[heroes.sales]]
+window = { dates = ["11-15", "11-19"] }
+rename = 50
+
 # The stats that a hero's public profile shows, as the 2012 site did: the keys of the game's stats
 # dictionary (BFHeroes.exe 1.89 0x006aa1fb) that its dedicated servers add to at the end of each
 # round (python/bf2/stats/stats.py), every one kept for all time and the weekly ones by week too.

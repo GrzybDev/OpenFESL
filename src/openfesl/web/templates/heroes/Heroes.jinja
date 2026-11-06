@@ -18,7 +18,7 @@
     </div>
     <SlotPanel :roster="roster" :buy="roster.heroes|length > 0">
     {{ _n("web.slots.free", rules.slots) }}
-    {{ _("web.slots.further", price=number(rules.slot_price), currency=_("games." ~ game.id ~ ".currency." ~ rules.currency)) }}
+    {{ _("web.slots.further", cost=cost(rules.slot_price, _("games." ~ game.id ~ ".currency." ~ rules.currency), rules.slot_sale)) }}
     </SlotPanel>
   </section>
   {% if cards %}
@@ -58,7 +58,8 @@
                 <span aria-hidden="true"
                       class="free-slot-disc"><Icon name="coin" :size="32" stroke="currentColor" /></span>
                 <h3 id="slot-buy" class="free-slot-title">{{ _("web.slots.another") }}</h3>
-                <p>{{ _n("web.slots.another.text", roster.slots, price=number(rules.slot_price), currency=_("games." ~ game.id ~ ".currency." ~ rules.currency)) }}</p>
+                {% if rules.slot_sale %}<DealSticker :off="number(rules.slot_sale.off)" />{% endif %}
+                <p>{{ _n("web.slots.another.text", roster.slots, cost=cost(rules.slot_price, _("games." ~ game.id ~ ".currency." ~ rules.currency), rules.slot_sale)) }}</p>
                 <BuySlotButton />
               </article>
             </div>

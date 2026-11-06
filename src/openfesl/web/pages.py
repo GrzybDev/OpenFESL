@@ -31,7 +31,7 @@ from openfesl.core.admins import Admin
 from openfesl.core.census import Census
 from openfesl.core.game_art import GameArt
 from openfesl.core.games import Game
-from openfesl.core.hero_rules import HeroRules
+from openfesl.core.hero_rules import HeroRules, SalePrice
 from openfesl.core.texts import languages, localize, translate, translate_count
 from openfesl.web.languages import split_language
 from openfesl.web.mugshots import mugshot_url
@@ -207,6 +207,21 @@ def _when(context: Context, value: datetime, skeleton: str) -> str:
 
 
 @pass_context
+def _cost(context: Context, price: int, currency: str, sale: SalePrice | None) -> str:
+    # A price with its currency, then the day its sale ends and the usual price after it.
+    if sale is None:
+        return f"{_number(context, price)} {currency}"
+    return _text(
+        context,
+        "web.sale.cost",
+        price=_number(context, price),
+        currency=currency,
+        end=_when(context, sale.ends, "MMMMd"),
+        usual=_number(context, sale.usual),
+    )
+
+
+@pass_context
 def _ago(context: Context, value: datetime) -> str:
     # How long ago a moment was, as the page's language says it, such as "18 minutes ago".
     elapsed = value - datetime.now(UTC)
@@ -327,6 +342,7 @@ _catalog = Catalog(
         "glyph": _glyph,
         "moment": _moment,
         "when": _when,
+        "cost": _cost,
         "ago": _ago,
         "seconds_left": _seconds_left,
         "listed": _listed,

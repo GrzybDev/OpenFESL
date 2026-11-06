@@ -15,6 +15,7 @@ pytestmark = pytest.mark.anyio
 VALUES = {
     "slot": "2499",
     "rename": "5899",
+    "sales": "1",
     "key": "499",
     "allowance-_PF": "2500",
     "allowance-_DV": "0",

@@ -1,7 +1,7 @@
 {#def hero, funds: int, name: str = "", check: str = "", dialog: bool = False #}
 {# The form that gives a hero a new name for Funds: the name checked as it is typed, the price
-   and the Funds left after it, and why it cannot be sent when the account has too few. Heroes
-   pages open it as a dialog; without scripts it is a page of its own. #}
+   and any sale of it, the Funds left after it, and why it cannot be sent when the account has
+   too few. Heroes pages open it as a dialog; without scripts it is a page of its own. #}
 {% set rules = bar.heroes %}
 {% set price = rules.rename_price %}
 {% set short = funds < price %}
@@ -44,10 +44,7 @@
   <p id="rename-hint-{{ id }}" class="naming-hint">{{ _("web.rename.hint") }}</p>
   <NameStatus :id="'rename-status-' ~ id" :name="name" :check="check" />
   <dl class="site-facts">
-    <dt>{{ _("web.rename.price") }}</dt>
-    <dd>
-      {{ number(price) }} {{ currency }}
-    </dd>
+    <SaleFacts :sale="rules.rename_sale" :price="number(price) ~ ' ' ~ currency" />
     {% if short %}
       <dt>{{ _("web.rename.funds_now", currency=currency) }}</dt>
       <dd>
