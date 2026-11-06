@@ -7,7 +7,9 @@ from typing import Any
 from weakref import WeakValueDictionary
 
 from fastapi import Request
+from fastapi.responses import RedirectResponse
 from starlette.datastructures import FormData
+from starlette.exceptions import HTTPException
 
 # A signed-in admin signs in again after this long, as a stolen cookie should not last.
 ADMIN_LIFETIME = timedelta(hours=12)
@@ -157,6 +159,36 @@ def toast(request: Request, key: str, error: bool = False, **values: str) -> Non
         values: The text's placeholders, and what else the next page marks as changed.
     """
     request.session["toast"] = {"key": key, "values": values, "error": error}
+
+
+def toast_at(
+    request: Request, page: str, key: str, /, error: bool = False, **values: str
+) -> RedirectResponse:
+    """Send the browser to a page that says what came of a change.
+
+    Args:
+        request: The request that made the change.
+        page: The page's address.
+        key: The text's key.
+        error: Whether the change failed.
+        values: What the text names.
+    """
+    toast(request, key, error, **values)
+    return RedirectResponse(page, 303)
+
+
+def or_404[T](found: T | None) -> T:
+    """Return a value an address found, or answer 404 when there is none.
+
+    Args:
+        found: What the address found.
+
+    Raises:
+        HTTPException: 404 when it found nothing.
+    """
+    if found is None:
+        raise HTTPException(404)
+    return found
 
 
 def notify(request: Request, kind: str, **values: str) -> None:

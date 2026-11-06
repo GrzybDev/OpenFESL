@@ -5,7 +5,7 @@ from typing import Any, Self
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from fastapi.responses import HTMLResponse, Response
 from starlette.datastructures import QueryParams
 from starlette.exceptions import HTTPException
 
@@ -19,7 +19,7 @@ from openfesl.web.admin.accounts import AccountView, AccountViews
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.admin.purchases import PurchaseLog, purchase_lines
 from openfesl.web.pages import number, page_number, whole_number
-from openfesl.web.sessions import checked_form, toast
+from openfesl.web.sessions import checked_form, toast_at
 
 SECTION = "accounts"
 PAGE_SIZE = 50
@@ -321,8 +321,7 @@ def wallet_routes(
         done_key = "taken" if taking else "granted"
         not_done = "fewer" if taking else "more"
         key = f"web.admin.toast.wallet.{done_key if done else not_done}"
-        toast(request, key, error=not done, **values)
-        return RedirectResponse(back, 303)
+        return toast_at(request, back, key, error=not done, **values)
 
     @router.get("/admin/accounts/{account_id}/ledger", response_class=HTMLResponse)
     async def ledger(request: Request, account_id: str) -> Response:

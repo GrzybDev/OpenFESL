@@ -18,7 +18,7 @@ from openfesl.core.store_prices import ItemPrices
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.boxes import BoxAdminViews, BoxRow, Entry, tiers
 from openfesl.web.admin.store import SECTION, store_url
-from openfesl.web.sessions import checked_form, toast
+from openfesl.web.sessions import checked_form, or_404, toast
 from openfesl.web.store_texts import StoreTexts
 
 
@@ -68,9 +68,7 @@ def box_table_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter
     async def found(request: Request, game_id: str, box_id: int) -> tuple[Game, Catalogue, BoxRow]:
         game = views.stores.game(game_id)
         catalogue, rows = await views.rows(game, request.state.language)
-        row = next((row for row in rows if row.box.id == box_id), None)
-        if row is None:
-            raise HTTPException(404)
+        row = or_404(next((row for row in rows if row.box.id == box_id), None))
         return game, catalogue, row
 
     async def page(

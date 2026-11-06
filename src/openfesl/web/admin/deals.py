@@ -5,7 +5,6 @@ from typing import Any
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
-from starlette.exceptions import HTTPException
 
 from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin, Role
@@ -19,7 +18,7 @@ from openfesl.core.policies import SettingStore
 from openfesl.core.store import AUTO, Bundle, ListedBundle
 from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.store import SECTION, StoreAdminViews, store_url
-from openfesl.web.sessions import checked_form, toast
+from openfesl.web.sessions import checked_form, or_404, toast
 from openfesl.web.store_texts import StoreTexts
 
 
@@ -131,9 +130,7 @@ class DealAdminViews:
         Raises:
             HTTPException: 404 for a game without hot deals.
         """
-        rules = await self.deals.rules(game)
-        if rules is None:
-            raise HTTPException(404)
+        rules = or_404(await self.deals.rules(game))
         return rules
 
     async def rotation(self, game: Game) -> Rotation:

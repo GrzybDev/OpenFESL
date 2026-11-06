@@ -24,6 +24,7 @@ from openfesl.web.sessions import (
     inside,
     purchase_matches,
     toast,
+    toast_at,
 )
 from openfesl.web.site import site_bar
 
@@ -178,8 +179,7 @@ class HeroesPages:
             price = (await self._heroes.rules(game)).rename_price
             heroes = localize(f"/{game.id}{HEROES}", request.state.language)
             if not form_matches(request, form):
-                toast(request, "web.rename.refused.form", error=True, hero=old)
-                return RedirectResponse(heroes, 303)
+                return toast_at(request, heroes, "web.rename.refused.form", error=True, hero=old)
             if str(form.get("price", "")) != str(price):
                 values = self._prices(game, 0, request.state.language, price)
                 toast(request, "web.rename.refused.price", error=True, hero=old, **values)
@@ -223,25 +223,21 @@ class HeroesPages:
             back = inside(str(form.get("next", "")), ("/",)) or heroes
             player = signed_in(request)
             if player is None or not purchase_matches(request, form):
-                toast(request, "web.slots.refused.form", error=True)
-                return RedirectResponse(back, 303)
+                return toast_at(request, back, "web.slots.refused.form", error=True)
             price = (await self._heroes.rules(game)).slot_price
             language = request.state.language
             if str(form.get("price", "")) != str(price):
                 values = self._prices(game, 0, language, price)
-                toast(request, "web.slots.refused.price", error=True, **values)
-                return RedirectResponse(back, 303)
+                return toast_at(request, back, "web.slots.refused.price", error=True, **values)
             try:
                 async with self._sent.once(form) as bought:
                     if bought:
-                        toast(request, "web.slots.done.again", error=False)
-                        return RedirectResponse(back, 303)
+                        return toast_at(request, back, "web.slots.done.again", error=False)
                     slot = await self._heroes.buy_slot(game, player.account_id, price)
             except HeroRefused:
                 funds = await self._funds(game, player.account_id)
                 values = self._prices(game, funds, language, price)
-                toast(request, "web.slots.refused.funds", error=True, **values)
-                return RedirectResponse(back, 303)
+                return toast_at(request, back, "web.slots.refused.funds", error=True, **values)
             values = self._prices(game, 0, language, price)
             slot_number = number(slot, language)
             toast(

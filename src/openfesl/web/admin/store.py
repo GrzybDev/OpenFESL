@@ -29,6 +29,7 @@ from openfesl.core.store_rules import StoreRules
 from openfesl.core.texts import localize, translate_count
 from openfesl.web.admin.auth import AdminSessions, game_among
 from openfesl.web.pages import page_number, query_of
+from openfesl.web.sessions import or_404
 from openfesl.web.store_front import kind_glyphs
 from openfesl.web.store_texts import StoreTexts
 
@@ -256,9 +257,7 @@ class StoreAdminViews:
             HTTPException: 404 when the store prices no such item.
         """
         catalogue, found = await self.prices(game, language)
-        prices = next((prices for prices in found if prices.item.id == item_id), None)
-        if prices is None:
-            raise HTTPException(404)
+        prices = or_404(next((prices for prices in found if prices.item.id == item_id), None))
         return catalogue, prices
 
     async def listed(self, game: Game, listing: ItemList, language: str) -> PriceList:

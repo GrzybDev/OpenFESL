@@ -7,6 +7,7 @@ from openfesl.core.games import Games
 from openfesl.core.magma import Magma
 from openfesl.core.mugshots import Mugshots
 from openfesl.web.game_art import art_cache, hidden
+from openfesl.web.sessions import or_404
 
 # Where a hero's mugshot is served, by game, hero and version; outside the games' sites, so that
 # a page's pictures do not each read the site's bar.
@@ -39,9 +40,7 @@ def mugshot_routes(games: Games, mugshots: Mugshots, art: GameArt, magma: Magma)
 
     @router.get(MUGSHOT_PATH)
     async def mugshot(request: Request, game: str, hero_id: int, version: int) -> Response:
-        known = games.by_id(game)
-        if known is None:
-            raise HTTPException(404)
+        known = or_404(games.by_id(game))
         cache = art_cache(request, known, art, magma)
         if cache is None:
             return hidden()

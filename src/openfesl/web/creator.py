@@ -3,7 +3,6 @@ from typing import Any
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
-from starlette.exceptions import HTTPException
 
 from openfesl.core.catalogues import Catalogues, file_path
 from openfesl.core.figures import Figure, Figures
@@ -21,7 +20,7 @@ from openfesl.core.texts import localize, translate_count
 from openfesl.web.account.session import signed_in
 from openfesl.web.catalogue_files import catalogue_file_url
 from openfesl.web.pages import Pages, listed
-from openfesl.web.sessions import form_matches, form_token
+from openfesl.web.sessions import form_matches, form_token, or_404
 from openfesl.web.site import CREATOR, FIGURE, NAME_CHECK, site_bar
 
 
@@ -118,9 +117,7 @@ class CreatorPages:
     def _figure(self, game: Game) -> Callable[[Request], Awaitable[Response]]:
         async def show_figure(request: Request) -> Response:
             look = read_look(_rules(game), request.query_params)
-            figure = self._document(request, game, look) if look else None
-            if figure is None:
-                raise HTTPException(404)
+            figure = or_404(self._document(request, game, look) if look else None)
             return JSONResponse(figure)
 
         return show_figure
@@ -133,9 +130,7 @@ class CreatorPages:
                     localize(f"/{game.id}{CREATOR}", request.state.language), 303
                 )
             roster = bar.roster
-            hero = next((h for h in roster.heroes if h.persona.id == hero_id), None)
-            if hero is None:
-                raise HTTPException(404)
+            hero = or_404(next((h for h in roster.heroes if h.persona.id == hero_id), None))
             slot = roster.heroes.index(hero) + 1
             kits = await self._kits(game, request.state.language)
             return self._pages.render(

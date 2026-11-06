@@ -5,11 +5,11 @@ from urllib.parse import urlsplit
 
 from fastapi import APIRouter, Request
 from fastapi.responses import Response
-from starlette.exceptions import HTTPException
 
 from openfesl.core.game_icons import GameIcons
 from openfesl.core.games import Games
 from openfesl.core.rich_presence import PresenceArt
+from openfesl.web.sessions import or_404
 
 # Where each game's icon is served, {game} standing for the game's id.
 ICON_PATH = "/{game}/icon.png"
@@ -75,9 +75,7 @@ def reaches_discord(public_url: str | None) -> bool:
 
 def _icon(icons: GameIcons, game_id: str) -> Callable[[Request], Awaitable[Response]]:
     async def show_icon(request: Request) -> Response:
-        png = await icons.icon(game_id)
-        if png is None:
-            raise HTTPException(404)
+        png = or_404(await icons.icon(game_id))
         tag = f'"{icon_version(png)}"'
         headers = {"Cache-Control": ICON_CACHE, "ETag": tag}
         asked = request.headers.get("If-None-Match", "")

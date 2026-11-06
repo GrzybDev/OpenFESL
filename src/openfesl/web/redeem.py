@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from fastapi.responses import HTMLResponse, Response
 
 from openfesl.core.catalogues import Catalogue, Catalogues
 from openfesl.core.entitlements import ACTIVE, EntitlementStore
@@ -20,7 +20,7 @@ from openfesl.core.wallets import MOST_BALANCE
 from openfesl.web.account.session import open_page, signed_in
 from openfesl.web.catalogue_files import icon_url
 from openfesl.web.pages import Pages, listed
-from openfesl.web.sessions import form_matches, form_token, toast
+from openfesl.web.sessions import form_matches, form_token, toast_at
 from openfesl.web.site import site_bar
 from openfesl.web.store_texts import StoreTexts
 
@@ -130,8 +130,7 @@ class RedeemPages:
             if player is None:
                 return open_page(request, "/sign-in", again)
             if not form_matches(request, form):
-                toast(request, "web.redeem.refused.form", error=True)
-                return RedirectResponse(again, 303)
+                return toast_at(request, again, "web.redeem.refused.form", error=True)
             chosen = str(form.get("hero", ""))
             hero_id = int(chosen) if chosen.isascii() and chosen.isdecimal() else None
             try:
@@ -154,15 +153,15 @@ class RedeemPages:
             key = "web.redeem.done.hero" if done.hero else "web.redeem.done.account"
             if given:
                 key += ".wallet"
-            toast(
+            return toast_at(
                 request,
+                base,
                 key,
                 code=done.code,
                 hero=done.hero or "",
                 given=listed(given, texts.language),
                 funds=str(done.funds[0] if done.funds else 0),
             )
-            return RedirectResponse(base, 303)
 
         return redeem
 

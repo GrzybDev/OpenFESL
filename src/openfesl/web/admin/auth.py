@@ -8,7 +8,6 @@ from urllib.parse import urlencode
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from pydantic import SecretStr
-from starlette.exceptions import HTTPException
 
 from openfesl.core.admins import Admin, GroupRoles, Role
 from openfesl.core.games import Game
@@ -21,6 +20,7 @@ from openfesl.web.sessions import (
     form_token,
     inside,
     notify,
+    or_404,
     renew_form_token,
     take_notice,
 )
@@ -304,10 +304,7 @@ def game_among(games: Iterable[Game], game_id: str) -> Game:
     Raises:
         HTTPException: 404 when none of them has the id.
     """
-    game = next((game for game in games if game.id == game_id), None)
-    if game is None:
-        raise HTTPException(404)
-    return game
+    return or_404(next((game for game in games if game.id == game_id), None))
 
 
 def back_to(request: Request, back: str, default: str = "/admin/") -> str:

@@ -11,7 +11,7 @@ from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.admin.heroes import GameHeroes, HeroAdminViews
 from openfesl.web.admin.wallets import counted_change
 from openfesl.web.pages import number
-from openfesl.web.sessions import checked_form, toast
+from openfesl.web.sessions import checked_form, toast, toast_at
 
 SECTION = "accounts"
 
@@ -124,10 +124,13 @@ async def _apply(
     language = request.state.language
     if shown.kind == "slots":
         await views.store.grant_slots(account.id, game.id, amount, note, admin)
-        toast(
-            request, "web.admin.toast.slots", count=number(amount, language), account=account.nuid
+        return toast_at(
+            request,
+            address,
+            "web.admin.toast.slots",
+            count=number(amount, language),
+            account=account.nuid,
         )
-        return RedirectResponse(address, 303)
     assert game.chests is not None
     hero = next(
         (card.hero for card in shown.found.cards if card.hero.persona.id == shown.hero), None

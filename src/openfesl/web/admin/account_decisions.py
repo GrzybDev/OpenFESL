@@ -13,7 +13,7 @@ from openfesl.core.personas import PersonaState
 from openfesl.core.texts import localize
 from openfesl.web.admin.accounts import AccountView, AccountViews, PersonaView
 from openfesl.web.admin.auth import AdminSessions, back_to, to_query
-from openfesl.web.sessions import checked_form, toast
+from openfesl.web.sessions import checked_form, toast, toast_at
 
 # The decisions about an account or one of its names that ask for confirmation first.
 CONFIRMED = ("end", "kick", "disable")
@@ -234,8 +234,7 @@ def account_decision_routes(
         else:
             await personas.set_state(target, PersonaState.DISABLED, admin)
         await apply()
-        toast(request, f"web.admin.toast.{decision}", name=name)
-        return RedirectResponse(back, 303)
+        return toast_at(request, back, f"web.admin.toast.{decision}", name=name)
 
     return router
 

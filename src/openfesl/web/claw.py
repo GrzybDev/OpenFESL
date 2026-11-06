@@ -25,6 +25,7 @@ from openfesl.web.sessions import (
     inside,
     purchase_matches,
     toast,
+    toast_at,
 )
 from openfesl.web.site import CLAW, CLAW_CLOSED, SiteBar, site_bar
 from openfesl.web.store_texts import StoreTexts
@@ -207,8 +208,7 @@ class ClawPages:
             if player is None:
                 return open_page(request, "/sign-in", page)
             if not purchase_matches(request, form):
-                toast(request, "web.claw.refused.form", error=True)
-                return RedirectResponse(page, 303)
+                return toast_at(request, page, "web.claw.refused.form", error=True)
             chosen = str(form.get("hero", ""))
             hero_id = int(chosen) if chosen.isascii() and chosen.isdecimal() else 0
             texts = StoreTexts(game, request.state.language)
@@ -218,13 +218,11 @@ class ClawPages:
             shown = (str(form.get("price", "")), str(form.get("currency", "")))
             if "paid" in form and rules and rules.paid.enabled and shown != charged:
                 price = texts.priced(rules.paid.price, rules.paid.currency)
-                toast(request, "web.claw.refused.price", error=True, price=price)
-                return RedirectResponse(page, 303)
+                return toast_at(request, page, "web.claw.refused.price", error=True, price=price)
             try:
                 async with self._sent.once(form) as grabbed:
                     if grabbed:
-                        toast(request, "web.claw.done.again", error=False)
-                        return RedirectResponse(page, 303)
+                        return toast_at(request, page, "web.claw.done.again", error=False)
                     done = await self._claw.grab(game, player.account_id, hero_id, "paid" in form)
             except ClawRefused as refused:
                 values = await self._why(texts, game, player.account_id, refused.refusal)

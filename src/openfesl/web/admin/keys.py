@@ -7,7 +7,6 @@ from urllib.parse import quote
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.datastructures import QueryParams
-from starlette.exceptions import HTTPException
 
 from openfesl.core.admins import Admin, Role
 from openfesl.core.games import Game, Games, ProductKey
@@ -17,7 +16,7 @@ from openfesl.web.admin.auth import AdminSessions, back_to, to_query
 from openfesl.web.admin.gift_codes import GiftCodeViews
 from openfesl.web.keys import KeyView, key_views
 from openfesl.web.pages import query_of
-from openfesl.web.sessions import checked_form, toast
+from openfesl.web.sessions import checked_form, or_404, toast
 
 SECTION = "keys"
 TABS = ("all", "enabled", "disabled")
@@ -229,10 +228,7 @@ async def key_view(games: Games, store: KeyAdmin, code: str) -> KeyView:
         HTTPException: 404 for no key by the code.
     """
     views = key_views(games, await store.keys(), await store.key_history())
-    view = next((view for view in views if view.key.code == code), None)
-    if view is None:
-        raise HTTPException(404)
-    return view
+    return or_404(next((view for view in views if view.key.code == code), None))
 
 
 def _decide(

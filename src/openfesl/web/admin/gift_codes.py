@@ -26,7 +26,7 @@ from openfesl.core.texts import localize
 from openfesl.web.admin.auth import AdminSessions, game_among
 from openfesl.web.admin.code_editor import CodeEditor, drafted, editor_of, written
 from openfesl.web.pages import whole_number
-from openfesl.web.sessions import checked_form, toast
+from openfesl.web.sessions import checked_form, or_404, toast
 from openfesl.web.store_texts import StoreTexts
 
 SECTION = "keys"
@@ -122,9 +122,7 @@ class GiftCodeViews:
         Raises:
             HTTPException: 404 for no code of a game that has codes.
         """
-        entry = await self.store.gift_code(code)
-        if entry is None:
-            raise HTTPException(404)
+        entry = or_404(await self.store.gift_code(code))
         return self.game(entry.game), entry
 
     def game(self, game_id: str) -> Game:

@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any, Protocol, Self
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from starlette.datastructures import QueryParams
-from starlette.exceptions import HTTPException
 
 from openfesl.core.accounts import AccountRecord, RememberedLogin
 from openfesl.core.census import Census, Server
@@ -17,6 +16,7 @@ from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.gift_codes import GiftCodeViews
 from openfesl.web.admin.referral import ReferralAdminViews
 from openfesl.web.pages import query_of
+from openfesl.web.sessions import or_404
 
 # For annotations only, as the heroes' pages build on the accounts'.
 if TYPE_CHECKING:
@@ -242,9 +242,7 @@ class AccountViews:
         Raises:
             HTTPException: 404 for no account by the number.
         """
-        view = await self.find(account_id)
-        if view is None:
-            raise HTTPException(404)
+        view = or_404(await self.find(account_id))
         return view
 
 

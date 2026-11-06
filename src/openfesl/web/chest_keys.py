@@ -1,7 +1,7 @@
 from collections.abc import Awaitable, Callable
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from fastapi.responses import HTMLResponse, Response
 
 from openfesl.core.chests import Chests
 from openfesl.core.entitlements import EntitlementStore
@@ -12,7 +12,7 @@ from openfesl.core.wallets import Wallets
 from openfesl.web.account.session import signed_in, to_sign_in
 from openfesl.web.chests import CHESTS, held_keys
 from openfesl.web.pages import Pages
-from openfesl.web.sessions import SentForms, form_token, purchase_matches, toast
+from openfesl.web.sessions import SentForms, form_token, purchase_matches, toast_at
 from openfesl.web.store_texts import StoreTexts
 
 KEYS = CHESTS + "/keys"
@@ -89,47 +89,45 @@ class KeyPages:
             page = localize(f"/{game.id}{CHESTS}", language)
             player = signed_in(request)
             if player is None or not purchase_matches(request, form):
-                toast(request, "web.chests.keys.refused.form", error=True)
-                return RedirectResponse(page, 303)
+                return toast_at(request, page, "web.chests.keys.refused.form", error=True)
             assert game.chests is not None and game.store is not None
             chosen = str(form.get("keys", ""))
             count = int(chosen) if chosen.isascii() and chosen.isdecimal() else 0
             key = await self._chests.key(game)
             if key is None or count not in game.chests.packs:
-                toast(request, "web.chests.keys.refused.unsold", error=True)
-                return RedirectResponse(page, 303)
+                return toast_at(request, page, "web.chests.keys.refused.unsold", error=True)
             texts = StoreTexts(game, language)
             if str(form.get("price", "")) != str(key.price):
                 each = texts.priced(key.price, key.currency)
-                toast(request, "web.chests.keys.refused.price", error=True, price=each)
-                return RedirectResponse(page, 303)
+                return toast_at(
+                    request, page, "web.chests.keys.refused.price", error=True, price=each
+                )
             price = texts.priced(key.price * count, key.currency)
             try:
                 async with self._sent.once(form) as bought:
                     if bought:
-                        toast(request, "web.chests.keys.done.again", error=False)
-                        return RedirectResponse(page, 303)
+                        return toast_at(request, page, "web.chests.keys.done.again", error=False)
                     await self._purchases.purchase_for_account(
                         game, player.account_id, game.store.product_id(key.id), count
                     )
             except PurchaseRefused as refused:
                 if refused.cause != INSUFFICIENT_FUNDS:
-                    toast(request, "web.chests.keys.refused.unsold", error=True)
-                    return RedirectResponse(page, 303)
+                    return toast_at(request, page, "web.chests.keys.refused.unsold", error=True)
                 [funds] = await self._wallets.of_account(game, player.account_id, [key.currency])
                 cost = texts.count("web.chests.keys.cost", count, price=price)
                 values = {"funds": texts.priced(funds, key.currency), "cost": cost}
-                toast(request, "web.chests.keys.refused.funds", error=True, **values)
-                return RedirectResponse(page, 303)
+                return toast_at(
+                    request, page, "web.chests.keys.refused.funds", error=True, **values
+                )
             keys = texts.count("web.chests.keys.bought", count)
-            toast(
+            return toast_at(
                 request,
+                page,
                 "web.chests.keys.done",
                 error=False,
                 keys=keys,
                 price=price,
                 bought=chosen,
             )
-            return RedirectResponse(page, 303)
 
         return buy_keys

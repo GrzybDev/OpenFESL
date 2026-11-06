@@ -25,7 +25,7 @@ from openfesl.web.admin.referral_view import goal
 from openfesl.web.admin.rewards import SECTION, RewardAdminViews, rewards_url
 from openfesl.web.referral_texts import NUMBERS, Chip, chip
 from openfesl.web.reward_texts import RewardTexts
-from openfesl.web.sessions import checked_form, toast
+from openfesl.web.sessions import checked_form, or_404, toast, toast_at
 
 
 @dataclass(frozen=True, slots=True)
@@ -251,8 +251,7 @@ def referral_routes(sessions: AdminSessions, views: ReferralAdminViews) -> APIRo
         details = {"enabled": on, "note": note}
         action = AdminAction.REFERRAL_SETTINGS
         await rewards.change(game, {"referral.enabled": value}, action, details, admin)
-        toast(request, f"web.admin.toast.referral.{'on' if on else 'off'}")
-        return RedirectResponse(back, 303)
+        return toast_at(request, back, f"web.admin.toast.referral.{'on' if on else 'off'}")
 
     @router.get("/admin/rewards/{game_id}/referral/{step}", response_class=HTMLResponse)
     async def edit_step(request: Request, game_id: str, step: str) -> HTMLResponse:
@@ -332,9 +331,7 @@ def referral_routes(sessions: AdminSessions, views: ReferralAdminViews) -> APIRo
     ) -> HTMLResponse:
         admin = sessions.admin(request, Role.ADMIN, "accounts")
         game = views.game(game_id)
-        recruit = await views.store.recruited(game, recruit_id)
-        if recruit is None:
-            raise HTTPException(404)
+        recruit = or_404(await views.store.recruited(game, recruit_id))
         return await remove_page(request, admin, game, recruit, back_to(request, back))
 
     @router.post(remove)

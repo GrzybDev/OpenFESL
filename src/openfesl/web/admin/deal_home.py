@@ -16,7 +16,7 @@ from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.deals import DealAdminViews
 from openfesl.web.admin.store import SECTION, store_url
 from openfesl.web.deal_art import DealArt
-from openfesl.web.sessions import check_form, checked_form, toast
+from openfesl.web.sessions import check_form, checked_form, or_404, toast
 from openfesl.web.store_texts import StoreTexts
 
 # The largest picture an upload takes; the game's own are a few hundred kilobytes at most.
@@ -100,9 +100,7 @@ class DealHomeViews:
         Raises:
             HTTPException: 404 for a number the store has no bundle by.
         """
-        listed = await self._products.bundle(game.id, number)
-        if listed is None:
-            raise HTTPException(404)
+        listed = or_404(await self._products.bundle(game.id, number))
         rules = await self.deals.rules(game)
         offer = offer_of(listed.bundle)
         uploaded = (await self.uploads.uploaded(game.id)).get(offer, set())
@@ -150,9 +148,7 @@ def deal_home_routes(sessions: AdminSessions, views: DealHomeViews) -> APIRouter
             raise HTTPException(404)
         # The pictures the game downloads, as it counts as signed in through its session.
         shown = views.game_art.shown(game, signed_in=True)
-        made = await views.art.picture(game, number, size == "big", shown)
-        if made is None:
-            raise HTTPException(404)
+        made = or_404(await views.art.picture(game, number, size == "big", shown))
         return Response(made, media_type="image/png", headers={"Cache-Control": "no-store"})
 
     @router.post(path)

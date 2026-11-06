@@ -31,7 +31,7 @@ from openfesl.web.admin.rewards import RewardAdminViews
 from openfesl.web.admin.servers import ServerViews
 from openfesl.web.game_icons import ICON_PATH, icon_version, reaches_discord
 from openfesl.web.pages import Toast
-from openfesl.web.sessions import check_form, checked_form, toast
+from openfesl.web.sessions import check_form, checked_form, toast, toast_at
 
 SECTION = "settings"
 # An icon file holds a few small images, so only this much of an upload is read into memory and
@@ -320,14 +320,12 @@ def settings_routes(
         chosen = str(form.get("mode", ""))
         back = localize("/admin/settings", request.state.language)
         if chosen not in set(HostingMode) or chosen == await hosting.hosting_mode():
-            toast(request, "web.admin.toast.mode_unchanged")
-            return RedirectResponse(back, 303)
+            return toast_at(request, back, "web.admin.toast.mode_unchanged")
         if form.get("confirmed") != "1":
             return to_query(request, "/admin/settings/hosting", mode=chosen)
         await hosting.set_hosting_mode(HostingMode(chosen), admin)
         await apply()
-        toast(request, f"web.admin.toast.mode.{chosen}")
-        return RedirectResponse(back, 303)
+        return toast_at(request, back, f"web.admin.toast.mode.{chosen}")
 
     @router.post("/admin/settings/site")
     async def change_site(request: Request) -> Response:

@@ -12,7 +12,7 @@ from openfesl.core.texts import localize
 from openfesl.web.admin.accounts import AccountViews
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.admin.heroes import HeroAdminViews, HeroPage
-from openfesl.web.sessions import checked_form, toast
+from openfesl.web.sessions import checked_form, toast, toast_at
 
 SECTION = "accounts"
 # What moderators may change of a hero; the other changes need the admin role.
@@ -117,10 +117,14 @@ def hero_action_routes(
             try:
                 await views.store.rename(persona, wanted, note, admin)
             except HeroRefused:
-                toast(
-                    request, "web.admin.toast.hero.not_renamed", error=True, hero=name, name=wanted
+                return toast_at(
+                    request,
+                    back,
+                    "web.admin.toast.hero.not_renamed",
+                    error=True,
+                    hero=name,
+                    name=wanted,
                 )
-                return RedirectResponse(back, 303)
             toast(request, "web.admin.toast.hero.renamed", old=name, new=wanted, game=game.name)
             return RedirectResponse(back, 303)
         if not note:

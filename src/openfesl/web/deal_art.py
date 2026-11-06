@@ -6,7 +6,6 @@ from pathlib import Path
 from fastapi import APIRouter, Request
 from fastapi.responses import Response
 from PIL import Image
-from starlette.exceptions import HTTPException
 
 from openfesl.core.catalogues import CatalogueFiles, Catalogues, file_path
 from openfesl.core.deal_uploads import DealUploads, offer_of
@@ -17,6 +16,7 @@ from openfesl.core.store import ListedBundle, ProductStore
 from openfesl.core.texts import BASE_LANGUAGE
 from openfesl.formats.deal_art import deal_art
 from openfesl.web.game_art import art_cache
+from openfesl.web.sessions import or_404
 
 # Where the game finds each hot deal's pictures, on its Magma host: plain http, no query and no
 # port, as the game turns the address into a file name.
@@ -138,13 +138,9 @@ def deal_art_router(game: Game, magma: Magma, art: DealArt, game_art: GameArt) -
     # The game saves whatever answers, whatever its status, as the picture.
     @router.get(f"{HOT_DEALS}/{{name}}")
     async def hot_deal_picture(request: Request, name: str) -> Response:
-        named = _NAME.fullmatch(name)
-        if named is None:
-            raise HTTPException(404)
+        named = or_404(_NAME.fullmatch(name))
         shown = art_cache(request, game, game_art, magma) is not None
-        made = await art.picture(game, int(named[1]), named[2] == "big", shown)
-        if made is None:
-            raise HTTPException(404)
+        made = or_404(await art.picture(game, int(named[1]), named[2] == "big", shown))
         return Response(made, media_type="image/png", headers={"Cache-Control": "no-cache"})
 
     return router

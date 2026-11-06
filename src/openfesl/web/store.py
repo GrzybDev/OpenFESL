@@ -25,7 +25,15 @@ from openfesl.core.texts import localize, translate
 from openfesl.web.account.session import open_page, signed_in
 from openfesl.web.catalogue_files import icon_url
 from openfesl.web.pages import Pages
-from openfesl.web.sessions import SentForms, form_matches, form_token, purchase_matches, toast
+from openfesl.web.sessions import (
+    SentForms,
+    form_matches,
+    form_token,
+    or_404,
+    purchase_matches,
+    toast,
+    toast_at,
+)
 from openfesl.web.site import site_bar
 from openfesl.web.store_quote import Quote, QuoteTexts, quote
 
@@ -92,8 +100,7 @@ class StorePages:
             if signed_in(request) is None:
                 return open_page(request, "/sign-in", back)
             if not form_matches(request, form):
-                toast(request, "web.store.refused.form", error=True)
-                return RedirectResponse(back, 303)
+                return toast_at(request, back, "web.store.refused.form", error=True)
             hero, price = str(form.get("hero", "")), str(form.get("price", ""))
             return await self._render(request, game, number, hero, price, review=True)
 
@@ -108,17 +115,14 @@ class StorePages:
             if player is None:
                 return open_page(request, "/sign-in", back)
             if not purchase_matches(request, form):
-                toast(request, "web.store.refused.form", error=True)
-                return RedirectResponse(back, 303)
+                return toast_at(request, back, "web.store.refused.form", error=True)
             texts = QuoteTexts(game, request.state.language)
             offered = await self._offered(request, game, number, hero, price)
             if offered is None:
-                toast(request, "web.store.refused.gone", error=True)
-                return RedirectResponse(back, 303)
+                return toast_at(request, back, "web.store.refused.gone", error=True)
             refused = self._refusal(texts, offered, str(form.get("paid", "")))
             if refused:
-                toast(request, refused[0], error=True, **refused[1])
-                return RedirectResponse(back, 303)
+                return toast_at(request, back, refused[0], error=True, **refused[1])
             assert game.store is not None
             persona = offered.choice.hero.persona
             try:
@@ -131,8 +135,7 @@ class StorePages:
                     )
             except PurchaseRefused as cause:
                 key, values = await self._refused(request, game, texts, offered, cause.cause)
-                toast(request, key, error=True, **values)
-                return RedirectResponse(back, 303)
+                return toast_at(request, back, key, error=True, **values)
             if won is not None:
                 more = await self._reveal(request, game, texts, offered, won.product)
                 toast(request, "web.store.done.box", error=False, **_paid(texts, offered), **more)
@@ -153,9 +156,7 @@ class StorePages:
         review: bool = False,
     ) -> Response:
         language = request.state.language
-        sold = await self._items.find(game, _number(number), language)
-        if sold is None:
-            raise HTTPException(404)
+        sold = or_404(await self._items.find(game, _number(number), language))
         bar = await site_bar(request)
         roster = bar.roster if bar else None
         choices = await self._choices(request, game, sold, roster)
@@ -204,9 +205,7 @@ class StorePages:
         if sold is None or point is None or roster is None:
             return None
         choices = await self._choices(request, game, sold, roster)
-        chosen = next((c for c in choices if str(c.hero.persona.id) == hero), None)
-        if chosen is None:
-            raise HTTPException(404)
+        chosen = or_404(next((c for c in choices if str(c.hero.persona.id) == hero), None))
         return quote(sold, chosen, point, datetime.now(UTC))
 
     def _refusal(

@@ -16,7 +16,7 @@ from openfesl.web.admin.accounts import AccountViews
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.admin.heroes import HeroAdminViews, HeroPage, InventoryRow
 from openfesl.web.pages import whole_number
-from openfesl.web.sessions import checked_form, toast
+from openfesl.web.sessions import checked_form, toast, toast_at
 from openfesl.web.store_texts import StoreTexts
 
 SECTION = "accounts"
@@ -230,10 +230,14 @@ def hero_item_routes(
         try:
             after = await views.store.grant_item(hero.persona, shown.item, gained, note, admin)
         except TooManyUses:
-            toast(
-                request, "web.admin.toast.item.more", error=True, item=name, hero=hero.persona.name
+            return toast_at(
+                request,
+                address,
+                "web.admin.toast.item.more",
+                error=True,
+                item=name,
+                hero=hero.persona.name,
             )
-            return RedirectResponse(address, 303)
         if after is None:
             toast(
                 request, "web.admin.toast.item.held", error=True, item=name, hero=hero.persona.name
@@ -311,8 +315,7 @@ def hero_item_routes(
             uses = value if isinstance(value, int) else None
             done = await views.store.change_item(persona, item_id, expires, uses, note, admin)
         key = f"web.admin.toast.item.{change}d" if done else "web.admin.toast.item.unchanged"
-        toast(request, key, error=not done, item=name, hero=persona.name)
-        return RedirectResponse(address, 303)
+        return toast_at(request, address, key, error=not done, item=name, hero=persona.name)
 
     return router
 

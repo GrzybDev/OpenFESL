@@ -19,7 +19,7 @@ from openfesl.web.admin.auth import AdminSessions
 from openfesl.web.admin.deals import DealAdminViews, SectionRow
 from openfesl.web.admin.store import SECTION, store_url
 from openfesl.web.pages import whole_number
-from openfesl.web.sessions import checked_form, toast
+from openfesl.web.sessions import checked_form, or_404, toast
 from openfesl.web.store_texts import StoreTexts
 
 # The most deals of each faction, and the longest repeat gap in days, that a section takes.
@@ -97,9 +97,7 @@ class DealSectionViews:
             HTTPException: 404 for a section the rotation lacks.
         """
         rotation = await self.deals.rotation(game)
-        row = next((row for row in rotation.rows if row.key == key), None)
-        if row is None:
-            raise HTTPException(404)
+        row = or_404(next((row for row in rotation.rows if row.key == key), None))
         section = row.section
         zone = rotation.rules.zone
         if isinstance(section, ItemSection):

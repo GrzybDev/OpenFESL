@@ -12,7 +12,7 @@ from openfesl.core.session import Players
 from openfesl.core.texts import localize
 from openfesl.web.account.session import signed_in
 from openfesl.web.pages import Pages
-from openfesl.web.sessions import form_matches, form_token, inside, toast
+from openfesl.web.sessions import form_matches, form_token, inside, toast_at
 
 FRIENDS = "/friends"
 # What the friends page's form does with a relationship, and to which list.
@@ -130,8 +130,7 @@ class FriendsPages:
             if player is None:
                 return RedirectResponse(page, 303)
             if not form_matches(request, form):
-                toast(request, "web.friends.refused.form", error=True)
-                return RedirectResponse(page, 303)
+                return toast_at(request, page, "web.friends.refused.form", error=True)
             action, name = str(form.get("action", "")), str(form.get("name", ""))
             account = str(form.get("account", ""))
             server = str(form.get("server", "")) or None
@@ -145,8 +144,7 @@ class FriendsPages:
             own, theirs = (known.own, known.theirs) if known else (False, False)
             if action == ASK and own:
                 key = "already" if theirs else "waiting"
-                toast(request, f"web.friends.refused.{key}", error=True, name=name)
-                return RedirectResponse(page, 303)
+                return toast_at(request, page, f"web.friends.refused.{key}", error=True, name=name)
             # What each action finds as the page showed it; another tab or the game may have
             # changed it since, and then nothing changes.
             expected = {
@@ -160,8 +158,7 @@ class FriendsPages:
             if action not in expected:
                 return RedirectResponse(page, 303)
             if not expected[action]:
-                toast(request, "web.friends.refused.form", error=True)
-                return RedirectResponse(page, 303)
+                return toast_at(request, page, "web.friends.refused.form", error=True)
             try:
                 if action in (ASK, ACCEPT):
                     await self._relationships.increase(game, me, member, tag)
@@ -169,12 +166,10 @@ class FriendsPages:
                     await self._relationships.decrease(game, me, member, tag)
             except RelationshipRefused as refused:
                 key = f"web.friends.refused.{refused.refusal.name.lower()}"
-                toast(request, key, error=True, name=name, most=str(rules.most))
-                return RedirectResponse(page, 303)
+                return toast_at(request, page, key, error=True, name=name, most=str(rules.most))
             # Asking an account that asked already accepts its request.
             done = ACCEPT if action == ASK and theirs else action
-            toast(request, f"web.friends.done.{done}", name=name, game=game.name)
-            return RedirectResponse(page, 303)
+            return toast_at(request, page, f"web.friends.done.{done}", name=name, game=game.name)
 
         return change
 

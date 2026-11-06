@@ -15,7 +15,7 @@ from openfesl.web.account.session import signed_in
 from openfesl.web.pages import Pages, listed
 from openfesl.web.referral_texts import NUMBERS
 from openfesl.web.reward_cards import RewardCards, reward_cards
-from openfesl.web.sessions import form_matches, form_token, inside, toast
+from openfesl.web.sessions import form_matches, form_token, inside, toast_at
 from openfesl.web.site import site_bar
 
 REWARDS = "/rewards"
@@ -142,8 +142,7 @@ class RewardsPages:
             if player is None:
                 return RedirectResponse(page, 303)
             if not form_matches(request, form):
-                toast(request, "web.rewards.refused.form", error=True)
-                return RedirectResponse(page, 303)
+                return toast_at(request, page, "web.rewards.refused.form", error=True)
             cards = await self._cards(game, request)
             claims, words = cards.claims, cards.words
             bar = await site_bar(request)
@@ -151,8 +150,7 @@ class RewardsPages:
             reward = _named(bar.rewards if bar else [], key, faction)
             if reward is None:
                 message, values = claims.refused(key, None, None, "")
-                toast(request, message, error=True, **values)
-                return RedirectResponse(page, 303)
+                return toast_at(request, page, message, error=True, **values)
             claiming = await claims.claiming(reward)
             chosen = str(form.get("hero", ""))
             hero = claiming.hero or words.hero(int(chosen) if chosen.isdecimal() else None)
@@ -168,8 +166,7 @@ class RewardsPages:
                 message, values = claims.refused(
                     key, _named(now, key, faction), refused.refusal, name
                 )
-                toast(request, message, error=True, **values)
-                return RedirectResponse(page, 303)
+                return toast_at(request, page, message, error=True, **values)
             parts = claiming.extra
             if given.items and hero:
                 items = ", ".join(words.item(*item) for item in given.items)
@@ -186,8 +183,7 @@ class RewardsPages:
                     "n": str(NUMBERS[referral.step]),
                     "given": ", ".join(words.texts.gift_words(words.catalogue, reward.gift)),
                 }
-            toast(request, key, False, funds=str(claiming.funds), **values)
-            return RedirectResponse(page, 303)
+            return toast_at(request, page, key, error=False, funds=str(claiming.funds), **values)
 
         return claim
 

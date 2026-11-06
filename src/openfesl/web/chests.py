@@ -18,7 +18,7 @@ from openfesl.core.wallets import Wallets
 from openfesl.web.account.session import signed_in
 from openfesl.web.catalogue_files import icon_url
 from openfesl.web.pages import Pages
-from openfesl.web.sessions import form_matches, form_token, toast
+from openfesl.web.sessions import form_matches, form_token, toast, toast_at
 from openfesl.web.site import site_bar
 from openfesl.web.store_texts import StoreTexts
 
@@ -162,8 +162,7 @@ class ChestsPages:
                 raise HTTPException(404)
             name = hero.persona.name
             if not form_matches(request, form):
-                toast(request, "web.chests.refused.form", error=True, hero=name)
-                return RedirectResponse(page, 303)
+                return toast_at(request, page, "web.chests.refused.form", error=True, hero=name)
             try:
                 won = await self._chests.open(game, hero.persona)
             except ChestRefused as refused:
@@ -177,8 +176,9 @@ class ChestsPages:
             worth = {"worth": texts.priced(won.price, won.currency)}
             if key:
                 worth["price"] = texts.priced(key.price, key.currency)
-            toast(
+            return toast_at(
                 request,
+                page,
                 "web.chests.opened",
                 error=False,
                 hero=name,
@@ -196,7 +196,6 @@ class ChestsPages:
                 ),
                 hero_id=str(hero_id),
             )
-            return RedirectResponse(page, 303)
 
         return open_chest
 

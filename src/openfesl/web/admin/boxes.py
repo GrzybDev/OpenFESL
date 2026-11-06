@@ -5,7 +5,6 @@ from typing import Any
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
-from starlette.exceptions import HTTPException
 
 from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin, Role
@@ -22,7 +21,7 @@ from openfesl.core.store import ListedBundle, Product
 from openfesl.web.admin.auth import AdminSessions, back_to
 from openfesl.web.admin.claw_panel import ClawForm, claw_panel
 from openfesl.web.admin.store import SECTION, StoreAdminViews, store_url
-from openfesl.web.sessions import checked_form, toast
+from openfesl.web.sessions import checked_form, or_404, toast
 from openfesl.web.store_texts import StoreTexts
 
 # The group of the boxes that no section of the hot deals sells, and of the treasure chests.
@@ -318,9 +317,7 @@ def box_routes(sessions: AdminSessions, views: BoxAdminViews) -> APIRouter:
         form = await checked_form(request)
         game = views.stores.game(game_id)
         _, rows = await views.rows(game, request.state.language)
-        row = next((row for row in rows if row.box.id == box_id), None)
-        if row is None:
-            raise HTTPException(404)
+        row = or_404(next((row for row in rows if row.box.id == box_id), None))
         on = bool(form.get("enabled"))
         if on != row.box.enabled:
             await views.boxes.switch(game.id, row.box, on, admin)
