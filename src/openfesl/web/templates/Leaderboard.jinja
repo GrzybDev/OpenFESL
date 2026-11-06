@@ -32,11 +32,7 @@
               {% if view.order != "score" %}<input type="hidden" name="stat" value="{{ view.order }}">{% endif %}
               {% if view.online %}<input type="hidden" name="show" value="online">{% endif %}
               <Bar id="find-title" large>{{ _("web.leaderboard.find") }}</Bar>
-              {% if view.player %}
-                <SearchField id="find-name" name="player" :label="_('web.leaderboard.name')" :value="view.player" :hint="_('web.leaderboard.name.hint')" hx-morph-skip aria-describedby="find-result" />
-              {% else %}
-                <SearchField id="find-name" name="player" :label="_('web.leaderboard.name')" :value="view.player" :hint="_('web.leaderboard.name.hint')" hx-morph-skip />
-              {% endif %}
+              <SearchField id="find-name" name="player" :label="_('web.leaderboard.name')" :value="view.player" :hint="_('web.leaderboard.name.hint')" hx-morph-skip :aria-describedby="'find-result' if view.player else none" />
               {% if found and found_page %}
                 <p id="find-result" aria-live="polite" class="find-found"><span>{{ found.name }}</span>{{ _("web.leaderboard.found", position=number(found.place), stat=stat, page=number(found_page)) }}</p>
               {% elif view.player %}

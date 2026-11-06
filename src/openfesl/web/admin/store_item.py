@@ -110,7 +110,6 @@ def store_item_routes(sessions: AdminSessions, views: StoreAdminViews) -> APIRou
             400 if refused else 200,
             admin=admin,
             of=game,
-            catalogue=catalogue,
             row=price_row(game, texts, name, prices),
             lines=ordered_lines(game, prices.lines),
             rule=_rule_text(texts, rules, prices),

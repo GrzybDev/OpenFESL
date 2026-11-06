@@ -48,8 +48,7 @@
                 {% set entry = row.entry %}
                 <div role="row" class="audit-columns audit-row">
                   <div role="cell" class="admin-cell admin-badges">
-                    <span aria-hidden="true"
-                          class="badge"><Icon :name="row.glyph" stroke="#0A0A0A" fill="#0A0A0A" /></span>
+                    <Badge :name="row.glyph" both />
                   </div>
                   <div role="cell" class="admin-cell cell-stack">
                     <span aria-hidden="true" class="cell-label">{{ _("web.admin.audit.time") }}</span>

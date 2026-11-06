@@ -191,7 +191,6 @@ class ClawPages:
                 game=game,
                 rules=rules,
                 running=running,
-                imported=catalogue.imported,
                 name=(catalogue.text(rules.name) if rules else None)
                 or translate("web.claw.name", language),
                 csrf=form_token(request) if player else "",

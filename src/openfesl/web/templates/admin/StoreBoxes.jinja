@@ -60,7 +60,7 @@
                     {% set href = base ~ "/" ~ box.id %}
                     <div role="row" class="boxes-columns boxes-row">
                       <div role="cell" class="admin-cell prices-item-name">
-                        <span aria-hidden="true" class="badge"><Icon :name="'chest' if box.kind != 'box' else 'box'" stroke="#0A0A0A" fill="#0A0A0A" /></span>
+                        <Badge :name="'chest' if box.kind != 'box' else 'box'" both />
                         <a href="{{ href }}" class="account-link"><span class="admin-hero-strong">{{ row.name }}</span><span class="admin-item-kind">{{ _("games." ~ game.id ~ ".faction." ~ box.faction) if box.faction else _("web.store.requires.any_faction") }} · {{ _("games." ~ game.id ~ ".class." ~ box.hero_class) if box.hero_class else _("web.store.requires.any_class") }}</span></a>
                       </div>
                       <div role="cell" class="admin-cell cell-stack">

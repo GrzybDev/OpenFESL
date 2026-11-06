@@ -11,9 +11,6 @@
 {% set counts = page.counts %}
 {% set shown = page.items|selectattr("state", "eq", "active")|list if tab == "active" else page.items|rejectattr("state", "eq", "active")|list if tab == "ended" else page.items %}
 {% set icons = catalogue.contents.icons %}
-{% macro badge(glyph) %}
-  <span aria-hidden="true" class="badge"><Icon :name="glyph" stroke="#0A0A0A" fill="#0A0A0A" /></span>
-{% endmacro %}
 <AdminPage :title="title ~ ' · ' ~ hero.persona.name" current="accounts">
   <PageHead labelledby="hero-title">
     <div class="enter-title page-title page-title-wider">
@@ -39,7 +36,7 @@
           {% set changed = page.history.state %}
           {% if hero.disabled %}
             <div class="bar-text admin-hero-banner">
-              {{ badge("x") }}
+              <Badge name="x" both />
               <p class="cell-stack">
                 <span class="admin-hero-strong">
                   {%- if changed -%}
@@ -106,7 +103,7 @@
           <Bar id="hero-items" :extra="_n('web.heroes.items.count', page.card.items) ~ ' · ' ~ (_n('web.heroes.items.low', page.card.low) if page.card.low else _('web.heroes.items.none_low'))" wrap>{{ _("web.admin.items.title") }}</Bar>
           {% if not catalogue.imported %}
             <p class="bar-text admin-hero-notice">
-              {{ badge("warn") }}<span>{{ _("web.admin.items.no_catalogue", game=game.name) }}</span>
+              <Badge name="warn" both /><span>{{ _("web.admin.items.no_catalogue", game=game.name) }}</span>
               <a href="{{ url('/admin/catalogues') }}" class="list-button">{{ _("web.admin.menu.catalogues") }}</a>
             </p>
           {% endif %}
@@ -169,7 +166,7 @@
                         {{ _("web.admin.items.from." ~ row.source) if row.source else "–" }}
                       </div>
                       <div role="cell" class="admin-cell admin-badges cell-stack">
-                        <span class="admin-item-state">{{ badge("tick" if row.state == "active" else "x") }}{{ _("web.admin.items.state." ~ row.state) }}</span>
+                        <span class="admin-item-state"><Badge :name="'tick' if row.state == 'active' else 'x'" both />{{ _("web.admin.items.state." ~ row.state) }}</span>
                         {% if row.ended %}<span class="cell-ago">{{ when(row.ended, "yMMMd") }}</span>{% endif %}
                       </div>
                       {% if manages %}
@@ -259,11 +256,17 @@
           <div class="admin-hero-actions">
             <FormButton icon="edit" :href="base ~ '/rename'" dialog>{{ _("web.admin.hero.rename") }}<span class="admin-hero-free">{{ _("web.admin.hero.rename.free") }}</span></FormButton>
             {% if page.card.default %}
-              <p class="bar-text admin-hero-line">{{ badge("star") }}{{ _("web.admin.hero.default.now", hero=hero.persona.name) }}</p>
+              <p class="bar-text admin-hero-line">
+                <Badge name="star" both />{{ _("web.admin.hero.default.now", hero=hero.persona.name) }}
+              </p>
             {% elif hero.disabled %}
-              <p class="bar-text admin-hero-line">{{ badge("x") }}{{ _("web.admin.hero.default.disabled") }}</p>
+              <p class="bar-text admin-hero-line">
+                <Badge name="x" both />{{ _("web.admin.hero.default.disabled") }}
+              </p>
             {% elif not hero.playable %}
-              <p class="bar-text admin-hero-line">{{ badge("warn") }}{{ _("web.admin.hero.default.no_look") }}</p>
+              <p class="bar-text admin-hero-line">
+                <Badge name="warn" both />{{ _("web.admin.hero.default.no_look") }}
+              </p>
             {% elif manages %}
               <FormButton icon="star" :href="base ~ '/default'" dialog>{{ _("web.admin.hero.make_default") }}</FormButton>
             {% endif %}
@@ -278,7 +281,9 @@
             {% if page.public %}
               <FormButton icon="go" :href="url('/' ~ game.id ~ '/heroes/' ~ hero.persona.id)">{{ _("web.admin.hero.profile") }}</FormButton>
             {% else %}
-              <p class="bar-text admin-hero-line">{{ badge("x") }}{{ _("web.admin.hero.profile.none") }}</p>
+              <p class="bar-text admin-hero-line">
+                <Badge name="x" both />{{ _("web.admin.hero.profile.none") }}
+              </p>
             {% endif %}
           </div>
           {% if not manages %}

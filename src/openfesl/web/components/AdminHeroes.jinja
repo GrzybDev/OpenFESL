@@ -48,7 +48,7 @@
             {% set state = "disabled" if hero.disabled else "active" if hero.playable else "no_look" %}
             <div role="row" class="admin-hero-columns admin-hero-row">
               <div role="cell" class="admin-cell admin-badges">
-                <span aria-hidden="true" class="badge"><Icon :name="{'active': 'tick', 'disabled': 'x', 'no_look': 'warn'}[state]" stroke="#0A0A0A" fill="#0A0A0A" /></span>
+                <Badge :name="{'active': 'tick', 'disabled': 'x', 'no_look': 'warn'}[state]" both />
                 <span class="admin-hero-state">{{ _("web.admin.heroes.state." ~ state) }}</span>
               </div>
               <div role="cell" class="admin-cell cell-stack">

@@ -308,7 +308,6 @@ def server_list_routes(sessions: AdminSessions, views: ServerViews) -> APIRouter
             listing=listing,
             servers=found,
             counts=counts,
-            total=len(every),
             mode=(await views.store.hosting_mode()).value,
             fellows=fellows,
         )

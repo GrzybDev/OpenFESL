@@ -12,9 +12,6 @@
 {% set session = view.session %}
 {% set playing = view.playing %}
 {% set revoked = entitlements|length - active %}
-{% macro badge(glyph) %}
-  <span aria-hidden="true" class="badge"><Icon :name="glyph" stroke="#0A0A0A" fill="#0A0A0A" /></span>
-{% endmacro %}
 <AdminPage :title="title ~ ' · ' ~ account.nuid" current="accounts">
   <PageHead labelledby="account-title">
     <div class="enter-title page-title page-title-wider">
@@ -92,7 +89,7 @@
               {% for persona in names %}
                 {% set entry = persona.record %}
                 <li>
-                  {{ badge("tick" if persona.usable else "x") }}
+                  <Badge :name="'tick' if persona.usable else 'x'" both />
                   {% if persona.usable and persona.game and "leaderboard" in persona.game.pages %}
                     <a href="{{ url('/' ~ persona.game.id ~ '/players/' ~ entry.persona.name|urlencode) }}"
                        class="account-name-link">{{ entry.persona.name }}</a>
@@ -181,7 +178,9 @@
                   {% for entitlement in entitlements %}
                     {% set held = entitlement.status == "ACTIVE" %}
                     <div role="row" class="entitlement-columns entitlement-row">
-                      <div role="cell" class="admin-cell admin-badges">{{ badge("tick" if held else "x") }}</div>
+                      <div role="cell" class="admin-cell admin-badges">
+                        <Badge :name="'tick' if held else 'x'" both />
+                      </div>
                       <div role="cell" class="admin-cell">
                         <code class="entitlement-code">{{ entitlement.tag }}</code>
                       </div>

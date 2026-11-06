@@ -126,7 +126,6 @@ def entitlement_routes(
             admin=admin,
             view=view,
             keys=choices,
-            held=held,
             back=page_of(request, view),
             form=form,
         )

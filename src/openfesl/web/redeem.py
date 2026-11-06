@@ -195,7 +195,6 @@ class RedeemPages:
             status,
             game=game,
             code=code,
-            look=look,
             entry=entry,
             refusal=refusal,
             said=_refusal(texts, catalogue, look, refusal, raced) if look and refusal else ("", ""),

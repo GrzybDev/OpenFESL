@@ -1,4 +1,4 @@
-{#def view, keys: list, held, back: str, form #}
+{#def view, keys: list, back: str, form #}
 {# The form that grants a player's account entitlements by hand, as a black-headed panel: the
    enabled product keys as tiles, whose grants the account gets without using the key up, or one
    tag typed in. Where scripts run, it opens as a dialog over the account's page. #}
@@ -38,7 +38,6 @@
             <legend class="sr-only">{{ _("web.admin.grant.what") }}</legend>
             {% for entry in keys %}
               {% set key = entry.view.key %}
-              {% set game = entry.view.game %}
               {% set total = key.grants|length %}
               <ChoiceTile name="key" :value="key.code" :title="entry.view.label(language) or key.code" glyph="key" :checked="key.code == chosen" :disabled="not entry.open" :focus="key.code == chosen">
               {% if entry.view.label(language) %}<code class="choice-code">{{ key.code }}</code>{% endif %}

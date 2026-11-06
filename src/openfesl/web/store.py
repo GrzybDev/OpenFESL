@@ -171,7 +171,6 @@ class StorePages:
                 request,
                 "store.Confirm",
                 game=game,
-                sold=sold,
                 offered=offered,
                 texts=texts,
                 back=self._address(request, game, number, hero or "", price or ""),

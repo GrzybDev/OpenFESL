@@ -214,7 +214,6 @@ class StoreFrontPages:
                 pages=pages,
                 size=PAGE_SIZE,
                 low=sum(held[item.id].low for _, item in pool) if choice.owned else 0,
-                imported=catalogue.imported,
                 on_sale=len(items),
                 empty=None
                 if pool

@@ -1,5 +1,4 @@
 {#def activity, busiest, overview, play_key: str | None = None #}
-{% set key = play_key %}
 {% set hook %}<FileName text="dinput8.dll" />{% endset %}
 <Layout :title="game.name">
   <GameMenu />
@@ -113,10 +112,10 @@
               </div>
             </li>
             <li>
-              {% set code %}{% if key %}<FileName :text="key" />{% endif %}{% endset %}
-              <div><StepNumber :number="3" /><p class="body-text">{% if game.launched %}{{ _("web.front.setup.launcher") }}{% elif key %}{{ _("web.front.setup.account", key=code) }}{% else %}{{ _("web.front.setup.account.plain") }}{% endif %}</p></div>
-              {% if key %}
-                <CopyButton :value="key" :label="_('web.front.setup.copy')" :note="_('web.front.setup.copied')" />
+              {% set code %}{% if play_key %}<FileName :text="play_key" />{% endif %}{% endset %}
+              <div><StepNumber :number="3" /><p class="body-text">{% if game.launched %}{{ _("web.front.setup.launcher") }}{% elif play_key %}{{ _("web.front.setup.account", key=code) }}{% else %}{{ _("web.front.setup.account.plain") }}{% endif %}</p></div>
+              {% if play_key %}
+                <CopyButton :value="play_key" :label="_('web.front.setup.copy')" :note="_('web.front.setup.copied')" />
               {% endif %}
             </li>
           </ol>
