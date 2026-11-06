@@ -2,7 +2,6 @@ from collections.abc import Collection
 from dataclasses import replace
 
 from sqlalchemy import ColumnElement, func, select, update
-from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.admin import AdminAction
@@ -17,6 +16,7 @@ from openfesl.core.servers import (
 )
 from openfesl.storage.admin import action_row
 from openfesl.storage.models import AdminActionRow, GameServerRow, ProviderRow, SettingRow
+from openfesl.storage.settings import put_setting
 
 HOSTING_MODE = "hosting_mode"
 
@@ -47,16 +47,11 @@ class SqlServerStore:
             mode: The new mode.
             admin: The admin who changed it; None for the command line.
         """
-        statement = insert(SettingRow).values(key=HOSTING_MODE, value=mode.value)
         async with self._sessions.begin() as session:
             earlier = await session.scalar(
                 select(SettingRow.value).where(SettingRow.key == HOSTING_MODE).with_for_update()
             )
-            await session.execute(
-                statement.on_conflict_do_update(
-                    index_elements=[SettingRow.key], set_={"value": statement.excluded.value}
-                )
-            )
+            await put_setting(session, HOSTING_MODE, mode.value)
             earlier = earlier or HostingMode.APPROVED.value
             if earlier != mode.value:
                 details = {"value": mode.value, "from": earlier}

@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Any
+from typing import Any, ClassVar
 
 from sqlalchemy import (
     BigInteger,
@@ -17,11 +17,15 @@ from sqlalchemy import (
     text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, MappedColumn, mapped_column
 
 
 class Base(DeclarativeBase):
-    pass
+    type_annotation_map: ClassVar[dict[Any, Any]] = {datetime: DateTime(timezone=True)}
+
+
+def _cascade(target: str, **options: Any) -> MappedColumn[Any]:
+    return mapped_column(ForeignKey(target, ondelete="CASCADE"), **options)
 
 
 class AccountRow(Base):
@@ -33,14 +37,14 @@ class AccountRow(Base):
     country: Mapped[str]
     terms_version: Mapped[str | None]
     server: Mapped[bool] = mapped_column(default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     state: Mapped[str] = mapped_column(server_default="active")
-    state_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    state_changed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    state_until: Mapped[datetime | None]
+    state_changed_at: Mapped[datetime | None]
+    last_login_at: Mapped[datetime | None]
     # Set while the account waits for the link that confirms its e-mail address.
     verification_hash: Mapped[bytes | None] = mapped_column(LargeBinary, unique=True)
-    verification_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    verification_expires_at: Mapped[datetime | None]
     # Moved on whenever the account's web sessions must end, such as on a password change.
     session_epoch: Mapped[int] = mapped_column(server_default="0")
     display_name: Mapped[str | None]
@@ -56,10 +60,8 @@ class LoginTokenRow(Base):
     __tablename__ = "login_token"
 
     token_hash: Mapped[bytes] = mapped_column(LargeBinary, primary_key=True)
-    account_id: Mapped[int] = mapped_column(
-        ForeignKey("account.id", ondelete="CASCADE"), index=True
-    )
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    account_id: Mapped[int] = _cascade("account.id", index=True)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class SignInIdentityRow(Base):
@@ -69,22 +71,20 @@ class SignInIdentityRow(Base):
 
     service: Mapped[str] = mapped_column(primary_key=True)
     subject: Mapped[str] = mapped_column(primary_key=True)
-    account_id: Mapped[int] = mapped_column(ForeignKey("account.id", ondelete="CASCADE"))
+    account_id: Mapped[int] = _cascade("account.id")
     name: Mapped[str]
-    linked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    linked_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class SignInProofRow(Base):
     __tablename__ = "sign_in_proof"
 
     token_hash: Mapped[bytes] = mapped_column(LargeBinary, primary_key=True)
-    account_id: Mapped[int] = mapped_column(
-        ForeignKey("account.id", ondelete="CASCADE"), index=True
-    )
+    account_id: Mapped[int] = _cascade("account.id", index=True)
     service: Mapped[str]
     subject: Mapped[str]
     name: Mapped[str]
-    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    expires_at: Mapped[datetime]
 
 
 class PasswordResetRow(Base):
@@ -92,26 +92,22 @@ class PasswordResetRow(Base):
 
     token_hash: Mapped[bytes] = mapped_column(LargeBinary, primary_key=True)
     # One link per account: a new one replaces the last.
-    account_id: Mapped[int] = mapped_column(
-        ForeignKey("account.id", ondelete="CASCADE"), unique=True
-    )
-    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    account_id: Mapped[int] = _cascade("account.id", unique=True)
+    expires_at: Mapped[datetime]
 
 
 class PersonaRow(Base):
     __tablename__ = "persona"
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
-    account_id: Mapped[int] = mapped_column(
-        ForeignKey("account.id", ondelete="CASCADE"), index=True
-    )
+    account_id: Mapped[int] = _cascade("account.id", index=True)
     namespace: Mapped[str]
     name: Mapped[str]
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     # When its player removed it; the admin's decision is the state.
-    disabled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    disabled_at: Mapped[datetime | None]
     state: Mapped[str] = mapped_column(server_default="active")
-    state_changed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    state_changed_at: Mapped[datetime | None]
 
 
 # Disabled names stay taken, so a name never moves to another account.
@@ -121,9 +117,7 @@ Index("persona_name_key", PersonaRow.namespace, func.lower(PersonaRow.name), uni
 class HeroAccountRow(Base):
     __tablename__ = "hero_account"
 
-    account_id: Mapped[int] = mapped_column(
-        ForeignKey("account.id", ondelete="CASCADE"), primary_key=True
-    )
+    account_id: Mapped[int] = _cascade("account.id", primary_key=True)
     game: Mapped[str] = mapped_column(primary_key=True)
     # The hero the game is started as; the account's first hero until another is chosen.
     default_persona_id: Mapped[int | None] = mapped_column(
@@ -139,30 +133,28 @@ class MugshotRow(Base):
     __tablename__ = "mugshot"
 
     # The picture of a hero that its game rendered last, which goes with the hero.
-    persona_id: Mapped[int] = mapped_column(
-        ForeignKey("persona.id", ondelete="CASCADE"), primary_key=True
-    )
+    persona_id: Mapped[int] = _cascade("persona.id", primary_key=True)
     # Raised with each new picture, so that a copy can tell it is out of date.
     version: Mapped[int]
     image: Mapped[bytes] = mapped_column(LargeBinary)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class EntitlementRow(Base):
     __tablename__ = "entitlement"
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
-    account_id: Mapped[int] = mapped_column(ForeignKey("account.id", ondelete="CASCADE"))
+    account_id: Mapped[int] = _cascade("account.id")
     # The persona that owns it, for a game whose personas own items each; none for the
     # account's own.
-    persona_id: Mapped[int | None] = mapped_column(ForeignKey("persona.id", ondelete="CASCADE"))
+    persona_id: Mapped[int | None] = _cascade("persona.id")
     tag: Mapped[str]
     group_name: Mapped[str | None]
     product_id: Mapped[str | None]
     status: Mapped[str] = mapped_column(default="ACTIVE")
-    granted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    granted_at: Mapped[datetime] = mapped_column(server_default=func.now())
     use_count: Mapped[int | None]
-    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    expires_at: Mapped[datetime | None]
 
 
 # One row per tag of an account, so a key entered again grants nothing twice and a revoked tag
@@ -195,12 +187,10 @@ class WalletRow(Base):
     )
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
-    account_id: Mapped[int] = mapped_column(ForeignKey("account.id", ondelete="CASCADE"))
+    account_id: Mapped[int] = _cascade("account.id")
     game: Mapped[str]
     currency: Mapped[str]
-    persona_id: Mapped[int | None] = mapped_column(
-        ForeignKey("persona.id", ondelete="CASCADE"), index=True
-    )
+    persona_id: Mapped[int | None] = _cascade("persona.id", index=True)
     # The sum of the wallet's ledger, changed only together with an entry in it.
     balance: Mapped[int] = mapped_column(BigInteger)
 
@@ -218,12 +208,12 @@ class WalletEntryRow(Base):
     )
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
-    wallet_id: Mapped[int] = mapped_column(ForeignKey("wallet.id", ondelete="CASCADE"), index=True)
+    wallet_id: Mapped[int] = _cascade("wallet.id", index=True)
     delta: Mapped[int] = mapped_column(BigInteger)
     # The wallet's balance after the change.
     balance: Mapped[int] = mapped_column(BigInteger)
     reason: Mapped[str]
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     transaction: Mapped[str | None]
 
 
@@ -260,7 +250,7 @@ class StoreProductRow(Base):
     # Unpublished products are never listed nor bought alone, only as parts of others.
     published: Mapped[bool] = mapped_column(server_default="true")
     sort: Mapped[int] = mapped_column(server_default="0")
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class StoreBundleRow(Base):
@@ -282,14 +272,12 @@ class StoreBundleRow(Base):
     game_order: Mapped[int] = mapped_column(server_default="0")
     # The share off its products' prices that the admin priced it by, in percent.
     discount: Mapped[int | None] = mapped_column(SmallInteger)
-    starts_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    starts_at: Mapped[datetime | None]
+    ends_at: Mapped[datetime | None]
     published: Mapped[bool] = mapped_column(server_default="true")
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     # The box of which it gives one product at random, for a box sold as a hot deal.
-    box_id: Mapped[int | None] = mapped_column(
-        ForeignKey("store_box.id", ondelete="CASCADE"), index=True
-    )
+    box_id: Mapped[int | None] = _cascade("store_box.id", index=True)
     # The hot deals' section it is listed in, and what the rotation picked it from.
     section: Mapped[str | None]
     pool: Mapped[str | None]
@@ -305,12 +293,8 @@ class StoreBundleRow(Base):
 class StoreBundleMemberRow(Base):
     __tablename__ = "store_bundle_member"
 
-    bundle_id: Mapped[int] = mapped_column(
-        ForeignKey("store_bundle.id", ondelete="CASCADE"), primary_key=True
-    )
-    product_id: Mapped[int] = mapped_column(
-        ForeignKey("store_product.id", ondelete="CASCADE"), primary_key=True, index=True
-    )
+    bundle_id: Mapped[int] = _cascade("store_bundle.id", primary_key=True)
+    product_id: Mapped[int] = _cascade("store_product.id", primary_key=True, index=True)
 
 
 class StoreBoxRow(Base):
@@ -340,12 +324,8 @@ class StoreBoxRow(Base):
 class StoreDropRow(Base):
     __tablename__ = "store_drop"
 
-    box_id: Mapped[int] = mapped_column(
-        ForeignKey("store_box.id", ondelete="CASCADE"), primary_key=True
-    )
-    product_id: Mapped[int] = mapped_column(
-        ForeignKey("store_product.id", ondelete="CASCADE"), primary_key=True, index=True
-    )
+    box_id: Mapped[int] = _cascade("store_box.id", primary_key=True)
+    product_id: Mapped[int] = _cascade("store_product.id", primary_key=True, index=True)
     # A tier's drops are equally likely, the tiers as likely as their weights; a rare tier's
     # drops are marked rare.
     tier: Mapped[int]
@@ -360,19 +340,15 @@ class ClawGrabRow(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
     game: Mapped[str]
-    account_id: Mapped[int] = mapped_column(ForeignKey("account.id", ondelete="CASCADE"))
-    persona_id: Mapped[int] = mapped_column(
-        ForeignKey("persona.id", ondelete="CASCADE"), index=True
-    )
+    account_id: Mapped[int] = _cascade("account.id")
+    persona_id: Mapped[int] = _cascade("persona.id", index=True)
     # The rewards' day it was made on, and which of the day's free grabs it was.
     day: Mapped[date]
     free: Mapped[int | None]
     item_id: Mapped[int]
     ownership: Mapped[str]
     rare: Mapped[bool]
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), index=True
-    )
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now(), index=True)
 
 
 class DealArtRow(Base):
@@ -384,7 +360,7 @@ class DealArtRow(Base):
     offer: Mapped[str] = mapped_column(primary_key=True)
     big: Mapped[bool] = mapped_column(primary_key=True)
     image: Mapped[bytes] = mapped_column(LargeBinary)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class PurchaseRow(Base):
@@ -392,13 +368,9 @@ class PurchaseRow(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
     game: Mapped[str]
-    account_id: Mapped[int] = mapped_column(
-        ForeignKey("account.id", ondelete="CASCADE"), index=True
-    )
+    account_id: Mapped[int] = _cascade("account.id", index=True)
     # The hero who bought, for what a hero owns.
-    persona_id: Mapped[int | None] = mapped_column(
-        ForeignKey("persona.id", ondelete="CASCADE"), index=True
-    )
+    persona_id: Mapped[int | None] = _cascade("persona.id", index=True)
     # The id the game bought it by, and whether it was a product, a bundle or a box.
     product_id: Mapped[str]
     kind: Mapped[str]
@@ -406,8 +378,8 @@ class PurchaseRow(Base):
     price: Mapped[int] = mapped_column(BigInteger)
     # What the hero or account gained.
     outcome: Mapped[dict[str, Any]] = mapped_column(JSONB)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    refunded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    refunded_at: Mapped[datetime | None]
 
 
 class RewardClaimRow(Base):
@@ -422,9 +394,7 @@ class RewardClaimRow(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
     game: Mapped[str]
-    account_id: Mapped[int] = mapped_column(
-        ForeignKey("account.id", ondelete="CASCADE"), index=True
-    )
+    account_id: Mapped[int] = _cascade("account.id", index=True)
     key: Mapped[str]
     faction: Mapped[str | None]
     # The hero its items went to.
@@ -433,7 +403,7 @@ class RewardClaimRow(Base):
     )
     # What the account and the hero got.
     outcome: Mapped[dict[str, Any]] = mapped_column(JSONB)
-    claimed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    claimed_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class RewardBaselineRow(Base):
@@ -445,7 +415,7 @@ class RewardBaselineRow(Base):
     stat: Mapped[str] = mapped_column(primary_key=True)
     # Every hero's value of the stat when it was taken, by persona.
     values: Mapped[dict[str, Any]] = mapped_column(JSONB)
-    taken_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    taken_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class RewardPauseRow(Base):
@@ -467,7 +437,7 @@ class ReferralRow(Base):
     recruiter_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey("account.id", ondelete="CASCADE"), index=True
     )
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     # When each step's goal was first seen reached, by which hero and at which level, by step.
     reached: Mapped[dict[str, Any]] = mapped_column(JSONB, server_default=text("'{}'::jsonb"))
 
@@ -478,7 +448,7 @@ class ProductKeyRow(Base):
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
     code: Mapped[str]
     enabled: Mapped[bool] = mapped_column(default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     # How many accounts may redeem it; None for any number.
     max_uses: Mapped[int | None]
     once_per_account: Mapped[bool] = mapped_column(server_default="false")
@@ -487,7 +457,7 @@ class ProductKeyRow(Base):
     # The game a key added by the admin is for; starting keys belong to their game data's.
     game: Mapped[str | None]
     # When it can no longer be redeemed; never when None.
-    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    expires_at: Mapped[datetime | None]
     # What a code of a game's site gives, as the rewards write a gift; None for a key that grants
     # entitlement tags.
     gift: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
@@ -501,13 +471,9 @@ Index("product_key_code_key", func.upper(ProductKeyRow.code), unique=True)
 class ProductKeyUseRow(Base):
     __tablename__ = "product_key_use"
 
-    key_id: Mapped[int] = mapped_column(
-        ForeignKey("product_key.id", ondelete="CASCADE"), primary_key=True
-    )
-    account_id: Mapped[int] = mapped_column(
-        ForeignKey("account.id", ondelete="CASCADE"), primary_key=True, index=True
-    )
-    used_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    key_id: Mapped[int] = _cascade("product_key.id", primary_key=True)
+    account_id: Mapped[int] = _cascade("account.id", primary_key=True, index=True)
+    used_at: Mapped[datetime] = mapped_column(server_default=func.now())
     # The hero a code's items went to.
     persona_id: Mapped[int | None] = mapped_column(ForeignKey("persona.id", ondelete="SET NULL"))
     # What a code gave the account and the hero; None for a key that grants entitlement tags.
@@ -517,9 +483,7 @@ class ProductKeyUseRow(Base):
 class ProductKeyGrantRow(Base):
     __tablename__ = "product_key_grant"
 
-    key_id: Mapped[int] = mapped_column(
-        ForeignKey("product_key.id", ondelete="CASCADE"), primary_key=True
-    )
+    key_id: Mapped[int] = _cascade("product_key.id", primary_key=True)
     tag: Mapped[str] = mapped_column(primary_key=True)
     group_name: Mapped[str | None]
     product_id: Mapped[str | None]
@@ -554,34 +518,24 @@ class RecordEntryRow(Base):
     __tablename__ = "record_entry"
 
     # The persona first, so the key also serves deleting a persona's records with it.
-    persona_id: Mapped[int] = mapped_column(
-        ForeignKey("persona.id", ondelete="CASCADE"), primary_key=True
-    )
+    persona_id: Mapped[int] = _cascade("persona.id", primary_key=True)
     partition: Mapped[str] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(primary_key=True)
     key: Mapped[str] = mapped_column(primary_key=True)
     value: Mapped[str]
-    modified_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    modified_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class AssociationRow(Base):
     __tablename__ = "association"
 
-    owner_id: Mapped[int] = mapped_column(
-        ForeignKey("persona.id", ondelete="CASCADE"), primary_key=True
-    )
+    owner_id: Mapped[int] = _cascade("persona.id", primary_key=True)
     type: Mapped[str] = mapped_column(primary_key=True)
     # `/domain/subDomain[/key]` as the game names the list, empty for lists without one.
     partition: Mapped[str] = mapped_column(primary_key=True)
-    member_id: Mapped[int] = mapped_column(
-        ForeignKey("persona.id", ondelete="CASCADE"), primary_key=True, index=True
-    )
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    modified_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    member_id: Mapped[int] = _cascade("persona.id", primary_key=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    modified_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class RelationshipRow(Base):
@@ -611,21 +565,17 @@ class RelationshipRow(Base):
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
     game: Mapped[str]
     tag: Mapped[str]
-    owner_id: Mapped[int | None] = mapped_column(ForeignKey("account.id", ondelete="CASCADE"))
+    owner_id: Mapped[int | None] = _cascade("account.id")
     owner_server: Mapped[str | None]
-    member_id: Mapped[int | None] = mapped_column(
-        ForeignKey("account.id", ondelete="CASCADE"), index=True
-    )
+    member_id: Mapped[int | None] = _cascade("account.id", index=True)
     member_server: Mapped[str | None]
     # Whether each side asked for the relationship or accepted it; both sides' rows say it.
     owner_agrees: Mapped[bool]
     member_agrees: Mapped[bool]
     # Whether the member changed the relationship since the owner last acknowledged it.
     new: Mapped[bool]
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    modified_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    modified_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class MessageRow(Base):
@@ -633,12 +583,12 @@ class MessageRow(Base):
 
     # The SDK reads message numbers as 32-bit integers.
     id: Mapped[int] = mapped_column(Identity(), primary_key=True)
-    sender_id: Mapped[int] = mapped_column(ForeignKey("persona.id", ondelete="CASCADE"), index=True)
+    sender_id: Mapped[int] = _cascade("persona.id", index=True)
     type: Mapped[str]
     purge: Mapped[str]
     attachments: Mapped[list[dict[str, str]]] = mapped_column(JSONB)
-    sent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    sent_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    expires_at: Mapped[datetime] = mapped_column(index=True)
     # The sender's copy, which its outbox lists.
     outbox: Mapped[bool] = mapped_column(default=True)
 
@@ -646,12 +596,8 @@ class MessageRow(Base):
 class MessageRecipientRow(Base):
     __tablename__ = "message_recipient"
 
-    message_id: Mapped[int] = mapped_column(
-        ForeignKey("message.id", ondelete="CASCADE"), primary_key=True
-    )
-    persona_id: Mapped[int] = mapped_column(
-        ForeignKey("persona.id", ondelete="CASCADE"), primary_key=True, index=True
-    )
+    message_id: Mapped[int] = _cascade("message.id", primary_key=True)
+    persona_id: Mapped[int] = _cascade("persona.id", primary_key=True, index=True)
     # The recipient's copy; the row outlives it, since the message still names the recipient.
     inbox: Mapped[bool] = mapped_column(default=True)
 
@@ -667,7 +613,7 @@ class AdminActionRow(Base):
     __tablename__ = "admin_action"
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
-    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    at: Mapped[datetime] = mapped_column(server_default=func.now())
     # The admin's subject at the sign-in provider and display name; None for the command line,
     # which knows no admin.
     admin: Mapped[str | None]
@@ -684,7 +630,7 @@ class ProviderRow(Base):
     id: Mapped[bytes] = mapped_column(LargeBinary, primary_key=True)
     name: Mapped[str]
     revoked: Mapped[bool] = mapped_column(default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class GameServerRow(Base):
@@ -698,7 +644,7 @@ class GameServerRow(Base):
     # provider, so that one created later is recognised.
     provider_id: Mapped[bytes | None] = mapped_column(LargeBinary)
     official: Mapped[bool] = mapped_column(default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class CatalogueRow(Base):
@@ -711,17 +657,13 @@ class CatalogueRow(Base):
     icons: Mapped[int]
     models: Mapped[int] = mapped_column(server_default="0")
     textures: Mapped[int] = mapped_column(server_default="0")
-    imported_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    imported_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class CatalogueTextRow(Base):
     __tablename__ = "catalogue_text"
 
-    partition: Mapped[str] = mapped_column(
-        ForeignKey("catalogue.partition", ondelete="CASCADE"), primary_key=True
-    )
+    partition: Mapped[str] = _cascade("catalogue.partition", primary_key=True)
     language: Mapped[str] = mapped_column(primary_key=True)
     texts: Mapped[dict[str, str]] = mapped_column(JSONB)
 
@@ -730,8 +672,8 @@ class ActivityHourRow(Base):
     __tablename__ = "activity_hour"
 
     game: Mapped[str] = mapped_column(primary_key=True)
-    hour: Mapped[datetime] = mapped_column(DateTime(timezone=True), primary_key=True)
-    at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    hour: Mapped[datetime] = mapped_column(primary_key=True)
+    at: Mapped[datetime]
     online: Mapped[int]
     in_matches: Mapped[int]
     servers: Mapped[int]
@@ -742,7 +684,7 @@ class ActivityDayRow(Base):
 
     game: Mapped[str] = mapped_column(primary_key=True)
     day: Mapped[date] = mapped_column(primary_key=True)
-    at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    at: Mapped[datetime]
     online: Mapped[int]
     in_matches: Mapped[int]
     servers: Mapped[int]

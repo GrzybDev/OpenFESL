@@ -16,7 +16,13 @@ from openfesl.storage.models import (
     StoreBundleRow,
     StoreProductRow,
 )
-from openfesl.storage.store import add_members, bundle_values, product_of, with_members
+from openfesl.storage.store import (
+    add_members,
+    bundle_values,
+    product_of,
+    product_values,
+    with_members,
+)
 
 type Key = tuple[int, Ownership, str]
 
@@ -175,21 +181,7 @@ async def _numbers(
     if missing:
         await session.execute(
             upsert(StoreProductRow)
-            .values(
-                [
-                    {
-                        "game": game,
-                        "item_id": product.item_id,
-                        "type": product.ownership.type,
-                        "days": product.ownership.days,
-                        "uses": product.ownership.uses,
-                        "currency": product.currency,
-                        "price": product.price,
-                        "published": False,
-                    }
-                    for product in missing.values()
-                ]
-            )
+            .values([product_values(game, product) for product in missing.values()])
             .on_conflict_do_nothing()
         )
         # Including any that the store added meanwhile, which the insert left alone.

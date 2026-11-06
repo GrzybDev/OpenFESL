@@ -1,7 +1,6 @@
 from collections.abc import Mapping
 
 from sqlalchemy import select
-from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.admin import AdminAction
@@ -9,6 +8,7 @@ from openfesl.core.admins import Admin
 from openfesl.core.game_art import ArtViewers
 from openfesl.storage.admin import action_row
 from openfesl.storage.models import SettingRow
+from openfesl.storage.settings import put_setting
 
 # The settings that say who sees each game's art, by the game's id after it.
 PREFIX = "art."
@@ -53,12 +53,7 @@ class SqlArtStore:
             covers: How many files of each kind the choice covers now, as the log records them.
             admin: The admin who chose; None for the command line.
         """
-        statement = insert(SettingRow).values(key=PREFIX + game, value=viewers.value)
         details = {"viewers": viewers.value, **covers}
         async with self._sessions.begin() as session:
-            await session.execute(
-                statement.on_conflict_do_update(
-                    index_elements=[SettingRow.key], set_={"value": statement.excluded.value}
-                )
-            )
+            await put_setting(session, PREFIX + game, viewers.value)
             session.add(action_row(AdminAction.CATALOGUE_ART, game, details, admin))

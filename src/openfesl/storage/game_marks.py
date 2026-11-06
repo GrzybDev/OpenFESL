@@ -1,11 +1,11 @@
 from sqlalchemy import select
-from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from openfesl.core.admin import AdminAction
 from openfesl.core.admins import Admin
 from openfesl.storage.admin import action_row
 from openfesl.storage.models import SettingRow
+from openfesl.storage.settings import put_setting
 
 # The settings that say whether each game shows its own server mark, by the game's id after it.
 PREFIX = "mark."
@@ -41,12 +41,7 @@ class SqlMarkStore:
             official: How many official servers host the game now, as the log records.
             admin: The admin who changed it.
         """
-        statement = insert(SettingRow).values(key=PREFIX + game, value="on" if shown else "off")
         details = {"shown": shown, "official": official}
         async with self._sessions.begin() as session:
-            await session.execute(
-                statement.on_conflict_do_update(
-                    index_elements=[SettingRow.key], set_={"value": statement.excluded.value}
-                )
-            )
+            await put_setting(session, PREFIX + game, "on" if shown else "off")
             session.add(action_row(AdminAction.GAME_MARK, game, details, admin))

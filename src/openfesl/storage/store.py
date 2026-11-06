@@ -59,18 +59,8 @@ class SqlProductStore:
             await session.execute(
                 insert(StoreProductRow),
                 [
-                    {
-                        "game": game,
-                        "item_id": product.item_id,
-                        "type": product.ownership.type,
-                        "days": product.ownership.days,
-                        "uses": product.ownership.uses,
-                        "currency": product.currency,
-                        "price": product.price,
-                        "published": product.published,
-                        "account": product.account,
-                        "sort": sort,
-                    }
+                    product_values(game, product)
+                    | {"published": product.published, "account": product.account, "sort": sort}
                     for sort, product in enumerate(products)
                 ],
             )
@@ -361,6 +351,25 @@ def _listed(row: StoreBundleRow, members: list[Product]) -> ListedBundle:
     )
 
 
+def product_values(game: str, product: NewProduct) -> dict[str, Any]:
+    """Return the columns of a new product, unpublished.
+
+    Args:
+        game: The game's data-file name.
+        product: The product.
+    """
+    return {
+        "game": game,
+        "item_id": product.item_id,
+        "type": product.ownership.type,
+        "days": product.ownership.days,
+        "uses": product.ownership.uses,
+        "currency": product.currency,
+        "price": product.price,
+        "published": False,
+    }
+
+
 def bundle_values(bundle: Bundle) -> dict[str, Any]:
     """Return a bundle's fields as its row keeps them, but for its game, members and sales.
 
@@ -468,19 +477,7 @@ async def _add_boxes(session: AsyncSession, game: str, boxes: Sequence[NewBox]) 
         return
     await session.execute(
         upsert(StoreProductRow).on_conflict_do_nothing(),
-        [
-            {
-                "game": game,
-                "item_id": product.item_id,
-                "type": product.ownership.type,
-                "days": product.ownership.days,
-                "uses": product.ownership.uses,
-                "currency": product.currency,
-                "price": product.price,
-                "published": False,
-            }
-            for product in needed
-        ],
+        [product_values(game, product) for product in needed],
     )
     await _stock_boxes(session, game, new)
 

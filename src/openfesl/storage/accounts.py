@@ -191,11 +191,7 @@ class SqlAccountStore:
             account_id: The account.
         """
         async with self._sessions.begin() as session:
-            await session.execute(
-                update(AccountRow)
-                .where(AccountRow.id == account_id)
-                .values(last_login_at=func.now())
-            )
+            await _change(session, account_id, last_login_at=func.now())
 
     async def find_remembered(self, token_hash: bytes) -> Account | None:
         """Return the account that a remembered login belongs to, if it is recent enough.
@@ -312,9 +308,7 @@ class SqlAccountStore:
         """
         try:
             async with self._sessions.begin() as session:
-                await session.execute(
-                    update(AccountRow).where(AccountRow.id == account_id).values(display_name=name)
-                )
+                await _change(session, account_id, display_name=name)
         except IntegrityError:
             return False
         return True
@@ -327,9 +321,7 @@ class SqlAccountStore:
             version: The version it accepted.
         """
         async with self._sessions.begin() as session:
-            await session.execute(
-                update(AccountRow).where(AccountRow.id == account_id).values(terms_version=version)
-            )
+            await _change(session, account_id, terms_version=version)
 
     async def remember(self, account_id: int, token_hash: bytes, password_hash: str | None) -> bool:
         """Keep a login token, dropping the account's oldest beyond the newest few.
@@ -391,15 +383,13 @@ class SqlAccountStore:
         state = AccountState.DEACTIVATED
         changed = datetime.now(UTC)
         async with self._sessions.begin() as session:
-            await session.execute(
-                update(AccountRow)
-                .where(AccountRow.id == account_id)
-                .values(
-                    state=state.value,
-                    state_until=None,
-                    state_changed_at=changed,
-                    session_epoch=AccountRow.session_epoch + 1,
-                )
+            await _change(
+                session,
+                account_id,
+                state=state.value,
+                state_until=None,
+                state_changed_at=changed,
+                session_epoch=AccountRow.session_epoch + 1,
             )
             details = {"state": state.value, "until": None}
             session.add(
@@ -414,11 +404,7 @@ class SqlAccountStore:
             account_id: The account.
         """
         async with self._sessions.begin() as session:
-            await session.execute(
-                update(AccountRow)
-                .where(AccountRow.id == account_id)
-                .values(session_epoch=AccountRow.session_epoch + 1)
-            )
+            await _change(session, account_id, session_epoch=AccountRow.session_epoch + 1)
             await session.execute(
                 delete(LoginTokenRow).where(LoginTokenRow.account_id == account_id)
             )
@@ -526,9 +512,7 @@ class SqlAccountStore:
             country: The ISO code of the new country.
         """
         async with self._sessions.begin() as session:
-            await session.execute(
-                update(AccountRow).where(AccountRow.id == account_id).values(country=country)
-            )
+            await _change(session, account_id, country=country)
 
     async def set_state(
         self, account_id: int, state: AccountState, until: datetime | None, admin: Admin | None
@@ -542,15 +526,13 @@ class SqlAccountStore:
             admin: The admin who changed it; None for the command line.
         """
         async with self._sessions.begin() as session:
-            await session.execute(
-                update(AccountRow)
-                .where(AccountRow.id == account_id)
-                .values(
-                    state=state.value,
-                    state_until=until,
-                    state_changed_at=func.now(),
-                    session_epoch=AccountRow.session_epoch + 1,
-                )
+            await _change(
+                session,
+                account_id,
+                state=state.value,
+                state_until=until,
+                state_changed_at=func.now(),
+                session_epoch=AccountRow.session_epoch + 1,
             )
             details = {"state": state.value, "until": until.isoformat() if until else None}
             session.add(action_row(AdminAction.ACCOUNT_STATE, str(account_id), details, admin))
@@ -621,11 +603,7 @@ class SqlAccountStore:
         async with self._sessions.begin() as session:
             found = await _waiting(session, token_hash, lock=True)
             if isinstance(found, int):
-                await session.execute(
-                    update(AccountRow)
-                    .where(AccountRow.id == found)
-                    .values(verification_hash=None, verification_expires_at=None)
-                )
+                await _change(session, found, verification_hash=None, verification_expires_at=None)
         return found
 
     async def confirm_account(self, account_id: int, admin: Admin | None) -> None:
@@ -636,11 +614,7 @@ class SqlAccountStore:
             admin: The admin who confirmed it; None for the command line.
         """
         async with self._sessions.begin() as session:
-            await session.execute(
-                update(AccountRow)
-                .where(AccountRow.id == account_id)
-                .values(verification_hash=None, verification_expires_at=None)
-            )
+            await _change(session, account_id, verification_hash=None, verification_expires_at=None)
             session.add(action_row(AdminAction.ACCOUNT_VERIFIED, str(account_id), {}, admin))
 
 
@@ -673,13 +647,19 @@ async def lock_ways_in(
     return bool(await session.scalar(select(others)))
 
 
+async def _change(session: AsyncSession, account_id: int, **values: object) -> None:
+    await session.execute(update(AccountRow).where(AccountRow.id == account_id).values(**values))
+
+
 async def _set_password(
     session: AsyncSession, account_id: int, password_hash: str | None, **values: object
 ) -> None:
-    await session.execute(
-        update(AccountRow)
-        .where(AccountRow.id == account_id)
-        .values(password_hash=password_hash, session_epoch=AccountRow.session_epoch + 1, **values)
+    await _change(
+        session,
+        account_id,
+        password_hash=password_hash,
+        session_epoch=AccountRow.session_epoch + 1,
+        **values,
     )
     await session.execute(delete(LoginTokenRow).where(LoginTokenRow.account_id == account_id))
 

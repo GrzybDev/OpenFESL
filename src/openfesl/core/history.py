@@ -18,27 +18,16 @@ HOURS_KEPT = timedelta(days=7)
 
 
 @dataclass(frozen=True, slots=True)
-class Peak:
+class Peak(Activity):
     """The most players that were online at once in an hour or a day, from the counts taken.
 
     Attributes:
         start: When the hour or day began, in UTC.
         at: When that many were counted; the earliest such count.
-        online: The players logged in to the game then.
-        in_matches: Those among them in a game that a server hosted.
-        servers: The games that servers hosted then.
     """
 
     start: datetime
     at: datetime
-    online: int
-    in_matches: int
-    servers: int
-
-    @property
-    def in_menus(self) -> int:
-        """The players logged in then who were in no hosted game."""
-        return max(self.online - self.in_matches, 0)
 
 
 class Period(StrEnum):

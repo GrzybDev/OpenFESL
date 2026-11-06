@@ -62,7 +62,7 @@ class SqlHistoryStore:
                 .where(ActivityHourRow.game == game, ActivityHourRow.hour >= since)
                 .order_by(ActivityHourRow.hour)
             )
-            return [Peak(row.hour, row.at, row.online, row.in_matches, row.servers) for row in rows]
+            return [Peak(row.online, row.in_matches, row.servers, row.hour, row.at) for row in rows]
 
     async def days(self, game: str, since: date | None = None) -> list[Peak]:
         """Return the peaks of a game's days, oldest first.
@@ -115,4 +115,4 @@ async def _keep_higher(
 
 def _day(row: ActivityDayRow) -> Peak:
     start = datetime.combine(row.day, time(), UTC)
-    return Peak(start, row.at, row.online, row.in_matches, row.servers)
+    return Peak(row.online, row.in_matches, row.servers, start, row.at)
