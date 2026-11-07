@@ -7,7 +7,7 @@ import { checkName, fill, flash, reducedMotion } from "./naming.js";
 // A dialog arrives after the page has loaded, so its name field starts its check when it first
 // takes the focus, as its autofocus gives it.
 document.addEventListener("focusin", (event) => {
-  const input = event.target instanceof Element ? event.target.closest("[data-name-check]") : null;
+  const input = event.target.closest("[data-name-check]");
   if (!input || input.dataset.started) {
     return;
   }
@@ -18,13 +18,13 @@ document.addEventListener("focusin", (event) => {
 });
 
 document.addEventListener("input", (event) => {
-  const form = event.target instanceof Element ? event.target.closest("[data-admin-form]") : null;
+  const form = event.target.closest("[data-admin-form]");
   if (form) {
     update(form);
   }
   // A field that the live parts follow, such as a search's item name, is followed a moment after
   // typing.
-  const field = event.target instanceof Element ? event.target.closest("[data-refresh]") : null;
+  const field = event.target.closest("[data-refresh]");
   if (field) {
     clearTimeout(refreshing);
     refreshing = setTimeout(() => refresh(field, chosen(field)), 250);
@@ -32,18 +32,14 @@ document.addEventListener("input", (event) => {
 });
 
 document.addEventListener("change", (event) => {
-  if (
-    event.target instanceof HTMLInputElement &&
-    event.target.matches("[data-live] [type=radio]")
-  ) {
+  if (event.target.matches("[data-live] [type=radio]")) {
     refresh(event.target, chosen(event.target));
   }
 });
 
 // A search's result is chosen in place, as its link would choose it on the page of its own.
 document.addEventListener("click", (event) => {
-  const link =
-    event.target instanceof Element ? event.target.closest("[data-live] [data-choose]") : null;
+  const link = event.target.closest("[data-live] [data-choose]");
   if (link && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey) {
     event.preventDefault();
     refresh(link, new URL(link.href).searchParams);
@@ -115,7 +111,7 @@ async function refresh(field, fields) {
 document.addEventListener(
   "invalid",
   (event) => {
-    const form = event.target.closest?.("[data-admin-form]");
+    const form = event.target.closest("[data-admin-form]");
     if (form) {
       event.preventDefault();
       update(form);
@@ -129,12 +125,7 @@ document.addEventListener(
 // nameless button that saves is held back.
 document.addEventListener("submit", (event) => {
   const form = event.target;
-  if (
-    form instanceof HTMLFormElement &&
-    form.matches("[data-admin-form]") &&
-    !event.submitter?.name &&
-    update(form)
-  ) {
+  if (form.matches("[data-admin-form]") && !event.submitter?.name && update(form)) {
     event.preventDefault();
     flash(form.querySelector(".admin-form-why"));
   }

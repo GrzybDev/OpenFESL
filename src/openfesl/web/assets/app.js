@@ -31,7 +31,7 @@ import "htmx.org";
 // A chevron block whose page takes longer than 300 ms to arrive shows that it is loading, and
 // a button that sends a form says what it does meanwhile, such as APPROVING….
 document.addEventListener("click", (event) => {
-  const block = event.target instanceof Element ? event.target.closest("a.chevron") : null;
+  const block = event.target.closest("a.chevron");
   const plain =
     event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
   if (
@@ -56,11 +56,7 @@ document.addEventListener("submit", (event) => {
 // click does, sends nothing more.
 document.addEventListener("submit", (event) => {
   const form = event.target;
-  if (
-    event.defaultPrevented ||
-    !(form instanceof HTMLFormElement) ||
-    !form.matches("[data-once]")
-  ) {
+  if (event.defaultPrevented || !form.matches("[data-once]")) {
     return;
   }
   if (form.dataset.sent) {
@@ -104,21 +100,16 @@ function showBusy(block) {
 }
 
 // On phones a form's further options start folded, unless the reader chose one of them.
-document.addEventListener("DOMContentLoaded", () => {
-  if (matchMedia("(width < 40rem)").matches) {
-    for (const fold of document.querySelectorAll("details[data-fold]:not([data-kept])")) {
-      fold.open = false;
-    }
+if (matchMedia("(width < 40rem)").matches) {
+  for (const fold of document.querySelectorAll("details[data-fold]:not([data-kept])")) {
+    fold.open = false;
   }
-});
+}
 
 // A file field hides the browser's own control behind its label, which names the file chosen.
 document.addEventListener("change", (event) => {
   const input = event.target;
-  const name =
-    input instanceof HTMLInputElement && input.type === "file"
-      ? input.closest("label")?.querySelector("[data-file-name]")
-      : null;
+  const name = input.type === "file" && input.closest("label")?.querySelector("[data-file-name]");
   if (name) {
     name.textContent = input.files[0]?.name ?? name.dataset.none;
   }
@@ -126,17 +117,15 @@ document.addEventListener("change", (event) => {
 
 // A chart wider than the screen starts scrolled to its latest values, and a row of tabs wider than
 // the screen to its current tab.
-document.addEventListener("DOMContentLoaded", () => {
-  for (const box of document.querySelectorAll("[data-scroll-end]")) {
-    box.scrollLeft = box.scrollWidth;
+for (const box of document.querySelectorAll("[data-scroll-end]")) {
+  box.scrollLeft = box.scrollWidth;
+}
+for (const row of document.querySelectorAll("[data-scroll-current]")) {
+  const current = row.querySelector("[aria-current]");
+  if (current) {
+    row.scrollLeft += current.getBoundingClientRect().right - row.getBoundingClientRect().right;
   }
-  for (const row of document.querySelectorAll("[data-scroll-current]")) {
-    const current = row.querySelector("[aria-current]");
-    if (current) {
-      row.scrollLeft += current.getBoundingClientRect().right - row.getBoundingClientRect().right;
-    }
-  }
-});
+}
 
 // Live values: a page's #live region refreshes itself through htmx every 15 s while the tab is
 // visible. A changed number counts to its new value, a server's slots fill or empty one by
@@ -161,7 +150,7 @@ document.addEventListener("visibilitychange", () => {
 });
 
 document.addEventListener("click", (event) => {
-  if (event.target instanceof Element && event.target.closest("[data-refresh]")) {
+  if (event.target.closest("[data-refresh]")) {
     refresh();
   }
 });
@@ -226,7 +215,7 @@ for (const failure of ["htmx:error", "htmx:response:error"]) {
 // After a change on the previous page, such as a purchase, or in a part of the page that a
 // script swapped in, such as an import's blocks: a number that names its value from before the
 // change counts to its new one, and the part's toasts leave in time.
-document.addEventListener("DOMContentLoaded", () => countFrom(document));
+countFrom(document);
 document.addEventListener("swapped", (event) => {
   countFrom(event.target);
   timeToasts();
@@ -303,7 +292,7 @@ function tick() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", tick);
+tick();
 setInterval(() => {
   if (!document.hidden) {
     tick();
@@ -313,7 +302,7 @@ setInterval(() => {
 // A copy button copies its text, says so for 1.5 s, in the line it names too, and has the page
 // announce it. Without clipboard access it stays as it was; the text it copies is on the page.
 document.addEventListener("click", async (event) => {
-  const button = event.target instanceof Element ? event.target.closest("[data-copy]") : null;
+  const button = event.target.closest("[data-copy]");
   if (!button) {
     return;
   }
@@ -343,14 +332,14 @@ document.addEventListener("click", async (event) => {
 
 // A read-only field of a text to copy, such as a personal link, selects all of it on focus.
 document.addEventListener("focusin", (event) => {
-  if (event.target instanceof HTMLInputElement && event.target.matches("[data-select]")) {
+  if (event.target.matches("[data-select]")) {
     event.target.select();
   }
 });
 
 // A toast that says a change was saved leaves after 4 s; one that says it failed stays until
 // dismissed.
-document.addEventListener("DOMContentLoaded", timeToasts);
+timeToasts();
 
 /** Has each toast that arrived and says a change was saved leave after 4 s. */
 function timeToasts() {
@@ -361,7 +350,7 @@ function timeToasts() {
 }
 
 document.addEventListener("click", (event) => {
-  const button = event.target instanceof Element ? event.target.closest("[data-dismiss]") : null;
+  const button = event.target.closest("[data-dismiss]");
   if (button) {
     leave(button.closest(".toast"));
   }
@@ -380,7 +369,7 @@ function leave(toast) {
 // A row's details button opens its details in place; without scripts it is a link that
 // opens them with the page.
 document.addEventListener("click", (event) => {
-  const button = event.target instanceof Element ? event.target.closest("[data-details]") : null;
+  const button = event.target.closest("[data-details]");
   if (
     button &&
     event.button === 0 &&
@@ -395,11 +384,7 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (
-    event.key === " " &&
-    event.target instanceof Element &&
-    event.target.matches("[data-details]")
-  ) {
+  if (event.key === " " && event.target.matches("[data-details]")) {
     event.preventDefault();
     toggleDetails(event.target);
   }
@@ -421,7 +406,7 @@ function toggleDetails(button) {
 // over the page it was made on; without scripts, or when the page does not come, the link
 // opens the confirmation page itself.
 document.addEventListener("click", async (event) => {
-  const link = event.target instanceof Element ? event.target.closest("a[data-dialog]") : null;
+  const link = event.target.closest("a[data-dialog]");
   if (
     !link ||
     event.button !== 0 ||
@@ -466,7 +451,7 @@ document.addEventListener("click", async (event) => {
 });
 
 document.addEventListener("click", (event) => {
-  const dialog = event.target instanceof Element ? event.target.closest("dialog.dialog") : null;
+  const dialog = event.target.closest("dialog.dialog");
   if (
     dialog &&
     event.target.closest("[data-close], .confirm-buttons a") &&
@@ -510,8 +495,7 @@ function closeDialog(dialog) {
 
 // A game password field's button shows the password as text and hides it again.
 document.addEventListener("click", (event) => {
-  const button =
-    event.target instanceof Element ? event.target.closest("[data-show-password]") : null;
+  const button = event.target.closest("[data-show-password]");
   if (!button) {
     return;
   }

@@ -4,9 +4,6 @@
 import { closeDialog, fill, flash, reducedMotion } from "./naming.js";
 
 document.addEventListener("click", (event) => {
-  if (!(event.target instanceof Element)) {
-    return;
-  }
   const summary = event.target.closest("[data-site-menu] > summary");
   for (const menu of document.querySelectorAll("[data-site-menu][open]")) {
     if (summary?.parentElement === menu) {
@@ -96,10 +93,7 @@ for (const dialog of document.querySelectorAll("dialog[data-modal]")) {
 // A link that is unavailable flashes the line beside it that says why instead of leading on;
 // without scripts it opens its page, which says the same.
 document.addEventListener("click", (event) => {
-  const link =
-    event.target instanceof Element
-      ? event.target.closest("a[aria-disabled=true][aria-describedby]")
-      : null;
+  const link = event.target.closest("a[aria-disabled=true][aria-describedby]");
   if (link) {
     event.preventDefault();
     flash(document.getElementById(link.getAttribute("aria-describedby")));

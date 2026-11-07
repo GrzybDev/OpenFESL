@@ -10,15 +10,13 @@ import { reducedMotion } from "./naming.js";
 const SOFTWARE = /swiftshader|llvmpipe|softpipe|lavapipe|basic render/i;
 
 // A hero just created greets once: the game's model cheers, or its glyph hops.
-document.addEventListener("DOMContentLoaded", () => {
-  const stage = document.querySelector("[data-stage][data-arrived]");
-  const shown = stage && heroStage(stage);
-  if (shown?.modelled) {
-    shown.react("cheer");
-  } else if (shown) {
-    stage.querySelector("[data-hop]").classList.add("hop");
-  }
-});
+const arrived = document.querySelector("[data-stage][data-arrived]");
+const shown = arrived && heroStage(arrived);
+if (shown?.modelled) {
+  shown.react("cheer");
+} else if (shown) {
+  arrived.querySelector("[data-hop]").classList.add("hop");
+}
 
 /**
  * Prepares a hero's stage, loading the game's model where the page offers it.

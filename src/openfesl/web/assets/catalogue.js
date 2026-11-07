@@ -6,17 +6,15 @@
 // it is.
 import { post, swap, toastFailed } from "./saving.js";
 
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.querySelector("[data-catalogue-upload]");
-  if (form) {
-    // The dialog asks instead of the form's required box, and the script says what is missing.
-    form.noValidate = true;
-  }
-});
+// The dialog asks instead of the form's required box, and the script says what is missing.
+const upload = document.querySelector("[data-catalogue-upload]");
+if (upload) {
+  upload.noValidate = true;
+}
 
 document.addEventListener("change", (event) => {
   const input = event.target;
-  const form = input instanceof HTMLInputElement ? input.closest("[data-catalogue-upload]") : null;
+  const form = input.closest("[data-catalogue-upload]");
   if (!form || input.type !== "file") {
     return;
   }
@@ -31,7 +29,7 @@ document.addEventListener("change", (event) => {
 
 document.addEventListener("submit", (event) => {
   const form = event.target;
-  if (!(form instanceof HTMLFormElement) || !form.matches("[data-catalogue-upload]")) {
+  if (!form.matches("[data-catalogue-upload]")) {
     return;
   }
   event.preventDefault();
@@ -252,7 +250,7 @@ function number(bytes) {
 const stillMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
 document.addEventListener("change", (event) => {
-  const form = event.target instanceof Element ? event.target.closest("form[data-art]") : null;
+  const form = event.target.closest("form[data-art]");
   if (form) {
     clearTimeout(form.restTimer);
     form.restTimer = setTimeout(() => saveArt(form), 400);

@@ -2,11 +2,9 @@
 // the button stays unavailable, saying why, until the name is free and the account has the price.
 import { checkName, decode } from "./naming.js";
 
-document.addEventListener("DOMContentLoaded", () => {
-  for (const dialog of document.querySelectorAll("[data-rename]")) {
-    rename(dialog);
-  }
-});
+for (const dialog of document.querySelectorAll("[data-rename]")) {
+  rename(dialog);
+}
 
 /**
  * Brings a hero's rename dialog to life.

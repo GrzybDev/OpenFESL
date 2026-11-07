@@ -26,7 +26,7 @@ if (overlay) {
 }
 
 document.addEventListener("click", (event) => {
-  const opener = event.target instanceof Element ? event.target.closest("[data-claw-open]") : null;
+  const opener = event.target.closest("[data-claw-open]");
   if (opener && overlay) {
     event.preventDefault();
     const menu = opener.closest("details");

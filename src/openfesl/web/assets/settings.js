@@ -5,7 +5,7 @@
 import { post, swap, toastFailed } from "./saving.js";
 
 document.addEventListener("change", (event) => {
-  const form = event.target instanceof Element ? event.target.closest("form[data-mark]") : null;
+  const form = event.target.closest("form[data-mark]");
   if (form) {
     saveMark(form);
   }

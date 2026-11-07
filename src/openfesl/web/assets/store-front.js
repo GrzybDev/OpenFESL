@@ -13,14 +13,14 @@ let pending = "";
 let asked = 0;
 
 document.addEventListener("change", (event) => {
-  const form = event.target instanceof Element ? event.target.closest("[data-store-filter]") : null;
+  const form = event.target.closest("[data-store-filter]");
   if (form) {
     show(form, event.target);
   }
 });
 
 document.addEventListener("submit", (event) => {
-  if (event.target instanceof HTMLFormElement && event.target.matches("[data-store-filter]")) {
+  if (event.target.matches("[data-store-filter]")) {
     event.preventDefault();
     show(event.target, event.target.elements.namedItem("q"));
   }

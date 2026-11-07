@@ -4,23 +4,21 @@
 // its choice and the confirmation is a page of its own.
 import { closeDialog, fill, flash, reducedMotion } from "./naming.js";
 
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.querySelector("[data-buy]");
-  if (form) {
-    buyPanel(form);
-  }
-  for (const timer of document.querySelectorAll("[role=timer][data-left]:not([data-deal] *)")) {
-    countDown(timer, "sale" in timer.dataset ? () => {} : endDeal);
-  }
-  const reveal = document.querySelector("dialog[data-reveal]");
-  if (reveal) {
-    // The box was bought with the page's Buy button, which takes the focus back.
-    closes(reveal, document.querySelector("[data-buy-open]"));
-    // Open in the page's flow without scripts, it opens over the page with them.
-    reveal.close();
-    reveal.showModal();
-  }
-});
+const form = document.querySelector("[data-buy]");
+if (form) {
+  buyPanel(form);
+}
+for (const timer of document.querySelectorAll("[role=timer][data-left]:not([data-deal] *)")) {
+  countDown(timer, "sale" in timer.dataset ? () => {} : endDeal);
+}
+const reveal = document.querySelector("dialog[data-reveal]");
+if (reveal) {
+  // The box was bought with the page's Buy button, which takes the focus back.
+  closes(reveal, document.querySelector("[data-buy-open]"));
+  // Open in the page's flow without scripts, it opens over the page with them.
+  reveal.close();
+  reveal.showModal();
+}
 
 /**
  * Brings a store page's buy panel to life.
@@ -34,7 +32,7 @@ function buyPanel(form) {
 
   form.addEventListener("change", async (event) => {
     const changed = event.target;
-    if (!(changed instanceof HTMLInputElement) || !["hero", "price"].includes(changed.name)) {
+    if (!["hero", "price"].includes(changed.name)) {
       return;
     }
     const number = ++asked;
@@ -75,7 +73,7 @@ function buyPanel(form) {
   });
 
   form.addEventListener("click", (event) => {
-    const buy = event.target instanceof Element ? event.target.closest("[data-buy-open]") : null;
+    const buy = event.target.closest("[data-buy-open]");
     if (!buy) {
       return;
     }
@@ -105,7 +103,7 @@ function buyPanel(form) {
  */
 function closes(dialog, opener) {
   dialog.addEventListener("click", (event) => {
-    if (event.target instanceof Element && event.target.closest("[data-close]")) {
+    if (event.target.closest("[data-close]")) {
       closeDialog(dialog, dialog.opener ?? opener);
     }
   });

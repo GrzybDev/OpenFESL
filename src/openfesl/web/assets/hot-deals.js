@@ -7,16 +7,14 @@ import { countDown } from "./store.js";
 
 const DAY = 86_400_000;
 
-document.addEventListener("DOMContentLoaded", () => {
-  for (const timer of document.querySelectorAll("[data-deal] [role=timer][data-left]")) {
-    countDown(timer, () => expire(timer.closest("[data-deal]")));
-    const soon = Number(timer.dataset.left) * 1000 - DAY;
-    // The longest wait setTimeout takes; a page shown that long has been reloaded.
-    if (soon > 0 && soon < 2 ** 31) {
-      setTimeout(() => timer.closest(".deal-timer").classList.add("deal-timer-soon"), soon);
-    }
+for (const timer of document.querySelectorAll("[data-deal] [role=timer][data-left]")) {
+  countDown(timer, () => expire(timer.closest("[data-deal]")));
+  const soon = Number(timer.dataset.left) * 1000 - DAY;
+  // The longest wait setTimeout takes; a page shown that long has been reloaded.
+  if (soon > 0 && soon < 2 ** 31) {
+    setTimeout(() => timer.closest(".deal-timer").classList.add("deal-timer-soon"), soon);
   }
-});
+}
 
 /**
  * Shows that a deal's time ran out.

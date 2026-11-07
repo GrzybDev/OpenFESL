@@ -7,12 +7,10 @@ import { heroStage } from "./stage.js";
 // The fields of the look that the hero's model is drawn in.
 const LOOK = ["faction", "class", "skin_tone", "hair_colour", "hair_style", "facial_hair"];
 
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.querySelector("[data-creator]");
-  if (form) {
-    creator(form);
-  }
-});
+const form = document.querySelector("[data-creator]");
+if (form) {
+  creator(form);
+}
 
 /**
  * Brings a creator's form to life.
