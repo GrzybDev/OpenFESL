@@ -45,15 +45,6 @@
   }
 
   .admin-sign-out {
-    display: flex;
-    min-height: 44px;
-    align-items: center;
-    background: var(--ink);
     padding-inline: 16px;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    color: var(--bright);
-    text-transform: uppercase;
   }
 }

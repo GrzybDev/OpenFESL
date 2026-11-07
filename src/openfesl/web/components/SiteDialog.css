@@ -18,7 +18,7 @@
       max-height: calc(100dvh - 16px);
       margin: auto;
       overflow: auto;
-      animation: site-dialog-in 160ms var(--ease-menu);
+      animation: scale-in 160ms var(--ease-menu);
     }
 
     &.closing:modal {
@@ -36,7 +36,7 @@
 
     &::backdrop {
       background: rgb(0 0 0 / 0.75);
-      animation: site-fade-in 160ms linear;
+      animation: fade-in 160ms linear;
     }
   }
 
@@ -101,13 +101,6 @@
     }
   }
 
-  @keyframes site-dialog-in {
-    from {
-      opacity: 0;
-      scale: 0.96;
-    }
-  }
-
   @keyframes site-flash {
     from {
       background: #ffe27a;
@@ -116,7 +109,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .site-dialog:modal {
-      animation: site-fade-in 100ms linear;
+      animation: fade-in 100ms linear;
     }
 
     .site-dialog.closing:modal {

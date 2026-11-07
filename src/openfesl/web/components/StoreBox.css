@@ -2,6 +2,7 @@
    black edge, an inner highlight, a yellow disc on the corner and a title tab, the red one of
    dialogs or a dark one on coloured boxes. */
 @layer components {
+  .info-box,
   .store-box {
     position: relative;
     padding: 0 18px 18px;
@@ -14,21 +15,16 @@
     color: var(--box-ink, #fff);
   }
 
+  .info-box {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
   .store-box-pale {
     --box: #f1e9de;
     --box-edge: #f8f4ef;
     --box-ink: #1f1712;
     --box-inset: 3px;
-  }
-
-  .store-box-red {
-    --box: #893531;
-    --box-edge: #c54d47;
-  }
-
-  .store-box-green {
-    --box: #4f5627;
-    --box-edge: #77813b;
   }
 
   /* The yellow disc on a box's corner and its dark title tab. */

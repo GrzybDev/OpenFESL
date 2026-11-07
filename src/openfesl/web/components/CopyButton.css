@@ -1,17 +1,8 @@
 /* A copy button shows a tick in place of its icon for a moment after it copied. */
 @layer components {
   .copy-button {
-    display: flex;
-    min-height: 44px;
-    align-items: center;
     gap: 10px;
-    background: var(--ink);
     padding: 0 16px 0 12px;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    color: var(--bright);
-    text-transform: uppercase;
   }
 
   .copy-tall {

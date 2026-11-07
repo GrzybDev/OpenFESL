@@ -92,17 +92,10 @@
 
   /* The card of a slot just bought scales into place. */
   .free-slot-new {
-    animation: free-slot-in 200ms var(--ease-menu) both;
+    animation: scale-in 200ms var(--ease-menu) both;
 
     @media (prefers-reduced-motion: reduce) {
       animation: fade-in 100ms linear both;
-    }
-  }
-
-  @keyframes free-slot-in {
-    from {
-      opacity: 0;
-      scale: 0.96;
     }
   }
 }

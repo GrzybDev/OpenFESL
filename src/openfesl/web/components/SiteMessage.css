@@ -66,7 +66,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .site-message {
-      animation: site-fade-in 100ms linear;
+      animation: fade-in 100ms linear;
 
       &.leaving {
         transition-duration: 100ms;

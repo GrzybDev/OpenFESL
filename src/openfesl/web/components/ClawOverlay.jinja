@@ -17,11 +17,11 @@
     {% if bar and bar.wallets %}
       <ul aria-label="{{ _('web.site.wallets') }}" class="claw-wallets">
         {% for wallet, balance in bar.wallets %}
-          <li data-wallet="{{ wallet.currency }}" class="claw-wallet">
+          <li data-wallet="{{ wallet.currency }}" class="site-wallet">
             <span aria-hidden="true"
                   class="wallet-coin"><Icon :name="wallet.glyph" :size="18" stroke="currentColor" /></span>
-            <span class="claw-wallet-amount">{{ number(balance) }}</span>
-            <span class="claw-wallet-name">{{ _("games." ~ game.id ~ ".currency." ~ wallet.currency) }}</span>
+            <span class="wallet-number">{{ number(balance) }}</span>
+            <span class="wallet-name">{{ _("games." ~ game.id ~ ".currency." ~ wallet.currency) }}</span>
           </li>
         {% endfor %}
       </ul>

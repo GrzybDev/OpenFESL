@@ -17,25 +17,6 @@
     }
   }
 
-  .server-cell {
-    display: flex;
-    min-height: 44px;
-    align-items: center;
-    background: var(--cell);
-    padding-inline: 10px;
-    color: var(--ink);
-  }
-
-  .cell-badges {
-    gap: 4px;
-    padding-inline: 6px;
-  }
-
-  .cell-name {
-    gap: 6px;
-    padding: 0 0 0 12px;
-  }
-
   /* An official server's name and its chip, which goes under a name too long for both. */
   .server-label {
     display: flex;

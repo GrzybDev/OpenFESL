@@ -57,7 +57,7 @@
           </div>
         {% endif %}
       </form>
-      <p class="catalogue-art-line">
+      <p class="game-mark-line catalogue-art-line">
         {% if art.chosen %}
           {{ _("web.admin.catalogue.art.chosen", time=_("web.server.time", time=moment(art.chosen.at)), who=art.chosen.name or _("web.admin.command_line")) }}
         {% else %}
@@ -65,7 +65,7 @@
         {% endif %}
         <a href="{{ url('/admin/audit') }}">{{ _("web.admin.catalogue.art.audit") }}</a>
       </p>
-      <p class="catalogue-art-line">{{ _("web.admin.catalogue.art.game") }}</p>
+      <p class="game-mark-line catalogue-art-line">{{ _("web.admin.catalogue.art.game") }}</p>
       {% if not manages %}
         <p class="role-note">
           <Badge name="lock" :size="14" lines />{{ _("web.admin.catalogue.art.managed") }}

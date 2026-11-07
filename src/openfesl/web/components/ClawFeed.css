@@ -58,7 +58,7 @@
     border-radius: 4px;
     background: #f2c12e;
     color: #0a0a0a;
-    animation: claw-feed-in 200ms var(--ease-menu);
+    animation: site-message-in 200ms var(--ease-menu);
   }
 
   .claw-feed-hero {
@@ -81,16 +81,9 @@
     line-height: 1.4;
   }
 
-  @keyframes claw-feed-in {
-    from {
-      opacity: 0;
-      translate: 0 -8px;
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .claw-feed-new {
-      animation: site-fade-in 100ms linear;
+      animation: fade-in 100ms linear;
     }
   }
 }

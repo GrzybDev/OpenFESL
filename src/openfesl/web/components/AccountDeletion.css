@@ -62,21 +62,6 @@
     }
   }
 
-  .deletion-label {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .deletion-title {
-    margin-top: 8px;
-    font-family: var(--font-sans);
-    font-size: 20px;
-    line-height: 1.25;
-    font-weight: 700;
-  }
-
   .deletion-request .body-text:not(.side-note) {
     margin-top: 6px;
   }

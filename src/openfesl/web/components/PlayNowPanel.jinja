@@ -31,7 +31,7 @@
       <div class="site-actions">
         <SiteButton :href="url('/sign-in') ~ '?' ~ {'next': again}|urlencode" glyph="sign-in" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.account.sign_in.action") }}</SiteButton>
         <a href="{{ url('/register') }}"
-           class="play-panel-link">{{ _("web.account.sign_in.create") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+           class="site-link play-panel-link">{{ _("web.account.sign_in.create") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
       </div>
     {% elif state == "no-hero" %}
       <h2 id="play-now-state" tabindex="-1" class="site-box-title">{{ _("web.play_now.no_hero") }}</h2>
@@ -83,7 +83,7 @@
           <a href="{{ link.address }}"
              class="site-button site-button-go site-button-large"><Icon name="play" :size="18" stroke="currentColor" />{{ _("web.play_now.open") }}</a>
           <a href="{{ heroes }}"
-             class="play-panel-link">{{ _("web.play_now.change") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+             class="site-link play-panel-link">{{ _("web.play_now.change") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
         {% endif %}
       </div>
     {% endif %}

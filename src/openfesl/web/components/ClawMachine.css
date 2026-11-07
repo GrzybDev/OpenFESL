@@ -14,7 +14,7 @@
     border: 2px solid #000;
     border-radius: 8px;
     background: rgb(0 0 0 / 0.35);
-    animation: claw-fold 200ms var(--ease-menu);
+    animation: drop-in 200ms var(--ease-menu);
 
     p {
       flex: 1 1 200px;
@@ -99,7 +99,7 @@
   }
 
   .claw-rows {
-    animation: claw-fill 200ms var(--ease-menu);
+    animation: fade-in 200ms var(--ease-menu);
   }
 
   .claw-row {
@@ -305,46 +305,6 @@
     z-index: 3;
   }
 
-  @keyframes claw-fill {
-    from {
-      opacity: 0;
-    }
-  }
-
-  @media (width < 40rem) {
-    .claw-glass {
-      height: 300px;
-    }
-
-    .claw-belts {
-      top: 96px;
-    }
-
-    .claw-row {
-      height: 62px;
-    }
-
-    .claw-tile {
-      --claw-tile: 58px;
-    }
-
-    .claw-tile-art .claw-icon {
-      width: 40px;
-      height: 40px;
-    }
-
-    .claw-tile-name {
-      display: none;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .claw-chosen,
-    .claw-rows {
-      animation: site-fade-in 100ms linear;
-    }
-  }
-
   /* With scripts the picked hero's row stands in for the picker. */
   .js [data-claw-form][data-hero] .claw-picker {
     display: none;
@@ -384,7 +344,7 @@
     background: #f1e9de;
     color: #1f1712;
     font-family: Arial, Helvetica, sans-serif;
-    animation: claw-fold 200ms var(--ease-menu);
+    animation: drop-in 200ms var(--ease-menu);
 
     .site-dialog-title {
       margin-left: -16px;
@@ -412,22 +372,45 @@
     color: #3b2d23;
   }
 
-  @keyframes claw-fold {
-    from {
-      opacity: 0;
-      translate: 0 -6px;
-    }
-  }
-
   @media (width < 40rem) {
+    .claw-glass {
+      height: 300px;
+    }
+
+    .claw-belts {
+      top: 96px;
+    }
+
+    .claw-row {
+      height: 62px;
+    }
+
+    .claw-tile {
+      --claw-tile: 58px;
+    }
+
+    .claw-tile-art .claw-icon {
+      width: 40px;
+      height: 40px;
+    }
+
+    .claw-tile-name {
+      display: none;
+    }
+
     .claw-speed {
       margin-left: 0;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .claw-chosen,
+    .claw-rows {
+      animation: fade-in 100ms linear;
+    }
+
     .claw-confirm {
-      animation: site-fade-in 100ms linear;
+      animation: fade-in 100ms linear;
     }
   }
 }

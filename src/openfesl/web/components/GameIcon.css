@@ -170,11 +170,6 @@
     }
   }
 
-  .game-icon-upload {
-    min-height: 0;
-    overflow: hidden;
-  }
-
   .game-icon-file {
     display: flex;
     min-height: 44px;

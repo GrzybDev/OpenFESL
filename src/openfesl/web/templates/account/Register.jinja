@@ -78,7 +78,7 @@
       <div class="account-page-form">
         <Bar large>{{ _("web.account.register.names" if service else "web.account.register.signs_in") }}</Bar>
         {% if referrer %}
-          <ul class="info-rows">
+          <ul class="facts">
             <InfoRow glyph="link" :label="_('web.referral.title')">{{ _("web.referral.register", name=referrer.account.display_name, game=referrer.game.name) }}</InfoRow>
           </ul>
         {% endif %}

@@ -41,6 +41,31 @@
     gap: 12px;
   }
 
+  .field-note.field-note-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0 12px;
+    padding-block: 0;
+    padding-right: 0;
+
+    p {
+      flex: 1 1 260px;
+      padding-block: 9px;
+    }
+
+    a {
+      display: flex;
+      min-height: 44px;
+      align-items: center;
+      padding-inline: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration-line: underline;
+    }
+  }
+
   .field-stack {
     display: grid;
     gap: 2px;

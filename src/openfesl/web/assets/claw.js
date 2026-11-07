@@ -329,7 +329,7 @@ function swap(body, page) {
     const shown = amount.querySelector("[data-count]").textContent;
     const code = amount.dataset.wallet;
     for (const place of document.querySelectorAll(
-      `.site-wallets [data-wallet="${code}"] [data-count], .claw-wallet[data-wallet="${code}"] .claw-wallet-amount`,
+      `.site-wallets [data-wallet="${code}"] [data-count], .claw-wallets [data-wallet="${code}"] .wallet-number`,
     )) {
       place.textContent = shown;
     }

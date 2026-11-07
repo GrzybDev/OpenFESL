@@ -79,18 +79,8 @@
     animation: spin 900ms linear infinite;
   }
 
-  .catalogue-art-line {
-    background: var(--row);
-    padding: 10px 14px;
-    font-family: var(--font-sans);
-    font-size: 14px;
-    line-height: 1.4;
-    font-weight: 600;
-    color: var(--ink);
-
-    a {
-      text-decoration: underline;
-    }
+  .catalogue-art-line a {
+    text-decoration: underline;
   }
 
   .catalogue-strip {

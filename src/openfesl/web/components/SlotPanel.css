@@ -82,17 +82,10 @@
 
   /* A slot just bought joins the pips. */
   .slot-pip-new {
-    animation: slot-pip-in 200ms var(--ease-menu) both;
+    animation: reveal-burst 200ms var(--ease-menu) both;
 
     @media (prefers-reduced-motion: reduce) {
       animation: fade-in 100ms linear both;
-    }
-  }
-
-  @keyframes slot-pip-in {
-    from {
-      opacity: 0;
-      scale: 0.6;
     }
   }
 }

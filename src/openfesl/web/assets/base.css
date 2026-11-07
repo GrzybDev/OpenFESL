@@ -202,6 +202,23 @@
     border-width: 0;
   }
 
+  /* The black blocks that lead somewhere or send something, each with its own room. */
+  .admin-sign-out,
+  .copy-button,
+  .form-button,
+  .row-link,
+  .stale-panel button {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    background: var(--ink);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--bright);
+    text-transform: uppercase;
+  }
+
   /* Text of the sentences on the area's rows and backdrop. */
   .body-text {
     font-family: var(--font-sans);
@@ -298,6 +315,20 @@
   @keyframes fade-in {
     from {
       opacity: 0;
+    }
+  }
+
+  @keyframes drop-in {
+    from {
+      opacity: 0;
+      translate: 0 -6px;
+    }
+  }
+
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      scale: 0.96;
     }
   }
 

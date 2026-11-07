@@ -6,12 +6,6 @@
     gap: 2px;
   }
 
-  @media (width >= 40rem) {
-    .stats {
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    }
-  }
-
   .stat {
     display: flex;
     flex-direction: column;
@@ -45,6 +39,10 @@
   }
 
   @media (width >= 40rem) {
+    .stats {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
     .stat {
       dd {
         min-height: 84px;

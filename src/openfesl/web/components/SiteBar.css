@@ -92,7 +92,7 @@
 
   /* The pill of a hero just made the default one shows it with a fade. */
   .hero-pill-changed > * {
-    animation: site-fade-in 150ms var(--ease-menu) both;
+    animation: fade-in 150ms var(--ease-menu) both;
 
     @media (prefers-reduced-motion: reduce) {
       animation-duration: 100ms;

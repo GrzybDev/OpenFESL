@@ -6,13 +6,6 @@
     flex-basis: 400px;
   }
 
-  .keys-count {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-top: 10px;
-  }
-
   .keys-disc {
     display: grid;
     width: 44px;

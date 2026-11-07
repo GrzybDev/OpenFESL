@@ -52,14 +52,6 @@
     }
   }
 
-  .catalogue-step-text,
-  .catalogue-step-hint {
-    font-family: var(--font-sans);
-    font-size: 15px;
-    line-height: 1.45;
-    font-weight: 500;
-  }
-
   .catalogue-step-hint {
     font-size: 14px;
     color: var(--dim);

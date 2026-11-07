@@ -130,18 +130,7 @@
   }
 
   .selector-tab {
-    display: flex;
-    min-height: 28px;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    align-self: stretch;
     margin-inline: -8px;
-    background: var(--faction, #3b2d23);
-    color: var(--faction-ink, #fff);
-    font: 800 12px/1 var(--site-heading);
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
   }
 
   .selector-mug {
@@ -158,16 +147,6 @@
       left: -199.1%;
       width: 485.3%;
     }
-  }
-
-  .selector-name {
-    font: 800 17px/1.15 var(--site-heading);
-    overflow-wrap: anywhere;
-  }
-
-  .selector-kind {
-    font-size: 14px;
-    line-height: 1.3;
   }
 
   .selector-default {
@@ -239,7 +218,7 @@
     }
 
     .selector.open .selector-hanger {
-      animation: site-fade-in 100ms linear both;
+      animation: fade-in 100ms linear both;
     }
   }
 }

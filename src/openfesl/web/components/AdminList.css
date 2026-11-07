@@ -40,7 +40,8 @@
     }
   }
 
-  .admin-cell {
+  .admin-cell,
+  .server-cell {
     display: flex;
     min-height: 44px;
     align-items: center;
@@ -49,12 +50,14 @@
     color: var(--ink);
   }
 
-  .admin-badges {
+  .admin-badges,
+  .cell-badges {
     gap: 4px;
     padding-inline: 6px;
   }
 
-  .admin-name-cell {
+  .admin-name-cell,
+  .cell-name {
     gap: 6px;
     padding: 0 0 0 12px;
   }

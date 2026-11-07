@@ -2,28 +2,7 @@
    then the row that links the terms. */
 @layer components {
   .terms-check {
-    display: grid;
-    min-height: 44px;
     grid-template-columns: 44px minmax(0, 1fr) 44px;
-    align-items: center;
-    background: var(--row);
-    color: var(--ink);
-    cursor: pointer;
-  }
-
-  .terms-glyph,
-  .terms-place {
-    display: grid;
-    place-items: center;
-  }
-
-  .terms-label {
-    padding: 8px 4px;
-    font-size: 14px;
-    line-height: 1.1;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
   }
 
   .terms-place input {
@@ -33,29 +12,11 @@
     cursor: pointer;
   }
 
+  .terms-label {
+    padding-block: 8px;
+  }
+
   .terms-note {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0 12px;
-    padding-block: 0;
-    padding-right: 0;
     background: var(--row-alt);
-
-    p {
-      flex: 1 1 260px;
-      padding-block: 9px;
-    }
-
-    a {
-      display: flex;
-      min-height: 44px;
-      align-items: center;
-      padding-inline: 14px;
-      font-size: 15px;
-      font-weight: 600;
-      text-decoration-line: underline;
-    }
   }
 }

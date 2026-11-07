@@ -117,16 +117,6 @@
     animation: spin 1.4s linear infinite;
   }
 
-  .play-panel-link {
-    display: inline-flex;
-    min-height: 44px;
-    align-items: center;
-    gap: 6px;
-    font: 800 15px/1.1 var(--site-heading);
-    color: #fede01;
-    text-decoration-line: underline;
-  }
-
   /* On phones the disc stands beside the title, with the text and actions under both. */
   @media (width < 40rem) {
     .play-panel {

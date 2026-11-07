@@ -17,7 +17,7 @@
   <input type="hidden" name="once" value="{{ once_token() }}">
   <DialogHead :id="'buy-keys-title' ~ suffix" :dialog="dialog">{{ _("web.chests.keys.buy") }}</DialogHead>
   <fieldset class="keys-packs">
-    <legend class="keys-legend">{{ _("web.chests.keys.how_many") }}</legend>
+    <legend class="store-legend">{{ _("web.chests.keys.how_many") }}</legend>
     <div class="keys-tiles">
       {% for count in game.chests.packs %}
         {% set price = key.price * count %}
@@ -47,7 +47,7 @@
                  data-pack-why="{{ pack.why }}"
                  class="keys-radio">
           <span class="keys-face">
-            <span aria-hidden="true" class="keys-face-disc"><Icon name="key" :size="22" stroke="#FEDE01" /></span>
+            <span aria-hidden="true" class="store-price-disc"><Icon name="key" :size="22" stroke="#FEDE01" /></span>
             <span class="keys-face-count">{{ _n("web.chests.keys.count", count) }}</span>
             <span class="keys-face-price"><strong>{{ number(price) }}</strong> {{ currency }}</span>
             <span id="keys-short-{{ count }}{{ suffix }}" class="keys-face-short">
@@ -83,7 +83,7 @@
     <Icon name="warn" :size="18" stroke="currentColor" />
     <span data-why-text>{{ first.why }}</span>
   </p>
-  <p class="keys-note">{{ _("web.chests.keys.belong") }} {{ _("web.heroes.wallet.note") }}</p>
+  <p class="store-confirm-note">{{ _("web.chests.keys.belong") }} {{ _("web.heroes.wallet.note") }}</p>
   <div class="site-dialog-actions">
     <SiteButton :aria-describedby="'buy-keys-why' ~ suffix" :aria-disabled="'true' if first.short else none" glyph="coin" :size="18" stroke="currentColor" class="site-button-go site-button-large"><span class="js-only" data-label>{{ first.label }}</span> <span class="no-js-only">{{ _("web.chests.keys.buy") }}</span></SiteButton>
     <FundsLink data-earn :hidden="not first.short" class="site-button site-button-ghost" />

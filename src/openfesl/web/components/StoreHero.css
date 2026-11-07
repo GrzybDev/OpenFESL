@@ -75,6 +75,7 @@
     }
   }
 
+  .selector-tab,
   .store-hero-tab {
     display: flex;
     min-height: 28px;
@@ -82,12 +83,15 @@
     align-self: stretch;
     justify-content: center;
     gap: 6px;
-    margin: 0 -10px;
     background: var(--faction, #3b2d23);
     color: var(--faction-ink, #fff);
     font: 800 12px/1 var(--site-heading);
     letter-spacing: 0.07em;
     text-transform: uppercase;
+  }
+
+  .store-hero-tab {
+    margin: 0 -10px;
   }
 
   .store-hero-disc {
@@ -127,13 +131,7 @@
 
   /* The tile of the hero a purchase was just made for. */
   .store-hero-changed {
-    animation: store-flash 600ms var(--ease-menu);
-  }
-
-  @keyframes store-flash {
-    from {
-      background: #ffe27a;
-    }
+    animation: site-flash 600ms var(--ease-menu);
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -22,7 +22,7 @@
     {% endif %}
     {% if "play" in game.pages %}
       <a href="{{ url('/' ~ game.id ~ '/play') }}"
-         class="play-panel-link">{{ _("web.site.page.play") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+         class="site-link play-panel-link">{{ _("web.site.page.play") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
     {% endif %}
   </div>
 </section>

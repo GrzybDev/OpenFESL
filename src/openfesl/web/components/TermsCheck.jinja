@@ -2,10 +2,10 @@
 {# The acceptance of the terms as a check row that the whole row toggles, with a row under it that
    links the terms or says the error. #}
 <label for="{{ id }}"
-       class="terms-check{% if error %} field-invalid{% endif %}">
-  <span class="terms-glyph"><Badge name="doc" /></span>
-  <span class="terms-label">{{ _("web.account.terms") }}</span>
-  <span class="terms-place">
+       class="check-row terms-check{% if error %} field-invalid{% endif %}">
+  <span class="check-glyph"><Badge name="doc" /></span>
+  <span class="check-label terms-label">{{ _("web.account.terms") }}</span>
+  <span class="check-glyph terms-place">
     <input id="{{ id }}"
            name="terms"
            type="checkbox"
@@ -19,7 +19,7 @@
 {% if error %}
   <FieldError :id="id ~ '-note'">{{ error }}</FieldError>
 {% else %}
-  <div class="field-note terms-note">
+  <div class="field-note field-note-row terms-note">
     <p id="{{ id }}-note">{{ _("web.account.terms.note") }}</p>
     <a href="{{ url('/terms') }}">{{ _("web.account.terms.read") }}</a>
   </div>

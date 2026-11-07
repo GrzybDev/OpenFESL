@@ -82,17 +82,10 @@
       flex: 1 1 300px;
       color: var(--soft);
     }
-
-    .form-button:disabled {
-      opacity: 0.62;
-      cursor: not-allowed;
-    }
   }
-}
 
-/* The session's own way in, the reason a last way in stays, and the column with the services to
-   link beside the ways in. */
-@layer components {
+  /* The session's own way in, the reason a last way in stays, and the column with the services to
+     link beside the ways in. */
   .way-chip {
     background: var(--ink);
     padding: 3px 6px;
@@ -126,14 +119,12 @@
     padding: 0;
   }
 
-  .way > .form-button:disabled {
+  :is(.way, .way-remove) > .form-button:disabled {
     opacity: 0.62;
     cursor: not-allowed;
   }
-}
 
-/* The session's buttons share one row. */
-@layer components {
+  /* The session's buttons share one row. */
   .security-sign-out {
     margin-top: 2px;
 

@@ -74,7 +74,7 @@
                        :label="_('web.account.password')"
                        note="sign-in-password-note"
                        :focus="notice is not none and notice.kind == 'wrong'">
-          <div class="field-note password-note">
+          <div class="field-note field-note-row">
             <p id="sign-in-password-note">{{ _("web.account.sign_in.password.note" ~ via, games=games) }}</p>
             {% if mail %}<a href="{{ url('/password-reset') }}">{{ _("web.account.sign_in.forgotten") }}</a>{% endif %}
           </div>
@@ -99,7 +99,7 @@
     </section>
     <section aria-labelledby="sign-in-how">
       <Bar id="sign-in-how">{{ _("web.account.how") }}</Bar>
-      <ul class="info-rows">
+      <ul class="facts">
         <InfoRow glyph="user" :label="_('web.account.how.account')">{{ _("web.account.how.account.text") }}</InfoRow>
         <InfoRow glyph="key" :label="_('web.account.how.ways')">{{ _("web.account.how.ways.text" ~ via, games=games) }}</InfoRow>
         <InfoRow glyph="people" :label="_('web.account.how.personas')">{{ _("web.account.how.personas.text", personas=listed(personas)) }}</InfoRow>

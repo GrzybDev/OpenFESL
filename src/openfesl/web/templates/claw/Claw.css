@@ -304,7 +304,7 @@
       inset: 0;
       width: min(460px, calc(100% - 16px));
       margin: auto;
-      animation: site-dialog-in 160ms var(--ease-menu);
+      animation: scale-in 160ms var(--ease-menu);
     }
 
     &::backdrop {
@@ -396,7 +396,7 @@
   @media (prefers-reduced-motion: reduce) {
     .claw-prize-rare,
     .claw-prize:modal {
-      animation: site-fade-in 100ms linear;
+      animation: fade-in 100ms linear;
     }
   }
 }

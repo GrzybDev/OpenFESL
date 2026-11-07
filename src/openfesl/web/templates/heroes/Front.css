@@ -230,6 +230,7 @@
   }
 
   .info-box-bluegray {
+    --box-ink: #1f1712;
     --box: #576d81;
     --box-edge: #83a4c0;
   }

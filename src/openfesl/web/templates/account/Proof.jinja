@@ -61,7 +61,7 @@
                          :label="_('web.account.password')"
                          note="proof-password-note"
                          :focus="notice is not none and notice.kind == 'wrong'">
-            <div class="field-note password-note">
+            <div class="field-note field-note-row">
               <p id="proof-password-note">{{ _("web.account.proof.password.note", account=name, games=games, service=service.name) }}</p>
               {% if mail %}<a href="{{ url('/password-reset') }}">{{ _("web.account.sign_in.forgotten") }}</a>{% endif %}
             </div>
@@ -129,7 +129,7 @@
     <section aria-labelledby="proof-changes">
       <Bar id="proof-changes">{{ _("web.account.proof.changes") }}</Bar>
       {% set ways = ([_("web.account.proof.ways.password")] if password else []) + linked|map(attribute="name")|list %}
-      <ul class="info-rows">
+      <ul class="facts">
         <InfoRow glyph="key" :label="_('web.account.proof.changes.way')">{{ _("web.account.proof.changes.way.text", service=service.name, account=name, ways=listed(ways)) }}</InfoRow>
         <InfoRow glyph="people" :label="_('web.account.proof.changes.rest')">{{ _("web.account.proof.changes.rest.text", personas=listed(personas)) }}</InfoRow>
         <InfoRow glyph="lock" :label="_('web.account.proof.changes.why')">{{ _("web.account.proof.changes.why.text") }}</InfoRow>

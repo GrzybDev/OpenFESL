@@ -42,8 +42,8 @@
   </section>
   <section aria-labelledby="request-title" class="account-side deletion-request">
     <div id="request-text" class="bar-text">
-      <h3 id="request-title" class="deletion-label">{{ _("web.account.deletion.request") }}</h3>
-      <p class="deletion-title">{{ _("web.account.deletion.request.title") }}</p>
+      <h3 id="request-title" class="row-facts">{{ _("web.account.deletion.request") }}</h3>
+      <p class="alert-title">{{ _("web.account.deletion.request.title") }}</p>
       <p class="body-text">{{ _("web.account.deletion.request.text", held=listed(played.counts)) if played.counts else _("web.account.deletion.request.text.empty") }}</p>
     </div>
     <Action :href="url('/account/deletion')" :label="_('web.account.deletion.action')" glyph="x" dialog />

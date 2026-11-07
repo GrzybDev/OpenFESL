@@ -141,7 +141,7 @@
       border-inline: 1px solid var(--shell-edge);
       box-shadow: 0 14px 30px rgb(0 0 0 / 0.55);
       transform-origin: top right;
-      animation-name: account-menu;
+      animation-name: dialog-in;
       animation-duration: 120ms;
 
       ul {
@@ -167,13 +167,6 @@
   /* With scripts the menu plays its closing before the details element closes. */
   .account-entry.closing .account-menu {
     animation: fade-out 100ms var(--ease-menu) both;
-  }
-
-  @keyframes account-menu {
-    from {
-      opacity: 0;
-      transform: scale(0.96);
-    }
   }
 
   @keyframes account-sheet {

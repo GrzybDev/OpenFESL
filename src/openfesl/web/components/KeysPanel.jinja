@@ -4,7 +4,7 @@
 {% set bought = toast.values.bought|int if toast and toast.key == "web.chests.keys.done" else 0 %}
 <section aria-labelledby="keys-title" class="slot-panel keys-panel">
   <h2 id="keys-title" class="slot-panel-title">{{ _("web.chests.keys.title") }}</h2>
-  <div class="keys-count">
+  <div class="slot-count">
     <span aria-hidden="true"
           class="keys-disc{% if not keys %} keys-disc-none{% elif bought == keys %} keys-disc-new{% endif %}"><Icon name="key" :size="24" stroke="#0A0A0A" /></span>
     <p class="keys-number">

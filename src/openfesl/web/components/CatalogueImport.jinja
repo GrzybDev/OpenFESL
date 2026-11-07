@@ -45,7 +45,7 @@
           <h3>
             <StepNumber :number="1" />{{ _("web.admin.catalogue.step.make") }}
           </h3>
-          <p class="catalogue-step-text">{{ _("web.admin.catalogue.step.make.text", exe=first.executable, file=file) }}</p>
+          <p class="body-text">{{ _("web.admin.catalogue.step.make.text", exe=first.executable, file=file) }}</p>
           <div class="catalogue-command">
             <code>{{ extract }}</code>
             <CopyButton :value="extract" :label="_('web.admin.catalogue.command.copy')" :note="_('web.admin.catalogue.command.copied')" />
@@ -79,13 +79,13 @@
              class="field-note field-error catalogue-needed">
             <Badge name="warn" :size="14" />{{ _("web.admin.catalogue.file.needed") }}
           </p>
-          <p id="catalogue-file-note" class="catalogue-step-hint">{{ _("web.admin.catalogue.file.hint") }}</p>
+          <p id="catalogue-file-note" class="body-text catalogue-step-hint">{{ _("web.admin.catalogue.file.hint") }}</p>
         </li>
         <li class="catalogue-step">
           <h3>
             <StepNumber :number="3" />{{ _("web.admin.catalogue.step.import") }}
           </h3>
-          <p class="catalogue-step-text">{{ _("web.admin.catalogue.replaces") }}</p>
+          <p class="body-text">{{ _("web.admin.catalogue.replaces") }}</p>
           {% if replaced %}
             <label class="catalogue-confirm-box no-js-only">
               <span>{{ _("web.admin.catalogue.confirm.check", game=listed(replaced|map(attribute="game.name")|list)) }}</span>
@@ -105,7 +105,7 @@
                       value="0"
                       aria-label="{{ _('web.admin.catalogue.uploading') }}"
                       class="catalogue-bar"></progress>
-            <p class="catalogue-step-text">{{ _("web.admin.catalogue.uploading.text") }}</p>
+            <p class="body-text">{{ _("web.admin.catalogue.uploading.text") }}</p>
             <FormButton icon="x" type="button" data-catalogue-stop>{{ _("web.admin.catalogue.stop") }}</FormButton>
           </div>
           <div data-catalogue-importing

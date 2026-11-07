@@ -15,11 +15,11 @@
     background: #1e1815;
     box-shadow: 0 6px 0 rgb(0 0 0 / 0.4);
     color: #fff;
-    animation: claw-open 200ms var(--ease-menu);
+    animation: scale-in 200ms var(--ease-menu);
 
     &::backdrop {
       background: rgb(0 0 0 / 0.75);
-      animation: site-fade-in 160ms linear;
+      animation: fade-in 160ms linear;
     }
 
     &.closing {
@@ -76,30 +76,6 @@
     list-style: none;
   }
 
-  .claw-wallet {
-    display: flex;
-    min-height: 44px;
-    align-items: center;
-    gap: 8px;
-    padding: 0 14px 0 5px;
-    border: 2px solid #000;
-    border-radius: 24px;
-    background: #2e2420;
-    font-family: var(--site-heading);
-  }
-
-  .claw-wallet-amount {
-    font-size: 17px;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .claw-wallet-name {
-    color: #d9cfc4;
-    font-size: 14px;
-    font-weight: 700;
-  }
-
   .claw-close-form {
     margin: 0;
   }
@@ -135,13 +111,6 @@
     color: #fede01;
     font-weight: 800;
     text-decoration-line: underline;
-  }
-
-  @keyframes claw-open {
-    from {
-      opacity: 0;
-      scale: 0.96;
-    }
   }
 
   @media (width < 40rem) {
@@ -186,7 +155,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .claw-overlay {
-      animation: site-fade-in 100ms linear;
+      animation: fade-in 100ms linear;
     }
   }
 }

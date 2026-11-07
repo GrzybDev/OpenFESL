@@ -63,9 +63,9 @@
       </Fact>
     </dl>
   {% else %}
-    <div class="catalogue-missing">
-      <p class="catalogue-missing-title">{{ _("web.admin.catalogue.missing") }}</p>
-      <p class="catalogue-missing-text">{{ _("web.admin.catalogue.missing.text") }}</p>
+    <div class="alert">
+      <p class="list-empty-title">{{ _("web.admin.catalogue.missing") }}</p>
+      <p class="alert-text">{{ _("web.admin.catalogue.missing.text") }}</p>
     </div>
   {% endif %}
   {{ content }}

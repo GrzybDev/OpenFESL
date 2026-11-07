@@ -24,14 +24,14 @@
               {% endif %}
             </p>
             <span class="selector-mug"><HeroPicture :hero="hero" /></span>
-            <h3 id="selector-{{ hero.persona.id }}" class="selector-name">
+            <h3 id="selector-{{ hero.persona.id }}" class="store-hero-name">
               {% if player.name and not hero.disabled %}
                 <HeroLink :hero_id="hero.persona.id" :name="hero.persona.name" />
               {% else %}
                 {{ hero.persona.name }}
               {% endif %}
             </h3>
-            <p class="selector-kind">
+            <p class="store-hero-kind">
               <HeroKind :hero="hero" />
             </p>
             {% if hero.persona.id == roster.default_id %}

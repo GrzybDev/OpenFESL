@@ -22,7 +22,7 @@
       fill: var(--faction);
       transform-box: fill-box;
       transform-origin: 0 50%;
-      animation: faction-grow 600ms var(--ease-menu) both;
+      animation: progress-grow 600ms var(--ease-menu) both;
     }
 
     line {
@@ -53,12 +53,6 @@
     > span:last-child:not(:first-child) {
       flex-direction: row-reverse;
       margin-left: auto;
-    }
-  }
-
-  @keyframes faction-grow {
-    from {
-      scale: 0 1;
     }
   }
 

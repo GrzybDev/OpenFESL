@@ -1,12 +1,6 @@
 /* What a chest can give, in the dark orange box (white text only): a list per faction with the
    item's tile, the item, for how long or how many uses, and its chance on the right. */
 @layer components {
-  .chest-lists-box {
-    --box: #9b4e14;
-    --box-edge: #cd751e;
-    --box-ink: #fff;
-  }
-
   .info-boxes.chest-lists {
     position: relative;
     isolation: isolate;

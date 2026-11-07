@@ -9,20 +9,6 @@
     margin-top: 64px;
   }
 
-  .info-box {
-    position: relative;
-    padding: 0 18px 18px;
-    border: 3px solid #000;
-    border-radius: 8px;
-    background: var(--box);
-    box-shadow:
-      inset 0 0 0 2px var(--box-edge),
-      0 4px 0 rgb(0 0 0 / 0.3);
-    color: var(--box-ink);
-    font-size: 14px;
-    line-height: 1.45;
-  }
-
   .info-box-brown {
     --box: #938166;
     --box-edge: #c9c099;
@@ -89,16 +75,5 @@
 
   .info-box-note {
     margin-top: 12px;
-  }
-
-  /* Links in a box take its text colour: black on the brown box, white on the dark orange one. */
-  .info-box-link {
-    display: inline-flex;
-    min-height: 44px;
-    align-items: center;
-    gap: 6px;
-    font: 800 15px/1.1 var(--site-heading);
-    color: inherit;
-    text-decoration-line: underline;
   }
 }

@@ -6,7 +6,7 @@
 {% set box = sold.kind == "box" %}
 <section aria-labelledby="contents-title" class="store-contents">
   <Splash />
-  <div class="store-box store-box-green">
+  <div class="store-box site-box-green">
     <span aria-hidden="true"
           class="store-disc"><Icon :name="'bag' if sold.kind == 'item' else sold.kind" :size="22" stroke="#0A0A0A" /></span>
     <h2 id="contents-title" class="store-tab">{{ _("web.store.contents." ~ sold.kind) }}</h2>

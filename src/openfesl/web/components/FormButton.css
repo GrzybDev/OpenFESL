@@ -1,17 +1,8 @@
 @layer components {
   .form-button {
-    display: flex;
-    min-height: 44px;
-    align-items: center;
     justify-content: center;
     gap: 10px;
-    background: var(--ink);
     padding-inline: 12px;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    color: var(--bright);
-    text-transform: uppercase;
   }
 
   /* Also the cross on the chips that remove a filter. */

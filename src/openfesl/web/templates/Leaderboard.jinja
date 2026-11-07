@@ -122,10 +122,10 @@
                       <div role="cell"
                            data-label="{{ _('web.leaderboard.column.now') }}"
                            class="line-now line-cell">
-                      {%- if line.persona_id not in places %}<span class="line-away">{{ _("web.leaderboard.offline_now") }}</span>
+                      {%- if line.persona_id not in places %}<span class="info-label line-away">{{ _("web.leaderboard.offline_now") }}</span>
                   {%- elif places[line.persona_id] and "servers" in game.pages %}<a href="{{ url('/' ~ game.id ~ '/servers/' ~ places[line.persona_id].slug) }}">{{ places[line.persona_id].name }}</a>
                   {%- elif places[line.persona_id] %}{{ places[line.persona_id].name }}
-      {%- else %}<span class="line-menus">{{ _("web.activity.in_menus") }}</span>{% endif -%}
+      {%- else %}<span class="info-label">{{ _("web.activity.in_menus") }}</span>{% endif -%}
         </div>
         <div role="cell" class="cell-end">
           <EndSquare :href="href" :label="_('web.leaderboard.page.of', name=line.name)" />

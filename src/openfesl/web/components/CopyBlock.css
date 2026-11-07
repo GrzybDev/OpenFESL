@@ -25,11 +25,6 @@
     text-transform: uppercase;
   }
 
-  .copy-hint {
-    margin: 10px 2px 0;
-    color: var(--soft);
-  }
-
   @media (width >= 40rem) {
     .copy-block-label {
       padding-inline: 18px;

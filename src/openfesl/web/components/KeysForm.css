@@ -5,13 +5,6 @@
     margin-top: 14px;
   }
 
-  .keys-legend {
-    font: 800 13px/1.2 var(--site-heading);
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: #5c4a3c;
-  }
-
   .keys-tiles {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
@@ -68,16 +61,6 @@
     }
   }
 
-  .keys-face-disc {
-    display: grid;
-    width: 40px;
-    height: 40px;
-    place-items: center;
-    border: 2px solid #000;
-    border-radius: 50%;
-    background: #1a1412;
-  }
-
   .keys-face-count {
     font: 800 19px/1.15 var(--site-heading);
   }
@@ -119,13 +102,6 @@
     &.flash {
       animation: site-flash 600ms linear;
     }
-  }
-
-  .keys-note {
-    margin-top: 12px;
-    font-size: 14px;
-    line-height: 1.45;
-    color: #2b2018;
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -63,7 +63,7 @@
       <section aria-labelledby="rewards-sign-in" class="site-box site-box-red">
         <h2 id="rewards-sign-in" class="site-box-title">{{ _("web.rewards.signed_out") }}</h2>
         <p>{{ _("web.rewards.signed_out.text") }}</p>
-        <SignInActions :next="next" link="site-link-light" />
+        <SignInActions :next="next" link="site-link site-link-light" />
       </section>
     </div>
   {% elif not bar.roster.heroes %}

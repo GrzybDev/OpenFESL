@@ -67,7 +67,7 @@
                            :label="_('web.account.password.current')"
                            note="current-password-note"
                            :error="current_error|trim">
-              <div class="field-note password-note">
+              <div class="field-note field-note-row">
                 <p id="current-password-note">{{ _("web.account.password.current.note") }}</p>
                 {% if mail %}<a href="{{ url('/password-reset') }}">{{ _("web.account.sign_in.forgotten") }}</a>{% endif %}
               </div>

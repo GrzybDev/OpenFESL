@@ -194,13 +194,6 @@
       0 3px 0 #000;
   }
 
-  .creator-done {
-    background: #3d6b1f;
-    box-shadow:
-      inset 0 2px 0 #6e9b3f,
-      0 3px 0 #000;
-  }
-
   @media (width >= 40rem) {
     .creator-box {
       grid-template-columns: minmax(0, 55fr) minmax(0, 45fr);

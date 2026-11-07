@@ -283,7 +283,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .redeem-main {
-      animation: site-fade-in 100ms linear;
+      animation: fade-in 100ms linear;
     }
   }
 

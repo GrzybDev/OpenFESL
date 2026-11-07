@@ -143,12 +143,6 @@
     }
   }
 
-  @keyframes fade-out {
-    to {
-      opacity: 0;
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .dialog,
     .dialog::backdrop {

@@ -64,16 +64,6 @@
     color: #1f1712;
   }
 
-  .site-link-light {
-    display: inline-flex;
-    min-height: 44px;
-    align-items: center;
-    gap: 6px;
-    font: 800 15px/1.1 var(--site-heading);
-    color: #fff;
-    text-decoration-line: underline;
-  }
-
   .site-link {
     display: inline-flex;
     min-height: 44px;
@@ -82,6 +72,19 @@
     font: 800 15px/1.1 var(--site-heading);
     color: #7a1d16;
     text-decoration-line: underline;
+  }
+
+  .site-link-light {
+    color: #fff;
+  }
+
+  .play-panel-link {
+    color: #fede01;
+  }
+
+  /* Links in a box take its text colour: black on the brown box, white on the dark orange one. */
+  .info-box-link {
+    color: inherit;
   }
 
   /* A hero's or player's name in a line of text, leading to their profile. */

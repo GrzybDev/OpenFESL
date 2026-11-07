@@ -82,12 +82,10 @@
     font-size: 12px;
     overflow-wrap: anywhere;
   }
-}
 
-/* The event's editor: its date rule as tiles over the fields of that rule alone, what they set or
-   why they are refused, the own text that the game's texts need once an edit outgrows them, and
-   Save event. The fields of the other rules stay in the form for browsers without :has(). */
-@layer pages {
+  /* The event's editor: its date rule as tiles over the fields of that rule alone, what they set or
+     why they are refused, the own text that the game's texts need once an edit outgrows them, and
+     Save event. The fields of the other rules stay in the form for browsers without :has(). */
   .reward-dating {
     display: grid;
     gap: 2px;
@@ -176,7 +174,7 @@
     background: #ffffff;
     padding: 12px 14px 14px;
     color: var(--ink);
-    animation: reward-own-in 200ms var(--ease-menu);
+    animation: drop-in 200ms var(--ease-menu);
   }
 
   .reward-own-why {
@@ -233,47 +231,9 @@
     }
   }
 
-  @keyframes reward-own-in {
-    from {
-      opacity: 0;
-      translate: 0 -6px;
-    }
-  }
-
-  @media (max-width: 600px) {
-    .reward-rules .choice-tile {
-      min-height: 0;
-      padding-inline: 4px;
-    }
-
-    .reward-rules .choice-square {
-      display: none;
-    }
-
-    .reward-own-row {
-      grid-template-columns: minmax(0, 1fr);
-    }
-
-    .reward-save {
-      justify-items: stretch;
-    }
-
-    .reward-save .action-button {
-      width: 100%;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .reward-own {
-      animation-duration: 1ms;
-    }
-  }
-}
-
-/* The editor's contents: each part's items with a square that takes one out, struck through once
-   ticked, its box, Funds and keys, the square that drops a day of other gifts, and the add panel,
-   whose uses field shows while uses are chosen. */
-@layer pages {
+  /* The editor's contents: each part's items with a square that takes one out, struck through once
+     ticked, its box, Funds and keys, the square that drops a day of other gifts, and the add panel,
+     whose uses field shows while uses are chosen. */
   .reward-items {
     display: grid;
     gap: 2px;
@@ -389,6 +349,27 @@
 
   /* On phones the days fit the screen with their remove squares, their gifts wrapping. */
   @media (max-width: 600px) {
+    .reward-rules .choice-tile {
+      min-height: 0;
+      padding-inline: 4px;
+    }
+
+    .reward-rules .choice-square {
+      display: none;
+    }
+
+    .reward-own-row {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .reward-save {
+      justify-items: stretch;
+    }
+
+    .reward-save .action-button {
+      width: 100%;
+    }
+
     .rewards-packs.reward-days {
       min-width: 0;
     }
@@ -417,16 +398,18 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .reward-own {
+      animation-duration: 1ms;
+    }
+
     .reward-item,
     .reward-drop-mark {
       transition: none;
     }
   }
-}
 
-/* A mission's goal, the one fact of its goal that the editor changes, on white with the ink
-   outline. */
-@layer pages {
+  /* A mission's goal, the one fact of its goal that the editor changes, on white with the ink
+     outline. */
   .reward-goal .reward-goal-input {
     width: 100%;
     max-width: 160px;

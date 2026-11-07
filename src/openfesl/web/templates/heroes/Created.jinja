@@ -45,10 +45,10 @@
             {% endif %}
             {% if game.site.start_links and default %}<PlayNowButton :hero="default" />{% endif %}
             <a href="{{ url('/' ~ game.id ~ '/heroes') }}"
-               class="site-link-light">{{ _("web.heroes.back") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+               class="site-link site-link-light">{{ _("web.heroes.back") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
             {% if roster.free %}
               <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
-                 class="site-link-light">{{ _("web.created.another") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
+                 class="site-link site-link-light">{{ _("web.created.another") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
             {% endif %}
           </div>
         </div>

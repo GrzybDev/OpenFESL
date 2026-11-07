@@ -26,8 +26,8 @@
     </p>
   {% else %}
     <a href="{{ url('/sign-in') }}?{{ {'next': here}|urlencode }}"
-       class="info-box-link referral-box-link-text"><Icon name="sign-in" :size="16" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+       class="site-link info-box-link referral-box-link-text"><Icon name="sign-in" :size="16" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
   {% endif %}
   <a href="{{ url('/' ~ game.id ~ '/recruit-a-friend') }}"
-     class="info-box-link referral-box-link-text">{{ _("web.referral.more") }}</a>
+     class="site-link info-box-link referral-box-link-text">{{ _("web.referral.more") }}</a>
 </section>

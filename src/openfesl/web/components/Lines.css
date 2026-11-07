@@ -94,14 +94,6 @@
     text-transform: uppercase;
   }
 
-  .line-away,
-  .line-menus {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-
   .line-away {
     color: var(--dim);
   }

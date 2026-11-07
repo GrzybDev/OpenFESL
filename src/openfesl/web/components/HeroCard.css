@@ -188,17 +188,11 @@
     margin-inline: -4px;
     padding-inline: 4px;
     border-radius: 4px;
-    animation: hero-renamed 600ms var(--ease-menu) both;
+    animation: site-flash 600ms var(--ease-menu) both;
 
     @media (prefers-reduced-motion: reduce) {
       animation-duration: 100ms;
       animation-timing-function: linear;
-    }
-  }
-
-  @keyframes hero-renamed {
-    from {
-      background-color: #ffe27a;
     }
   }
 

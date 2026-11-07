@@ -1,12 +1,5 @@
 /* Rows that explain something, each with a badge, a label and a sentence, shaded in turn. */
 @layer components {
-  .info-rows {
-    display: grid;
-    gap: 2px;
-    margin-top: 2px;
-    color: var(--ink);
-  }
-
   .info-row {
     display: flex;
     align-items: flex-start;

@@ -123,21 +123,6 @@
     }
   }
 
-  @media (width >= 40rem) {
-    .shell-bar > .shell-row {
-      justify-content: flex-start;
-      column-gap: 28px;
-    }
-
-    .shell-games {
-      order: 0;
-      flex: 1 1 420px;
-      margin-inline: 0;
-      border-top-width: 0;
-      padding-inline: 0;
-    }
-  }
-
   /* The area takes the height a short page leaves, so the footer stays at the window's foot. */
   body {
     display: flex;
@@ -226,6 +211,19 @@
   }
 
   @media (width >= 40rem) {
+    .shell-bar > .shell-row {
+      justify-content: flex-start;
+      column-gap: 28px;
+    }
+
+    .shell-games {
+      order: 0;
+      flex: 1 1 420px;
+      margin-inline: 0;
+      border-top-width: 0;
+      padding-inline: 0;
+    }
+
     .shell-footer > .shell-row {
       column-gap: 24px;
       padding-top: 18px;
