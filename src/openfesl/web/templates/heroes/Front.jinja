@@ -43,8 +43,7 @@
                     {% endif %}
                   </p>
                   {% if gift.state == "claimable" %}
-                    <a href="{{ url('/' ~ game.id ~ '/rewards') }}"
-                       class="site-button site-button-go"><Icon name="gift" :size="16" stroke="currentColor" />{{ _("web.rewards.claim") }}<span class="sr-only">{{ _("web.front.event.on_rewards") }}</span></a>
+                    <SiteButton :href="url('/' ~ game.id ~ '/rewards')" glyph="gift" stroke="currentColor" class="site-button-go">{{ _("web.rewards.claim") }}<span class="sr-only">{{ _("web.front.event.on_rewards") }}</span></SiteButton>
                   {% endif %}
                 </div>
               {% endfor %}
@@ -73,8 +72,7 @@
               {% endif %}
               <p>{{ _("web.front.event.all_year") }}</p>
               <p class="site-actions">
-                <a href="{{ url('/' ~ game.id ~ '/rewards') }}"
-                   class="site-button"><Icon name="gift" :size="16" stroke="#FEDE01" />{{ _("web.site.page.rewards") }}</a>
+                <SiteButton :href="url('/' ~ game.id ~ '/rewards')" glyph="gift">{{ _("web.site.page.rewards") }}</SiteButton>
               </p>
             </div>
           </div>
@@ -162,8 +160,7 @@
               </p>
             {% elif signed %}
               <p class="site-actions">
-                <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
-                   class="site-button site-button-go"><Icon name="plus" :size="16" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+                <SiteButton :href="url('/' ~ game.id ~ '/user/createHero')" glyph="plus" stroke="currentColor" class="site-button-go">{{ _("web.bar.create") }}</SiteButton>
               </p>
             {% endif %}
           </li>
@@ -226,7 +223,7 @@
                   {% endif %}
                   <strong>{{ card.price }}</strong> {{ _("games." ~ game.id ~ ".currency." ~ card.currency) }}
                 </p>
-                <a href="{{ card.href }}" class="site-button"><Icon name="bag" :size="16" stroke="#FEDE01" />{{ _("web.front.deal.see") }}<span class="sr-only">{{ card.name }}</span></a>
+                <SiteButton :href="card.href" glyph="bag">{{ _("web.front.deal.see") }}<span class="sr-only">{{ card.name }}</span></SiteButton>
               </li>
             {% endfor %}
           </ul>
@@ -245,16 +242,10 @@
         <span aria-hidden="true" class="info-box-disc"><Icon name="people" :size="20" stroke="#0A0A0A" /></span>
         <dl class="front-online-counts">
           <div>
-            <dt>{{ _("web.front.online.players") }}</dt>
-            <dd>
-              {{ number(activity.online) }}
-            </dd>
+            <Term :label="_('web.front.online.players')">{{ number(activity.online) }}</Term>
           </div>
           <div>
-            <dt>{{ _("web.front.online.in_matches") }}</dt>
-            <dd>
-              {{ number(activity.in_matches) }}
-            </dd>
+            <Term :label="_('web.front.online.in_matches')">{{ number(activity.in_matches) }}</Term>
           </div>
         </dl>
         <p class="info-box-note">

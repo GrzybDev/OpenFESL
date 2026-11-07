@@ -62,14 +62,11 @@
         <RewardClaim :claiming="card.claim" />
       {% elif card.needs == "create" %}
         <p class="site-actions">
-          <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
-             class="site-button site-button-go"><Icon name="plus" :size="16" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+          <SiteButton :href="url('/' ~ game.id ~ '/user/createHero')" glyph="plus" stroke="currentColor" class="site-button-go">{{ _("web.bar.create") }}</SiteButton>
         </p>
       {% elif card.needs == "slot" %}
         <p class="site-actions">
-          <a href="{{ url('/' ~ game.id ~ '/user/buyCharacterSlots') }}?{{ {'next': here}|urlencode }}"
-             data-opens="buy-slot"
-             class="site-button"><Icon name="coin" :size="16" stroke="#FEDE01" />{{ _("web.slots.buy") }}</a>
+          <SiteButton :href="url('/' ~ game.id ~ '/user/buyCharacterSlots') ~ '?' ~ {'next': here}|urlencode" data-opens="buy-slot" glyph="coin">{{ _("web.slots.buy") }}</SiteButton>
         </p>
       {% endif %}
     </div>

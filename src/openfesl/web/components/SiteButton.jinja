@@ -1,0 +1,11 @@
+{#def glyph: str, size: int = 16, stroke: str = "#FEDE01", href: str = "", type: str = "submit" #}
+{# One of the pills of a game's own site with its glyph at the start: a link where it leads somewhere,
+   otherwise a button. Further attributes go on the link or button. #}
+{% if href %}
+  <a href="{{ href }}"
+     {{ attrs.render(class="site-button") }}><Icon :name="glyph" :size="size" :stroke="stroke" />{{ content }}</a>
+{% else %}
+  <button type="{{ type }}" {{ attrs.render(class="site-button") }}>
+    <Icon :name="glyph" :size="size" :stroke="stroke" />{{ content }}
+  </button>
+{% endif %}

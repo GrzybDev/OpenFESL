@@ -13,20 +13,14 @@
         <h2 class="box-tab">{{ _("web.ingame.need.box", currency=currency) }}</h2>
         <dl class="facts">
           <div class="fact">
-            <dt>{{ _("web.ingame.need.price") }}</dt>
-            <dd>
-              <InGamePrice :kit="kit" :amount="product.price" :currency="product.currency" />
-            </dd>
+            <Term :label="_('web.ingame.need.price')"><InGamePrice :kit="kit" :amount="product.price" :currency="product.currency" /></Term>
             {% set term %}<InGameTerm :ownership="product.ownership" lower />{% endset %}
             <dd class="fact-note">
               {{ _("web.ingame.need.what", item=ware.name, term=term | trim) }}
             </dd>
           </div>
           <div class="fact">
-            <dt>{{ _("web.ingame.need.has") }}</dt>
-            <dd>
-              <InGamePrice :kit="kit" :amount="point.balance" :currency="product.currency" />
-            </dd>
+            <Term :label="_('web.ingame.need.has')"><InGamePrice :kit="kit" :amount="point.balance" :currency="product.currency" /></Term>
           </div>
           <div class="fact">
             <dt>{{ _("web.ingame.need.short") }}</dt>

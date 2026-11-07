@@ -31,10 +31,7 @@
   {% for line in claiming.extra %}<p class="claim-extra">{{ line }}</p>{% endfor %}
   <p class="claim-stays">{{ _("web.rewards.claim.stays", game=game.name) }}</p>
   <div class="site-dialog-actions">
-    <button type="submit" class="site-button site-button-go site-button-large">
-      <Icon name="gift" :size="18" stroke="currentColor" />
-      {{ _("web.rewards.claim") }}
-    </button>
+    <SiteButton glyph="gift" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.rewards.claim") }}</SiteButton>
     {% if dialog %}
       <button type="button" data-close class="site-button site-button-ghost">{{ _("web.dialog.cancel") }}</button>
     {% else %}

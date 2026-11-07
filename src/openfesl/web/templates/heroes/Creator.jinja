@@ -49,8 +49,7 @@
         <h2 id="creator-closed" class="site-box-title">{{ _("web.creator.signed_out") }}</h2>
         <p>{{ _("web.creator.signed_out.text") }}</p>
         <p class="site-actions">
-          <a href="{{ url('/sign-in') }}?{{ {'next': next}|urlencode }}"
-             class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+          <SiteButton :href="url('/sign-in') ~ '?' ~ {'next': next}|urlencode" glyph="sign-in" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.account.sign_in.action") }}</SiteButton>
           <a href="{{ url('/register') }}"
              class="site-link">{{ _("web.account.sign_in.create") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
         </p>

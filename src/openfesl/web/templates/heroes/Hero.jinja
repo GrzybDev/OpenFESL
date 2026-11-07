@@ -74,15 +74,14 @@
         <dl class="profile-facts">
           {% for fact in facts %}
             <div>
-              <dt>{{ _("web.hero.fact." ~ fact.name) }}</dt>
-              <dd>
-                {%- if fact.value is none %}–{% elif fact.value is string %}{{ fact.value }}{% else %}{{ when(fact.value, "yMMMd") }}{% endif -%}
-                {%- if fact.name == "score" and rank %}
-                  · <a href="{{ rank[1] }}">{{ _("web.hero.rank", place=number(rank[0])) }}</a>
-                {% elif fact.name == "score" and unranked %}
-                  · {{ _("web.hero.unranked") }}
-                {% endif -%}
-              </dd>
+              <Term :label="_('web.hero.fact.' ~ fact.name)">
+              {%- if fact.value is none %}–{% elif fact.value is string %}{{ fact.value }}{% else %}{{ when(fact.value, "yMMMd") }}{% endif -%}
+              {%- if fact.name == "score" and rank %}
+                · <a href="{{ rank[1] }}">{{ _("web.hero.rank", place=number(rank[0])) }}</a>
+              {% elif fact.name == "score" and unranked %}
+                · {{ _("web.hero.unranked") }}
+              {% endif -%}
+              </Term>
             </div>
           {% endfor %}
         </dl>
@@ -114,10 +113,7 @@
                   <dl class="profile-row-stats">
                     {% for label, value in row.stats %}
                       <div>
-                        <dt>{{ label }}</dt>
-                        <dd>
-                          {{ value }}
-                        </dd>
+                        <Term :label="label">{{ value }}</Term>
                       </div>
                     {% endfor %}
                   </dl>

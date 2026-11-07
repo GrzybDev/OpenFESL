@@ -32,9 +32,7 @@
            class="keys-waits"><Icon name="gift" :size="16" stroke="currentColor" />{{ _("web.chests.keys.reward_waits") }}</a>
       {% endif %}
       {% if key %}
-        <a href="{{ url('/' ~ game.id ~ '/treasure-chests/keys') }}"
-           data-opens="buy-keys"
-           class="site-button slot-buy"><Icon name="key" :size="16" stroke="#FEDE01" />{{ _("web.chests.keys.buy") }}<span class="slot-price"><Icon name="coin" :size="15" stroke="currentColor" />{{ _("web.chests.keys.each", price=price) }}</span></a>
+        <SiteButton :href="url('/' ~ game.id ~ '/treasure-chests/keys')" data-opens="buy-keys" glyph="key" class="slot-buy">{{ _("web.chests.keys.buy") }}<span class="slot-price"><Icon name="coin" :size="15" stroke="currentColor" />{{ _("web.chests.keys.each", price=price) }}</span></SiteButton>
       {% endif %}
       </KeysPanel>
     {% endif %}
@@ -74,15 +72,13 @@
           </p>
           {% if game.site.start_links %}
             <p class="site-actions">
-              <a href="{{ url('/' ~ game.id ~ '/play-now') }}"
-                 class="site-button site-button-large"><Icon name="go" :size="18" stroke="#FEDE01" />{{ _("web.chests.none.play", hero=hero.persona.name) }}</a>
+              <SiteButton :href="url('/' ~ game.id ~ '/play-now')" glyph="go" :size="18" class="site-button-large">{{ _("web.chests.none.play", hero=hero.persona.name) }}</SiteButton>
             </p>
           {% endif %}
         {% else %}
           <p>{{ _("web.chests.none.no_hero") }}</p>
           <p class="site-actions">
-            <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
-               class="site-button site-button-go site-button-large"><Icon name="plus" :size="18" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+            <SiteButton :href="url('/' ~ game.id ~ '/user/createHero')" glyph="plus" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.bar.create") }}</SiteButton>
           </p>
         {% endif %}
       </div>

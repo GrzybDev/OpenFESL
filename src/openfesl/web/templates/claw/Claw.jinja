@@ -35,8 +35,7 @@
           <h2 class="claw-heading">{{ _("web.claw.no_hero") }}</h2>
           <p>{{ _("web.claw.no_hero.text", time=_("web.store.utc", time=when(day.next_free, "Hm"))) }}</p>
           <p class="site-actions">
-            <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
-               class="site-button site-button-go"><Icon name="plus" :size="16" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+            <SiteButton :href="url('/' ~ game.id ~ '/user/createHero')" glyph="plus" stroke="currentColor" class="site-button-go">{{ _("web.bar.create") }}</SiteButton>
           </p>
         </div>
       </div>
@@ -67,11 +66,7 @@
             </p>
             <p class="claw-prize-line">{{ grabbed.line }}</p>
             <p class="site-actions js-only">
-              <button type="button"
-                      data-claw-ok
-                      class="site-button site-button-go site-button-large">
-                <Icon name="tick" :size="18" stroke="currentColor" />{{ _("web.claw.ok") }}
-              </button>
+              <SiteButton type="button" data-claw-ok glyph="tick" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.claw.ok") }}</SiteButton>
             </p>
           </div>
         </dialog>
@@ -153,22 +148,13 @@
                   <h3 class="site-dialog-title">{{ _("web.claw.paid.title") }}</h3>
                   <dl class="claw-facts">
                     <div>
-                      <dt>{{ _("web.claw.paid.price") }}</dt>
-                      <dd>
-                        {{ price }} {{ currency }}
-                      </dd>
+                      <Term :label="_('web.claw.paid.price')">{{ price }} {{ currency }}</Term>
                     </div>
                     <div>
-                      <dt>{{ _("web.claw.paid.now", currency=currency) }}</dt>
-                      <dd>
-                        {{ number(funds) }}
-                      </dd>
+                      <Term :label="_('web.claw.paid.now', currency=currency)">{{ number(funds) }}</Term>
                     </div>
                     <div>
-                      <dt>{{ _("web.claw.paid.after", currency=currency) }}</dt>
-                      <dd>
-                        {{ number(funds - paid.price) }}
-                      </dd>
+                      <Term :label="_('web.claw.paid.after', currency=currency)">{{ number(funds - paid.price) }}</Term>
                     </div>
                     <div>
                       <dt>{{ _("web.claw.paid.hero") }}</dt>
@@ -178,12 +164,7 @@
                   </dl>
                   <p class="claw-note">{{ _("web.claw.paid.same") }}</p>
                   <p class="site-actions">
-                    <button type="submit"
-                            name="paid"
-                            value="1"
-                            class="site-button site-button-go">
-                      <Icon name="claw" :size="18" stroke="currentColor" />{{ _("web.claw.paid.confirm", price=price, currency=currency) }}
-                    </button>
+                    <SiteButton name="paid" value="1" glyph="claw" :size="18" stroke="currentColor" class="site-button-go">{{ _("web.claw.paid.confirm", price=price, currency=currency) }}</SiteButton>
                     <button type="button"
                             data-claw-cancel
                             class="site-button site-button-ghost">{{ _("web.admin.cancel") }}</button>

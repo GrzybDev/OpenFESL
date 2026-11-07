@@ -80,14 +80,12 @@
       {% elif signed %}
         <p class="referral-link-label">{{ _("web.referral.needs_name") }}</p>
         <p class="site-actions">
-          <a href="{{ url('/account/display-name') }}?{{ {'next': here}|urlencode }}"
-             class="site-button site-button-go"><Icon name="user" :size="16" stroke="currentColor" />{{ _("web.referral.needs_name.action") }}</a>
+          <SiteButton :href="url('/account/display-name') ~ '?' ~ {'next': here}|urlencode" glyph="user" stroke="currentColor" class="site-button-go">{{ _("web.referral.needs_name.action") }}</SiteButton>
         </p>
       {% else %}
         <p class="referral-link-label">{{ _("web.referral.widget.signed_out") }}</p>
         <p class="site-actions">
-          <a href="{{ url('/sign-in') }}?{{ {'next': here}|urlencode }}"
-             class="site-button site-button-go"><Icon name="sign-in" :size="16" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+          <SiteButton :href="url('/sign-in') ~ '?' ~ {'next': here}|urlencode" glyph="sign-in" stroke="currentColor" class="site-button-go">{{ _("web.account.sign_in.action") }}</SiteButton>
         </p>
       {% endif %}
       <p class="referral-timing">

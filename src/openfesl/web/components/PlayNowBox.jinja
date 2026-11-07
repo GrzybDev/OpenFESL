@@ -18,8 +18,7 @@
   {% endif %}
   <div class="play-now-box-actions">
     {% if hero %}
-      <a href="{{ url('/' ~ game.id ~ '/play-now') }}"
-         class="site-button"><Icon name="play" :size="16" stroke="#FEDE01" />{{ _("web.play_now.title") }}</a>
+      <SiteButton :href="url('/' ~ game.id ~ '/play-now')" glyph="play">{{ _("web.play_now.title") }}</SiteButton>
     {% endif %}
     {% if "play" in game.pages %}
       <a href="{{ url('/' ~ game.id ~ '/play') }}"

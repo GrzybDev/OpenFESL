@@ -62,10 +62,7 @@
       <FriendForm action="leave" :member="rel.member" :name="rel.name" :label="_('web.friends.vip.leave')" />
     {% else %}
       {% set id = "remove-" ~ rel.member.account_id %}
-      <a href="{{ url('/' ~ game.id ~ '/friends/' ~ rel.member.account_id ~ '/remove') }}"
-         data-opens="{{ id }}"
-         aria-haspopup="dialog"
-         class="site-button friend-button site-button-ghost"><Icon name="x" :size="16" stroke="currentColor" />{{ _("web.friends.remove") }}<span class="sr-only">{{ rel.name }}</span></a>
+      <SiteButton :href="url('/' ~ game.id ~ '/friends/' ~ rel.member.account_id ~ '/remove')" :data-opens="id" aria-haspopup="dialog" glyph="x" stroke="currentColor" class="friend-button site-button-ghost">{{ _("web.friends.remove") }}<span class="sr-only">{{ rel.name }}</span></SiteButton>
       <dialog id="{{ id }}"
               aria-labelledby="{{ id }}-title"
               data-modal

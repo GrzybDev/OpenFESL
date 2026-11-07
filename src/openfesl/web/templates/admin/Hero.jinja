@@ -73,11 +73,10 @@
             {% endif %}
             {% if page.card.xp_needed %}
               <div class="fact fact-wide admin-hero-xp">
-                <dt>{{ _("web.admin.hero.xp", level=number(hero.level + 1)) }}</dt>
-                <dd>
-                  {{ _("web.admin.hero.xp.of", xp=number(hero.xp), needed=number(page.card.xp_needed)) }}
-                  <ProgressBar :share="hero.xp / page.card.xp_needed" :label="_('web.admin.hero.xp.of', xp=number(hero.xp), needed=number(page.card.xp_needed))" />
-                </dd>
+                <Term :label="_('web.admin.hero.xp', level=number(hero.level + 1))">
+                {{ _("web.admin.hero.xp.of", xp=number(hero.xp), needed=number(page.card.xp_needed)) }}
+                <ProgressBar :share="hero.xp / page.card.xp_needed" :label="_('web.admin.hero.xp.of', xp=number(hero.xp), needed=number(page.card.xp_needed))" />
+                </Term>
               </div>
             {% endif %}
             <Fact :label="_('web.admin.hero.fact.look')" plain wide>

@@ -71,16 +71,12 @@
       {% endfor %}
     </ul>
     <dl class="store-facts">
-      <dt>{{ _("web.store.requires") }}</dt>
-      <dd>
-        {{ texts.requires(sold.requirement) }}
-      </dd>
+      <Term :label="_('web.store.requires')">{{ texts.requires(sold.requirement) }}</Term>
       {% if sold.kind != "item" or sold.description %}
-        <dt>{{ _("web.store.about") }}</dt>
-        <dd>
-          {% for paragraph in sold.description %}<p>{{ paragraph }}</p>{% endfor %}
-          {% if sold.kind != "item" %}<p>{{ _("web.store.about." ~ sold.kind) }}</p>{% endif %}
-        </dd>
+        <Term :label="_('web.store.about')">
+        {% for paragraph in sold.description %}<p>{{ paragraph }}</p>{% endfor %}
+        {% if sold.kind != "item" %}<p>{{ _("web.store.about." ~ sold.kind) }}</p>{% endif %}
+        </Term>
       {% endif %}
     </dl>
     {% if box %}

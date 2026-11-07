@@ -38,18 +38,14 @@
     {% set check = {"format": "format", "taken": "refused"}.get(refused, "") %}
     <NameStatus :name="name" :check="check" />
     <dl class="site-facts">
-      <dt>{{ _("web.creator.slot") }}</dt>
-      <dd>
-        {{ _("web.creator.slot.of", slot=slot, slots=roster.slots) }}
-      </dd>
-      <dt>{{ _("web.creator.default") }}</dt>
-      <dd>
-        {% if roster.default %}
-          {{ _("web.creator.default.stays", hero=roster.default.persona.name) }}
-        {% else %}
-          {{ _("web.creator.default.becomes") }}
-        {% endif %}
-      </dd>
+      <Term :label="_('web.creator.slot')">{{ _("web.creator.slot.of", slot=slot, slots=roster.slots) }}</Term>
+      <Term :label="_('web.creator.default')">
+      {% if roster.default %}
+        {{ _("web.creator.default.stays", hero=roster.default.persona.name) }}
+      {% else %}
+        {{ _("web.creator.default.becomes") }}
+      {% endif %}
+      </Term>
       <dt>{{ _("web.creator.kit") }}</dt>
       <dd>
         <ul class="naming-kits">
@@ -65,13 +61,7 @@
       </dd>
     </dl>
     <div class="site-dialog-actions">
-      <button type="submit"
-              aria-describedby="create-why"
-              data-create
-              class="site-button site-button-go site-button-large">
-        <Icon name="tick" :size="18" stroke="currentColor" />
-        {{ _("web.creator.create") }}
-      </button>
+      <SiteButton aria-describedby="create-why" data-create glyph="tick" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.creator.create") }}</SiteButton>
       <button type="button"
               data-close
               class="site-button site-button-ghost js-only">{{ _("web.creator.back") }}</button>

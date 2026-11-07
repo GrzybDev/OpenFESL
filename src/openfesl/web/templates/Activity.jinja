@@ -269,10 +269,7 @@
           <dl class="how-terms">
             {% for term in ["online", "in_matches", "in_menus"] %}
               <div>
-                <dt>{{ _("web.activity." ~ term) }}</dt>
-                <dd>
-                  {{ _("web.activity.how." ~ term) }}
-                </dd>
+                <Term :label="_('web.activity.' ~ term)">{{ _("web.activity.how." ~ term) }}</Term>
               </div>
             {% endfor %}
           </dl>

@@ -41,8 +41,7 @@
                       class="free-slot-disc"><Icon name="plus" :size="32" stroke="currentColor" /></span>
                 <h3 id="slot-{{ number }}" class="free-slot-title">{{ _("web.heroes.free") }}</h3>
                 <p>{{ _("web.heroes.free.text") }}</p>
-                <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
-                   class="site-button site-button-go"><Icon name="plus" :size="16" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+                <SiteButton :href="url('/' ~ game.id ~ '/user/createHero')" glyph="plus" stroke="currentColor" class="site-button-go">{{ _("web.bar.create") }}</SiteButton>
               </article>
             </div>
           </li>
@@ -74,8 +73,7 @@
       </svg>
       <h2 id="heroes-none" class="free-slot-title">{{ _("web.bar.no_hero") }}</h2>
       <p>{{ _n("web.heroes.none.text", rules.slots) }}</p>
-      <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
-         class="site-button site-button-go site-button-large"><Icon name="plus" :size="18" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+      <SiteButton :href="url('/' ~ game.id ~ '/user/createHero')" glyph="plus" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.bar.create") }}</SiteButton>
     </section>
   {% endif %}
   <div class="info-boxes">

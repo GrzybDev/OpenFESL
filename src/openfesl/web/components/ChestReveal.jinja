@@ -35,15 +35,10 @@
         <form method="post"
               action="{{ url('/' ~ game.id ~ '/treasure-chests/' ~ hero.persona.id ~ '/open') }}">
           <input type="hidden" name="csrf" value="{{ csrf }}">
-          <button type="submit" class="site-button site-button-large">
-            <Icon name="key" :size="18" stroke="#FEDE01" />
-            {{ _("web.chests.reveal.again") }}
-          </button>
+          <SiteButton glyph="key" :size="18" class="site-button-large">{{ _("web.chests.reveal.again") }}</SiteButton>
         </form>
       {% elif held.count and key %}
-        <a href="{{ url('/' ~ game.id ~ '/treasure-chests/keys') }}"
-           data-opens="buy-keys"
-           class="site-button site-button-large"><Icon name="key" :size="18" stroke="#FEDE01" />{{ _("web.chests.keys.buy") }}</a>
+        <SiteButton :href="url('/' ~ game.id ~ '/treasure-chests/keys')" data-opens="buy-keys" glyph="key" :size="18" class="site-button-large">{{ _("web.chests.keys.buy") }}</SiteButton>
       {% endif %}
       <a href="{{ here }}" data-close class="site-button site-button-ghost">{{ _("web.dialog.close") }}</a>
     </div>

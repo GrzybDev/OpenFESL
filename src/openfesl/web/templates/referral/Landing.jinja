@@ -54,8 +54,7 @@
         <li>{{ _("web.referral.landing.step.play") }}</li>
       </ol>
       <p class="site-actions referral-landing-actions">
-        <a href="{{ url('/register') }}"
-           class="site-button site-button-go site-button-large"><Icon name="user-plus" :size="18" stroke="currentColor" />{{ _("web.referral.landing.sign_up") }}</a>
+        <SiteButton :href="url('/register')" glyph="user-plus" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.referral.landing.sign_up") }}</SiteButton>
         <a href="{{ url('/' ~ game.id) }}" class="site-link">{{ _("web.referral.landing.have_account") }}</a>
       </p>
     {% endif %}

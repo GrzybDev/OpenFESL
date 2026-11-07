@@ -2,7 +2,6 @@
 {# The ways on from a site's page that needs an account: sign in, back to the address given, or
    create one. #}
 <p class="site-actions">
-  <a href="{{ url('/sign-in') }}?{{ {'next': next}|urlencode }}"
-     class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+  <SiteButton :href="url('/sign-in') ~ '?' ~ {'next': next}|urlencode" glyph="sign-in" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.account.sign_in.action") }}</SiteButton>
   <a href="{{ url('/register') }}" class="{{ link }}">{{ _("web.account.sign_in.create") }}</a>
 </p>

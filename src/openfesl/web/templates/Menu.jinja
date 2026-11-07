@@ -26,10 +26,7 @@
               {# Four stats in a row, or two, so that the busiest server's row below spans them evenly. #}
               <dl class="tile-figures">
                 <div>
-                  <dt>{{ _("web.activity.online") }}</dt>
-                  <dd>
-                    <Count :value="activity.online" class="live-value" />
-                  </dd>
+                  <Term :label="_('web.activity.online')"><Count :value="activity.online" class="live-value" /></Term>
                 </div>
                 <div>
                   <dt>{{ _("web.activity.in_matches") }}</dt>
@@ -39,33 +36,26 @@
                   </dd>
                 </div>
                 <div>
-                  <dt>{{ _("web.activity.in_menus") }}</dt>
-                  <dd>
-                    <Count :value="activity.in_menus" class="live-value" />
-                  </dd>
+                  <Term :label="_('web.activity.in_menus')"><Count :value="activity.in_menus" class="live-value" /></Term>
                 </div>
                 <div>
-                  <dt>{{ _("web.activity.servers") }}</dt>
-                  <dd>
-                    <Count :value="activity.servers" class="live-value" />
-                  </dd>
+                  <Term :label="_('web.activity.servers')"><Count :value="activity.servers" class="live-value" /></Term>
                 </div>
                 {% set room = "" if tile.game.listing.squad > 1 else ".free" %}
                 <div class="tile-busiest">
-                  <dt>{{ _("web.activity.busiest" ~ room) }}</dt>
-                  <dd>
-                    {% if tile.busiest %}
-                      <span class="tile-server">{{ tile.busiest.name }}</span>
-                      {% if tile.busiest.official %}
-                        <span class="tile-official"><Icon name="star" :size="14" fill="#0A0A0A" />{{ _("web.server.official") }}</span>
-                      {% endif %}
-                      <span class="tile-players"><Count :value="tile.busiest.players" class="count-sm live-value" />&nbsp;/&nbsp;{{ number(tile.busiest.max_players) }}<span class="tile-free">{{ _("web.server.free", count=number(tile.busiest.free)) }}</span></span>
-                    {% elif activity.servers %}
-                      <span class="tile-none">{{ _("web.activity.no_room" ~ room) }}</span>
-                    {% else %}
-                      <span class="tile-none">{{ _("web.activity.no_servers") }}</span>
+                  <Term :label="_('web.activity.busiest' ~ room)">
+                  {% if tile.busiest %}
+                    <span class="tile-server">{{ tile.busiest.name }}</span>
+                    {% if tile.busiest.official %}
+                      <span class="tile-official"><Icon name="star" :size="14" fill="#0A0A0A" />{{ _("web.server.official") }}</span>
                     {% endif %}
-                  </dd>
+                    <span class="tile-players"><Count :value="tile.busiest.players" class="count-sm live-value" />&nbsp;/&nbsp;{{ number(tile.busiest.max_players) }}<span class="tile-free">{{ _("web.server.free", count=number(tile.busiest.free)) }}</span></span>
+                  {% elif activity.servers %}
+                    <span class="tile-none">{{ _("web.activity.no_room" ~ room) }}</span>
+                  {% else %}
+                    <span class="tile-none">{{ _("web.activity.no_servers") }}</span>
+                  {% endif %}
+                  </Term>
                 </div>
               </dl>
               <div aria-hidden="true" class="tile-enter">

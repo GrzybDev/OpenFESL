@@ -37,8 +37,7 @@
                     class="store-none-disc"><Icon name="plus" :size="26" stroke="currentColor" /></span>
               <p>{{ _n("web.store.no_hero", roster.free) }}</p>
             </div>
-            <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
-               class="site-button site-button-go site-button-large"><Icon name="plus" :size="18" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+            <SiteButton :href="url('/' ~ game.id ~ '/user/createHero')" glyph="plus" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.bar.create") }}</SiteButton>
           {% elif barred|length == choices|length %}
             <p class="store-note">
               <Icon name="warn" :size="20" stroke="#5C4A3C" />
@@ -47,8 +46,7 @@
               </span>
             </p>
             {% if roster.free and sold.requirement.level <= 1 %}
-              <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
-                 class="site-button site-button-go site-button-large"><Icon name="plus" :size="18" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+              <SiteButton :href="url('/' ~ game.id ~ '/user/createHero')" glyph="plus" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.bar.create") }}</SiteButton>
             {% endif %}
           {% else %}
             <form method="post"

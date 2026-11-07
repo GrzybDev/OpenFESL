@@ -63,10 +63,7 @@
               <dl class="host-states guide-fill">
                 {% for state in ["waiting", "approved"] %}
                   <div>
-                    <dt>{{ _("web.host.state." ~ state) }}</dt>
-                    <dd>
-                      {{ _("web.host.state." ~ state ~ ".text") }}
-                    </dd>
+                    <Term :label="_('web.host.state.' ~ state)">{{ _("web.host.state." ~ state ~ ".text") }}</Term>
                   </div>
                 {% endfor %}
               </dl>

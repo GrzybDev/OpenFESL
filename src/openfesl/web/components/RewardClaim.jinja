@@ -4,24 +4,15 @@
    returns to the next page, if given. While claims are paused it stays in view, unavailable,
    saying why. #}
 {% set id = "claim-" ~ claiming.key|replace(":", "-") ~ "-" ~ (claiming.faction or "account") %}
-{% set classes = "site-button site-button-go" ~ ("" if small else " site-button-large") %}
+{% set classes = "site-button-go" ~ ("" if small else " site-button-large") %}
 {% if claiming.paused %}
   <p class="site-actions">
-    <button type="button"
-            aria-disabled="true"
-            aria-describedby="{{ id }}-why"
-            class="{{ classes }}">
-      <Icon name="gift" :size="18" stroke="currentColor" />
-      {{ _("web.rewards.claim") }}<span class="sr-only">{{ claiming.label }}</span>
-    </button>
+    <SiteButton type="button" aria-disabled="true" :aria-describedby="id ~ '-why'" glyph="gift" :size="18" stroke="currentColor" :class="classes">{{ _("web.rewards.claim") }}<span class="sr-only">{{ claiming.label }}</span></SiteButton>
     <span id="{{ id }}-why" class="reward-why">{{ _("web.rewards.paused.why") }}</span>
   </p>
 {% elif claiming.choices %}
   <p class="site-actions">
-    <a href="{{ url('/' ~ game.id ~ '/rewards/claim') }}?{{ {'key': claiming.key, 'faction': claiming.faction}|urlencode }}"
-       data-opens="{{ id }}"
-       aria-haspopup="dialog"
-       class="{{ classes }}"><Icon name="gift" :size="18" stroke="currentColor" />{{ _("web.rewards.claim") }}<span class="sr-only">{{ claiming.label }}</span></a>
+    <SiteButton :href="url('/' ~ game.id ~ '/rewards/claim') ~ '?' ~ {'key': claiming.key, 'faction': claiming.faction}|urlencode" :data-opens="id" aria-haspopup="dialog" glyph="gift" :size="18" stroke="currentColor" :class="classes">{{ _("web.rewards.claim") }}<span class="sr-only">{{ claiming.label }}</span></SiteButton>
   </p>
   <dialog id="{{ id }}"
           aria-labelledby="{{ id }}-title"
@@ -38,9 +29,6 @@
     <input type="hidden" name="key" value="{{ claiming.key }}">
     <input type="hidden" name="faction" value="{{ claiming.faction }}">
     {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
-    <button type="submit" class="{{ classes }}">
-      <Icon name="gift" :size="18" stroke="currentColor" />
-      {{ _("web.rewards.claim") }}<span class="sr-only">{{ claiming.label }}</span>
-    </button>
+    <SiteButton glyph="gift" :size="18" stroke="currentColor" :class="classes">{{ _("web.rewards.claim") }}<span class="sr-only">{{ claiming.label }}</span></SiteButton>
   </form>
 {% endif %}

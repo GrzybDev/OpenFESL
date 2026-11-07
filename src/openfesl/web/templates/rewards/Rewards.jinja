@@ -18,24 +18,15 @@
         <h2 id="rewards-account" class="slot-panel-title">{{ _("web.rewards.account") }}</h2>
         <dl class="rewards-facts">
           <div>
-            <dt>{{ _("web.rewards.ready") }}</dt>
-            <dd>
-              {{ number(ready) }}
-            </dd>
+            <Term :label="_('web.rewards.ready')">{{ number(ready) }}</Term>
           </div>
           {% if daily %}
             <div>
-              <dt>{{ _("web.rewards.next_daily") }}</dt>
-              <dd>
-                {{ daily }}
-              </dd>
+              <Term :label="_('web.rewards.next_daily')">{{ daily }}</Term>
             </div>
           {% endif %}
           <div>
-            <dt>{{ _("web.rewards.claimed_in", year=year) }}</dt>
-            <dd>
-              {{ number(claimed) }}
-            </dd>
+            <Term :label="_('web.rewards.claimed_in', year=year)">{{ number(claimed) }}</Term>
           </div>
         </dl>
       </section>
@@ -85,8 +76,7 @@
           {% if first_hero %}{{ _("web.rewards.no_hero.first", amount=first_hero) }}{% endif %}
         </p>
         <p class="site-actions">
-          <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
-             class="site-button site-button-go site-button-large"><Icon name="plus" :size="18" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+          <SiteButton :href="url('/' ~ game.id ~ '/user/createHero')" glyph="plus" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.bar.create") }}</SiteButton>
         </p>
       </div>
     </section>

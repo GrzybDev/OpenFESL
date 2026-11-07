@@ -17,15 +17,11 @@
     <form method="post" action="{{ url('/sign-out') }}">
       <input type="hidden" name="csrf" value="{{ csrf }}">
       <input type="hidden" name="next" value="{{ here }}">
-      <button type="submit" class="site-button site-button-large">
-        <Icon name="sign-out" :size="18" stroke="#FEDE01" />
-        {{ _("web.funds.arrival.switch") }}
-      </button>
+      <SiteButton glyph="sign-out" :size="18" class="site-button-large">{{ _("web.funds.arrival.switch") }}</SiteButton>
     </form>
   {% else %}
     <p class="site-actions funds-arrival-actions">
-      <a href="{{ url('/sign-in') }}?{{ {'next': here}|urlencode }}"
-         class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+      <SiteButton :href="url('/sign-in') ~ '?' ~ {'next': here}|urlencode" glyph="sign-in" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.account.sign_in.action") }}</SiteButton>
       <a href="{{ url('/register') }}" class="funds-arrival-link">{{ _("web.account.sign_in.create") }}</a>
     </p>
   {% endif %}

@@ -3,21 +3,12 @@
 {% set free, paid, spent = claw.counts %}
 <dl class="claw-today">
   <div>
-    <dt>{{ _("web.admin.boxes.claw.today.free") }}</dt>
-    <dd>
-      {{ number(free) }}
-    </dd>
+    <Term :label="_('web.admin.boxes.claw.today.free')">{{ number(free) }}</Term>
   </div>
   <div>
-    <dt>{{ _("web.admin.boxes.claw.today.paid") }}</dt>
-    <dd>
-      {{ number(paid) }}
-    </dd>
+    <Term :label="_('web.admin.boxes.claw.today.paid')">{{ number(paid) }}</Term>
   </div>
   <div>
-    <dt>{{ _("web.admin.boxes.claw.today.spent", currency=_("games." ~ of.id ~ ".currency." ~ claw.rules.paid.currency)) }}</dt>
-    <dd>
-      {{ number(spent) }}
-    </dd>
+    <Term :label="_('web.admin.boxes.claw.today.spent', currency=_('games.' ~ of.id ~ '.currency.' ~ claw.rules.paid.currency))">{{ number(spent) }}</Term>
   </div>
 </dl>

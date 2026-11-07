@@ -69,14 +69,7 @@
       </span>
     </p>
     <div class="store-actions">
-      <button type="submit"
-              data-buy-open
-              aria-describedby="buy-why"
-              {% if not offered.buyable %}aria-disabled="true"{% endif %}
-              class="site-button site-button-large">
-        <Icon name="bag" :size="18" :stroke="'#FEDE01' if offered.buyable else 'currentColor'" />
-        {{ _("web.store.buy", price=number(offered.price.price), currency=currency) }}
-      </button>
+      <SiteButton data-buy-open aria-describedby="buy-why" :aria-disabled="'true' if not offered.buyable else none" glyph="bag" :size="18" :stroke="'#FEDE01' if offered.buyable else 'currentColor'" class="site-button-large">{{ _("web.store.buy", price=number(offered.price.price), currency=currency) }}</SiteButton>
       <p id="buy-why"
          role="status"
          data-why

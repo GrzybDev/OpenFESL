@@ -24,23 +24,14 @@
            class="game-icon-image">
       <dl class="game-icon-facts">
         <div>
-          <dt>{{ _("web.admin.icon.image") }}</dt>
-          <dd>
-            {{ _("web.admin.icon.image.value", width=number(icon.width), height=number(icon.height), size=number(icon.kilobytes)) }}
-          </dd>
+          <Term :label="_('web.admin.icon.image')">{{ _("web.admin.icon.image.value", width=number(icon.width), height=number(icon.height), size=number(icon.kilobytes)) }}</Term>
         </div>
         <div>
-          <dt>{{ _("web.admin.icon.address") }}</dt>
-          <dd>
-            <code class="entitlement-code">{{ icon.address }}</code>
-          </dd>
+          <Term :label="_('web.admin.icon.address')"><code class="entitlement-code">{{ icon.address }}</code></Term>
         </div>
         {% if icon.at %}
           <div>
-            <dt>{{ _("web.admin.icon.stored") }}</dt>
-            <dd>
-              {{ _("web.server.time", time=moment(icon.at)) }} · {{ icon.by or _("web.admin.command_line") }}
-            </dd>
+            <Term :label="_('web.admin.icon.stored')">{{ _("web.server.time", time=moment(icon.at)) }} · {{ icon.by or _("web.admin.command_line") }}</Term>
           </div>
         {% endif %}
       </dl>

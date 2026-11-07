@@ -27,8 +27,7 @@
       {% else %}
         <p>{{ _("web.arrival.text") }} {{ _("web.arrival.sign_in") }}</p>
         <div class="arrival-other">
-          <a href="{{ url('/sign-in') }}?{{ {'next': next}|urlencode }}"
-             class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+          <SiteButton :href="url('/sign-in') ~ '?' ~ {'next': next}|urlencode" glyph="sign-in" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.account.sign_in.action") }}</SiteButton>
           {# The strip above takes the address and password only where the sign-in asks for no check. #}
           {% if not sign_in_check %}<span>{{ _("web.arrival.strip") }}</span>{% endif %}
         </div>

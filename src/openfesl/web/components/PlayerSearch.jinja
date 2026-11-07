@@ -19,9 +19,7 @@
            {% if compact %} placeholder="{{ _('web.search.field.short') }}"{% endif %}
            {% if not compact %} aria-describedby="search-hint"{% endif %}
            class="player-search-input">
-    <button type="submit" class="site-button">
-      <Icon name="find" :size="16" stroke="#FEDE01" />{{ _("web.search.submit") }}
-    </button>
+    <SiteButton glyph="find">{{ _("web.search.submit") }}</SiteButton>
   </div>
   {% if not compact %}
     <p id="search-hint"

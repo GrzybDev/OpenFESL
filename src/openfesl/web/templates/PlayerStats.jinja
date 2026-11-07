@@ -123,22 +123,13 @@
               </div>
             {% endfor %}
             <div class="score-sum">
-              <dt>{{ _("web.player.combat_score") }}</dt>
-              <dd>
-                +{{ number(score - award_score) }}
-              </dd>
+              <Term :label="_('web.player.combat_score')">+{{ number(score - award_score) }}</Term>
             </div>
             <div class="score-sum score-linked">
-              <dt>{{ _("web.player.award_score") }}</dt>
-              <dd>
-                <a href="{{ profile }}/awards">+{{ number(award_score) }}<Icon name="go" :size="14" stroke="currentColor" /></a>
-              </dd>
+              <Term :label="_('web.player.award_score')"><a href="{{ profile }}/awards">+{{ number(award_score) }}<Icon name="go" :size="14" stroke="currentColor" /></a></Term>
             </div>
             <div class="score-total">
-              <dt>{{ _("web.player.total_score") }}</dt>
-              <dd>
-                ={{ number(score) }}
-              </dd>
+              <Term :label="_('web.player.total_score')">={{ number(score) }}</Term>
             </div>
           </dl>
         </section>
@@ -147,34 +138,19 @@
           <h2 id="player-record" class="sr-only">{{ _("web.player.record") }}</h2>
           <dl class="record">
             <div>
-              <dt>{{ _("web.leaderboard.column.kills") }}</dt>
-              <dd>
-                {{ number(values.kills|round|int) }}
-              </dd>
+              <Term :label="_('web.leaderboard.column.kills')">{{ number(values.kills|round|int) }}</Term>
             </div>
             <div>
-              <dt>{{ _("web.leaderboard.column.deaths") }}</dt>
-              <dd>
-                {{ number(values.deaths|round|int) }}
-              </dd>
+              <Term :label="_('web.leaderboard.column.deaths')">{{ number(values.deaths|round|int) }}</Term>
             </div>
             <div class="record-alt">
-              <dt>{{ _("web.player.kd") }}</dt>
-              <dd>
-                {{ number(values.kills / values.deaths if values.deaths > 0 else values.kills, 2) }}
-              </dd>
+              <Term :label="_('web.player.kd')">{{ number(values.kills / values.deaths if values.deaths > 0 else values.kills, 2) }}</Term>
             </div>
             <div class="record-alt record-linked">
-              <dt>{{ _("web.leaderboard.column.dog_tags") }}</dt>
-              <dd>
-                <a href="{{ profile }}/dog-tags">{{ number(values.dog_tags|round|int) }}<Icon name="go" :size="14" stroke="#0A0A0A" /></a>
-              </dd>
+              <Term :label="_('web.leaderboard.column.dog_tags')"><a href="{{ profile }}/dog-tags">{{ number(values.dog_tags|round|int) }}<Icon name="go" :size="14" stroke="#0A0A0A" /></a></Term>
             </div>
             <div>
-              <dt>{{ _("web.leaderboard.stat.time") }}</dt>
-              <dd>
-                {{ _("web.leaderboard.hours", hours=number((values.time // 3600)|int)) }}
-              </dd>
+              <Term :label="_('web.leaderboard.stat.time')">{{ _("web.leaderboard.hours", hours=number((values.time // 3600)|int)) }}</Term>
             </div>
             <div{% if place %} class="record-linked"{% endif %}>
               <dt>{{ _("web.leaderboard.title") }}</dt>

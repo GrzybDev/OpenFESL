@@ -31,8 +31,7 @@
             </p>
           {% endif %}
           <p class="site-actions">
-            <a href="{{ base }}"
-               class="site-button site-button-large"><Icon name="ticket" :size="18" stroke="#FEDE01" />{{ _("web.redeem.again") }}</a>
+            <SiteButton :href="base" glyph="ticket" :size="18" class="site-button-large">{{ _("web.redeem.again") }}</SiteButton>
             {% if "treasure-chests" in game.pages %}
               <a href="{{ url('/' ~ game.id ~ '/treasure-chests') }}"
                  class="store-back">{{ _("web.chests.title") }}</a>
@@ -108,10 +107,7 @@
             {% if entry.gift.funds or entry.gift.keys %}<p class="redeem-note">{{ _("web.redeem.wallet_note") }}</p>{% endif %}
           {% endif %}
           <p class="site-actions">
-            <button type="submit" class="site-button site-button-go site-button-large">
-              <Icon name="tick" :size="18" stroke="currentColor" />
-              <span data-redeem-label>{{ _("web.redeem.submit.plain") }}</span>
-            </button>
+            <SiteButton glyph="tick" :size="18" stroke="currentColor" class="site-button-go site-button-large"><span data-redeem-label>{{ _("web.redeem.submit.plain") }}</span></SiteButton>
             <a href="{{ base }}" class="store-back">{{ _("web.admin.cancel") }}</a>
           </p>
           {% if entry.gift.items %}
@@ -139,12 +135,7 @@
                    aria-describedby="redeem-hint{% if refusal %} redeem-refused{% endif %}"
                    {% if refusal %} aria-invalid="true"{% endif %}
                    class="redeem-field">
-            <button type="submit"
-                    name="from"
-                    value="form"
-                    class="site-button site-button-large">
-              <Icon name="ticket" :size="18" stroke="#FEDE01" />{{ _("web.redeem.show") }}
-            </button>
+            <SiteButton name="from" value="form" glyph="ticket" :size="18" class="site-button-large">{{ _("web.redeem.show") }}</SiteButton>
           </div>
           <p id="redeem-hint" class="redeem-note">{{ _("web.redeem.hint") }}</p>
           {% if refusal %}
@@ -155,8 +146,7 @@
             {% if said[1] %}<p class="redeem-note">{{ said[1] }}</p>{% endif %}
             {% if refusal == "no_hero" and free %}
               <p class="site-actions">
-                <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
-                   class="site-button site-button-go"><Icon name="plus" :size="16" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+                <SiteButton :href="url('/' ~ game.id ~ '/user/createHero')" glyph="plus" stroke="currentColor" class="site-button-go">{{ _("web.bar.create") }}</SiteButton>
               </p>
             {% endif %}
           {% endif %}

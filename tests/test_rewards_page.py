@@ -153,7 +153,7 @@ async def test_while_claims_are_paused_the_page_says_so_and_the_days_gifts_wait_
 
     shown = visible(paused.content)
     assert "Claims are paused for now" in shown
-    assert re.search(r'aria-disabled="true"\s+aria-describedby="claim-christmas', paused.text)
+    assert re.search(r'aria-describedby="claim-christmas[^"]*"\s+aria-disabled="true"', paused.text)
     assert "Claims are paused; this reward waits." in shown
     assert "rewards to claim" not in shown and "Ready to claim 0" in shown
     assert "Nothing to claim right now" not in shown

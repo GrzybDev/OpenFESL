@@ -27,8 +27,7 @@
   </p>
   <div class="play-now-box-actions">
     {% if total %}
-      <a href="{{ url('/' ~ game.id ~ '/treasure-chests') }}"
-         class="site-button"><Icon name="chest" :size="16" stroke="#FEDE01" />{{ _("web.chests.box.open") }}</a>
+      <SiteButton :href="url('/' ~ game.id ~ '/treasure-chests')" glyph="chest">{{ _("web.chests.box.open") }}</SiteButton>
     {% else %}
       <a href="{{ url('/' ~ game.id ~ '/treasure-chests') }}"
          class="info-box-link">{{ _("web.chests.box.about") }}<Icon name="go" :size="12" stroke="currentColor" /></a>

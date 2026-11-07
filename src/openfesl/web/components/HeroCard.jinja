@@ -48,10 +48,7 @@
             </div>
           {% endif %}
           <div class="hero-level">
-            <dt>{{ _("web.heroes.level.label") }}</dt>
-            <dd>
-              {{ hero.level }}
-            </dd>
+            <Term :label="_('web.heroes.level.label')">{{ hero.level }}</Term>
           </div>
         </dl>
       </div>
@@ -65,53 +62,41 @@
         </div>
       {% endif %}
       <dl class="hero-facts">
-        <dt>{{ _("games." ~ game.id ~ ".currency." ~ rules.points) }}</dt>
-        <dd>
-          <strong>{{ _("web.heroes.points.of", unspent=number(card.points[0]), earned=number(card.points[1])) }}</strong>
-          <span class="hero-scope">· {{ _("web.heroes.points.scope") }}</span>
-        </dd>
-        <dt>{{ _("web.heroes.items") }}</dt>
-        <dd>
-          <strong>{{ _n("web.heroes.items.count", card.items) }}</strong>
-          {% if card.low %}
-            <strong class="hero-low">· {{ _n("web.heroes.items.low", card.low) }}</strong>
-          {% else %}
-            <span class="hero-scope">· {{ _("web.heroes.items.none_low") }}</span>
-          {% endif %}
-        </dd>
-        {% if card.chests is not none %}
-          <dt>{{ _("web.heroes.chests") }}</dt>
-          <dd>
-            {% if card.chests %}
-              <strong>{{ _n("web.heroes.chests.count", card.chests) }}</strong>
-            {% else %}
-              {{ _("web.heroes.chests.none") }}
-            {% endif %}
-          </dd>
+        <Term :label="_('games.' ~ game.id ~ '.currency.' ~ rules.points)">
+        <strong>{{ _("web.heroes.points.of", unspent=number(card.points[0]), earned=number(card.points[1])) }}</strong>
+        <span class="hero-scope">· {{ _("web.heroes.points.scope") }}</span>
+        </Term>
+        <Term :label="_('web.heroes.items')">
+        <strong>{{ _n("web.heroes.items.count", card.items) }}</strong>
+        {% if card.low %}
+          <strong class="hero-low">· {{ _n("web.heroes.items.low", card.low) }}</strong>
+        {% else %}
+          <span class="hero-scope">· {{ _("web.heroes.items.none_low") }}</span>
         {% endif %}
-        <dt>{{ _("web.heroes.enlisted") }}</dt>
-        <dd>
-          {{ when(hero.created, "yMMMd") }}
-        </dd>
+        </Term>
+        {% if card.chests is not none %}
+          <Term :label="_('web.heroes.chests')">
+          {% if card.chests %}
+            <strong>{{ _n("web.heroes.chests.count", card.chests) }}</strong>
+          {% else %}
+            {{ _("web.heroes.chests.none") }}
+          {% endif %}
+          </Term>
+        {% endif %}
+        <Term :label="_('web.heroes.enlisted')">{{ when(hero.created, "yMMMd") }}</Term>
       </dl>
       <div class="hero-actions">
         {# Others see the profile once the account has a display name and the hero is in play. #}
         {% if player.name and not hero.disabled %}
-          <a href="{{ url('/' ~ game.id ~ '/heroes/' ~ id) }}"
-             class="site-button site-button-ghost"><Icon name="user" :size="17" stroke="currentColor" />{{ _("web.heroes.profile") }}<span class="sr-only">{{ hero.persona.name }}</span></a>
+          <SiteButton :href="url('/' ~ game.id ~ '/heroes/' ~ id)" glyph="user" :size="17" stroke="currentColor" class="site-button-ghost">{{ _("web.heroes.profile") }}<span class="sr-only">{{ hero.persona.name }}</span></SiteButton>
         {% endif %}
-        <a href="{{ url('/' ~ game.id ~ '/heroes/' ~ id ~ '/rename') }}"
-           data-opens="rename-{{ id }}"
-           class="site-button site-button-ghost hero-rename"><Icon name="edit" :size="17" stroke="currentColor" />{{ _("web.rename.action") }}<span class="sr-only">{{ hero.persona.name }}</span><span class="hero-price">{% if not rules.rename_sale %}· {% endif %}<SalePrice :sale="rules.rename_sale" :price="_('web.rename.price.short', price=number(rules.rename_price), currency=_('games.' ~ game.id ~ '.currency.' ~ rules.currency))" /></span></a>
+        <SiteButton :href="url('/' ~ game.id ~ '/heroes/' ~ id ~ '/rename')" :data-opens="'rename-' ~ id" glyph="edit" :size="17" stroke="currentColor" class="site-button-ghost hero-rename">{{ _("web.rename.action") }}<span class="sr-only">{{ hero.persona.name }}</span><span class="hero-price">{% if not rules.rename_sale %}· {% endif %}<SalePrice :sale="rules.rename_sale" :price="_('web.rename.price.short', price=number(rules.rename_price), currency=_('games.' ~ game.id ~ '.currency.' ~ rules.currency))" /></span></SiteButton>
         {# A hero made before the creator has no faction, class or look to start the game with. #}
         {% if not card.default and hero.playable %}
           <form method="post"
                 action="{{ url('/' ~ game.id ~ '/heroes/' ~ id ~ '/default') }}">
             <input type="hidden" name="csrf" value="{{ csrf }}">
-            <button type="submit" class="site-button site-button-yellow">
-              <Icon name="star" :size="15" stroke="currentColor" />
-              {{ _("web.heroes.make_default") }} <span class="sr-only">{{ hero.persona.name }}</span>
-            </button>
+            <SiteButton glyph="star" :size="15" stroke="currentColor" class="site-button-yellow">{{ _("web.heroes.make_default") }} <span class="sr-only">{{ hero.persona.name }}</span></SiteButton>
           </form>
         {% endif %}
       </div>

@@ -19,8 +19,7 @@
         <span aria-hidden="true" class="info-box-disc"><Icon name="deal" :size="22" stroke="#0A0A0A" /></span>
         <p class="info-box-note">{{ _("web.store.front.hot_deals") }}</p>
         <p class="info-box-note">
-          <a href="{{ url('/' ~ game.id ~ game.site.path('hot-deals')) }}"
-             class="site-button"><Icon name="deal" :size="16" stroke="#FEDE01" />{{ _("web.site.page.hot-deals") }}</a>
+          <SiteButton :href="url('/' ~ game.id ~ game.site.path('hot-deals'))" glyph="deal">{{ _("web.site.page.hot-deals") }}</SiteButton>
         </p>
       </section>
     {% endif %}
@@ -29,8 +28,7 @@
     <p class="store-front-line">
       <Icon name="sign-in" :size="22" stroke="#FEDE01" />
       <span>{{ _("web.store.front.signed_out") }}</span>
-      <a href="{{ url('/sign-in') }}?{{ {'next': here ~ choice.query()}|urlencode }}"
-         class="site-button site-button-go"><Icon name="sign-in" :size="16" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+      <SiteButton :href="url('/sign-in') ~ '?' ~ {'next': here ~ choice.query()}|urlencode" glyph="sign-in" stroke="currentColor" class="site-button-go">{{ _("web.account.sign_in.action") }}</SiteButton>
     </p>
   {% elif not heroes %}
     <div class="store-front-none">
@@ -39,8 +37,7 @@
         <strong>{{ _("web.store.front.no_hero.title") }}</strong>
         {{ _("web.store.front.no_hero") }}
       </p>
-      <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
-         class="site-button site-button-go"><Icon name="plus" :size="16" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+      <SiteButton :href="url('/' ~ game.id ~ '/user/createHero')" glyph="plus" stroke="currentColor" class="site-button-go">{{ _("web.bar.create") }}</SiteButton>
     </div>
   {% endif %}
   <div data-store-front class="store-front">
@@ -108,9 +105,7 @@
                      class="store-search-input">
             </span>
           </div>
-          <button type="submit" class="site-button no-js-only">
-            <Icon name="find" :size="16" stroke="#FEDE01" />{{ _("web.store.front.show") }}
-          </button>
+          <SiteButton glyph="find" class="no-js-only">{{ _("web.store.front.show") }}</SiteButton>
         </div>
       </form>
     {% endif %}

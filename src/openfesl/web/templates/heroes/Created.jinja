@@ -40,11 +40,7 @@
                     action="{{ url('/' ~ game.id ~ '/heroes/' ~ hero.persona.id ~ '/default') }}">
                 <input type="hidden" name="csrf" value="{{ csrf }}">
                 <input type="hidden" name="next" value="{{ here }}">
-                <button type="submit"
-                        class="site-button site-button-yellow site-button-large">
-                  <Icon name="star" :size="18" stroke="currentColor" />
-                  {{ _("web.created.make_default", hero=name) }}
-                </button>
+                <SiteButton glyph="star" :size="18" stroke="currentColor" class="site-button-yellow site-button-large">{{ _("web.created.make_default", hero=name) }}</SiteButton>
               </form>
             {% endif %}
             {% if game.site.start_links and default %}<PlayNowButton :hero="default" />{% endif %}

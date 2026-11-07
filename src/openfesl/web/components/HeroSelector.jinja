@@ -48,10 +48,7 @@
                     action="{{ url('/' ~ game.id ~ '/heroes/' ~ hero.persona.id ~ '/default') }}">
                 <input type="hidden" name="csrf" value="{{ csrf }}">
                 <input type="hidden" name="next" value="{{ here }}">
-                <button type="submit" class="site-button site-button-yellow selector-button">
-                  <Icon name="star" :size="15" stroke="currentColor" />
-                  {{ _("web.heroes.make_default") }} <span class="sr-only">{{ hero.persona.name }}</span>
-                </button>
+                <SiteButton glyph="star" :size="15" stroke="currentColor" class="site-button-yellow selector-button">{{ _("web.heroes.make_default") }} <span class="sr-only">{{ hero.persona.name }}</span></SiteButton>
               </form>
             {% endif %}
           </article>
@@ -71,8 +68,7 @@
           <div class="selector-free">
             <span aria-hidden="true" class="selector-plus"><Icon name="plus" :size="26" stroke="currentColor" /></span>
             <p>{{ _("web.selector.free", slot=number) }}</p>
-            <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
-               class="site-button site-button-go selector-button"><Icon name="plus" :size="15" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+            <SiteButton :href="url('/' ~ game.id ~ '/user/createHero')" glyph="plus" :size="15" stroke="currentColor" class="site-button-go selector-button">{{ _("web.bar.create") }}</SiteButton>
           </div>
         </li>
       {% endfor %}

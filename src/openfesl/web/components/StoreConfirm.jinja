@@ -29,41 +29,22 @@
     <h1 id="confirm-title" class="site-dialog-title">{{ _("web.store.confirm.title") }}</h1>
   {% endif %}
   <dl class="site-facts store-confirm-facts">
-    <dt>{{ _("web.store.row.item") }}</dt>
-    <dd>
-      {{ sold.name }}
-    </dd>
-    <dt>{{ _("web.store.row.hero") }}</dt>
-    <dd>
-      {{ offered.choice.hero.persona.name }}
-    </dd>
-    <dt>{{ change[0] }}</dt>
-    <dd>
-      {{ change[1] }}
-    </dd>
-    <dt>{{ _("web.rename.price") }}</dt>
-    <dd>
-      {% if price.original_price %}
-        {{ _("web.store.confirm.was", price=texts.priced(price.price, price.currency), was=number(price.original_price)) }}
-      {% else %}
-        {{ texts.priced(price.price, price.currency) }}
-      {% endif %}
-    </dd>
-    <dt>{{ _("web.rename.funds_now", currency=currency) }}</dt>
-    <dd>
-      {{ number(offered.balance) }}
-    </dd>
-    <dt>{{ _("web.rename.funds_after", currency=currency) }}</dt>
-    <dd>
-      {{ number(offered.balance - price.price) }}
-    </dd>
+    <Term :label="_('web.store.row.item')">{{ sold.name }}</Term>
+    <Term :label="_('web.store.row.hero')">{{ offered.choice.hero.persona.name }}</Term>
+    <Term :label="change[0]">{{ change[1] }}</Term>
+    <Term :label="_('web.rename.price')">
+    {% if price.original_price %}
+      {{ _("web.store.confirm.was", price=texts.priced(price.price, price.currency), was=number(price.original_price)) }}
+    {% else %}
+      {{ texts.priced(price.price, price.currency) }}
+    {% endif %}
+    </Term>
+    <Term :label="_('web.rename.funds_now', currency=currency)">{{ number(offered.balance) }}</Term>
+    <Term :label="_('web.rename.funds_after', currency=currency)">{{ number(offered.balance - price.price) }}</Term>
   </dl>
   <p class="store-confirm-note">{{ texts.confirm_note(offered) }}</p>
   <div class="site-dialog-actions">
-    <button type="submit" class="site-button site-button-go site-button-large">
-      <Icon name="bag" :size="18" stroke="currentColor" />
-      {{ _("web.store.confirm." ~ ("open" if sold.kind == "box" else "buy"), price=number(price.price), currency=currency) }}
-    </button>
+    <SiteButton glyph="bag" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.store.confirm." ~ ("open" if sold.kind == "box" else "buy"), price=number(price.price), currency=currency) }}</SiteButton>
     {% if dialog %}
       <button type="button" data-close class="site-button site-button-ghost">{{ _("web.rename.cancel") }}</button>
     {% else %}

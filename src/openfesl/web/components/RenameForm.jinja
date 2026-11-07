@@ -46,26 +46,13 @@
   <dl class="site-facts">
     <SaleFacts :sale="rules.rename_sale" :price="number(price) ~ ' ' ~ currency" />
     {% if short %}
-      <dt>{{ _("web.rename.funds_now", currency=currency) }}</dt>
-      <dd>
-        {{ number(funds) }} <span class="site-short">· {{ _("web.rename.short", amount=number(price - funds)) }}</span>
-      </dd>
+      <Term :label="_('web.rename.funds_now', currency=currency)">{{ number(funds) }} <span class="site-short">· {{ _("web.rename.short", amount=number(price - funds)) }}</span></Term>
     {% else %}
-      <dt>{{ _("web.rename.funds_after", currency=currency) }}</dt>
-      <dd>
-        {{ number(funds - price) }}
-      </dd>
+      <Term :label="_('web.rename.funds_after', currency=currency)">{{ number(funds - price) }}</Term>
     {% endif %}
   </dl>
   <div class="site-dialog-actions">
-    <button type="submit"
-            aria-describedby="rename-why-{{ id }}"
-            {% if short %} aria-disabled="true"{% endif %}
-            data-submit
-            class="site-button site-button-go site-button-large">
-      <Icon name="edit" :size="18" stroke="currentColor" />
-      {{ _("web.rename.submit", price=number(price), currency=currency) }}
-    </button>
+    <SiteButton :aria-describedby="'rename-why-' ~ id" data-submit :aria-disabled="'true' if short else none" glyph="edit" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.rename.submit", price=number(price), currency=currency) }}</SiteButton>
     {% if dialog %}
       <button type="button" data-close class="site-button site-button-ghost">{{ _("web.rename.cancel") }}</button>
     {% else %}

@@ -32,10 +32,7 @@
       <dl class="catalogue-kinds">
         {% for kind, found in view.kinds %}
           <div class="catalogue-kind">
-            <dt>{{ _("games." ~ game.id ~ ".item_kind." ~ kind) }}</dt>
-            <dd>
-              {{ count(found) }}
-            </dd>
+            <Term :label="_('games.' ~ game.id ~ '.item_kind.' ~ kind)">{{ count(found) }}</Term>
           </div>
         {% endfor %}
       </dl>

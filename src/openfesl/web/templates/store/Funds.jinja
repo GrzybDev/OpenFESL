@@ -52,10 +52,7 @@
             </div>
             <dl class="funds-heroes">
               {% for hero, (unspent, earned) in points %}
-                <dt>{{ hero.persona.name }}</dt>
-                <dd>
-                  {{ _("web.heroes.points.of", unspent=number(unspent), earned=number(earned)) }}
-                </dd>
+                <Term :label="hero.persona.name">{{ _("web.heroes.points.of", unspent=number(unspent), earned=number(earned)) }}</Term>
               {% else %}
                 <dt>{{ _("web.bar.no_hero") }}</dt>
                 <dd>

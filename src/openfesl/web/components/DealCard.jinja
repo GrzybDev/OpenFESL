@@ -42,10 +42,7 @@
          class="deal-free"><Icon name="gift" :size="18" stroke="currentColor" />{{ _("web.deals.card.free") }}</a>
     {% endif %}
     <dl class="deal-facts">
-      <dt>{{ _("web.store.requires") }}</dt>
-      <dd>
-        {{ card.requires }}
-      </dd>
+      <Term :label="_('web.store.requires')">{{ card.requires }}</Term>
       {% if card.heroes is not none %}
         <dt class="phone-sr-only">{{ _("web.deals.card.heroes") }}</dt>
         <dd class="deal-heroes{% if not card.heroes %} deal-heroes-none{% endif %}">
@@ -81,10 +78,7 @@
         <Icon name="warn" :size="18" fill="currentColor" />{{ card.sold_out }}
       </p>
     {% else %}
-      <a data-live href="{{ card.href }}" class="site-button deal-buy">
-        <Icon :name="'box' if card.box else 'bag'" :size="16" stroke="#FEDE01" />
-        {{ card.action or _("web.deals.card.contents" if card.box else "web.deals.card.choose") }}
-      </a>
+      <SiteButton data-live :href="card.href" :glyph="'box' if card.box else 'bag'" class="deal-buy">{{ card.action or _("web.deals.card.contents" if card.box else "web.deals.card.choose") }}</SiteButton>
     {% endif %}
   </div>
 </article>

@@ -75,10 +75,7 @@
     <dd class="js-only" data-fact="price">
       {{ first.price }}
     </dd>
-    <dt>{{ _("web.rename.funds_now", currency=currency) }}</dt>
-    <dd>
-      {{ number(funds) }}
-    </dd>
+    <Term :label="_('web.rename.funds_now', currency=currency)">{{ number(funds) }}</Term>
     <dt class="js-only">{{ _("web.rename.funds_after", currency=currency) }}</dt>
     <dd class="js-only{% if first.short %} site-short{% endif %}"
         data-fact="after">
@@ -98,14 +95,7 @@
   </p>
   <p class="keys-note">{{ _("web.chests.keys.belong") }} {{ _("web.heroes.wallet.note") }}</p>
   <div class="site-dialog-actions">
-    <button type="submit"
-            aria-describedby="buy-keys-why{{ suffix }}"
-            {% if first.short %} aria-disabled="true"{% endif %}
-            class="site-button site-button-go site-button-large">
-      <Icon name="coin" :size="18" stroke="currentColor" />
-      <span class="js-only" data-label>{{ first.label }}</span>
-      <span class="no-js-only">{{ _("web.chests.keys.buy") }}</span>
-    </button>
+    <SiteButton :aria-describedby="'buy-keys-why' ~ suffix" :aria-disabled="'true' if first.short else none" glyph="coin" :size="18" stroke="currentColor" class="site-button-go site-button-large"><span class="js-only" data-label>{{ first.label }}</span> <span class="no-js-only">{{ _("web.chests.keys.buy") }}</span></SiteButton>
     <FundsLink data-earn :hidden="not first.short" class="site-button site-button-ghost" />
     {% if dialog %}
       <button type="button"

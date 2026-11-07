@@ -10,8 +10,7 @@
       <div class="player-title">
         <Plaque id="player-name">{{ name }}</Plaque>
         {% if referral and not player %}
-          <a href="{{ url('/' ~ game.id ~ '/ref/' ~ account.account.id) }}"
-             class="site-button site-button-go"><Icon name="user-plus" :size="16" stroke="currentColor" />{{ _("web.referral.landing.sign_up") }}<span class="sr-only">{{ _("web.referral.profile.through", name=name) }}</span></a>
+          <SiteButton :href="url('/' ~ game.id ~ '/ref/' ~ account.account.id)" glyph="user-plus" stroke="currentColor" class="site-button-go">{{ _("web.referral.landing.sign_up") }}<span class="sr-only">{{ _("web.referral.profile.through", name=name) }}</span></SiteButton>
         {% endif %}
       </div>
       <p class="site-lead">{{ _("web.profile.since", date=when(account.created, "yMMMd")) }}</p>
@@ -57,14 +56,8 @@
   <section aria-labelledby="player-totals" class="player-section">
     <h2 id="player-totals" class="site-heading">{{ _("web.profile.totals") }}</h2>
     <dl class="site-facts player-totals">
-      <dt>{{ _("web.profile.time") }}</dt>
-      <dd>
-        {{ time }}
-      </dd>
-      <dt>{{ _("web.profile.games") }}</dt>
-      <dd>
-        {{ number(games) }}
-      </dd>
+      <Term :label="_('web.profile.time')">{{ time }}</Term>
+      <Term :label="_('web.profile.games')">{{ number(games) }}</Term>
     </dl>
   </section>
   {% if referral %}

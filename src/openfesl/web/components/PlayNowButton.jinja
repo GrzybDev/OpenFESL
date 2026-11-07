@@ -1,4 +1,3 @@
 {#def hero #}
 {# The black pill that opens Play Now, naming the hero the game starts as. #}
-<a href="{{ url('/' ~ game.id ~ '/play-now') }}"
-   class="site-button site-button-large"><Icon name="play" :size="18" stroke="#FEDE01" />{{ _("web.play_now.as", hero=hero.persona.name) }}</a>
+<SiteButton :href="url('/' ~ game.id ~ '/play-now')" glyph="play" :size="18" class="site-button-large">{{ _("web.play_now.as", hero=hero.persona.name) }}</SiteButton>

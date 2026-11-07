@@ -29,8 +29,7 @@
       <p>{{ _("web.play_now.signed_out.text") }}</p>
       <p class="play-panel-small">{{ _("web.play_now.signed_out.after") }}</p>
       <div class="site-actions">
-        <a href="{{ url('/sign-in') }}?{{ {'next': again}|urlencode }}"
-           class="site-button site-button-go site-button-large"><Icon name="sign-in" :size="18" stroke="currentColor" />{{ _("web.account.sign_in.action") }}</a>
+        <SiteButton :href="url('/sign-in') ~ '?' ~ {'next': again}|urlencode" glyph="sign-in" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.account.sign_in.action") }}</SiteButton>
         <a href="{{ url('/register') }}"
            class="play-panel-link">{{ _("web.account.sign_in.create") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
       </div>
@@ -39,28 +38,26 @@
       <p>{{ _("web.play_now.no_hero.text", game=game.name) }}</p>
       <p class="play-panel-small">{{ _("web.play_now.no_hero.first") }}</p>
       <div class="site-actions">
-        <a href="{{ url('/' ~ game.id ~ '/user/createHero') }}"
-           class="site-button site-button-go site-button-large"><Icon name="plus" :size="18" stroke="currentColor" />{{ _("web.bar.create") }}</a>
+        <SiteButton :href="url('/' ~ game.id ~ '/user/createHero')" glyph="plus" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.bar.create") }}</SiteButton>
       </div>
     {% elif state == "taken" %}
       <h2 id="play-now-state" tabindex="-1" class="site-box-title">{{ _("web.play_now.taken", game=game.name) }}</h2>
       <p>{{ _("web.play_now.taken.text", time=when(link.taken, 'Hm'), hero=link.hero) }}</p>
       <p class="play-panel-small">{{ _("web.play_now.taken.used") }}</p>
       <div class="site-actions">
-        <a href="{{ heroes }}"
-           class="site-button site-button-large"><Icon name="star" :size="18" stroke="#FEDE01" />{{ _("web.heroes.title") }}</a>
+        <SiteButton :href="heroes" glyph="star" :size="18" class="site-button-large">{{ _("web.heroes.title") }}</SiteButton>
       </div>
     {% elif state == "ended" %}
       <h2 id="play-now-state" tabindex="-1" class="site-box-title">{{ _("web.play_now.ended") }}</h2>
       <p>{{ _n("web.play_now.ended.text", minutes) }}</p>
       <p class="play-panel-small">{{ _("web.play_now.ended.unused") }}</p>
+      {# A button followed by another element stays a plain link: a component's closing tag drops the line break that spaces them. #}
       <div class="site-actions">
         {% if play %}
           <a href="{{ play }}"
              class="site-button site-button-large"><Icon name="book" :size="18" stroke="#FEDE01" />{{ _("web.site.page.play") }}</a>
         {% endif %}
-        <a href="{{ again }}"
-           class="site-button"><Icon name="retry" :size="17" stroke="#FEDE01" />{{ _("web.play_now.again") }}</a>
+        <SiteButton :href="again" glyph="retry" :size="17">{{ _("web.play_now.again") }}</SiteButton>
       </div>
     {% else %}
       {% set ends = when(link.ends, 'Hm') %}
@@ -81,8 +78,7 @@
             <a href="{{ play }}"
                class="site-button site-button-yellow site-button-large"><Icon name="book" :size="18" stroke="currentColor" />{{ _("web.site.page.play") }}</a>
           {% endif %}
-          <a href="{{ again }}"
-             class="site-button"><Icon name="retry" :size="17" stroke="#FEDE01" />{{ _("web.play_now.again") }}</a>
+          <SiteButton :href="again" glyph="retry" :size="17">{{ _("web.play_now.again") }}</SiteButton>
         {% else %}
           <a href="{{ link.address }}"
              class="site-button site-button-go site-button-large"><Icon name="play" :size="18" stroke="currentColor" />{{ _("web.play_now.open") }}</a>
