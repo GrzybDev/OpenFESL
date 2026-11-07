@@ -26,7 +26,6 @@
 
   .claw-heading {
     margin: 0 0 10px;
-    padding: 0;
     font: 800 21px/1.2 var(--site-heading);
     text-shadow: var(--site-outline-thin);
   }
@@ -106,18 +105,10 @@
     min-width: 0;
   }
 
-  .claw-form {
-    margin: 0;
-  }
-
   .claw-picker {
-    margin: 0;
-    padding: 0;
-    border: 0;
   }
 
   .claw-heroes {
-    margin: 0;
     color: #1f1712;
   }
 
@@ -185,7 +176,6 @@
     min-height: 56px;
     align-items: center;
     gap: 10px;
-    margin: 0;
     padding: 4px 18px 4px 8px;
     border: 3px solid #000;
     border-radius: 30px;
@@ -274,8 +264,6 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 0 18px;
-    margin: 0;
-    padding: 0;
 
     li {
       display: flex;
@@ -290,7 +278,6 @@
     position: static;
     width: auto;
     margin: 0 0 16px;
-    padding: 0;
     overflow: hidden;
     border: 3px solid #000;
     border-radius: 8px;
@@ -313,7 +300,6 @@
   }
 
   .claw-prize-title {
-    margin: 0;
     padding: 12px 16px;
     background: #893531;
     color: #fff;

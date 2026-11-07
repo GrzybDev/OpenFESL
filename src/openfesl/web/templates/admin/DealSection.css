@@ -46,8 +46,6 @@
     display: flex;
     min-width: 0;
     gap: 2px;
-    margin: 0;
-    border: 0;
     padding: 4px;
   }
 

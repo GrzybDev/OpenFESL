@@ -287,7 +287,6 @@
     grid-template-columns: minmax(0, 1fr) 120px 150px 44px;
 
     > .box-candidate-name {
-      margin: 0;
       background: var(--row);
       padding: 2px 10px 2px 2px;
     }

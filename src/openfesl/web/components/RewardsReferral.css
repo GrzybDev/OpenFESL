@@ -58,14 +58,6 @@
   }
 
   @container (width < 760px) {
-    .admin-list .referral-admin-table [role="rowgroup"]:first-child {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip-path: inset(50%);
-    }
-
     .referral-admin-row.referral-admin-columns {
       grid-template-columns: 44px minmax(0, 1fr) 44px;
 

@@ -29,11 +29,6 @@
     line-height: 1.35;
   }
 
-  .claw-feed-list {
-    margin: 0;
-    padding: 0;
-  }
-
   .claw-feed-row {
     display: flex;
     align-items: flex-start;

@@ -152,8 +152,6 @@
     display: grid;
     gap: 2px;
     margin: 2px 0 0;
-    padding: 0;
-    list-style: none;
   }
 
   .rewards-mission,

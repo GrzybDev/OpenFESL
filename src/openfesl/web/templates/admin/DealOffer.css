@@ -54,7 +54,6 @@
   .offer-drop {
     display: grid;
     place-items: center;
-    border: 0;
     background: var(--ink);
     color: var(--bright);
     cursor: pointer;
@@ -68,7 +67,6 @@
     display: flex;
     justify-content: space-between;
     gap: 12px;
-    margin: 0;
     background: var(--row-light);
     padding: 10px 12px;
     color: var(--ink);
@@ -91,7 +89,6 @@
   .offer-amount-label {
     display: flex;
     align-items: center;
-    margin: 0;
   }
 
   .offer-line:not(:empty) {
@@ -120,9 +117,6 @@
   .offer-own-texts {
     display: grid;
     gap: 2px;
-    margin: 0;
-    border: 0;
-    padding: 0;
     min-width: 0;
     color: var(--ink);
   }
@@ -149,7 +143,6 @@
     display: grid;
     justify-items: center;
     gap: 6px;
-    margin: 0;
     background: var(--panel);
     padding: 12px;
 

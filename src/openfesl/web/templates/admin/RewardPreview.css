@@ -36,8 +36,6 @@
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 2px;
     margin: 2px 0 0;
-    padding: 0;
-    list-style: none;
   }
 
   .preview-card-always {

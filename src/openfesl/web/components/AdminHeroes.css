@@ -91,10 +91,6 @@
     align-items: center;
     gap: 12px;
 
-    .badge {
-      flex: none;
-    }
-
     > p {
       display: grid;
       gap: 3px;

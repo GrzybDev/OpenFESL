@@ -38,10 +38,6 @@
     font-size: 15px;
     font-weight: 600;
 
-    .badge {
-      flex: none;
-    }
-
     .list-button {
       margin-left: auto;
     }
@@ -164,10 +160,6 @@
     font-family: var(--font-sans);
     font-size: 15px;
     font-weight: 600;
-
-    .badge {
-      flex: none;
-    }
   }
 
   .admin-hero-banner {

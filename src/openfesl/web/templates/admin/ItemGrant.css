@@ -58,10 +58,6 @@
     font-size: 15px;
     font-weight: 600;
     color: var(--ink);
-
-    .badge {
-      flex: none;
-    }
   }
 
   .admin-fit-no {

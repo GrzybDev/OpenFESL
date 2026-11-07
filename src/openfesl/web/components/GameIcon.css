@@ -21,8 +21,6 @@
 
   .game-icon-image {
     flex: none;
-    width: 96px;
-    height: 96px;
     object-fit: contain;
   }
 
@@ -87,8 +85,6 @@
     flex: none;
 
     > img:first-child {
-      width: 72px;
-      height: 72px;
       border-radius: 8px;
       object-fit: cover;
     }

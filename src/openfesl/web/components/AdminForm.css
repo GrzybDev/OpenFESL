@@ -17,10 +17,6 @@
       display: none;
     }
 
-    .badge {
-      flex: none;
-    }
-
     &.flash {
       animation: site-flash 600ms linear;
     }

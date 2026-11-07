@@ -14,12 +14,6 @@
     line-height: 1.35;
     font-weight: 600;
     color: var(--ink);
-
-    .badge {
-      width: 26px;
-      height: 26px;
-      flex: none;
-    }
   }
 
   /* The list comes first, also on phones, where the search and the mode follow it. */

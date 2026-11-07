@@ -10,7 +10,6 @@
     min-height: 36px;
     align-items: center;
     gap: 6px;
-    border: 0;
     background: var(--accent);
     padding: 0 10px 0 4px;
     font-family: var(--font-sans);

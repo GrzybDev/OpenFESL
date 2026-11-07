@@ -51,7 +51,6 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    margin: 0;
     font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.06em;
@@ -61,9 +60,6 @@
   .deals-step-lines {
     display: grid;
     gap: 2px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
     font-family: var(--font-sans);
     font-size: 14px;
     font-weight: 600;
@@ -75,7 +71,6 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    margin: 0;
     font-family: var(--font-sans);
     font-size: 14px;
     font-weight: 600;
@@ -91,7 +86,6 @@
 
     > .body-text {
       flex: 1 1 320px;
-      margin: 0;
       background: var(--row-light);
       padding: 10px 14px;
       color: var(--ink);
@@ -107,8 +101,6 @@
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 2px;
     margin: 2px 0 0;
-    padding: 0;
-    list-style: none;
   }
 
   .deals-season {
@@ -131,14 +123,6 @@
   @container (width < 820px) {
     .admin-list .table.deals-table {
       min-width: 0;
-
-      [role="rowgroup"]:first-child {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip-path: inset(50%);
-      }
     }
 
     .deals-step {

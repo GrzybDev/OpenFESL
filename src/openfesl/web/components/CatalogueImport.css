@@ -25,7 +25,6 @@
   .catalogue-steps {
     display: grid;
     gap: 2px;
-    list-style: none;
   }
 
   .catalogue-step {
@@ -68,7 +67,6 @@
       flex: 1 1 220px;
       background: var(--row-light);
       padding: 11px 12px;
-      font-family: var(--font-mono);
       font-size: 14px;
       line-height: 1.4;
       overflow-wrap: anywhere;

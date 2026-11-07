@@ -8,7 +8,6 @@
   }
 
   .provider-code {
-    font-family: var(--font-mono);
     font-size: 13px;
     font-weight: 500;
     letter-spacing: 0;
@@ -113,7 +112,6 @@
     }
 
     code {
-      font-family: var(--font-mono);
       font-size: 13px;
     }
 

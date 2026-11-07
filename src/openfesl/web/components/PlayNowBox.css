@@ -13,14 +13,4 @@
     gap: 6px 18px;
     margin-top: 12px;
   }
-
-  .play-now-box-changed {
-    animation: fade-in 150ms var(--ease-menu) both;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .play-now-box-changed {
-      animation-duration: 100ms;
-    }
-  }
 }

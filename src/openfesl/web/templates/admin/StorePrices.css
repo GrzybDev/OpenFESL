@@ -23,7 +23,6 @@
   .prices-search-input {
     min-width: 0;
     flex: 1;
-    border: 0;
     background: var(--row-light);
     padding: 12px 14px;
     font-size: 16px;
@@ -107,9 +106,6 @@
     display: grid;
     min-width: 0;
     gap: 2px;
-    border: 0;
-    margin: 0;
-    padding: 0;
   }
 
   .prices-filter-legend {

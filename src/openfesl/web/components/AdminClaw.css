@@ -50,7 +50,6 @@
 
   .claw-admin-day {
     min-height: 44px;
-    margin: 0;
     padding: 10px 12px;
     background: var(--row-light);
     color: var(--ink);
@@ -75,7 +74,6 @@
     }
 
     dd {
-      margin: 0;
       font-size: 26px;
       font-weight: 800;
       font-variant-numeric: tabular-nums;

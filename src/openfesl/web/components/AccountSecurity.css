@@ -32,13 +32,9 @@
   }
 
   .way-glyph.badge {
-    display: grid;
     width: 40px;
     height: 40px;
     flex: 0 0 40px;
-    place-items: center;
-    border: 1px solid var(--badge-edge);
-    background: var(--badge);
   }
 
   .way-text {
@@ -113,10 +109,6 @@
     display: grid;
     flex: 1 1 340px;
     gap: 22px;
-  }
-
-  .way .account-form {
-    padding: 0;
   }
 
   :is(.way, .way-remove) > .form-button:disabled {

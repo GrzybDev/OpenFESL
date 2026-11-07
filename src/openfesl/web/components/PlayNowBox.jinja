@@ -8,7 +8,7 @@
   <span aria-hidden="true" class="info-box-disc"><Icon name="play" :size="20" stroke="#0A0A0A" /></span>
   {% if hero %}
     {% set name %}<strong>{{ hero.persona.name }}</strong>{% endset %}
-    <p class="info-box-note{% if changed %} play-now-box-changed{% endif %}">
+    <p class="info-box-note{% if changed %} play-badge-changed{% endif %}">
       {{ _("web.play_now.box", game=game.name, hero=name) }}
     </p>
   {% elif player %}

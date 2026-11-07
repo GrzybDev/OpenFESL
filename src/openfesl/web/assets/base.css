@@ -194,12 +194,10 @@
     position: absolute;
     width: 1px;
     height: 1px;
-    padding: 0;
     margin: -1px;
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
-    border-width: 0;
   }
 
   /* The black blocks that lead somewhere or send something, each with its own room. */
@@ -457,12 +455,10 @@
       position: absolute;
       width: 1px;
       height: 1px;
-      padding: 0;
       margin: -1px;
       overflow: hidden;
       clip-path: inset(50%);
       white-space: nowrap;
-      border-width: 0;
     }
   }
 

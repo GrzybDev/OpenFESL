@@ -204,9 +204,6 @@
   .prices-add-part {
     display: grid;
     gap: 4px;
-    border: 0;
-    margin: 0;
-    padding: 0;
 
     > legend {
       width: 100%;

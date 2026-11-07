@@ -36,8 +36,6 @@
     gap: 2px;
     margin-top: 2px;
     margin: 2px 0 0;
-    border: 0;
-    padding: 0;
     min-width: 0;
   }
 
@@ -70,9 +68,6 @@
   .reward-gift {
     display: grid;
     gap: 2px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
     font-weight: 600;
   }
 
@@ -90,8 +85,6 @@
     display: grid;
     gap: 2px;
     margin: 2px 0 0;
-    border: 0;
-    padding: 0;
     min-width: 0;
   }
 
@@ -169,8 +162,6 @@
   .reward-own {
     display: grid;
     gap: 2px;
-    margin: 0;
-    border: 0;
     background: #ffffff;
     padding: 12px 14px 14px;
     color: var(--ink);
@@ -184,7 +175,6 @@
     gap: 10px;
     width: 100%;
     margin-bottom: 8px;
-    padding: 0;
     font-weight: 700;
 
     .badge {
@@ -237,9 +227,6 @@
   .reward-items {
     display: grid;
     gap: 2px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
   }
 
   .reward-item {
@@ -283,7 +270,6 @@
   .reward-drop-input {
     position: absolute;
     inset: 0;
-    margin: 0;
     opacity: 0;
     cursor: inherit;
   }

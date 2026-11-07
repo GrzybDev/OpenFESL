@@ -78,7 +78,6 @@
     position: absolute;
     inset: 0 16% 0 0;
     display: grid;
-    margin: 0;
     padding: 20px;
     place-items: center;
     color: #c9d6e2;
@@ -124,9 +123,6 @@
     left: 0;
     z-index: 1;
     display: flex;
-    margin: 0;
-    padding: 0;
-    list-style: none;
   }
 
   .claw-tile {
@@ -363,7 +359,6 @@
     }
 
     dd {
-      margin: 0;
       font-weight: 700;
     }
   }

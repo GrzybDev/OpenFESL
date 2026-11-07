@@ -20,21 +20,11 @@
   }
 
   .store-sticker {
-    position: absolute;
     top: 44px;
     right: -18px;
-    z-index: 3;
-    display: grid;
     width: 84px;
     height: 84px;
-    place-items: center;
-    rotate: 9deg;
-    font: 800 21px/1 var(--site-heading);
-    color: #fff;
-
-    > * {
-      grid-area: 1 / 1;
-    }
+    font-size: 21px;
   }
 
   .store-sticker-burst {

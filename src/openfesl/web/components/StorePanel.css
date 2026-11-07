@@ -19,10 +19,6 @@
       flex: 0 0 auto;
       margin-top: 1px;
     }
-
-    &[hidden] {
-      display: none;
-    }
   }
 
   .store-prices {

@@ -173,11 +173,6 @@
         background: var(--row-alt);
       }
     }
-
-    .badge {
-      width: 26px;
-      height: 26px;
-    }
   }
 
   .account-name-link,
@@ -247,7 +242,6 @@
     .badge {
       width: 22px;
       height: 22px;
-      flex: none;
     }
   }
 
@@ -261,7 +255,6 @@
   }
 
   .entitlement-code {
-    font-family: var(--font-mono);
     font-size: 13px;
     font-weight: 500;
     letter-spacing: 0;

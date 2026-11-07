@@ -81,14 +81,6 @@
   @container (width < 940px) {
     .admin-list .table.boxes-table {
       min-width: 0;
-
-      [role="rowgroup"]:first-child {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip-path: inset(50%);
-      }
     }
 
     .boxes-row.boxes-columns {
