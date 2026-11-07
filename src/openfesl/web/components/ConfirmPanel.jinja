@@ -1,0 +1,18 @@
+{#def question: str #}
+{# The black-headed panel that asks before a change, as the game's dialogs, with the button that
+   closes it where it opens as a dialog. The content's text that describes it is confirm-text. #}
+<section aria-labelledby="confirm-question"
+         aria-describedby="confirm-text"
+         data-confirm
+         class="confirm">
+  <div class="confirm-head">
+    <h2 id="confirm-question">{{ question }}</h2>
+    <button type="button"
+            data-close
+            class="confirm-close"
+            aria-label="{{ _('web.admin.close') }}">
+      <span><Icon name="x" :size="14" stroke="currentColor" /></span>
+    </button>
+  </div>
+  {{ content }}
+</section>

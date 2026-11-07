@@ -6,15 +6,8 @@
 {% set title = _("web.admin.account") %}
 {% set chosen = form.get("state") or account.state %}
 {% set glyphs = {"active": "tick", "disabled": "lock", "banned": "warn", "deactivated": "x"} %}
-<AdminDialog :title="title"
-             :name="account.nuid"
-             id="state-title"
-             current="accounts">
-  <section aria-labelledby="confirm-question"
-           aria-describedby="confirm-text"
-           data-confirm
-           class="confirm">
-    <ConfirmHead :question="_('web.admin.account.state.change')" />
+<AdminDialog :title="title" :name="account.nuid" id="state-title">
+  <ConfirmPanel :question="_('web.admin.account.state.change')">
     <form method="post"
           action="{{ url('/admin/accounts/' ~ account.id ~ '/state') }}">
       <CsrfField />
@@ -46,5 +39,5 @@
         <SmallAction :label="_('web.admin.account.state.save')" :busy="_('web.admin.account.state.saving')" />
       </div>
     </form>
-  </section>
+  </ConfirmPanel>
 </AdminDialog>

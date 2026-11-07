@@ -4,10 +4,7 @@
    opens as a dialog over the account's page. #}
 {% set account = view.record.account %}
 {% set title = _("web.admin.account") %}
-<AdminDialog :title="title"
-             :name="account.nuid"
-             id="revoke-title"
-             current="accounts">
+<AdminDialog :title="title" :name="account.nuid" id="revoke-title">
   <Confirmation :question="_('web.admin.confirm.entitlement')"
                 :action="url('/admin/accounts/' ~ account.id ~ '/entitlements/revoke')"
                 :label="_('web.admin.entitlement.revoke')"

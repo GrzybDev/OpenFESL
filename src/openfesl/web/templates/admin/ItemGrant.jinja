@@ -31,10 +31,7 @@
 {% else %}
   {% set blocked = "" %}
 {% endif %}
-<AdminDialog :title="title"
-             :name="hero.persona.name"
-             id="grant-title"
-             current="accounts">
+<AdminDialog :title="title" :name="hero.persona.name" id="grant-title">
   <AdminForm :question="_('web.admin.items.grant')" :action="url(path)" :label="_('web.admin.items.grant.submit')" :busy="_('web.admin.items.grant.busy')" :back="back" :note="note" :error="error" :why="why" :search="url(path)">
   <ConfirmWho :name="hero.persona.name" :about="_('web.admin.hero.line', faction=_('games.' ~ game.id ~ '.faction.' ~ hero.faction), hero_class=_('games.' ~ game.id ~ '.class.' ~ hero.hero_class), level=number(hero.level), id=hero.persona.id) if hero.faction and hero.hero_class else _('web.admin.hero.heading', id=hero.persona.id)" />
   <label for="grant-q" class="field-label field-label-joined">{{ _("web.admin.items.search") }}</label>

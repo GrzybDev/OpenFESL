@@ -7,7 +7,7 @@
     <h2 id="claw-feed-title" class="claw-feed-title">{{ _("web.claw.feed") }}</h2>
     {% if feed %}
       <p class="claw-feed-text">{{ _("web.claw.feed.text") }}</p>
-      <ol role="list" data-claw-feed class="claw-feed-list">
+      <ol role="list" class="claw-feed-list">
         {% for won in feed %}
           <li class="claw-feed-row{% if won.new %} claw-feed-new{% endif %}">
             <ClawIcon :prize="won.prize" :size="40" />

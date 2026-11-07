@@ -108,25 +108,11 @@
             <Refusal>{{ _("web.admin.keys.refused.withheld", id=withheld) }}</Refusal>
           {% endif %}
           {% for found in candidates %}
-            <form method="post" action="{{ here }}/add" class="box-candidate">
-              <CsrfField />
-              <input type="hidden" name="item" value="{{ found.item.id }}">
-              <p class="box-candidate-name">
-                <AdminItemIcon :game="game" :item="found.item" :shown="icons" />
-                <span class="cell-stack"><span class="admin-hero-strong">{{ found.name }}</span><span class="cell-ago">{{ _("web.admin.items.number", id=found.item.id) }}</span></span>
-              </p>
-              <div class="prices-picks">
-                {% for option in found.options %}
-                  <FilterPick name="ownership" :value="option.written" :checked="loop.first">{{ option.label }}</FilterPick>
-                {% endfor %}
-              </div>
-              <div class="prices-picks">
-                {% for tier in tiers %}
-                  <FilterPick name="tier" :value="tier.index" :checked="loop.first">{{ tier_name(tier.index) }}</FilterPick>
-                {% endfor %}
-              </div>
-              <FormButton icon="plus">{{ _("web.admin.boxes.add.submit") }}</FormButton>
-            </form>
+            <BoxCandidate :found="found" :game="game" :icons="icons" :action="here ~ '/add'">
+            {% for tier in tiers %}
+              <FilterPick name="tier" :value="tier.index" :checked="loop.first">{{ tier_name(tier.index) }}</FilterPick>
+            {% endfor %}
+            </BoxCandidate>
           {% else %}
             {% if query and not withheld %}<p class="bar-text body-text">{{ _("web.admin.boxes.add.none", query=query) }}</p>{% endif %}
           {% endfor %}

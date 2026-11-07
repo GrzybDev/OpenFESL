@@ -131,10 +131,7 @@
       </div>
     </div>
     <template data-catalogue-confirm>
-      <section aria-labelledby="confirm-question"
-               aria-describedby="confirm-text"
-               class="confirm">
-        <ConfirmHead :question="_('web.admin.catalogue.confirm', game=replaced[0].game.name) if replaced|length == 1 else _('web.admin.catalogue.confirm.any')" />
+      <ConfirmPanel :question="_('web.admin.catalogue.confirm', game=replaced[0].game.name) if replaced|length == 1 else _('web.admin.catalogue.confirm.any')">
         <div class="confirm-body">
           <p class="catalogue-confirm-file">
           <Icon name="doc" :size="18" stroke="currentColor" /><span data-chosen></span>
@@ -156,7 +153,7 @@
           <span aria-hidden="true" class="small-action-square"><Chevron :size="16" /></span><span class="small-action-label">{{ _("web.admin.catalogue.confirm.replace") }}</span>
         </button>
       </div>
-    </section>
+    </ConfirmPanel>
     </template>
     <template data-catalogue-refused-size>
       <Alert :label="_('web.admin.catalogue.refused')" :title="_('web.admin.catalogue.refused.size', file='{file}', size='{size}', most=megabytes(most))" glyph="warn" alert>

@@ -226,13 +226,6 @@
     margin-top: 2px;
   }
 
-  /* The start of a name that a search matched. */
-  .search-match {
-    background: var(--accent);
-    padding-inline: 1px;
-    color: var(--ink);
-  }
-
   .field-error {
     display: flex;
     align-items: flex-start;

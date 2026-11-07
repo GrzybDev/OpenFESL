@@ -13,12 +13,7 @@
     {% set price = sold.prices[0] %}
     {% if sold.kind == "deal" and price.original_price and price.original_price > price.price %}
       {% set off = texts.off(price) %}
-      <p class="store-sticker">
-        <svg aria-hidden="true" viewBox="0 0 100 100" class="store-sticker-burst">
-          <use href="{{ static('icons.svg') }}#sticker" />
-        </svg>
-        <span aria-hidden="true">{{ _("web.store.sticker", off=off) }}</span><span class="sr-only">{{ _("web.store.sticker.label", off=off) }}</span>
-      </p>
+      <DealSticker :off="off" class="store-sticker" />
     {% endif %}
     {% if sold.kind == "deal" and sold.ends and not sold.ended %}
       <div class="store-timer">

@@ -11,7 +11,7 @@
   <span class="bar-chip">{{ _("web.admin.heroes.title") }}<GameChip :of="game" full /></span>
   </Bar>
   <p class="admin-hero-slots">
-    <span class="admin-hero-slots-label">{{ _("web.admin.heroes.slots") }}</span>
+    <span class="admin-count-label">{{ _("web.admin.heroes.slots") }}</span>
     <span class="admin-hero-slots-used">{{ _("web.admin.heroes.slots.used", used=number(used), total=number(roster.slots)) }}</span>
     <span>
       {%- if roster.granted -%}
@@ -49,7 +49,7 @@
             <div role="row" class="admin-hero-columns admin-hero-row">
               <div role="cell" class="admin-cell admin-badges">
                 <Badge :name="{'active': 'tick', 'disabled': 'x', 'no_look': 'warn'}[state]" both />
-                <span class="admin-hero-state">{{ _("web.admin.heroes.state." ~ state) }}</span>
+                <span class="admin-count-label">{{ _("web.admin.heroes.state." ~ state) }}</span>
               </div>
               <div role="cell" class="admin-cell cell-stack">
                 <a href="{{ href }}" class="admin-hero-link">{{ hero.persona.name }}</a>

@@ -19,10 +19,7 @@
 {% else %}
   {% set now = _("web.store.price.permanent") %}
 {% endif %}
-<AdminDialog :title="title"
-             :name="hero.persona.name"
-             id="item-title"
-             current="accounts">
+<AdminDialog :title="title" :name="hero.persona.name" id="item-title">
   <AdminForm :question="_('web.admin.items.change.title') if change == 'change' else _('web.admin.items.revoke.confirm', item=name)" :action="url(path)" :label="_('web.admin.items.' ~ change)" :busy="_('web.admin.items.' ~ change ~ '.busy')" :back="back" :glyph="'x' if change == 'revoke' else 'go'" :note="form.get('note', '')" :error="error" :why="_('web.admin.still_needed', what=_('web.admin.still_needed.' ~ ('uses' if counted else 'end'))) if error == 'value' else ''">
   <p class="confirm-account">
     <span>{{ name }}</span>

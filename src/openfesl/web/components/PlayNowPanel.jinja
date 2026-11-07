@@ -13,6 +13,11 @@
   "taken": "tick",
   "ended": "clock"
 } %}
+{% macro told(title, text, small) %}
+  <h2 id="play-now-state" tabindex="-1" class="site-box-title">{{ title }}</h2>
+  <p>{{ text }}</p>
+  <p class="play-panel-small">{{ small }}</p>
+{% endmacro %}
 <div data-state="{{ state }}"
      class="site-box play-panel play-panel-{{ state }}">
   <span aria-hidden="true" class="play-disc">
@@ -25,32 +30,24 @@
   </span>
   <div class="play-panel-text">
     {% if state == "signed-out" %}
-      <h2 id="play-now-state" tabindex="-1" class="site-box-title">{{ _("web.play_now.signed_out") }}</h2>
-      <p>{{ _("web.play_now.signed_out.text") }}</p>
-      <p class="play-panel-small">{{ _("web.play_now.signed_out.after") }}</p>
+      {{ told(_("web.play_now.signed_out"), _("web.play_now.signed_out.text"), _("web.play_now.signed_out.after")) }}
       <div class="site-actions">
         <SiteButton :href="url('/sign-in') ~ '?' ~ {'next': again}|urlencode" glyph="sign-in" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.account.sign_in.action") }}</SiteButton>
         <a href="{{ url('/register') }}"
            class="site-link play-panel-link">{{ _("web.account.sign_in.create") }}<Icon name="go" :size="12" stroke="currentColor" /></a>
       </div>
     {% elif state == "no-hero" %}
-      <h2 id="play-now-state" tabindex="-1" class="site-box-title">{{ _("web.play_now.no_hero") }}</h2>
-      <p>{{ _("web.play_now.no_hero.text", game=game.name) }}</p>
-      <p class="play-panel-small">{{ _("web.play_now.no_hero.first") }}</p>
+      {{ told(_("web.play_now.no_hero"), _("web.play_now.no_hero.text", game=game.name), _("web.play_now.no_hero.first")) }}
       <div class="site-actions">
         <SiteButton :href="url('/' ~ game.id ~ '/user/createHero')" glyph="plus" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.bar.create") }}</SiteButton>
       </div>
     {% elif state == "taken" %}
-      <h2 id="play-now-state" tabindex="-1" class="site-box-title">{{ _("web.play_now.taken", game=game.name) }}</h2>
-      <p>{{ _("web.play_now.taken.text", time=when(link.taken, 'Hm'), hero=link.hero) }}</p>
-      <p class="play-panel-small">{{ _("web.play_now.taken.used") }}</p>
+      {{ told(_("web.play_now.taken", game=game.name), _("web.play_now.taken.text", time=when(link.taken, 'Hm'), hero=link.hero), _("web.play_now.taken.used")) }}
       <div class="site-actions">
         <SiteButton :href="heroes" glyph="star" :size="18" class="site-button-large">{{ _("web.heroes.title") }}</SiteButton>
       </div>
     {% elif state == "ended" %}
-      <h2 id="play-now-state" tabindex="-1" class="site-box-title">{{ _("web.play_now.ended") }}</h2>
-      <p>{{ _n("web.play_now.ended.text", minutes) }}</p>
-      <p class="play-panel-small">{{ _("web.play_now.ended.unused") }}</p>
+      {{ told(_("web.play_now.ended"), _n("web.play_now.ended.text", minutes), _("web.play_now.ended.unused")) }}
       {# A button followed by another element stays a plain link: a component's closing tag drops the line break that spaces them. #}
       <div class="site-actions">
         {% if play %}
@@ -62,15 +59,9 @@
     {% else %}
       {% set ends = when(link.ends, 'Hm') %}
       {% if state == "missing" %}
-        <h2 id="play-now-state" tabindex="-1" class="site-box-title">{{ _("web.play_now.missing") }}</h2>
-        <p>{{ _("web.play_now.missing.text", game=game.name) }}</p>
-        <p class="play-panel-small">{{ _("web.play_now.missing.ends", time=ends) }}</p>
+        {{ told(_("web.play_now.missing"), _("web.play_now.missing.text", game=game.name), _("web.play_now.missing.ends", time=ends)) }}
       {% else %}
-        <h2 id="play-now-state"
-            tabindex="-1"
-            class="site-box-title">{{ _("web.play_now.waiting", game=game.name, hero=link.hero) }}</h2>
-        <p>{{ _("web.play_now.waiting.text") }}</p>
-        <p class="play-panel-small">{{ _("web.play_now.waiting.ends", time=ends) }}</p>
+        {{ told(_("web.play_now.waiting", game=game.name, hero=link.hero), _("web.play_now.waiting.text"), _("web.play_now.waiting.ends", time=ends)) }}
       {% endif %}
       <div class="site-actions">
         {% if state == "missing" %}

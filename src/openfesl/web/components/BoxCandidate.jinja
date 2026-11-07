@@ -1,0 +1,18 @@
+{#def found, game, icons: bool, action: str #}
+{# An item that a search found for a box, as the form that adds it: its icon and name, how it is owned
+   and, as the content, the choice of the box's tier. #}
+<form method="post" action="{{ action }}" class="box-candidate">
+  <CsrfField />
+  <input type="hidden" name="item" value="{{ found.item.id }}">
+  <p class="box-candidate-name">
+    <AdminItemIcon :game="game" :item="found.item" :shown="icons" />
+    <span class="cell-stack"><span class="admin-hero-strong">{{ found.name }}</span><span class="cell-ago">{{ _("web.admin.items.number", id=found.item.id) }}</span></span>
+  </p>
+  <div class="prices-picks">
+    {% for option in found.options %}
+      <FilterPick name="ownership" :value="option.written" :checked="loop.first">{{ option.label }}</FilterPick>
+    {% endfor %}
+  </div>
+  <div class="prices-picks">{{ content }}</div>
+  <FormButton icon="plus">{{ _("web.admin.boxes.add.submit") }}</FormButton>
+</form>

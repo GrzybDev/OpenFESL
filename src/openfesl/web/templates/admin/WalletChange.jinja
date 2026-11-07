@@ -20,7 +20,7 @@
 {% else %}
   {% set why = "" %}
 {% endif %}
-<AdminDialog :title="title" :name="owner" id="wallet-title" current="accounts">
+<AdminDialog :title="title" :name="owner" id="wallet-title">
   <AdminForm :question="_('web.admin.wallets.dialog', currency=currency)" :action="url('/admin/accounts/' ~ account.id ~ '/wallets/' ~ game ~ '/' ~ line.key)" :label="_('web.admin.wallets.dialog.submit')" :busy="_('web.admin.count.busy')" :back="back" :note="form.get('note', '')" :error="error" :why="why">
   <p class="confirm-account">
     <span>{{ owner }}</span>

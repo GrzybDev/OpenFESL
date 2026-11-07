@@ -4,11 +4,7 @@
    the audit log keeps with the change, what is still needed, and the buttons that go back or send
    it. A form with a search sends the search's fields, which name the admin-search form, to its
    own page. Where scripts run, a link with data-dialog opens it over its page. #}
-<section aria-labelledby="confirm-question"
-         aria-describedby="confirm-text"
-         data-confirm
-         class="confirm">
-  <ConfirmHead :question="question" />
+<ConfirmPanel :question="question">
   {% if search %}
     <form id="admin-search" method="get" action="{{ search }}">
     </form>
@@ -29,4 +25,4 @@
       <SmallAction :label="label" :busy="busy" :glyph="glyph" />
     </div>
   </form>
-</section>
+</ConfirmPanel>

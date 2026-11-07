@@ -28,13 +28,6 @@
     }
   }
 
-  .admin-hero-slots-label {
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
   .admin-hero-slots-used {
     font-size: 19px;
     font-weight: 700;
@@ -48,13 +41,6 @@
     display: grid;
     grid-template-columns: 128px minmax(200px, 1fr) 64px 120px 140px 80px 172px 44px;
     gap: 2px;
-  }
-
-  .admin-hero-state {
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
   }
 
   .admin-hero-link {

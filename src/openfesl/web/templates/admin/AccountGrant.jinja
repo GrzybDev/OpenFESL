@@ -7,15 +7,8 @@
 {% set missing = form.get("key") == "tag" and not form.get("tag") %}
 {% set open = keys|selectattr("open")|map(attribute="view.key.code")|list %}
 {% set chosen = form.get("key") or (open[0] if open else "tag") %}
-<AdminDialog :title="title"
-             :name="account.nuid"
-             id="grant-title"
-             current="accounts">
-  <section aria-labelledby="confirm-question"
-           aria-describedby="confirm-text"
-           data-confirm
-           class="confirm">
-    <ConfirmHead :question="_('web.admin.entitlements.grant')" />
+<AdminDialog :title="title" :name="account.nuid" id="grant-title">
+  <ConfirmPanel :question="_('web.admin.entitlements.grant')">
     <form method="post"
           action="{{ url('/admin/accounts/' ~ account.id ~ '/grant') }}"
           class="grant-form">
@@ -62,5 +55,5 @@
         <SmallAction :label="_('web.admin.grant.button')" :busy="_('web.admin.grant.busy')" />
       </div>
     </form>
-  </section>
+  </ConfirmPanel>
 </AdminDialog>

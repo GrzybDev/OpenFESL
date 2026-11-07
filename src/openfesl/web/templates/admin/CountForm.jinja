@@ -19,7 +19,7 @@
 {% else %}
   {% set why = "" %}
 {% endif %}
-<AdminDialog :title="title" :name="holder" id="count-title" current="accounts">
+<AdminDialog :title="title" :name="holder" id="count-title">
   <AdminForm :question="_('web.admin.count.' ~ shown.kind ~ '.title')" :action="url(path)" :label="_('web.admin.count.' ~ shown.kind ~ '.submit')" :busy="_('web.admin.count.busy')" :back="back" glyph="go" :note="form.get('note', '')" :error="error" :why="why">
   <p class="confirm-account">
     <span>{{ holder }}</span>

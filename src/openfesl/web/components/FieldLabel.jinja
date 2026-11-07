@@ -1,0 +1,10 @@
+{#def id: str, label: str, tag: str = "" #}
+{# A form field's label on the accent, with a word such as Public at its end. #}
+<label for="{{ id }}"
+       class="field-label field-label-joined{% if tag %} field-label-tagged{% endif %}">
+  {% if tag %}
+    <span>{{ label }}</span><span>{{ tag }}</span>
+  {% else %}
+    {{ label }}
+  {% endif %}
+</label>

@@ -4,11 +4,7 @@
    buttons that go back or send the decision, whose form sends the hidden fields too and the
    content's fields that name its id. Where scripts run, a link with data-dialog opens it over its
    page; only there does it close with its own button. #}
-<section aria-labelledby="confirm-question"
-         aria-describedby="confirm-text"
-         data-confirm
-         class="confirm">
-  <ConfirmHead :question="question" />
+<ConfirmPanel :question="question">
   <div class="confirm-body">{{ content }}</div>
   <div class="confirm-buttons">
     <FormButton icon="x" :href="back">{{ _("web.admin.cancel") }}</FormButton>
@@ -22,4 +18,4 @@
       <SmallAction :label="label" :busy="busy" :glyph="glyph" />
     </form>
   </div>
-</section>
+</ConfirmPanel>

@@ -1,4 +1,3 @@
-{#def page: str = "" #}
 {# A game's own website around a page: the painted sky, and the site's container with its header
    and menus, the bar with the account's wallets or a sign-in form, the page on parchment under
    the message of the last change, and the footer; for an account, the Daily Claw's overlay,
@@ -73,7 +72,7 @@
     {{ content }}
   </div>
   <footer class="site-footer">
-    <FooterLinks :page="page" />
+    <FooterLinks />
   </footer>
   {% if player and claw %}<ClawOverlay />{% endif %}
 </div>

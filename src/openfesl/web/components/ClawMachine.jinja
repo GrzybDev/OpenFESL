@@ -31,7 +31,7 @@
 <div class="claw-machine js-only">
   <h2 class="sr-only">{{ _("web.claw.machine") }}</h2>
   <div aria-hidden="true" data-claw-glass class="claw-glass">
-    <p data-claw-empty class="claw-empty">{{ _("web.claw.belts_empty") }}</p>
+    <p class="claw-empty">{{ _("web.claw.belts_empty") }}</p>
     <div class="claw-belts">
       {% for each in heroes %}
         <div data-belts="{{ each.hero.persona.id }}" hidden class="claw-rows">

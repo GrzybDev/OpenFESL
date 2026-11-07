@@ -14,7 +14,7 @@ if (form) {
   const input = naming.querySelector("[name=name]");
   const done = form.querySelector("[data-done]");
   const stage = heroStage(form.querySelector("[data-stage]"));
-  let check = naming.querySelector("[data-check]")?.dataset.check ?? "";
+  let check = naming.querySelector("[data-check]").dataset.check;
 
   form.addEventListener("change", (event) => {
     const field = event.target;
@@ -57,7 +57,7 @@ if (form) {
         }
       }
     }
-    form.querySelector(".look-note-disc use")?.setAttribute("href", texts.glyphs[faction]);
+    form.querySelector(".look-note-disc use").setAttribute("href", texts.glyphs[faction]);
     hop();
   }
 
@@ -90,10 +90,9 @@ if (form) {
     form.querySelector("[data-look-text]").textContent = fill(texts.look, chosen);
     const look = new URLSearchParams(LOOK.map((name) => [name, form.elements[name].value]));
     stage.show(look, fill(texts.model_label, chosen));
-    const note = form.querySelector("[data-look-note]");
-    if (note) {
-      note.textContent = fill(texts.note, { faction: decode(texts.factions[faction]) });
-    }
+    form.querySelector("[data-look-note]").textContent = fill(texts.note, {
+      faction: decode(texts.factions[faction]),
+    });
     const [skin, hairColour] = form.querySelectorAll("[data-swatch-value]");
     skin.textContent = fill(texts.of_skin, { n: form.dataset.skin });
     hairColour.textContent = fill(texts.of_hair, { n: form.dataset.hairColour });

@@ -20,20 +20,20 @@
         data-mark>
     <CsrfField />
     <div class="settings-policy settings-switch">
+      {% set switch %}
+        <span class="settings-switch-text">
+          <span class="settings-policy-name">{{ _("web.admin.game_mark.switch") }}</span>
+          <span class="settings-policy-text">{{ _("web.admin.game_mark.switch.text", game=short) }}</span>
+        </span>
+      {% endset %}
       {% if manages %}
         <label class="settings-switch-row">
-          <span class="settings-switch-text">
-            <span class="settings-policy-name">{{ _("web.admin.game_mark.switch") }}</span>
-            <span class="settings-policy-text">{{ _("web.admin.game_mark.switch.text", game=short) }}</span>
-          </span>
+          {{ switch }}
           <CheckBox name="shown" value="on" :checked="mark.shown" />
         </label>
       {% else %}
         <div class="settings-switch-row">
-          <span class="settings-switch-text">
-            <span class="settings-policy-name">{{ _("web.admin.game_mark.switch") }}</span>
-            <span class="settings-policy-text">{{ _("web.admin.game_mark.switch.text", game=short) }}</span>
-          </span>
+          {{ switch }}
           <span class="game-mark-state">
             <Badge :name="'tick' if mark.shown else 'x'" :size="14" lines />{{ _("web.admin.game_mark.state." ~ state) }}
           </span>

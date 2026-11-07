@@ -17,10 +17,7 @@
   "default": "web.admin.hero.make_default",
   "portrait": "web.admin.hero.portrait.remove"
 } %}
-<AdminDialog :title="title"
-             :name="hero.persona.name"
-             id="action-title"
-             current="accounts">
+<AdminDialog :title="title" :name="hero.persona.name" id="action-title">
   <AdminForm :question="questions[action]" :action="url(base ~ '/' ~ action)" :label="_(labels[action])" :busy="_(labels[action] ~ '.busy')" :back="back" :glyph="'x' if action in ('disable', 'portrait') else 'go'" :note="form.get('note', '')" :error="error" :why="_('web.admin.still_needed', what=_('web.admin.still_needed.name')) if error == 'name' else ''">
   <p class="confirm-account">
     <span>{{ hero.persona.name }}</span>

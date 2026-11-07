@@ -120,25 +120,11 @@
           <Bar id="box-add">{{ _("web.admin.boxes.add") }}</Bar>
           <ItemSearch id="box-search" :label="_('web.admin.store.search')" :value="query" :action="here ~ '#box-add'" />
           {% for found in candidates %}
-            <form method="post" action="{{ here }}/add" class="box-candidate">
-              <CsrfField />
-              <input type="hidden" name="item" value="{{ found.item.id }}">
-              <p class="box-candidate-name">
-                <AdminItemIcon :game="game" :item="found.item" :shown="icons" />
-                <span class="cell-stack"><span class="admin-hero-strong">{{ found.name }}</span><span class="cell-ago">{{ _("web.admin.items.number", id=found.item.id) }}</span></span>
-              </p>
-              <div class="prices-picks">
-                {% for option in found.options %}
-                  <FilterPick name="ownership" :value="option.written" :checked="loop.first">{{ option.label }}</FilterPick>
-                {% endfor %}
-              </div>
-              <div class="prices-picks">
-                {% for tier in tiers %}
-                  <FilterPick name="tier" :value="tier.index" :checked="loop.last">{{ _("web.admin.boxes.tier", number=tier.index + 1) }}</FilterPick>
-                {% endfor %}
-              </div>
-              <FormButton icon="plus">{{ _("web.admin.boxes.add.submit") }}</FormButton>
-            </form>
+            <BoxCandidate :found="found" :game="game" :icons="icons" :action="here ~ '/add'">
+            {% for tier in tiers %}
+              <FilterPick name="tier" :value="tier.index" :checked="loop.last">{{ _("web.admin.boxes.tier", number=tier.index + 1) }}</FilterPick>
+            {% endfor %}
+            </BoxCandidate>
           {% else %}
             {% if query %}<p class="bar-text body-text">{{ _("web.admin.boxes.add.none", query=query) }}</p>{% endif %}
           {% endfor %}

@@ -1,8 +1,8 @@
-{#def title: str, name: str, id: str, current: str, subtitle: str = "" #}
+{#def title: str, name: str, id: str #}
 {# A page of the admin panel that only holds a panel that asks about what it names, which opens as
    a dialog over the page it came from where scripts run. #}
-<AdminPage :title="title ~ ' · ' ~ name" :current="current">
-  <PageHead :labelledby="id" :title="title" :subtitle="subtitle or name" />
+<AdminPage :title="title ~ ' · ' ~ name" current="accounts">
+  <PageHead :labelledby="id" :title="title" :subtitle="name" />
   <Panel class="enter-panel confirm-frame">
     {{ content }}
   </Panel>
