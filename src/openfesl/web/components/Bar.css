@@ -34,6 +34,11 @@
     color: var(--accent);
   }
 
+  /* The word of a part that shows nothing, or that a change is being saved. */
+  .bar-extra-off {
+    color: var(--soft);
+  }
+
   /* The light block under a bar that holds its text. */
   .bar-text {
     margin-top: 2px;

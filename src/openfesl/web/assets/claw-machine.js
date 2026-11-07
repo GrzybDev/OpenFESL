@@ -6,6 +6,18 @@
 const RUN = 2400;
 
 /**
+ * Returns the frames of a move along an axis.
+ *
+ * @param {string} axis - X or Y.
+ * @param {number} from - Where the move starts, in pixels.
+ * @param {number} to - Where it ends, in pixels.
+ * @returns {Keyframe[]} The frames.
+ */
+function along(axis, from, to) {
+  return [from, to].map((at) => ({ transform: `translate${axis}(${at}px)` }));
+}
+
+/**
  * Starts the belts and the claw's wait, and returns how to stop them or play the taking.
  *
  * @param {HTMLFormElement} form - The grab form, whose picked hero's belts run.
@@ -27,11 +39,8 @@ export function run(form) {
   };
   const loops = belts.map((belt, row) => {
     const half = belt.scrollWidth / 2;
-    const frames = row === 1 ? [-half, 0] : [0, -half];
-    return belt.animate(
-      frames.map((x) => ({ transform: `translateX(${x}px)` })),
-      { duration: 1600, iterations: Infinity },
-    );
+    const frames = row === 1 ? along("X", -half, 0) : along("X", 0, -half);
+    return belt.animate(frames, { duration: 1600, iterations: Infinity });
   });
 
   /**
@@ -86,20 +95,12 @@ export function run(form) {
       for (const loop of loops) {
         loop.cancel();
       }
-      await Promise.all(
-        stops.map(({ belt, at, stop }) =>
-          move(
-            belt,
-            [{ transform: `translateX(${at}px)` }, { transform: `translateX(${stop}px)` }],
-            900,
-          ),
-        ),
-      );
+      await Promise.all(stops.map(({ belt, at, stop }) => move(belt, along("X", at, stop), 900)));
       const row = (stops.find((each) => each.found) ?? stops[1]).belt.closest(".claw-row");
       const drop = row.getBoundingClientRect().top - box.top - 34;
       const x = target - 34;
-      await move(arm, [{ transform: "translateX(0)" }, { transform: `translateX(${x}px)` }], 450);
-      const down = [{ transform: "translateY(0)" }, { transform: `translateY(${drop}px)` }];
+      await move(arm, along("X", 0, x), 450);
+      const down = along("Y", 0, drop);
       const stretched = [{ transform: "scaleY(1)" }, { transform: `scaleY(${1 + drop / 12})` }];
       await Promise.all([move(head, down, 500), move(cable, stretched, 500)]);
       head.classList.add("claw-closed-prongs");
@@ -115,19 +116,11 @@ export function run(form) {
         move(cable, stretched.toReversed(), 500),
       ]);
       const chute = box.width * 0.92 - 34;
-      await move(
-        arm,
-        [{ transform: `translateX(${x}px)` }, { transform: `translateX(${chute}px)` }],
-        500,
-      );
+      await move(arm, along("X", x, chute), 500);
       head.classList.remove("claw-closed-prongs");
       const slot = glass.querySelector("[data-claw-slot]");
       const fall = slot.getBoundingClientRect().top - held.getBoundingClientRect().top;
-      await move(
-        held,
-        [{ transform: "translateY(0)" }, { transform: `translateY(${fall}px)` }],
-        350,
-      );
+      await move(held, along("Y", 0, fall), 350);
       for (const animation of held.getAnimations()) {
         animation.cancel();
       }

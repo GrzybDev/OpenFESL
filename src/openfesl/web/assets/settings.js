@@ -2,7 +2,7 @@
 // and stays disabled while the request runs; one that takes longer than 300 ms turns the box into
 // the spinning segment and the state word into Saving… The saved block comes in place with
 // its toast; a change that was not saved leaves the block as it was and says so in a toast.
-import { post, swap, toastFailed } from "./saving.js";
+import { post, spin, swap, toastFailed } from "./saving.js";
 
 document.addEventListener("change", (event) => {
   const form = event.target.closest("form[data-mark]");
@@ -27,7 +27,10 @@ async function saveMark(form) {
   // Read before the box is disabled, which takes the focus from it.
   const focused = section.contains(document.activeElement);
   box.disabled = true;
-  const timer = setTimeout(() => spin(section), 300);
+  const timer = setTimeout(() => {
+    section.setAttribute("aria-busy", "true");
+    spin(section.querySelector(".check-box svg"), section.querySelector("[data-mark-word]"));
+  }, 300);
   const page = await post(form, body);
   clearTimeout(timer);
   const placed = page?.getElementById(section.id) ? swap(section, page) : null;
@@ -38,20 +41,4 @@ async function saveMark(form) {
   if (focused) {
     (placed ?? saved).querySelector("input[name=shown]").focus();
   }
-}
-
-/**
- * Turns the mark's box into the spinning segment and says the change is being saved.
- *
- * @param {Element} section - The mark's block.
- */
-function spin(section) {
-  section.setAttribute("aria-busy", "true");
-  const glyph = section.querySelector(".check-box svg");
-  const use = glyph.querySelector("use");
-  use.setAttribute("href", use.getAttribute("href").replace(/#.*$/, "#busy"));
-  glyph.classList.add("spinning");
-  const word = section.querySelector("[data-mark-word]");
-  word.textContent = word.dataset.saving;
-  word.classList.add("game-mark-off");
 }

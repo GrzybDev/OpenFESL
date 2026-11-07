@@ -2,7 +2,7 @@
 // under a day; a card whose time runs out says expired, keeps its end time and the line that it
 // leaves at the next page load, and hides its sticker, usual price and way to buy. Without scripts
 // the cards show their end times.
-import { reducedMotion } from "./naming.js";
+import { reducedMotion } from "./shared.js";
 import { countDown } from "./store.js";
 
 const DAY = 86_400_000;

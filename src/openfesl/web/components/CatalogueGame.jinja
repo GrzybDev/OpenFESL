@@ -15,7 +15,7 @@
          id="{{ key }}"
          class="catalogue-game">
   <h2 id="{{ key }}-title" class="bar bar-large bar-wrap">
-    <span>{{ game.name }}</span><span class="bar-extra{% if not contents.revision %} catalogue-missing-word{% endif %}">{{ _("web.admin.catalogue.state.imported" if contents.revision else "web.admin.catalogue.state.missing") }}</span>
+    <span>{{ game.name }}</span><span class="bar-extra{% if not contents.revision %} bar-extra-off{% endif %}">{{ _("web.admin.catalogue.state.imported" if contents.revision else "web.admin.catalogue.state.missing") }}</span>
   </h2>
   {% if contents.revision %}
     <dl class="facts catalogue-facts">

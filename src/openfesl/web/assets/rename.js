@@ -1,17 +1,8 @@
 // The heroes page's dialogs that give a hero a new name: the name is checked as it is typed, and
 // the button stays unavailable, saying why, until the name is free and the account has the price.
-import { checkName, decode } from "./naming.js";
+import { checkName, decode } from "./shared.js";
 
 for (const dialog of document.querySelectorAll("[data-rename]")) {
-  rename(dialog);
-}
-
-/**
- * Brings a hero's rename dialog to life.
- *
- * @param {HTMLDialogElement} dialog - The dialog.
- */
-function rename(dialog) {
   const form = dialog.querySelector("form");
   const input = form.querySelector("[name=name]");
   const submit = form.querySelector("[data-submit]");

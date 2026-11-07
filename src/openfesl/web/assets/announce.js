@@ -7,10 +7,8 @@
  */
 export function announce(message) {
   const region = document.getElementById("announce");
-  if (region) {
-    region.textContent = "";
-    requestAnimationFrame(() => {
-      region.textContent = message;
-    });
-  }
+  region.textContent = "";
+  requestAnimationFrame(() => {
+    region.textContent = message;
+  });
 }

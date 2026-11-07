@@ -1,7 +1,7 @@
 // The Play Now page: it opens the start link it made, which the browser hands to OpenFESLHook's
 // launcher, then asks the server every 2 s, while the tab is visible, where the link stands, and
 // cross-fades to the panel of each new state until the launcher takes the link or it ends.
-import { reducedMotion } from "./naming.js";
+import { fetchPage, reducedMotion } from "./shared.js";
 
 const POLL = 2000;
 const SETTLED = ["taken", "ended"];
@@ -40,18 +40,10 @@ function follow(section) {
       return;
     }
     asking = true;
-    try {
-      const answer = await fetch(section.dataset.status, { cache: "no-store" });
-      if (answer.ok) {
-        const page = new DOMParser().parseFromString(await answer.text(), "text/html");
-        show(page.querySelector("[data-state]"));
-      }
-    } catch {
-      // The next request may reach the server again.
-    } finally {
-      asking = false;
-      schedule();
-    }
+    const page = await fetchPage(section.dataset.status, { cache: "no-store" }).catch(() => null);
+    asking = false;
+    show(page?.querySelector("[data-state]"));
+    schedule();
   }
 
   /**

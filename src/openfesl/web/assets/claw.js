@@ -5,7 +5,7 @@
 // straight to the prize, and reduced motion starts with Speed Claw. Without scripts the menu
 // leads to the Claw's page, whose form grabs and shows the prize on the next page.
 import { run } from "./claw-machine.js";
-import { closeDialog, flash, reducedMotion } from "./naming.js";
+import { closeDialog, fetchPage, flash, reducedMotion } from "./shared.js";
 import { countDown } from "./store.js";
 
 const SPEED = "claw-speed";
@@ -260,7 +260,10 @@ async function grab(body, form, button, quick) {
   const machine = quick ? null : run(form);
   let page;
   try {
-    const [answer] = await Promise.all([fetchPage(form.action, data), machine?.ran]);
+    const [answer] = await Promise.all([
+      fetchPage(form.action, { method: "POST", body: data }),
+      machine?.ran,
+    ]);
     page = answer;
   } catch (error) {
     machine?.stop();
@@ -374,19 +377,4 @@ function showMessage(message, body) {
 function failure(why) {
   const template = document.querySelector(`template[data-claw-failed="${why}"]`);
   return template.content.firstElementChild.cloneNode(true);
-}
-
-/**
- * Fetches a page of the site, following its redirect, as a document.
- *
- * @param {string} address - The page's address.
- * @param {FormData} [data] - A form to post to it.
- * @returns {Promise<Document>} The page.
- */
-async function fetchPage(address, data) {
-  const answer = await fetch(address, data ? { method: "POST", body: data } : {});
-  if (!answer.ok) {
-    throw new Error("failed");
-  }
-  return new DOMParser().parseFromString(await answer.text(), "text/html");
 }

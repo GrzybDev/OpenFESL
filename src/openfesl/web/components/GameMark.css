@@ -8,10 +8,6 @@
     scroll-margin-top: 16px;
   }
 
-  .game-mark-off {
-    color: var(--soft);
-  }
-
   .game-mark-state {
     display: flex;
     flex: none;

@@ -1,7 +1,7 @@
 // The hero creator: the hero on the stage follows every choice, the look tabs and Surprise me
 // work, and I'm done opens the naming dialog, whose name is checked as it is typed. Without
 // scripts the same form shows every list and its naming part, and the server checks the name.
-import { checkName, closeDialog, decode, fill, flash, reducedMotion } from "./naming.js";
+import { checkName, closes, decode, fill, flash, reducedMotion } from "./shared.js";
 import { heroStage } from "./stage.js";
 
 // The fields of the look that the hero's model is drawn in.
@@ -9,15 +9,6 @@ const LOOK = ["faction", "class", "skin_tone", "hair_colour", "hair_style", "fac
 
 const form = document.querySelector("[data-creator]");
 if (form) {
-  creator(form);
-}
-
-/**
- * Brings a creator's form to life.
- *
- * @param {HTMLFormElement} form - The creator's form.
- */
-function creator(form) {
   const texts = JSON.parse(form.querySelector("[data-creator-texts]").textContent);
   const naming = form.querySelector("[data-naming]");
   const input = naming.querySelector("[name=name]");
@@ -61,9 +52,7 @@ function creator(form) {
         if (own) {
           list.querySelector(`[data-place="${place}"]`).checked = true;
           if (!reducedMotion.matches) {
-            list.classList.remove("fading");
-            void list.offsetWidth;
-            list.classList.add("fading");
+            flash(list, "fading");
           }
         }
       }
@@ -74,10 +63,7 @@ function creator(form) {
 
   /** Makes the hero hop and the bubble grow as its faction or class changes. */
   function hop() {
-    const hero = form.querySelector("[data-hop]");
-    hero.classList.remove("hop");
-    void hero.offsetWidth;
-    hero.classList.add("hop");
+    flash(form.querySelector("[data-hop]"), "hop");
   }
 
   /** Writes the chosen faction, class and look into the stage, the dialog and the labels. */
@@ -196,13 +182,7 @@ function creator(form) {
     input.focus();
     input.select();
   }
-  for (const button of naming.querySelectorAll("[data-close]")) {
-    button.addEventListener("click", () => closeDialog(naming, done));
-  }
-  naming.addEventListener("cancel", (event) => {
-    event.preventDefault();
-    closeDialog(naming, done);
-  });
+  closes(naming, done);
   checkName(naming, input, form.dataset.nameCheck, texts.checking, (found) => {
     check = found;
     ready();

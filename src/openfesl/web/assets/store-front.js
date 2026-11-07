@@ -4,8 +4,8 @@
 // screen readers hear the list's heading. Should the answer fail, the browser loads the address
 // itself. Without scripts Show items sends the form.
 import { announce } from "./announce.js";
+import { fetchPage, reducedMotion } from "./shared.js";
 
-const stillMotion = matchMedia("(prefers-reduced-motion: reduce)");
 // The address being shown, as Enter in the search both changes it and sends the form.
 let pending = "";
 // The number of the latest choice: an answer to an earlier one, such as a search that left its
@@ -47,13 +47,7 @@ async function show(form, control) {
   pending = address.href;
   const mine = ++asked;
   form.closest("[data-store-front]").setAttribute("aria-busy", "true");
-  let page = null;
-  try {
-    const answer = await fetch(address);
-    page = answer.ok ? new DOMParser().parseFromString(await answer.text(), "text/html") : null;
-  } catch {
-    page = null;
-  }
+  const page = await fetchPage(address).catch(() => null);
   if (mine !== asked) {
     return;
   }
@@ -81,7 +75,7 @@ async function show(form, control) {
  * @param {NodeListOf<Element>} tiles - The list's tiles.
  */
 function rise(tiles) {
-  if (stillMotion.matches) {
+  if (reducedMotion.matches) {
     return;
   }
   [...tiles].slice(0, 12).forEach((tile, index) => {

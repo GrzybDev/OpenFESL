@@ -4,7 +4,8 @@
 // page's new blocks in place, whose numbers count to their new values; a refusal or a stopped
 // upload says so above the steps, and the file stays chosen. Without scripts the form is sent as
 // it is.
-import { post, swap, toastFailed } from "./saving.js";
+import { post, spin, swap, toastFailed } from "./saving.js";
+import { openPanel, reducedMotion } from "./shared.js";
 
 // The dialog asks instead of the form's required box, and the script says what is missing.
 const upload = document.querySelector("[data-catalogue-upload]");
@@ -60,28 +61,12 @@ document.addEventListener("submit", (event) => {
  */
 function confirmReplace(form, file) {
   const panel = document.querySelector("[data-catalogue-confirm]").content.cloneNode(true);
-  const dialog = document.createElement("dialog");
-  dialog.className = "dialog";
-  dialog.setAttribute("aria-labelledby", "confirm-question");
-  dialog.setAttribute("aria-describedby", "confirm-text");
-  dialog.append(panel);
+  const dialog = openPanel(panel, form.querySelector("[type=submit]"));
   dialog.querySelector("[data-chosen]").textContent = chosen(form, file);
-  // The dialog takes the colours of the area the form is in.
-  (form.closest(".area") ?? document.body).append(dialog);
-  dialog.addEventListener("close", () => {
-    dialog.remove();
-    form.querySelector("[type=submit]").focus();
-  });
-  // Escape plays the closing as the cancel button does.
-  dialog.addEventListener("cancel", (cancelled) => {
-    cancelled.preventDefault();
-    dialog.querySelector(".confirm-buttons [data-close]").click();
-  });
   dialog.querySelector("[data-catalogue-replace]").addEventListener("click", () => {
     dialog.close();
     send(form, file);
   });
-  dialog.showModal();
   dialog.querySelector(".confirm-buttons [data-close]").focus();
 }
 
@@ -247,8 +232,6 @@ function number(bytes) {
 // winning. The saved section comes in place with the strip's changed cells cross-fading and its
 // toast; a failed save returns the accent to the saved tile and says so in a toast that
 // stays.
-const stillMotion = matchMedia("(prefers-reduced-motion: reduce)");
-
 document.addEventListener("change", (event) => {
   const form = event.target.closest("form[data-art]");
   if (form) {
@@ -269,7 +252,10 @@ async function saveArt(form) {
   }
   form.dataset.saving = chosen;
   const section = form.closest("[data-art-section]");
-  const timer = setTimeout(() => spin(section, chosen), 300);
+  const word = section.querySelector("[data-art-word]");
+  const timer = setTimeout(() => {
+    spin(section.querySelector(`input[value="${chosen}"] ~ .choice-square svg`), word);
+  }, 300);
   const page = await post(form);
   clearTimeout(timer);
   if (!page?.getElementById(section.id)) {
@@ -289,7 +275,7 @@ async function saveArt(form) {
     placed.querySelector(`input[value="${focused}"]`)?.focus();
   }
   placed.querySelectorAll("[data-strip] td").forEach((cell, index) => {
-    if (cell.dataset.shown !== before[index] && !stillMotion.matches) {
+    if (cell.dataset.shown !== before[index] && !reducedMotion.matches) {
       cell.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, easing: "linear" });
     }
   });
@@ -298,24 +284,6 @@ async function saveArt(form) {
     next.querySelector(`input[value="${latest}"]`).checked = true;
     saveArt(next);
   }
-}
-
-/**
- * Turns the chosen tile's glyph into the spinning segment and says the choice is being saved.
- *
- * @param {Element} section - The game's art section.
- * @param {string} chosen - The choice being saved.
- */
-function spin(section, chosen) {
-  const glyph = section.querySelector(`input[value="${chosen}"] ~ .choice-square svg`);
-  const use = glyph.querySelector("use");
-  glyph.dataset.glyph = use.getAttribute("href");
-  use.setAttribute("href", glyph.dataset.glyph.replace(/#.*$/, "#busy"));
-  glyph.classList.add("spinning");
-  const word = section.querySelector("[data-art-word]");
-  word.dataset.word = word.textContent;
-  word.textContent = word.dataset.saving;
-  word.classList.add("catalogue-art-off");
 }
 
 /**
@@ -332,7 +300,7 @@ function unspin(section) {
   const word = section.querySelector("[data-art-word]");
   word.textContent = word.dataset.word ?? word.textContent;
   word.classList.toggle(
-    "catalogue-art-off",
+    "bar-extra-off",
     section.querySelector("form[data-art]").dataset.saved === "nobody",
   );
 }

@@ -2,7 +2,7 @@
 // what each still needs is said beside its button as it is filled in, a new name is checked as it
 // is typed, and the live parts of a form, such as its search, follow its choices. Without scripts
 // the browser and the server check the same, and a search is sent with its own button.
-import { checkName, fill, flash, reducedMotion } from "./naming.js";
+import { checkName, fetchPage, fill, flash, reducedMotion } from "./shared.js";
 
 // A dialog arrives after the page has loaded, so its name field starts its check when it first
 // takes the focus, as its autofocus gives it.
@@ -77,11 +77,10 @@ function chosen(field) {
 async function refresh(field, fields) {
   const lives = [...field.closest("[data-confirm], form").querySelectorAll("[data-live]")];
   const number = ++asked;
-  const answer = await fetch(`${lives[0].dataset.live}?${fields}`).catch(() => null);
-  if (!answer?.ok || number !== asked) {
+  const page = await fetchPage(`${lives[0].dataset.live}?${fields}`).catch(() => null);
+  if (!page || number !== asked) {
     return;
   }
-  const page = new DOMParser().parseFromString(await answer.text(), "text/html");
   const founds = page.querySelectorAll("[data-live]");
   const focused = document.activeElement?.id;
   lives.forEach((live, index) => {

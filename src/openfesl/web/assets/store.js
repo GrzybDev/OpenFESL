@@ -2,33 +2,25 @@
 // part and the confirmation of that choice; Buy opens the confirmation as a dialog; a hot deal's
 // time left counts down; a box just bought opens over the page. Without scripts the panel sends
 // its choice and the confirmation is a page of its own.
-import { closeDialog, fill, flash, reducedMotion } from "./naming.js";
+import { closes, fetchPage, fill, flash, reducedMotion } from "./shared.js";
 
-const form = document.querySelector("[data-buy]");
-if (form) {
-  buyPanel(form);
-}
 for (const timer of document.querySelectorAll("[role=timer][data-left]:not([data-deal] *)")) {
   countDown(timer, "sale" in timer.dataset ? () => {} : endDeal);
 }
 const reveal = document.querySelector("dialog[data-reveal]");
 if (reveal) {
-  // The box was bought with the page's Buy button, which takes the focus back.
+  // The page's Buy button takes the focus back, unless the page gave the reveal its opener.
   closes(reveal, document.querySelector("[data-buy-open]"));
   // Open in the page's flow without scripts, it opens over the page with them.
   reveal.close();
   reveal.showModal();
 }
 
-/**
- * Brings a store page's buy panel to life.
- *
- * @param {HTMLFormElement} form - The panel's form.
- */
-function buyPanel(form) {
+const form = document.querySelector("[data-buy]");
+if (form) {
   const dialog = document.getElementById("buy-confirm");
   let asked = 0;
-  closes(dialog, null);
+  closes(dialog);
 
   form.addEventListener("change", async (event) => {
     const changed = event.target;
@@ -43,11 +35,10 @@ function buyPanel(form) {
         query.set(name, value);
       }
     }
-    const answer = await fetch(`${location.pathname}?${query}`);
-    if (!answer.ok || number !== asked) {
+    const page = await fetchPage(`${location.pathname}?${query}`).catch(() => null);
+    if (!page || number !== asked) {
       return;
     }
-    const page = new DOMParser().parseFromString(await answer.text(), "text/html");
     const panel = form.querySelector("[data-buy-panel]");
     const found = page.querySelector("[data-buy-panel]");
     panel.replaceChildren(...found.childNodes);
@@ -92,24 +83,6 @@ function buyPanel(form) {
       dialog.showModal();
       dialog.querySelector("[type=submit]")?.focus();
     }
-  });
-}
-
-/**
- * Lets a dialog close from its close buttons and Escape, returning the focus to its opener.
- *
- * @param {HTMLDialogElement} dialog - The dialog.
- * @param {HTMLElement | null} opener - What takes the focus back when nothing else opened it.
- */
-function closes(dialog, opener) {
-  dialog.addEventListener("click", (event) => {
-    if (event.target.closest("[data-close]")) {
-      closeDialog(dialog, dialog.opener ?? opener);
-    }
-  });
-  dialog.addEventListener("cancel", (event) => {
-    event.preventDefault();
-    closeDialog(dialog, dialog.opener ?? opener);
   });
 }
 

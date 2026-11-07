@@ -4,7 +4,7 @@
 // that fail to load or once the browser takes the model's drawing away. Without scripts they
 // stay, and so they do where WebGL is drawn without a graphics card, as loading the model there
 // holds the page up for about a second.
-import { reducedMotion } from "./naming.js";
+import { reducedMotion } from "./shared.js";
 
 // The renderers that draw WebGL in software, as browsers name them where they do.
 const SOFTWARE = /swiftshader|llvmpipe|softpipe|lavapipe|basic render/i;

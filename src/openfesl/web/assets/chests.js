@@ -2,14 +2,13 @@
 // page and gives the focus back to the hero's chests when it closes; opening a chest without a
 // key, or buying keys without the Funds, says why instead of sending the form; and the key
 // purchase shows what the chosen number of keys costs and leaves.
-import { flash } from "./naming.js";
+import { flash } from "./shared.js";
 
 const reveal = document.querySelector("dialog[data-reveal]");
 if (reveal) {
+  // store.js opens every reveal as a dialog; here the focus goes back to the hero's chests.
   reveal.opener = document.getElementById(reveal.dataset.returns);
   // Without scripts the reveal stands open in the page, and its close links reload the page.
-  reveal.close();
-  reveal.showModal();
   for (const link of reveal.querySelectorAll("a[data-close]")) {
     link.addEventListener("click", (event) => event.preventDefault());
   }

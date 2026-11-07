@@ -173,14 +173,11 @@ class HeroModel {
       depthWrite: false,
       blending: NormalBlending,
     });
-    this.camera = null;
     this.idle = null;
     this.reaction = null;
     this.still = stillness.matches;
     this.seen = false;
     this.running = false;
-    this.last = 0;
-    this.nextFace = 0;
     this.watching = new AbortController();
     const { signal } = this.watching;
     this.observers = [

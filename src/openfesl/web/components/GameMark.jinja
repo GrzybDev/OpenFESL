@@ -13,7 +13,7 @@
   <h3 id="{{ key }}-title" class="bar bar-wrap">
     <span>{{ _("web.admin.game_mark") }}</span><span data-mark-word
       data-saving="{{ _('web.admin.game_mark.state.saving') }}"
-      class="bar-extra{% if not mark.shown %} game-mark-off{% endif %}">{{ _("web.admin.game_mark.state." ~ state) }}</span>
+      class="bar-extra{% if not mark.shown %} bar-extra-off{% endif %}">{{ _("web.admin.game_mark.state." ~ state) }}</span>
   </h3>
   <form method="post"
         action="{{ url('/admin/settings/games/' ~ game.id ~ '/mark') }}"

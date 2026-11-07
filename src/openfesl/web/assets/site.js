@@ -1,16 +1,19 @@
 // The motion and keyboard of a game's own site: one menu open at a time, closed by Escape, a
-// click outside or another menu, playing its closing first; and the message of the last change,
-// which its button closes. Without scripts the menus open and close as disclosures.
-import { closeDialog, fill, flash, reducedMotion } from "./naming.js";
+// click outside or another menu, playing its closing first, as the account menu is too; and the
+// message of the last change, which its button closes. Without scripts the menus open and close as
+// disclosures.
+import { closes, fill, flash, reducedMotion } from "./shared.js";
+
+const MENUS = ":is([data-site-menu], [data-account-menu])";
 
 document.addEventListener("click", (event) => {
-  const summary = event.target.closest("[data-site-menu] > summary");
-  for (const menu of document.querySelectorAll("[data-site-menu][open]")) {
+  const summary = event.target.closest(`${MENUS} > summary`);
+  for (const menu of document.querySelectorAll(`${MENUS}[open]`)) {
     if (summary?.parentElement === menu) {
       event.preventDefault();
-      closeMenu(menu, 140, 100);
+      closeMenu(menu);
     } else if (!menu.contains(event.target)) {
-      closeMenu(menu, 140, 100);
+      closeMenu(menu);
     }
   }
   const dismiss = event.target.closest("[data-site-dismiss]");
@@ -28,14 +31,16 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
-  // An open dialog takes Escape alone, closing and returning the focus to what opened it.
-  if (document.querySelector("dialog:modal")) {
-    return;
-  }
-  const menu = document.querySelector("[data-site-menu][open]");
+  // An open dialog takes Escape, closing and returning the focus to what opened it; the account
+  // menu still closes with it.
+  const modal = document.querySelector("dialog:modal");
+  const menu = document.querySelector(modal ? "[data-account-menu][open]" : `${MENUS}[open]`);
   if (menu && event.key === "Escape") {
-    closeMenu(menu, 140, 100);
+    closeMenu(menu);
     menu.querySelector("summary").focus();
+  }
+  if (modal) {
+    return;
   }
   const toggle = document.querySelector("[data-selector-toggle][aria-expanded=true]");
   if (toggle && event.key === "Escape") {
@@ -75,13 +80,7 @@ for (const opener of document.querySelectorAll("[data-opens]")) {
 }
 
 for (const dialog of document.querySelectorAll("dialog[data-modal]")) {
-  for (const button of dialog.querySelectorAll("[data-close]")) {
-    button.addEventListener("click", () => closeDialog(dialog, dialog.opener));
-  }
-  dialog.addEventListener("cancel", (event) => {
-    event.preventDefault();
-    closeDialog(dialog, dialog.opener);
-  });
+  closes(dialog);
   dialog.addEventListener("submit", (event) => {
     if (event.submitter?.getAttribute("aria-disabled") === "true") {
       event.preventDefault();
@@ -143,10 +142,9 @@ function showSelector(toggle, open) {
  * Plays a menu's closing and closes it.
  *
  * @param {HTMLDetailsElement} menu - The open menu.
- * @param {number} delay - How long its closing plays, in milliseconds.
- * @param {number} reducedDelay - How long its closing plays with reduced motion.
  */
-export function closeMenu(menu, delay, reducedDelay) {
+function closeMenu(menu) {
+  const [delay, reducedDelay] = menu.matches("[data-site-menu]") ? [140, 100] : [100, 0];
   menu.classList.add("closing");
   setTimeout(
     () => {

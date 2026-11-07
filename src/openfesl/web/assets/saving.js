@@ -2,6 +2,7 @@
 // background, and the block that the answer's page holds under the same id takes the old one's
 // place with the toast the answer brings. A change that was not saved says so in a toast
 // that stays.
+import { fetchPage } from "./shared.js";
 
 /**
  * Sends a form in the background and reads the page it answers with.
@@ -10,13 +11,24 @@
  * @param {FormData} [body] - What it sends, when read before the form changed.
  * @returns {Promise<Document | null>} The page, or null when the change was not saved.
  */
-export async function post(form, body = new FormData(form)) {
-  try {
-    const answer = await fetch(form.action, { method: "POST", body });
-    return answer.ok ? new DOMParser().parseFromString(await answer.text(), "text/html") : null;
-  } catch {
-    return null;
-  }
+export function post(form, body = new FormData(form)) {
+  return fetchPage(form.action, { method: "POST", body }).catch(() => null);
+}
+
+/**
+ * Turns a glyph into the spinning segment and says the change is being saved, in the state word.
+ *
+ * @param {Element} glyph - The glyph.
+ * @param {Element} word - The state word, muted meanwhile.
+ */
+export function spin(glyph, word) {
+  const use = glyph.querySelector("use");
+  glyph.dataset.glyph = use.getAttribute("href");
+  use.setAttribute("href", glyph.dataset.glyph.replace(/#.*$/, "#busy"));
+  glyph.classList.add("spinning");
+  word.dataset.word = word.textContent;
+  word.textContent = word.dataset.saving;
+  word.classList.add("bar-extra-off");
 }
 
 /**

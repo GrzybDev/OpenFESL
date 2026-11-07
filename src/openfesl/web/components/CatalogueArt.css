@@ -15,11 +15,6 @@
     font-size: 14px;
   }
 
-  /* The header's word is muted while nothing is shown and while a choice is saved. */
-  .catalogue-art-off {
-    color: var(--soft);
-  }
-
   .catalogue-art-columns {
     display: grid;
     grid-template-columns: minmax(0, 1fr);

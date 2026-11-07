@@ -14,7 +14,8 @@ import "@fontsource/urbanist/700.css";
 import "@fontsource/urbanist/800.css";
 import "./base.css";
 import "./styles.js";
-import { closeMenu } from "./site.js";
+import "./site.js";
+import { closeDialog, fetchPage, openPanel, reducedMotion } from "./shared.js";
 import "./creator.js";
 import "./rename.js";
 import "./play-now.js";
@@ -32,11 +33,9 @@ import "htmx.org";
 // a button that sends a form says what it does meanwhile, such as APPROVING….
 document.addEventListener("click", (event) => {
   const block = event.target.closest("a.chevron");
-  const plain =
-    event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
   if (
     block &&
-    plain &&
+    plainClick(event) &&
     !event.defaultPrevented &&
     !block.target &&
     !block.hasAttribute("data-dialog") &&
@@ -70,6 +69,16 @@ document.addEventListener("submit", (event) => {
   // A page restored from the back-forward cache may send it again.
   addEventListener("pagehide", () => delete form.dataset.sent, { once: true });
 });
+
+/**
+ * Tells whether a click is a plain one, not one that opens its link elsewhere.
+ *
+ * @param {MouseEvent} event - The click.
+ * @returns {boolean} Whether it came from the main button without a modifier key.
+ */
+function plainClick(event) {
+  return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+}
 
 /**
  * Marks a chevron block as loading once its page takes longer than 300 ms to arrive.
@@ -132,7 +141,6 @@ for (const row of document.querySelectorAll("[data-scroll-current]")) {
 // one, rows glide to their new places, and a failed refresh keeps the last values,
 // muted, until the next one succeeds or the reader asks again.
 const REFRESH = 15000;
-const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 let refreshedAt = Date.now();
 let counted = new Map();
 let places = new Map();
@@ -204,10 +212,15 @@ document.addEventListener("htmx:after:swap", () => {
 });
 
 for (const failure of ["htmx:error", "htmx:response:error"]) {
-  document.addEventListener(failure, () => {
+  document.addEventListener(failure, (event) => {
     document.documentElement.dataset.stale = "";
     for (const note of document.querySelectorAll("[data-stale-note]")) {
       note.hidden = false;
+    }
+    // A change the account page's forms sent, which the server did not answer, says so in a toast.
+    if (event.target instanceof Element && event.target.closest("[data-account-form]")) {
+      const toast = document.getElementById("toast-failed").content.cloneNode(true);
+      document.getElementById("toasts").append(toast);
     }
   });
 }
@@ -370,14 +383,7 @@ function leave(toast) {
 // opens them with the page.
 document.addEventListener("click", (event) => {
   const button = event.target.closest("[data-details]");
-  if (
-    button &&
-    event.button === 0 &&
-    !event.metaKey &&
-    !event.ctrlKey &&
-    !event.shiftKey &&
-    !event.altKey
-  ) {
+  if (button && plainClick(event)) {
     event.preventDefault();
     toggleDetails(button);
   }
@@ -407,43 +413,22 @@ function toggleDetails(button) {
 // opens the confirmation page itself.
 document.addEventListener("click", async (event) => {
   const link = event.target.closest("a[data-dialog]");
-  if (
-    !link ||
-    event.button !== 0 ||
-    event.metaKey ||
-    event.ctrlKey ||
-    event.shiftKey ||
-    event.altKey
-  ) {
+  if (!link || !plainClick(event)) {
     return;
   }
   event.preventDefault();
   const timer = setTimeout(() => link.setAttribute("aria-busy", "true"), 300);
-  const panel = await confirmation(link.href);
+  const page = await fetchPage(link.href, { headers: { Accept: "text/html" } }).catch(() => null);
+  const panel = page?.querySelector("[data-confirm]");
   clearTimeout(timer);
   link.removeAttribute("aria-busy");
   if (!panel) {
     location.assign(link.href);
     return;
   }
-  const dialog = document.createElement("dialog");
-  dialog.className = "dialog";
-  dialog.setAttribute("aria-labelledby", panel.getAttribute("aria-labelledby"));
-  dialog.setAttribute("aria-describedby", panel.getAttribute("aria-describedby"));
   panel.removeAttribute("aria-labelledby");
   panel.removeAttribute("aria-describedby");
-  dialog.append(panel);
-  // The dialog takes the colours of the area the link is in.
-  (link.closest(".area") ?? document.body).append(dialog);
-  dialog.addEventListener("close", () => {
-    dialog.remove();
-    link.focus();
-  });
-  dialog.addEventListener("cancel", (cancelled) => {
-    cancelled.preventDefault();
-    closeDialog(dialog);
-  });
-  dialog.showModal();
+  const dialog = openPanel(document.importNode(panel, true), link);
   // A form's own first field takes the focus; a question starts on its way back.
   if (!dialog.querySelector("[autofocus]")) {
     dialog.querySelector(".confirm-buttons a")?.focus();
@@ -451,47 +436,12 @@ document.addEventListener("click", async (event) => {
 });
 
 document.addEventListener("click", (event) => {
-  const dialog = event.target.closest("dialog.dialog");
-  if (
-    dialog &&
-    event.target.closest("[data-close], .confirm-buttons a") &&
-    !event.metaKey &&
-    !event.ctrlKey
-  ) {
+  const back = event.target.closest("dialog.dialog :is([data-close], .confirm-buttons a)");
+  if (back && !event.metaKey && !event.ctrlKey) {
     event.preventDefault();
-    closeDialog(dialog);
+    closeDialog(back.closest("dialog"));
   }
 });
-
-/**
- * Fetches a confirmation page and returns its panel, or nothing when the page does not come.
- *
- * @param {string} address - The confirmation page's address.
- * @returns {Promise<Element | null>} The panel, ready to be put on this page.
- */
-async function confirmation(address) {
-  try {
-    const response = await fetch(address, { headers: { Accept: "text/html" } });
-    if (!response.ok) {
-      return null;
-    }
-    const page = new DOMParser().parseFromString(await response.text(), "text/html");
-    const panel = page.querySelector("[data-confirm]");
-    return panel ? document.importNode(panel, true) : null;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Plays a dialog's closing and closes it.
- *
- * @param {HTMLDialogElement} dialog - The dialog.
- */
-function closeDialog(dialog) {
-  dialog.classList.add("closing");
-  setTimeout(() => dialog.close(), reducedMotion.matches ? 100 : 120);
-}
 
 // A game password field's button shows the password as text and hides it again.
 document.addEventListener("click", (event) => {
@@ -504,33 +454,8 @@ document.addEventListener("click", (event) => {
   button.parentElement.querySelector("input").type = shown ? "text" : "password";
 });
 
-// The account menu closes with Escape, a click outside it or the choice of an item, playing its
-// closing first; without scripts its summary closes it at once.
-document.addEventListener("click", (event) => {
-  const menu = document.querySelector("[data-account-menu][open]");
-  if (!menu || !(event.target instanceof Element)) {
-    return;
-  }
-  const summary = event.target.closest("summary");
-  if (summary?.parentElement === menu) {
-    event.preventDefault();
-    closeMenu(menu, 100, 0);
-  } else if (!menu.contains(event.target)) {
-    closeMenu(menu, 100, 0);
-  }
-});
-
-document.addEventListener("keydown", (event) => {
-  const menu = document.querySelector("[data-account-menu][open]");
-  if (menu && event.key === "Escape") {
-    closeMenu(menu, 100, 0);
-    menu.querySelector("summary").focus();
-  }
-});
-
 // The account page's forms swap only their part: it cross-fades in with the toast of the change,
-// and Cloudflare's check in it is drawn anew. A change the server did not answer says so in an
-// error toast that stays.
+// and Cloudflare's check in it is drawn anew.
 document.addEventListener("htmx:after:swap", (event) => {
   const part = event.target instanceof Element ? event.target.closest("[data-account-part]") : null;
   if (!part) {
@@ -550,17 +475,6 @@ document.addEventListener("htmx:after:swap", (event) => {
   }
   followParts?.();
 });
-
-for (const failure of ["htmx:error", "htmx:response:error"]) {
-  document.addEventListener(failure, (event) => {
-    if (event.target instanceof Element && event.target.closest("[data-account-form]")) {
-      const toast = document.getElementById("toast-failed")?.content.cloneNode(true);
-      if (toast) {
-        document.getElementById("toasts")?.append(toast);
-      }
-    }
-  });
-}
 
 // The account page's index marks the part being read, its block sliding to the part's link.
 const followParts = accountIndex(document.querySelector("[data-account-index]"));

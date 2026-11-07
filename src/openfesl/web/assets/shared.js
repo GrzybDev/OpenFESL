@@ -1,6 +1,22 @@
-// What the dialogs that name a hero share: the check of a name as it is typed, the dialogs'
-// closing, the flash of what is still missing, and the page's texts with their placeholders.
+// What the pages' scripts share: pages fetched in the background, the check of a hero's name as
+// it is typed, the dialogs' closing, the flash of what is still missing, and the page's texts with
+// their placeholders.
 export const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+
+/**
+ * Fetches a page of the site, following its redirect, as a document.
+ *
+ * @param {string | URL} address - The page's address.
+ * @param {RequestInit} [options] - How to fetch it.
+ * @returns {Promise<Document>} The page; a page the server refuses fails as a lost connection does.
+ */
+export async function fetchPage(address, options) {
+  const answer = await fetch(address, options);
+  if (!answer.ok) {
+    throw new Error("failed");
+  }
+  return new DOMParser().parseFromString(await answer.text(), "text/html");
+}
 
 /**
  * Checks a dialog's name field as it is typed, swapping in the server's status line.
@@ -36,11 +52,10 @@ export function checkName(dialog, input, address, checking, changed) {
     const number = ++asked;
     const query = new URLSearchParams(address.split("?")[1] ?? "");
     query.set("name", name);
-    const answer = await fetch(`${address.split("?")[0]}?${query}`);
-    if (!answer.ok || number !== asked) {
+    const page = await fetchPage(`${address.split("?")[0]}?${query}`).catch(() => null);
+    if (!page || number !== asked) {
       return;
     }
-    const page = new DOMParser().parseFromString(await answer.text(), "text/html");
     const found = page.querySelector("[data-check]");
     // The status line stays the same element: screen readers announce a live region's new
     // content, not a new region.
@@ -59,7 +74,7 @@ export function checkName(dialog, input, address, checking, changed) {
  * Plays a dialog's closing, closes it and returns to what opened it.
  *
  * @param {HTMLDialogElement} dialog - The open dialog.
- * @param {HTMLElement} opener - What opened it, which takes the focus back.
+ * @param {HTMLElement} [opener] - What opened it, which takes the focus back.
  */
 export function closeDialog(dialog, opener) {
   dialog.classList.add("closing");
@@ -74,14 +89,59 @@ export function closeDialog(dialog, opener) {
 }
 
 /**
- * Flashes the line that says what is still missing.
+ * Lets a dialog close from its close buttons and Escape, returning the focus to its opener.
  *
- * @param {HTMLElement} line - The line.
+ * @param {HTMLDialogElement} dialog - The dialog.
+ * @param {HTMLElement | null} [opener] - What takes the focus back when nothing else opened it.
  */
-export function flash(line) {
-  line.classList.remove("flash");
-  void line.offsetWidth;
-  line.classList.add("flash");
+export function closes(dialog, opener) {
+  dialog.addEventListener("click", (event) => {
+    if (event.target.closest("[data-close]")) {
+      closeDialog(dialog, dialog.opener ?? opener);
+    }
+  });
+  dialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeDialog(dialog, dialog.opener ?? opener);
+  });
+}
+
+/**
+ * Opens a black-headed panel as a dialog over the page, in the colours of the area its opener is in.
+ *
+ * @param {Node} panel - The panel, which holds the question and text that name the dialog.
+ * @param {HTMLElement} opener - What takes the focus back once the dialog is gone.
+ * @returns {HTMLDialogElement} The open dialog.
+ */
+export function openPanel(panel, opener) {
+  const dialog = document.createElement("dialog");
+  dialog.className = "dialog";
+  dialog.setAttribute("aria-labelledby", "confirm-question");
+  dialog.setAttribute("aria-describedby", "confirm-text");
+  dialog.append(panel);
+  opener.closest(".area").append(dialog);
+  dialog.addEventListener("close", () => {
+    dialog.remove();
+    opener.focus();
+  });
+  dialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeDialog(dialog);
+  });
+  dialog.showModal();
+  return dialog;
+}
+
+/**
+ * Plays an element's animation again: the flash of what is still missing, unless another is named.
+ *
+ * @param {HTMLElement} element - The element.
+ * @param {string} [name] - The class that plays the animation.
+ */
+export function flash(element, name = "flash") {
+  element.classList.remove(name);
+  void element.offsetWidth;
+  element.classList.add(name);
 }
 
 /**
