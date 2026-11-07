@@ -156,6 +156,17 @@ def test_a_paused_address_resumes_once_its_oldest_failure_is_old_enough() -> Non
     )
 
 
+def test_a_failed_sign_in_counts_after_the_check_let_the_failures_of_its_address_expire() -> None:
+    now = [0.0]
+    attempts = Attempts(2, 10.0, lambda: now[0])
+    attempts.failed("ann@example.test")
+    now[0] = 11.0
+    assert not attempts.paused("ann@example.test")
+    attempts.failed("ann@example.test")
+    attempts.failed("ann@example.test")
+    assert attempts.paused("ann@example.test")
+
+
 @pytest.fixture
 async def turnstile(monkeypatch: pytest.MonkeyPatch) -> AsyncIterator[list[dict[str, str]]]:
     # Cloudflare's siteverify, which passes the token "passed"; set before the server starts.

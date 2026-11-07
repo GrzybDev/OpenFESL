@@ -57,7 +57,9 @@ class Attempts:
             # Addresses tried once and never again would otherwise stay for good.
             self._purged = now
             stale = [
-                key for key, times in self._failures.items() if now - times[-1] >= self._window
+                key
+                for key, times in self._failures.items()
+                if not times or now - times[-1] >= self._window
             ]
             for key in stale:
                 del self._failures[key]
