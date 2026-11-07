@@ -88,13 +88,7 @@
                 <FormButton icon="x" :href="url('/account/game-password/remove')" dialog>{{ _("web.account.password.remove") }}</FormButton>
                 <p class="body-text">{{ _("web.account.password.remove.note", games=used) }}</p>
               {% else %}
-                <button type="button"
-                        disabled
-                        aria-describedby="password-last"
-                        class="form-button">
-                  <span aria-hidden="true"
-                        class="form-glyph"><Icon name="x" :size="14" stroke="#F4F4EE" /></span>{{ _("web.account.password.remove") }}
-                </button>
+                <FormButton icon="x" type="button" disabled aria-describedby="password-last">{{ _("web.account.password.remove") }}</FormButton>
                 <p id="password-last" class="body-text">{{ _("web.account.password.last") }}</p>
               {% endif %}
             </div>

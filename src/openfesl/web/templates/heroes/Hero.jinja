@@ -13,12 +13,7 @@
     <section aria-labelledby="profile-name" class="profile-head enter-title">
       <HeroMugshot :hero="hero" />
       <div class="profile-who">
-        {% if hero.faction %}
-          <p class="profile-faction">
-            <Icon :name="rules.factions[hero.faction].glyph" :size="16" stroke="currentColor" />
-            {{ _("games." ~ game.id ~ ".faction." ~ hero.faction) }}
-          </p>
-        {% endif %}
+        <FactionTab :hero="hero" class="profile-faction" />
         <h1 id="profile-name" class="profile-name">{{ name }}</h1>
         <p class="profile-kind">
           {% if hero.hero_class %}

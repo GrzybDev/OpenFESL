@@ -1,0 +1,14 @@
+{#def src, size: int, glyph: str, glyph_size: int, stroke: str = "currentColor", drawn: str = "", eager: bool = False #}
+{# An item's imported icon, or where there is none the glyph that stands in for it, with the class
+   named drawn too. The row or card names the item beside it. Further attributes go on both. #}
+{% if src %}
+  <img src="{{ src }}"
+       width="{{ size }}"
+       height="{{ size }}"
+       alt=""
+       {% if not eager %} loading="lazy"{% endif %}
+       {{ attrs.render() }}>
+{% else %}
+  <span aria-hidden="true"
+        {{ attrs.render(class=drawn) }}><Icon :name="glyph" :size="glyph_size" :stroke="stroke" /></span>
+{% endif %}

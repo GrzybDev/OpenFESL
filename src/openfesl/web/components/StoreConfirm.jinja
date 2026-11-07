@@ -17,17 +17,7 @@
   <input type="hidden" name="price" value="{{ price.number }}">
   <input type="hidden" name="paid" value="{{ price.price }}">
   <input type="hidden" name="once" value="{{ once_token() }}">
-  {% if dialog %}
-    <button type="button"
-            data-close
-            class="site-dialog-close"
-            aria-label="{{ _('web.dialog.close') }}">
-      <Icon name="x" :size="18" stroke="currentColor" />
-    </button>
-    <h2 id="confirm-title" class="site-dialog-title">{{ _("web.store.confirm.title") }}</h2>
-  {% else %}
-    <h1 id="confirm-title" class="site-dialog-title">{{ _("web.store.confirm.title") }}</h1>
-  {% endif %}
+  <DialogHead id="confirm-title" :dialog="dialog">{{ _("web.store.confirm.title") }}</DialogHead>
   <dl class="site-facts store-confirm-facts">
     <Term :label="_('web.store.row.item')">{{ sold.name }}</Term>
     <Term :label="_('web.store.row.hero')">{{ offered.choice.hero.persona.name }}</Term>
@@ -45,10 +35,6 @@
   <p class="store-confirm-note">{{ texts.confirm_note(offered) }}</p>
   <div class="site-dialog-actions">
     <SiteButton glyph="bag" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.store.confirm." ~ ("open" if sold.kind == "box" else "buy"), price=number(price.price), currency=currency) }}</SiteButton>
-    {% if dialog %}
-      <button type="button" data-close class="site-button site-button-ghost">{{ _("web.rename.cancel") }}</button>
-    {% else %}
-      <a href="{{ back }}" class="site-button site-button-ghost">{{ _("web.rename.cancel") }}</a>
-    {% endif %}
+    <DialogCancel :back="back" :dialog="dialog" />
   </div>
 </form>

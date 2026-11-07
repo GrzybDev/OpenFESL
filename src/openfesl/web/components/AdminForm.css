@@ -1,10 +1,6 @@
 /* The admin panel's forms that ask for a note: the note's field, the line that says what is still
    needed, and the list of what a change does. */
 @layer components {
-  .admin-note {
-    margin-top: 14px;
-  }
-
   .admin-form-why {
     display: flex;
     align-items: center;
@@ -64,10 +60,6 @@
 
   .admin-count-tiles {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    margin-top: 12px;
-  }
-
-  .admin-count-field {
     margin-top: 12px;
   }
 

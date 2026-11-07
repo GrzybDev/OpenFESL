@@ -11,12 +11,7 @@
   <input type="hidden" name="key" value="{{ claiming.key }}">
   <input type="hidden" name="faction" value="{{ claiming.faction }}">
   {% if dialog %}
-    <button type="button"
-            data-close
-            class="site-dialog-close"
-            aria-label="{{ _('web.dialog.close') }}">
-      <Icon name="x" :size="18" stroke="currentColor" />
-    </button>
+    <DialogClose />
   {% endif %}
   <h2 id="{{ id }}-title" class="site-dialog-title">{{ _("web.rewards.claim.title", reward=claiming.title) }}</h2>
   <fieldset class="claim-heroes">

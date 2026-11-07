@@ -39,15 +39,7 @@
         {# A tile for each of a bundle's first three items, as the 2012 page showed their icons. #}
         {% set small = icons|length > 1 %}
         {% for src in icons[:3] %}
-          {% if src %}
-            <img src="{{ src }}"
-                 width="{{ 76 if small else 110 }}"
-                 height="{{ 76 if small else 110 }}"
-                 alt=""
-                 class="store-icon{% if small %} store-icon-small{% endif %}">
-          {% else %}
-            <span class="store-icon{% if small %} store-icon-small{% endif %}"><Icon :name="'bag' if sold.kind == 'item' else 'deal'" :size="28" stroke="currentColor" /></span>
-          {% endif %}
+          <ItemImage :src="src" :size="76 if small else 110" :glyph="'bag' if sold.kind == 'item' else 'deal'" :glyph_size="28" :class="'store-icon store-icon-small' if small else 'store-icon'" eager />
         {% endfor %}
       {% endif %}
     </div>

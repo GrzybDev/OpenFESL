@@ -10,12 +10,7 @@
     class="pale-hanger">
   <Splash />
   <article aria-labelledby="chest-hero-{{ id }}" class="pale-card">
-    {% if hero.faction %}
-      <p class="pale-band">
-        <Icon :name="rules.factions[hero.faction].glyph" :size="18" stroke="currentColor" />
-        {{ _("games." ~ game.id ~ ".faction." ~ hero.faction) }}
-      </p>
-    {% endif %}
+    <FactionTab :hero="hero" :size="18" class="pale-band" />
     <div class="chest-body">
       <div class="chest-hero">
         <span aria-hidden="true" class="chest-class">
@@ -26,11 +21,7 @@
         <div>
           <h3 id="chest-hero-{{ id }}" class="chest-name">{{ hero.persona.name }}</h3>
           <p>
-            {% if hero.hero_class %}
-              {{ _("web.heroes.kind", hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class), level=hero.level) }}
-            {% else %}
-              {{ _("web.heroes.level", level=hero.level) }}
-            {% endif %}
+            <HeroKind :hero="hero" />
           </p>
         </div>
       </div>

@@ -53,7 +53,7 @@
   }
 
   /* An item's icon on the pale tile that the game draws icons on. */
-  .reward-icon {
+  img.reward-glyph {
     background: #cdbfa6;
     object-fit: contain;
   }

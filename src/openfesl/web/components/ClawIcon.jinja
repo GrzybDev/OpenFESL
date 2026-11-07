@@ -1,12 +1,4 @@
 {#def prize, size: int #}
 {# A prize's icon where the page shows the game's art, else the glyph of its kind on a dashed
    card. #}
-{% if prize.icon %}
-  <img src="{{ prize.icon }}"
-       alt=""
-       width="{{ size }}"
-       height="{{ size }}"
-       class="claw-icon">
-{% else %}
-  <span class="claw-icon claw-icon-glyph"><Icon :name="prize.glyph" :size="size // 2" stroke="currentColor" /></span>
-{% endif %}
+<ItemImage :src="prize.icon" :size="size" :glyph="prize.glyph" :glyph_size="size // 2" class="claw-icon" drawn="claw-icon-glyph" eager />

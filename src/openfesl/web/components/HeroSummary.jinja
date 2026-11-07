@@ -5,12 +5,7 @@
 <article aria-labelledby="hero-{{ hero.persona.id }}"
          {% if hero.faction %} data-faction="{{ hero.faction }}"{% endif %}
          class="hero-summary">
-  {% if hero.faction %}
-    <p class="hero-tab">
-      <Icon :name="rules.factions[hero.faction].glyph" :size="16" stroke="currentColor" />
-      {{ _("games." ~ game.id ~ ".faction." ~ hero.faction) }}
-    </p>
-  {% endif %}
+  <FactionTab :hero="hero" class="hero-tab" />
   <div class="hero-summary-body">
     <div class="hero-heading">
       <h3 id="hero-{{ hero.persona.id }}"

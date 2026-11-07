@@ -26,7 +26,7 @@
             aria-labelledby="unknown-search"
             class="missing-search">
         <Bar id="unknown-search" large>{{ _("web.server.find") }}</Bar>
-        <SearchField id="unknown-name" name="q" :label="_('web.servers.name')" :value="wanted" :hint="_('web.servers.name.hint')" />
+        <TextField type="search" autocomplete="off" id="unknown-name" name="q" :label="_('web.servers.name')" :value="wanted" :placeholder="_('web.servers.name.hint')" />
         <FormButton icon="find">{{ _("web.servers.search") }}</FormButton>
       </form>
     </div>

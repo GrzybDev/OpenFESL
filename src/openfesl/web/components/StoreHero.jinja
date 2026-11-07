@@ -29,11 +29,7 @@
     </span>
     <span class="store-hero-name">{{ hero.persona.name }}</span>
     <span class="store-hero-kind">
-      {% if hero.hero_class %}
-        {{ _("web.heroes.kind", hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class), level=hero.level) }}
-      {% else %}
-        {{ _("web.heroes.level", level=hero.level) }}
-      {% endif %}
+      <HeroKind :hero="hero" />
     </span>
     {% if status %}
       <span id="hero-{{ hero.persona.id }}"

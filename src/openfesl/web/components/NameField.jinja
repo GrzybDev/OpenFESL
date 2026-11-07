@@ -1,0 +1,20 @@
+{#def id: str, label: str, hint: str, name: str, check: str #}
+{# The field that names a hero, under its label, with the hint and the status line that scripts
+   keep up to date as the name is typed. #}
+{% set rules = game.heroes %}
+<label for="{{ id }}" class="naming-label">{{ label }}</label>
+<input id="{{ id }}"
+       name="name"
+       type="text"
+       required
+       minlength="{{ rules.name_length[0] }}"
+       maxlength="{{ rules.name_length[1] }}"
+       pattern="{{ rules.name }}"
+       autocomplete="off"
+       spellcheck="false"
+       aria-describedby="{{ id }}-hint {{ id }}-status"
+       {% if check and check != "free" %} aria-invalid="true"{% endif %}
+       value="{{ name }}"
+       class="naming-input">
+<p id="{{ id }}-hint" class="naming-hint">{{ hint }}</p>
+<NameStatus :id="id ~ '-status'" :name="name" :check="check" />

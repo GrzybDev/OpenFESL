@@ -4,20 +4,8 @@
    role="status"
    data-check="{{ check }}"
    class="name-status">
-  {% if check == "format" %}
-    <Icon name="warn" :size="18" stroke="currentColor" />
-    {{ _("web.creator.name.format") }}
-  {% elif check == "taken" %}
-    <Icon name="warn" :size="18" stroke="currentColor" />
-    {{ _("web.creator.name.taken", name=name) }}
-  {% elif check == "refused" %}
-    <Icon name="warn" :size="18" stroke="currentColor" />
-    {{ _("web.creator.name.refused", name=name) }}
-  {% elif check == "same" %}
-    <Icon name="warn" :size="18" stroke="currentColor" />
-    {{ _("web.rename.same") }}
-  {% elif check == "free" %}
-    <Icon name="tick" :size="18" stroke="currentColor" />
-    {{ _("web.creator.name.free", name=name) }}
+  {% if check %}
+    <Icon :name="'tick' if check == 'free' else 'warn'" :size="18" stroke="currentColor" />
+    {{ _("web.rename.same" if check == "same" else "web.creator.name." ~ check, name=name) }}
   {% endif %}
 </p>

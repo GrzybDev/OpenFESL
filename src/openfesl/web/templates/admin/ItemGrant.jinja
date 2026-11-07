@@ -66,14 +66,7 @@
                data-choose
                {% if number == grant.item %} aria-current="true"{% endif %}
                class="admin-match">
-              {% if icons and item and item.icon %}
-                <img src="{{ url('/admin/icons/' ~ game.id ~ '/' ~ number) }}"
-                     alt=""
-                     class="admin-item-icon">
-              {% else %}
-                <span aria-hidden="true"
-                      class="admin-item-icon admin-item-icon-none"><Icon name="doc" :size="18" stroke="currentColor" /></span>
-              {% endif %}
+              <AdminItemIcon :game="game" :item="item" :shown="icons" />
               <span class="cell-stack">
                 <span class="admin-hero-strong">{{ name or _("web.admin.items.unnamed", id=number) }}</span>
                 <span class="admin-item-kind">

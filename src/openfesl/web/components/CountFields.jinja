@@ -19,18 +19,7 @@
     </ChoiceTile>
   </fieldset>
 {% endif %}
-<label for="count-amount"
-       class="field-label field-label-joined admin-count-field">{{ label }}</label>
-<input id="count-amount"
-       name="amount"
-       type="number"
-       min="1"
-       max="{{ most }}"
-       value="{{ amount }}"
-       required
-       autofocus
-       data-needed="{{ _('web.admin.still_needed.amount') }}"
-       class="field-input">
+<TextField id="count-amount" name="amount" type="number" :label="label" :value="amount" min="1" :max="most" required autofocus :data-needed="_('web.admin.still_needed.amount')" />
 <p data-count
    data-now="{{ now }}"
    data-most="{{ most }}"

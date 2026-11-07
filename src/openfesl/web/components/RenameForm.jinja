@@ -9,40 +9,11 @@
 {% set currency = _("games." ~ game.id ~ ".currency." ~ rules.currency) %}
 <form method="post"
       action="{{ url('/' ~ game.id ~ '/heroes/' ~ id ~ '/rename') }}"
-      data-rename-form
       class="site-dialog-box">
   <input type="hidden" name="csrf" value="{{ csrf }}">
   <input type="hidden" name="price" value="{{ price }}">
-  {% if dialog %}
-    <button type="button"
-            data-close
-            class="site-dialog-close"
-            aria-label="{{ _('web.dialog.close') }}">
-      <Icon name="x" :size="18" stroke="currentColor" />
-    </button>
-  {% endif %}
-  {% set title = _("web.rename.title", hero=hero.persona.name) %}
-  {% if dialog %}
-    <h2 id="rename-title-{{ id }}" class="site-dialog-title">{{ title }}</h2>
-  {% else %}
-    <h1 id="rename-title-{{ id }}" class="site-dialog-title">{{ title }}</h1>
-  {% endif %}
-  <label for="rename-name-{{ id }}" class="naming-label">{{ _("web.rename.name") }}</label>
-  <input id="rename-name-{{ id }}"
-         name="name"
-         type="text"
-         required
-         minlength="{{ rules.name_length[0] }}"
-         maxlength="{{ rules.name_length[1] }}"
-         pattern="{{ rules.name }}"
-         autocomplete="off"
-         spellcheck="false"
-         aria-describedby="rename-hint-{{ id }} rename-status-{{ id }}"
-         {% if check and check != "free" %} aria-invalid="true"{% endif %}
-         value="{{ name }}"
-         class="naming-input">
-  <p id="rename-hint-{{ id }}" class="naming-hint">{{ _("web.rename.hint") }}</p>
-  <NameStatus :id="'rename-status-' ~ id" :name="name" :check="check" />
+  <DialogHead :id="'rename-title-' ~ id" :dialog="dialog">{{ _("web.rename.title", hero=hero.persona.name) }}</DialogHead>
+  <NameField :id="'rename-name-' ~ id" :label="_('web.rename.name')" :hint="_('web.rename.hint')" :name="name" :check="check" />
   <dl class="site-facts">
     <SaleFacts :sale="rules.rename_sale" :price="number(price) ~ ' ' ~ currency" />
     {% if short %}
@@ -53,12 +24,7 @@
   </dl>
   <div class="site-dialog-actions">
     <SiteButton :aria-describedby="'rename-why-' ~ id" data-submit :aria-disabled="'true' if short else none" glyph="edit" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.rename.submit", price=number(price), currency=currency) }}</SiteButton>
-    {% if dialog %}
-      <button type="button" data-close class="site-button site-button-ghost">{{ _("web.rename.cancel") }}</button>
-    {% else %}
-      <a href="{{ url('/' ~ game.id ~ '/heroes') }}"
-         class="site-button site-button-ghost">{{ _("web.rename.cancel") }}</a>
-    {% endif %}
+    <DialogCancel :back="url('/' ~ game.id ~ '/heroes')" :dialog="dialog" />
     {% if short %}<FundsLink class="site-link" />{% endif %}
   </div>
   <p id="rename-why-{{ id }}" data-why class="site-dialog-why">

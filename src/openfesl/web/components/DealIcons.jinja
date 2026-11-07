@@ -1,14 +1,5 @@
 {#def icons: list #}
 {# A deal's items, each as its imported icon or as OpenFESL's tile with the glyph of its kind. #}
 {% for icon in icons %}
-  {% if icon.src %}
-    <img src="{{ icon.src }}"
-         width="58"
-         height="58"
-         alt=""
-         loading="lazy"
-         class="deal-icon">
-  {% else %}
-    <span class="deal-icon deal-icon-drawn"><Icon :name="icon.glyph" :size="26" stroke="currentColor" /></span>
-  {% endif %}
+  <ItemImage :src="icon.src" :size="58" :glyph="icon.glyph" :glyph_size="26" class="deal-icon" drawn="deal-icon-drawn" />
 {% endfor %}

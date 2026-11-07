@@ -1,4 +1,4 @@
-{#def icon: str, href: str = "", dialog: bool = False, busy: str = "", filled: bool = False #}
+{#def icon: str, href: str = "", dialog: bool = False, busy: str = "", filled: bool = False, type: str = "submit" #}
 {# A filter panel's black button with its glyph on a grey square: a link where it leads somewhere,
    otherwise the button that sends the form. A link to a confirmation opens it as a dialog where
    scripts run. A filled glyph is a shape rather than lines; a busy label replaces the button's
@@ -14,5 +14,5 @@
           data-busy="{{ busy }}"
           {{ attrs.render(class="form-button chevron") }}>{{ glyph }}<span data-label>{{ content }}</span></button>
 {% else %}
-  <button type="submit" {{ attrs.render(class="form-button") }}>{{ glyph }}{{ content }}</button>
+  <button type="{{ type }}" {{ attrs.render(class="form-button") }}>{{ glyph }}{{ content }}</button>
 {% endif %}

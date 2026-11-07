@@ -8,12 +8,7 @@
         data-reveal
         class="site-dialog box-reveal">
   <div class="site-dialog-box">
-    <button type="button"
-            data-close
-            class="site-dialog-close js-only"
-            aria-label="{{ _('web.dialog.close') }}">
-      <Icon name="x" :size="18" stroke="currentColor" />
-    </button>
+    <DialogClose class="js-only" />
     <h2 id="reveal-title" class="site-dialog-title">{{ _("web.store.reveal.title") }}</h2>
     <RevealStage glyph="bag"
                  :size="36"

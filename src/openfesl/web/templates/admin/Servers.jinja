@@ -254,7 +254,7 @@
                 role="search"
                 aria-labelledby="find-title">
             <Bar id="find-title" large>{{ _("web.admin.find") }}</Bar>
-            <SearchField id="find-q" name="q" :label="_('web.admin.find.field')" :value="listing.query" :hint="_('web.admin.find.hint')" aria-describedby="find-note" hx-morph-skip />
+            <TextField type="search" autocomplete="off" id="find-q" name="q" :label="_('web.admin.find.field')" :value="listing.query" :placeholder="_('web.admin.find.hint')" aria-describedby="find-note" hx-morph-skip />
             <p id="find-note" class="field-note">{{ _("web.admin.find.note") }}</p>
             <div class="find-button">
               <FormButton icon="find">{{ _("web.admin.find.search") }}</FormButton>

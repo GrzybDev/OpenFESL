@@ -1,13 +1,4 @@
 {#def src: str | None #}
 {# An item's tile at the start of a row of items: its imported icon, or the bag glyph where the
    page shows none. The row names the item beside it. #}
-{% if src %}
-  <img src="{{ src }}"
-       width="44"
-       height="44"
-       alt=""
-       loading="lazy"
-       class="item-icon">
-{% else %}
-  <span aria-hidden="true" class="item-icon"><Icon name="bag" :size="18" stroke="currentColor" /></span>
-{% endif %}
+<ItemImage :src="src" :size="44" glyph="bag" :glyph_size="18" class="item-icon" />

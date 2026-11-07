@@ -7,12 +7,7 @@
 {% set id = "remove-" ~ rel.member.account_id %}
 <div class="site-dialog-box">
   {% if dialog %}
-    <button type="button"
-            data-close
-            class="site-dialog-close"
-            aria-label="{{ _('web.dialog.close') }}">
-      <Icon name="x" :size="18" stroke="currentColor" />
-    </button>
+    <DialogClose />
   {% endif %}
   <h2 id="{{ id }}-title" class="site-dialog-title">{{ _("web.friends.remove.title", name=rel.name) }}</h2>
   <p class="friend-removal-text">{{ _("web.friends.remove.text", account=account, name=rel.name) }}</p>

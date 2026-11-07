@@ -26,16 +26,7 @@
     </p>
     <div class="reward-body">
       <div class="reward-head">
-        {% if card.icon %}
-          <img src="{{ card.icon }}"
-               width="56"
-               height="56"
-               alt=""
-               loading="lazy"
-               class="reward-glyph reward-icon">
-        {% else %}
-          <span aria-hidden="true" class="reward-glyph"><Icon :name="card.glyph" :size="26" stroke="#F2C12E" /></span>
-        {% endif %}
+        <ItemImage :src="card.icon" :size="56" :glyph="card.glyph" :glyph_size="26" stroke="#F2C12E" class="reward-glyph" />
         <div>
           <h3 id="{{ card.id }}-title" class="reward-title">{{ card.title }}</h3>
           {% if card.text %}<p class="reward-text">{{ card.text }}</p>{% endif %}

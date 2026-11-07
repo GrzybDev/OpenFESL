@@ -1,0 +1,8 @@
+{#def back: str, dialog: bool = False #}
+{# The way out of a form of a game's own site: the button that closes its dialog, or the link back
+   from the page of its own. #}
+{% if dialog %}
+  <button type="button" data-close class="site-button site-button-ghost">{{ _("web.rename.cancel") }}</button>
+{% else %}
+  <a href="{{ back }}" class="site-button site-button-ghost">{{ _("web.rename.cancel") }}</a>
+{% endif %}

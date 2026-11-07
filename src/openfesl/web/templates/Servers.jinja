@@ -55,7 +55,7 @@
             {% for field, value in [("mode", filters.mode), ("map", filters.map), ("region", filters.region), ("sort", "" if filters.sort == "players" else filters.sort), ("order", "" if filters.descending == (filters.sort == "players") else filters.direction)] %}
               {% if value %}<input type="hidden" name="{{ field }}" value="{{ value }}">{% endif %}
             {% endfor %}
-            <SearchField id="filters-name" name="q" :label="_('web.servers.name')" :value="filters.name" :hint="_('web.servers.name.hint')" hx-morph-skip />
+            <TextField type="search" autocomplete="off" id="filters-name" name="q" :label="_('web.servers.name')" :value="filters.name" :placeholder="_('web.servers.name.hint')" hx-morph-skip />
 
             {% if modes_data %}
               <div role="group"

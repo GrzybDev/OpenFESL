@@ -5,17 +5,7 @@
 {% set states = {"held": "tick", "low": "warn", "level": "warn", "none": "bag"} %}
 {% set inside %}
   <span class="store-tile-art">
-    {% if tile.icon %}
-      <img src="{{ tile.icon }}"
-           width="72"
-           height="72"
-           alt=""
-           loading="lazy"
-           class="store-tile-icon">
-    {% else %}
-      <span aria-hidden="true"
-            class="store-tile-icon store-tile-drawn"><Icon :name="glyph" :size="34" stroke="currentColor" /></span>
-    {% endif %}
+    <ItemImage :src="tile.icon" :size="72" :glyph="glyph" :glyph_size="34" class="store-tile-icon" drawn="store-tile-drawn" />
   </span>
   <span class="store-tile-body">
     <span class="store-tile-kind"><Icon :name="glyph" :size="13" stroke="currentColor" />{{ _("games." ~ game.id ~ ".item_kind." ~ tile.kind ~ ".item") }}</span>

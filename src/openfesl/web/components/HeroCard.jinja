@@ -15,12 +15,7 @@
     <span aria-hidden="true" class="hero-string hero-string-left"></span>
     <span aria-hidden="true" class="hero-string hero-string-right"></span>
     <article aria-labelledby="hero-name-{{ id }}" class="hero-card">
-      {% if hero.faction %}
-        <p class="hero-tab">
-          <Icon :name="rules.factions[hero.faction].glyph" :size="18" stroke="currentColor" />
-          {{ _("games." ~ game.id ~ ".faction." ~ hero.faction) }}
-        </p>
-      {% endif %}
+      <FactionTab :hero="hero" :size="18" class="hero-tab" />
       <div class="hero-heading">
         <h3 id="hero-name-{{ id }}"
             class="hero-name{% if hero.persona.name|length > 13 %} hero-name-long{% endif %}{% if renamed %} hero-name-renamed{% endif %}">

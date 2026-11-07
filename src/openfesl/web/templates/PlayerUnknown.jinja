@@ -18,7 +18,7 @@
             role="search"
             aria-labelledby="unknown-find">
         <Bar id="unknown-find" large>{{ _("web.leaderboard.find") }}</Bar>
-        <SearchField id="unknown-name" name="player" :label="_('web.leaderboard.name')" :value="wanted" :hint="_('web.leaderboard.name.hint')" />
+        <TextField type="search" autocomplete="off" id="unknown-name" name="player" :label="_('web.leaderboard.name')" :value="wanted" :placeholder="_('web.leaderboard.name.hint')" />
         <FormButton icon="find">{{ _("web.player.unknown.find") }}</FormButton>
       </form>
     </Panel>

@@ -26,17 +26,7 @@
 {% endmacro %}
 {% macro number_field(name, label) %}
   <div class="field-column">
-    <label for="claw-{{ name }}" class="field-label field-label-joined">{{ label }}</label>
-    <input id="claw-{{ name }}"
-           name="{{ name }}"
-           type="text"
-           inputmode="numeric"
-           value="{{ values[name] }}"
-           maxlength="10"
-           required
-           {{ invalid(name) }}
-           class="field-input{% if name in refused %} field-invalid{% endif %}">
-    {{ error(name) }}
+    <TextField :id="'claw-' ~ name" :name="name" :label="label" :value="values[name]" :error="refused.get(name, '')" inputmode="numeric" maxlength="10" required />
   </div>
 {% endmacro %}
 <section aria-labelledby="boxes-claw" class="admin-claw">
@@ -88,17 +78,7 @@
       {{ number_field("length", _("web.admin.boxes.claw.feed.length")) }}
       <ClawToday :of="game" :claw="claw" />
       <div class="field-column">
-        <label for="claw-note" class="field-label field-label-joined">{{ _("web.admin.note") }}</label>
-        <input id="claw-note"
-               name="note"
-               type="text"
-               value="{{ values.get('note', '') }}"
-               required
-               maxlength="300"
-               autocomplete="off"
-               {{ invalid("note") }}
-               class="field-input{% if 'note' in refused %} field-invalid{% endif %}">
-        {{ error("note") }}
+        <TextField id="claw-note" name="note" :label="_('web.admin.note')" :value="values.get('note', '')" :error="refused.get('note', '')" required maxlength="300" autocomplete="off" />
       </div>
       <div class="prices-save">
         <SmallAction :label="_('web.admin.boxes.claw.save')" :busy="_('web.admin.store.save.busy')" />

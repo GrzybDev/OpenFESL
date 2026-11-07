@@ -14,19 +14,7 @@
   <input type="hidden" name="next" value="{{ next }}">
   <input type="hidden" name="once" value="{{ once_token() }}">
   <input type="hidden" name="price" value="{{ price }}">
-  {% if dialog %}
-    <button type="button"
-            data-close
-            class="site-dialog-close"
-            aria-label="{{ _('web.dialog.close') }}">
-      <Icon name="x" :size="18" stroke="currentColor" />
-    </button>
-  {% endif %}
-  {% if dialog %}
-    <h2 id="buy-slot-title" class="site-dialog-title">{{ _("web.slots.buy") }}</h2>
-  {% else %}
-    <h1 id="buy-slot-title-page" class="site-dialog-title">{{ _("web.slots.buy") }}</h1>
-  {% endif %}
+  <DialogHead :id="'buy-slot-title' if dialog else 'buy-slot-title-page'" :dialog="dialog">{{ _("web.slots.buy") }}</DialogHead>
   <dl class="site-facts">
     <SaleFacts :sale="rules.slot_sale" :price="number(price) ~ ' ' ~ currency" />
     <Term :label="_('web.rename.funds_now', currency=currency)">
@@ -41,12 +29,7 @@
   <p class="slot-kept">{{ _("web.slots.kept") }}</p>
   <div class="site-dialog-actions">
     <SiteButton :aria-describedby="'buy-slot-why' if dialog else 'buy-slot-why-page'" :aria-disabled="'true' if short else none" glyph="coin" :size="18" stroke="currentColor" class="site-button-go site-button-large">{{ _("web.slots.submit", price=number(price), currency=currency) }}</SiteButton>
-    {% if dialog %}
-      <button type="button" data-close class="site-button site-button-ghost">{{ _("web.rename.cancel") }}</button>
-    {% else %}
-      <a href="{{ next or url('/' ~ game.id ~ '/heroes') }}"
-         class="site-button site-button-ghost">{{ _("web.rename.cancel") }}</a>
-    {% endif %}
+    <DialogCancel :back="next or url('/' ~ game.id ~ '/heroes')" :dialog="dialog" />
     {% if short %}<FundsLink class="site-link" />{% endif %}
   </div>
   <p id="buy-slot-why{{ '' if dialog else '-page' }}"

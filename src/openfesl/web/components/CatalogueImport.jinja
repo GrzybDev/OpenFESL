@@ -106,10 +106,7 @@
                       aria-label="{{ _('web.admin.catalogue.uploading') }}"
                       class="catalogue-bar"></progress>
             <p class="catalogue-step-text">{{ _("web.admin.catalogue.uploading.text") }}</p>
-            <button type="button" data-catalogue-stop class="form-button">
-              <span aria-hidden="true"
-                    class="form-glyph"><Icon name="x" :size="14" stroke="#F4F4EE" /></span>{{ _("web.admin.catalogue.stop") }}
-            </button>
+            <FormButton icon="x" type="button" data-catalogue-stop>{{ _("web.admin.catalogue.stop") }}</FormButton>
           </div>
           <div data-catalogue-importing
                hidden
@@ -137,17 +134,7 @@
       <section aria-labelledby="confirm-question"
                aria-describedby="confirm-text"
                class="confirm">
-        <div class="confirm-head">
-          <h2 id="confirm-question">
-            {{ _("web.admin.catalogue.confirm", game=replaced[0].game.name) if replaced|length == 1 else _("web.admin.catalogue.confirm.any") }}
-          </h2>
-          <button type="button"
-                  data-close
-                  class="confirm-close"
-                  aria-label="{{ _('web.admin.close') }}">
-            <span><Icon name="x" :size="14" stroke="currentColor" /></span>
-          </button>
-        </div>
+        <ConfirmHead :question="_('web.admin.catalogue.confirm', game=replaced[0].game.name) if replaced|length == 1 else _('web.admin.catalogue.confirm.any')" />
         <div class="confirm-body">
           <p class="catalogue-confirm-file">
           <Icon name="doc" :size="18" stroke="currentColor" /><span data-chosen></span>
@@ -164,10 +151,7 @@
         </div>
       </div>
       <div class="confirm-buttons">
-        <button type="button" data-close class="form-button">
-          <span aria-hidden="true"
-                class="form-glyph"><Icon name="x" :size="14" stroke="#F4F4EE" /></span>{{ _("web.admin.cancel") }}
-        </button>
+        <FormButton icon="x" type="button" data-close>{{ _("web.admin.cancel") }}</FormButton>
         <button type="button" data-catalogue-replace class="small-action chevron">
           <span aria-hidden="true" class="small-action-square"><Chevron :size="16" /></span><span class="small-action-label">{{ _("web.admin.catalogue.confirm.replace") }}</span>
         </button>

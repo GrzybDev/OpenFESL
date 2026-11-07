@@ -14,23 +14,8 @@
         action="{{ url('/admin/settings/games/' ~ game.id ~ '/zone') }}">
     <CsrfField />
     <div class="settings-policy settings-text">
-      <label for="{{ field }}" class="field-label field-label-joined">{{ _("web.admin.reward_zone.field") }}</label>
-      <input id="{{ field }}"
-             name="zone"
-             type="text"
-             value="{{ zone.entered if refused else zone.zone }}"
-             maxlength="64"
-             autocomplete="off"
-             spellcheck="false"
-             aria-describedby="{{ field }}-note"
-             {% if refused %} aria-invalid="true"{% endif %}
-             {% if not manages %} disabled{% endif %}
-             class="field-input field-code{% if refused %} field-invalid{% endif %}">
-      {% if refused %}
-        <FieldError :id="field ~ '-note'" role="alert">{{ _("web.admin.reward_zone.refused") }}</FieldError>
-      {% else %}
-        <p id="{{ field }}-note" class="field-note">{{ _("web.admin.reward_zone.text") }}</p>
-      {% endif %}
+      <TextField :id="field" name="zone" :label="_('web.admin.reward_zone.field')" :value="zone.entered if refused else zone.zone" :note="'' if refused else _('web.admin.reward_zone.text')" :wrong="refused" :aria-describedby="field ~ '-note' if refused else none" :disabled="not manages" maxlength="64" autocomplete="off" spellcheck="false" class="field-code" />
+      {% if refused %}<FieldError :id="field ~ '-note'" role="alert">{{ _("web.admin.reward_zone.refused") }}</FieldError>{% endif %}
       <p class="settings-default">
         {{ _("web.admin.settings.default") if zone.zone == zone.default else _("web.admin.settings.changed", value=zone.default) }}
       </p>

@@ -21,19 +21,7 @@
     <input type="hidden" name="back" value="{{ back }}">
     <div class="confirm-body">
       {{ content }}
-      <label for="admin-note" class="field-label field-label-joined admin-note">{{ _("web.admin.note") }}</label>
-      <input id="admin-note"
-             name="note"
-             type="text"
-             value="{{ note }}"
-             required
-             maxlength="300"
-             autocomplete="off"
-             data-needed="{{ _('web.admin.still_needed.note') }}"
-             aria-describedby="admin-note-hint"
-             {% if error == "note" %} aria-invalid="true"{% endif %}
-             class="field-input{% if error == 'note' %} field-invalid{% endif %}">
-      <p id="admin-note-hint" class="field-note">{{ _("web.admin.note.hint") }}</p>
+      <TextField id="admin-note" name="note" :label="_('web.admin.note')" :value="note" :note="_('web.admin.note.hint')" :wrong="error == 'note'" required maxlength="300" autocomplete="off" :data-needed="_('web.admin.still_needed.note')" />
     </div>
     <FormWhy>{%- if error == "note" %}{{ _("web.admin.still_needed", what=_("web.admin.still_needed.note")) }}{% else %}{{ why }}{% endif -%}</FormWhy>
     <div class="confirm-buttons">

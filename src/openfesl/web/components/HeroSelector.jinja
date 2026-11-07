@@ -32,11 +32,7 @@
               {% endif %}
             </h3>
             <p class="selector-kind">
-              {% if hero.hero_class %}
-                {{ _("web.heroes.kind", hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class), level=hero.level) }}
-              {% else %}
-                {{ _("web.heroes.level", level=hero.level) }}
-              {% endif %}
+              <HeroKind :hero="hero" />
             </p>
             {% if hero.persona.id == roster.default_id %}
               <p class="selector-default">

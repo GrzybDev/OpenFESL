@@ -1,0 +1,9 @@
+{#def id: str, dialog: bool = False #}
+{# The head of a form of a game's own site: the cross and a section's title where it opens as a
+   dialog, the page's title where it is a page of its own. #}
+{% if dialog %}
+  <DialogClose />
+  <h2 id="{{ id }}" class="site-dialog-title">{{ content }}</h2>
+{% else %}
+  <h1 id="{{ id }}" class="site-dialog-title">{{ content }}</h1>
+{% endif %}

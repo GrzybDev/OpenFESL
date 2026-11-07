@@ -1,0 +1,3 @@
+{#def hero #}
+{# A hero's class and level, or its level alone before it has a class. #}
+{{ _("web.heroes.kind", hero_class=_("games." ~ game.id ~ ".class." ~ hero.hero_class), level=hero.level) if hero.hero_class else _("web.heroes.level", level=hero.level) }}

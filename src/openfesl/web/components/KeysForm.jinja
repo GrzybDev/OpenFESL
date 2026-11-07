@@ -15,17 +15,7 @@
   <input type="hidden" name="csrf" value="{{ csrf }}">
   <input type="hidden" name="price" value="{{ key.price }}">
   <input type="hidden" name="once" value="{{ once_token() }}">
-  {% if dialog %}
-    <button type="button"
-            data-close
-            class="site-dialog-close"
-            aria-label="{{ _('web.dialog.close') }}">
-      <Icon name="x" :size="18" stroke="currentColor" />
-    </button>
-    <h2 id="buy-keys-title" class="site-dialog-title">{{ _("web.chests.keys.buy") }}</h2>
-  {% else %}
-    <h1 id="buy-keys-title-page" class="site-dialog-title">{{ _("web.chests.keys.buy") }}</h1>
-  {% endif %}
+  <DialogHead :id="'buy-keys-title' ~ suffix" :dialog="dialog">{{ _("web.chests.keys.buy") }}</DialogHead>
   <fieldset class="keys-packs">
     <legend class="keys-legend">{{ _("web.chests.keys.how_many") }}</legend>
     <div class="keys-tiles">

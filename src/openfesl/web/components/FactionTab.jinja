@@ -1,0 +1,9 @@
+{#def hero, size: int = 16 #}
+{# The tab or band of a hero's card that names its faction, which a hero made before the creator
+   does not have. Further attributes go on the tab. #}
+{% if hero.faction %}
+  <p {{ attrs.render() }}>
+    <Icon :name="game.heroes.factions[hero.faction].glyph" :size="size" stroke="currentColor" />
+    {{ _("games." ~ game.id ~ ".faction." ~ hero.faction) }}
+  </p>
+{% endif %}

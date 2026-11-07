@@ -1,5 +1,40 @@
-/* A field's label with a word at its end, such as Public or Optional. */
+/* A field's label on the accent, the field on the light row, and how forms arrange fields. */
 @layer components {
+  .field-label {
+    display: block;
+    background: var(--accent);
+    padding: 9px 14px;
+    font-size: 14px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    text-transform: uppercase;
+  }
+
+  .field-label-joined {
+    margin-top: 2px;
+  }
+
+  .field-input {
+    display: block;
+    height: 44px;
+    width: 100%;
+    background: var(--row-light);
+    padding-inline: 14px;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    font-weight: 600;
+    color: var(--ink);
+
+    &::placeholder {
+      opacity: 1;
+      color: var(--placeholder);
+    }
+  }
+
+  /* A label with a word at its end, such as Public or Optional. */
   .field-label-tagged {
     display: flex;
     justify-content: space-between;
