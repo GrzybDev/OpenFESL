@@ -127,6 +127,7 @@ The server reads its settings from the environment.
 | `PUBLIC_URL` | The address the server's web pages are reached at, where the links in mail lead and sign-in services send the browser back to, such as `https://fesl.example.com`; required for mail to go out and for the images of Discord presence, which Discord fetches only from a public HTTPS address. The guides to playing and hosting give the relay address that follows from it, such as `wss://fesl.example.com`, or the request's own without it | none |
 | `HOOK_DEFAULT_URL` | The relay address OpenFESLHook's releases connect to without an `OpenFESLHook.ini`; where this server's relay address differs, the guides show the lines of that file | `wss://fesl.grzyb.app` |
 | `CONTACT_EMAIL` | The address at which the operators of dedicated servers reach this server's administrators, such as for a provider file; the guide to hosting shows it | none |
+| `SOURCE_URL` | The address of the source code of the version this server runs, offered in the site's footer; a server that runs a changed version has to name that version's source code here | `https://github.com/GrzybDev/OpenFESL` |
 | `SESSION_SECRET` | The key that signs the session cookie of the admin panel and the site's accounts; without one each start of the server picks its own, which signs everyone out | none |
 | `ADMIN_OIDC_NAME` | The name of the admin panel's sign-in provider on its button | `Authentik` |
 | `ADMIN_OIDC_ISSUER` | The OpenID Connect issuer the admins sign in through, whose discovery document names its endpoints, such as `https://auth.example.com/application/o/openfesl/`; without it and the client's id and secret nobody signs in to the panel | none |
@@ -294,7 +295,8 @@ opt-in, only read the copy and skip without these variables:
 
 ## Licence
 
-OpenFESL is licensed under the GNU General Public License v3.0 or later; see [LICENSE.md](LICENSE.md). The web pages
-ship third-party components under their own licences, listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+OpenFESL is licensed under the GNU Affero General Public License v3.0 or later; see [LICENSE.md](LICENSE.md). A server
+that runs a changed version has to offer that version's source code to its users, which the site's footer does
+through `SOURCE_URL`. The web pages ship third-party components under their own licences, listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 OpenFESL is not affiliated with or endorsed by Electronic Arts.

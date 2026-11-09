@@ -53,6 +53,9 @@ class Settings(BaseSettings):
         hook_default_url: The relay address OpenFESLHook's releases connect to when no
             OpenFESLHook.ini names another; the guide to playing explains that file to players
             of other servers.
+        source_url: The address of the source code of the version this server runs, which the
+            site's footer offers to its users; a server that runs a changed version has to
+            name that version's source code here.
         session_secret: The key that signs the session cookie of the admin panel and the site's
             accounts; without one each start of the server picks its own, which signs everyone
             out.
@@ -93,6 +96,7 @@ class Settings(BaseSettings):
     public_url: str | None = None
     contact_email: str | None = None
     hook_default_url: str = "wss://fesl.grzyb.app"
+    source_url: str = "https://github.com/GrzybDev/OpenFESL"
     session_secret: SecretStr | None = None
     admin_oidc_name: str = "Authentik"
     admin_oidc_issuer: str | None = None

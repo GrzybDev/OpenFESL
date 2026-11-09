@@ -1,7 +1,7 @@
 {#def page: str = "" #}
 {# OpenFESL's links and the line on its affiliation, at the foot of every page. #}
 <span class="footer-name">OpenFESL</span>
-<a href="https://github.com/GrzybDev/OpenFESL">{{ _("web.footer.repository", name="OpenFESL") }}</a>
+<a href="{{ source_url }}">{{ _("web.footer.repository", name="OpenFESL") }}</a>
 <a href="https://github.com/GrzybDev/OpenFESLHook">{{ _("web.footer.repository", name="OpenFESLHook") }}</a>
 <a href="https://github.com/GrzybDev/OpenFESL/blob/main/LICENSE.md">{{ _("web.footer.licence") }}</a>
 <a href="{{ url('/terms') }}"

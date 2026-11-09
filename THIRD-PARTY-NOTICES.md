@@ -3,8 +3,8 @@
 OpenFESL contains fonts and scripts made by other people. This file lists each such component that ships with
 the server's web pages, gives its licence and copyright, and contains the licence texts that have to accompany it.
 
-OpenFESL's own source code is licensed under the GNU General Public License, version 3 or (at your option) any later
-version. That licence does not cover the components below, each of which is under its own licence only.
+OpenFESL's own source code is licensed under the GNU Affero General Public License, version 3 or (at your option) any
+later version. That licence does not cover the components below, each of which is under its own licence only.
 
 Licence texts are reproduced as their authors published them; only line endings and trailing spaces were normalised.
 

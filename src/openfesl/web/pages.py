@@ -409,7 +409,12 @@ class Pages:
     """Renders the web pages in the OpenFESL shell, in the language their address names."""
 
     def __init__(
-        self, games: Iterable[Game], census: Census, art: GameArt, sign_in_check: bool
+        self,
+        games: Iterable[Game],
+        census: Census,
+        art: GameArt,
+        sign_in_check: bool,
+        source_url: str,
     ) -> None:
         """Prepare the shell for the games the server serves.
 
@@ -421,11 +426,13 @@ class Pages:
             sign_in_check: Whether the sign-in with an e-mail address asks for Cloudflare
                 Turnstile's check, which only the sign-in pages load, so that the pages of a
                 game's own site link to them instead of taking the password.
+            source_url: The address of the source code of the version this server runs.
         """
         self._games = list(games)
         self._census = census
         self._art = art
         self._sign_in_check = sign_in_check
+        self._source_url = source_url
         self.themes = "".join(_theme_rule(game) for game in self._games)
         self._themes_url = f"/themes.css?v={_digest(self.themes.encode())}"
 
@@ -486,6 +493,7 @@ class Pages:
             path=path,
             bar=state.get("site_bar"),
             sign_in_check=self._sign_in_check,
+            source_url=self._source_url,
             # The Daily Claw that a game's own site lists, for a visitor as for an account.
             claw=state["site_bar"].claw if state.get("site_bar") else state.get("claw"),
             assets=built_assets(),

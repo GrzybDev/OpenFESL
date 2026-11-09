@@ -11,6 +11,19 @@ from openfesl.server import app
 pytestmark = pytest.mark.anyio
 
 
+@pytest.fixture
+def changed_version(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Set before the server starts, which reads its settings once.
+    monkeypatch.setenv("SOURCE_URL", "https://forge.example.test/changed-openfesl")
+
+
+async def test_the_footer_offers_the_source_code_of_the_version_the_server_runs(
+    changed_version: None, server_url: str
+) -> None:
+    _, _, body = await fetch(server_url, "/")
+    assert 'href="https://forge.example.test/changed-openfesl"' in body.decode()
+
+
 class Page(HTMLParser):
     """The parts of a page that its tests read."""
 
